@@ -1,74 +1,33 @@
 package com.limegroup.gnutella.downloader.serial;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.limewire.collection.Range;
 
-import com.limegroup.gnutella.downloader.CoreDownloader;
-import com.limegroup.gnutella.downloader.DownloaderType;
+import com.limegroup.gnutella.URN;
 
-public class GnutellaDownloadMemento implements DownloadMemento {
-    
-    /** The kind of download this is. */
-    private final DownloaderType downloadType;
+public interface GnutellaDownloadMemento extends DownloadMemento {
 
-    /** Any additional properties of this download. */
-    private final Map<String, Serializable> properties;
+    void setContentLength(long contentLength);
 
-    /** Any ranges that were written. */
-    private final List<Range> ranges;
+    void setSha1Urn(URN sha1Urn);
 
-    /** The filename of the incomplete file. */
-    private final File incompleteFile;
+    void setSavedBlocks(List<Range> serializableBlocks);
 
-    /** All remote hosts that should be saved. */
-    private final Set<RemoteHostMemento> remoteHosts;
+    void setIncompleteFile(File incompleteFile);
 
-    public GnutellaDownloadMemento(DownloaderType downloadType, Map<String, Serializable> properties,
-            List<Range> ranges, File incompleteFile, Set<RemoteHostMemento> remoteHosts) {
-        switch(downloadType) {
-        case INNETWORK:
-        case MAGNET:
-        case MANAGED:
-        case STORE:
-            break;
-        default:
-            throw new IllegalArgumentException("invalid type: " + downloadType);
-        }
-        this.downloadType = downloadType;
-        this.properties = properties;
-        this.ranges = ranges;
-        this.incompleteFile = incompleteFile;
-        this.remoteHosts = remoteHosts;
-    }
+    void setRemoteHosts(Set<RemoteHostMemento> remoteHostMementos);
 
-    public DownloaderType getDownloadType() {
-        return downloadType;
-    }
+    long getContentLength();
 
-    public Map<String, Serializable> getPropertiesMap() {
-        return properties;
-    }
+    URN getSha1Urn();
 
-    public List<Range> getRanges() {
-        return ranges;
-    }
+    File getIncompleteFile();
 
-    public File getIncompleteFile() {
-        return incompleteFile;
-    }
+    Set<RemoteHostMemento> getRemoteHosts();
 
-    public Set<RemoteHostMemento> getRemoteHosts() {
-        return remoteHosts;
-    }
-    
-    public String getDefaultFileName() {
-        return (String)properties.get(CoreDownloader.DEFAULT_FILENAME);
-    }
-
+    List<Range> getSavedBlocks();
 
 }

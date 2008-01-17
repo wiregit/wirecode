@@ -49,13 +49,13 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
             VerifyingFileFactory verifyingFileFactory, DiskController diskController,
             @Named("ipFilter") IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<MessageRouter> messageRouter, Provider<TigerTreeCache> tigerTreeCache,
-            ApplicationServices applicationServices) {
+            ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory) {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
                 contentManager, sourceRankerFactory, urnCache, savedFileManager,
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
-                tigerTreeCache, applicationServices);
+                tigerTreeCache, applicationServices, remoteFileDescFactory);
     } 
            
     
@@ -157,7 +157,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
     @Override
     protected File getSuggestedSaveLocation(File saveFile) throws IOException{
         // First attempt to get new save location
-        final File realOutputDir = SharingSettings.getSaveLWSDirectory(incompleteFile);
+        final File realOutputDir = SharingSettings.getSaveLWSDirectory(getIncompleteFile());
 
         // make sure it is writable
         if (!FileUtils.setWriteable(realOutputDir)) {
@@ -198,7 +198,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
      */
     @Override
     protected void addAndRegisterIncompleteFile(){
-        incompleteFileManager.addEntry(incompleteFile, commonOutFile, true);
+        incompleteFileManager.addEntry(getIncompleteFile(), commonOutFile, true);
     } 
     
     

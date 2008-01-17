@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.InvalidDataException;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -30,6 +31,9 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.downloader.serial.DownloadMemento;
+import com.limegroup.gnutella.downloader.serial.MagnetDownloadMemento;
+import com.limegroup.gnutella.downloader.serial.MagnetDownloadMementoImpl;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -63,7 +67,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 
     private static final Log LOG = LogFactory.getLog(MagnetDownloaderImpl.class);
     
-	private static final String MAGNET = "MAGNET"; 
+	private MagnetOptions magnet;
 
     /**
      * Creates a new MAGNET downloader.  Immediately tries to download from
@@ -97,33 +101,32 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
             DiskController diskController, @Named("ipFilter")
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
-            Provider<TigerTreeCache> tigerTreeCache, ApplicationServices applicationServices)
+            Provider<TigerTreeCache> tigerTreeCache, ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory)
             throws SaveLocationException {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
                 contentManager, sourceRankerFactory, urnCache, savedFileManager,
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
-                tigerTreeCache, applicationServices);
+                tigerTreeCache, applicationServices, remoteFileDescFactory);
     }
     
     public void initialize() {
         assert (getMagnet() != null);
-        downloadSHA1 = getMagnet().getSHA1Urn();
+        URN sha1 = getMagnet().getSHA1Urn();
+        if(sha1 != null)
+            setSha1Urn(sha1);
         super.initialize();
     }
 
-	private synchronized MagnetOptions getMagnet() {
-		return (MagnetOptions)propertiesMap.get(MAGNET);
+	protected synchronized MagnetOptions getMagnet() {
+	    return magnet;
 	}
 	
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.downloader.MagnetDownloader#initMagnet(com.limegroup.gnutella.browser.MagnetOptions)
-     */
-	public synchronized void initMagnet(MagnetOptions magnetOptions) {
-	    if(propertiesMap.get(MAGNET) != null)
-	        throw new IllegalStateException("magnet already set!");
-	    propertiesMap.put(MAGNET, magnetOptions);
+	public synchronized void setMagnet(MagnetOptions magnet) {
+        if(getMagnet() != null)
+            throw new IllegalStateException("magnet already set!");
+        this.magnet = magnet;
 	}
     
     /**
@@ -237,8 +240,8 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     protected boolean allowAddition(RemoteFileDesc other) {        
         // Allow if we have a hash and other matches it.
 		URN otherSHA1 = other.getSHA1Urn();
-		if (downloadSHA1 != null && otherSHA1 != null) {
-			return downloadSHA1.equals(otherSHA1);
+		if (getSha1Urn() != null && otherSHA1 != null) {
+			return getSha1Urn().equals(otherSHA1);
         }
         return false;
     }
@@ -258,7 +261,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 	 * Only allow requeries when <code>downloadSHA1</code> is not null.
      */
 	protected boolean canSendRequeryNow() {
-		return downloadSHA1 != null ? super.canSendRequeryNow() : false;
+		return getSha1Urn() != null ? super.canSendRequeryNow() : false;
 	}
 
 	/**
@@ -274,5 +277,25 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     @Override
     public DownloaderType getDownloadType() {
         return DownloaderType.MAGNET;
+    }
+    
+    @Override
+    public synchronized void initFromMemento(DownloadMemento memento) throws InvalidDataException {
+        super.initFromMemento(memento);
+        MagnetDownloadMemento mmem = (MagnetDownloadMemento)memento;
+        setMagnet(mmem.getMagnet());
+        
+    }
+    
+    @Override
+    protected void fillInMemento(DownloadMemento memento) {
+        super.fillInMemento(memento);
+        MagnetDownloadMemento mmem = (MagnetDownloadMemento)memento;
+        mmem.setMagnet(getMagnet());
+    }
+    
+    @Override
+    protected DownloadMemento createMemento() {
+        return new MagnetDownloadMementoImpl();
     }
 }

@@ -4,6 +4,6 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 
 public interface MagnetDownloader extends ManagedDownloader {
 
-    public void initMagnet(MagnetOptions magnetOptions);
+    public void setMagnet(MagnetOptions magnetOptions);
 
 }

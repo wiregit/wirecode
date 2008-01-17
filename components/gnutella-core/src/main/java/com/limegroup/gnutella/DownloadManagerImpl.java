@@ -179,7 +179,7 @@ public class DownloadManagerImpl implements DownloadManager {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadMI#postGuiInit()
      */
-    public void loadStoredDownloadsAndScheduleWriting() {
+    public void loadSavedDownloadsAndScheduleWriting() {
         loadStoredDownloads();
         scheduleSnapshots();
     }
@@ -205,7 +205,7 @@ public class DownloadManagerImpl implements DownloadManager {
         if(coreDownloader instanceof ManagedDownloader) {
             GnutellaDownloadMemento gmem = (GnutellaDownloadMemento)memento;
             try {
-                incompleteFileManager.initEntry(gmem.getIncompleteFile(), gmem.getRanges(), coreDownloader.getSHA1Urn(), coreDownloader instanceof StoreDownloader);
+                incompleteFileManager.initEntry(gmem.getIncompleteFile(), gmem.getSavedBlocks(), coreDownloader.getSha1Urn(), coreDownloader instanceof StoreDownloader);
             } catch (InvalidDataException e) {
                 LOG.warn("Unable to register serialized download: " + coreDownloader, e);
                 return null;
@@ -242,7 +242,7 @@ public class DownloadManagerImpl implements DownloadManager {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadMI#isGUIInitd()
      */
-    public boolean isStoredDownloadsLoaded() {
+    public boolean isSavedDownloadsLoaded() {
         return downloadsReadFromDisk;
     }
     
@@ -274,7 +274,7 @@ public class DownloadManagerImpl implements DownloadManager {
         iter.hasNext();) {
             CoreDownloader d = iter.next();
             if (d.getDownloadType() == DownloaderType.INNETWORK  && 
-                    !urns.contains(d.getSHA1Urn().httpStringValue())) 
+                    !urns.contains(d.getSha1Urn().httpStringValue())) 
                 d.stop();
         }
         
@@ -447,7 +447,7 @@ public class DownloadManagerImpl implements DownloadManager {
      */
     public synchronized Downloader getDownloaderForURN(URN sha1) {
         for (CoreDownloader md : activeAndWaiting) {
-            if (md.getSHA1Urn() != null && sha1.equals(md.getSHA1Urn()))
+            if (md.getSha1Urn() != null && sha1.equals(md.getSha1Urn()))
                 return md;
         }
         return null;
@@ -458,7 +458,7 @@ public class DownloadManagerImpl implements DownloadManager {
      */
     public synchronized Downloader getDownloaderForURNString(String urn) {
         for (CoreDownloader md : activeAndWaiting) {
-            if (md.getSHA1Urn() != null && urn.equals(md.getSHA1Urn().toString()))
+            if (md.getSha1Urn() != null && urn.equals(md.getSha1Urn().toString()))
                 return md;
         }
         return null;
@@ -741,7 +741,7 @@ public class DownloadManagerImpl implements DownloadManager {
     private void checkActiveAndWaiting(URN urn, TorrentFileSystem system) 
     throws SaveLocationException {
         for (CoreDownloader current : activeAndWaiting) {
-            if (urn.equals(current.getSHA1Urn())) {
+            if (urn.equals(current.getSha1Urn())) {
                 // this is the place to add new trackers eventually.
                 throw new SaveLocationException
                 (SaveLocationException.FILE_ALREADY_DOWNLOADING, system.getCompleteFile());

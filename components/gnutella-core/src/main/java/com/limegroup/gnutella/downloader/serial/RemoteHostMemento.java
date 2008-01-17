@@ -18,7 +18,7 @@ public class RemoteHostMemento implements Serializable {
     }
     
     private final Map<Keys, Serializable> propertiesMap;
-    
+        
     public RemoteHostMemento(String host, int port, String filename, long index, byte[] clientGuid,
             int speed, long size, boolean chat, int quality, boolean replyToMulticast, String xml,
             Set<URN> urns, boolean browseHost, boolean firewalled, String vendor, boolean http1,
@@ -65,6 +65,9 @@ public class RemoteHostMemento implements Serializable {
     public boolean isHttp11() { return (Boolean)propertiesMap.get(Keys.HTTP11); }
     public boolean isTls() { return (Boolean)propertiesMap.get(Keys.TLS); }
     public String getPushAddr() { return (String)propertiesMap.get(Keys.PUSH_ADDR); }
-    
+
+    public Map<Keys, Serializable> getPropertiesMap() {
+        return propertiesMap;
+    }
     
 }

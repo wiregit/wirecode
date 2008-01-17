@@ -13,6 +13,12 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.version.DownloadInformation;
 
+/**
+ * Constructs all kinds of {@link CoreDownloader CoreDownloaders}.<p>
+ * 
+ * This handles creating downloads from data as well as from mementos
+ * of prior downloads.
+ */
 public interface CoreDownloaderFactory {
 
     public ManagedDownloader createManagedDownloader(RemoteFileDesc[] files,

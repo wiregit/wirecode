@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import java.io.Serializable;
 
 /**
  * The downloader interface.  The UI maintains a list of Downloader's and uses
@@ -280,18 +279,19 @@ public interface Downloader extends BandwidthTracker {
 	 * <code>null</code> if there is none.
 	 * @return
 	 */
-	public URN getSHA1Urn();
+	public URN getSha1Urn();
     
     /**
      * Sets a new attribute associated with the download.
      * The attributes are used eg. by GUI to store some extra
      * information about the download.
      * @param key A key used to identify the attribute.
+     * @param serialize Whether the attribute should be serialized to disk.
      * @patam value The value of the key.
      * @return A prvious value of the attribute, or <code>null</code>
      *         if the attribute wasn't set.
      */
-    public Serializable setAttribute( String key, Serializable value );
+    public Object setAttribute( String key, Object value, boolean serialize );
 
     /**
      * Gets a value of attribute associated with the download.
@@ -301,7 +301,7 @@ public interface Downloader extends BandwidthTracker {
      * @return The value of the specified attribute,
      *         or <code>null</code> if value was not specified.
      */
-    public Serializable getAttribute( String key );
+    public Object getAttribute( String key );
 
     /**
      * Removes an attribute associated with this download.

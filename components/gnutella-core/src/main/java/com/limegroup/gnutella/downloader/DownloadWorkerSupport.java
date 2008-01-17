@@ -9,6 +9,10 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.tigertree.HashTree;
 
+/**
+ * Defines the contract by which a download can be signaled & controlled from a
+ * DownloadWorker.
+ */
 interface DownloadWorkerSupport extends ManagedDownloader {
 
     void addRFD(RemoteFileDesc _rfd);
@@ -20,8 +24,6 @@ interface DownloadWorkerSupport extends ManagedDownloader {
     List<DownloadWorker> getAllWorkers();
 
     Set<AlternateLocation> getInvalidAlts();
-
-    int getNumDownloaders();
 
     Map<DownloadWorker, Integer> getQueuedWorkers();
 

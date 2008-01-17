@@ -26,7 +26,7 @@ public class InNetworkCallback implements DownloadCallback {
     public void removeDownload(Downloader d) {
         InNetworkDownloader downloader = (InNetworkDownloader) d;
         updateHandler.inNetworkDownloadFinished(
-                downloader.getSHA1Urn(),
+                downloader.getSha1Urn(),
                 downloader.getState() == DownloadStatus.COMPLETE);
     }
 

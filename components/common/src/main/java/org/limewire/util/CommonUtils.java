@@ -217,14 +217,22 @@ public class CommonUtils {
         if(resource == null)
             throw new IOException("resource: " + fileName + " doesn't exist.");
         
-    	copyStream(resource.openStream(), newFile);
+    	saveStream(resource.openStream(), newFile);
     }
     
+    /**
+     * Copies the src file to the destination file.
+     * This will always overwrite the destination.
+     */
     public static void copyFile(File src, File dst) throws IOException {
-        copyStream(new FileInputStream(src), dst);
+        saveStream(new FileInputStream(src), dst);
     }
     
-    public static void copyStream(InputStream inStream, File newFile) throws IOException {
+    /**
+     * Saves all data from the stream into the destination file.
+     * This will always overwrite the file.
+     */
+    public static void saveStream(InputStream inStream, File newFile) throws IOException {
     	BufferedInputStream bis = null;
     	BufferedOutputStream bos = null;            
     	try {

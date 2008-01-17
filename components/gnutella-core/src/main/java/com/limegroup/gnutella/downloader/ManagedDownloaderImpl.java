@@ -4,7 +4,6 @@ import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,6 +24,7 @@ import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.DiskException;
 import org.limewire.io.IOUtils;
+import org.limewire.io.InvalidDataException;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 
@@ -65,6 +65,7 @@ import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.downloader.RequeryManager.QueryType;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.GnutellaDownloadMemento;
+import com.limegroup.gnutella.downloader.serial.GnutellaDownloadMementoImpl;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
@@ -241,10 +242,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
     /** The size of the approx matcher 2d buffer... */
     private static final int MATCHER_BUF_SIZE = 120;
-    
-	/** The value of an unknown filename - potentially overridden in 
-      * subclasses */
-	protected static final String UNKNOWN_FILENAME = "";  
 
     /** This is used for matching of filenames.  kind of big so we only want
      *  one. */
@@ -298,7 +295,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * The SHA1 hash of the file that this ManagedDownloader is controlling.
      */
-    protected URN downloadSHA1;
+    private URN downloadSHA1;
 	
     /**
      * The collection of alternate locations we successfully downloaded from
@@ -338,7 +335,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /** The current incomplete file that we're downloading, or the last
      *  incomplete file if we're not currently downloading, or null if we
      *  haven't started downloading.  Used for previewing purposes. */
-    protected File incompleteFile;
+    private File incompleteFile;
    
     /**
      * The position of the downloader in the uploadQueue */
@@ -420,13 +417,14 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 	 */
     private volatile int triedHosts;
     
-
-    private final DownloadManager downloadManager;
+    private long contentLength = -1;
+    
+    protected final DownloadManager downloadManager;
     protected final FileManager fileManager;
     protected final IncompleteFileManager incompleteFileManager;
-    private final DownloadCallback downloadCallback;    
-    private final NetworkManager networkManager;
-    private final AlternateLocationFactory alternateLocationFactory;
+    protected final DownloadCallback downloadCallback;    
+    protected final NetworkManager networkManager;
+    protected final AlternateLocationFactory alternateLocationFactory;
     protected final RequeryManager requeryManager;
     protected final QueryRequestFactory queryRequestFactory;
     protected final OnDemandUnicaster onDemandUnicaster;
@@ -443,6 +441,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final Provider<MessageRouter> messageRouter;
     protected final Provider<TigerTreeCache> tigerTreeCache;
     protected final ApplicationServices applicationServices;
+    protected final RemoteFileDescFactory remoteFileDescFactory;
 
     /**
      * Creates a new ManagedDownload to download the given files.
@@ -464,7 +463,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             DiskController diskController, @Named("ipFilter")
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
-            Provider<TigerTreeCache> tigerTreeCache, ApplicationServices applicationServices) {
+            Provider<TigerTreeCache> tigerTreeCache, ApplicationServices applicationServices,
+            RemoteFileDescFactory remoteFileDescFactory) {
         super(saveLocationManager);
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
@@ -488,10 +488,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.messageRouter = messageRouter;
         this.tigerTreeCache = tigerTreeCache;
         this.applicationServices = applicationServices;
+        this.remoteFileDescFactory = remoteFileDescFactory;
         this.cachedRFDs = new HashSet<RemoteFileDesc>();
     }
     
-    public void addInitialSources(Collection<RemoteFileDesc> rfds, String defaultFileName) {
+    public synchronized void addInitialSources(Collection<RemoteFileDesc> rfds, String defaultFileName) {
         if(rfds == null)
             rfds = Collections.emptyList();
         
@@ -500,8 +501,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             initPropertiesMap(rfds.iterator().next());
 
         assert rfds.size() > 0 || defaultFileName != null;
-        if (rfds.isEmpty())
-            propertiesMap.put(CoreDownloader.DEFAULT_FILENAME, defaultFileName);
+        if (!hasDefaultFileName())
+            setDefaultFileName(defaultFileName);
     }
     
     public void setQueryGuid(GUID queryGuid) {
@@ -509,10 +510,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
 
     protected synchronized void initPropertiesMap(RemoteFileDesc rfd) {
-		if (propertiesMap.get(CoreDownloader.DEFAULT_FILENAME) == null)
-			propertiesMap.put(CoreDownloader.DEFAULT_FILENAME,rfd.getFileName());
-		if (propertiesMap.get(CoreDownloader.FILE_SIZE) == null)
-			propertiesMap.put(CoreDownloader.FILE_SIZE,Long.valueOf(rfd.getSize()));
+        if(!hasDefaultFileName()) {
+            setDefaultFileName(rfd.getFileName());
+        }
+        if(getContentLength() == -1)
+            setContentLength(rfd.getSize());
     }
 
     /* (non-Javadoc)
@@ -540,27 +542,16 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 		ranker = getSourceRanker(null);
         ranker.setMeshHandler(this);
         
-        // get the SHA1 if we can.
-        
         synchronized(this) {
-            if (downloadSHA1 == null) {
-                Object value = propertiesMap.get(ManagedDownloader.SHA1_URN);
-                if (value instanceof URN) {
-                    downloadSHA1 = (URN)value;
-                }
-            }
-            
             for(RemoteFileDesc rfd : cachedRFDs) {
-                if(downloadSHA1 != null)
+                if(getSha1Urn() != null)
                     break;
-                downloadSHA1 = rfd.getSHA1Urn();
+                setSha1Urn(rfd.getSHA1Urn());
             }
-            if (downloadSHA1 != null)
-                propertiesMap.put(ManagedDownloader.SHA1_URN,downloadSHA1);
         }
         
-		if (downloadSHA1 != null) 
-		    altLocManager.addListener(downloadSHA1,this);
+		if (getSha1Urn() != null) 
+		    altLocManager.addListener(getSha1Urn(),this);
         
 		
 		// make sure all rfds have the same sha1
@@ -614,12 +605,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * remove the extraneous RFDs.
      */
     private synchronized void verifyAllFiles() {
-        if(downloadSHA1 == null)
-            return ;
+        if(getSha1Urn() == null)
+            return;
         
 		for (Iterator<RemoteFileDesc> iter = cachedRFDs.iterator(); iter.hasNext();) {
 			RemoteFileDesc rfd = iter.next();
-			if (rfd.getSHA1Urn() != null && !downloadSHA1.equals(rfd.getSHA1Urn()))
+			if (rfd.getSHA1Urn() != null && !getSha1Urn().equals(rfd.getSHA1Urn()))
 				iter.remove();
 		}
     }
@@ -843,7 +834,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * Tries iterative GUESSing of sources.
      */
     private boolean tryGUESSing() {
-        if(originalQueryGUID == null || triedLocatingSources || downloadSHA1 == null)
+        if(originalQueryGUID == null || triedLocatingSources || getSha1Urn() == null)
             return false;
             
         Set<GUESSEndpoint> guessLocs = messageRouter.get().getQueryLocs(this.originalQueryGUID);
@@ -856,7 +847,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         //TODO: should we increment a stat to get a sense of
         //how much this is happening?
         for(GUESSEndpoint ep : guessLocs) {
-            onDemandUnicaster.query(ep, downloadSHA1);
+            onDemandUnicaster.query(ep, getSha1Urn());
             // TODO: see if/how we can wait 750 seconds PER send again.
             // if we got a result, no need to continue GUESSing.
             if(receivedNewSources)
@@ -981,11 +972,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         if (incompleteFile != null)
             return;
         
-        if (downloadSHA1 != null)
-            incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
+        URN sha1 = getSha1Urn();
+        if (sha1 != null)
+            incompleteFile = incompleteFileManager.getFileForUrn(sha1);
         
         if (incompleteFile == null) { 
-            incompleteFile = getIncompleteFile(getSaveFile().getName(), downloadSHA1,
+            incompleteFile = getIncompleteFile(getSaveFile().getName(), sha1,
                                                getContentLength());
         }
         
@@ -1014,13 +1006,13 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         if( fd != null && fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
             // Assert that the SHA1 of the IFD and our sha1 match.
-            if(downloadSHA1 != null && !downloadSHA1.equals(ifd.getSHA1Urn())) {
+            if(getSha1Urn() != null && !getSha1Urn().equals(ifd.getSHA1Urn())) {
                 ErrorService.error(new IllegalStateException(
                            "wrong IFD." +
                            "\nclass: " + getClass().getName() +
                            "\nours  :   " + incompleteFile +
                            "\ntheirs: " + ifd.getFile() +
-                           "\nour hash    : " + downloadSHA1 +
+                           "\nour hash    : " + getSha1Urn() +
                            "\ntheir hashes: " + ifd.getUrns()+
                            "\nifm.hashes : "+incompleteFileManager.dumpHashes()));
                 fileManager.removeFileIfShared(incompleteFile);
@@ -1077,7 +1069,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 		if (iFile != null) {
 			return iFile.equals(incFile);
 		}
-		URN urn = downloadSHA1;
+		URN urn = getSha1Urn();
 		if (urn != null) {
 			iFile = incompleteFileManager.getFileForUrn(urn);
 		}
@@ -1107,8 +1099,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#conflicts(com.limegroup.gnutella.URN, long, java.io.File)
      */
 	public boolean conflicts(URN urn, long fileSize, File... fileName) {
-		if (urn != null && downloadSHA1 != null) {
-			return urn.equals(downloadSHA1);
+		if (urn != null && getSha1Urn() != null) {
+			return urn.equals(getSha1Urn());
 		}
 		if (fileSize > 0) {
 			try {
@@ -1208,8 +1200,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             if (ourLength != -1 && ourLength != otherLength) 
                 return false;
             
-            if (otherUrn != null && downloadSHA1 != null) 
-                return otherUrn.equals(downloadSHA1);
+            if (otherUrn != null && getSha1Urn() != null) 
+                return otherUrn.equals(getSha1Urn());
             
             // compare to previously cached rfds
             for(RemoteFileDesc rfd : cachedRFDs) {
@@ -1258,7 +1250,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#locationAdded(com.limegroup.gnutella.altlocs.AlternateLocation)
      */
     public synchronized void locationAdded(AlternateLocation loc) {
-        assert(loc.getSHA1Urn().equals(getSHA1Urn()));
+        assert(loc.getSHA1Urn().equals(getSha1Urn()));
         
         long contentLength = -1L;
         if (loc instanceof DirectDHTAltLoc) {
@@ -1279,7 +1271,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                         contentLength = fileSize;
                         
                         if (contentLength <= MAX_FILE_SIZE) {
-                            propertiesMap.put(CoreDownloader.FILE_SIZE, contentLength);
+                            setContentLength(contentLength);
                         }
                     }
                 }
@@ -1409,9 +1401,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
     
     private void prepareRFD(RemoteFileDesc rfd, boolean cache) {
-        if(downloadSHA1 == null) {
-            downloadSHA1 = rfd.getSHA1Urn();
-            altLocManager.addListener(downloadSHA1,this);
+        if(getSha1Urn() == null) {
+            setSha1Urn(rfd.getSHA1Urn());
+            altLocManager.addListener(getSha1Urn(),this);
         }
 
         //add to allFiles for resume purposes if caching...
@@ -1606,9 +1598,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         
         // Verify that this download has a hash.  If it does not,
         // we should not have been getting locations in the first place.
-        assert downloadSHA1 != null : "null hash.";
+        assert getSha1Urn() != null : "null hash.";
         
-        assert downloadSHA1.equals(rfd.getSHA1Urn()) : "wrong loc SHA1";
+        assert getSha1Urn().equals(rfd.getSHA1Urn()) : "wrong loc SHA1";
         
         AlternateLocation loc;
         try {
@@ -1749,8 +1741,16 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#getSHA1Urn()
      */
-    public URN getSHA1Urn() {
+    public synchronized URN getSha1Urn() {
         return downloadSHA1;
+    }
+    
+    protected synchronized void setSha1Urn(URN sha1) {
+        if(!sha1.isSHA1())
+            throw new IllegalArgumentException("not sha1: " + sha1);
+        if(downloadSHA1 != null && !sha1.equals(downloadSHA1))
+            throw new IllegalStateException("sha1 already set to: " + downloadSHA1);
+        this.downloadSHA1 = sha1;
     }
     
     /* (non-Javadoc)
@@ -1803,14 +1803,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return commonOutFile.getOffsetForPreview();
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.downloader.ManagedDownloader#getSaveFile()
+    /**
+     * Returns the save file from the default save directory.
      */
-    public synchronized File getSaveFile() {
-        Object saveFile = propertiesMap.get(CoreDownloader.SAVE_FILE);
-		if (saveFile != null) {
-			return (File)saveFile;
-		}
+    @Override
+    protected File getDefaultSaveFile() {
         String fileName = getDefaultFileName(); 
         return new File(SharingSettings.getSaveDirectory(fileName), fileName);
     }  
@@ -1821,8 +1818,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#finish()
      */
     public synchronized void finish() {
-        if (downloadSHA1 != null)
-            altLocManager.removeListener(downloadSHA1, this);
+        if (getSha1Urn() != null)
+            altLocManager.removeListener(getSha1Urn(), this);
         requeryManager.cleanUp();
         if(cachedRFDs != null) {
             for(RemoteFileDesc rfd : cachedRFDs)
@@ -1908,7 +1905,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
         // Create a new validAlts for this sha1.
         // initialize the HashTree
-        if( downloadSHA1 != null ) 
+        if( getSha1Urn() != null ) 
             initializeHashTree();
         
         // load up the ranker with the hosts we know about
@@ -1944,8 +1941,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     private void validateDownload() {
         if(shouldValidate()) {
-            if(downloadSHA1 != null) {
-                contentManager.request(downloadSHA1, new ContentResponseObserver() {
+            if(getSha1Urn() != null) {
+                contentManager.request(getSha1Urn(), new ContentResponseObserver() {
                     public void handleResponse(URN urn, ContentResponseData response) {
                         if(response != null && !response.isOK()) {
                             invalidated = true;
@@ -1995,17 +1992,17 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         catch(IOException ignored) {}
         
         // If we have no hash, we can't check at all.
-        if(downloadSHA1 == null)
+        if(getSha1Urn() == null)
             return fileHash;
 
         // If they're equal, everything's fine.
         //if fileHash == null, it will be a mismatch
-        if(downloadSHA1.equals(fileHash))
+        if(getSha1Urn().equals(fileHash))
             return fileHash;
         
         if(LOG.isWarnEnabled()) {
             LOG.warn("hash verification problem, fileHash="+
-                           fileHash+", ourHash="+downloadSHA1);
+                           fileHash+", ourHash="+getSha1Urn());
         }
 
         // unshare the file if we didn't have a tree
@@ -2014,7 +2011,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             fileManager.removeFileIfShared(incompleteFile);
         
         // purge the tree
-        tigerTreeCache.get().purgeTree(downloadSHA1);
+        tigerTreeCache.get().purgeTree(getSha1Urn());
         commonOutFile.setHashTree(null);
 
         // ask what to do next 
@@ -2028,7 +2025,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * checks the TT cache and if a good tree is present loads it 
      */
     private void initializeHashTree() {
-		HashTree tree = tigerTreeCache.get().getHashTree(downloadSHA1); 
+		HashTree tree = tigerTreeCache.get().getHashTree(getSha1Urn()); 
 	    
 		// if we have a valid tree, update our chunk size and disable overlap checking
 		if (tree != null && tree.isDepthGoodEnough()) {
@@ -2140,9 +2137,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     protected URN saveTreeHash(URN fileHash) {
             // save the trees!
-            if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
+            if (getSha1Urn() != null && getSha1Urn().equals(fileHash) && commonOutFile.getHashTree() != null) {
                 tigerTreeCache.get(); // instantiate it. 
-                TigerTreeCache.addHashTree(downloadSHA1,commonOutFile.getHashTree());
+                TigerTreeCache.addHashTree(getSha1Urn(),commonOutFile.getHashTree());
                 return commonOutFile.getHashTree().getTTRootUrn();
             }
             return null;
@@ -2686,8 +2683,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#getContentLength()
      */
     public synchronized long getContentLength() {
-        Number i = (Number)propertiesMap.get(CoreDownloader.FILE_SIZE);
-        return i != null ? i.longValue() : -1;
+        return contentLength;
+    }
+    
+    protected synchronized void setContentLength(long contentLength) {
+        this.contentLength = contentLength;
     }
 
     /* (non-Javadoc)
@@ -2895,7 +2895,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
         
         if (set && tree != null) { // warning?
-            URN sha1 = getSHA1Urn();
+            URN sha1 = getSha1Urn();
             URN ttroot = tree.getTTRootUrn();
             tigerTreeCache.get();
             TigerTreeCache.addRoot(sha1, ttroot);
@@ -3101,13 +3101,42 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             }
         }
     }
-
-    public synchronized DownloadMemento toMemento() {
-        return new GnutellaDownloadMemento(getDownloadType(), 
-                new HashMap<String, Serializable>(propertiesMap), 
-                commonOutFile == null ? null : commonOutFile.getSerializableBlocks(),
-                incompleteFile,
-                getRemoteHostMementos());
+    
+    protected synchronized void setIncompleteFile(File incompleteFile) {
+        this.incompleteFile = incompleteFile;
+    }
+    
+    protected synchronized File getIncompleteFile() {
+        return incompleteFile;
+    }
+    
+    protected DownloadMemento createMemento() {
+        return new GnutellaDownloadMementoImpl();
+    }
+    
+    @Override
+    public synchronized void initFromMemento(DownloadMemento memento) throws InvalidDataException {
+        super.initFromMemento(memento);
+        GnutellaDownloadMemento gmem = (GnutellaDownloadMemento)memento;
+        setContentLength(gmem.getContentLength());
+        if(gmem.getSha1Urn() != null)
+            setSha1Urn(gmem.getSha1Urn());
+        setIncompleteFile(gmem.getIncompleteFile());
+        if(gmem.getRemoteHosts().isEmpty() && gmem.getDefaultFileName() == null)
+            throw new InvalidDataException("must have a name!");
+        addInitialSources(toRfds(gmem.getRemoteHosts()), gmem.getDefaultFileName());
+    }
+    
+    @Override
+    protected void fillInMemento(DownloadMemento memento) {
+        GnutellaDownloadMemento gmem = (GnutellaDownloadMemento)memento;
+        super.fillInMemento(gmem);
+        gmem.setContentLength(getContentLength());
+        gmem.setSha1Urn(getSha1Urn());
+        if(commonOutFile != null)
+            gmem.setSavedBlocks(commonOutFile.getSerializableBlocks());
+        gmem.setIncompleteFile(getIncompleteFile());
+        gmem.setRemoteHosts(getRemoteHostMementos());
     }
     
     private Set<RemoteHostMemento> getRemoteHostMementos() {
@@ -3116,5 +3145,17 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             mementos.add(rfd.toMemento());
         }
         return mementos;
+    }
+
+    private Collection<RemoteFileDesc> toRfds(Collection<? extends RemoteHostMemento> mementos)
+            throws InvalidDataException {
+        if (mementos == null)
+            return Collections.emptyList();
+
+        List<RemoteFileDesc> rfds = new ArrayList<RemoteFileDesc>(mementos.size());
+        for (RemoteHostMemento memento : mementos) {
+            rfds.add(remoteFileDescFactory.createFromMemento(memento));
+        }
+        return rfds;
     }
 }

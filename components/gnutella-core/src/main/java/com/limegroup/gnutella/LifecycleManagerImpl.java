@@ -410,7 +410,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         // Restore any downloads in progress.
         LOG.trace("START DownloadManager.postGuiInit");
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Old Downloads..."));
-        downloadManager.get().loadStoredDownloadsAndScheduleWriting();
+        downloadManager.get().loadSavedDownloadsAndScheduleWriting();
         LOG.trace("STOP DownloadManager.postGuiInit");
         
         LOG.trace("START LWSIntegrationServices.postGuiInit");

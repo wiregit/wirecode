@@ -1,11 +1,9 @@
 package com.limegroup.bittorrent;
 
 import java.io.File;
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.limewire.collection.NumericBuffer;
+import org.limewire.io.InvalidDataException;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -21,10 +19,10 @@ import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractCoreDownloader;
-import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMemento;
+import com.limegroup.gnutella.downloader.serial.BTDownloadMementoImpl;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 
 /**
@@ -33,10 +31,7 @@ import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 public class BTDownloaderImpl extends AbstractCoreDownloader 
                           implements TorrentEventListener, BTDownloader {
 	
-    
-	private static final String METAINFO = "metainfo";
-	
-	private volatile long startTime, stopTime;
+    private volatile long startTime, stopTime;
 	
 	private final NumericBuffer<Float> averagedBandwidth = new NumericBuffer<Float>(10);
     
@@ -83,19 +78,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
     public void initBtMetaInfo(BTMetaInfo btMetaInfo) {
         this.btMetaInfo = btMetaInfo;  
 		synchronized(this) {
-		    propertiesMap.put(METAINFO, btMetaInfo);
-		    propertiesMap.put(CoreDownloader.DEFAULT_FILENAME, btMetaInfo.getName());
+		    setDefaultFileName(btMetaInfo.getName());
 		}
         this.torrentContext = btContextFactory.createBTContext(btMetaInfo);
         this.torrent = managedTorrentFactory.create(torrentContext);
 	}
-    
-    @Override
-    public void addNewProperties(Map<String, Serializable> newProperties) {
-        if(newProperties.get(METAINFO) != null)
-            btMetaInfo = (BTMetaInfo)newProperties.get(METAINFO);
-        super.addNewProperties(newProperties);
-    }
 	
 	/**
 	 * Stops a torrent download.  If the torrent is in
@@ -351,6 +338,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 		return !isCompleted();
 	}
 
+    @Override
 	public void setSaveFile(File saveDirectory, String fileName,
 			boolean overwrite) throws SaveLocationException {
 		super.setSaveFile(saveDirectory, fileName, overwrite);
@@ -358,11 +346,17 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 		torrentFileSystem().setCompleteFile(new File(saveDirectory, fileName));
 	}
 
+	@Override
 	public File getSaveFile() {
 		return torrentFileSystem().getCompleteFile();
 	}
 	
-	public URN getSHA1Urn() {
+	@Override
+	protected File getDefaultSaveFile() {
+	    return null;
+	}
+	
+	public URN getSha1Urn() {
 		return btMetaInfo.getURN();
 	}
 	
@@ -406,7 +400,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	private void torrentStopped(String description) {
 		if (stopTime == 0) {
             if (description != null)
-                setAttribute(CUSTOM_INACTIVITY_KEY, description);
+                setAttribute(CUSTOM_INACTIVITY_KEY, description, false);
 			averagedBandwidth.clear();
 			boolean resumable = isResumable();
 			stopTime = System.currentTimeMillis();
@@ -452,6 +446,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 		return false;
 	}
 	
+    @Override
 	public boolean conflictsSaveFile(File candidate) {
 		return torrentFileSystem().conflicts(candidate);
 	}
@@ -465,9 +460,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 		torrentManager.get().removeEventListener(this);
 		torrent = new FinishedTorrentDownload(torrent);
 		btMetaInfo = null;
-		propertiesMap.remove(METAINFO);
 	}
 	
+    @Override
 	public String toString() {
 		return "downloader facade for "+torrentFileSystem().getCompleteFile().getName();
 	}
@@ -476,7 +471,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 		if (! (o instanceof Downloader))
 			return false;
 		Downloader other = (Downloader)o;
-		return getSHA1Urn().equals(other.getSHA1Urn());
+		return getSha1Urn().equals(other.getSha1Urn());
 	}
 
 	public int getTriedHostCount() {
@@ -497,9 +492,23 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
         return btMetaInfo.getFileSystem();
     }
 
-    public synchronized DownloadMemento toMemento() {
+    protected DownloadMemento createMemento() {
         if(finished)
-            throw new IllegalStateException("writing finished BT download!");
-        return new BTDownloadMemento(new HashMap<String, Serializable>(propertiesMap));
+            throw new IllegalStateException("creating memento for finished torrent!");
+        return new BTDownloadMementoImpl();
+    }
+    
+    @Override
+    protected void fillInMemento(DownloadMemento memento) {
+        super.fillInMemento(memento);
+        BTDownloadMemento bmem = (BTDownloadMemento)memento;
+        bmem.setBtMetaInfo(btMetaInfo);
+    }
+    
+    @Override
+    public synchronized void initFromMemento(DownloadMemento memento) throws InvalidDataException {
+        super.initFromMemento(memento);
+        BTDownloadMemento bmem = (BTDownloadMemento)memento;
+        initBtMetaInfo(bmem.getBtMetaInfo());
     }
 }

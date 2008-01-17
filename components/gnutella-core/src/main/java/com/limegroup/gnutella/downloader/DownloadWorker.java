@@ -515,7 +515,7 @@ public class DownloadWorker {
                 // isn't good enough or we don't have a tree) and another
                 // worker isn't currently requesting one
                 shouldRequest = _downloader.hasHashTree()
-                        && _manager.getSHA1Urn() != null
+                        && _manager.getSha1Urn() != null
                         && (ourTree == null || !ourTree.isDepthGoodEnough());
 
                 if (shouldRequest)
@@ -524,7 +524,7 @@ public class DownloadWorker {
         }
 
         if (shouldRequest) {
-            _downloader.requestHashTree(_manager.getSHA1Urn(), new State() {
+            _downloader.requestHashTree(_manager.getSha1Urn(), new State() {
                 protected void handleState(boolean success) {
                 }
             });
@@ -554,7 +554,7 @@ public class DownloadWorker {
             incrementState(status);
         } else {
             _manager.removeQueuedWorker(this);
-            _downloader.downloadThexBody(_manager.getSHA1Urn(), new State() {
+            _downloader.downloadThexBody(_manager.getSha1Urn(), new State() {
                 protected void handleState(boolean success) {
                     HashTree newTree = _downloader.getHashTree();
                     _manager.hashTreeRead(newTree);

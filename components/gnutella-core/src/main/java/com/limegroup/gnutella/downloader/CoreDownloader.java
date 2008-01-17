@@ -1,25 +1,19 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.File;
-import java.io.Serializable;
-import java.util.Map;
+
+import org.limewire.io.InvalidDataException;
 
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 
+/**
+ * Extends the {@link Downloader} interface to provide more functionality,
+ * allowing the download to be more tightly managed.
+ */
 public interface CoreDownloader extends Downloader {
-
-    public static final String ATTRIBUTES = "attributes";
-    public static final String DEFAULT_FILENAME = "defaultFileName";
-    public static final String FILE_SIZE = "fileSize";
-    
-    /**
-     * The key under which the saveFile File is stored in the attribute map
-     * used in serializing and deserializing ManagedDownloaders. 
-     */
-    public static final String SAVE_FILE = "saveFile";
 
     /**
      * Sets the inactive priority of this download.
@@ -77,10 +71,14 @@ public interface CoreDownloader extends Downloader {
      */
     public DownloaderType getDownloadType();
     
-    /** Adds all new properties & attributes, not overwriting old ones. */
-    public void addNewProperties(Map<String, Serializable> newProperties);
-    
     /** Constructs a memento that will be used for serialization. */
     DownloadMemento toMemento();
+    
+    /**
+     * Initializes this object from the given memento.
+     * 
+     * @throws InvalidDataException if the memento contains invalid data.
+     */
+    void initFromMemento(DownloadMemento memento) throws InvalidDataException;
 
 }

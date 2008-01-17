@@ -2,22 +2,25 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.io.InvalidDataException;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
 
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
+import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.settings.SharingSettings;
 
+/**
+ * A basic implementation of CoreDownloader.
+ * 
+ * Subclasses still need to do the heavy-lifting.
+ */
 public abstract class AbstractCoreDownloader implements CoreDownloader {
-    
-	/** LOCKING: this */
-	protected volatile Map<String, Serializable> propertiesMap;
 
 	/**
 	 * The current priority of this download -- only valid if inactive.
@@ -32,16 +35,21 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	 * may be used by GUI, to keep some additional information about
 	 * the download.
 	 */
-	protected Map<String, Serializable> attributes = new HashMap<String, Serializable>();
+	private Map<String, Attribute> attributes = new HashMap<String, Attribute>();
+	
+	/**
+	 * The save file this download should be saved too.
+	 * If null, the subclass should return a suggested location.
+	 */
+	private File saveFile;
+	
+	/** The default fileName this should use. */
+	private String defaultFileName;
 
-	protected final SaveLocationManager saveLocationManager;
+	private final SaveLocationManager saveLocationManager;
 	
 	protected AbstractCoreDownloader(SaveLocationManager saveLocationManager) {
-	    this.saveLocationManager = Objects.nonNull(saveLocationManager, "saveLocationManager");	    
-	    synchronized(this) {
-	        propertiesMap = new HashMap<String, Serializable>();
-	        propertiesMap.put(CoreDownloader.ATTRIBUTES, (Serializable)attributes);
-	    }
+	    this.saveLocationManager = Objects.nonNull(saveLocationManager, "saveLocationManager");
 	}
 	
 	/* (non-Javadoc)
@@ -57,38 +65,23 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	public int getInactivePriority() {
 	    return inactivePriority;
 	}
-	
-	@SuppressWarnings("unchecked")
-    public void addNewProperties(Map<String, Serializable> newProperties) {
-	    synchronized(this) {
-    	    for(Map.Entry<String, Serializable> entry : newProperties.entrySet()) {
-    	        if(propertiesMap.get(entry.getKey()) == null)
-    	            propertiesMap.put(entry.getKey(), entry.getValue());
-    	    }
-    	    
-    	    // and go through attributes individually, since this will always have an attr map
-    	    Map<String, Serializable> newAttributes = (Map<String, Serializable>)newProperties.get(CoreDownloader.ATTRIBUTES);
-    	    if(newAttributes != null) {
-    	        for(Map.Entry<String, Serializable> entry : newAttributes.entrySet()) {
-    	            if(attributes.get(entry.getKey()) == null)
-    	                attributes.put(entry.getKey(), entry.getValue());
-    	        }    	            
-    	    }   
-	    }
-	}
 
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.CoreDownloader#setAttribute(java.lang.String, java.io.Serializable)
      */
-	public Serializable setAttribute(String key, Serializable value) {
-	    return attributes.put( key, value );
+	public Object setAttribute(String key, Object value, boolean serialize) {
+	    return attributes.put( key, new Attribute(serialize, value) );
 	}
 
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.CoreDownloader#getAttribute(java.lang.String)
      */
-	public Serializable getAttribute(String key) {
-	    return attributes.get( key );
+	public Object getAttribute(String key) {
+	    Attribute attr = attributes.get(key);
+	    if(attr != null)
+	        return attr.getObject();
+	    else
+	        return null;
 	}
 
 	/* (non-Javadoc)
@@ -161,9 +154,19 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	    synchronized (this) {
 	        if (!isRelocatable())
 	            throw new SaveLocationException(SaveLocationException.FILE_ALREADY_SAVED, candidateFile);
-	        propertiesMap.put(CoreDownloader.SAVE_FILE, candidateFile);
+	        this.saveFile = candidateFile;
 	    }
 	}
+	
+	public synchronized File getSaveFile() {
+	    if(saveFile == null)
+	        return getDefaultSaveFile();
+	    else
+	        return saveFile;
+	}
+	
+	/** A default location where this file should be saved, if no explicit saveFile is set. */
+	protected abstract File getDefaultSaveFile();
 	
     /**
 	 * Returns the value for the key {@link CoreDownloader#DEFAULT_FILENAME} from
@@ -172,10 +175,69 @@ public abstract class AbstractCoreDownloader implements CoreDownloader {
 	 * Subclasses should put the name into the map or override this
 	 * method.
 	 */
-    protected synchronized String getDefaultFileName() {       
-        String fileName = (String)propertiesMap.get(CoreDownloader.DEFAULT_FILENAME); 
-        assert fileName != null : "defaultFileName is null, "+
-                         "subclass may have not overridden getDefaultFileName";
-		return CommonUtils.convertFileName(fileName);
+    protected synchronized String getDefaultFileName() {     
+        assert defaultFileName != null : "no default filename initialized!";
+		return CommonUtils.convertFileName(defaultFileName);
+    }
+    
+    /** Returns true if a defaultFileName is set. */
+    protected synchronized boolean hasDefaultFileName() {
+        return defaultFileName != null;
+    }
+    
+    /** Sets the default filename this will use. */
+    protected synchronized void setDefaultFileName(String defaultFileName) {
+        this.defaultFileName = defaultFileName;
+    }
+    
+    public synchronized void initFromMemento(DownloadMemento memento) throws InvalidDataException {
+        this.saveFile = memento.getSaveFile();
+        setDefaultFileName(memento.getDefaultFileName());
+        if(memento.getAttributes() != null) {
+            for(Map.Entry<String, Object> entry : memento.getAttributes().entrySet()) {
+                attributes.put(entry.getKey(), new Attribute(true, entry.getValue()));
+            }
+        }
+    }
+    
+    public final synchronized DownloadMemento toMemento() {
+        DownloadMemento memento = createMemento();
+        fillInMemento(memento);
+        return memento;
+    }
+    
+    /** Constructs the correct type of memento. */
+    protected abstract DownloadMemento createMemento();
+
+    /** Fills in all data this class wants to store. */
+    protected void fillInMemento(DownloadMemento memento) {
+        memento.setDownloadType(getDownloadType());
+        memento.setSaveFile(saveFile);
+        memento.setDefaultFileName(defaultFileName);
+        Map<String, Object> saveAttributes = new HashMap<String, Object>(attributes.size());
+        for(Map.Entry<String, Attribute> entry : attributes.entrySet()) {
+            if(entry.getValue().isSerialize())
+                saveAttributes.put(entry.getKey(), entry.getValue().getObject());
+        }
+        memento.setAttributes(saveAttributes);
+    }
+    
+    /** A wrapper for an attribute. */
+    private static class Attribute {
+        private final boolean serialize;
+        private final Object object;
+        
+        public Attribute(boolean serialize, Object object) {
+            this.serialize = serialize;
+            this.object = object;
+        }
+
+        public boolean isSerialize() {
+            return serialize;
+        }
+
+        public Object getObject() {
+            return object;
+        }        
     }
 }

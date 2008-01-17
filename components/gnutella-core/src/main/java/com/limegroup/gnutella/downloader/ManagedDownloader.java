@@ -9,9 +9,6 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 
 public interface ManagedDownloader extends MeshHandler, CoreDownloader {
 
-    /** The key under which the URN is stored in the attribute map */
-    public static final String SHA1_URN = "sha1Urn";
-
     /** Adds any default sources, and a default filename to use. */
     public void addInitialSources(Collection<RemoteFileDesc> rfds, String defaultFileName);
     

@@ -4,11 +4,13 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -17,19 +19,24 @@ import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
 import org.limewire.util.CommonUtils;
 
+import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.FileNotFoundException;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMemento;
+import com.limegroup.gnutella.downloader.serial.BTDownloadMementoImpl;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.GnutellaDownloadMemento;
+import com.limegroup.gnutella.downloader.serial.GnutellaDownloadMementoImpl;
+import com.limegroup.gnutella.downloader.serial.MagnetDownloadMemento;
+import com.limegroup.gnutella.downloader.serial.MagnetDownloadMementoImpl;
 import com.limegroup.gnutella.downloader.serial.OldDownloadConverter;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.downloader.serial.conversion.DownloadConverterObjectInputStream.Version;
 import com.limegroup.gnutella.settings.SharingSettings;
 
 public class OldDownloadConverterImpl implements OldDownloadConverter {
-    
     
     private static Log LOG = LogFactory.getLog(OldDownloadConverterImpl.class);
     
@@ -90,17 +97,39 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
         
         return mementos;
     }
+    
+    private void addGnutellaProperties(GnutellaDownloadMemento memento, Map<String, Serializable> properties, List<Range> ranges, File incompleteFile, Set<SerialRemoteFileDesc> rfds) {
+        memento.setSavedBlocks(ranges);
+        memento.setIncompleteFile(incompleteFile);
+        memento.setRemoteHosts(convertToMementos(rfds));
+        memento.setContentLength(properties.get("fileSize") == null ? -1 : ((Number)properties.get("fileSize")).longValue());
+        memento.setSha1Urn((URN)properties.get("sha1Urn"));
+        addCommonProperties(memento, properties);
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void addCommonProperties(DownloadMemento memento, Map<String, Serializable> properties) {
+        memento.setAttributes((Map<String, Object>)properties.get("attributes"));
+        memento.setDefaultFileName((String)properties.get("defaultFileName"));
+        memento.setSaveFile((File)properties.get("saveFile"));
+    }
 
     private void addStore(List<DownloadMemento> mementos, SerialStoreDownloader o, SerialIncompleteFileManager sifm) {
         File incompleteFile = getIncompleteFile(o, sifm);
         List<Range> ranges = getRanges(incompleteFile, sifm);
-        mementos.add(new GnutellaDownloadMemento(DownloaderType.STORE, o.getProperties(), ranges, incompleteFile, convertToMementos(o.getRemoteFileDescs())));        
+        GnutellaDownloadMemento memento = new GnutellaDownloadMementoImpl();
+        memento.setDownloadType(DownloaderType.STORE);
+        addGnutellaProperties(memento, o.getProperties(), ranges, incompleteFile, o.getRemoteFileDescs());
+        mementos.add(memento);
     }
     
     private void addManaged(List<DownloadMemento> mementos, SerialManagedDownloader o, SerialIncompleteFileManager sifm) {
         File incompleteFile = getIncompleteFile(o, sifm);
         List<Range> ranges = getRanges(incompleteFile, sifm);
-        mementos.add(new GnutellaDownloadMemento(DownloaderType.MANAGED, o.getProperties(), ranges, incompleteFile, convertToMementos(o.getRemoteFileDescs())));        
+        GnutellaDownloadMemento memento = new GnutellaDownloadMementoImpl();
+        memento.setDownloadType(DownloaderType.MANAGED);
+        addGnutellaProperties(memento, o.getProperties(), ranges, incompleteFile, o.getRemoteFileDescs());
+        mementos.add(memento);                
     }
 
     private void addResume(List<DownloadMemento> mementos, SerialResumeDownloader o, SerialIncompleteFileManager sifm) {
@@ -109,7 +138,10 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
         o.getProperties().put("fileSize", o.getSize());
         o.getProperties().put("sha1Urn", o.getUrn());
         o.getProperties().put("defaultFileName", o.getName());
-        mementos.add(new GnutellaDownloadMemento(DownloaderType.MANAGED, o.getProperties(), ranges, incompleteFile, convertToMementos(o.getRemoteFileDescs())));
+        GnutellaDownloadMemento memento = new GnutellaDownloadMementoImpl();
+        memento.setDownloadType(DownloaderType.MANAGED);
+        addGnutellaProperties(memento, o.getProperties(), ranges, incompleteFile, o.getRemoteFileDescs());
+        mementos.add(memento);       
     }
 
     private void addMagnet(List<DownloadMemento> mementos, SerialMagnetDownloader o, SerialIncompleteFileManager sifm) {
@@ -117,11 +149,19 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
         List<Range> ranges = getRanges(incompleteFile, sifm);
         if(o.getUrn() != null)
             o.getProperties().put("sha1Urn", o.getUrn());      
-        mementos.add(new GnutellaDownloadMemento(DownloaderType.MAGNET, o.getProperties(), ranges, incompleteFile, convertToMementos(o.getRemoteFileDescs())));
+        MagnetDownloadMemento memento = new MagnetDownloadMementoImpl();
+        memento.setDownloadType(DownloaderType.MAGNET);
+        memento.setMagnet((MagnetOptions)o.getProperties().get("MAGNET"));
+        addGnutellaProperties(memento, o.getProperties(), ranges, incompleteFile, o.getRemoteFileDescs());
+        mementos.add(memento); 
     }
 
     private void addBTDownloader(List<DownloadMemento> mementos, SerialBTDownloader o, SerialIncompleteFileManager sifm) {
-        mementos.add(new BTDownloadMemento(o.getProperties()));
+        BTDownloadMemento memento = new BTDownloadMementoImpl();
+        memento.setDownloadType(DownloaderType.BTDOWNLOADER);
+        memento.setBtMetaInfo((BTMetaInfo)o.getProperties().get("metainfo"));
+        addCommonProperties(memento, o.getProperties());
+        mementos.add(memento);
     }
     
     private List<Range> getRanges(File incompleteFile, SerialIncompleteFileManager ifm) {

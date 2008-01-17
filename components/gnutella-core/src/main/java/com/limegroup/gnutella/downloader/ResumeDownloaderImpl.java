@@ -16,6 +16,7 @@ import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.SavedFileManager;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
@@ -59,22 +60,24 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
             VerifyingFileFactory verifyingFileFactory, DiskController diskController,
             @Named("ipFilter") IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<MessageRouter> messageRouter, Provider<TigerTreeCache> tigerTreeCache,
-            ApplicationServices applicationServices) {
+            ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory) {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
                 contentManager, sourceRankerFactory, urnCache, savedFileManager,
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
-                tigerTreeCache, applicationServices);
+                tigerTreeCache, applicationServices, remoteFileDescFactory);
     }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ResumeDownloader#initIncompleteFile(java.io.File, java.lang.String, long)
      */
     public void initIncompleteFile(File incompleteFile, long size) {
-        this.incompleteFile = Objects.nonNull(incompleteFile, "incompleteFile");
-        propertiesMap.put(FILE_SIZE, size);
-        this.downloadSHA1=incompleteFileManager.getCompletedHash(incompleteFile);
+        setIncompleteFile(Objects.nonNull(incompleteFile, "incompleteFile"));
+        setContentLength(size);
+        URN sha1 = incompleteFileManager.getCompletedHash(incompleteFile);
+        if(sha1 != null)
+            setSha1Urn(sha1);
     }
 
     /**

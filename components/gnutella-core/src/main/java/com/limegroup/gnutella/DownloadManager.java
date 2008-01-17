@@ -55,15 +55,11 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
     /**
      * Performs the slow, low-priority initialization tasks: reading in
      * snapshots and scheduling snapshot checkpointing.
-     * 
-     * @param lwsManager 
      */
-    public void loadStoredDownloadsAndScheduleWriting();
+    public void loadSavedDownloadsAndScheduleWriting();
 
-    /**
-     * Is the GUI init'd?
-     */
-    public boolean isStoredDownloadsLoaded();
+    /** True if saved downloads have been loaded from disk. */
+    public boolean isSavedDownloadsLoaded();
 
     /**
      * Determines if an 'In Network' download exists in either active or waiting.

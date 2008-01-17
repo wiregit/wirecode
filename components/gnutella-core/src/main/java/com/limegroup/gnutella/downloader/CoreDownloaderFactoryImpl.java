@@ -1,11 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import org.limewire.io.InvalidDataException;
 
@@ -19,8 +16,6 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
-import com.limegroup.gnutella.downloader.serial.GnutellaDownloadMemento;
-import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 import com.limegroup.gnutella.version.DownloadInformation;
 
 @Singleton
@@ -38,22 +33,19 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
 
     private final Provider<BTDownloader> btDownloaderFactory;
 
-    private final RemoteFileDescFactory remoteFileDescFactory;
-
     @Inject
     public CoreDownloaderFactoryImpl(Provider<ManagedDownloader> managedDownloaderFactory,
             Provider<MagnetDownloader> magnetDownloaderFactory,
             Provider<InNetworkDownloader> inNetworkDownloaderFactory,
             Provider<ResumeDownloader> resumeDownloaderFactory,
             Provider<StoreDownloader> storeDownloaderFactory,
-            Provider<BTDownloader> btDownloaderFactory, RemoteFileDescFactory remoteFileDescFactory) {
+            Provider<BTDownloader> btDownloaderFactory) {
         this.managedDownloaderFactory = managedDownloaderFactory;
         this.magnetDownloaderFactory = magnetDownloaderFactory;
         this.inNetworkDownloaderFactory = inNetworkDownloaderFactory;
         this.resumeDownloaderFactory = resumeDownloaderFactory;
         this.storeDownloaderFactory = storeDownloaderFactory;
         this.btDownloaderFactory = btDownloaderFactory;
-        this.remoteFileDescFactory = remoteFileDescFactory;
     }
 
     public ManagedDownloader createManagedDownloader(RemoteFileDesc[] files,
@@ -76,7 +68,7 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
         MagnetDownloader md = magnetDownloaderFactory.get();
         md.addInitialSources(null, fileName);
         md.setSaveFile(saveDirectory, fileName, overwrite);
-        md.initMagnet(magnet);
+        md.setMagnet(magnet);
         return md;
     }
 
@@ -116,12 +108,7 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
         try {
             Provider<? extends CoreDownloader> coreFactory = providerForMemento(memento);
             CoreDownloader downloader = coreFactory.get();
-            if (memento instanceof GnutellaDownloadMemento) {
-                ManagedDownloader md = (ManagedDownloader) downloader;
-                GnutellaDownloadMemento gmem = (GnutellaDownloadMemento) memento;
-                md.addInitialSources(toRfds(gmem.getRemoteHosts()), gmem.getDefaultFileName());
-            }
-            downloader.addNewProperties(memento.getPropertiesMap());
+            downloader.initFromMemento(memento);
             return downloader;
         } catch (ClassCastException cce) {
             throw new InvalidDataException("invalid memento!", cce);
@@ -146,18 +133,6 @@ public class CoreDownloaderFactoryImpl implements CoreDownloaderFactory {
             throw new InvalidDataException("invalid memento type: " + memento.getDownloadType());
         }
 
-    }
-
-    private Collection<RemoteFileDesc> toRfds(Collection<? extends RemoteHostMemento> mementos)
-            throws InvalidDataException {
-        if (mementos == null)
-            return Collections.emptyList();
-
-        List<RemoteFileDesc> rfds = new ArrayList<RemoteFileDesc>(mementos.size());
-        for (RemoteHostMemento memento : mementos) {
-            rfds.add(remoteFileDescFactory.createFromMemento(memento));
-        }
-        return rfds;
     }
 
 }

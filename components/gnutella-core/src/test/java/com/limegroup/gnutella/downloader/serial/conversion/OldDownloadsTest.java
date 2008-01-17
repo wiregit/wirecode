@@ -63,7 +63,7 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
             }
         });
         DownloadManager manager = injector.getInstance(DownloadManager.class);
-        manager.loadStoredDownloadsAndScheduleWriting();
+        manager.loadSavedDownloadsAndScheduleWriting();
         assertEquals("unexpected amount of downloaders added to gui", 1, callback.downloaders.size());
         ManagedDownloader md = (ManagedDownloader)callback.downloaders.get(0);
         assertEquals("unexpected filename", fileName, md.getSaveFile().getName());
@@ -80,11 +80,12 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
         
         DownloadSerializeSettings oldSettings = new DownloadSerialSettingsStub(copiedDat, copiedDat);
         DownloadSerializeSettings newSettings = new DownloadSerialSettingsStub(newSaveFile, newSaveFile);
+        DownloadSerializer downloadSerializer = new DownloadSerializerImpl(newSettings);
         
-        DownloadUpgradeTask downloadUpgradeTask = new DownloadUpgradeTask(new OldDownloadConverterImpl(), oldSettings, newSettings); 
+        DownloadUpgradeTask downloadUpgradeTask = new DownloadUpgradeTask(new OldDownloadConverterImpl(), oldSettings, newSettings, downloadSerializer); 
         downloadUpgradeTask.upgrade();
         
-        return new DownloadSerializerImpl(newSettings);
+        return downloadSerializer;
     }
             
     private static class TestActivityCallback extends ActivityCallbackStub {

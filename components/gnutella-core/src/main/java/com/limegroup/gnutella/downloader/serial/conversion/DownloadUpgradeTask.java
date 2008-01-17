@@ -6,12 +6,12 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializeSettings;
+import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
 import com.limegroup.gnutella.downloader.serial.OldDownloadConverter;
 
 public class DownloadUpgradeTask {
@@ -21,14 +21,17 @@ public class DownloadUpgradeTask {
     private final OldDownloadConverter oldDownloadConverter;
     private final DownloadSerializeSettings oldDownloadSettings;
     private final DownloadSerializeSettings newSettings;
+    private final DownloadSerializer downloadSerializer;
     
     @Inject
     public DownloadUpgradeTask(OldDownloadConverter oldDownloadConverter,
                                @Named("oldDownloadSettings") DownloadSerializeSettings oldDownloadSettings,
-                               DownloadSerializeSettings newSettings) {
+                               DownloadSerializeSettings newSettings, 
+                               DownloadSerializer downloadSerializer) {
         this.oldDownloadConverter = oldDownloadConverter;
         this.oldDownloadSettings = oldDownloadSettings;
         this.newSettings = newSettings;
+        this.downloadSerializer = downloadSerializer;
     }
     
     public void upgrade() {
@@ -37,10 +40,7 @@ public class DownloadUpgradeTask {
         if(!newSaveBackup.exists() && !newSave.exists()) {
             try {
                 List<DownloadMemento> mementos = readAndConvertOldFormat();
-                FileUtils.writeObject(newSaveBackup, mementos);
-                if(!newSaveBackup.renameTo(newSave)) {
-                    LOG.warn("Unable to rename backup to valid!");
-                } else {
+                if(downloadSerializer.writeToDisk(mementos)) {
                     // Success! Now delete the old files.
                     oldDownloadSettings.getSaveFile().delete();
                     oldDownloadSettings.getBackupFile().delete();

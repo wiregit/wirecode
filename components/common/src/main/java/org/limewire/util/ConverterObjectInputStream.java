@@ -72,11 +72,15 @@ public class ConverterObjectInputStream extends ObjectInputStream {
         createLookups();
     } 
     
+    /**
+     * Erases any lookups that were added using {@link #addLookup(String, String)}.
+     */
     public void revertToDefault() {
         lookups.clear();
         createLookups();
     }
     
+    /** Adds all internal lookups. */
     private void createLookups() {
         lookups.put("com.limegroup.gnutella.util.FileComparator", "org.limewire.collection.FileComparator");
         lookups.put("com.limegroup.gnutella.util.Comparators$CaseInsensitiveStringComparator", "org.limewire.collection.Comparators$CaseInsensitiveStringComparator");

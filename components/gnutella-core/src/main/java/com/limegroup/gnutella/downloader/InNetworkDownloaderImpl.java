@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.io.InvalidDataException;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
@@ -21,6 +23,9 @@ import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.downloader.serial.DownloadMemento;
+import com.limegroup.gnutella.downloader.serial.InNetworkDownloadMemento;
+import com.limegroup.gnutella.downloader.serial.InNetworkDownloadMementoImpl;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.library.SharingUtils;
@@ -34,9 +39,9 @@ import com.limegroup.gnutella.version.DownloadInformation;
  */
 class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetworkDownloader {
     
-    private static String TT_ROOT = "innetwork.ttRoot";
-    private static String START_TIME = "innetwork.startTime";
-    private static String DOWNLOAD_ATTEMPTS = "innetwork.downloadAttempts";
+    private String tigerTreeRoot;
+    private long startTime;
+    private int downloadAttempts;
     
     /** 
      * Constructs a new downloader that's gonna work off the network.
@@ -53,13 +58,13 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
             VerifyingFileFactory verifyingFileFactory, DiskController diskController,
             @Named("ipFilter") IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<MessageRouter> messageRouter, Provider<TigerTreeCache> tigerTreeCache,
-            ApplicationServices applicationServices) throws SaveLocationException {
+            ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory) throws SaveLocationException {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
                 contentManager, sourceRankerFactory, urnCache, savedFileManager,
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
-                tigerTreeCache, applicationServices);
+                tigerTreeCache, applicationServices, remoteFileDescFactory);
     }
     
     /* (non-Javadoc)
@@ -69,13 +74,25 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
         // note: even though we support bigger files, this is a good sanity check
         if (downloadInformation.getSize() > Integer.MAX_VALUE)
             throw new IllegalArgumentException("size too big for now.");
-        propertiesMap.put(FILE_SIZE, downloadInformation.getSize());
-        propertiesMap.put(SHA1_URN, downloadInformation.getUpdateURN());
-        propertiesMap.put(TT_ROOT, downloadInformation.getTTRoot());
-        propertiesMap.put(START_TIME, startTime);
-        propertiesMap.put(DOWNLOAD_ATTEMPTS, 0);
+        setContentLength(downloadInformation.getSize());
+        setSha1Urn(downloadInformation.getUpdateURN());
+        setTigerTreeRoot(downloadInformation.getTTRoot());
+        setStartTime(startTime);
+        setDownloadAttempts(0);
     }    
     
+    protected synchronized void setDownloadAttempts(int i) {
+        this.downloadAttempts = i;
+    }
+
+    protected synchronized void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    protected synchronized void setTigerTreeRoot(String tigerTreeRoot) {
+        this.tigerTreeRoot = tigerTreeRoot;
+    }
+
     /**
      * Overriden to use a different incomplete directory.
      */
@@ -101,15 +118,14 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
      */
     @Override
     public synchronized void startDownload() {
-        Integer i = (Integer)propertiesMap.get(DOWNLOAD_ATTEMPTS);
-        if(i == null)
-            i = 1;
-        else
-            i = i+1;
-        propertiesMap.put(DOWNLOAD_ATTEMPTS, i);
+        incrementDownloadAttempts();
         super.startDownload();
     }
     
+    private synchronized void incrementDownloadAttempts() {
+        downloadAttempts++;
+    }
+
     @Override
     protected boolean shouldValidate() {
         return false;
@@ -122,13 +138,15 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
     protected void initializeVerifyingFile() throws IOException {
         super.initializeVerifyingFile();
         if(commonOutFile != null) {
-            commonOutFile.setExpectedHashTreeRoot((String)propertiesMap.get(TT_ROOT));
+            commonOutFile.setExpectedHashTreeRoot(getTigerTreeRoot());
         }
     }
     
-    /**
-     * Sends a targeted query for this.
-     */
+    protected synchronized String getTigerTreeRoot() {
+        return tigerTreeRoot;
+    }
+
+    /** Sends a targeted query for this. */
     @Override
     public synchronized QueryRequest newRequery() throws CantResumeException {
         QueryRequest qr = super.newRequery();
@@ -141,19 +159,42 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
      * 
      * @see com.limegroup.gnutella.downloader.InNetworkDownloader#getNumAttempts()
      */
-    public synchronized int getNumAttempts() {
-        return (Integer)propertiesMap.get(DOWNLOAD_ATTEMPTS);
+    public synchronized int getDownloadAttempts() {
+        return downloadAttempts;
     }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.InNetworkDownloader#getStartTime()
      */
-    public long getStartTime() {
-        return (Long)propertiesMap.get(START_TIME);
+    public synchronized long getStartTime() {
+        return startTime;
     }
     
     @Override
     public DownloaderType getDownloadType() {
         return DownloaderType.INNETWORK;
+    }
+    
+    @Override
+    protected void fillInMemento(DownloadMemento memento) {
+        super.fillInMemento(memento);
+        InNetworkDownloadMemento imem = (InNetworkDownloadMemento)memento;
+        imem.setTigerTreeRoot(getTigerTreeRoot());
+        imem.setStartTime(getStartTime());
+        imem.setDownloadAttempts(getDownloadAttempts());
+    }
+    
+    @Override
+    protected DownloadMemento createMemento() {
+        return new InNetworkDownloadMementoImpl();
+    }
+    
+    @Override
+    public synchronized void initFromMemento(DownloadMemento memento) throws InvalidDataException {
+        super.initFromMemento(memento);
+        InNetworkDownloadMemento imem = (InNetworkDownloadMemento)memento;
+        setTigerTreeRoot(imem.getTigerTreeRoot());
+        setStartTime(imem.getStartTime());
+        setDownloadAttempts(imem.getDownloadAttempts());
     }
 }
