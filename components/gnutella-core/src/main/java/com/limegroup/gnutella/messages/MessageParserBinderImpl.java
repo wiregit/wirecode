@@ -50,35 +50,30 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     public static abstract class GnutellaMessageParser implements MessageParser {
         
         public Message parse(byte[] header, byte[] payload,
-                Network network, byte softMax, SocketAddress address) throws BadPacketException, IOException {
+                Network network, byte max, SocketAddress address) throws BadPacketException, IOException {
             
-            // 4. Check values. These are based on the recommendations from the
-            // GnutellaDev page. This also catches those TTLs and hops whose
-            // high bit is set to 0.
+
+            // enforce ttl + hops <= max.
+            // except for PingReply messages
             
             byte func = header[16];
             byte ttl = header[17];
             byte hops = header[18];
 
-            byte hardMax = (byte) 14;
             if (hops < 0) {
                 ReceivedErrorStat.INVALID_HOPS.incrementStat();
                 throw new BadPacketException("Negative (or very large) hops");
             } else if (ttl < 0) {
                 ReceivedErrorStat.INVALID_TTL.incrementStat();
                 throw new BadPacketException("Negative (or very large) TTL");
-            } else if ((hops > softMax) && (func != Message.F_QUERY_REPLY)
+            } else if ((hops > max) 
                     && (func != Message.F_PING_REPLY)) {
                 ReceivedErrorStat.HOPS_EXCEED_SOFT_MAX.incrementStat();
                 throw new BadPacketException("func: " + func + ", ttl: " + ttl
                         + ", hops: " + hops);
-            } else if (ttl + hops > hardMax) {
-                ReceivedErrorStat.HOPS_AND_TTL_OVER_HARD_MAX.incrementStat();
-                throw new BadPacketException(
-                        "TTL+hops exceeds hard max; probably spam");
-            } else if ((ttl + hops > softMax) && (func != Message.F_QUERY_REPLY)
+            } else if ((ttl + hops > max) 
                     && (func != Message.F_PING_REPLY)) {
-                ttl = (byte) (softMax - hops); // overzealous client;
+                ttl = (byte) (max - hops); // overzealous client;
                 // readjust accordingly
                 assert(ttl >= 0); // should hold since hops<=softMax ==>
                 // new ttl>=0
