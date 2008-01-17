@@ -11,6 +11,7 @@ import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.limewire.net.HttpClientManager;
 
+import com.limegroup.gnutella.lws.server.LWSUtil;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -37,6 +38,10 @@ public class HTTPUtils {
         HttpMethod head = new HeadMethod(url.toExternalForm());
         head.addRequestHeader("User-Agent",
                               LimeWireUtils.getHttpServer());
+        
+        // TODO: We need authentication to do this
+        LWSUtil.addAuthentication(head);
+        
         try {
             client.executeMethod(head);
             //Extract Content-length, but only if the response was 200 OK.

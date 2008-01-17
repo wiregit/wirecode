@@ -172,11 +172,7 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         //       This is gross gross gross and needs changing, but can stay for now
         //
         get.setDoAuthentication(true);
-        String username = LWSSettings.LWS_AUTHENTICATION_USERNAME.getValue();
-        String password = LWSSettings.LWS_AUTHENTICATION_PASSWORD.getValue();
-        String unecrypted = username + ":" + password;
-        String encrypted = new String(Base64.encode(unecrypted.getBytes()));
-        get.addRequestHeader("Authorization", "Basic " + encrypted);        
+        LWSUtil.addAuthentication(get);
         exe.execute(get, new HttpClientListener() {
             
             public boolean requestComplete(HttpMethod method) {
