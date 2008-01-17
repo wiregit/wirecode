@@ -226,6 +226,13 @@ public interface QueryReplyFactory {
      */
     public QueryReply createQueryReply(byte[] guid, QueryReply reply);
 
+    /**
+     * Copy constructor.
+     * @param address - 4 byte ip address.
+     * @return original reply but with the new address.
+     */
+    public QueryReply createWithNewAddress(byte [] address, QueryReply original);
+    
     public QueryReply createFromNetwork(byte[] guid, byte ttl, byte hops,
             byte[] payload, Network network) throws BadPacketException;
 

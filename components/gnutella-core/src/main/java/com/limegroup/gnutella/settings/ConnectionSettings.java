@@ -73,7 +73,8 @@ public final class ConnectionSettings extends LimeProps {
      * If this is the case, the TTL is set to SOFT_MAX - hops.
      */
     public static final ByteSetting SOFT_MAX =
-        FACTORY.createByteSetting("SOFT_MAX", (byte)3);
+        FACTORY.createRemoteByteSetting("SOFT_MAX", (byte)3,
+                "ConnectionSettings.softMax",(byte)3,(byte)5);
 
 	/**
 	 * Settings for whether or not to local addresses should be considered

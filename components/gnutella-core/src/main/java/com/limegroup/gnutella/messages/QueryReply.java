@@ -220,4 +220,6 @@ public interface QueryReply extends Message, SecureMessage {
     public void recordDrop();
 
     public byte[] getPayload();
+    
+    public boolean isLocal();
 }

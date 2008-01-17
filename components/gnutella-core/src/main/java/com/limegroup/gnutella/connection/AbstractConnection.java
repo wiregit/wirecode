@@ -86,6 +86,9 @@ public abstract class AbstractConnection implements Connection {
     /** The address of the remote host. */
     private final String host;
 
+    /** The IP of the remote side in byte[] format */
+    private final byte []hostBytes;
+    
     /** The port the remote host is listening on. */
     private volatile int port;
 
@@ -136,6 +139,9 @@ public abstract class AbstractConnection implements Connection {
     private final Acceptor acceptor;
 
     private final SimpleProtocolBandwidthTracker simpleProtocolBandwidthTracker;
+    
+    /** The IP of this connection if reported by the remote side */
+    protected volatile byte []myIp;
 
     /**
      * Cache the 'connection closed' exception, so we have to allocate one for
@@ -193,7 +199,12 @@ public abstract class AbstractConnection implements Connection {
         this.networkManager = networkManager;
         this.acceptor = acceptor;
         this.simpleProtocolBandwidthTracker = new SimpleProtocolBandwidthTracker();
-
+        byte [] hostBytes = null;
+        try {
+            hostBytes = InetAddress.getByName(getAddress()).getAddress();
+        } catch (UnknownHostException bad) {
+        }
+        this.hostBytes = hostBytes;
         if (!outgoing) {
             connectionBandwidthStatistics.setTlsOption(SSLUtils.isTLSEnabled(socket), SSLUtils
                     .getSSLBandwidthTracker(socket));
@@ -272,6 +283,10 @@ public abstract class AbstractConnection implements Connection {
      */
     public String getAddress() {
         return host;
+    }
+    
+    public byte [] getAddressBytes() {
+        return hostBytes;
     }
 
     /*
@@ -586,6 +601,8 @@ public abstract class AbstractConnection implements Connection {
         if (!NetworkUtils.isValidAddress(ia) || NetworkUtils.isPrivateAddress(ia))
             return;
 
+        myIp = ia.getAddress();
+        
         // If we're forcing, change that if necessary.
         if (ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
             StringSetting addr = ConnectionSettings.FORCED_IP_ADDRESS_STRING;

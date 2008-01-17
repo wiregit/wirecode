@@ -105,6 +105,8 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     private final HostDataFactory hostDataFactory;
     private final ResponseFactory responseFactory;
     
+    private final boolean local;
+    
     
     QueryReplyImpl(byte[] guid, byte ttl, byte hops, byte[] payload,
             Network network, HostDataFactory hostDataFactory,
@@ -129,7 +131,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 		    ReceivedErrorStat.REPLY_INVALID_ADDRESS.incrementStat();
 		    throw new BadPacketException("invalid address");
 		}
-		
+		this.local = false;
         //repOk();
     }
 
@@ -163,6 +165,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 			throw new IllegalArgumentException("invalid num responses: "+n);
 		}
         
+		this.local = true;
         _data = new QueryReplyData();
         _data.setXmlBytes(xmlBytes);
         _data.setProxies(proxies);
@@ -1202,5 +1205,9 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     @Override
     public Class<? extends Message> getHandlerClass() {
         return QueryReply.class;
+    }
+    
+    public boolean isLocal() {
+        return local;
     }
 }

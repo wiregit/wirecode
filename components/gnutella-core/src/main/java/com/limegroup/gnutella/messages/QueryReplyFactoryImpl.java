@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.messages;
 
+import java.util.Arrays;
 import java.util.Set;
 
 import org.limewire.io.IpPort;
@@ -288,6 +289,19 @@ public class QueryReplyFactoryImpl implements QueryReplyFactory {
         }
     }
 
+    public QueryReply createWithNewAddress(byte [] ip, QueryReply reply) {
+        if (Arrays.equals(ip, reply.getIPBytes()))
+            return reply;
+        
+        byte [] payload = reply.getPayload().clone();
+        System.arraycopy(ip,0,payload,3,4);
+        try {
+            return createFromNetwork(reply.getGUID(), reply.getTTL(), reply.getHops(), payload);
+        } catch (BadPacketException bpe) {
+            throw new IllegalArgumentException("Invalid QR", bpe);
+        }
+    }
+    
     ///   The only two methods that actually end up constructing a QR!
     
 

@@ -14,6 +14,7 @@ import java.util.zip.Inflater;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
+import org.limewire.io.NetworkUtils;
 import org.limewire.io.Pools;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -963,7 +964,20 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             return resp;
     }
 
-    public boolean isSpam(Message m) {
+    boolean isSpam(Message m) {
+        // leafs can only send hops == 0
+        if (isSupernodeClientConnection() && m.getHops() != 0)
+            return true;
+        
+        // replies with hops 0 must match the address.
+        if (m instanceof QueryReply && m.getHops() == 0) {
+            QueryReply reply = (QueryReply)m;
+            byte [] ip = reply.getIPBytes();
+            if (!NetworkUtils.isPrivateAddress(ip) &&
+                    !reply.hasSecureData() &&
+                    !Arrays.equals(ip, getAddressBytes()))
+                    return true;
+        }
         return !_routeFilter.allow(m);
     }
 
@@ -1006,6 +1020,13 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         if (checkOOB && queryReply.isUDP() && !queryReply.isReplyToMulticastQuery())
             return;
 
+        // if the remote side reported an ip and this reply is from us, make sure
+        // its source ip matches.
+        if (myIp != null && 
+                queryReply.isLocal() &&
+                !NetworkUtils.isPrivateAddress(queryReply.getIPBytes()) &&
+                !queryReply.hasSecureData()) // don't mess with signed results
+            queryReply = queryReplyFactory.createWithNewAddress(myIp, queryReply);
         send(queryReply);
     }
 
