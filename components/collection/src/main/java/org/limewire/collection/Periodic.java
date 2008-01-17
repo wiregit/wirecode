@@ -137,7 +137,7 @@ public class Periodic {
 				
 				long now = now();
 				if (now < nextExecuteTime) {
-					future = scheduler.schedule(this, nextExecuteTime - now, TimeUnit.NANOSECONDS);
+					future = scheduler.schedule(this, Math.max(0, nextExecuteTime - now), TimeUnit.NANOSECONDS);
 					return;
 				}
 			}
