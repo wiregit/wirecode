@@ -32,6 +32,13 @@ public class DownloadSerializerImpl implements DownloadSerializer {
         this.downloadSerializeSettings = downloadSerializeSettings;
     }
     
+    /**
+     * Reads all saved downloads from disk.
+     * 
+     * This works by first attempting to read from the save file described in the settings,
+     * and then attempting to read from the backup file if there were any errors while
+     * reading the normal file.  If both files fail, this returns an empty list.
+     */
     public List<DownloadMemento> readFromDisk() {
         ObjectInputStream in = null;
         try {
@@ -43,6 +50,8 @@ public class DownloadSerializerImpl implements DownloadSerializer {
             IOUtils.close(in);
         }
         
+        // Falls through to here only on error with normal file.
+        
         try {
             in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(downloadSerializeSettings.getBackupFile())));
             return GenericsUtils.scanForList(in.readObject(), DownloadMemento.class, GenericsUtils.ScanMode.REMOVE);
@@ -51,12 +60,26 @@ public class DownloadSerializerImpl implements DownloadSerializer {
         } finally {
             IOUtils.close(in);
         }
+
+        // Falls through to here only on error with normal file & backup.
         
         return Collections.emptyList();        
     }
     
-    
+    /**
+     * Writes the mementos to disk.  This works by first writing to the backup file
+     * and then renaming the backup file to the save file.  If the backup file cannot
+     * be written, this fails.
+     */
     public boolean writeToDisk(List<? extends DownloadMemento> mementos) {
+        // Follows this process:
+        // 1) Write backup file.
+        // 2) Try to rename save file to a temporary file
+        //   a) If success, continue.  If failure, delete save file.
+        // 3) Rename backup file to save file.
+        //   a) If success, return true.  Delete temp file.
+        //      If failure, revert temp file back to save file, return false.
+        
         File backupFile = downloadSerializeSettings.getBackupFile();
         ObjectOutputStream out = null;
         try {
@@ -71,7 +94,7 @@ public class DownloadSerializerImpl implements DownloadSerializer {
         
         File saveFile = downloadSerializeSettings.getSaveFile();
         if(saveFile.equals(backupFile)) {
-            LOG.debug("Save file is backup, bailing!");
+            LOG.debug("backup == save, nothing more to do");
             return true;
         }
         
@@ -95,8 +118,13 @@ public class DownloadSerializerImpl implements DownloadSerializer {
         }
         
         boolean renamed = backupFile.renameTo(downloadSerializeSettings.getSaveFile());
-        if(tmpFile != null)
+        if(tmpFile != null) {
+            // If we couldn't rename, but we did create the tmp file,
+            // revert that back to the save file.
+            if(!renamed)
+                tmpFile.renameTo(saveFile);
             tmpFile.delete();
+        }
         return renamed;
     }
 }

@@ -14,6 +14,8 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.DownloaderType;
 
 public class MagnetDownloadMementoImpl implements MagnetDownloadMemento, Serializable {
+
+    private static final long serialVersionUID = -8527778982043022351L;
     
     private Map<String, Object> serialObjects = new HashMap<String, Object>();
     

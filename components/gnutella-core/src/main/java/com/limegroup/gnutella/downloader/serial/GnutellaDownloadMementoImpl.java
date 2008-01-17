@@ -13,6 +13,8 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.DownloaderType;
 
 public class GnutellaDownloadMementoImpl implements GnutellaDownloadMemento, Serializable {
+
+    private static final long serialVersionUID = 1655079783169954740L;
     
     private Map<String, Object> serialObjects = new HashMap<String, Object>();
 

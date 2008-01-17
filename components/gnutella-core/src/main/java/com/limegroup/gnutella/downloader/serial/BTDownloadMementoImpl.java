@@ -9,7 +9,9 @@ import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.downloader.DownloaderType;
 
 public class BTDownloadMementoImpl implements BTDownloadMemento, Serializable {
-        
+
+    private static final long serialVersionUID = -1116043348504657012L;
+    
     private Map<String, Object> serialObjects = new HashMap<String, Object>();
     
     @SuppressWarnings("unchecked")

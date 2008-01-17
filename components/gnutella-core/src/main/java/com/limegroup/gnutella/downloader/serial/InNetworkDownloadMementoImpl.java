@@ -14,6 +14,8 @@ import com.limegroup.gnutella.downloader.DownloaderType;
 
 public class InNetworkDownloadMementoImpl implements InNetworkDownloadMemento, Serializable {
 
+    private static final long serialVersionUID = -8013513174476895995L;
+    
     private Map<String, Object> serialObjects = new HashMap<String, Object>();
 
     public int getDownloadAttempts() {
