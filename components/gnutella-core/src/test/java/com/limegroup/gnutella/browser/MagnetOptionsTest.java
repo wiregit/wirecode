@@ -189,7 +189,7 @@ public class MagnetOptionsTest extends BaseTestCase {
         assertEquals("Should have parsed 2 magnets", 4, opts.length);
     }
     
-    public void testMagnetOptionsParsingSwallowsGuidUrns() {
+    public void testMagnetOptionsParsesGuidUrns() {
         String prefix = "magnet:?dn=filename&kt=keyword&xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=http://127.0.0.1:6346/uri-res/N2R?urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C";
         String guidUrn = "urn:guid:" + new GUID().toHexString();
         String magnet = prefix + "&xs=" + guidUrn;
