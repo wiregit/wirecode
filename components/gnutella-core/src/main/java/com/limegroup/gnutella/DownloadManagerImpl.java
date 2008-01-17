@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -17,8 +18,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.DualIterator;
 import org.limewire.collection.MultiIterable;
+import org.limewire.i18n.I18nMarker;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
+import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -185,13 +188,33 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     public void loadStoredDownloads() {
-        List<DownloadMemento> mementos = downloadSerializer.readFromDisk();
+        boolean failedAll = true;
+        boolean failedSome = false;
+        
+        List<DownloadMemento> mementos;
+        try {
+            mementos = downloadSerializer.readFromDisk();
+            if(mementos.isEmpty())
+                failedAll = false;
+        } catch(IOException ioex) {
+            mementos = Collections.emptyList();
+        }
         for(DownloadMemento memento : mementos) {
             CoreDownloader coreDownloader = prepareMemento(memento);
-            if(coreDownloader != null)
+            if(coreDownloader != null) {
+                failedAll = false;
                 addNewDownloader(coreDownloader);
+            } else {
+                failedSome = true;
+            }
         }
+        
         downloadsReadFromDisk = true;
+        
+        if(failedAll)
+            MessageService.showError(I18nMarker.marktr("Sorry, LimeWire couldn't read your old downloads.  You can restart them by going to your Library, viewing your 'Incomplete Files', and clicking to 'Resume' your downloads."));
+        else if(failedSome)
+            MessageService.showError(I18nMarker.marktr("Sorry, LimeWire couldn't read some of your old downloads.  You can restart them by going to your Library, viewing your 'Incomplete Files', and clicking to 'Resume' your downloads."));
     }
     
     public CoreDownloader prepareMemento(DownloadMemento memento) {

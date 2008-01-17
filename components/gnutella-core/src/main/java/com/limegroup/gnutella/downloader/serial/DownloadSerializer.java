@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.downloader.serial;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -7,8 +8,9 @@ import java.util.List;
  */
 public interface DownloadSerializer {
     
-    /** Reads all saved downloads from disk. */
-    public List<DownloadMemento> readFromDisk();
+    /** Reads all saved downloads from disk. 
+     * @throws IOException */
+    public List<DownloadMemento> readFromDisk() throws IOException;
     
     /** Writes all mementos to disk. */
     public boolean writeToDisk(List<? extends DownloadMemento> mementos);    

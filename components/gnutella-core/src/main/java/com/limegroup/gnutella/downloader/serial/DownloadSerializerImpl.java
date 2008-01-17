@@ -39,12 +39,17 @@ public class DownloadSerializerImpl implements DownloadSerializer {
      * and then attempting to read from the backup file if there were any errors while
      * reading the normal file.  If both files fail, this returns an empty list.
      */
-    public List<DownloadMemento> readFromDisk() {
+    public List<DownloadMemento> readFromDisk() throws IOException {
+        if(!downloadSerializeSettings.getSaveFile().exists() && !downloadSerializeSettings.getSaveFile().exists())
+            return Collections.emptyList();
+        
+        Throwable exception;
         ObjectInputStream in = null;
         try {
             in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(downloadSerializeSettings.getSaveFile())));
             return GenericsUtils.scanForList(in.readObject(), DownloadMemento.class, GenericsUtils.ScanMode.REMOVE);
         } catch(Throwable ignored) {
+            exception = ignored;
             LOG.warn("Error reading normal file.", ignored);
         } finally {
             IOUtils.close(in);
@@ -60,10 +65,11 @@ public class DownloadSerializerImpl implements DownloadSerializer {
         } finally {
             IOUtils.close(in);
         }
-
-        // Falls through to here only on error with normal file & backup.
         
-        return Collections.emptyList();        
+        if(exception instanceof IOException)
+            throw (IOException)exception;
+        else
+            throw (IOException)new IOException().initCause(exception);
     }
     
     /**
