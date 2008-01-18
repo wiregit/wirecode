@@ -14,18 +14,21 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.service.ErrorService;
+import org.limewire.util.Version;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.lws.server.LWSManager;
 import com.limegroup.gnutella.lws.server.LWSManagerCommandResponseHandlerWithCallback;
 import com.limegroup.gnutella.lws.server.LWSUtil;
 import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.EncodingUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Tagged;
 import com.limegroup.gnutella.util.URLDecoder;
 
@@ -58,7 +61,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         //  urns - space-separated string of urns
         // OUTPUT
         //  ID of download - a string of form
-        //          <ID> ' ' <percentage-downloaded> [ '|' <ID> ' ' <percentage-downloaded> ]
+        //          <ID> ' ' <percentage-downloaded> ':' <download-status> [ '|' <ID> ' ' <percentage-downloaded> ':' <download-status> ]
         //  This ID is the identity hash code
         //
         lwsManager.registerHandler("GetDownloadProgress", new LWSManagerCommandResponseHandlerWithCallback("GetDownloadProgress") {
@@ -147,9 +150,12 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 long read = d.getAmountRead();
                 long total = d.getContentLength();
                 String ratio = String.valueOf((float)read / (float)total);
+                String status = downloadStatusToString(d.getState());
                 res.append(id);
                 res.append(" ");
                 res.append(ratio);
+                res.append(":");
+                res.append(status);
                 res.append("|");                
             }
         }); 
@@ -281,6 +287,22 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
             protected void takeAction(Downloader d) {
                 d.resume();
             }           
+        });
+        //
+        // Add a handler for the LimeWire Store Server so that we can find the
+        // version of the client running
+        // INPUT
+        //  --
+        // OUTPUT
+        //  <version>
+        //
+        lwsManager.registerHandler("GetVersion", new LWSManagerCommandResponseHandlerWithCallback("GetVersion") {
+
+            @Override
+            protected String handleRest(Map<String, String> args) {
+                return LimeWireUtils.getLimeWireVersion();
+            }
+           
         });          
     }
     
@@ -320,4 +342,86 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
             return "OK";
         }         
     }     
+    
+    /**
+     * Returns a printable version of a {@link DownloadStatus}.
+     * 
+     * @param s status in question
+     * @return a printable version of a {@link DownloadStatus}.
+     */
+    private static String downloadStatusToString(DownloadStatus s) {
+        if (s == DownloadStatus.INITIALIZING) {
+            return "Initializing";
+        }
+        if (s == DownloadStatus.QUEUED) {
+            return "Queued";
+        }
+        if (s == DownloadStatus.CONNECTING) {
+            return "Connecting";
+        }
+        if (s == DownloadStatus.DOWNLOADING) {
+            return "Downloading";
+        }
+        if (s == DownloadStatus.BUSY) {
+            return "Busy";
+        }
+        if (s == DownloadStatus.COMPLETE) {
+            return "Complete";
+        }
+        if (s == DownloadStatus.ABORTED) {
+            return "Aborted";
+        }
+        if (s == DownloadStatus.GAVE_UP) {
+            return "Gave up";
+        }
+        if (s == DownloadStatus.DISK_PROBLEM) {
+            return "Disk problem";
+        }
+        if (s == DownloadStatus.WAITING_FOR_GNET_RESULTS) {
+            return "Waiting for gnet results";
+        }
+        if (s == DownloadStatus.CORRUPT_FILE) {
+            return "Corrupt_FILE";
+        }
+        if (s == DownloadStatus.REMOTE_QUEUED) {
+            return "Remote_QUEUED";
+        }
+        if (s == DownloadStatus.HASHING) {
+            return "Hashing";
+        }
+        if (s == DownloadStatus.SAVING) {
+            return "Saving";
+        }
+        if (s == DownloadStatus.WAITING_FOR_USER) {
+            return "Waiting for user";
+        }
+        if (s == DownloadStatus.WAITING_FOR_CONNECTIONS) {
+            return "Waiting for connections";
+        }
+        if (s == DownloadStatus.ITERATIVE_GUESSING) {
+            return "Iterative guessing";
+        }
+        if (s == DownloadStatus.QUERYING_DHT) {
+            return "Querying DHT";
+        }
+        if (s == DownloadStatus.IDENTIFY_CORRUPTION) {
+            return "Identify corruption";
+        }
+        if (s == DownloadStatus.RECOVERY_FAILED) {
+            return "Recovery failed";
+        }
+        if (s == DownloadStatus.PAUSED) {
+            return "Paused";
+        }
+        if (s == DownloadStatus.INVALID) {
+            return "Invalid";
+        }
+        if (s == DownloadStatus.RESUMING) {
+            return "Resuming";
+        }
+        if (s == DownloadStatus.FETCHING) {
+            return "Fetching";
+        }
+        return null;
+    }
 }
