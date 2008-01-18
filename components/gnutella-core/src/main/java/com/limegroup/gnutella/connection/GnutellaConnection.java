@@ -974,6 +974,9 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     }
 
     boolean isSpam(Message m) {
+        if (!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
+            return !_routeFilter.allow(m);
+        
         // leafs can only send hops == 0
         if (isSupernodeClientConnection() && m.getHops() != 0)
             return true;
