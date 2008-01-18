@@ -467,12 +467,10 @@ public class MagnetOptions implements Serializable {
         for (String candidate : potentialUrns) {
             try {
                 URN urn = URN.createGUIDUrn(candidate);
-                if (urn.isGUID()) {
-                    if (urns == null) {
-                        urns = new ArrayList<URN>(2);
-                    }
-                    urns.add(urn);
+                if (urns == null) {
+                    urns = new ArrayList<URN>(2);
                 }
+                urns.add(urn);
             } catch (IOException ie) {
                 // ignore, just not a valid guid urn 
             }
@@ -482,7 +480,7 @@ public class MagnetOptions implements Serializable {
         } else {
             urns = Collections.unmodifiableList(urns);
         }
-        // only set after list is full to avoid race condition where some other thread sees the half full list
+        // only set after list is full to avoid race condition where some other thread sees the partial list
         guidUrns = urns;
         return urns;
     }
