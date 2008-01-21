@@ -192,7 +192,6 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
         // confirm it has proxy info
         QueryReply reply = (QueryReply) m;
-        assertEquals(reply.getIP(), "10.7.19.76", reply.getIP());
         assertTrue(reply.getSupportsFWTransfer());
         assertEquals(UDPConnection.VERSION, reply.getFWTransferVersion());
         assertNotNull(reply.getPushProxies());
@@ -235,7 +234,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            Message syn = messageFactory.read(in, Network.TCP);
+            Message syn = messageFactory.read(in, Network.UDP);
             if (syn instanceof SynMessage) break;
         }
 
@@ -362,7 +361,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
-            Message syn = messageFactory.read(in, Network.TCP);
+            Message syn = messageFactory.read(in, Network.UDP);
             if (syn instanceof SynMessage) break;
         }
 
