@@ -422,19 +422,6 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         if (observer == null && isOutgoing())
             throw new NullPointerException("must have an observer if outgoing!");
 
-        // add some heavier stats code in betas
-        if (LimeWireUtils.isBetaRelease() || LimeWireUtils.isTestingVersion()) {
-            statsWriters.put(StatsWriters.TOP,new StatisticGatheringWriter());
-            statsWriters.put(StatsWriters.DEFLATER, new StatisticGatheringWriter());
-            statsWriters.put(StatsWriters.DELAYER, new StatisticGatheringWriter());
-            statsWriters.put(StatsWriters.THROTTLE, new StatisticGatheringWriter());
-            incoming = new MessageCounter(10);
-            outgoing = new MessageCounter(10);
-        } else {
-            incoming = new MessageCounter(1);
-            outgoing = new MessageCounter(1);
-        }
-        
         Properties requestHeaders;
         HandshakeResponder responder;
 
@@ -486,6 +473,19 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             GnetConnectObserver observer) throws IOException {
         responder.setLocalePreferencing(_useLocalPreference);
 
+        // add some heavier stats code in betas
+        if (LimeWireUtils.isBetaRelease() || LimeWireUtils.isTestingVersion()) {
+            statsWriters.put(StatsWriters.TOP,new StatisticGatheringWriter());
+            statsWriters.put(StatsWriters.DEFLATER, new StatisticGatheringWriter());
+            statsWriters.put(StatsWriters.DELAYER, new StatisticGatheringWriter());
+            statsWriters.put(StatsWriters.THROTTLE, new StatisticGatheringWriter());
+            incoming = new MessageCounter(10);
+            outgoing = new MessageCounter(10);
+        } else {
+            incoming = new MessageCounter(1);
+            outgoing = new MessageCounter(1);
+        }
+        
         if (isOutgoing()) {
             ConnectObserver connectObserver = new AsyncHandshakeConnecter(requestHeaders,
                     responder, observer);
