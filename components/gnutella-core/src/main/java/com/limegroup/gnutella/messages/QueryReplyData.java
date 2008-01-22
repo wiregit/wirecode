@@ -46,6 +46,12 @@ class QueryReplyData {
     
     /** The number of unique results (by SHA1) this message carries */
     private volatile short uniqueResultURNs;
+    
+    /** 
+     * The number of unique results (by SHA1) for partial files this message carries.
+     * INVARIANT: <= uniqueResultURNS;
+     */
+    private volatile short partialResultCount;
 
     /** the PushProxy info for this hit. */ 
     private volatile Set<? extends IpPort> proxies; 
@@ -146,6 +152,14 @@ class QueryReplyData {
 
     public void setUniqueResultURNs(short uniqueResultURNs) {
         this.uniqueResultURNs = uniqueResultURNs;
+    }
+    
+    public short getPartialResultCount() {
+        return partialResultCount;
+    }
+    
+    public void setPartialResultCount(short partialResultCount) {
+        this.partialResultCount = partialResultCount;
     }
 
     public int getUploadedFlag() {

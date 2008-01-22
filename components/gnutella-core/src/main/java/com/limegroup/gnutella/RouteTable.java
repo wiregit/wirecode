@@ -93,6 +93,8 @@ public final class RouteTable  {
         private int bytesRouted;
         /** The number of replies already routed for this GUID. */
         private int repliesRouted;
+        /** The number of replies for partial files already routed for this GUID */
+        private int partialRepliesRouted;
         /** The ttl associated with this RTE - meaningful only if > 0. */
         private byte ttl = 0;
         /** The class C networks that have returned a reply for this query */
@@ -121,7 +123,7 @@ public final class RouteTable  {
         public byte getTTL() { return ttl; }
 
 		/** Accessor for the number of results for this entry. */
-		public int getNumResults() { return repliesRouted; }
+		public int getNumResults() { return Math.max(0,repliesRouted - partialRepliesRouted); }
         
         void updateClassCNetworks(int classCNetwork, int numReplies) {
             classCnetworks.add(classCNetwork, numReplies);
@@ -293,8 +295,9 @@ public final class RouteTable  {
 
     public synchronized ReplyRoutePair getReplyHandler(byte[] guid, 
             int replyBytes,
-               short numReplies) {
-        return getReplyHandler(guid, replyBytes, numReplies, 0);
+               short numReplies,
+               short partialReplies) {
+        return getReplyHandler(guid, replyBytes, numReplies, partialReplies, 0);
     }
     
     /**
@@ -313,6 +316,7 @@ public final class RouteTable  {
     public synchronized ReplyRoutePair getReplyHandler(byte[] guid, 
                                                        int replyBytes,
 													   short numReplies,
+													   short partialReplies,
                                                        int classCNetwork) {
         //no purge
         repOk();
@@ -336,6 +340,7 @@ public final class RouteTable  {
 
         entry.bytesRouted += replyBytes;
         entry.repliesRouted += numReplies;
+        entry.partialRepliesRouted += partialReplies;
         if (classCNetwork != 0)
             entry.updateClassCNetworks(classCNetwork, numReplies);
         return ret;
@@ -543,6 +548,7 @@ public final class RouteTable  {
             ClassCNetworks globalClassC = new ClassCNetworks();
             List<Double> classCSizes = new ArrayList<Double>();
             List<Double> repliesRouted = new ArrayList<Double>();
+            List<Double> partialRepliesRouted = new ArrayList<Double>();
             List<Double> ttls = new ArrayList<Double>();
             List<Double> timeToFirstReply = new ArrayList<Double>();
             List<Double> timeToSecondReply = new ArrayList<Double>();
@@ -566,6 +572,7 @@ public final class RouteTable  {
                     ttlsHist.set(i, ttlsHist.get(i)+rte.ttls[i]);
                 classCSizes.add((double)(rte.classCnetworks.getMap().size()));
                 repliesRouted.add((double)rte.repliesRouted);
+                partialRepliesRouted.add((double)rte.partialRepliesRouted);
                 ttls.add((double)rte.ttl);
                 globalClassC.addAll(rte.classCnetworks);
 
@@ -607,6 +614,8 @@ public final class RouteTable  {
             ret.put("csh", StatsUtils.getHistogram(classCSizes, 10));
             ret.put("rr", StatsUtils.quickStatsDouble(repliesRouted).getMap());
             ret.put("rrh", StatsUtils.getHistogram(repliesRouted, 10));
+            ret.put("prr", StatsUtils.quickStatsDouble(partialRepliesRouted).getMap());
+            ret.put("prrh", StatsUtils.getHistogram(partialRepliesRouted, 10));
             ret.put("ttl", StatsUtils.quickStatsDouble(ttls).getMap());
             ret.put("ttlh", StatsUtils.getHistogram(ttls, 5));
             ret.put("tt1r", StatsUtils.quickStatsDouble(timeToFirstReply).getMap());
@@ -647,6 +656,7 @@ public final class RouteTable  {
                 m.put("br", e.bytesRouted);
                 m.put("ttl", e.ttl);
                 m.put("rr", e.repliesRouted);
+                m.put("prr", e.partialRepliesRouted);
                 m.put("cc", e.classCnetworks.getMap());
                 m.put("rt", e.resultTimeStamps);
                 m.put("rc", e.resultCounts);

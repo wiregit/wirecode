@@ -62,6 +62,12 @@ public interface QueryReply extends Message, SecureMessage {
      * @return the number of unique results (per SHA1) carried in this message
      */
     public short getUniqueResultCount();
+    
+    /**
+     * @return the number of unique partial results carried in this message
+     * <= getResultCount()
+     */
+    public short getPartialResultCount();
 
     public int getPort();
 
