@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.metadata;
 
 
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import junit.framework.Test;
 
@@ -63,7 +63,7 @@ public class MP3Test extends com.limegroup.gnutella.util.LimeTestCase {
     }
     
     private MP3Info newMP3Info(String loc) throws Exception {
-        return new MP3Info(CommonUtils.getResourceFile(loc).getPath());
+        return new MP3Info(TestUtils.getResourceFile(loc).getPath());
     }
 
     

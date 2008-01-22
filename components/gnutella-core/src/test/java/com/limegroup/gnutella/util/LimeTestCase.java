@@ -7,9 +7,9 @@ import java.io.IOException;
 import org.limewire.service.ErrorCallback;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.SystemUtils;
+import org.limewire.util.TestUtils;
 
 import com.limegroup.gnutella.Backend;
 import com.limegroup.gnutella.LimeCoreGlue;
@@ -284,7 +284,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     
     protected static File getRootDir() throws Exception {
         // Get a marker file.
-        File f = CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
+        File f = TestUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
         f = f.getCanonicalFile();
                  //gnutella       // limegroup    // com         // tests       // .
         return f.getParentFile().getParentFile().getParentFile().getParentFile().getParentFile();        

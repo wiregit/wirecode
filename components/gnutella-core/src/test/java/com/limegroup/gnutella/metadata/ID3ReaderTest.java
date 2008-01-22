@@ -4,8 +4,8 @@ package com.limegroup.gnutella.metadata;
 import java.io.File;
 import java.io.IOException;
 
-import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import junit.framework.Test;
 
@@ -30,7 +30,7 @@ public class ID3ReaderTest extends LimeTestCase {
     ////////////
     public static void globalSetUp() {
         String dir = "com/limegroup/gnutella/metadata/";
-        TEST_FILE = CommonUtils.getResourceFile(dir+"ID3TestFile.mp3");
+        TEST_FILE = TestUtils.getResourceFile(dir+"ID3TestFile.mp3");
         assertTrue("file should exist", TEST_FILE.exists());
     }
     

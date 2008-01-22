@@ -17,7 +17,7 @@ import java.net.UnknownHostException;
 
 import org.limewire.service.ErrorCallback;
 import org.limewire.service.ErrorService;
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Guice;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -420,7 +420,7 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
      */
     private void populateSharedDirectory() {
         File coreDir;
-        coreDir = CommonUtils.getResourceFile("com/limegroup/gnutella");
+        coreDir = TestUtils.getResourceFile("com/limegroup/gnutella");
         File[] files = coreDir.listFiles();
 
         if (files != null) {

@@ -9,9 +9,9 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
@@ -79,7 +79,7 @@ public class MulticastTest extends LimeTestCase {
             new String[] {ip});
         ConnectionSettings.PORT.setValue(TEST_PORT);
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
-        File mp3 = CommonUtils.getResourceFile(MP3_NAME);
+        File mp3 = TestUtils.getResourceFile(MP3_NAME);
         assertTrue(mp3.exists());
         FileUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
 

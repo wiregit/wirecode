@@ -2,7 +2,7 @@ package com.limegroup.gnutella.metadata;
 
 import java.io.File;
 
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import junit.framework.Test;
 
@@ -16,9 +16,9 @@ public class OGGParsingTest extends LimeTestCase {
 	static String _path = "com"+File.separator+"limegroup"+
 					File.separator+"gnutella"+File.separator+"metadata"+File.separator;
 	
-	static File _allFields = CommonUtils.getResourceFile(_path+"oggAll.ogg");
-	static File _someFields = CommonUtils.getResourceFile(_path+"oggSome.ogg");
-	static File _noFields = CommonUtils.getResourceFile(_path+"oggNone.ogg");
+	static File _allFields = TestUtils.getResourceFile(_path+"oggAll.ogg");
+	static File _someFields = TestUtils.getResourceFile(_path+"oggSome.ogg");
+	static File _noFields = TestUtils.getResourceFile(_path+"oggNone.ogg");
 	
 	
 	static AudioMetaData _metaData;

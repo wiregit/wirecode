@@ -15,7 +15,7 @@ import junit.framework.Test;
 
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.helpers.UrnHelper;
@@ -164,7 +164,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         assertNotNull(qkToUse);
 
         // now send a URN query, make sure that works....
-        File berkeley = CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
+        File berkeley = TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
         Iterator iter = UrnHelper.calculateAndCacheURN(berkeley, urnCache).iterator();
         URN berkeleyURN = (URN) iter.next();
         while (!berkeleyURN.isSHA1())

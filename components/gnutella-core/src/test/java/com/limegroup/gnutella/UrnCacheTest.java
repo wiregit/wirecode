@@ -8,7 +8,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -77,7 +77,7 @@ public final class UrnCacheTest extends LimeTestCase {
     }
 
 	private FileDesc[] createFileDescs() throws Exception {
-        File path = CommonUtils.getResourceFile(FILE_PATH);
+        File path = TestUtils.getResourceFile(FILE_PATH);
         File[] files = path.listFiles(new FileFilter() { 
             public boolean accept(File file) {
                 return !file.isDirectory();

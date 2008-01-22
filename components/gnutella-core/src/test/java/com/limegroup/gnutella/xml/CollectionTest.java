@@ -14,7 +14,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.collection.NameValue;
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.FileDesc;
@@ -31,9 +31,9 @@ public class CollectionTest extends LimeTestCase {
 
     FileDesc[] files = new FileDesc[3];
     final String fileLocation = "com/limegroup/gnutella/xml/";
-    final File mason = CommonUtils.getResourceFile(fileLocation + "nullfile.null");
-    final File test1 = CommonUtils.getResourceFile(fileLocation + "test1.mp3");
-    final File test2 = CommonUtils.getResourceFile(fileLocation + "test2.mp3");
+    final File mason = TestUtils.getResourceFile(fileLocation + "nullfile.null");
+    final File test1 = TestUtils.getResourceFile(fileLocation + "test1.mp3");
+    final File test2 = TestUtils.getResourceFile(fileLocation + "test2.mp3");
     final String audioSchemaURI = "http://www.limewire.com/schemas/audio.xsd";
     final String videoSchemaURI = "http://www.limewire.com/schemas/video.xsd";
 
@@ -404,7 +404,7 @@ public class CollectionTest extends LimeTestCase {
         map.put(getHash(test1), doc);
         doc = reader.readDocument(test2);
         map.put(getHash(test2), doc);
-        File marker = CommonUtils.getResourceFile(fileLocation + "nullfile.null");
+        File marker = TestUtils.getResourceFile(fileLocation + "nullfile.null");
         marker = marker.getParentFile();
         write(map, new File(marker, "audio.collection"));
         
@@ -435,8 +435,8 @@ public class CollectionTest extends LimeTestCase {
     }
 
     private void populateDirectory() {
-        File audioFile = CommonUtils.getResourceFile(fileLocation + "audio.collection");
-        File videoFile = CommonUtils.getResourceFile(fileLocation + "video.collection");
+        File audioFile = TestUtils.getResourceFile(fileLocation + "audio.collection");
+        File videoFile = TestUtils.getResourceFile(fileLocation + "video.collection");
         File newAudio  = new File(limeXMLProperties.getXMLDocsDir(), "audio.sxml");
         File newVideo  = new File(limeXMLProperties.getXMLDocsDir(), "video.sxml");
         assertTrue("Necessary file audio.collection cannot be found!", audioFile.exists());

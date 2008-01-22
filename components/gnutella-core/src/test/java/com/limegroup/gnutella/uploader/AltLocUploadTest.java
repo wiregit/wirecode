@@ -35,7 +35,7 @@ import org.jmock.Mockery;
 import org.jmock.api.Action;
 import org.jmock.api.Invocation;
 import org.limewire.net.HttpClientManager;
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -149,7 +149,7 @@ public class AltLocUploadTest extends LimeTestCase {
         
         doSettings();
 
-        File testDir = CommonUtils.getResourceFile(testDirName);
+        File testDir = TestUtils.getResourceFile(testDirName);
         assertTrue("test directory could not be found", testDir.isDirectory());
         File testFile = new File(testDir, fileName);
         assertTrue("test file should exist", testFile.exists());

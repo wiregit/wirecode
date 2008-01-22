@@ -15,9 +15,9 @@ import java.util.StringTokenizer;
 import junit.framework.Test;
 
 import org.limewire.net.SocketsManager.ConnectType;
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -103,9 +103,9 @@ public class LeafRoutingTest extends LimeTestCase {
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         // get the resource file for com/limegroup/gnutella
         File berkeley = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
+            TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
         File susheel = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
+            TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
         // now move them to the share dir        
         FileUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
         FileUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
@@ -421,9 +421,9 @@ public class LeafRoutingTest extends LimeTestCase {
 
         // get the URNS for the files
         File berkeley = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
+            TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
         File susheel = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
+            TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
         Iterator iter = UrnHelper.calculateAndCacheURN(berkeley, urnCache).iterator();
         URN berkeleyURN = (URN) iter.next();
         while (!berkeleyURN.isSHA1())

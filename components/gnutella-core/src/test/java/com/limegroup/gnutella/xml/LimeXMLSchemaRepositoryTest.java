@@ -3,6 +3,7 @@ package com.limegroup.gnutella.xml;
 import junit.framework.Test;
 
 import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -31,7 +32,7 @@ public class LimeXMLSchemaRepositoryTest extends LimeTestCase {
 	
 	public void setUp() throws Exception {
 	    Expand.expandFile(
-            CommonUtils.getResourceFile("com/limegroup/gnutella/xml/xml.war"), 
+            TestUtils.getResourceFile("com/limegroup/gnutella/xml/xml.war"), 
             CommonUtils.getUserSettingsDir()
         );
 

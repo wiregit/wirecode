@@ -32,7 +32,7 @@ public class I18NConvertTest extends BaseTestCase {
     public void setUp() throws Exception {
         //read in a file and do the tests from there.
         FileInputStream fin = 
-            new FileInputStream(CommonUtils.getResourceFile(fileName));
+            new FileInputStream(TestUtils.getResourceFile(fileName));
         _buf = new BufferedReader(new InputStreamReader(fin, "UTF-8"));
 
         //_instance = I18NConvert.instance();

@@ -5,9 +5,9 @@ import java.io.File;
 
 import junit.framework.Test;
 
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -36,7 +36,7 @@ public class OGGWritingTest extends LimeTestCase {
 
     public void setUp() {
         String dir = "com/limegroup/gnutella/metadata/";
-        File f = CommonUtils.getResourceFile(dir + "oggAll.ogg");
+        File f = TestUtils.getResourceFile(dir + "oggAll.ogg");
         assertTrue(f.exists());
         TEST_FILE = new File(TEST_NAME);
         TEST_FILE.delete();

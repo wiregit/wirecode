@@ -9,6 +9,7 @@ import junit.framework.Test;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -72,7 +73,7 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
 
     private DownloadSerializer getSerializerFor(String file) throws Exception {
         LOG.debug("-Trying to read downloads.dat from \""+file+"\"");
-        File downloadDat = LimeTestUtils.getResourceInPackage(file, OldDownloadsTest.class);
+        File downloadDat = TestUtils.getResourceInPackage(file, OldDownloadsTest.class);
         File copiedDat = File.createTempFile("lwc", "copyDat");
         CommonUtils.copyFile(downloadDat, copiedDat);
         File newSaveFile = File.createTempFile("lwc", "saveTmp");

@@ -5,8 +5,8 @@ import java.util.Iterator;
 
 import junit.framework.Test;
 
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.helpers.UrnHelper;
@@ -60,7 +60,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
         // get the resource file for com/limegroup/gnutella
         File mp3 = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg2layII_1504h_16k_frame56_24000hz_joint_CRCOrigID3v1&2_test27.mp3");
+            TestUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg2layII_1504h_16k_frame56_24000hz_joint_CRCOrigID3v1&2_test27.mp3");
         assertTrue(mp3.exists());
         // now move them to the share dir        
         FileUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));

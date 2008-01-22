@@ -87,37 +87,6 @@ public class CommonUtils {
     }
 
     /**
-     * Gets a resource file using the CommonUtils class loader,
-     * or the system class loader if CommonUtils isn't loaded.
-     */
-    public static File getResourceFile(String location) {
-        ClassLoader cl = CommonUtils.class.getClassLoader();            
-        URL resource = null;
-    
-        if(cl == null) {
-            resource = ClassLoader.getSystemResource(location);
-        } else {
-            resource = cl.getResource(location);
-        }
-        
-        if( resource == null ) {
-            // note: this will probably not work,
-            // but it will ultimately trigger a better exception
-            // than returning null.
-            return new File(location);
-        }
-        
-        //NOTE: The resource URL will contain %20 instead of spaces.
-        // This is by design, but will not work when trying to make a file.
-        // See BugParadeID: 4466485
-        //(http://developer.java.sun.com/developer/bugParade/bugs/4466485.html)
-        // The recommended workaround is to use the URI class, but that doesn't
-        // exist until Java 1.4.  So, we can't use it here.
-        // Thus, we manually have to parse out the %20s from the URL
-        return new File( decode(resource.getFile()) );
-    }
-
-    /**
      * Gets an InputStream from a resource file.
      * 
      * @param location the location of the resource in the resource file

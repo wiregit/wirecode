@@ -9,11 +9,12 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.limewire.collection.NameValue;
 import org.limewire.collection.Range;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.TestUtils;
 
 import com.limegroup.bittorrent.BTMetaInfo;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -37,7 +38,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
     }
 
     public void testConversionForTypes() throws Exception {
-        File file = LimeTestUtils.getResourceInPackage("allKindsofDownloads.dat", DownloadUpgradeTask.class);
+        File file = TestUtils.getResourceInPackage("allKindsofDownloads.dat", DownloadUpgradeTask.class);
         
         OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl();
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(file);
@@ -52,7 +53,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
         {
             GnutellaDownloadMemento mem = (GnutellaDownloadMemento)read1;
             assertEquals(DownloaderType.MANAGED, mem.getDownloadType());
-            assertEquals(new File("C:\\Documents and Settings\\Sam\\Incomplete\\T-123-fileA.txt"), mem.getIncompleteFile());
+            assertEquals(new File("C:/Documents and Settings/Sam/Incomplete/T-123-fileA.txt"), mem.getIncompleteFile());
             assertEquals(0, mem.getSavedBlocks().size());
             assertEquals(1, mem.getRemoteHosts().size());
             RemoteHostMemento rmem = mem.getRemoteHosts().iterator().next();
@@ -82,7 +83,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
         {
             GnutellaDownloadMemento mem = (GnutellaDownloadMemento)read2;
             assertEquals(DownloaderType.STORE, mem.getDownloadType());
-            assertEquals(new File("C:\\Documents and Settings\\Sam\\Incomplete\\T-123-fileA.txt"), mem.getIncompleteFile());
+            assertEquals(new File("C:/Documents and Settings/Sam/Incomplete/T-123-fileA.txt"), mem.getIncompleteFile());
             assertEquals(0, mem.getSavedBlocks().size());
             assertEquals(1, mem.getRemoteHosts().size());
             RemoteHostMemento rmem = mem.getRemoteHosts().iterator().next();
@@ -154,7 +155,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
     }
     
     public void testConversionForRanges() throws Exception {
-        File file = LimeTestUtils.getResourceInPackage("allKindsofRanges.dat", DownloadUpgradeTask.class);
+        File file = TestUtils.getResourceInPackage("allKindsofRanges.dat", DownloadUpgradeTask.class);
         
         OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl();
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(file);
@@ -170,7 +171,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
         {
             GnutellaDownloadMemento mem = (GnutellaDownloadMemento)read1;
             assertEquals(DownloaderType.MANAGED, mem.getDownloadType());
-            assertEquals(new File("C:\\Documents and Settings\\sberlin\\My Documents\\LimeWire\\Incomplete\\T-4495072-LimeWireWin4.16.0.exe"), mem.getIncompleteFile());
+            assertEquals(new File("C:/Documents and Settings/sberlin/My Documents/LimeWire/Incomplete/T-4495072-LimeWireWin4.16.0.exe"), mem.getIncompleteFile());
             assertEquals(1, mem.getSavedBlocks().size());
             assertEquals(Range.createRange(3276800, 3316399), mem.getSavedBlocks().get(0));
             
@@ -233,7 +234,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
         {
             GnutellaDownloadMemento mem = (GnutellaDownloadMemento)read2;
             assertEquals(DownloaderType.MANAGED, mem.getDownloadType());
-            assertEquals(new File("C:\\Documents and Settings\\sberlin\\My Documents\\LimeWire\\Incomplete\\T-4400168-LimeWireWin4.15.5.exe"), mem.getIncompleteFile());
+            assertEquals(new File("C:/Documents and Settings/sberlin/My Documents/LimeWire/Incomplete/T-4400168-LimeWireWin4.15.5.exe"), mem.getIncompleteFile());
             assertEquals(3, mem.getSavedBlocks().size());
             assertEquals(Range.createRange(0, 16895), mem.getSavedBlocks().get(0));
             assertEquals(Range.createRange(786432, 823029), mem.getSavedBlocks().get(1));
@@ -256,7 +257,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
         {
             GnutellaDownloadMemento mem = (GnutellaDownloadMemento)read3;
             assertEquals(DownloaderType.MANAGED, mem.getDownloadType());
-            assertEquals(new File("C:\\Documents and Settings\\sberlin\\My Documents\\LimeWire\\Incomplete\\T-3381280-LimeWireWin4.14.12.exe"), mem.getIncompleteFile());
+            assertEquals(new File("C:/Documents and Settings/sberlin/My Documents/LimeWire/Incomplete/T-3381280-LimeWireWin4.14.12.exe"), mem.getIncompleteFile());
             assertEquals(6, mem.getSavedBlocks().size());
             assertEquals(Range.createRange(0, 23551), mem.getSavedBlocks().get(0));
             assertEquals(Range.createRange(524288, 634879), mem.getSavedBlocks().get(1));
@@ -282,7 +283,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
         {
             GnutellaDownloadMemento mem = (GnutellaDownloadMemento)read4;
             assertEquals(DownloaderType.MANAGED, mem.getDownloadType());
-            assertEquals(new File("C:\\Documents and Settings\\sberlin\\My Documents\\LimeWire\\Incomplete\\T-2305127-LimeWirePackedJars4.12.6.7z"), mem.getIncompleteFile());
+            assertEquals(new File("C:/Documents and Settings/sberlin/My Documents/LimeWire/Incomplete/T-2305127-LimeWirePackedJars4.12.6.7z"), mem.getIncompleteFile());
             assertEquals(4, mem.getSavedBlocks().size());
             assertEquals(Range.createRange(262144, 263543), mem.getSavedBlocks().get(0));
             assertEquals(Range.createRange(524288, 1310719), mem.getSavedBlocks().get(1));
@@ -306,7 +307,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
         {
             GnutellaDownloadMemento mem = (GnutellaDownloadMemento)read5;
             assertEquals(DownloaderType.MANAGED, mem.getDownloadType());
-            assertEquals(new File("C:\\Documents and Settings\\sberlin\\My Documents\\LimeWire\\Incomplete\\T-3380048-LimeWireWin4.14.10.exe"), mem.getIncompleteFile());
+            assertEquals(new File("C:/Documents and Settings/sberlin/My Documents/LimeWire/Incomplete/T-3380048-LimeWireWin4.14.10.exe"), mem.getIncompleteFile());
             assertEquals(5, mem.getSavedBlocks().size());
             assertEquals(Range.createRange(0, 99703), mem.getSavedBlocks().get(0));
             assertEquals(Range.createRange(262144, 292328), mem.getSavedBlocks().get(1));
@@ -331,7 +332,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
         {
             GnutellaDownloadMemento mem = (GnutellaDownloadMemento)read6;
             assertEquals(DownloaderType.MANAGED, mem.getDownloadType());
-            assertEquals(new File("C:\\Documents and Settings\\sberlin\\My Documents\\LimeWire\\Incomplete\\T-3064200-LimeWireWin4.12.6.exe"), mem.getIncompleteFile());
+            assertEquals(new File("C:/Documents and Settings/sberlin/My Documents/LimeWire/Incomplete/T-3064200-LimeWireWin4.12.6.exe"), mem.getIncompleteFile());
             assertEquals(3, mem.getSavedBlocks().size());
             assertEquals(Range.createRange(262144, 490223), mem.getSavedBlocks().get(0));
             assertEquals(Range.createRange(1572864, 1886959), mem.getSavedBlocks().get(1));
@@ -353,7 +354,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
     }
     
     public void testMagnet() throws Exception {
-        File file = LimeTestUtils.getResourceInPackage("magnet.dat", DownloadUpgradeTask.class);
+        File file = TestUtils.getResourceInPackage("magnet.dat", DownloadUpgradeTask.class);
         
         OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl();
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(file);
@@ -362,7 +363,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
         DownloadMemento read = mementos.get(0);
         MagnetDownloadMemento mem = (MagnetDownloadMemento)read;
         assertEquals(DownloaderType.MAGNET, mem.getDownloadType());
-        assertEquals(new File("C:\\Documents and Settings\\sberlin\\My Documents\\LimeWire\\Incomplete\\T-12229522-01-steve_winwood-dear_mr_fantasy-jun.mp3"), mem.getIncompleteFile());
+        assertEquals(new File("C:/Documents and Settings/sberlin/My Documents/LimeWire/Incomplete/T-12229522-01-steve_winwood-dear_mr_fantasy-jun.mp3"), mem.getIncompleteFile());
         assertEquals(2, mem.getSavedBlocks().size());
         assertEquals(Range.createRange(0, 1310719), mem.getSavedBlocks().get(0));
         assertEquals(Range.createRange(4718592, 4890161), mem.getSavedBlocks().get(1));
@@ -377,8 +378,9 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
         assertEquals(Collections.singletonList("http://64.61.25.138:6346/uri-res/N2R?urn:sha1:VSHERRKVKU4FZVUDOB6UVERRC2BOEBG4"), mo.getXS());
     }
     
+    @SuppressWarnings("unchecked")
     public void testXml() throws Exception {
-        File file = LimeTestUtils.getResourceInPackage("xml.dat", DownloadUpgradeTask.class);
+        File file = TestUtils.getResourceInPackage("xml.dat", DownloadUpgradeTask.class);
         
         OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl();
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(file);
@@ -387,14 +389,43 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
         DownloadMemento read = mementos.get(0);
         GnutellaDownloadMemento mem = (GnutellaDownloadMemento)read;
         assertEquals(DownloaderType.MANAGED, mem.getDownloadType());
-        assertEquals(new File("C:\\Documents and Settings\\sberlin\\My Documents\\LimeWire\\Incomplete\\T-12229522-01-steve_winwood-dear_mr_fantasy-jun.mp3"), mem.getIncompleteFile());
+        assertEquals(new File("C:/Documents and Settings/sberlin/My Documents/LimeWire/Incomplete/T-12229522-01-steve_winwood-dear_mr_fantasy-jun.mp3"), mem.getIncompleteFile());
         assertEquals(1, mem.getSavedBlocks().size());
         assertEquals(Range.createRange(0, 131071), mem.getSavedBlocks().get(0));
         assertEquals(1, mem.getRemoteHosts().size());
         assertEquals(12229522L, mem.getContentLength());
         assertEquals("01-steve_winwood-dear_mr_fantasy-jun.mp3", mem.getDefaultFileName());
         assertEquals(URN.createSHA1Urn("urn:sha1:VSHERRKVKU4FZVUDOB6UVERRC2BOEBG4"), mem.getSha1Urn());
-        assertEquals("<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio year=\"2004\" title=\"Dear Mr. Fantasy\" artist=\"Steve Winwood\" album=\"Dear Mr. Fantasy Album Single\" genre=\"Classic Rock\" license=\"Access Hollywood\" seconds=\"509\" bitrate=\"192\" comments=\"Visit www.AccessHollywood.com/Abouttime for more free media content from Steve Winwood.\" track=\"1\"/></audios>",
-                mem.getRemoteHosts().iterator().next().getXml());
+        String xmlStart = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio ";
+        String xmlEnd = "/></audios>";
+        String readXml = mem.getRemoteHosts().iterator().next().getXml();
+        assertTrue("read: " + readXml, readXml.startsWith(xmlStart));
+        assertTrue("read: " + readXml, readXml.endsWith(xmlEnd));
+        NameValue<String>[] nvs = new NameValue[] {
+            new NameValue("track", "1"),
+            new NameValue("year", "2004"),
+            new NameValue("title", "Dear Mr. Fantasy"),
+            new NameValue("artist", "Steve Winwood"),
+            new NameValue("license", "Access Hollywood"),
+            new NameValue("album", "Dear Mr. Fantasy Album Single"),
+            new NameValue("genre", "Classic Rock"),
+            new NameValue("seconds", "509"),
+            new NameValue("bitrate", "192"),
+            new NameValue("comments", "Visit www.AccessHollywood.com/Abouttime for more free media content from Steve Winwood."),
+        };
+        String leftoverXml = readXml.substring(xmlStart.length(), readXml.length() - xmlEnd.length());
+        for(int i = 0; i < nvs.length; i++) {
+            String attr = nvs[i].getName() + "=\"" + nvs[i].getValue() + "\"";
+            assertTrue("has left: " + leftoverXml, leftoverXml.contains(attr));
+            int idx = leftoverXml.indexOf(attr);
+            if(idx == 0)
+                leftoverXml = leftoverXml.substring(attr.length());
+            else if(idx == leftoverXml.length() - attr.length())
+                leftoverXml = leftoverXml.substring(0, leftoverXml.length() - attr.length());
+            else
+                leftoverXml = leftoverXml.substring(0, leftoverXml.length() - attr.length()) + leftoverXml.substring(idx + attr.length());
+            leftoverXml = leftoverXml.trim();   
+        }
+        
     }
 }

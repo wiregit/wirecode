@@ -5,9 +5,9 @@ import java.io.File;
 
 import junit.framework.Test;
 
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
@@ -356,7 +356,7 @@ public class InterClientTest extends PeerTestCase {
     }
     
     private static byte[] readFile(int i) throws Exception {
-        File f = CommonUtils.getResourceFile("com/limegroup/gnutella/version/test_" + i + ".xml");
+        File f = TestUtils.getResourceFile("com/limegroup/gnutella/version/test_" + i + ".xml");
         assertTrue(f.exists());
         assertTrue(f.isFile());
         return FileUtils.readFileFully(f);

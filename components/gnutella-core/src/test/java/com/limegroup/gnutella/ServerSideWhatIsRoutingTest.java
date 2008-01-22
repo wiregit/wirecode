@@ -7,8 +7,8 @@ import java.util.Iterator;
 
 import junit.framework.Test;
 
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.connection.BlockingConnection;
@@ -120,9 +120,9 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         // get the resource file for com/limegroup/gnutella
         File berkeley = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
+            TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
         File susheel = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
+            TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
         // now move them to the share dir        
         FileUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
         FileUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));

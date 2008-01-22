@@ -9,6 +9,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.DownloadManager;
@@ -92,7 +93,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
 
     public void testLoads32Bit() throws Exception {
         OldDownloadConverter oldDownloadConverter = new OldDownloadConverterImpl();
-        File downloadDat = LimeTestUtils.getResourceInPackage("resume_4.1.1-32bit-size.dat", ResumeDownloaderTest.class);
+        File downloadDat = TestUtils.getResourceInPackage("resume_4.1.1-32bit-size.dat", ResumeDownloaderTest.class);
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(downloadDat);
         assertEquals(1, mementos.size());
         

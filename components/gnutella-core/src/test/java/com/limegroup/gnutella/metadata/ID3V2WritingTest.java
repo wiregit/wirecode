@@ -3,9 +3,9 @@ package com.limegroup.gnutella.metadata;
 
 import java.io.File;
 
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import junit.framework.Test;
 
@@ -32,7 +32,7 @@ public class ID3V2WritingTest extends LimeTestCase {
 
     public void setUp() {
         String dir = "com/limegroup/gnutella/metadata/";
-        File f = CommonUtils.getResourceFile(dir + "ID3EditorTestFile.mp3");
+        File f = TestUtils.getResourceFile(dir + "ID3EditorTestFile.mp3");
         assertTrue(f.exists());
         TEST_FILE = new File(TEST_NAME);
         TEST_FILE.delete();

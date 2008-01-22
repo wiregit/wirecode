@@ -13,8 +13,8 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.CommonUtils;
 import org.limewire.util.GenericsUtils;
+import org.limewire.util.TestUtils;
 import org.limewire.util.GenericsUtils.ScanMode;
 
 import com.limegroup.bittorrent.BTMetaInfo;
@@ -32,7 +32,7 @@ public class DownloadConversionTest extends BaseTestCase {
     }
 
     public void testConversion() throws Exception {
-        File file = CommonUtils
+        File file = TestUtils
                 .getResourceFile("com/limegroup/gnutella/downloader/serial/conversion/allKindsOfDownloads.dat");
         ObjectInputStream in = new DownloadConverterObjectInputStream(new FileInputStream(file));
         Object read1 = in.readObject();

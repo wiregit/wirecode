@@ -19,7 +19,6 @@ import java.util.concurrent.Future;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.util.AssertComparisons;
-import org.limewire.util.CommonUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -33,11 +32,6 @@ import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 public class LimeTestUtils {
 
-    public static File getResourceInPackage(String resourceName, Class nearResource) {
-        String name = nearResource.getPackage().getName().replace(".", "/");
-        return CommonUtils.getResourceFile(name + "/" + resourceName);
-    }
-    
     public static void waitForNIO() throws InterruptedException {
         Future<?> future = NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {
             public void run() {

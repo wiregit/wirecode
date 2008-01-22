@@ -9,8 +9,8 @@ import java.io.ObjectOutputStream;
 
 import junit.framework.Test;
 
-import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -19,7 +19,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 public class MediaTypeTest extends LimeTestCase {
     
-    static File mediatypesWithOldDescriptionKeys  = CommonUtils.getResourceFile(MediaTypeTest.class.getPackage().getName().replace('.', '/') + "/mediatypes-with-old-description-keys.bin");
+    static File mediatypesWithOldDescriptionKeys  = TestUtils.getResourceFile(MediaTypeTest.class.getPackage().getName().replace('.', '/') + "/mediatypes-with-old-description-keys.bin");
     
     public MediaTypeTest(String name) {
 		super(name);

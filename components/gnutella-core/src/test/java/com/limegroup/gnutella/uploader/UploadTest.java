@@ -36,6 +36,7 @@ import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.HttpClientManager;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -135,7 +136,7 @@ public class UploadTest extends LimeTestCase {
         doSettings();
 
         // copy resources
-        File testDir = CommonUtils.getResourceFile(testDirName);
+        File testDir = TestUtils.getResourceFile(testDirName);
         // we must use a separate copy method
         // because the filename has a # in it which can't be a resource.
         File target = new File(_sharedDir, fileName);

@@ -11,7 +11,7 @@ import junit.framework.Test;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cyberneko.relaxng.parsers.SAXParser;
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -103,7 +103,7 @@ public class PublishedCCLicenseTest extends LimeTestCase {
         // bug in MinekiNeko prevents use of compact schema.  use regular schema instead
         //		parser.setFeature("http://cyberneko.org/xml/features/relaxng/compact-syntax", true);
 
-        File f = CommonUtils.getResourceFile("lib/xml/schemas/ccverificationrdf-schema.rng");
+        File f = TestUtils.getResourceFile("lib/xml/schemas/ccverificationrdf-schema.rng");
         assertTrue(f.exists()); // must have rng to validate.
 		parser.setProperty(
 				"http://cyberneko.org/xml/properties/relaxng/schema-location",

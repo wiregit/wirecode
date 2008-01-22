@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.IOException;
 
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import junit.framework.Test;
 
@@ -170,7 +170,7 @@ public final class UrnTest extends com.limegroup.gnutella.util.LimeTestCase {
 			}
 		}
 
-		_testDir = CommonUtils.getResourceFile("com/limegroup/gnutella");
+		_testDir = TestUtils.getResourceFile("com/limegroup/gnutella");
 		assertTrue("should have been able to initialize gnutella dir", 
 				   _testDir.isDirectory());
 		File[] files = _testDir.listFiles();
