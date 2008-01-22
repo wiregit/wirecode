@@ -421,11 +421,12 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             if(idx == 0)
                 leftoverXml = leftoverXml.substring(attr.length());
             else if(idx == leftoverXml.length() - attr.length())
-                leftoverXml = leftoverXml.substring(0, leftoverXml.length() - attr.length());
+                leftoverXml = leftoverXml.substring(0, idx);
             else
-                leftoverXml = leftoverXml.substring(0, leftoverXml.length() - attr.length()) + leftoverXml.substring(idx + attr.length());
-            leftoverXml = leftoverXml.trim();   
+                leftoverXml = leftoverXml.substring(0, idx) + leftoverXml.substring(idx + attr.length());
+            leftoverXml = leftoverXml.trim();
         }
+        assertEquals("has left: " + leftoverXml, 0, leftoverXml.length());
         
     }
 }
