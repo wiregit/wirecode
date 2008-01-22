@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Random;
 
 import org.limewire.io.NetworkUtils;
@@ -435,7 +436,7 @@ public class GUID implements Comparable<GUID> {
             str = "0" + str;
             buf.append( str );
         }
-        return buf.toString().toUpperCase();
+        return buf.toString().toUpperCase(Locale.US);
     }
     
     /**

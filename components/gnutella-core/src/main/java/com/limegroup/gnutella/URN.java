@@ -59,7 +59,10 @@ public final class URN implements HTTPHeaderValue, Serializable {
         ANY_TYPE("",-1),
 
         /** UrnType for an invalid Urn Type. */
-        INVALID("Invalid",-1);
+        INVALID("Invalid",-1),
+        
+        /** UrnType for a {@link GUID} URN. */
+        GUID("guid:", 32);
         
         private final String descriptor;
         
@@ -106,7 +109,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
         }
         
         static URN.Type createFromDescriptor(String desc) {
-            desc = desc.toLowerCase().trim();
+            desc = desc.toLowerCase(Locale.US).trim();
             for(Type type : values())
                 if(type.descriptor.equals(desc))
                     return type;
@@ -123,7 +126,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
          *  string, or <tt>null</tt> if the type is not supported
          */
         public static URN.Type createUrnType(String value) {
-            value = value.toLowerCase().trim();
+            value = value.toLowerCase(Locale.US).trim();
             for(Type type : values())
                 if(type.toString().equals(value))
                     return type;
@@ -268,11 +271,34 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		throws IOException {
         String typeString = URN.getTypeString(urnString).toLowerCase(Locale.US);
         if (typeString.indexOf(Type.SHA1.getDescriptor()) == 4)
-    		return createSHA1UrnFromString(urnString);
+    		return createUrnFromString(urnString);
         else if (typeString.indexOf(Type.BITPRINT.getDescriptor()) == 4)
             return createSHA1UrnFromBitprint(urnString);
         else
             throw new IOException("unsupported or malformed URN");
+	}
+	
+	/**
+	 * Creates a GUID URN from a string.
+	 * 
+	 * @param urnString string of the format "urn:guid:[hexstringoflength32]"
+	 * @return a URN with urn type {@link Type#GUID}
+	 * 
+	 * @throws IOException if the string has an invalid URN format or is not of type {@link Type#GUID}
+	 */
+	public static URN createGUIDUrn(final String urnString) throws IOException {
+	    URN urn = createUrnFromString(urnString);
+	    if (urn.getUrnType() != Type.GUID) {
+	        throw new IOException("Not a GUID urn: " + urnString);
+	    }
+	    return urn;
+	}
+
+	/**
+	 * Creates a URN for a guid.
+	 */
+	public static URN createGUIDUrn(final GUID guid) {
+	    return new URN(Type.URN_NAMESPACE_ID + Type.GUID.getDescriptor() + guid.toHexString(), Type.GUID);
 	}
 
     /**
@@ -326,7 +352,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		throws IOException {
 		sha1String.trim();
 		if(isValidUriResSHA1Format(sha1String)) {
-			return createSHA1UrnFromString(sha1String.substring(13));
+			return createUrnFromString(sha1String.substring(13));
 		} else {
 			throw new IOException("could not parse string format: "+sha1String);
 		}
@@ -371,7 +397,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
             throw new IOException("invalid bytes!");
         
         String hash = Base32.encode(bytes);
-        return createSHA1UrnFromString("urn:sha1:" + hash);
+        return createUrnFromString("urn:sha1:" + hash);
     }
     
     /**
@@ -393,11 +419,8 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @return a new <tt>URN</tt> built from the specified string
 	 * @throws <tt>IOException</tt> if there is an error
 	 */
-	private static URN createSHA1UrnFromString(final String urnString) 
+	private static URN createUrnFromString(final String urnString) 
 		throws IOException {
-		if(urnString == null) {
-			throw new IOException("cannot accept null URN string");
-		}
 		if(!URN.isValidUrn(urnString)) {
 			throw new IOException("invalid urn string: "+urnString);
 		}
@@ -427,7 +450,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
             bitprintString.substring(
                 bitprintString.indexOf(':', 4) + 1, dotIdx);
 
-        return createSHA1UrnFromString(
+        return createUrnFromString(
             Type.URN_NAMESPACE_ID + Type.SHA1.getDescriptor() + sha1);
     }
     
@@ -466,17 +489,23 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	}
     
     /**
-     * Returns the bytes of this URN.
+     * Returns the bytes of the namespace specific string URN.
      * 
      * TODO: If the URN wasn't stored in Base32, this will be wrong.
      *       We deal only with SHA1 right now, which will be Base32.
      */
     public byte[] getBytes() {
-        int lastColon = _urnString.lastIndexOf(":");
-        String hash = _urnString.substring(lastColon+1);
-        return Base32.decode(hash);        
+        return Base32.decode(getNamespaceSpecificString());        
     }
 
+    /**
+     * Returns the namespace specific string part of the URN, this is
+     * the part after the second colon.
+     */
+    public String getNamespaceSpecificString() {
+        return _urnString.substring(_urnString.lastIndexOf(':') + 1); 
+    }
+    
 	/**
 	 * Returns the <tt>UrnType</tt> instance for this <tt>URN</tt>.
 	 *
@@ -516,10 +545,19 @@ public final class URN implements HTTPHeaderValue, Serializable {
     /**
      * Returns whether or not this URN is a Tiger Tree Root URN.
      *
-     * @return <tt>true</tt> if this is a SHA1 URN, <tt>false</tt> otherwise
+     * @return <tt>true</tt> if this is a Tiger Tree Root URN, <tt>false</tt> otherwise
      */
     public boolean isTTRoot() {
         return _urnType == Type.TTROOT;
+    }
+    
+    /**
+     * Returns whether or not this URN is a GUID URN.
+     *
+     * @return <tt>true</tt> if this is a GUID URN, <tt>false</tt> otherwise
+     */
+    public boolean isGUID() {
+        return _urnType == Type.GUID;
     }
 
     /**
