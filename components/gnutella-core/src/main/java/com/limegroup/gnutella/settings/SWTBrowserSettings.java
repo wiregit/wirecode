@@ -3,6 +3,8 @@ package com.limegroup.gnutella.settings;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.StringSetting;
 
+import com.limegroup.gnutella.util.LimeWireUtils;
+
 /**
  * Settings for the SWT browser. This will allow us to enable or disable the
  * browser.
@@ -27,23 +29,39 @@ public final class SWTBrowserSettings extends LimeProps {
                                           "http://www.limewire.com/features?inclient", 
                                           "SWTBrowserSettings.remoteLimeWireStoreUrl");
     
-     /**
-      * The name of the browser in the tab.
-      */
-    public static final StringSetting SWT_BROWSER_TITLE =
-        FACTORY.createRemoteStringSetting("SWT_BROWSER_TITLE", 
-                                          "Browser", 
-                                          "SWTBrowserSettings.swtBrowserTitle");
+    public static StringSetting getTitleSetting() {
+        return LimeWireUtils.isPro() ? SWT_BROWSER_TITLE_WITH_AMPS_PRO :
+            SWT_BROWSER_TITLE_WITH_AMPS;
+    }
+    
+    public static StringSetting getTooltipSetting() {
+        return LimeWireUtils.isPro() ? SWT_BROWSER_TOOLTIP_PRO :
+            SWT_BROWSER_TOOLTIP;
+    }
     
     /**
      * The name of the browser in the tab, with ampserands for better functionality.
      */
-   public static final StringSetting SWT_BROWSER_TITLE_WITH_AMPS =
+   private static final StringSetting SWT_BROWSER_TITLE_WITH_AMPS =
        FACTORY.createRemoteStringSetting("SWT_BROWSER_TITLE_WITH_AMPS", 
                                          "&Browser", 
-                                         "SWTBrowserSettings.swtBrowserTitleWithAmps");    
+                                         "SWTBrowserSettings.swtBrowserTitleWithAmps");
+   
+   /**
+    * The name of the browser in the tab for PRO people, with ampserands for better functionality.
+    */
+   private static final StringSetting SWT_BROWSER_TITLE_WITH_AMPS_PRO =
+      FACTORY.createRemoteStringSetting("SWT_BROWSER_TITLE_WITH_AMPS_PRO", 
+                                        "&Browser", 
+                                        "SWTBrowserSettings.swtBrowserTitleWithAmpsPro");
+  
+   private static final StringSetting SWT_BROWSER_TOOLTIP_PRO =
+      FACTORY.createRemoteStringSetting("SWT_BROWSER_TOOLTIP_PRO", 
+                                        "Browse The Web", 
+                                        "SWTBrowserSettings.swtBrowserTooltipPro");
+  
     
-    public static final StringSetting SWT_BROWSER_TOOLTIP =
+   private static final StringSetting SWT_BROWSER_TOOLTIP =
         FACTORY.createRemoteStringSetting("SWT_BROWSER_TOOLTIP", 
                                           "Browse The Web", 
                                           "SWTBrowserSettings.swtBrowserTooltip");
