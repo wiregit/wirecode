@@ -320,7 +320,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     /** writers of statistics if any */
     enum StatsWriters {TOP, DEFLATER, DELAYER, THROTTLE }
     private final Map<StatsWriters,StatisticGatheringWriter> statsWriters = new HashMap<StatsWriters,StatisticGatheringWriter>();
-    private MessageCounter incoming, outgoing;
+    private volatile MessageCounter incoming, outgoing;
 
     /**
      * Creates a new outgoing connection to the specified host on the specified
@@ -473,19 +473,6 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             GnetConnectObserver observer) throws IOException {
         responder.setLocalePreferencing(_useLocalPreference);
 
-        // add some heavier stats code in betas
-        if (LimeWireUtils.isBetaRelease() || LimeWireUtils.isTestingVersion()) {
-            statsWriters.put(StatsWriters.TOP,new StatisticGatheringWriter());
-            statsWriters.put(StatsWriters.DEFLATER, new StatisticGatheringWriter());
-            statsWriters.put(StatsWriters.DELAYER, new StatisticGatheringWriter());
-            statsWriters.put(StatsWriters.THROTTLE, new StatisticGatheringWriter());
-            incoming = new MessageCounter(10);
-            outgoing = new MessageCounter(10);
-        } else {
-            incoming = new MessageCounter(1);
-            outgoing = new MessageCounter(1);
-        }
-        
         if (isOutgoing()) {
             ConnectObserver connectObserver = new AsyncHandshakeConnecter(requestHeaders,
                     responder, observer);
@@ -682,6 +669,17 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
 
     /** Starts outgoing messages being sent. */
     private void startOutput() {
+        
+        // add some heavier stats code in betas
+        if (LimeWireUtils.isBetaRelease() || LimeWireUtils.isTestingVersion()) {
+            statsWriters.put(StatsWriters.TOP,new StatisticGatheringWriter());
+            statsWriters.put(StatsWriters.DEFLATER, new StatisticGatheringWriter());
+            statsWriters.put(StatsWriters.DELAYER, new StatisticGatheringWriter());
+            statsWriters.put(StatsWriters.THROTTLE, new StatisticGatheringWriter());
+            outgoing = new MessageCounter(10);
+        } else
+            outgoing = new MessageCounter(1);
+        
         MessageQueue queue;
         // Taking this change out until we can safely handle attacks and
         // overflow
@@ -809,6 +807,8 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      *         loop to continue.
      */
     public void startMessaging() {
+        this.incoming = new Message.MessageCounter(LimeWireUtils.isBetaRelease() ? 10 : 1);
+        
         supernodeClientAtLooping = isSupernodeClientConnection();
 
         LOG.debug("Starting asynchronous connection");
