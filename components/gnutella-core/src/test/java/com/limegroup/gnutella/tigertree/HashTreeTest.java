@@ -17,8 +17,8 @@ import org.limewire.collection.Range;
 import org.limewire.inject.Providers;
 import org.limewire.util.Base32;
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.TestUtils;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dime.DIMEGenerator;
@@ -33,7 +33,7 @@ public class HashTreeTest extends BaseTestCase {
     
     private static final String filename = 
      "com/limegroup/gnutella/metadata/mpg4_golem160x90first120.avi";
-    private static final File file = CommonUtils.getResourceFile(filename);
+    private static final File file = TestUtils.getResourceFile(filename);
     
     // urn & tigertree root from bitcollider
     private static final String sha1 = 

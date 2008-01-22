@@ -20,9 +20,9 @@ import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.ByteOrder;
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.helpers.UrnHelper;
@@ -67,9 +67,9 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
     static String _path = "com/limegroup/gnutella/";
 
-    static File _fileWithSOFlag = CommonUtils.getResourceFile(_path + "queryWithSOFlag.bin");
+    static File _fileWithSOFlag = TestUtils.getResourceFile(_path + "queryWithSOFlag.bin");
     
-    static File _fileWithSO = CommonUtils.getResourceFile(_path + "queryWithSO.bin");
+    static File _fileWithSO = TestUtils.getResourceFile(_path + "queryWithSO.bin");
     
     /**
      * Ultrapeer 1 UDP connection.

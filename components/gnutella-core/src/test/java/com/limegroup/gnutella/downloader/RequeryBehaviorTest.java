@@ -97,7 +97,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
      */
     public void testWaitingForResults() throws Exception {
         
-        ManagedDownloader downloader = (ManagedDownloader)
+        ManagedDownloaderImpl downloader = (ManagedDownloaderImpl)
             downloadManager.download(new RemoteFileDesc[] {fakeRFD()}, new ArrayList<RemoteFileDesc>(), new GUID() , true, new File("."), "asdf");
         LOG.debug("starting downloader");
         assertSame(DownloadStatus.QUEUED, downloader.getState());
@@ -174,7 +174,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
      */
     public void testBasicRequeryBehavior() throws Exception {
         
-        ManagedDownloader downloader = (ManagedDownloader)
+        ManagedDownloaderImpl downloader = (ManagedDownloaderImpl)
         downloadManager.download(new RemoteFileDesc[] {fakeRFD()}, new ArrayList<RemoteFileDesc>(), new GUID() , true, new File("."), "asdf");
         LOG.debug("starting downloader");
         assertSame(DownloadStatus.QUEUED, downloader.getState());
@@ -277,7 +277,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         PrivilegedAccessor.setValue(LimeWireUtils.class,"_isPro",Boolean.TRUE);
         assertTrue(LimeWireUtils.isPro());
         
-        ManagedDownloader downloader = (ManagedDownloader)
+        ManagedDownloaderImpl downloader = (ManagedDownloaderImpl)
         downloadManager.download(new RemoteFileDesc[] {fakeRFD()}, new ArrayList<RemoteFileDesc>(), new GUID() , true, new File("."), "asdf");
         LOG.debug("starting downloader");
         assertSame(DownloadStatus.QUEUED, downloader.getState());

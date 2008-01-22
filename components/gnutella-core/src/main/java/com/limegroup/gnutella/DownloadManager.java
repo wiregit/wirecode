@@ -1,21 +1,17 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.Socket;
 import java.util.Collection;
 import java.util.List;
 
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.downloader.AbstractDownloader;
 import com.limegroup.gnutella.downloader.CantResumeException;
+import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
-import com.limegroup.gnutella.downloader.ManagedDownloader;
-import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
-import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.version.DownloadInformation;
@@ -39,7 +35,10 @@ import com.limegroup.gnutella.version.DownloadInformation;
  */
 public interface DownloadManager extends BandwidthTracker, SaveLocationManager, LWSIntegrationServicesDelegate, PushedSocketHandler {
     
-    public void register(PushedSocketHandlerRegistry registry);
+    /**
+     * Adds a new downloader that this will manager.
+     */
+    public void addNewDownloader(CoreDownloader downloader);
 
     /** 
      * Initializes this manager. <b>This method must be called before any other
@@ -56,15 +55,11 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
     /**
      * Performs the slow, low-priority initialization tasks: reading in
      * snapshots and scheduling snapshot checkpointing.
-     * 
-     * @param lwsManager 
      */
-    public void postGuiInit();
+    public void loadSavedDownloadsAndScheduleWriting();
 
-    /**
-     * Is the GUI init'd?
-     */
-    public boolean isGUIInitd();
+    /** True if saved downloads have been loaded from disk. */
+    public boolean isSavedDownloadsLoaded();
 
     /**
      * Determines if an 'In Network' download exists in either active or waiting.
@@ -72,25 +67,12 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
     public boolean hasInNetworkDownload();
 
     /**
-     * Determines if any store download exists in either active or waiting
-     * state. 
-     */
-    public boolean hasStoreDownload();
-
-    /**
      * Kills all in-network downloaders that are not present in the list of URNs
      * @param urns a current set of urns that we are downloading in-network.
      */
     public void killDownloadersNotListed(Collection<? extends DownloadInformation> updates);
 
-    public PushDownloadManager getPushManager();
-
     public boolean acceptPushedSocket(String file, int index, byte[] clientGUID, Socket socket);
-
-    /**
-     * Schedules the runnable that pumps through waiting downloads.
-     */
-    public void scheduleWaitingPump();
 
     /**
      * Determines if the given URN has an incomplete file.
@@ -122,8 +104,6 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
 
     public Downloader getDownloaderForURN(URN sha1);
 
-    public Downloader getDownloaderForURNString(String urn);
-
     /**
      * Returns the active or waiting downloader that uses or will use 
      * <code>file</code> as incomplete file.
@@ -133,22 +113,6 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
     public Downloader getDownloaderForIncompleteFile(File file);
 
     public boolean isGuidForQueryDownloading(GUID guid);
-
-    /**
-     * Clears all downloads.
-     */
-    public void clearAllDownloads();
-
-    /** Reads the downloaders serialized in DOWNLOAD_SNAPSHOT_FILE and adds them
-     *  to this, queued.  The queued downloads will restart immediately if slots
-     *  are available.  Returns false iff the file could not be read for any
-     *  reason.  THIS METHOD SHOULD BE CALLED BEFORE ANY GUI ACTION. 
-     *  It is public for testing purposes only!  
-     *  @param file the downloads.dat snapshot file */
-    public boolean readAndInitializeSnapshot(File file);
-
-    /* public for testing only right now. */
-    public List<AbstractDownloader> readSnapshot(File file) throws IOException;
 
     /** 
      * Tries to "smart download" any of the given files.<p>  
@@ -271,7 +235,7 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
      * puts the download back in the waiting list to be finished later.
      *     @modifies this, callback
      */
-    public void remove(AbstractDownloader downloader, boolean completed);
+    public void remove(CoreDownloader downloader, boolean completed);
 
     /**
      * Bumps the priority of an inactive download either up or down
@@ -283,17 +247,11 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
      * Attempts to send the given requery to provide the given downloader with 
      * more sources to download.  May not actually send the requery if it doing
      * so would exceed the maximum requery rate.
-     * 
      * @param query the requery to send, which should have a marked GUID.
      *  Queries are subjected to global rate limiting iff they have marked 
      *  requery GUIDs.
-     * @param requerier the downloader requesting more sources.  Needed to 
-     *  ensure fair requery scheduling.  This MUST be in the waiting list,
-     *  i.e., it MUST NOT have a download slot.
-     * @return true iff the query was actually sent.  If false is returned,
-     *  the downloader should attempt to send the query later.
      */
-    public boolean sendQuery(ManagedDownloader requerier, QueryRequest query);
+    public void sendQuery(QueryRequest query);
 
     /** Calls measureBandwidth on each uploader. */
     public void measureBandwidth();
@@ -312,12 +270,12 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
      */
     public float getLastMeasuredBandwidth();
 
-    public Iterable<AbstractDownloader> getAllDownloaders();
+    public Iterable<CoreDownloader> getAllDownloaders();
     
     /** Writes a snapshot of all downloaders in this and all incomplete files to
      *  the file named DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method
      *  at any time for checkpointing purposes.  Returns true iff the file was
      *  successfully written. */
-    public boolean writeSnapshot();
+    public void writeSnapshot();
 
 }

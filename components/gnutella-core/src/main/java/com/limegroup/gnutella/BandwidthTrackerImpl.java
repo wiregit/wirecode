@@ -1,56 +1,42 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.io.NotActiveException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-
 import org.limewire.collection.Buffer;
 
 
 /**
- * A helper class for implementing the BandwidthTracker interface.  For
- * backwards compatibility, this implements the Serializable interface and marks
- * some fields transient.  However, LimeWire currently only reads but not writes
- * BandwidthTrackerImpl.
+ * A helper class for implementing the BandwidthTracker interface
  */
-public class BandwidthTrackerImpl implements Serializable {
-    static final long serialVersionUID = 7694080781117787305L;
-    static final int HISTORY_SIZE=10;
+public class BandwidthTrackerImpl {
+    private static final int HISTORY_SIZE=10;
 
     /** Keep 10 clicks worth of data, which we can then average to get a more
      *  accurate moving time average.
      *  INVARIANT: snapShots[0]==measuredBandwidth.floatValue() */
-    transient Buffer<Float> snapShots = new Buffer<Float>(HISTORY_SIZE);
+    private final Buffer<Float> snapShots = new Buffer<Float>(HISTORY_SIZE);
     
     /**
      * Number of times we've been bandwidth measured.
      */
-    private transient int numMeasures = 0;
+    private int numMeasures = 0;
     
     /**
      * Overall average throughput
      */
-    private transient float averageBandwidth = 0;
+    private float averageBandwidth = 0;
     
     /**
      * The cached getMeasuredBandwidth value.
      */
-    private transient float cachedBandwidth = 0;
+    private float cachedBandwidth = 0;
     
-    long lastTime;
-    
-    /** The old lastAmountRead field */
-    @Deprecated
-    int lastAmountRead;
+    private long lastTime;
 
     /** The most recent measured bandwidth.  DO NOT DELETE THIS; it exists
      *  for backwards serialization reasons. */
-    float measuredBandwidth;
+    private float measuredBandwidth;
 
     /** The last amount read */
-    long lastAmountRead64;
+    private long lastAmountRead64;
     
     /** 
      * Measures the data throughput since the last call to measureBandwidth,
@@ -105,25 +91,5 @@ public class BandwidthTrackerImpl implements Serializable {
     public synchronized float getAverageBandwidth() {
         if(snapShots.getSize() < 3) return 0f;
         return averageBandwidth;
-    }
-          
-
-    private void readObject(ObjectInputStream in) throws IOException {
-        snapShots=new Buffer<Float>(HISTORY_SIZE);
-        numMeasures = 0;
-        averageBandwidth = 0;
-        try {
-            in.defaultReadObject();
-            if (lastAmountRead64 == 0)
-                lastAmountRead64 = lastAmountRead;
-        } catch (ClassNotFoundException e) {
-            throw new IOException("Class not found");
-        } catch (NotActiveException e) {
-            throw new IOException("Not active");
-        }
-    }
-
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
     }
 }

@@ -2,9 +2,9 @@ package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 
-public interface DownloadWorkerFactory {
+interface DownloadWorkerFactory {
 
-    public DownloadWorker create(ManagedDownloader manager, RemoteFileDesc rfd,
+    DownloadWorker create(DownloadWorkerSupport manager, RemoteFileDesc rfd,
             VerifyingFile vf);
 
 }

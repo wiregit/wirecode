@@ -3,7 +3,7 @@ package com.limegroup.gnutella.metadata;
 import java.io.File;
 import java.io.IOException;
 
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import junit.framework.Test;
 
@@ -23,7 +23,7 @@ public class ASFParsingTest extends LimeTestCase {
 	}
 	
 	public void testWMASimpleDescription() throws IOException {
-	    File f = CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/simple description.wma");
+	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/metadata/simple description.wma");
 	    assertTrue(f.exists());
 	    
 	    ASFParser parser = new ASFParser(f);
@@ -65,7 +65,7 @@ public class ASFParsingTest extends LimeTestCase {
 
 
 	public void testWMAExtendedDescription() throws IOException {
-	    File f = CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/extended description.wma");
+	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/metadata/extended description.wma");
 	    assertTrue(f.exists());
 	    
 	    ASFParser parser = new ASFParser(f);
@@ -106,7 +106,7 @@ public class ASFParsingTest extends LimeTestCase {
     }
 
 	public void testASFVBR() throws IOException {
-	    File f = CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/vbr encoding.asf");
+	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/metadata/vbr encoding.asf");
 	    assertTrue(f.exists());
 	    
 	    ASFParser parser = new ASFParser(f);

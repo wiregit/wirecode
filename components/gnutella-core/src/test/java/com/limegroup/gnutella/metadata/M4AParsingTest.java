@@ -2,7 +2,7 @@ package com.limegroup.gnutella.metadata;
 
 import java.io.File;
 
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import junit.framework.Test;
 
@@ -16,7 +16,7 @@ public class M4AParsingTest extends LimeTestCase {
 	static String _path = "com"+File.separator+"limegroup"+
 					File.separator+"gnutella"+File.separator+"metadata"+File.separator;
 	
-	static File _file = CommonUtils.getResourceFile(_path+"Purr.m4a");
+	static File _file = TestUtils.getResourceFile(_path+"Purr.m4a");
 	
 	
 	

@@ -13,8 +13,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
-import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -61,9 +61,9 @@ public class DownloadTestCase extends LimeTestCase {
 
     protected static final String filePath = "com/limegroup/gnutella/downloader/DownloadTestData/";
 
-    protected File dataDir = CommonUtils.getResourceFile(filePath);
+    protected File dataDir = TestUtils.getResourceFile(filePath);
 
-    protected File saveDir = (CommonUtils.getResourceFile(filePath + "saved")).getAbsoluteFile();
+    protected File saveDir = (TestUtils.getResourceFile(filePath + "saved")).getAbsoluteFile();
 
     // a random name for the saved file
     protected final String savedFileName = "DownloadTester2834343.out";
@@ -94,7 +94,7 @@ public class DownloadTestCase extends LimeTestCase {
 
     protected ActivityCallbackStub activityCallback;
 
-    protected ManagedDownloader managedDownloader;
+    protected ManagedDownloaderImpl managedDownloader;
 
     protected TigerTreeCache tigerTreeCache;
 
@@ -491,7 +491,7 @@ public class DownloadTestCase extends LimeTestCase {
 
         @Override
         public void addDownload(Downloader d) {
-            managedDownloader = (ManagedDownloader) d;
+            managedDownloader = (ManagedDownloaderImpl) d;
         }
 
         @SuppressWarnings("unchecked")

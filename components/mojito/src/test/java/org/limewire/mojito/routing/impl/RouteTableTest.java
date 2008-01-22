@@ -32,7 +32,7 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.CollectionUtils;
 import org.limewire.mojito.util.EntryImpl;
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 @SuppressWarnings("null")
 public class RouteTableTest extends MojitoTestCase {
@@ -592,7 +592,7 @@ public class RouteTableTest extends MojitoTestCase {
     }
     
     private List<Entry<KUID, KUID[]>> load(String name) throws Exception {
-        File file = CommonUtils.getResourceFile("org/limewire/mojito/routing/impl/" + name);
+        File file = TestUtils.getResourceFile("org/limewire/mojito/routing/impl/" + name);
         BufferedReader in = null;
         
         List<Entry<KUID, KUID[]>> entries = new ArrayList<Entry<KUID, KUID[]>>();

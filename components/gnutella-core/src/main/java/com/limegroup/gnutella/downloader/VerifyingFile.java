@@ -16,6 +16,7 @@ import org.limewire.collection.Range;
 import org.limewire.io.DiskException;
 import org.limewire.util.FileUtils;
 
+import com.google.inject.Provider;
 import com.limegroup.gnutella.tigertree.HashTree;
 
 
@@ -158,13 +159,13 @@ public class VerifyingFile {
     private MultiIterable<Range> allBlocksIterable = null;
     
     /** The controller for doing disk reads/writes. */
-    private final DiskController diskController;
+    private final Provider<DiskController> diskController;
         
     /**
      * Constructs a new VerifyingFile for the specified size.
      * If checkOverlap is true, will scan for overlap corruption.
      */
-    VerifyingFile(long completedSize, DiskController diskController) {
+    VerifyingFile(long completedSize, Provider<DiskController> diskController) {
         this.completedSize = completedSize;
         verifiedBlocks = new IntervalSet();
         leasedBlocks = new IntervalSet();
@@ -221,7 +222,7 @@ public class VerifyingFile {
         if (writeBlockImpl(request)) {
             callback.writeScheduled();
         } else {
-            diskController.addDelayedWrite(new VerifyingFileDelayedWrite(request, callback, this));
+            diskController.get().addDelayedWrite(new VerifyingFileDelayedWrite(request, callback, this));
         }
     }
 
@@ -241,7 +242,7 @@ public class VerifyingFile {
         
         request.startProcessing();
         updateState(request.in);
-        boolean canWrite = diskController.canWriteNow();
+        boolean canWrite = diskController.get().canWriteNow();
         
         if(canWrite)
         	return writeBlockImpl(request);
@@ -265,7 +266,7 @@ public class VerifyingFile {
         if (!validateState(request))
         	return true;
         
-        byte[] temp = diskController.getWriteChunk();
+        byte[] temp = diskController.get().getWriteChunk();
         if(temp == null)
             return false;
         
@@ -279,7 +280,7 @@ public class VerifyingFile {
             chunksScheduledPerFile++;
         }
         
-        diskController.addDiskJob(new ChunkHandler(temp, request.in));
+        diskController.get().addDiskJob(new ChunkHandler(temp, request.in));
         return true;
     }
     
@@ -712,7 +713,7 @@ public class VerifyingFile {
             if (verifiedBlocks.getSize() > 0) {
                 partialBlocks.add(verifiedBlocks);
                 verifiedBlocks.clear();
-                diskController.addDiskJobWithoutChunk(new EmptyVerifier(existingFileSize));
+                diskController.get().addDiskJobWithoutChunk(new EmptyVerifier(existingFileSize));
             }
         }
         
@@ -726,7 +727,7 @@ public class VerifyingFile {
         if (previous == null && tree != null && (existingFileSize != -1 ||
                 (pendingBlocks.getSize() == 0 && partialBlocks.getSize() > 0))
            ) {
-            diskController.addDiskJobWithoutChunk(new EmptyVerifier(existingFileSize));
+            diskController.get().addDiskJobWithoutChunk(new EmptyVerifier(existingFileSize));
             existingFileSize = -1;
         }
         return true;
@@ -768,7 +769,7 @@ public class VerifyingFile {
         // if we have a tree, see if there is a completed chunk in the partial list
         if(tree != null) {
             for(Range i : findVerifyableBlocks(existingFileSize)) {
-                byte[] tmp = diskController.getPowerOf2Chunk(Math.min(VERIFYABLE_CHUNK,tree.getNodeSize()));
+                byte[] tmp = diskController.get().getPowerOf2Chunk(Math.min(VERIFYABLE_CHUNK,tree.getNodeSize()));
                 boolean good = !tree.isCorrupt(i, fos, tmp);
                 synchronized (this) {
                     partialBlocks.delete(i);

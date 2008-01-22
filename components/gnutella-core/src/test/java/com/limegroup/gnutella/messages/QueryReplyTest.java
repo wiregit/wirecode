@@ -37,9 +37,9 @@ import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.ByteOrder;
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -1424,7 +1424,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     private void addFilesToLibrary() throws Exception {
         FileManager fileManager = injector.getInstance(FileManager.class);
         String dirString = "com/limegroup/gnutella";
-        File testDir = CommonUtils.getResourceFile(dirString);
+        File testDir = TestUtils.getResourceFile(dirString);
         testDir = testDir.getCanonicalFile();
         assertTrue("could not find the gnutella directory", testDir.isDirectory());
 

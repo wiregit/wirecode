@@ -28,7 +28,7 @@ import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -150,7 +150,7 @@ public class PushUploadTest extends LimeTestCase {
         doSettings();
 
         // copy resources
-        File testDir = CommonUtils.getResourceFile(testDirName);
+        File testDir = TestUtils.getResourceFile(testDirName);
         assertTrue("test directory could not be found", testDir.isDirectory());
         File testFile = new File(testDir, fileName);
         assertTrue("test file should exist", testFile.exists());

@@ -86,7 +86,7 @@ public class DownloaderDialogTest extends GUIBaseTestCase {
 		d.createUniqueFilenameDownloader();
 	}
 	
-	private class MockDownloaderFactory implements DownloaderFactory {
+	private class MockDownloaderFactory implements GuiDownloaderFactory {
 
 		private File saveFile;
 

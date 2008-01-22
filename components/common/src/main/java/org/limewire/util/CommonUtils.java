@@ -3,6 +3,7 @@ package org.limewire.util;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,37 +84,6 @@ public class CommonUtils {
      */
     public static String getUserName() {
         return System.getProperty("user.name");
-    }
-
-    /**
-     * Gets a resource file using the CommonUtils class loader,
-     * or the system class loader if CommonUtils isn't loaded.
-     */
-    public static File getResourceFile(String location) {
-        ClassLoader cl = CommonUtils.class.getClassLoader();            
-        URL resource = null;
-    
-        if(cl == null) {
-            resource = ClassLoader.getSystemResource(location);
-        } else {
-            resource = cl.getResource(location);
-        }
-        
-        if( resource == null ) {
-            // note: this will probably not work,
-            // but it will ultimately trigger a better exception
-            // than returning null.
-            return new File(location);
-        }
-        
-        //NOTE: The resource URL will contain %20 instead of spaces.
-        // This is by design, but will not work when trying to make a file.
-        // See BugParadeID: 4466485
-        //(http://developer.java.sun.com/developer/bugParade/bugs/4466485.html)
-        // The recommended workaround is to use the URI class, but that doesn't
-        // exist until Java 1.4.  So, we can't use it here.
-        // Thus, we manually have to parse out the %20s from the URL
-        return new File( decode(resource.getFile()) );
     }
 
     /**
@@ -207,36 +177,46 @@ public class CommonUtils {
     		parentFile.mkdirs();
     
     	ClassLoader cl = CommonUtils.class.getClassLoader();			
-    	
+        //load resource using my class loader or system class loader
+        //Can happen if Launcher loaded by system class loader
+        URL resource = cl != null
+            ?  cl.getResource(fileName)
+            :  ClassLoader.getSystemResource(fileName);
+            
+        if(resource == null)
+            throw new IOException("resource: " + fileName + " doesn't exist.");
+        
+    	saveStream(resource.openStream(), newFile);
+    }
+    
+    /**
+     * Copies the src file to the destination file.
+     * This will always overwrite the destination.
+     */
+    public static void copyFile(File src, File dst) throws IOException {
+        saveStream(new FileInputStream(src), dst);
+    }
+    
+    /**
+     * Saves all data from the stream into the destination file.
+     * This will always overwrite the file.
+     */
+    public static void saveStream(InputStream inStream, File newFile) throws IOException {
     	BufferedInputStream bis = null;
     	BufferedOutputStream bos = null;            
     	try {
-    		//load resource using my class loader or system class loader
-    		//Can happen if Launcher loaded by system class loader
-            URL resource = cl != null
-    			?  cl.getResource(fileName)
-    			:  ClassLoader.getSystemResource(fileName);
-                
-            if(resource == null)
-                throw new IOException("resource: " + fileName + " doesn't exist.");
-            
-            InputStream is = resource.openStream();
-    		
     		//buffer the streams to improve I/O performance
     		final int bufferSize = 2048;
-    		bis = new BufferedInputStream(is, bufferSize);
-    		bos = 
-    			new BufferedOutputStream(new FileOutputStream(newFile), 
-    									 bufferSize);
-    		byte[] buffer = new byte[bufferSize];
-    		int c = 0;
+            bis = new BufferedInputStream(inStream, bufferSize);
+            bos = new BufferedOutputStream(new FileOutputStream(newFile), bufferSize);
+            byte[] buffer = new byte[bufferSize];
+            int c = 0;
     		
     		do { //read and write in chunks of buffer size until EOF reached
     			c = bis.read(buffer, 0, bufferSize);
                 if (c > 0)
                     bos.write(buffer, 0, c);
-    		}
-    		while (c == bufferSize); //(# of bytes read)c will = bufferSize until EOF
+    		} while (c == bufferSize); //(# of bytes read)c will = bufferSize until EOF
             
             bos.flush();
     	} catch(IOException e) {

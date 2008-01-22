@@ -1,12 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,7 +41,7 @@ import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.DownloadManagerStub;
+import com.limegroup.gnutella.DownloadManagerImpl;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -58,12 +54,12 @@ import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
-import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
@@ -79,11 +75,10 @@ public class ManagedDownloaderTest extends LimeTestCase {
     private static final Log LOG = LogFactory.getLog(ManagedDownloaderTest.class);
     
     private final static int PORT=6666;
-    private DownloadManagerStub downloadManager;
+    private DownloadManagerImpl downloadManager;
     private FileManagerStub fileManager;
-    private GnutellaDownloaderFactory gnutellaDownloaderFactory;
+    private CoreDownloaderFactory gnutellaDownloaderFactory;
     private NetworkManagerStub networkManager;
-    private DownloadReferencesFactory downloadReferencesFactory;
     private Injector injector;
     private ScheduledExecutorService background;
 
@@ -110,7 +105,6 @@ public class ManagedDownloaderTest extends LimeTestCase {
            @Override
             protected void configure() {
                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
-               bind(DownloadManager.class).to(DownloadManagerStub.class);
                bind(MessageRouter.class).to(MessageRouterStub.class);
                bind(FileManager.class).to(FileManagerStub.class);
                bind(NetworkManager.class).to(NetworkManagerStub.class);
@@ -125,11 +119,10 @@ public class ManagedDownloaderTest extends LimeTestCase {
         localSocketAddressProvider.setLocalAddressPrivate(false);
         LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProvider);
         
-        downloadManager = (DownloadManagerStub)injector.getInstance(DownloadManager.class);
+        downloadManager = (DownloadManagerImpl)injector.getInstance(DownloadManager.class);
         fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
-        gnutellaDownloaderFactory = injector.getInstance(GnutellaDownloaderFactory.class);
+        gnutellaDownloaderFactory = injector.getInstance(CoreDownloaderFactory.class);
         networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
-        downloadReferencesFactory = injector.getInstance(DownloadReferencesFactory.class);
         
         downloadManager.initialize();
         downloadManager.scheduleWaitingPump();
@@ -187,17 +180,17 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	HTTPDownloaderFactory httpDownloaderFactory =injector.getInstance(HTTPDownloaderFactory.class);
     	AltLocDownloaderStub fakeDownloader = (AltLocDownloaderStub)httpDownloaderFactory.create(null, other, null, false);
     	
-    	TestManagedDownloader md = new TestManagedDownloader(new RemoteFileDesc[]{rfd}, downloadManager);
+    	ManagedDownloaderImpl md = (ManagedDownloaderImpl)gnutellaDownloaderFactory.createManagedDownloader(new RemoteFileDesc[] { rfd}, null, null, null, false);
         DownloadWorkerFactory downloadWorkerFactory = injector.getInstance(DownloadWorkerFactory.class);
         AltLocWorkerStub worker = (AltLocWorkerStub)downloadWorkerFactory.create(md, rfd, null);
         worker.setHTTPDownloader(fakeDownloader);
         
         List<DownloadWorker> l = new LinkedList<DownloadWorker>();
         l.add(worker);
-    	md.initialize(downloadReferencesFactory.create(md));
-    	md.setDloaders(l);
-    	md.setSHA1(partialURN);
-    	md.setIncompleteFile(f);
+    	md.initialize();
+    	setDloaders(md, l);
+    	setSHA1(md, partialURN);
+    	setIncompleteFile(md, f);
     	
     	
     	//and see if it behaves correctly
@@ -252,9 +245,9 @@ public class ManagedDownloaderTest extends LimeTestCase {
             newRFD("Susheel/cool\\Daswani.txt",
                    "urn:sha1:XXXXGIPQGXXXXS5FJUPAKPZWUGYQYPFB")   //ignored
         };
-        TestManagedDownloader downloader=new TestManagedDownloader(rfds,downloadManager);
-        downloader.initialize(downloadReferencesFactory.create(downloader));
-        QueryRequest qr=downloader.newRequery2();
+        ManagedDownloaderImpl downloader= (ManagedDownloaderImpl)gnutellaDownloaderFactory.createManagedDownloader(rfds, null, null, null, false);
+        downloader.initialize();
+        QueryRequest qr=downloader.newRequery();
         assertNotNull("Couldn't make query", qr);
         
         assertTrue(qr.getQuery().equals("neil daswani susheel") ||
@@ -275,20 +268,18 @@ public class ManagedDownloaderTest extends LimeTestCase {
         assertEquals(0, urns.size());
         
         networkManager.setCanDoFWT(true);
-        qr=downloader.newRequery2();
+        qr=downloader.newRequery();
         // minspeed mask | firewalled | xml | firewall transfer = 226
         assertEquals(226, qr.getMinSpeed());
-            
-        
     }
 
     /** Catches a bug with earlier keyword intersection code. */
     public void testNewRequery2() throws Exception {
         LOG.info("testing new requery 2");
         RemoteFileDesc[] rfds={ newRFD("LimeWire again LimeWire the 34") };
-        TestManagedDownloader downloader=new TestManagedDownloader(rfds,downloadManager);
-        downloader.initialize(downloadReferencesFactory.create(downloader));
-        QueryRequest qr=downloader.newRequery2();
+        ManagedDownloaderImpl downloader= (ManagedDownloaderImpl) gnutellaDownloaderFactory.createManagedDownloader(rfds, null, null, null, false);
+        downloader.initialize();
+        QueryRequest qr=downloader.newRequery();
         assertEquals("limewire again", qr.getQuery());
         assertEquals(new HashSet(), qr.getQueryUrns());
     }
@@ -299,7 +290,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         
         networkManager.setAddress(new byte[] { 127, 0, 0, 1 });
         
-        IncompleteFileManager ifm=new IncompleteFileManager();
+        IncompleteFileManager ifm = injector.getInstance(IncompleteFileManager.class);
         RemoteFileDesc rfd=newRFD("some file.txt",FileDescStub.DEFAULT_URN.toString());
         File incompleteFile=ifm.getFile(rfd);
         int amountDownloaded=100;
@@ -308,36 +299,23 @@ public class ManagedDownloaderTest extends LimeTestCase {
         
         VerifyingFile vf=verifyingFileFactory.createVerifyingFile(1024);
         vf.addInterval(Range.createRange(0, amountDownloaded-1));  //inclusive
-        ifm.addEntry(incompleteFile, vf, false);
+        ifm.addEntry(incompleteFile, vf, true);
 
         //Start downloader, make it sure requeries, etc.
         ManagedDownloader downloader = 
             gnutellaDownloaderFactory.createManagedDownloader(new RemoteFileDesc[] { rfd },
-                ifm, null);
-        downloader.initialize(downloadReferencesFactory.create(downloader));
+                null, null, null, false);
+        downloader.initialize();
         requestStart(downloader);
         try { Thread.sleep(200); } catch (InterruptedException e) { }
         //assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
-
-        try {
-            //Serialize it!
-            ByteArrayOutputStream baos=new ByteArrayOutputStream();
-            ObjectOutputStream out=new ObjectOutputStream(baos);
-            out.writeObject(downloader);
-            out.flush(); out.close();
-            downloader.stop();
-
-            //Deserialize it as a different instance.  Initialize.
-            ObjectInputStream in=new ObjectInputStream(
-                new ByteArrayInputStream(baos.toByteArray()));
-            downloader=(ManagedDownloader)in.readObject();
-            in.close();
-            downloader.initialize(downloadReferencesFactory.create(downloader));
-            requestStart(downloader);
-        } catch (IOException e) {
-            fail("Couldn't serialize", e);
-        }
+        
+        DownloadMemento memento = downloader.toMemento();
+        downloader.stop();
+        downloader = (ManagedDownloader)downloadManager.prepareMemento(memento);
+        downloader.initialize();
+        requestStart(downloader);
 
         //Check same state as before serialization.
         try {Thread.sleep(500);}catch(InterruptedException ignroed){}
@@ -356,10 +334,10 @@ public class ManagedDownloaderTest extends LimeTestCase {
         LOG.info("test requery progress");
         TestUploader uploader=null;
         ManagedDownloader downloader=null;
-	// TestFile's static initializer does all kinds of expensive stuff
-	// that can cause the http communication to timeout when it's
-	// done lazily
-	TestFile.length();
+    	// TestFile's static initializer does all kinds of expensive stuff
+    	// that can cause the http communication to timeout when it's
+    	// done lazily
+    	TestFile.length();
         try {
             //Start uploader and download.
             uploader = new TestUploader(injector);
@@ -369,8 +347,9 @@ public class ManagedDownloaderTest extends LimeTestCase {
             uploader.setSendThexTree(false);
             downloader=
 				gnutellaDownloaderFactory.createManagedDownloader(
-                        new RemoteFileDesc[] {newRFD("another testfile.txt",FileDescStub.DEFAULT_URN.toString())}, new IncompleteFileManager(), null);
-            downloader.initialize(downloadReferencesFactory.create(downloader));
+                        new RemoteFileDesc[] {newRFD("another testfile.txt",FileDescStub.DEFAULT_URN.toString())}, null, null, null, false);
+        
+            downloader.initialize();
             requestStart(downloader);
             Thread.sleep(1000);
             //Wait for it to download until error, need to wait 
@@ -407,7 +386,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         
         try {
             gnutellaDownloaderFactory.createManagedDownloader(rfds,
-                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), saveDir, "does not matter", false);
+                    new GUID(GUID.makeGuid()), saveDir, "does not matter", false);
             fail("No exception thrown for dir " + saveDir);
         }
         catch (SaveLocationException sle) {
@@ -442,7 +421,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
 		if (noWritePermissionDir != null) {
 			try {
 				gnutellaDownloaderFactory.createManagedDownloader(rfds,
-                        new IncompleteFileManager(), new GUID(GUID.makeGuid()), noWritePermissionDir, "does not matter", false);
+                        new GUID(GUID.makeGuid()), noWritePermissionDir, "does not matter", false);
 				fail("No exception thrown for dir " + noWritePermissionDir);
 			}
 			catch (SaveLocationException sle) {
@@ -454,7 +433,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         
 		try {
 			gnutellaDownloaderFactory.createManagedDownloader(rfds,
-                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), new File("/non existent directory"), null, false);
+                    new GUID(GUID.makeGuid()), new File("/non existent directory"), null, false);
 			fail("No exception thrown");
 		}
 		catch (SaveLocationException sle) {
@@ -464,7 +443,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
 		}
 		try {
 			gnutellaDownloaderFactory.createManagedDownloader(rfds,
-                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), file.getParentFile(), file.getName(), false);
+                    new GUID(GUID.makeGuid()), file.getParentFile(), file.getName(), false);
 			fail("No exception thrown");
 		}
 		catch (SaveLocationException sle) {
@@ -475,7 +454,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
 		try {
 			// should not throw an exception because of overwrite 
 			gnutellaDownloaderFactory.createManagedDownloader(rfds,
-                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), file.getParentFile(), file.getName(), true); 
+                    new GUID(GUID.makeGuid()), file.getParentFile(), file.getName(), true); 
 		}
 		catch (SaveLocationException sle) {
 			fail("There shouldn't have been an exception of type " + sle.getErrorCode());
@@ -484,7 +463,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
 			File f = File.createTempFile("notadirectory", "file");
 			f.deleteOnExit();
 			gnutellaDownloaderFactory.createManagedDownloader(rfds,
-                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), f, null, false);
+                    new GUID(GUID.makeGuid()), f, null, false);
 			fail("No exception thrown");
 		}
 		catch (SaveLocationException sle) {
@@ -493,40 +472,26 @@ public class ManagedDownloaderTest extends LimeTestCase {
 						 sle.getErrorCode());
 		}
         // we force filename normalization
-        try {
-            gnutellaDownloaderFactory.createManagedDownloader(rfds,
-                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), null, "./", false);
-            gnutellaDownloaderFactory.createManagedDownloader(rfds,
-                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), null, "../myfile.txt", false);
-        }
-        catch (SaveLocationException sle) {
-            fail("Should not have thrown" + sle);
-        }
-		try {
-			// should not throw an exception
-			gnutellaDownloaderFactory.createManagedDownloader(rfds,
-                    new IncompleteFileManager(), new GUID(GUID.makeGuid()), null, null, false);
-		}
-		catch (SaveLocationException sle) {
-			fail("There shouldn't have been an exception of type " + sle.getErrorCode());
-		}
+        gnutellaDownloaderFactory.createManagedDownloader(rfds, new GUID(GUID.makeGuid()), null,
+                "./", false);
+        gnutellaDownloaderFactory.createManagedDownloader(rfds, new GUID(GUID.makeGuid()), null,
+                "../myfile.txt", false);
 
-		List<RemoteFileDesc> emptyRFDList = Collections.emptyList();
-		// already downloading based on filename and same size
-		try {
-			downloadManager.download(rfds, emptyRFDList, 
-					new GUID(GUID.makeGuid()), false, null, null);
-		}
-		catch (SaveLocationException sle) {
-			fail("There should not have been an exception of type " + sle.getErrorCode());
-		}
-		try {
-			downloadManager.download(rfds, emptyRFDList,
-					new GUID(GUID.makeGuid()), false, null, null);
-			fail("No exception thrown");
-		}
-		catch (SaveLocationException sle) {
-			assertEquals("Error code should be: already downloading", 
+        // should not throw an exception
+        gnutellaDownloaderFactory.createManagedDownloader(rfds, new GUID(GUID.makeGuid()), null,
+                null, false);
+
+        List<RemoteFileDesc> emptyRFDList = Collections.emptyList();
+        // already downloading based on filename and same size
+
+        downloadManager.download(rfds, emptyRFDList, new GUID(GUID.makeGuid()), false, null, null);
+
+        try {
+            downloadManager.download(rfds, emptyRFDList, new GUID(GUID.makeGuid()), false, null,
+                    null);
+            fail("No exception thrown");
+        } catch (SaveLocationException sle) {
+            assertEquals("Error code should be: already downloading", 
 					SaveLocationException.FILE_ALREADY_DOWNLOADING,
 					sle.getErrorCode());
 		}
@@ -535,13 +500,10 @@ public class ManagedDownloaderTest extends LimeTestCase {
 		RemoteFileDesc[] hashRFDS = new RemoteFileDesc[] {
 				newRFD("dl", "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")
 		};
-		try {
-			downloadManager.download(hashRFDS, emptyRFDList,
-					new GUID(GUID.makeGuid()), false, null, null);
-		}
-		catch (SaveLocationException sle) {
-			fail("There should not have been an exception of type " + sle.getErrorCode());
-		}
+
+		downloadManager.download(hashRFDS, emptyRFDList, new GUID(GUID.makeGuid()), false, null,
+                null);
+		
 		try {
 			downloadManager.download(hashRFDS, emptyRFDList,
 					new GUID(GUID.makeGuid()), false, null, null);
@@ -554,22 +516,21 @@ public class ManagedDownloaderTest extends LimeTestCase {
 		}
 				
 		// other download is already being saved to the same file with different hashes
-		try {
+		{
 			RemoteFileDesc[] fds = new RemoteFileDesc[] {
 					newRFD("savedto", "urn:sha1:QLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB")
 			};
 			downloadManager.download(fds, emptyRFDList,
 					new GUID(GUID.makeGuid()), false, null, "alreadysavedto");
 		}
-		catch (SaveLocationException sle) {
-			fail("There should not have been an exception of type " + sle.getErrorCode());
-		}
-		try {
+
+        try {
 			RemoteFileDesc[] fds = new RemoteFileDesc[] {
 					newRFD("otherfd", "urn:sha1:PLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB")
 			};
 			downloadManager.download(fds, emptyRFDList,
 					new GUID(GUID.makeGuid()), false, null, "alreadysavedto");
+			fail("should have gotten exception!");
 		}
 		catch (SaveLocationException sle) {
 			assertEquals("Error code should be: already being saved to", 
@@ -605,8 +566,8 @@ public class ManagedDownloaderTest extends LimeTestCase {
     
     @SuppressWarnings("unchecked")
     private void requestStart(ManagedDownloader dl) throws Exception {
-        List<AbstractDownloader> waiting = (List<AbstractDownloader>)PrivilegedAccessor.getValue(downloadManager, "waiting");
-        List<AbstractDownloader> active = (List<AbstractDownloader>)PrivilegedAccessor.getValue(downloadManager, "active");
+        List<CoreDownloader> waiting = (List<CoreDownloader>)PrivilegedAccessor.getValue(downloadManager, "waiting");
+        List<CoreDownloader> active = (List<CoreDownloader>)PrivilegedAccessor.getValue(downloadManager, "active");
         synchronized(downloadManager) {
             waiting.remove(dl);
             active.add(dl);
@@ -657,32 +618,23 @@ public class ManagedDownloaderTest extends LimeTestCase {
         return longestDir;
     }
     
+    
 
-    /** Provides access to protected methods. */
-    private static class TestManagedDownloader extends ManagedDownloader {
-        public TestManagedDownloader(RemoteFileDesc[] files, SaveLocationManager saveLocationManager) {
-            super(files, new IncompleteFileManager(), null, saveLocationManager);
-        }
-
-        public QueryRequest newRequery2() throws CantResumeException {
-            return super.newRequery(2);
-        }
-        
-        /**
-         * allows overriding of the list of current downloaders
-         */
-        public void setDloaders(List l) throws Exception {
-            PrivilegedAccessor.setValue(this,"_activeWorkers",l);
-        }
-        
-        public void setSHA1(URN sha1) throws Exception{
-        	PrivilegedAccessor.setValue(this,"downloadSHA1",sha1);
-        }
-        
-        public void setIncompleteFile(File f) throws Exception {
-        	PrivilegedAccessor.setValue(this,"incompleteFile",f);
-        }
+    /**
+     * allows overriding of the list of current downloaders
+     */
+    private void setDloaders(ManagedDownloader managedDownloader, List l) throws Exception {
+        PrivilegedAccessor.setValue(managedDownloader,"_activeWorkers",l);
     }
+    
+    private void setSHA1(ManagedDownloader managedDownloader, URN sha1) throws Exception{
+        PrivilegedAccessor.setValue(managedDownloader,"downloadSHA1",sha1);
+    }
+    
+    private void setIncompleteFile(ManagedDownloader managedDownloader, File f) throws Exception {
+        PrivilegedAccessor.setValue(managedDownloader,"incompleteFile",f);
+    }
+    
     
     @Singleton    
     private static class AltLocDownloaderStubFactory implements HTTPDownloaderFactory {
@@ -778,7 +730,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
             this.socketsManager = socketsManager;
         }
         
-        public DownloadWorker create(ManagedDownloader manager,
+        public DownloadWorker create(DownloadWorkerSupport manager,
                 RemoteFileDesc rfd, VerifyingFile vf) {
             return new AltLocWorkerStub(manager, rfd, vf, httpDownloaderFactory,
                     backgroundExecutor, nioExecutor, pushDownloadManager,
@@ -789,7 +741,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     private static class AltLocWorkerStub extends DownloadWorkerStub {
         private volatile HTTPDownloader httpDownloader;
         
-        public AltLocWorkerStub(ManagedDownloader manager, RemoteFileDesc rfd, VerifyingFile vf,
+        public AltLocWorkerStub(DownloadWorkerSupport manager, RemoteFileDesc rfd, VerifyingFile vf,
                 HTTPDownloaderFactory httpDownloaderFactory,
                 ScheduledExecutorService backgroundExecutor, ScheduledExecutorService nioExecutor,
                 Provider<PushDownloadManager> pushDownloadManager, SocketsManager socketsManager) {

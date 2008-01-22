@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.connection.BlockingConnection;
@@ -90,9 +90,9 @@ public class ServerSideWhatIsNewTest
         LimeTestUtils.setSharedDirectories( new File[] { _sharedDir, _savedDir } );
         // get the resource file for com/limegroup/gnutella
         berkeley = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
+            TestUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
         susheel = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
+            TestUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
         // now move them to the share dir
         File berkeleyDest = new File(_sharedDir, "berkeley.txt");
         File susheelDest = new File(_sharedDir, "susheel.txt");
@@ -758,9 +758,9 @@ public class ServerSideWhatIsNewTest
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
 
-        File winInstaller = CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
-        File linInstaller = CommonUtils.getResourceFile("com/limegroup/gnutella/GUIDTest.java");
-        File osxInstaller = CommonUtils.getResourceFile("com/limegroup/gnutella/UrnTest.java");
+        File winInstaller = TestUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
+        File linInstaller = TestUtils.getResourceFile("com/limegroup/gnutella/GUIDTest.java");
+        File osxInstaller = TestUtils.getResourceFile("com/limegroup/gnutella/UrnTest.java");
 
         //  Gotta make use of the force-share folder for this test
         if( SharingUtils.PROGRAM_SHARE.exists() ) {

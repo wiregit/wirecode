@@ -23,7 +23,7 @@ import junit.framework.Test;
 import org.limewire.collection.PatriciaTrie.KeyAnalyzer;
 import org.limewire.collection.Trie.Cursor;
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 
 public class PatriciaTrieTest extends BaseTestCase {
@@ -533,7 +533,7 @@ public class PatriciaTrieTest extends BaseTestCase {
         SortedMap<String, String> sortedControl = new TreeMap<String, String>();
         PatriciaTrie<String, String> trie = new PatriciaTrie<String, String>(new CharSequenceKeyAnalyzer());
         
-        File hamlet = CommonUtils.getResourceFile("org/limewire/collection/hamlet.txt");
+        File hamlet = TestUtils.getResourceFile("org/limewire/collection/hamlet.txt");
         BufferedReader reader = new BufferedReader(new FileReader(hamlet));
         String read = null;
         while( (read = reader.readLine()) != null) {

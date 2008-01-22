@@ -6,8 +6,8 @@ import java.util.Iterator;
 
 import junit.framework.Test;
 
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -62,11 +62,11 @@ public final class LicenseSharingTest extends ClientSideTestCase {
     public void setSettings() {
 	    SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;ogg;wma");
         // get the resource file for com/limegroup/gnutella
-        File cc1 = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.mp3");
-        File cc2 = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest1.mp3");
-        File cc3 = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/cc1.mp3");
-        File cc4 = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.ogg");
-        File wma5 = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/weed-PUSA-LoveEverybody.wma");
+        File cc1 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.mp3");
+        File cc2 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest1.mp3");
+        File cc3 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/cc1.mp3");
+        File cc4 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.ogg");
+        File wma5 = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/weed-PUSA-LoveEverybody.wma");
         assertTrue(cc1.exists());
         assertTrue(cc2.exists());
         assertTrue(cc3.exists());

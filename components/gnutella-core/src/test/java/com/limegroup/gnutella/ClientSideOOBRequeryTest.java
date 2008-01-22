@@ -17,15 +17,14 @@ import junit.framework.Test;
 import org.limewire.io.IpPort;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
-import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
@@ -113,7 +112,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;mp3");
         // get the resource file for com/limegroup/gnutella
         File mp3 = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
+            TestUtils.getResourceFile("com/limegroup/gnutella/metadata/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3");
         // now move them to the share dir
         FileUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
@@ -714,7 +713,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
 
         //Thread.sleep((UDP_ACCESS.length * 1000) - 
                      //(System.currentTimeMillis() - currTime));
-        int guessWaitTime = ((Integer)PrivilegedAccessor.getValue(ManagedDownloader.class,"GUESS_WAIT_TIME")).intValue();
+        int guessWaitTime = 5000;
         Thread.sleep(guessWaitTime+2000);
         assertEquals(DownloadStatus.BUSY, downloader.getState());
 

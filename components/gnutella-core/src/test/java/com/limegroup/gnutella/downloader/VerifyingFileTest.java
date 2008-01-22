@@ -10,8 +10,8 @@ import junit.framework.Test;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -24,7 +24,7 @@ public class VerifyingFileTest extends LimeTestCase {
 
     private static final String filename = "com/limegroup/gnutella/metadata/mpg4_golem160x90first120.avi";
 
-    private static final File completeFile = CommonUtils.getResourceFile(filename);
+    private static final File completeFile = TestUtils.getResourceFile(filename);
 
     private static final String sha1 = "urn:sha1:UBJSGDTCVZDSBS4K3ZDQJV5VQ3WTBCOK";
 

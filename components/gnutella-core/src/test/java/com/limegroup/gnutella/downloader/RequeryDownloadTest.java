@@ -3,9 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -32,6 +30,7 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.DownloadManagerImpl;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.ForMeReplyHandler;
@@ -99,7 +98,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
 public class RequeryDownloadTest extends LimeTestCase {
 
     /** The main test fixture.  Contains the incomplete file and hash below. */
-    private DownloadManager downloadManager; 
+    private DownloadManagerImpl downloadManager; 
     /** Where to send and receive messages */
     private static TestMessageRouter messageRouter;
     /** The simulated downloads.dat file.  Used only to build _mgr. */
@@ -130,13 +129,14 @@ public class RequeryDownloadTest extends LimeTestCase {
         return buildTestSuite(RequeryDownloadTest.class);
     }
     
+    
     public void setUp() throws Exception {
         injector = LimeTestUtils.createInjector(new AbstractModule() {
           @Override
             protected void configure() {
               bind(MessageRouter.class).to(TestMessageRouter.class);
               bind(ConnectionManager.class).to(ConnectionManagerStub.class);
-              bind(NetworkManager.class).to(NetworkManagerStub.class);  
+              bind(NetworkManager.class).to(NetworkManagerStub.class);
             }  
         });
         
@@ -150,12 +150,10 @@ public class RequeryDownloadTest extends LimeTestCase {
         
         forMeReplyHandler = injector.getInstance(ForMeReplyHandler.class);
 
-        createSnapshot();
-        downloadManager = injector.getInstance(DownloadManager.class);
+        initializeIncompleteFileManager();
+        downloadManager = (DownloadManagerImpl)injector.getInstance(DownloadManager.class);
         downloadManager.initialize();
         downloadManager.scheduleWaitingPump();
-        boolean ok = downloadManager.readAndInitializeSnapshot(snapshot);
-        assertTrue("Couldn't read snapshot file", ok);
         testUploader = injector.getInstance(TestUploader.class);
         testUploader.start("uploader 6666", 6666, false);
         testUploader.setRate(Integer.MAX_VALUE);
@@ -168,31 +166,10 @@ public class RequeryDownloadTest extends LimeTestCase {
         new File(getSaveDirectory(), filename).delete();
     }
     
-    /** Creates a downloads.dat file named SNAPSHOT with a faked up
-     *  IncompleteFileManager in it.  All of this because we can't access
-     *  DownloadManager.incompleteFileManager. */
-    private void createSnapshot() throws Exception {
-        try {
-            //Make IncompleteFileManager with appropriate entries...
-            IncompleteFileManager ifm=createIncompleteFile();
-            //...and write it to downloads.dat.
-            snapshot = File.createTempFile(
-                "ResumeByHashTest", ".dat"
-            );
-            ObjectOutputStream out = 
-                new ObjectOutputStream(new FileOutputStream(snapshot));
-            out.writeObject(new ArrayList());   //downloads
-            out.writeObject(ifm);
-            out.close();
-        } catch (IOException e) {
-            fail("Couldn't create temp file", e);
-        }
-    }
-
     /** Creates the incomplete file and returns an IncompleteFileManager with
      *  info for that file. */
-    public IncompleteFileManager createIncompleteFile() throws Exception {
-       IncompleteFileManager ifm=new IncompleteFileManager();
+    private void initializeIncompleteFileManager() throws Exception {
+       IncompleteFileManager ifm= injector.getInstance(IncompleteFileManager.class);
        Set<URN> urns=new HashSet<URN>(1);
        urns.add(hash);
        RemoteFileDesc rfd = new RemoteFileDesc("1.2.3.4", PORT, 13l,
@@ -218,8 +195,7 @@ public class RequeryDownloadTest extends LimeTestCase {
        VerifyingFileFactory verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
        VerifyingFile vf= verifyingFileFactory.createVerifyingFile(TestFile.length());
        vf.addInterval(Range.createRange(0, 1));  //inclusive
-       ifm.addEntry(incompleteFile, vf, false);       
-       return ifm;
+       ifm.addEntry(incompleteFile, vf, true);
     }
        
     public void tearDown() {

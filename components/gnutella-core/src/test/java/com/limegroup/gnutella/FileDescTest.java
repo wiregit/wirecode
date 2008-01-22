@@ -9,8 +9,8 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.helpers.UrnHelper;
@@ -52,7 +52,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
 	 * Tests the FileDesc construcotor for invalid arguments
 	 */
 	public void testInvalidConstructorArguments() throws Exception {
-        File file = CommonUtils.getResourceFile("build.xml");
+        File file = TestUtils.getResourceFile("build.xml");
         Set urns = UrnHelper.calculateAndCacheURN(file, urnCache);
         
 		try {
@@ -102,7 +102,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
     
     public void testIsRareFile() throws Exception {
         FileManager fm = new MetaFileManager(fileManagerController);
-        File file = CommonUtils.getResourceFile("build.xml");
+        File file = TestUtils.getResourceFile("build.xml");
         Set urns = UrnHelper.calculateAndCacheURN(file, urnCache);
         
         FileDesc fd = new FileDesc(file, urns, 0);

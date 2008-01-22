@@ -14,8 +14,8 @@ import java.util.concurrent.Future;
 
 import junit.framework.Test;
 
-import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -349,7 +349,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
     }
 
 	private FileDesc[] createFileDescs(CreationTimeCache cache) throws Exception {
-        File path = CommonUtils.getResourceFile(FILE_PATH);
+        File path = TestUtils.getResourceFile(FILE_PATH);
         File[] files = path.listFiles(new FileFilter() { 
             public boolean accept(File file) {
                 return !file.isDirectory();

@@ -9,7 +9,7 @@ import java.util.Map;
 import junit.framework.Test;
 
 import org.limewire.collection.NameValue;
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -45,7 +45,7 @@ public final class LicenseReadingTest extends LimeTestCase {
 	}
 	
 	public void testReadID3AndXML() throws Exception {
-	    File f = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/cc1.mp3");
+	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/cc1.mp3");
 	    assertTrue(f.exists());
 	    
 	    AudioMetaData amd = (AudioMetaData)MetaData.parse(f);
@@ -103,7 +103,7 @@ public final class LicenseReadingTest extends LimeTestCase {
     }
     
     public void testReadOGG() throws Exception {
- 	    File f = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.ogg");
+ 	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.ogg");
 	    assertTrue(f.exists());
 	    
 	    AudioMetaData amd = (AudioMetaData)MetaData.parse(f);
@@ -123,7 +123,7 @@ public final class LicenseReadingTest extends LimeTestCase {
 	                 amd.getLicense());
 
 
- 	    f = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest1.ogg");
+ 	    f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest1.ogg");
 	    assertTrue(f.exists());
 	    
 	    amd = (AudioMetaData)MetaData.parse(f);
@@ -144,7 +144,7 @@ public final class LicenseReadingTest extends LimeTestCase {
     }
     
     public void testReadWeed() throws Exception {
-	    File f = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/weed-PUSA-LoveEverybody.wma");
+	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/weed-PUSA-LoveEverybody.wma");
 	    assertTrue(f.exists());
 	    
 	    AudioMetaData amd = (AudioMetaData)MetaData.parse(f);

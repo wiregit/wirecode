@@ -11,7 +11,7 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.ByteReader;
 import org.limewire.service.ErrorService;
 import org.limewire.util.AssertComparisons;
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -218,23 +218,23 @@ public class TestConnection extends AssertComparisons {
         File file = null;
         String simppDir = "com/limegroup/gnutella/simpp/";
         if(fileVersion == SimppManagerTest.OLD)
-            file = CommonUtils.getResourceFile(simppDir+"oldFile.xml");
+            file = TestUtils.getResourceFile(simppDir+"oldFile.xml");
         else if(fileVersion == SimppManagerTest.MIDDLE)
-            file = CommonUtils.getResourceFile(simppDir+"middleFile.xml");
+            file = TestUtils.getResourceFile(simppDir+"middleFile.xml");
         else if(fileVersion == SimppManagerTest.NEW) 
-            file = CommonUtils.getResourceFile(simppDir+"newFile.xml");
+            file = TestUtils.getResourceFile(simppDir+"newFile.xml");
         else if(fileVersion == SimppManagerTest.DEF_MESSAGE)
-            file = CommonUtils.getResourceFile(simppDir+"defMessageFile.xml");
+            file = TestUtils.getResourceFile(simppDir+"defMessageFile.xml");
         else if(fileVersion == SimppManagerTest.DEF_SIGNATURE)
-            file = CommonUtils.getResourceFile(simppDir+"defSigFile.xml");
+            file = TestUtils.getResourceFile(simppDir+"defSigFile.xml");
         else if(fileVersion == SimppManagerTest.BAD_XML)
-            file = CommonUtils.getResourceFile(simppDir+"badXmlFile.xml");
+            file = TestUtils.getResourceFile(simppDir+"badXmlFile.xml");
         else if(fileVersion == SimppManagerTest.RANDOM_BYTES)
-            file = CommonUtils.getResourceFile(simppDir+"randFile.xml");
+            file = TestUtils.getResourceFile(simppDir+"randFile.xml");
         else if(fileVersion == SimppManagerTest.ABOVE_MAX)
-            file = CommonUtils.getResourceFile(simppDir+"aboveMaxFile.xml");
+            file = TestUtils.getResourceFile(simppDir+"aboveMaxFile.xml");
         else if(fileVersion == SimppManagerTest.BELOW_MIN)
-            file = CommonUtils.getResourceFile(simppDir+"belowMinFile.xml");
+            file = TestUtils.getResourceFile(simppDir+"belowMinFile.xml");
         else
             fail("simpp version set to illegal value");
         

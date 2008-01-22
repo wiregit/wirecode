@@ -21,12 +21,12 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.Range;
 import org.limewire.io.LocalSocketAddressService;
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -1439,7 +1439,7 @@ public class FileManagerTest extends LimeTestCase {
 	
 	private void addFilesToLibrary() throws Exception {
 		String dirString = "com/limegroup/gnutella";
-		File testDir = CommonUtils.getResourceFile(dirString);
+		File testDir = TestUtils.getResourceFile(dirString);
 		testDir = testDir.getCanonicalFile();
 		assertTrue("could not find the gnutella directory",
 		    testDir.isDirectory());

@@ -7,7 +7,6 @@ import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -25,7 +24,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  *  The manager keeps track of what queries have been sent out,
  *  when queries can begin, and how long queries should wait for results.
  */
-public class RequeryManager implements DHTEventListener, AltLocSearchListener {
+class RequeryManager implements DHTEventListener, AltLocSearchListener {
 
     private static final Log LOG = LogFactory.getLog(RequeryManager.class);
     
@@ -41,11 +40,11 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
      */
     static long TIME_BETWEEN_REQUERIES = 5L * 60L * 1000L;  //5 minutes
     
-    private final ManagedDownloader downloader;
+    private final RequeryListener requeryListener;
     
-    private final DownloadManager manager;
+    private final DownloadManager downloadManager;
     
-    private final AltLocFinder finder;
+    private final AltLocFinder altLocFinder;
     
     private final DHTManager dhtManager;
     
@@ -72,14 +71,14 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
     
     private final ConnectionServices connectionServices;
     
-    RequeryManager(ManagedDownloader downloader, 
+    RequeryManager(RequeryListener requeryListener, 
             DownloadManager manager,
             AltLocFinder finder,
             DHTManager dhtManager,
             ConnectionServices connectionServices) {
-        this.downloader = downloader;
-        this.manager = manager;
-        this.finder = finder;
+        this.requeryListener = requeryListener;
+        this.downloadManager = manager;
+        this.altLocFinder = finder;
         this.dhtManager = dhtManager;
         this.connectionServices = connectionServices;
         dhtManager.addEventListener(this);
@@ -164,7 +163,7 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
         // because even if this was a success (it found results),
         // it's possible the download isn't going to want to use
         // those results.
-        downloader.setStateIfExistingStateIs(DownloadStatus.GAVE_UP, DownloadStatus.QUERYING_DHT);
+        requeryListener.lookupFinished(QueryType.DHT);
     }
     
     /**
@@ -191,35 +190,31 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
         lastQuerySent = System.currentTimeMillis();
         lastQueryType = QueryType.DHT;
         numDHTQueries++;
-        downloader.setState(DownloadStatus.QUERYING_DHT, 
-                Math.max(TIME_BETWEEN_REQUERIES, 
-                        LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue()));
-        dhtQuery = finder.findAltLocs(downloader.getSHA1Urn(), this);
+        requeryListener.lookupStarted(QueryType.DHT, Math.max(TIME_BETWEEN_REQUERIES, 
+                LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue()));
+      
+        dhtQuery = altLocFinder.findAltLocs(requeryListener.getSHA1Urn(), this);
     }
     
     /** Sends a Gnutella Query */
     private void sendGnutellaQuery() {
         // If we don't have stable connections, wait until we do.
         if (hasStableConnections()) {
-            try {
-                QueryRequest qr = downloader.newRequery(0);
-                if(manager.sendQuery(downloader, qr)) {
-                    LOG.debug("Sent a gnutella requery!");
-                    sentGnutellaQuery = true;
-                    lastQueryType = QueryType.GNUTELLA;
-                    lastQuerySent = System.currentTimeMillis();
-                    downloader.setState(DownloadStatus.WAITING_FOR_GNET_RESULTS, TIME_BETWEEN_REQUERIES);
-                } else {
-                    throw new IllegalStateException("manager must sent query!");
-                }
-            } catch(CantResumeException cre) {
+            QueryRequest qr = requeryListener.createQuery();
+            if(qr != null) {
+                downloadManager.sendQuery(qr);
+                LOG.debug("Sent a gnutella requery!");
                 sentGnutellaQuery = true;
-                downloader.setState(DownloadStatus.GAVE_UP);
-                LOG.debug("CantResumeException", cre);
+                lastQueryType = QueryType.GNUTELLA;
+                lastQuerySent = System.currentTimeMillis();
+                requeryListener.lookupStarted(QueryType.GNUTELLA, TIME_BETWEEN_REQUERIES);
+            } else {
+                sentGnutellaQuery = true;
+                requeryListener.lookupFinished(QueryType.GNUTELLA);
             }
         } else {
             LOG.debug("Tried to send a gnutella requery, but no stable connections.");
-            downloader.setState(DownloadStatus.WAITING_FOR_CONNECTIONS, CONNECTING_WAIT_TIME);
+            requeryListener.lookupPending(QueryType.GNUTELLA, CONNECTING_WAIT_TIME);
         }
     }
     
@@ -227,11 +222,11 @@ public class RequeryManager implements DHTEventListener, AltLocSearchListener {
      * How long we'll wait before attempting to download again after checking
      * for stable connections (and not seeing any)
      */
-    private static final int CONNECTING_WAIT_TIME = 750;
+    private static final int CONNECTING_WAIT_TIME     = 750;
     private static final int MIN_NUM_CONNECTIONS      = 2;
     private static final int MIN_CONNECTION_MESSAGES  = 6;
     private static final int MIN_TOTAL_MESSAGES       = 45;
-    public static boolean   NO_DELAY                 = false; // For testing
+            static boolean   NO_DELAY                 = false; // For testing
     
     /**
      *  Determines if we have any stable connections to send a requery down.

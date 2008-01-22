@@ -4,9 +4,9 @@ import java.io.File;
 
 import junit.framework.Test;
 
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.ConnectionServices;
@@ -108,15 +108,15 @@ public class SimppManagerTest extends LimeTestCase {
     private void setSettings() throws Exception {
         String simppDir = "com/limegroup/gnutella/simpp/";
 
-        OLD_SIMPP_FILE = CommonUtils.getResourceFile(simppDir+"oldFile.xml");
-        MIDDLE_SIMPP_FILE = CommonUtils.getResourceFile
+        OLD_SIMPP_FILE = TestUtils.getResourceFile(simppDir+"oldFile.xml");
+        MIDDLE_SIMPP_FILE = TestUtils.getResourceFile
                                                  (simppDir+"middleFile.xml");
-        NEW_SIMPP_FILE = CommonUtils.getResourceFile(simppDir+"newFile.xml");
-        DEF_SIG_FILE = CommonUtils.getResourceFile(simppDir+"defSigFile.xml");
-        DEF_MESSAGE_FILE = CommonUtils.getResourceFile
+        NEW_SIMPP_FILE = TestUtils.getResourceFile(simppDir+"newFile.xml");
+        DEF_SIG_FILE = TestUtils.getResourceFile(simppDir+"defSigFile.xml");
+        DEF_MESSAGE_FILE = TestUtils.getResourceFile
                                                (simppDir+"defMessageFile.xml");
-        BAD_XML_FILE = CommonUtils.getResourceFile(simppDir+"badXmlFile.xml");
-        RANDOM_BYTES_FILE = CommonUtils.getResourceFile
+        BAD_XML_FILE = TestUtils.getResourceFile(simppDir+"badXmlFile.xml");
+        RANDOM_BYTES_FILE = TestUtils.getResourceFile
                                                     (simppDir+"randFile.xml");
 
         assertTrue(OLD_SIMPP_FILE.exists());
@@ -127,7 +127,7 @@ public class SimppManagerTest extends LimeTestCase {
         assertTrue(RANDOM_BYTES_FILE.exists());
         
         // TODO: make simpp more than 1 class with 1 method.
-        File pub = CommonUtils.getResourceFile(simppDir+"pub1.key");
+        File pub = TestUtils.getResourceFile(simppDir+"pub1.key");
         File pub2 = new File(".", "pub1.key");
         pub2.delete();
         FileUtils.copy(pub, pub2);

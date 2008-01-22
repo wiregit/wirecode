@@ -19,7 +19,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.http.HttpStatus;
 import org.limewire.net.HttpClientManager;
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.FileManager;
@@ -69,7 +69,7 @@ public class BrowseTest extends LimeTestCase {
     protected void setUp() throws Exception {
 
         String directoryName = "com/limegroup/gnutella";
-        sharedDirectory = CommonUtils.getResourceFile(directoryName);
+        sharedDirectory = TestUtils.getResourceFile(directoryName);
         sharedDirectory = sharedDirectory.getCanonicalFile();
         assertTrue("Could not find directory: " + directoryName,
                 sharedDirectory.isDirectory());

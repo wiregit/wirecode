@@ -8,6 +8,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Converts older package and class names to the new equivalent name and is useful 
  * in code refactoring. For example, if packages or classes are renamed, 
@@ -56,6 +59,8 @@ import java.util.Map;
 
 public class ConverterObjectInputStream extends ObjectInputStream { 
     
+    private static final Log LOG = LogFactory.getLog(ConverterObjectInputStream.class);
+    
     private Map<String, String> lookups = new HashMap<String, String>(8);
 
     /**
@@ -67,10 +72,17 @@ public class ConverterObjectInputStream extends ObjectInputStream {
         createLookups();
     } 
     
+    /**
+     * Erases any lookups that were added using {@link #addLookup(String, String)}.
+     */
+    public void revertToDefault() {
+        lookups.clear();
+        createLookups();
+    }
+    
+    /** Adds all internal lookups. */
     private void createLookups() {
         lookups.put("com.limegroup.gnutella.util.FileComparator", "org.limewire.collection.FileComparator");
-        lookups.put("com.limegroup.gnutella.downloader.Interval", "org.limewire.collection.Interval");
-        lookups.put("com.limegroup.gnutella.util.IntervalSet", "org.limewire.collection.IntervalSet");
         lookups.put("com.limegroup.gnutella.util.Comparators$CaseInsensitiveStringComparator", "org.limewire.collection.Comparators$CaseInsensitiveStringComparator");
         lookups.put("com.limegroup.gnutella.util.StringComparator", "org.limewire.collection.StringComparator");
         lookups.put("com.sun.java.util.collections", "java.util");
@@ -104,6 +116,16 @@ public class ConverterObjectInputStream extends ObjectInputStream {
         ObjectStreamClass read = super.readClassDescriptor(); 
         String className = read.getName();        
 
+        if(LOG.isDebugEnabled())
+            LOG.debug("Looking up class: " + className);
+        
+        boolean array = className.startsWith("[L") && className.endsWith(";");
+        if(array) {
+            className = className.substring(2, className.length()-1);
+            if(LOG.isDebugEnabled())
+                LOG.debug("Stripping array form off, resulting in: " + className);
+        }
+        
         ObjectStreamClass clazzToReturn; 
         String newName = lookups.get(className);
         if (newName != null) {
@@ -125,7 +147,18 @@ public class ConverterObjectInputStream extends ObjectInputStream {
                 clazzToReturn = read;
             }
         }
-
+        
+        if(LOG.isDebugEnabled() && clazzToReturn != read)
+            LOG.debug("Located substitute class: " + clazzToReturn.getName());
+        
+        // If it's an array, and we modified we we read off disk, convert
+        // to array form.
+        if(array && read != clazzToReturn) {
+            clazzToReturn = ObjectStreamClass.lookup(Class.forName("[L" + clazzToReturn.getName() + ";"));
+            if(LOG.isDebugEnabled())
+                LOG.debug("Re-added array wrapper, for class: " + clazzToReturn.getName());
+        }
+        
         return clazzToReturn;
     } 
 }

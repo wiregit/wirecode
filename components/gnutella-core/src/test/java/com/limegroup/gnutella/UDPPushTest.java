@@ -374,7 +374,7 @@ public class UDPPushTest extends LimeTestCase {
 //        t.start();
 //        Thread.sleep(100);
 //        
-        injector.getInstance(DownloadManager.class).getPushManager().sendPush(rfd);
+        ((DownloadManagerImpl)injector.getInstance(DownloadManager.class)).getPushManager().sendPush(rfd);
     }
 
     private void sendGiv(final Socket sock, final String str) {

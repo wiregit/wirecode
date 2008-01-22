@@ -17,7 +17,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.security.MessageDigest;
 
-import org.limewire.util.CommonUtils;
+import org.limewire.util.TestUtils;
 
 import junit.framework.Test;
 
@@ -95,7 +95,7 @@ public class SHA1Test extends LimeTestCase {
     
     public void testFiles() throws Exception {
         String dirString = "com/limegroup/gnutella";
-        File testDir = CommonUtils.getResourceFile(dirString);
+        File testDir = TestUtils.getResourceFile(dirString);
         assertTrue(testDir.isDirectory());
         int tested = testDirectory(testDir);
         assertGreaterThan("didn't test enough", 10, tested);

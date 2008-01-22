@@ -581,7 +581,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
             if (isHopeless(next))
                 continue; 
             
-            if(downloadManager.get().isGUIInitd() && fileManager.get().isLoadFinished()) {
+            if(downloadManager.get().isSavedDownloadsLoaded() && fileManager.get().isLoadFinished()) {
                 
                 FileDesc shared = fileManager.get().getFileDescForUrn(next.getUpdateURN());
                 //TODO: remove the cast
@@ -624,7 +624,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
      * Deletes any files in the folder that are not listed in the update message.
      */
     private void killObsoleteUpdates(List<? extends DownloadInformation> toDownload) {
-    	if (!downloadManager.get().isGUIInitd() || !fileManager.get().isLoadFinished())
+    	if (!downloadManager.get().isSavedDownloadsLoaded() || !fileManager.get().isLoadFinished())
     		return;
     	
         if (_killingObsoleteNecessary) {
@@ -802,7 +802,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
                 UpdateSettings.UPDATE_DOWNLOAD_DELAY.getValue())
             return false;
         
-        if (downloader.getNumAttempts() < UpdateSettings.UPDATE_MIN_ATTEMPTS.getValue())
+        if (downloader.getDownloadAttempts() < UpdateSettings.UPDATE_MIN_ATTEMPTS.getValue())
             return false;
         
         return true;

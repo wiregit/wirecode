@@ -23,7 +23,7 @@ public class LimeXMLSchemaTest extends LimeTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
-		
+	
 	/**
 	 * Tests getCanonicalizedFieldName and SchemaFieldInfo.<p>
 	 *

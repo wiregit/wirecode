@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.gui.download;
+package com.limegroup.gnutella.downloader;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -14,7 +14,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.DownloadManagerStub;
+import com.limegroup.gnutella.DownloadManagerImpl;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
@@ -22,8 +22,6 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.downloader.RequeryManager;
-import com.limegroup.gnutella.downloader.StoreDownloader;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
@@ -37,7 +35,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 public class StoreDownloaderTest extends LimeTestCase{
 
-    private DownloadManagerStub downloadManager;
+    private DownloadManagerImpl downloadManager;
     private Injector injector; 
     
     public StoreDownloaderTest(String name) {
@@ -62,7 +60,6 @@ public class StoreDownloaderTest extends LimeTestCase{
            @Override
             protected void configure() {
                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
-               bind(DownloadManager.class).to(DownloadManagerStub.class);
                bind(MessageRouter.class).to(MessageRouterStub.class);
                bind(FileManager.class).to(FileManagerStub.class);
                bind(NetworkManager.class).to(NetworkManagerStub.class);
@@ -77,7 +74,7 @@ public class StoreDownloaderTest extends LimeTestCase{
         localSocketAddressProvider.setLocalAddressPrivate(false);
         LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProvider);
         
-        downloadManager = (DownloadManagerStub)injector.getInstance(DownloadManager.class);       
+        downloadManager = (DownloadManagerImpl)injector.getInstance(DownloadManager.class);       
         downloadManager.initialize();
         RequeryManager.NO_DELAY = false;
     }
@@ -88,12 +85,12 @@ public class StoreDownloaderTest extends LimeTestCase{
     public void testEmptyOverrides() throws Exception{
         URN urn = UrnHelper.URNS[0];
         URL url = new URL("http:\\test.com");
-        RemoteFileDesc rfd = StoreDownloader.createRemoteFileDesc(url, "test.txt", urn, 10L);
+        RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(url, "test.txt", urn, 10L);
         
         //create a valid download
-        StoreDownloader downloader = (StoreDownloader) downloadManager.downloadFromStore(rfd, false, _storeDir, "test.txt" );
+        StoreDownloaderImpl downloader = (StoreDownloaderImpl) downloadManager.downloadFromStore(rfd, false, _storeDir, "test.txt" );
         
-        assertNull(downloader.newRequery(9) );
+        assertNull(downloader.newRequery() );
         
         assertFalse(downloader.allowAddition(null));
         
@@ -119,9 +116,9 @@ public class StoreDownloaderTest extends LimeTestCase{
         URL url = new URL("http:\\test.com");
         
         // test invalid rfd
-        assertNull( StoreDownloader.createRemoteFileDesc(null, "", null, -1) );
+        assertNull( RemoteFileDescUtils.createRemoteFileDesc(null, "", null, -1) );
         
-        RemoteFileDesc rfd = StoreDownloader.createRemoteFileDesc(url, "test.txt", urn, 10L);
+        RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(url, "test.txt", urn, 10L);
         
         assertTrue(rfd.getUrns().contains(urn));
         
@@ -141,7 +138,7 @@ public class StoreDownloaderTest extends LimeTestCase{
 
         URN urn = UrnHelper.URNS[0];
         URL url = new URL("http:\\test.com");
-        RemoteFileDesc rfd = StoreDownloader.createRemoteFileDesc(url, "test.txt", urn, 10L);
+        RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(url, "test.txt", urn, 10L);
                 
         //create a valid download
         downloadManager.downloadFromStore(rfd, false, _storeDir, "test.txt" );
@@ -163,7 +160,7 @@ public class StoreDownloaderTest extends LimeTestCase{
         
         URN urn = UrnHelper.URNS[0];
         URL url = new URL("http:\\test.com");
-        RemoteFileDesc rfd = StoreDownloader.createRemoteFileDesc(url, "test.txt", urn, 10L);
+        RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(url, "test.txt", urn, 10L);
         
         
         downloadManager.downloadFromStore(rfd, false, _storeDir, "test.txt" );

@@ -134,8 +134,8 @@ public class DownloadQueueTest extends DownloadTestCase {
         RemoteFileDesc rfd4=newRFDWithURN(PORTS[3], false);
         RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
         
-        ManagedDownloader downloader = null;
-        downloader = (ManagedDownloader)downloadServices.download(rfds, false, null);
+        ManagedDownloaderImpl downloader = null;
+        downloader = (ManagedDownloaderImpl)downloadServices.download(rfds, false, null);
         Thread.sleep(2 * DownloadSettings.WORKER_INTERVAL.getValue()+ 1000);
         int swarm = downloader.getNumDownloaders();
         int queued = downloader.getQueuedHostCount();

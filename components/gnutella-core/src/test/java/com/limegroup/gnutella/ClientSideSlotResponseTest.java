@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
+import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -61,11 +61,11 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
     	someFileMatches.add(TORRENT_FILE);
     	someFileMatches.add(USER_TORRENT);
     	someFileMatches.add(APP_TXT);
-    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/gui/GUIBaseTestCase.java"), textFile);
-    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ClientSideTestCase.java"), torrentFile);
-    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ClientSideSlotResponseTest.java"), userTorrentFile);
-    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/ServerSideTestCase.java"), appTextFile);
-    	FileUtils.copy(CommonUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestCase.java"), appTorrentFile);
+    	FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/gui/GUIBaseTestCase.java"), textFile);
+    	FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/ClientSideTestCase.java"), torrentFile);
+    	FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/ClientSideSlotResponseTest.java"), userTorrentFile);
+    	FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/ServerSideTestCase.java"), appTextFile);
+    	FileUtils.copy(TestUtils.getResourceFile("com/limegroup/gnutella/util/LimeTestCase.java"), appTorrentFile);
         FileEventListenerWaiter waiter = new FileEventListenerWaiter(5);
         fileManager.addFileAlways(textFile, waiter);
         fileManager.addFileAlways(torrentFile, waiter);
