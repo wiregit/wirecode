@@ -340,6 +340,11 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         return (short)ByteOrder.ubyte2int(_payload[0]);
     }
     
+    public short getPartialResultCount() {
+        parseResults();
+        return _data.getPartialResultCount();
+    }
+    
     /** 
      * @return the number of unique results (per SHA1) carried in this message
      */
@@ -669,12 +674,15 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         Response[] responses=new Response[left];
         Set<URN> urns = new HashSet<URN>(responses.length); // set for the urns carried in this reply
         short uniqueURNs = 0;
+        short partialURNs = 0;
         try {
             InputStream bais = 
                 new ByteArrayInputStream(_payload,i,_payload.length-i);             
             //For each record...
             for ( ; left > 0; left--) {
                 Response r = responseFactory.createFromStream(bais);
+                if (r.getRanges() != null && r.getRanges().getSize() > 0)
+                    partialURNs++;
                 responses[responses.length-left] = r;
                 i+=r.getIncomingLength();
                 
@@ -694,6 +702,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         // remember how many unique urns this reply carries
         uniqueURNs += (short) urns.size();
         _data.setUniqueResultURNs(uniqueURNs);
+        _data.setPartialResultCount((short)Math.min(uniqueURNs, partialURNs));
         
         //2. Extract BearShare-style metainformation, if any.  Any exceptions
         //are silently caught.  The definitive reference for this format is at

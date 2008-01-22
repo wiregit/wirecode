@@ -2027,6 +2027,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             _queryRouteTable.getReplyHandler(queryReply.getGUID(),
                                              queryReply.getTotalLength(),
 											 queryReply.getUniqueResultCount(),
+											 queryReply.getPartialResultCount(),
                                              ByteOrder.beb2int(queryReply.getIPBytes(), 0));
 
         if(rrp != null) {
@@ -2244,6 +2245,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             _queryRouteTable.getReplyHandler(queryReply.getGUID(),
                                              queryReply.getTotalLength(),
 											 queryReply.getResultCount(),
+											 queryReply.getPartialResultCount(),
                                              0);
 
         if(rrp != null) {

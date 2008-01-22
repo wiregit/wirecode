@@ -90,6 +90,8 @@ public final class RouteTable implements Inspectable {
         private int bytesRouted;
         /** The number of replies already routed for this GUID. */
         private int repliesRouted;
+        /** The number of replies for partial files already routed for this GUID */
+        private int partialRepliesRouted;
         /** The ttl associated with this RTE - meaningful only if > 0. */
         private byte ttl = 0;
         /** The class C networks that have returned a reply for this query */
@@ -118,7 +120,7 @@ public final class RouteTable implements Inspectable {
         public byte getTTL() { return ttl; }
 
 		/** Accessor for the number of results for this entry. */
-		public int getNumResults() { return repliesRouted; }
+        public int getNumResults() { return Math.max(0,repliesRouted - partialRepliesRouted); }
         
         void updateClassCNetworks(int classCNetwork, int numReplies) {
             classCnetworks.add(classCNetwork, numReplies);
@@ -290,8 +292,9 @@ public final class RouteTable implements Inspectable {
 
     public synchronized ReplyRoutePair getReplyHandler(byte[] guid, 
             int replyBytes,
-               short numReplies) {
-        return getReplyHandler(guid, replyBytes, numReplies, 0);
+               short numReplies,
+               short partialReplies) {
+        return getReplyHandler(guid, replyBytes, numReplies, partialReplies, 0);
     }
     
     /**
@@ -310,6 +313,7 @@ public final class RouteTable implements Inspectable {
     public synchronized ReplyRoutePair getReplyHandler(byte[] guid, 
                                                        int replyBytes,
 													   short numReplies,
+													   short partialReplies,
                                                        int classCNetwork) {
         //no purge
         repOk();
@@ -333,6 +337,7 @@ public final class RouteTable implements Inspectable {
 
         entry.bytesRouted += replyBytes;
         entry.repliesRouted += numReplies;
+        entry.partialRepliesRouted += partialReplies;
         if (classCNetwork != 0)
             entry.updateClassCNetworks(classCNetwork, numReplies);
         return ret;
@@ -544,6 +549,7 @@ public final class RouteTable implements Inspectable {
             m.put("br", e.bytesRouted);
             m.put("ttl", e.ttl);
             m.put("rr", e.repliesRouted);
+            m.put("prr", e.partialRepliesRouted);
             m.put("cc", e.classCnetworks.getMap());
             m.put("rt", e.resultTimeStamps);
             m.put("rc", e.resultCounts);

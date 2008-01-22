@@ -45,14 +45,14 @@ public final class RouteTableTest extends LimeTestCase {
         rt.routeReply(g3, c3);                    //{}, {g1, g2, g3}
         assertSame(c1, rt.getReplyHandler(g1));
         assertSame(c2, rt.getReplyHandler(g2));
-        assertSame(c3, rt.getReplyHandler(g3, 0, (short) 0).getReplyHandler());
-        assertNull(rt.getReplyHandler(g4, 0, (short) 0));
+        assertSame(c3, rt.getReplyHandler(g3, 0, (short) 0,(short) 0).getReplyHandler());
+        assertNull(rt.getReplyHandler(g4, 0, (short) 0,(short) 0));
         try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
         assertNotNull(rt.tryToRouteReply(g4, c4));  //{g1, g2, g3}, {g4}
         assertSame(c1, rt.getReplyHandler(g1));
         rt.routeReply(g1, c1);                    //{g2, g3}, {g1, g4}
         assertSame(c1, rt.getReplyHandler(g1));
-        assertSame(c2, rt.getReplyHandler(g2, 0, (short) 0).getReplyHandler());
+        assertSame(c2, rt.getReplyHandler(g2, 0, (short) 0,(short) 0).getReplyHandler());
         assertSame(c3, rt.getReplyHandler(g3));
         assertSame(c4, rt.getReplyHandler(g4));
         try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
@@ -106,7 +106,7 @@ public final class RouteTableTest extends LimeTestCase {
 
         rt.removeReplyHandler(c1);                       //g1->null
         rt.removeReplyHandler(c3);                       //g2->null
-        assertNull(rt.getReplyHandler(g1, 0, (short) 0));
+        assertNull(rt.getReplyHandler(g1, 0, (short) 0,(short) 0));
         assertNull(rt.getReplyHandler(g2));
         assertNull(rt.tryToRouteReply(g1, c1));   
         assertNull(rt.tryToRouteReply(g2, c3));
@@ -134,14 +134,14 @@ public final class RouteTableTest extends LimeTestCase {
         RouteTable.ReplyRoutePair rrp=null;
         rt=new RouteTable(MSECS/1000, Integer.MAX_VALUE);
         assertNotNull(rt.tryToRouteReply(g1, c1));  //g1 -> <c1, 0>
-        rrp=rt.getReplyHandler(g1, 5, (short) 0);            //g1 -> <c1, 0+5>
+        rrp=rt.getReplyHandler(g1, 5, (short) 0,(short) 0);            //g1 -> <c1, 0+5>
         assertSame(c1, rrp.getReplyHandler());
         assertEquals(0, rrp.getBytesRouted());
-        rrp=rt.getReplyHandler(g1, 1, (short) 0);            //g1 -> <c1, 5+1>
+        rrp=rt.getReplyHandler(g1, 1, (short) 0,(short) 0);            //g1 -> <c1, 5+1>
         assertSame(c1, rrp.getReplyHandler());
         assertEquals(5, rrp.getBytesRouted());
         rt.routeReply(g1, c2);                    //g1 -> <c2, 6>
-        rrp=rt.getReplyHandler(g1, 2, (short) 0);            //g1 -> <c2, 6+2>
+        rrp=rt.getReplyHandler(g1, 2, (short) 0,(short) 0);            //g1 -> <c2, 6+2>
         assertSame(c2, rrp.getReplyHandler());
         assertEquals("Reply bytes", 6, 
                    rrp.getBytesRouted());
@@ -152,17 +152,17 @@ public final class RouteTableTest extends LimeTestCase {
         PrivilegedAccessor.invokeMethod(rt, "purge");
         assertEquals(0, (getMap(rt, "_newMap")).size());
         assertEquals(1, (getMap(rt, "_oldMap")).size());
-        rrp=rt.getReplyHandler(g1, 3, (short) 0);            //g1 -> <c2, 8+3>
+        rrp=rt.getReplyHandler(g1, 3, (short) 0,(short) 0);            //g1 -> <c2, 8+3>
         assertSame(c2, rrp.getReplyHandler());
         assertEquals(8, rrp.getBytesRouted());
         rt.routeReply(g1, c3);                    //g1 -> <c3, 11>
         assertEquals(1, (getMap(rt, "_newMap")).size());
         assertEquals(0, (getMap(rt, "_oldMap")).size());
-        rrp=rt.getReplyHandler(g1, 10, (short) 0);            //g1 -> <c3, 11+10>
+        rrp=rt.getReplyHandler(g1, 10, (short) 0,(short) 0);            //g1 -> <c3, 11+10>
         assertSame(c3, rrp.getReplyHandler());
         assertEquals(11, rrp.getBytesRouted());
         rt.removeReplyHandler(c3);
-        assertNull(rt.getReplyHandler(g1,0, (short) 0));                    
+        assertNull(rt.getReplyHandler(g1,0, (short) 0,(short) 0));                    
     }
 
     public void testTTLAdditions() {
