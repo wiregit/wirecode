@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2007-12-27 16:18+0000\n"
+"PO-Revision-Date: 2008-01-08 19:03+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-01-08 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -272,12 +272,19 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
+"LimeWire gat ekki skrifað nauðsynlega skrá vegna þess að harði diskurinn "
+"þinn er fullur.Til að halda áfram að nota LimeWire verður þú að losa rými á "
+"harða disknum."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
+#, fuzzy
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
+"LimeWire gat ekki opnað nauðsynlega skrá vegna þess að annað forrit hefur "
+"lokað skráinni. LimeWire mun kannski grípa í á óvæntan hátt þangað til þessi "
+"skrá er gefin út."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:54
 msgid ""
@@ -285,6 +292,8 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
+"LimeWire gat ekki skrifað nauðsynlega skrá vegna þess að þú hefur ekki "
+"nauðsynlega leyfið.Beiðni þín"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:56
 msgid ""

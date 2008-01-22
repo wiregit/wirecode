@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2007-12-26 15:28+0000\n"
+"PO-Revision-Date: 2008-01-19 23:39+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-01-08 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -2404,28 +2404,37 @@ msgstr "Todas as pastas"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:48
 msgid "View My Shared Files."
-msgstr ""
+msgstr "Ver os Meus Ficheiros Partilhados."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:81
-#, java-format
+#, fuzzy, java-format
 msgid ""
 "You are sharing many subfolders within your shared folder: {0}. This "
 "indicates a potential security problem, so please review your \"My Shared "
 "Files\" to ensure you aren't sharing any sensitive files."
 msgstr ""
+"Você está a partilhar várias sub-pastas na sua pasta de partilha: {0}. Isto "
+"indica um potencial problema de segurança, portanto sugere-se que verifique "
+"a pasta dos seus Ficheiros Partilhados, assegurando assim que não está a "
+"partilhar quaisquer ficheiros que possam conter dados privados."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:94
-#, java-format
+#, fuzzy, java-format
 msgid ""
 "You are sharing a lot of files through LimeWire, {0} files and counting. Do "
 "you mean to share all these files? Please review your sharing settings and "
 "which files are shared to ensure you aren't sharing any sensitive files."
 msgstr ""
+"Você está a partilhar diversos ficheiros através do LimeWire ({0} ficheiros "
+"e a contar). Pretende partilhar todos estes ficheiros? Por favor, verifique "
+"as suas definições de partilha e quais os ficheiros para partilha, de modo a "
+"assegurar que não está compartilhando algum ficheiro que contenha "
+"informações privadas."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:106
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:107
 msgid "Do not display this message again."
-msgstr ""
+msgstr "Não voltar a mostrar esta mensagem."
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 msgid "Modem"
@@ -2500,6 +2509,7 @@ msgstr "LimeWire: A permitir a partilha de informação aberta"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:395
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:399
+#, fuzzy
 msgid ""
 "LimeWire has encountered a problem during startup and cannot proceed. You "
 "may be able to fix this problem by changing LimeWire's Windows "
@@ -2509,6 +2519,14 @@ msgid ""
 "then select 'Windows 2000' in the box below the check box. Then click the "
 "'OK' button at the bottom and restart LimeWire."
 msgstr ""
+"O programa LimeWire encontrou um problema durante o arranque e não consegue "
+"continuar. Você poderá solucionar este problema alterando a Compatibilidade "
+"do Windows do LimeWire. Clique no botão direito do seu rato sobre o ícone do "
+"LimeWire localizado no seu Ambiente de Trabalho e seleccione 'Propriedades'. "
+"Carregue na aba 'Compatibilidade' no topo da janela, e depois escolha "
+"'Executar este programa em modo de compatibilidade', e seleccione 'Windows "
+"2000' na caixa abaixo. Após proceder aos passos anteriores, carregue no "
+"botão 'OK' e execute o programa de novo."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:488
 msgid ""
@@ -2595,6 +2613,9 @@ msgid ""
 "LimeWire was unable to create your settings directory and is using a "
 "temporary directory.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
+"O LimeWire não foi capaz de criar o seu directório de definições, estando a "
+"usar um directório temporário. As suas definições poderam ser eliminadas "
+"quando fechar o LimeWire. "
 
 #. Initialize IconManager.
 #: gui/com/limegroup/gnutella/gui/Initializer.java:466
@@ -2637,6 +2658,7 @@ msgstr ""
 "reinicie-o."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:558
+#, fuzzy
 msgid ""
 "LimeWire could not create a temporary preferences directory.\n"
 "\n"
@@ -2647,6 +2669,14 @@ msgid ""
 "\n"
 "LimeWire will now exit.  Thank You."
 msgstr ""
+"O LimeWire não conseguiu criar um directório de preferências temporárias.\n"
+"\n"
+"Isto deve-se geralmente pela falta de permissões. Por favor, tenha a certeza "
+"que o LimeWire (e tu) têm acesso à criação  de ficheiros e de pastas no seu "
+"computador. Se o problema persistir, visite por favor www.limewire.com e "
+"carregue em 'Support' (ou 'Suporte').\n"
+"\n"
+"O LimeWire irá agora encerrar. Obrigado."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:568
 #: gui/com/limegroup/gnutella/gui/MessageService.java:76
@@ -2964,6 +2994,9 @@ msgid ""
 "are saved properly you should save them to a sub-directory of {1}.  Would "
 "you like to choose another location?"
 msgstr ""
+"Salvar os downloads para {0} poderá não funcionar correctamente. Para "
+"assegurar que os downloads são salvaguardados correctamente, deverá salvá-"
+"los para um sub-directório de {1}. Gostaria de optar por outro local?"
 
 #: gui/com/limegroup/gnutella/gui/ShutdownWindow.java:18
 msgid "Shutting down LimeWire..."
@@ -3006,11 +3039,11 @@ msgstr "O LimeWire detectou um firewall."
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:500
 msgid "You are not connected to the LimeWire Store"
-msgstr ""
+msgstr "Você não está ligado à Loja do LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:503
 msgid "You are connected to the LimeWire Store"
-msgstr ""
+msgstr "Está ligado à Loja do LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:595
 msgid "Connection"
@@ -3112,8 +3145,9 @@ msgid "Show Firewall Status"
 msgstr "Mostrar estado do firewall"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:810
+#, fuzzy
 msgid "Show Store Indicator"
-msgstr ""
+msgstr "Mostrar o Indicador da Loja"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:826
 msgid "Show Bandwidth Consumption"
@@ -3193,12 +3227,18 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:25
+#, fuzzy
 msgid ""
 "When your downloads say 'Needs More Sources', try choosing that download and "
 "then clicking 'Find More Sources'. LimeWire will search the network for more "
 "places to download the file and automatically resume downloading if it finds "
 "any matches."
 msgstr ""
+"Quando os seus downloads dizem 'Precisa de Mais Fontes', tente seleccionar "
+"esse download e carregue em 'Encontrar Mais Fontes'. O LimeWire irá "
+"pesquisar à rede por mais lugares por onde possa efectuar o download do "
+"ficheiro e resumirá os downloads se encontrar alguma fonte disponível que "
+"corresponda ao seu pedido."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:26
 msgid ""
@@ -3206,6 +3246,9 @@ msgid ""
 "the bar in the bottom-left corner will change colors. Once all bars are "
 "green (or blue!), LimeWire has completely connected."
 msgstr ""
+"Quando o LimeWire iniciar terá de ligar-se à rede. Durante esse tempo, a "
+"barra no canto inferior-esquerdo irá mudar de cores. Quando todas as barras "
+"estiverem verdes (ou azuis!), o LimeWire estará completamente ligado."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:27
 msgid ""
@@ -3227,12 +3270,17 @@ msgstr ""
 "têm maior probabilidade de terminarem no topo da lista."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:29
+#, fuzzy
 msgid ""
 "The more stars a search result has, the better the chances of the download "
 "completing successfully! Some search results may even appear with four blue "
 "stars and a speed of 'Ethernet'. These results have the greatest chance of "
 "completing successfully."
 msgstr ""
+"Quantas mais estrelas um resultado tiver, maior a hipótese do download "
+"completar com sucesso! Alguns resultados de pesquisa podem aparecer ainda "
+"com quatro estrelas azuis e uma velocidade de 'Ethernet'. Estes resultados "
+"têm maior chance de serem completados com êxito."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:30
 msgid ""
@@ -3244,17 +3292,23 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:31
+#, fuzzy
 msgid ""
 "Curious how many people are searching for your files? The 'hits' column in "
 "the Library will count how many times LimeWire has returned a result from "
 "someone searching for that file."
 msgstr ""
+"É curioso o número de pessoas que procuram pelos seus ficheiros, não é? A "
+"coluna 'acessos' na Biblioteca irá contar quantas vezes o LimeWire retornou "
+"um resultado de alguém pesquisando por esse ficheiro."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:32
 msgid ""
 "It helps the network if you keep your LimeWire running. Others will connect "
 "to the network easier and searches will perform better. "
 msgstr ""
+"Se deixar o LimeWire a correr, está a ajudar a rede: terceiros irão conectar-"
+"se à rede mais facilmente e as pesquisas serão melhor efectuadas. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:33
 msgid ""
@@ -3269,14 +3323,22 @@ msgid ""
 "Want to open this Tip Of The Day dialog after you've closed it? Go to the "
 "Help menu and choose 'Tip of the Day'."
 msgstr ""
+"Deseja abrir a Sugestão do Dia após te-la fechado? Vá ao menu Ajuda e "
+"seleccione 'Sugestão do Dia'."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:35
+#, fuzzy
 msgid ""
 "When LimeWire says your download is 'Waiting In Line', that means that "
 "source you are downloading from is temporarily busy and has queued your "
 "download. In order to successfully complete your download, wait while your "
 "request advances in line and is eventually serviced."
 msgstr ""
+"Quando o LimeWire diz que o seu download está 'Em Fila' significa que a "
+"fonte de onde você está a fazer o download encontra-se ocupada de momento e "
+"que colocou o seu download a aguardar. De modo a completar com êxito o seu "
+"download, terá de esperar enquanto o seu pedido avança na linha e será "
+"eventualmente servido."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:36
 #, java-format
@@ -3323,19 +3385,27 @@ msgid ""
 "You can make your own LimeWire skins! Visit <a href=\"{0}\">LimeWire's "
 "website</a> for detailed information about how skins are created."
 msgstr ""
+"Você pode criar a sua própria máscara do LimeWire! Visite o <a "
+"href=\"{0}\">site do LimeWire</a> e descubra como."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
-#, java-format
+#, fuzzy, java-format
 msgid ""
 "Want to know more about the development of LimeWire? Visit <a "
 "href=\"{0}\">LimeWire's open-source website</a> and look around!"
 msgstr ""
+"Deseja saber mais acerca do desenvolvimento do LimeWire? Visite <a "
+"href=\"{0}\">o site do código-fonte do LimeWire</a> e esteja à vontade!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:43
+#, fuzzy
 msgid ""
 "You can preview downloaded files to make sure they're what you expect. Just "
 "select the download and click 'Preview'!"
 msgstr ""
+"Você pode pré-visualizar ficheiros cujo download já iniciou, para ter a "
+"certeza que são os ficheiros que pretende. Após seleccionar o download "
+"pretendido, carregue simplesmente em 'Pré-visualizar'!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:44
 msgid ""
@@ -3345,10 +3415,15 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:45
+#, fuzzy
 msgid ""
 "You can chat with other people who are running LimeWire. Choose any download "
 "or search result that has a smiley in the Chat column and then click 'Chat'."
 msgstr ""
+"Você pode conversar com outros utilizadores do LimeWire. Carregue com o "
+"botão direito do rato sobre qualquer download ou resultado de pesquisa que "
+"contenha um risonho na coluna 'Conversação', e depois clique em 'Conversar "
+"com o anfitrião'."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:46
 #, java-format
@@ -3360,12 +3435,17 @@ msgstr ""
 "Frontier Foundation</a> e veja o que pode fazer para ajudar."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:47
+#, fuzzy
 msgid ""
 "LimeWire is translated into many different languages including Chinese, "
 "French, German, Japanese, Italian, Spanish and many more. Visit LimeWire's "
 "<a href=\"{0}\">internationalization page</a> for information on how you can "
 "help translation efforts! "
 msgstr ""
+"O LimeWire é traduzido para variadas línguas, das quais se incluem Chinês, "
+"Francês, Alemão, Japonês, Italiano e Espanhol. Visite a <a "
+"href=\"{0}\">página de internacionalização</a> do LimeWire para informação "
+"de como pode cooperar com os esforços existentes das várias traduções. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:48
 #, java-format
@@ -3380,6 +3460,10 @@ msgid ""
 "choose a genre from the drop-down box, and then press 'Search'. Most if not "
 "all of the files returned will be from the selected genre."
 msgstr ""
+"Experimente uma pesquisa por um género musical!<br>Carregue em 'Áudio' na "
+"janela de pesquisa, escolhe um género da caixa, e pressione 'Pesquisar'. A "
+"maior parte dos resultados da pesquisa (se não for a totalidade) será do "
+"género escolhido."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:50
 #, fuzzy

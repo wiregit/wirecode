@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2008-01-02 13:11+0000\n"
+"PO-Revision-Date: 2008-01-21 17:15+0000\n"
 "Last-Translator: Seanán Ó Coistín <seananoc@gmail.com>\n"
 "Language-Team: Irish(Ireland) <ga_IE@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n==2 ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2008-01-08 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Country: IRELAND\n"
 "X-Poedit-Language: Irish\n"
@@ -1684,7 +1684,7 @@ msgstr "Taispeáin Treo an Balla Dóiteáin"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:810
 msgid "Show Store Indicator"
-msgstr ""
+msgstr "Taispeáin Táscaire an Díolbhoth"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:826
 msgid "Show Bandwidth Consumption"
@@ -1700,7 +1700,8 @@ msgstr "Taispeáin Seinnteoir Meáin"
 msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
 msgstr[0] "Tá {0} comhad á chomhroinnt agat"
-msgstr[1] "Tá {0} comhaid á chomhroinnt agat"
+msgstr[1] "Tá {0} comhad á chomhroinnt agat"
+msgstr[2] "Tá {0} comhaid á chomhroinnt agat"
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:915
@@ -2126,6 +2127,8 @@ msgstr ""
 msgid ""
 "Have a lot of files? Try an instant search at the top of the Library window."
 msgstr ""
+"An bhfuil a lán comhaid agat? Bain triail as cuardach láithreach ag barr an "
+"fhuinneog Leabharlanna."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:65
 #, java-format
@@ -2381,6 +2384,9 @@ msgid ""
 "Java will improve LimeWire's speed and stability. You can find the most "
 "recent Java release at <a href=\"{0}\">www.java.com</a>."
 msgstr ""
+"Tá LimeWire scríofa i Java, a gciallaíonn go mbeidh luas agus cobhsaíocht "
+"LimeWire feabhsaithe má bhíonn an leagan is déanaí de Java agat. Is féidir "
+"an leagan is déanaí de Java ag <a href=\"{0}\">www.java.com</a>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:109
 msgid ""
@@ -2903,6 +2909,8 @@ msgid ""
 "LimeWire has detected a corruption in the file {0}. Do you want to continue "
 "the download?"
 msgstr ""
+"Bhraith LimeWire truailliú sa comhad {0}. Ar mhaith leat leanúint leis an t-"
+"íosluchtú?"
 
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:638
 msgid ""
@@ -3247,7 +3255,7 @@ msgstr "Nasctha ar"
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:60
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:23
 msgid "Ultrapeer"
-msgstr ""
+msgstr "Comhghleacaí"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:63
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:20
@@ -3265,7 +3273,7 @@ msgstr "Duilleoga"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:72
 msgid "Ultrapeers"
-msgstr ""
+msgstr "Comhghleacaithe"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:75
 msgid "Peers"
@@ -3407,7 +3415,7 @@ msgstr "Tuilleadh Foinsí de Dhíth"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:130
 msgid "Waiting for Stable Connections"
-msgstr ""
+msgstr "Ag feitheamh do Naisc Cobhsaí"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:136
 msgid "Waiting in Line, Position"
@@ -4068,7 +4076,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:52
 msgid "Scan Hard Drive?"
-msgstr ""
+msgstr "Scrúdaigh an Tiomántán Crua?"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:265
 msgid "LimeWire Setup Dialog"
@@ -4133,7 +4141,7 @@ msgstr "Uaththosaigh"
 
 #: gui/com/limegroup/gnutella/gui/init/WaitWindow.java:38
 msgid "Scanning Hard Drive"
-msgstr ""
+msgstr "Ag Scrúdú an Tiomántán Crua"
 
 #: gui/com/limegroup/gnutella/gui/init/WaitWindow.java:38
 msgid "Please wait as LimeWire scans your hard drive..."
@@ -4145,7 +4153,7 @@ msgstr "Scan Cealaithe"
 
 #: gui/com/limegroup/gnutella/gui/init/WaitWindow.java:107
 msgid "Scanning Hard Drive..."
-msgstr ""
+msgstr "Ag Scrúdú an Tiomántán Crua..."
 
 #: gui/com/limegroup/gnutella/gui/init/WaitWindow.java:160
 msgid "Cancel Scan"
@@ -4205,7 +4213,7 @@ msgstr "Cumraigh..."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:398
 msgid "Songs purchased from the LimeWire Store"
-msgstr ""
+msgstr "Amhráin cheannaithe ó Dhíolbhoth LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:55
 msgid "Search In Shared Files:"
@@ -4273,7 +4281,7 @@ msgstr "Mionathraithe an Uair Deiridh"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:171
 msgid "Shared"
-msgstr ""
+msgstr "Comhroinnte"
 
 #. for sharing gnutella
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:230
@@ -4307,6 +4315,8 @@ msgid ""
 "Are you sure you want to delete the selected file(s), thus removing it from "
 "your computer?"
 msgstr ""
+"An bhfuil tú cinnte go dteastaíonn uait an comhad/na comhaid roghnaithe a "
+"scrios, é a bhaint ó do ríomhaire dá bharr?"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:904
 msgid ""
@@ -5107,6 +5117,8 @@ msgid ""
 "You can choose whether or not to automatically connect to the network when "
 "the application starts up."
 msgstr ""
+"Is féidir roghnú nascadh go huathoibríodh leis an líonra nó gan nuair a "
+"thosaíonn an feidhmchlár."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ConnectOnStartupPaneItem.java:29
 msgid "Connect on Startup:"
@@ -5305,7 +5317,7 @@ msgstr "Taispeáin mangarae in áit"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:37
 msgid "Display junk at the bottom of search results"
-msgstr ""
+msgstr "Taispeáin mangarae ag bun na torthaí cuardach."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:38
 msgid "Do not display junk"
@@ -5386,7 +5398,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreMessagesPaneItem.java:56
 msgid "Use LimeWire's built-in blacklist"
-msgstr ""
+msgstr "Bain feidhm as réim dubh LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:22
 msgid "Filter Result Types"
@@ -5738,6 +5750,8 @@ msgid ""
 "Would you like to share your new save folders? The following new folders "
 "will be shared:"
 msgstr ""
+"Ar mhaith leat do fhillteán cur i dtaisce nua a chomhroinnt? Comhroinnfear "
+"na fillteáin nua seo:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:22
 msgid "Search Result Quality"
@@ -5806,11 +5820,11 @@ msgstr "Comhroinn Íosluchtaithe Críochnaithe:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:64
 msgid "All downloads will be shared."
-msgstr ""
+msgstr "Comhroinnfear gach íosluchtú."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:66
 msgid "Only downloads in shared folders will be shared."
-msgstr ""
+msgstr "Ní comhroinnfear ach íosluchtaithe i gcomhaid comhroinnte."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:15
 msgid "Torrent Sharing"
@@ -5928,7 +5942,7 @@ msgstr "Taispeáin Táscaire an Leithead Croise:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarConnectionQualityPaneItem.java:21
 msgid "Connection Quality Indicator"
-msgstr ""
+msgstr "Táscaire Cáilíocht an Nasc"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarConnectionQualityPaneItem.java:23
 msgid ""
@@ -5981,7 +5995,7 @@ msgstr "Taispeán Táscaire Comhaid Comhroinnte"
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:34
 msgid "LimeWire Store - Subfolder Template"
-msgstr ""
+msgstr "Díolbhoth LimeWire - Fíoraí Fófhillteán"
 
 #. *
 #. * General description of what this item is, and what its used for
@@ -6051,12 +6065,14 @@ msgstr "Fíoraithe {0} neamhsheasmhach"
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreSaveDirPaneItem.java:21
 msgid "LimeWire Store - Save Folder"
-msgstr ""
+msgstr "Díolbhoth LimeWire - Fillteán Taisce"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreSaveDirPaneItem.java:23
 msgid ""
 "You can choose the folder for saving files purchased from the LimeWire Store."
 msgstr ""
+"Is féidir an fillteán chun comhaid cheannaithe ó Dhíolbhoth LimeWire a chur "
+"i dtaisce ann a roghnú."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:20
 msgid "System Tray Icon"

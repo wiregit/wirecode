@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2007-12-17 23:05+0000\n"
+"PO-Revision-Date: 2008-01-18 21:51+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-01-08 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -1576,7 +1576,7 @@ msgstr "Ngarkuat Shkarkesat e Vjetra..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:398
 msgid "Attaching LWS Listeners..."
-msgstr ""
+msgstr "Ngjitët Dëgjuesit LWS..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:403
 #, fuzzy
@@ -2406,7 +2406,7 @@ msgstr "Gjithë Dosjet"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:48
 msgid "View My Shared Files."
-msgstr ""
+msgstr "Shiko Skedat e Mia të Shpërndara."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:81
 #, java-format
@@ -2415,6 +2415,10 @@ msgid ""
 "indicates a potential security problem, so please review your \"My Shared "
 "Files\" to ensure you aren't sharing any sensitive files."
 msgstr ""
+"Ju po shpërndani shumë nëndosje brenda dosjes tuaj të shpërndarë: {0}. Kjo "
+"paraqet një problem të mundshëm sigurie, ndaj ju lutemi rishikoni \"Skedat e "
+"Mia të Shpërndara\" për t'u siguruar që nuk po shpërndani skeda me të dhëna "
+"personale."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:94
 #, java-format
@@ -2423,11 +2427,15 @@ msgid ""
 "you mean to share all these files? Please review your sharing settings and "
 "which files are shared to ensure you aren't sharing any sensitive files."
 msgstr ""
+"Ju po shpërndani shumë skeda me LimeWire, {0} skeda dhe po rriten. A doni "
+"vërtet t'i shpërndani gjithë këto skedat? Ju lutemi rishikoni kuadrot tuaj "
+"të shpërndarjes për secilën, në mënyrë që të mos shpërdani skedat me të "
+"dhëna personale."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:106
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:107
 msgid "Do not display this message again."
-msgstr ""
+msgstr "Mos e shfaq më këtë mesazh."
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 msgid "Modem"
@@ -3290,6 +3298,10 @@ msgid ""
 "that file, and 'X' is the number of people that have successfully uploaded "
 "it."
 msgstr ""
+"Ju mund ta zbuloni sa herë e ka ngarkuar dikush një skedë duke zgjedhur "
+"shufrën 'Librari' dhe duke parë kolonën Ngarkesat. Informacioni listohet si "
+"'X / Y', ku 'Y' është numri i njerëzve që janë orvatur të ngarkojnë skedën, "
+"dhe 'X', numri i njerëzve që e kanë ngarkuar atë me sukses."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:31
 msgid ""
@@ -3332,6 +3344,10 @@ msgid ""
 "download. In order to successfully complete your download, wait while your "
 "request advances in line and is eventually serviced."
 msgstr ""
+"Kur LimeWire thotë se sharkesa juaj po \"Pret në Radhë\", kjo do të thotë se "
+"burimi nga ku po shkarkoni është përkohësisht i zënë dhe e ka vënë në radhë "
+"shkarkesën tuaj. Në mënyrë që shkarkimi juaj të përfundojë me sukses, prisni "
+"sa kërkesa juaj të përparojë në radhë dhe me kohë do të ndreqet."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:36
 #, java-format
@@ -3341,6 +3357,11 @@ msgid ""
 "href=\"{1}\">FAQ</a> for answers to commonly asked questions or the <a "
 "href=\"{2}\">User Guide</a> for more information."
 msgstr ""
+"Keni nevojë për më tepër ndihmë? Vizitoni <a href=\"{0}\">bordet tona për "
+"mesazhet</a> dhe shikoni nëse të tjerët i janë përgjigjur më parë pyetjes "
+"tuaj! Po ashtu mundet edhe të rishikoni <a href=\"{1}\">FAQ</a> për "
+"përgjigjet e pyetjeve që bëhen shpesh, ose <a href=\"{2}\">Guidën e "
+"Përdoruesit</a> për më tepër informacion."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:37
 msgid ""
@@ -3360,6 +3381,8 @@ msgid ""
 "Do you have a tip for effectively using LimeWire? Add it to <a "
 "href=\"{0}\">the wiki</a> and it may make it into future Tips of the Day!"
 msgstr ""
+"A keni ndonjë këshillë si LimeWire të përdoret më efektshëm? Shtojeni atë <a "
+"href=\"{0}\">në wiki</a> dhe mund të bëhet Këshillë e Ditës në të ardhmen!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:39
 msgid ""
@@ -3388,6 +3411,9 @@ msgid ""
 "You can make your own LimeWire skins! Visit <a href=\"{0}\">LimeWire's "
 "website</a> for detailed information about how skins are created."
 msgstr ""
+"Ju mund të bëni lëvoret tuaja për LimeWire! Për një informacion më të "
+"detajuar se si krijohen lëvoret, vizitoni <a href=\"{0}\">truallin në rrjet "
+"të LimeWire</a>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
 #, java-format
@@ -3453,6 +3479,8 @@ msgid ""
 "Sport the LimeWire look! Visit our <a href=\"{0}\">LimeWire gear</a> page "
 "and purchase a t-shirt or hat!"
 msgstr ""
+"Luani me pamjen e LimeWire! Vizitoni faqen tonë <a href=\"{0}\">LimeWire "
+"gear</a> dhe blini një t-shirt ose kapele!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:49
 msgid ""
@@ -3460,6 +3488,10 @@ msgid ""
 "choose a genre from the drop-down box, and then press 'Search'. Most if not "
 "all of the files returned will be from the selected genre."
 msgstr ""
+"Provoni të kërkoni sipas gjinisë zanore! <br>Klikoni në dritaren e kërkimit "
+"të Metadatave për 'Audio', zgjidhni një gjini nga kuti me ashensor, dhe "
+"pastaj shtypni 'Kërko'. Shumica, për të mos thënë të gjitha skedat e "
+"rikthyera do të jenë të gjinisë së zgjedhur."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:50
 msgid ""
@@ -3489,6 +3521,10 @@ msgid ""
 "&gt; Advanced &gt; Statistics, choosing 'Advanced', and opting to view "
 "Advanced Statistics."
 msgstr ""
+"A doni të dini më tepër detaje rreth veprimit të brendshëm të LimeWire? Ju "
+"mund të shikoni të njëjtat statistika që përdorin zhvilluesit e LimeWire "
+"duke shkuar në Mjete &gt; Përparime &gt; Statistikat, pastaj 'Përparime', "
+"dhe aktivizoni Statistikat e Avancuara."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:53
 #, java-format
@@ -3497,6 +3533,9 @@ msgid ""
 "href=\"{0}\">www.limewire.org</a> for information on how to join developer "
 "mailing lists or to review the code."
 msgstr ""
+"A e dini që LimeWire është krejtësisht burim i hapur? Vizitoni <a "
+"href=\"{0}\">www.limewire.org</a> për informacione se si të bashkoheni në "
+"listat e postimeve të zhvilluesve ose për të parë kodin."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:54
 msgid ""
@@ -3505,6 +3544,11 @@ msgid ""
 "LimeWire learns what to block and what not to block. After a short training "
 "period, LimeWire automatically blocks most junk results. Try it!"
 msgstr ""
+"Jeni bombarduar me rezultate kërkimi pa kuptim? Zgjidhni rezultatin e "
+"kërkimit, dhe pastaj klikoni butonin Mbeturinë. Ndërkohë që i shenjoni "
+"rezultatet si Mbeturinë ose Jo Mbeturinë, LimeWire mëson çfarë të bllokojë "
+"dhe çfarë të mos bllokojë. Pas një periudhe të shkurtër trajnimi, LimeWire i "
+"bllokon automatikisht shumicën e rezultateve si mbeturinë. Provojeni!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:55
 msgid ""
@@ -3512,6 +3556,9 @@ msgid ""
 "buddy is sharing 'Limers' but you searched for 'The Limers', your buddy's "
 "file will still be found. "
 msgstr ""
+"Variacionet e vogla në titullin e kërkuar ende punojnë. Për shembull, nëse "
+"shoku juaj po shpërndaj 'Limers' por ju kërkuat për 'The Limers', skeda e "
+"shokut tuaj prapë do të gjendet. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:56
 msgid ""
@@ -3535,6 +3582,9 @@ msgid ""
 "folder from your desktop to the LimeWire Library. Select Individually Shared "
 "Files to see your newly shared file in the Library."
 msgstr ""
+"Doni të shpërndani me LimeWire një skedë në desktop-in tuaj? Thjesht hidheni "
+"skedën ose dosjen nga desktop-i në Librarinë e LimeWire. Zgjidhni Skedat e "
+"Shpërndara Individualisht për të parë skedën e re që shpërndahet në Librari."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:59
 msgid ""
@@ -3565,6 +3615,11 @@ msgid ""
 "computer in the following format: 'ip address:port'. The port can be found "
 "in LimeWire's Options in the Advanced &gt; Firewall Config section."
 msgstr ""
+"A doni të shfletoni Librarinë e LimeWire të shokut tuaj? Shkoni në Kërkim "
+"&gt; Lidhje Direkte, pastaj shkruani adresën ip dhe numrin e portit të "
+"kompjuterit të shokut tuaj sipas këtij formati: 'adresa ip:porti'. Porti "
+"mund të gjendet në Mundësitë e LimeWire në Përparime &gt; sektori i "
+"Konfigurimit të Fajruollit."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:62
 msgid ""
@@ -3600,6 +3655,10 @@ msgid ""
 "click the Publish button. Visit the <a href=\"{0}\">creative commons "
 "website</a> for more information."
 msgstr ""
+"Punën tuaj origjinale mund ta publikoni në rrjetin Gnutella sipas licensës "
+"Creative Commons. Zgjidhni në Librari skedën e shpërndarë .ogg ose .mp3 dhe "
+"klikoni butonin Publiko. Vizitoni <a href=\"{0}\">truallin në rrjet të "
+"creative commons</a> për më tepër informacion."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:66
 msgid ""
@@ -3608,6 +3667,11 @@ msgid ""
 "the file's metadata to your heart's content. You can even edit many files at "
 "once by selecting more than one file before clicking Describe."
 msgstr ""
+"A keni shkarkuar në skedë me informacion të paplotë ose krejt të gabuar në "
+"përmbajtjen e saj? Zgjidheni skedën në Librari dhe klikoni Përshkruaje. "
+"Editoni metadatat e skedës sipas qejfit. Ju mund të editoni edhe shumë "
+"skedat përnjëherë, duke zgjedhur më tepër se një përpara klikimit të "
+"Përshkruaje."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:67
 msgid ""
@@ -3655,6 +3719,11 @@ msgid ""
 "select a Media Type like Audio, and click the Browse button. You can group "
 "files by media type in the Library even if all saved files are in one folder."
 msgstr ""
+"Në vend që t'i vendosni gjithë skedat tuaja në një dosje të vetme, LimeWire "
+"mund t'i rëndisë ato automatikisht sipas llojit të medias. Në Mundësi &gt; "
+"në dritaren Ruajtja, zgjidhni Llojin e Medias p.sh. Audio, dhe klikoni "
+"butonin Shfleto. Skedat në Librari mund t'i gruponi sipas llojit të medias "
+"edhe nëse gjithë skedat e ruajtura janë në një dosje."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:72
 msgid ""
@@ -3662,6 +3731,10 @@ msgid ""
 "autocompletion, open the Options window. Under View, choose Autocompletion. "
 "Uncheck the box Enable Autocompletion of Text Fields, and click OK."
 msgstr ""
+"LimeWire autoplotëson ato çfarë keni shkruar në kutinë e kërkimit. Për të "
+"parandaluar autoplotësimin, hapeni dritaren Mundësi. Nën Pamje, zgjidhni "
+"Autoplotësimi. Çaktivizoni kutinë Lejo Autoplotësimin e Fushave të Tekstit, "
+"dhe klikoni OK."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:73
 msgid ""
@@ -3670,6 +3743,10 @@ msgid ""
 "can disable this sharing in the Options window by going to iTunes &gt; "
 "Sharing."
 msgstr ""
+"Kur LimeWire vepron, skedat tuaja filmike dhe zanore shpërndahen "
+"automatikisht me iTunes dhe programe të tjera që përkrahin protokollin DAAP. "
+"Kjo shpërndarje mund të çaktivizohet në dritaren Mundësitë, duke shkuar në "
+"iTunes &gt; Shpërndarje."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:74
 msgid ""
@@ -3678,6 +3755,10 @@ msgid ""
 "change your network interface by going to Tools &gt; Options &gt; Advanced "
 "&gt; Network Interface."
 msgstr ""
+"A lidheni në Internet me tel apo me valë? Të dyja në të njëjtën kohë? Doni "
+"që LimeWire të përdorë vetëm një nga lidhjet? E lehtë fare! Ndërfaqja e "
+"rrjetit mund të ndryshohet duke shkuar në Mjete &gt; Përparime &gt; Ndërfaqe "
+"e Rrjetit."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:75
 msgid ""
@@ -3688,6 +3769,12 @@ msgid ""
 "can disable OOB (out-of-band) searching in the Options for more reliable "
 "results."
 msgstr ""
+"Kërkimet tuaja kalojnë përmes një rrjeti me kompjutera të ndërlidhur, "
+"prandaj duhet pak kohë që të merren gjithë rezultatet e kërkimit. LimeWire "
+"shpesh zgjedh rrugët e shkurtra që t'i shfaqë rezultatet më shpejt, por nëse "
+"mendoni se rezultatet e kërkimit janë bllokuar sepse kompjuteri juaj ka "
+"probleme me paketat UDP, mund të çaktivizoni kërkimin OOB (jashtë bandës) "
+"tek Mundësitë, për rezultate më të besueshme."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:76
 msgid ""
@@ -3695,6 +3782,10 @@ msgid ""
 "you don't want it to be shared, you can have it filtered out of the network "
 "search results. <a href=\"{0}\">More information</a> is available."
 msgstr ""
+"Nëse keni të drejtën e autorit për një skedë që po shpërndahet në rrjet, dhe "
+"ju nuk doni që ajo të shpërndahet, ajo mundet që të filtrohet prej "
+"rezultateve të kërkimit në rrjet. <a href=\"{0}\">Më tepër informacion</a> "
+"gjendet këtu."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:77
 msgid ""
@@ -3702,6 +3793,9 @@ msgid ""
 "even if both parties are behind a firewall. You don't have to do anything "
 "extra because it happens automatically!"
 msgstr ""
+"Ndryshe nga programe skedë-shpërndarëse pikë më pikë, LimeWire mund t'i "
+"transferojë skedat edhe nëse të dyja palët ndodhen pas një fajruolli. Nuk "
+"duhet të bëni asgjë tjetër, sepse kjo ndodh automatikisht!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:78
 msgid ""
@@ -3710,6 +3804,10 @@ msgid ""
 "itself to the list of exceptions. All this is done in the background to make "
 "your experience as smooth as possible."
 msgstr ""
+"Nise shpërndarjen e skedave pa e ditur fare si konfigurohet një fajruoll! "
+"Nëse përdor fajroullin e Windows, LimeWire do e shtojë automatikisht veten "
+"tek përjashtimet. E gjithë kjo kryhet në sfond, që përshtypjet e tua të jenë "
+"sa më të qeta."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:79
 msgid ""
@@ -3717,6 +3815,10 @@ msgid ""
 "In order to be eligible for inclusion in the DHT, make sure you are not "
 "behind a firewall, and leave LimeWire running for as long as possible."
 msgstr ""
+"LimeWire përdor një teknologji të quajtur DHT për të ndihmuar përdoruesit që "
+"të gjejnë më mirë skedat e rralla. Në mënyrë që të përfshihesh ligjërisht në "
+"DHT, sigurohu që të mos jesh pas një fajruolli dhe lëre LimeWire të veprojë "
+"sa më gjatë të jetë e mundur."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:80
 msgid ""
@@ -3733,6 +3835,10 @@ msgid ""
 "status after a while. Make sure that you have not disabled Ultrapeer "
 "capabilties in the Options."
 msgstr ""
+"Do të jesh një Ultrapikë? Lëre LimeWire të veprojë sa më gjatë të jetë e "
+"mundur. Nëse ke një lidhje të shpejtë pa fajruoll, shumë shpejt do të "
+"gradohesh në statusin Ultrapikë. Sigurohu që të mos i kesh çaktivizuar "
+"aftësitë e Ultrapikës tek Mundësitë."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:82
 msgid ""
@@ -3765,6 +3871,10 @@ msgid ""
 "When you put a magnet link on your web page (in the 'href' attribute of "
 "anchor tags), and a user clicks the link, a download will start in LimeWire."
 msgstr ""
+"Linket magnet i lejojnë përdoruesit të shkarkojnë skedat me LimeWire nga një "
+"faqe rrjeti. Kur vendoset një link magnet në faqen e rrjetit (në atributin "
+"'href' të etiketave lidhëse), dhe përdoruesi klikon mbi link, shkarkimi do "
+"të nisë në LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:96
 msgid ""
@@ -3773,12 +3883,18 @@ msgid ""
 "etc... These preferences (and more) are available at the Tools &gt; Options "
 "menu."
 msgstr ""
+"LimeWire-n mund ta ndreqni si t'ju dojë qejfi duke ndryshuar parapëlqimet e "
+"ndryshme si Direktori e Ruajtjes, Direktori e Shpërndarjes, Shtrirje e "
+"Bandës së Ngarkimit etj... Këto parapëlqime (dhe më tepër) mund të gjenden "
+"tek menyja Mjete &gt; Mundësi."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:97
 msgid ""
 "You can find out which version of LimeWire you are using by choosing 'About "
 "LimeWire' from the Help menu. "
 msgstr ""
+"Ju mund të gjeni se cili version i LimeWire po përdoret duke zgjedhur \"Info "
+"mbi LimeWire\" në menynë Ndihmë. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:98
 msgid ""
@@ -3787,6 +3903,10 @@ msgid ""
 "and uploads are complete by going to Tools &gt; Options and looking at the "
 "'Shutdown' options."
 msgstr ""
+"Bëhuni një pjesëmarrës rrjeti i mirë, mos e mbyllni LimeWire nëse dikush po "
+"ngarkon për ju. Ju mund t'i tregoni LimeWire që të mbyllet automatikisht "
+"pasi gjithë shkarkesat dhe ngarkesat të përfundojnë, duke shkuar tek Mjete "
+"&gt; Mundësi dhe duke parë mundësitë në \"Fikje\"."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:99
 msgid ""
@@ -3794,6 +3914,10 @@ msgid ""
 "specific file you'd like to share, make sure its extension is being shared. "
 "This can be done via Tools &gt; Options and altering the 'Sharing' options."
 msgstr ""
+"LimeWire nuk i shpërndan automatikisht gjithë llojet e skedave. Nëse keni "
+"një skedë të caktuar që doni të shpërndahet, sigurohuni që të shpërndahet "
+"shtojca e saj. Kjo mund të bëhet duke shkuar në Mjete &gt; Mundësi dhe duke "
+"ndërruar mundësitë në 'Shpërndarje'."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:100
 msgid ""
@@ -3811,6 +3935,9 @@ msgid ""
 "display this message again' or 'Always Use This Answer'? Go to Tools &gt; "
 "Options, and check 'Revert To Default' under View &gt; Popups."
 msgstr ""
+"Doni të shikoni tabelat për pyetje që më parë i keni shenjuar 'Mos e shfaq "
+"më këtë mesazh' ose 'Përdore Gjithmonë Këtë Përgjigje'? Shkoni në Mjete &gt; "
+"Mundësi, dhe zgjidhni 'Kthehu Te Tipiket', nën Pamje &gt; Kërcyeset."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:102
 msgid ""
@@ -3818,6 +3945,9 @@ msgid ""
 "'Options' from the 'Tools' menu and adding new words to those listed under "
 "Filters &gt; Keywords."
 msgstr ""
+"Fjalë të caktuara mund t'i pengoni të shfaqen në rezultatet e kërkimit duke "
+"zgjedhur 'Mundësi', në menynë 'Mjete', dhe duke shtuar fjalët e reja tek ato "
+"që listohen nën Filtrat &gt; Fjalët Kyçe."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:103
 msgid ""
@@ -3826,6 +3956,11 @@ msgid ""
 "Just right-click on the search result column headers, choose audio or video, "
 "and check the columns you want to see!"
 msgstr ""
+"Ju mund të ndryshoni kolonat që shfaqin informacionin e rezultatit të "
+"kërkuar. Kolonat që mund të zgjidhni përfshijnë 'Titulli', 'Gjini', "
+"'Kolona', 'Gjatësi' dhe shumë të tjera. Thjesht klikoni me të djathtën mbi "
+"kokat e kolonës të rezultatit të kërkuar, zgjidhni audio ose video, dhe "
+"zgjidhni kolonat që doni të shihni!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:104
 msgid ""
@@ -3834,6 +3969,11 @@ msgid ""
 "toggle other options here too, like whether or not to sort tables "
 "automatically and if you prefer the rows to be striped."
 msgstr ""
+"I urreni këshillat! I doni këshillat! Ato mund t'i aktivizoni ose "
+"çaktivizoni në shumicën e tabelave duke klikuar me të djathtën mbi kokat e "
+"kolonës dhe duke zgjedhur 'Më Tepër Mundësi'. Këtu mund të nyjëtoni edhe "
+"mundësitë e tjera, si p.sh. nëse tabelat do të renditen apo jo automatikisht "
+"dhe nëse parapëlqeni që rreshtat të shkurtohen."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:105
 msgid ""
@@ -3842,6 +3982,11 @@ msgid ""
 "sorting behavior off by right-clicking on a column header, choosing 'More "
 "Options' and un-checking 'Sort Automatically'."
 msgstr ""
+"Ngarkesat, shkarkesat etj. ... mund t'i rendisni duke klikuar mbi një "
+"kolonë. Tabela do të rirendite ndërkohë që informacioni ndryshohet. Këtë "
+"sjellje autorenditëse mund ta çaktivizoni duke klikuar me të djathtën mbi "
+"kokën e një kolone, duke zgjedhur 'Më Tepër Mundësi' dhe duke çaktivizuar "
+"'Rendite Automatikisht'."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:106
 msgid ""
@@ -3849,6 +3994,9 @@ msgid ""
 "the column headers and uncheck that column. You can also drag the columns "
 "around to make them appear in the order you'd like."
 msgstr ""
+"Nuk doni t'i shikoni kolonat e Chat-i (apo tjetër) tek shkarkesat? Klikoni "
+"me të djathtën në kokat e kolonës dhe çaktivizoni kolonën. Gjithashtu mundet "
+"që t'i hidhni kolonat gjithandej që ato të shfaqen në rendin që ju pëlqen."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:107
 msgid ""
@@ -3857,6 +4005,10 @@ msgid ""
 "the download you want to start next and click the up arrow until it's at the "
 "top!"
 msgstr ""
+"LimeWire-t mund t'i tregoni cilat shkarkesa të nisin më pas. Klikoni me të "
+"djathtën në kokat e kolonës në zonën e shkarkimit dhe zgjidhni kolonën "
+"'Përparësi'. Zgjidhni shkarkesën që doni të nisni dhe klikoni shigjetën për "
+"lart derisa të arrijë në majë!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:108
 msgid ""
@@ -3864,6 +4016,10 @@ msgid ""
 "Java will improve LimeWire's speed and stability. You can find the most "
 "recent Java release at <a href=\"{0}\">www.java.com</a>."
 msgstr ""
+"LimeWire është i shkruar në Java, që do të thotë se të paturit e versionit "
+"të fundit të Java-s do e përmirësojë shpejtësinë dhe qëndrueshmërinë e "
+"LimeWire. Lëshimi i versionit më të fundit të Java-s gjendet në <a "
+"href=\"{0}\">www.java.com</a>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:109
 msgid ""
@@ -3878,6 +4034,9 @@ msgid ""
 "Are you unhappy with the small number of search results you received? Right-"
 "click a search result, then choose Search More, then Get More Results. "
 msgstr ""
+"Nuk jeni i kënaqur me numrin e vogël të rezultateve të kërkimit që keni "
+"marrë? Klikoni me të djathtën një rezultat të kërkimit, pastaj zgjidhni "
+"Kërko më Tepër, pastaj Më Tepër Rezultate. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:111
 msgid ""
@@ -3909,6 +4068,8 @@ msgid ""
 "Did you just download a file that you don't want to share? In the Library, "
 "right-click it and choose Stop Sharing File. "
 msgstr ""
+"A shkarkuat një skedë që nuk doni të shpërndahet? Në Librari, klikoni me të "
+"djathtë dhe zgjidhni Ndale Shpërndarjen e Skedës. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:115
 msgid ""
@@ -3957,6 +4118,8 @@ msgid ""
 "You can find out which version of LimeWire you are using by choosing 'About "
 "LimeWire' from the LimeWire menu. "
 msgstr ""
+"Ju mund të gjeni se cili version i LimeWire po përdoret duke zgjedhur 'Info "
+"mbi LimeWire', në menynë e LimeWire. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:131
 msgid ""
@@ -3980,6 +4143,9 @@ msgid ""
 "highlight the file and click 'Explore'. LimeWire will open that folder in "
 "the Finder. "
 msgstr ""
+"Doni të shikoni se ku ndodhet një skedë që po shpërndani me kompjuter? "
+"Shkoni në Librari, zgjidhni skedën dhe klikoni 'Eksploro'. LimeWire do e "
+"hapë dosjen tek Gjetësi. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:134
 msgid ""
@@ -4054,6 +4220,9 @@ msgid ""
 "Control-click a search result, then choose Search More, then Get More "
 "Results. "
 msgstr ""
+"Jeni i pakënaqur me numrin e vogël të rezultateve të kërkimit që keni marrë? "
+"Klikoni një rezultat të kërkimit, pastaj zgjidhni Kërko më Tepër, pastaj Më "
+"Tepër Rezultate. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:144
 msgid ""
@@ -4390,25 +4559,27 @@ msgstr "Shkëput Rrjetin"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:108
 msgid "O&pen Magnet or Torrent"
-msgstr ""
+msgstr "H&ap Magnet ose Torrent"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:109
 msgid "Opens a magnet link or torrent file"
-msgstr ""
+msgstr "Hap një link magnet ose skedë torrent"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:133
 msgid "Open Magnet or Torrent"
-msgstr ""
+msgstr "Hap Magnet ose Torrent"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:166
 msgid ""
 "Type a magnet link, or the path or Web address of a torrent file, and "
 "LimeWire will download it for you."
 msgstr ""
+"Shkruani një link Magnet, ose shtegun a adresën në Rrjet të një skede "
+"torrente, dhe LimeWire do e shkarkojë për ty."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:173
 msgid "Open:"
-msgstr ""
+msgstr "Hape:"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:234
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:204
@@ -4423,6 +4594,8 @@ msgid ""
 "LimeWire cannot download this address. Make sure you typed it correctly, and "
 "then try again."
 msgstr ""
+"LimeWire nuk mundi të shkarkojë këtë adresë.Siguroni që i keni shkruar "
+"korrekt,"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:332
 msgid "&Close"
@@ -4587,11 +4760,11 @@ msgstr "Mesazhet (I/O)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:61
 msgid "Messages In"
-msgstr ""
+msgstr "Mesazhet Brenda"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:64
 msgid "Messages Out"
-msgstr ""
+msgstr "Mesazhet Jashtë"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:67
 msgid "Bandwidth (I/O)"
@@ -4599,11 +4772,11 @@ msgstr "Shtrirja e bandës (I/O)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:70
 msgid "Bandwidth In"
-msgstr ""
+msgstr "Shtrirja e Brendshme e Dajës"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:73
 msgid "Bandwidth Out"
-msgstr ""
+msgstr "Sbtrirja e Jashtme e bandës,"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:76
 msgid "Dropped (I/O)"
@@ -5128,6 +5301,8 @@ msgid ""
 "LimeWire was unable to load the torrent file \"{0}\", - it may be malformed "
 "or LimeWire does not have permission to access this file."
 msgstr ""
+"LimeWire nuk arriti të ngarkojë skedën torrent \"{0}\", - mund të jetë e "
+"keqformuar ose LimeWire nuk lejohet të hapë skedën."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:627
 msgid "Choose Save Location"
@@ -5443,7 +5618,7 @@ msgstr "Gjuha:"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:59
 msgid "Save Folder and Shared Folders"
-msgstr ""
+msgstr "Dosja e Ruajtjes dhe Dosjet e Shpërndara"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:72
 msgid ""
@@ -5451,6 +5626,9 @@ msgid ""
 "can also choose folders you would like to share with other users running "
 "LimeWire."
 msgstr ""
+"Ju lutemi zgjidhni dosjen ku doni të shkarkohen skedat tuaja. Ju mundet edhe "
+"të zgjidhni dosjet që doni të shpërndani me përdoruesin e tjerë që veprojnë "
+"me LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:74
 msgid ""
@@ -5458,6 +5636,10 @@ msgid ""
 "the folder where you would like your files to be downloaded. You can also "
 "choose folders you would like to share with other users running LimeWire."
 msgstr ""
+"Tani LimeWire i shkarkon skedat në një direktori të re, të ndryshme. Ju "
+"lutemi konfirmoni dosjen ku doni të shkarkohen skedat tuaja. Ju mundet edhe "
+"të zgjidhni dosjet që doni të shpërndani me përdoruesit e tjerë që veprojnë "
+"me LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:93
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:327
@@ -5488,12 +5670,16 @@ msgid ""
 "LimeWire could not create default share folder {0}, a file with that name "
 "already exists."
 msgstr ""
+"LimeWire nuk arriti të krijojë dosjen tipike të shpërndarjes {0}, një skedë "
+"me atë emër ekziston që më parë."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:178
 #, java-format
 msgid ""
 "LimeWire could not create default share folder {0}, it will not be shared."
 msgstr ""
+"LimeWire nuk arriti të krijojë dosjen tipike të shpërndarjes {0}, nuk do të "
+"shpërndahet."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:192
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:87
@@ -5559,7 +5745,7 @@ msgstr "Doni ta Skanoni Diskun?"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:265
 msgid "LimeWire Setup Dialog"
-msgstr ""
+msgstr "Tabelë e Ndërtimit të LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:514
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:255
@@ -5673,11 +5859,11 @@ msgstr "Sa Ditë Doni të Ruani Skedat e Papërfunduara:"
 
 #: gui/com/limegroup/gnutella/gui/library/LWSSpecialFilesHolder.java:22
 msgid "Individual Store Files"
-msgstr ""
+msgstr "Depozitimi Individual i Skedave"
 
 #: gui/com/limegroup/gnutella/gui/library/LWSSpecialFilesHolder.java:27
 msgid "List of All Individual Purchased Files"
-msgstr ""
+msgstr "Listë e Gjithë Blerjes Individuale të Skedave"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:109
 msgid "Loading Library Window..."
@@ -5695,7 +5881,7 @@ msgstr "Konfiguro..."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:398
 msgid "Songs purchased from the LimeWire Store"
-msgstr ""
+msgstr "Këngët e Blera në Dyqanin e LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:55
 msgid "Search In Shared Files:"
@@ -6306,7 +6492,7 @@ msgstr ""
 #. store options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:326
 msgid "LimeWire Store"
-msgstr ""
+msgstr "Dyqani i LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:337
 msgid "Slots"
@@ -6342,7 +6528,7 @@ msgstr "iTunes"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:369
 #: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:15
 msgid "Importing"
-msgstr ""
+msgstr "Importimi"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:374
 msgid "Helper Apps"
@@ -6361,7 +6547,7 @@ msgstr "Pamje"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:380
 #: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:20
 msgid "Popups"
-msgstr ""
+msgstr "Kërcyeset"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:381
 msgid "Autocompletion"
@@ -6375,7 +6561,7 @@ msgstr "Kërkimi"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:386
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:32
 msgid "Quality"
-msgstr ""
+msgstr "Cilësi"
 
 #. filter options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:390
@@ -6813,7 +6999,7 @@ msgstr "Shpejtësi e Shkarkimit:"
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:46
 #: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:46
 msgid "Unlimited"
-msgstr ""
+msgstr "Pa kufi"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:21
 msgid "License Warning"
@@ -6934,10 +7120,12 @@ msgid ""
 "LimeWire can also manage a blacklist for you.  This will keep LimeWire "
 "protected from harmful clients and other nuisances."
 msgstr ""
+"LimeWire mundet edhe të menaxhojë listën tuaj të zezë. Kështu LimeWire do të "
+"mbrohet nga klientet e rrezikshëm dhe telashet e tjera."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreMessagesPaneItem.java:56
 msgid "Use LimeWire's built-in blacklist"
-msgstr ""
+msgstr "Përdor listën e zezë në brendësi të LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:22
 msgid "Filter Result Types"
@@ -7388,11 +7576,11 @@ msgstr "Shpërndaji Shkarkesat e Përfunduara:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:64
 msgid "All downloads will be shared."
-msgstr ""
+msgstr "Gjithë shkarkesat do të shpërndahen."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:66
 msgid "Only downloads in shared folders will be shared."
-msgstr ""
+msgstr "Do të shpërndahen vetëm shkarkesat në dosjet e shpërndara."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:15
 msgid "Torrent Sharing"
@@ -7563,7 +7751,7 @@ msgstr "Trego Treguesin e Skedave të Shpërndara:"
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:34
 msgid "LimeWire Store - Subfolder Template"
-msgstr ""
+msgstr "Dyqani i LimeWire - Mostra e Nëndosjes"
 
 #. *
 #. * General description of what this item is, and what its used for
@@ -7579,56 +7767,65 @@ msgid ""
 " Template: ${artist} \n"
 " How its saved: LimeWireStore/Artist Name/Artist Name - Track 1"
 msgstr ""
+"Ju mund të porositni ku ruhen skedat e depozituara. Duke krijuar një mostër "
+"LimeWire mund t'i ruajë automatikisht skedat e blera në dosjet me emrin e "
+"artistit dhe titullin e albumit. \n"
+"\n"
+"p.sh.:\n"
+"Këngë e blerë: Emri i Artistit - Kolona 1\n"
+" Mostër: $(artist) \n"
+" Si ruhet: DyqaniLimeWire/Emër Artisti/Emër Artisti - Kolona 1"
 
 #. *
 #. * Label for the finished template
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:44
 msgid "Template"
-msgstr ""
+msgstr "Mostër"
 
 #. *
 #. * Label for a drop down with options that can be added to the template
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:49
 msgid "Variables"
-msgstr ""
+msgstr "Ndryshoret"
 
 #. *
 #. * Label for predefined templates
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:54
 msgid "Templates"
-msgstr ""
+msgstr "Mostrat"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:125
 msgid "Insert a Variable"
-msgstr ""
+msgstr "Vendosni një Ndryshore"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:156
 msgid "Insert a template"
-msgstr ""
+msgstr "Vendosni një mostër"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:160
 msgid "iTunes like"
-msgstr ""
+msgstr "Si iTunes"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:197
 #, java-format
 msgid "Invalid template {0}"
-msgstr ""
+msgstr "Mostër e pavlerë {0}"
 
 #. *
 #. * Title of the item in the pane, this name will be displayed in a line border
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreSaveDirPaneItem.java:21
 msgid "LimeWire Store - Save Folder"
-msgstr ""
+msgstr "Dyqani i LimeWire - Ruani Dosjen"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreSaveDirPaneItem.java:23
 msgid ""
 "You can choose the folder for saving files purchased from the LimeWire Store."
 msgstr ""
+"Mund të zgjidhni dosjen për të ruajtur skedat e blera në Dyqanin e LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:20
 msgid "System Tray Icon"
@@ -7736,7 +7933,7 @@ msgstr "Komenti"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:152
 msgid "Playlist"
-msgstr ""
+msgstr "Lista"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:174
 msgid "Loading Playlist Window..."
@@ -7768,6 +7965,8 @@ msgid ""
 "Warning: a file with the name {0} already exists in the directory. Overwrite "
 "this file?"
 msgstr ""
+"Kujdes: një skedë me emrin {0} ekziston që më parë në direktori. A doni të "
+"mbishkruani skedën?"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:796
 msgid "Playlist Files (*.m3u)"
@@ -7805,17 +8004,19 @@ msgstr "Gjithçka"
 
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:162
 msgid "Stop Sharing File(s)"
-msgstr ""
+msgstr "Ndalni Shpërndarjen e Skedave {s}"
 
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:258
 #, java-format
 msgid ""
 "You are sharing {0} files. You can control which files LimeWire shares."
 msgstr ""
+"Ju po shpërndani {0} skeda. Ju mund të kontrolloni cilat skeda shpërndan "
+"LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:270
 msgid "Configure"
-msgstr ""
+msgstr "Konfiguro"
 
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:271
 #: gui/com/limegroup/gnutella/gui/tabs/LibraryPlayListTab.java:38
@@ -8120,11 +8321,11 @@ msgstr "Ky rezultat është i sigurt! Nuk u ngacmua asnjë informacion."
 
 #: gui/com/limegroup/gnutella/gui/search/ThirdPartySearchResult.java:166
 msgid "View in Browser..."
-msgstr ""
+msgstr "Shiko në Shfletues..."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:56
 msgid "Extension Sharing Settings"
-msgstr ""
+msgstr "Kuadrot e Shpërndarjes së Shtojcës"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:58
 msgid ""
@@ -8132,62 +8333,68 @@ msgid ""
 "LimeWire's extension sharing preferences to the original preferences. Do you "
 "wish to continue?"
 msgstr ""
+"Kjo mundësi pastron çdo ndryshim të bërë në shtojcën që shpërndahet dhe i "
+"vendos si në fillim parapëlqimet e shpërndarjes së shtojcës në LimeWire. A "
+"doni të vijoni?"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:59
 msgid "Enter the extension pattern:"
-msgstr ""
+msgstr "Shkruani modelin e shtojcës:"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:60
 msgid "The extension name was not valid, could not add."
-msgstr ""
+msgstr "Emri i shtojcës nuk ishte i vlefshëm, nuk mund të shtohej."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:61
 msgid "To allow selection enable sharing of sensitive types."
-msgstr ""
+msgstr "Që zgjedhja të lejohet, aktivizoni shpërndarjen e llojeve sekrete."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:65
 msgid "Sharing Extensions"
-msgstr ""
+msgstr "Shpërndarja e Shtojcave"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:68
 msgid ""
 "Select the types of files on your computer that you wish to share with "
 "LimeWire."
 msgstr ""
+"Zgjidhni llojet e skedave në kompjuter që doni të shpërndani me LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:91
 msgid "My Extensions"
-msgstr ""
+msgstr "Shtojcat e Mia"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:92
 msgid "Other"
-msgstr ""
+msgstr "Tjetër"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:493
 msgid "Add New Extension"
-msgstr ""
+msgstr "Shto Shtojcë të Re"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:494
 msgid "Add a New Extension to My Extensions"
-msgstr ""
+msgstr "Shto një Shtojcë të Re në Shtojcat e Mia"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:536
 msgid "Do Not Share Sensitive File Types"
-msgstr ""
+msgstr "Mos i Shpërnda Llojet Sekrete të Skedave"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:537
 msgid ""
 "This stops LimeWire from sharing certain files that may contain sensitive "
 "information."
 msgstr ""
+"Kjo e ndal LimeWire që të shpërndajë lloje të caktuara skedash që përmbajnë "
+"informacion të fshehtë."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:753
 msgid "File types you added to share."
-msgstr ""
+msgstr "Llojet e skedave që shtuat të shpërndani."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:757
 msgid "Other types of files."
-msgstr ""
+msgstr "Lloje të tjera të skedave."
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:29
 #, java-format
@@ -8196,6 +8403,10 @@ msgid ""
 "this folder because it is either not a folder or cannot be "
 "read.<br><br>Please select another folder to share.</table></html>"
 msgstr ""
+"<html><table width=400>Ju zgjodhët: <i>{0}</i><br>LimeWire nuk mund ta "
+"shpërndajë këtë dosje sepse nuk është një dosje, ose nuk mund të "
+"lexohet.<br><br>Ju lutemi zgjidhni një dosje tjetër për të "
+"shpërndarë.</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:35
 #, java-format
@@ -8204,6 +8415,9 @@ msgid ""
 "this folder for security reasons.<br><br>Please select another folder to "
 "share.</table></html>"
 msgstr ""
+"<html><table width=400>Ju zgjodhët: <i>{0}</i><br>LimeWire nuk mund ta "
+"shpërndajë këtë dosje për arsye sigurie.<br><br>Ju lutemi zgjidhni një dosje "
+"tjetër për të shpërndarë.</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:52
 #, java-format
@@ -8213,6 +8427,10 @@ msgid ""
 "NOT</b> share this folder.<br><br>Are you sure you want to share "
 "it?</table></html>"
 msgstr ""
+"<html><table width=400>Dosja <i>{0}</i><br>ka të ngjarë të përmbajë "
+"informacione sekrete ose personale.<br><br>LimeWire rekomandon që ju të "
+"<b>MOS</b> e shpërndani këtë dosje.<br><br>A jeni i sigurt se doni të "
+"shpërndahet?</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:75
 msgid "\".torrent\" files"
@@ -8241,7 +8459,7 @@ msgstr "I varur"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:278
 msgid "Sorry, the browser could not be loaded."
-msgstr ""
+msgstr "Na falni, shfletuesi nuk arriti të ngarkohet."
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:306
 msgid "Go"

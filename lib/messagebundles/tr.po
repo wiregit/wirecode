@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2008-01-06 00:18+0000\n"
+"PO-Revision-Date: 2008-01-19 08:07+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <tr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2008-01-08 04:49+0000\n"
+"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
@@ -23,17 +23,18 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"LimeWire gerekli bir dosyayı sabit diskiniz dolu olduğundan kaydedemiyor. "
+"LimeWire, sabit diskiniz dolu olduğundan gerekli bir dosyayı oluşturamadı. "
 "LimeWire'ı kullanmaya devam etmek için sabit diskinizde yer açmalısınız."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
+#, fuzzy
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
-"LimeWire gerekli bir dosyayı başka bir program dosyayı kilitlediği için "
-"açamıyor. LimeWire bu dosya serbest kalana kadar beklenmedik davranışlarda "
-"bulunabilir."
+"Başka bir program tarafından kullanıldığı için, LimeWire gerekli bir dosyayı "
+"açamadı. Bu dosya serbest bıraklıana kadar LimeWire beklenmedik bir şekilde "
+"hareket edebilir."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:54
 msgid ""
@@ -111,23 +112,27 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/DownloadManager.java:236
 msgid "Sorry, but LimeWire was unable to restart your old downloads."
-msgstr "Üzgünüz ama LimeWire eski indirme ögelerinizi yeniden başlatamıyor."
+msgstr "Üzgünüz, ancak LimeWire eski yüklemelerinizi yeniden başaltamadı."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:309
+#, fuzzy
 msgid "Loading TLS Encryption..."
-msgstr "TLS Şifreleme yükleniyor..."
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:321
+#, fuzzy
 msgid "Loading Safe Content Management..."
-msgstr "Güvenli İçerik Yöneticisi yükleniyor..."
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:326
+#, fuzzy
 msgid "Loading Message Router..."
-msgstr "Mesaj Yönlendiricisi yükleniyor..."
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:331
+#, fuzzy
 msgid "Loading Upload Management..."
-msgstr "Yükleme Yönetimi yükleniyor..."
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:341
 msgid "Loading Connection Listener..."
@@ -142,12 +147,14 @@ msgid "Loading Download Management..."
 msgstr "İndirme Yönetimi yükleniyor..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:361
+#, fuzzy
 msgid "Loading Ultrapeer/DHT Management..."
-msgstr "Ultrapeer/DHT Yönetimi yükleniyor..."
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:366
+#, fuzzy
 msgid "Locating Peers..."
-msgstr "Eşler Konumlandırılıyor..."
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:382
 msgid "Loading Shared Files..."
@@ -2461,11 +2468,16 @@ msgstr ""
 "değiştirerek yapabilirsiniz."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:101
+#, fuzzy
 msgid ""
 "Want to see dialogs for questions which you previously marked 'Do not "
 "display this message again' or 'Always Use This Answer'? Go to Tools &gt; "
 "Options, and check 'Revert To Default' under View &gt; Popups."
 msgstr ""
+"Önceden ayarladığın \"Bu mesajı bir daha gösterme?\" ya da \"Her Zamam Bu "
+"Cevabı kullan\" diyaloglarını görmek ister misin? Önce Araçlar'a &gt; sonra "
+"Seçenekler'e git ve Görünüm > Açılan Pencereler'den \"Varsayılan'a Dön\" "
+"seçeneğini işaretle."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:102
 msgid ""
@@ -2555,12 +2567,13 @@ msgstr ""
 "mause sağa tıkla , Sonra aramayı daha çok seç, sonra daha çok sonucu al. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:111
+#, fuzzy
 msgid ""
 "Can't connect to the Gnutella network? If you are using a firewall, make "
 "sure that a port is opened for LimeWire (both incoming and outgoing, UPD and "
 "TCP). Go to Tools &gt; Options &gt; Advanced &gt; Firewall Config to find "
 "the port number. "
-msgstr ""
+msgstr "Gnutella ağına bağlanamıyor musunuz? "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:112
 msgid ""
@@ -2923,12 +2936,13 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:167
+#, fuzzy
 msgid ""
 "LimeWire's Library is a file manager, not just an MP3 Playlist. That means "
 "that when you delete a file from the Library, you have the option to either "
 "permanently delete the file from your computer or move it to the Recycle "
 "Bin. "
-msgstr ""
+msgstr "LimeWire bir dosya yöneticisidir, sadece bir MP3 oynatıcı değil. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:168
 msgid ""
@@ -5604,8 +5618,9 @@ msgid "Use UPnP (Recommended)"
 msgstr "UPnP yi Kullan(Tavsiye Edilen)"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ForceIPPaneItem.java:51
+#, fuzzy
 msgid "Manual Port Forward:"
-msgstr ""
+msgstr "Elle Bağlantı Noktası:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ForceIPPaneItem.java:53
 msgid "Do Nothing (Not Recommended)"
@@ -5632,10 +5647,13 @@ msgstr ""
 "\"192.168.12.16/28\" )  yasaklanan liste"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreMessagesPaneItem.java:55
+#, fuzzy
 msgid ""
 "LimeWire can also manage a blacklist for you.  This will keep LimeWire "
 "protected from harmful clients and other nuisances."
 msgstr ""
+"LimeWire senin için bir karaliste hazırlayabilir. Bunun sayesinde zararlı "
+"müşterilerden ve diğer rahatsızlıklardan korunabilirsin."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreMessagesPaneItem.java:56
 msgid "Use LimeWire's built-in blacklist"
@@ -6112,7 +6130,7 @@ msgstr "Sistem Çubuğuna Küçült"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:20
 msgid "Start Upload Slots"
-msgstr ""
+msgstr "Upload bağlantılarını başlat."
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
@@ -6303,7 +6321,7 @@ msgstr "LimeWire Store - Klasörü Kaydet"
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreSaveDirPaneItem.java:23
 msgid ""
 "You can choose the folder for saving files purchased from the LimeWire Store."
-msgstr ""
+msgstr "LimeWire'den satın aldığın dosyalar için bir klasör seçebilirsin."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:20
 msgid "System Tray Icon"
@@ -6549,7 +6567,7 @@ msgstr "Daha çok ara"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:674
 msgid "Do you want to block search results from the following list of hosts?"
-msgstr ""
+msgstr "Sunucunun listesindeki sonuçları engellemek ister misin?"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1020
 msgid "More Info..."
@@ -6760,7 +6778,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:386
 #, java-format
 msgid "Could not browse host {0}."
-msgstr ""
+msgstr "Sunucu{0}'ya bağlanılamıyor."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:78
 msgid "Location"
@@ -7058,7 +7076,7 @@ msgstr "Dosya Bulunamadı"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:84
 msgid "Queued at"
-msgstr ""
+msgstr "Sırada"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:90
 msgid "Range Unavailable"

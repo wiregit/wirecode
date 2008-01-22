@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2007-12-18 15:51+0000\n"
+"PO-Revision-Date: 2008-01-15 21:34+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-01-08 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -335,12 +335,16 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
+"כתיבת קובץ נחוץ לא התאפשרה היות והדיסק הקשיח מלא. ע\"מ להמשיך להשתמש "
+"בLimeWire עליך לפנות מקום בדיסק הקשיח."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
+"LimeWire לא הצליחה לפתוח קובץ נחוץ היות ותוכנה אחרת נועלת אותו. LimeWire "
+"עשויה להתנהג באופן בלתי צפוי עד לשחרור הקובץ."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:54
 msgid ""
@@ -348,6 +352,9 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
+"LimeWire לא הצליחה לכתוב קובץ נחוץ היות ואין לך הרשאות מתאימות. ההגדרות שלך "
+"לא יישמרו בפעם הבאה שתפעיל את LimeWire או לחילופין LimeWire עשויה להתנהג "
+"באופן בלתי צפוי."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:56
 msgid ""
@@ -355,18 +362,24 @@ msgid ""
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
 msgstr ""
+"LimeWire לא יכולה לפתוח קובץ נחוץ היות ושם הקובץ מכיל תווים שאינם נתמכים "
+"ע\"י מערכת ההפעלה. LimeWire עשויה להתנהג באופן בלתי צפוי."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:60
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
+"LimeWire לא יכולה להוריד את הקובץ הנבחר היות והדיסק הקשיח מלא. ע\"מ להוריד "
+"קבצים נוספים עליך לפנות מקום בדיסק הקשיח."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:62
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr ""
+"LimeWire לא יכולה להוריד את הקובץ הנבחר היות ותוכנה אחרת משתמשת בקובץ. אנא "
+"סגור את התוכנה האחרת ונסה להוריד את הקובץ בשנית."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:64
 msgid ""
@@ -375,6 +388,9 @@ msgid ""
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
+"LimeWire לא יכלה ליצור או להמשיך לכתוב קובץ חלקי עבור ההורדה הנבחרת היות "
+"ואין לך הרשאות לכתוב קבצים לתיקיית הקבצים החלקיים. ע\"מ להמשיך להשתמש "
+"בLimeWire אנא בחר תיקיית שמירה אחרת."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:66
 msgid ""
@@ -382,6 +398,8 @@ msgid ""
 "because the filename contains characters which are not supported by your "
 "operating system."
 msgstr ""
+"LimeWire לא יכול היה לפתוח את הקובץ החלקי עבור ההורדה הבחרת היות ושם הקובץ "
+"מכיל תווים שאינם נתמכים ע\"י מערכת ההפעלה."
 
 #. it was the "file or directory corrupted" exception
 #. revert to defaults
@@ -390,6 +408,7 @@ msgid ""
 "A file used to save your preferences was corrupted. LimeWire will use "
 "default values."
 msgstr ""
+"קובץ המשמש לשמירת ההגדרות שלך התקלקל. LimeWire ישתמש בערכי ברירת מחדל."
 
 #: core/com/limegroup/gnutella/Acceptor.java:287
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:35
@@ -397,30 +416,29 @@ msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
+"LimeWire לא יכול היה להגדיר port להאזנה עבור חיבורים נכנסים. חלק מהתכונות של "
+"LimeWire עשויים לא לעבוד כצפוי."
 
 #: core/com/limegroup/gnutella/DownloadManager.java:236
-#, fuzzy
 msgid "Sorry, but LimeWire was unable to restart your old downloads."
-msgstr ""
+msgstr "סליחה, LimeWire לא הצליחה לשחזר את ההורדות הישנות."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:309
-#, fuzzy
 msgid "Loading TLS Encryption..."
-msgstr "טוען מנוע HTML..."
+msgstr "טוען הצפנת TLS..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:321
-#, fuzzy
 msgid "Loading Safe Content Management..."
-msgstr "טוען מאזין לחיבורים מיושנים..."
+msgstr "טוען ניהול תכנים מאובטח..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:326
 msgid "Loading Message Router..."
-msgstr "טוען את ראוטר ההודעות..."
+msgstr "טוען את נתב ההודעות..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:331
 #, fuzzy
 msgid "Loading Upload Management..."
-msgstr "טוען את מנהל החיבורים..."
+msgstr "טוען את מנהל הטעינות..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:341
 msgid "Loading Connection Listener..."
@@ -433,12 +451,12 @@ msgstr "טוען את מנהל החיבורים..."
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:355
 #, fuzzy
 msgid "Loading Download Management..."
-msgstr "טוען את מנהל החיבורים..."
+msgstr "טוען את מנהל ההורדות..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:361
 #, fuzzy
 msgid "Loading Ultrapeer/DHT Management..."
-msgstr "טוען מאזין לחיבורים מיושנים..."
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:366
 msgid "Locating Peers..."
@@ -447,12 +465,12 @@ msgstr "טוען את ה-Peers..."
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:382
 #, fuzzy
 msgid "Loading Shared Files..."
-msgstr "טוען קבצים שמורים..."
+msgstr "טוען קבצים משותפים..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:387
 #, fuzzy
 msgid "Loading bittorrent Management..."
-msgstr "טוען את מנהל החיבורים..."
+msgstr "טוען ניוהל bittorrent..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:393
 msgid "Loading Old Downloads..."
@@ -465,7 +483,7 @@ msgstr ""
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:403
 #, fuzzy
 msgid "Checking for Updates..."
-msgstr "מכניס פנימה..."
+msgstr "בודק אם קיימים עדכונים..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:408
 msgid "Loading Directed Querier..."

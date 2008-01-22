@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2007-11-28 17:02+0000\n"
+"PO-Revision-Date: 2008-01-19 16:33+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: English (Canada) <en_CA@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-01-08 04:49+0000\n"
+"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
@@ -165,7 +165,7 @@ msgstr "Loading Old Downloads..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:398
 msgid "Attaching LWS Listeners..."
-msgstr ""
+msgstr "Attaching LWS Listeners..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:403
 msgid "Checking for Updates..."
@@ -254,37 +254,37 @@ msgstr "You have already downloaded {0}"
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:205
 #, java-format
 msgid "You are already downloading this file to {0}"
-msgstr ""
+msgstr "You are already downloading this file to {0}"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:71
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:42
 msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr ""
+msgstr "For Turbo-Charged searches get LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:75
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:46
 msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr ""
+msgstr "Support LimeWire's peer-to-peer development.  Get LimeWire PRO,"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:79
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:50
 msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr ""
+msgstr "Purchase LimeWire PRO to help us make downloads faster."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:82
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:53
 msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr ""
+msgstr "For Turbo-Charged downloads get LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:85
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:56
 msgid "Support open networks. Get LimeWire PRO."
-msgstr ""
+msgstr "Support open networks.  Get LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:89
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:60
 msgid "Support open source and open protocols. Get LimeWire PRO."
-msgstr ""
+msgstr "Support open source and open protocols.  Get LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:92
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:63
@@ -294,7 +294,7 @@ msgstr ""
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:95
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:66
 msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr ""
+msgstr "Keep the Internet open.  Get LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:98
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:69

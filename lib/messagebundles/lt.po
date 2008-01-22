@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2007-10-15 19:28+0000\n"
+"PO-Revision-Date: 2008-01-20 21:08+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Lithuanian <lt@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "(n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2008-01-08 04:49+0000\n"
+"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
@@ -24,12 +24,18 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
+"LimeWire negalėjo įrašyti reikiamos bylos, nes jūsų kietasis diskas yra "
+"pilnas. Norėdami toliau naudotis LimeWire atlaisvinkite vietos kietajame "
+"diske."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
+#, fuzzy
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
+"LimeWire negalėjo atidaryti reikiamos bylos, nes kita programą bylą "
+"užrakino. Kol byla nebus atblokuota LimeWire gali elgtis nenuspėjamai."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:54
 msgid ""
@@ -37,6 +43,9 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
+"LimeWire negalėjo įrašyti reikiamos bylos, nes jūs neturite pakankamai "
+"teisių. Jūsų nustatymai gali būti nepritaikyti arba LimeWire gali elgtis "
+"nenuspėjamai kai kitą kartą paleisite ją."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:56
 msgid ""
@@ -44,18 +53,25 @@ msgid ""
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
 msgstr ""
+"LimeWire negali atverti reikiamos bylos, nes bylos pavadinime yra simbolių "
+"kurių nepalaiko jūsų operacinė sistema. LimeWire gali elgtis nenuspėjamai."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:60
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
+"LimeWire negali parsiųsti nurodytos bylos, nes jūsų kietajame diske "
+"nepakanka vietos. Norėdami parsiųsti daugiau bylų turite atlaisvinti vietos "
+"diske."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:62
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr ""
+"LimeWire negalėjo parsiųsti pažymėtos bylos, nes kita programa naudoja šią "
+"bylą. Prašome uždaryti kitą programą ir pabandyti dar kartą."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:64
 msgid ""
@@ -64,6 +80,10 @@ msgid ""
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
+"LimeWire negalėjo sukurti arba tęsti nebaigtos bylos įrašymo pažymėtam "
+"siuntiniui, nes jūs neturitė pakankamai teisių įrašyti bylas į nebaigtų bylų "
+"katalogą. Norėdami toliau naudotis LimeWire pasirinkite kitą katalogą "
+"Saugojimui."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:66
 msgid ""
@@ -71,6 +91,9 @@ msgid ""
 "because the filename contains characters which are not supported by your "
 "operating system."
 msgstr ""
+"LimeWire negali atverti nebaigtos siųsti bylos, nes bylos pavadinime yra "
+"simbolių kurių nepalaiko jūsų operacinė sistema. LimeWire gali elgtis "
+"nenuspėjamai."
 
 #. it was the "file or directory corrupted" exception
 #. revert to defaults
@@ -79,6 +102,8 @@ msgid ""
 "A file used to save your preferences was corrupted. LimeWire will use "
 "default values."
 msgstr ""
+"Byla kurioje saugomi jūsų nustatymai yra išgadinta, LimeWire naudos "
+"bendruosius nustatymus."
 
 #: core/com/limegroup/gnutella/Acceptor.java:287
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:35
@@ -86,131 +111,140 @@ msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
+"LimeWire negalėjo nustatyti prievado įeinantiems ryšiams. Kai kurios "
+"LimeWire ypatybės gali veikti ne taip kaip turėtų."
 
 #: core/com/limegroup/gnutella/DownloadManager.java:236
 msgid "Sorry, but LimeWire was unable to restart your old downloads."
 msgstr ""
+"Atsiprašome, tačiau LImeWire negalėjo pratėstį anksčiau pradėtų siuntimų."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:309
 msgid "Loading TLS Encryption..."
-msgstr ""
+msgstr "Įkeliamas TLS kodavimas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:321
 msgid "Loading Safe Content Management..."
-msgstr ""
+msgstr "Įkeliamas Saugaus Turinio Valdymas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:326
 msgid "Loading Message Router..."
-msgstr ""
+msgstr "Įkeliamas pranešimų paskirstymas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:331
 msgid "Loading Upload Management..."
-msgstr ""
+msgstr "Įkeliamas išsiuntimų valdymas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:341
+#, fuzzy
 msgid "Loading Connection Listener..."
-msgstr ""
+msgstr "Įkeliamas ryšių klausytojas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:350
 msgid "Loading Connection Management..."
-msgstr ""
+msgstr "Įkeliamas ryšių valdymas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:355
 msgid "Loading Download Management..."
-msgstr ""
+msgstr "Įkeliamas parsiuntimų valdymas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:361
 msgid "Loading Ultrapeer/DHT Management..."
-msgstr ""
+msgstr "Įkeliamas Ultrapeer/DHT valdymas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:366
 msgid "Locating Peers..."
-msgstr ""
+msgstr "Ieškoma mazgų..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:382
 msgid "Loading Shared Files..."
-msgstr ""
+msgstr "Įkeliamos bendrai naudojamos bylos..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:387
 msgid "Loading bittorrent Management..."
-msgstr ""
+msgstr "Įkeliamas bittorrent valdymas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:393
 msgid "Loading Old Downloads..."
-msgstr ""
+msgstr "Įkeliami seni siuntimai..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:398
+#, fuzzy
 msgid "Attaching LWS Listeners..."
-msgstr ""
+msgstr "Prijungiami LWS klausytojai..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:403
 msgid "Checking for Updates..."
-msgstr ""
+msgstr "Ieškoma atnaujinimų..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:408
+#, fuzzy
 msgid "Loading Directed Querier..."
-msgstr ""
+msgstr "Įkeliamos nukreipiamasis užklausėjas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:413
+#, fuzzy
 msgid "Loading Magnet Listener..."
-msgstr ""
+msgstr "Įkeliamas Magnet klausytojas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:424
+#, fuzzy
 msgid "Loading Peer Listener..."
-msgstr ""
+msgstr "Įkeliamas mazgų klausytojas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:429
 msgid "Loading Stale Connection Management..."
-msgstr ""
+msgstr "Įkeliamas pasenusių ryšių valdymas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:434
 msgid "Loading Saved Files..."
-msgstr ""
+msgstr "Įkeliamos išsaugotos bylos..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:439
 msgid "Loading Spam Management..."
-msgstr ""
+msgstr "Įkeliamas brukalų valdymas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:444
+#, fuzzy
 msgid "Loading Network Listeners..."
-msgstr ""
+msgstr "Įkeliamas tinklo klausytojas..."
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
 msgid "All Types"
-msgstr ""
+msgstr "Visų tipų"
 
 #: core/com/limegroup/gnutella/MediaType.java:46
 msgid "Documents"
-msgstr ""
+msgstr "Dokumentai"
 
 #: core/com/limegroup/gnutella/MediaType.java:47
 msgid "Programs"
-msgstr ""
+msgstr "Programos"
 
 #: core/com/limegroup/gnutella/MediaType.java:48
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:87
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
 msgid "Audio"
-msgstr ""
+msgstr "Muzika"
 
 #: core/com/limegroup/gnutella/MediaType.java:49
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
 msgid "Video"
-msgstr ""
+msgstr "Vaizdas"
 
 #: core/com/limegroup/gnutella/MediaType.java:50
 msgid "Images"
-msgstr ""
+msgstr "Paveikslėliai"
 
 #. show warning and return
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:183
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:124
 #, java-format
 msgid "Could not process bad MAGNET link {0}"
-msgstr ""
+msgstr "Negalima apdoroti blogos MAGNET nuorodos {0}"
 
 #. show warning but proceed
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:189
@@ -219,46 +253,51 @@ msgid ""
 "One or more URLs in the MAGNET link were invalid. Your file may not download "
 "correctly."
 msgstr ""
+"Viena ar daugiau URL nuorodų MAGNET nuorodoje yra negaliojanti (-čios). Byla "
+"gali būtį parsiųsta su klaidomis."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:200
 #, java-format
 msgid "You have already downloaded {0}"
-msgstr ""
+msgstr "Jūs jau esate parsiuntę {0}"
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:205
 #, java-format
 msgid "You are already downloading this file to {0}"
-msgstr ""
+msgstr "Jūs jau siunčiate šią bylą į {0}"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:71
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:42
 msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr ""
+msgstr "Ypatingai sparčiai (Turbo-Charged) paieškai įsigykite LImeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:75
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:46
 msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr ""
+msgstr "Paremkite LimeWire peer-to-peer vystymą. Įsigykite PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:79
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:50
+#, fuzzy
 msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr ""
+msgstr "Įsigykite LimeWire PRO, kad padėtumėte mums spartinti parsiuntimus."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:82
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:53
 msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr ""
+msgstr "Ypatingai sparčiam (Turbo-Charged) siuntimui įsigykite LImeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:85
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:56
 msgid "Support open networks. Get LimeWire PRO."
-msgstr ""
+msgstr "Paremkite atviruosius tinklus. Įsigykite LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:89
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:60
+#, fuzzy
 msgid "Support open source and open protocols. Get LimeWire PRO."
 msgstr ""
+"Paremkite atvirąjį kodą ir atviruosius protokolus. Įsigykite LImeWire PRO"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:92
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:63
@@ -268,12 +307,12 @@ msgstr ""
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:95
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:66
 msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr ""
+msgstr "Išsaugokime Internetą atvirą. Įsigykite LimeWire PRO"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:98
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:69
 msgid "Developing LimeWire costs real money. Get PRO."
-msgstr ""
+msgstr "LimeWire plėtojimas kainuoja. Įsigykite PRO"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:88
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:104
@@ -282,7 +321,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:269
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:49
 msgid "Title"
-msgstr ""
+msgstr "Pavadinimas"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:89
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:126
@@ -290,26 +329,26 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:57
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:42
 msgid "Artist"
-msgstr ""
+msgstr "Atlikėjas"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:90
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:273
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:58
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:65
 msgid "Album"
-msgstr ""
+msgstr "Albumas"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:91
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:275
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:98
 msgid "Genre"
-msgstr ""
+msgstr "Žanras"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:92
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:277
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:73
 msgid "Track"
-msgstr ""
+msgstr "Takelis"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:93
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:109
@@ -318,48 +357,48 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:58
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:80
 msgid "Type"
-msgstr ""
+msgstr "Tipas"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:94
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:110
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:281
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:57
 msgid "Length"
-msgstr ""
+msgstr "Trukmė"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:95
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:111
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:279
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:123
 msgid "Year"
-msgstr ""
+msgstr "Metai"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:96
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
 msgid "Language"
-msgstr ""
+msgstr "Kalba"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:97
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:121
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:283
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:82
 msgid "Bitrate"
-msgstr ""
+msgstr "Kokybė"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:98
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:115
 msgid "Comments"
-msgstr ""
+msgstr "Komentarai"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:99
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
 msgid "Action"
-msgstr ""
+msgstr "Veiksmas"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
 msgid "Copyright"
-msgstr ""
+msgstr "Autorinės teisės"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:101
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:118
@@ -367,48 +406,48 @@ msgstr ""
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:135
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:141
 msgid "License Type"
-msgstr ""
+msgstr "Licensijos tipas"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:105
 msgid "Director"
-msgstr ""
+msgstr "Režisierius"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:106
 msgid "Producer"
-msgstr ""
+msgstr "Prodiuseris"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:107
 msgid "Studio"
-msgstr ""
+msgstr "Studija"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 msgid "Stars"
-msgstr ""
+msgstr "Žvaigždės"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
-msgstr ""
+msgstr "Subtitrai"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 msgid "Rating"
-msgstr ""
+msgstr "Įvertinimas"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:119
 msgid "Height"
-msgstr ""
+msgstr "Aukštis"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:120
 msgid "Width"
-msgstr ""
+msgstr "Plotis"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
 msgid "Image"
-msgstr ""
+msgstr "Paveikslėlis"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
 msgid "Description"
-msgstr ""
+msgstr "Aprašymas"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:127
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:134
@@ -417,25 +456,25 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:263
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:42
 msgid "License"
-msgstr ""
+msgstr "Licencija"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:71
 msgid "Document"
-msgstr ""
+msgstr "Dokumentas"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
 msgid "Topic"
-msgstr ""
+msgstr "Tema"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
 msgid "Author"
-msgstr ""
+msgstr "Autorius"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
 msgid "Application"
-msgstr ""
+msgstr "Programa"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:367
@@ -444,15 +483,15 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:53
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:219
 msgid "Name"
-msgstr ""
+msgstr "Vardas"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Publisher"
-msgstr ""
+msgstr "Leidėjas"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 msgid "Platform"
-msgstr ""
+msgstr "Platforma"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:100
 msgid "The selected .torrent file may contain a security hazard."
@@ -531,7 +570,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:76
 msgid "Internal Error"
-msgstr ""
+msgstr "Vidinė klaida"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:383
 msgid ""
@@ -551,7 +590,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:396
 msgid "Send"
-msgstr ""
+msgstr "Siųsti"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:404
 msgid "Review"

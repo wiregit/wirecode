@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2008-01-07 11:28+0000\n"
+"PO-Revision-Date: 2008-01-21 21:48+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2008-01-08 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -1230,7 +1230,7 @@ msgstr "Dopu?? wolnych strzelc�"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:48
 msgid "View My Shared Files."
-msgstr ""
+msgstr "Pokaż Moje Udostępniane Pliki"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:81
 #, java-format
@@ -1487,7 +1487,7 @@ msgstr "B??d"
 
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:67
 msgid "Input"
-msgstr ""
+msgstr "Źródło"
 
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:93
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:44
@@ -1923,6 +1923,8 @@ msgstr "Twoje połączenie z siecią jest niebywale dobre."
 msgid ""
 "You can experience Turbo-Charged connections all the time with LimeWire PRO!"
 msgstr ""
+"Możesz doświadczyć połączenia Turbo-Change za każdym razem używając LimeWire "
+"PRO!"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:632
 #, fuzzy

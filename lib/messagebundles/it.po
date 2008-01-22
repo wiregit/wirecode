@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2008-01-06 21:06+0000\n"
+"PO-Revision-Date: 2008-01-18 14:15+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-01-08 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Loading magnet Management..."
@@ -1599,8 +1599,8 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"Limewire non può scrivere file perchè il disco fisso è pieno. Per continuare "
-"ad usare LimeWire devi liberare spazio nel tuo disco fisso."
+"LimeWire non può scrivere un file necessario perché il disco fisso è pieno. "
+"Per continuare ad usare LimeWIre devi liberare spazio nel tuo disco fisso."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
 #, fuzzy
@@ -2594,6 +2594,9 @@ msgid ""
 "indicates a potential security problem, so please review your \"My Shared "
 "Files\" to ensure you aren't sharing any sensitive files."
 msgstr ""
+"Stai condividendo una grande quantità di sottocartelle con la cartella {0}. "
+"Possibile rischio per la sicurezza. Controlla \"File Condivisi\" per "
+"accertarti di non condividere file sensibili."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:94
 #, java-format
@@ -2602,10 +2605,9 @@ msgid ""
 "you mean to share all these files? Please review your sharing settings and "
 "which files are shared to ensure you aren't sharing any sensitive files."
 msgstr ""
-"Stai condividendo molti file attraverso LimeWire, {0} file e oltre. Intendi "
-"davvero condividere tutti questi file? Per favore, controlla le tue "
-"impostazioni di condivisione e quali file sono condivisi, e assicurati che "
-"tu non stia condividendo file contenenti informazioni sensibili."
+"Stai condividendo una grande quantità di file con LimeWire, circa {0}. "
+"Intendi davvero condividerli tutti? Controlla le impostazioni dei \"Files "
+"Condivisi\" per assicurarti di non condividere file sensibili."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:106
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:107
@@ -3702,14 +3704,23 @@ msgid ""
 "Go to Advanced &gt; Firewall Config in LimeWire's Options window to find the "
 "port. Review your router's configuration to set it up correctly."
 msgstr ""
+"Usi un Router? Devi aggiungere le porte specificate nelle impostazioni di "
+"Limewire nel Router. Vai in Avanzate --> Firewall nelle opzioni di Limewire "
+"per trovare la porta utilizzata da Limewire. Controlla che le configurazioni "
+"siano state fatte correttamente."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:52
+#, fuzzy
 msgid ""
 "Want to know more detailed information about the inner workings of LimeWire? "
 "You can view the same statistics that the developers use by choosing Tools "
 "&gt; Advanced &gt; Statistics, choosing 'Advanced', and opting to view "
 "Advanced Statistics."
 msgstr ""
+"Vuoi avere informazioni più dettagliate sulle operazioni interne di "
+"LimeWire? Puoi vedere le stesse statistiche utilizzate dagli sviluppatori da "
+"Menu Strumenti &gt; Avanzate &gt; Statistiche, scegliendo 'Avanzate' e "
+"cliccando su Visualizza Statistiche Avanzate."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:53
 #, java-format
@@ -3718,6 +3729,9 @@ msgid ""
 "href=\"{0}\">www.limewire.org</a> for information on how to join developer "
 "mailing lists or to review the code."
 msgstr ""
+"Sapevi che LimeWire è completamente open-source? Visita il sito <a "
+"href=\"{0}\">www.limewire.org</a> per informazioni su come unirti alla "
+"mailing list dello sviluppo o per contribuire alla scrittura del codice."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:54
 msgid ""
@@ -3726,6 +3740,11 @@ msgid ""
 "LimeWire learns what to block and what not to block. After a short training "
 "period, LimeWire automatically blocks most junk results. Try it!"
 msgstr ""
+"Ottieni molti risultati di ricerca senza senso? Seleziona il risultato "
+"insensato e, poi, clicca sul pulsante \"Junk\". Da come voterai i risultati "
+"\"junk\" o \"Not Junk\", LimeWire imparerà quali bloccare e quali no. Dopo "
+"un piccolo periodo di adestramento, LimeWire bloccherà automaticamente la "
+"maggior parte dei risultati non pertinenti. Prova!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:55
 msgid ""

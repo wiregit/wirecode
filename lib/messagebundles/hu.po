@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2007-12-27 22:07+0000\n"
+"PO-Revision-Date: 2008-01-21 08:33+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2008-01-08 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -1118,20 +1118,23 @@ msgstr ""
 #. it was the "file or directory corrupted" exception
 #. revert to defaults
 #: components/setting/src/main/java/org/limewire/setting/SettingsFactory.java:187
+#, fuzzy
 msgid ""
 "A file used to save your preferences was corrupted. LimeWire will use "
 "default values."
 msgstr ""
-"A beállításokat torolo fajl hibas. A LimeWire visszater az alapertelmezeshez."
+"A beállításokat tároló fájl hibás. A LimeWire az alapértelmezett értékeket "
+"fogja használni."
 
 #: core/com/limegroup/gnutella/Acceptor.java:287
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:35
+#, fuzzy
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
-"A LimeWire nem tudott portot létrehozni a bejovo kapcsolatok figyelesere. A "
-"LimeWire par lehetosege lehet, hogy nem fog teljesen mukodni."
+"A LimeWire nem tudott portot létrehozni a bejövő kapcsolatok figyel�s�re. A "
+"LimeWire pár lehetősége lehet, hogy nem fog teljesen működni."
 
 #: core/com/limegroup/gnutella/DownloadManager.java:236
 msgid "Sorry, but LimeWire was unable to restart your old downloads."
@@ -1992,7 +1995,7 @@ msgstr "Minden mappa"
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:48
 #, fuzzy
 msgid "View My Shared Files."
-msgstr "Nézd meg a megosztott fájlokat."
+msgstr "Meogsztott fájlaim megtekintése."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:81
 #, java-format
@@ -3034,10 +3037,10 @@ msgid ""
 "<a href=\"{0}\">internationalization page</a> for information on how you can "
 "help translation efforts! "
 msgstr ""
-"A limeWire le van fordítva több különféle nyelvre, úgy mint a Kínai, "
+"A LimeWire le van fordítva több különféle nyelvre, úgy mint a Kínai, "
 "Francia, Német, Japán, Olasz, Spanyol és még sok másik. Látogass el a "
-"LimeWire következő oldalára <a href=\"{0}\">internationalization page</a>, "
-"hogy megtudd hogyan tudnál segíteni a fordítási folyamatban. "
+"LimeWire következő oldalára <a href=\"{0}\">Nemzetközösítő oldal</a>, hogy "
+"megtudd hogyan tudnál segíteni a fordítási folyamatban. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:48
 #, java-format
@@ -3251,8 +3254,10 @@ msgid ""
 "files by media type in the Library even if all saved files are in one folder."
 msgstr ""
 "Ahelyett, hogy minden fájlod egyetlen mappába pakolnád, Limewire "
-"automatikusan képes médiatípus szerint rendezni őket. Az Opciók &gt; Ablak "
-"mentése, válassz egy Média Típust mint Audio, és kattints a Böngészés gombra."
+"automatikusan képes médiatípus szerint rendezni őket. Az Opciók &gt;  "
+"mentési lehetőségek ablaknál, egy médiatípus kijelölésével, mint az audio és "
+"a bongészés gombra kattintva. Csoportosítani tudod a fájljaidat még akkor is "
+"ha az összes egy mappában van tárolva."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:72
 #, fuzzy
@@ -5513,7 +5518,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:293
 #, fuzzy
 msgid "Legend"
-msgstr "K�"
+msgstr "Jelmagyarázat"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:302
 msgid "Folder is fully shared including all subfolders."
@@ -7759,16 +7764,19 @@ msgid "Sorry, the browser could not be loaded."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:306
+#, fuzzy
 msgid "Go"
-msgstr ""
+msgstr "Mehet"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:352
+#, fuzzy
 msgid "Back"
-msgstr ""
+msgstr "Vissza"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:364
+#, fuzzy
 msgid "Forward"
-msgstr ""
+msgstr "Következő"
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:46
 msgid "Revert To Default"
@@ -7824,7 +7832,7 @@ msgstr "Keres�sek �s felt�lt�sek megtekint�se"
 
 #: gui/com/limegroup/gnutella/gui/tabs/SWTBrowserSearchTab.java:19
 msgid "Shop at the LimeWire Store"
-msgstr ""
+msgstr "Vásárolj a LimeWire áruházban."
 
 #: gui/com/limegroup/gnutella/gui/tabs/SearchDownloadTab.java:42
 msgid "Search and Download Files"
@@ -8405,7 +8413,7 @@ msgstr "Nyelv:"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:45
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:59
 msgid "Length:"
-msgstr ""
+msgstr "Hossz:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:46
 msgid "Bitrate:"
