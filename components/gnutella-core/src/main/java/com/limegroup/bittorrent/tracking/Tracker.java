@@ -3,13 +3,14 @@ package com.limegroup.bittorrent.tracking;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpConnectionParams;
 import org.limewire.http.LimeHttpClient;
@@ -198,7 +199,8 @@ class Tracker {
         HttpGet get = null;
         LimeHttpClient client = clientProvider.get();
         try {
-            get = new HttpGet(uri + query);
+            URI requestURI = new URI(uri.toASCIIString() + query);
+            get = new HttpGet(requestURI);
             get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
             get.addHeader("Cache-Control", "no-cache");
             get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
