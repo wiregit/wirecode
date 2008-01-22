@@ -320,19 +320,32 @@ public final class TigerTreeCache {
     /**
      * Write cache so that we only have to calculate them once.
      */
-    public synchronized void persistCache(FileManager fileManager, DownloadManager downloadManager) {
+    public void persistCache(FileManager fileManager, DownloadManager downloadManager) {
         if(!dirty)
             return;
-        //It's not ideal to hold a lock while writing to disk, but I doubt
-        // think
-        //it's a problem in practice.
-        removeOldEntries(ROOT_MAP, TREE_MAP, fileManager, downloadManager);
-
+        
+        Map<URN,URN> roots;
+        Map<URN, HashTree> trees;
+        synchronized(this) {
+            trees = new HashMap<URN,HashTree>(TREE_MAP);
+            roots = new HashMap<URN,URN>(ROOT_MAP);
+        }
+        
+        removeOldEntries(roots, trees, fileManager, downloadManager);
+        
+        synchronized(this) {
+            TREE_MAP = null; // free for gc
+            TREE_MAP = new HashMap<URN,HashTree>(trees);
+            ROOT_MAP = null;
+            ROOT_MAP = new HashMap<URN,URN>(roots);
+        }
+        
         try {
-            FileUtils.writeObject(ROOT_CACHE_FILE, ROOT_MAP);
-            FileUtils.writeObject(TREE_CACHE_FILE, TREE_MAP);
+            FileUtils.writeObject(ROOT_CACHE_FILE, roots);
+            FileUtils.writeObject(TREE_CACHE_FILE, trees);
             dirty = false;
         } catch (IOException e) {} 
+        // this may any roots added while writing to get lost
     }
 
     /**
