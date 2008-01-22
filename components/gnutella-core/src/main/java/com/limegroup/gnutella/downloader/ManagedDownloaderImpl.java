@@ -956,16 +956,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 throw new IOException("invalid incomplete file "+completedSize);
 			commonOutFile = verifyingFileFactory.createVerifyingFile(completedSize);
 			commonOutFile.setScanForExistingBlocks(true, incompleteFile.length());
-			//we must add an entry in IncompleteFileManager
-			addAndRegisterIncompleteFile();
+			incompleteFileManager.addEntry(incompleteFile, commonOutFile, shouldPublishIFD());
 		}
-	}
-    
-    /**
-     * Adds an incomplete file entry into the file manager
-     */
-    protected void addAndRegisterIncompleteFile(){
-        incompleteFileManager.addEntry(incompleteFile, commonOutFile, false);
 	}
 
 	protected void initializeIncompleteFile() throws IOException {
@@ -3125,6 +3117,15 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         if(gmem.getRemoteHosts().isEmpty() && gmem.getDefaultFileName() == null)
             throw new InvalidDataException("must have a name!");
         addInitialSources(toRfds(gmem.getRemoteHosts()), gmem.getDefaultFileName());
+        
+        if(getIncompleteFile() != null) {
+            incompleteFileManager.initEntry(getIncompleteFile(), gmem.getSavedBlocks(), getSha1Urn(), shouldPublishIFD());
+        }
+    }
+    
+    /** Returns true if this download's IFD should be published as sharable. */
+    protected boolean shouldPublishIFD() {
+        return true;
     }
     
     @Override

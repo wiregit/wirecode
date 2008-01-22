@@ -468,7 +468,7 @@ public class DownloadAltLocTest extends DownloadTestCase {
         File incFile = ifm.getFile(rfd1);
         incFile.createNewFile();
         // add the entry, so it's added to FileManager.
-        ifm.addEntry(incFile, verifyingFileFactory.createVerifyingFile(TestFile.length()), false);
+        ifm.addEntry(incFile, verifyingFileFactory.createVerifyingFile(TestFile.length()), true);
         
         // Get the IncompleteFileDesc and add these alt locs to it.
         FileDesc fd =

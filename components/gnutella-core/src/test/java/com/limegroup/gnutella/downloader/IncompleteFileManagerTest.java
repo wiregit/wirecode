@@ -74,7 +74,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         assertEquals(0, incompleteFileManager.getBlockSize(file));
         //1 block
         vf.addInterval(Range.createRange(0,10));
-        incompleteFileManager.addEntry(file,vf, false);
+        incompleteFileManager.addEntry(file,vf, true);
         assertEquals(11, incompleteFileManager.getBlockSize(file));//full inclusive now
         iter=incompleteFileManager.getEntry(file).getBlocks().iterator();
         assertEquals(Range.createRange(0, 10), iter.next());
@@ -159,7 +159,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"); 
         File tmp1=incompleteFileManager.getFile(rfd1);
         VerifyingFile vf=verifyingFileFactory.createVerifyingFile(1839);
-        incompleteFileManager.addEntry(tmp1, vf, false);
+        incompleteFileManager.addEntry(tmp1, vf, true);
 
         //After deleting entry there should be no more blocks...
         incompleteFileManager.removeEntry(tmp1);      
@@ -185,7 +185,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         File tmp1=incompleteFileManager.getFile(rfd1);
         VerifyingFile vf=verifyingFileFactory.createVerifyingFile(1839);
-        incompleteFileManager.addEntry(tmp1, vf, false);
+        incompleteFileManager.addEntry(tmp1, vf, true);
         
         assertEquals(1, fm.getNumIncompleteFiles()); // 1 added.
         

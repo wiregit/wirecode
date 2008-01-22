@@ -366,7 +366,7 @@ public class IncompleteFileManager  {
     /**
      * Initializes entries with URNs, Files & Ranges.
      */
-    public synchronized void initEntry(File incompleteFile, List<Range> ranges, URN sha1, boolean store) throws InvalidDataException {
+    public synchronized void initEntry(File incompleteFile, List<Range> ranges, URN sha1, boolean publish) throws InvalidDataException {
         try {
             incompleteFile = canonicalize(incompleteFile);
         } catch(IOException iox) {
@@ -394,7 +394,7 @@ public class IncompleteFileManager  {
         blocks.put(incompleteFile, verifyingFile);
         if(sha1 != null)
             hashes.put(sha1, incompleteFile);
-        if(!store)
+        if(publish)
             registerIncompleteFile(incompleteFile);
         
     }
@@ -403,7 +403,7 @@ public class IncompleteFileManager  {
      * Associates the incompleteFile with the VerifyingFile vf.
      * Notifies FileManager about a new Incomplete File.
      */
-    public synchronized void addEntry(File incompleteFile, VerifyingFile vf, boolean isStore) {
+    public synchronized void addEntry(File incompleteFile, VerifyingFile vf, boolean publish) {
         // We must canonicalize the file.
         try {
             incompleteFile = canonicalize(incompleteFile);
@@ -411,8 +411,8 @@ public class IncompleteFileManager  {
 
         blocks.put(incompleteFile,vf);
         
-        if( !isStore )
-        	registerIncompleteFile(incompleteFile);
+        if (publish)
+            registerIncompleteFile(incompleteFile);
     }
     
     public synchronized void addTorrentEntry(URN urn) {

@@ -299,7 +299,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         
         VerifyingFile vf=verifyingFileFactory.createVerifyingFile(1024);
         vf.addInterval(Range.createRange(0, amountDownloaded-1));  //inclusive
-        ifm.addEntry(incompleteFile, vf, false);
+        ifm.addEntry(incompleteFile, vf, true);
 
         //Start downloader, make it sure requeries, etc.
         ManagedDownloader downloader = 

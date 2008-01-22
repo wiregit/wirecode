@@ -192,17 +192,8 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
         return DownloaderType.STORE;
     }
     
-    /**
-     * Overrides the entry to a new download into the file manager to ensure that the 
-     * file is not shared
-     */
     @Override
-    protected void addAndRegisterIncompleteFile(){
-        incompleteFileManager.addEntry(getIncompleteFile(), commonOutFile, true);
-    } 
-    
-    
-
-
-
+    protected boolean shouldPublishIFD() {
+        return false;
+    }
 }
