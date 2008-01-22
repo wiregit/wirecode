@@ -42,7 +42,7 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
     
     public List<DownloadMemento> readAndConvertOldDownloads(File inputFile) throws IOException {
         if(!inputFile.exists())
-            throw new FileNotFoundException("file doesn't exist!");
+            throw new FileNotFoundException("file " + inputFile + " doesn't exist!");
         
         DownloadConverterObjectInputStream in = null;
         List roots = null;
