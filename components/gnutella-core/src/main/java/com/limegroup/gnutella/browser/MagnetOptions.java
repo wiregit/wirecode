@@ -333,9 +333,6 @@ public class MagnetOptions implements Serializable {
 		     if (getQueryString() != null) {
 		         return true;
 		     }
-		     if (!getGUIDUrns().isEmpty()) {
-		         return true;
-		     }
 		 }
 		 return false;
 	}

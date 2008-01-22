@@ -108,13 +108,6 @@ public class MagnetOptionsTest extends BaseTestCase {
 		
 	}
 
-    public void testIsDownloadableWithOnlyGUIDUrns() {
-        for (String magnet : guidMagnets) {
-            MagnetOptions options = MagnetOptions.parseMagnet(magnet)[0];
-            assertTrue(options + " should be downloadable", options.isDownloadable());
-        }
-    }
-	
 	public void testIsHashOnly() {
 		
 		// hash only
