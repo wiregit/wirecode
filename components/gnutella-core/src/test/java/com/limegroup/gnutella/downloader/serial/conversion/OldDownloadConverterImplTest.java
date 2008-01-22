@@ -38,7 +38,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
     }
 
     public void testConversionForTypes() throws Exception {
-        File file = TestUtils.getResourceInPackage("allKindsofDownloads.dat", DownloadUpgradeTask.class);
+        File file = TestUtils.getResourceInPackage("allKindsOfDownloads.dat", DownloadUpgradeTask.class);
         
         OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl();
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(file);
@@ -155,7 +155,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
     }
     
     public void testConversionForRanges() throws Exception {
-        File file = TestUtils.getResourceInPackage("allKindsofRanges.dat", DownloadUpgradeTask.class);
+        File file = TestUtils.getResourceInPackage("allKindsOfRanges.dat", DownloadUpgradeTask.class);
         
         OldDownloadConverterImpl oldDownloadConverter = new OldDownloadConverterImpl();
         List<DownloadMemento> mementos = oldDownloadConverter.readAndConvertOldDownloads(file);
