@@ -109,6 +109,7 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         assertTrue(Arrays.equals("inspected".getBytes(),(byte[])o.get("0")));
     }
     
+    @SuppressWarnings("unchecked")
     public void testTooSmallNotEncoded() throws Exception {
         final InspectionRequest request = mockery.mock(InspectionRequest.class);
         mockery.checking(createExpectations(request, true, "inspected"));
@@ -128,6 +129,7 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
         assertTrue(Arrays.equals("inspected".getBytes(),(byte[])o.get("0")));
     }
     
+    @SuppressWarnings("unchecked")
     public void testNotSupported() throws Exception {
         final InspectionRequest request = mockery.mock(InspectionRequest.class);
         byte [] data = new byte[10000];
