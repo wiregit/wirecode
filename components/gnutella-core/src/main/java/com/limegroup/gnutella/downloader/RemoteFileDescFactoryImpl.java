@@ -29,35 +29,44 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
     }
     
     public RemoteFileDesc createFromMemento(RemoteHostMemento remoteHostMemento) throws InvalidDataException {
-        try {
-            return new RemoteFileDesc(
-                    remoteHostMemento.getHost(),
-                    remoteHostMemento.getPort(),
-                    remoteHostMemento.getIndex(),
-                    remoteHostMemento.getFileName(),
-                    remoteHostMemento.getSize(),
-                    remoteHostMemento.getClientGuid(),
-                    remoteHostMemento.getSpeed(),
-                    remoteHostMemento.isChat(),
-                    remoteHostMemento.getQuality(),
-                    remoteHostMemento.isBrowseHost(),
-                    xml(remoteHostMemento.getXml()),
-                    remoteHostMemento.getUrns(),
-                    remoteHostMemento.isReplyToMulticast(),
-                    remoteHostMemento.isFirewalled(),
-                    remoteHostMemento.getVendor(),
-                    IpPort.EMPTY_SET,
-                    -1L,
-                    -1,
-                    pe(remoteHostMemento.getPushAddr()),
-                    remoteHostMemento.isTls()
-                    );
-        } catch (SAXException e) {
-            throw new InvalidDataException(e);
-        } catch (SchemaNotFoundException e) {
-            throw new InvalidDataException(e);
-        } catch (IOException e) {
-            throw new InvalidDataException(e);
+        if(remoteHostMemento.getCustomUrl() != null) {
+            return new URLRemoteFileDesc(remoteHostMemento.getHost(),
+                                         remoteHostMemento.getPort(),
+                                         remoteHostMemento.getFileName(),
+                                         remoteHostMemento.getSize(),
+                                         remoteHostMemento.getUrns(),
+                                         remoteHostMemento.getCustomUrl());
+        } else {
+            try {
+                return new RemoteFileDesc(
+                        remoteHostMemento.getHost(),
+                        remoteHostMemento.getPort(),
+                        remoteHostMemento.getIndex(),
+                        remoteHostMemento.getFileName(),
+                        remoteHostMemento.getSize(),
+                        remoteHostMemento.getClientGuid(),
+                        remoteHostMemento.getSpeed(),
+                        remoteHostMemento.isChat(),
+                        remoteHostMemento.getQuality(),
+                        remoteHostMemento.isBrowseHost(),
+                        xml(remoteHostMemento.getXml()),
+                        remoteHostMemento.getUrns(),
+                        remoteHostMemento.isReplyToMulticast(),
+                        remoteHostMemento.isFirewalled(),
+                        remoteHostMemento.getVendor(),
+                        IpPort.EMPTY_SET,
+                        -1L,
+                        -1,
+                        pe(remoteHostMemento.getPushAddr()),
+                        remoteHostMemento.isTls()
+                        );
+            } catch (SAXException e) {
+                throw new InvalidDataException(e);
+            } catch (SchemaNotFoundException e) {
+                throw new InvalidDataException(e);
+            } catch (IOException e) {
+                throw new InvalidDataException(e);
+            }
         }
     }
 

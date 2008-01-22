@@ -4,11 +4,10 @@ package com.limegroup.gnutella.downloader;
 import java.net.URL;
 import java.util.Set;
 
-import org.limewire.io.IpPort;
-
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 
 /**
  * A RemoteFileDesc augmented with a URL, which might be different from the
@@ -24,16 +23,11 @@ public class URLRemoteFileDesc extends RemoteFileDesc {
      * Constructs a new RemoteFileDesc.
      * @param url the url 
      */
-	public URLRemoteFileDesc(String host, int port, long index, String filename,
-                             long size, byte[] clientGUID, int speed, 
-                             boolean chat, int quality, boolean browseHost, 
-                             LimeXMLDocument xmlDoc, Set<? extends URN> urns,
-                             boolean replyToMulticast, boolean firewalled,
-                             String vendor, URL url,
-                             Set<? extends IpPort> proxies, int FWTversion) {
-        super(host, port, index, filename, size, clientGUID, speed, chat,
-              quality, browseHost, xmlDoc, urns, replyToMulticast, firewalled,
-              vendor, proxies, -1, FWTversion, false);
+	public URLRemoteFileDesc(String host, int port, String filename,
+                             long size, Set<? extends URN> urns,
+                             URL url) {
+        super(host, port, 1, filename, size, new byte[16], SpeedConstants.T3_SPEED_INT, false,
+              3, false, null, urns, false, false, "", null, -1, 0, false);
         this._url=url;
     }
 
@@ -43,5 +37,12 @@ public class URLRemoteFileDesc extends RemoteFileDesc {
      */
     public URL getUrl() {
         return _url;
+    }
+    
+    @Override
+    public RemoteHostMemento toMemento() {
+        RemoteHostMemento memento = super.toMemento();
+        memento.setCustomUrl(_url);
+        return memento;
     }
 }

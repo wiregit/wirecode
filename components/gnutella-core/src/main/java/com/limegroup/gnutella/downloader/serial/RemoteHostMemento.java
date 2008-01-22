@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.downloader.serial;
 
 import java.io.Serializable;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -9,12 +10,14 @@ import com.limegroup.gnutella.URN;
 
 /** A memento for a remote host. */
 public class RemoteHostMemento implements Serializable {
+    
+    private static final long serialVersionUID = 1452696797555431199L;
 
     private static enum Keys {
         HOST, PORT, FILENAME, INDEX, CLIENTGUID,
         SPEED, SIZE, CHAT, QUALITY, REPLY_TO_MULTICAST,
         XML, URNS, BH, FIREWALLED, VENDOR, HTTP11,
-        TLS, PUSH_ADDR
+        TLS, PUSH_ADDR, CUSTOM_URL
     }
     
     private final Map<Keys, Serializable> propertiesMap;
@@ -65,9 +68,10 @@ public class RemoteHostMemento implements Serializable {
     public boolean isHttp11() { return (Boolean)propertiesMap.get(Keys.HTTP11); }
     public boolean isTls() { return (Boolean)propertiesMap.get(Keys.TLS); }
     public String getPushAddr() { return (String)propertiesMap.get(Keys.PUSH_ADDR); }
-
-    public Map<Keys, Serializable> getPropertiesMap() {
-        return propertiesMap;
+    public URL getCustomUrl() { return (URL)propertiesMap.get(Keys.CUSTOM_URL); }
+    
+    public void setCustomUrl(URL url) {
+        propertiesMap.put(Keys.CUSTOM_URL, url);
     }
     
 }

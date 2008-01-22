@@ -23,7 +23,6 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.SavedFileManager;
-import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnSet;
@@ -193,21 +192,10 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
         return new URLRemoteFileDesc(
                 url.getHost(),  
                 port,
-                0l,             //index--doesn't matter since we won't push
                 filename != null ? filename : MagnetOptions.extractFileName(uri),
                 HTTPUtils.contentLength(url),
-                new byte[16],   //GUID--doesn't matter since we won't push
-                SpeedConstants.T3_SPEED_INT,
-                false,          //no chat support
-                3,              //four [sic] star quality
-                false,          //no browse host
-                null,           //no metadata
                 urns,
-                false,          //not a reply to a multicast query
-                false,"",       //not firewalled, no vendor,
-                url,            //url for GET request
-                null,           //no push proxies
-                0);         //assume no firewall transfer
+                url);         //assume no firewall transfer
     } 
 
     ////////////////////////////// Requery Logic ///////////////////////////

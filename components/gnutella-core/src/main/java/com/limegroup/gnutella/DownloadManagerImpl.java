@@ -183,11 +183,11 @@ public class DownloadManagerImpl implements DownloadManager {
      * @see com.limegroup.gnutella.DownloadMI#postGuiInit()
      */
     public void loadSavedDownloadsAndScheduleWriting() {
-        loadStoredDownloads();
+        loadSavedDownloads();
         scheduleSnapshots();
     }
     
-    public void loadStoredDownloads() {
+    public void loadSavedDownloads() {
         boolean failedAll = true;
         boolean failedSome = false;
         
@@ -197,6 +197,7 @@ public class DownloadManagerImpl implements DownloadManager {
             if(mementos.isEmpty())
                 failedAll = false;
         } catch(IOException ioex) {
+            ioex.printStackTrace();
             mementos = Collections.emptyList();
         }
         for(DownloadMemento memento : mementos) {
@@ -222,16 +223,20 @@ public class DownloadManagerImpl implements DownloadManager {
         try {
             coreDownloader = coreDownloaderFactory.createFromMemento(memento);
         } catch(InvalidDataException ide) {
+            ide.printStackTrace();
             LOG.warn("Unable to read download from memento: " + memento, ide);
             return null;
         }
         if(coreDownloader instanceof ManagedDownloader) {
             GnutellaDownloadMemento gmem = (GnutellaDownloadMemento)memento;
-            try {
-                incompleteFileManager.initEntry(gmem.getIncompleteFile(), gmem.getSavedBlocks(), coreDownloader.getSha1Urn(), coreDownloader instanceof StoreDownloader);
-            } catch (InvalidDataException e) {
-                LOG.warn("Unable to register serialized download: " + coreDownloader, e);
-                return null;
+            if(gmem.getIncompleteFile() != null) {
+                try {
+                    incompleteFileManager.initEntry(gmem.getIncompleteFile(), gmem.getSavedBlocks(), coreDownloader.getSha1Urn(), coreDownloader instanceof StoreDownloader);
+                } catch (InvalidDataException e) {
+                    e.printStackTrace();
+                    LOG.warn("Unable to register serialized download: " + coreDownloader, e);
+                    return null;
+                }
             }
         }
         return coreDownloader;

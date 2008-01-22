@@ -239,11 +239,14 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
     private Set<RemoteHostMemento> convertToMementos(Set<SerialRemoteFileDesc> rfds) {
         Set<RemoteHostMemento> mementos = new HashSet<RemoteHostMemento>(rfds.size());
         for(SerialRemoteFileDesc rfd : rfds) {
-            mementos.add(new RemoteHostMemento(rfd.getHost(), rfd.getPort(), rfd.getFilename(), rfd
+            RemoteHostMemento memento = new RemoteHostMemento(rfd.getHost(), rfd.getPort(), rfd.getFilename(), rfd
                     .getIndex(), rfd.getClientGUID(), rfd.getSpeed(), rfd.getSize(), rfd
                     .isChatEnabled(), rfd.getQuality(), rfd.isReplyToMulticast(), rfd
                     .getXml(), rfd.getUrns(), rfd.isBrowseHostEnabled(), rfd.isFirewalled(),
-                    rfd.getVendor(), rfd.isHttp11(), rfd.isTlsCapable(), rfd.getHttpPushAddr()));
+                    rfd.getVendor(), rfd.isHttp11(), rfd.isTlsCapable(), rfd.getHttpPushAddr());
+            if(rfd instanceof SerialUrlRemoteFileDesc)
+                memento.setCustomUrl(((SerialUrlRemoteFileDesc)rfd).getUrl());
+            mementos.add(memento);
         }
         return mementos;
     }
