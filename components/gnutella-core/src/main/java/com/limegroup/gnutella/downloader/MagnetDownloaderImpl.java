@@ -1,13 +1,15 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
+import java.net.URISyntaxException;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpException;
 import org.limewire.io.InvalidDataException;
 
 import com.google.inject.Inject;
@@ -150,8 +152,11 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 							
 					initPropertiesMap(firstDesc);
 					addDownloadForced(firstDesc, true);
-				} catch (IOException badRFD) {}
-			}
+				} catch (IOException badRFD) {} 
+                  catch (HttpException e) {} 
+                  catch (URISyntaxException e) {} 
+                  catch (InterruptedException e) {}
+            }
         
 			// if all locations included in the magnet URI fail we can't do much
 			if (firstDesc == null)
@@ -170,7 +175,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      */
     @SuppressWarnings("deprecation")
     private static RemoteFileDesc createRemoteFileDesc(String defaultURL,
-        String filename, URN urn) throws IOException{
+        String filename, URN urn) throws IOException, HttpException, InterruptedException, URISyntaxException {
         if (defaultURL==null) {
             LOG.debug("createRemoteFileDesc called with null URL");        
             return null;
@@ -187,13 +192,13 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
         if (urn!=null)
             urns.add(urn);
         
-        URI uri = new URI(url);
+        URI uri = new URI(defaultURL);
         
         return new URLRemoteFileDesc(
                 url.getHost(),  
                 port,
                 filename != null ? filename : MagnetOptions.extractFileName(uri),
-                HTTPUtils.contentLength(url),
+                HTTPUtils.contentLength(uri),
                 urns,
                 url);         //assume no firewall transfer
     } 

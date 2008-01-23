@@ -24,6 +24,7 @@ public abstract class BaseTestCase extends AssertComparisons {
     protected TestResult _testResult;
     protected TimerTask _testKiller;
     protected long _startTimeForTest;
+    protected Class<Throwable> expectedException;
 
     /**
      * bug 6435126
@@ -151,6 +152,10 @@ public abstract class BaseTestCase extends AssertComparisons {
             }
         }
         if ( deleteDirs ) dir.delete();
+    }
+    
+    protected void setExpectedException(Class t) {
+        this.expectedException = t;
     }
     
     /*
@@ -296,6 +301,11 @@ public abstract class BaseTestCase extends AssertComparisons {
      * message/stacktrace.
      */
     public void error(Throwable ex, String detail) {
+        if(expectedException != null && ex != null) {
+            if(expectedException.isInstance(ex)) {
+                return;
+            }
+        }
         ex = new UnexpectedExceptionError(detail, ex); // remember the detail & stack trace of the ErrorService.
         if ( _testThread != Thread.currentThread() ) {
             // the Eclipse JUnit plug-in does not report multiple errors per test case: 
@@ -327,6 +337,12 @@ public abstract class BaseTestCase extends AssertComparisons {
     			fail(message);
     		}
     	};
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        setExpectedException(null);
     }
 }       
 

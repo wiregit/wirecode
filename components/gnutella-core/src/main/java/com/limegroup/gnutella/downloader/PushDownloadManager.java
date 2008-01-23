@@ -4,6 +4,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,12 +18,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.limewire.collection.IntWrapper;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.http.DefaultHttpParams;
 import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
@@ -376,7 +381,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             ":" + port;
 
         // the methods to execute
-        final List<HeadMethod> methods = new ArrayList<HeadMethod>();
+        final List<HttpHead> methods = new ArrayList<HttpHead>();
 
         // try to contact each proxy
         for(IpPort ppi : proxies) {
@@ -388,15 +393,27 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                     protocol = "tls://";
             }
             String connectTo =  protocol + ppi.getAddress() + ":" + ppi.getPort() + request;
-            HeadMethod head = new HeadMethod(connectTo);
-            head.addRequestHeader(nodeString, nodeValue);
-            head.addRequestHeader("Cache-Control", "no-cache");
-            methods.add(head);
+            HttpHead head = null;
+            try {
+                head = new HttpHead(connectTo);
+                head.addHeader(nodeString, nodeValue);
+                head.addHeader("Cache-Control", "no-cache");
+                methods.add(head);
+            } catch (URISyntaxException e) {
+                LOG.error(e);
+            }            
         }        
         
-        HttpClientListener l = new PushHttpClientListener(methods, data);
-        Shutdownable s = httpExecutor.get().executeAny(l, 5000, PUSH_THREAD_POOL, methods, data.getMultiShutdownable());
-        data.getMultiShutdownable().addShutdownable(s);
+        //if(!methods.isEmpty()) {
+            HttpClientListener l = new PushHttpClientListener(methods, data);
+            HttpParams params = new DefaultHttpParams();
+            HttpConnectionParams.setConnectionTimeout(params, 5000);
+            HttpConnectionParams.setSoTimeout(params, 5000);
+            Shutdownable s = httpExecutor.get().executeAny(l, PUSH_THREAD_POOL, methods, params, data.getMultiShutdownable());
+            data.getMultiShutdownable().addShutdownable(s);
+        //} else {
+        //    sendPushThroughNetwork(data);    
+        //}
     }
     
     /**
@@ -406,31 +423,31 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      */
     private class PushHttpClientListener implements HttpClientListener {
         /** The HttpMethods that are being executed. */
-    	private final Collection<HttpMethod> methods;
+    	private final Collection<HttpUriRequest> methods;
         /** Information about the push. */
         private final PushData data;
         
-    	PushHttpClientListener(Collection <? extends HttpMethod> methods, PushData data) {
-    		this.methods = new LinkedList<HttpMethod>(methods);
+    	PushHttpClientListener(Collection <? extends HttpUriRequest> methods, PushData data) {
+    		this.methods = new LinkedList<HttpUriRequest>(methods);
     		this.data = data;
     	}
     	
-    	public boolean requestFailed(HttpMethod method, IOException exc) {
+    	public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
     		LOG.warn("PushProxy request exception", exc);
-    		httpExecutor.get().releaseResources(method);
-    		methods.remove(method);
+    		httpExecutor.get().releaseResources(response);
+    		methods.remove(request);
     		if (methods.isEmpty()) // all failed
                 sendPushThroughNetwork(data);
             return true;
     	}
     	
-    	public boolean requestComplete(HttpMethod method) {
-    		methods.remove(method);
-    		int statusCode = method.getStatusCode();
-    		httpExecutor.get().releaseResources(method);
+    	public boolean requestComplete(HttpUriRequest request, HttpResponse response) {
+    		methods.remove(request);
+    		int statusCode = response.getStatusLine().getStatusCode();
+    		httpExecutor.get().releaseResources(response);
     		if (statusCode == 202) {
     			if(LOG.isInfoEnabled())
-    				LOG.info("Succesful push proxy: " + method);
+    				LOG.info("Succesful push proxy: " + request);
     			
     			if (data.isFWTransfer()) {
     				UDPConnection socket = new UDPConnection();
@@ -443,7 +460,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             
             
     		if(LOG.isWarnEnabled())
-    		    LOG.warn("Invalid push proxy: " + method + ", response: " + method.getStatusCode());
+    		    LOG.warn("Invalid push proxy: " + request + ", response: " + response.getStatusLine().getStatusCode());
 
     		if (methods.isEmpty()) // all failed 
     		    sendPushThroughNetwork(data);

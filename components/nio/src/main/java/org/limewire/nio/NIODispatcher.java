@@ -453,12 +453,16 @@ public class NIODispatcher implements Runnable {
     
     /** Process a channel read operation. */
     private void processRead(long now, ReadObserver handler, Attachment proxy) throws IOException {
+        if (LOG.isDebugEnabled())
+            LOG.debug("Handling read: " + handler);
         proxy.updateReadTimeout(now);
         handler.handleRead();
     }
     
     /** Process a channel write operation. */
     private void processWrite(long now, WriteObserver handler, Attachment proxy) throws IOException {
+        if (LOG.isDebugEnabled())
+            LOG.debug("Handling write: " + handler);
         handler.handleWrite();
     }
     

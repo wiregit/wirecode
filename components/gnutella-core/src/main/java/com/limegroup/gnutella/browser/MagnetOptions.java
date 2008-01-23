@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,8 +16,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.FileDetails;
@@ -306,12 +306,12 @@ public class MagnetOptions implements Serializable {
 	private URN extractSHA1URNFromURLS(String[] defaultURLs) {
 		for (int i = 0; i < defaultURLs.length; i++) {
 			try {
-				URI uri = new URI(defaultURLs[i].toCharArray());
+				URI uri = new URI(defaultURLs[i]);
 				String query = uri.getQuery();
 				if (query != null) {
 					return URN.createSHA1Urn(uri.getQuery());
 				}
-			} catch (URIException e) {
+			} catch (URISyntaxException e) {
 			} catch (IOException e) {
 			}
 		}
@@ -438,8 +438,8 @@ public class MagnetOptions implements Serializable {
 			for(Iterator<String> it = urls.iterator(); it.hasNext(); ) {
 				try {
 					String nextURL = it.next();
-					new URI(nextURL.toCharArray());  // is it a valid URI?
-				} catch(URIException e) {
+					new URI(nextURL);  // is it a valid URI?
+				} catch(URISyntaxException e) {
 					it.remove(); // if not, remove it from the list.
 					localizedErrorMessage = e.getLocalizedMessage();
 				}
@@ -532,12 +532,12 @@ public class MagnetOptions implements Serializable {
         String[] urls = getDefaultURLs();
         if (urls.length > 0) {
             try {
-                URI uri = new URI(urls[0].toCharArray());
+                URI uri = new URI(urls[0]);
                 tempFileName = extractFileName(uri);
                 if (tempFileName != null && tempFileName.length() > 0) {
                     return tempFileName;
                 }
-            } catch (URIException e) {
+            } catch (URISyntaxException e) {
             }
         }
         try {
@@ -615,12 +615,9 @@ public class MagnetOptions implements Serializable {
         //It also returns "" if no file part.
         String path = null;
         String host = null;
-		try {
-			path = uri.getPath();
-			host = uri.getHost();
-		} catch (URIException e) {
-		}
-        if (path != null && path.length() > 0) {
+		path = uri.getPath();
+        host = uri.getHost();
+		if (path != null && path.length() > 0) {
             int i = path.lastIndexOf('/');
             if (i < 0)
                 return path;                  //e.g., "file.txt"

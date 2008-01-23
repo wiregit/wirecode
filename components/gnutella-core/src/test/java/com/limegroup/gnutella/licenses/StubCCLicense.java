@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.licenses;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
+import org.limewire.service.ErrorService;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 class StubCCLicense extends CCLicense {
 
@@ -10,8 +12,9 @@ class StubCCLicense extends CCLicense {
     static {
         URI uri = null;
         try {
-            uri = new URI("http://1.2.3.4/page".toCharArray());
-        } catch(URIException muri) {
+            uri = new URI("http://1.2.3.4/page");
+        } catch(URISyntaxException muri) {
+            ErrorService.error(muri);
         }
         LICENSE_URI = uri;
     }    

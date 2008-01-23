@@ -237,7 +237,7 @@ public class LimeTestUtils {
      * @return a <tt>Matcher</tt> to use with JMock that compares byte []
      * using Arrays.equals
      */
-    public Matcher<byte []> createByteMatcher(byte [] toMatch) {
+    public static Matcher<byte []> createByteMatcher(byte [] toMatch) {
         return new ByteMatcher(toMatch);
     }
     

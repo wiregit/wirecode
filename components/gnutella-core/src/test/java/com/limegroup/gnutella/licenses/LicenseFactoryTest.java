@@ -1,11 +1,13 @@
 package com.limegroup.gnutella.licenses;
 
-import junit.framework.Test;
+import java.net.URISyntaxException;
 
 import org.limewire.inject.Providers;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.URN;
+
+import junit.framework.Test;
 
 public class LicenseFactoryTest extends BaseTestCase {
 
@@ -51,7 +53,8 @@ public class LicenseFactoryTest extends BaseTestCase {
 	    assertEquals("Creative Commons License", l.getLicenseName());
 	    
 	    // 'verify at' with invalid URI
-	    l = licenseFactory.create("verify at nowhere");
+        setExpectedException(URISyntaxException.class);
+        l = licenseFactory.create("verify at nowhere");
         assertNotNull(l);
 	    assertEquals(BadCCLicense.class, l.getClass());
 	    assertTrue(l.isVerified());

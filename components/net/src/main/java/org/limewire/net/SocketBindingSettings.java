@@ -8,6 +8,9 @@ public interface SocketBindingSettings {
 
     /** Returns the address outgoing sockets should be bound to. */
     String getAddressToBindTo();
+    
+    /** Returns the port outgoing sockets should be bound to. */
+    int getPortToBindTo();
 
     /** Notification that a binding failed. */
     void bindingFailed();
