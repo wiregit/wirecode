@@ -1451,21 +1451,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return observer != null;
     }
     
-    /**
-     * Registers a new ConnectObserver that is waiting for a socket from the given MRFD.
-     * @param observer
-     * @param mrfd
-     */
     public void registerPushObserver(HTTPConnectObserver observer, PushDetails details) {
         pushes.addPushHost(details, observer);
     }
     
-    /**
-     * Unregisters a ConnectObserver that was waiting for the given MRFD.  If shutdown
-     * is true and the observer was still registered, calls shutdown on that observer.
-     * @param mrfd
-     * @param shutdown
-     */
     public void unregisterPushObserver(PushDetails details, boolean shutdown) {
         HTTPConnectObserver observer = pushes.getExactHostFor(details);
         if(observer != null && shutdown)
@@ -1947,7 +1936,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
     }
     
-    /** Determines if validation should occur for this download. */
+    /**
+     * Determines if validation with a content authority should occur for this
+     * download. By default, this always returns true. Subclasses can override
+     * this to return other values.
+     */
     protected boolean shouldValidate() {
         return true;
     }
@@ -2199,9 +2192,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         worker.start();
     }        
     
-    /**
-     * Callback that the specified worker has finished.
-     */
+
     public synchronized void workerFinished(DownloadWorker finished) {
         if (LOG.isDebugEnabled())
             LOG.debug("worker "+finished+" finished.");
@@ -2260,9 +2251,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             workerState += worker.getInfo();
         return workerState;
     }
-    /**
-     * @return The alternate locations we have successfully downloaded from
-     */
+
     public Set<AlternateLocation> getValidAlts() {
         synchronized(altLock) {
             Set<AlternateLocation> ret;
@@ -2278,9 +2267,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
     }
     
-    /**
-     * @return The alternate locations we have failed to downloaded from
-     */
+
     public Set<AlternateLocation> getInvalidAlts() {
         synchronized(altLock) {
             Set<AlternateLocation>  ret;
@@ -2517,9 +2504,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             return SpeedConstants.T3_SWARM;
     }
 
-    /**
-     * Asks the user if we should continue or discard this download.
-     */
+
     public void promptAboutCorruptDownload() {
         synchronized(corruptStateLock) {
             if(corruptState == NOT_CORRUPT_STATE) {
@@ -2597,7 +2582,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
     /////////////////////////////Display Variables////////////////////////////
 
-    /** Same as setState(newState, Integer.MAX_VALUE). */
     public synchronized void setState(DownloadStatus newState) {
         setState(newState, Long.MAX_VALUE);
     }

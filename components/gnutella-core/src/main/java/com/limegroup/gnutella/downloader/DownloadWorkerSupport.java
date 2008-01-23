@@ -23,14 +23,21 @@ interface DownloadWorkerSupport extends ManagedDownloader {
 
     List<DownloadWorker> getAllWorkers();
 
+    /**
+     * @return The alternate locations we have failed to downloaded from
+     */
     Set<AlternateLocation> getInvalidAlts();
 
     Map<DownloadWorker, Integer> getQueuedWorkers();
 
+    /**
+     * @return The alternate locations we have successfully downloaded from
+     */
     Set<AlternateLocation> getValidAlts();
 
     void hashTreeRead(HashTree newTree);
 
+    /** Same as setState(newState, Integer.MAX_VALUE). */
     void setState(DownloadStatus connecting);
 
     void incrementTriedHostsCount();
@@ -39,18 +46,31 @@ interface DownloadWorkerSupport extends ManagedDownloader {
 
     boolean killQueuedIfNecessary(DownloadWorker downloadWorker, int i);
 
+    /**
+     * Asks the user if we should continue or discard this download.
+     */
     void promptAboutCorruptDownload();
 
     QueryRequest newRequery() throws CantResumeException;
     
+    /**
+     * Registers a new ConnectObserver that is waiting for a socket from the given MRFD.
+     */
     void registerPushObserver(HTTPConnectObserver observer, PushDetails details);
 
     boolean removeActiveWorker(DownloadWorker downloadWorker);
 
+    /**
+     * Unregisters a ConnectObserver that was waiting for the given MRFD.  If shutdown
+     * is true and the observer was still registered, calls shutdown on that observer.
+     */
     void unregisterPushObserver(PushDetails details, boolean b);
 
     void workerFailed(DownloadWorker downloadWorker);
 
+    /**
+     * Callback that the specified worker has finished.
+     */
     void workerFinished(DownloadWorker downloadWorker);
 
     void workerStarted(DownloadWorker downloadWorker);

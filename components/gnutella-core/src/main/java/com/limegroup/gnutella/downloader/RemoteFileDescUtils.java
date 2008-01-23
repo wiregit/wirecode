@@ -17,10 +17,9 @@ public class RemoteFileDescUtils {
     
     private static final Log LOG = LogFactory.getLog(RemoteFileDescUtils.class);
 
-    /** 
-     * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader. File size
-     * should always be passed in, if not this method will do a lookup using the URL
-     * to retrieve HEAD which will result in this method blocking
+    /**
+     * Returns a RemoteFileDesc that will look up its size from the given URL if
+     * the given size is less than 0.
      */
     @SuppressWarnings("deprecation")
     public static RemoteFileDesc createRemoteFileDesc(RemoteFileDescFactory remoteFileDescFactory,

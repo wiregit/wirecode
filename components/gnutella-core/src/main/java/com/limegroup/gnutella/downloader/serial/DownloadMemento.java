@@ -6,7 +6,8 @@ import java.util.Map;
 import com.limegroup.gnutella.downloader.DownloaderType;
 
 /**
- * A memento for a download.
+ * Defines an interface from which downloads can be saved and recreated over
+ * different sessions.
  */
 public interface DownloadMemento {
     
