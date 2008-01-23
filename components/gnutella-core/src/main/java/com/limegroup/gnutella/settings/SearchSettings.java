@@ -356,6 +356,9 @@ public final class SearchSettings extends LimeProps {
     public static final ProbabilisticBooleanSetting SEND_LIME_RESPONSES =
         FACTORY.createRemoteProbabilisticBooleanSetting("SEND_LIME_RESPONSES", 1.0f, "SearchSettings.sendLimeResponses", 0f, 1.0f);
     
+    public static final ProbabilisticBooleanSetting PUBLISH_LIME_KEYWORDS =
+        FACTORY.createRemoteProbabilisticBooleanSetting("PUBLISH_LIME_KEYWORDS", 1.0f, "SearchSettings.publishLimeKeywords", 0f, 1f);
+    
     public static final StringArraySetting LIME_SEARCH_TERMS =
         FACTORY.createRemoteStringArraySetting("LIME_SEARCH_TERMS", 
                 new String[]{"limewire"}, "SearchSettings.limeSearchTerms");

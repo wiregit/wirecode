@@ -62,6 +62,7 @@ import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
@@ -86,9 +87,9 @@ public abstract class FileManagerImpl implements FileManager {
     
     /**
      * delay between qrp updates should the simpp words change.
-     * Not final for testing.
+     * Not final for testing.  Betas update faster for experiments.
      */
-    private static long QRP_DELAY = 60 * 60 * 1000;
+    private static long QRP_DELAY = (LimeWireUtils.isBetaRelease() ? 1 : 60) * 60 * 1000;
      
     /** List of event listeners for FileManagerEvents. */
     private volatile CopyOnWriteArrayList<FileEventListener> eventListeners 
@@ -2202,7 +2203,7 @@ public abstract class FileManagerImpl implements FileManager {
      */
     protected synchronized void buildQRT() {
         _queryRouteTable = new QueryRouteTable();
-        if (SearchSettings.SEND_LIME_RESPONSES.getBoolean()) {
+        if (SearchSettings.PUBLISH_LIME_KEYWORDS.getBoolean()) {
             for (String entry : SearchSettings.LIME_QRP_ENTRIES.getValue())
                 _queryRouteTable.addIndivisible(entry);
         }
