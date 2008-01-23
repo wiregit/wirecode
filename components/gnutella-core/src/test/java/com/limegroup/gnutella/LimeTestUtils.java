@@ -246,7 +246,7 @@ public class LimeTestUtils {
         private final byte[] toMatch;
         
         ByteMatcher(byte [] toMatch) {
-            this.toMatch = toMatch;
+            this.toMatch = toMatch.clone();
         }
         
         public boolean matches(Object item) {
