@@ -172,11 +172,8 @@ public class RequeryDownloadTest extends LimeTestCase {
        IncompleteFileManager ifm= injector.getInstance(IncompleteFileManager.class);
        Set<URN> urns=new HashSet<URN>(1);
        urns.add(hash);
-       RemoteFileDesc rfd = new RemoteFileDesc("1.2.3.4", PORT, 13l,
-                                               filename, TestFile.length(),
-                                               new byte[16], 56, false, 4, 
-                                               true, null, urns,  false, 
-                                               false,"",null, -1, false);
+       RemoteFileDesc rfd = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("1.2.3.4", PORT, 13l, filename, TestFile.length(),
+            new byte[16], 56, false, 4, true, null, urns, false, false, "", null, -1, false);
 
        //Create incompleteFile, write a few bytes
        incompleteFile=ifm.getFile(rfd);

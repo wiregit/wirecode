@@ -21,6 +21,7 @@ public class SourceRankerFactoryTest extends BaseTestCase {
     private MessageRouter messageRouter;
     private SourceRankerFactory factory;
     private Mockery context;
+    private RemoteFileDescFactory remoteFileDescFactory;
     
 
     public SourceRankerFactoryTest(String name) {
@@ -37,7 +38,8 @@ public class SourceRankerFactoryTest extends BaseTestCase {
         networkManager = context.mock(NetworkManager.class);
         pinger = context.mock(UDPPinger.class);
         messageRouter = context.mock(MessageRouter.class);
-        factory = new SourceRankerFactory(networkManager, Providers.of(pinger), Providers.of(messageRouter));
+        remoteFileDescFactory = context.mock(RemoteFileDescFactory.class);
+        factory = new SourceRankerFactory(networkManager, Providers.of(pinger), Providers.of(messageRouter), remoteFileDescFactory);
     }
     
     @Override

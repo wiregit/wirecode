@@ -21,6 +21,7 @@ public class SocketlessHTTPDownloaderFactory implements HTTPDownloaderFactory {
     private final BandwidthManager bandwidthManager;
     private final Provider<PushEndpointCache> pushEndpointCache;
     private final PushEndpointFactory pushEndpointFactory;
+    private final RemoteFileDescFactory remoteFileDescFactory;
 
     public SocketlessHTTPDownloaderFactory(NetworkManager networkManager,
             AlternateLocationFactory alternateLocationFactory,
@@ -28,7 +29,8 @@ public class SocketlessHTTPDownloaderFactory implements HTTPDownloaderFactory {
             CreationTimeCache creationTimeCache,
             BandwidthManager bandwidthManager,
             Provider<PushEndpointCache> pushEndpointCache,
-            PushEndpointFactory pushEndpointFactory) {
+            PushEndpointFactory pushEndpointFactory,
+            RemoteFileDescFactory remoteFileDescFactory) {
         this.networkManager = networkManager;
         this.alternateLocationFactory = alternateLocationFactory;
         this.downloadManager = downloadManager;
@@ -36,13 +38,14 @@ public class SocketlessHTTPDownloaderFactory implements HTTPDownloaderFactory {
         this.bandwidthManager = bandwidthManager;
         this.pushEndpointCache = pushEndpointCache;
         this.pushEndpointFactory = pushEndpointFactory;
+        this.remoteFileDescFactory = remoteFileDescFactory;
     }
 
     public HTTPDownloader create(Socket socket, RemoteFileDesc rfd,
             VerifyingFile incompleteFile, boolean inNetwork) {
         return new HTTPDownloader(socket, rfd, incompleteFile, inNetwork,
                 false, networkManager, alternateLocationFactory,
-                downloadManager, creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory);
+                downloadManager, creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory, remoteFileDescFactory);
     }
 
 }

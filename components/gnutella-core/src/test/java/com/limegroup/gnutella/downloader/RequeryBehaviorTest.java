@@ -8,12 +8,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import junit.framework.Test;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.PrivilegedAccessor;
-
-import junit.framework.Test;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -54,6 +54,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
     }
     
     
+    private RemoteFileDescFactory remoteFileDescFactory;
     private DownloadManager downloadManager;
     private MyAltLocFinder myAltFinder;
     private MyDHTManager myDHTManager;
@@ -75,6 +76,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
             }
         };
         Injector injector = LimeTestUtils.createInjector(m);
+        remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
         downloadManager = injector.getInstance(DownloadManager.class);
         downloadManager.initialize();
         myAltFinder = (MyAltLocFinder) injector.getInstance(AltLocFinder.class);
@@ -356,11 +358,9 @@ public class RequeryBehaviorTest extends LimeTestCase {
         
     }
     
-    private static RemoteFileDesc fakeRFD() {
-        return new RemoteFileDesc("0.0.0.1", (int)(Math.random() * Short.MAX_VALUE +1000), 13l,
-                "badger", 1024,
-                new byte[16], 56, false, 4, true, null, new HashSet<URN>(),
-                false, false,"",null, -1, false);
+    private RemoteFileDesc fakeRFD() {
+        return remoteFileDescFactory.createRemoteFileDesc("0.0.0.1", (int)(Math.random() * Short.MAX_VALUE +1000), 13l, "badger", 1024, new byte[16],
+                56, false, 4, true, null, new HashSet<URN>(), false, false, "", null, -1, false);
     }
     
     

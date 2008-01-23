@@ -45,6 +45,7 @@ import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.downloader.DiskController;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
@@ -672,6 +673,10 @@ public class LimeWireCore {
 
     public DiskController getDiskController() {
         return injector.getInstance(DiskController.class);
+    }
+
+    public RemoteFileDescFactory getRemoteFileDescFactory() {
+        return injector.getInstance(RemoteFileDescFactory.class);
     }
     
 }

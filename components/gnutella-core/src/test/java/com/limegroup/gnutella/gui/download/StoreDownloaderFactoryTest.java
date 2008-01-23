@@ -8,9 +8,11 @@ import junit.framework.Test;
 
 import org.limewire.util.FileUtils;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.downloader.RemoteFileDescUtils;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -19,6 +21,8 @@ import com.limegroup.gnutella.util.LimeTestCase;
 
 public class StoreDownloaderFactoryTest extends LimeTestCase{
 
+    private RemoteFileDescFactory remoteFileDescFactory;
+    
     public StoreDownloaderFactoryTest(String name) {
         super(name);
     }
@@ -32,8 +36,8 @@ public class StoreDownloaderFactoryTest extends LimeTestCase{
     }
 
     protected void setUp() {
-        //must create the injector since RemoteFileDesc relies on PushEndpointFactory injection
-        LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector();
+        remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
     }
 
     public void testInvalidStoreDownloaderFactoryArgs(){
@@ -55,7 +59,7 @@ public class StoreDownloaderFactoryTest extends LimeTestCase{
         long size = 100;
         
         // create rfd with the same filename as passed into the factory
-        RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(file.toURL(), fileName, urn, size);
+        RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(remoteFileDescFactory, file.toURL(), fileName, urn, size);
         
         assertNotNull(rfd);
         

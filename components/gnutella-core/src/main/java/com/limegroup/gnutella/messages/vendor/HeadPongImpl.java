@@ -25,6 +25,7 @@ import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.DownloadWorker;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -352,17 +353,17 @@ public class HeadPongImpl extends AbstractVendorMessage implements HeadPong {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.messages.vendor.HeadPongI#getAllLocsRFD(com.limegroup.gnutella.RemoteFileDesc)
      */
-    public Set<RemoteFileDesc> getAllLocsRFD(RemoteFileDesc original){
+    public Set<RemoteFileDesc> getAllLocsRFD(RemoteFileDesc original, RemoteFileDescFactory remoteFileDescFactory){
         Set<RemoteFileDesc> ret = new HashSet<RemoteFileDesc>();
         
         if (_altLocs!=null) {
             for(IpPort current : _altLocs)
-                ret.add(new RemoteFileDesc(original,current));
+                ret.add(remoteFileDescFactory.createRemoteFileDesc(original, current));
         }
         
         if (_pushLocs!=null) {
             for(PushEndpoint current : _pushLocs)
-                ret.add(new RemoteFileDesc(original,current));
+                ret.add(remoteFileDescFactory.createRemoteFileDesc(original, current));
         }
         
         return ret;

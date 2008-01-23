@@ -6,6 +6,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -26,13 +27,14 @@ public class LegacyRankerTest extends LimeTestCase {
         return buildTestSuite(LegacyRankerTest.class);
     }
     
-    static SourceRanker ranker;
+    private static SourceRanker ranker;
+    private RemoteFileDescFactory remoteFileDescFactory;
     
     public void setUp() throws Exception {
         ranker = new LegacyRanker();
         
-        // TODO: remove.... HashTree requires static injections for this test to complete
-        LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector();
+        remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
         
     }
     
@@ -92,15 +94,12 @@ public class LegacyRankerTest extends LimeTestCase {
     
     // TODO: add more tests, although this ranker will be used rarely. 
     
-    private static RemoteFileDesc newRFD(String host, int speed){
-        return new RemoteFileDesc(host, 1,
-                                  0, "asdf",
-                                  TestFile.length(), new byte[16],
-                                  speed, false, 4, false, null, null,
-                                  false,false,"",null, -1, false);
+    private RemoteFileDesc newRFD(String host, int speed){
+        return remoteFileDescFactory.createRemoteFileDesc(host, 1, 0, "asdf", TestFile.length(), new byte[16],
+                speed, false, 4, false, null, null, false, false, "", null, -1, false);
     }
 
-    private static RemoteFileDesc newRFDWithURN(String host, int speed) {
+    private RemoteFileDesc newRFDWithURN(String host, int speed) {
         Set set = new HashSet();
         try {
             // for convenience, don't require that they pass the urn.
@@ -109,11 +108,8 @@ public class LegacyRankerTest extends LimeTestCase {
         } catch(Exception e) {
             fail("SHA1 not created");
         }
-        return new RemoteFileDesc(host, 1,
-                                  0, "asdf",
-                                  TestFile.length(), new byte[16],
-                                  speed, false, 4, false, null, set,
-                                  false, false,"",null, -1, false);
+        return remoteFileDescFactory.createRemoteFileDesc(host, 1, 0, "asdf", TestFile.length(), new byte[16],
+                speed, false, 4, false, null, set, false, false, "", null, -1, false);
     }
 
 }

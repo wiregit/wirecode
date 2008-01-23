@@ -17,6 +17,7 @@ import org.limewire.util.TestUtils;
 
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
@@ -287,7 +288,7 @@ public abstract class ClientSideTestCase extends LimeTestCase {
         Response[] resp = qr.getResultsArray();
         RemoteFileDesc rfds[] = new RemoteFileDesc[resp.length];
         for(int i = 0; i < resp.length; i++) {
-            rfds[i] = resp[i].toRemoteFileDesc(qr.getHostData());
+            rfds[i] = resp[i].toRemoteFileDesc(qr.getHostData(), injector.getInstance(RemoteFileDescFactory.class));
             //assertTrue(SpamManager.instance().isSpam(rfds[i]));
         }
         

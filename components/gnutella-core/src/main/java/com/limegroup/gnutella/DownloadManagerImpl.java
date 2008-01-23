@@ -42,6 +42,7 @@ import com.limegroup.gnutella.downloader.MagnetDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.StoreDownloader;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
@@ -124,6 +125,7 @@ public class DownloadManagerImpl implements DownloadManager {
     private final CoreDownloaderFactory coreDownloaderFactory;
     private final DownloadSerializer downloadSerializer;
     private final IncompleteFileManager incompleteFileManager;
+    private final RemoteFileDescFactory remoteFileDescFactory;
     
     @Inject
     public DownloadManagerImpl(NetworkManager networkManager,
@@ -135,7 +137,8 @@ public class DownloadManagerImpl implements DownloadManager {
             Provider<PushDownloadManager> pushDownloadManager,
             CoreDownloaderFactory coreDownloaderFactory,
             DownloadSerializer downloaderSerializer,
-            IncompleteFileManager incompleteFileManager) {
+            IncompleteFileManager incompleteFileManager,
+            RemoteFileDescFactory remoteFileDescFactory) {
         this.networkManager = networkManager;
         this.innetworkCallback = innetworkCallback;
         this.downloadCallback = downloadCallback;
@@ -146,6 +149,7 @@ public class DownloadManagerImpl implements DownloadManager {
         this.coreDownloaderFactory = coreDownloaderFactory;
         this.downloadSerializer = downloaderSerializer;
         this.incompleteFileManager = incompleteFileManager;
+        this.remoteFileDescFactory = remoteFileDescFactory;
     }
 
     /* (non-Javadoc)
@@ -895,7 +899,7 @@ public class DownloadManagerImpl implements DownloadManager {
         //that would cause a conflict with downloader y.  Check for this.
         for(Response r : responses) {
             // Don't bother with making XML from the EQHD.
-            RemoteFileDesc rfd = r.toRemoteFileDesc(data);
+            RemoteFileDesc rfd = r.toRemoteFileDesc(data, remoteFileDescFactory);
             for(Downloader current : downloaders) {
                 if ( !(current instanceof ManagedDownloader))
                     continue; // can't add sources to torrents yet
@@ -906,7 +910,7 @@ public class DownloadManagerImpl implements DownloadManager {
                 if (currD.addDownload(rfd, true)) {
                     for(IpPort ipp : r.getLocations()) {
                         // don't cache alts.
-                        currD.addDownload(new RemoteFileDesc(rfd, ipp), false);
+                        currD.addDownload(remoteFileDescFactory.createRemoteFileDesc(rfd, ipp), false);
                     }
                     break;
                 }

@@ -95,7 +95,7 @@ public class DownloadPushTest extends DownloadTestCase {
         AlternateLocation pushLoc = alternateLocationFactory.create(guid.toHexString()
                 + ";127.0.0.1:" + PPORT_2, TestFile.hash());
         ((PushAltLoc) pushLoc).updateProxies(true);
-        RemoteFileDesc rfd2 = pushLoc.createRemoteFileDesc(TestFile.length());
+        RemoteFileDesc rfd2 = pushLoc.createRemoteFileDesc(TestFile.length(), remoteFileDescFactory);
 
         TestUploader uploader = injector.getInstance(TestUploader.class);
         uploader.start("push uploader");
@@ -387,7 +387,7 @@ public class DownloadPushTest extends DownloadTestCase {
 
         assertEquals(UDPConnection.VERSION, pushLoc.supportsFWTVersion());
 
-        RemoteFileDesc readRFD = pushLoc.createRemoteFileDesc(1);
+        RemoteFileDesc readRFD = pushLoc.createRemoteFileDesc(1, remoteFileDescFactory);
         assertTrue(readRFD.getPushAddr().supportsFWTVersion() > 0);
         assertTrue(readRFD.supportsFWTransfer());
         assertEquals(readRFD.getPushAddr().getPort(), FWTPort);

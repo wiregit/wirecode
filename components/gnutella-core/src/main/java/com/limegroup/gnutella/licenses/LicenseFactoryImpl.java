@@ -22,7 +22,7 @@ public final class LicenseFactoryImpl implements LicenseFactory {
     
     private static final Log LOG = LogFactory.getLog(LicenseFactoryImpl.class);
     
-    final Provider<LicenseCache> licenseCache;
+    private final Provider<LicenseCache> licenseCache;
     
     @Inject
     public LicenseFactoryImpl(Provider<LicenseCache> licenseCache) {

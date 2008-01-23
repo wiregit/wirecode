@@ -74,6 +74,7 @@ public class PingRankerTest extends LimeTestCase {
     SpamFilterFactory spamFilterFactory;
     PushEndpointFactory pushEndpointFactory;
     HeadPongFactory headPongFactory;
+    RemoteFileDescFactory remoteFileDescFactory;
     
     public void setUp() throws Exception {
         networkManager = new NetworkManagerStub();
@@ -97,8 +98,9 @@ public class PingRankerTest extends LimeTestCase {
         pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
         headPongFactory = injector.getInstance(HeadPongFactory.class);
         pinger = (MockPinger)injector.getInstance(UDPPinger.class);
+        remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
         
-        ranker = new PingRanker(networkManager, pinger, messageRouter);
+        ranker = new PingRanker(networkManager, pinger, messageRouter, remoteFileDescFactory);
         ranker.setMeshHandler(new MockMesh(ranker));
         DownloadSettings.WORKER_INTERVAL.setValue(-1);
         DownloadSettings.MAX_VERIFIED_HOSTS.revertToDefault();
@@ -493,7 +495,7 @@ public class PingRankerTest extends LimeTestCase {
         assertTrue(s.contains(rfd2));
     }
 
-    private static RemoteFileDesc newRFDWithURN(String host, int speed) {
+    private  RemoteFileDesc newRFDWithURN(String host, int speed) {
         Set set = new HashSet();
         try {
             // for convenience, don't require that they pass the urn.
@@ -502,11 +504,8 @@ public class PingRankerTest extends LimeTestCase {
         } catch(Exception e) {
             fail("SHA1 not created");
         }
-        return new RemoteFileDesc(host, 1,
-                                  0, "asdf",
-                                  TestFile.length(), new byte[16],
-                                  speed, false, 4, false, null, set,
-                                  false, false,"",null, -1, false);
+        return remoteFileDescFactory.createRemoteFileDesc(host, 1, 0, "asdf", TestFile.length(), new byte[16],
+                speed, false, 4, false, null, set, false, false, "", null, -1, false);
     }
     
     /**
@@ -525,7 +524,7 @@ public class PingRankerTest extends LimeTestCase {
         
         PushEndpoint pe = pushEndpointFactory.createPushEndpoint(s);
         RemoteFileDesc ret = newRFDWithURN(host,3);
-        ret = new RemoteFileDesc(ret,pe);
+        remoteFileDescFactory.createRemoteFileDesc(ret, pe);
         return ret;
     }
     
@@ -593,13 +592,13 @@ public class PingRankerTest extends LimeTestCase {
             if (altLocs!=null)
                 for(Iterator iter = altLocs.iterator();iter.hasNext();) {
                     IpPort current = (IpPort)iter.next();
-                    ret.add(new RemoteFileDesc(original,current));
+                    ret.add(remoteFileDescFactory.createRemoteFileDesc(original, current));
                 }
             
             if (pushLocs!=null){
                 for(Iterator iter = pushLocs.iterator();iter.hasNext();) {
                     PushEndpoint current = (PushEndpoint)iter.next();
-                    ret.add(new RemoteFileDesc(original,current));
+                    ret.add(remoteFileDescFactory.createRemoteFileDesc(original, current));
                 }
             }
             return ret;

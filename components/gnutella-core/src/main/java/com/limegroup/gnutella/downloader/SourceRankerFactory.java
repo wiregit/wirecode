@@ -14,14 +14,17 @@ public class SourceRankerFactory {
     private final NetworkManager networkManager;
     private final Provider<UDPPinger> udpPingerFactory;
     private final Provider<MessageRouter> messageRouter;
+    private final RemoteFileDescFactory remoteFileDescFactory;
     
     @Inject
     public SourceRankerFactory(NetworkManager networkManager,
                                Provider<UDPPinger> udpPingerFactory, 
-                               Provider<MessageRouter> messageRouter) {
+                               Provider<MessageRouter> messageRouter,
+                               RemoteFileDescFactory remoteFileDescFactory) {
         this.networkManager = networkManager;
         this.udpPingerFactory = udpPingerFactory;
         this.messageRouter = messageRouter;
+        this.remoteFileDescFactory = remoteFileDescFactory;
     }
 
     /**
@@ -30,7 +33,7 @@ public class SourceRankerFactory {
     public SourceRanker getAppropriateRanker() {
         if (networkManager.canReceiveSolicited() && 
                 DownloadSettings.USE_HEADPINGS.getValue())
-            return new PingRanker(networkManager, udpPingerFactory.get(), messageRouter.get());
+            return new PingRanker(networkManager, udpPingerFactory.get(), messageRouter.get(), remoteFileDescFactory);
         else 
             return new LegacyRanker();
     }
@@ -49,7 +52,7 @@ public class SourceRankerFactory {
                 DownloadSettings.USE_HEADPINGS.getValue()) {
             if (original instanceof PingRanker)
                 return original;
-            better = new PingRanker(networkManager, udpPingerFactory.get(), messageRouter.get());
+            better = new PingRanker(networkManager, udpPingerFactory.get(), messageRouter.get(), remoteFileDescFactory);
         }else {
             if (original instanceof LegacyRanker)
                 return original;

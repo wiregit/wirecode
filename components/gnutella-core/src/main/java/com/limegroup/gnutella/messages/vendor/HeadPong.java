@@ -7,6 +7,7 @@ import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 
 /**
  * a response to an HeadPing.  It is a trimmed down version of the standard HEAD response,
@@ -130,7 +131,7 @@ public interface HeadPong extends VendorMessage {
      * @return all altlocs carried in the pong as 
      * set of <tt>RemoteFileDesc</tt>
      */
-    public Set<RemoteFileDesc> getAllLocsRFD(RemoteFileDesc original);
+    public Set<RemoteFileDesc> getAllLocsRFD(RemoteFileDesc original, RemoteFileDescFactory remoteFileDescFactory);
 
     /**
      * updates the rfd with information in this pong

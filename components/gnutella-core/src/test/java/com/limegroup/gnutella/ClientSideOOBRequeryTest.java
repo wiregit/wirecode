@@ -25,6 +25,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
@@ -93,6 +94,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     private OnDemandUnicaster onDemandUnicaster;
     
     private MACCalculatorRepositoryManager macManager;
+    
+    private RemoteFileDescFactory remoteFileDescFactory;
 
     public ClientSideOOBRequeryTest(String name) {
         super(name);
@@ -139,6 +142,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         onDemandUnicaster = injector.getInstance(OnDemandUnicaster.class);
         callback = (MyCallback) injector.getInstance(ActivityCallback.class);
         macManager = injector.getInstance(MACCalculatorRepositoryManager.class);
+        remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
         
         networkManagerStub.setAcceptedIncomingConnection(true);
         networkManagerStub.setCanReceiveSolicited(true);
@@ -328,7 +332,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         // now do the download, wait for it to finish, and then bypassed results
         // should be empty again
-        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply.getHostData());
+        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply.getHostData(), remoteFileDescFactory);
         assertFalse("file should not be saved yet", 
             new File( _savedDir, "berkeley.txt").exists());
         assertTrue("file should be shared",
@@ -450,7 +454,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         // now do the download, wait for it to finish, and then bypassed results
         // should not be empty since the query is still alive
-        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply.getHostData());
+        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply.getHostData(), remoteFileDescFactory);
         
         assertFalse("file should not be saved yet", 
             new File( _savedDir, "berkeley.txt").exists());
@@ -579,7 +583,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         
         // now do the download, wait for it to finish, and then bypassed results
         // should be empty again
-        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply.getHostData());
+        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply.getHostData(), remoteFileDescFactory);
         
         assertFalse("file should not be saved yet", 
             new File( _savedDir, "metadata.mp3").exists());
@@ -1362,11 +1366,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     private RemoteFileDesc makeRFD(URN urn, int port) throws Exception {
         Set<URN> urns = new HashSet<URN>();
         urns.add(urn);
-        return new RemoteFileDesc("127.0.0.1", port, 1, 
-                                  "whatever", 10, GUID.makeGuid(),
-                                  1, false, 3, false, null, 
-                                  urns, false, false, 
-                                  "LIME", IpPort.EMPTY_SET, -1, false);
+        return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("127.0.0.1", port, 1, "whatever", 10, GUID.makeGuid(), 1,
+                false, 3, false, null, urns, false, false, "LIME", IpPort.EMPTY_SET, -1, false);
     }
     
     private RemoteFileDesc makeRFD(String sha1) throws Exception {

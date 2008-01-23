@@ -17,6 +17,7 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.downloader.TestFile;
 import com.limegroup.gnutella.downloader.TestUploader;
 import com.limegroup.gnutella.library.SharingUtils;
@@ -650,12 +651,9 @@ public class ServerSideWhatIsNewTest
         uploader.setCreationTime(cTime);
         Set urns = new HashSet();
         urns.add(TestFile.hash());
-        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, 
-                                                "whatever.txt", 
-                                                TestFile.length(), 
-                                                guid, 1, false, 3,
-                                                false, null, urns, false,
-                                                false, "LIME", new HashSet(), -1, false);
+        RemoteFileDesc rfd = injector.getInstance(RemoteFileDescFactory.class)
+                .createRemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, "whatever.txt", TestFile.length(), guid, 1, false, 3,
+                        false, null, urns, false, false, "LIME", new HashSet(), -1, false);
         
         int sharedBefore = fileManager.getNumFiles();
         final CountDownLatch downloadedLatch = new CountDownLatch(2); //1 incomplete, 2 complete
@@ -708,11 +706,9 @@ public class ServerSideWhatIsNewTest
             uploader[i].setCreationTime(cTime[i]);
             Set urns = new HashSet();
             urns.add(TestFile.hash());
-            rfds[i] = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT+i, 1, 
-                                         "anita.txt", TestFile.length(), 
-                                         guid, 1, false, 3,
-                                         false, null, urns, false,
-                                         false, "LIME", new HashSet(), -1, false);
+            rfds[i] = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("127.0.0.1", UPLOADER_PORT+i, 1, "anita.txt",
+                    TestFile.length(), guid, 1, false, 3, false, null, urns, false, false, "LIME",
+                    new HashSet(), -1, false);
         }
 
         // first we get a notification for sharing the incomplete file desc

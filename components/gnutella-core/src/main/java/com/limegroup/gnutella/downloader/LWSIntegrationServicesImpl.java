@@ -24,14 +24,17 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
     private final LWSManager lwsManager;
     private final DownloadServices downloadServices;
     private final LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate;
+    private final RemoteFileDescFactory remoteFileDescFactory;
     
     @Inject
     public LWSIntegrationServicesImpl(LWSManager lwsManager, 
                                       DownloadServices downloadServices,
-                                      LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate) {
+                                      LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate,
+                                      RemoteFileDescFactory remoteFileDescFactory) {
         this.lwsManager = lwsManager;
         this.downloadServices = downloadServices;
         this.lwsIntegrationServicesDelegate = lwsIntegrationServicesDelegate;
+        this.remoteFileDescFactory = remoteFileDescFactory;
     }
     
 
@@ -147,8 +150,9 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 try {
                     String urlStr = URLDecoder.decode(baseURL);
                     URL url = new URL(urlStr); 
-                    RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(url, 
-                            fileName, null, length); // this make the size looked up
+                    // this make the size looked up
+                    RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(
+                            remoteFileDescFactory, url, fileName, null, length);
                     //
                     // We'll associate the identity hash code of the downloader
                     // with this file so that the web page can keep track

@@ -1,9 +1,15 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.IOException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.Set;
 
+import org.limewire.io.Connectable;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.xml.sax.SAXException;
 
 import com.google.inject.Inject;
@@ -11,14 +17,19 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
+import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
 
 @Singleton
 class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
-    
+        
+    private static final int COPY_INDEX = Integer.MAX_VALUE;
+
     private final LimeXMLDocumentFactory limeXMLDocumentFactory;
     private final PushEndpointFactory pushEndpointFactory;
     
@@ -28,38 +39,148 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
         this.pushEndpointFactory = pushEndpointFactory;
     }
     
+    public RemoteFileDesc createRemoteFileDesc(RemoteFileDesc rfd, IpPort ep) {
+        return createRemoteFileDesc(
+                ep.getAddress(),              // host
+                ep.getPort(),                 // port
+                COPY_INDEX,                   // index (unknown)
+                rfd.getFileName(),            // filename
+                rfd.getSize(),                // filesize
+                rfd.getClientGUID(),          // client GUID
+                0,                            // speed
+                false,                        // chat capable
+                2,                            // quality
+                false,                        // browse hostable
+                rfd.getXMLDocument(),         // xml doc
+                rfd.getUrns(),                // urns
+                false,                        // reply to MCast
+                false,                        // is firewalled
+                AlternateLocation.ALT_VENDOR, // vendor
+                IpPort.EMPTY_SET,             // push proxies
+                rfd.getCreationTime(),        // creation time
+                0,                            // firewalled transfer
+                null,                         // no PE cause not firewalled
+            ep instanceof Connectable ? 
+        ((Connectable)ep).isTLSCapable() : false // TLS capable if ep is.
+               );
+    }
+    
+    public RemoteFileDesc createRemoteFileDesc(RemoteFileDesc rfd, PushEndpoint pe) {
+        return createRemoteFileDesc(
+                pe.getAddress(),                // host - ignored
+                pe.getPort(),                 // port -ignored
+                COPY_INDEX,                   // index (unknown)
+                rfd.getFileName(),            // filename
+                rfd.getSize(),                // filesize
+                DataUtils.EMPTY_GUID,         // guid
+                rfd.getSpeed(),               // speed
+                false,                        // chat capable
+                rfd.getQuality(),             // quality
+                false,                        // browse hostable
+                rfd.getXMLDocument(),         // xml doc
+                rfd.getUrns(),                // urns
+                false,                        // reply to MCast
+                true,                         // is firewalled
+                AlternateLocation.ALT_VENDOR, // vendor
+                null,                         // push proxies
+                rfd.getCreationTime(),        // creation time
+                0,                            // firewalled transfer
+                pe,                           // use existing PE
+                false);                       // not TLS capable (they connect to us anyway)
+    }
+    
+    public RemoteFileDesc createRemoteFileDesc(String host, int port, long index,
+            String filename, long size, byte[] clientGUID, int speed, boolean chat, int quality,
+            boolean browseHost, LimeXMLDocument xmlDoc, Set<? extends URN> urns,
+            boolean replyToMulticast, boolean firewalled, String vendor,
+            Set<? extends IpPort> proxies, long createTime, boolean tlsCapable) {
+        return createRemoteFileDesc(
+                host, port, index, filename, size, clientGUID, speed, chat,
+                quality, browseHost, xmlDoc, urns, replyToMulticast, firewalled,
+                vendor, proxies, createTime, 0, null, tlsCapable);
+    }
+    
+    public RemoteFileDesc createRemoteFileDesc(String host, int port, long index,
+            String filename, long size, byte[] clientGUID, int speed, boolean chat, int quality,
+            boolean browseHost, LimeXMLDocument xmlDoc, Set<? extends URN> urns,
+            boolean replyToMulticast, boolean firewalled, String vendor,
+            Set<? extends IpPort> proxies, long createTime, int FWTVersion, boolean tlsCapable) {
+        return createRemoteFileDesc(
+                host,
+                port,
+                index,
+                filename,
+                size,
+                clientGUID,
+                speed,
+                chat,
+                quality,
+                browseHost,
+                xmlDoc,
+                urns, 
+                replyToMulticast,
+                firewalled,
+                vendor, 
+                proxies,
+                createTime,
+                FWTVersion, 
+                null, // this will create a PE to house the data if the host is firewalled
+                tlsCapable); 
+    }
+
+    public RemoteFileDesc createRemoteFileDesc(String host, int port, long index,
+            String filename, long size, int speed, boolean chat, int quality, boolean browseHost,
+            LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
+            boolean firewalled, String vendor, long createTime, PushEndpoint pe) {
+        return createRemoteFileDesc(
+                host,port,index,filename,size,null,speed,chat,quality,browseHost,xmlDoc,urns,
+                replyToMulticast,firewalled,vendor,null,createTime,0,pe, false); // use exising pe
+    }
+
+    public RemoteFileDesc createRemoteFileDesc(String host, int port, long index,
+            String filename, long size, byte[] clientGUID, int speed, boolean chat, int quality,
+            boolean browseHost, LimeXMLDocument xmlDoc, Set<? extends URN> urns,
+            boolean replyToMulticast, boolean firewalled, String vendor,
+            Set<? extends IpPort> proxies, long createTime, int FWTVersion, PushEndpoint pe,
+            boolean tlsCapable) {
+        if (firewalled) {
+            if (pe == null) {
+                try {
+                    pe = pushEndpointFactory.createPushEndpoint(clientGUID, proxies,
+                            PushEndpoint.PLAIN, FWTVersion, new IpPortImpl(host, port));
+                } catch (UnknownHostException uhe) {
+                    throw new IllegalArgumentException(uhe);
+                }
+            }
+            clientGUID = pe.getClientGUID();
+        } else {
+            assert pe == null;
+        }
+        
+        if(urns == null)
+            urns = Collections.emptySet();
+        boolean http11 = !urns.isEmpty();
+        
+        return new RemoteFileDescImpl(host, port, index, filename, size, clientGUID, speed, chat,
+                quality, browseHost, xmlDoc, urns, replyToMulticast, firewalled, vendor,
+                proxies, createTime, FWTVersion, pe, tlsCapable, http11);
+    }
+
+    public RemoteFileDesc createUrlRemoteFileDesc(String host, int port,
+            String filename, long size, Set<? extends URN> urns, URL url) {
+        return new UrlRemoteFileDescImpl(host, port, filename, size, urns, url);
+    }
+        
     public RemoteFileDesc createFromMemento(RemoteHostMemento remoteHostMemento) throws InvalidDataException {
         if(remoteHostMemento.getCustomUrl() != null) {
-            return new URLRemoteFileDesc(remoteHostMemento.getHost(),
-                                         remoteHostMemento.getPort(),
-                                         remoteHostMemento.getFileName(),
-                                         remoteHostMemento.getSize(),
-                                         remoteHostMemento.getUrns(),
-                                         remoteHostMemento.getCustomUrl());
+            return createUrlRemoteFileDesc(remoteHostMemento.getHost(), remoteHostMemento.getPort(), remoteHostMemento.getFileName(), remoteHostMemento.getSize(), remoteHostMemento.getUrns(),
+                    remoteHostMemento.getCustomUrl());
         } else {
             try {
-                return new RemoteFileDesc(
-                        remoteHostMemento.getHost(),
-                        remoteHostMemento.getPort(),
-                        remoteHostMemento.getIndex(),
-                        remoteHostMemento.getFileName(),
-                        remoteHostMemento.getSize(),
-                        remoteHostMemento.getClientGuid(),
-                        remoteHostMemento.getSpeed(),
-                        remoteHostMemento.isChat(),
-                        remoteHostMemento.getQuality(),
-                        remoteHostMemento.isBrowseHost(),
-                        xml(remoteHostMemento.getXml()),
-                        remoteHostMemento.getUrns(),
-                        remoteHostMemento.isReplyToMulticast(),
-                        remoteHostMemento.isFirewalled(),
-                        remoteHostMemento.getVendor(),
-                        IpPort.EMPTY_SET,
-                        -1L,
-                        -1,
-                        pe(remoteHostMemento.getPushAddr()),
-                        remoteHostMemento.isTls()
-                        );
+                return createRemoteFileDesc(remoteHostMemento.getHost(), remoteHostMemento.getPort(), remoteHostMemento.getIndex(), remoteHostMemento.getFileName(), remoteHostMemento.getSize(),
+                        remoteHostMemento.getClientGuid(), remoteHostMemento.getSpeed(), remoteHostMemento.isChat(), remoteHostMemento.getQuality(), remoteHostMemento.isBrowseHost(), xml(remoteHostMemento.getXml()),
+                        remoteHostMemento.getUrns(), remoteHostMemento.isReplyToMulticast(), remoteHostMemento.isFirewalled(), remoteHostMemento.getVendor(), IpPort.EMPTY_SET, -1L,
+                        -1, pe(remoteHostMemento.getPushAddr()), remoteHostMemento.isTls());
             } catch (SAXException e) {
                 throw new InvalidDataException(e);
             } catch (SchemaNotFoundException e) {

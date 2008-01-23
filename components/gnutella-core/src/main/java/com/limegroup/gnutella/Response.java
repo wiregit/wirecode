@@ -1,6 +1,8 @@
 package com.limegroup.gnutella;
 
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -12,9 +14,9 @@ import org.limewire.io.IpPort;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 
 /**
@@ -294,33 +296,16 @@ public class Response {
     /**
      * Returns this Response as a RemoteFileDesc.
      */
-    public RemoteFileDesc toRemoteFileDesc(HostData data){
+    public RemoteFileDesc toRemoteFileDesc(HostData data, RemoteFileDescFactory remoteFileDescFactory){
         if(cachedRFD != null &&
            cachedRFD.getPort() == data.getPort() &&
            cachedRFD.getHost().equals(data.getIP()))
             return cachedRFD;
         else {
-            RemoteFileDesc rfd = new RemoteFileDesc(
-                 data.getIP(),
-                 data.getPort(),
-                 getIndex(),
-                 getName(),
-                 getSize(),
-                 data.getClientGUID(),
-                 data.getSpeed(),
-                 data.isChatEnabled(),
-                 data.getQuality(),
-                 data.isBrowseHostEnabled(),
-                 getDocument(),
-                 getUrns(),
-                 data.isReplyToMulticastQuery(),
-                 data.isFirewalled(), 
-                 data.getVendorCode(),
-                 data.getPushProxies(),
-                 getCreateTime(),
-                 data.getFWTVersionSupported(),
-                 data.isTLSCapable()
-                );
+            RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc(data.getIP(), data.getPort(), getIndex(),
+                    getName(), getSize(), data.getClientGUID(), data.getSpeed(), data.isChatEnabled(), data.getQuality(), data.isBrowseHostEnabled(),
+                    getDocument(), getUrns(), data.isReplyToMulticastQuery(), data.isFirewalled(), data.getVendorCode(), data.getPushProxies(), getCreateTime(),
+                    data.getFWTVersionSupported(), data.isTLSCapable());
             cachedRFD = rfd;
             return rfd;
         }

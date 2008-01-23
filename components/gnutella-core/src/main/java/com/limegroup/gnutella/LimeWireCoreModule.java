@@ -336,10 +336,9 @@ public class LimeWireCoreModule extends AbstractModule {
         bindAll(Names.named("messageExecutor"), ExecutorService.class, MessageExecutorProvider.class, Executor.class);
         bindAll(Names.named("nioExecutor"), ScheduledExecutorService.class, NIOScheduledExecutorServiceProvider.class, ExecutorService.class, Executor.class);
 
-        // TODO: statically injecting this for now...
+        // TODO: statically injecting these for now...
         requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
         requestStaticInjection(AddressToken.class);
-        requestStaticInjection(RemoteFileDesc.class);
         requestStaticInjection(HashTree.class);
         requestStaticInjection(LimeXMLDocument.class);
         requestStaticInjection(StatisticsManager.class);

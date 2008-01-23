@@ -176,7 +176,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	
     	//add one fake downloader to the downloader list
     	Endpoint e = new Endpoint("1.2.3.5",12345);
-    	RemoteFileDesc other = new RemoteFileDesc(newRFD("incomplete"),e);
+    	RemoteFileDesc other = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(newRFD("incomplete"), e);
     	HTTPDownloaderFactory httpDownloaderFactory =injector.getInstance(HTTPDownloaderFactory.class);
     	AltLocDownloaderStub fakeDownloader = (AltLocDownloaderStub)httpDownloaderFactory.create(null, other, null, false);
     	
@@ -543,11 +543,11 @@ public class ManagedDownloaderTest extends LimeTestCase {
 	}
 	
     
-    private static RemoteFileDesc newRFD(String name) {
+    private RemoteFileDesc newRFD(String name) {
         return newRFD(name, null);
     }
 
-    private static RemoteFileDesc newRFD(String name, String hash) {
+    private RemoteFileDesc newRFD(String name, String hash) {
         Set<URN> urns=null;
         if (hash!=null) {
             urns=new HashSet<URN>(1);
@@ -557,10 +557,8 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 fail("Couldn't create URN", e);
             }
         }        
-        return new RemoteFileDesc("127.0.0.1", PORT, 13l,
-                                  name, 1024,
-                                  new byte[16], 56, false, 4, true, null, urns,
-                                  false, false,"",null, -1, false);
+        return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("127.0.0.1", PORT, 13l, name, 1024, new byte[16],
+                56, false, 4, true, null, urns, false, false, "", null, -1, false);
     }
     
     
@@ -587,7 +585,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         PushEndpoint pe = pushEndpointFactory.createPushEndpoint(guid, ppis);
         pe.updateProxies(true);
 
-        return new RemoteFileDesc(newRFD(name, hash), pe);
+        return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc(newRFD(name, hash), pe);
     }
     
     private File createMaximumPathLengthDirectory() throws IOException {
@@ -646,6 +644,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         private final BandwidthManager bandwidthManager;
         private final Provider<PushEndpointCache> pushEndpointCache;
         private final PushEndpointFactory pushEndpointFactory;
+        private final RemoteFileDescFactory remoteFileDescFactory;
 
         @Inject
         public AltLocDownloaderStubFactory(NetworkManager networkManager,
@@ -654,7 +653,8 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 Provider<CreationTimeCache> creationTimeCache,
                 BandwidthManager bandwidthManager,
                 Provider<PushEndpointCache> pushEndpointCache,
-                PushEndpointFactory pushEndpointFactory) {
+                PushEndpointFactory pushEndpointFactory,
+                RemoteFileDescFactory remoteFileDescFactory) {
             this.networkManager = networkManager;
             this.alternateLocationFactory = alternateLocationFactory;
             this.downloadManager = downloadManager;
@@ -662,13 +662,14 @@ public class ManagedDownloaderTest extends LimeTestCase {
             this.bandwidthManager = bandwidthManager;
             this.pushEndpointCache = pushEndpointCache;
             this.pushEndpointFactory = pushEndpointFactory;
+            this.remoteFileDescFactory = remoteFileDescFactory;
         }
         
         public HTTPDownloader create(Socket socket, RemoteFileDesc rfd,
                 VerifyingFile incompleteFile, boolean inNetwork) {
             return new AltLocDownloaderStub(rfd, incompleteFile,
                     networkManager, alternateLocationFactory, downloadManager,
-                    creationTimeCache.get(), bandwidthManager, pushEndpointCache, pushEndpointFactory);
+                    creationTimeCache.get(), bandwidthManager, pushEndpointCache, pushEndpointFactory, remoteFileDescFactory);
         }
 
     }
@@ -681,9 +682,9 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 NetworkManager networkManager, AlternateLocationFactory alternateLocationFactory,
                 DownloadManager downloadManager, CreationTimeCache creationTimeCache,
                 BandwidthManager bandwidthManager, Provider<PushEndpointCache> pushEndpointCache,
-                PushEndpointFactory pushEndpointFactory) {
+                PushEndpointFactory pushEndpointFactory, RemoteFileDescFactory remoteFileDescFactory) {
             super(rfd, null, networkManager, alternateLocationFactory, downloadManager,
-                    creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory);
+                    creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory, remoteFileDescFactory);
             this.rfd = rfd;
         }
     	

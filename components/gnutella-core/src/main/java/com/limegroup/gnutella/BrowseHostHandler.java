@@ -26,6 +26,7 @@ import org.limewire.service.ErrorService;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -80,6 +81,7 @@ public class BrowseHostHandler {
     private final Provider<ForMeReplyHandler> forMeReplyHandler;
 
     private final MessageFactory messageFactory;
+    private final RemoteFileDescFactory remoteFileDescFactory;
 
     /**
      * @param callback A instance of a ActivityCallback, so I can notify it of
@@ -95,7 +97,8 @@ public class BrowseHostHandler {
             ActivityCallback activityCallback, SocketsManager socketsManager,
             Provider<PushDownloadManager> pushDownloadManager,
             Provider<ForMeReplyHandler> forMeReplyHandler,
-            MessageFactory messageFactory) {
+            MessageFactory messageFactory,
+            RemoteFileDescFactory remoteFileDescFactory) {
         _guid = guid;
         _serventID = serventID;
         this.browseHostCallback = browseHostCallback;
@@ -104,6 +107,7 @@ public class BrowseHostHandler {
         this.pushDownloadManager = pushDownloadManager;
         this.forMeReplyHandler = forMeReplyHandler;
         this.messageFactory = messageFactory;
+        this.remoteFileDescFactory = remoteFileDescFactory;
     }
 
     /** 
@@ -190,11 +194,9 @@ public class BrowseHostHandler {
         	failed();
         } else {
         	RemoteFileDesc fakeRFD = 
-        		new RemoteFileDesc(host.getAddress(), host.getPort(), SPECIAL_INDEX, "fake", 0, 
-        				_serventID.bytes(), 0, false, 0, false,
-        				null, null,false,true,"", proxies,
-        				-1, canDoFWTransfer ? UDPConnection.VERSION : 0,
-        				host.isTLSCapable()); 
+        		remoteFileDescFactory.createRemoteFileDesc(host.getAddress(), host.getPort(), SPECIAL_INDEX, "fake",
+                    0, _serventID.bytes(), 0, false, 0, false, null, null, false, true, "", proxies,
+                    -1, canDoFWTransfer ? UDPConnection.VERSION : 0, host.isTLSCapable()); 
         	// register with the map so i get notified about a response to my
         	// Push.
             browseHostCallback.putInfo(_serventID, new PushRequestDetails(this));

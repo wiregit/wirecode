@@ -22,6 +22,7 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.BrowseHostHandler.PushRequestDetails;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.MessageFactory;
 
 @Singleton
@@ -37,6 +38,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
     private final Provider<PushDownloadManager> pushDownloadManager;
     private final Provider<ForMeReplyHandler> forMeReplyHandler;
     private final ScheduledExecutorService backgroundExecutor;
+    private final RemoteFileDescFactory remoteFileDescFactory;
 
     private final MessageFactory messageFactory;
 
@@ -47,13 +49,15 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
             SocketsManager socketsManager,
             Provider<PushDownloadManager> pushDownloadManager,
             Provider<ForMeReplyHandler> forMeReplyHandler,
-            MessageFactory messageFactory) {
+            MessageFactory messageFactory,
+            RemoteFileDescFactory remoteFileDescFactory) {
         this.activityCallback = activityCallback;
         this.socketsManager = socketsManager;
         this.pushDownloadManager = pushDownloadManager;
         this.forMeReplyHandler = forMeReplyHandler;
         this.messageFactory = messageFactory;
         this.backgroundExecutor = backgroundExecutor;
+        this.remoteFileDescFactory = remoteFileDescFactory;
 
     }
     
@@ -84,7 +88,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
                         }
                     },
                 activityCallback.get(), socketsManager, pushDownloadManager,
-                forMeReplyHandler, messageFactory);
+                forMeReplyHandler, messageFactory, remoteFileDescFactory);
     }
 
     /** @return true if the Push was handled by me. */

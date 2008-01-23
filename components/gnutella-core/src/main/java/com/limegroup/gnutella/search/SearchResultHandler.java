@@ -32,6 +32,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.SearchServices;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -89,6 +90,7 @@ public final class SearchResultHandler {
     private final Provider<ConnectionManager> connectionManager;
     private final ConnectionServices connectionServices;
     private final Provider<SpamManager> spamManager;
+    private final RemoteFileDescFactory remoteFileDescFactory;
 
     @Inject
     public SearchResultHandler(NetworkManager networkManager,
@@ -96,13 +98,15 @@ public final class SearchResultHandler {
             Provider<ActivityCallback> activityCallback,
             Provider<ConnectionManager> connectionManager,
             ConnectionServices connectionServices,
-            Provider<SpamManager> spamManager) {
+            Provider<SpamManager> spamManager,
+            RemoteFileDescFactory remoteFileDescFactory) {
         this.networkManager = networkManager;
         this.searchServices = searchServices;
         this.activityCallback = activityCallback;
         this.connectionManager = connectionManager;
         this.connectionServices = connectionServices;
         this.spamManager = spamManager;
+        this.remoteFileDescFactory = remoteFileDescFactory;
     }
 
     /*---------------------------------------------------    
@@ -289,7 +293,7 @@ public final class SearchResultHandler {
             
             // we'll be showing the result to the user, count it
             countClassC(qr,response);
-            RemoteFileDesc rfd = response.toRemoteFileDesc(data);
+            RemoteFileDesc rfd = response.toRemoteFileDesc(data, remoteFileDescFactory);
             rfd.setSecureStatus(secureStatus);
             Set<? extends IpPort> alts = response.getLocations();
             activityCallback.get().handleQueryResult(rfd, data, alts);

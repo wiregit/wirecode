@@ -14,6 +14,7 @@ import org.limewire.service.ErrorService;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.util.DataUtils;
 
@@ -60,18 +61,12 @@ public class DirectAltLoc extends AlternateLocation {
 		return ret;
 	}
 	
-	public RemoteFileDesc createRemoteFileDesc(long size) {
+	public RemoteFileDesc createRemoteFileDesc(long size, RemoteFileDescFactory remoteFileDescFactory) {
 		Set<URN> urnSet = new UrnSet(getSHA1Urn());
         int quality = 3;
-		RemoteFileDesc ret = new RemoteFileDesc(_node.getAddress(), _node.getPort(),
-								  0, HTTPConstants.URI_RES_N2R+SHA1_URN, size,  
-								  DataUtils.EMPTY_GUID, 1000,
-								  true, quality, false, null, urnSet, false,
-                                  false, //assume altLoc is not firewalled
-                                  ALT_VENDOR,//Never displayed, and we don't know
-                                  null, -1, 
-              _node instanceof Connectable ? ((Connectable)_node).isTLSCapable() : false // TLS
-                                );
+		RemoteFileDesc ret = remoteFileDescFactory.createRemoteFileDesc(_node.getAddress(), _node.getPort(), 0, HTTPConstants.URI_RES_N2R+SHA1_URN, size, DataUtils.EMPTY_GUID, 1000, true, quality, false, null, urnSet,
+                false, false, ALT_VENDOR, null, -1, _node instanceof Connectable ? ((Connectable)_node).isTLSCapable() : false // TLS
+);
 		
 		return ret;
 	}

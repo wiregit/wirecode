@@ -23,7 +23,8 @@ public class RemoteFileDescUtils {
      * to retrieve HEAD which will result in this method blocking
      */
     @SuppressWarnings("deprecation")
-    public static RemoteFileDesc createRemoteFileDesc(URL url,
+    public static RemoteFileDesc createRemoteFileDesc(RemoteFileDescFactory remoteFileDescFactory,
+            URL url,
         String filename, URN urn, long size) throws IOException{
         if (url==null) {
             LOG.debug("createRemoteFileDesc called with null URL");        
@@ -42,13 +43,7 @@ public class RemoteFileDescUtils {
         
         URI uri = new URI(url);    
     
-        return new URLRemoteFileDesc(
-                url.getHost(),  
-                port,
-                filename != null ? filename : MagnetOptions.extractFileName(uri),
-                size <= 0 ? HTTPUtils.contentLength(url) : size,
-                urns,
-                url);         //assume no firewall transfer
+        return remoteFileDescFactory.createUrlRemoteFileDesc(url.getHost(), port, filename != null ? filename : MagnetOptions.extractFileName(uri), size <= 0 ? HTTPUtils.contentLength(url) : size, urns, url);         //assume no firewall transfer
     }
 
 }

@@ -11,6 +11,7 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.settings.SearchSettings;
@@ -54,6 +55,7 @@ public class SpamManagerTest extends LimeTestCase {
     private SpamManager manager;
     private LimeXMLDocumentFactory limeXMLDocumentFactory;
     private QueryRequestFactory queryRequestFactory;
+    private RemoteFileDescFactory remoteFileDescFactory;
     
     public SpamManagerTest(String name) {
         super(name);
@@ -75,6 +77,7 @@ public class SpamManagerTest extends LimeTestCase {
 		Injector injector = LimeTestUtils.createInjector();
 		limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
 		queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+		remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
         
         manager = new SpamManager(new RatingTable());
         manager.clearFilterData();
@@ -283,16 +286,12 @@ public class SpamManagerTest extends LimeTestCase {
         
     }
 
-    private static RemoteFileDesc createRFD(String addr, int port,
+    private RemoteFileDesc createRFD(String addr, int port,
             String name, LimeXMLDocument doc, URN urn, int size) {
         Set<URN> urns = new HashSet<URN>();
         urns.add(urn);
-        return new RemoteFileDesc(addr, port, 1, name,
-                size, DataUtils.EMPTY_GUID, 3, 
-                false, 3, false,
-                doc, urns,
-                false,false,
-                "ALT",
+        return remoteFileDescFactory.createRemoteFileDesc(addr, port, 1, name, size,
+                DataUtils.EMPTY_GUID, 3, false, 3, false, doc, urns, false, false, "ALT",
                 new IpPortSet(), 0l, false);
     }
     

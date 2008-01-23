@@ -125,6 +125,8 @@ public class DownloadTestCase extends LimeTestCase {
     protected SocketsManager socketsManager;
 
     protected MessageFactory messageFactory;
+    
+    protected RemoteFileDescFactory remoteFileDescFactory;
 
     protected DownloadTestCase(String name) {
         super(name);
@@ -148,6 +150,8 @@ public class DownloadTestCase extends LimeTestCase {
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);
             }
         });
+        
+        remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
 
         networkManager = (NetworkManagerStub) injector.getInstance(NetworkManager.class);
         networkManager.setAcceptedIncomingConnection(true);
@@ -345,8 +349,9 @@ public class DownloadTestCase extends LimeTestCase {
     }
 
     protected RemoteFileDesc newRFD(int port, boolean useTLS) {
-        return new RemoteFileDesc("127.0.0.1", port, 0, savedFile.getName(), TestFile.length(),
-                new byte[16], 100, false, 4, false, null, null, false, false, "", null, -1, useTLS);
+        return remoteFileDescFactory.createRemoteFileDesc("127.0.0.1", port, 0, savedFile.getName(), TestFile.length(),
+                new byte[16], 100, false, 4, false, null, null, false, false, "", null, -1,
+                useTLS);
     }
 
     protected RemoteFileDesc newRFDWithURN(int port, boolean useTLS) {
@@ -365,8 +370,9 @@ public class DownloadTestCase extends LimeTestCase {
         } catch (Exception e) {
             fail("SHA1 not created for: " + savedFile, e);
         }
-        return new RemoteFileDesc("127.0.0.1", port, 0, savedFile.getName(), TestFile.length(),
-                new byte[16], 100, false, 4, false, null, set, false, false, "", null, -1, useTLS);
+        return remoteFileDescFactory.createRemoteFileDesc("127.0.0.1", port, 0, savedFile.getName(), TestFile.length(),
+                new byte[16], 100, false, 4, false, null, set, false, false, "", null, -1,
+                useTLS);
     }
 
     protected RemoteFileDesc newRFDPush(int port, int suffix) throws Exception {
@@ -381,8 +387,9 @@ public class DownloadTestCase extends LimeTestCase {
         Set<URN> urns = new HashSet<URN>();
         urns.add(TestFile.hash());
 
-        return new RemoteFileDesc("127.0.0." + rfdSuffix, 6346, 0, savedFile.getName(), TestFile
-                .length(), 100, false, 1, false, null, urns, false, true, "ALT", 0, al
+        return remoteFileDescFactory.createRemoteFileDesc("127.0.0." + rfdSuffix, 6346, 0, savedFile.getName(),
+                TestFile
+                        .length(), 100, false, 1, false, null, urns, false, true, "ALT", 0, al
                 .getPushAddress());
     }
 

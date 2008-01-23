@@ -282,8 +282,8 @@ public class HTTPDownloader implements BandwidthTracker {
     private final CreationTimeCache creationTimeCache;
     private final BandwidthManager bandwidthManager;
     private final Provider<PushEndpointCache> pushEndpointCache;
-
     private final PushEndpointFactory pushEndpointFactory;
+    private final RemoteFileDescFactory remoteFileDescFactory;
 
     HTTPDownloader(Socket socket, RemoteFileDesc rfd,
             VerifyingFile incompleteFile, boolean inNetwork,
@@ -293,7 +293,8 @@ public class HTTPDownloader implements BandwidthTracker {
             CreationTimeCache creationTimeCache,
             BandwidthManager bandwidthManager,
             Provider<PushEndpointCache> pushEndpointCache,
-            PushEndpointFactory pushEndpointFactory) {
+            PushEndpointFactory pushEndpointFactory,
+            RemoteFileDescFactory remoteFileDescFactory) {
         
         
         if (rfd == null)
@@ -308,6 +309,7 @@ public class HTTPDownloader implements BandwidthTracker {
         this.bandwidthManager = bandwidthManager;
         this.pushEndpointCache = pushEndpointCache;
         this.pushEndpointFactory = pushEndpointFactory;
+        this.remoteFileDescFactory = remoteFileDescFactory;
         _rfd=rfd;
         _socket=socket;
         _incompleteFile=incompleteFile;
@@ -940,7 +942,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	private void readAlternateLocations(String altStr, boolean allowTLS) {
         AltLocUtils.parseAlternateLocations(_rfd.getSHA1Urn(), altStr, allowTLS, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             public Void apply(AlternateLocation location) {
-                RemoteFileDesc rfd = location.createRemoteFileDesc(_rfd.getSize());
+                RemoteFileDesc rfd = location.createRemoteFileDesc(_rfd.getSize(), remoteFileDescFactory);
                 if(_locationsReceived.add(rfd)) {
                     if (location instanceof DirectAltLoc)
                         DownloadStat.ALTERNATE_COLLECTED.incrementStat();

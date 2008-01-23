@@ -101,7 +101,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
             Provider<TigerTreeCache> tigerTreeCache, ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory)
-            throws SaveLocationException {
+             {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
@@ -169,7 +169,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      * link to determine the file length. This is a blocking call!
      */
     @SuppressWarnings("deprecation")
-    private static RemoteFileDesc createRemoteFileDesc(String defaultURL,
+    private RemoteFileDesc createRemoteFileDesc(String defaultURL,
         String filename, URN urn) throws IOException{
         if (defaultURL==null) {
             LOG.debug("createRemoteFileDesc called with null URL");        
@@ -189,13 +189,10 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
         
         URI uri = new URI(url);
         
-        return new URLRemoteFileDesc(
-                url.getHost(),  
-                port,
-                filename != null ? filename : MagnetOptions.extractFileName(uri),
-                HTTPUtils.contentLength(url),
-                urns,
-                url);         //assume no firewall transfer
+        return remoteFileDescFactory.createUrlRemoteFileDesc(url.getHost(), port,
+                filename != null ? filename : MagnetOptions.extractFileName(uri), HTTPUtils
+                        .contentLength(url), urns, url); // assume no
+                                                            // firewall transfer
     } 
 
     ////////////////////////////// Requery Logic ///////////////////////////

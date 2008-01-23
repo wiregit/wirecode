@@ -37,6 +37,7 @@ import com.limegroup.gnutella.downloader.ConnectionStatus;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.HTTPDownloaderFactory;
 import com.limegroup.gnutella.downloader.QueuedException;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.downloader.TryAgainLaterException;
 import com.limegroup.gnutella.downloader.UnknownCodeException;
 import com.limegroup.gnutella.downloader.VerifyingFile;
@@ -86,6 +87,8 @@ public class UploadQueueingTest extends LimeTestCase {
     private VerifyingFileFactory verifyingFileFactory;
 
     private HTTPDownloaderFactory httpDownloaderFactory;
+    
+    private RemoteFileDescFactory remoteFileDescFactory;
 
     public UploadQueueingTest(String name) {
         super(name);
@@ -113,6 +116,8 @@ public class UploadQueueingTest extends LimeTestCase {
                         bind(FileManager.class).to(FileManagerStub.class);
                     }
                 });
+        
+        remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
 
         fm = (FileManagerStub) injector.getInstance(FileManager.class);
         initializeFileManager();
@@ -143,37 +148,37 @@ public class UploadQueueingTest extends LimeTestCase {
         FileDescStub descStub = new FileDescStub("abc1.txt", urn1, 0);
         urns.put(urn1, descStub);
         descs.add(descStub);
-        rfd1 = new RemoteFileDesc("1.1.1.1", 1, 0, "abc1.txt",
-                FileDescStub.DEFAULT_SIZE, new byte[16], 56, false, 3, false,
-                null, descStub.getUrns(), false, false, "", null, -1, false);
+        rfd1 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.1", 1, 0, "abc1.txt", FileDescStub.DEFAULT_SIZE,
+                new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
+                false);
 
         descStub = new FileDescStub("abc2.txt", urn2, 1);
         urns.put(urn2, descStub);
         descs.add(descStub);
-        rfd2 = new RemoteFileDesc("1.1.1.2", 1, 1, "abc2.txt",
-                FileDescStub.DEFAULT_SIZE, new byte[16], 56, false, 3, false,
-                null, descStub.getUrns(), false, false, "", null, -1, false);
+        rfd2 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.2", 1, 1, "abc2.txt", FileDescStub.DEFAULT_SIZE,
+                new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
+                false);
 
         descStub = new FileDescStub("abc3.txt", urn3, 2);
         urns.put(urn3, descStub);
         descs.add(descStub);
-        rfd3 = new RemoteFileDesc("1.1.1.3", 1, 2, "abc3.txt",
-                FileDescStub.DEFAULT_SIZE, new byte[16], 56, false, 3, false,
-                null, descStub.getUrns(), false, false, "", null, -1, false);
+        rfd3 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.3", 1, 2, "abc3.txt", FileDescStub.DEFAULT_SIZE,
+                new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
+                false);
 
         descStub = new FileDescStub("abc4.txt", urn4, 3);
         urns.put(urn4, descStub);
         descs.add(descStub);
-        rfd4 = new RemoteFileDesc("1.1.1.4", 1, 3, "abc4.txt",
-                FileDescStub.DEFAULT_SIZE, new byte[16], 56, false, 3, false,
-                null, descStub.getUrns(), false, false, "", null, -1, false);
+        rfd4 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.4", 1, 3, "abc4.txt", FileDescStub.DEFAULT_SIZE,
+                new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
+                false);
 
         descStub = new FileDescStub("abc5.txt", urn5, 4);
         urns.put(urn5, descStub);
         descs.add(descStub);
-        rfd5 = new RemoteFileDesc("1.1.1.5", 1, 4, "abc5.txt",
-                FileDescStub.DEFAULT_SIZE, new byte[16], 56, false, 3, false,
-                null, descStub.getUrns(), false, false, "", null, -1, false);
+        rfd5 = remoteFileDescFactory.createRemoteFileDesc("1.1.1.5", 1, 4, "abc5.txt", FileDescStub.DEFAULT_SIZE,
+                new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
+                false);
 
         fm.setUrns(urns);
         fm.setDescs(descs);

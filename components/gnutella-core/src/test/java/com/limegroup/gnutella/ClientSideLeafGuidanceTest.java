@@ -8,11 +8,11 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-
-import com.limegroup.gnutella.connection.BlockingConnection;
-import com.limegroup.gnutella.connection.RoutedConnection;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.connection.BlockingConnection;
+import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
@@ -355,13 +355,9 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         }
         
         // mark anita as spammy
-        RemoteFileDesc anita =new RemoteFileDesc("127.0.0.1", 6355, 1, "anita kasevan",
-                1000, DataUtils.EMPTY_GUID, 3, 
-                false, 3, false,
-                null, Collections.EMPTY_SET,
-                false,false,
-                "ALT",
-                Collections.EMPTY_SET, 0l, false);
+        RemoteFileDesc anita =injector.getInstance(RemoteFileDescFactory.class)
+                .createRemoteFileDesc("127.0.0.1", 6355, 1, "anita kasevan", 1000, DataUtils.EMPTY_GUID, 3, false, 3, false,
+                        null, Collections.EMPTY_SET, false, false, "ALT", Collections.EMPTY_SET, 0l, false);
         
         spamManager.handleUserMarkedSpam(new RemoteFileDesc[]{anita});
         assertTrue(spamManager.isSpam(anita));

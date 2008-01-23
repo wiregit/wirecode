@@ -1038,17 +1038,17 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
         synchronized(direct) {
             for(AlternateLocation loc : direct)
-                locs.add(loc.createRemoteFileDesc(size));
+                locs.add(loc.createRemoteFileDesc(size, remoteFileDescFactory));
         }
         
         synchronized(push) {
             for(AlternateLocation loc : push)
-                locs.add(loc.createRemoteFileDesc(size));
+                locs.add(loc.createRemoteFileDesc(size, remoteFileDescFactory));
         }
         
         synchronized(fwt) {
             for(AlternateLocation loc : fwt)
-                locs.add(loc.createRemoteFileDesc(size));
+                locs.add(loc.createRemoteFileDesc(size, remoteFileDescFactory));
         }
                 
         addPossibleSources(locs);
@@ -1295,7 +1295,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             return;
         }
         
-        addDownload(loc.createRemoteFileDesc(contentLength), false);
+        addDownload(loc.createRemoteFileDesc(contentLength, remoteFileDescFactory), false);
     }
     
     /* (non-Javadoc)

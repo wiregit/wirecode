@@ -51,6 +51,7 @@ import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
@@ -146,6 +147,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
     private final ApplicationServices applicationServices;
     private final UpdateCollectionFactory updateCollectionFactory;
     private final UpdateMessageVerifier updateMessageVerifier;
+    private final RemoteFileDescFactory remoteFileDescFactory;
     
     private volatile String timeoutUpdateLocation = "http://update0.limewire.com/update.def";
     private volatile List<String> maxedUpdateList = Arrays.asList("http://update1.limewire.com/update.def",
@@ -175,7 +177,8 @@ public class UpdateHandlerImpl implements UpdateHandler {
             ApplicationServices applicationServices,
             UpdateCollectionFactory updateCollectionFactory,
             Clock clock,
-            UpdateMessageVerifier updateMessageVerifier) {
+            UpdateMessageVerifier updateMessageVerifier, 
+            RemoteFileDescFactory remoteFileDescFactory) {
         this.backgroundExecutor = backgroundExecutor;
         this.activityCallback = activityCallback;
         this.connectionServices = connectionServices;
@@ -189,6 +192,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
         this.updateCollectionFactory = updateCollectionFactory;
         this.clock = clock;
         this.updateMessageVerifier = updateMessageVerifier;
+        this.remoteFileDescFactory = remoteFileDescFactory;
     }
         
     String getTimeoutUrl() {
@@ -663,26 +667,10 @@ public class UpdateHandlerImpl implements UpdateHandler {
      */
     private RemoteFileDesc rfd(ReplyHandler rh, DownloadInformation info) {
         Set<URN> urns = new UrnSet(info.getUpdateURN());
-        return new RemoteFileDesc(rh.getAddress(),               // address
-                                  rh.getPort(),                 // port
-                                  Integer.MAX_VALUE,            // index (unknown)
-                                  info.getUpdateFileName(),     // filename
-                                  (int)info.getSize(),          // filesize
-                                  rh.getClientGUID(),           // client GUID
-                                  0,                            // speed
-                                  false,                        // chat capable
-                                  2,                            // quality
-                                  false,                        // browse hostable
-                                  null,                         // xml doc
-                                  urns,                         // urns
-                                  false,                        // reply to MCast
-                                  false,                        // is firewalled
-                                  "LIME",                        // vendor
-                                  IpPort.EMPTY_SET,             // push proxies
-                                  0,                            // creation time
-                                  0,                            //  firewalled transfer
-                               rh instanceof Connectable ? 
-                                  ((Connectable)rh).isTLSCapable() : false );  // tls capability
+        return remoteFileDescFactory.createRemoteFileDesc(rh.getAddress(), rh.getPort(), Integer.MAX_VALUE,
+                info.getUpdateFileName(), (int)info.getSize(), rh.getClientGUID(), 0, false, 2, false, null, urns, false,
+                false, "LIME", IpPort.EMPTY_SET, 0, 0, rh instanceof Connectable ? 
+                      ((Connectable)rh).isTLSCapable() : false);  // tls capability
     }
     
     /**

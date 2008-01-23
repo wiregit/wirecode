@@ -85,6 +85,8 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     private Mockery context;
 
     private PushEndpointFactory pushEndpointFactory;
+    
+    private RemoteFileDescFactory remoteFileDescFactory;
 
     public HTTPDownloaderTest(String name) {
         super(name);
@@ -101,6 +103,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
 
     private Injector setupInjector(Module... modules) {
 		Injector injector = LimeTestUtils.createInjector(modules);
+		remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
 		networkManager = injector.getInstance(NetworkManager.class);
 		alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
 		downloadManager = injector.getInstance(DownloadManager.class);
@@ -113,7 +116,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         
 		httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(networkManager,
                 alternateLocationFactory, downloadManager, creationTimeCache, bandwidthManager,
-                Providers.of(pushEndpointCache), pushEndpointFactory);
+                Providers.of(pushEndpointCache), pushEndpointFactory, remoteFileDescFactory);
 		
 		return injector;
     }
@@ -331,7 +334,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     public void testParseContentRange() throws Throwable {
         setupInjector();
         int length = 1000;
-        RemoteFileDesc rfd = new RemoteFileDesc("1.2.3.4", 1, 1, "file", length, new byte[16], 1,
+        RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc("1.2.3.4", 1, 1, "file", length, new byte[16], 1,
                 false, 2, false, null, null, false, false, "LIME", null, -1, false);
         File f = new File("sam");
         VerifyingFile vf = verifyingFileFactory.createVerifyingFile(length);
@@ -496,9 +499,9 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         server.setReuseAddress(true);
         server.bind(new InetSocketAddress(0));
 
-        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", server.getLocalPort(), 1, "file",
-                1000, new byte[16], 1, false, 1, false, null, UrnHelper.URN_SETS[0], false, false,
-                "TEST", Collections.EMPTY_SET, -1, 0, false);
+        RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc("127.0.0.1", server.getLocalPort(), 1, "file", 1000, new byte[16], 1,
+                false, 1, false, null, UrnHelper.URN_SETS[0], false, false, "TEST", Collections.EMPTY_SET,
+                -1, 0, false);
 
         VerifyingFile vf = verifyingFileFactory.createVerifyingFile(1000);
 
@@ -540,9 +543,9 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         s += "\r\n";
         SimpleReadHeaderState reader = new SimpleReadHeaderState(null, 100, 2048);
         reader.process(new ReadBufferChannel(s.getBytes()), ByteBuffer.allocate(1024));
-        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", 1, 1, "file", 1000, new byte[16], 1,
-                false, 1, false, null, UrnHelper.URN_SETS[0], false, false, "TEST",
-                Collections.EMPTY_SET, -1, 0, false);
+        RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc("127.0.0.1", 1, 1, "file", 1000, new byte[16], 1, false, 1,
+                false, null, UrnHelper.URN_SETS[0], false, false, "TEST", Collections.EMPTY_SET, -1, 0,
+                false);
         HTTPDownloader d = httpDownloaderFactory.create(null, rfd, null, false);
         PrivilegedAccessor.setValue(d, "_headerReader", reader);
         return d;

@@ -22,6 +22,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -98,17 +99,17 @@ public class UDPPushTest extends LimeTestCase {
         Set<IpPortImpl> proxies = new TreeSet<IpPortImpl>(IpPort.COMPARATOR);
         proxies.add(new IpPortImpl(InetAddress.getLocalHost().getHostAddress(), 10000));
 
-        rfd1 = new RemoteFileDesc("127.0.0.1", 20000, 30l, "file1", 100, guid,
-                SpeedConstants.CABLE_SPEED_INT, false, 1, false, null, null, false, true, "LIME",
-                proxies, now, false);
+        rfd1 = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("127.0.0.1", 20000, 30l, "file1", 100, guid,
+                SpeedConstants.CABLE_SPEED_INT, false, 1, false, null, null, false, true, "LIME", proxies, now,
+                false);
 
-        rfd2 = new RemoteFileDesc("127.0.0.1", 20000, 31l, "file2", 100, guid,
-                SpeedConstants.CABLE_SPEED_INT, false, 1, false, null, null, false, true, "LIME",
-                proxies, now, false);
+        rfd2 = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("127.0.0.1", 20000, 31l, "file2", 100, guid,
+                SpeedConstants.CABLE_SPEED_INT, false, 1, false, null, null, false, true, "LIME", proxies, now,
+                false);
 
-        rfdAlt = new RemoteFileDesc("127.0.0.1", 20000, 30l, "file1", 100, guid,
-                SpeedConstants.CABLE_SPEED_INT, false, 1, false, null, null, false, true, "ALT",
-                proxies, now, false);
+        rfdAlt = injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("127.0.0.1", 20000, 30l, "file1", 100, guid,
+                SpeedConstants.CABLE_SPEED_INT, false, 1, false, null, null, false, true, "ALT", proxies, now,
+                false);
      
         injector.getInstance(LifecycleManager.class).start();
     }

@@ -6,13 +6,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 
-import junit.framework.Test;
-
 import com.google.inject.Injector;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.http.HTTPConstants;
 
@@ -24,6 +25,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 
 	private byte[] TEST_GUID;
     private PushEndpointFactory pushEndpointFactory;
+    private RemoteFileDescFactory remoteFileDescFactory;
 
 	public RemoteFileDescTest(String name) {
 		super(name);
@@ -40,6 +42,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 	protected void setUp() {
 	    Injector injector = LimeTestUtils.createInjector();
 	    pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
+	    remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
 		TEST_GUID = GUID.makeGuid();
 	}
 
@@ -53,11 +56,9 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 		for(int i=0; i<invalidPorts.length; i++) {
 			try {
 				RemoteFileDesc rfd = 
-					new RemoteFileDesc("www.limewire.org", invalidPorts[i], 
-									   10, "test",
-									   10, TEST_GUID, 10, false, 3,
-									   false, null, null, false, false,"",
-                                       null, -1, false);
+				    remoteFileDescFactory.createRemoteFileDesc("www.limewire.org", invalidPorts[i], 10, "test", 10,
+                        TEST_GUID, 10, false, 3, false, null, null, false, false, "", null, -1,
+                        false);
 				fail("rfd1 should have received an exception for invalid port: "+
 					 rfd.getPort());
 			} catch(IllegalArgumentException e) {
@@ -75,11 +76,9 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 		validPorts[1] = 6000;
 		for(int i=0; i<validPorts.length; i++) {
 			try {
-				new RemoteFileDesc("www.limewire.org", validPorts[i], 
-									   10, "test",
-									   10, TEST_GUID, 10, false, 3,
-									   false, null, null, false, false,"",
-                                       null, -1, false);
+			    remoteFileDescFactory.createRemoteFileDesc("www.limewire.org", validPorts[i], 10, "test", 10,
+                        TEST_GUID, 10, false, 3, false, null, null, false, false, "", null, -1,
+                        false);
 			} catch(IllegalArgumentException e) {
 				fail("rfd1 should not have received an exception for valid port: "+
 					 validPorts[i], e);
@@ -94,9 +93,8 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 		Set urns = new HashSet();
 		urns.add(UrnHelper.URNS[0]);
 		RemoteFileDesc rfd =
-			new RemoteFileDesc("www.test.org", 3000, 10, "test", 10, TEST_GUID,
-							   10, true, 3, true, null, urns, 
-                               false, false,"", null, -1, false);
+		    remoteFileDescFactory.createRemoteFileDesc("www.test.org", 3000, 10, "test", 10, TEST_GUID, 10, true, 3,
+                true, null, urns, false, false, "", null, -1, false);
 		URL rfdUrl = rfd.getUrl();
 		String urlString = rfdUrl.toString();
 		String host = rfd.getHost();
@@ -128,22 +126,20 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
         PushEndpoint pe2 = pushEndpointFactory.createPushEndpoint(g2.bytes(), proxies2);
         
         //test an rfd with push proxies
-		 RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
-                UrnHelper.URNS[0].httpStringValue(), 10, 
-                pe.getClientGUID(), 10, true, 2, true, null, 
-                UrnHelper.URN_SETS[0],
-                false,true,"",proxies,-1, false);
+		 RemoteFileDesc fwalled = remoteFileDescFactory.createRemoteFileDesc("127.0.0.1", 6346, 10, HTTPConstants.URI_RES_N2R+
+                UrnHelper.URNS[0].httpStringValue(), 10,
+                pe.getClientGUID(), 10, true, 2, true, null, UrnHelper.URN_SETS[0], false, true, "", proxies,
+                -1, false);
 		 
 		 assertTrue(Arrays.equals(pe.getClientGUID(),fwalled.getClientGUID()));
 		 
 		 RemoteFileDesc nonfwalled = 
-			new RemoteFileDesc("www.limewire.org", 6346, 10, HTTPConstants.URI_RES_N2R+
-							   UrnHelper.URNS[1].httpStringValue(), 10, 
-							   GUID.makeGuid(), 10, true, 2, true, null, 
-							   UrnHelper.URN_SETS[1],
-                               false,false,"",null, -1, false);
+		     remoteFileDescFactory.createRemoteFileDesc("www.limewire.org", 6346, 10, HTTPConstants.URI_RES_N2R+
+        				   UrnHelper.URNS[1].httpStringValue(), 10,
+                GUID.makeGuid(), 10, true, 2, true, null, UrnHelper.URN_SETS[1], false, false, "", null,
+                -1, false);
 		 
-		 RemoteFileDesc differentPE = new RemoteFileDesc(fwalled,pe2);
+		 RemoteFileDesc differentPE = remoteFileDescFactory.createRemoteFileDesc(fwalled, pe2);
 		 assertTrue(Arrays.equals(pe2.getClientGUID(),differentPE.getClientGUID()));
 		 
 		 //both rfds should report as being altloc capable, but only
@@ -158,7 +154,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 		 PushEndpoint noProxies = pushEndpointFactory.createPushEndpoint(g3.bytes());
 
 		 RemoteFileDesc fwalledNotGood = 
-		 	new RemoteFileDesc(fwalled, noProxies);
+		     remoteFileDescFactory.createRemoteFileDesc(fwalled, noProxies);
 		 
 		 //it should not be a capable altloc.
 		 assertFalse(fwalledNotGood.isAltLocCapable());

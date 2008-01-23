@@ -47,16 +47,13 @@ public class IncompleteFileManagerTest extends LimeTestCase {
     }
 
     /** @param urn a SHA1 urn, or null */
-    public static RemoteFileDesc newRFD(String name, int size, String urn) {
+    public RemoteFileDesc newRFD(String name, int size, String urn) {
        try {
            Set<URN> urns=new HashSet<URN>(1);
            if (urn!=null) 
                urns.add(URN.createSHA1Urn(urn));
-           return new RemoteFileDesc(
-               "18.239.0.144", 6346, 13l,
-               name, size,
-               new byte[16], 56, false, 4, true, null,
-               urns, false, false,"",null, -1, false);
+           return injector.getInstance(RemoteFileDescFactory.class).createRemoteFileDesc("18.239.0.144", 6346, 13l, name, size, new byte[16],
+                56, false, 4, true, null, urns, false, false, "", null, -1, false);
        } catch (IOException e) {
            fail("Invalid URN", e);
            return null;

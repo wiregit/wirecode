@@ -26,10 +26,11 @@ public class HTTPDownloaderStub extends HTTPDownloader {
             NetworkManager networkManager,
             AlternateLocationFactory alternateLocationFactory, DownloadManager downloadManager,
             CreationTimeCache creationTimeCache, BandwidthManager bandwidthManager,
-            Provider<PushEndpointCache> pushEndpointCache, PushEndpointFactory pushEndpointFactory) {
+            Provider<PushEndpointCache> pushEndpointCache, PushEndpointFactory pushEndpointFactory,
+            RemoteFileDescFactory remoteFileDescFactory) {
         super(null, rfd, incompleteFile, false, false, networkManager,
                 alternateLocationFactory, downloadManager, creationTimeCache, bandwidthManager,
-                pushEndpointCache, pushEndpointFactory);
+                pushEndpointCache, pushEndpointFactory, remoteFileDescFactory);
     }
 	
 	public void addFailedAltLoc(AlternateLocation loc) {
