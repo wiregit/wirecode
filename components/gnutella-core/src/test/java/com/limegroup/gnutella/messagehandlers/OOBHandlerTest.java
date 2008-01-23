@@ -39,6 +39,7 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactoryImpl;
 import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
@@ -69,7 +70,6 @@ public class OOBHandlerTest extends BaseTestCase {
         router = new MyMessageRouter();
         router.start();
         macManager = new MACCalculatorRepositoryManager();
-        handler = new OOBHandler(router, macManager);
         g = new GUID(GUID.makeGuid());
         address = InetAddress.getByName("1.2.3.4");
         replyHandler = new MyReplyHandler(address, 1);
@@ -85,14 +85,133 @@ public class OOBHandlerTest extends BaseTestCase {
             @Override
             protected void configure() {
                 bind(ReplyNumberVendorMessageFactory.class).toInstance(factory);
+                bind(MessageRouter.class).toInstance(router);
+                bind(MACCalculatorRepositoryManager.class).toInstance(macManager);
             }
         };
         
         Injector injector = LimeTestUtils.createInjector(module);
         responseFactory = injector.getInstance(ResponseFactory.class);
         queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+        handler = injector.getInstance(OOBHandler.class);
     }
 
+    public void testRedundantAcks() throws Exception {
+        MessageSettings.OOB_REDUNDANCY.setValue(true);
+        // a host claims to have 10 results
+        ReplyNumberVendorMessage rnvm = factory.create(g, 10);
+        router.numToRequest = 10;
+        handler.handleMessage(rnvm, null, replyHandler);
+        
+        assertNotNull(replyHandler.m);
+        assertTrue(replyHandler.m instanceof LimeACKVendorMessage);
+        LimeACKVendorMessage ack = (LimeACKVendorMessage) replyHandler.m;
+        assertEquals(10, ack.getNumResults());
+        assertNotNull(ack.getSecurityToken());
+        
+        // 100 ms later a second ack should be sent
+        replyHandler.m = null;
+        Thread.sleep(120);
+        assertSame(ack, replyHandler.m);
+    }
+    
+    public void testNoRedundantAcks() throws Exception {
+        MessageSettings.OOB_REDUNDANCY.setValue(false);
+        // a host claims to have 10 results
+        ReplyNumberVendorMessage rnvm = factory.create(g, 10);
+        router.numToRequest = 10;
+        handler.handleMessage(rnvm, null, replyHandler);
+        
+        assertNotNull(replyHandler.m);
+        assertTrue(replyHandler.m instanceof LimeACKVendorMessage);
+        LimeACKVendorMessage ack = (LimeACKVendorMessage) replyHandler.m;
+        assertEquals(10, ack.getNumResults());
+        assertNotNull(ack.getSecurityToken());
+        
+        // no more acks
+        replyHandler.m = null;
+        Thread.sleep(120);
+        assertNull(replyHandler.m);
+    }
+    
+    public void testDuplicateRNVMs() throws Exception {
+        MessageSettings.OOB_REDUNDANCY.setValue(false);
+        
+        // a host claims to have 10 results
+        ReplyNumberVendorMessage rnvm = factory.create(g, 10);
+        router.numToRequest = 10;
+        handler.handleMessage(rnvm, null, replyHandler);
+        
+        assertNotNull(replyHandler.m);
+        assertTrue(replyHandler.m instanceof LimeACKVendorMessage);
+        LimeACKVendorMessage ack = (LimeACKVendorMessage) replyHandler.m;
+        assertEquals(10, ack.getNumResults());
+        assertNotNull(ack.getSecurityToken());
+        
+        replyHandler.m = null;
+        
+        // a duplicate RNVM arrives
+        handler.handleMessage(rnvm, null, replyHandler);
+        
+        // but we don't send an ack
+        assertNull(replyHandler.m);
+        
+        // ever
+        replyHandler.m = null;
+        Thread.sleep(50);
+        handler.handleMessage(rnvm, null, replyHandler);
+        assertNull(replyHandler.m);
+        Thread.sleep(50);
+        handler.handleMessage(rnvm, null, replyHandler);
+        assertNull(replyHandler.m);
+        
+    }
+    /**
+     * tests that duplicate RNVMs will send only the correct # of acks
+     */
+    public void testDuplicateRNVMsRedundantACKs() throws Exception {
+        MessageSettings.OOB_REDUNDANCY.setValue(true);
+        
+        // a host claims to have 10 results
+        ReplyNumberVendorMessage rnvm = factory.create(g, 10);
+        router.numToRequest = 10;
+        handler.handleMessage(rnvm, null, replyHandler);
+        
+        assertNotNull(replyHandler.m);
+        assertTrue(replyHandler.m instanceof LimeACKVendorMessage);
+        LimeACKVendorMessage ack = (LimeACKVendorMessage) replyHandler.m;
+        assertEquals(10, ack.getNumResults());
+        assertNotNull(ack.getSecurityToken());
+        
+        replyHandler.m = null;
+        
+        // a duplicate RNVM arrives
+        handler.handleMessage(rnvm, null, replyHandler);
+        
+        // but we don't send an ack
+        assertNull(replyHandler.m);
+        
+        // a little later another duplicate RNVM arrives
+        // we don't ack
+        Thread.sleep(50);
+        handler.handleMessage(rnvm, null, replyHandler);
+        assertNull(replyHandler.m);
+        
+        // after a while the redundancy interval hits and we send the
+        // redundant ACK
+        Thread.sleep(70);
+        assertSame(ack, replyHandler.m);
+        
+        // any further RNVMs do nothing
+        replyHandler.m = null;
+        Thread.sleep(50);
+        handler.handleMessage(rnvm, null, replyHandler);
+        assertNull(replyHandler.m);
+        Thread.sleep(50);
+        handler.handleMessage(rnvm, null, replyHandler);
+        assertNull(replyHandler.m);
+    }
+    
     public void testDropsLargeResponses() throws Exception {
 
         // a host claims to have 10 results

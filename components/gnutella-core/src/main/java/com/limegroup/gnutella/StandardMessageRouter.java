@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,6 +54,7 @@ import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.ReceivedMessageStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
@@ -381,17 +383,26 @@ public class StandardMessageRouter extends MessageRouterImpl {
                 try {
                     addr = InetAddress.getByName(query.getReplyAddress());
                 } catch (UnknownHostException uhe) {}
-                int port = query.getReplyPort();
+                final int port = query.getReplyPort();
                 
                 if(addr != null) { 
                     // send a ReplyNumberVM to the host - he'll ACK you if he
                     // wants the whole shebang
                     int resultCount = 
                         (responses.length > 255) ? 255 : responses.length;
-                    ReplyNumberVendorMessage vm = query.desiresOutOfBandRepliesV3() ?
+                    final ReplyNumberVendorMessage vm = query.desiresOutOfBandRepliesV3() ?
                             replyNumberVendorMessageFactory.createV3ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount) :
                                 replyNumberVendorMessageFactory.createV2ReplyNumberVendorMessage(new GUID(query.getGUID()), resultCount);
                     udpService.send(vm, addr, port);
+                    if (MessageSettings.OOB_REDUNDANCY.getValue() && 
+                            query.desiresOutOfBandRepliesV3()) {
+                        final InetAddress addrf = addr;
+                        backgroundExecutor.schedule(new Runnable() {
+                            public void run () {
+                                udpService.send(vm, addrf, port);
+                            }
+                        }, 100, TimeUnit.MILLISECONDS);
+                    }
                     return true;
                 }
             } else {

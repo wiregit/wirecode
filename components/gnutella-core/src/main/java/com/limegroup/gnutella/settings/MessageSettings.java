@@ -49,4 +49,10 @@ public class MessageSettings extends LimeProps {
      */
     public static final BooleanSetting TTROOT_IN_GGEP = 
         FACTORY.createRemoteBooleanSetting("TTROOT_IN_GGEP", true, "MessageSettings.TTROOTInGGEP");
+    
+    /**
+     * Whether to send redundant LIME11 and LIME12 messages
+     */
+    public static final BooleanSetting OOB_REDUNDANCY =
+        FACTORY.createRemoteBooleanSetting("OOB_REDUNDANCY", false, "MessageSettings.OOBRedundancy");
 }

@@ -43,6 +43,7 @@ import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessageParser;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
@@ -209,6 +210,14 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         assertEquals(3, reply.getVersion());
         assertTrue(reply.canReceiveUnsolicited());
         
+        // make sure we get no further RNVMs
+        try {
+            UDP_ACCESS.setSoTimeout(200);
+            DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
+            UDP_ACCESS.receive(pack);
+            fail("got something");
+        } catch (IOException expected){}
+        
         //rince and repeat, this time pretend to be firewalled
         
         query = 
@@ -326,6 +335,9 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
             message = messageFactory.read(in, Network.TCP);
+            
+            // should not be receiving redundant RNVMs in this test
+            assertNotInstanceof(ReplyNumberVendorMessage.class, message);
         }
         // make sure this is the correct QR
         assertTrue(Arrays.equals(message.getGUID(), ack.getGUID()));
@@ -384,6 +396,138 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         catch (IOException expected) {}
 
 
+    }
+    
+    /**
+     * tests that we send redundant RNVMs if setting is set 
+     */
+    public void testRedundantRNVMs() throws Exception {
+        MessageSettings.OOB_REDUNDANCY.setValue(true);
+        drain();
+
+        QueryRequest query = 
+            queryRequestFactory.createOutOfBandQuery("txt",
+                                              InetAddress.getLocalHost().getAddress(),
+                                              UDP_ACCESS.getLocalPort());
+        assertTrue(query.desiresOutOfBandReplies());
+        assertNotEquals(v2disabled, query.desiresOutOfBandRepliesV2());
+        assertTrue(query.desiresOutOfBandRepliesV3());
+        
+        query.hop();
+
+        // we needed to hop the message because we need to make it seem that it
+        // is from sufficiently far away....
+        ULTRAPEER[0].send(query);
+        ULTRAPEER[0].flush();
+
+        // we should get a ReplyNumberVendorMessage via UDP - we'll get an
+        // interrupted exception if not
+        int RNVMs = 0;
+        while (RNVMs < 2) {
+            UDP_ACCESS.setSoTimeout(500);
+            DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                fail("Did not get VM", bad);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            Message message = messageFactory.read(in, Network.TCP);
+
+            // we should get an RNVM
+            assertInstanceof(ReplyNumberVendorMessage.class, message);
+            RNVMs++;
+        }
+    }
+    
+    /**
+     * tests that receiving duplicate ACKs will not result in sending
+     * results twice 
+     */
+    public void testDuplicateACKs() throws Exception {
+        drain();
+
+        QueryRequest query = 
+            queryRequestFactory.createOutOfBandQuery("txt",
+                                              InetAddress.getLocalHost().getAddress(),
+                                              UDP_ACCESS.getLocalPort());
+        assertTrue(query.desiresOutOfBandReplies());
+        assertNotEquals(v2disabled, query.desiresOutOfBandRepliesV2());
+        assertTrue(query.desiresOutOfBandRepliesV3());
+        
+        query.hop();
+
+        // we needed to hop the message because we need to make it seem that it
+        // is from sufficiently far away....
+        ULTRAPEER[0].send(query);
+        ULTRAPEER[0].flush();
+
+        // we should get a ReplyNumberVendorMessage via UDP - we'll get an
+        // interrupted exception if not
+        Message message = null;
+        DatagramPacket pack = null;
+        while (!(message instanceof ReplyNumberVendorMessage)) {
+            UDP_ACCESS.setSoTimeout(500);
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                fail("Did not get VM", bad);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            message = messageFactory.read(in, Network.TCP);
+
+            // we should NOT get a reply to our query
+            assertTrue(!((message instanceof QueryReply) &&
+                         (Arrays.equals(message.getGUID(), query.getGUID()))));
+        }
+
+        // prepare an ACK
+        ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage)message;
+        SecurityToken token = new OOBSecurityToken(new OOBTokenData(pack.getAddress(), 
+                pack.getPort(), reply.getGUID(), reply.getNumResults()), macManager);
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        LimeACKVendorMessage ack = 
+            new LimeACKVendorMessage(new GUID(message.getGUID()),
+                                     reply.getNumResults(), token);
+        ack.write(baos);
+        pack = new DatagramPacket(baos.toByteArray(), baos.toByteArray().length,
+                                  pack.getAddress(), pack.getPort());
+        UDP_ACCESS.send(pack);
+        
+        // send a duplicate ACK
+        Thread.sleep(50);
+        UDP_ACCESS.send(pack);
+        
+        // now we should get TWO replies, each with one response
+        //1)
+        int replies = 0;
+        try {
+        while (true) {
+            UDP_ACCESS.setSoTimeout(500);
+            DatagramPacket pack2 = new DatagramPacket(new byte[1000], 1000);
+            UDP_ACCESS.receive(pack2);
+            InputStream in = new ByteArrayInputStream(pack2.getData());
+            // as long as we don't get a ClassCastException we are good to go
+            message = messageFactory.read(in, Network.TCP);
+            
+            assertInstanceof(QueryReply.class,message);
+            replies++;
+        }
+        } catch (IOException expected) {}
+        assertEquals(2, replies);
+        
+        // send another duplicate ACK
+        UDP_ACCESS.send(pack);
+        
+        // no replies though
+        try {
+            UDP_ACCESS.receive(pack);
+            fail("received something");
+        } catch (IOException expected){}
     }
     
     public void testBasicOutOfBandRequestV3Only() throws Exception {

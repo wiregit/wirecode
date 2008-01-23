@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,6 +24,7 @@ import org.limewire.security.SecurityToken;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.BypassedResultsCache;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
@@ -31,6 +34,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
@@ -48,14 +52,19 @@ public class OOBHandler implements MessageHandler, Runnable {
 	private final MessageRouter router;
 	
 	private final MACCalculatorRepositoryManager MACCalculatorRepositoryManager;
+    
+    private final ScheduledExecutorService executor;
 	
     private final Map<Integer,OOBSession> OOBSessions =
         Collections.synchronizedMap(new HashMap<Integer, OOBSession>());
     
     @Inject
-	public OOBHandler(MessageRouter router, MACCalculatorRepositoryManager MACCalculatorRepositoryManager) {
+	public OOBHandler(MessageRouter router, 
+            MACCalculatorRepositoryManager MACCalculatorRepositoryManager,
+            @Named("backgroundExecutor") ScheduledExecutorService executor) {
 		this.router = router;
 		this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
+        this.executor = executor;
 	}
 
 	public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
@@ -73,7 +82,7 @@ public class OOBHandler implements MessageHandler, Runnable {
      * that case. Otherwise the source of the <code>msg</code> is added to the 
      * {@link BypassedResultsCache}.
      */
-	private void handleRNVM(ReplyNumberVendorMessage msg, ReplyHandler handler) {
+	private void handleRNVM(ReplyNumberVendorMessage msg, final ReplyHandler handler) {
 		GUID g = new GUID(msg.getGUID());
 
         int toRequest;
@@ -85,21 +94,32 @@ public class OOBHandler implements MessageHandler, Runnable {
             return;
         }
 				
-		LimeACKVendorMessage ack;
+		LimeACKVendorMessage ack = null;
         if (msg.isOOBv3()) {
             SecurityToken t = new OOBSecurityToken(new OOBSecurityToken.OOBTokenData(handler, msg.getGUID(), toRequest), 
                     MACCalculatorRepositoryManager); 
-			ack = new LimeACKVendorMessage(g, toRequest,t);
-			if (SearchSettings.CREATE_OOB_SESSIONS_EARLY.getValue()) {
-			    int hash = Arrays.hashCode(t.getBytes());
-			    OOBSession session = new OOBSession(t, toRequest, new GUID(msg.getGUID()), true);
-			    OOBSessions.put(hash,session);
-			}
+            int hash = Arrays.hashCode(t.getBytes());
+            synchronized(OOBSessions) {
+                if (!OOBSessions.containsKey(hash)) {
+                    OOBSessions.put(hash,new OOBSession(t, toRequest, new GUID(msg.getGUID()), true));
+                    ack = new LimeACKVendorMessage(g, toRequest,t);
+                } // else we already sent ack(s)
+            }
         } else
             ack = new LimeACKVendorMessage(g, toRequest);
         
-		OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(toRequest);
-		handler.reply(ack);
+        if (ack != null) {
+            OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(toRequest);
+            handler.reply(ack);
+            if (MessageSettings.OOB_REDUNDANCY.getValue()) {
+                final LimeACKVendorMessage ackf = ack;
+                executor.schedule(new Runnable() {
+                    public void run() {
+                        handler.reply(ackf);
+                    }
+                }, 100, TimeUnit.MILLISECONDS);
+            }
+        }
 	}
     
     /**
