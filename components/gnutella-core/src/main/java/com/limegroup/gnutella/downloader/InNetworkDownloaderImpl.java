@@ -75,7 +75,8 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
         if (downloadInformation.getSize() > Integer.MAX_VALUE)
             throw new IllegalArgumentException("size too big for now.");
         setContentLength(downloadInformation.getSize());
-        setSha1Urn(downloadInformation.getUpdateURN());
+        if(downloadInformation.getUpdateURN() != null)
+            setSha1Urn(downloadInformation.getUpdateURN());
         setTigerTreeRoot(downloadInformation.getTTRoot());
         setStartTime(startTime);
         setDownloadAttempts(0);

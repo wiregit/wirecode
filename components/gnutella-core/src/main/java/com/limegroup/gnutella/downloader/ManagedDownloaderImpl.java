@@ -546,7 +546,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             for(RemoteFileDesc rfd : cachedRFDs) {
                 if(getSha1Urn() != null)
                     break;
-                setSha1Urn(rfd.getSHA1Urn());
+                if(rfd.getSHA1Urn() != null)
+                    setSha1Urn(rfd.getSHA1Urn());
             }
         }
         
@@ -1393,7 +1394,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
     
     private void prepareRFD(RemoteFileDesc rfd, boolean cache) {
-        if(getSha1Urn() == null) {
+        if(getSha1Urn() == null && rfd.getSHA1Urn() != null) {
             setSha1Urn(rfd.getSHA1Urn());
             altLocManager.addListener(getSha1Urn(),this);
         }
