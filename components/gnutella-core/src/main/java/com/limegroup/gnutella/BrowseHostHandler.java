@@ -16,7 +16,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.HttpException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpProtocolParams;
 import org.limewire.io.Connectable;
@@ -24,7 +23,6 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
-import org.limewire.http.HttpClientManager;
 import org.limewire.http.SocketWrappingClient;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -130,6 +128,7 @@ public class BrowseHostHandler {
             // if host is null we can't do fwts
             assert !canDoFWTransfer : "Can't do fwts without host";
             try {
+                setState(STARTED);
                 browseFirewalledHost(createInvalidHost(), proxies, canDoFWTransfer);
             } catch (UnknownHostException e) {
                 failed();
