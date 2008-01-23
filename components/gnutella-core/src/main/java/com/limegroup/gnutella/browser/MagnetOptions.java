@@ -27,6 +27,8 @@ import com.limegroup.gnutella.util.URLDecoder;
  * Contains information fields extracted from a magnet link.
  */
 public class MagnetOptions implements Serializable {
+    
+    private static final long serialVersionUID = 5612757489102667276L;
 	
 	public static final String MAGNET    = "magnet:?";
 	private static final String HTTP     = "http://";

@@ -510,7 +510,6 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
             // wait for the incoming HTTP request
             Socket httpSock = ss.accept();
             try {
-                System.out.println("sending error");
                 // send back an error and make sure the PushRequest is sent via
                 // the normal way
                 BufferedWriter writer = new BufferedWriter(
@@ -562,7 +561,6 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
 
         public void handleQueryResult(RemoteFileDesc rfd, HostData data,
                 Set locs) {
-            System.out.println("rfd received");
             rfdLock.lock();
             try {
                 this.rfd = rfd;
