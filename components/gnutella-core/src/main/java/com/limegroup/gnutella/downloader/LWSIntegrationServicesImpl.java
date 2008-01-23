@@ -58,7 +58,6 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         // DownloadMediator
         // 
         // INPUT
-        //  urns - space-separated string of urns
         // OUTPUT
         //  ID of download - a string of form
         //          <ID> ' ' <percentage-downloaded> ':' <download-status> [ '|' <ID> ' ' <percentage-downloaded> ':' <download-status> ]
@@ -89,20 +88,10 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
             private final Map<String, AbstractDownloader> everActiveDownloaderIDs2Downloaders = new HashMap<String, AbstractDownloader>();            
 
             protected String handleRest(Map<String, String> args) {
-
-                Tagged<String> idsString = LWSUtil.getArg(args, "urns", "GetDownloadProgress");
-                if (!idsString.isValid()) return idsString.getValue();
                 //
                 // Return a string mapping urns to download percentages
                 //
                 StringBuffer res = new StringBuffer();
-                String decodedIDs = null;
-                try {
-                    decodedIDs = URLDecoder.decode(idsString.getValue());
-                } catch (IOException e) {
-                    return "invalid.ids";
-                }
-                String[] downloaderIDs = decodedIDs.split(" ");
                 //
                 // Remember the downloader that are actually active, so we see if there are any that once existed
                 // but are completed and take the correct action.  See the comment for 'everActiveDownloaderIDs'
@@ -115,11 +104,8 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                         String id = String.valueOf(System.identityHashCode(d));
                         everActiveDownloaderIDs2Downloaders.put(id, d);
                         activeDownloaderIDS.add(id);
-                        urnLoop: for (String downloaderID : downloaderIDs) {
-                            if (downloaderID.equals(id)) {
-                                recordProgress(d, res, downloaderID);
-                                break urnLoop;
-                            }
+                        if (d instanceof StoreDownloader) {
+                            recordProgress(d, res, id);
                         }
                     }
                 }
@@ -227,9 +213,24 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                     // with this file so that the web page can keep track
                     // of this downloader w.r.t this file
                     //
-                    File saveDir = SharingSettings.getSaveLWSDirectory();  
-                    Downloader d = downloadServices.downloadFromStore(rfd, true, saveDir, fileName);
-                    long idOfTheDownloader = System.identityHashCode(d);
+                    File saveDir = SharingSettings.getSaveLWSDirectory();
+                    //
+                    // Make sure we aren't already downloading this
+                    //
+                    Downloader theDownloader = null;
+                    synchronized (lwsIntegrationServicesDelegate) {
+                        File saveFile = new File(saveDir, fileName);
+                        for (AbstractDownloader d : lwsIntegrationServicesDelegate.getAllDownloaders()) {
+                            if (d.conflictsSaveFile(saveFile)) {
+                                theDownloader = d;
+                                break;
+                            }
+                        }
+                    }
+                    if (theDownloader == null) {
+                        theDownloader = downloadServices.downloadFromStore(rfd, true, saveDir, fileName);
+                    }
+                    long idOfTheDownloader = System.identityHashCode(theDownloader);
                     return idOfTheDownloader + " " + idOfTheProgressBarString.getValue();
                 } catch (IOException e) {
                     ErrorService.error(e, "Invalid URL: " + urlStr);

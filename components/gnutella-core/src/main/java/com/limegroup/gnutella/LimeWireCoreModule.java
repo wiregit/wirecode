@@ -16,6 +16,8 @@ import org.limewire.inspection.InspectorImpl;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressService;
 import org.limewire.io.Pools;
+import org.limewire.lws.server.LWSDispatcherFactory;
+import org.limewire.lws.server.LWSDispatcherFactoryImpl;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
@@ -327,6 +329,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(LWSManager.class).to(LWSManagerImpl.class);
         bind(LWSIntegrationServices.class).to(LWSIntegrationServicesImpl.class);
         bind(LWSIntegrationServicesDelegate.class).to(DownloadManager.class);
+        bind(LWSDispatcherFactory.class).to(LWSDispatcherFactoryImpl.class);
         bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderImpl.class);
         bind(SettingsProvider.class).to(MacCalculatorSettingsProviderImpl.class);
         bind(ReplyHandler.class).annotatedWith(Names.named("forMeReplyHandler")).to(ForMeReplyHandler.class);

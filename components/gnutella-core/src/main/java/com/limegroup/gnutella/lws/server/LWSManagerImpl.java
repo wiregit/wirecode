@@ -9,7 +9,6 @@ import java.util.Vector;
 
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.util.Base64;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.lws.server.AbstractReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSConnectionListener;
@@ -49,20 +48,13 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     private final String hostNameAndPort;
     
     private final HttpExecutor exe;
-    private boolean isConnected;
+    private boolean isConnected;  
     
     @Inject
-    public LWSManagerImpl(HttpExecutor exe) {
-        this(exe, new LWSDispatcherFactoryImpl()); //TODO: inject
-    }    
-    
-    //todo @Inject
     public LWSManagerImpl(HttpExecutor exe, LWSDispatcherFactory lwsDispatcherFactory) {
-        this(exe, LWSSettings.LWS_AUTHENTICATION_HOSTNAME.getValue(), 
-             LWSSettings.LWS_AUTHENTICATION_PORT.getValue(), lwsDispatcherFactory);
-    }
-    
-    public LWSManagerImpl(HttpExecutor exe, String host, int port, LWSDispatcherFactory lwsDispatcherFactory) {
+
+        String host = LWSSettings.LWS_AUTHENTICATION_HOSTNAME.getValue();
+        int port = LWSSettings.LWS_AUTHENTICATION_PORT.getValue(); 
         
         this.exe = exe;
         this.dispatcher = lwsDispatcherFactory.createDispatcher(this, new  AbstractReceivesCommandsFromDispatcher() {
