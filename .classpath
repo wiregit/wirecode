@@ -57,8 +57,6 @@
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/colt.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/commons-collections-3.2.jar"/>
 	<classpathentry kind="lib" path="components/mojito-ui/misc/lib/jung-1.7.5.jar"/>
-	<classpathentry kind="lib" path="lib/jars/httpcore.jar" sourcepath="lib/sources/httpcore-src.jar"/>
-	<classpathentry kind="lib" path="lib/jars/httpcore-nio.jar" sourcepath="lib/sources/httpcore-nio-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/aopalliance.jar"/>
 	<classpathentry kind="lib" path="lib/jars/guice-1.0.jar" sourcepath="lib/sources/guice-1.0-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/forms.jar"/>
@@ -93,5 +91,9 @@
 	<classpathentry kind="lib" path="lib/jars/tests/xerces.jar"/>
 	<classpathentry kind="lib" path="lib/jars/onion-common.jar"/>
 	<classpathentry kind="lib" path="lib/jars/onion-fec.jar"/>
+	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-alpha2-HTTPCLIENT-730.jar"/>
+	<classpathentry kind="lib" path="lib/jars/httpcore-4.0-alpha6.jar"/>
+	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.0-alpha6.jar"/>
+	<classpathentry kind="lib" path="lib/jars/httpcore-niossl-4.0-alpha6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
