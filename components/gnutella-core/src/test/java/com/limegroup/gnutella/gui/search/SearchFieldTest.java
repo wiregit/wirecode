@@ -4,6 +4,8 @@ import javax.swing.text.BadLocationException;
 
 import junit.framework.Test;
 
+import org.limewire.util.I18NConvert;
+
 import com.limegroup.gnutella.gui.GUIBaseTestCase;
 import com.limegroup.gnutella.gui.search.SearchField.SearchFieldDocument;
 import com.limegroup.gnutella.settings.SearchSettings;
@@ -85,5 +87,19 @@ public class SearchFieldTest extends GUIBaseTestCase {
         // + and = are removed in normalization and thus a too long query string could slip in
         doc.insertString(0, "hello === ==++ world that is way too +==++", null);
         assertEquals(0, doc.getLength());
+    }
+    
+    public void testInsertTooLongStringWithCharactersThatAreAddedByNormalization() throws Exception {
+        // preconditons of test
+        assertEquals(1, "\uFB01".length());
+        assertGreaterThan("\uFB01".length(), I18NConvert.instance().getNorm("\uFB01").length());
+        SearchFieldDocument doc = new SearchFieldDocument();
+        
+        // add incrementally the character that expands to two with normalization
+        for (int i = 0; i < SearchSettings.MAX_QUERY_LENGTH.getValue() - 2; i++) {
+            doc.insertString(doc.getLength(), "\uFB01", null);
+        }
+        assertLessThanOrEquals(SearchSettings.MAX_QUERY_LENGTH.getValue(), I18NConvert.instance().getNorm(doc.getText(0, doc.getLength())).length());
+        assertLessThanOrEquals(SearchSettings.MAX_QUERY_LENGTH.getValue(), doc.getText(0, doc.getLength()).length());
     }
 }
