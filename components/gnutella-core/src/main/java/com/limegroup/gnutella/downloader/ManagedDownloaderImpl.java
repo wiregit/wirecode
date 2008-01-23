@@ -3052,7 +3052,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         }
 
         public URN getSHA1Urn() {
-            return getSHA1Urn();
+            return ManagedDownloaderImpl.this.getSha1Urn();
         }
 
         public void lookupFinished(QueryType queryType) {
