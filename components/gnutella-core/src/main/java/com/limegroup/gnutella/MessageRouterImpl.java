@@ -3316,7 +3316,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
                     if (last != null && Arrays.equals(guid,last))
                         unregisterMessageListener(guid, GUIDTracker.this);
                 }
-            }, 300, TimeUnit.SECONDS);
+            }, 600, TimeUnit.SECONDS);
         }
         
         public void unregistered(byte[] guid) {
