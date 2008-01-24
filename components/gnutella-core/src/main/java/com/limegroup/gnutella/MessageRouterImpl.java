@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -3297,6 +3298,11 @@ public abstract class MessageRouterImpl implements MessageRouter {
             data.put("ttl",m.getTTL());
             data.put("net",m.getNetwork());
             data.put("len",m.getLength()); // why not
+            try {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                m.writeQuickly(baos);
+                data.put("pay",baos.toByteArray());
+            } catch (IOException impossible){}
             l.add(data);
         }
         
