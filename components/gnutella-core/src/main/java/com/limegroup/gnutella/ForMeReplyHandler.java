@@ -82,7 +82,7 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
             ApplicationServices applicationServices,
             ConnectionServices connectionServices,
             LimeXMLDocumentHelper limeXMLDocumentHelper,
-            @Named("ipFilter")Provider<IPFilter> ipFilterProvider) {
+            Provider<IPFilter> ipFilterProvider) {
         this.networkManager = networkManager;
         this.secureMessageVerifier = secureMessageVerifier;
         this.connectionManager = connectionManager;

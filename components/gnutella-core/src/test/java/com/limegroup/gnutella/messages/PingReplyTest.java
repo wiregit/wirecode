@@ -1090,7 +1090,7 @@ public class PingReplyTest extends LimeTestCase {
                 SocketsManager socketsManager,
                 ConnectionServices connectionServices,
                 Provider<NodeAssigner> nodeAssigner, 
-                @Named("ipFilter") Provider<IPFilter> ipFilter,
+                 Provider<IPFilter> ipFilter,
                 ConnectionCheckerManager connectionCheckerManager,
                 PingRequestFactory pingRequestFactory) {
             super(networkManager, hostCatcher, connectionDispatcher, 

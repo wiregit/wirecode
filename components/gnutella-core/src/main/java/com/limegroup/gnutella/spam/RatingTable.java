@@ -28,6 +28,7 @@ import org.limewire.statistic.StatsUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -56,18 +57,25 @@ public class RatingTable {
      * be used inplace of that Token (one that has rating data).
 	 */
 	private final Map<Token, Token> _tokenMap;
+	
+	private final Tokenizer tokenizer;
 
 	/**
 	 * constructor, tries to deserialize filter data from disc, which will fail
 	 * silently, if it fails
 	 */
-	RatingTable() {
+	@Inject
+	RatingTable(Tokenizer tokenizer) {
+	    this.tokenizer = tokenizer;
+	    
 		// deserialize
 		_tokenMap = readData();
+		
+		for(Token token : _tokenMap.values())
+            tokenizer.initialize(token);
 
 		if (LOG.isDebugEnabled())
 			LOG.debug("size of tokenSet " + _tokenMap.size());
-
 	}
 
 	/**
@@ -85,7 +93,7 @@ public class RatingTable {
 	 * @return the rating for the RemoteFileDesc
 	 */
 	float getRating(RemoteFileDesc desc) {
-		float ret = getRating(lookup(Tokenizer.getTokens(desc)));
+		float ret = getRating(lookup(tokenizer.getTokens(desc)));
 		if (LOG.isDebugEnabled())
 			LOG.debug(desc.toString() + " rated " + ret);
 		return ret;
@@ -124,7 +132,7 @@ public class RatingTable {
 	 *            must be a rating as defined by the Token interface
 	 */
 	void mark(RemoteFileDesc[] descs, Rating rating) {
-		markInternal(lookup(Tokenizer.getTokens(descs)), rating);
+		markInternal(lookup(tokenizer.getTokens(descs)), rating);
 	}
 
 	/**
@@ -136,7 +144,7 @@ public class RatingTable {
 	 *            must be a rating as defined by the Token interface
 	 */
 	void mark(RemoteFileDesc desc, Rating rating) {
-		markInternal(lookup(Tokenizer.getTokens(desc)), rating);
+		markInternal(lookup(tokenizer.getTokens(desc)), rating);
 	}
 
 	/**
@@ -148,7 +156,7 @@ public class RatingTable {
 	 *            must be a rating as defined by the Token interface
 	 */
 	void mark(QueryRequest qr, Rating rating) {
-		markInternal(lookup(Tokenizer.getTokens(qr)), rating);
+		markInternal(lookup(tokenizer.getTokens(qr)), rating);
 	}
 
 	/**

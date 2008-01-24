@@ -304,7 +304,7 @@ public class LimeWireCore {
     }
 
     public IPFilter getIpFilter() {
-        return injector.getInstance(Key.get(IPFilter.class,Names.named("ipFilter")));
+        return injector.getInstance(IPFilter.class);
     }
 
     public IPFilter getHostileFilter() {

@@ -55,7 +55,7 @@ public class ConnectionManagerStub extends ConnectionManagerImpl {
             Provider<MessageRouter> messageRouter, Provider<QueryUnicaster> queryUnicaster,
             SocketsManager socketsManager, ConnectionServices connectionServices,
             Provider<NodeAssigner> nodeAssigner, 
-            @Named("ipFilter") Provider<IPFilter> ipFilter,
+             Provider<IPFilter> ipFilter,
             ConnectionCheckerManager connectionCheckerManager, PingRequestFactory pingRequestFactory) {
         super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor, simppManager,
                 capabilitiesVMFactory, managedConnectionFactory, messageRouter, queryUnicaster,

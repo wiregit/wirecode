@@ -460,7 +460,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             AltLocManager altLocManager, ContentManager contentManager,
             SourceRankerFactory sourceRankerFactory, UrnCache urnCache,
             SavedFileManager savedFileManager, VerifyingFileFactory verifyingFileFactory,
-            DiskController diskController, @Named("ipFilter")
+            DiskController diskController, 
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
             Provider<TigerTreeCache> tigerTreeCache, ApplicationServices applicationServices,

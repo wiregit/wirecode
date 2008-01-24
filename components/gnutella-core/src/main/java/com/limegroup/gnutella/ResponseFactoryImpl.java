@@ -28,7 +28,6 @@ import org.limewire.util.ByteOrder;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
@@ -72,7 +71,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
     @Inject
     public ResponseFactoryImpl(AltLocManager altLocManager,
             Provider<CreationTimeCache> creationTimeCache, 
-            @Named("ipFilter") IPFilter ipFilter, LimeXMLDocumentFactory limeXMLDocumentFactory) {
+             IPFilter ipFilter, LimeXMLDocumentFactory limeXMLDocumentFactory) {
         this.altLocManager = altLocManager;
         this.creationTimeCache = creationTimeCache;
         this.ipFilter = ipFilter;

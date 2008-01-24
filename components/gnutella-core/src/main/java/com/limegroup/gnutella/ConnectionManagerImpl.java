@@ -304,7 +304,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
             SocketsManager socketsManager,
             ConnectionServices connectionServices,
             Provider<NodeAssigner> nodeAssigner, 
-            @Named("ipFilter") Provider<IPFilter> ipFilter,
+             Provider<IPFilter> ipFilter,
             ConnectionCheckerManager connectionCheckerManager,
             PingRequestFactory pingRequestFactory) {
         this.networkManager = networkManager;

@@ -78,8 +78,7 @@ public class SpamManagerTest extends LimeTestCase {
 		limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
 		queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
 		remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
-        
-        manager = new SpamManager(new RatingTable());
+		manager = injector.getInstance(SpamManager.class);
         manager.clearFilterData();
         
         doc1 = limeXMLDocumentFactory.createLimeXMLDocument(xml1);

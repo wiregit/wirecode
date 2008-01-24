@@ -11,7 +11,6 @@ import org.limewire.io.IP;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -85,7 +84,7 @@ public class IPFilterTest extends LimeTestCase {
         }});
 	
         injector = LimeTestUtils.createInjector(m);
-        filter = injector.getInstance(Key.get(IPFilter.class,Names.named("ipFilter")));
+        filter = injector.getInstance(IPFilter.class);
         final CountDownLatch loaded = new CountDownLatch(1);
         IPFilterCallback ipfc = new IPFilter.IPFilterCallback() {
             public void ipFiltersLoaded() {

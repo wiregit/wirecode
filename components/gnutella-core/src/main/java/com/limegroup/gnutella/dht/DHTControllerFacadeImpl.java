@@ -51,7 +51,7 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
     @Inject
     public DHTControllerFacadeImpl(NetworkManager networkManager,
             Provider<ConnectionManager> connectionManager,
-            @Named("ipFilter") Provider<IPFilter> ipFilter, // TODO: maybe hostileFilter here 
+             Provider<IPFilter> ipFilter, // TODO: maybe hostileFilter here 
             SpamServices spamServices,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             CapabilitiesVMFactory capabilitiesVMFactory,

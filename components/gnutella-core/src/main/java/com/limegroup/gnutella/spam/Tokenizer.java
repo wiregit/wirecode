@@ -10,8 +10,12 @@ import java.util.StringTokenizer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.XMLStringUtils;
@@ -34,6 +38,7 @@ import com.limegroup.gnutella.xml.XMLStringUtils;
  * following keyword</li>
  * </ul>
  */
+@Singleton
 public class Tokenizer {
 	private static final Log LOG = LogFactory.getLog(Tokenizer.class);
 
@@ -45,21 +50,31 @@ public class Tokenizer {
 	 * block because e.g. in japanese many words will be only one or two chars
 	 * long.
 	 */
-	private static int MIN_KEYWORD_LENGTH = 3;
+	private int MIN_KEYWORD_LENGTH = 3;
 
 	/**
 	 * the max number of bytes for a keyword, keywords longer than this will be
 	 * truncated
 	 */
-	private static int MAX_KEYWORD_LENGTH = 8;
+	private int MAX_KEYWORD_LENGTH = 8;
 
 	/**
 	 * these are the characters used to split file names and meta-data fields
 	 * into keyword tokens.
 	 */
-	private static final String KEYWORD_DELIMITERS = " -._+/*()\\,\t";
+	private final String KEYWORD_DELIMITERS = " -._+/*()\\,\t";
+	
+	private final Provider<IPFilter> ipFilter;
 
-	private Tokenizer() {
+	@Inject
+	Tokenizer(Provider<IPFilter> ipFilter) {
+	    this.ipFilter = ipFilter;
+	}
+	
+	/** Initializes tokens with any objects required after deserialization. */
+	void initialize(Token token) {
+	    if(token instanceof AddressToken)
+	        ((AddressToken)token).setIpFilter(ipFilter);
 	}
 
 	/**
@@ -69,7 +84,7 @@ public class Tokenizer {
 	 *            the RemoteFileDesc, that should be tokenized
 	 * @return an array of Tokens, will never be empty
 	 */
-	public static Token[] getTokens(RemoteFileDesc desc) {
+	public Token[] getTokens(RemoteFileDesc desc) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("tokenizing: " + desc);
 		Set<Token> set = new HashSet<Token>();
@@ -94,7 +109,7 @@ public class Tokenizer {
 	 *            the array of RemoteFileDesc, that should be tokenized
 	 * @return an array of Tokens, will never be empty
 	 */
-	public static Token[] getTokens(RemoteFileDesc[] descs) {
+	public Token[] getTokens(RemoteFileDesc[] descs) {
 		Set<Token> set = new HashSet<Token>();
 		for (int i = 0; i < descs.length; i++) {
 			if (LOG.isDebugEnabled())
@@ -119,7 +134,7 @@ public class Tokenizer {
 	 *            the <tt>QueryRequest</tt> to tokenize
 	 * @return an array of <tt>Token</tt>
 	 */
-	public static Token[] getTokens(QueryRequest qr) {
+	public Token[] getTokens(QueryRequest qr) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("tokenizing: " + qr);
 		Set<Token> set = new HashSet<Token>();
@@ -138,7 +153,7 @@ public class Tokenizer {
 	 * @return a new UrnToken, built from the SHA1 urn or null, if the RFD did
 	 *         not contain a URN
 	 */
-	private static Token getUrnToken(RemoteFileDesc desc) {
+	private Token getUrnToken(RemoteFileDesc desc) {
 		if (desc.getSHA1Urn() != null)
 			return new UrnToken(desc.getSHA1Urn());
 		return null;
@@ -151,7 +166,7 @@ public class Tokenizer {
 	 *            the QueryRequest we are tokenizing
 	 * @return a Set of UrnToken, built from the query urns
 	 */
-	private static Set<Token> getUrnTokens(QueryRequest qr) {
+	private Set<Token> getUrnTokens(QueryRequest qr) {
 		if (qr.getQueryUrns().isEmpty())
 			return Collections.emptySet();
 		Set<Token> ret = new HashSet<Token>();
@@ -167,7 +182,7 @@ public class Tokenizer {
 	 *            the RemoteFileDesc we are tokenizing
 	 * @return a new SizeToken
 	 */
-	private static Token getSizeToken(RemoteFileDesc desc) {
+	private Token getSizeToken(RemoteFileDesc desc) {
 		return new SizeToken(desc.getSize());
 	}
     
@@ -175,7 +190,7 @@ public class Tokenizer {
      * Returns a (most often) previously cached token for the specific
      * vendor
      */
-    private static Token getVendorToken(RemoteFileDesc desc) {
+    private Token getVendorToken(RemoteFileDesc desc) {
         return VendorToken.getToken(desc.getVendor());
     }
 
@@ -186,9 +201,9 @@ public class Tokenizer {
 	 *            the RemoteFileDesc we are tokenizing
 	 * @return a new AddressToken
 	 */
-	private static Token getAddressToken(RemoteFileDesc desc) {
+	private Token getAddressToken(RemoteFileDesc desc) {
 		return new AddressToken(desc.getInetAddress().getAddress(), desc
-				.getPort());
+				.getPort(), ipFilter);
 	}
 
 	/**
@@ -198,7 +213,7 @@ public class Tokenizer {
 	 *            the RemoteFileDesc we are tokenizing
 	 * @return a Set of KeywordToken and XMLKeywordToken
 	 */
-	private static Set<Token> getKeywordTokens(RemoteFileDesc desc) {
+	private Set<Token> getKeywordTokens(RemoteFileDesc desc) {
 		return getKeywordTokens(desc.getFileName(), desc.getXMLDocument());
 	}
 
@@ -209,7 +224,7 @@ public class Tokenizer {
 	 *            the QueryRequest we are tokenizing
 	 * @return a Set of KeywordToken and XMLKeywordToken
 	 */
-	private static Set<Token> getKeywordTokens(QueryRequest qr) {
+	private Set<Token> getKeywordTokens(QueryRequest qr) {
 		return getKeywordTokens(qr.getQuery(), qr.getRichQuery());
 	}
 
@@ -222,7 +237,7 @@ public class Tokenizer {
 	 *            the LimeXMLDocument that should be split into XMLKeywordToken
 	 * @return a Set of XMLKeywordToken
 	 */
-	private static Set<Token> getKeywordTokens(String fname, LimeXMLDocument doc) {
+	private Set<Token> getKeywordTokens(String fname, LimeXMLDocument doc) {
 		Set<Token> tokens = getKeywordTokens(fname.toLowerCase(Locale.US));
 		if (doc != null) {
             for(Map.Entry<String, String> entry : doc.getNameValueSet()) {
@@ -244,7 +259,7 @@ public class Tokenizer {
 	 *            the value String
 	 * @return a Set of XMLKeywordToken
 	 */
-	private static Set<Token> getXMLKeywords(String name, String value) {
+	private Set<Token> getXMLKeywords(String name, String value) {
 		name = extractSimpleFieldName(name);
 
 		Set<Token> ret = new HashSet<Token>();
@@ -270,7 +285,7 @@ public class Tokenizer {
 	 *            the length of the truncated array
 	 * @return array of the first length bytes of the source array
 	 */
-	private static byte[] truncateArray(byte[] array, int length) {
+	private byte[] truncateArray(byte[] array, int length) {
 		byte[] ret = new byte[length];
 		System.arraycopy(array, 0, ret, 0, length);
 		return ret;
@@ -284,7 +299,7 @@ public class Tokenizer {
 	 * @param array2
 	 * @return byte array
 	 */
-	private static byte[] mergeArrays(byte[] array1, byte[] array2) {
+	private byte[] mergeArrays(byte[] array1, byte[] array2) {
 		byte[] ret = new byte[array1.length + array2.length + 1];
 		System.arraycopy(array1, 0, ret, 0, array1.length);
 		ret[array1.length] = 0;
@@ -300,7 +315,7 @@ public class Tokenizer {
 	 *            the canonical field name
 	 * @return the last part of the canonical field name
 	 */
-	private static String extractSimpleFieldName(String canonicalField) {
+	private String extractSimpleFieldName(String canonicalField) {
 		int idx1 = canonicalField.lastIndexOf(XMLStringUtils.DELIMITER);
 		int idx2 = canonicalField.lastIndexOf(XMLStringUtils.DELIMITER,
 				idx1 - 1);
@@ -315,7 +330,7 @@ public class Tokenizer {
 	 *            the String to tokenize
 	 * @return a Set of KeywordToken
 	 */
-	private static Set<Token> getKeywordTokens(String str) {
+	private Set<Token> getKeywordTokens(String str) {
 		Set<Token> ret = new HashSet<Token>();
 
 		StringTokenizer tok = new StringTokenizer(str, KEYWORD_DELIMITERS);

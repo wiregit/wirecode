@@ -107,7 +107,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             @Named("backgroundExecutor") ScheduledExecutorService scheduler,
             Provider<SocketProcessor> processor,
     		NetworkManager networkManager,
-    		@Named("ipFilter") Provider<IPFilter> ipFilter,
+    		 Provider<IPFilter> ipFilter,
     		Provider<UDPService> udpService) {
     	this.messageRouter = router;
     	this.httpExecutor = executor;

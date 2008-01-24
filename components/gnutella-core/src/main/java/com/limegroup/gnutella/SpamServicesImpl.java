@@ -9,7 +9,6 @@ import org.limewire.collection.Comparators;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
@@ -25,7 +24,7 @@ public class SpamServicesImpl implements SpamServices {
 
     @Inject
     public SpamServicesImpl(Provider<ConnectionManager> connectionManager,
-            @Named("ipFilter")Provider<IPFilter> ipFilter, SpamFilterFactory spamFilterFactory,
+            Provider<IPFilter> ipFilter, SpamFilterFactory spamFilterFactory,
             UDPReplyHandlerCache udpReplyHandlerCache) {
         this.connectionManager = connectionManager;
         this.ipFilter = ipFilter;

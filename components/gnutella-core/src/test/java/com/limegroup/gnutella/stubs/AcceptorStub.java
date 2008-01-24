@@ -29,7 +29,7 @@ public class AcceptorStub extends AcceptorImpl {
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<ActivityCallback> activityCallback,
             Provider<ConnectionManager> connectionManager,
-            @Named("ipFilter") Provider<IPFilter> ipFilter, ConnectionServices connectionServices,
+             Provider<IPFilter> ipFilter, ConnectionServices connectionServices,
             Provider<UPnPManager> upnpManager) {
         super(networkManager, udpService, multicastService, connectionDispatcher, backgroundExecutor,
                 activityCallback, connectionManager, ipFilter, connectionServices, upnpManager);

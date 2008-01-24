@@ -1,14 +1,10 @@
 package com.limegroup.gnutella.spam;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.Arrays;
 
 import org.limewire.io.IP;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.name.Named;
 import com.limegroup.gnutella.filters.IPFilter;
 
 /**
@@ -48,17 +44,18 @@ public class AddressToken extends AbstractToken {
     private final int _hashCode;
 
     private volatile transient Provider<IPFilter> ipFilter;
-    
-    @Inject
-    private static @Named("ipFilter") Provider<IPFilter> globalIpFilter;
 
-	public AddressToken(byte[] address, int port) {
-		this.ipFilter = globalIpFilter;
+	public AddressToken(byte[] address, int port, Provider<IPFilter> ipFilter) {
+		this.ipFilter = ipFilter;
         assert address.length == 4;
 		_address = address;
 		_port = (short) port;
         _hashCode = getHashCode();
         ratingInitialized = false;
+	}
+	
+	void setIpFilter(Provider<IPFilter> ipFilter) {
+	    this.ipFilter = ipFilter;
 	}
     
     /* Rating initialization is costly, and many Tokens are created 
@@ -68,6 +65,10 @@ public class AddressToken extends AbstractToken {
         if (ratingInitialized) {
             return;
         }
+        
+        if(ipFilter == null)
+            throw new IllegalStateException("must initialize IPFilter after deserializing.");
+                
         // this initial value is an
         _good = INITIAL_GOOD;
         int logDistance = ipFilter.get().logMinDistanceTo(new IP(_address));
@@ -176,13 +177,5 @@ public class AddressToken extends AbstractToken {
 		return "" + (0xFF & _address[0]) + "." + (0xFF & _address[1]) + "."
 				+ (0xFF & _address[2]) + "." + (0xFF & _address[3]) + ":"
 				+ (0xFFFF & _port) + " " + _bad;
-	}
-	
-    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-        stream.defaultReadObject();
-        
-        this.ipFilter = globalIpFilter; 
-    }
-
-	
+	}	
 }

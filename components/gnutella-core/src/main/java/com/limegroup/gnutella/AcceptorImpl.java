@@ -146,7 +146,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<ActivityCallback> activityCallback,
             Provider<ConnectionManager> connectionManager,
-            @Named("ipFilter")Provider<IPFilter> ipFilter, 
+            Provider<IPFilter> ipFilter, 
             ConnectionServices connectionServices,
             Provider<UPnPManager> upnpManager) {
         this.networkManager = networkManager;

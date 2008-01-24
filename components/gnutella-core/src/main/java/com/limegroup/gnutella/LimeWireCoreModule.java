@@ -306,7 +306,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(SettingsProvider.class).to(MacCalculatorSettingsProviderImpl.class);
         bind(ReplyHandler.class).annotatedWith(Names.named("forMeReplyHandler")).to(ForMeReplyHandler.class);
         bind(MessageRouter.class).to(StandardMessageRouter.class);
-        bind(IPFilter.class).annotatedWith(Names.named("ipFilter")).to(LocalIPFilter.class);
+        bind(IPFilter.class).to(LocalIPFilter.class);
         bind(IPFilter.class).annotatedWith(Names.named("hostileFilter")).to(HostileFilter.class);
         bind(UploadSlotManager.class).to(UploadSlotManagerImpl.class);
         bind(new TypeLiteral<EventDispatcher<TorrentEvent, TorrentEventListener>>(){}).to(TorrentManager.class);
@@ -338,7 +338,6 @@ public class LimeWireCoreModule extends AbstractModule {
 
         // TODO: statically injecting these for now...
         requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
-        requestStaticInjection(AddressToken.class);
         requestStaticInjection(HashTree.class);
         requestStaticInjection(LimeXMLDocument.class);
         requestStaticInjection(StatisticsManager.class);

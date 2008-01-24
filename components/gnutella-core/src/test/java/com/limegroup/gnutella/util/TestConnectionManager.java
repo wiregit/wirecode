@@ -136,7 +136,7 @@ public class TestConnectionManager extends ConnectionManagerImpl {
             SocketsManager socketsManager,
             ConnectionServices connectionServices,
             Provider<NodeAssigner> nodeAssigner, 
-            @Named("ipFilter") Provider<IPFilter> ipFilter,
+             Provider<IPFilter> ipFilter,
             ConnectionCheckerManager connectionCheckerManager,
             PingRequestFactory pingRequestFactory, QueryRequestFactory queryRequestFactory,
             TestConnectionFactory testConnectionFactory) {

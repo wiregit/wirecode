@@ -56,7 +56,7 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
             ContentManager contentManager, SourceRankerFactory sourceRankerFactory,
             UrnCache urnCache, SavedFileManager savedFileManager,
             VerifyingFileFactory verifyingFileFactory, DiskController diskController,
-            @Named("ipFilter") IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+             IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<MessageRouter> messageRouter, Provider<TigerTreeCache> tigerTreeCache,
             ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory) throws SaveLocationException {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
