@@ -137,7 +137,7 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
                 replyToMulticast,firewalled,vendor,null,createTime,0,pe, false); // use exising pe
     }
 
-    public RemoteFileDesc createRemoteFileDesc(String host, int port, long index,
+    private RemoteFileDesc createRemoteFileDesc(String host, int port, long index,
             String filename, long size, byte[] clientGUID, int speed, boolean chat, int quality,
             boolean browseHost, LimeXMLDocument xmlDoc, Set<? extends URN> urns,
             boolean replyToMulticast, boolean firewalled, String vendor,

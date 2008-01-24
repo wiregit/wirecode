@@ -11,6 +11,11 @@ import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 
+/**
+ * A reference to a single file on a remote machine.  In this respect
+ * RemoteFileDesc is similar to a URL, but it contains Gnutella-
+ * specific data as well, such as the server's 16-byte GUID.<p>
+ */
 public interface RemoteFileDesc extends IpPort, Connectable, FileDetails {
 
     /** bogus IP we assign to RFDs whose real ip is unknown */
@@ -55,13 +60,6 @@ public interface RemoteFileDesc extends IpPort, Connectable, FileDetails {
      * Mutator for the available ranges.
      */
     public void setAvailableRanges(IntervalSet availableRanges);
-
-    /**
-     * updates the push address of the rfd to a new one.
-     * This should be done only to update the set of push proxies,
-     * features or FWT capability.
-     */
-    public void setPushAddress(PushEndpoint pe);
 
     /**
      * Returns the current failed count.

@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.downloader;
 
-
-
 import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 import java.net.InetAddress;
@@ -31,20 +29,7 @@ import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
- * A reference to a single file on a remote machine.  In this respect
- * RemoteFileDesc is similar to a URL, but it contains Gnutella-
- * specific data as well, such as the server's 16-byte GUID.<p>
- *
- * This class is serialized to disk as part of the downloads.dat file.  Hence
- * you must be very careful before making any changes.  Changing the
- * types of fields is DISALLOWED.  Deleting fields is not recommended,
- * as it can cause problems in the future if the field is re-added. 
- * Adding field a F is acceptable as long as the
- * readObject() method of this initializes F to a reasonable value when
- * reading from older files where the fields are not present.  This is exactly
- * what we do with _urns and _browseHostEnabled.  On the other hand, older
- * version of LimeWire will simply discard any extra fields F if reading from a
- * newer serialized file.  
+ * A default implementation for {@link RemoteFileDesc}.
  */
 class RemoteFileDescImpl implements RemoteFileDesc {
     
@@ -59,17 +44,17 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 	private final boolean _chatEnabled;
     private final int _quality;
     private final boolean _replyToMulticast;
-    private LimeXMLDocument _xmlDoc;
-	private Set<URN>  _urns;
+    private final LimeXMLDocument _xmlDoc;
+	private final Set<URN>  _urns;
 
     /**
      * Boolean indicating whether or not the remote host has browse host 
      * enabled.
      */
-	private boolean _browseHostEnabled;
+	private final boolean _browseHostEnabled;
 
-    private boolean _firewalled;
-    private String _vendor;
+    private final boolean _firewalled;
+    private final String _vendor;
     
     /**
      * Whether or not the remote host supports HTTP/1.1
@@ -88,13 +73,13 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     private boolean _http11;
     
     /** True if this host is TLS capable. */
-    public boolean _tlsCapable;
+    private boolean _tlsCapable;
     
     /**
      * The <tt>PushEndpoint</tt> for this RFD.
      * if null, the rfd is not behind a push proxy.
      */
-    private PushEndpoint _pushAddr;
+    private final PushEndpoint _pushAddr;
 		
 
     /**
@@ -143,7 +128,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     /**
      * The creation time of this file.
      */
-    private long _creationTime;
+    private final long _creationTime;
     
     /** Whether to serialize the push proxies */
     private volatile boolean _serializeProxies = false;
@@ -156,7 +141,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     /** the security of this RemoteFileDesc. */
     private int _secureStatus = SecureMessage.INSECURE;
     
-    private volatile long longSize;
+    private final long _size;
     
     /**
      * Actual constructor.  If the firewalled flag is set and a PE object is passed it is used, if 
@@ -185,7 +170,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 		_port = port;
 		_index = index;
 		_filename = filename;
-        longSize = size;
+        _size = size;
         _firewalled = firewalled;
 		_pushAddr = pe;
 		_clientGUID = clientGUID;
@@ -261,15 +246,6 @@ class RemoteFileDescImpl implements RemoteFileDesc {
      */
     public void setAvailableRanges(IntervalSet availableRanges) {
         this._availableRanges = availableRanges;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.RemoteFileDesc#setPushAddress(com.limegroup.gnutella.PushEndpoint)
-     */
-    public void setPushAddress(PushEndpoint pe) {
-        if (!Arrays.equals(pe.getClientGUID(),this._clientGUID))
-                throw new IllegalArgumentException("different clientGUID");
-        this._pushAddr=pe;
     }
     
     /* (non-Javadoc)
@@ -386,9 +362,9 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#getSize()
      */
-	public final long getSize() {return longSize;}
+	public final long getSize() {return _size;}
 	
-	public final long getFileSize() { return longSize; }
+	public final long getFileSize() { return _size; }
 
 	/**
 	 * Accessor for the file name for this file, which can be <tt>null</tt>.
@@ -607,7 +583,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
         if (! (nullEquals(_host, other.getHost()) && (_port==other.getPort())) )
             return false;
 
-        if (longSize != other.getSize())
+        if (_size != other.getSize())
             return false;
         
         if ( (_clientGUID ==null) != (other.getClientGUID()==null) )
@@ -641,7 +617,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
             int result = 17;
             result = (37* result)+_host.hashCode();
             result = (37* result)+_port;
-			result = (int)((37* result)+longSize);
+			result = (int)((37* result)+_size);
             result = (37* result)+_urns.hashCode();
             if (_clientGUID!=null)
                 result = (37* result)+(new GUID(_clientGUID)).hashCode();
@@ -721,7 +697,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
      */
     public RemoteHostMemento toMemento() {
         return new RemoteHostMemento(_host, _port, _filename, _index, _clientGUID, _speed,
-                longSize, _chatEnabled, _quality, _replyToMulticast, xmlString(), _urns,
+                _size, _chatEnabled, _quality, _replyToMulticast, xmlString(), _urns,
                 _browseHostEnabled, _firewalled, _vendor, _http11, _tlsCapable, pushAddrString()); 
     }
     

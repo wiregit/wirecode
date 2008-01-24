@@ -338,8 +338,9 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
             
             // older push proxies do not route but respond directly, we want to get responses
             // from other push proxies
-            if (!pong.hasFile() && pong.isRoutingBroken() && rfd.needsPush())
+            if (!pong.hasFile() && pong.isRoutingBroken() && rfd.needsPush()) {
                 return;
+            }
             
             // if the pong is firewalled, remove the other proxies from the 
             // pinged set
@@ -365,10 +366,11 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         
         // if the pong didn't have the file, drop it
         // otherwise add any altlocs the pong had to our known hosts
-        if (alts == null) 
+        if (alts == null)  {
             mesh.informMesh(rfd,false);
-        else
+        } else {
             mesh.addPossibleSources(alts);
+        }
     }
 
 

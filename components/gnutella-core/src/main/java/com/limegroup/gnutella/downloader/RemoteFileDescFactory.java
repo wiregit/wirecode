@@ -106,15 +106,6 @@ public interface RemoteFileDescFactory {
             Set<? extends URN> urns, boolean replyToMulticast, boolean firewalled, String vendor, long createTime, PushEndpoint pe);
 
     /**
-     * Actual constructor.  If the firewalled flag is set and a PE object is passed it is used, if 
-     * no PE object is passed a new one is created.
-     */
-    public RemoteFileDesc createRemoteFileDesc(String host, int port, long index, String filename,
-            long size, byte[] clientGUID, int speed, boolean chat, int quality, boolean browseHost,
-            LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast, boolean firewalled, String vendor, Set<? extends IpPort> proxies,
-            long createTime, int FWTVersion, PushEndpoint pe, boolean tlsCapable);
-
-    /**
      * Constructs a URLRemoteFileDesc, whose getUrl method will return that URL.
      */
     public RemoteFileDesc createUrlRemoteFileDesc(String host, int port, String filename, long size,

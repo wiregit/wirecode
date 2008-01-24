@@ -524,7 +524,7 @@ public class PingRankerTest extends LimeTestCase {
         
         PushEndpoint pe = pushEndpointFactory.createPushEndpoint(s);
         RemoteFileDesc ret = newRFDWithURN(host,3);
-        remoteFileDescFactory.createRemoteFileDesc(ret, pe);
+        ret = remoteFileDescFactory.createRemoteFileDesc(ret, pe);
         return ret;
     }
     
@@ -532,7 +532,7 @@ public class PingRankerTest extends LimeTestCase {
      * a mock pinger.  Note that the base code will still register messsage listeners
      * but we don't care because they will never be used.
      */
-    static class MockPinger extends UDPPingerImpl {
+    private static class MockPinger extends UDPPingerImpl {
         
         @Inject
         public MockPinger(Provider<MessageRouter> messageRouter, @Named("backgroundExecutor") ScheduledExecutorService scheduledExecutorService,
@@ -565,7 +565,7 @@ public class PingRankerTest extends LimeTestCase {
     /**
      * a very customizable HeadPong
      */
-    class MockPong extends HeadPongImpl {
+    private class MockPong extends HeadPongImpl {
         
         private Set<IpPort> altLocs;
         private Set<PushEndpoint> pushLocs;
@@ -588,7 +588,8 @@ public class PingRankerTest extends LimeTestCase {
             this.ranges = ranges;
         }
 
-        public Set getAllLocsRFD(RemoteFileDesc original) {
+        @Override
+        public Set<RemoteFileDesc> getAllLocsRFD(RemoteFileDesc original, RemoteFileDescFactory remoteFileDescFactory) {
             Set<RemoteFileDesc> ret = new HashSet<RemoteFileDesc>();
             
             if (altLocs!=null)
@@ -662,7 +663,7 @@ public class PingRankerTest extends LimeTestCase {
         assertTrue(IpPort.COMPARATOR.compare(a,b) == 0);
     }
     
-    static class MockMesh implements MeshHandler {
+    private static class MockMesh implements MeshHandler {
         private final SourceRanker ranker;
         public MockMesh(SourceRanker ranker) {
             this.ranker = ranker;
