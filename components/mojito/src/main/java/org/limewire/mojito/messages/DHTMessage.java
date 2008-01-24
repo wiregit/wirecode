@@ -111,4 +111,7 @@ public interface DHTMessage {
     
     /** Writes this Message to the OutputStream */
     public void write(OutputStream out) throws IOException;
+
+    /** The length of this message */
+    public int getLength();
 }

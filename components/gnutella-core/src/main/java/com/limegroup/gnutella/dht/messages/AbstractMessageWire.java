@@ -32,7 +32,7 @@ abstract class AbstractMessageWire<T extends DHTMessage>
     protected final T delegate;
     
     AbstractMessageWire(T delegate) {
-        super(GUID, (byte)DHTMessage.F_DHT_MESSAGE, TTL, HOPS, 0, Network.UNKNOWN);
+        super(GUID, (byte)DHTMessage.F_DHT_MESSAGE, TTL, HOPS, delegate.getLength(), Network.UNKNOWN);
         this.delegate = delegate;
     }
 

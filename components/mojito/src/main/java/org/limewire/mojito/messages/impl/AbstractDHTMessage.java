@@ -216,4 +216,13 @@ abstract class AbstractDHTMessage implements DHTMessage {
             throw new SignatureException(err);
         }
     }
+    
+    public final int getLength() {
+        try {
+            serialize();
+            return payload.length;
+        } catch (IOException impossible) {
+            return -1;
+        }
+    }
 }
