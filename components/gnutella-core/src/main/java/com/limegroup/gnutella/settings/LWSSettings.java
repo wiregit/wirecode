@@ -18,13 +18,14 @@ public final class LWSSettings extends LimeProps {
      * The hostname to which we connect for authentication.
      */
     public static final StringSetting LWS_AUTHENTICATION_HOSTNAME = FACTORY.createRemoteStringSetting(
-            "LWS_AUTHENTICATION_HOSTNAME", "localhost", "LWSSettings.lwsAuthenticationHostname");
+            "LWS_AUTHENTICATION_HOSTNAME", "10.254.0.247", "LWSSettings.lwsAuthenticationHostname");
 
     /**
      * The port on which we connect for authentication. This can be
      * <code><= 0</code> for no port.
      */
     public static final IntSetting LWS_AUTHENTICATION_PORT = FACTORY.createRemoteIntSetting(
+            //"LWS_AUTHENTICATION_PORT", 8443, "LWSSettings.lwsAuthenticationPort", -Integer.MIN_VALUE,
             "LWS_AUTHENTICATION_PORT", 8080, "LWSSettings.lwsAuthenticationPort", -Integer.MIN_VALUE,
             10000);
     
@@ -33,7 +34,7 @@ public final class LWSSettings extends LimeProps {
      * so needs to be all together.  This also makes it clearer.  <b>This HAS to end in a <code>/</code></b>.
      */
     public static final StringSetting LWS_DOWNLOAD_PREFIX = FACTORY.createRemoteStringSetting(
-            "LWS_DOWNLOAD_PREFIX", "localhost:8080", "LWSSettings.lwsDownloadPrefix"); 
+            "LWS_DOWNLOAD_PREFIX", "10.254.0.247:8080", "LWSSettings.lwsDownloadPrefix"); 
     
     /**
      * The hostname to which we connect for adding to playlists.
@@ -54,6 +55,12 @@ public final class LWSSettings extends LimeProps {
      */
     public static final BooleanSetting LWS_IS_ENABLED = FACTORY.createRemoteBooleanSetting(
             "LWS_IS_ENABLED", true, "LWSSettings.lwsIsEnabled");
+    
+    /**
+     * Allow us to turn on/off SSL messages to the Server.
+     */
+    public static final BooleanSetting LWS_USE_SSL = FACTORY.createRemoteBooleanSetting(
+            "LWS_USE_SSL", false, "LWSSettings.lwsUseSSL");    
     
     /*
      * These are mainly for the demos when we are using HTTP authentication for accessing the store.

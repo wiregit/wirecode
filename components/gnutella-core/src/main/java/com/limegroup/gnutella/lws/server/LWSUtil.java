@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.util.Base64;
 import org.limewire.lws.server.LWSDispatcherSupport;
 
@@ -51,7 +50,9 @@ public final class LWSUtil {
      */
     public static void addAuthentication(HttpMethod method) {
         String username = LWSSettings.LWS_AUTHENTICATION_USERNAME.getValue();
+        if (username == null || username.equals("")) return;
         String password = LWSSettings.LWS_AUTHENTICATION_PASSWORD.getValue();
+        if (password == null || password.equals("")) return;
         String unecrypted = username + ":" + password;
         String encrypted = new String(Base64.encode(unecrypted.getBytes()));
         method.addRequestHeader("Authorization", "Basic " + encrypted);

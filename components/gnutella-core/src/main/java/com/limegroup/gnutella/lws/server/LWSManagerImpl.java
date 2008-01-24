@@ -149,8 +149,14 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     public final void sendMessageToServer(final String msg, 
                                           final Map<String, String> args, 
                                           final StringCallback cb) throws IOException {
-        String url = constructURL(msg, args);
+        String url = constructURL(msg, args); System.out.println("****** URL:" + url);
         final GetMethod get = new GetMethod(url);
+        //
+        // TODO: Need to do authentication
+        //       This is gross gross gross and needs changing, but can stay for now
+        //
+        get.setDoAuthentication(true);
+        LWSUtil.addAuthentication(get);        
         get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
         //
         // we don't care what this response is, because we are
@@ -159,12 +165,6 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         //
         //
         cb.process(Responses.OK);
-        //
-        // TODO: Need to do authentication
-        //       This is gross gross gross and needs changing, but can stay for now
-        //
-        get.setDoAuthentication(true);
-        LWSUtil.addAuthentication(get);
         exe.execute(get, new HttpClientListener() {
             
             public boolean requestComplete(HttpMethod method) {
@@ -182,9 +182,13 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     }
     
     private String constructURL(final String msg, final Map<String, String> args) {
-        StringBuffer url = new StringBuffer("http://")
-            .append(hostNameAndPort)
-            .append(COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES);
+        StringBuffer url = new StringBuffer("http");
+        if (LWSSettings.LWS_USE_SSL.getValue()) {
+            url.append("s");
+        }
+        url.append("://")
+           .append(hostNameAndPort)
+           .append(COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES);
         url.append(msg);
         for (Map.Entry<String, String> e : args.entrySet()) {
             url.append("/");
