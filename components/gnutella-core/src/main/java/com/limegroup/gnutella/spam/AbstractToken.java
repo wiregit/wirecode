@@ -56,7 +56,7 @@ public abstract class AbstractToken implements Token {
             return 1;
         
         // Then, sort by type
-        int typeDelta = this.getType() - t.getType();
+        int typeDelta = this.getType().ordinal() - t.getType().ordinal();
         if (typeDelta != 0)
             return typeDelta;
         

@@ -15,8 +15,6 @@ public class UrnToken extends AbstractToken {
 	 */
 	private static final int MAX = 4;
 
-	private static final int TYPE = TYPE_URN;
-
 	private final URN _urn;
 
 	private byte _bad;
@@ -36,22 +34,22 @@ public class UrnToken extends AbstractToken {
 	/**
 	 * implements interface <tt>Token</tt>
 	 */
-	public void rate(int rating) {
+	public void rate(Rating rating) {
 		_age = 0;
 		switch (rating) {
-		case RATING_GOOD:
+		case PROGRAM_MARKED_GOOD:
 			if (_bad > 0)
 				_bad--;
 			break;
-		case RATING_SPAM:
+		case PROGRAM_MARKED_SPAM:
 			if (_bad < MAX)
 				_bad++;
 			break;
-		case RATING_CLEARED:
-		case RATING_USER_MARKED_GOOD:
+		case CLEARED:
+		case USER_MARKED_GOOD:
 			_bad = 0;
 			break;
-		case RATING_USER_MARKED_SPAM:
+		case USER_MARKED_SPAM:
 			_bad = MAX;
 			break;
 		default:
@@ -62,8 +60,8 @@ public class UrnToken extends AbstractToken {
 	/**
 	 * implements interface <tt>Token</tt>
 	 */
-	public int getType() {
-		return TYPE;
+	public TokenType getType() {
+		return TokenType.URN;
 	}
     
     public final int hashCode() {

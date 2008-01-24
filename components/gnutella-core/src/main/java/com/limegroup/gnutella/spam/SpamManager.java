@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.spam.Token.Rating;
 
 @Singleton
 public class SpamManager {
@@ -47,7 +48,7 @@ public class SpamManager {
 	 */
 	public void startedQuery(QueryRequest qr) {
 		if (SearchSettings.ENABLE_SPAM_FILTER.getValue())
-			ratingTable.mark(qr, Token.RATING_CLEARED);
+			ratingTable.mark(qr, Rating.CLEARED);
 	}
 
 	/**
@@ -92,7 +93,7 @@ public class SpamManager {
 		for (int i = 0; i < rfds.length; i++)
 			rfds[i].setSpamRating(1.f);
 
-		ratingTable.mark(rfds, Token.RATING_USER_MARKED_SPAM);
+		ratingTable.mark(rfds, Rating.USER_MARKED_SPAM);
 	}
 
 	/**
@@ -105,7 +106,7 @@ public class SpamManager {
 		for (int i = 0; i < rfds.length; i++)
 			rfds[i].setSpamRating(0.f);
 
-		ratingTable.mark(rfds, Token.RATING_USER_MARKED_GOOD);
+		ratingTable.mark(rfds, Rating.USER_MARKED_GOOD);
 	}
 
 	/**

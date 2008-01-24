@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.spam;
 
+
+
 public class VendorToken extends AbstractToken {
     
     private static final long serialVersionUID = -3593261726550970847L;
@@ -70,30 +72,30 @@ public class VendorToken extends AbstractToken {
         return vendor.equals(((VendorToken)o).vendor);
     }
     
-    public int getType() {
-        return TYPE_VENDOR;
+    public TokenType getType() {
+        return TokenType.VENDOR;
     }
     
     public float getRating() {
         return (float)Math.pow(1.f * _bad / (_good + _bad + 1), 2);
     }
 
-    public void rate(int rating) {
+    public void rate(Rating rating) {
         _age = 0;
         switch (rating) {
-        case RATING_GOOD:
+        case PROGRAM_MARKED_GOOD:
             _good++;
             break;
-        case RATING_SPAM:
+        case PROGRAM_MARKED_SPAM:
             _bad++;
             break;
-        case RATING_USER_MARKED_GOOD:
+        case USER_MARKED_GOOD:
             _bad = (byte) (_bad / 2); // bad rating should decrease slowly
             break;
-        case RATING_USER_MARKED_SPAM: // bad rating should increase slowly.
+        case USER_MARKED_SPAM: // bad rating should increase slowly.
             _bad = (byte) Math.min(_bad + 2, MAX);
             break;
-        case RATING_CLEARED:
+        case CLEARED:
             _bad = 0;
             _good = INITAL_GOOD;
             break;
@@ -122,7 +124,7 @@ public class VendorToken extends AbstractToken {
             return 0;
         }
 
-        public void rate(int rating) {}
+        public void rate(Rating rating) {}
         
     }
 

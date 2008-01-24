@@ -32,6 +32,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.spam.Token.Rating;
 
 @Singleton
 public class RatingTable {
@@ -107,9 +108,9 @@ public class RatingTable {
 
         float bad = SearchSettings.FILTER_SPAM_RESULTS.getValue();
         if (rating >= bad && rating <= SpamManager.MAX_THRESHOLD)
-            markInternal(tokens, Token.RATING_SPAM);
+            markInternal(tokens, Rating.PROGRAM_MARKED_SPAM);
         else if (rating <= 1f - bad)
-            markInternal(tokens, Token.RATING_GOOD);
+            markInternal(tokens, Rating.PROGRAM_MARKED_GOOD);
 
         return rating;
     }
@@ -122,7 +123,7 @@ public class RatingTable {
 	 * @param rating
 	 *            must be a rating as defined by the Token interface
 	 */
-	void mark(RemoteFileDesc[] descs, int rating) {
+	void mark(RemoteFileDesc[] descs, Rating rating) {
 		markInternal(lookup(Tokenizer.getTokens(descs)), rating);
 	}
 
@@ -134,7 +135,7 @@ public class RatingTable {
 	 * @param rating
 	 *            must be a rating as defined by the Token interface
 	 */
-	void mark(RemoteFileDesc desc, int rating) {
+	void mark(RemoteFileDesc desc, Rating rating) {
 		markInternal(lookup(Tokenizer.getTokens(desc)), rating);
 	}
 
@@ -146,7 +147,7 @@ public class RatingTable {
 	 * @param rating
 	 *            must be a rating as defined by the Token interface
 	 */
-	void mark(QueryRequest qr, int rating) {
+	void mark(QueryRequest qr, Rating rating) {
 		markInternal(lookup(Tokenizer.getTokens(qr)), rating);
 	}
 
@@ -158,7 +159,7 @@ public class RatingTable {
 	 * @param rating
 	 *            must be a rating as defined by the Token interface
 	 */
-	private void markInternal(Token[] tokens, int rating) {
+	private void markInternal(Token[] tokens, Rating rating) {
 		for (int i = 0; i < tokens.length; i++)
 			tokens[i].rate(rating);
 	}
@@ -322,9 +323,9 @@ public class RatingTable {
                     List<Double> ratingToType = new ArrayList<Double>(_tokenMap.size());
                     for (Token t : _tokenMap.values()) {
                         ratings.add((double)t.getRating());
-                        types.add((double)t.getType());
+                        types.add((double)t.getType().ordinal());
                         importance.add(t.getImportance());
-                        ratingToType.add((double)t.getRating() - t.getType());
+                        ratingToType.add((double)t.getRating() - t.getType().ordinal());
                     }
 
                     ret.put("ratings", StatsUtils.quickStatsDouble(ratings).getMap());

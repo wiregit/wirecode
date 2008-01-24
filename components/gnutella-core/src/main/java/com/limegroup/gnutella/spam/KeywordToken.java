@@ -8,8 +8,6 @@ import java.util.Arrays;
 public class KeywordToken extends AbstractToken {
 	private static final long serialVersionUID = 3257850995487748662L;
 
-	public static final int TYPE = TYPE_KEYWORD;
-
 	/**
 	 * must be positive
 	 * 
@@ -75,22 +73,22 @@ public class KeywordToken extends AbstractToken {
 	/**
 	 * implements interface <tt>Token</tt>
 	 */
-	public void rate(int rating) {
+	public void rate(Rating rating) {
 		_age = 0;
 		switch (rating) {
-		case RATING_GOOD:
+		case PROGRAM_MARKED_GOOD:
 			_good++;
 			break;
-		case RATING_SPAM:
+		case PROGRAM_MARKED_SPAM:
 			_bad++;
 			break;
-		case RATING_USER_MARKED_GOOD:
+		case USER_MARKED_GOOD:
 			_bad = 0;
 			break;
-		case RATING_USER_MARKED_SPAM:
+		case USER_MARKED_SPAM:
 			_bad = (byte) Math.min(_bad + 10, MAX);
 			break;
-		case RATING_CLEARED:
+		case CLEARED:
 			_bad = 0;
 			_good = INITAL_GOOD;
 			break;
@@ -107,8 +105,8 @@ public class KeywordToken extends AbstractToken {
 	/**
 	 * implements interface <tt>Token</tt>
 	 */
-	public int getType() {
-		return TYPE;
+	public TokenType getType() {
+		return TokenType.KEYWORD;
 	}
 
 	/**

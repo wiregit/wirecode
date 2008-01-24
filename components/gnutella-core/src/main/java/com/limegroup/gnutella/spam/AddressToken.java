@@ -17,8 +17,6 @@ import com.limegroup.gnutella.filters.IPFilter;
 public class AddressToken extends AbstractToken {
 	private static final long serialVersionUID = 3257568416670824244L;
 
-	private static final int TYPE = TYPE_ADDRESS;
-
 	/**
 	 * must be positive
 	 * 
@@ -88,13 +86,7 @@ public class AddressToken extends AbstractToken {
     }
     
     private int getHashCode() {
-        int hashCode = TYPE;
-        hashCode = (TYPE * hashCode) + _address[0];
-        hashCode = (TYPE * hashCode) + _address[1];
-        hashCode = (TYPE * hashCode) + _address[2];
-        hashCode = (TYPE * hashCode) + _address[3];
-        hashCode = (TYPE * hashCode) + _port;
-        return hashCode;
+        return _address[0] + _address[1] + _address[2] + _address[3] + _port;
     }
 
 	/**
@@ -120,25 +112,25 @@ public class AddressToken extends AbstractToken {
 	/**
 	 * implements interface <tt>Token</tt>
 	 */
-	public void rate(int rating) {
+	public void rate(Rating rating) {
         if (!ratingInitialized) {
             initializeRating();
         }
 		_age = 0;
 		switch (rating) {
-		case RATING_GOOD:
+		case PROGRAM_MARKED_GOOD:
 			_good++;
 			break;
-		case RATING_SPAM:
+		case PROGRAM_MARKED_SPAM:
 			_bad++;
 			break;
-		case RATING_USER_MARKED_GOOD:
+		case USER_MARKED_GOOD:
 			_bad = 0;
 			break;
-		case RATING_USER_MARKED_SPAM:
+		case USER_MARKED_SPAM:
 			_bad = (byte) Math.min(_bad + 10, MAX);
 			break;
-		case RATING_CLEARED:
+		case CLEARED:
 			_bad = 0;
 			_good = INITIAL_GOOD;
 			break;
@@ -155,8 +147,8 @@ public class AddressToken extends AbstractToken {
 	/**
 	 * implements interface <tt>Token</tt>
 	 */
-	public int getType() {
-		return TYPE;
+	public TokenType getType() {
+		return TokenType.ADDRESS;
 	}
 
     public final int hashCode() {
