@@ -422,7 +422,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         }
 
         @Override
-        public boolean findPushAltLocs(GUID guid, URN urn) {
+        public boolean findPushAltLocs(GUID guid, URN urn, AltLocSearchListener listener) {
             return true;
         }
     }

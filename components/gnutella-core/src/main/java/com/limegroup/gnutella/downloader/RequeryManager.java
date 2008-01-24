@@ -7,6 +7,7 @@ import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -243,5 +244,8 @@ class RequeryManager implements DHTEventListener, AltLocSearchListener {
         return connectionServices.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
                     >= MIN_NUM_CONNECTIONS &&
                     connectionServices.getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
+    }
+
+    public void handleAlternateLocation(AlternateLocation alternateLocation) {
     }
 }

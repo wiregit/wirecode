@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -67,7 +68,7 @@ public class MagnetOptions implements Serializable {
 	 * @return
 	 */
 	public static MagnetOptions createMagnet(FileDetails fileDetails) {
-		Map<Option, List<String>> map = new HashMap<Option, List<String>>();
+		Map<Option, List<String>> map = new EnumMap<Option, List<String>>(Option.class);
         List<String> name = new ArrayList<String>(1);
         name.add(fileDetails.getFileName());
 		map.put(Option.DN, name);

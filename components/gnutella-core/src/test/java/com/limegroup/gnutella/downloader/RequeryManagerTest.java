@@ -14,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.URN;
@@ -513,11 +512,6 @@ public class RequeryManagerTest extends LimeTestCase {
                 }
             };
         }
-
-        @Override
-        public boolean findPushAltLocs(GUID guid, URN urn) {
-            return true;
-        }
-        
+ 
     }
 }

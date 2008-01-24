@@ -65,6 +65,10 @@ public class AltLocFinder {
     
     /**
      * Finds AlternateLocations for the given URN
+     * 
+     * @param urn for the alternate location
+     * 
+     * @return <code>null</code> if <code>urn</code> is null or DHT is not bootstrapped
      */
     public Shutdownable findAltLocs(URN urn, AltLocSearchListener listener) {
         if (urn == null) {
@@ -91,13 +95,21 @@ public class AltLocFinder {
     
     /**
      * Finds push AlternateLocations for the given GUID and URN
+     * 
+     * @param guid the guid of the (firewalled) client that constitutes an alternate location for the urn
+     * @param urn the urn of the alternate location
+     * @param listener listener that is notified of retrieved alternate locations 
+     * 
+     * @return <code>false</code> if <code>guid</code> or <code>urn</code> are null
+     * or DHT is not boostrapped
      */
-    public boolean findPushAltLocs(GUID guid, URN urn) {
-        return findPushAltLocs(guid, urn, null, null);
+    public boolean findPushAltLocs(GUID guid, URN urn, AltLocSearchListener listener) {
+        return findPushAltLocs(guid, urn, null, listener);
     }
     
     /**
-     * 
+     * @return <code>false</code> if <code>guid</code> or <code>urn</code> are null
+     * or DHT is not boostrapped
      */
     private boolean findPushAltLocs(GUID guid, URN urn, 
             DHTValueEntity altLocEntity, AltLocSearchListener listener) {
@@ -123,6 +135,9 @@ public class AltLocFinder {
     /**
      * An abstract implementation of DHTFutureAdapter to handle AltLocValues
      * and PushAltLocValues.
+     * 
+     * Iterates over entity keys and retrieves their values from the node and
+     * calls {@link #handleDHTValueEntity(DHTValueEntity)} for them.
      */
     private abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
         
@@ -284,6 +299,9 @@ public class AltLocFinder {
                     AlternateLocation location = alternateLocationFactory
                             .createDirectDHTAltLoc(c, urn, fileSize, ttroot);
                     altLocManager.add(location, this);
+                    if (listener != null) {
+                        listener.handleAlternateLocation(location);
+                    }
                     return true;
                 } catch (IOException e) {
                     // Thrown if IpPort is an invalid address
@@ -362,6 +380,9 @@ public class AltLocFinder {
             try {
                 AlternateLocation location = alternateLocationFactory.createPushAltLoc(pe, urn);
                 altLocManager.add(location, this);
+                if (listener != null) {
+                    listener.handleAlternateLocation(location);
+                }
                 return true;
             } catch (IOException e) {
                 // Impossible. Thrown if URN or PushEndpoint is null

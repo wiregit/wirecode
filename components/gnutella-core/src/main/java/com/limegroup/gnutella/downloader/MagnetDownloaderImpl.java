@@ -42,7 +42,7 @@ import com.limegroup.gnutella.util.QueryUtils;
 
 /**
  * A ManagedDownloader for MAGNET URIs.  Unlike a ManagedDownloader, a
- * MagnetDownloader need not have an initial RemoteFileDesc.  Instead it can be
+ * MagnetDownloader needs not have an initial RemoteFileDesc.  Instead it can be
  * started with various combinations of the following:
  * <ul>
  * <li>initial URL (exact source)
