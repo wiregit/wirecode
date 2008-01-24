@@ -17,6 +17,7 @@ import org.limewire.collection.Cancellable;
 import org.limewire.collection.IntervalSet;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.IpPortSet;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -55,7 +56,6 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * and how it ranks hosts based on the returned results.
  *
  */
-@SuppressWarnings("unchecked")
 public class PingRankerTest extends LimeTestCase {
 
     public PingRankerTest(String name) {
@@ -66,15 +66,15 @@ public class PingRankerTest extends LimeTestCase {
         return buildTestSuite(PingRankerTest.class);
     }
     
-    MockPinger pinger;
-    PingRanker ranker;
-    MessageRouterStub messageRouter;
-    NetworkManagerStub networkManager;
-    UDPReplyHandlerFactory udpReplyHandlerFactory;
-    SpamFilterFactory spamFilterFactory;
-    PushEndpointFactory pushEndpointFactory;
-    HeadPongFactory headPongFactory;
-    RemoteFileDescFactory remoteFileDescFactory;
+    private MockPinger pinger;
+    private PingRanker ranker;
+    private MessageRouterStub messageRouter;
+    private NetworkManagerStub networkManager;
+    private UDPReplyHandlerFactory udpReplyHandlerFactory;
+    private SpamFilterFactory spamFilterFactory;
+    private PushEndpointFactory pushEndpointFactory;
+    private HeadPongFactory headPongFactory;
+    private RemoteFileDescFactory remoteFileDescFactory;
     
     public void setUp() throws Exception {
         networkManager = new NetworkManagerStub();
@@ -167,12 +167,12 @@ public class PingRankerTest extends LimeTestCase {
         // send two altlocs, one containing the node itself 
         IpPort ip = new IpPortImpl("1.2.3.5",1);
         
-        Set alts = new HashSet();
+        Set<IpPort> alts = new IpPortSet();
         alts.add(ip);
         
         //and one push loc
         PushEndpoint pe = pushEndpointFactory.createPushEndpoint((new GUID(GUID.makeGuid())).toHexString()+";1.2.3.6:7");
-        Set push = new HashSet();
+        Set<PushEndpoint> push = new HashSet<PushEndpoint>();
         push.add(pe);
         
         MockPong pong = new MockPong(true,true,1,false,false,false,null,alts,push);
@@ -213,9 +213,9 @@ public class PingRankerTest extends LimeTestCase {
         // make one of the hosts send an altloc of itself (spammer?) and the pushloc 
         IpPort ip = new IpPortImpl("1.2.3.4",1);
         PushEndpoint pe = pushEndpointFactory.createPushEndpoint(g.toHexString()+";7:1.2.3.6;4.4.4.4:4");
-        Set alts = new HashSet();
+        Set<IpPort> alts = new IpPortSet();
         alts.add(ip);
-        Set push = new HashSet();
+        Set<PushEndpoint> push = new HashSet<PushEndpoint>();
         push.add(pe);
         
         MockPong pong = new MockPong(true,true,-1,false,false,false,null,alts,push);
@@ -234,7 +234,7 @@ public class PingRankerTest extends LimeTestCase {
         GUID g = new GUID(GUID.makeGuid());
         ranker.addToPool(newPushRFD(g.bytes(),"1.2.2.2:3","2.2.2.3:5"));
         assertEquals(1,pinger.hosts.size());
-        assertIpPortEquals(new IpPortImpl("1.2.2.2",3),(IpPort)pinger.hosts.get(0));
+        assertIpPortEquals(new IpPortImpl("1.2.2.2",3),pinger.hosts.get(0));
         HeadPing ping = (HeadPing)pinger.messages.get(0);
         assertEquals(g,ping.getClientGuid());
     }
@@ -281,7 +281,7 @@ public class PingRankerTest extends LimeTestCase {
         
         // two pings should be sent out
         assertEquals(2,pinger.hosts.size());
-        Set s = new TreeSet(IpPort.COMPARATOR);
+        Set<IpPort> s = new TreeSet<IpPort>(IpPort.COMPARATOR);
         s.addAll(pinger.hosts);
         assertTrue(s.contains(new IpPortImpl("1.2.2.2",3)));
         assertTrue(s.contains(new IpPortImpl("1.3.3.3",4)));
@@ -303,7 +303,7 @@ public class PingRankerTest extends LimeTestCase {
      */
     public void testPrefersPongedHost() throws Exception {
         assertFalse(ranker.hasMore());
-        List l = new ArrayList(10);
+        List<RemoteFileDesc> l = new ArrayList<RemoteFileDesc>(10);
         for (int i =0;i < 10;i++) 
             l.add(newRFDWithURN("1.2.3."+i,3));
         ranker.addToPool(l);
@@ -350,7 +350,7 @@ public class PingRankerTest extends LimeTestCase {
      * Tests that the ranker offers hosts that indicated they were busy last
      */
     public void testBusyOfferedLast() throws Exception {
-        List l = new ArrayList();
+        List<RemoteFileDesc> l = new ArrayList<RemoteFileDesc>();
         l.add(newRFDWithURN("1.2.3.4",3));
         l.add(newRFDWithURN("1.2.3.5",3));
         ranker.addToPool(l);
@@ -371,7 +371,7 @@ public class PingRankerTest extends LimeTestCase {
      * Tests that the ranker offers hosts that have more free slots first 
      */
     public void testSortedByQueueRank() throws Exception {
-        List l = new ArrayList();
+        List<RemoteFileDesc> l = new ArrayList<RemoteFileDesc>();
         
         l.add(newRFDWithURN("1.2.3.4",3));
         l.add(newRFDWithURN("1.2.3.5",3));
@@ -403,7 +403,7 @@ public class PingRankerTest extends LimeTestCase {
         RemoteFileDesc open = newRFDWithURN("1.2.3.4",3);
         RemoteFileDesc openMoreSlots = newRFDWithURN("1.2.3.5",3);
         RemoteFileDesc push = newPushRFD(GUID.makeGuid(),"1.2.3.6:6",null);
-        List l = new ArrayList();
+        List<RemoteFileDesc> l = new ArrayList<RemoteFileDesc>();
         l.add(open);l.add(openMoreSlots);l.add(push);
         ranker.addToPool(l);
         
@@ -429,7 +429,7 @@ public class PingRankerTest extends LimeTestCase {
      */
     public void testPartialPreferred() throws Exception {
         networkManager.setAcceptedIncomingConnection(true);
-        List l = new ArrayList();
+        List<RemoteFileDesc> l = new ArrayList<RemoteFileDesc>();
         l.add(newRFDWithURN("1.2.3.4",3));
         l.add(newRFDWithURN("1.2.3.5",3));
         l.add(newRFDWithURN("1.2.3.6",3));
@@ -467,7 +467,7 @@ public class PingRankerTest extends LimeTestCase {
         ranker.addToPool(rfd1);
         ranker.addToPool(rfd2);
         
-        Collection c = ranker.getShareableHosts();
+        Collection<RemoteFileDesc> c = ranker.getShareableHosts();
         assertTrue(c.contains(rfd1));
         assertTrue(c.contains(rfd2));
         assertEquals(2,c.size());
@@ -477,7 +477,7 @@ public class PingRankerTest extends LimeTestCase {
         IpPort ip1, ip2;
         ip1 = new IpPortImpl("1.2.3.6",3);
         ip2 = new IpPortImpl("1.2.3.7",3);
-        Set alts = new HashSet();
+        Set<IpPort> alts = new IpPortSet();
         alts.add(ip1);
         alts.add(ip2);
         MockPong oneFreeOpen= new MockPong(true,true,-1,false,false,true,null,alts,null);
@@ -486,7 +486,7 @@ public class PingRankerTest extends LimeTestCase {
         // the ranker should pass on the altlocs it discovered as well.
         c = ranker.getShareableHosts();
         assertEquals(4,c.size());
-        TreeSet s = new TreeSet(IpPort.COMPARATOR);
+        TreeSet<IpPort> s = new TreeSet<IpPort>(IpPort.COMPARATOR);
         s.addAll(c);
         assertEquals(4,s.size());
         assertTrue(s.contains(ip1));
@@ -496,7 +496,7 @@ public class PingRankerTest extends LimeTestCase {
     }
 
     private  RemoteFileDesc newRFDWithURN(String host, int speed) {
-        Set set = new HashSet();
+        Set<URN> set = new HashSet<URN>();
         try {
             // for convenience, don't require that they pass the urn.
             // assume a null one is the TestFile's hash.
@@ -543,17 +543,18 @@ public class PingRankerTest extends LimeTestCase {
         /**
          * the list of messages that was sent
          */
-        public List messages = new ArrayList();
+        public List<Message> messages = new ArrayList<Message>();
         
         /**
          * the list of hosts that we pinged, same order as messages
          */
-        public List hosts = new ArrayList();
+        public List<IpPort> hosts = new ArrayList<IpPort>();
         
-        public void rank(Collection hosts, MessageListener listener, 
+        @Override
+        public void rank(Collection<? extends IpPort> hosts, MessageListener listener,
                 Cancellable canceller, Message message) {
-            for (Iterator iter = hosts.iterator(); iter.hasNext();) {
-                this.hosts.add(iter.next());
+            for(IpPort next : hosts) {
+                this.hosts.add(next);
                 messages.add(message);
             }
         }
@@ -566,13 +567,14 @@ public class PingRankerTest extends LimeTestCase {
      */
     class MockPong extends HeadPongImpl {
         
-        private Set altLocs, pushLocs;
+        private Set<IpPort> altLocs;
+        private Set<PushEndpoint> pushLocs;
         private boolean have, full, firewalled, busy, downloading;
         private IntervalSet ranges;
         private int queueStatus;
         public MockPong(boolean have, boolean full, int queueStatus, 
                 boolean firewalled, boolean busy, boolean downloading,
-                IntervalSet ranges, Set altLocs, Set pushLocs) 
+                IntervalSet ranges, Set<IpPort> altLocs, Set<PushEndpoint> pushLocs) 
         throws IOException{
             super(new GUID(), HeadPong.VERSION, headPongFactory.create(new HeadPing(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE"))).getPayload());
             this.altLocs = altLocs;
@@ -587,7 +589,7 @@ public class PingRankerTest extends LimeTestCase {
         }
 
         public Set getAllLocsRFD(RemoteFileDesc original) {
-            Set ret = new HashSet();
+            Set<RemoteFileDesc> ret = new HashSet<RemoteFileDesc>();
             
             if (altLocs!=null)
                 for(Iterator iter = altLocs.iterator();iter.hasNext();) {
@@ -604,46 +606,56 @@ public class PingRankerTest extends LimeTestCase {
             return ret;
         }
 
-        public Set getAltLocs() {
+        @Override
+        public Set<IpPort> getAltLocs() {
             return this.altLocs;
         }
 
-        public Set getPushLocs() {
+        @Override
+        public Set<PushEndpoint> getPushLocs() {
             return pushLocs;
         }
         
+        @Override
         public int getQueueStatus() {
             return queueStatus;
         }
         
+        @Override
         public IntervalSet getRanges() {
             return ranges;
         }
         
+        @Override
         public boolean hasCompleteFile() {
             return full;
         }
-        
+
+        @Override
         public boolean hasFile() {
             return have;
         }
-        
+
+        @Override
         public boolean isBusy() {
             return busy;
         }
-        
+
+        @Override
         public boolean isDownloading() {
             return downloading;
         }
-        
+
+        @Override
         public boolean isFirewalled() {
             return firewalled;
         }
-        
+
+        @Override
         public boolean isRoutingBroken() {
             return true;
         }
-        
+
     }
 
     private static void assertIpPortEquals(IpPort a, IpPort b) {
@@ -657,13 +669,13 @@ public class PingRankerTest extends LimeTestCase {
         }
         public boolean good;
         public RemoteFileDesc rfd;
-        public Collection sources;
+        public Collection<? extends RemoteFileDesc> sources;
         public void informMesh(RemoteFileDesc rfd, boolean good) {
             this.rfd = rfd;
             this.good = good;
         }
-        
-        public void addPossibleSources(Collection c) {
+
+        public void addPossibleSources(Collection<? extends RemoteFileDesc> c) {
             sources = c;
             ranker.addToPool(c);
         }
