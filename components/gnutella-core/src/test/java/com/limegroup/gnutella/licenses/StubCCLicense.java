@@ -10,13 +10,7 @@ class StubCCLicense extends CCLicense {
     private static final URI LICENSE_URI;
     
     static {
-        URI uri = null;
-        try {
-            uri = new URI("http://1.2.3.4/page");
-        } catch(URISyntaxException muri) {
-            ErrorService.error(muri);
-        }
-        LICENSE_URI = uri;
+        LICENSE_URI = URI.create("http://1.2.3.4/page");   
     }    
     
     private final String page;

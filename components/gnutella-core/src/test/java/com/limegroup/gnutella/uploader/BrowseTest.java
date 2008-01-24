@@ -102,10 +102,6 @@ public class BrowseTest extends LimeTestCase {
 
         client = HttpClientManager.getNewClient();
         
-        /*client = new DefaultHttpClient();
-        Scheme https = client.getConnectionManager().getSchemeRegistry().getScheme("https");
-        Scheme tls = new Scheme("tls", https.getSocketFactory(), https.getDefaultPort());
-        client.getConnectionManager().getSchemeRegistry().register(tls);*/
         host = protocol + "://localhost:" + PORT;
     }
 

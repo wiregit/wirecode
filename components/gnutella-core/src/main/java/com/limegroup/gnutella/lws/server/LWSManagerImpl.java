@@ -179,7 +179,6 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         HttpParams params = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(params, 1000);
         HttpConnectionParams.setSoTimeout(params, 1000);
-        //get.addHeader("Connection", "close");
         exe.execute(get, params, new HttpClientListener() {
             
             public boolean requestComplete(HttpUriRequest request, HttpResponse response) {

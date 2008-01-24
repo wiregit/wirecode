@@ -1,11 +1,9 @@
 package org.limewire.http;
 
 import org.apache.http.conn.ClientConnectionManager;
-import org.apache.log4j.Logger;
+import org.limewire.service.ErrorService;
 
 class IdleConnectionCloser implements Runnable {
-
-    private static final Logger LOG = Logger.getLogger(IdleConnectionCloser.class);
 
     private static final long IDLE_TIME = 30 * 1000; // 30 seconds.
 
@@ -19,7 +17,7 @@ class IdleConnectionCloser implements Runnable {
         try {
             manager.closeIdleConnections(IDLE_TIME);
         } catch (Throwable t) {
-            LOG.error(t);
+            ErrorService.error(t);
         }
     }
 }

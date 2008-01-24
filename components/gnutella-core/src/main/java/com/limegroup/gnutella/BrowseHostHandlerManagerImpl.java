@@ -16,7 +16,7 @@ import org.apache.http.HttpException;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
-import org.limewire.http.SocketWrappingClient;
+import org.limewire.http.SocketWrappingHttpClient;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -42,7 +42,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
     private final ScheduledExecutorService backgroundExecutor;
 
     private final MessageFactory messageFactory;
-    private Provider<SocketWrappingClient> clientProvider;
+    private Provider<SocketWrappingHttpClient> clientProvider;
 
     @Inject
     public BrowseHostHandlerManagerImpl(@Named("backgroundExecutor")
@@ -51,7 +51,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
                                         SocketsManager socketsManager,
                                         Provider<PushDownloadManager> pushDownloadManager,
                                         @Named("forMeReplyHandler")Provider<ReplyHandler> forMeReplyHandler,
-                                        MessageFactory messageFactory, Provider<SocketWrappingClient> clientProvider) {
+                                        MessageFactory messageFactory, Provider<SocketWrappingHttpClient> clientProvider) {
         this.activityCallback = activityCallback;
         this.socketsManager = socketsManager;
         this.pushDownloadManager = pushDownloadManager;

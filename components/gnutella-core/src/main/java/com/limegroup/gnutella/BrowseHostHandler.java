@@ -16,6 +16,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.HttpException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpProtocolParams;
 import org.limewire.io.Connectable;
@@ -23,7 +24,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
-import org.limewire.http.SocketWrappingClient;
+import org.limewire.http.SocketWrappingHttpClient;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.rudp.UDPConnection;
@@ -87,7 +88,7 @@ public class BrowseHostHandler {
     private final Provider<ReplyHandler> forMeReplyHandler;
 
     private final MessageFactory messageFactory;
-    private final Provider<SocketWrappingClient> clientProvider;
+    private final Provider<SocketWrappingHttpClient> clientProvider;
 
     /**
      * @param guid The GUID you have associated on the front end with the
@@ -100,7 +101,7 @@ public class BrowseHostHandler {
                       ActivityCallback activityCallback, SocketsManager socketsManager,
                       Provider<PushDownloadManager> pushDownloadManager,
                       @Named("forMeReplyHandler")Provider<ReplyHandler> forMeReplyHandler,
-                      MessageFactory messageFactory, Provider<SocketWrappingClient> clientProvider) {
+                      MessageFactory messageFactory, Provider<SocketWrappingHttpClient> clientProvider) {
         _guid = guid;
         _serventID = serventID;
         this.browseHostCallback = browseHostCallback;
@@ -289,7 +290,7 @@ public class BrowseHostHandler {
     }
 
     private HttpResponse makeHTTPRequest(Socket socket) throws IOException, URISyntaxException, HttpException, InterruptedException {
-        SocketWrappingClient client = clientProvider.get();
+        SocketWrappingHttpClient client = clientProvider.get();
         client.setSocket(socket);
         // TODO
         // hardcoding to "http" should work;

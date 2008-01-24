@@ -6,6 +6,9 @@ import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 
+/**
+ * Contains the default <code>HttpParam</code>s that all <code>LimeHttpClient</code>s use
+ */
 public class DefaultHttpParams extends BasicHttpParams {
     
     /**

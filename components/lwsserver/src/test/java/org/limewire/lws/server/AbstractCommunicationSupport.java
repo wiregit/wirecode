@@ -12,7 +12,6 @@ import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
-import org.limewire.net.EmptySocketBindingSettings;
 import org.limewire.net.LimeWireNetModule;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManagerImpl;
@@ -22,6 +21,8 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
+import com.limegroup.gnutella.settings.SettingsBackedProxySettings;
+import com.limegroup.gnutella.settings.SettingsBackedSocketBindingSettings;
 
 /**
  * Provides the basis methods for doing communication. Subclasses should test
@@ -180,7 +181,7 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
         remoteThread    = remoteServer.start();
         code            = new FakeJavascriptCodeInTheWebpage(socketsManager, localServer, remoteServer);
 
-        Injector injector = Guice.createInjector(new LimeWireCommonModule(), new LimeWireNetModule(), new LimeWireHttpModule(), new AbstractModule() {
+        Injector injector = Guice.createInjector(new LimeWireCommonModule(), new LimeWireNetModule(SettingsBackedProxySettings.class, SettingsBackedSocketBindingSettings.class), new LimeWireHttpModule(), new AbstractModule() {
             protected void configure() {
                 bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
             }

@@ -295,6 +295,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
                                            true, fGuid);
                 }
                 catch (Exception damn) {
+                    damn.printStackTrace();
                     assertTrue(false);
                 }
             }

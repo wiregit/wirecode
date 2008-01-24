@@ -5,22 +5,27 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.net.URI;
+import java.net.URISyntaxException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.limewire.io.IOUtils;
 import org.limewire.http.HttpClientManager;
+import org.limewire.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -102,17 +107,37 @@ public abstract class AbstractLicense implements MutableLicense, Serializable, C
             get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
 
             response = client.execute(get);
+            String charset = getCharset(response);
             if (response.getEntity() != null) {
-                return new String(IOUtils.readFully(response.getEntity().getContent()));
+                return new String(IOUtils.readFully(response.getEntity().getContent()), charset);
             }
-        } catch (Exception ioe) {
-            LOG.warn("Can't contact license server: " + url, ioe);
+        } catch (IOException e) {
+            LOG.warn("Can't contact license server: " + url, e);
+        } catch (HttpException e) {
+            LOG.warn("Can't contact license server: " + url, e);
+        } catch (URISyntaxException e) {
+            LOG.warn("Can't contact license server: " + url, e);
+        } catch (InterruptedException e) {
+            LOG.warn("Can't contact license server: " + url, e);
         } finally {
             HttpClientManager.releaseConnection(response);
         }
         return null;
     }
-    
+
+    private String getCharset(HttpResponse response) {
+        String charset = Constants.ASCII_ENCODING;
+        Header contentType = response.getEntity().getContentType();
+        if(contentType != null) {
+            for(HeaderElement headerElement : contentType.getElements()) {
+                if(headerElement.getParameterByName("charset") != null) {
+                    charset = headerElement.getParameterByName("charset").getValue();
+                }
+            }
+        }
+        return charset;
+    }
+
     /** Parses the document node of the XML. */
     protected abstract void parseDocumentNode(Node node, LicenseCache licenseCache);
     

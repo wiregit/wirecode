@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.URL;
 
 import org.limewire.service.ErrorService;
+import org.limewire.http.URIUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -45,7 +46,7 @@ class WeedLicense extends AbstractLicense {
         try {
             return new URI((URI + "?" + VID + "=" + vid + "&" + CID + "=" + cid));
         } catch(URISyntaxException bad) {
-            ErrorService.error(bad);
+            URIUtils.error(bad);
             return null;
         }  
     }

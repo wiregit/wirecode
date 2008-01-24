@@ -71,7 +71,7 @@ class LimitedSocketController extends SimpleSocketController {
      * Otherwise, observer will be notified of success or failure.
      */
     @Override
-    protected Socket connectPlain(NBSocket socket, SocketBindingSettings bindingSettings, NBSocketFactory factory, InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException {
+    protected Socket connectPlain(NBSocket socket, PerCallSocketBindingSettings bindingSettings, NBSocketFactory factory, InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException {
         if(socket == null) {
             socket = factory.createSocket();
         }

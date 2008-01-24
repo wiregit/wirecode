@@ -404,16 +404,16 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             }            
         }        
         
-        //if(!methods.isEmpty()) {
+        if(!methods.isEmpty()) {
             HttpClientListener l = new PushHttpClientListener(methods, data);
             HttpParams params = new DefaultHttpParams();
             HttpConnectionParams.setConnectionTimeout(params, 5000);
             HttpConnectionParams.setSoTimeout(params, 5000);
             Shutdownable s = httpExecutor.get().executeAny(l, PUSH_THREAD_POOL, methods, params, data.getMultiShutdownable());
             data.getMultiShutdownable().addShutdownable(s);
-        //} else {
-        //    sendPushThroughNetwork(data);    
-        //}
+        } else {
+            sendPushThroughNetwork(data);    
+        }
     }
     
     /**

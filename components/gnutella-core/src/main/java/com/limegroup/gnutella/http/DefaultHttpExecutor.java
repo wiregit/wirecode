@@ -144,10 +144,8 @@ public class DefaultHttpExecutor implements HttpExecutor {
 				shutdown = true;
 				m = currentMethod;
 			}
-			if (m != null) {
-                if(m instanceof AbortableHttpRequest) {
-                    ((AbortableHttpRequest)m).abort();
-                }
+            if(m instanceof AbortableHttpRequest) {
+                ((AbortableHttpRequest)m).abort();
             }
         }
 	}

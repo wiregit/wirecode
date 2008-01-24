@@ -129,9 +129,6 @@ public class UpdateHandlerTest extends LimeTestCase {
         saveFile = new File(CommonUtils.getUserSettingsDir(), "version.xml");
         saveFile.delete();
         assertFalse(saveFile.exists());
-        
-        injector.getInstance(Key.get(ScheduledExecutorService.class, Names.named("httpExecutor")));
-        int i = 0;
     }
 
     /** tests that we set up bindings correctly */

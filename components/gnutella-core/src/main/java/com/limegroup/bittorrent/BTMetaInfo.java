@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.service.ErrorService;
 import org.limewire.util.GenericsUtils;
+import org.limewire.http.URIUtils;
 
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.FileDesc;
@@ -256,8 +257,8 @@ public class BTMetaInfo implements Serializable {
 			URI trackerURI = new URI(data.getAnnounce());
 			validateURI(trackerURI);
 			_trackers = new URI[] { trackerURI };
-		} catch (URISyntaxException mue) {
-            ErrorService.error(mue);
+		} catch (URISyntaxException e) {
+            URIUtils.error(e);
             throw new ValueException("bad tracker: " + data.getAnnounce());
 		}
 
@@ -282,7 +283,7 @@ public class BTMetaInfo implements Serializable {
 
 		fileSystem = new TorrentFileSystem(data, _hashes.size(), _pieceLength, _infoHash);
 	}
-    
+
     private static void validateURI(URI check) throws ValueException {
         if (check == null)
             throw new ValueException("null URI");

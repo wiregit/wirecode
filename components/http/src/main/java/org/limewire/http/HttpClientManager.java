@@ -3,6 +3,8 @@ package org.limewire.http;
 import java.io.IOException;
 import java.net.Socket;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.params.HttpParams;
@@ -20,13 +22,14 @@ public class HttpClientManager {
     
     private static Provider<LimeHttpClient> blockingClient;
     private static Provider<LimeHttpClient> nonBlockingClient;
-    private static Provider<SocketWrappingClient> socketWrappingClient;
+    private static Provider<SocketWrappingHttpClient> socketWrappingClient;
+    private static final Log LOG = LogFactory.getLog(HttpClientManager.class);
 
     /** Ensures this is initialized. */
     @Inject
     public synchronized static void initialize(@Named("blockingClient") Provider<LimeHttpClient> blockingClient,
                                                Provider<LimeHttpClient> nonBlockingClient,
-                                               Provider<SocketWrappingClient> socketWrappingClient) {
+                                               Provider<SocketWrappingHttpClient> socketWrappingClient) {
         HttpClientManager.blockingClient = blockingClient;
         HttpClientManager.nonBlockingClient = nonBlockingClient;
         HttpClientManager.socketWrappingClient = socketWrappingClient;
@@ -49,7 +52,7 @@ public class HttpClientManager {
     }
     
     public static HttpClient getNewClient(HttpParams params, Socket socket){
-        SocketWrappingClient client = socketWrappingClient.get();
+        SocketWrappingHttpClient client = socketWrappingClient.get();
         client.setSocket(socket);
         if(params != null) {
             client.setParams(params);
@@ -84,7 +87,7 @@ public class HttpClientManager {
                 response.getEntity().consumeContent();
                 //IOUtils.close(response.getEntity().getContent());
             } catch (IOException e) {
-                e.printStackTrace();  // TODO log
+                LOG.error(e);
             }            
         }
     }        

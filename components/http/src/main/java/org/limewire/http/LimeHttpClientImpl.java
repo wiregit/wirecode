@@ -23,44 +23,33 @@ import java.util.concurrent.TimeUnit;
 /**
  * An <code>HttpClient</code> extension that supports utility methods defined
  * in <code>LimeHttpClient</code> and Socket "injection" as defined in
- * <code>SocketWrappingClient</code> 
+ * <code>SocketWrappingHttpClient</code> 
  */
-class LimeHttpClientImpl extends DefaultHttpClient implements SocketWrappingClient {
+class LimeHttpClientImpl extends DefaultHttpClient implements SocketWrappingHttpClient {
     
     private static final Log LOG = LogFactory.getLog(LimeHttpClientImpl.class);
-    
-    private static HttpParams defaultParams = new DefaultHttpParams();
-    private Socket socket;
-    private final ScheduledExecutorService scheduler;
 
     public void setSocket(Socket socket) {
-        this.socket = socket;
+        ((ReapingClientConnectionManager)getConnectionManager()).setSocket(socket);
     }
 
     public void releaseConnection(HttpRequest request, HttpResponse response) {
         close(response);
     }
     
-    public LimeHttpClientImpl(ScheduledExecutorService scheduler) {
-        this(null, scheduler);
+    public LimeHttpClientImpl(ReapingClientConnectionManager manager) {
+        super(manager, new BasicHttpParams(new DefaultHttpParams()));
     }
 
-    public LimeHttpClientImpl(ClientConnectionManager manager, ScheduledExecutorService scheduler) {
-        super(manager, new BasicHttpParams(defaultParams));
-        this.scheduler = scheduler;
-    }
-
-    protected ClientConnectionManager createClientConnectionManager() {
-        if(socket == null) {
-            throw new IllegalStateException("attempt to create ClientConnectionManager with null socket");
-        } else {
-            return createSocketWrappingManager(socket);
-        }
-    }
-
+    /**
+     * @return an <code>HttpRequestRetryHandler</code> that always returns
+     * <code>false</code>
+     */
     protected HttpRequestRetryHandler createHttpRequestRetryHandler() {
         return new HttpRequestRetryHandler() {
             public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
+                // when requests fail for unexpected reasons (eg., IOException), we don't 
+                // want to blindly re-attempt 
                 return false;
             }
         };
@@ -77,41 +66,5 @@ class LimeHttpClientImpl extends DefaultHttpClient implements SocketWrappingClie
         }
     }
 
-    private ClientConnectionManager createSocketWrappingManager(Socket socket) {
-        SchemeRegistry registry = new SchemeRegistry();
-        registry.register(new Scheme("http", new SocketWrapperProtocolSocketFactory(socket), 80));
-        registry.register(new Scheme("tls", new SocketWrapperProtocolSocketFactory(socket),80));
-        registry.register(new Scheme("https", new SocketWrapperProtocolSocketFactory(socket),80));
         
-        HttpParams defaultParams = new BasicHttpParams();
-        
-        // TODO does this need to be ThreadSafe?
-        // TODO does this need to be shutdown ever?
-        ClientConnectionManager manager =  new ThreadSafeClientConnManager(defaultParams, registry);
-        // TODO does this need to be canceled ever?
-        Periodic periodic = new Periodic(new IdleConnectionCloser(manager), scheduler);
-        periodic.scheduleAtFixedRate(0, 10, TimeUnit.SECONDS);
-        return manager;
-    }
-
-    private static class SocketWrapperProtocolSocketFactory implements SocketFactory {
-
-        private Socket socket;
-
-        SocketWrapperProtocolSocketFactory(Socket s) {
-            socket = s;
-        }
-
-        public Socket createSocket() throws IOException {
-            return socket; // TODO validate parameters actually match those of the socket
-        }
-
-        public Socket connectSocket(Socket socket, String s, int i, InetAddress inetAddress, int i1, HttpParams httpParams) throws IOException, UnknownHostException, ConnectTimeoutException {
-            return socket; // TODO validate parameters actually match those of the socket
-        }
-
-        public boolean isSecure(Socket socket) throws IllegalArgumentException {
-            return false; // TODO
-        }
-    }    
 }

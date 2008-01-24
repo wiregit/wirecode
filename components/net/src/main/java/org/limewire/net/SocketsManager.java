@@ -63,7 +63,7 @@ public interface SocketsManager {
      *  requested time
      * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public Socket connect(NBSocket socket, SocketBindingSettings bindingSettings, InetSocketAddress addr, int timeout, ConnectType type) throws IOException;
+    public Socket connect(NBSocket socket, PerCallSocketBindingSettings bindingSettings, InetSocketAddress addr, int timeout, ConnectType type) throws IOException;
     
     /**
      * Connects and returns a socket to the given host, with a timeout.

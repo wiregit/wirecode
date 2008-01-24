@@ -32,7 +32,7 @@ public class SocketsManagerImpl implements SocketsManager {
         return type.getFactory().createSocket();
     }
 
-    public Socket connect(NBSocket socket, SocketBindingSettings bindingSettings, InetSocketAddress addr, int timeout, ConnectType type) throws IOException {
+    public Socket connect(NBSocket socket, PerCallSocketBindingSettings bindingSettings, InetSocketAddress addr, int timeout, ConnectType type) throws IOException {
         return connect(socket, bindingSettings, addr, timeout, null, type);    
     }
 
@@ -52,14 +52,18 @@ public class SocketsManagerImpl implements SocketsManager {
         return connect(null, null, addr, timeout, observer, type);    
     }
 
-    public Socket connect(NBSocket socket, SocketBindingSettings bindingSettings, InetSocketAddress addr, int timeout, ConnectObserver observer, ConnectType type) throws IOException {
+    public Socket connect(NBSocket socket, PerCallSocketBindingSettings bindingSettings, InetSocketAddress addr, int timeout, ConnectObserver observer, ConnectType type) throws IOException {
         if(!NetworkUtils.isValidPort(addr.getPort()))  
             throw new IllegalArgumentException("port out of range: "+addr.getPort());
         if(addr.isUnresolved())
             throw new IOException("address must be resolved!");
         
-        return socketController.connect(socket, bindingSettings, type.getFactory(), addr, timeout, observer);
-	}    
+        if(socket == null) {
+            return socketController.connect(type.getFactory(), addr, timeout, observer);
+	    } else {
+            return socketController.connect(socket, bindingSettings, addr, timeout, observer);
+        }
+    }
 
     public boolean removeConnectObserver(ConnectObserver observer) {
         return socketController.removeConnectObserver(observer);

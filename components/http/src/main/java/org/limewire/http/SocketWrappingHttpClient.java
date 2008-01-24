@@ -7,7 +7,7 @@ import java.net.Socket;
  * This is useful for http that is initiated via the "server side", such as a 
  * GIV
  */
-public interface SocketWrappingClient extends LimeHttpClient {
+public interface SocketWrappingHttpClient extends LimeHttpClient {
 
     /**
      * Sets the socket to use
