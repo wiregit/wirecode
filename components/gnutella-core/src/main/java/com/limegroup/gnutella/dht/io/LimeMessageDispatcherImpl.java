@@ -49,6 +49,8 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements
     private static final Log LOG = LogFactory
             .getLog(LimeMessageDispatcherImpl.class);
 
+    private final Message.MessageCounter dhtMessageCounter;
+    
     /**
      * An array of Messages this MessageHandler supports
      */
@@ -72,13 +74,15 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements
             Provider<SecureMessageVerifier> secureMessageVerifier,
             Provider<MessageRouter> messageRouter,
             Provider<com.limegroup.gnutella.MessageDispatcher> messageDispatcher,
-            MessageFactory messageFactory) {
+            MessageFactory messageFactory,
+            Message.MessageCounter dhtMessageCounter) {
         super(context);
 
         this.udpService = udpService;
         this.secureMessageVerifier = secureMessageVerifier;
         this.messageRouter = messageRouter;
         this.messageDispatcher = messageDispatcher;
+        this.dhtMessageCounter = dhtMessageCounter;
 
         // Get Context's MessageFactory and wrap it into a
         // MessageFactoryWire and set it as the MessageFactory
@@ -147,6 +151,7 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements
         InetSocketAddress dst = (InetSocketAddress) tag.getSocketAddress();
         ByteBuffer data = tag.getData();
         udpService.get().send(data, dst, true);
+        dhtMessageCounter.countMessage((Message)tag.getMessage());
         register(tag);
         SentMessageStatHandler.UDP_DHT_MSG.addMessage((Message) tag
                 .getMessage());
