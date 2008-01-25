@@ -16,7 +16,6 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.Constants;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.ValueException;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
@@ -211,7 +210,7 @@ class TrackerResponse {
 					+ t_ip);
 		InetAddress addr;
 		try {
-			String ipS = new String((byte [])t_ip, Constants.ASCII_ENCODING);
+			String ipS = new String((byte [])t_ip, org.limewire.http.Constants.ASCII_ENCODING);
 			addr = InetAddress.getByName(ipS);
 		} catch (UnknownHostException uhe) {
 			throw new ValueException("bad tracker response - bad peer ip "

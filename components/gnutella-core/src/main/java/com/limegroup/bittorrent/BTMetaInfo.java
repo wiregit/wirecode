@@ -7,6 +7,8 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.ObjectStreamField;
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,27 +18,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.http.URIUtils;
+import org.limewire.io.InvalidDataException;
 import org.limewire.service.ErrorService;
 import org.limewire.util.GenericsUtils;
 
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
+import com.limegroup.gnutella.downloader.serial.BTMetaInfoMementoImpl;
 import com.limegroup.gnutella.security.SHA1;
 
 /**
  * Contains information usually parsed in a .torrent file
  */
-public class BTMetaInfo implements Serializable {
-
-	private static final long serialVersionUID = -2693983731217045071L;
-	
-	private static final ObjectStreamField[] serialPersistentFields = 
-    	ObjectStreamClass.NO_FIELDS;
+public class BTMetaInfo {
 
     private static final Log LOG = LogFactory.getLog(BTMetaInfo.class);
     
@@ -69,7 +68,8 @@ public class BTMetaInfo implements Serializable {
 	 * because at a later date we may want to be able to add trackers to a
 	 * torrent
 	 */
-	private URI[] _trackers;
+    // TODO update serialization code
+    private URI[] _trackers;
 
 	/**
 	 * FileDesc for the GUI
@@ -246,8 +246,43 @@ public class BTMetaInfo implements Serializable {
 	        throw bad;
 	    }
 	}
+    
+    public BTMetaInfo(BTMetaInfoMemento memento) throws InvalidDataException {
+        _hashes =  memento.getHashes();
+		Integer pieceLength = memento.getPieceLength();
+		fileSystem = memento.getFileSystem();
+		_infoHash = memento.getInfoHash();
+        try {
+            _infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
+        } catch (IOException e) {
+            throw new InvalidDataException(e);
+        }
+        _trackers = memento.getTrackers();
+		Float ratio = memento.getRatio();
+        diskManagerData = memento.getFolderData();
+		
+		if (_hashes == null || pieceLength == null || fileSystem == null ||
+				 _infoHash == null || _trackers == null ||
+                 diskManagerData == null || ratio == null)
+			throw new InvalidDataException("cannot read BTMetaInfo");
+        
+        if (_trackers.length == 0)
+            throw new InvalidDataException("no trackers");
+        for (URI uri : _trackers) {
+            try {
+                validateURI(uri);
+            } catch (ValueException e) {
+                throw new InvalidDataException(e);
+            }
+        }
 
-	/**
+        historicRatio = ratio.floatValue();
+		_pieceLength = pieceLength.intValue();
+        
+        isPrivate = memento.isPrivate();   
+    }
+
+    /**
 	 * Constructs a BTMetaInfo based on the BTData.
 	 */
 	public BTMetaInfo(BTData data) throws IOException {
@@ -255,8 +290,9 @@ public class BTMetaInfo implements Serializable {
 			URI trackerURI = new URI(data.getAnnounce());
 			validateURI(trackerURI);
 			_trackers = new URI[] { trackerURI };
-		} catch (URIException mue) {
-			throw new ValueException("bad tracker: " + data.getAnnounce());
+		} catch (URISyntaxException e) {
+            URIUtils.error(e);
+            throw new ValueException("bad tracker: " + data.getAnnounce());
 		}
 
         isPrivate = data.isPrivate();
@@ -280,83 +316,35 @@ public class BTMetaInfo implements Serializable {
 
 		fileSystem = new TorrentFileSystem(data, _hashes.size(), _pieceLength, _infoHash);
 	}
-    
+
     private static void validateURI(URI check) throws ValueException {
         if (check == null)
             throw new ValueException("null URI");
         if (!"http".equalsIgnoreCase(check.getScheme()))
             throw new ValueException("unsupported tracker protocol: "+check.getScheme());
         boolean hostOk = false;
-        try {
-            hostOk = check.getHost() != null; // validity will be checked upon request
-        } catch (URIException bad) {}
+        hostOk = check.getHost() != null; // validity will be checked upon request
         if (!hostOk)
             throw new ValueException("invalid host");
     }
     
-    // keys used between read/write object.
-    private static enum SerialKeys {
-        HASHES, PIECE_LENGTH, FILE_SYSTEM, INFO_HASH, TRACKERS, RATIO, FOLDER_DATA, PRIVATE;
-    }
+    
 	
 	/**
 	 * Serializes this, including information about the written ranges.
 	 */
-	private synchronized void writeObject(ObjectOutputStream out)
-			throws IOException {
-		Map<SerialKeys,Serializable> toWrite = new EnumMap<SerialKeys, Serializable>(SerialKeys.class);
-		
-		toWrite.put(SerialKeys.HASHES,(Serializable)_hashes);
-		toWrite.put(SerialKeys.PIECE_LENGTH, _pieceLength);
-		toWrite.put(SerialKeys.FILE_SYSTEM,fileSystem);
-		toWrite.put(SerialKeys.INFO_HASH,_infoHash);
-		toWrite.put(SerialKeys.TRACKERS,_trackers);
-		toWrite.put(SerialKeys.RATIO, getRatio());		
-		toWrite.put(SerialKeys.FOLDER_DATA,context.getDiskManager().getSerializableObject());
-        if (isPrivate())
-            toWrite.put(SerialKeys.PRIVATE, Boolean.TRUE);
-        
-		out.writeObject(toWrite);
-	}
-
-	/**
-	 * Overrides serialization method to initialize the VerifyingFolder
-	 */
-	private synchronized void readObject(ObjectInputStream in)
-	throws IOException, ClassNotFoundException {
-		Object read = in.readObject();
-		Map<SerialKeys, Serializable> toRead;
-		toRead = GenericsUtils.scanForMap(read, 
-						SerialKeys.class, Serializable.class, 
-						GenericsUtils.ScanMode.EXCEPTION);
-		
-		_hashes =  GenericsUtils.scanForList(toRead.get(SerialKeys.HASHES),
-                                             byte[].class,
-                                             GenericsUtils.ScanMode.EXCEPTION);
-		Integer pieceLength = (Integer)toRead.get(SerialKeys.PIECE_LENGTH);
-		fileSystem = (TorrentFileSystem) toRead.get(SerialKeys.FILE_SYSTEM);
-		_infoHash = (byte []) toRead.get(SerialKeys.INFO_HASH);
-		_infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
-		_trackers = (URI []) toRead.get(SerialKeys.TRACKERS);
-		Float ratio = (Float)toRead.get(SerialKeys.RATIO);
-        diskManagerData = toRead.get(SerialKeys.FOLDER_DATA); 
-		
-		if (_hashes == null || pieceLength == null || fileSystem == null ||
-				 _infoHash == null || _trackers == null ||
-                 diskManagerData == null || ratio == null)
-			throw new IOException("cannot read BTMetaInfo");
-        
-        if (_trackers.length == 0)
-            throw new IOException("no trackers");
-        for (URI uri : _trackers)
-            validateURI(uri);
-        
-		historicRatio = ratio.floatValue();
-		_pieceLength = pieceLength.intValue();
-        
-        if (toRead.containsKey(SerialKeys.PRIVATE))
-            isPrivate = true;
-	}
+	public synchronized BTMetaInfoMemento toMemento() {
+        BTMetaInfoMemento memento = new BTMetaInfoMementoImpl();
+        memento.setFileSystem(fileSystem);
+        memento.setFolderData(context.getDiskManager().getSerializableObject());
+        memento.setHashes(_hashes);
+        memento.setInfoHash(_infoHash);
+        memento.setPieceLength(_pieceLength);
+        memento.setPrivate(isPrivate);
+        memento.setRatio(getRatio());
+        memento.setTrackers(_trackers);
+        return memento;
+    }
 
 	/**
 	 * parse the hashes

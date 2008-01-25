@@ -4,18 +4,18 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.URI;
 
-import junit.framework.Test;
-
-import org.apache.commons.httpclient.URI;
+import org.limewire.http.HttpClientManager;
 import org.limewire.inject.Providers;
-import org.limewire.net.HttpClientManager;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
+
+import junit.framework.Test;
 
 public final class CCLicenseTest extends BaseTestCase {
     
@@ -134,7 +134,7 @@ public final class CCLicenseTest extends BaseTestCase {
         assertEquals("text1", l.getLicense());
         assertEquals("http://1.2.3.4/page", l.getLicenseURI().toString());
         
-        License l2 = l.copy("text3", new URI("http://uri.com".toCharArray()));
+        License l2 = l.copy("text3", new URI("http://uri.com"));
         assertEquals("text3", l2.getLicense());
         assertEquals("http://uri.com", l2.getLicenseURI().toString());
     }

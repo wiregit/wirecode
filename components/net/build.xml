@@ -17,8 +17,7 @@
         <do.setup-properties component="net">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
-				<pathelement location="${limewire.lib.jars}/commons-httpclient.jar"/>
-			    <path refid="build.limewire.components.common.buildpath"/>
+                <path refid="build.limewire.components.common.buildpath"/>
 			    <path refid="build.limewire.components.io.buildpath"/>
 			    <path refid="build.limewire.components.nio.buildpath"/>
 			</src-classpath>

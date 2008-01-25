@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,9 +12,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpException;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
+import org.limewire.http.SocketWrappingHttpClient;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -36,21 +39,23 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
     private final Provider<ActivityCallback> activityCallback;
     private final SocketsManager socketsManager;
     private final Provider<PushDownloadManager> pushDownloadManager;
-    private final Provider<ForMeReplyHandler> forMeReplyHandler;
+    private final Provider<ReplyHandler> forMeReplyHandler;
     private final ScheduledExecutorService backgroundExecutor;
     private final RemoteFileDescFactory remoteFileDescFactory;
 
     private final MessageFactory messageFactory;
+    private Provider<SocketWrappingHttpClient> clientProvider;
 
     @Inject
     public BrowseHostHandlerManagerImpl(@Named("backgroundExecutor")
-    ScheduledExecutorService backgroundExecutor,
-            Provider<ActivityCallback> activityCallback,
-            SocketsManager socketsManager,
-            Provider<PushDownloadManager> pushDownloadManager,
-            Provider<ForMeReplyHandler> forMeReplyHandler,
-            MessageFactory messageFactory,
-            RemoteFileDescFactory remoteFileDescFactory) {
+                                        ScheduledExecutorService backgroundExecutor,
+                                        Provider<ActivityCallback> activityCallback,
+                                        SocketsManager socketsManager,
+                                        Provider<PushDownloadManager> pushDownloadManager,
+                                        @Named("forMeReplyHandler")Provider<ReplyHandler> forMeReplyHandler,
+                                        MessageFactory messageFactory,
+                                        RemoteFileDescFactory remoteFileDescFactory,
+                                        Provider<SocketWrappingHttpClient> clientProvider) {
         this.activityCallback = activityCallback;
         this.socketsManager = socketsManager;
         this.pushDownloadManager = pushDownloadManager;
@@ -58,7 +63,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
         this.messageFactory = messageFactory;
         this.backgroundExecutor = backgroundExecutor;
         this.remoteFileDescFactory = remoteFileDescFactory;
-
+        this.clientProvider = clientProvider;
     }
     
     public void initialize() {
@@ -88,7 +93,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
                         }
                     },
                 activityCallback.get(), socketsManager, pushDownloadManager,
-                forMeReplyHandler, messageFactory, remoteFileDescFactory);
+                forMeReplyHandler, messageFactory, remoteFileDescFactory, clientProvider);
     }
 
     /** @return true if the Push was handled by me. */
@@ -108,9 +113,18 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
             ThreadExecutor.startThread(new Runnable() {
                 public void run() {
                     try {
-                        finalPRD.getBrowseHostHandler().browseExchange(socket);
-                    } catch (IOException ohWell) {
-                        LOG.debug("error while push transfer", ohWell);
+                        finalPRD.getBrowseHostHandler().browseHost(socket);
+                    } catch (IOException e) {
+                        LOG.debug("error while push transfer", e);
+                        finalPRD.getBrowseHostHandler().failed();
+                    } catch (HttpException e) {
+                        LOG.debug("error while push transfer", e);
+                        finalPRD.getBrowseHostHandler().failed();
+                    } catch (URISyntaxException e) {
+                        LOG.debug("error while push transfer", e);
+                        finalPRD.getBrowseHostHandler().failed();
+                    } catch (InterruptedException e) {
+                        LOG.debug("error while push transfer", e);
                         finalPRD.getBrowseHostHandler().failed();
                     }
                 }

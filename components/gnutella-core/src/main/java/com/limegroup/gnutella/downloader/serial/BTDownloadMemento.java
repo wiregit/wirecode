@@ -8,8 +8,8 @@ import com.limegroup.bittorrent.BTMetaInfo;
  */
 public interface BTDownloadMemento extends DownloadMemento {
 
-    void setBtMetaInfo(BTMetaInfo btMetaInfo);
+    void setBtMetaInfo(BTMetaInfoMemento btMetaInfo);
 
-    BTMetaInfo getBtMetaInfo();
+    BTMetaInfoMemento getBtMetaInfo();
 
 }

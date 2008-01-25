@@ -2,18 +2,22 @@ package com.limegroup.gnutella.http;
 
 import java.io.IOException;
 
-import junit.framework.Test;
-
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.limewire.net.HttpClientManager;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.params.ClientPNames;
+import org.limewire.http.LimeHttpClient;
 import org.limewire.nio.NIODispatcher;
 
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
 import com.limegroup.gnutella.util.LimeTestCase;
+
+import junit.framework.Test;
 
 /**
  * Tests various things of HttpClient / HttpClientManager.
@@ -28,6 +32,7 @@ public class HttpClientManagerTest extends LimeTestCase {
     
     private static final int HTTP_PORT=6700;
     private static final int TLS_PORT=7700;
+    private Injector injector;
 
     public HttpClientManagerTest(String name) {
         super(name);
@@ -43,7 +48,7 @@ public class HttpClientManagerTest extends LimeTestCase {
     
     public void setUp() throws Exception {
         // TODO: this statically injects HttpClientManager -- fix! 
-        LimeTestUtils.createInjector();
+        injector = LimeTestUtils.createInjector();
         
         httpServers = new TestBootstrapServer[11];
         tlsServers = new TestBootstrapServer[11];
@@ -70,10 +75,10 @@ public class HttpClientManagerTest extends LimeTestCase {
     
     public void testTLStoNormalFails() throws Exception {
         // make sure execution fails if the server doesn't respond
-        HttpClient client = HttpClientManager.getNewClient();
-        GetMethod get = new GetMethod("tls://127.0.0.1:" + HTTP_PORT);
+        HttpClient client = injector.getInstance(Key.get(LimeHttpClient.class));
+        HttpGet get = new HttpGet("tls://127.0.0.1:" + HTTP_PORT);
         try {
-            client.executeMethod(get);
+            client.execute(get);
             fail("should have thrown exception");
         } catch(IOException expected) {}
     }
@@ -91,8 +96,8 @@ public class HttpClientManagerTest extends LimeTestCase {
     }
     
     private void doExecuteMethodRedirectingTest(String[] urls, TestBootstrapServer[] servers) throws Exception {
-        HttpClient client = HttpClientManager.getNewClient();
-        HttpMethod get = new GetMethod(urls[0]);
+        HttpClient client = injector.getInstance(Key.get(LimeHttpClient.class));
+        HttpGet get = new HttpGet(urls[0]);
         
         servers[0].setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+urls[1]);
         servers[1].setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+urls[2]);
@@ -107,7 +112,8 @@ public class HttpClientManagerTest extends LimeTestCase {
         servers[9].setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+urls[10]);
         
         try {
-            HttpClientManager.executeMethodRedirecting(client, get, 2);
+            client.getParams().setIntParameter(ClientPNames.MAX_REDIRECTS, 1);
+            client.execute(get);
             fail("Should have thrown redirect failure");
         } catch(HttpException he) {
             assertNotNull(servers[0].getRequest());
@@ -116,7 +122,10 @@ public class HttpClientManagerTest extends LimeTestCase {
             // expected.
         }
         
-        HttpClientManager.executeMethodRedirecting(client, get, 9);
+        get = new HttpGet(urls[2]);
+        client = injector.getInstance(Key.get(LimeHttpClient.class));
+        client.getParams().setIntParameter(ClientPNames.MAX_REDIRECTS, 8);
+        client.execute(get);
         assertNotNull(servers[2].getRequest());
         assertNotNull(servers[3].getRequest());
         assertNotNull(servers[4].getRequest());
@@ -133,8 +142,8 @@ public class HttpClientManagerTest extends LimeTestCase {
     }
     
     private void doExecuteMethodRedirectingNoNIOTest(String[] urls, TestBootstrapServer[] servers) throws Exception {
-        HttpClient client = HttpClientManager.getNewClient();
-        HttpMethod get = new GetMethod(urls[0]);
+        HttpClient client = injector.getInstance(Key.get(LimeHttpClient.class, Names.named("blockingClient")));
+        HttpGet get = new HttpGet(urls[0]);
         
         servers[0].setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+urls[1]);
         servers[1].setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+urls[2]);
@@ -161,7 +170,8 @@ public class HttpClientManagerTest extends LimeTestCase {
                     }
                 });
                 Thread.sleep(100);
-                HttpClientManager.executeMethodRedirectingNoNIO(client, get, 2);
+                client.getParams().setIntParameter(ClientPNames.MAX_REDIRECTS, 1);
+                client.execute(get);
                 fail("Should have thrown redirect failure");
             } finally {
                 synchronized(nioLock) {
@@ -186,7 +196,9 @@ public class HttpClientManagerTest extends LimeTestCase {
                 }
             });
             Thread.sleep(100);
-            HttpClientManager.executeMethodRedirectingNoNIO(client, get, 9);
+            client.getParams().setIntParameter(ClientPNames.MAX_REDIRECTS, 8);
+            get = new HttpGet(urls[2]);
+            client.execute(get);
         } finally {
             synchronized (nioLock) {
                 nioLock.notify();
@@ -206,7 +218,8 @@ public class HttpClientManagerTest extends LimeTestCase {
     public void testVariousHttpClientThings() throws Exception {        
         // Make sure a bad protocol throws an unexpected exception.
         try {
-            new GetMethod("bad://127.0.0.1:80/file");
+            HttpGet get = new HttpGet("bad://127.0.0.1:80/file");
+            injector.getInstance(Key.get(LimeHttpClient.class)).execute(get);
             fail("expected exception");
         } catch(IllegalStateException ise) {
             // expected.
@@ -218,7 +231,8 @@ public class HttpClientManagerTest extends LimeTestCase {
         
         // Make sure we know what a malformed URL will give us.
         try {
-            new GetMethod("http:asdofih");
+            HttpGet get = new HttpGet("http:asdofih");
+            injector.getInstance(Key.get(LimeHttpClient.class)).execute(get);
             fail("expected exception");
         } catch(IllegalArgumentException iae) {
             // expected.
@@ -228,9 +242,9 @@ public class HttpClientManagerTest extends LimeTestCase {
     private void doUppercaseTest(String url, TestBootstrapServer server) throws Exception {
         // Make sure we can deal with strange info such as uppercase
         // HTTP stuff.
-        GetMethod get = new GetMethod(url.toUpperCase());
-        HttpClient client = HttpClientManager.getNewClient();
-        client.executeMethod(get);
+        HttpGet get = new HttpGet(url.toUpperCase());
+        HttpClient client = injector.getInstance(Key.get(LimeHttpClient.class));
+        client.execute(get);
         assertNotNull(server.getRequest());
     }
     
@@ -250,23 +264,24 @@ public class HttpClientManagerTest extends LimeTestCase {
         server.setResponseData(responseData);
         server.setResponse("HTTP/1.1 200 OK\r\nContent-Length: " + length);
         server.setAllowConnectionReuse(true);
-        HttpMethod get;
-        HttpClient client;
+        HttpGet get;
+        LimeHttpClient client;
         
-        get = new GetMethod(url);
-        client = HttpClientManager.getNewClient();
+        get = new HttpGet(url);
+        client = injector.getInstance(Key.get(LimeHttpClient.class));
+        HttpResponse response = null;
         try {
-            client.executeMethod(get);
+            response = client.execute(get);
         } finally {
-            get.releaseConnection();
+            client.releaseConnection(get, response);
         }
         
-        get = new GetMethod(url);
-        client = HttpClientManager.getNewClient();
+        get = new HttpGet(url);
+        client = injector.getInstance(Key.get(LimeHttpClient.class));
         try {
-            client.executeMethod(get);
+            response = client.execute(get);
         } finally {
-            get.releaseConnection();
+            client.releaseConnection(get, response);
         }
         
         assertEquals("wrong connection attempts", 1, server.getConnectionAttempts());
@@ -294,25 +309,26 @@ public class HttpClientManagerTest extends LimeTestCase {
         server.setResponseData(responseData);
         server.setResponse("HTTP/1.1 200 OK\r\nContent-Length: " + length);
         server.setAllowConnectionReuse(true);
-        HttpMethod get;
-        HttpClient client;
+        HttpGet get;
+        LimeHttpClient client;
         
-        get = new GetMethod(url);
-        client = HttpClientManager.getNewClient();
+        get = new HttpGet(url);
+        client = injector.getInstance(Key.get(LimeHttpClient.class));
+        HttpResponse response = null;
         try {
-            client.executeMethod(get);
+            response = client.execute(get);
         } finally {
-            get.releaseConnection();
+            client.releaseConnection(get, response);
         }
         
         Thread.sleep(1000 * 70);
         
-        get = new GetMethod(url);
-        client = HttpClientManager.getNewClient();
+        get = new HttpGet(url);
+        client = injector.getInstance(Key.get(LimeHttpClient.class));
         try {
-            client.executeMethod(get);
+            response = client.execute(get);
         } finally {
-            get.releaseConnection();
+            client.releaseConnection(get, response);
         }
         
         assertEquals("wrong connection attempts", 2, server.getConnectionAttempts());

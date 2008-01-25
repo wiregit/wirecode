@@ -7,8 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.Test;
-
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.limewire.collection.NameValue;
 import org.limewire.collection.Range;
 import org.limewire.util.BaseTestCase;
@@ -24,13 +24,17 @@ import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.GnutellaDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.MagnetDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
+import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.gui.search.SearchInformation;
 import com.limegroup.gnutella.helpers.UrnHelper;
+
+import junit.framework.Test;
 
 public class OldDownloadConverterImplTest extends BaseTestCase {
 
     public OldDownloadConverterImplTest(String name) {
         super(name);
+        Logger.getLogger("com.limegroup.gnutella.downloader.serial.conversion").setLevel(Level.DEBUG);
     }
 
     public static Test suite() {
@@ -145,7 +149,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             BTDownloadMemento mem = (BTDownloadMemento)read5;
             assertEquals(DownloaderType.BTDOWNLOADER, mem.getDownloadType());
             assertEquals("btName", mem.getDefaultFileName());
-            BTMetaInfo info = mem.getBtMetaInfo();
+            BTMetaInfoMemento info = mem.getBtMetaInfo();
             assertEquals("http://www.example.com/announce", info.getTrackers()[0].toString());
             assertEquals(UrnHelper.URNS[3].getBytes(), info.getInfoHash());
             assertEquals(123L, info.getFileSystem().getTotalSize());

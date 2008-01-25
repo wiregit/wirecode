@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.net.URISyntaxException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,6 +27,8 @@ import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.FileNotFoundException;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMementoImpl;
+import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
+import com.limegroup.gnutella.downloader.serial.BTMetaInfoMementoImpl;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.GnutellaDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.GnutellaDownloadMementoImpl;
@@ -73,7 +76,7 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
     }
 
     private List<DownloadMemento> convertSerialRootsToMementos(List roots,
-            SerialIncompleteFileManager sifm) {
+            SerialIncompleteFileManager sifm) throws IOException {
         List<DownloadMemento> mementos = new ArrayList<DownloadMemento>(roots.size());
         
         for(Object o : roots) {
@@ -156,12 +159,31 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
         mementos.add(memento); 
     }
 
-    private void addBTDownloader(List<DownloadMemento> mementos, SerialBTDownloader o, SerialIncompleteFileManager sifm) {
+    private void addBTDownloader(List<DownloadMemento> mementos, SerialBTDownloader o, SerialIncompleteFileManager sifm) throws IOException {
         BTDownloadMemento memento = new BTDownloadMementoImpl();
         memento.setDownloadType(DownloaderType.BTDOWNLOADER);
-        memento.setBtMetaInfo((BTMetaInfo)o.getProperties().get("metainfo"));
+        memento.setBtMetaInfo(toBTMetaInfoMemento((SerialBTMetaInfo)o.getProperties().get("metainfo")));
         addCommonProperties(memento, o.getProperties());
         mementos.add(memento);
+    }
+    
+    private BTMetaInfoMemento toBTMetaInfoMemento(SerialBTMetaInfo info) throws IOException {
+        BTMetaInfoMemento memento = new BTMetaInfoMementoImpl();
+        memento.setFileSystem(info.getFileSystem());
+        memento.setFolderData(info.getDiskManagerData());
+        memento.setHashes(info.getHashes());
+        memento.setInfoHash(info.getInfoHash());
+        memento.setPieceLength(info.getPieceLength());
+        memento.setPrivate(info.isPrivate());
+        memento.setRatio(info.getHistoricRatio());
+        try {
+            memento.setTrackers(info.getTrackers());
+        } catch (URISyntaxException e) {
+            IOException ioe = new IOException();
+            ioe.initCause(e);
+            throw ioe;
+        }
+        return memento;
     }
     
     private List<Range> getRanges(File incompleteFile, SerialIncompleteFileManager ifm) {

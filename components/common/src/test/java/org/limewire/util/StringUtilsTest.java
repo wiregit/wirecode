@@ -3,6 +3,7 @@ package org.limewire.util;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Locale;
 
 import junit.framework.Test;
 
@@ -16,7 +17,7 @@ public class StringUtilsTest extends BaseTestCase {
 
     public static Test suite() {
         return buildTestSuite(StringUtilsTest.class);
-    }  
+    }
 
     /**
      * Tests the method for getting the index of a substring from within 
@@ -30,6 +31,11 @@ public class StringUtilsTest extends BaseTestCase {
         
         index = StringUtils.indexOfIgnoreCase("test", "st");
         assertEquals("unexpected index", 2, index);
+    }
+
+    public void testIndexOfIgnoreCaseLocale() throws Exception {
+        int index = StringUtils.indexOfIgnoreCase("TITle", "t\u0131tlE", new Locale("tr"));
+        assertEquals("unexpected index", 0, index);
     }
     
     public void testCase() {

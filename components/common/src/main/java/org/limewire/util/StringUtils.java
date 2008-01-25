@@ -333,6 +333,24 @@ public class StringUtils {
 
     /**
      * Helper method to obtain the starting index of a substring within another
+     * string, ignoring their case.  This method is expensive because it has
+     * to set each character of each string to lower case before doing the
+     * comparison.  Uses the default <code>Locale</code> for case conversion.
+     *
+     * @param str the string in which to search for the <tt>substring</tt>
+     *  argument
+     * @param substring the substring to search for in <tt>str</tt>
+     * @return if the <tt>substring</tt> argument occurs as a substring within
+     *  <tt>str</tt>, then the index of the first character of the first such
+     *  substring is returned; if it does not occur as a substring, -1 is
+     *  returned
+     */
+    public static int indexOfIgnoreCase(String str, String substring) {
+    	return indexOfIgnoreCase(str, substring, Locale.getDefault());
+    }
+
+    /**
+     * Helper method to obtain the starting index of a substring within another
      * string, ignoring their case.  This method is expensive because it has  
      * to set each character of each string to lower case before doing the 
      * comparison.
@@ -340,14 +358,17 @@ public class StringUtils {
      * @param str the string in which to search for the <tt>substring</tt>
      *  argument
      * @param substring the substring to search for in <tt>str</tt>
+     * @param locale the <code>Locale</code> to use when converting the
+     *  case of <code>str</code> and <code>substring</code>.  This is necessary because
+     *  case conversion is <code>Locale</code> specific.
      * @return if the <tt>substring</tt> argument occurs as a substring within  
      *  <tt>str</tt>, then the index of the first character of the first such  
      *  substring is returned; if it does not occur as a substring, -1 is 
      *  returned
      */
-    public static int indexOfIgnoreCase(String str, String substring) {
+    public static int indexOfIgnoreCase(String str, String substring, Locale locale) {
     	// Look for the index after the expensive conversion to lower case.
-    	return str.toLowerCase().indexOf(substring.toLowerCase());
+    	return str.toLowerCase(locale).indexOf(substring.toLowerCase(locale));
     }
 
 	/**

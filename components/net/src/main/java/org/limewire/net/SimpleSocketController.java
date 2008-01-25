@@ -23,12 +23,20 @@ class SimpleSocketController implements SocketController {
     private InetSocketAddress lastBindAddr;
     
     private final ProxyManager proxyManager;
-    private final SocketBindingSettings socketBindingSettings;
+    private final SocketBindingSettings defaultSocketBindingSettings;
     
     @Inject
-    SimpleSocketController(ProxyManager proxyManager, SocketBindingSettings socketBindingSettings) {
+    SimpleSocketController(ProxyManager proxyManager, SocketBindingSettings defaultSocketBindingSettings) {
         this.proxyManager = proxyManager;
-        this.socketBindingSettings = socketBindingSettings;
+        this.defaultSocketBindingSettings = defaultSocketBindingSettings;
+    }
+    
+    public Socket connect(NBSocketFactory factory, InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException {
+        return connect(null, null, factory, addr, timeout, observer);
+    }
+    
+    public Socket connect(NBSocket socket, PerCallSocketBindingSettings bindingSettings, InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException {
+        return connect(socket, bindingSettings, null, addr, timeout, observer);    
     }
     
     /**
@@ -36,14 +44,14 @@ class SimpleSocketController implements SocketController {
      * If observer is null, this will block.
      * Otherwise, the observer will be notified of success or failure.
      */
-    public Socket connect(NBSocketFactory factory, InetSocketAddress addr, int timeout, ConnectObserver observer) 
+    public Socket connect(NBSocket socket, PerCallSocketBindingSettings bindingSettings, NBSocketFactory factory, InetSocketAddress addr, int timeout, ConnectObserver observer) 
       throws IOException {  
         ProxyType proxyType = proxyManager.getProxyType(addr.getAddress());  
                        
         if (proxyType != ProxyType.NONE)  
-            return connectProxy(factory, proxyType, addr, timeout, observer);  
+            return connectProxy(socket, bindingSettings, factory, proxyType, addr, timeout, observer);  
         else
-            return connectPlain(factory, addr, timeout, observer);  
+            return connectPlain(socket, bindingSettings, factory, addr, timeout, observer);  
     }
 
     /** Allows endless # of sockets. */
@@ -67,11 +75,13 @@ class SimpleSocketController implements SocketController {
      * If observer is null, this will block until a connection is established or an IOException is thrown.
      * Otherwise, this will return immediately and the Observer will be notified of success or failure.
      */
-    protected Socket connectPlain(NBSocketFactory factory, InetSocketAddress addr, int timeout, ConnectObserver observer)
+    protected Socket connectPlain(NBSocket socket, PerCallSocketBindingSettings bindingSettings, NBSocketFactory factory, InetSocketAddress addr, int timeout, ConnectObserver observer)
         throws IOException {
         
-        NBSocket socket = factory.createSocket();
-        bindSocket(socket);
+        if(socket == null) {
+            socket = factory.createSocket();
+        }
+        bindSocket(socket, bindingSettings);
         
         if(observer == null)
             socket.connect(addr, timeout); // blocking
@@ -81,31 +91,42 @@ class SimpleSocketController implements SocketController {
         return socket;
     }
     
-    /** Attempts to bind the Socket using the values from ConnectionSettings. */
-    protected void bindSocket(Socket socket) {
-        if(socketBindingSettings.isSocketBindingRequired()) {
+    /** Attempts to bind the Socket using the values from socketBindingSettings,
+     *  or ConnectionSettings if none are specified. */
+    protected void bindSocket(NBSocket socket, PerCallSocketBindingSettings socketBindingSettings) {
+        if(socketBindingSettings != null && socketBindingSettings.isSocketBindingRequired()) {
             String bindAddrString = socketBindingSettings.getAddressToBindTo();
-            try {
-                if(lastBindAddr == null || !lastBindAddr.getAddress().getHostAddress().equals(bindAddrString))
-                    lastBindAddr = new InetSocketAddress(bindAddrString, 0);
-                socket.bind(lastBindAddr);
-            } catch(IOException iox) {
-                socketBindingSettings.bindingFailed();
-            }
+            int bindPortInt = socketBindingSettings.getPortToBindTo();                
+            InetSocketAddress bindAddr = new InetSocketAddress(bindAddrString, bindPortInt);
+            bindSocket(socket, socketBindingSettings, bindAddr);
+        } else if(defaultSocketBindingSettings.isSocketBindingRequired()) {
+            String bindAddrString = defaultSocketBindingSettings.getAddressToBindTo();
+            if(lastBindAddr == null
+              || !lastBindAddr.getAddress().getHostAddress().equals(bindAddrString))
+                lastBindAddr = new InetSocketAddress(bindAddrString, 0);
+            bindSocket(socket, defaultSocketBindingSettings, lastBindAddr);
         }
     }
-    
+
+    private void bindSocket(NBSocket socket, SocketBindingSettings socketBindingSettings, InetSocketAddress address) {
+        try {            
+            socket.bind(address);
+        } catch(IOException iox) {
+            socketBindingSettings.bindingFailed();
+        }
+    }
+
     /**
      * Connects to a host using a proxy.
      */
-    protected Socket connectProxy(NBSocketFactory factory, ProxyType type, InetSocketAddress addr, int timeout, ConnectObserver observer)
+    protected Socket connectProxy(NBSocket socket, PerCallSocketBindingSettings bindingSettings, NBSocketFactory factory, ProxyType type, InetSocketAddress addr, int timeout, ConnectObserver observer)
       throws IOException {
         InetSocketAddress proxyAddr = proxyManager.getProxyHost();
         
         if(observer != null) {
-            return connectPlain(factory, proxyAddr, timeout, proxyManager.getConnectorFor(type, observer, addr, timeout));
+            return connectPlain(socket, bindingSettings, factory, proxyAddr, timeout, proxyManager.getConnectorFor(type, observer, addr, timeout));
         } else {
-            Socket proxySocket = connectPlain(factory, proxyAddr, timeout, null);
+            Socket proxySocket = connectPlain(socket, bindingSettings, factory, proxyAddr, timeout, null);
             try {
                 return proxyManager.establishProxy(type, proxySocket, addr, timeout);
             } catch(IOException iox) {
