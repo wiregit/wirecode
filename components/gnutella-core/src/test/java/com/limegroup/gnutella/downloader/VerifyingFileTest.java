@@ -18,6 +18,8 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.VerifyingFile.WriteCallback;
 import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutella.tigertree.HashTreeFactory;
+import com.limegroup.gnutella.tigertree.HashTreeFactoryImpl;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class VerifyingFileTest extends LimeTestCase {
@@ -37,6 +39,8 @@ public class VerifyingFileTest extends LimeTestCase {
     private VerifyingFile vf;
 
     private VerifyingFileFactory verifyingFileFactory;
+    
+    private HashTreeFactoryImpl tigerTreeFactory;
 
     public VerifyingFileTest(String name) {
         super(name);
@@ -49,10 +53,11 @@ public class VerifyingFileTest extends LimeTestCase {
     @Override
     public void setUp() throws Exception {
         Injector injector = LimeTestUtils.createInjector();
+        tigerTreeFactory = (HashTreeFactoryImpl)injector.getInstance(HashTreeFactory.class);
 
         InputStream in = new FileInputStream(completeFile);
         try {
-            defaultHashTree = HashTree.createHashTree(completeFile.length(), in, URN
+            defaultHashTree = tigerTreeFactory.createHashTree(completeFile.length(), in, URN
                     .createSHA1Urn(sha1));
         } finally {
             in.close();
@@ -267,7 +272,7 @@ public class VerifyingFileTest extends LimeTestCase {
         writeImpl((int)r.getLow(), chunk);
         vf.waitForPending(1000);
         assertEquals(4 * VerifyingFile.DEFAULT_CHUNK_SIZE, vf.getVerifiedBlockSize());
-        HashTree other = HashTree.createHashTree(completeFile.length(), new ByteArrayInputStream(new byte[(int)completeFile.length()]), URN.createSHA1Urn(sha1));
+        HashTree other = tigerTreeFactory.createHashTree(completeFile.length(), new ByteArrayInputStream(new byte[(int)completeFile.length()]), URN.createSHA1Urn(sha1));
         String currentRoot = vf.getHashTree().getRootHash();
         vf.setHashTree(other);
         assertEquals(currentRoot,vf.getHashTree().getRootHash());
@@ -289,7 +294,7 @@ public class VerifyingFileTest extends LimeTestCase {
         writeImpl((int)r.getLow(), chunk);
         vf.waitForPending(1000);
         assertEquals(2 * VerifyingFile.DEFAULT_CHUNK_SIZE, vf.getVerifiedBlockSize());
-        HashTree other = HashTree.createHashTree(completeFile.length(), new ByteArrayInputStream(new byte[(int)completeFile.length()]), URN.createSHA1Urn(sha1));
+        HashTree other = tigerTreeFactory.createHashTree(completeFile.length(), new ByteArrayInputStream(new byte[(int)completeFile.length()]), URN.createSHA1Urn(sha1));
         String currentRoot = vf.getHashTree().getRootHash();
         
         // everything verified becomes partial
@@ -509,7 +514,7 @@ public class VerifyingFileTest extends LimeTestCase {
         InputStream in = new FileInputStream(exact);
         HashTree exactTree;
         try {
-            exactTree = HashTree.createHashTree(exact.length(), in,
+            exactTree = tigerTreeFactory.createHashTree(exact.length(), in,
                     URN.createSHA1Urn(exact));
         } finally {
             in.close();

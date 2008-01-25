@@ -29,7 +29,7 @@ import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 /**
  *  Allows the rest of LimeWire to treat this as a regular download. Handles downloading
@@ -48,7 +48,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
             UrnCache urnCache, SavedFileManager savedFileManager,
             VerifyingFileFactory verifyingFileFactory, DiskController diskController,
              IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-            Provider<MessageRouter> messageRouter, Provider<TigerTreeCache> tigerTreeCache,
+            Provider<MessageRouter> messageRouter, Provider<HashTreeCache> tigerTreeCache,
             ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory) {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,

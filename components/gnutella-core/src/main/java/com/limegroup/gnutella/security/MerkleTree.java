@@ -2,7 +2,7 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.12 2007-07-30 04:31:10 zlatinb Exp $
+ * $Id: MerkleTree.java,v 1.1 2008-01-25 16:59:25 sberlin Exp $
  */
 package com.limegroup.gnutella.security;
 
@@ -11,14 +11,13 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 
 /**
- * Implementation of THEX tree hash algorithm, with Tiger as the internal
- * algorithm (using the approach as revised in December 2002, to add unique
- * prefixes to leaf and node operations)
+ * Implementation of Merkle Tree hash algorithm, (using the approach as revised
+ * in December 2002, to add unique prefixes to leaf and node operations)
  * 
- * This class calculates the root of a TigerTree, and keeps at most log(n) nodes
- * (one for each tree level) in memory while doing so. 
+ * This class calculates the root of a MerkleTree, and keeps at most log(n) nodes
+ * (one for each tree level) in memory while doing so.
  */
-public class TigerTree extends MessageDigest {
+public class MerkleTree extends MessageDigest {
     private static final int BLOCKSIZE = 1024;
     public static final int HASHSIZE = 24;
 
@@ -35,7 +34,7 @@ public class TigerTree extends MessageDigest {
     private long byteCount;
 
     /** Internal Tiger MD instance */
-    private final MessageDigest tiger;
+    private final MessageDigest internalDigest;
 
     /** The List of Nodes */
     private final ArrayList<byte[]> nodes;
@@ -43,13 +42,13 @@ public class TigerTree extends MessageDigest {
     /**
      * Constructor
      */
-    public TigerTree() {
-        super("tigertree");
+    public MerkleTree(MessageDigest internalDigest) {
+        super("merkletree");
         buffer = new byte[BLOCKSIZE];
         bufferOffset = 0;
         byteCount = 0;
         nodes = new ArrayList<byte[]>();
-        tiger = new Tiger();
+        this.internalDigest = internalDigest;
     }
 
     protected int engineGetDigestLength() {
@@ -129,11 +128,11 @@ public class TigerTree extends MessageDigest {
             if (last == null)
                 last = current;
             else {
-                tiger.reset();
-                tiger.update((byte) 1);
-                tiger.update(current);
-                tiger.update(last);
-                last = tiger.digest();
+                internalDigest.reset();
+                internalDigest.update((byte) 1);
+                internalDigest.update(current);
+                internalDigest.update(last);
+                last = internalDigest.digest();
             }
 
             nodes.set(i, MARKER);
@@ -146,7 +145,7 @@ public class TigerTree extends MessageDigest {
         bufferOffset = 0;
         byteCount = 0;
         nodes.clear();
-        tiger.reset();
+        internalDigest.reset();
     }
 
     /**
@@ -166,12 +165,12 @@ public class TigerTree extends MessageDigest {
      * final block) from the internal buffer.
      */
     protected void blockUpdate(byte [] buf, int pos, int len) {
-        tiger.reset();
-        tiger.update((byte) 0); // leaf prefix
-        tiger.update(buf, pos, len);
+        internalDigest.reset();
+        internalDigest.update((byte) 0); // leaf prefix
+        internalDigest.update(buf, pos, len);
         if ((len == 0) && (nodes.size() > 0))
             return; // don't remember a zero-size hash except at very beginning
-        byte [] digest = tiger.digest();
+        byte [] digest = internalDigest.digest();
         push(digest);
     }
 
@@ -185,11 +184,11 @@ public class TigerTree extends MessageDigest {
                     return;
                 }
 
-                tiger.reset();
-                tiger.update((byte) 1);
-                tiger.update(node);
-                tiger.update(data);
-                data = tiger.digest();
+                internalDigest.reset();
+                internalDigest.update((byte) 1);
+                internalDigest.update(node);
+                internalDigest.update(data);
+                data = internalDigest.digest();
                 nodes.set(i, MARKER);
             }
         }

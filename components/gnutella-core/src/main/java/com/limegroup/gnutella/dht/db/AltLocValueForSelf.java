@@ -5,7 +5,7 @@ import java.io.OutputStream;
 
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.security.TigerTree;
+import com.limegroup.gnutella.security.MerkleTree;
 import com.limegroup.gnutella.settings.SSLSettings;
 
 /**
@@ -31,7 +31,7 @@ class AltLocValueForSelf extends AbstractAltLocValue {
             throw new IllegalArgumentException("Illegal fileSize: " + fileSize);
         }
         
-        if (ttroot != null && ttroot.length != TigerTree.HASHSIZE) {
+        if (ttroot != null && ttroot.length != MerkleTree.HASHSIZE) {
             throw new IllegalArgumentException("Illegal ttroot length: " + ttroot.length);
         }
         

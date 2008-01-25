@@ -30,8 +30,8 @@ import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.http.AltLocHeaderInterceptor;
-import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
 import com.limegroup.gnutella.http.FWNodeInfoInterceptor;
+import com.limegroup.gnutella.http.FeatureHeaderInterceptor;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
@@ -40,7 +40,9 @@ import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.tigertree.HashTreeCache;
+import com.limegroup.gnutella.tigertree.HashTreeWriteHandler;
+import com.limegroup.gnutella.tigertree.HashTreeWriteHandlerFactory;
 import com.limegroup.gnutella.uploader.FileRequestParser.FileRequest;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;
 
@@ -78,9 +80,11 @@ public class FileRequestHandler implements HttpRequestHandler {
 
     private final Provider<DownloadManager> downloadManager;
 
-    private final Provider<TigerTreeCache> tigerTreeCache;
+    private final Provider<HashTreeCache> tigerTreeCache;
 
     private final PushEndpointFactory pushEndpointFactory;
+    
+    private final HashTreeWriteHandlerFactory tigerWriteHandlerFactory;
     
     @Inject
     FileRequestHandler(HTTPUploadSessionManager sessionManager,
@@ -90,8 +94,9 @@ public class FileRequestHandler implements HttpRequestHandler {
             AltLocManager altLocManager,
             AlternateLocationFactory alternateLocationFactory,
             Provider<DownloadManager> downloadManager,
-            Provider<TigerTreeCache> tigerTreeCache,
-            PushEndpointFactory pushEndpointFactory) {
+            Provider<HashTreeCache> tigerTreeCache,
+            PushEndpointFactory pushEndpointFactory,
+            HashTreeWriteHandlerFactory tigerWriteHandlerFactory) {
         this.sessionManager = sessionManager;
         this.fileManager = fileManager;
         this.httpHeaderUtils = httpHeaderUtils;
@@ -103,6 +108,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         this.downloadManager = downloadManager;
         this.tigerTreeCache = tigerTreeCache;
         this.pushEndpointFactory = pushEndpointFactory;
+        this.tigerWriteHandlerFactory = tigerWriteHandlerFactory;
     }
     
     public void handle(HttpRequest request, HttpResponse response,
@@ -359,9 +365,11 @@ public class FileRequestHandler implements HttpRequestHandler {
             response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             return;
         }
+        
+        HashTreeWriteHandler tigerWriteHandler = tigerWriteHandlerFactory.createTigerWriteHandler(tree);
 
         // XXX reset range to size of THEX tree
-        int outputLength = tree.getOutputLength();
+        int outputLength = tigerWriteHandler.getOutputLength();
         uploader.setFileSize(outputLength);
         uploader.setUploadBegin(0);
         uploader.setUploadEnd(outputLength);
@@ -370,7 +378,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         // response.addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(fd.getSHA1Urn()));
 
         uploader.setState(UploadStatus.THEX_REQUEST);
-        response.setEntity(new THEXResponseEntity(uploader, tree, uploader.getFileSize()));
+        response.setEntity(new THEXResponseEntity(uploader, tigerWriteHandler, uploader.getFileSize()));
         response.setStatusCode(HttpStatus.SC_OK);
     }
 

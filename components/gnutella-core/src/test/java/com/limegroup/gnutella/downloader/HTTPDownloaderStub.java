@@ -16,6 +16,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
+import com.limegroup.gnutella.tigertree.ThexReaderFactory;
 
 /**
  * stubbed out HTTPDownloader.  Extend this stub to override specific behavior
@@ -27,10 +28,10 @@ public class HTTPDownloaderStub extends HTTPDownloader {
             AlternateLocationFactory alternateLocationFactory, DownloadManager downloadManager,
             CreationTimeCache creationTimeCache, BandwidthManager bandwidthManager,
             Provider<PushEndpointCache> pushEndpointCache, PushEndpointFactory pushEndpointFactory,
-            RemoteFileDescFactory remoteFileDescFactory) {
+            RemoteFileDescFactory remoteFileDescFactory, ThexReaderFactory thexReaderFactory) {
         super(null, rfd, incompleteFile, false, false, networkManager,
                 alternateLocationFactory, downloadManager, creationTimeCache, bandwidthManager,
-                pushEndpointCache, pushEndpointFactory, remoteFileDescFactory);
+                pushEndpointCache, pushEndpointFactory, remoteFileDescFactory, thexReaderFactory);
     }
 	
 	public void addFailedAltLoc(AlternateLocation loc) {

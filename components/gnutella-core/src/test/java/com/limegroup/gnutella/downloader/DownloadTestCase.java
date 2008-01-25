@@ -50,7 +50,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class DownloadTestCase extends LimeTestCase {
@@ -96,7 +96,7 @@ public class DownloadTestCase extends LimeTestCase {
 
     protected ManagedDownloaderImpl managedDownloader;
 
-    protected TigerTreeCache tigerTreeCache;
+    protected HashTreeCache tigerTreeCache;
 
     protected DownloadServices downloadServices;
 
@@ -207,7 +207,7 @@ public class DownloadTestCase extends LimeTestCase {
         savedFile.delete();
         ConnectionSettings.CONNECTION_SPEED.setValue(1000);
 
-        tigerTreeCache = injector.getInstance(TigerTreeCache.class);
+        tigerTreeCache = injector.getInstance(HashTreeCache.class);
         tigerTreeCache.purgeTree(TestFile.hash());
 
         downloadServices = injector.getInstance(DownloadServices.class);

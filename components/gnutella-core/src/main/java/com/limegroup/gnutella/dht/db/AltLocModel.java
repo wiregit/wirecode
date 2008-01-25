@@ -27,7 +27,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 /**
  * The AltLocPublisher publishes the localhost as an alternate 
@@ -45,12 +45,12 @@ public class AltLocModel implements StorableModel {
     
     private final AltLocValueFactory altLocValueFactory;
 
-    private final Provider<TigerTreeCache> tigerTreeCache;
+    private final Provider<HashTreeCache> tigerTreeCache;
 
     private final Provider<FileManager> fileManager;
     
     @Inject
-    public AltLocModel(AltLocValueFactory altLocValueFactory, Provider<FileManager> fileManager, Provider<TigerTreeCache> tigerTreeCache) {
+    public AltLocModel(AltLocValueFactory altLocValueFactory, Provider<FileManager> fileManager, Provider<HashTreeCache> tigerTreeCache) {
         this.altLocValueFactory = altLocValueFactory;
         this.fileManager = fileManager;
         this.tigerTreeCache = tigerTreeCache;

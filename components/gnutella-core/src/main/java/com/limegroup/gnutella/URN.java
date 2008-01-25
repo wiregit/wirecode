@@ -26,7 +26,8 @@ import org.limewire.util.SystemUtils;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.security.SHA1;
-import com.limegroup.gnutella.security.TigerTree;
+import com.limegroup.gnutella.security.MerkleTree;
+import com.limegroup.gnutella.security.Tiger;
 import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
@@ -788,7 +789,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	public static UrnSet createSHA1AndTTRootUrns(final File file) 
       throws IOException, InterruptedException {
 		MessageDigest md = new SHA1();
-        MessageDigest tt = new TigerTree();
+        MessageDigest tt = new MerkleTree(new Tiger());
         byte[] buffer = threadLocal.get();
         int read;
         IntWrapper progress = new IntWrapper(0);

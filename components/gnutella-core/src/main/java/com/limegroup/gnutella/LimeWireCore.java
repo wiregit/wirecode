@@ -82,8 +82,6 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.statistics.QueryStats;
-import com.limegroup.gnutella.tigertree.HashTreeNodeManager;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
@@ -433,14 +431,6 @@ public class LimeWireCore {
 
     public SpamManager getSpamManager() {
         return injector.getInstance(SpamManager.class);
-    }
-
-    public HashTreeNodeManager getHashTreeNodeManager() {
-        return injector.getInstance(HashTreeNodeManager.class);
-    }
-
-    public TigerTreeCache getTigerTreeCache() {
-        return injector.getInstance(TigerTreeCache.class);
     }
 
     public UpdateHandler getUpdateHandler() {

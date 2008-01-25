@@ -44,6 +44,7 @@ import org.limewire.rudp.UDPConnection;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Provider;
+import com.google.inject.util.Objects;
 import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.BandwidthTracker;
@@ -76,8 +77,9 @@ import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.statistics.DownloadStat;
-import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexReader;
+import com.limegroup.gnutella.tigertree.ThexReaderFactory;
+import com.limegroup.gnutella.tigertree.HashTree;
 
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as
@@ -284,6 +286,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private final Provider<PushEndpointCache> pushEndpointCache;
     private final PushEndpointFactory pushEndpointFactory;
     private final RemoteFileDescFactory remoteFileDescFactory;
+    private final ThexReaderFactory thexReaderFactory;
 
     HTTPDownloader(Socket socket, RemoteFileDesc rfd,
             VerifyingFile incompleteFile, boolean inNetwork,
@@ -294,11 +297,9 @@ public class HTTPDownloader implements BandwidthTracker {
             BandwidthManager bandwidthManager,
             Provider<PushEndpointCache> pushEndpointCache,
             PushEndpointFactory pushEndpointFactory,
-            RemoteFileDescFactory remoteFileDescFactory) {
+            RemoteFileDescFactory remoteFileDescFactory,
+            ThexReaderFactory thexReaderFactory) {
         
-        
-        if (rfd == null)
-            throw new NullPointerException("null rfd");
         if(requireSocket && socket == null)
             throw new NullPointerException("null socket");
         
@@ -310,7 +311,8 @@ public class HTTPDownloader implements BandwidthTracker {
         this.pushEndpointCache = pushEndpointCache;
         this.pushEndpointFactory = pushEndpointFactory;
         this.remoteFileDescFactory = remoteFileDescFactory;
-        _rfd=rfd;
+        this.thexReaderFactory = thexReaderFactory;
+        _rfd= Objects.nonNull(rfd, "rfd");
         _socket=socket;
         _incompleteFile=incompleteFile;
 		_filename = rfd.getFileName();
@@ -700,7 +702,7 @@ public class HTTPDownloader implements BandwidthTracker {
     }
     
     public void downloadThexBody(URN sha1, IOStateObserver observer) {
-        _thexReader = HashTree.createHashTreeReader(sha1.httpStringValue(), _root32, _rfd.getFileSize());
+        _thexReader = thexReaderFactory.createHashTreeReader(sha1.httpStringValue(), _root32, _rfd.getFileSize());
         observerHandler.setDelegate(observer);
         _stateMachine.addState(_thexReader);
     }

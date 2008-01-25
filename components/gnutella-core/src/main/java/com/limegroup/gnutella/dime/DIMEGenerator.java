@@ -19,7 +19,7 @@ import java.util.List;
  *     gen.add(recordTwo);
  *     etc...
  *     gen.write(myOutputStream);
- * To the same records to another output stream, simply call
+ * To write the same records to another output stream, simply call
  *     gen.write(anotherOutputStream);
  * again.
  */

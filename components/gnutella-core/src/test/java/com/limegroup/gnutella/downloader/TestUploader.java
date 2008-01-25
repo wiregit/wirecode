@@ -45,6 +45,10 @@ import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
+import com.limegroup.gnutella.tigertree.HashTreeWriteHandler;
+import com.limegroup.gnutella.tigertree.HashTreeWriteHandlerFactory;
+import com.limegroup.gnutella.tigertree.SimpleHashTreeNodeManager;
+import com.limegroup.gnutella.tigertree.dime.TigerWriteHandlerFactoryImpl;
 
 // NOT A SINGLETON!!
 public class TestUploader {    
@@ -724,14 +728,19 @@ public class TestUploader {
     }
     
     private void sendThexTree(OutputStream out) throws IOException {
+        HashTreeWriteHandlerFactory tigerWriteHandlerFactory = new TigerWriteHandlerFactoryImpl(
+                new SimpleHashTreeNodeManager());
+        HashTreeWriteHandler tigerWriteHandler = tigerWriteHandlerFactory
+                .createTigerWriteHandler(TestFile.tree());
+        
         if(!useBadThexResponseHeader) {
             String str = "HTTP/1.1 200 OK\r\n" +
                          "ugly-header: ugly-value\r\n" + 
                          "hot diggity doo\r\n" +
-                         "Content-Length: " + TestFile.tree().getOutputLength() + "\r\n" + 
+                         "Content-Length: " + tigerWriteHandler.getOutputLength() + "\r\n" + 
                          "\r\n";
             out.write(str.getBytes());
-            TestFile.tree().write(out);
+            tigerWriteHandler.write(out);
         } else {
             String body = "You have failed miserably in your attempts.";
             String str = "HTTP/1.1 9000 Failed Miserably\r\n" +

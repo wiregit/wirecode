@@ -23,6 +23,7 @@ import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileDesc;
@@ -35,56 +36,86 @@ import com.limegroup.gnutella.URN;
  * 
  * This class maps SHA1_URNs to TigerTreeCache
  */
+/* This is public for tests, but only the interface should be used. */
 @Singleton
-public final class TigerTreeCache {
+public final class HashTreeCacheImpl implements HashTreeCache {
+    
+    private static final Log LOG = LogFactory.getLog(HashTreeCacheImpl.class);
+    
     
     /**
      * The ProcessingQueue to do the hashing.
      */
-    private static final ExecutorService QUEUE = 
-        ExecutorsHelper.newProcessingQueue("TreeHashTread");
-
-    private static final Log LOG =
-        LogFactory.getLog(TigerTreeCache.class);
+    private final ExecutorService QUEUE = ExecutorsHelper.newProcessingQueue("TreeHashTread");
 
     /**
      * A root tree that is not fully constructed yet
      */
-    private static final URN BUSH = URN.INVALID;
+    private final URN BUSH = URN.INVALID;
     
     /**
      * SHA1 -> TTROOT mapping
      */
-    private static Map<URN, URN> ROOT_MAP;
+    private Map<URN, URN> ROOT_MAP;
     /**
      * TigerTreeCache container.
      */
-    private static Map<URN, HashTree> TREE_MAP;
+    private Map<URN, HashTree> TREE_MAP;
 
     /**
      * File where the old Mapping SHA1->TIGERTREE is stored
      */
-    private static final File OLD_CACHE_FILE =
+    private final File OLD_CACHE_FILE =
         new File(CommonUtils.getUserSettingsDir(), "ttree.cache");
     
     /**
      * File where the Mapping SHA1->TTROOT is stored
      */
-    private static final File ROOT_CACHE_FILE =
+    private final File ROOT_CACHE_FILE =
         new File(CommonUtils.getUserSettingsDir(), "ttroot.cache");
     
     /**
      * File where the Mapping TTROOT->TIGERTREE is stored
      */
-    private static final File TREE_CACHE_FILE =
+    private final File TREE_CACHE_FILE =
         new File(CommonUtils.getUserSettingsDir(), "ttrees.cache");
         
     /**
      * Whether or not data dirtied since the last time we saved.
      */
-    private volatile static boolean dirty = false;        
+    private volatile boolean dirty = false;
+    
+    private final HashTreeFactory tigerTreeFactory;
+    
+    @Inject
+    HashTreeCacheImpl(HashTreeFactory tigerTreeFactory) {
+        this.tigerTreeFactory = tigerTreeFactory;
+
+        // try reading the new format first
+        try {
+            loadCaches();
+            return;
+        } catch (Throwable t) {
+            t.printStackTrace();
+            LOG.info("didn't load new caches",t);
+        }
+        
+        // otherwise read the old format.
+        Map<URN, HashTree> m = createMap();
+        ROOT_MAP = new HashMap<URN,URN>(m.size());
+        TREE_MAP = new HashMap<URN,HashTree>(m.size());
+        for (URN urn : m.keySet()) {
+            HashTree tree = m.get(urn);
+            URN root = tree.getTreeRootUrn();
+            ROOT_MAP.put(urn, root);
+            TREE_MAP.put(root,tree);
+        }
+    }
 
     
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.tigertree.HashTreeCache#getHashTreeAndWait(com.limegroup.gnutella.FileDesc, long)
+     */
     public HashTree getHashTreeAndWait(FileDesc fd, long timeout) throws InterruptedException, TimeoutException {
         if (fd instanceof IncompleteFileDesc) {
             throw new IllegalArgumentException("fd must not inherit from IncompleFileDesc");
@@ -114,13 +145,8 @@ public final class TigerTreeCache {
         throw new RuntimeException("hash tree was not calculated");
     }
     
-    /**
-     * If HashTree wasn't found, schedule file for hashing
-     * 
-     * @param fd
-     *            the <tt>FileDesc</tt> for which we want to obtain the
-     *            HashTree
-     * @return HashTree for File
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.tigertree.HashTreeCache#getHashTree(com.limegroup.gnutella.FileDesc)
      */
     public synchronized HashTree getHashTree(FileDesc fd) {
         
@@ -135,12 +161,8 @@ public final class TigerTreeCache {
         return tree;
     }
 
-    /**
-     * Retrieves the cached HashTree for this URN.
-     * 
-     * @param sha1
-     *            the <tt>URN</tt> for which we want to obtain the HashTree
-     * @return HashTree for URN
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.tigertree.HashTreeCache#getHashTree(com.limegroup.gnutella.URN)
      */
     public synchronized HashTree getHashTree(URN sha1) {
         if (!sha1.isSHA1())
@@ -152,10 +174,10 @@ public final class TigerTreeCache {
         return TREE_MAP.get(root);
     }
     
-    /**
-     * @return a TTROOT urn matching the sha1 urn
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.tigertree.HashTreeCache#getTigerTreeRootForSha1(com.limegroup.gnutella.URN)
      */
-    public synchronized URN getTTROOT(URN sha1) {
+    public synchronized URN getHashTreeRootForSha1(URN sha1) {
         if (!sha1.isSHA1())
             throw new IllegalArgumentException();
         URN root = ROOT_MAP.get(sha1);
@@ -164,8 +186,8 @@ public final class TigerTreeCache {
         return root;
     }
     
-    /**
-     * Purges the HashTree for this URN.
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.tigertree.HashTreeCache#purgeTree(com.limegroup.gnutella.URN)
      */
     public synchronized void purgeTree(URN sha1) {
         if (!sha1.isSHA1())
@@ -177,16 +199,11 @@ public final class TigerTreeCache {
             dirty = true;
     }
 
-    /**
-     * add a hashtree to the internal list if the tree depth is sufficient
-     * 
-     * @param sha1
-     *            the SHA1- <tt>URN</tt> of a file
-     * @param tree
-     *            the <tt>HashTree</tt>
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.tigertree.HashTreeCache#addHashTree(com.limegroup.gnutella.URN, com.limegroup.gnutella.tigertree.TigerTree)
      */
-    public static synchronized void addHashTree(URN sha1, HashTree tree) {
-        URN root = tree.getTTRootUrn();
+    public synchronized void addHashTree(URN sha1, HashTree tree) {
+        URN root = tree.getTreeRootUrn();
         addRoot(sha1, root);
         if (tree.isGoodDepth()) {
             ROOT_MAP.put(sha1, root);
@@ -199,35 +216,13 @@ public final class TigerTreeCache {
             LOG.debug("hashtree for urn " + sha1 + " had bad depth");
     }
     
-    public static synchronized void addRoot(URN sha1, URN ttroot) {
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.tigertree.HashTreeCache#addRoot(com.limegroup.gnutella.URN, com.limegroup.gnutella.URN)
+     */
+    public synchronized void addRoot(URN sha1, URN ttroot) {
         if (!sha1.isSHA1() || !ttroot.isTTRoot())
             throw new IllegalArgumentException();
         dirty |= !ttroot.equals(ROOT_MAP.put(sha1,ttroot));
-    }
-
-    /**
-     * private constructor
-     */
-    //DPINJ: Delay deserialization...
-    private TigerTreeCache() {
-        // try reading the new format first
-        try {
-            loadCaches();
-            return;
-        } catch (Throwable t) {
-            LOG.info("didn't load new caches",t);
-        }
-        
-        // otherwise read the old format.
-        Map<URN, HashTree> m = createMap();
-        ROOT_MAP = new HashMap<URN,URN>(m.size());
-        TREE_MAP = new HashMap<URN,HashTree>(m.size());
-        for (URN urn : m.keySet()) {
-            HashTree tree = m.get(urn);
-            URN root = tree.getTTRootUrn();
-            ROOT_MAP.put(urn, root);
-            TREE_MAP.put(root,tree);
-        }
     }
 
     /**
@@ -235,7 +230,7 @@ public final class TigerTreeCache {
      * 
      * @return Map of SHA1->HashTree
      */
-    private static Map<URN, HashTree> createMap() {
+    private Map<URN, HashTree> createMap() {
         File toRead = OLD_CACHE_FILE;
         try {
             toRead = FileUtils.getCanonicalFile(toRead);
@@ -248,6 +243,7 @@ public final class TigerTreeCache {
                         new FileInputStream(toRead)));
             return GenericsUtils.scanForMap(ois.readObject(), URN.class, HashTree.class, GenericsUtils.ScanMode.REMOVE);
         } catch(Throwable t) {
+            t.printStackTrace();
             LOG.error("Can't read tiger trees", t);
             return new HashMap<URN, HashTree>();
         } finally {
@@ -258,7 +254,7 @@ public final class TigerTreeCache {
     /**
      * Loads values from the root and tree caches
      */
-    private static void loadCaches() throws IOException, ClassNotFoundException {
+    private void loadCaches() throws IOException, ClassNotFoundException {
         Object roots = FileUtils.readObject(ROOT_CACHE_FILE);
         Object trees = FileUtils.readObject(TREE_CACHE_FILE);
 
@@ -295,7 +291,7 @@ public final class TigerTreeCache {
      * @param map
      *            the <tt>Map</tt> to check
      */
-    private static void removeOldEntries(Map<URN,URN> roots, Map <URN, HashTree> map, FileManager fileManager, DownloadManager downloadManager) {
+    private void removeOldEntries(Map<URN,URN> roots, Map <URN, HashTree> map, FileManager fileManager, DownloadManager downloadManager) {
         // discard outdated info
         Iterator<URN> iter = roots.keySet().iterator();
         while (iter.hasNext()) {
@@ -317,8 +313,8 @@ public final class TigerTreeCache {
         }
     }
 
-    /**
-     * Write cache so that we only have to calculate them once.
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.tigertree.HashTreeCache#persistCache(com.limegroup.gnutella.FileManager, com.limegroup.gnutella.DownloadManager)
      */
     public void persistCache(FileManager fileManager, DownloadManager downloadManager) {
         if(!dirty)
@@ -363,8 +359,8 @@ public final class TigerTreeCache {
             try {
                 URN sha1 = FD.getSHA1Urn();
                 // if it was scheduled multiple times, ignore latter times.
-                if (TigerTreeCache.this.getHashTree(sha1) == null) {
-                    HashTree tree = HashTree.createHashTree(FD);
+                if (HashTreeCacheImpl.this.getHashTree(sha1) == null) {
+                    HashTree tree = tigerTreeFactory.createHashTree(FD);
                     addHashTree(sha1, tree);
                 }
             } catch(IOException ignored) {}

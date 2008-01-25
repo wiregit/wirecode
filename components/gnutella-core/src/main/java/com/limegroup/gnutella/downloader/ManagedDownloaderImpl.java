@@ -77,7 +77,7 @@ import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.util.QueryUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -439,7 +439,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final IPFilter ipFilter;
     protected final ScheduledExecutorService backgroundExecutor;
     protected final Provider<MessageRouter> messageRouter;
-    protected final Provider<TigerTreeCache> tigerTreeCache;
+    protected final Provider<HashTreeCache> tigerTreeCache;
     protected final ApplicationServices applicationServices;
     protected final RemoteFileDescFactory remoteFileDescFactory;
 
@@ -463,7 +463,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             DiskController diskController, 
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
-            Provider<TigerTreeCache> tigerTreeCache, ApplicationServices applicationServices,
+            Provider<HashTreeCache> tigerTreeCache, ApplicationServices applicationServices,
             RemoteFileDescFactory remoteFileDescFactory) {
         super(saveLocationManager);
         this.downloadManager = downloadManager;
@@ -2011,7 +2011,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * checks the TT cache and if a good tree is present loads it 
      */
     private void initializeHashTree() {
-		HashTree tree = tigerTreeCache.get().getHashTree(getSha1Urn()); 
+        HashTree tree = tigerTreeCache.get().getHashTree(getSha1Urn()); 
 	    
 		// if we have a valid tree, update our chunk size and disable overlap checking
 		if (tree != null && tree.isDepthGoodEnough()) {
@@ -2124,9 +2124,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected URN saveTreeHash(URN fileHash) {
             // save the trees!
             if (getSha1Urn() != null && getSha1Urn().equals(fileHash) && commonOutFile.getHashTree() != null) {
-                tigerTreeCache.get(); // instantiate it. 
-                TigerTreeCache.addHashTree(getSha1Urn(),commonOutFile.getHashTree());
-                return commonOutFile.getHashTree().getTTRootUrn();
+                tigerTreeCache.get().addHashTree(getSha1Urn(),commonOutFile.getHashTree());
+                return commonOutFile.getHashTree().getTreeRootUrn();
             }
             return null;
         }
@@ -2873,9 +2872,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         
         if (set && tree != null) { // warning?
             URN sha1 = getSha1Urn();
-            URN ttroot = tree.getTTRootUrn();
-            tigerTreeCache.get();
-            TigerTreeCache.addRoot(sha1, ttroot);
+            URN ttroot = tree.getTreeRootUrn();
+            tigerTreeCache.get().addRoot(sha1, ttroot);
             synchronized(fileManager) {
                 FileDesc fd = fileManager.getFileDescForUrn(sha1);
                 if (fd == null) // possible for in-network downloads

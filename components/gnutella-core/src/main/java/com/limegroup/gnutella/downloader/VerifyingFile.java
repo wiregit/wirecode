@@ -765,7 +765,7 @@ public class VerifyingFile {
 	 */
 	private void verifyChunks(long existingFileSize) {
         boolean fullScan = existingFileSize != -1;
-	    HashTree tree = getHashTree(); // capture the tree.
+        HashTree tree = getHashTree(); // capture the tree.
         // if we have a tree, see if there is a completed chunk in the partial list
         if(tree != null) {
             for(Range i : findVerifyableBlocks(existingFileSize)) {

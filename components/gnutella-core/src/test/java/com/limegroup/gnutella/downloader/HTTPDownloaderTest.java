@@ -61,6 +61,7 @@ import com.limegroup.gnutella.http.SimpleReadHeaderState;
 import com.limegroup.gnutella.stubs.IOStateObserverStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
+import com.limegroup.gnutella.tigertree.ThexReaderFactory;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 @SuppressWarnings("unchecked")
@@ -116,7 +117,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         
 		httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(networkManager,
                 alternateLocationFactory, downloadManager, creationTimeCache, bandwidthManager,
-                Providers.of(pushEndpointCache), pushEndpointFactory, remoteFileDescFactory);
+                Providers.of(pushEndpointCache), pushEndpointFactory, remoteFileDescFactory, injector.getInstance(ThexReaderFactory.class));
 		
 		return injector;
     }

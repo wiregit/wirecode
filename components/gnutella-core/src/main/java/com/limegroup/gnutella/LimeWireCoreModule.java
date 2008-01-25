@@ -157,8 +157,7 @@ import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
 import com.limegroup.gnutella.settings.SettingsBackedProxySettings;
 import com.limegroup.gnutella.settings.SettingsBackedSocketBindingSettings;
-import com.limegroup.gnutella.spam.AddressToken;
-import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutella.tigertree.LimeWireHashTreeModule;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactoryImpl;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
@@ -206,6 +205,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireCommonModule());
         binder().install(new LimeWireNetModule(SettingsBackedProxySettings.class, SettingsBackedSocketBindingSettings.class));
         binder().install(new LimeWireDownloadModule());
+        binder().install(new LimeWireHashTreeModule());
         
         bind(LimeWireCore.class);
         
@@ -338,7 +338,6 @@ public class LimeWireCoreModule extends AbstractModule {
 
         // TODO: statically injecting these for now...
         requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
-        requestStaticInjection(HashTree.class);
         requestStaticInjection(LimeXMLDocument.class);
         requestStaticInjection(StatisticsManager.class);
         requestStaticInjection(Pools.class);

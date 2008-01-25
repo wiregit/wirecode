@@ -9,8 +9,8 @@ import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.nio.NBThrottle;
 
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexWriter;
+import com.limegroup.gnutella.tigertree.HashTreeWriteHandler;
 
 /**
  * Sends a THEX tree as an HTTP message.
@@ -27,19 +27,19 @@ public class THEXResponseEntity extends AbstractHttpNIOEntity {
         new NBThrottle(true, UploadSettings.THEX_UPLOAD_SPEED.getValue());
 
     private HTTPUploader uploader;
-
-    private HashTree tree;
+    
+    private final HashTreeWriteHandler tigerWriteHandler;
 
     private ThexWriter writer;
 
     private long size;
 
-    public THEXResponseEntity(HTTPUploader uploader, HashTree tree, long size) {
+    public THEXResponseEntity(HTTPUploader uploader, HashTreeWriteHandler tigerWriteHandler, long size) {
         this.uploader = uploader;
-        this.tree = tree;
+        this.tigerWriteHandler = tigerWriteHandler;
         this.size = size;
 
-        setContentType(tree.getOutputType());
+        setContentType(tigerWriteHandler.getOutputType());
     }
 
     @Override
@@ -49,7 +49,7 @@ public class THEXResponseEntity extends AbstractHttpNIOEntity {
 
     @Override
     public void initialize() throws IOException {
-        this.writer = tree.createAsyncWriter();
+        this.writer = tigerWriteHandler.createAsyncWriter();
         
         THROTTLE.setRate(UploadSettings.THEX_UPLOAD_SPEED.getValue());
         uploader.getSession().getIOSession().setThrottle(THROTTLE);

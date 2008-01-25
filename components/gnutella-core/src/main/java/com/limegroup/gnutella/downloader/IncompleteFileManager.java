@@ -26,7 +26,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 /** 
  * A repository of temporary filenames.  Gives out file names for temporary
@@ -75,12 +75,12 @@ public class IncompleteFileManager  {
     private final Map<URN, File> hashes = new HashMap<URN, File>();
     
     private final Provider<FileManager> fileManager;
-    private final Provider<TigerTreeCache> tigerTreeCache;
+    private final Provider<HashTreeCache> tigerTreeCache;
     private final VerifyingFileFactory verifyingFileFactory;
     
     @Inject
     public IncompleteFileManager(Provider<FileManager> fileManager,
-            Provider<TigerTreeCache> tigerTreeCache,
+            Provider<HashTreeCache> tigerTreeCache,
             VerifyingFileFactory verifyingFileFactory) {
         this.fileManager = fileManager;
         this.tigerTreeCache = tigerTreeCache;
@@ -586,7 +586,7 @@ public class IncompleteFileManager  {
         for(Map.Entry<URN, File> entry : hashes.entrySet()) {
             if (incompleteFile.equals(entry.getValue())) {
                 urns.add(entry.getKey());
-                URN ttroot = tigerTreeCache.get().getTTROOT(entry.getKey());
+                URN ttroot = tigerTreeCache.get().getHashTreeRootForSha1(entry.getKey());
                 if (ttroot != null)
                     urns.add(ttroot);
             }

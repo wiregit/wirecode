@@ -11,7 +11,7 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.dht.DHTTestCase;
-import com.limegroup.gnutella.security.TigerTree;
+import com.limegroup.gnutella.security.MerkleTree;
 
 public class AltLocValueTest extends DHTTestCase {
     
@@ -69,7 +69,7 @@ public class AltLocValueTest extends DHTTestCase {
         byte[] guid = GUID.makeGuid();
         int port = 1234;
         long fileSize = 334455;
-        byte[] ttroot = new byte[TigerTree.HASHSIZE];
+        byte[] ttroot = new byte[MerkleTree.HASHSIZE];
         boolean firewalled = true;
         
         Random random = new Random();

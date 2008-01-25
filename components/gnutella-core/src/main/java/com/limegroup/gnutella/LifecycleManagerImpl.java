@@ -57,7 +57,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 @Singleton
@@ -105,7 +105,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<RatingTable> ratingTable;
     private final Provider<ChatManager> chatManager;
     private final Provider<UDPMultiplexor> udpMultiplexor;
-    private final Provider<TigerTreeCache> tigerTreeCache;
+    private final Provider<HashTreeCache> tigerTreeCache;
     private final Provider<DHTManager> dhtManager;
     private final Provider<ByteBufferCache> byteBufferCache;
     private final Provider<ScheduledExecutorService> backgroundExecutor;
@@ -162,7 +162,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<RatingTable> ratingTable,
             Provider<ChatManager> chatManager,
             Provider<UDPMultiplexor> udpMultiplexor,
-            Provider<TigerTreeCache> tigerTreeCache,
+            Provider<HashTreeCache> tigerTreeCache,
             Provider<DHTManager> dhtManager,
             Provider<ByteBufferCache> byteBufferCache,
             @Named("backgroundExecutor") Provider<ScheduledExecutorService> backgroundExecutor,

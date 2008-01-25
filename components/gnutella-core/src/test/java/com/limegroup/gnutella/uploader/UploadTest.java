@@ -55,6 +55,7 @@ import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.VerifyingFileFactory;
+import com.limegroup.gnutella.security.Tiger;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -63,7 +64,9 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.tigertree.HashTreeCache;
+import com.limegroup.gnutella.tigertree.HashTreeCacheImpl;
+import com.limegroup.gnutella.tigertree.HashTreeUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -1157,7 +1160,7 @@ public class UploadTest extends LimeTestCase {
     }
 
     public void testThexHeader() throws Exception {
-        TigerTreeCache tigerTreeCache = injector.getInstance(TigerTreeCache.class);
+        HashTreeCache tigerTreeCache = injector.getInstance(HashTreeCache.class);
         HashTree tree = getThexTree(tigerTreeCache);
 
         GetMethod method = new GetMethod(fileNameUrl);
@@ -1173,7 +1176,7 @@ public class UploadTest extends LimeTestCase {
     }
 
     public void testDownloadFromBitprintUrl() throws Exception {
-        TigerTreeCache tigerTreeCache = injector.getInstance(TigerTreeCache.class);
+        HashTreeCache tigerTreeCache = injector.getInstance(HashTreeCache.class);
         HashTree tree = getThexTree(tigerTreeCache);
 
         GetMethod method = new GetMethod("/uri-res/N2R?urn:bitprint:"
@@ -1240,7 +1243,7 @@ public class UploadTest extends LimeTestCase {
     }
 
     public void testGetTree() throws Exception {
-        TigerTreeCache tigerTreeCache = injector.getInstance(TigerTreeCache.class);
+        HashTreeCache tigerTreeCache = injector.getInstance(HashTreeCache.class);
         HashTree tree = getThexTree(tigerTreeCache);
 
         GetMethod method = new GetMethod("/uri-res/N2X?" + hash);
@@ -1251,7 +1254,7 @@ public class UploadTest extends LimeTestCase {
             parser.nextRecord(); // xml
             DIMERecord record = parser.nextRecord();
             assertFalse(parser.hasNext());
-            List<List<byte[]>> allNodes = tree.getAllNodes();
+            List<List<byte[]>> allNodes = HashTreeUtils.createAllParentNodes(tree.getNodes(), new Tiger());
             byte[] data = record.getData();
             int offset = 0;
             for (Iterator<List<byte[]>> genIter = allNodes.iterator(); genIter
@@ -1274,7 +1277,7 @@ public class UploadTest extends LimeTestCase {
     }
 
     public void testGetNonExistingTree() throws Exception {
-        TigerTreeCache tigerTreeCache = injector.getInstance(TigerTreeCache.class);
+        HashTreeCache tigerTreeCache = injector.getInstance(HashTreeCache.class);
         
         URN urn = URN.createSHA1Urn(hash);
         tigerTreeCache.purgeTree(urn);
@@ -1345,9 +1348,9 @@ public class UploadTest extends LimeTestCase {
         client.getHttpConnectionManager().releaseConnection(connection);
     }
 
-    private HashTree getThexTree(TigerTreeCache tigerTreeCache) throws Exception {
+    private HashTree getThexTree(HashTreeCache tigerTreeCache) throws Exception {
         FileDesc fd = fileManager.getFileDescForFile(new File(_sharedDir, fileName));
-        return tigerTreeCache.getHashTreeAndWait(fd, 1000);
+        return ((HashTreeCacheImpl)tigerTreeCache).getHashTreeAndWait(fd, 1000);
     }
 
 }

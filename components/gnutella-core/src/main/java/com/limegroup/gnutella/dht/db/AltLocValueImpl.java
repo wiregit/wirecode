@@ -11,7 +11,7 @@ import org.limewire.util.ByteOrder;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
-import com.limegroup.gnutella.security.TigerTree;
+import com.limegroup.gnutella.security.MerkleTree;
 
 /**
  * 
@@ -54,7 +54,7 @@ class AltLocValueImpl extends AbstractAltLocValue {
                 throw new IllegalArgumentException("Illegal fileSize: " + fileSize);
             }
             
-            if (ttroot != null && ttroot.length != TigerTree.HASHSIZE) {
+            if (ttroot != null && ttroot.length != MerkleTree.HASHSIZE) {
                 throw new IllegalArgumentException("Illegal ttroot length: " + ttroot.length);
             }
         }
@@ -110,7 +110,7 @@ class AltLocValueImpl extends AbstractAltLocValue {
                 
                 if (ggep.hasKey(AbstractAltLocValue.TTROOT)) {
                     byte[] ttroot = ggep.getBytes(AbstractAltLocValue.TTROOT);
-                    if (ttroot.length != TigerTree.HASHSIZE) {
+                    if (ttroot.length != MerkleTree.HASHSIZE) {
                         throw new DHTValueException("Illegal ttroot length: " + ttroot.length);
                     }
                     this.ttroot = ttroot;

@@ -14,12 +14,13 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
-import org.limewire.inject.Providers;
 import org.limewire.util.Base32;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dime.DIMEGenerator;
 import com.limegroup.gnutella.dime.DIMEParser;
@@ -59,15 +60,22 @@ public class HashTreeTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    private HashTreeFactoryImpl tigerTreeFactory;
+    private HashTreeNodeManager tigerTreeNodeManager;
+    private HashTreeWriteHandlerFactory tigerWriteHandlerFactory;
+    
     @Override
     protected void setUp() throws Exception {
-        HashTree.hashTreeNodeManager = Providers.of(new HashTreeNodeManager());
+        Injector injector = LimeTestUtils.createInjector();
+        tigerTreeFactory = (HashTreeFactoryImpl)injector.getInstance(HashTreeFactory.class);
+        tigerTreeNodeManager = injector.getInstance(HashTreeNodeManager.class);
+        tigerWriteHandlerFactory = injector.getInstance(HashTreeWriteHandlerFactory.class);
     }
     
     public void testLargeFile()  throws Exception {
     	URN urn = URN.createSHA1Urn(file);
     	try {
-    		HashTree.createHashTree(1780149344l, new ByteArrayInputStream(new byte[0]), urn);
+    	    tigerTreeFactory.createHashTree(1780149344l, new ByteArrayInputStream(new byte[0]), urn);
     		fail("shouldn't have read whole file");
     	}catch(IOException expected){}
     }
@@ -84,7 +92,7 @@ public class HashTreeTest extends BaseTestCase {
                 
         InputStream in = new BufferedInputStream(new FileInputStream(file));
         try {
-            hashTree = HashTree.createHashTree(file.length(), in, urn);
+            hashTree = tigerTreeFactory.createHashTree(file.length(), in, urn);
         } finally {
             in.close();
         }
@@ -98,7 +106,7 @@ public class HashTreeTest extends BaseTestCase {
         assertEquals("/uri-res/N2X?" + sha1 + ";" + root32,
             hashTree.httpStringValue());
 
-        List allNodes = hashTree.getAllNodes();
+        List allNodes = tigerTreeNodeManager.getAllNodes(hashTree);
         assertEquals(5, allNodes.size());
         List one, two, three, four, five;
         one = (List)allNodes.get(0);
@@ -129,12 +137,14 @@ public class HashTreeTest extends BaseTestCase {
     
     public void testWriteToStream() throws Exception {
         
+        HashTreeWriteHandler tigerWriteHandler = tigerWriteHandlerFactory.createTigerWriteHandler(hashTree);
+        
         // Now make sure we can write this record out correctly.
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        hashTree.write(baos);
+        tigerWriteHandler.write(baos);
         
         written = baos.toByteArray();
-        assertEquals(written.length, hashTree.getOutputLength());
+        assertEquals(written.length, tigerWriteHandler.getOutputLength());
         
         // Should be two DIME Records.
         ByteArrayInputStream in = new ByteArrayInputStream(baos.toByteArray());
@@ -148,16 +158,17 @@ public class HashTreeTest extends BaseTestCase {
     }
     
     public void testReadFromStream() throws Exception {
+        HashTreeWriteHandler tigerWriteHandler = tigerWriteHandlerFactory.createTigerWriteHandler(hashTree);        
         
         // Make sure we can read the tree back in.
-        treeFromNetwork = HashTree.createHashTree(
+        treeFromNetwork = tigerTreeFactory.createHashTree(
             new ByteArrayInputStream(written), sha1,
                                      root32, file.length()
         );
         
         assertEquals(hashTree.getDepth(), treeFromNetwork.getDepth());
         assertEquals(hashTree.getRootHash(), treeFromNetwork.getRootHash());
-        assertEquals(written.length, hashTree.getOutputLength());
+        assertEquals(written.length, tigerWriteHandler.getOutputLength());
         
     }
 
@@ -347,7 +358,7 @@ public class HashTreeTest extends BaseTestCase {
         gen.add(a); gen.add(b);
         gen.write(out);
         ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-        return HashTree.createHashTree(in, sha1, root32, file.length());
+        return tigerTreeFactory.createHashTree(in, sha1, root32, file.length());
     }
     
     private DIMERecord createCorruptRecord(DIMERecord base, byte[] data) {
@@ -388,7 +399,7 @@ public class HashTreeTest extends BaseTestCase {
         data = data.substring(test.length());
         assertEquals(test, current);
         
-        test = "segmentsize='" + HashTree.BLOCK_SIZE + "'/>";
+        test = "segmentsize='" + HashTreeUtils.BLOCK_SIZE + "'/>";
         current = data.substring(0, test.length());
         data = data.substring(test.length());
         assertEquals(test, current);
@@ -441,7 +452,7 @@ public class HashTreeTest extends BaseTestCase {
         
         byte[] data = tree.getData();
         int offset = 0;
-        List allNodes = hashTree.getAllNodes();
+        List allNodes = tigerTreeNodeManager.getAllNodes(hashTree);
         for(Iterator genIter = allNodes.iterator(); genIter.hasNext(); ) {
             for(Iterator i = ((List)genIter.next()).iterator(); i.hasNext();) {
                 byte[] current = (byte[])i.next();
