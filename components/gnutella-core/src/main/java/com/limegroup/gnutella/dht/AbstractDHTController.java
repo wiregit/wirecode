@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Buffer;
 import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.concurrent.ManagedThread;
@@ -118,6 +119,11 @@ public abstract class AbstractDHTController implements DHTController {
     
     private final DHTControllerFacade dhtControllerFacade;
     
+    /**
+     * Contacts to forward to passive leafs.
+     */
+    private final Buffer<Contact> contactsToForward = new Buffer<Contact>(10);
+    
     public AbstractDHTController(Vendor vendor, Version version,
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
             final DHTMode mode, DHTControllerFacade dhtControllerFacade) {
@@ -186,6 +192,11 @@ public abstract class AbstractDHTController implements DHTController {
         // If we're an Ultrapeer we want to notify our firewalled
         // leafs about every new Contact
         if (dhtControllerFacade.isActiveSupernode()) {
+            dht.getDHTExecutorService().scheduleAtFixedRate(new Runnable() {
+                public void run() {
+                    forwardContacts();
+                }
+            }, 60, 60, TimeUnit.SECONDS);
             dht.getRouteTable().addRouteTableListener(new RouteTableListener() {
                 public void handleRouteTableEvent(RouteTableEvent event) {
                     switch(event.getEventType()) {
@@ -193,8 +204,11 @@ public abstract class AbstractDHTController implements DHTController {
                         case ADD_CACHED_CONTACT:
                         case UPDATE_CONTACT:
                             Contact node = event.getContact();
-                            if (mode == DHTMode.ACTIVE || !dht.getLocalNodeID().equals(node.getNodeID()))
-                                forwardContact(node);
+                            if (mode == DHTMode.ACTIVE || !dht.getLocalNodeID().equals(node.getNodeID())) {
+                                synchronized(contactsToForward) {
+                                    contactsToForward.add(node);
+                                }
+                            }
                             break;
                     }
                 }
@@ -217,12 +231,20 @@ public abstract class AbstractDHTController implements DHTController {
      */
     protected abstract MojitoDHT createMojitoDHT(Vendor vendor, Version version);
     
-    private void forwardContact(Contact node) {
+    private void forwardContacts() {
         if (!DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.getValue()) {
             return;
         }
         
-        DHTContactsMessage msg = new DHTContactsMessage(node);
+        Collection<Contact> contacts;
+        synchronized(contactsToForward) {
+            contacts = new ArrayList<Contact>(10);
+            for(Contact c : contactsToForward)
+                contacts.add(c);
+            // do not erase contacts - can be re-forwarded to new connections
+        }
+        
+        DHTContactsMessage msg = new DHTContactsMessage(contacts);
         List<RoutedConnection> list = dhtControllerFacade.getInitializedClientConnections();
         for (RoutedConnection mc : list) {
             if (mc.isPushProxyFor()
