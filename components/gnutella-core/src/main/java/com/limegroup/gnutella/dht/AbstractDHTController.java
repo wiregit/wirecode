@@ -238,6 +238,8 @@ public abstract class AbstractDHTController implements DHTController {
         
         Collection<Contact> contacts;
         synchronized(contactsToForward) {
+            if (contactsToForward.isEmpty())
+                return;
             contacts = new ArrayList<Contact>(10);
             for(Contact c : contactsToForward)
                 contacts.add(c);
