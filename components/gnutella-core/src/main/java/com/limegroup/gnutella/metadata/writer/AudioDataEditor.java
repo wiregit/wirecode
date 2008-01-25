@@ -33,21 +33,13 @@ public abstract class AudioDataEditor extends AudioMetaDataEditor {
      *  a given tag field
      */
     protected Tag updateTag(Tag tag) throws FieldDataInvalidException { 
-//        if(album_ != null)
-            tag.setAlbum(album_);
-//        if(artist_ != null)
-            tag.setArtist(artist_);
-//        if(comment_ != null) 
-        {System.out.println("updating comment tag");
-            tag.setComment(comment_); }System.out.println("new comment " + comment_ + " " + tag.getFirstComment());
-//        if(genre_ != null)
-            tag.setGenre(genre_);
-//        if(title_ != null)
-            tag.setTitle(title_);
-//        if(year_ != null )
-            tag.setYear(year_);
-//        if(track_ != null)
-            tag.setTrack(track_);
+        tag.setAlbum(album_);
+        tag.setArtist(artist_);
+        tag.setComment(comment_); 
+        tag.setGenre(genre_);
+        tag.setTitle(title_);
+        tag.setYear(year_);
+        tag.setTrack(track_);
         return tag;
     }
     
@@ -71,7 +63,7 @@ public abstract class AudioDataEditor extends AudioMetaDataEditor {
      *      a different value if write wasn't successful.
      */
     @Override
-    public int commitMetaData(String fileName) { System.out.println("writing changes to " + fileName);
+    public int commitMetaData(String fileName) {
         if(!isValidFileType(fileName))
             return LimeXMLReplyCollection.INCORRECT_FILETYPE;
         
@@ -89,22 +81,16 @@ public abstract class AudioDataEditor extends AudioMetaDataEditor {
             audioFile.setTag(audioTag);
             audioFile.commit();
         } catch (CannotReadException e) {
-            e.printStackTrace();
             return LimeXMLReplyCollection.RW_ERROR;
         } catch (IOException e) {
-            e.printStackTrace();
             return LimeXMLReplyCollection.RW_ERROR;
         } catch (TagException e) {
-            e.printStackTrace();
             return LimeXMLReplyCollection.FAILED_ALBUM;
         } catch (ReadOnlyFileException e) {
-            e.printStackTrace();
             return LimeXMLReplyCollection.RW_ERROR;
         } catch (InvalidAudioFrameException e) {
-            e.printStackTrace();
             return LimeXMLReplyCollection.FAILED_ALBUM;
         } catch (CannotWriteException e) {
-            e.printStackTrace();
             return LimeXMLReplyCollection.RW_ERROR;
         }        
         return LimeXMLReplyCollection.NORMAL;

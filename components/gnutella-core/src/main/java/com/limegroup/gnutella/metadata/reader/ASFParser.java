@@ -65,10 +65,10 @@ public class ASFParser {
     public int getWidth() { return _width; }
     public int getHeight() { return _height; }
     
-    WeedInfo getWeedInfo() { return _weed; }
-    WRMXML getWRMXML() { return _wrmdata; }
+    public WeedInfo getWeedInfo() { return _weed; }
+    public WRMXML getWRMXML() { return _wrmdata; }
     
-    boolean hasAudio() { return _hasAudio; }
+    public boolean hasAudio() { return _hasAudio; }
     public boolean hasVideo() { return _hasVideo; }
     
     public String getLicenseInfo() {

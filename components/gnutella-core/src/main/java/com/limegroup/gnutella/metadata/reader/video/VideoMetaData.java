@@ -80,21 +80,21 @@ public abstract class VideoMetaData extends MetaData {
     void setHeight(int height) { this.height = height; }
     void setLicenseType(String licensetype) { this.licensetype = licensetype; }
 	
-    /**
-     * Determines if all fields are valid.
-     */
-    public boolean isComplete() {
-        return isValid(title)
-            && isValid(year)
-            && isValid(length)            
-            && isValid(comment)
-            && isValid(language)
-            && isValid(license)
-            && isValid(width)
-            && isValid(height)
-            && isValid(licensetype)
-            ;
-    }
+//    /**
+//     * Determines if all fields are valid.
+//     */
+//    public boolean isComplete() {
+//        return isValid(title)
+//            && isValid(year)
+//            && isValid(length)            
+//            && isValid(comment)
+//            && isValid(language)
+//            && isValid(license)
+//            && isValid(width)
+//            && isValid(height)
+//            && isValid(licensetype)
+//            ;
+//    }
 	
 	public List<NameValue<String>> toNameValueList() {
         List<NameValue<String>> list = new ArrayList<NameValue<String>>();

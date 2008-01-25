@@ -99,7 +99,7 @@ public abstract class AudioMetaData extends MetaData {
     public int getSampleRate(){ return sampleRate; }
     public boolean isVBR(){ return isVBR; }
     
-    void setPrice(String price)  { this.price = price; }
+    public void setPrice(String price)  { this.price = price; }
     void setTitle(String title) { this.title = title; }
     void setArtist(String artist) { this.artist = artist; }    
     void setAlbum(String album) { this.album = album; }
@@ -121,7 +121,7 @@ public abstract class AudioMetaData extends MetaData {
 //    /**
 //     * Determines if all fields are valid.
 //     */
-    public boolean isComplete() { return false;
+//    public boolean isComplete() { 
 //        return isValid(title)
 //            && isValid(artist)
 //            && isValid(album)
@@ -133,7 +133,7 @@ public abstract class AudioMetaData extends MetaData {
 //            && isValid(length)
 //            && isValid(license)
 //            && isValid(licensetype);
-    }
+//    }
 
     /**
      * Writes the data to a NameValue list.
@@ -180,23 +180,6 @@ public abstract class AudioMetaData extends MetaData {
         appendTo.append(value);
         appendTo.append("\"");
     }
-
-//	/**
-//	 * Walks back through the byte array to trim off null characters and
-//	 * spaces.  A helper for read(...) above.
-//	 * @return the number of bytes with nulls and spaces trimmed.
-//	 */
-//	protected int getTrimmedLength(byte[] bytes, int includedLength) {
-//	    int i;
-//	    for(i = includedLength - 1;
-//	        (i >= 0) && ((bytes[i] == 0) || (bytes[i] == 32));
-//	        i--);
-//	    //replace the nulls with spaces in the array upto i
-//	    for(int j=0; j<=i; j++) 
-//	        if(bytes[j]==0)
-//	            bytes[j]=(byte)32;
-//	    return i + 1;
-//	}
 	
     /**
      * Determines whether a LimeXMLDocument was corrupted by

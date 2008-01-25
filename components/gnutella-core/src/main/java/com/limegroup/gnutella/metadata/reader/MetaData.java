@@ -54,11 +54,6 @@ public abstract class MetaData {
     }
 	
 	/**
-	 * Determines if all fields are valid.
-	 */
-	public abstract boolean isComplete();
-	
-	/**
 	 * Writes the data to a NameValue list.
 	 */
 	public abstract List<NameValue<String>> toNameValueList();

@@ -48,7 +48,7 @@ public class WRMXML {
     /**
      * Parses the given XML & constructs a WRMXML object out of it.
      */
-    WRMXML(String xml) {
+    public WRMXML(String xml) {
         parse(xml);
     }
     

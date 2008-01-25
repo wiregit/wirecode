@@ -21,13 +21,12 @@ import org.jaudiotagger.tag.id3.framebody.AbstractFrameBodyTextInfo;
 
 public class MP3MetaData extends AudioDataReader {
 	
+	static final String LICENSE_ID = "TCOP";
+    static final String PRIV_ID = "PRIV";
+	
 	public MP3MetaData(File f) throws IOException {
 		super(f);
 	}
-
-    static final String LICENSE_ID = "TCOP";
-    static final String PRIV_ID = "PRIV";
-	
 	
     @Override
     protected void readTag(AudioFile audioFile, Tag tag) {
@@ -35,9 +34,9 @@ public class MP3MetaData extends AudioDataReader {
             setTitle(tag.getFirstTitle());
             setArtist(tag.getFirstArtist());
             setAlbum(tag.getFirstAlbum());
-            setYear(tag.getFirstYear()); System.out.println("reading comment " + tag.getFirstComment());
+            setYear(tag.getFirstYear()); 
             setComment(tag.getFirstComment());
-            setGenre(tag.getFirstGenre());
+            setGenre(tag.getFirstGenre()); 
             try {
                 String trackTag = tag.getFirstTrack();
                 if( trackTag != null && trackTag.length() > 0 )
@@ -50,7 +49,7 @@ public class MP3MetaData extends AudioDataReader {
             // for ID3v2 tags, check for additional values such as Copyright Info
             if( !(tag instanceof ID3v1Tag) ) {
                 MP3File mp3File = ((MP3File)audioFile);
-
+                setGenre(parseGenre(tag.getFirstGenre()));
                 AbstractID3v2Tag vTag = mp3File.getID3v2Tag();
                 if( vTag != null ) {
                     List<TagField> license = vTag.get(PRIV_ID);
@@ -101,5 +100,22 @@ public class MP3MetaData extends AudioDataReader {
             if( content.indexOf(MAGIC_KEY) != -1) { 
                 setLicenseType(MAGIC_KEY);
             }
+    }
+    
+    private String parseGenre(String genre){
+        if( genre == null || genre.length() <= 0) 
+            return genre;
+        String cleanGenre = genre;
+        if( genre.charAt(0) == '(') {
+            int startIndex = 0;
+            for(int i = 0; i < genre.length(); i++) {
+                if( genre.charAt(i) == ')') {
+                    startIndex = i + 1;
+                }
+            }            
+            cleanGenre = genre.substring(startIndex);
+        }
+        return cleanGenre;
+        
     }
 }

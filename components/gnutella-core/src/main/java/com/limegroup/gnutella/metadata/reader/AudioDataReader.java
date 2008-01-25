@@ -32,8 +32,7 @@ public class AudioDataReader extends AudioMetaData {
         setAlbum(tag.getFirstAlbum());
         setYear(tag.getFirstYear());
         setComment(tag.getFirstComment());
-        if( tag.getFirstTrack() != null && tag.getFirstTrack().length() > 0)
-            setTrack(tag.getFirstTrack());
+        setTrack(tag.getFirstTrack());
         setGenre(tag.getFirstGenre());
     }
     

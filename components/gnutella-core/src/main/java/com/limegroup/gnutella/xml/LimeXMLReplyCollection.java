@@ -546,9 +546,7 @@ public class LimeXMLReplyCollection {
         // see if you need to change a hash for a file due to a write...
         // if so, we need to commit the ID3 data to disk....
         MetaDataEditor commitWith = getEditorIfNeeded(fileName, doc, checkBetter);
-        System.out.println("need to commit " + commitWith);
         if (commitWith != null)  {
-            System.out.println("writing? " + commitWith.getCorrectDocument());
         	if(commitWith.getCorrectDocument() == null) {
         		writeState = commitMetaData(fileName, commitWith);
         	} else { 
