@@ -1,10 +1,7 @@
 package com.limegroup.gnutella.tigertree;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -16,10 +13,9 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Tuple;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.io.IOUtils;
 import org.limewire.util.CommonUtils;
-import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.FileUtils;
 import org.limewire.util.GenericsUtils;
 
@@ -42,7 +38,6 @@ public final class HashTreeCacheImpl implements HashTreeCache {
     
     private static final Log LOG = LogFactory.getLog(HashTreeCacheImpl.class);
     
-    
     /**
      * The ProcessingQueue to do the hashing.
      */
@@ -56,17 +51,12 @@ public final class HashTreeCacheImpl implements HashTreeCache {
     /**
      * SHA1 -> TTROOT mapping
      */
-    private Map<URN, URN> ROOT_MAP;
+    private final Map<URN, URN> ROOT_MAP;
+    
     /**
      * TigerTreeCache container.
      */
-    private Map<URN, HashTree> TREE_MAP;
-
-    /**
-     * File where the old Mapping SHA1->TIGERTREE is stored
-     */
-    private final File OLD_CACHE_FILE =
-        new File(CommonUtils.getUserSettingsDir(), "ttree.cache");
+    private final Map<URN, HashTree> TREE_MAP;
     
     /**
      * File where the Mapping SHA1->TTROOT is stored
@@ -90,26 +80,9 @@ public final class HashTreeCacheImpl implements HashTreeCache {
     @Inject
     HashTreeCacheImpl(HashTreeFactory tigerTreeFactory) {
         this.tigerTreeFactory = tigerTreeFactory;
-
-        // try reading the new format first
-        try {
-            loadCaches();
-            return;
-        } catch (Throwable t) {
-            t.printStackTrace();
-            LOG.info("didn't load new caches",t);
-        }
-        
-        // otherwise read the old format.
-        Map<URN, HashTree> m = createMap();
-        ROOT_MAP = new HashMap<URN,URN>(m.size());
-        TREE_MAP = new HashMap<URN,HashTree>(m.size());
-        for (URN urn : m.keySet()) {
-            HashTree tree = m.get(urn);
-            URN root = tree.getTreeRootUrn();
-            ROOT_MAP.put(urn, root);
-            TREE_MAP.put(root,tree);
-        }
+        Tuple<Map<URN, URN>, Map<URN, HashTree>> tuple = loadCaches();
+        ROOT_MAP = tuple.getFirst();
+        TREE_MAP = tuple.getSecond();
     }
 
     
@@ -224,39 +197,21 @@ public final class HashTreeCacheImpl implements HashTreeCache {
             throw new IllegalArgumentException();
         dirty |= !ttroot.equals(ROOT_MAP.put(sha1,ttroot));
     }
-
-    /**
-     * Loads values from cache file, if available
-     * 
-     * @return Map of SHA1->HashTree
-     */
-    private Map<URN, HashTree> createMap() {
-        File toRead = OLD_CACHE_FILE;
-        try {
-            toRead = FileUtils.getCanonicalFile(toRead);
-        } catch (IOException ignore){}
-        
-        ObjectInputStream ois = null;
-        try {
-            ois = new ConverterObjectInputStream(
-                    new BufferedInputStream(
-                        new FileInputStream(toRead)));
-            return GenericsUtils.scanForMap(ois.readObject(), URN.class, HashTree.class, GenericsUtils.ScanMode.REMOVE);
-        } catch(Throwable t) {
-            t.printStackTrace();
-            LOG.error("Can't read tiger trees", t);
-            return new HashMap<URN, HashTree>();
-        } finally {
-            IOUtils.close(ois);
-        }
-    }
     
     /**
      * Loads values from the root and tree caches
      */
-    private void loadCaches() throws IOException, ClassNotFoundException {
-        Object roots = FileUtils.readObject(ROOT_CACHE_FILE);
-        Object trees = FileUtils.readObject(TREE_CACHE_FILE);
+    private Tuple<Map<URN, URN>, Map<URN, HashTree>> loadCaches() {
+        Object roots;
+        Object trees;
+        try {
+            roots = FileUtils.readObject(ROOT_CACHE_FILE);
+            trees = FileUtils.readObject(TREE_CACHE_FILE);
+        } catch (Throwable t) {
+            LOG.debug("Error reading from disk.", t);
+            roots = new HashMap();
+            trees = new HashMap();
+        }
 
         Map<URN,URN> rootsMap = GenericsUtils.scanForMap(roots, URN.class, URN.class, GenericsUtils.ScanMode.REMOVE);
         Map<URN,HashTree> treesMap = GenericsUtils.scanForMap(trees, URN.class, HashTree.class, GenericsUtils.ScanMode.REMOVE);
@@ -279,9 +234,7 @@ public final class HashTreeCacheImpl implements HashTreeCache {
         }
         
         // Note: its ok to have roots without trees.
-        
-        ROOT_MAP = rootsMap;
-        TREE_MAP = treesMap;
+        return new Tuple<Map<URN,URN>, Map<URN,HashTree>>(rootsMap, treesMap);
     }
 
     /**
@@ -330,10 +283,10 @@ public final class HashTreeCacheImpl implements HashTreeCache {
         removeOldEntries(roots, trees, fileManager, downloadManager);
         
         synchronized(this) {
-            TREE_MAP = null; // free for gc
-            TREE_MAP = new HashMap<URN,HashTree>(trees);
-            ROOT_MAP = null;
-            ROOT_MAP = new HashMap<URN,URN>(roots);
+            TREE_MAP.clear();
+            TREE_MAP.putAll(trees);
+            ROOT_MAP.clear();
+            ROOT_MAP.putAll(roots);
         }
         
         try {
