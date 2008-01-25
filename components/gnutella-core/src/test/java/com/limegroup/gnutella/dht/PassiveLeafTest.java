@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -24,6 +24,7 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.util.UnitTestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LifecycleManager;
@@ -70,24 +71,9 @@ public class PassiveLeafTest extends DHTTestCase {
         final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         MojitoDHT passiveLeaf = null;
-        List<MojitoDHT> dhts = new ArrayList<MojitoDHT>();
+        List<MojitoDHT> dhts = Collections.emptyList();
         try {
-            
-            // Start some DHT Nodes
-            for (int i = 0; i < 3*k; i++) {
-                MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-                dht.bind(2000 + i);
-                dht.start();
-                
-                if (i > 0) {
-                    Thread.sleep(100);
-                    dht.bootstrap(dhts.get(i-1).getContactAddress()).get();
-                }
-                
-                dhts.add(dht);
-            }
-            dhts.get(0).bootstrap(dhts.get(1).getContactAddress()).get();
-            
+            dhts = UnitTestUtils.createBootStrappedDHTs(3);
             // Store a DHTValue
             KUID key = KUID.createRandomID();
             DHTValue value = new DHTValueImpl(

@@ -1,13 +1,13 @@
 package org.limewire.mojito.util;
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
+import java.util.Map;
 
 import org.limewire.concurrent.OnewayExchanger;
 import org.limewire.mojito.Context;
@@ -81,9 +81,6 @@ public class UnitTestUtils {
      * Creates <code>factor</code> * {@link KademliaSettings#REPLICATION_PARAMETER} bootstrapped dhts.
      * 
      * Make sure to close them in a try-finally block.
-     * @throws IOException 
-     * @throws ExecutionException 
-     * @throws InterruptedException 
      */
     public static List<MojitoDHT> createBootStrappedDHTs(int factor) throws Exception {
         if (factor < 1) {
@@ -93,7 +90,6 @@ public class UnitTestUtils {
         int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         List<MojitoDHT> dhts = new ArrayList<MojitoDHT>();
         
-        MojitoDHT first = null;
         for (int i = 0; i < factor * k; i++) {
             MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
             
@@ -101,14 +97,46 @@ public class UnitTestUtils {
             dht.start();
             
             if (i > 0) {
+                Thread.sleep(100);
+                dht.bootstrap(new InetSocketAddress("localhost", 3000)).get();
+            }
+            dhts.add(dht);
+        }
+        dhts.get(0).bootstrap(dhts.get(1).getContactAddress()).get();
+        return dhts;
+    }
+    
+    /**
+     * Creates <code>factor</code> * {@link KademliaSettings#REPLICATION_PARAMETER} bootstrapped dhts
+     * and stores each under its node id in a map.
+     * 
+     * Make sure to close them in a try-finally block.
+     */
+    public static Map<KUID, MojitoDHT> createBootStrappedDHTsMap(int factor) throws Exception {
+        if (factor < 1) {
+            throw new IllegalArgumentException("only values >= 1");
+        }
+        
+        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
+        Map<KUID, MojitoDHT> dhts = new LinkedHashMap<KUID, MojitoDHT>();
+        MojitoDHT first = null;
+        
+        for (int i = 0; i < factor * k; i++) {
+            MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
+            
+            dht.bind(new InetSocketAddress(3000 + i));
+            dht.start();
+            
+            if (i > 0) {
+                Thread.sleep(100);
                 dht.bootstrap(new InetSocketAddress("localhost", 3000)).get();
             } else {
                 first = dht;
             }
-            dhts.add(dht);
+            dhts.put(dht.getLocalNodeID(), dht);
         }
-        if (first != null) { // check to satisfy the compiler
-            first.bootstrap(new InetSocketAddress("localhost", 3001)).get();
+        if (first != null) { // unnecessary null check to satisfy compiler
+            first.bootstrap(new InetSocketAddress("localhost", 3000 + 1)).get();
         }
         return dhts;
     }

@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.dht;
 
 import java.io.InterruptedIOException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
@@ -10,11 +10,11 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito.util.UnitTestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -113,20 +113,8 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         dhtManager = injector.getInstance(DHTManager.class);
         // Start and bootstrap a bunch of DHT Nodes
         k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        dhts = new ArrayList<MojitoDHT>();
-        for (int i = 0; i < 2*k; i++) {
-            MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-            dht.bind(2000 + i);
-            dht.start();
-            
-            if (i > 0) {
-                Thread.sleep(100);
-                dht.bootstrap(dhts.get(i-1).getContactAddress()).get();
-            }
-            
-            dhts.add(dht);
-        }
-        dhts.get(0).bootstrap(dhts.get(1).getContactAddress()).get();
+        dhts = Collections.emptyList();
+        dhts = UnitTestUtils.createBootStrappedDHTs(2);
     }
 
     private void doSettings() {
