@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Buffer;
 import org.limewire.collection.FixedsizeHashMap;
 import org.limewire.collection.NoMoreStorageException;
 import org.limewire.concurrent.ExecutorsHelper;
@@ -119,6 +120,7 @@ import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.statistics.RouteErrorStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 
 
@@ -306,6 +308,9 @@ public abstract class MessageRouterImpl implements MessageRouter {
     @InspectionPoint("guid tracker")
     @SuppressWarnings("unused")
     private final GUIDTracker guidTracker = new GUIDTracker();
+    
+    @InspectionPoint("dropped replies")
+    private final DroppedReplyCounter droppedReplyCounter = new DroppedReplyCounter(); 
     
     protected final NetworkManager networkManager;
     protected final QueryRequestFactory queryRequestFactory;
@@ -2113,7 +2118,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     private boolean shouldDropReply(RouteTable.ReplyRoutePair rrp,
                                     ReplyHandler rh,
                                     QueryReply qr) {
-        int ttl = qr.getTTL();
+        byte ttl = qr.getTTL();
                                            
         // Reason 2 --  The reply is meant for me, do not drop it.
         if( rh == forMeReplyHandler ) return false;
@@ -2127,7 +2132,10 @@ public abstract class MessageRouterImpl implements MessageRouter {
 
         // drop the reply if we've already sent more than the specified number
         // of results for this GUID
-        if(resultsRouted > 100) return true;
+        if(resultsRouted > 100) {
+            droppedReplyCounter.tooManyResults((short)resultsRouted);
+            return true;
+        }
 
         int bytesRouted = rrp.getBytesRouted();
         // send replies with ttl above 2 if we've routed under 50K 
@@ -2137,6 +2145,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         // send replies with ttl 2 if we've routed under 333K 
         if(ttl == 2 && bytesRouted < 100  * 1024) return false;
 
+        droppedReplyCounter.ttlByteDrop(ttl, bytesRouted);
         // if none of the above conditions holds true, drop the reply
         return true;
     }
@@ -3339,6 +3348,48 @@ public abstract class MessageRouterImpl implements MessageRouter {
             registerMessageListener(guid, this);
         }
     }        
+    
+    /**
+     * Counts reasons why a reply would be dropped.
+     */
+    private static class DroppedReplyCounter implements Inspectable {
+        // buffer storage is actually inited lazily
+        private final Buffer<Short> tooManyResults = new Buffer<Short>(50);
+        private final Buffer<Byte> ttls = new Buffer<Byte>(50);
+        private final Buffer<Integer> bytesRouted = new Buffer<Integer>(50);
+        
+        public synchronized Object inspect() {
+            byte [] tooManyResultsByte = new byte[tooManyResults.getSize() * 2];
+            for (int i = 0; i < tooManyResults.getSize(); i++)
+                ByteOrder.short2beb(tooManyResults.get(i), tooManyResultsByte, i * 2);
+            
+            byte [] ttlsByte = new byte[ttls.getSize()];
+            for (int i = 0; i < ttls.getSize(); i++)
+                ttlsByte[i] = ttls.get(i);
+            
+            byte [] bytesRoutedByte = new byte[bytesRouted.getSize() * 4];
+            for (int i = 0; i < bytesRouted.getSize(); i++)
+                ByteOrder.int2beb(bytesRouted.get(i), bytesRoutedByte, i * 4);
+            
+            Map<String,byte []> ret = new HashMap<String,byte []>();
+            ret.put("tooMany",tooManyResultsByte);
+            ret.put("ttls",ttlsByte);
+            ret.put("bytes",bytesRoutedByte);
+            return ret;
+        }
+        
+        public synchronized void tooManyResults(short numResults) {
+            if (LimeWireUtils.isBetaRelease())
+                tooManyResults.add(numResults);
+        }
+        
+        public synchronized void ttlByteDrop(byte ttl, int bytes) {
+            if (!LimeWireUtils.isBetaRelease())
+                return;
+            ttls.add(ttl);
+            bytesRouted.add(bytes);
+        }
+    }
     
     private class ConnectionListener implements ConnectionLifecycleListener {
 
