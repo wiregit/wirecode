@@ -163,6 +163,18 @@ public final class LWSServerUtil {
     public static boolean isValidPublicKey(final String key) {
         return isValidKey(key);
     }
+    
+    /**
+     * Returns <tt>true</tt> if <tt>key</tt> is a valid shared key,
+     * <tt>false</tt> otherwise.
+     * 
+     * @param key key in question
+     * @return <tt>true</tt> if <tt>key</tt> is a valid shared key,
+     *         <tt>false</tt> otherwise
+     */
+    public static boolean isValidSharedKey(final String key) {
+        return isValidKey(key);
+    }    
 
     /**
      * Returns <tt>true</tt> if <tt>key</tt> is a valid private key,

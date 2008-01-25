@@ -488,11 +488,16 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
          * Private key.
          */
         String PRIVATE = "private";
-    
+          
         /**
          * Public key.
          */
         String PUBLIC = "public";
+        
+        /**
+         * Shared key.
+         */
+        String SHARED = "shared";        
     
         /**
          * Name of the command to send to the {@link LWSReceivesCommandsFromDispatcher}.
@@ -531,6 +536,11 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
          * Indicating an invalid private key.
          */
         String INVALID_PRIVATE_KEY = "invalid.private.key";
+        
+        /**
+         * Indicating an invalid shared key.
+         */
+        String INVALID_SHARED_KEY = "invalid.shared.key";        
     
         /**
          * Indicating an invalid public key or IP address.
@@ -552,11 +562,21 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
          * No private key has been generated yet.
          */
         String UNITIALIZED_PRIVATE_KEY = "uninitialized.private.key";
-    
+        
         /**
          * No private key parameter was supplied.
          */
         String MISSING_PRIVATE_KEY_PARAMETER = "missing.private.parameter";
+        
+        /**
+         * No shared key has been generated yet.
+         */
+        String UNITIALIZED_SHARED_KEY = "uninitialized.shared.key";
+                
+        /**
+         * No shared key parameter was supplied.
+         */
+        String MISSING_SHARED_KEY_PARAMETER = "missing.shared.parameter";        
     
         /**
          * No public key parameter was supplied.

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.LogFactory;
+import org.limewire.lws.server.FakeJavascriptCodeInTheWebpage;
 import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.net.SocketsManager;
@@ -59,6 +60,7 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     private LifecycleManager lifecycleManager;
     
     private String privateKey;
+    private String sharedKey;
     
         
 
@@ -189,37 +191,60 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     }
 
     protected final String getPrivateKey() {
-        note("Getting private key");
         if (privateKey == null) {
-            note("Getting public key");
-            String publicKey = getPublicKey();
-            note("Got the public key: " + publicKey);
-            try {
-                Thread.sleep(100);
-            } catch (Exception e) {
-                //
-                // Not crucial, but would like to see the error
-                //
-                e.printStackTrace();
-            }
-            String ip = "127.0.0.1";
-            //
-            // We'll try this TIMES_TO_TRY_FOR_PRIVATE_KEY times
-            // See the comment at TIMES_TO_TRY_FOR_PRIVATE_KEY for why.
-            //
-            for (int i=0; i<TIMES_TO_TRY_FOR_PRIVATE_KEY; i++) {
-                privateKey = remoteServer.lookupPrivateKey(publicKey, ip);
-                if (LWSServerUtil.isValidPrivateKey(privateKey)) break;
-                try {
-                    Thread.sleep(SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES);
-                } catch (InterruptedException e) {
-                    // ignore
-                }
-            }            
-            
+            requestPrivateAndSharedKeys();
         }
-        note("Got the private key: " + privateKey);
         return privateKey;
+    }
+    
+    protected final String getSharedKey() {
+        if (sharedKey == null) {
+            requestPrivateAndSharedKeys();
+        }
+        return sharedKey;
+    }    
+    
+    protected final static class KeyPair {
+        
+        private final String publicKey;
+        private final String sharedKey;
+        private final boolean isValid;
+        
+        private KeyPair(String publicKey, String sharedKey, boolean isValid) {
+            this.publicKey = publicKey;
+            this.sharedKey = sharedKey;
+            this.isValid = isValid;
+        }
+        
+        protected final String getPublicKey() {
+            return publicKey;
+        }
+        
+        protected final String getSharedKey() {
+            return sharedKey;
+        }
+        
+        /**
+         * Returns whether this request was valid or not.
+         * 
+         * @return whether this request was valid or not.
+         */
+        protected final boolean isValid() {
+            return isValid;
+        }
+        
+        public final String toString() {
+            return "<publicKey=" + getPublicKey() + ",sharedKey=" + getSharedKey() + ",isValid=" + isValid() + ">";
+        }
+    }
+
+    protected final KeyPair getPublicAndSharedKeys() {
+        String res = sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.START_COM, NULL_ARGS);
+        String parts[] = res.split(" ");
+        if (parts.length < 2) {
+            return new KeyPair(null, null, false);
+        }
+        return new KeyPair(parts[0], sharedKey = parts[1], true);
     }
    
 
@@ -233,11 +258,57 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
         String responseWithCallback = sender.sendMessage(cmd, args);
         return LWSServerUtil.removeCallback(responseWithCallback);
     }
+    
+    /**
+     * Returns a {@link FakeJavascriptCodeInTheWebpage#Handler} for ensuring
+     * there was some error, but the type doesn't matter.
+     * 
+     * @return a {@link FakeJavascriptCodeInTheWebpage#Handler} for ensuring
+     *         there was some error, but the type doesn't matter.
+     */
+    protected final FakeJavascriptCodeInTheWebpage.Handler errorHandlerAny() {
+        return new FakeJavascriptCodeInTheWebpage.Handler() {
+            public void handle(final String res) {
+                final String have = LWSServerUtil.unwrapError(LWSServerUtil.removeCallback(res));
+                assertTrue(have.indexOf('.') != -1);
+            }
+        };
+    }    
 
 
     // -----------------------------------------------------------
     // Private
     // -----------------------------------------------------------
+    
+    private void requestPrivateAndSharedKeys() {
+        KeyPair kp = getPublicAndSharedKeys();
+        String publicKey = kp.getPublicKey();
+        try {
+            Thread.sleep(100);
+        } catch (Exception e) {
+            //
+            // Not crucial, but would like to see the error
+            //
+            e.printStackTrace();
+        }
+        Map<String, String> args = new HashMap<String, String>();
+        args.put(LWSDispatcherSupport.Parameters.PUBLIC, publicKey);
+        
+        String ip = "127.0.0.1";
+        //
+        // We'll try this TIMES_TO_TRY_FOR_PRIVATE_KEY times
+        // See the comment at TIMES_TO_TRY_FOR_PRIVATE_KEY for why.
+        //
+        for (int i=0; i<TIMES_TO_TRY_FOR_PRIVATE_KEY; i++) {
+            privateKey = remoteServer.lookupPrivateKey(publicKey, ip);
+            if (LWSServerUtil.isValidPrivateKey(privateKey)) break;
+            try {
+                Thread.sleep(SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }        
+    }     
     
     private void stop(final AbstractServer t) {
         if (t != null) {

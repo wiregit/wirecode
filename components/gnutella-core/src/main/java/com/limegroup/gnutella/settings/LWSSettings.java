@@ -30,6 +30,13 @@ public final class LWSSettings extends LimeProps {
             10000);
     
     /**
+     * Allow us to turn on/off SSL messages to the Server.
+     */
+    public static final BooleanSetting LWS_USE_SSL = FACTORY.createRemoteBooleanSetting(
+            "LWS_USE_SSL", false, "LWSSettings.lwsUseSSL");    
+    
+    
+    /**
      * The entire prefix to put before a url is downloaded.  This is encoded/decoded many times
      * so needs to be all together.  This also makes it clearer.  <b>This HAS to end in a <code>/</code></b>.
      */
@@ -55,12 +62,6 @@ public final class LWSSettings extends LimeProps {
      */
     public static final BooleanSetting LWS_IS_ENABLED = FACTORY.createRemoteBooleanSetting(
             "LWS_IS_ENABLED", true, "LWSSettings.lwsIsEnabled");
-    
-    /**
-     * Allow us to turn on/off SSL messages to the Server.
-     */
-    public static final BooleanSetting LWS_USE_SSL = FACTORY.createRemoteBooleanSetting(
-            "LWS_USE_SSL", false, "LWSSettings.lwsUseSSL");    
     
     /*
      * These are mainly for the demos when we are using HTTP authentication for accessing the store.

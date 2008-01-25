@@ -52,7 +52,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
     
 
     public void init() {
-        //
+        // =============================================================================================================
         // Add a handler for the LimeWire Store Server so that
         // we can keep track of downloads that were made on the
         // DownloadMediator
@@ -62,7 +62,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         //  ID of download - a string of form
         //          <ID> ' ' <percentage-downloaded> ':' <download-status> [ '|' <ID> ' ' <percentage-downloaded> ':' <download-status> ]
         //  This ID is the identity hash code
-        //
+        // =============================================================================================================
         lwsManager.registerHandler("GetDownloadProgress", new LWSManagerCommandResponseHandlerWithCallback("GetDownloadProgress") {
             
             /** 
@@ -145,7 +145,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 res.append("|");                
             }
         }); 
-        //
+        // =============================================================================================================
         // Add a handler for the LimeWire Store Server so that
         // we can download songs from The Store
         // INPUT
@@ -157,7 +157,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         //  URN - of downloader for keeping track of progress
         //   -or-
         //  timeout - if we timeout
-        //
+        // =============================================================================================================
         lwsManager.registerHandler("Download", new LWSManagerCommandResponseHandlerWithCallback("Download") {
 
             protected String handleRest(Map<String, String> args) {
@@ -247,56 +247,56 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 return urlString.substring(ilast+1);
             }            
         });
-        //
+        // =============================================================================================================
         // Add a handler for the LimeWire Store Server so that
         // we can download songs from The Store
         // INPUT
         //  id - to pause
         // OUTPUT
         //  OK
-        //
+        // =============================================================================================================
         lwsManager.registerHandler("PauseDownload", new LWSManagerCommandResponseForDownloading("PauseDownload", lwsIntegrationServicesDelegate) {
             @Override
             protected void takeAction(Downloader d) {
                 d.pause();
             }          
         });
-        //
+        // =============================================================================================================
         // Add a handler for the LimeWire Store Server so that
         // we can download songs from The Store
         // INPUT
         //  id - to pause
         // OUTPUT
         //  OK
-        //
+        // =============================================================================================================
         lwsManager.registerHandler("StopDownload", new LWSManagerCommandResponseForDownloading("StopDownload", lwsIntegrationServicesDelegate) {
             @Override
             protected void takeAction(Downloader d) {
                 d.stop();
             }              
         }); 
-        //
+        // =============================================================================================================
         // Add a handler for the LimeWire Store Server so that
         // we can download songs from The Store
         // INPUT
         //  id - to pause
         // OUTPUT
         //  OK
-        //
+        // =============================================================================================================
         lwsManager.registerHandler("ResumeDownload", new LWSManagerCommandResponseForDownloading("ResumeDownload", lwsIntegrationServicesDelegate) {
             @Override
             protected void takeAction(Downloader d) {
                 d.resume();
             }           
         });
-        //
+        // =============================================================================================================
         // Add a handler for the LimeWire Store Server so that we can find the
         // version of the client running
         // INPUT
         //  --
         // OUTPUT
         //  <version>
-        //
+        // =============================================================================================================
         lwsManager.registerHandler("GetVersion", new LWSManagerCommandResponseHandlerWithCallback("GetVersion") {
 
             @Override

@@ -143,7 +143,7 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
                 if (privateKey == null) {
                     cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER));
                     return;
-                }
+                }               
                 String ip = args.get(LWSDispatcherSupport.Parameters.IP);
                 if (ip == null) {
                     cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_IP_PARAMETER));

@@ -149,7 +149,7 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     public final void sendMessageToServer(final String msg, 
                                           final Map<String, String> args, 
                                           final StringCallback cb) throws IOException {
-        String url = constructURL(msg, args); System.out.println("****** URL:" + url);
+        String url = constructURL(msg, args);
         final GetMethod get = new GetMethod(url);
         //
         // TODO: Need to do authentication
