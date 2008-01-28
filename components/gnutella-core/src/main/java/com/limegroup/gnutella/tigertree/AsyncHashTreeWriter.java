@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.tigertree.dime;
+package com.limegroup.gnutella.tigertree;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -7,13 +7,12 @@ import java.nio.channels.WritableByteChannel;
 import org.limewire.nio.statemachine.WriteState;
 
 import com.limegroup.gnutella.dime.AsyncDimeWriter;
-import com.limegroup.gnutella.tigertree.ThexWriter;
 
-public class AsyncTigerTreeWriter extends WriteState implements ThexWriter {
+public class AsyncHashTreeWriter extends WriteState implements ThexWriter {
 
     private AsyncDimeWriter writer;
 
-    public AsyncTigerTreeWriter(AsyncDimeWriter asyncDimeWriter) {
+    public AsyncHashTreeWriter(AsyncDimeWriter asyncDimeWriter) {
         this.writer = asyncDimeWriter;
     }
 
