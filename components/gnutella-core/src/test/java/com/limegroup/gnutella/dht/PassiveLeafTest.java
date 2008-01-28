@@ -73,7 +73,7 @@ public class PassiveLeafTest extends DHTTestCase {
         MojitoDHT passiveLeaf = null;
         List<MojitoDHT> dhts = Collections.emptyList();
         try {
-            dhts = UnitTestUtils.createBootStrappedDHTs(3);
+            dhts = UnitTestUtils.createBootStrappedDHTs(3, 2000);
             // Store a DHTValue
             KUID key = KUID.createRandomID();
             DHTValue value = new DHTValueImpl(
@@ -118,7 +118,7 @@ public class PassiveLeafTest extends DHTTestCase {
             }
             
         } finally {
-            close(dhts);
+            UnitTestUtils.close(dhts);
             
             if (passiveLeaf != null) {
                 passiveLeaf.close();

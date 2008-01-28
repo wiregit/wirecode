@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
-import java.util.Collection;
 
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
@@ -28,20 +27,9 @@ public abstract class DHTTestCase extends LimeTestCase {
     
     private boolean bootstrapped = false;
     
-    //protected static List<MojitoDHT> DHT_LIST = new ArrayList<MojitoDHT>();
-
-    // DPINJ: remove
-    protected static boolean startDHT = true;
-    
     public DHTTestCase(String name) {
         super(name);
     }
-    
-//    public static void globalSetUp() throws Exception {
-//        if (startDHT) {
-//            startServices(ProviderHacks.getLifecycleManager());
-//        }
-//    }
     
     protected MojitoDHT startBootstrapDHT(LifecycleManager lifeCycleManager) throws Exception {
         assertFalse("bootstrap DHT already started", bootstrapped);
@@ -94,15 +82,6 @@ public abstract class DHTTestCase extends LimeTestCase {
         // LockTimeoutExceptions on the loopback then check this Setting!
         ContextSettings.WAIT_ON_LOCK.setValue(1500);
     }
-    
-//    public static void globalTearDown() throws Exception {
-//        if (startDHT) {
-//            close(DHT_LIST);
-//        }
-//        
-//        DHT_LIST.clear();
-//        BOOTSTRAP_DHT = null;
-//    }
 
     protected void fillRoutingTable(RouteTable rt, int numNodes) {
         for(int i = 0; i < numNodes; i++) {
@@ -119,10 +98,5 @@ public abstract class DHTTestCase extends LimeTestCase {
             rt.add(node);
         }
     }
-    
-    protected static void close(Collection<? extends MojitoDHT> dhts) {
-        for (MojitoDHT dht : dhts) {
-            dht.close();
-        }
-    }
+
 }
