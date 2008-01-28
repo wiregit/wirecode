@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -103,6 +104,11 @@ public abstract class AbstractDHTController implements DHTController {
     private final RandomNodeAdder dhtNodeAdder = new RandomNodeAdder();
     
     /**
+     * The forwarder of nodes to passive leafs.
+     */
+    private final NodeForwarder nodeForwarder = new NodeForwarder();
+    
+    /**
      * The DHT event dispatcher
      */
     private final EventDispatcher<DHTEvent, DHTEventListener> dispatcher;
@@ -118,11 +124,6 @@ public abstract class AbstractDHTController implements DHTController {
     private final int routeTableVersion;
     
     private final DHTControllerFacade dhtControllerFacade;
-    
-    /**
-     * Contacts to forward to passive leafs.
-     */
-    private final Buffer<Contact> contactsToForward = new Buffer<Contact>(10);
     
     public AbstractDHTController(Vendor vendor, Version version,
             EventDispatcher<DHTEvent, DHTEventListener> dispatcher,
@@ -192,11 +193,6 @@ public abstract class AbstractDHTController implements DHTController {
         // If we're an Ultrapeer we want to notify our firewalled
         // leafs about every new Contact
         if (dhtControllerFacade.isActiveSupernode()) {
-            dht.getDHTExecutorService().scheduleAtFixedRate(new Runnable() {
-                public void run() {
-                    forwardContacts();
-                }
-            }, 60, 60, TimeUnit.SECONDS);
             dht.getRouteTable().addRouteTableListener(new RouteTableListener() {
                 public void handleRouteTableEvent(RouteTableEvent event) {
                     switch(event.getEventType()) {
@@ -205,9 +201,7 @@ public abstract class AbstractDHTController implements DHTController {
                         case UPDATE_CONTACT:
                             Contact node = event.getContact();
                             if (mode == DHTMode.ACTIVE || !dht.getLocalNodeID().equals(node.getNodeID())) {
-                                synchronized(contactsToForward) {
-                                    contactsToForward.add(node);
-                                }
+                                    nodeForwarder.addContact(node);
                             }
                             break;
                     }
@@ -230,31 +224,6 @@ public abstract class AbstractDHTController implements DHTController {
      * A factory method to create MojitoDHTs
      */
     protected abstract MojitoDHT createMojitoDHT(Vendor vendor, Version version);
-    
-    private void forwardContacts() {
-        if (!DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.getValue()) {
-            return;
-        }
-        
-        Collection<Contact> contacts;
-        synchronized(contactsToForward) {
-            if (contactsToForward.isEmpty())
-                return;
-            contacts = new ArrayList<Contact>(10);
-            for(Contact c : contactsToForward)
-                contacts.add(c);
-            // do not erase contacts - can be re-forwarded to new connections
-        }
-        
-        DHTContactsMessage msg = new DHTContactsMessage(contacts);
-        List<RoutedConnection> list = dhtControllerFacade.getInitializedClientConnections();
-        for (RoutedConnection mc : list) {
-            if (mc.isPushProxyFor()
-                    && mc.getConnectionCapabilities().remoteHostIsPassiveLeafNode() > -1) {
-                mc.send(msg);
-            }
-        }
-    }
     
     public DHTMode getDHTMode() {
         return mode;
@@ -291,6 +260,8 @@ public abstract class AbstractDHTController implements DHTController {
             int port = dhtControllerFacade.getPort();
             dht.bind(new InetSocketAddress(addr, port));
             dht.start();
+            if (dhtControllerFacade.isActiveSupernode()) 
+                nodeForwarder.start();
             
             // Bootstrap only if we're not a passive leaf node
             if (getDHTMode() != DHTMode.PASSIVE_LEAF) {
@@ -315,6 +286,7 @@ public abstract class AbstractDHTController implements DHTController {
         
         bootstrapper.stop();
         dhtNodeAdder.stop();
+        nodeForwarder.stop();
         dht.close();
         
         dispatcher.dispatchEvent(new DHTEvent(this, Type.STOPPED));
@@ -529,5 +501,57 @@ public abstract class AbstractDHTController implements DHTController {
             return dhtControllerFacade.allow(addr);
         }
     }
+    
+    /**
+     * Forwards contacts to passive leafs.
+     */
+    private class NodeForwarder implements Runnable {
+        /**
+         * Contacts to forward to passive leafs.
+         */
+        private final Buffer<Contact> contactsToForward = new Buffer<Contact>(10);
+        
+        /**
+         * Future that actually forwards.
+         */
+        private volatile Future<?> forwarderFuture;
+        
+        void start() {
+            forwarderFuture = dhtControllerFacade.scheduleWithFixedDelay(this, 60, 60, TimeUnit.SECONDS);
+        }
+        
+        synchronized void addContact(Contact contact) {
+            contactsToForward.add(contact);
+        }
+        
+        public void run() {
+            if (!DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.getValue() || !isRunning()) {
+                return;
+            }
+            Collection<Contact> contacts;
+            synchronized(this) {
+                if (contactsToForward.isEmpty())
+                    return;
+                contacts = new ArrayList<Contact>(10);
+                for(Contact c : contactsToForward)
+                    contacts.add(c);
+                // do not erase contacts - can be re-forwarded to new connections
+            }
 
+            DHTContactsMessage msg = new DHTContactsMessage(contacts);
+            List<RoutedConnection> list = dhtControllerFacade.getInitializedClientConnections();
+            for (RoutedConnection mc : list) {
+                if (mc.isPushProxyFor()
+                        && mc.getConnectionCapabilities().remoteHostIsPassiveLeafNode() > -1) {
+                    mc.send(msg);
+                }
+            }
+        }
+        
+        void stop() {
+            Future<?> f = forwarderFuture;
+            if (f != null)
+                f.cancel(false);
+        }
+    }
 }

@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.dht;
 
+import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -230,6 +231,8 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             assertNotEquals(-1, in.getConnectionCapabilities().remoteHostIsPassiveLeafNode());
             assertTrue(in.isPushProxyFor());
             
+            // we expect to get the first dht contacts msg about a minute from now
+            long firstMsg = System.currentTimeMillis() + 58000;
             dhtManager.start(DHTMode.PASSIVE);
             Thread.sleep(250);
             assertEquals(DHTMode.PASSIVE, dhtManager.getDHTMode());
@@ -239,41 +242,30 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
             
             // -------------------------------------
             
-            // And check what the leaf is receiving...
-            int count = 0;
-            Set<Contact> nodes = new LinkedHashSet<Contact>();
+            // the leaf should not receive a dht contacts msg for about a minute
             try {
+                long now = System.currentTimeMillis();
+                while( now < firstMsg) {
+                    assertNotInstanceof(DHTContactsMessage.class, out.receive((int)(firstMsg - now)));
+                    now = System.currentTimeMillis();
+                }
+            } catch (IOException expected){}
+            
+            // And check what the leaf is receiving...
+            Set<Contact> nodes = new HashSet<Contact>();
                 while(true) {
-                    Message msg = out.receive(2000);
+                    Message msg = out.receive(10000);
                     if (msg instanceof DHTContactsMessage) {
                         DHTContactsMessage message = (DHTContactsMessage)msg;
+                        assertEquals(10,message.getContacts().size());
                         nodes.addAll(message.getContacts());
-                        count += message.getContacts().size();
+                        break;
                     }
                 }
-            } catch (InterruptedIOException err) {
-                if (nodes.isEmpty()) {
-                    fail(err);
-                }
-            }
-            
-            assertGreaterThanOrEquals(nodes.size(), count);
             
             // the ultrapeer id should not be sent as ups are passive.
             for (Contact c : nodes) 
                 assertFalse(dhtManager.getMojitoDHT().getLocalNodeID().equals(c.getNodeID()));
-            
-            // Note: This assert can sometimes fail! It's not a bug!
-            // The reason for this lies in the lookup algorithm which
-            // terminates as soon as it can't find any closer Nodes.
-            // That means our Ultrapeer may not hit all 2*k DHT Nodes
-            // and will therefore send us less. 
-            //assertEquals(2*k, nodes.size());
-           
-            
-            // See above
-            assertTrue("k=" + k + ", size=" + nodes.size(), 
-                    nodes.size() >= k && nodes.size() <= 2*k); 
             
         } finally {
             out.close();
