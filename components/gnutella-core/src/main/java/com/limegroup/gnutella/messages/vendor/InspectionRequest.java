@@ -3,9 +3,8 @@ package com.limegroup.gnutella.messages.vendor;
 import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.Message;
 
-public interface InspectionRequest extends Message {
+public interface InspectionRequest extends VendorMessage.ControlMessage {
     
     static final int VERSION = 1;
 

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.vendor.VendorMessage;
 
 /**
  * A queue of messages organized by type.  Used by ManagedConnection to
@@ -85,21 +86,22 @@ public class CompositeQueue implements MessageQueue {
     public static final int QUEUE_TIME=5*1000;
     
     /** The number of different priority levels. */
-    private static final int PRIORITIES = 8;
+    private static final int PRIORITIES = 9;
     
     /** 
      * Names for each priority. "Other" includes QRP messages and is NOT
      * reordered.  These numbers do NOT translate directly to priorities;
      * that's determined by the cycle fields passed to MessageQueue.
      */
-    private static final int PRIORITY_WATCHDOG=0;
-    private static final int PRIORITY_PUSH=1;
-    private static final int PRIORITY_QUERY_REPLY=2;
-    private static final int PRIORITY_QUERY=3; //TODO: separate requeries
-    private static final int PRIORITY_PING_REPLY=4;
-    private static final int PRIORITY_PING=5;
-    private static final int PRIORITY_OTHER=6;    
-    private static final int PRIORITY_OUR_QUERY=7; // seperate for re-originated leaf-queries.
+    private static final int PRIORITY_CONTROL=0;
+    private static final int PRIORITY_WATCHDOG=1;
+    private static final int PRIORITY_PUSH=2;
+    private static final int PRIORITY_QUERY_REPLY=3;
+    private static final int PRIORITY_QUERY=4; 
+    private static final int PRIORITY_PING_REPLY=5;
+    private static final int PRIORITY_PING=6;
+    private static final int PRIORITY_OTHER=7;    
+    private static final int PRIORITY_OUR_QUERY=8 ; // seperate for re-originated leaf-queries.
     
     /**
      * Constructs a new queue with the default sizes.
@@ -112,6 +114,7 @@ public class CompositeQueue implements MessageQueue {
      * Constructs a new queue with the given message buffer sizes. 
      */
     public CompositeQueue(int largeTime, int largeSize, int normalTime, int normalSize) {
+        _queues[PRIORITY_CONTROL]     = new SimpleMessageQueue(10, Integer.MAX_VALUE, largeSize, false);
         _queues[PRIORITY_WATCHDOG]    = new SimpleMessageQueue(1, Integer.MAX_VALUE, largeSize, true); // LIFO
         _queues[PRIORITY_PUSH]        = new PriorityMessageQueue(6, largeTime, largeSize);
         _queues[PRIORITY_QUERY_REPLY] = new PriorityMessageQueue(6, largeTime, largeSize);
@@ -148,6 +151,8 @@ public class CompositeQueue implements MessageQueue {
      * MessageRouter and account for number of reply bytes.
      */
     private int calculatePriority(Message m) {
+        if (m instanceof VendorMessage.ControlMessage)
+            return PRIORITY_CONTROL;
         byte opcode=m.getFunc();
         switch (opcode) {
             case Message.F_QUERY:

@@ -2,6 +2,8 @@ package com.limegroup.gnutella.connection;
 
 import junit.framework.Test;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
@@ -18,6 +20,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -62,6 +65,47 @@ public class CompositeQueueTest extends LimeTestCase {
         pingReplyFactory = injector.getInstance(PingReplyFactory.class);
     }
         
+    public void testControlMessages() throws Exception {
+        Mockery mockery = new Mockery();
+        final Message m = mockery.mock(VendorMessage.ControlMessage.class);
+        final Message m2 = mockery.mock(VendorMessage.ControlMessage.class);
+        mockery.checking(new Expectations() {{
+            allowing(m).getCreationTime();
+            will(returnValue(System.currentTimeMillis() - 100000)); // long ago doesn't matter
+            exactly(0).of(m).recordDrop(); // no dropping!
+            allowing(m2).getCreationTime();
+            will(returnValue(System.currentTimeMillis() - 900000));
+            exactly(0).of(m2).recordDrop(); 
+        }});
+        
+        
+        // add lots of messages before and after the control messages
+        for (int i = 0; i < 1000; i++) {
+            QUEUE.add(new PushRequestImpl(new byte[16], (byte)5, new byte[16],
+                    0, IP, 6340));
+        }
+        QUEUE.add(m);
+        for (int i = 0; i < 1000; i++) {
+            QUEUE.add(new PushRequestImpl(new byte[16], (byte)5, new byte[16],
+                    0, IP, 6340));
+        }
+        QUEUE.add(m2);
+        for (int i = 0; i < 1000; i++) {
+            QUEUE.add(new PushRequestImpl(new byte[16], (byte)5, new byte[16],
+                    0, IP, 6340));
+        }
+        
+        // 6 push requests per cycle, after that our control messages.
+        for (int i = 0; i < 6; i++)
+            assertInstanceof(PushRequest.class, QUEUE.removeNext());
+        
+        // no reordering either
+        assertSame(m, QUEUE.removeNext());
+        assertSame(m2, QUEUE.removeNext());
+        
+        mockery.assertIsSatisfied();
+    }
+    
     /**
      * This checks to make sure that messages in the outgoing queue are ordered
      * and prioritized correctly.
