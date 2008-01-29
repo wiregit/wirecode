@@ -691,9 +691,23 @@ final class QueryHandlerImpl implements Inspectable, QueryHandler {
         ret.put("pqs", _probeQuerySent);
         ret.put("ftw", _forwardedToLeaves);
         ret.put("the", _theoreticalHostsQueried);
+        ret.put("rpl", _numResultsReportedByLeaf);
+        ret.put("RES", RESULTS);
         if (RESULT_COUNTER != null)
             ret.put("rc", RESULT_COUNTER.getNumResults());
         ret.put("rh", REPLY_HANDLER.getAddress());
+        
+        // we could inspect() these here, but they can be cross-referenced with the
+        // IPs in ConnectionManagerImpl
+        List<String> probes = new ArrayList<String>(QUERIED_PROBE_CONNECTIONS.size());
+        for (RoutedConnection rc : QUERIED_PROBE_CONNECTIONS)
+            probes.add(rc.getAddress());
+        ret.put("probes",probes);
+        List<String> queried = new ArrayList<String>(QUERIED_CONNECTIONS.size());
+        for (RoutedConnection rc : QUERIED_CONNECTIONS)
+            queried.add(rc.getAddress());
+        ret.put("queried",queried);
+        
         return ret;
     }
 
