@@ -45,28 +45,6 @@ import com.limegroup.gnutella.settings.DHTSettings;
 @Singleton
 public class AltLocFinder {
 
-    /**
-     * Result type to denote different results of {@link AbstractResultHandler#handleDHTValueEntity(DHTValueEntity)}.
-     */
-    private enum Result {
-        /** An alternate location has been found */
-        FOUND(true),
-        /** An alternate location has not been found and will not be found */
-        NOT_FOUND(false),
-        /** An alternate location has not yet been found but could still be found */
-        NOT_YET_FOUND(false);
-        
-        private final boolean value;
-        
-        private Result(boolean value) {
-            this.value = value;
-        }
-        
-        public final boolean toBoolean() {
-            return value;
-        }
-    };
-    
     private static final Log LOG = LogFactory.getLog(AltLocFinder.class);
     
     private final DHTManager manager;
@@ -161,7 +139,29 @@ public class AltLocFinder {
      * Iterates over entity keys and retrieves their values from the node and
      * calls {@link #handleDHTValueEntity(DHTValueEntity)} for them.
      */
-    private abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
+    private static abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
+        
+        /**
+         * Result type to denote different results of {@link AbstractResultHandler#handleDHTValueEntity(DHTValueEntity)}.
+         */
+        enum Result {
+            /** An alternate location has been found */
+            FOUND(true),
+            /** An alternate location has not been found and will not be found */
+            NOT_FOUND(false),
+            /** An alternate location has not yet been found but could still be found */
+            NOT_YET_FOUND(false);
+            
+            private final boolean value;
+            
+            private Result(boolean value) {
+                this.value = value;
+            }
+            
+            public final boolean toBoolean() {
+                return value;
+            }
+        };
         
         protected final MojitoDHT dht;
         
