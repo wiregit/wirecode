@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2008-01-20 21:08+0000\n"
+"PO-Revision-Date: 2008-01-23 13:10+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Lithuanian <lt@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "(n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-01-29 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
@@ -594,11 +594,11 @@ msgstr "Siųsti"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:404
 msgid "Review"
-msgstr ""
+msgstr "Peržiūra"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:417
 msgid "Discard"
-msgstr ""
+msgstr "Atsikratyti"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:434
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
@@ -6899,39 +6899,39 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:38
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:88
 msgid "Artist:"
-msgstr ""
+msgstr "Atlikėjas:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:39
 msgid "Album:"
-msgstr ""
+msgstr "Albumas:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:40
 msgid "Genre:"
-msgstr ""
+msgstr "Žanras:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:41
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:57
 msgid "Year:"
-msgstr ""
+msgstr "Metai:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:42
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:56
 msgid "Type:"
-msgstr ""
+msgstr "Tipas:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:43
 msgid "Track:"
-msgstr ""
+msgstr "Takelio nr.:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:44
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:66
 msgid "Language:"
-msgstr ""
+msgstr "Kalba:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:45
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:59
 msgid "Length:"
-msgstr ""
+msgstr "Trukmė:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:46
 msgid "Bitrate:"
@@ -6940,7 +6940,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:47
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:60
 msgid "Comments:"
-msgstr ""
+msgstr "Komentarai:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:48
 msgid "SHA1:"
@@ -6948,16 +6948,16 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:49
 msgid "Price:"
-msgstr ""
+msgstr "Kaina:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:50
 msgid "Link:"
-msgstr ""
+msgstr "Nuoroda į:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:51
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:63
 msgid "Action:"
-msgstr ""
+msgstr "Veiksmas:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:52
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:61
@@ -6965,18 +6965,18 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:83
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:89
 msgid "License:"
-msgstr ""
+msgstr "Licencija:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:58
 msgid "Rating:"
-msgstr ""
+msgstr "Įvertinimas:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:62
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:76
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:82
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:90
 msgid "License Type:"
-msgstr ""
+msgstr "Licenzijos tipas:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:64
 msgid "Director:"
@@ -7000,19 +7000,19 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:73
 msgid "Topic:"
-msgstr ""
+msgstr "Tema:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:74
 msgid "Author:"
-msgstr ""
+msgstr "Autorius:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:79
 msgid "Name:"
-msgstr ""
+msgstr "Pavadinimas:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:80
 msgid "Publisher:"
-msgstr ""
+msgstr "Leidejas:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:81
 msgid "Platform:"
@@ -7032,4 +7032,4 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/audio/AudioInfo.java:21
 msgid "Info"
-msgstr ""
+msgstr "Informacija"

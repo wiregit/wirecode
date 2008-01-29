@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2007-08-29 20:04+0000\n"
+"PO-Revision-Date: 2008-01-28 14:42+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 1 : (n>=2 && n<=4) ? 2 : 0;\n"
-"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-01-29 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -687,23 +687,20 @@ msgid "Sorry, but LimeWire was unable to restart your old downloads."
 msgstr "Prepáčte, ale LimeWire nebol schopný obnoviť vaše staré sťahovania"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:309
-#, fuzzy
 msgid "Loading TLS Encryption..."
-msgstr "Načítavam HTML prostriedky..."
+msgstr "Načítavam kódovanie TLS..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:321
-#, fuzzy
 msgid "Loading Safe Content Management..."
-msgstr "Načítavam predošlého správcu pripojení..."
+msgstr "Načítavam správcu zabezpečovacieho obsahu..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:326
 msgid "Loading Message Router..."
 msgstr "Načítavam router správ..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:331
-#, fuzzy
 msgid "Loading Upload Management..."
-msgstr "Načítavam správcu pripojení"
+msgstr "Načítavam správcu uploadov..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:341
 msgid "Loading Connection Listener..."
@@ -714,28 +711,24 @@ msgid "Loading Connection Management..."
 msgstr "Načítavam správcu pripojení"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:355
-#, fuzzy
 msgid "Loading Download Management..."
-msgstr "Načítavam správcu pripojení"
+msgstr "Načítavam správcu sťahovania..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:361
-#, fuzzy
 msgid "Loading Ultrapeer/DHT Management..."
-msgstr "Načítavam predošlého správcu pripojení..."
+msgstr "Načítavam správcu Ultrapeer/DHT..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:366
 msgid "Locating Peers..."
 msgstr "Lokalizujem Peer..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:382
-#, fuzzy
 msgid "Loading Shared Files..."
-msgstr "Načítavam uložené súbory..."
+msgstr "Načítavam zdieľané súbory..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:387
-#, fuzzy
 msgid "Loading bittorrent Management..."
-msgstr "Načítavam správcu pripojení"
+msgstr "Načítavam správcu bittorrentov..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:393
 msgid "Loading Old Downloads..."
@@ -743,12 +736,11 @@ msgstr "Načítavam už stiahnuté súbory..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:398
 msgid "Attaching LWS Listeners..."
-msgstr ""
+msgstr "Pripájam užívateľov LWS..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:403
-#, fuzzy
 msgid "Checking for Updates..."
-msgstr "Overovanie..."
+msgstr "Kontrola aktualizácii..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:408
 msgid "Loading Directed Querier..."
@@ -771,13 +763,12 @@ msgid "Loading Saved Files..."
 msgstr "Načítavam uložené súbory..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:439
-#, fuzzy
 msgid "Loading Spam Management..."
-msgstr "Načítavam správcu pripojení"
+msgstr "Načítavam správcu spamu..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:444
 msgid "Loading Network Listeners..."
-msgstr ""
+msgstr "Načítavam sieťových užívateľov..."
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
@@ -795,17 +786,15 @@ msgstr "Programy"
 #: core/com/limegroup/gnutella/MediaType.java:48
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:87
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
-#, fuzzy
 msgid "Audio"
-msgstr "Štúdio"
+msgstr "Audio"
 
 #: core/com/limegroup/gnutella/MediaType.java:49
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
-#, fuzzy
 msgid "Video"
-msgstr "Zobrazenie"
+msgstr "Video"
 
 #: core/com/limegroup/gnutella/MediaType.java:50
 msgid "Images"
@@ -816,7 +805,7 @@ msgstr "Obrázky"
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:124
 #, java-format
 msgid "Could not process bad MAGNET link {0}"
-msgstr ""
+msgstr "Nemôže byť vykonané. Zlý MAGNET link {0}"
 
 #. show warning but proceed
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:189
@@ -829,12 +818,12 @@ msgstr ""
 "správne stiahnuť."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:200
-#, fuzzy, java-format
+#, java-format
 msgid "You have already downloaded {0}"
-msgstr "Tento súbor už sťahujete do \"{0}\"."
+msgstr "Toto ste už stiahli {0}"
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:205
-#, fuzzy, java-format
+#, java-format
 msgid "You are already downloading this file to {0}"
 msgstr "Tento súbor už sťahujete do \"{0}\"."
 
@@ -890,18 +879,16 @@ msgstr "Vývoj LimeWire stojí skutočné peniaze. Zakúpte si PRO."
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:131
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:269
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:49
-#, fuzzy
 msgid "Title"
-msgstr "Názov:"
+msgstr "Názov"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:89
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:126
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:271
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:57
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:42
-#, fuzzy
 msgid "Artist"
-msgstr "Umelec:"
+msgstr "Umelec"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:90
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:273
@@ -928,65 +915,57 @@ msgstr "Stopa"
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:115
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:58
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:80
-#, fuzzy
 msgid "Type"
-msgstr "Typ:"
+msgstr "Typ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:94
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:110
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:281
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:57
 msgid "Length"
-msgstr ""
+msgstr "Dĺžka"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:95
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:111
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:279
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:123
-#, fuzzy
 msgid "Year"
-msgstr "Rok:"
+msgstr "Rok"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:96
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
-#, fuzzy
 msgid "Language"
-msgstr "Jazyk:"
+msgstr "Jazyk"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:97
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:121
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:283
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:82
-#, fuzzy
 msgid "Bitrate"
-msgstr "Bitrate:"
+msgstr "Bitrate"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:98
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:115
-#, fuzzy
 msgid "Comments"
-msgstr "Komentáre:"
+msgstr "Komentáre"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:99
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
-#, fuzzy
 msgid "Action"
-msgstr "Akcia:"
+msgstr "Akcia"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
-#, fuzzy
 msgid "Copyright"
-msgstr "Rok autorských práv:"
+msgstr "Autorské práva"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:101
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:118
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:128
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:135
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:141
-#, fuzzy
 msgid "License Type"
-msgstr "Typ Licencie:"
+msgstr "Typ licencie"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:105
 msgid "Director"
@@ -1022,7 +1001,6 @@ msgstr "Šírka"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
-#, fuzzy
 msgid "Image"
 msgstr "Obrázky"
 
@@ -1036,13 +1014,11 @@ msgstr "Popis"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:164
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:263
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:42
-#, fuzzy
 msgid "License"
-msgstr "Licencia:"
+msgstr "Licencia"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:71
-#, fuzzy
 msgid "Document"
 msgstr "Dokumenty"
 
@@ -1056,9 +1032,8 @@ msgstr "Autor"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
-#, fuzzy
 msgid "Application"
-msgstr "Akcia:"
+msgstr "Aplikácie"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:367
@@ -1066,26 +1041,24 @@ msgstr "Akcia:"
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:34
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:53
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:219
-#, fuzzy
 msgid "Name"
-msgstr "Názov:"
+msgstr "Názov"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Publisher"
 msgstr "Vydavateľ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
-#, fuzzy
 msgid "Platform"
-msgstr "Platforma:"
+msgstr "Platforma"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:100
 msgid "The selected .torrent file may contain a security hazard."
-msgstr ""
+msgstr "Označený súbor .torrent môže spôsobiť bezpečnostné riziko."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:102
 msgid "LimeWire could not download a .torrent file from the provided URL."
-msgstr ""
+msgstr "LimeWire nemohol stiahnuť z tejto URL adresy súbor .torrent."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:35
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:539
@@ -1093,6 +1066,8 @@ msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
+"Ak pozastavíš tento upload, sťahovanie torrentu sa zastaví. Ste si istý, že "
+"to chcete vykonať?"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:38
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:544
@@ -1100,28 +1075,28 @@ msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
+"Tento upload je torrent a nebol dostatočné seedovaný. Mali by ste ho nechať "
+"viac uploadovať. Ste si istý, že ho chcete pozastaviť?"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:16
-#, fuzzy
 msgid "Automatically start torrents"
-msgstr "Automatický posun"
+msgstr "Automaticky spustiť torrenty"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:18
-#, fuzzy
 msgid ""
 "You can choose whether to automatically start torrents downloaded from "
 "Gnutella."
 msgstr ""
-"Môžete vybrať, či chcete automaticky zdieľať čiastočne stiahnuté súbory."
+"Môžete si vybrať, či chcete automaticky začať sťahovať torrenty zo siete "
+"Gnutella."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:26
-#, fuzzy
 msgid "Start automatically"
 msgstr "Automatické spustenie"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:36
 msgid "BitTorrent Settings"
-msgstr ""
+msgstr "Nastavenia BitTorrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:38
 msgid ""
@@ -1130,6 +1105,10 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"Môžete si zvoliť, či má LimeWire spravovať Vaše nastavenia protokolu "
+"Bittorrent. Je vysoko odporúčané, aby LimeWire tieto nastavenia spravoval. "
+"Neplatné alebo nevhodné hodnoty môžu spôsobiť vážne problémy s výkonom "
+"a/alebo pamäťou."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
 msgid ""
@@ -1137,26 +1116,29 @@ msgid ""
 "memory problems. Unless you really know what you're doing, it is highly "
 "recommended that you let LimeWire manage these settings."
 msgstr ""
+"Neplatné alebo nevhodné nastavenia hodnôt môžu spôsobiť vážne problémy s "
+"výkonom a/alebo pamäťou. Pokiaľ naozaj neviete čo vykonávate, je vysoko "
+"odporúčané, aby ste nechali LimeWire spravovať tieto nastavenia."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:77
 msgid "Let LimeWire manage my BitTorrent settings. (Recommended)"
-msgstr ""
+msgstr "Nechaj LimeWire spravovať moje BitTorrent nastavenia. (Odporúčané)"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:85
 msgid "Maximum uploads per torrent"
-msgstr ""
+msgstr "Maximum uploadov na torrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:91
 msgid "Minimum uploads per torrent"
-msgstr ""
+msgstr "Minimum uploadov na torrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:97
 msgid "Safe chunk verification"
-msgstr ""
+msgstr "Bezpečné overovanie informácii"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:103
 msgid "Experimental disk access"
-msgstr ""
+msgstr "Experimentálny prístup na disk"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:76
 msgid "Internal Error"
@@ -1241,7 +1223,7 @@ msgstr "Skopírovať správu"
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:302
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:56
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
 msgid "Automatically Scroll"
@@ -1254,9 +1236,8 @@ msgstr "O LimeWire"
 #. set up limewire version label
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:80
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:35
-#, fuzzy
 msgid "LimeWire"
-msgstr "O LimeWire"
+msgstr "LimeWire"
 
 #. set up close button
 #. *
@@ -1264,9 +1245,8 @@ msgstr "O LimeWire"
 #. 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:104
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:79
-#, fuzzy
 msgid "Close"
-msgstr "&Koniec"
+msgstr "Zrušiť"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:106
 msgid "Close This Window"
@@ -1284,6 +1264,14 @@ msgid ""
 "collection of protocols that is constantly improving -- a testament to the "
 "power of open protocols and open standards."
 msgstr ""
+"Inšpirovaný majiteľom LimeWire-u Markom Gortonom, LimeWire je projekt "
+"založený na spolupráci <a href=\"http://www.limewire.org/\">úsilia "
+"otvoreného kódu</a> zahŕňajúci programátorov a výskumníkov z celého sveta. "
+"Podstata spolupráce na Gnutelle sa takisto odzrkadľuje na Gnutella "
+"Developers Forum (GDF), ktorým je LimeWire účastníkom. Členovia GDF každý "
+"deň usilovne pracujú, aby urobili Gnutellu naozaj inovatívnou zbierkou "
+"protokolov, ktorá sa neustále zlepšuje --  vôľa sily otvorených protokolov a "
+"otvorených štandardov."
 
 #. developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:181
@@ -1300,6 +1288,8 @@ msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
 msgstr ""
+"V zákulisí obchodnej stratégie a dennodenných udalostí to zvládajú obchodní "
+"vývojári LimeWire-u:"
 
 #. web developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:207
@@ -1322,6 +1312,8 @@ msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
 msgstr ""
+"Okrem toho, nasledujúci jedinci v minulosti pracovali v LimeWire tíme, ale "
+"presunuli sa na iné projekty:"
 
 #. open source contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:248
@@ -1331,6 +1323,10 @@ msgid ""
 "have either written code that is distributed with every version of LimeWire, "
 "have identified serious bugs in the code, or both:"
 msgstr ""
+"LimeWire open source prispievatelia urobili významné kódové zmeny a opravy "
+"chýb a takisto prispeli nápadmi a výskumom. Títo, ktorí sú menovaní nižšie "
+"tiež napísali kód, ktorý je distribuovaný s každou verziou LimeWire, "
+"identifikovali vážne chyby v kóde alebo oboje:"
 
 #. internationalization contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:285
@@ -1339,6 +1335,8 @@ msgid ""
 "internationalization project, both for the application itself and for the "
 "LimeWire web site."
 msgstr ""
+"LimeWire by tiež chcel rád poďakovať prispievateľom v preklade tohto "
+"projektu, aj za samotnú aplikáciu aj za web stránku LimeWire."
 
 #. community VIPs
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:289
@@ -1346,6 +1344,8 @@ msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
 msgstr ""
+"Viacerí kolegovia v Gnutella komunite si zaslúžia špeciálne poďakovanie. Sú "
+"to:"
 
 #. conclusion
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:310
@@ -1354,21 +1354,24 @@ msgid ""
 "developers, users, and all others who have contributed their ideas to the "
 "project. Without LimeWire users, the LimeWire network would not exist."
 msgstr ""
+"Nakoniec, LimeWire by rád rozšíril svoje úprimné poďakovanie vývojárom, "
+"užívateľom a všekým ostatným, ktorí prispievali nápadmi na tento projekt. "
+"Bez užívateľov LimeWire by sieť LimeWire nemohla existovať."
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:315
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc."
 msgstr ""
+"BitTorrent, logo BitTorrent a Torrent sú ochranné známky BitTorrent, Inc."
 
 #. *
 #. * The select all action.
 #. 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:606
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:74
-#, fuzzy
 msgid "Select All"
-msgstr "Odznačiť všetko"
+msgstr "Označiť všetko"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:608
 msgid "Marks all Items as Selected"
@@ -1399,9 +1402,8 @@ msgstr "Zmazať"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:150
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:116
-#, fuzzy
 msgid "Save"
-msgstr "Uložiť ako"
+msgstr "Uložiť"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:545
 msgid "Save As"
@@ -1450,6 +1452,11 @@ msgid ""
 "full access to incoming and outgoing connections. To disable this feature, "
 "click 'No'."
 msgstr ""
+"LimeWire nemohol spustiť Digital Audio Access Protocol (na zdieľanie súborov "
+"s iTunes), pretože firewall blokuje prístup. Pre použitie tejto funkcie "
+"kliknite na \"Áno\" a zmeňte Váš firewall tak, aby umožnil \"LimeWire.exe\" "
+"plný prístup prichádzajúcich a odchádzajúcich spojení. Pre vypnutie tejto "
+"funkcie kliknite na \"Nie.\""
 
 #. NOTE: The IDs are serialized to disk, and should never change.
 #. *
@@ -1523,9 +1530,8 @@ msgstr "Vybrať priečinok"
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:465
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:486
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:508
-#, fuzzy
 msgid "Select"
-msgstr "Vybrať rýchlosť"
+msgstr "Označiť"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:812
 msgid "All Folders"
@@ -1533,7 +1539,7 @@ msgstr "Všetky priečinky"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:48
 msgid "View My Shared Files."
-msgstr ""
+msgstr "Ukáž Moje zdieľané súbory."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:81
 #, java-format
@@ -1542,6 +1548,10 @@ msgid ""
 "indicates a potential security problem, so please review your \"My Shared "
 "Files\" to ensure you aren't sharing any sensitive files."
 msgstr ""
+"Zdieľate veľa podpriečinkov v rámci Vášho zdieľaného priečinku: {0}. Toto "
+"predstavuje potenciálny bezpečnostný problém, tak prosím preskúmajte Váš "
+"priečinok \"Moje zdieľané súbory\" a uistite sa, že nezdieľate žiadne "
+"citlivé súbory."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:94
 #, java-format
@@ -1550,11 +1560,15 @@ msgid ""
 "you mean to share all these files? Please review your sharing settings and "
 "which files are shared to ensure you aren't sharing any sensitive files."
 msgstr ""
+"Zdieľate veľa súborov prostredníctvom LimeWire, {0} súborov a pribúdajú. "
+"Naozaj chcete zdieľať všetky tieto súbory? Prosím, preskúmajte Vaše "
+"nastavenia zdieľania a ktoré súbory zdieľate, aby ste sa uistili, že "
+"nezdieľate citlivé súbory."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:106
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:107
 msgid "Do not display this message again."
-msgstr ""
+msgstr "Nezobrazuj túto správu znova."
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 msgid "Modem"
@@ -1590,42 +1604,37 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:120
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:25
-#, fuzzy
 msgid "&Search"
-msgstr "Vyhľadávania"
+msgstr "&Hľadať"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:121
-#, fuzzy
 msgid "&Monitor"
-msgstr "Monitorovanie"
+msgstr "&Monitorovanie"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:122
-#, fuzzy
 msgid "&Connections"
-msgstr "Pripojenie"
+msgstr "&Pripojenia"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:123
-#, fuzzy
 msgid "&Library"
-msgstr "Knižnica"
+msgstr "&Knižnica"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:124
-#, fuzzy
 msgid "C&onsole"
-msgstr "Konzola"
+msgstr "Kon&zola"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:125
 msgid "Lo&gging"
-msgstr ""
+msgstr "Pr&ipájam"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:126
 msgid "&Browser"
-msgstr ""
+msgstr "&Prehliadač"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:140
 #, java-format
 msgid "Display the {0} Screen"
-msgstr ""
+msgstr "Zobraziť {0} obraz"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:227
 msgid "LimeWire: Enabling Open Information Sharing"
@@ -1642,6 +1651,13 @@ msgid ""
 "then select 'Windows 2000' in the box below the check box. Then click the "
 "'OK' button at the bottom and restart LimeWire."
 msgstr ""
+"V programe LimeWire sa vyskytol problém pri štarte a nemôže pokračovať. "
+"Mohli by ste opraviť tento problém zmenou LimeWire Windows Compatibility. "
+"Kliknite pravým tlačítkom myši na ikonu LimeWire na Vašej pracovnej ploche a "
+"označte \"Vlastnosti\" z kontextového menu. Kliknite hore na záložku "
+"\"Kompatibilita\", a potom zašktnite \"Tento program spustiť v režime "
+"kompatibilnom so systémom:\" a v rolovacom menu nižšie označte \"Windows "
+"2000\". Potom dole stlačte tlačítko \"OK\" a reštartujte LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:488
 msgid ""
@@ -1651,6 +1667,11 @@ msgid ""
 "Please note: LimeWire cannot monitor or control the content of the Gnutella "
 "network. Please respect your local copyright laws."
 msgstr ""
+"LimeWire nevie nájsť licenciu na tento súbor. Naozaj chcete tento súbor "
+"stiahnuť?\n"
+"\n"
+"Prosím všimnite si: LimeWire nemôže sledovať alebo kontrolovať obsah siete "
+"Gnutella. Rešpektujte prosím Vaše miestne autorské práva."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1405
 #, java-format
@@ -1658,6 +1679,8 @@ msgid ""
 "LimeWire could not locate your web browser to display the following webpage: "
 "{0}."
 msgstr ""
+"LimeWire nemohol lokalizovať Váš internetový prehliadač, aby zobrazil "
+"nasledujúcu webovú stránku: {0}."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1424
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1447
@@ -1672,12 +1695,14 @@ msgid ""
 "\n"
 "Executed command: {0}."
 msgstr ""
+"LimeWire nemôže spustiť označený súbor.\n"
+"\n"
+"Vykonávací príkaz: {0}."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1429
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1452
-#, fuzzy
 msgid "LimeWire could not launch the specified file."
-msgstr "LimeWire nenačíta špecifikovaný súbor z bezpečnostných dôvodov."
+msgstr "LimeWire nemôže spustiť špecifikovaný súbor."
 
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:135
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:232
@@ -1718,6 +1743,9 @@ msgid ""
 "LimeWire was unable to create your settings directory and is using a "
 "temporary directory.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
+"LimeWire nemohol vytvoriť Váš prednastavený priečinok a používa teraz "
+"dočasný priečinok. Vaše nastavenia môžu byť zmazané po zavretí programu "
+"LimeWire. "
 
 #. Initialize IconManager.
 #: gui/com/limegroup/gnutella/gui/Initializer.java:466
@@ -1745,7 +1773,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:546
 msgid "This Alpha version has expired.  Press Ok to exit. "
-msgstr ""
+msgstr "Platnosť tejto alfa verzie vypršala. Stlačte OK pre koniec. "
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:552
 msgid ""
@@ -1770,6 +1798,14 @@ msgid ""
 "\n"
 "LimeWire will now exit.  Thank You."
 msgstr ""
+"LimeWire nemohol vytvoriť dočasný priečinok.\n"
+"\n"
+"Toto je pravdepodobne spôsobené nedostatkom oprávnení. Uistite sa prosím, že "
+"LimeWire (a Vy) máte prístup na vytváranie súborov a priečinkov na Vašom "
+"počítači. Ak problémy zotrvávajú, navštívte prosím www.limewire.com a "
+"kliknite na odkaz \"Support.\"\n"
+"\n"
+"LimeWire sa teraz zavrie. Ďakujeme."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:568
 #: gui/com/limegroup/gnutella/gui/MessageService.java:76
@@ -1792,7 +1828,7 @@ msgstr "Aplikovať operáciu"
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:94
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:45
 msgid "Cancel Operation"
-msgstr "Zrušiť operáciu"
+msgstr "Zrušiť proces"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:70
 msgid ""
@@ -1800,30 +1836,30 @@ msgid ""
 "version is known to have caused problems with LimeWire. Please upgrade to "
 "the final 1.6.0 release.\n"
 msgstr ""
+"Momentálne používate beta alebo testovaciu verziu Java 1.6.0. Táto verzia je "
+"známa, že spôsobuje problémy s programom LimeWire. Upgradujte prosím na "
+"finálnu verziu 1.6.0.\n"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:151
-#, fuzzy
 msgid "Upgrade Java"
-msgstr "Upgrade Java"
+msgstr "Upgradeovať Java"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:168
-#, fuzzy
 msgid "More Information"
-msgstr "Rozšírené info o súbore"
+msgstr "Viac informácií"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:169
 #, java-format
 msgid "Visit {0}"
-msgstr ""
+msgstr "Navštívené {0}"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:177
 msgid "Remind Me Later"
-msgstr ""
+msgstr "Pripomeň mi neskôr"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:184
-#, fuzzy
 msgid "Do not Show Again"
-msgstr "Zdieľanie sťahovaných súborov"
+msgstr "Viac nezobazovať"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:173
 msgid "LimeWire must be restarted for the new language to take effect."
@@ -1831,7 +1867,7 @@ msgstr "Na aplikovanie zmeny jazyka treba reštartovať LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:186
 msgid "Change Language"
-msgstr ""
+msgstr "Zmeň jazyk"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:189
 msgid "Help Translate LimeWire"
@@ -1839,7 +1875,7 @@ msgstr "Pomoc pri prekladaní LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:190
 msgid "Show Language in status bar"
-msgstr ""
+msgstr "Zobraz jazyk v stavovom riadku."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:383
 msgid "Verify"
@@ -1896,43 +1932,37 @@ msgid "Creative Commons Details"
 msgstr "Detaily Creative Commons"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:485
-#, fuzzy
 msgid "LimeWire was unable to locate the details of this Weed file."
-msgstr "LimeWire nedokázal zistiť detaily tejto licencie."
+msgstr "LimeWire nedokázal vyhľadať detaily tohto Weed súboru."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:490
-#, fuzzy
 msgid "You can try looking up the details again by clicking 'Verify'."
-msgstr ""
-"Môžete sa pokúsiť o znovuoverenie tejto licencie kliknutím na 'Overiť'."
+msgstr "Môžete sa znovu pokúsiť o náhľad detailov kliknutím na \"Overiť\"."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:495
 msgid "View Weedshare Usage Rights"
-msgstr ""
+msgstr "Zobraz Weedshare Usage Rights"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:510
 msgid "View Usage Rights"
-msgstr ""
+msgstr "Zobraz Usage Rights"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:515
-#, fuzzy
 msgid ""
 "LimeWire is contacting www.weedshare.com for the details of this file."
-msgstr "LimeWire teraz zisťuje detaily tejto licencie."
+msgstr "LimeWire kontaktuje www.weedshare.com kvôli detailom tohto súboru."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:520
-#, fuzzy
 msgid ""
 "LimeWire has not yet verified this license.\n"
 "Click 'verify' to locate the details of this file."
 msgstr ""
 "LimeWire ešte neoveril túto licenciu.\n"
-"Kliknite 'overiť' pre zistenie detailov licencie Creative COmmons."
+"Kliknite \"overiť\" pre vyhľadanie detailov tohto súboru."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:525
-#, fuzzy
 msgid "Weedshare Details"
-msgstr "Detaily licencie"
+msgstr "Detaily Weedshare"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:553
 msgid "This file may require a license in order to open and view."
@@ -1980,7 +2010,7 @@ msgstr "Vložiť"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1275
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:120
 msgid "Delete"
-msgstr ""
+msgstr "Odstrániť"
 
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:229
 #: gui/com/limegroup/gnutella/gui/actions/SelectSharedDirectoryAction.java:26
@@ -1994,9 +2024,8 @@ msgstr "Pridať"
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:44
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:224
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:49
-#, fuzzy
 msgid "Remove"
-msgstr "Premenovať"
+msgstr "Odstrániť"
 
 #: gui/com/limegroup/gnutella/gui/MessageResourceHandler.java:10
 msgid "Download Page"
@@ -2008,7 +2037,7 @@ msgstr "Zoznam súborov pre"
 
 #: gui/com/limegroup/gnutella/gui/MessageResourceHandler.java:18
 msgid "Magnet Links for Fast Downloads (if you have LimeWire installed)"
-msgstr ""
+msgstr "Magnet Links pre Rýchle Sťahovanie (ak máte nainštalované LimeWire)"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:63
 msgid "Loading Messages..."
@@ -2062,6 +2091,8 @@ msgid ""
 "Your client is a leaf node shielded by an Ultrapeer. Hence you will see few "
 "or no searches in the monitor window."
 msgstr ""
+"Váš klient je tienený koncovým uzlom Ultrapeer. Preto vidíte len pár alebo "
+"žiadne výsedky vyhľadávania v sledovanom okne."
 
 #: gui/com/limegroup/gnutella/gui/MonitorView.java:85
 msgid "Show Last"
@@ -2088,6 +2119,9 @@ msgid ""
 "are saved properly you should save them to a sub-directory of {1}.  Would "
 "you like to choose another location?"
 msgstr ""
+"Uloženie súborov do {0} nemuselo prebehnúť správne. Aby ste si boli istý, že "
+"sťahované súbory sú správne uložené, mali by ste ich uložiť do podpriečinka "
+"{1}. Chceli by ste vybrať iné umiestnenie?"
 
 #: gui/com/limegroup/gnutella/gui/ShutdownWindow.java:18
 msgid "Shutting down LimeWire..."
@@ -2098,17 +2132,15 @@ msgid "Please wait while LimeWire shuts down..."
 msgstr "Vyčkajte, prosím, pokiaľ sa LimeWire vypne..."
 
 #: gui/com/limegroup/gnutella/gui/SplashWindow.java:108
-#, fuzzy
 msgid "Loading LimeWire..."
-msgstr "Načítavam zdroje..."
+msgstr "Načítavam LimeWire..."
 
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:94
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:104
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:43
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:218
-#, fuzzy
 msgid "Add..."
-msgstr "Pridať"
+msgstr "Pridať..."
 
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:331
 msgid "Add New List Item"
@@ -2132,11 +2164,11 @@ msgstr "LimeWire zistil prítomnosť firewallu"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:500
 msgid "You are not connected to the LimeWire Store"
-msgstr ""
+msgstr "Nie ste pripojený k LimeWire Store"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:503
 msgid "You are connected to the LimeWire Store"
-msgstr ""
+msgstr "Ste pripojený k LimeWire Store"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:595
 msgid "Connection"
@@ -2238,12 +2270,11 @@ msgstr "Zobraziť stav Firewallu"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:810
 msgid "Show Store Indicator"
-msgstr ""
+msgstr "Ukáž indikátor Store"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:826
-#, fuzzy
 msgid "Show Bandwidth Consumption"
-msgstr "Zobraziť bandwidth indikátor:"
+msgstr "Zobraziť využitie šírky pásma"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:842
 msgid "Show Media Player"
@@ -2254,16 +2285,18 @@ msgstr "Zobraziť prehrávač médií"
 #, java-format
 msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Zdieľate {0} súborov"
+msgstr[1] "Zdieľate {0} súbor"
+msgstr[2] "Zdieľate {0} súbory"
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:915
 #, java-format
 msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Zdieľate {0} súborov (Načítavam...)"
+msgstr[1] "Zdieľate {0} súbor (Načítavam...)"
+msgstr[2] "Zdieľate {0} súbory (Načítavam...)"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:986
 msgid "Downloads:"
@@ -2317,6 +2350,11 @@ msgid ""
 "chance of getting your file! In case a junk result appears to have a lot of "
 "sources, use the 'Junk' button to train LimeWire's junk filter."
 msgstr ""
+"Ste už unavený ukončiť sťahovanie v polovici? Pomôže Vám vybrať si výsledky "
+"vyhľadávania s väčším číslom v \"#\" stĺpci. # je množstvo unikátnych miest "
+"na sieti, ktoré hostujú súbor. Viac zdrojov, viac šancí dostať svoj súbor! V "
+"prípade, že sa objaví \"odpadový\" súbor, ktorý má veľa zdrojov, použite "
+"tlačidlo \"Odpad\", aby ste vycvičili odpadový filter programu LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:25
 msgid ""
@@ -2325,6 +2363,10 @@ msgid ""
 "places to download the file and automatically resume downloading if it finds "
 "any matches."
 msgstr ""
+"Ak Váš sťahovaný súbor ukáže \"Potrebujem viac zdrojov\", vyberte si ten "
+"súbor skúste kliknúť na \"Nájsť viac zdrojov\". LimeWire prehľadá sieť, aby "
+"našiel viac miest pre sťahovanie súboru a automaticky obnoví sťahovanie, ak "
+"nájde nejaké zhody."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:26
 msgid ""
@@ -2332,6 +2374,9 @@ msgid ""
 "the bar in the bottom-left corner will change colors. Once all bars are "
 "green (or blue!), LimeWire has completely connected."
 msgstr ""
+"Keď sa LimeWire spúšťa, musí sa pripojiť k sieti. Behom tohto času, pruh v "
+"ľavom dolnom rohu mení farby. Ak sú všetky pruhy zelené (alebo modré!), "
+"LimeWire sa kompletne pripojil."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:27
 msgid ""
@@ -2341,6 +2386,12 @@ msgid ""
 "'Download into LimeWire' links, LimeWire will automatically ask if you want "
 "to use the new skin when the download completes."
 msgstr ""
+"Môžete zmeniť vzhľad a pocit z programu LimeWire kliknutím na Zobraziť a "
+"prejdením na Zmeniť tému/skin a vybrať si nový skin. Celkom nové skiny sú na "
+"webovej stránke programu LimeWire, dostupné po kliknutí na \"Získať viac "
+"tém/skins\". Ak si stiahnete skiny pomocou \"Stiahni do programu LimeWire\", "
+"LimeWire sa automaticky spýta, či chcete použiť nový skin, ak sa sťahovanie "
+"ukončí."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:28
 msgid ""
@@ -2348,6 +2399,9 @@ msgid ""
 "column to sort by is the '#' column, which can put the results that have the "
 "highest chance of downloading at the top of the list."
 msgstr ""
+"Môžete triediť Vaše výsledky vyhľadávania kliknutím na stĺpec. "
+"Najužitočnejší stĺpec na triedenie je \"#\" stĺpec, ktoré môžu určiť "
+"výsledky s najvyššou šancou na stiahnutie na vrch zoznamu."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:29
 msgid ""
@@ -2356,6 +2410,10 @@ msgid ""
 "stars and a speed of 'Ethernet'. These results have the greatest chance of "
 "completing successfully."
 msgstr ""
+"Čím viac hviezdičiek má výsledok vyhľadávania, tým je väčšia šanca na "
+"úspešné dokončenie sťahovania! Niektoré výsledky vyhľadávania sa môžu "
+"objaviť aj so štyrmi modrými hviezdičkami a rýchlosťou \"Ethernet\". Tieto "
+"výsledky majú najväčšiu šancu na úspešné dokončenie."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:30
 msgid ""
@@ -2365,6 +2423,10 @@ msgid ""
 "that file, and 'X' is the number of people that have successfully uploaded "
 "it."
 msgstr ""
+"Môžete zistiť, koľko krát niekto uploadol súbor pomocou záložky \"Knižnica\" "
+"a prezretím si stĺpca Uploady. Informácia je uvádzaná ako \"X / Y\", kde "
+"\"Y\" je číslo ľudí, ktorí sa pokúsili uploadovať súbor a \"X\" je číslo "
+"ľudí, ktorí ho úspešne uploadovali."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:31
 msgid ""
@@ -2372,24 +2434,33 @@ msgid ""
 "the Library will count how many times LimeWire has returned a result from "
 "someone searching for that file."
 msgstr ""
+"Ste zvedavý, koľko ľudí hľadá Vaše súbory? Stĺpec \"Prístupy\" v Knižnici "
+"počíta, koľko krát LimeWire vrátil výsledok niekoho vyhľadávania konkrétneho "
+"súboru."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:32
 msgid ""
 "It helps the network if you keep your LimeWire running. Others will connect "
 "to the network easier and searches will perform better. "
 msgstr ""
+"Sieti pomáhate, ak je LimeWire spustený. Ostatní sa ľahšie pripoja a "
+"vyhľadávanie bude fungovať lepšie. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:33
 msgid ""
 "Looking for something rare? The more detailed your search is, the better "
 "your chances of getting a result you want!"
 msgstr ""
+"Hľadáte niečo ojedinelé? Čím viac je detailné Vaše vyhľadávanie, tým sú "
+"väčšie šance získať výsledok, ktorý ste požadovali!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:34
 msgid ""
 "Want to open this Tip Of The Day dialog after you've closed it? Go to the "
 "Help menu and choose 'Tip of the Day'."
 msgstr ""
+"Chcete otvoriť Tip dňa potom, ako ste ho zavreli? Choďte do menu Pomocníka a "
+"zvoľte \"Tip dňa\"."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:35
 msgid ""
@@ -2398,6 +2469,10 @@ msgid ""
 "download. In order to successfully complete your download, wait while your "
 "request advances in line and is eventually serviced."
 msgstr ""
+"Ak LimeWire hovorí, že Vaše downloady \"Čakajú v rade\" znamená to, že "
+"zdroje, od ktorých sťahujete sú dočasne zaneprázdnené alebo čakajú v rade na "
+"stiahnutie. V prípade, že chcete, aby sa úspešne dokončili vaše downloady, "
+"počkajte kým Vaša požiadavka postúpi v rade a bude napokon obslúžená."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:36
 #, java-format
@@ -2407,6 +2482,10 @@ msgid ""
 "href=\"{1}\">FAQ</a> for answers to commonly asked questions or the <a "
 "href=\"{2}\">User Guide</a> for more information."
 msgstr ""
+"Potrebujete viac pomoci? Navštívte <a href=\"{0}\">našu nástenku správ</a> a "
+"pozrite si, či už niekto iní neodpovedal na Vašu otázku. Takisto si môžete "
+"prezieť <a href=\"{1}\">ČKD</a> na zvyčajne pýtané otázky alebo pre viac "
+"informácii <a href=\"{2}\">Príručku pre používateľa</a>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:37
 msgid ""
@@ -2415,6 +2494,10 @@ msgid ""
 "resume downloading and click resume. LimeWire will automatically search for "
 "that file and begin downloading it again."
 msgstr ""
+"Náhodne ste zrušili Vaše sťahovanie downloadu? Kliknite na záložku knižnice, "
+"vyberte si Nedokončené súbory a označte meno súboru, ktorý chcete obnoviť "
+"sťahovanie a kliknite na obnoviť. LimeWire ten súbor automaticky vyhľadá a "
+"začne sťahovanie znovu."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:38
 #, java-format
@@ -2422,6 +2505,8 @@ msgid ""
 "Do you have a tip for effectively using LimeWire? Add it to <a "
 "href=\"{0}\">the wiki</a> and it may make it into future Tips of the Day!"
 msgstr ""
+"Máte tip ako efektívne používať LimeWire? Pridajte ho do <a "
+"href=\"{0}\">wiki</a> a môže sa dostať do budúcich Tipov dňa!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:39
 msgid ""
@@ -2429,6 +2514,9 @@ msgid ""
 "file again. LimeWire will automatically restart the download if it finds any "
 "matching results."
 msgstr ""
+"Môžete reštartovať downloady, ktoré hovoria, že \"Očakávajú zdroje\" "
+"hľadaním súboru ešte raz. LimeWire automaticky reštartuje download, ak nájde "
+"nejaké zhody vo vyhľadávaní."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:40
 #, java-format
@@ -2437,6 +2525,9 @@ msgid ""
 "on LimeWire's <a href=\"{0}\">message boards</a> and it may be added to "
 "future versions!"
 msgstr ""
+"Máte nejakú skvelú vec, ktorú by ste chceli pridať do programu LimeWire? "
+"Navrhnite ich  na <a href=\"{0}\">nástenku správ</a> programu LimeWire a "
+"môže byť pridaná do budúcich verzii."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:41
 #, java-format
@@ -2444,6 +2535,9 @@ msgid ""
 "You can make your own LimeWire skins! Visit <a href=\"{0}\">LimeWire's "
 "website</a> for detailed information about how skins are created."
 msgstr ""
+"Môžete vytvoriť vlastné skiny do programu LimeWire! Navštívte <a "
+"href=\"{0}\">web stránku LimeWire</a> pre detailnejšie informácie, ako sa "
+"vytvárajú skiny."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
 #, java-format
@@ -2451,12 +2545,16 @@ msgid ""
 "Want to know more about the development of LimeWire? Visit <a "
 "href=\"{0}\">LimeWire's open-source website</a> and look around!"
 msgstr ""
+"Chcete vydieť viac o vývoji LimeWire? Navštívte <a href=\"{0}\">web stránku "
+"otvoreného zdrojového kódu LimeWire</a> a poobzerajte sa!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:43
 msgid ""
 "You can preview downloaded files to make sure they're what you expect. Just "
 "select the download and click 'Preview'!"
 msgstr ""
+"Môžete zhliadnuť sťahované súbory pred dokončením, aby ste sa uistili, že sú "
+"to tie, ktoré očakávate. Kliknite iba na download a kliknite \"Náhľad\"!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:44
 msgid ""
@@ -2464,12 +2562,18 @@ msgid ""
 "Connections tab from View &gt; Show/Hide, and take a look at LimeWire's "
 "connections."
 msgstr ""
+"Ste zvedavý kto sa pripája alebo je pripojený k LimeWire? Aktivujte záložku "
+"Pripojenia pomocou Zobraziť &gt; Zobraziť/Skryť a pozrite sa na pripojenia "
+"programu LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:45
 msgid ""
 "You can chat with other people who are running LimeWire. Choose any download "
 "or search result that has a smiley in the Chat column and then click 'Chat'."
 msgstr ""
+"Môžete chatovať s ostatnými ľuďmi, ktorí používajú LimeWire. Zvoľte si "
+"ktorýkoľvek download alebo výsledok vyhľadávania, ktorý má úsmev v stĺpci "
+"Chat a kliknite na \"Chat\"."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:46
 #, java-format
@@ -2477,6 +2581,8 @@ msgid ""
 "Passionate about digital rights? Visit the <a href=\"{0}\">Electronic "
 "Frontier Foundation</a> and see what you can do to help."
 msgstr ""
+"Zaujímate sa o digitálne práva? Navštívte <a href=\"{0}\">Electronic "
+"Frontier Foundation</a> a uvidíte, ako môžete pomôcť."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:47
 msgid ""
@@ -2485,6 +2591,10 @@ msgid ""
 "<a href=\"{0}\">internationalization page</a> for information on how you can "
 "help translation efforts! "
 msgstr ""
+"LimeWire je preložený do mnohých rôznych jazykov vrátane čínštiny, "
+"francúžštiny, nemčiny, japončiny, taliančiny, španielčiny a mnohých ďaľších. "
+"Navštívte <a href=\"{0}\">stránku prekladov</a> programu LimeWire pre ďaľšie "
+"informácie ako môžete pomôcť s prekladom! "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:48
 #, java-format
@@ -2492,6 +2602,8 @@ msgid ""
 "Sport the LimeWire look! Visit our <a href=\"{0}\">LimeWire gear</a> page "
 "and purchase a t-shirt or hat!"
 msgstr ""
+"Športujte s LimeWire! Navštívte našu <a href=\"{0}\">LimeWire gear</a> "
+"stránku a kúpte si tričko alebo čiapku!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:49
 msgid ""
@@ -2499,12 +2611,18 @@ msgid ""
 "choose a genre from the drop-down box, and then press 'Search'. Most if not "
 "all of the files returned will be from the selected genre."
 msgstr ""
+"Vyskúšajte vyhľadávanie podľa hudobného žánru!<br>Kliknite na \"Audio\" "
+"Metadata vyhľadávacie okno, zvoľte si žáner z rolovacieho menu a stlačte "
+"\"Vyhľadať\". Väčšina, ak nie všetky súbory sa vrátia a budú z požadovaného "
+"žánru."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:50
 msgid ""
 "Don't know what to look for? Try a 'What's New' search and see what's "
 "recently been added to the network."
 msgstr ""
+"Neviete, čo máte hľadať? Vyskúšajte vyhľadávanie \"Čo je nové\" a uvidíte, "
+"čo sa naposledy pridalo na sieť."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:51
 msgid ""
@@ -2513,6 +2631,11 @@ msgid ""
 "Go to Advanced &gt; Firewall Config in LimeWire's Options window to find the "
 "port. Review your router's configuration to set it up correctly."
 msgstr ""
+"Používate router? Uistite sa, že pridáte port predpísaný v nastaveniach "
+"LimeWire do firewallu v routery, UDP a TCP, prichádzajúce a odchádzajúce. "
+"Choďte do Pokročilé &gt; Nastavenie firewallu v okne nastaveniach programu "
+"LimeWire, aby ste našli port. Preskúmajte, či je konfigurácia routera "
+"správne nastavená."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:52
 msgid ""
@@ -2521,6 +2644,10 @@ msgid ""
 "&gt; Advanced &gt; Statistics, choosing 'Advanced', and opting to view "
 "Advanced Statistics."
 msgstr ""
+"Chcete vedieť viac detailných informácii o vnútornom pracovaní programu "
+"LimeWire? Môžete vidieť rovnaké štatistiky, ktoré používajú vývojári "
+"zvolením Nástroje &gt; Pokročilé &gt; Štatisktika, zvolením \"Pokročilé\" a "
+"zameraním sa na Pokročilá štatistika."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:53
 #, java-format
@@ -2529,6 +2656,9 @@ msgid ""
 "href=\"{0}\">www.limewire.org</a> for information on how to join developer "
 "mailing lists or to review the code."
 msgstr ""
+"Viete že LimeWire jmá úplne otvorený zdrojový kód? Navštívte <a "
+"href=\"{0}\">www.limewire.org</a> pre informácie, ako sa pripojiť do "
+"vývojárskych mailing listov alebo prezrieť si kód."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:54
 msgid ""
@@ -2537,6 +2667,11 @@ msgid ""
 "LimeWire learns what to block and what not to block. After a short training "
 "period, LimeWire automatically blocks most junk results. Try it!"
 msgstr ""
+"Ste bombardovaní nezmyselnými výsledkami vyhľadávania? Označte výsledok "
+"vyhľadávania a potom kliknite na tlačidlo Odpad. Ak označíte výsledok "
+"vyhľadávania ako Odpad alebo Nie je odpad LimeWire sa naučí čo blokovať a čo "
+"nie. Po krátkej dobe výuky, LimeWire automaticky zablokuje väčšinu "
+"odpadových výsledkov.Vyskúšajte!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:55
 msgid ""
@@ -2544,18 +2679,25 @@ msgid ""
 "buddy is sharing 'Limers' but you searched for 'The Limers', your buddy's "
 "file will still be found. "
 msgstr ""
+"Malé zmeny v názve vyhľadávania budú takisto fungovať. Napríklad, ak Váš "
+"kamoš zdieľa \"Limers\", ale Vy ste hľadali \"The Limers\", kamošov súbor sa "
+"aj tak nájde. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:56
 msgid ""
 "Did you know? LimeWire supports two different peer-to-peer file sharing "
 "protocols: Gnutella and BitTorrent."
 msgstr ""
+"Vedeli ste? LimeWire podporuje dve rozdielne peer-to-peer zdieľacie "
+"protokoly: Gnutella a BitTorrent."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:57
 msgid ""
 "To download a file with BitTorrent, just click a link to a .torrent file on "
 "the Web, or drag a .torrent file to LimeWire's Downloads section."
 msgstr ""
+"Na stiahnutie súboru BitTorrent stačí na webe kliknúť na súbor .torrent "
+"alebo súbor pretiahnuť do sekcie sťahovania programu LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:58
 msgid ""
@@ -2563,6 +2705,10 @@ msgid ""
 "folder from your desktop to the LimeWire Library. Select Individually Shared "
 "Files to see your newly shared file in the Library."
 msgstr ""
+"Chcete zdieľať súbor umiestnený na pracovnej ploche s programom LimeWire? "
+"Jednoducho pretiahnite súbor alebo priečinok z pracovnej plochy do Knižnice "
+"LimeWire. Označte Individuálne zdieľané súbory, aby ste videli novozdieľané "
+"súbory v Knižnici."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:59
 msgid ""
@@ -2570,6 +2716,9 @@ msgid ""
 "marked with a lock icon in the Quality column are official communications "
 "from Lime Wire, LLC."
 msgstr ""
+"Výsledky vyhľadávania v programe LimeWire prichádzajú od ostatných "
+"užívateľov ako Vy. Výsledky vyhľadávania označené s ikonou zámku v stĺpci "
+"Kvalita sú oficiálne prenosy z LimeWire, LLC."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:60
 msgid ""
@@ -2578,6 +2727,9 @@ msgid ""
 "Click the circle in the upper left corner of a box, and choose a new option "
 "from the menu."
 msgstr ""
+"Po začatí vyhľadávania môžete upravovať tri okná naľavo s názvami ako Média, "
+"Umelec a Album. Môžete meniť to, čo tieto okná ukazujú. Kliknite na krúžok v "
+"ľavom hornom rohu okna a zvoľte si nové možnosti z menu."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:61
 msgid ""
@@ -2586,12 +2738,18 @@ msgid ""
 "computer in the following format: 'ip address:port'. The port can be found "
 "in LimeWire's Options in the Advanced &gt; Firewall Config section."
 msgstr ""
+"Chcete prehliadať kamarátovu LimeWire Knižnicu? Choďte do Hľadať &gt; Priame "
+"pripojenie, potom vložte IP adresu a číslo portu kamarátovho počítača v "
+"nasledujúcom formáte: \"IP adresa:port\". Port môžete nájsť v Možnostiach "
+"LimeWire, Pokročilé &gt; v sekcii Nastavenie firewallu."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:62
 msgid ""
 "If you try to download a file that you already have, LimeWire lets you know, "
 "even if the file has a different name."
 msgstr ""
+"Ak sa pokúšate stiahnuť súbor, ktorý už máte, LimeWire Vás upozorní, aj keď "
+"má súbor iný názov."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:63
 msgid ""
@@ -2600,11 +2758,17 @@ msgid ""
 "entering your LimeWire. Double-click an incoming query to perform a search "
 "for that keyword."
 msgstr ""
+"Ste zvedavý, čo ľudia vyhľadávajú? Choďte do záložky Monitorovanie a označte "
+"Zobraziť prichádzajúce vyhľadávania, aby ste videli vyhľadávania ostatných "
+"ľudí, ktorí pristupujú do Vášho programu LimeWire. Dvojklikom na "
+"prichádzajúce názvy vykonáte vyhľadanie toho kľúčového slova."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:64
 msgid ""
 "Have a lot of files? Try an instant search at the top of the Library window."
 msgstr ""
+"Máte veľa súborov? Vyskúšajte okamžité vyhľadávanie v hornej časti okna "
+"Knižnica."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:65
 #, java-format
@@ -2614,6 +2778,10 @@ msgid ""
 "click the Publish button. Visit the <a href=\"{0}\">creative commons "
 "website</a> for more information."
 msgstr ""
+"Môžete zverejniť originálnu prácu na sieti Gnutella s licenciou Creative "
+"Commons. Označte zdieľané súbory .ogg alebo .mp3 v Knižnici a kliknite na "
+"tlačidlo Publikovať. Navštívte <a href=\"{0}\">web stránku creative "
+"commons</a> pre viac informácii."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:66
 msgid ""
@@ -2622,6 +2790,10 @@ msgid ""
 "the file's metadata to your heart's content. You can even edit many files at "
 "once by selecting more than one file before clicking Describe."
 msgstr ""
+"Stiahli ste súbor s neúplnou alebo úplne zlou informáciou o jej obsahu? "
+"Označte súbor v Knižnici a kliknite na Popis. Upravte obsah metadata súboru "
+"podľa Vášho želania. Takisto môžete upravovať viacero súborov naraz "
+"označením viacero súborov pred kliknutím na Popis."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:67
 msgid ""
@@ -2629,6 +2801,9 @@ msgid ""
 "for the globe. If there is a brick wall in front of it, your Internet "
 "connection is firewalled."
 msgstr ""
+"Ste za firewallom? Dole v stavovom riadku programu LimeWire sa pozrite na "
+"zemeguľu. Ak je pred ňou tehlová stena, Vaše internetové pripojenie je za "
+"firewallom"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:68
 msgid ""
@@ -2636,6 +2811,9 @@ msgid ""
 "the number in a green oval. A beige oval means LimeWire is still building "
 "your Library. A red oval means files are not being shared."
 msgstr ""
+"Ste zvedavý, koľko zdieľate súborov? Pozrite sa do stavového riadku LimeWire "
+"na číslo v zelenom ovále. Béžový ovál znamená, že LimeWire ešte zostavuje "
+"Knižnicu. Červený ovál znamená, že súbory sa nezdieľajú."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:69
 msgid ""
@@ -2643,12 +2821,16 @@ msgid ""
 "of LimeWire show how fast all of your files are downloading or uploading "
 "combined."
 msgstr ""
+"Čísla pri šípkach hore a dole v stavovom riadku na spodu programu LimeWire "
+"ukazujú, ako rýchlo sa všetky súbory sťahujú a uploadujú."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:70
 msgid ""
 "Don't strain your eyes to use LimeWire! You can adjust the text size by "
 "going to View &gt; Increase Font Size."
 msgstr ""
+"Nenamáhajte svoje oči používaním LimeWire! Môžete nastaviť veľkosť textu "
+"prejdením na Zobraziť &gt; Zväčšiť veľkosť písma."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:71
 msgid ""
@@ -2657,6 +2839,11 @@ msgid ""
 "select a Media Type like Audio, and click the Browse button. You can group "
 "files by media type in the Library even if all saved files are in one folder."
 msgstr ""
+"Namiesto dávania všetkých súborov do jediného priečinka, LimeWire ich môže "
+"automaticky triediť podľa typu média. V Možnostiach &gt; v okne Ukladanie si "
+"zvoľte typ média ako Audio a kliknite na tlačidlo Vyhľadať. Môžete "
+"zoskupovať súbory podľa typu média v Knižnici, aj keď sú súbory v jednom "
+"priečinku."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:72
 msgid ""
@@ -2664,6 +2851,10 @@ msgid ""
 "autocompletion, open the Options window. Under View, choose Autocompletion. "
 "Uncheck the box Enable Autocompletion of Text Fields, and click OK."
 msgstr ""
+"LimeWire automaticky dokončuje čo práve píšete do vyhľadávacieho okna. Aby "
+"ste zabránili automatickému dokončovaniu, otvorte okno Možnosti. Pod "
+"Zobrazenie zvoľte Automatické dokončenie. Odškrtnite miesto Povoliť "
+"automatické dokončovanie textových polí a kliknite OK."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:73
 msgid ""
@@ -2672,6 +2863,9 @@ msgid ""
 "can disable this sharing in the Options window by going to iTunes &gt; "
 "Sharing."
 msgstr ""
+"Ak je spustený LimeWire, audio a video súbory sú automaticky zdieľané s "
+"iTunes a ostatnými programami, ktoré podporujú protokol DAAP. Toto zdieľanie "
+"môžete vypnúť v okne Možnosti, iTunes &gt; Zdieľanie.."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:74
 msgid ""
@@ -2680,6 +2874,10 @@ msgid ""
 "change your network interface by going to Tools &gt; Options &gt; Advanced "
 "&gt; Network Interface."
 msgstr ""
+"Pripájate sa na internet drátovo aj bezdrátovo? Naraz? Chcete, aby LimeWire "
+"používal iba jedno z týchto pripojení? Hračka!  Sieťové pripojenie môžete "
+"zmeniť kliknutím sa Nástroje &gt; Možnosti &gt; Pokročilé &gt; Sieťové "
+"pripojenie."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:75
 msgid ""
@@ -2690,6 +2888,12 @@ msgid ""
 "can disable OOB (out-of-band) searching in the Options for more reliable "
 "results."
 msgstr ""
+"Vaše vyhľadávanie cestuje cez sieť poprepájaných počítačov, čo spôsobuje "
+"oneskorenie prijatia všetkých výsledkov vyhľadávania. LimeWire často používa "
+"skratky, aby priniesol výsledky rýchlejšie, ale ak si myslíte, že výsledky "
+"vyhľadávania sú blokované, pretože Váš počítač má problémy s UDP paketmi, "
+"môžete vypnúť vyhľadávanie OOB (out-of-band) v Možnostiach pre "
+"vierohodnejšie výsledky."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:76
 msgid ""
@@ -2697,6 +2901,9 @@ msgid ""
 "you don't want it to be shared, you can have it filtered out of the network "
 "search results. <a href=\"{0}\">More information</a> is available."
 msgstr ""
+"Ak vlastníte autorské práva na súbor, ktorý sa zdieľa na sieti a nechcete, "
+"aby sa zdieľal, môžete ho odfiltrovať z výsledkov vyhľadávania siete. <a "
+"href=\"{0}\"> Viac informácii</a> je k dispozícii."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:77
 msgid ""
@@ -2704,6 +2911,9 @@ msgid ""
 "even if both parties are behind a firewall. You don't have to do anything "
 "extra because it happens automatically!"
 msgstr ""
+"Na rozdiel od peer-to-peer programov zdieľajúcich súbory, LimeWire môže "
+"prenášať súbory aj keď sú obe strany za firewallom. Nemusíte robiť nič "
+"naviac, lebo sa to deje automaticky!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:78
 msgid ""
@@ -2712,6 +2922,10 @@ msgid ""
 "itself to the list of exceptions. All this is done in the background to make "
 "your experience as smooth as possible."
 msgstr ""
+"Začnite zdieľať súbory bez toho, aby ste vedeli ako konfigurovať firewall! "
+"Ak používate Windows firewall, LimeWire sa automatický pridá do zoznamu "
+"vínimiek. Toto všetko sa deje na pozadí, aby Váš zážitok prebiehal hladko "
+"ako to je len možné."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:79
 msgid ""
@@ -2719,12 +2933,17 @@ msgid ""
 "In order to be eligible for inclusion in the DHT, make sure you are not "
 "behind a firewall, and leave LimeWire running for as long as possible."
 msgstr ""
+"LimeWire používa technológiu nazývanu DHT, aby pomohol užívateľom lepšie "
+"nájsť ojedinelé súbory. Za účelom vhodnosti zahrnutia do DHT sa uistite, že "
+"nie ste za firewallom a nechajte LimeWire bežať ako dlho to je len možné."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:80
 msgid ""
 "Want to share a large file? LimeWire supports file sizes up to 1 TB "
 "(terabyte)."
 msgstr ""
+"Chcete zdieľať veľký súbor? LimeWire podporuje veľkosť súboru do 1TB "
+"(terabyte)."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:81
 msgid ""
@@ -2733,24 +2952,36 @@ msgid ""
 "status after a while. Make sure that you have not disabled Ultrapeer "
 "capabilties in the Options."
 msgstr ""
+"Chcete byť Ultrapeer? Nechajte LimeWire bežať ako dlho to je len možné. Ak "
+"máte rýchle pripojenie bez firewallu, zanedlho budete povýšený na status "
+"Ultrapeer. Uistite sa, že nemáte zablokované schopnosti Ultrapeer v "
+"Možnostiach."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:82
 msgid ""
 "Curious about the inner workings of LimeWire? Go to View &gt; Show/Hide &gt; "
 "Console to see LimeWire's source code in action! (not for the faint of heart)"
 msgstr ""
+"Ste zvedavý na vnútorné činnsoti programu LimeWire? Choďte do Zobraziť &gt; "
+"Zobraziť/Skryť &gt; Konzola, aby ste videli otvorený kód LimeWire v akcii! "
+"(nevhodné pre kardiakov)"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:83
 msgid ""
 "Wondering if someone browsed your shared library? Go to View &gt; Show/Hide "
 "&gt; Logging to see the recent activity. "
 msgstr ""
+"Ste zvedavý, či niekto prehľadával Vášu zdieľanú knižnicu? Choďte do "
+"Zobraziť &gt; Zobraziť/Skryť &gt; Pripájanie, aby ste videli nedávnu "
+"aktivitu. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:84
 msgid ""
 "Ultrapeers help the network by distributing only pertinent network traffic "
 "to the leaf nodes. "
 msgstr ""
+"Ultrapeeri pomáhajú sieti distribuovať iba patričný sieťový traffic do "
+"koncových uzlov. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:85
 msgid ""
@@ -2758,6 +2989,10 @@ msgid ""
 "When you put a magnet link on your web page (in the 'href' attribute of "
 "anchor tags), and a user clicks the link, a download will start in LimeWire."
 msgstr ""
+"Magnet linky dovoľujú používateľom sťahovať súbory cez LimeWire z webových "
+"stránok. Ak dáte Magnet link na svoju webovú stránku (v atribúte \"href\" "
+"zakotvených v tagoch) a používateľ klikne na link, sťahovanie sa začne v "
+"programe LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:96
 msgid ""
@@ -2766,12 +3001,17 @@ msgid ""
 "etc... These preferences (and more) are available at the Tools &gt; Options "
 "menu."
 msgstr ""
+"Môžete si prispôsobovať obsah LimeWire k obrazu svojmu zmenou rozličných "
+"volieb ako Adresár na ukladanie, Adresár na zdieľanie, Rýchlosť uploadu, "
+"atď... Tieto voľby (a ďaľšie) sú dostupné v Nástrojoch &gt; v menu Možnosti."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:97
 msgid ""
 "You can find out which version of LimeWire you are using by choosing 'About "
 "LimeWire' from the Help menu. "
 msgstr ""
+"Môžete zistiť, ktorú verziu programu LimeWire používate zvolením \"O "
+"LimeWire\" z Pomocníka. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:98
 msgid ""
@@ -2780,6 +3020,10 @@ msgid ""
 "and uploads are complete by going to Tools &gt; Options and looking at the "
 "'Shutdown' options."
 msgstr ""
+"Buďte dobrým sieťovým účastníkom a nezatvárajte LimeWire, ak od Vás niekto "
+"sťahuje súbory. LimeWire môže automaticky ukončiť sťahovanie, ak sú všetky "
+"dowloady a uploady ukončené prejdením do Nástrojov &gt; Možnosti a prezretím "
+"si možnosti \"Vypnutie\"."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:99
 msgid ""
@@ -2787,6 +3031,10 @@ msgid ""
 "specific file you'd like to share, make sure its extension is being shared. "
 "This can be done via Tools &gt; Options and altering the 'Sharing' options."
 msgstr ""
+"LimeWire automaticky nezdieľa všetky typy súborov. Ak máte špecifický súbor, "
+"ktorý chcete zdieľať, uistite sa, že táto prípona je zdieľateľná. Toto "
+"môžete vyriešiť pomocou Nástrojov &gt; Možnosti a vykonaním zmien v "
+"možnostiach \"Zdieľanie\"."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:100
 msgid ""
@@ -2794,6 +3042,9 @@ msgid ""
 "the 'Tools' menu, and changing the value of 'Autocomplete Text' under the "
 "'View' option."
 msgstr ""
+"Môžete zapnúť/vypnúť automatické dokončovanie vo vyhľadávaní zvolením "
+"\"Možnosti\" z menu \"Nástrojov\" a zmenou hodnoty \"Autimatické "
+"dokončenie\" v možnosti \"Zobrazenie\"."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:101
 msgid ""
@@ -2801,6 +3052,10 @@ msgid ""
 "display this message again' or 'Always Use This Answer'? Go to Tools &gt; "
 "Options, and check 'Revert To Default' under View &gt; Popups."
 msgstr ""
+"Chcete zobraziť dialógové okná, ktoré ste predtým označili ako \"Nezobrazuj "
+"túto správu znovu\" alebo \"Vždy použi túto odpoveď\"? Choďte do Nástrojov "
+"&gt; Možnosti a zaškrtnite \"Vrátiť pôvodné hodnoty\" v sekcii Zobraziť &gt; "
+"Popups."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:102
 msgid ""
@@ -2808,6 +3063,9 @@ msgid ""
 "'Options' from the 'Tools' menu and adding new words to those listed under "
 "Filters &gt; Keywords."
 msgstr ""
+"Môžete zakázať určité slová, aby sa neobjavovali vo výsledkoch vyhľadávania "
+"zvolením \"Možnosti\" z menu \"Nástroje\" a pridaním nových slov pod Filtre "
+"&gt; Kľúčové slová."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:103
 msgid ""
@@ -2816,6 +3074,11 @@ msgid ""
 "Just right-click on the search result column headers, choose audio or video, "
 "and check the columns you want to see!"
 msgstr ""
+"Môžete zmeniť stĺpce, ktoré sa zobrazia vo výsledkoch vyhľadávania. Stĺpce, "
+"z ktorých si môžete vybrať zahŕňajú \"Názov\", \"Žáner\", \"Stopa\", Dĺžka\" "
+"a oveľa viac. Stačí kliknúť pravým tlačítkom na hlavičku stĺpca výsledkov "
+"vyhľadávania, vybrať si audio alebo video a zaškrtnúť tie stĺpce, ktoré "
+"chcete vidieť."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:104
 msgid ""
@@ -2824,6 +3087,10 @@ msgid ""
 "toggle other options here too, like whether or not to sort tables "
 "automatically and if you prefer the rows to be striped."
 msgstr ""
+"Neznášate nástrojové tipy? Milujete nástrojové tipy? Môžete ich zapnúť alebo "
+"vypnúť vo väčšine tabuliek pravým klikom na hlavičku stĺpca a zvolením "
+"\"Viac možností\". Môžete tu prepínať aj ďaľšie možnosti ako automaticky "
+"triediť/netriediť tabuľky alebo ak uprednostňujete prúžkované stĺpce."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:105
 msgid ""
@@ -2832,6 +3099,10 @@ msgid ""
 "sorting behavior off by right-clicking on a column header, choosing 'More "
 "Options' and un-checking 'Sort Automatically'."
 msgstr ""
+"Môžete triediť uploady, downloady, atď...., klknutím na stĺpec. Tabuľka "
+"pretriedi informácie tak, ako sa menia. Automatické triedenie môžete vypnúť "
+"pravým klikom na hlavičku stĺpca, zvolením \"Viac možností\" a odškrtnutím "
+"\"Automaticky zoradiť\"."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:106
 msgid ""
@@ -2839,6 +3110,9 @@ msgid ""
 "the column headers and uncheck that column. You can also drag the columns "
 "around to make them appear in the order you'd like."
 msgstr ""
+"Nechcete vidieť Chat (alebo iné) stĺpce v dowloadoch? Pravým klikom kliknite "
+"na hlavičku stĺpca a odškrtnite požadovaný stĺpec. Takisto môžete pretiahnuť "
+"stĺpec tak, aby bol v poradí ako sa Vám najviac páči."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:107
 msgid ""
@@ -2847,6 +3121,10 @@ msgid ""
 "the download you want to start next and click the up arrow until it's at the "
 "top!"
 msgstr ""
+"Môžete určiť programu LimeWire, ktorý download sa má ako ďaľší začať "
+"sťahovať. Pravým klikom kliknite na hlavičku v oblasti sťahovania a "
+"zaškrtnite stĺpec \"Priorita\". Označte download, ktorý chcete začať ako "
+"ďaľší a kliknite na šípku hore, až kým nebude na vrchu."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:108
 msgid ""
@@ -2854,6 +3132,9 @@ msgid ""
 "Java will improve LimeWire's speed and stability. You can find the most "
 "recent Java release at <a href=\"{0}\">www.java.com</a>."
 msgstr ""
+"LimeWire je napísaný v Java, čiže mať poslednú verziu Java zlepšuje rýchlosť "
+"a stabilitu programu LimeWire. Posledné vydanie Java môžete nájsť na <a "
+"href=\"{0}\">www.java.com</a>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:109
 msgid ""
@@ -2862,12 +3143,19 @@ msgid ""
 "&gt; Filters &gt; Keywords. Any search result that contains a word from the "
 "keyword filter will not even reach your computer. "
 msgstr ""
+"Dosiahli ste vyhľadávací limit a všetky výsledky sú spam alebo nezodpovedajú "
+"Vášmu vyhľadávaniu? Skúste použiť filter kľúčových slov v Nástrojoch &gt; "
+"Možnosti &gt; Filtre &gt; Kľúčové slová. Každý výsledok vyhľadávania, ktorý "
+"obsahuje slovo z filtra kľúčových slov nepríde do Vášho počítača. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:110
 msgid ""
 "Are you unhappy with the small number of search results you received? Right-"
 "click a search result, then choose Search More, then Get More Results. "
 msgstr ""
+"Ste nešťastný s malým počtom výsledkov vyhľadávania, ktoré ste dostali? "
+"Pravým klikom kliknite na výsledok vyhľadávania, potom zvoľte Hľadať ďalej a "
+"Získať viac výsledkov. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:111
 msgid ""
@@ -2876,6 +3164,10 @@ msgid ""
 "TCP). Go to Tools &gt; Options &gt; Advanced &gt; Firewall Config to find "
 "the port number. "
 msgstr ""
+"Nemôžete sa pripojiť na sieť Gnutella? Ak používate firewall, uistite sa že "
+"máte otvorený port pre LimeWire (aj prichádzajúce aj odchádzajúce, UDP a "
+"TCP). Choďte do Nástroje  &gt; Možnosti  &gt; Pokročilé  &gt; Nastavenie "
+"firewallu pre nájdenie čísla portu. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:112
 msgid ""
@@ -2884,6 +3176,10 @@ msgid ""
 "download in progress by right-clicking the download and choosing Change File "
 "Location. "
 msgstr ""
+"Individuálne downloady môžete ukladať do aj na iné miesto na disku. Pravým "
+"klikom na výsledok vyhľadávania zvolíte Stiahnuť ako. Takisto môžete zmeniť "
+"umistnenie dowloadu počas sťahovania pravým klikom ma download a zvolením "
+"Zmeniť umiestnenie súboru. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:113
 msgid ""
@@ -2893,12 +3189,19 @@ msgid ""
 "arrow to increase the priority. LimeWire attempts to download files of "
 "higher priority first. "
 msgstr ""
+"Chcete stiahnuť nejaké súbory skôr ako ostatné? Prioritu konkrétneho "
+"downloadu môžete nastaviť pravým klikom na hlavičku stĺpca v oblasti "
+"Sťahovania a označte stĺpec Priorita. Potom kliknite na šípku Poradie hore "
+"pre zvýšenie priority. LimeWire sa pokúsi stiahnuť prioritné súbory ako "
+"prvé. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:114
 msgid ""
 "Did you just download a file that you don't want to share? In the Library, "
 "right-click it and choose Stop Sharing File. "
 msgstr ""
+"Stiahli ste si súbor, ktorý nechcete zdieľať? V Knižnici pravým klikom "
+"zvoľte Zastavenie zdieľania súboru. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:115
 msgid ""
@@ -2906,6 +3209,9 @@ msgid ""
 "images, in different folders on your computer automatically? Just go to "
 "Tools &gt; Options &gt; Saving to choose the location for each type of file. "
 msgstr ""
+"Viete že môžete automaticky ukladať rôzne typy súborov ako audio, video a "
+"obrázky do rôznych priečinkov na počítači? Choďte do Nástroje &gt; Možnosti "
+"&gt; Ukladanie, aby ste si zvolili umiestnenie každého typu súboru. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:116
 msgid ""
@@ -2913,6 +3219,8 @@ msgid ""
 "stricter. Adjust that and more by going to Tools &gt; Options &gt; Filters "
 "&gt; Junk. "
 msgstr ""
+"Spravte filter Odpadu prísnejším, aby blokoval viac výsledkov. Nastavenie a "
+"veľa ďaľších nájdete pod Nástroje &gt; Možnosti &gt; Filtre &gt; Odpad. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:117
 msgid ""
@@ -2920,6 +3228,9 @@ msgid ""
 "Feedback on new features is always welcomed and appreciated! Go to Tools "
 "&gt; Options &gt; Updates to get notified of beta releases. "
 msgstr ""
+"Radi skúšate nové funkcie produktu ihneď ako sú vydané? Spätná väzba na nové "
+"funkcie je vždy vítaná a cenená! Choďte do Nástroje &gt; Možnosti &gt; "
+"Aktualizácie, aby ste boli oboznámený s beta vydaniami. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:127
 msgid ""
@@ -2927,12 +3238,17 @@ msgid ""
 "Java will improve LimeWire's speed and stability. You can upgrade to the "
 "latest Java release by using Software Update. "
 msgstr ""
+"LimeWire je napísaný v Java, čiže mať poslednú verziu Java zlepšuje rýchlosť "
+"a stabilitu programu LimeWire. Upgradovanie na posledné vydanie Java je "
+"možné pomocou Softvérovej aktualizácie. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:128
 msgid ""
 "Tired of the OSX Aqua look? Try using a new theme, available from the View "
 "&gt; Apply Themes menu. "
 msgstr ""
+"Ste unavený zo vzhľadu OSX Aqua? Skúste použiť novú tému dostupnú cez "
+"Zobraziť &gt; v menu Zmeniť tému. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:129
 msgid ""
@@ -2941,12 +3257,17 @@ msgid ""
 "etc... These preferences (and more) are available at the LimeWire &gt; "
 "Preferences menu. "
 msgstr ""
+"Môžete si nastaviť obsah LimeWire k obrazu svojmu zmenou rozličných volieb "
+"ako Úložný adresár, Zdieľaný adresár, Rýchlosť uploadovania, atď... Tieto "
+"voľby (a mnohé ďaľšie) sú dostupné cez menu Voľby programu LimeWire. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:130
 msgid ""
 "You can find out which version of LimeWire you are using by choosing 'About "
 "LimeWire' from the LimeWire menu. "
 msgstr ""
+"Môžete zistiť, akú verziu LimeWire používate zvolením \"O LimeWire\" z "
+"LimeWire menu. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:131
 msgid ""
@@ -2955,6 +3276,9 @@ msgid ""
 "and uploads are complete by going to LimeWire &gt; Preferences and looking "
 "at the 'Shutdown' options. "
 msgstr ""
+"Ak chcete byť dobrým sieťovým účastníkom, nezatvárajte LimeWire, ak od Vás "
+"niekto sťahuje. LimeWire sa automaticky zavrie po dokončení všetkých "
+"downloadov a uploadov prejdením do LimeWire &gt; Voľby a možnosť Vypnúť. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:132
 msgid ""
@@ -2963,6 +3287,10 @@ msgid ""
 "This can be done via LimeWire &gt; Preferences and altering the 'Sharing' "
 "options. "
 msgstr ""
+"LimeWire automaticky nezdieľa všetky typy súborov. Ak máte špecifický súbor, "
+"ktorý chcete zieľať, uistite sa, že prípona je zdieľateľná. Toto môže byť "
+"urobené cez LimeWire &gt; Voľby a vykonaním zmien v možnostiach "
+"\"Zdieľanie\". "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:133
 msgid ""
@@ -2970,6 +3298,9 @@ msgid ""
 "highlight the file and click 'Explore'. LimeWire will open that folder in "
 "the Finder. "
 msgstr ""
+"Chcete vedieť, kde sa na počítači nachádza zdieľaný súbor? Choďte do "
+"Knižnice, označte súbor a kliknite \"Preskúmať\". LimeWire otvorí priečinok "
+"v novom okne. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:134
 msgid ""
@@ -2977,6 +3308,9 @@ msgid ""
 "clicking on the Apple Menu &gt; System Preferences &gt; Sharing &gt; "
 "Firewall &gt; New &gt; and choosing to open 'Gnutella/Limewire (6346)'. "
 msgstr ""
+"Používate vstavaný OSX firewall? Uistite sa, že port LimeWire je otvorený "
+"kliknutím na menu Apple &gt; Sytémové nastavenia &gt; Zdieľanie &gt; "
+"Firewall &gt; Nové &gt; vybratím otvorenia \"Gnutella/Limewire (6346)\". "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:135
 msgid ""
@@ -2984,6 +3318,9 @@ msgid ""
 "from the 'LimeWire' menu, and changing the value of 'Autocomplete Text' "
 "under the 'View' option. "
 msgstr ""
+"Môžete zapnúť/vypnúť automatické dokončovanie vyhľadávania zvolením "
+"\"Voľby\" z menu \"LimeWire\" a zmenou hodnoty \"Automatické dokončovanie "
+"textu\" pod možnosťou \"Zobraziť\". "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:136
 msgid ""
@@ -2991,6 +3328,9 @@ msgid ""
 "display this message again' or 'Always Use This Answer'? Go to LimeWire &gt; "
 "Preferences, and check 'Revert To Default' under View &gt; Popups. "
 msgstr ""
+"Chcete vidieť dialógové okná, ktoré boli predtým označené ako \"Nezobrazovať "
+"túto spravú znovu\" alebo \"Vždy použiť túto odpoveď\"? Choďte do LimeWire "
+"&gt; Voľby a zaškrtnite \"Vrátiť pôvodné hodnoty\" pod Zobraziť &gt; Popups. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:137
 msgid ""
@@ -2998,6 +3338,9 @@ msgid ""
 "'Preferences' from the 'LimeWire' menu and adding new words to those listed "
 "under Filters &gt; Keywords. "
 msgstr ""
+"Môžete zakázať určité slová, aby sa nezobrazovali vo výsledkoch vyhľadávania "
+"zvolením \"Voľby\" z menu \"LimeWire\" a zvolením nových slov do zoznamu v "
+"sekcii Filtre &gt; Kľúčové slová. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:138
 msgid ""
@@ -3006,6 +3349,10 @@ msgid ""
 "more. Just control-click on the search result column headers, choose audio "
 "or video, and check the columns you want to see! "
 msgstr ""
+"Môžete zmeniť stĺpce, ktoré sa zobrazia vo výsledkoch vyhľadávania. Stĺpce, "
+"z ktoých si môžete vybrať zahŕňaju \"Názov\", Žáner\", Stopa\", \"Dĺžka\" a "
+"oveľa viac. Stačí kliknúť na hlavičku stĺpcov výsledkov vyhľadávania a "
+"zvoliť si audio alebo video a zvoliť si stĺpce, ktoré chcete vidieť! "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:139
 msgid ""
@@ -3014,6 +3361,10 @@ msgid ""
 "can toggle other options here too, like whether or not to sort tables "
 "automatically and if you prefer the rows to be striped. "
 msgstr ""
+"Neznášate nástrojové tipy? Milujete nástrojové tipy? Môžete ich zapnúť alebo "
+"vypnúť vo väčšine tabuliek kliknutím na hlavičku stĺpca a zvolením \"Viac "
+"možností\". Môžete tu prepínať aj ďaľšie možnosti ako automaticky "
+"triediť/netriediť tabuľky alebo ak uprednostňujete prúžkované stĺpce. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:140
 msgid ""
@@ -3022,6 +3373,10 @@ msgid ""
 "sorting behavior off by control-clicking on a column header, choosing 'More "
 "Options' and un-checking 'Sort Automatically'. "
 msgstr ""
+"Môžete triediť uploady, downloady, atď...., kliknutím na stĺpec. Tabuľka "
+"pretriedi informácie tak, ako sa menia. Automatické triedenie môžete vypnúť "
+"kliknutím na hlavičku stĺpca, zvolením \"Viac možností\" a odškrtnutím "
+"\"Automaticky zoradiť\". "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:141
 msgid ""
@@ -3029,6 +3384,9 @@ msgid ""
 "the column headers and uncheck that column. You can also drag the columns "
 "around to make them appear in the order you'd like. "
 msgstr ""
+"Nechcete vidieť Chat (alebo iné) stĺpce v dowloadoch? Kliknite na hlavičku "
+"stĺpca a odškrtnite požadovaný stĺpec. Takisto môžete pretiahnuť stĺpec tak, "
+"aby bol v poradí ako sa Vám najviac páči. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:142
 msgid ""
@@ -3037,6 +3395,10 @@ msgid ""
 "Preferences &gt; Filters &gt; Keywords. Any search result that contains a "
 "word from the keyword filter will not even reach your computer. "
 msgstr ""
+"Dosiahli ste vyhľadávací limit a všetky výsledky sú spam alebo nezodpovedajú "
+"Vášmu vyhľadávaniu? Skúste použiť filter kľúčových slov v LimeWire &gt; "
+"Možnosti &gt; Filtre &gt; Kľúčové slová. Každý výsledok vyhľadávania, ktorý "
+"obsahuje slovo z filtra kľúčových slov nepríde do Vášho počítača. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:143
 msgid ""
@@ -3044,6 +3406,9 @@ msgid ""
 "Control-click a search result, then choose Search More, then Get More "
 "Results. "
 msgstr ""
+"Ste nešťastný s malým počtom výsledkov vyhľadávania, ktoré ste dostali? "
+"Kliknite na výsledok vyhľadávania, potom zvoľte Hľadať ďalej a Získať viac "
+"výsledkov. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:144
 msgid ""
@@ -3053,6 +3418,11 @@ msgid ""
 "you. To share a single file instead of the whole folder, just drag that file "
 "to LimeWire's Library. "
 msgstr ""
+"Buďte obozretný, aby ste nezdieľali citlivé informácie ako daňové hárky, "
+"heslá, atď. Ak sa pokúšate zdieľať priečinok, ktorý ľudia väčšinou používajú "
+"na ukladanie citlivých dát (ako Užívatelia, Systém, Pracovná plocha, atď.), "
+"LimeWire Vás upozorní. Ak chcete zdieľať jeden súbor namiesto celého "
+"priečinka, stačí pretiahnuť tento súbor do knižnice LimeWire. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:145
 msgid ""
@@ -3061,6 +3431,10 @@ msgid ""
 "the download you want to start next and click the up arrow until it's at the "
 "top. "
 msgstr ""
+"Môžete určiť programu LimeWire, ktorý download sa má ako ďaľší začať "
+"sťahovať. Kliknite na hlavičku v oblasti sťahovania a zaškrtnite stĺpec "
+"\"Priorita\". Označte download, ktorý chcete začať ako ďaľší a kliknite na "
+"šípku hore, až kým nebude na vrchu. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:146
 msgid ""
@@ -3069,6 +3443,10 @@ msgid ""
 "download in progress by control-clicking the download and choosing Change "
 "File Location. "
 msgstr ""
+"Individuálne downloady môžete ukladať aj na iné miesto na disku. Kliknite na "
+"výsledok vyhľadávania zvolením Stiahnuť ako. Takisto môžete zmeniť "
+"umistnenie dowloadu počas sťahovania kliknutím na download a zvolením Zmeniť "
+"umiestnenie súboru. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:147
 msgid ""
@@ -3078,12 +3456,18 @@ msgid ""
 "arrow to increase the priority. LimeWire attempts to download files of "
 "higher priority first. "
 msgstr ""
+"Chcete stiahnuť nejaké súbory skôr ako ostatné? Prioritu konkrétneho "
+"downloadu môžete nastaviť kliknutím na hlavičku stĺpca v oblasti Sťahovania "
+"a označte stĺpec Priorita. Potom kliknite na šípku Poradie hore pre zvýšenie "
+"priority. LimeWire sa pokúsi stiahnuť prioritné súbory ako prvé. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:148
 msgid ""
 "Did you just download a file that you don't want to share? In the Library, "
 "control-click it and choose Stop Sharing File. "
 msgstr ""
+"Stiahli ste si súbor, ktorý nechcete zdieľať? V Knižnici na neho kliknite a "
+"zvoľte Zastavenie zdieľania súboru. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:149
 msgid ""
@@ -3091,12 +3475,18 @@ msgid ""
 "that when you delete a file from the Library, you have the option to either "
 "permanently delete the file from your computer or move it to the Trash. "
 msgstr ""
+"LimeWire je súborový manažér, nie iba zonam skladieb empétrojek.  To "
+"znamená, ak zmažete súbor z Knižnice, máte na výber súbor vymazať nastálo "
+"alebo ho presunúť do Koša. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:150
 msgid ""
 "Want to play music in your default media player instead of in LimeWire? "
 "Control-click the LimeWire status bar and deselect 'Show Media Player'. "
 msgstr ""
+"Chcete prehrať hudbu vo Vašom prednastavenom prehrávači médii namiesto v "
+"programe LimeWire? Kliknite na stavový riadok programu LimeWire a odznačte "
+"\"Ukáž Prehrávač médii\". "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:151
 msgid ""
@@ -3105,6 +3495,9 @@ msgid ""
 "LimeWire &gt; Preferences &gt; Saving to choose the location for each type "
 "of file. "
 msgstr ""
+"Viete že môžete automaticky ukladať rôzne typy súborov ako audio, video a "
+"obrázky do rôznych priečinkov na počítači? Choďte do LimeWire &gt; Voľby "
+"&gt; Ukladanie, aby ste si zvolili umiestnenie každého typu súboru. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:152
 msgid ""
@@ -3112,6 +3505,9 @@ msgid ""
 "stricter. Adjust that and more by going to LimeWire &gt; Preferences &gt; "
 "Filters &gt; Junk. "
 msgstr ""
+"Spravte filter Odpadu LimeWire prísnejším, aby blokoval viac výsledkov. "
+"Nastavenie a veľa ďaľších nájdete pod LimeWire &gt; Voľby &gt; Filtre &gt; "
+"Odpad. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:153
 msgid ""
@@ -3119,18 +3515,26 @@ msgid ""
 "Feedback on new features is always welcomed and appreciated! Go to LimeWire "
 "&gt; Preferences &gt; Updates to get notified of beta releases. "
 msgstr ""
+"Radi skúšate nové funkcie produktu ihneď ako sú vydané? Spätná väzba na nové "
+"funkcie je vždy vítaná a cenená! Choďte do LimeWire &gt; Voľby &gt; "
+"Aktualizácie, aby ste boli oboznámený s beta vydaniami. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:162
 msgid ""
 "Want LimeWire to look like your other Windows programs? Choose the Windows "
 "theme, available from the View &gt; Apply Themes menu. "
 msgstr ""
+"Chcete aby LimeWire vyzeral ako ostatné programy z Windows? Zvoľte si tému "
+"Windows dostupnú cez Zobraziť &gt; v menu Aplikovať tému. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:163
 msgid ""
 "Want to play music in your default media player instead of in LimeWire? "
 "Right-click the LimeWire status bar and deselect 'Show Media Player'. "
 msgstr ""
+"Chcete prehrať hudbu vo Vašom prednastavenom prehrávači médii namiesto v "
+"programe LimeWire? Pravým klikom kliknite na stavový riadok programu "
+"LimeWire a odznačte \"Ukáž Prehrávač médii\". "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:164
 msgid ""
@@ -3138,6 +3542,9 @@ msgid ""
 "highlight the file and click 'Explore'. LimeWire will open that folder in "
 "the Explorer. "
 msgstr ""
+"Chcete vedieť, kde sa na počítači nachádza zdieľaný súbor? Choďte do "
+"Knižnice, označte súbor a kliknite \"Preskúmať\". LimeWire otvorí priečinok "
+"v prieskumníku. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:165
 msgid ""
@@ -3147,6 +3554,11 @@ msgid ""
 "will warn you. To share a single file instead of the whole folder, just drag "
 "that file to LimeWire's Library. "
 msgstr ""
+"Buďte obozretný, aby ste nezdieľali citlivé informácie ako daňové hárky, "
+"heslá, atď. Ak sa pokúšate zdieľať priečinok, ktorý ľudia väčšinou používajú "
+"na ukladanie citlivých dát (ako Moje dokumenty, Pracovná plocha, Program "
+"Files, atď.), LimeWire Vás upozorní. Ak chcete zdieľať jeden súbor namiesto "
+"celého priečinka, stačí pretiahnuť tento súbor do knižnice LimeWire. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:166
 msgid ""
@@ -3156,6 +3568,11 @@ msgid ""
 "Explorer (from the Tools menu). This is a Windows setting, not a LimeWire "
 "setting. "
 msgstr ""
+"Ikona, ktorá je hneď vedľa výsledkov vyhľadávania v stĺpci \"?\" označuje "
+"symboly programu, ktorý používa na otváranie konkrétneho typu súboru. Na "
+"zmenu programu asociovanú so súborom, choďte do Možnosti priečinka vo "
+"Windows Exploreri (v menu Nástroje). Toto je nastavenie Windows a nie "
+"nastavenie LimeWire. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:167
 msgid ""
@@ -3164,6 +3581,9 @@ msgid ""
 "permanently delete the file from your computer or move it to the Recycle "
 "Bin. "
 msgstr ""
+"Knižnica LimeWire je súborový manažér, nie iba zonam skladieb empétrojek. To "
+"znamená, ak zmažete súbor z Knižnice, máte na výber súbor vymazať nastálo z "
+"Vášho počítača alebo ho presunúť do Koša. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:168
 msgid ""
@@ -3171,6 +3591,9 @@ msgid ""
 ".torrent files for the smoothest experience using LimeWire with the web. Go "
 "to Tools &gt; Options &gt; Advanced &gt; File Associations. "
 msgstr ""
+"Nastavte si LimeWire, aby bol Váš prednastavený program na otváranie magnet "
+"linkov a súborov .torrent pre hladší zážitok používaním LimeWire s webom. "
+"Choďte do Nástroje &gt; Možnosti &gt; Pokročilé &gt; Asociácia súborov. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:169
 msgid ""
@@ -3178,6 +3601,10 @@ msgid ""
 "click the system tray icon (next to the time), and select Exit. You can "
 "change this behavior by going to Tools &gt; Options &gt; System Tray. "
 msgstr ""
+"Ak zavriete LimeWire, minimalizuje sa do systémovej lišty. Pre ukončenie "
+"programu, pravým klikom kliknite na systémovú ikonu (vedľa času) a označte "
+"Ukončiť. Toto môžete zmeniť prejdením do Nástroje &gt; Možnosti &gt; "
+"Systémový lišta. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:178
 msgid ""
@@ -3187,6 +3614,11 @@ msgid ""
 "share a single file instead of the whole folder, just drag that file to "
 "LimeWire's Library. "
 msgstr ""
+"Buďte obozretný, aby ste nezdieľali citlivé informácie ako daňové hárky, "
+"heslá, atď. Ak sa pokúšate zdieľať priečinok, ktorý ľudia väčšinou používajú "
+"na ukladanie citlivých dát (ako bin, dev, home, atď.), LimeWire Vás "
+"upozorní. Ak chcete zdieľať jeden súbor namiesto celého priečinka, stačí "
+"pretiahnuť tento súbor do knižnice LimeWire. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:179
 msgid ""
@@ -3194,16 +3626,24 @@ msgid ""
 "Right-click the LimeWire status bar and deselect 'Show Media Player'. Then "
 "go to Tools &gt; Options &gt; Helper Apps to set the program of your choice. "
 msgstr ""
+"Chcete prehrať hudbu vo Vašom prednastavenom prehrávači médii namiesto v "
+"programe LimeWire? Pravým klikom kliknite na stavový riadok programu "
+"LimeWire a odznačte \"Ukáž Prehrávač médii\". Potom choďte do Nástroje &gt; "
+"Možnosti &gt; Pomocník aplikácii, aby ste si zvolili Váš zvolený program. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:196
 msgid "Thank you for supporting LimeWire! We hope you enjoy LimeWire PRO. "
 msgstr ""
+"Ďakujeme za podporovanie programu LimeWire! Dúfame, že si vychutnávate "
+"LimeWire PRO. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:197
 msgid ""
 "The blinking plug in the top-right corner of LimeWire indicates that a "
 "search is in progress. "
 msgstr ""
+"Blikajúca zástrčka v pravom hornom rohu programu LimeWire indikuje, že "
+"prebieha vyhľadávanie. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:206
 #, java-format
@@ -3212,12 +3652,17 @@ msgid ""
 "upgrading to <a href=\"{0}\">LimeWire PRO</a> to help support our ongoing "
 "development to make LimeWire and the network even better. "
 msgstr ""
+"Ďakujeme, že pomáhate sieti používaním programu LimeWire. Zvážte prosím "
+"upgrade na <a href=\"{0}\">LimeWire PRO</a>, aby ste podporili pokračujúci "
+"vývoj programu LimeWire a sieti byť ešte lepšou. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:207
 msgid ""
 "The spinning lime in the top-right corner of LimeWire indicates that a "
 "search is in progress. "
 msgstr ""
+"Rotujúca limetka v pravom hornom rohu programu LimeWire indikuje, že "
+"prebieha vyhľadávanie. "
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:36
 msgid "New Version Available!"
@@ -3310,9 +3755,8 @@ msgstr "ČO o získam s verziou PRO?"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:173
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:201
-#, fuzzy
 msgid "Later"
-msgstr "Vložiť"
+msgstr "Neskôr"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:175
 msgid "Get LimeWire PRO Later"
@@ -3333,6 +3777,10 @@ msgid ""
 "href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> and download "
 "the newest official version of LimeWire.</html>"
 msgstr ""
+"<html><b>LimeWire môže byť poškodený vírusom alebo trojanom!</b><br><br> "
+"Navštívte prosím <a "
+"href=\"http://www.limewire.com/corrupted\">www.limewire.com</a> a stiahnite "
+"si najnovšiu oficiálnu veziu programu LimeWire.</html>"
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:34
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
@@ -3340,19 +3788,20 @@ msgid "Lookup File with Bitzi"
 msgstr "Vyhľadať súbor pomocou Bitzi"
 
 #: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:34
-#, fuzzy
 msgid "Copy Magnet Links to Clipboard"
-msgstr "Kopírovať do schránky"
+msgstr "Kopírovať magnet linky do schránky"
 
 #: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:36
 msgid "Copy the Magnet Links of the Selected Files to the Clipboard"
-msgstr ""
+msgstr "Skopíruj Magnet linky označených súborov do schránky"
 
 #: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:73
 msgid ""
 "One or more of the created magnet links may not be accessible since their "
 "hosts are firewalled."
 msgstr ""
+"Jeden alebo viac vytvorených magnet linkov nemusia byť prístupné, pretože "
+"hosty sú za firewallom."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:47
 msgid "C&onnect"
@@ -3372,39 +3821,42 @@ msgstr "Odpojiť zo siete"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:108
 msgid "O&pen Magnet or Torrent"
-msgstr ""
+msgstr "O&tvor Magnet alebo Torrent"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:109
 msgid "Opens a magnet link or torrent file"
-msgstr ""
+msgstr "Otvorí magnet link alebo súbor torrent"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:133
 msgid "Open Magnet or Torrent"
-msgstr ""
+msgstr "Otvoriť Magnet alebo Torrent"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:166
 msgid ""
 "Type a magnet link, or the path or Web address of a torrent file, and "
 "LimeWire will download it for you."
 msgstr ""
+"Napíš magnet link alebo cestu webovej adresy súboru torrent a LimeWire ho "
+"pre Vás stiahne."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:173
 msgid "Open:"
-msgstr ""
+msgstr "Otvoriť:"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:234
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:204
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:117
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:200
-#, fuzzy
 msgid "Browse..."
-msgstr "Prehliadač"
+msgstr "Prehliadať..."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:255
 msgid ""
 "LimeWire cannot download this address. Make sure you typed it correctly, and "
 "then try again."
 msgstr ""
+"LimeWire nemôže stiahnuť z tejto adresy. Uistite sa, že ste ju správne "
+"napísali a skúste znovu."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:332
 msgid "&Close"
@@ -3416,12 +3868,12 @@ msgstr "Ukončiť program"
 
 #: gui/com/limegroup/gnutella/gui/actions/MySharedFilesAction.java:52
 msgid "My Shared Files"
-msgstr ""
+msgstr "Moje zdieľané súbory"
 
 #: gui/com/limegroup/gnutella/gui/actions/MySharedFilesAction.java:56
 #, java-format
 msgid "View My {0} Shared Files"
-msgstr ""
+msgstr "Ukáž mojich {0} zdieľaných súborov"
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
@@ -3438,7 +3890,7 @@ msgstr "Vyhľadávanie: {0}"
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchWhatsNewMediaTypeAction.java:32
 msgid "Search \"What's New\" for: {0}"
-msgstr ""
+msgstr "Hľadať \"Čo je nové\" pre: {0}"
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchXMLFieldAction.java:49
 #, java-format
@@ -3519,12 +3971,11 @@ msgstr "Vy"
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:231
 msgid "A connection error has occurred"
-msgstr ""
+msgstr "Vyskytla sa chyba pripojenia"
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:252
-#, fuzzy
 msgid "Could not send chat message"
-msgstr "Nedá sa prehliadať server {0} ."
+msgstr "Chat správa sa nemôže odoslať {0} ."
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:45
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:231
@@ -3534,9 +3985,8 @@ msgstr "Nedá sa prehliadať server {0} ."
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:44
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:53
-#, fuzzy
 msgid "Browse Host"
-msgstr "Môžnosti prehliadača"
+msgstr "Prehliadať host"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:48
 msgid "Create a New Outgoing Connection"
@@ -3553,16 +4003,14 @@ msgstr "Zobraziť všetky súbory z vybraného počítača"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:52
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:227
-#, fuzzy
 msgid "Host"
-msgstr "Server:"
+msgstr "Host"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:55
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:383
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:243
-#, fuzzy
 msgid "Status"
-msgstr "Stavový riadok"
+msgstr "Stav"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:58
 msgid "Messages (I/O)"
@@ -3570,11 +4018,11 @@ msgstr "Správy (I/O)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:61
 msgid "Messages In"
-msgstr ""
+msgstr "Prichádzajúce správy"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:64
 msgid "Messages Out"
-msgstr ""
+msgstr "Odchádzajúce správy"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:67
 msgid "Bandwidth (I/O)"
@@ -3582,82 +4030,77 @@ msgstr "Bandwidth (I/O)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:70
 msgid "Bandwidth In"
-msgstr ""
+msgstr "Šírka pásma sťahovania"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:73
 msgid "Bandwidth Out"
-msgstr ""
+msgstr "Šírka pásma uploadovania"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:76
-#, fuzzy
 msgid "Dropped (I/O)"
-msgstr "Pridať (#)"
+msgstr "Vypustené (I/O)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:79
 msgid "Dropped In"
-msgstr ""
+msgstr "Zahodené prichádzajúce"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:82
 msgid "Dropped Out"
-msgstr ""
+msgstr "Zahodené odchádzajúce"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:85
 msgid "Protocol"
-msgstr ""
+msgstr "Protokol"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:88
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:423
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:283
-#, fuzzy
 msgid "Vendor/Version"
-msgstr "Predajca"
+msgstr "Predajca/Verzia"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:91
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:415
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:31
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:275
-#, fuzzy
 msgid "Time"
-msgstr "Názov:"
+msgstr "Čas"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:94
-#, fuzzy
 msgid "Compressed (I/O)"
-msgstr "Správy (I/O)"
+msgstr "Skomprimované (I/O)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:97
 msgid "Compressed In"
-msgstr ""
+msgstr "Prichádzajúca kompresia"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:100
 msgid "Compressed Out"
-msgstr ""
+msgstr "Odchádzajúca kompresia"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:103
 msgid "SSL Overhead (I/O)"
-msgstr ""
+msgstr "Réžia SSL (I/O)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:106
 msgid "SSL Overhead In"
-msgstr ""
+msgstr "Prichádzajúca réžia SSL"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:109
 msgid "SSL Overhead Out"
-msgstr ""
+msgstr "Odchádzajúca réžia SSL"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:112
 msgid "QRP (%)"
-msgstr ""
+msgstr "QRP (%)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:115
 msgid "QRP Empty"
-msgstr ""
+msgstr "QRP je prázdne"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:123
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:66
-#, fuzzy
 msgid "Connecting..."
-msgstr "Pripojené..."
+msgstr "Pripájanie..."
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:129
 msgid "Outgoing"
@@ -3668,43 +4111,39 @@ msgid "Incoming"
 msgstr "Prichádzajúce"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:141
-#, fuzzy
 msgid "Connected on"
-msgstr "Pripojenie"
+msgstr "Pripojené na"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:60
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:23
 msgid "Ultrapeer"
-msgstr ""
+msgstr "Ultrapeer"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:63
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:20
 msgid "Leaf"
-msgstr ""
+msgstr "List"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:66
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:42
-#, fuzzy
 msgid "Connecting"
-msgstr "Pripojenie"
+msgstr "Pripájanie"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:69
-#, fuzzy
 msgid "Leaves"
-msgstr "Uložiť ako"
+msgstr "Odchádza"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:72
 msgid "Ultrapeers"
-msgstr ""
+msgstr "Ultrapeeri"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:75
 msgid "Peers"
-msgstr ""
+msgstr "Peeri"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:78
-#, fuzzy
 msgid "Standard"
-msgstr "Stars"
+msgstr "Štandardné"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:163
 msgid "Loading Connections Window..."
@@ -3728,75 +4167,71 @@ msgstr "Server:"
 #. 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:378
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:55
-#, fuzzy
 msgid "Port:"
-msgstr "Slabé"
+msgstr "Port:"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:390
 msgid "Use TLS:"
-msgstr ""
+msgstr "Použiť TLS:"
 
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:26
-#, fuzzy
 msgid "Peer"
-msgstr "Prehrávač"
+msgstr "Peer"
 
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:29
 msgid "0.6"
-msgstr ""
+msgstr "0,6"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:90
 msgid ""
 "You dropped the following files/folders on LimeWire, please select the ones "
 "you would like to share."
 msgstr ""
+"Pridali ste nasledujúce súbory/priečinky so programu LimeWire, zvoľte si "
+"prosím, ktoré chcete zdieľať."
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:94
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:259
-#, fuzzy
 msgid "All folders you select will also have their subfolders shared."
-msgstr "Vybrané priečinky (aj ich podpriečinky) budú zdieľané."
+msgstr "Všetky vybrané priečinky (aj ich podpriečinky) budú zdieľané."
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:99
-#, fuzzy
 msgid "Share Dropped Files?"
-msgstr "Zdieľané súbory"
+msgstr "Zdieľať zahodené súbory?"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:115
 msgid "Yes, Try Again"
-msgstr ""
+msgstr "Áno, skúste znovu"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:116
-#, fuzzy
 msgid "No, Share Nothing"
-msgstr "Práve zdieľate"
+msgstr "NIe, nič nezdieľať"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:119
-#, fuzzy
 msgid "Do not show this message again."
-msgstr "Na budúce už nezobrazovať túto hlášku"
+msgstr "Nabudúce už túto hlášku nezobrazovať."
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:122
 msgid ""
 "You clicked OK but did not select any files to be shared. Would you like to "
 "try again?"
 msgstr ""
+"Klikli ste na OK, ale neoznačili ste žiadny súbor, ktorý má byť zdieľaný. "
+"Chcete to skúsiť znovu?"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadButtons.java:49
-#, fuzzy
 msgid "Queue"
-msgstr "Zaradiť do frontu"
+msgstr "Fronta"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:60
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:59
-#, fuzzy
 msgid "Queued"
-msgstr "Zaradiť do frontu"
+msgstr "Vo fronte"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:69
 #, java-format
 msgid "Connecting ({0} hosts tried)..."
-msgstr ""
+msgstr "Pripájanie (skúsilo to {0} hostov)..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:75
 msgid "Waiting On Busy Hosts"
@@ -3805,7 +4240,7 @@ msgstr "Čakanie na zaneprázdnenom serveri"
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:81
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:72
 msgid "Complete"
-msgstr ""
+msgstr "Dokončené"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:87
 msgid "Aborted"
@@ -3874,29 +4309,25 @@ msgid "Content Removed"
 msgstr "Obsah odstránený"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:174
-#, fuzzy
 msgid "Resuming..."
-msgstr "Pozastavenie..."
+msgstr "Obnovujem..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:178
-#, fuzzy
 msgid "Downloading .torrent file..."
-msgstr "Načítavam uložené súbory..."
+msgstr "Sťahujem súbor .torrent..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:184
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:126
-#, fuzzy
 msgid "Average Bandwidth"
-msgstr "Bandwidth odosielania"
+msgstr "Priemerná šírka pásma"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:190
 msgid "Valid Alternate Locations"
-msgstr ""
+msgstr "Náhradné platné umiestnenia"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:196
-#, fuzzy
 msgid "Invalid Alternate Locations"
-msgstr "Chybný názov súboru"
+msgstr "Neplatné umiestnenia"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:202
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:132
@@ -3959,7 +4390,7 @@ msgstr "Lokalizácia zdrojov..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:269
 msgid "LimeWire cannot download this torrent.  The tracker responded"
-msgstr ""
+msgstr "LimeWire nemôže stiahnuť tento torrent. Tracker odpovedal"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:359
 msgid "Priority"
@@ -3970,23 +4401,20 @@ msgstr "Priorita"
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:106
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:63
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:235
-#, fuzzy
 msgid "Size"
-msgstr "Veľkosť:"
+msgstr "Veľkosť"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:391
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:359
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:73
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:251
-#, fuzzy
 msgid "Chat"
-msgstr "Chat..."
+msgstr "Chat"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:399
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:259
-#, fuzzy
 msgid "Progress"
-msgstr "Programy"
+msgstr "Priebeh"
 
 #. addOption(STORE_KEY, STORE_ADVANCED_KEY, GUIMediator.getStringResource("Template"), StoreDirectoryTemplatePaneItem.class);
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:407
@@ -3995,9 +4423,8 @@ msgstr "Programy"
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:68
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:81
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:267
-#, fuzzy
 msgid "Speed"
-msgstr "Rýchlosť:"
+msgstr "Rýchlosť"
 
 #. connectionsPane.add(new AutoConnectPaneItem("AUTO_CONNECT"));
 #. connectionsPane.add(new AutoConnectActivePaneItem("AUTO_CONNECT_ACTIVE"));
@@ -4005,14 +4432,13 @@ msgstr "Rýchlosť:"
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:962
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:345
 msgid "BitTorrent"
-msgstr ""
+msgstr "BitTorrent"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1023
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:808
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1236
-#, fuzzy
 msgid "Launch"
-msgstr "Načítať súbor"
+msgstr "Spustiť"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1025
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1238
@@ -4020,20 +4446,17 @@ msgid "Launch Selected Files"
 msgstr "Spustiť vybrané súbory"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1042
-#, fuzzy
 msgid "Show in Library"
-msgstr "Knižnica"
+msgstr "Ukázať v knižnici"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1044
-#, fuzzy
 msgid "Show Download in Library"
-msgstr "Sťahovanie z"
+msgstr "Ukázať download v knižnici"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:192
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:332
-#, fuzzy
 msgid "Downloads"
-msgstr "Pre sťahovanie:"
+msgstr "Downloady"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:232
 msgid "Loading Download Window..."
@@ -4064,9 +4487,8 @@ msgstr "Obnoviť sťahovanie"
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:793
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:953
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1331
-#, fuzzy
 msgid "Resume"
-msgstr "Premenovať"
+msgstr "Obnoviť"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:279
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:795
@@ -4114,6 +4536,8 @@ msgid ""
 "LimeWire was unable to load the torrent file \"{0}\", - it may be malformed "
 "or LimeWire does not have permission to access this file."
 msgstr ""
+"LimeWire nebol schopný nahrať súbor torrent \"{0}\", - môže byť nefunkčný "
+"alebo LimeWire nemá povolenie pristupovať k tomuto súboru."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:627
 msgid "Choose Save Location"
@@ -4142,12 +4566,12 @@ msgstr "Spustiť vybrané súbory"
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:814
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:875
 msgid "Cancel Download"
-msgstr "Zrušiť sťahovanie"
+msgstr "Ukončiť sťahovanie"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:818
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:879
 msgid "Cancel Selected Downloads"
-msgstr "Ukončiť sťahovanie vybraných súborov"
+msgstr "Ukončiť sťahovanie pre vybrané súbory"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:820
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:933
@@ -4166,7 +4590,6 @@ msgstr "Náhľad vybraných súborov"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:892
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:46
-#, fuzzy
 msgid "Chat with Host"
 msgstr "Chat s hostiteľom servera"
 
@@ -4176,9 +4599,8 @@ msgstr "Zmazať všetky neaktívne sťahované súbory"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:906
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:45
-#, fuzzy
 msgid "Clear Inactive"
-msgstr "Zmazať všetky neaktívne sťahované súbory"
+msgstr "Zmazať neaktívne"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:908
 msgid "Remove Inactive Downloads"
@@ -4193,9 +4615,8 @@ msgstr "Pozastaviť sťahovanie"
 #. 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:970
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:95
-#, fuzzy
 msgid "Pause"
-msgstr "Pozastavené"
+msgstr "Pozastaviť"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:972
 msgid "Pause Selected Downloads"
@@ -4213,11 +4634,11 @@ msgstr "Otvoriť priečinok obsahujúci súbor"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1001
 msgid "Move the Selected Download Closer to Becoming Active"
-msgstr ""
+msgstr "Pohni označený download bližšie k tomu, aby sa stal aktívny"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1020
 msgid "Move the Selected Download Further from Becoming Active"
-msgstr ""
+msgstr "Pohni označený download ďalej od toho, aby sa stal aktívny"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1039
 msgid "Change File Location..."
@@ -4271,9 +4692,8 @@ msgstr "Prepísať existujúci súbor"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:335
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:48
-#, fuzzy
 msgid "Save As..."
-msgstr "Uložiť ako"
+msgstr "Uložiť ako..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:337
 msgid "Choose a different location for the Download"
@@ -4296,6 +4716,7 @@ msgid ""
 "LimeWire may not be able to start the download you have selected unless you "
 "start a search for it."
 msgstr ""
+"LimeWire nemôže začať sťahovať označený download , dokiaľ ho nevyhľadáte."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:186
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1026
@@ -4331,55 +4752,53 @@ msgstr "Bez názvu"
 
 #: gui/com/limegroup/gnutella/gui/download/PriorityHolder.java:33
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:57
-#, fuzzy
 msgid "Active"
-msgstr "Akcia:"
+msgstr "Aktívny"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:34
 msgid "File & Protocol Associations"
-msgstr ""
+msgstr "Asociácie súborov a protokolov"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:34
 msgid "What type of resources should LimeWire open?"
-msgstr ""
+msgstr "Aké typy zdrojov by mal LimeWire otvoriť?"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:65
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:69
 msgid "What should LimeWire do with the selected associations on startup?"
-msgstr ""
+msgstr "Čo by mal spraviť LimeWire s označenými asociáciami po štarte?"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:67
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:71
-#, fuzzy
 msgid "Always take the selected associations."
-msgstr "Odstrániť vybrané pripojenia"
+msgstr "Vždy si vybrať zvolené asociácie."
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:69
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:73
 msgid "Ignore all missing associations."
-msgstr ""
+msgstr "Ignoruj všetky chýbajúce asociácie."
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:71
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:75
 msgid "Ask me what to do when an association is missing."
-msgstr ""
+msgstr "Spýtať sa, keď chýba asociácia."
 
 #: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:26
 msgid "Content Filtering"
 msgstr "Filtrovanie obsahu"
 
 #: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:27
-#, fuzzy
 msgid ""
 "LimeWire can filter files that copyright owners request not be shared. By "
 "enabling filtering, you are telling LimeWire to confirm all files you "
 "download or share with a list of removed content. You can change this at any "
 "time by choosing Filters -> Configure Content Filters from the main menu."
 msgstr ""
-"Môžete prikázať LimeWire aby filtroval súbory, ktoré vlastníci autorských "
+"Môžete prikázať LimeWire, aby filtroval súbory, ktoré vlastníci autorských "
 "práv požiadali nezdieľať. Povolením filtrovania nastavíte LimeWire tak, aby "
 "povolil všetky súbory ktoré sťahujete alebo zdieľate v súlade so zoznamom "
-"filtrovaného obsahu."
+"filtrovaného obsahu. Toto môžete kedykoľvek zmeniť zvolením Filtre -> "
+"Nastaviť filtrovanie z hlavného menu."
 
 #: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:38
 msgid "Enable Content Filtering"
@@ -4426,7 +4845,7 @@ msgstr "Vybrať jazyk:"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:59
 msgid "Save Folder and Shared Folders"
-msgstr ""
+msgstr "Uložiť priečinok a zdieľané priečinky"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:72
 msgid ""
@@ -4434,6 +4853,9 @@ msgid ""
 "can also choose folders you would like to share with other users running "
 "LimeWire."
 msgstr ""
+"Zvoľte si prosím priečinok, kde by sa mali sťahovať súbory. Takisto si "
+"môžete zvoliť priečinky, ktoré chcete zdieľať s ostatnými užívateľmi "
+"programu LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:74
 msgid ""
@@ -4441,14 +4863,16 @@ msgid ""
 "the folder where you would like your files to be downloaded. You can also "
 "choose folders you would like to share with other users running LimeWire."
 msgstr ""
+"LimeWire teraz stiahne súbory do iného, nového adresára. Prosím potvrďte "
+"priečinok, kde by sa mali Vaše súbory sťahovať. Takisto si môžete zvoliť "
+"priečinky, ktoré chcete zdieľať s ostatnými užívateľmi programu LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:93
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:327
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirDataLine.java:48
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:30
-#, fuzzy
 msgid "Save Folder"
-msgstr "Uložiť priečinok:"
+msgstr "Uložiť priečinok"
 
 #. center
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:112
@@ -4471,29 +4895,31 @@ msgid ""
 "LimeWire could not create default share folder {0}, a file with that name "
 "already exists."
 msgstr ""
+"LimeWire nehohol vytvoriť prednastavený priečinok na zdieľanie {0}, súbor s "
+"týmto názvom už existuje."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:178
 #, java-format
 msgid ""
 "LimeWire could not create default share folder {0}, it will not be shared."
 msgstr ""
+"LimeWire nehohol vytvoriť prednastavený priečinok na zdieľanie {0}, odteraz "
+"nebude zdieľaný."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:192
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:87
-#, fuzzy
 msgid "Use Default"
 msgstr "P&oužiť pôvodné"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:193
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:88
-#, fuzzy
 msgid "Use the Default Folder"
-msgstr "Reset na pôvodný priečinko sťahovania"
+msgstr "Použiť prednastavený priečinok"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:205
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:118
 msgid "Choose Another Folder"
-msgstr ""
+msgstr "Zvoľte si iný priečinok"
 
 #: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:46
 msgid "Confirm Scan"
@@ -4542,7 +4968,7 @@ msgstr "Prehľadať pevný disk?"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:265
 msgid "LimeWire Setup Dialog"
-msgstr ""
+msgstr "Dialógové okno nastavenia LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:514
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:255
@@ -4563,13 +4989,12 @@ msgstr "Ukončiť"
 #: gui/com/limegroup/gnutella/gui/init/SetupWindow.java:131
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractPaneItem.java:66
 msgid "Learn more about this option..."
-msgstr ""
+msgstr "Naučte sa o tejto možnosti viac..."
 
 #: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:40
 #: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:23
-#, fuzzy
 msgid "Connection Speed"
-msgstr "Pripojenie uzavreté"
+msgstr "Rýchlosť pripojenia"
 
 #: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:41
 msgid ""
@@ -4590,9 +5015,8 @@ msgstr "Vybrať rýchlosť"
 #: gui/com/limegroup/gnutella/gui/init/StartupWindow.java:31
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:407
 #: gui/com/limegroup/gnutella/gui/options/panes/StartupPaneItem.java:22
-#, fuzzy
 msgid "System Startup"
-msgstr "Spúšťať spolu so štartom systému:"
+msgstr "Spúšťať spolu so štartom systému"
 
 #: gui/com/limegroup/gnutella/gui/init/StartupWindow.java:32
 msgid ""
@@ -4650,17 +5074,16 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/IncompleteDirectoryHolder.java:16
 #: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:21
-#, fuzzy
 msgid "Incomplete Files"
-msgstr "Počet dní na zachovanie nedokončených súborov:"
+msgstr "Nedokončené súbory"
 
 #: gui/com/limegroup/gnutella/gui/library/LWSSpecialFilesHolder.java:22
 msgid "Individual Store Files"
-msgstr ""
+msgstr "Individuálne súbory zo Store"
 
 #: gui/com/limegroup/gnutella/gui/library/LWSSpecialFilesHolder.java:27
 msgid "List of All Individual Purchased Files"
-msgstr ""
+msgstr "Zoznam všetkých individuálne kúpených súborov"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:109
 msgid "Loading Library Window..."
@@ -4678,29 +5101,26 @@ msgstr "Nastavenie..."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:398
 msgid "Songs purchased from the LimeWire Store"
-msgstr ""
+msgstr "Skladby kúpené z LimeWire Store"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:55
-#, fuzzy
 msgid "Search In Shared Files:"
-msgstr "Vyhľadávanie a sťahovanie súborov"
+msgstr "Vyhľadávanie v zdieľaných súboroch:"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:73
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:297
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:560
 #: gui/com/limegroup/gnutella/gui/tabs/SearchDownloadTab.java:41
-#, fuzzy
 msgid "Search"
-msgstr "Vyhľadávania"
+msgstr "Hľadať"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:81
-#, fuzzy
 msgid ""
 "Your search must be at least three characters long to avoid too many "
 "meaningless results."
 msgstr ""
-"Vaše vyhľadávanie musí mať aspoň tri znaky, aby sa zbytočne prehľadávaním "
-"nezahltila sieť."
+"Vaše vyhľadávanie musí mať aspoň tri znaky, aby ste zbytočne nedostali "
+"bezvýznamné výsledky."
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:84
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:429
@@ -4711,20 +5131,18 @@ msgstr ""
 "znova."
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchResultsHolder.java:29
-#, fuzzy
 msgid "Search Results"
-msgstr "Rýchlosť výsledku hľadania"
+msgstr "Výsledky vyhľadávania"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchResultsHolder.java:33
 msgid "Holds the Results of the Last Search"
-msgstr ""
+msgstr "Pozdrží výsledky posledného vyhľadávania"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:140
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:18
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:47
-#, fuzzy
 msgid "Icon"
-msgstr "Prichádzajúce"
+msgstr "Ikona"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:152
 #: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:124
@@ -4735,9 +5153,8 @@ msgstr "Cesta"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:155
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:335
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:55
-#, fuzzy
 msgid "Uploads"
-msgstr "Pre odosielanie:"
+msgstr "Uploady"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:158
 msgid "Hits"
@@ -4748,22 +5165,20 @@ msgid "Locations"
 msgstr "Umiestnenia"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:168
-#, fuzzy
 msgid "Last Modified"
-msgstr "Dátum zmeny:"
+msgstr "Dátum zmeny"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:171
 msgid "Shared"
-msgstr ""
+msgstr "Zdieľané"
 
 #. for sharing gnutella
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:230
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:320
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:371
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:19
-#, fuzzy
 msgid "Sharing"
-msgstr "Začínam"
+msgstr "Zdieľanie"
 
 #. advanced options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:280
@@ -4774,27 +5189,31 @@ msgstr "Začínam"
 #: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:201
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:55
 msgid "Advanced"
-msgstr ""
+msgstr "Pokročilé"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:789
 msgid "Move to Recycle Bin"
-msgstr ""
+msgstr "Presunúť do koša"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:790
 msgid "Move to Trash"
-msgstr ""
+msgstr "Presunúť do koša"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:838
 msgid ""
 "Are you sure you want to delete the selected file(s), thus removing it from "
 "your computer?"
 msgstr ""
+"Ste si istý, že chcete vymazať označený/é súbor(y), teda vymazať ich z "
+"počítača?"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:904
 msgid ""
 "The following files could not be deleted. They may be in use by another "
 "application or are currently being downloaded to."
 msgstr ""
+"Nasledujúce súbory nemôžu byť zmazané. Môžu byť používané inou aplikáciou "
+"alebo sa práve sťahujú."
 
 #. notify the user that renaming failed
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:976
@@ -4838,9 +5257,8 @@ msgid "Publish under Creative Commons License"
 msgstr "Publikovať pod licenciou Creative Commons"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1320
-#, fuzzy
 msgid "Edit License..."
-msgstr "Zobraziť licenciu"
+msgstr "Upraviť licenciu"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1333
 msgid "Continue Downloading Selected Incomplete File"
@@ -4860,20 +5278,17 @@ msgstr "Zastavenie zdieľania súboru"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1414
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:859
-#, fuzzy
 msgid "Share Folder"
-msgstr "Zdieľané priečinky"
+msgstr "Zdieľať priečinok"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1444
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:800
-#, fuzzy
 msgid "Stop Sharing Folder"
-msgstr "Zastavenie zdieľania súboru"
+msgstr "Zastaviť zdieľanie priečinku"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1471
-#, fuzzy
 msgid "Show Magnet Details"
-msgstr "Detaily prihlásenia"
+msgstr "Zobraziť Magnet detaily"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1483
 #: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:170
@@ -4897,6 +5312,7 @@ msgid ""
 "LimeWire will not allow you delete to the folder reserved for incomplete "
 "files."
 msgstr ""
+"LimeWire Vám neumožní zmazať priečinok vyhradený pre nedokončené súbory."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:784
 msgid "Shared Files"
@@ -4905,7 +5321,7 @@ msgstr "Zdieľané súbory"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:811
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:360
 msgid "Store"
-msgstr ""
+msgstr "Store"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:823
 msgid "Add Folder Contents to Playlist"
@@ -4913,12 +5329,11 @@ msgstr "Pridať obsah priečinka do Playlistu"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:870
 msgid "Hide .torrent Files"
-msgstr ""
+msgstr "Skryť súbory .torrent"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:873
-#, fuzzy
 msgid "Show .torrent Files"
-msgstr "Filtrovanie obsahu"
+msgstr "Zobraziť súbory .torrent"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:901
 msgid "Refresh"
@@ -4938,7 +5353,7 @@ msgstr "Nastaviť možnosti zdieľania"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:68
 msgid "Folders to share"
-msgstr ""
+msgstr "Priečinky na zdieľanie"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:76
 msgid ""
@@ -4946,25 +5361,26 @@ msgid ""
 "folders you do not want to share.  (You can change your shared folders at "
 "any time in LimeWire's options.)"
 msgstr ""
+"Nasledujúce priečinky a podpriečinky budú zdieľané. Môžete odškrtnúť "
+"akékoľvek priečinky, ktoré nechcete zdieľať. (Kedykoľvek môžete zmeniť "
+"zdieľané priečinky v možnostiach LimeWire.)"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:255
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:293
-#, fuzzy
 msgid "Legend"
-msgstr "Poslať"
+msgstr "Legenda"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:302
 msgid "Folder is fully shared including all subfolders."
-msgstr ""
+msgstr "Priečinok je naplno zdieľaný vrátane všetkých podpriečinkov."
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:316
 msgid "Folder is not shared and no subfolders are shared."
-msgstr ""
+msgstr "Priečinok nie je zdieľaný a ani žiadne podpriečinky."
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:324
-#, fuzzy
 msgid "Folder's files and some subfolders are shared."
-msgstr "Vybrané priečinky (aj ich podpriečinky) budú zdieľané."
+msgstr "Vybrané priečinky (aj ich podpriečinky) sú zdieľané."
 
 #: gui/com/limegroup/gnutella/gui/library/SpeciallySharedFilesDirectoryHolder.java:15
 msgid "Individually Shared Files"
@@ -4976,34 +5392,32 @@ msgstr "Zoznam všetkých samostatne zdieľaných súborov"
 
 #: gui/com/limegroup/gnutella/gui/library/TorrentMetaFileDirectoryHolder.java:15
 msgid "List of .torrent files"
-msgstr ""
+msgstr "Zoznam súborov .torrent"
 
 #: gui/com/limegroup/gnutella/gui/library/TorrentMetaFileDirectoryHolder.java:17
-#, fuzzy
 msgid ".torrent files"
-msgstr "Filtrovanie obsahu"
+msgstr "súbory .torrent"
 
 #: gui/com/limegroup/gnutella/gui/logging/LoggingMediator.java:36
 #: gui/com/limegroup/gnutella/gui/tabs/LoggingTab.java:22
 msgid "Logging"
-msgstr ""
+msgstr "Záznamy"
 
 #: gui/com/limegroup/gnutella/gui/logging/LoggingMediator.java:57
-#, fuzzy
 msgid "Loading Logging Window..."
-msgstr "Načítavam okno Voľby"
+msgstr "Načítavam okno Záznamov"
 
 #: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:19
 msgid "&Advanced"
-msgstr ""
+msgstr "&Pokročilé"
 
 #: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:28
 msgid "Mojito &DHT Arcs View"
-msgstr ""
+msgstr "Zobraziť Mojito &DHT Arcs"
 
 #: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:29
 msgid "Display a view of the incoming and outgoing DHT messages"
-msgstr ""
+msgstr "Zobraziť náhlad prichádzajúcich a odchádzajúcich správ DHT"
 
 #: gui/com/limegroup/gnutella/gui/menu/FileMenu.java:26
 msgid "&File"
@@ -5090,19 +5504,16 @@ msgid "&Navigation"
 msgstr "&Navigácia"
 
 #: gui/com/limegroup/gnutella/gui/menu/ResourcesMenu.java:21
-#, fuzzy
 msgid "&Resources"
-msgstr "Obnoviť"
+msgstr "&Zdroje"
 
 #: gui/com/limegroup/gnutella/gui/menu/ResourcesMenu.java:23
-#, fuzzy
 msgid "LimeWire &PRO"
-msgstr "Získať LimeWire PRO"
+msgstr "LimeWire &PRO"
 
 #: gui/com/limegroup/gnutella/gui/menu/ResourcesMenu.java:24
-#, fuzzy
 msgid "Display the LimeWire PRO Website"
-msgstr "Získať LimeWire PRO neskôr"
+msgstr "Zobraziť web stránku LimeWire PRO"
 
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:28
 msgid "Result &Filters"
@@ -5119,7 +5530,7 @@ msgstr "Zob&raziť/Skryť"
 #: gui/com/limegroup/gnutella/gui/menu/ShowHideMenu.java:46
 #, java-format
 msgid "Show {0} Window"
-msgstr ""
+msgstr "Zobraz {0} okno"
 
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:64
 msgid "&Get More Skins"
@@ -5171,19 +5582,19 @@ msgstr "Zobraziť text pod ikonami"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:45
 msgid "&Increase Font Size"
-msgstr ""
+msgstr "&Zväčšiť veľkosť písma"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:46
 msgid "Increases the Font Size"
-msgstr ""
+msgstr "Zväčší veľkosť písma"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:49
 msgid "&Decrease Font Size"
-msgstr ""
+msgstr "Z&menšiť veľkosť písma"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:50
 msgid "Decreases the Font Size"
-msgstr ""
+msgstr "Zmenší veľkosť písma"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:60
 msgid "C&hange Language"
@@ -5258,21 +5669,21 @@ msgstr "Vrátiť všetky nadstavenia na pôvodné"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:207
 #: gui/com/limegroup/gnutella/gui/search/FilterBox.java:76
-#, fuzzy
 msgid "Options"
-msgstr "&Voľby"
+msgstr "Možnosti"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:224
 msgid ""
 "You have made changes to some of LimeWire's settings. Would you like to save "
 "these changes?"
 msgstr ""
+"Previedli ste niektoré zmeny v nastaveniach LimeWire. Chcete tieto zmeny "
+"uložiť?"
 
 #. set text before adding the document listener
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:255
-#, fuzzy
 msgid "Search here"
-msgstr "Hľadať ďalej"
+msgstr "Hľadať tu"
 
 #. for saving gnutella
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:315
@@ -5285,16 +5696,16 @@ msgstr "Ukladanie"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:346
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:385
 msgid "Basic"
-msgstr ""
+msgstr "Základné"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
 msgid "Types"
-msgstr ""
+msgstr "Typy"
 
 #. store options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:326
 msgid "LimeWire Store"
-msgstr ""
+msgstr "LimeWire Store"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:337
 msgid "Slots"
@@ -5303,9 +5714,8 @@ msgstr "Sloty"
 #. uploadSlotsPane.add(new SoftMaximumUploadsPaneItem("UPLOAD_SOFT_MAX"));
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:340
 #: gui/com/limegroup/gnutella/gui/tabs/ConnectionsTab.java:26
-#, fuzzy
 msgid "Connections"
-msgstr "Pripojenie"
+msgstr "Pripojenia"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:355
 msgid "System Tray"
@@ -5330,7 +5740,7 @@ msgstr "iTunes"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:369
 #: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:15
 msgid "Importing"
-msgstr ""
+msgstr "Importovanie"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:374
 msgid "Helper Apps"
@@ -5338,9 +5748,8 @@ msgstr "Aplikácie pomocníka"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:377
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:76
-#, fuzzy
 msgid "Bug Reports"
-msgstr "Skopírovať správu"
+msgstr "Správy o chybách"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:379
 msgid "View"
@@ -5349,7 +5758,7 @@ msgstr "Zobrazenie"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:380
 #: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:20
 msgid "Popups"
-msgstr ""
+msgstr "Popups"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:381
 msgid "Autocompletion"
@@ -5363,7 +5772,7 @@ msgstr "Vyhľadávanie"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:386
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:32
 msgid "Quality"
-msgstr ""
+msgstr "Kvalita"
 
 #. filter options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:390
@@ -5381,9 +5790,8 @@ msgstr "Obsah"
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:568
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:590
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
-#, fuzzy
 msgid "Junk"
-msgstr "Nie je Odpad"
+msgstr "Odpad"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:393
 msgid "Keywords"
@@ -5403,25 +5811,22 @@ msgstr "Nastavenie firewallu"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:400
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:28
-#, fuzzy
 msgid "Proxy"
-msgstr "Proxy:"
+msgstr "Proxy"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:401
 #: gui/com/limegroup/gnutella/gui/options/panes/NetworkInterfacePaneItem.java:33
-#, fuzzy
 msgid "Network Interface"
-msgstr "Použiť špecifické sieťové rozhranie."
+msgstr "Sieťové rozhranie"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:403
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:58
-#, fuzzy
 msgid "File Associations"
-msgstr "Umiestnenia"
+msgstr "Asociácie súborov"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:405
 msgid "Performance"
-msgstr ""
+msgstr "Výkon"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsMediator.java:70
 msgid "Loading Options Window..."
@@ -5473,9 +5878,8 @@ msgstr ""
 "prepísanie zoznamu zakázaných."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:29
-#, fuzzy
 msgid "Links and File Types"
-msgstr "Typ Licencie:"
+msgstr "Linky a typy súborov"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:31
 msgid ""
@@ -5483,11 +5887,13 @@ msgid ""
 "instruct LimeWire to always regain these associations if another program "
 "takes them."
 msgstr ""
+"LimeWire môžete použiť k otvoreniu určitých typov súborov a protokolov. "
+"Takisto môžete dať pokyn programu LimeWire, aby si opäť získal asociácie, ak "
+"mu ho vzal iný program."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:59
-#, fuzzy
 msgid "Use LimeWire for..."
-msgstr "Používanie &LimeWire"
+msgstr "Používať LimeWire pre..."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:22
 msgid "Audio Options"
@@ -5592,7 +5998,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:99
 msgid "Send Errors Automatically if LimeWire is Frozen"
-msgstr ""
+msgstr "Automaticky poslať chybové hlášky, ak LimeWire zamrzne."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ChatActivePaneItem.java:20
 msgid "Host Communication"
@@ -5698,9 +6104,8 @@ msgstr "Vyžadované heslo:"
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapPasswordPaneItem.java:38
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:48
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:598
-#, fuzzy
 msgid "Password:"
-msgstr "Vyžadované heslo:"
+msgstr "Heslo:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:21
 msgid ""
@@ -5744,7 +6149,7 @@ msgstr "Vždy sa spýtať, čo urobiť"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:23
 msgid "Capabilities"
-msgstr ""
+msgstr "Schopnosti"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:25
 msgid ""
@@ -5753,34 +6158,39 @@ msgid ""
 "secure communications mode called TLS, which may use more CPU resources.  "
 "You can disable these if needed."
 msgstr ""
+"Ak Váš počítač používa rýchle internetové pripojenie, LimeWire sa môže "
+"správať ako Ultrapeer a/alebo sa pripojiť ako Mojito DHT. LimeWire takisto "
+"môže použiť bezpečný komunikačný mód zvaný TLS, ktorý môže viac zaťažiť "
+"procesor. Toto môžete vypnúť, ak je to potrebné."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:39
 msgid "Disable Ultrapeer Capabilities:"
-msgstr ""
+msgstr "Vypnúť schopnosti Ultrapeer:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:41
 msgid "Disable Mojito DHT Capabilities:"
-msgstr ""
+msgstr "Vypnúť schopnosti Mojito DHT:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:45
 msgid "Disable TLS Capabilities:"
-msgstr ""
+msgstr "Vypnúť schopnosti TLS:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableOOBSearchingPaneItem.java:20
-#, fuzzy
 msgid "OOB Searching"
-msgstr "Vyhľadávanie"
+msgstr "Vyhľadávanie OOB"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableOOBSearchingPaneItem.java:22
 msgid ""
 "Out-Of-Band Searching results in faster result delivery to your client, "
 "though some internet connections may not work well with this feature."
 msgstr ""
+"Vyhľadávanie výsledkov mimo pásma prinesie Vášmu klientovi rýchlejšie "
+"výsledky, hoci niektoré internetové pripojenia nemusia s touto funkciou "
+"správne pracovať."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableOOBSearchingPaneItem.java:29
-#, fuzzy
 msgid "Enable OOB Searching:"
-msgstr "Vyhľadávanie"
+msgstr "Zapnúť OOB vyhľadávanie:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:28
 msgid "Download Bandwidth"
@@ -5797,7 +6207,7 @@ msgstr "Rýchlosť sťahovania:"
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:46
 #: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:46
 msgid "Unlimited"
-msgstr ""
+msgstr "Neobmedzená"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:21
 msgid "License Warning"
@@ -5915,10 +6325,12 @@ msgid ""
 "LimeWire can also manage a blacklist for you.  This will keep LimeWire "
 "protected from harmful clients and other nuisances."
 msgstr ""
+"LimeWire takisto môže spravovať čiernu listinu. Toto ochráni LimeWire pred "
+"škodlivými klientami a inými nepríjemnosťami."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreMessagesPaneItem.java:56
 msgid "Use LimeWire's built-in blacklist"
-msgstr ""
+msgstr "Použi vstavanú čiernu listinu LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:22
 msgid "Filter Result Types"
@@ -6065,7 +6477,6 @@ msgid "Open Dialog to Select a Folder"
 msgstr "Otovriť okno na výber priečinka"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:233
-#, fuzzy
 msgid "Reset"
 msgstr "Obnoviť"
 
@@ -6099,19 +6510,20 @@ msgstr ""
 "počítači. Odchádzajúce spojenia budú spájané do ľubovoľných rozhraní."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/NotificationsPaneItem.java:20
-#, fuzzy
 msgid "Notifications"
-msgstr "Umiestnenia"
+msgstr "Upozornenia"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/NotificationsPaneItem.java:22
 msgid ""
 "LimeWire can display popups to notify you when certain things happen, such "
 "as a download completing. "
 msgstr ""
+"LimeWire môže zobraziť vyskakovacie okná, aby Vás upozornil na určité veci "
+"ako dokončenie sťahovania. "
 
 #: gui/com/limegroup/gnutella/gui/options/panes/NotificationsPaneItem.java:25
 msgid "Show Notifications:"
-msgstr ""
+msgstr "Ukázať upozornenia:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/PartialFileSharingPaneItem.java:19
 msgid "Partial Files"
@@ -6224,9 +6636,8 @@ msgstr "Povoliť autentifikáciu (Nefunguje s HTTP proxy):"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:41
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:595
-#, fuzzy
 msgid "Username:"
-msgstr "Vyžadované používateľské meno:"
+msgstr "Používateľské meno:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:30
 msgid "Configure Proxy Options for LimeWire."
@@ -6366,26 +6777,23 @@ msgstr "Zdieľanie stiahnutých súborov:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:64
 msgid "All downloads will be shared."
-msgstr ""
+msgstr "Všetky downloady budú zdieľané."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:66
 msgid "Only downloads in shared folders will be shared."
-msgstr ""
+msgstr "Iba downloady v zdieľaných priečinkoch budú zdieľané."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:15
-#, fuzzy
 msgid "Torrent Sharing"
-msgstr "Práve zdieľate"
+msgstr "Zdieľanie torrentu"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:17
-#, fuzzy
 msgid "You can automatically share .torrent files."
-msgstr "Môžete automaticky mazať staré nedokončené sťahované súbory."
+msgstr "Automaticky môžete zdieľať súbory .torrent."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:24
-#, fuzzy
 msgid "Share .torrent files"
-msgstr "Zdieľané súbory"
+msgstr "Zdieľať súbory .torrent"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:33
 msgid ""
@@ -6417,7 +6825,7 @@ msgstr "Minimalizovať do systémovej lišty"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:20
 msgid "Start Upload Slots"
-msgstr ""
+msgstr "Spustiť uploadovacie sloty"
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
@@ -6426,17 +6834,16 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:22
 #: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:29
-#, fuzzy
 msgid "Start Upload Slots:"
-msgstr "Maximum slotov pre odosielanie:"
+msgstr "Spustiť upload sloty:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:28
 msgid "Sensitivity"
-msgstr ""
+msgstr "Citlivosť"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:30
 msgid "Adjust the sensitivity of LimeWire's junk filter"
-msgstr ""
+msgstr "Nastaviť citlivosť filtra odpadu programu LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:41
 msgid "Forget Training Data"
@@ -6517,15 +6924,15 @@ msgstr "Zobraziť indikátor firewallu:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarLWSPaneItem.java:21
 msgid "LimeWire Store Indicator"
-msgstr ""
+msgstr "Indikátor LimeWire Store"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarLWSPaneItem.java:23
 msgid "You can display your LimeWire Store status in the status bar."
-msgstr ""
+msgstr "Môžete zobraziť stav LimeWire Store v stavovom riadku."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarLWSPaneItem.java:30
 msgid "Show LimeWire Store Indicator:"
-msgstr ""
+msgstr "Ukázať indikátor LimeWire Store:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarSharedFilesPaneItem.java:21
 msgid "Shared Files Indicator"
@@ -6545,7 +6952,7 @@ msgstr "Zobraziť indikátorzdieľaných súborov:"
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:34
 msgid "LimeWire Store - Subfolder Template"
-msgstr ""
+msgstr "LimeWire Store - šablóna podpriečinku"
 
 #. *
 #. * General description of what this item is, and what its used for
@@ -6561,56 +6968,65 @@ msgid ""
 " Template: ${artist} \n"
 " How its saved: LimeWireStore/Artist Name/Artist Name - Track 1"
 msgstr ""
+"Môžete prispôsobiť, kde sa súbory zo store ukladajú. Vytvorením šablóny, "
+"LimeWire môže automaticky ukladať nakúpené súbory do priečinkov používajúc "
+"názov umelca a názov albumu. \n"
+"\n"
+"Napr.:\n"
+"Nakúpená skladba: Meno umelca - Stopa 1\n"
+" Šablóna: ${umelec} \n"
+" Je to uložené pod: LimeWireStore/Meno umelca/Meno umelca - Stopa 1"
 
 #. *
 #. * Label for the finished template
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:44
 msgid "Template"
-msgstr ""
+msgstr "Šablóna"
 
 #. *
 #. * Label for a drop down with options that can be added to the template
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:49
 msgid "Variables"
-msgstr ""
+msgstr "Premenné"
 
 #. *
 #. * Label for predefined templates
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:54
 msgid "Templates"
-msgstr ""
+msgstr "Šablóny"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:125
 msgid "Insert a Variable"
-msgstr ""
+msgstr "Vložte premennú"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:156
 msgid "Insert a template"
-msgstr ""
+msgstr "Vložte šablónu"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:160
 msgid "iTunes like"
-msgstr ""
+msgstr "Ako iTunes"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:197
 #, java-format
 msgid "Invalid template {0}"
-msgstr ""
+msgstr "Neplatná šablóna {0}"
 
 #. *
 #. * Title of the item in the pane, this name will be displayed in a line border
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreSaveDirPaneItem.java:21
 msgid "LimeWire Store - Save Folder"
-msgstr ""
+msgstr "LimeWire Store - Priečinok na ukladanie"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreSaveDirPaneItem.java:23
 msgid ""
 "You can choose the folder for saving files purchased from the LimeWire Store."
 msgstr ""
+"Môžete si zvoliť priečinok na ukladanie nakúpených súborov z LimeWire Store."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:20
 msgid "System Tray Icon"
@@ -6707,7 +7123,7 @@ msgstr "Odstrániť vybrané súbory z Playlistu"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:56
 msgid "Removes all Files from Playlist"
-msgstr ""
+msgstr "Odstrániť všetky súbory zo zoznamu skladieb"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:26
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:37
@@ -6716,11 +7132,11 @@ msgstr "počet"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:90
 msgid "Comment"
-msgstr ""
+msgstr "Komentár"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:152
 msgid "Playlist"
-msgstr ""
+msgstr "Zoznam skladieb"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:174
 msgid "Loading Playlist Window..."
@@ -6752,6 +7168,8 @@ msgid ""
 "Warning: a file with the name {0} already exists in the directory. Overwrite "
 "this file?"
 msgstr ""
+"Upozornenie: súbor s týmto názvom {0} už v tomto adresári existuje. Prepísať "
+"súbor?"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:796
 msgid "Playlist Files (*.m3u)"
@@ -6780,11 +7198,8 @@ msgid "Download As..."
 msgstr "Stiahnuť ako..."
 
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:255
-#, fuzzy
 msgid "Would you like to start downloads from the following magnets?"
-msgstr ""
-"Chcete zdieľať vaše nové ukladacie periečinky? Nasledovné nové priečinky "
-"budú zdieľané:"
+msgstr "Chcete začať sťahovať z nasledujúcich magnetov?"
 
 #: gui/com/limegroup/gnutella/gui/search/MetadataModel.java:575
 msgid "All"
@@ -6792,17 +7207,18 @@ msgstr "Všetko"
 
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:162
 msgid "Stop Sharing File(s)"
-msgstr ""
+msgstr "Zastaviť zdieľanie súboru/ov"
 
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:258
 #, java-format
 msgid ""
 "You are sharing {0} files. You can control which files LimeWire shares."
 msgstr ""
+"Zdieľate {0} súborov. Môžete ovládať, ktoré súbory má LimeWire zdieľať."
 
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:270
 msgid "Configure"
-msgstr ""
+msgstr "Nastaviť"
 
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:271
 #: gui/com/limegroup/gnutella/gui/tabs/LibraryPlayListTab.java:38
@@ -6871,7 +7287,7 @@ msgstr "Chcete zakázať vyhľadávanie zo servera"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1020
 msgid "More Info..."
-msgstr ""
+msgstr "Viac informácií..."
 
 #: gui/com/limegroup/gnutella/gui/search/SchemaBox.java:44
 msgid "Select Search Type:"
@@ -6904,9 +7320,8 @@ msgstr "Stiahnuť"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:44
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:87
-#, fuzzy
 msgid "Stop Search"
-msgstr "Ukončiť hľadanie"
+msgstr "Ukončiť vyhľadávanie"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:47
 msgid "Download All Selected Files"
@@ -6930,9 +7345,8 @@ msgstr "Kľúčové slovo"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:173
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:352
-#, fuzzy
 msgid "Direct Connect"
-msgstr "&Odpojiť"
+msgstr "Priame pripojenie"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:326
 msgid "Got Friends?"
@@ -6992,16 +7406,15 @@ msgstr "Prehľadať sieť na zvolené slová"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:657
 msgid "The address format is incorrect, please use host:port."
-msgstr ""
+msgstr "Formát adresy je nesprávny, použite prosím host:port."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:85
 msgid "Close Search"
 msgstr "Ukončiť hľadanie"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:89
-#, fuzzy
 msgid "Launch Action"
-msgstr "Načítať súbor"
+msgstr "Akcia spustiť"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
 msgid "Chat With Host"
@@ -7047,6 +7460,8 @@ msgstr ""
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
+"Počkajte prosím, LimeWire musí dokončiť načítavanie pred začatím "
+"vyhľadávania."
 
 #. if not connected or connecting, show one message.
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:450
@@ -7110,11 +7525,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/ThirdPartySearchResult.java:166
 msgid "View in Browser..."
-msgstr ""
+msgstr "Zobraziť v prehliadači..."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:56
 msgid "Extension Sharing Settings"
-msgstr ""
+msgstr "Nastavenie zdieľania prípon"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:58
 msgid ""
@@ -7122,62 +7537,68 @@ msgid ""
 "LimeWire's extension sharing preferences to the original preferences. Do you "
 "wish to continue?"
 msgstr ""
+"Táto možnosť vráti späť každú zmenu zdieľaných prípon, ktorú ste spravili a "
+"preferenčne nastaví prípony LimeWire do pôvodnej podoby. Chcete pokračovať?"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:59
 msgid "Enter the extension pattern:"
-msgstr ""
+msgstr "Vložiť vzor prípony:"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:60
 msgid "The extension name was not valid, could not add."
-msgstr ""
+msgstr "Názov prípony nie je platný, nemôže byť pridaná."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:61
 msgid "To allow selection enable sharing of sensitive types."
-msgstr ""
+msgstr "Umožniť povolenia zdieľať citlivé súbory."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:65
 msgid "Sharing Extensions"
-msgstr ""
+msgstr "Zdieľané prípony"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:68
 msgid ""
 "Select the types of files on your computer that you wish to share with "
 "LimeWire."
 msgstr ""
+"Označte typy súborov na počítači, ktoré si prajete zdieľať s programom "
+"LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:91
 msgid "My Extensions"
-msgstr ""
+msgstr "Moje prípony"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:92
 msgid "Other"
-msgstr ""
+msgstr "Iné"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:493
 msgid "Add New Extension"
-msgstr ""
+msgstr "Pridať novú príponu"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:494
 msgid "Add a New Extension to My Extensions"
-msgstr ""
+msgstr "Pridať novú príponu do Mojich prípon"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:536
 msgid "Do Not Share Sensitive File Types"
-msgstr ""
+msgstr "Nezdieľať citlivé typy súborov"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:537
 msgid ""
 "This stops LimeWire from sharing certain files that may contain sensitive "
 "information."
 msgstr ""
+"Toto zastaví LimeWire zdieľať určité súbory, ktoré môžu obsahovať citlivé "
+"informácie."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:753
 msgid "File types you added to share."
-msgstr ""
+msgstr "Typy súborov, ktoré ste pridali na zdieľanie."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:757
 msgid "Other types of files."
-msgstr ""
+msgstr "Iné typy súborov."
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:29
 #, java-format
@@ -7186,6 +7607,9 @@ msgid ""
 "this folder because it is either not a folder or cannot be "
 "read.<br><br>Please select another folder to share.</table></html>"
 msgstr ""
+"<html><table width=400>Označili ste: <i>{0}</i><br>LimeWire nemôže zdieľať "
+"tento priečinok, pretože to buď nie je priečinok alebo nemôže byť "
+"prečítaný.<br><br>Zvoľte si prosím iný priečinok na zdieľanie.</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:35
 #, java-format
@@ -7194,6 +7618,9 @@ msgid ""
 "this folder for security reasons.<br><br>Please select another folder to "
 "share.</table></html>"
 msgstr ""
+"<html><table width=400>Označili ste: <i>{0}</i><br> LimeWire nemôže zdieľať "
+"tento priečinok pre bezpečnostné dôvody.<br><br>Zvoľte si prosím iný "
+"priečinok na zdieľanie.</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:52
 #, java-format
@@ -7203,20 +7630,26 @@ msgid ""
 "NOT</b> share this folder.<br><br>Are you sure you want to share "
 "it?</table></html>"
 msgstr ""
+"<html><table width=400>Priečinok <i>{0}</i><br> pravdepodobne obsahuje "
+"citlivé alebo osobné údaje.<br><br>LimeWire odporúča aby ste "
+"<b>NEZDIEĽALI</b> tento priečinok.<br><br>Ste si istý, že ho chcete "
+"zdieľať?</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:75
 msgid "\".torrent\" files"
-msgstr ""
+msgstr "Súbory \".torrent\""
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:87
 msgid "\"magnet:\" links"
-msgstr ""
+msgstr "\"magnet:\" linky"
 
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:48
 msgid ""
 "One or more files or protocols that LimeWire uses are no longer associated "
 "with LimeWire. Would you like LimeWire to re-associate them?"
 msgstr ""
+"Jeden alebo viac súborov alebo protokolov, ktoré LimeWire používa nie sú "
+"asociované s programom LimeWire. Chcete ich znovu asociovať?"
 
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:50
 msgid "Details"
@@ -7225,23 +7658,23 @@ msgstr "Podrobnosti"
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:119
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:222
 msgid "Idle"
-msgstr ""
+msgstr "Nečinný"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:278
 msgid "Sorry, the browser could not be loaded."
-msgstr ""
+msgstr "Prepáčte, prehliadač sa nemôže načítať."
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:306
 msgid "Go"
-msgstr ""
+msgstr "Štart"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:352
 msgid "Back"
-msgstr ""
+msgstr "Späť"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:364
 msgid "Forward"
-msgstr ""
+msgstr "Dopredu"
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:46
 msgid "Revert To Default"
@@ -7253,7 +7686,7 @@ msgstr "Viac možností"
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:58
 msgid "Stripe Rows"
-msgstr ""
+msgstr "Prúžkované riadky"
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:64
 msgid "Sort Automatically"
@@ -7261,7 +7694,7 @@ msgstr "Automaticky zoradiť"
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:70
 msgid "Extended Tooltips"
-msgstr ""
+msgstr "Rozšírené tipy nástrojov"
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:186
 msgid "You cannot turn off all columns."
@@ -7284,9 +7717,8 @@ msgid "View Repository of Saved Files"
 msgstr "Zobrazenie umiestnenia uložených súborov"
 
 #: gui/com/limegroup/gnutella/gui/tabs/LoggingTab.java:23
-#, fuzzy
 msgid "View Logging Messages"
-msgstr "Zobrazenie Log správ"
+msgstr "Zobraziť záznamy správ"
 
 #: gui/com/limegroup/gnutella/gui/tabs/MonitorUploadTab.java:35
 msgid "Monitor"
@@ -7298,7 +7730,7 @@ msgstr "Zobrazenie vyhľadávaných a sťahovaných súborov"
 
 #: gui/com/limegroup/gnutella/gui/tabs/SWTBrowserSearchTab.java:19
 msgid "Shop at the LimeWire Store"
-msgstr ""
+msgstr "Nakupujte v LimeWire Store"
 
 #: gui/com/limegroup/gnutella/gui/tabs/SearchDownloadTab.java:42
 msgid "Search and Download Files"
@@ -7341,9 +7773,8 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:43
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:39
-#, fuzzy
 msgid "Kill Upload"
-msgstr "Nahrať"
+msgstr "Zrušiť upload"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:48
 msgid "Stop Selected Uploads"
@@ -7362,9 +7793,8 @@ msgid "Upload Limit Reached"
 msgstr "Dosiahnutý limit pre upload"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:60
-#, fuzzy
 msgid "Freeloader Uploading"
-msgstr "Preberanie súborov"
+msgstr "Freeloader uploadovanie"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:66
 msgid "Transfer Interrupted"
@@ -7376,49 +7806,44 @@ msgstr "Súbor nenájdený"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:84
 msgid "Queued at"
-msgstr ""
+msgstr "Čakajúci v rade"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:90
-#, fuzzy
 msgid "Range Unavailable"
-msgstr "Server je nedostupný"
+msgstr "Rozsah nedostupný"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:96
 msgid "Malformed Request"
-msgstr ""
+msgstr "Chybná požiadavka"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:102
 msgid "Banned Greedy Servent"
-msgstr ""
+msgstr "Nenásytný servent zákazaný"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:108
-#, fuzzy
 msgid "Uploading Hash Tree"
-msgstr "Nahrať súbor"
+msgstr "Uploadovanie hash stromu"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:116
-#, fuzzy
 msgid "Suspended"
-msgstr "Rýchlosť:"
+msgstr "Pozastavený"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:120
-#, fuzzy
 msgid "Awaiting Requests"
 msgstr "Čakanie na ďalšie zdroje"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:313
-#, fuzzy, java-format
+#, java-format
 msgid "Swarm for {0}"
-msgstr "Vyhľadávanie: {0}"
+msgstr "Swarm pre {0}"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:128
 msgid "Loading Upload Window..."
 msgstr "Načítavam okno Upload..."
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadProgressBarRenderer.java:39
-#, fuzzy
 msgid "Seeding"
-msgstr "Vyhľadávanie"
+msgstr "Seedovanie"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:37
 msgid "Invalid Filename"
@@ -7528,11 +7953,13 @@ msgid ""
 "The path of the parent folder exceeds the maximum length of paths on the "
 "filesystem. {0} "
 msgstr ""
+"Cesta pôvodného priečinka presahuje maximálnu dĺžku cesty v súborovom "
+"systéme. {0} "
 
 #: gui/com/limegroup/gnutella/gui/util/GUILauncher.java:67
 #, java-format
 msgid "There is nothing to preview for file {0}."
-msgstr ""
+msgstr "K dispozícii nie je žiadny náhľad pre súbor {0}."
 
 #: gui/com/limegroup/gnutella/gui/xml/IndentingPanel.java:131
 msgid "More Search Options"
@@ -7643,14 +8070,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:327
 msgid "Modify the license of this file"
-msgstr ""
+msgstr "Modifikovať licenciu pre tento súbor"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:330
-#, fuzzy
 msgid "Permanently remove the license from this file"
-msgstr ""
-"Ste si istý, že chcete natrvalo odstrániť licenciu s vašej kópie tohto "
-"súboru?"
+msgstr "Permanentne odstráň licenciu z tohto súboru"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:334
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:433
@@ -7676,9 +8100,8 @@ msgid "Allow modification of your work?"
 msgstr "Povoliť úpravu vašeho diela?"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:498
-#, fuzzy
 msgid "Save details to file"
-msgstr "Uložiť terajší Playlist do súboru"
+msgstr "Uložiť detaily do súboru"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:514
 msgid "Copyright Holder:"
@@ -7694,15 +8117,13 @@ msgstr "Názov práce:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:534
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:87
-#, fuzzy
 msgid "Description:"
-msgstr "Popis"
+msgstr "Popis:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:555
-#, fuzzy
 msgid "Please enter the copyright holder, copright year and title."
 msgstr ""
-"Zadajte prosím vlastníka autorských práv súboru, ktorý chcete publikovať."
+"Zadajte prosím vlastníka autorských práv, rok autorských práv a názov."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:561
 msgid "Please enter a valid year for the file you want to publish."
@@ -7725,9 +8146,8 @@ msgid "What is this?"
 msgstr "Čo je toto?"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:659
-#, fuzzy
 msgid "The verification file is hosted at the following URL:"
-msgstr "Chcem sám poskytnúť overovací súbor na tejto URL arese:"
+msgstr "Verifikovaný súbor je hostovaný na nasledujúcej URL adrese:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:707
 msgid "Please enter your Internet Archive username and password."
@@ -7772,6 +8192,9 @@ msgid ""
 "The default Internet Archive identifier for this file and username is "
 "already taken. Please modify it below or press cancel to return."
 msgstr ""
+"Prednastavený identifikátor internetového archívu pre tento súbor a "
+"používateľské meno je už použitý. Zmeňte ho nižšie alebo stačte zrušiť pre "
+"návrat."
 
 #. TODO: BAD.  DO NOT CALL SWING HERE.
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveIdentifierRetriever.java:86
@@ -7901,7 +8324,7 @@ msgstr "Jazyk:"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:45
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:59
 msgid "Length:"
-msgstr ""
+msgstr "Dĺžka:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:46
 msgid "Bitrate:"

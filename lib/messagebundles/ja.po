@@ -10,14 +10,14 @@ msgstr ""
 "Project-Id-Version: ja\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2008-01-07 03:47+0000\n"
+"PO-Revision-Date: 2008-01-22 16:24+0000\n"
 "Last-Translator: Steffen Pingel <steffenp@gmx.de>\n"
 "Language-Team: <en@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-01-29 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -2211,6 +2211,8 @@ msgid ""
 "indicates a potential security problem, so please review your \"My Shared "
 "Files\" to ensure you aren't sharing any sensitive files."
 msgstr ""
+"共有フォルダ「{0}」内の多くのサブフォルダが共有されていますが、これはセキュリティ上の問題となる可能性があります。「共有ファイル」を調べて、重要なファイ"
+"ルが共有されていないか確認して下さい。"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:94
 #, java-format

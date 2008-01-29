@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2008-01-07 02:45+0000\n"
+"PO-Revision-Date: 2008-01-26 16:02+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-01-29 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -3926,10 +3926,13 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:80
+#, fuzzy
 msgid ""
 "Want to share a large file? LimeWire supports file sizes up to 1 TB "
 "(terabyte)."
 msgstr ""
+"Deseja  compartilhar um arquivo grande? LimeWire suporta arquivos com "
+"tamanhos superiores à 1 TB (terabyte)"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:81
 msgid ""

@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2008-01-14 18:07+0000\n"
+"PO-Revision-Date: 2008-01-27 22:52+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-01-22 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-01-29 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -2344,6 +2344,11 @@ msgid ""
 "have either written code that is distributed with every version of LimeWire, "
 "have identified serious bugs in the code, or both:"
 msgstr ""
+"Οι συνησφέροντες στο πρόγραμμα ανοιχτού κώδικα Limewire προσέφεραν σημαντικό "
+"μέρος του κώδικα , διόρθωση σφαλμάτων , ιδέες , έρευνα ,κτλ στο πρόγραμμα "
+"αυτό. Όσοι αναφέρονται παρακάτω έχουν , είτε γράψει κώδικα ο οποίος "
+"διανέμεται με κάθε έκδοση του LimeWire  είτε έχουν υποδείξει σοβαρά "
+"προβλήματα στον κώδικα ή και τα δύο:"
 
 #. internationalization contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:285
@@ -2477,6 +2482,12 @@ msgid ""
 "full access to incoming and outgoing connections. To disable this feature, "
 "click 'No'."
 msgstr ""
+"Το LimeWire δέν μπόρεσε να ξεκινήσει το προτόκολλο Digital Audio Access (για "
+"τον διαμoiρασμο  αρχείων στο  iTunes) επειδή το firewall μπλοκάρει την "
+"πρόσβαση. Για να συνεχίσετε να χρησιμοποιήτε αυτό το χαρακτηριστικό , "
+"πατήστε 'Ναι' και αλλάξτε το firewall έτσι ώστε να δίνει στο 'LimeWire.exe' "
+"πλήρη πρόσβαση στις εισερχόμενες και εξερχόμενες συνδέσεις. Για να "
+"απενεργοποιοήσετε το χαρακτηριστικό αυτό, πατήστε 'Οχι'."
 
 #. NOTE: The IDs are serialized to disk, and should never change.
 #. *
@@ -2561,7 +2572,7 @@ msgstr "Όλοι οι φάκελοι"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:48
 msgid "View My Shared Files."
-msgstr ""
+msgstr "Προβολή των κοινόχρηστων αρχείων μου"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:81
 #, java-format
@@ -2570,6 +2581,10 @@ msgid ""
 "indicates a potential security problem, so please review your \"My Shared "
 "Files\" to ensure you aren't sharing any sensitive files."
 msgstr ""
+"Μοιράζεστε πολλούς υποφακέλλους μέσα στον κοινόχρηστο φάκελλο :{0}. Αυτό "
+"υποδεικνύει ένα πιθανό πρόβλημα ασφαλείας , έτσι παρακαλούμε να κάνετε μία "
+"ανασκόπηση στα \"Kοινόχρηστα αρχεία μου\" για να βεβαιωθείτε οτι δεν "
+"μοιράζεστε αρχεία ευαίσθητων περιεχομένων."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:94
 #, java-format
@@ -2578,11 +2593,15 @@ msgid ""
 "you mean to share all these files? Please review your sharing settings and "
 "which files are shared to ensure you aren't sharing any sensitive files."
 msgstr ""
+"Μοιράζεστε πολλά αρχεία μέσο του LimeWire, {0} αρχεία και πάνω. Έιστε "
+"σίγουρος οτι θέλετε να μοιράζεστε όλα αυτα τα αρχεία? Παρακαλούμε να κάνετε "
+"μία ανασκόπηση στις ρυθμίσεις σας και ποιά αρχεία είναι κοινόχρηστα για να "
+"βεβαιωθείτε οτι δεν μοιράζεστε αρχεία ευαίσθητων περιεχομένων."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:106
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:107
 msgid "Do not display this message again."
-msgstr ""
+msgstr "Μήν ξαναδείξεις αυτο το μήνυμα."
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 msgid "Modem"
