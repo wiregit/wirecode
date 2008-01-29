@@ -77,7 +77,6 @@ public class AudioDataReader implements MetaReader {
     }
 
     public List<NameValue<String>> toNameValueList() {
-        // TODO Auto-generated method stub
-        return null;
+        return audioData.toNameValueList();
     }
 }
