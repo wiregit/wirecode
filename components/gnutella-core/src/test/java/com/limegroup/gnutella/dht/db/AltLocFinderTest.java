@@ -17,6 +17,7 @@ import org.limewire.mojito.util.UnitTestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
@@ -29,6 +30,7 @@ import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.security.TigerTree;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
+import com.limegroup.gnutella.util.MockUtils;
 
 public class AltLocFinderTest extends MojitoTestCase {
 
@@ -70,11 +72,15 @@ public class AltLocFinderTest extends MojitoTestCase {
 
         networkManager = new NetworkManagerStub();
 
+        // to have non-empty push proxies to send
+        final ConnectionManager connectionManager = MockUtils.createConnectionManagerWithPushProxies(context);
+        
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(DHTManager.class).toInstance(dhtManager);
                 bind(NetworkManager.class).toInstance(networkManager);
+                bind(ConnectionManager.class).toInstance(connectionManager);
             }
         });
         altLocValueFactory = injector.getInstance(AltLocValueFactory.class);
@@ -131,7 +137,7 @@ public class AltLocFinderTest extends MojitoTestCase {
         mojitoDHT.put(kuid, value).get();
         // publish push proxy manually
         PushProxiesValue pushProxiesValue = pushProxiesValueFactory.createDHTValueForSelf();
-        mojitoDHT.put(KUIDUtils.toKUID(new GUID(pushProxiesValue.getGUID())), pushProxiesValue);  
+        mojitoDHT.put(KUIDUtils.toKUID(new GUID(pushProxiesValue.getGUID())), pushProxiesValue).get();  
         
         AltLocSearchHandler listener = new AltLocSearchHandler();        
         

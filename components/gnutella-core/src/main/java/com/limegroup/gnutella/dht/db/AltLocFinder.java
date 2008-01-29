@@ -45,6 +45,28 @@ import com.limegroup.gnutella.settings.DHTSettings;
 @Singleton
 public class AltLocFinder {
 
+    /**
+     * Result type to denote different results of {@link AbstractResultHandler#handleDHTValueEntity(DHTValueEntity)}.
+     */
+    private enum Result {
+        /** An alternate location has been found */
+        FOUND(true),
+        /** An alternate location has not been found and will not be found */
+        NOT_FOUND(false),
+        /** An alternate location has not yet been found but could still be found */
+        NOT_YET_FOUND(false);
+        
+        private final boolean value;
+        
+        private Result(boolean value) {
+            this.value = value;
+        }
+        
+        public final boolean toBoolean() {
+            return value;
+        }
+    };
+    
     private static final Log LOG = LogFactory.getLog(AltLocFinder.class);
     
     private final DHTManager manager;
@@ -139,7 +161,7 @@ public class AltLocFinder {
      * Iterates over entity keys and retrieves their values from the node and
      * calls {@link #handleDHTValueEntity(DHTValueEntity)} for them.
      */
-    private static abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
+    private abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
         
         protected final MojitoDHT dht;
         
@@ -151,27 +173,6 @@ public class AltLocFinder {
         
         protected final DHTValueType valueType;
         
-        /**
-         * Result type to denote different results of {@link AbstractResultHandler#handleDHTValueEntity(DHTValueEntity)}.
-         */
-        enum Result {
-            /** An alternate location has been found */
-            FOUND(true),
-            /** An alternate location has not been found and will not be found */
-            NOT_FOUND(false),
-            /** An alternate location has not yet been found but could still be found */
-            NOT_YET_FOUND(false);
-            
-            private final boolean value;
-            
-            private Result(boolean value) {
-                this.value = value;
-            }
-            
-            public final boolean toBoolean() {
-                return value;
-            }
-        };
         
         private AbstractResultHandler(MojitoDHT dht, URN urn, 
                 KUID key, AltLocSearchListener listener, 
@@ -186,11 +187,11 @@ public class AltLocFinder {
         
         @Override
         public void handleFutureSuccess(FindValueResult result) {
-            Result success = Result.NOT_FOUND;
+            Result outcome = Result.NOT_FOUND;
             
             if (result.isSuccess()) {
                 for (DHTValueEntity entity : result.getEntities()) {
-                    success = updateResult(success, handleDHTValueEntity(entity)); 
+                    outcome = updateResult(outcome, handleDHTValueEntity(entity)); 
                 }
                 
                 for (EntityKey entityKey : result.getEntityKeys()) {
@@ -204,7 +205,7 @@ public class AltLocFinder {
                         
                         if (resultFromKey.isSuccess()) {
                             for (DHTValueEntity entity : resultFromKey.getEntities()) {
-                                success = updateResult(success, handleDHTValueEntity(entity));
+                                outcome = updateResult(outcome, handleDHTValueEntity(entity));
                             }
                         }
                     } catch (ExecutionException e) {
@@ -217,9 +218,9 @@ public class AltLocFinder {
             
             if (listener != null) {
                 // only notify if there if we already found something or there is 
-                // not chance of still finding a value
-                if (success != Result.NOT_YET_FOUND) {
-                    listener.handleAltLocSearchDone(success.toBoolean());
+                // no chance of still finding a value
+                if (outcome != Result.NOT_YET_FOUND) {
+                    listener.handleAltLocSearchDone(outcome.toBoolean());
                 }
             }
         }
@@ -355,7 +356,6 @@ public class AltLocFinder {
         private PushAltLocsHandler(MojitoDHT dht, GUID guid, URN urn, 
                 KUID key, DHTValueEntity altLocEntity, AltLocSearchListener listener) {
             super(dht, urn, key, listener, AbstractPushProxiesValue.PUSH_PROXIES);
-            
             this.guid = guid;
             this.altLocEntity = altLocEntity;
         }
