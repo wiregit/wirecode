@@ -102,6 +102,14 @@ public class AltLocFinderTest extends MojitoTestCase {
     }
     
     public void testAltLocListenerIsNotifiedOfNonFirewalledLocations() throws Exception {
+        testAltLocListenerNonFirewalledLocations(true);
+    }
+    
+    public void testAltLocListenerIsNotNotifiedOfNonFirewalledLocations() throws Exception {
+        testAltLocListenerNonFirewalledLocations(false);
+    }
+    
+    private void testAltLocListenerNonFirewalledLocations(boolean successful) throws Exception {
         // set to non-firewalled, so created altloc value for self is not firewalled
         networkManager.setAcceptedIncomingConnection(true);
         // publish an alternate location in the DHT
@@ -110,22 +118,41 @@ public class AltLocFinderTest extends MojitoTestCase {
         assertFalse(value.isFirewalled());
         KUID kuid = KUIDUtils.toKUID(urn);
 
-        // publish altloc value manually
-        mojitoDHT.put(kuid, value).get();
+        // publish altloc value manually for successful case
+        if (successful) {
+            mojitoDHT.put(kuid, value).get();
+        }
         
         // expected alternate location
         final AlternateLocation expectedAltLoc = alternateLocationFactory.createDirectDHTAltLoc(new IpPortImpl(networkManager.getAddress(), networkManager.getPort()), urn, 5555, new byte[TigerTree.HASHSIZE]);
-        AltLocSearchHandler listener = new AltLocSearchHandler();        
+        AltLocSearchHandler listener = new AltLocSearchHandler();
+        // initialize with other value to see if it is actually called
+        listener.success = !successful;
         
         altLocFinder.findAltLocs(urn, listener);
         listener.doneLatch.await(500, TimeUnit.MILLISECONDS);
         listener.alternateLocationLatch.await(500, TimeUnit.MILLISECONDS);
-        
-        assertEquals(expectedAltLoc, listener.altLoc);
-        assertTrue(listener.success);
+
+        if (successful) {
+            assertEquals(expectedAltLoc, listener.altLoc);
+            assertTrue(listener.success);
+        } else {
+            assertNull(listener.altLoc);
+            assertFalse(listener.success);
+        }
     }
     
+    
+    
     public void testAltLocListenerIsNotifedOfFirewalledLocations() throws Exception {
+        testAltLocListenerFirewalledLocations(true);
+    }
+    
+    public void testAltLocListenerIsNotNotifedOfFirewalledLocations() throws Exception {
+        testAltLocListenerFirewalledLocations(false);
+    }
+    
+    public void testAltLocListenerFirewalledLocations(boolean successful) throws Exception {
         networkManager.setExternalAddress(new byte[] { 127, 0, 0, 1 });
         
         URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
@@ -137,9 +164,13 @@ public class AltLocFinderTest extends MojitoTestCase {
         mojitoDHT.put(kuid, value).get();
         // publish push proxy manually
         PushProxiesValue pushProxiesValue = pushProxiesValueFactory.createDHTValueForSelf();
-        mojitoDHT.put(KUIDUtils.toKUID(new GUID(pushProxiesValue.getGUID())), pushProxiesValue).get();  
+        if (successful) {
+            mojitoDHT.put(KUIDUtils.toKUID(new GUID(pushProxiesValue.getGUID())), pushProxiesValue).get();
+        }
         
-        AltLocSearchHandler listener = new AltLocSearchHandler();        
+        AltLocSearchHandler listener = new AltLocSearchHandler();
+        // initialize with opposite value to see if it is actually set
+        listener.success = !successful;
         
         altLocFinder.findAltLocs(urn, listener);
         listener.doneLatch.await(500, TimeUnit.MILLISECONDS);
@@ -148,8 +179,13 @@ public class AltLocFinderTest extends MojitoTestCase {
         // expected alternate location
         AlternateLocation expectedAltLoc = alternateLocationFactory.createPushAltLoc(pushEndpointFactory.createForSelf(), urn);
         
-        assertEquals(expectedAltLoc, listener.altLoc);
-        assertTrue(listener.success);
+        if (successful) {
+            assertEquals(expectedAltLoc, listener.altLoc);
+            assertTrue(listener.success);
+        } else {
+            assertNull(listener.altLoc);
+            assertFalse(listener.success);
+        }
     }
     
     private static class AltLocSearchHandler implements AltLocSearchListener {
