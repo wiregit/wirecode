@@ -10,10 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -21,10 +18,8 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
-import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IOUtils;
-import org.limewire.statistic.StatsUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.GenericsUtils;
 
@@ -59,7 +54,7 @@ public class RatingTable {
 	private final Map<Token, Token> _tokenMap;
 	
 	private final Tokenizer tokenizer;
-
+	
 	/**
 	 * constructor, tries to deserialize filter data from disc, which will fail
 	 * silently, if it fails
@@ -309,79 +304,37 @@ public class RatingTable {
 	    return new File(CommonUtils.getUserSettingsDir(),"spam.dat");
 	}
     
-    @SuppressWarnings("unused")
-    @InspectableContainer
-	private class RatingTableInspectables {
+   
         
-        private static final int VERSION = 1;
-        private void addVersion(Map<String, Object> m) {
-            m.put("ver", VERSION);
-        }
-        
-        /** Inspectable with some stats about tokens */
-        @InspectionPoint("spam rating table token stats")
-        public final Inspectable TOKEN_STAT = new Inspectable() {
-            public Object inspect() {
-                synchronized(RatingTable.this) {
-                    Map<String, Object> ret = new HashMap<String, Object>();
-                    addVersion(ret);
-                    List<Double> ratings = new ArrayList<Double>(_tokenMap.size());
-                    List<Double> types = new ArrayList<Double>(_tokenMap.size());
-                    List<Double> importance = new ArrayList<Double>(_tokenMap.size());
-                    List<Double> ratingToType = new ArrayList<Double>(_tokenMap.size());
-                    for (Token t : _tokenMap.values()) {
-                        ratings.add((double)t.getRating());
-                        types.add((double)t.getType().ordinal());
-                        importance.add(t.getImportance());
-                        ratingToType.add((double)t.getRating() - t.getType().ordinal());
-                    }
-
-                    ret.put("ratings", StatsUtils.quickStatsDouble(ratings).getMap());
-                    ret.put("types", StatsUtils.quickStatsDouble(types).getMap());
-                    ret.put("imp", StatsUtils.quickStatsDouble(importance).getMap());
-                    ret.put("r2tt", StatsUtils.quickStatsDouble(ratingToType).getTTestMap());
-                    return ret;
-                }
-            }
-        };
-
-        /** Inspectable that returns a hash of the tokens */
-        @InspectionPoint("spam rating table token hashes")
-        public final Inspectable TOKEN_HASH = new Inspectable() {
-            public Object inspect() {
-                synchronized(RatingTable.this) {
-                    Map<String, Object> ret = new HashMap<String, Object>();
-                    addVersion(ret);
-                    final float spamTreshold = Math.max(SearchSettings.FILTER_SPAM_RESULTS.getValue(),
-                            SearchSettings.QUERY_SPAM_CUTOFF.getValue());
-                    Set<Token> spam = new TreeSet<Token>(new Comparator<Token>() {
-                        public int compare(Token a, Token b) {
-                            // higher rating first
-                            return -Float.compare(a.getRating(), b.getRating());
-                        }
-                    });
-                    spam.addAll(_tokenMap.values());
-                    int written = 0;
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    DataOutputStream daos = new DataOutputStream(baos);
-                    try {
-                        for (Token t : spam) {
-                            // 8 bytes per entry, limit size to 2kb uncompressed
-                            float rating = t.getRating();
-                            if (rating < spamTreshold || written++ > 250)
-                                break;
-                            daos.writeFloat(rating);
-                            daos.writeInt(t.hashCode());
-                        }
-                        daos.flush();
-                        daos.close();
-                        ret.put("dump", baos.toByteArray());
-                    } catch (IOException impossible) {
-                        ret.put("error", impossible.toString());
-                    }
-                    return ret;
-                }
-            }
-        };
-    }
+	/** Inspectable that returns a hash and rating of the tokens */
+	@InspectionPoint("spam rating table token hashes")
+	@SuppressWarnings("unused")
+	private final Inspectable TOKEN_HASH = new Inspectable() {
+	    public Object inspect() {
+	        synchronized(RatingTable.this) {
+	            Map<String, Object> ret = new HashMap<String, Object>();
+	            ret.put("ver",1);
+	            final float spamTreshold = Math.max(SearchSettings.FILTER_SPAM_RESULTS.getValue(),
+	                    SearchSettings.QUERY_SPAM_CUTOFF.getValue());
+	            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	            DataOutputStream daos = new DataOutputStream(baos);
+	            try {
+	                for (Token t : _tokenMap.values()) {
+	                    // 8 bytes per entry
+	                    float rating = t.getRating();
+	                    if (rating < spamTreshold)
+	                        break;
+	                    daos.writeFloat(rating);
+	                    daos.writeInt(t.hashCode());
+	                }
+	                daos.flush();
+	                daos.close();
+	                ret.put("dump", baos.toByteArray());
+	            } catch (IOException impossible) {
+	                ret.put("error", impossible.toString());
+	            }
+	            return ret;
+	        }
+	    }
+	};
 }
