@@ -16,7 +16,7 @@ import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.util.UnitTestUtils;
+import org.limewire.mojito.util.MojitoUtils;
 
 @SuppressWarnings("null")
 public class GetValueTest extends MojitoTestCase {
@@ -42,7 +42,7 @@ public class GetValueTest extends MojitoTestCase {
     public void testGetValueByType() throws Exception {
         List<MojitoDHT> dhts = Collections.emptyList();
         try {        
-            dhts = UnitTestUtils.createBootStrappedDHTs(1);
+            dhts = MojitoUtils.createBootStrappedDHTs(1);
             MojitoDHT first = dhts.get(0);
             Thread.sleep(250);
             
@@ -94,7 +94,7 @@ public class GetValueTest extends MojitoTestCase {
     public void testNotSameReference() throws Exception {
         List<MojitoDHT> dhts = Collections.emptyList();
         try {
-            dhts = UnitTestUtils.createBootStrappedDHTs(1);
+            dhts = MojitoUtils.createBootStrappedDHTs(1);
             MojitoDHT first = dhts.get(0);
             Thread.sleep(250);
             

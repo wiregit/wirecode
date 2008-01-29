@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 
 import junit.framework.Test;
 
+import org.limewire.io.IOUtils;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
@@ -24,7 +25,7 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.KademliaSettings;
-import org.limewire.mojito.util.UnitTestUtils;
+import org.limewire.mojito.util.MojitoUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LifecycleManager;
@@ -73,7 +74,7 @@ public class PassiveLeafTest extends DHTTestCase {
         MojitoDHT passiveLeaf = null;
         List<MojitoDHT> dhts = Collections.emptyList();
         try {
-            dhts = UnitTestUtils.createBootStrappedDHTs(3, 2000);
+            dhts = MojitoUtils.createBootStrappedDHTs(3, 2000);
             // Store a DHTValue
             KUID key = KUID.createRandomID();
             DHTValue value = new DHTValueImpl(
@@ -118,7 +119,7 @@ public class PassiveLeafTest extends DHTTestCase {
             }
             
         } finally {
-            UnitTestUtils.close(dhts);
+            IOUtils.close(dhts);
             
             if (passiveLeaf != null) {
                 passiveLeaf.close();

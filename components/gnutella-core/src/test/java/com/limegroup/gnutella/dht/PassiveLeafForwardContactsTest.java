@@ -14,7 +14,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.NetworkSettings;
-import org.limewire.mojito.util.UnitTestUtils;
+import org.limewire.mojito.util.MojitoUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
@@ -114,7 +114,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         // Start and bootstrap a bunch of DHT Nodes
         k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         dhts = Collections.emptyList();
-        dhts = UnitTestUtils.createBootStrappedDHTs(2);
+        dhts = MojitoUtils.createBootStrappedDHTs(2);
     }
 
     private void doSettings() {

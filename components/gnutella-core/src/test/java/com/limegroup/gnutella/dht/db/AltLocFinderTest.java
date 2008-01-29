@@ -12,7 +12,7 @@ import org.jmock.Mockery;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.util.UnitTestUtils;
+import org.limewire.mojito.util.MojitoUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -60,7 +60,7 @@ public class AltLocFinderTest extends DHTTestCase {
         
         context = new Mockery();
         dhtManager = context.mock(DHTManager.class);
-        dhts = UnitTestUtils.createBootStrappedDHTs(1);
+        dhts = MojitoUtils.createBootStrappedDHTs(1);
         
         mojitoDHT = dhts.get(0);
         context.checking(new Expectations() {{
@@ -140,8 +140,6 @@ public class AltLocFinderTest extends DHTTestCase {
             assertFalse(listener.success);
         }
     }
-    
-    
     
     public void testAltLocListenerIsNotifedOfFirewalledLocations() throws Exception {
         testAltLocListenerFirewalledLocations(true);

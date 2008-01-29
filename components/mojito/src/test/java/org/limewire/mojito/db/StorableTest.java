@@ -35,7 +35,7 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.DatabaseSettings;
 import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.DatabaseUtils;
-import org.limewire.mojito.util.UnitTestUtils;
+import org.limewire.mojito.util.MojitoUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 public class StorableTest extends MojitoTestCase {
@@ -66,7 +66,7 @@ public class StorableTest extends MojitoTestCase {
         
         Map<KUID, MojitoDHT> dhts = Collections.emptyMap();
         try {
-            dhts = UnitTestUtils.createBootStrappedDHTsMap(2);
+            dhts = MojitoUtils.createBootStrappedDHTsMap(2);
             Thread.sleep(250);
             
             KUID key = KUID.createRandomID();
