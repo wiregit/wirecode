@@ -12,7 +12,6 @@ import org.jmock.Mockery;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.util.UnitTestUtils;
 
 import com.google.inject.AbstractModule;
@@ -26,13 +25,13 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.security.TigerTree;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.MockUtils;
 
-public class AltLocFinderTest extends MojitoTestCase {
+public class AltLocFinderTest extends DHTTestCase {
 
     private Mockery context;
     private MojitoDHT mojitoDHT;
@@ -56,8 +55,8 @@ public class AltLocFinderTest extends MojitoTestCase {
     
     @Override
     protected void setUp() throws Exception {
+        setSettings();
         setLocalIsPrivate(false);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         
         context = new Mockery();
         dhtManager = context.mock(DHTManager.class);
