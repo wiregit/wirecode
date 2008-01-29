@@ -3,10 +3,12 @@ package com.limegroup.gnutella.metadata;
 import java.io.File;
 import java.io.IOException;
 
-import org.limewire.util.CommonUtils;
-
 import junit.framework.Test;
 
+import org.limewire.util.CommonUtils;
+
+import com.limegroup.gnutella.metadata.audio.AudioMetaData;
+import com.limegroup.gnutella.metadata.audio.reader.ASFParser;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -46,21 +48,23 @@ public class ASFParsingTest extends LimeTestCase {
 	    assertTrue(parser.hasAudio());
 	    assertFalse(parser.hasVideo());
 	    
-	    AudioMetaData data = (AudioMetaData)MetaData.parse(f);
-	    assertEquals("Normal Author", data.getArtist());
-	    assertEquals("Normal Title", data.getTitle());
-	    assertEquals("Normal Copyright", data.getLicense());
-	    assertEquals("Normal Description", data.getComment());
-	    assertEquals(315, data.getBitrate());
-	    assertEquals(null, data.getLicenseType());
-	    assertEquals(-1, data.getTrack());
-	    assertEquals(null, data.getAlbum());
-	    assertEquals(null, data.getYear());
-	    assertEquals(null, data.getGenre());
-	    assertEquals(0, data.getLength());
-	    assertEquals(-1, data.getTotalTracks());
-	    assertEquals(-1, data.getDisk());
-	    assertEquals(-1, data.getTotalDisks());
+	    MetaReader data = MetaDataFactory.parse(f);
+	    AudioMetaData amd = (AudioMetaData) data.getMetaData();
+	    
+	    assertEquals("Normal Author", amd.getArtist());
+	    assertEquals("Normal Title", amd.getTitle());
+	    assertEquals("Normal Copyright", amd.getLicense());
+	    assertEquals("Normal Description", amd.getComment());
+	    assertEquals(315, amd.getBitrate());
+	    assertEquals(null, amd.getLicenseType());
+	    assertEquals("-1", amd.getTrack());
+	    assertEquals(null, amd.getAlbum());
+	    assertEquals(null, amd.getYear());
+	    assertEquals(null, amd.getGenre());
+	    assertEquals(0, amd.getLength());
+	    assertEquals(-1, amd.getTotalTracks());
+	    assertEquals(-1, amd.getDisk());
+	    assertEquals(-1, amd.getTotalDisks());
     }
 
 
@@ -88,21 +92,23 @@ public class ASFParsingTest extends LimeTestCase {
 	    assertTrue(parser.hasAudio());
 	    assertFalse(parser.hasVideo());
 	    
-	    AudioMetaData data = (AudioMetaData)MetaData.parse(f);
-	    assertEquals("An Artist", data.getArtist());
-	    assertEquals("A Title", data.getTitle());
-	    assertEquals("This is a copyright", data.getLicense());
-	    assertEquals("This is a comment", data.getComment());
-	    assertEquals(192, data.getBitrate());
-	    assertEquals(null, data.getLicenseType());
-	    assertEquals(1, data.getTrack());
-	    assertEquals("An Album", data.getAlbum());
-	    assertEquals("2005", data.getYear());
-	    assertEquals("Acoustic", data.getGenre());
-	    assertEquals(0, data.getLength());
-	    assertEquals(-1, data.getTotalTracks());
-	    assertEquals(-1, data.getDisk());
-	    assertEquals(-1, data.getTotalDisks());
+	    MetaReader data = MetaDataFactory.parse(f);
+	    AudioMetaData amd = (AudioMetaData) data.getMetaData();
+	       
+	    assertEquals("An Artist", amd.getArtist());
+	    assertEquals("A Title", amd.getTitle());
+	    assertEquals("This is a copyright", amd.getLicense());
+	    assertEquals("This is a comment", amd.getComment());
+	    assertEquals(192, amd.getBitrate());
+	    assertEquals(null, amd.getLicenseType());
+	    assertEquals("1", amd.getTrack());
+	    assertEquals("An Album", amd.getAlbum());
+	    assertEquals("2005", amd.getYear());
+	    assertEquals("Acoustic", amd.getGenre());
+	    assertEquals(0, amd.getLength());
+	    assertEquals(-1, amd.getTotalTracks());
+	    assertEquals(-1, amd.getDisk());
+	    assertEquals(-1, amd.getTotalDisks());
     }
 
 	public void testASFVBR() throws IOException {
@@ -129,20 +135,22 @@ public class ASFParsingTest extends LimeTestCase {
 	    assertTrue(parser.hasAudio());
 	    assertFalse(parser.hasVideo());
 	    
-	    AudioMetaData data = (AudioMetaData)MetaData.parse(f);
-	    assertEquals("Another Artist", data.getArtist());
-	    assertEquals("Another Title", data.getTitle());
-	    assertEquals("None", data.getLicense());
-	    assertEquals("This is a small comment.", data.getComment());
-	    assertEquals(7686, data.getBitrate());
-	    assertEquals(null, data.getLicenseType());
-	    assertEquals(-1, data.getTrack());
-	    assertEquals("Another Album", data.getAlbum());
-	    assertEquals("2001", data.getYear());
-	    assertEquals("My Own", data.getGenre());
-	    assertEquals(0, data.getLength());
-	    assertEquals(-1, data.getTotalTracks());
-	    assertEquals(-1, data.getDisk());
-	    assertEquals(-1, data.getTotalDisks());
+	    MetaReader data = MetaDataFactory.parse(f);
+	    AudioMetaData amd = (AudioMetaData) data.getMetaData();
+	    
+	    assertEquals("Another Artist", amd.getArtist());
+	    assertEquals("Another Title", amd.getTitle());
+	    assertEquals("None", amd.getLicense());
+	    assertEquals("This is a small comment.", amd.getComment());
+	    assertEquals(7686, amd.getBitrate());
+	    assertEquals(null, amd.getLicenseType());
+	    assertEquals("-1", amd.getTrack());
+	    assertEquals("Another Album", amd.getAlbum());
+	    assertEquals("2001", amd.getYear());
+	    assertEquals("My Own", amd.getGenre());
+	    assertEquals(0, amd.getLength());
+	    assertEquals(-1, amd.getTotalTracks());
+	    assertEquals(-1, amd.getDisk());
+	    assertEquals(-1, amd.getTotalDisks());
     }
 }

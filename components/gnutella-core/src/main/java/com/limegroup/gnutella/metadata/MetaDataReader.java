@@ -9,7 +9,6 @@ import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.metadata.reader.MetaData;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLSchema;
@@ -36,7 +35,7 @@ public class MetaDataReader {
      * given schemaURI.
      */
     public LimeXMLDocument readDocument(File file) throws IOException {
-        MetaData data = MetaData.parse(file);
+        MetaReader data = MetaDataFactory.parse(file);
         if (data == null)
             throw new IOException("unable to parse file");
 

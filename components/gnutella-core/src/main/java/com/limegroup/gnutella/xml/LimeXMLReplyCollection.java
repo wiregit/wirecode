@@ -32,13 +32,12 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.metadata.MetaDataReader;
-import com.limegroup.gnutella.metadata.reader.AudioMetaData;
-import com.limegroup.gnutella.metadata.writer.MetaDataEditor;
+import com.limegroup.gnutella.metadata.MetaDataWriter;
+import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 
 /**
  * Maps LimeXMLDocuments for FileDescs in a specific schema.
  */
-
 public class LimeXMLReplyCollection {
     
     private static final Log LOG = LogFactory.getLog(LimeXMLReplyCollection.class);
@@ -543,85 +542,80 @@ public class LimeXMLReplyCollection {
         if(LOG.isDebugEnabled())
             LOG.debug("writing: " + fileName + " to disk.");
         
-        // see if you need to change a hash for a file due to a write...
-        // if so, we need to commit the ID3 data to disk....
-        MetaDataEditor commitWith = getEditorIfNeeded(fileName, doc, checkBetter);
-        if (commitWith != null)  {
-        	if(commitWith.getCorrectDocument() == null) {
-        		writeState = commitMetaData(fileName, commitWith);
-        	} else { 
-        		//The data on disk is better than the data we got in the
-        		//query reply. So we should update the Document we added
-        		removeDoc(fd);
-        		addReply(fd, commitWith.getCorrectDocument());
-        		writeState = NORMAL;//no need to write anything
-        	}
+        MetaDataWriter writer = new MetaDataWriter(fileName);
+        if( writer.getEditor() != null ) {
+            writer.populate(doc);
+            
+            LimeXMLDocument existingDoc = constructDocument(new File(fileName));
+            boolean needsWrite = writer.needsToUpdate(existingDoc);
+            
+            // see if you need to change a hash for a file due to a write...
+            // if so, we need to commit the ID3 data to disk....
+//            MetaDat commitWith = getEditorIfNeeded(fileName, doc, checkBetter);
+//            if (writer.getCorrectDocument() != null) {//commitWith != null)  {
+                if(needsWrite) {
+                    writeState = commitMetaData(fileName, writer);
+                } else { 
+                    //The data on disk is better than the data we got in the
+                    //query reply. So we should update the Document we added
+                    removeDoc(fd);
+                    addReply(fd, writer.getCorrectDocument());
+                    writeState = NORMAL;//no need to write anything
+                }
+//            }
         }
         
         assert writeState != INCORRECT_FILETYPE : "trying to write data to unwritable file";
 
         return writeState;
     }
-
-    /**
-     * Determines whether or not this LimeXMLDocument can or should be
-     * commited to disk to replace the ID3 tags in the mp3File.
-     * If the ID3 tags in the file are the same as those in document,
-     * this returns null (indicating no changes required).
-     * @return An ID3Editor to use when committing or null if nothing 
-     *  should be editted.
-     */
-    private MetaDataEditor getEditorIfNeeded(String mp3File, LimeXMLDocument doc, 
-                                                        boolean checkBetter) {
-        
-        MetaDataEditor newValues = MetaDataEditor.getEditorForFile(mp3File);
-        //if this call returned null, we should store the data in our
-        //xml repository only.
-        if (newValues == null)
-        	return null;
-        newValues.populate(doc);
-        
-        // Now see if the file already has the same info ...
-        MetaDataEditor existing = MetaDataEditor.getEditorForFile(mp3File);
-        LimeXMLDocument existingDoc = null;
-        try {
-            existingDoc = metaDataReader.readDocument(new File(mp3File));
-        } catch(IOException e) {
-            return null;
-        }
-        existing.populate(existingDoc);
-        
-        //We are supposed to pick and chose the better set of tags
-        if( newValues.equals(existing) ) {
-            LOG.debug("tag read from disk is same as XML doc.");
-            return null;
-        } else if(checkBetter) {
-            if(existing.betterThan(newValues)) {
-                LOG.debug("Data on disk is better, using disk data.");
-                //Note: In this case we are going to discard the LimeXMLDocument we
-                //got off the network, because the data on the file is better than
-                //the data in the query reply. Only in this case, we set the
-                //"correctDocument variable of the ID3Editor.
-                existing.setCorrectDocument(existingDoc);
-                return existing;
-            } else {
-                LOG.debug("Retrieving better fields from disk.");
-                newValues.pickBetterFields(existing);        
-            }
-        }
-            
-        // Commit using this Meta data editor ... 
-        return newValues;
-    }
+//
+//    /**
+//     * Determines whether or not this LimeXMLDocument can or should be
+//     * commited to disk to replace the ID3 tags in the mp3File.
+//     * If the ID3 tags in the file are the same as those in document,
+//     * this returns null (indicating no changes required).
+//     * @return An ID3Editor to use when committing or null if nothing 
+//     *  should be editted.
+//     */
+//    private MetaDat getEditorIfNeeded(String mp3File, LimeXMLDocument doc, 
+//                                                        boolean checkBetter) {
+//        
+//        MetaDat newValues = MetaDat.getEditorForFile(mp3File);
+//        //if this call returned null, we should store the data in our
+//        //xml repository only.
+//        if (newValues == null)
+//        	return null;
+//        newValues.populate(doc);
+//        
+////         Now see if the file already has the same info ...
+////        MetaDat existing = MetaDat.getEditorForFile(mp3File);
+//        LimeXMLDocument existingDoc = constructDocument(new File(mp3File));
+////        try {
+////            existingDoc = metaDataReader.readDocument(new File(mp3File));
+////        } catch(IOException e) {
+////            return null;
+////        }
+//        existing.populate(existingDoc);
+//        
+//        //We are supposed to pick and chose the better set of tags
+//        if( newValues.equals(existing) ) {
+//            LOG.debug("tag read from disk is same as XML doc.");
+//            return null;
+//        } 
+//            
+//        // Commit using this Meta data editor ... 
+//        return newValues;
+//    }
 
 
     /**
      * Commits the changes to disk.
      * If anything was changed on disk, notifies the FileManager of a change.
      */
-    private int commitMetaData(String fileName, MetaDataEditor editor) {
+    private int commitMetaData(String fileName, MetaDataWriter editor) {
         //write to mp3 file...
-        int retVal = editor.commitMetaData(fileName);
+        int retVal = editor.commitMetaData();
         if(LOG.isDebugEnabled())
             LOG.debug("wrote data: " + retVal);
         // any error where the file wasn't changed ... 

@@ -2,6 +2,8 @@ package com.limegroup.gnutella.metadata;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.metadata.audio.reader.WRMXML;
+import com.limegroup.gnutella.metadata.audio.reader.WeedInfo;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public final class WeedInfoTest extends LimeTestCase {

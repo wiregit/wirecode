@@ -90,6 +90,6 @@
 	<classpathentry kind="lib" path="lib/jars/tests/pmd.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/saxpath-1.0-fcs.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/xerces.jar"/>
-	<classpathentry kind="lib" path="lib/jars/jaudiotagger.jar"/>
+	<classpathentry kind="lib" path="C:/Documents and Settings/meverett/src/jaudiotaggerv1.0.8/jAudioTagger.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
