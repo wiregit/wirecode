@@ -24,6 +24,8 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.FileNotFoundException;
+import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
+import com.limegroup.gnutella.downloader.serial.BTDiskManagerMementoImpl;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMementoImpl;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
@@ -35,6 +37,8 @@ import com.limegroup.gnutella.downloader.serial.MagnetDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.MagnetDownloadMementoImpl;
 import com.limegroup.gnutella.downloader.serial.OldDownloadConverter;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
+import com.limegroup.gnutella.downloader.serial.TorrentFileSystemMemento;
+import com.limegroup.gnutella.downloader.serial.TorrentFileSystemMementoImpl;
 import com.limegroup.gnutella.downloader.serial.conversion.DownloadConverterObjectInputStream.Version;
 import com.limegroup.gnutella.settings.SharingSettings;
 
@@ -161,15 +165,15 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
     private void addBTDownloader(List<DownloadMemento> mementos, SerialBTDownloader o, SerialIncompleteFileManager sifm) throws IOException {
         BTDownloadMemento memento = new BTDownloadMementoImpl();
         memento.setDownloadType(DownloaderType.BTDOWNLOADER);
-        memento.setBtMetaInfo(toBTMetaInfoMemento((SerialBTMetaInfo)o.getProperties().get("metainfo")));
+        memento.setBtMetaInfoMemento(toBTMetaInfoMemento((SerialBTMetaInfo)o.getProperties().get("metainfo")));
         addCommonProperties(memento, o.getProperties());
         mementos.add(memento);
     }
     
     private BTMetaInfoMemento toBTMetaInfoMemento(SerialBTMetaInfo info) throws IOException {
         BTMetaInfoMemento memento = new BTMetaInfoMementoImpl();
-        memento.setFileSystem(info.getFileSystem());
-        memento.setFolderData(info.getDiskManagerData());
+        memento.setFileSystem(toFileSystemMemento(info.getFileSystem()));
+        memento.setFolderData(toBTDiskManagerMemento(info.getDiskManagerData()));
         memento.setHashes(info.getHashes());
         memento.setInfoHash(info.getInfoHash());
         memento.setPieceLength(info.getPieceLength());
@@ -182,6 +186,25 @@ public class OldDownloadConverterImpl implements OldDownloadConverter {
             ioe.initCause(e);
             throw ioe;
         }
+        return memento;
+    }
+    
+    private BTDiskManagerMemento toBTDiskManagerMemento(SerialDiskManagerData data) {
+        BTDiskManagerMemento memento = new BTDiskManagerMementoImpl();
+        memento.setPartialBlocks(data.getPartialBlocks());
+        memento.setVerifiedBlocks(data.getVerifiedBlocks());
+        memento.setVerifying(data.isVerifying());
+        return memento;
+    }
+    
+    private TorrentFileSystemMemento toFileSystemMemento(SerialTorrentFileSystem system) {
+        TorrentFileSystemMemento memento = new TorrentFileSystemMementoImpl();
+        memento.setCompleteFile(system.getCompleteFile());
+        memento.setFiles(system.getFiles());
+        memento.setFolders(system.getFolders());
+        memento.setIncompleteFile(system.getIncompleteFile());
+        memento.setName(system.getName());
+        memento.setTotalSize(system.getTotalSize());
         return memento;
     }
     

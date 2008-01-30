@@ -2,7 +2,6 @@ package com.limegroup.bittorrent;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.MessageDigest;
@@ -17,11 +16,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.http.URIUtils;
 import org.limewire.io.InvalidDataException;
-import org.limewire.service.ErrorService;
 
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMementoImpl;
 import com.limegroup.gnutella.security.SHA1;
@@ -37,32 +36,32 @@ public class BTMetaInfo {
 	private static final byte [] VERIFIED_HASH = new byte[0];
 
 	/** a list the hashes for this file */
-	private List<byte []> _hashes;
+	private final List<byte []> _hashes;
 
 	/** the length of one piece */
-	private int _pieceLength;
+	private final int _pieceLength;
 
 	/**
 	 * Information about how the torrent looks on disk.
 	 */
-	private TorrentFileSystem fileSystem;
+	private final TorrentFileSystem fileSystem;
 	
 	/**
 	 * the sha1-hash of te beencoded _infoMap Object
 	 */
-	private byte[] _infoHash;
+	private final byte[] _infoHash;
 	
 	/**
 	 * An URN representation of the infoHash;
 	 */
-	private URN _infoHashURN;
+	private final URN _infoHashURN;
 
 	/**
 	 * an array of URL[] containing any trackers. This field is non-final
 	 * because at a later date we may want to be able to add trackers to a
 	 * torrent
 	 */
-    private URI[] _trackers;
+    private final URI[] _trackers;
 
 	/**
 	 * FileDesc for the GUI
@@ -72,7 +71,7 @@ public class BTMetaInfo {
 	/**
 	 * Object that can save/restore the diskManager
 	 */
-	private Serializable diskManagerData;
+	private final BTDiskManagerMemento diskManagerData;
 	
 	/**
 	 * The current <tt>TorrentContext</tt>
@@ -93,12 +92,12 @@ public class BTMetaInfo {
 	/**
 	 * The ratio from previous sessions
 	 */
-	private float historicRatio;
+	private final float historicRatio;
     
     /**
      * Whether this torrent has the private flag set
      */
-    private volatile boolean isPrivate;
+    private final boolean isPrivate;
     
 	/**
 	 * @return piece length for this torrent
@@ -111,7 +110,7 @@ public class BTMetaInfo {
 		return fileSystem;
 	}
 	
-	public Serializable getDiskManagerData() {
+	public BTDiskManagerMemento getDiskManagerData() {
 		return diskManagerData;
 	}
     
@@ -243,7 +242,7 @@ public class BTMetaInfo {
     public BTMetaInfo(BTMetaInfoMemento memento) throws InvalidDataException {
         _hashes =  memento.getHashes();
 		Integer pieceLength = memento.getPieceLength();
-		fileSystem = memento.getFileSystem();
+		fileSystem = new TorrentFileSystem(memento.getFileSystem());
 		_infoHash = memento.getInfoHash();
         try {
             _infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
@@ -296,7 +295,7 @@ public class BTMetaInfo {
 		try {
 			_infoHashURN = URN.createSHA1UrnFromBytes(_infoHash);
 		} catch (IOException impossible) {
-			ErrorService.error(impossible);
+		    throw new RuntimeException(impossible);
 		}
 
 		_hashes = parsePieces(data.getPieces());
@@ -306,7 +305,8 @@ public class BTMetaInfo {
 		if (_pieceLength <= 0)
 			throw new ValueException("bad metainfo - illegal piece length: " + data.getPieceLength());
 
-
+		diskManagerData = null;
+		historicRatio = 0;
 		fileSystem = new TorrentFileSystem(data, _hashes.size(), _pieceLength, _infoHash);
 	}
 
@@ -328,8 +328,8 @@ public class BTMetaInfo {
 	 */
 	public synchronized BTMetaInfoMemento toMemento() {
         BTMetaInfoMemento memento = new BTMetaInfoMementoImpl();
-        memento.setFileSystem(fileSystem);
-        memento.setFolderData(context.getDiskManager().getSerializableObject());
+        memento.setFileSystem(fileSystem.toMemento());
+        memento.setFolderData(context.getDiskManager().toMemento());
         memento.setHashes(_hashes);
         memento.setInfoHash(_infoHash);
         memento.setPieceLength(_pieceLength);

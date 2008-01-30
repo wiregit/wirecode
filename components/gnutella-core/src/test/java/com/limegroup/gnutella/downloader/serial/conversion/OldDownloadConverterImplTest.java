@@ -145,7 +145,7 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
             BTDownloadMemento mem = (BTDownloadMemento)read5;
             assertEquals(DownloaderType.BTDOWNLOADER, mem.getDownloadType());
             assertEquals("btName", mem.getDefaultFileName());
-            BTMetaInfoMemento info = mem.getBtMetaInfo();
+            BTMetaInfoMemento info = mem.getBtMetaInfoMemento();
             assertEquals("http://www.example.com/announce", info.getTrackers()[0].toString());
             assertEquals(UrnHelper.URNS[3].getBytes(), info.getInfoHash());
             assertEquals(123L, info.getFileSystem().getTotalSize());

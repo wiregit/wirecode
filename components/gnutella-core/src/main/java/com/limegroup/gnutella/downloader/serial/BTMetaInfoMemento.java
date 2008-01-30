@@ -1,10 +1,8 @@
 package com.limegroup.gnutella.downloader.serial;
 
-import java.io.Serializable;
 import java.net.URI;
 import java.util.List;
 
-import com.limegroup.bittorrent.TorrentFileSystem;
 
 /**
  * Defines an interface from which bittorrent meta-info can be saved and recreated over
@@ -20,9 +18,9 @@ public interface BTMetaInfoMemento {
 
     void setPieceLength(int pieceLength);
 
-    TorrentFileSystem getFileSystem();
+    TorrentFileSystemMemento getFileSystem();
 
-    void setFileSystem(TorrentFileSystem fileSystem);
+    void setFileSystem(TorrentFileSystemMemento fileSystem);
 
     byte[] getInfoHash();
 
@@ -32,9 +30,9 @@ public interface BTMetaInfoMemento {
 
     void setRatio(float ratio);
 
-    Serializable getFolderData();
+    BTDiskManagerMemento getFolderData();
 
-    void setFolderData(Serializable folderData);
+    void setFolderData(BTDiskManagerMemento folderData);
 
     URI[] getTrackers();
 

@@ -49,7 +49,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
      * Non-final because it's nulled when the torrent is done.
      */
     private volatile BTMetaInfo btMetaInfo;
-    private volatile TorrentContext torrentContext;    
+    private volatile TorrentContext torrentContext;
+    private volatile TorrentFileSystem torrentFileSystem;
+    private volatile URN urn;
         
     private final DownloadManager downloadManager;
     private final IncompleteFileManager incompleteFileManager;
@@ -76,7 +78,9 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
      * @see com.limegroup.bittorrent.BTDownloader#initBtMetaInfo(com.limegroup.bittorrent.BTMetaInfo)
      */
     public void initBtMetaInfo(BTMetaInfo btMetaInfo) {
-        this.btMetaInfo = btMetaInfo;  
+        this.btMetaInfo = btMetaInfo;
+        this.torrentFileSystem = btMetaInfo.getFileSystem();
+        this.urn = btMetaInfo.getURN();
 		synchronized(this) {
 		    setDefaultFileName(btMetaInfo.getName());
 		}
@@ -116,7 +120,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	}
 	
 	public boolean isLaunchable() {
-		return torrentFileSystem().getFiles().size() == 1 && 
+		return torrentFileSystem.getFiles().size() == 1 && 
         torrentContext.getDiskManager().getLastVerifiedOffset() > 0;
 	}
 	
@@ -135,8 +139,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 
 	public File getFile() {
 		if (torrent.isComplete())
-			return torrentFileSystem().getCompleteFile();
-		return torrentFileSystem().getBaseFile();
+			return torrentFileSystem.getCompleteFile();
+		return torrentFileSystem.getBaseFile();
 	}
 
 	public File getDownloadFragment() {
@@ -147,11 +151,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 		long size = torrentContext.getDiskManager().getLastVerifiedOffset();
         if (size <= 0)
             return null;
-        File file=new File(torrentFileSystem().getBaseFile().getParent(),
+        File file=new File(torrentFileSystem.getBaseFile().getParent(),
                 IncompleteFileManager.PREVIEW_PREFIX
-                    +torrentFileSystem().getBaseFile().getName());
+                    +torrentFileSystem.getBaseFile().getName());
         // Copy first block, returning if nothing was copied.
-        if (FileUtils.copy(torrentFileSystem().getBaseFile(), size, file) <=0 ) 
+        if (FileUtils.copy(torrentFileSystem.getBaseFile(), size, file) <=0 ) 
             return null;
         return file;
 	}
@@ -215,7 +219,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	}
 
 	public long getContentLength() {
-		return torrentFileSystem().getTotalSize();
+		return torrentFileSystem.getTotalSize();
 	}
 
 	public long getAmountRead() {
@@ -343,12 +347,12 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 			boolean overwrite) throws SaveLocationException {
 		super.setSaveFile(saveDirectory, fileName, overwrite);
 		// if this didn't throw target is ok.
-		torrentFileSystem().setCompleteFile(new File(saveDirectory, fileName));
+		torrentFileSystem.setCompleteFile(new File(saveDirectory, fileName));
 	}
 
 	@Override
 	public File getSaveFile() {
-		return torrentFileSystem().getCompleteFile();
+		return torrentFileSystem.getCompleteFile();
 	}
 	
 	@Override
@@ -357,7 +361,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	}
 	
 	public URN getSha1Urn() {
-		return btMetaInfo.getURN();
+		return urn;
 	}
 	
 	public int getAmountPending() {
@@ -388,7 +392,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	private void torrentComplete() {
 		// the download stops now. even though the torrent goes on
 		stopTime = System.currentTimeMillis();
-		incompleteFileManager.removeTorrentEntry(btMetaInfo.getURN());
+		incompleteFileManager.removeTorrentEntry(urn);
 		downloadManager.remove(this, true);
 	}
 
@@ -412,7 +416,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 
 	public void initialize() {
         torrentManager.get().addEventListener(this);
-        incompleteFileManager.addTorrentEntry(btMetaInfo.getURN());
+        incompleteFileManager.addTorrentEntry(urn);
     }
 	
 	public void startDownload() {
@@ -437,7 +441,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	}
 	
 	public boolean conflicts(URN urn, long fileSize, File... file) {
-		if (btMetaInfo.getURN().equals(urn))
+		if (urn.equals(urn))
 			return true;
 		for (File f : file) {
 			if (conflictsSaveFile(f))
@@ -448,11 +452,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	
     @Override
 	public boolean conflictsSaveFile(File candidate) {
-		return torrentFileSystem().conflicts(candidate);
+		return torrentFileSystem.conflicts(candidate);
 	}
 
 	public boolean conflictsWithIncompleteFile(File incomplete) {
-		return torrentFileSystem().conflictsIncomplete(incomplete); 
+		return torrentFileSystem.conflictsIncomplete(incomplete); 
 	}
 	
 	public synchronized void finish() {
@@ -464,7 +468,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	
     @Override
 	public String toString() {
-		return "downloader facade for "+torrentFileSystem().getCompleteFile().getName();
+		return "downloader facade for "+torrentFileSystem.getCompleteFile().getName();
 	}
 	
 	public boolean equals(Object o) {
@@ -479,7 +483,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	}
 	
 	public String getCustomIconDescriptor() {
-		if (torrentFileSystem().getFiles().size() == 1)
+		if (torrentFileSystem.getFiles().size() == 1)
 			return null;
 		return BITTORRENT_DOWNLOAD;
 	}
@@ -488,10 +492,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
         return DownloaderType.BTDOWNLOADER;
     }
     
-    private TorrentFileSystem torrentFileSystem() {
-        return btMetaInfo.getFileSystem();
-    }
-
     protected DownloadMemento createMemento() {
         if(finished)
             throw new IllegalStateException("creating memento for finished torrent!");
@@ -502,13 +502,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
     protected void fillInMemento(DownloadMemento memento) {
         super.fillInMemento(memento);
         BTDownloadMemento bmem = (BTDownloadMemento)memento;
-        bmem.setBtMetaInfo(btMetaInfo.toMemento());
+        bmem.setBtMetaInfoMemento(btMetaInfo.toMemento());
     }
     
     @Override
     public synchronized void initFromMemento(DownloadMemento memento) throws InvalidDataException {
         super.initFromMemento(memento);
         BTDownloadMemento bmem = (BTDownloadMemento)memento;
-        initBtMetaInfo(new BTMetaInfo(bmem.getBtMetaInfo()));
+        initBtMetaInfo(new BTMetaInfo(bmem.getBtMetaInfoMemento()));
     }
 }

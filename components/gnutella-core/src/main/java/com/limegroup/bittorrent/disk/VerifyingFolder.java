@@ -3,7 +3,6 @@ package com.limegroup.bittorrent.disk;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.io.Serializable;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,6 +40,8 @@ import com.limegroup.bittorrent.TorrentFile;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
+import com.limegroup.gnutella.downloader.serial.BTDiskManagerMementoImpl;
 import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
@@ -151,7 +152,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	 */
 	VerifyingFolder(TorrentContext context, 
 			boolean complete, 
-            Serializable data,
+            BTDiskManagerMemento data,
 			DiskController<TorrentFile> diskController) {
 		TorrentFileSystem system = context.getFileSystem();
 		_files = complete? system.getFiles() : system.getIncompleteFiles();
@@ -171,8 +172,8 @@ class VerifyingFolder implements TorrentDiskManager {
 			verified = context.getFullBitField();
 		} else {
 			verifiedBlocks = new BitSet(context.getMetaInfo().getNumBlocks());
-			if (data != null && data instanceof SerialData)
-				initialize((SerialData)data);
+			if (data != null)
+				initialize(data);
 			verified = new BitFieldSet(verifiedBlocks, context.getMetaInfo().getNumBlocks());
 		}
 		
@@ -183,7 +184,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	 * populates various fields from data object that was 
 	 * deserialized.
 	 */
-	private void initialize(SerialData data) {
+	private void initialize(BTDiskManagerMemento data) {
 		if (data.getPartialBlocks() != null) 
 			partialBlocks.putAll(data.getPartialBlocks());
 		
@@ -854,12 +855,13 @@ class VerifyingFolder implements TorrentDiskManager {
 		return _corruptedBytes;
 	}
 	
-	public Serializable getSerializableObject() {
-        Serializable ret;
+	public BTDiskManagerMemento toMemento() {
+	    BTDiskManagerMemento memento = new BTDiskManagerMementoImpl();
         synchronized(this) {
-        	ret = new SerialData((BitSet)verifiedBlocks.clone(), 
-        		partialBlocks.clone(), 
-        		isVerifying);
+            // TODO: this is a shallow copy, so IntervalSet can still be mutated
+            memento.setPartialBlocks(new HashMap<Integer, IntervalSet>(partialBlocks));
+            memento.setVerifiedBlocks((BitSet)verifiedBlocks.clone());
+            memento.setVerifying(isVerifying);
         }
         if (BittorrentSettings.TORRENT_FLUSH_VERIRY.getValue()) {
         	try {
@@ -869,7 +871,7 @@ class VerifyingFolder implements TorrentDiskManager {
         		storedException = iox; 
         	}
         }
-        return ret;
+        return memento;
     }
     
 	/* (non-Javadoc)
@@ -951,32 +953,4 @@ class VerifyingFolder implements TorrentDiskManager {
 			return clone;
 		}
 	}
-    
-    /** Data that's serialized. */
-    private static class SerialData implements Serializable {
-    	private static final long serialVersionUID = -6901065516261232111l;
-        private final BitSet verifiedBlocks;
-        private final BlockRangeMap partialBlocks;
-        private final boolean isVerifying;
-        
-        private SerialData(BitSet verifiedBlocks, 
-        		BlockRangeMap partialBlocks, 
-        		boolean isVerifying) {
-            this.verifiedBlocks = verifiedBlocks;
-            this.partialBlocks = partialBlocks;
-            this.isVerifying = isVerifying;
-        }
-
-        public boolean isVerifying() {
-            return isVerifying;
-        }
-
-        public BlockRangeMap getPartialBlocks() {
-            return partialBlocks;
-        }
-
-        public BitSet getVerifiedBlocks() {
-            return verifiedBlocks;
-        }
-    }
 }

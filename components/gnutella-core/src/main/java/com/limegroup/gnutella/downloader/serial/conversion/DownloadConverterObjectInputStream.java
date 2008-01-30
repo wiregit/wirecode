@@ -59,6 +59,8 @@ class DownloadConverterObjectInputStream extends ConverterObjectInputStream {
         addLookup("org.apache.commons.httpclient.URI", SerialOldURI.class.getName());
         addLookup("com.limegroup.bittorrent.BTMetaInfo", SerialBTMetaInfo.class.getName());
         addLookup("com.limegroup.bittorrent.BTMetaInfo$SerialKeys", SerialBTMetaInfo.SerialKeys.class.getName());
+        addLookup("com.limegroup.bittorrent.TorrentFileSystem", SerialTorrentFileSystem.class.getName());
+        addLookup("com.limegroup.bittorrent.disk.VerifyingFolder$SerialData", SerialDiskManagerData.class.getName());
     }
     
 

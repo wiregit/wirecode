@@ -7,8 +7,8 @@ package com.limegroup.gnutella.downloader.serial;
  */
 public interface BTDownloadMemento extends DownloadMemento {
 
-    void setBtMetaInfo(BTMetaInfoMemento btMetaInfo);
+    void setBtMetaInfoMemento(BTMetaInfoMemento btMetaInfo);
 
-    BTMetaInfoMemento getBtMetaInfo();
+    BTMetaInfoMemento getBtMetaInfoMemento();
 
 }

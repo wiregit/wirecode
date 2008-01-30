@@ -3,17 +3,16 @@ package com.limegroup.gnutella.downloader.serial.conversion;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.io.ObjectStreamField;
 import java.io.ObjectStreamClass;
+import java.io.ObjectStreamField;
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 import org.limewire.util.GenericsUtils;
 
-import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.gnutella.URN;
 
 public class SerialBTMetaInfo implements Serializable {
@@ -23,11 +22,11 @@ public class SerialBTMetaInfo implements Serializable {
 	private static final ObjectStreamField[] serialPersistentFields = 
     	ObjectStreamClass.NO_FIELDS;
     private List<byte[]> hashes;
-    private TorrentFileSystem fileSystem;
+    private SerialTorrentFileSystem fileSystem;
     private byte[] infoHash;
     private URN infoHashURN;
     private SerialOldURI[] trackers;
-    private Serializable diskManagerData;
+    private SerialDiskManagerData diskManagerData;
     private int pieceLength;
     private boolean isPrivate;
     private float historicRatio;
@@ -54,12 +53,12 @@ public class SerialBTMetaInfo implements Serializable {
                                              byte[].class,
                                              GenericsUtils.ScanMode.EXCEPTION);
 		Integer pieceLength = (Integer)toRead.get(SerialKeys.PIECE_LENGTH);
-		fileSystem = (TorrentFileSystem) toRead.get(SerialKeys.FILE_SYSTEM);
+		fileSystem = (SerialTorrentFileSystem) toRead.get(SerialKeys.FILE_SYSTEM);
 		infoHash = (byte []) toRead.get(SerialKeys.INFO_HASH);
 		infoHashURN = URN.createSHA1UrnFromBytes(infoHash);
 		trackers = (SerialOldURI[]) toRead.get(SerialKeys.TRACKERS);
 		Float ratio = (Float)toRead.get(SerialKeys.RATIO);
-        diskManagerData = toRead.get(SerialKeys.FOLDER_DATA);         
+        diskManagerData = (SerialDiskManagerData)toRead.get(SerialKeys.FOLDER_DATA);         
 		historicRatio = ratio.floatValue();
 		this.pieceLength = pieceLength.intValue();        
         if (toRead.containsKey(SerialKeys.PRIVATE))
@@ -70,7 +69,7 @@ public class SerialBTMetaInfo implements Serializable {
         return hashes;
     }
 
-    public TorrentFileSystem getFileSystem() {
+    public SerialTorrentFileSystem getFileSystem() {
         return fileSystem;
     }
 
@@ -90,7 +89,7 @@ public class SerialBTMetaInfo implements Serializable {
         return uris;
     }
 
-    public Serializable getDiskManagerData() {
+    public SerialDiskManagerData getDiskManagerData() {
         return diskManagerData;
     }
 

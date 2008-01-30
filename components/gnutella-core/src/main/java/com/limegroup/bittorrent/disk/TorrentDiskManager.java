@@ -1,7 +1,6 @@
 package com.limegroup.bittorrent.disk;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Set;
 
 import org.limewire.collection.BitField;
@@ -10,6 +9,7 @@ import org.limewire.collection.NECallable;
 import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTPiece;
 import com.limegroup.bittorrent.PieceReadListener;
+import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 
 /**
  * A facility that manages access to the collection of files 
@@ -126,10 +126,9 @@ public interface TorrentDiskManager {
 	public int getAmountPending();
 	
 	/**
-	 * @return a serializable object representing the current state
-	 * of this
+	 * @return a memento describing this.
 	 */
-	public Serializable getSerializableObject();
+	public BTDiskManagerMemento toMemento();
     
     /**
      * @return the last offset inside the torrent filesystem that has been 

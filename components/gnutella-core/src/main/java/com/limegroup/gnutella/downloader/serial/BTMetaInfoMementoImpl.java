@@ -1,14 +1,13 @@
 package com.limegroup.gnutella.downloader.serial;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.limegroup.bittorrent.TorrentFileSystem;
 
-public class BTMetaInfoMementoImpl implements BTMetaInfoMemento{
+public class BTMetaInfoMementoImpl implements BTMetaInfoMemento, Serializable {
     
     private Map<String, Object> serialObjects = new HashMap<String, Object>();
 
@@ -34,11 +33,11 @@ public class BTMetaInfoMementoImpl implements BTMetaInfoMemento{
         serialObjects.put("pieceLength", pieceLength);
     }
 
-    public TorrentFileSystem getFileSystem() {
-        return (TorrentFileSystem)serialObjects.get("fileSystem");    
+    public TorrentFileSystemMemento getFileSystem() {
+        return (TorrentFileSystemMemento)serialObjects.get("fileSystem");    
     }
 
-    public void setFileSystem(TorrentFileSystem fileSystem) {
+    public void setFileSystem(TorrentFileSystemMemento fileSystem) {
         serialObjects.put("fileSystem", fileSystem);
     }
 
@@ -59,11 +58,11 @@ public class BTMetaInfoMementoImpl implements BTMetaInfoMemento{
         serialObjects.put("ratio", ratio);
     }
 
-    public Serializable getFolderData() {
-        return (Serializable)serialObjects.get("folderData");    
+    public BTDiskManagerMemento getFolderData() {
+        return (BTDiskManagerMemento)serialObjects.get("folderData");    
     }
 
-    public void setFolderData(Serializable folderData) {
+    public void setFolderData(BTDiskManagerMemento folderData) {
         serialObjects.put("folderData", folderData);
     }
 

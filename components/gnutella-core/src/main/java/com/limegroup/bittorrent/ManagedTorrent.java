@@ -385,7 +385,7 @@ BTLinkListener {
 	private void saveInfoMapInIncomplete() throws IOException {
 		String path = context.getFileSystem().getBaseFile().getParent()+
 		File.separator+".dat"+context.getFileSystem().getName();
-		FileUtils.writeObject(path, context.getMetaInfo());
+		FileUtils.writeObject(path, context.getMetaInfo().toMemento());
 	}
 	
     private void dispatchEvent(TorrentEvent.Type type, String description) {

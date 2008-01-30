@@ -45,6 +45,7 @@ import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.StoreDownloader;
+import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
 import com.limegroup.gnutella.library.SharingUtils;
@@ -696,11 +697,18 @@ public class DownloadManagerImpl implements DownloadManager {
         if(infohash == null)
             throw new CantResumeException(name);
         
-        BTMetaInfo info = null;
+        BTMetaInfoMemento memento = null;
         try {
             Object infoObj = FileUtils.readObject(infohash.getAbsolutePath());
-            info = (BTMetaInfo)infoObj;
+            memento = (BTMetaInfoMemento)infoObj;
         } catch (Throwable bad) {
+            throw new CantResumeException(name);
+        }
+        
+        BTMetaInfo info;
+        try {
+            info = new BTMetaInfo(memento);
+        } catch(InvalidDataException ide) {
             throw new CantResumeException(name);
         }
         

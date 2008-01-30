@@ -2,7 +2,6 @@ package com.limegroup.bittorrent;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -14,17 +13,17 @@ import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.SaveLocationException;
+import com.limegroup.gnutella.downloader.serial.TorrentFileSystemMemento;
+import com.limegroup.gnutella.downloader.serial.TorrentFileSystemMementoImpl;
 import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
  * Information about the file hierarchy contained in the torrent.
  */
-public class TorrentFileSystem implements Serializable {
-	
-	private static final long serialVersionUID = 6006838744525690869L;
+public class TorrentFileSystem {
 
 	/* the name of the torrent */
-	private String _name;
+	private final String _name;
 	
 	/*
 	 * the total length of this torrent.
@@ -34,29 +33,38 @@ public class TorrentFileSystem implements Serializable {
 	/**
 	 * a list of <tt>TorrentFile</tt> for every file in this torrent
 	 */
-	private List<TorrentFile> _files;
+	private final List<TorrentFile> _files;
 	
 	/**
 	 * any folders that are contained in the torrent
 	 */
-	private Collection<File> _folders = new HashSet<File>();
+	private final Collection<File> _folders = new HashSet<File>();
 	
 	/**
 	 * a view of the files and folders contained in this torrent
 	 */
-	private transient Collection<File> _filesAndFolders;
+	private Collection<File> _filesAndFolders;
 	
 	/*
 	 * A <tt>File</tt> pointing to the location where the incomplete
 	 * torrent is written.
 	 */
-	private File _incompleteFile;
+	private final File _incompleteFile;
 
 	/*
 	 * A <tt> File </tt> pointing to the file/directory where the completed
 	 * torrent will be moved.
 	 */
 	private File _completeFile;
+	
+	public TorrentFileSystem(TorrentFileSystemMemento torrentFileSystemMemento) {
+        this._name = torrentFileSystemMemento.getName();
+        this._totalSize = torrentFileSystemMemento.getTotalSize();
+        this._files = torrentFileSystemMemento.getFiles();
+        _folders.addAll(torrentFileSystemMemento.getFolders());
+        this._incompleteFile = torrentFileSystemMemento.getIncompleteFile();
+        this._completeFile = torrentFileSystemMemento.getCompleteFile();
+    }
 
 	
     /**
@@ -124,6 +132,17 @@ public class TorrentFileSystem implements Serializable {
 		_totalSize = calculateTotalSize(_files);
         if (_totalSize <= 0)
             throw new ValueException("invalid size "+_totalSize);
+	}
+	
+	public TorrentFileSystemMemento toMemento() {
+	    TorrentFileSystemMemento memento = new TorrentFileSystemMementoImpl();
+	    memento.setCompleteFile(_completeFile);
+	    memento.setFiles(_files);
+	    memento.setFolders(_folders);
+	    memento.setIncompleteFile(_incompleteFile);
+	    memento.setName(_name);
+	    memento.setTotalSize(_totalSize);
+	    return memento;
 	}
 	
 	/**

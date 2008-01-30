@@ -30,7 +30,7 @@ public class BTDownloadMementoImpl implements BTDownloadMemento, Serializable {
         return (File)serialObjects.get("saveFile");
     }
     
-    public BTMetaInfoMemento getBtMetaInfo() {
+    public BTMetaInfoMemento getBtMetaInfoMemento() {
         return (BTMetaInfoMemento)serialObjects.get("btMetaInfo");
     }
     
@@ -38,7 +38,7 @@ public class BTDownloadMementoImpl implements BTDownloadMemento, Serializable {
         serialObjects.put("attributes", attributes);
     }
     
-    public void setBtMetaInfo(BTMetaInfoMemento btMetaInfo) {
+    public void setBtMetaInfoMemento(BTMetaInfoMemento btMetaInfo) {
         serialObjects.put("btMetaInfo", btMetaInfo);
     }
     
