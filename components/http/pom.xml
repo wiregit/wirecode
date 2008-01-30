@@ -63,7 +63,7 @@
       <version>4.0-alpha6</version>
     </dependency>
      <!-- Customized LimeWire Jars -->
-    <dependency>
+    <dependency> 
       <groupId>org.limewire</groupId>
       <artifactId>lw-httpclient</artifactId>
       <version>4.0-alpha2-730</version>
