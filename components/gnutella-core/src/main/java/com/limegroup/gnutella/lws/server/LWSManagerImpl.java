@@ -166,7 +166,9 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         try {
             get = new HttpGet(url);
         } catch (URISyntaxException e) {
-            throw new IOException(e);
+            IOException ioe = new IOException();
+            ioe.initCause(e);
+            throw ioe;
         }
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         //

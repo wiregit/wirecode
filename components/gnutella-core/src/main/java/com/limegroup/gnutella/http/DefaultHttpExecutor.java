@@ -99,9 +99,13 @@ public class DefaultHttpExecutor implements HttpExecutor {
 		} catch (IOException failed) {
 			return !listener.requestFailed(method, null, failed);
 		} catch (HttpException e) {
-            return !listener.requestFailed(method, null, new IOException(e));
+            IOException ioe = new IOException();
+            ioe.initCause(e);
+            return !listener.requestFailed(method, null, ioe);
         } catch (InterruptedException e) {
-            return !listener.requestFailed(method, null, new IOException(e));
+            IOException ioe = new IOException();
+            ioe.initCause(e);
+            return !listener.requestFailed(method, null, ioe);
         }
 
         return !listener.requestComplete(method, response);
