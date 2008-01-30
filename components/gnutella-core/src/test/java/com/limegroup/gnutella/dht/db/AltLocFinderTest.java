@@ -24,6 +24,7 @@ import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
@@ -108,7 +109,7 @@ public class AltLocFinderTest extends DHTTestCase {
         testAltLocListenerNonFirewalledLocations(false);
     }
     
-    private void testAltLocListenerNonFirewalledLocations(boolean successful) throws Exception {
+    private URN publishDirectAltLoc(boolean publish) throws Exception {
         // set to non-firewalled, so created altloc value for self is not firewalled
         networkManager.setAcceptedIncomingConnection(true);
         // publish an alternate location in the DHT
@@ -118,10 +119,14 @@ public class AltLocFinderTest extends DHTTestCase {
         KUID kuid = KUIDUtils.toKUID(urn);
 
         // publish altloc value manually for successful case
-        if (successful) {
+        if (publish) {
             mojitoDHT.put(kuid, value).get();
         }
-        
+        return urn;
+    }
+    
+    private void testAltLocListenerNonFirewalledLocations(boolean successful) throws Exception {
+        URN urn = publishDirectAltLoc(successful);
         // expected alternate location
         final AlternateLocation expectedAltLoc = alternateLocationFactory.createDirectDHTAltLoc(new IpPortImpl(networkManager.getAddress(), networkManager.getPort()), urn, 5555, new byte[TigerTree.HASHSIZE]);
         AltLocSearchHandler listener = new AltLocSearchHandler();
@@ -149,7 +154,7 @@ public class AltLocFinderTest extends DHTTestCase {
         testAltLocListenerFirewalledLocations(false);
     }
     
-    public void testAltLocListenerFirewalledLocations(boolean successful) throws Exception {
+    private URN publishPushAltLoc(boolean publish) throws Exception {
         networkManager.setExternalAddress(new byte[] { 127, 0, 0, 1 });
         
         URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
@@ -161,9 +166,14 @@ public class AltLocFinderTest extends DHTTestCase {
         mojitoDHT.put(kuid, value).get();
         // publish push proxy manually
         PushProxiesValue pushProxiesValue = pushProxiesValueFactory.createDHTValueForSelf();
-        if (successful) {
+        if (publish) {
             mojitoDHT.put(KUIDUtils.toKUID(new GUID(pushProxiesValue.getGUID())), pushProxiesValue).get();
         }
+        return urn;
+    }
+    
+    private void testAltLocListenerFirewalledLocations(boolean successful) throws Exception {
+        URN urn = publishPushAltLoc(successful);
         
         AltLocSearchHandler listener = new AltLocSearchHandler();
         // initialize with opposite value to see if it is actually set
@@ -183,6 +193,19 @@ public class AltLocFinderTest extends DHTTestCase {
             assertNull(listener.altLoc);
             assertFalse(listener.success);
         }
+    }
+    
+    public void testGetPushAlternateLocation() throws Exception {
+        URN urn = publishPushAltLoc(true);
+        PushAltLoc expectedAltLoc = (PushAltLoc) alternateLocationFactory.createPushAltLoc(pushEndpointFactory.createForSelf(), urn);
+        AlternateLocation result = altLocFinder.getAlternateLocation(new GUID(expectedAltLoc.getPushAddress().getClientGUID()), urn);
+        assertEquals(expectedAltLoc, result);
+    }
+    
+    public void testGetUnavailablePushAlternateLocation() throws Exception {
+        URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        AlternateLocation result = altLocFinder.getAlternateLocation(new GUID(), urn);
+        assertNull(result);
     }
     
     private static class AltLocSearchHandler implements AltLocSearchListener {

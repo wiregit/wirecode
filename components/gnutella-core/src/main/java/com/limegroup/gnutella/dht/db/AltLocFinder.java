@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.OnewayExchanger;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
@@ -101,7 +102,7 @@ public class AltLocFinder {
      * @param listener listener that is notified of retrieved alternate locations 
      * 
      * @return <code>false</code> if <code>guid</code> or <code>urn</code> are null
-     * or DHT is not boostrapped
+     * or DHT is not boostrapped, true if search was successfully started
      */
     public boolean findPushAltLocs(GUID guid, URN urn, AltLocSearchListener listener) {
         return findPushAltLocs(guid, urn, null, listener);
@@ -419,4 +420,36 @@ public class AltLocFinder {
             return Result.NOT_FOUND;
         }
     }
+    
+    /**
+     * Performs a blocking lookup for an alternate location denoted by the 
+     * <code>guid</code>. Lookup is solely based on <code>guid</code> not on
+     * <code>urn</urn> which is only needed to to create the alternate location.
+     *
+     * @return null if the alternate location could not be found
+     */
+    public AlternateLocation getAlternateLocation(GUID guid, URN urn) {
+        final OnewayExchanger<AlternateLocation, RuntimeException> exchanger = new OnewayExchanger<AlternateLocation, RuntimeException>();
+        AltLocSearchListener listener = new AltLocSearchListener() {
+            public void handleAltLocSearchDone(boolean success) {
+                if (!success) {
+                    exchanger.setValue(null);
+                }
+            }
+            public void handleAlternateLocation(AlternateLocation alternateLocation) {
+                exchanger.setValue(alternateLocation);
+            }
+        };
+        
+        if (!findPushAltLocs(guid, urn, listener)) {
+            return null;
+        } else {
+            try {
+                return exchanger.get();
+            } catch (InterruptedException e) {
+                return null;
+            }
+        }
+    }
+
 }

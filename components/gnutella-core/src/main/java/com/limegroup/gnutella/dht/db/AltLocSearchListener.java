@@ -18,10 +18,12 @@ public interface AltLocSearchListener {
     
     /**
      * Is called when a lookup for an alternate location has been performed, any
-     * result has been returned or an exception occurred during lookup.
-     *
+     * result has been returned or an exception occurred during lookup. 
+     * It is also called when the search was not successful.
+     * <p>
      * Note: This could just mean the lookup of a firewalled location without its
      * pushproxies has taken place.
+     * </p>
      * 
      * @param success whether or not the lookup was successful
      */
