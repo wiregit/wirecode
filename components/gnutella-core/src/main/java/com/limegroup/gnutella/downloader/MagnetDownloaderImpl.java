@@ -140,21 +140,19 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 			if (defaultURLs.length == 0 )
 				return DownloadStatus.GAVE_UP;
 
-
-			RemoteFileDesc firstDesc = null;
-			
-			for (int i = 0; i < defaultURLs.length && firstDesc == null; i++) {
+			RemoteFileDesc rfd = null;
+			for (int i = 0; i < defaultURLs.length; i++) {
 				try {
-					firstDesc = createRemoteFileDesc(defaultURLs[i],
+					 rfd = createRemoteFileDesc(defaultURLs[i],
 													 getSaveFile().getName(), magnet.getSHA1Urn());
 							
-					initPropertiesMap(firstDesc);
-					addDownloadForced(firstDesc, true);
+					initPropertiesMap(rfd);
+					addDownloadForced(rfd, true);
 				} catch (IOException badRFD) {}
 			}
         
 			// if all locations included in the magnet URI fail we can't do much
-			if (firstDesc == null)
+			if (rfd == null)
 				return DownloadStatus.GAVE_UP;
 		}
         return super.initializeDownload();
@@ -163,22 +161,21 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     /** 
      * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader.  If a URL
      * is provided, issues a HEAD request to get the file size.  If this fails,
-     * returns null.  Package-access and static for easy testing.
-     * 
+     * returns null.
+     * <p>
+     * Protected and non-static so it can be overridden in tests.
+     * </p>
+     * <p>
      * NOTE: this calls HTTPUtils.contentLength which opens a URL and calls Head on the
      * link to determine the file length. This is a blocking call!
+     * </p>
      */
     @SuppressWarnings("deprecation")
-    private static RemoteFileDesc createRemoteFileDesc(String defaultURL,
+    protected RemoteFileDesc createRemoteFileDesc(String defaultURL,
         String filename, URN urn) throws IOException{
-        if (defaultURL==null) {
-            LOG.debug("createRemoteFileDesc called with null URL");        
-            return null;
-        }
 
-        URL url = null;
         // Use the URL class to do a little parsing for us.
-        url = new URL(defaultURL);
+        URL url = new URL(defaultURL);
         int port = url.getPort();
         if (port<0)
             port=80;      //assume default for HTTP (not 6346)
