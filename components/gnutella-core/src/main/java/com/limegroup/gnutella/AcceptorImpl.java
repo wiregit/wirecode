@@ -13,6 +13,7 @@ import java.util.Random;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,6 +62,9 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
     private long incomingExpireTime = DEFAULT_INCOMING_EXPIRE_TIME;
     private long waitTimeAfterRequests = DEFAULT_WAIT_TIME_AFTER_REQUESTS;
     private long timeBetweenValidates = DEFAULT_TIME_BETWEEN_VALIDATES;
+    
+    /** Task for validating incoming requests */
+    private final IncomingValidator incomingValidator = new IncomingValidator();
     
     /**
      * The socket that listens for incoming connections. Can be changed to
@@ -121,9 +125,6 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
      * to starting are dropped.
      */
     private volatile boolean _started;
-    
-    /** Future for our resetter */
-    private volatile Future<?> resetterFuture;
     
     private final NetworkManager networkManager;
     private final Provider<UDPService> udpService;
@@ -331,11 +332,12 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         	            networkManager.addressChanged();
         		
         		    // we could get our external address from the NAT but its too slow
-        		    // so we clear the last connect back times.
-        	        // This will not help with already established connections, but if 
-        	        // we establish new ones in the near future
+        		    // so we clear the last connect back times and re-validate cause our
+        	        // status may have changed.
         		    resetLastConnectBackTime();
         		    udpService.get().resetLastConnectBackTime();
+        		    if (!acceptedIncoming())
+        		        incomingValidator.run();
 			    }			        
         	}
         }
@@ -348,7 +350,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         multicastService.get().start();
         udpService.get().start();
         connectionDispatcher.get().addConnectionAcceptor(this, false, "CONNECT", "\n\n");
-        backgroundExecutor.scheduleWithFixedDelay(new IncomingValidator(),
+        backgroundExecutor.scheduleWithFixedDelay(incomingValidator,
                 timeBetweenValidates, timeBetweenValidates,
                 TimeUnit.MILLISECONDS);
         _started = true;
@@ -537,11 +539,8 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
 	 * Returns whether or not the status changed.
 	 */
 	boolean setIncoming(boolean canReceiveIncoming) {
-        if (canReceiveIncoming) {
-            Future<?> resetter = resetterFuture;
-            if (resetter != null)
-                resetter.cancel(false);
-        }
+        if (canReceiveIncoming) 
+            incomingValidator.cancelReset();
 	    
 	    if (_acceptedIncoming == canReceiveIncoming)
             return false;
@@ -715,8 +714,12 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
      * (Re)validates acceptedIncoming.
      */
     private class IncomingValidator implements Runnable {
-        public IncomingValidator() {}
+        private final AtomicBoolean validating = new AtomicBoolean(false);
+        private volatile Future<?> resetterFuture;
+        
         public void run() {
+            if (validating.getAndSet(true))
+                return;
             // clear and revalidate if we haven't done so in a while
             final long currTime = System.currentTimeMillis();
             if (currTime - _lastConnectBackTime > incomingExpireTime){
@@ -737,7 +740,14 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
                     resetterFuture = backgroundExecutor.schedule(resetter, 
                                            waitTimeAfterRequests, TimeUnit.MILLISECONDS);
                 } 
-            } 
+            }
+            validating.set(false);
+        }
+        
+        void cancelReset() {
+            Future<?> resetter = resetterFuture;
+            if (resetter != null)
+                resetter.cancel(false);
         }
     }
 
