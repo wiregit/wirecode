@@ -86,7 +86,13 @@
 	    			 forkmode="perTest"/>
 	</target>
     
-	<target name="test-some" 
+    <target name="tests2html" 
+            description="Creates html test report from previous test run."
+            depends="initialize">
+        <do.tests2html          component="tests"/>
+    </target>
+    
+    <target name="test-some" 
             description="Runs some tests in this module."
             depends="compile"
 			if="include">

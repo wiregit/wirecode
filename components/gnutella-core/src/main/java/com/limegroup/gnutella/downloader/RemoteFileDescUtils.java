@@ -1,12 +1,14 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
+import java.net.URISyntaxException;
 import java.util.Set;
 
-import org.apache.commons.httpclient.URI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpException;
 
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
@@ -23,8 +25,8 @@ public class RemoteFileDescUtils {
      */
     @SuppressWarnings("deprecation")
     public static RemoteFileDesc createRemoteFileDesc(RemoteFileDescFactory remoteFileDescFactory,
-            URL url,
-        String filename, URN urn, long size) throws IOException{
+              URL url,
+        String filename, URN urn, long size) throws IOException, URISyntaxException, HttpException, InterruptedException {
         if (url==null) {
             LOG.debug("createRemoteFileDesc called with null URL");        
             return null;
@@ -40,9 +42,9 @@ public class RemoteFileDescUtils {
         if (urn!=null)
             urns.add(urn);
         
-        URI uri = new URI(url);    
+        URI uri = new URI(url.toExternalForm());    
     
-        return remoteFileDescFactory.createUrlRemoteFileDesc(url.getHost(), port, filename != null ? filename : MagnetOptions.extractFileName(uri), size <= 0 ? HTTPUtils.contentLength(url) : size, urns, url);         //assume no firewall transfer
+        return remoteFileDescFactory.createUrlRemoteFileDesc(url.getHost(), port, filename != null ? filename : MagnetOptions.extractFileName(uri), size <= 0 ? HTTPUtils.contentLength(uri) : size, urns, url);         //assume no firewall transfer
     }
 
 }

@@ -1,11 +1,12 @@
 package com.limegroup.gnutella.licenses;
 
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URI;
 import java.net.URL;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
 import org.limewire.service.ErrorService;
+import org.limewire.http.URIUtils;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -43,8 +44,9 @@ class WeedLicense extends AbstractLicense {
     /** Builds the URI from the given cid & vid. */
     public static final URI buildURI(String cid, String vid) {
         try {
-            return new URI((URI + "?" + VID + "=" + vid + "&" + CID + "=" + cid).toCharArray());
-        } catch(URIException bad) {
+            return new URI((URI + "?" + VID + "=" + vid + "&" + CID + "=" + cid));
+        } catch(URISyntaxException bad) {
+            URIUtils.error(bad);
             return null;
         }  
     }

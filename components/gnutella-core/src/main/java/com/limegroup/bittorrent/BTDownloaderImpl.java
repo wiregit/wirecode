@@ -502,13 +502,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
     protected void fillInMemento(DownloadMemento memento) {
         super.fillInMemento(memento);
         BTDownloadMemento bmem = (BTDownloadMemento)memento;
-        bmem.setBtMetaInfo(btMetaInfo);
+        bmem.setBtMetaInfo(btMetaInfo.toMemento());
     }
     
     @Override
     public synchronized void initFromMemento(DownloadMemento memento) throws InvalidDataException {
         super.initFromMemento(memento);
         BTDownloadMemento bmem = (BTDownloadMemento)memento;
-        initBtMetaInfo(bmem.getBtMetaInfo());
+        initBtMetaInfo(new BTMetaInfo(bmem.getBtMetaInfo()));
     }
 }

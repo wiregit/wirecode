@@ -37,8 +37,6 @@ public class LimeWireNetModule extends AbstractModule {
         bind(ProxyManager.class).to(ProxyManagerImpl.class);
         bind(WhoIsRequestFactory.class).to(WhoIsRequestFactoryImpl.class);
         
-        requestStaticInjection(HttpClientManager.class);
-        
         if(OSUtils.isSocketChallengedWindows())
             bind(SocketController.class).to(LimitedSocketController.class);
         else

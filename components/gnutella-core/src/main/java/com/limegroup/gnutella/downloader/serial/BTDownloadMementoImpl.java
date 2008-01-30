@@ -31,15 +31,15 @@ public class BTDownloadMementoImpl implements BTDownloadMemento, Serializable {
         return (File)serialObjects.get("saveFile");
     }
     
-    public BTMetaInfo getBtMetaInfo() {
-        return (BTMetaInfo)serialObjects.get("btMetaInfo");
+    public BTMetaInfoMemento getBtMetaInfo() {
+        return (BTMetaInfoMemento)serialObjects.get("btMetaInfo");
     }
     
     public void setAttributes(Map<String, Object> attributes) {
         serialObjects.put("attributes", attributes);
     }
     
-    public void setBtMetaInfo(BTMetaInfo btMetaInfo) {
+    public void setBtMetaInfo(BTMetaInfoMemento btMetaInfo) {
         serialObjects.put("btMetaInfo", btMetaInfo);
     }
     

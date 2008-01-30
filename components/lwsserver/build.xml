@@ -9,16 +9,21 @@
 
 	<import file="../common/build-macros.xml" />
 	<import file="../common/build.xml" />
+    <import file="../net/build.xml"/>
 
-	<target name="initialize" depends="lw-common.initialize" unless="initialized.lwsserver">
+    <target name="initialize" depends="lw-common.initialize, lw-net.initialize" unless="initialized.lwsserver">
 		<do.setup-properties component="lwsserver">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar" />
 				<pathelement location="${limewire.lib.jars}/jakarta-httpcore.jar"/>
 				<path refid="build.limewire.components.common.buildpath" />
 				<path refid="build.limewire.components.http.buildpath" />
-			</src-classpath>
-		</do.setup-properties>
+                <!--path refid="build.limewire.components.net.buildpath" /-->
+            </src-classpath>
+            <build-tests-classpath>
+                <path refid="tests.limewire.components.net.classpath"/>
+            </build-tests-classpath>
+        </do.setup-properties>
 	</target>
 
 	<target name="clean" depends="lw-common.clean">

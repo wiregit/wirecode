@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.Test;
-
 import org.limewire.io.LocalSocketAddressService;
 
 import com.google.inject.AbstractModule;
@@ -29,6 +27,8 @@ import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
+
+import junit.framework.Test;
 
 /**
  *  Tests downloading from the store site
@@ -86,7 +86,7 @@ public class StoreDownloaderTest extends LimeTestCase{
      */
     public void testEmptyOverrides() throws Exception{
         URN urn = UrnHelper.URNS[0];
-        URL url = new URL("http:\\test.com");
+        URL url = new URL("http://test.com");
         RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(remoteFileDescFactory, url, "test.txt", urn, 10L);
         
         //create a valid download
@@ -115,7 +115,7 @@ public class StoreDownloaderTest extends LimeTestCase{
      */
     public void testRFDCreation() throws Exception {
         URN urn = UrnHelper.URNS[0];
-        URL url = new URL("http:\\test.com");
+        URL url = new URL("http://test.com");
         
         // test invalid rfd
         assertNull( RemoteFileDescUtils.createRemoteFileDesc(remoteFileDescFactory, null, "", null, -1) );
@@ -139,7 +139,7 @@ public class StoreDownloaderTest extends LimeTestCase{
     public void testInvalidStoreDownloads() throws Exception {
 
         URN urn = UrnHelper.URNS[0];
-        URL url = new URL("http:\\test.com");
+        URL url = new URL("http://test.com");
         RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(remoteFileDescFactory, url, "test.txt", urn, 10L);
                 
         //create a valid download
@@ -161,7 +161,7 @@ public class StoreDownloaderTest extends LimeTestCase{
     public void testValidStoreDownloads() throws Exception {
         
         URN urn = UrnHelper.URNS[0];
-        URL url = new URL("http:\\test.com");
+        URL url = new URL("http://test.com");
         RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(remoteFileDescFactory, url, "test.txt", urn, 10L);
         
         

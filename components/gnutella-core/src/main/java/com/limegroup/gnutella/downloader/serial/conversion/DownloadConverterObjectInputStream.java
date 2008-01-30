@@ -56,6 +56,9 @@ class DownloadConverterObjectInputStream extends ConverterObjectInputStream {
         addLookup("com.limegroup.gnutella.downloader.Interval", "org.limewire.collection.Interval");
         addLookup("com.limegroup.gnutella.util.IntervalSet", IntervalSet.class.getName());
         addLookup("com.limegroup.gnutella.BandwidthTrackerImpl", SerialBandwidthTrackerImpl.class.getName());
+        addLookup("org.apache.commons.httpclient.URI", SerialOldURI.class.getName());
+        addLookup("com.limegroup.bittorrent.BTMetaInfo", SerialBTMetaInfo.class.getName());
+        addLookup("com.limegroup.bittorrent.BTMetaInfo$SerialKeys", SerialBTMetaInfo.SerialKeys.class.getName());
     }
     
 

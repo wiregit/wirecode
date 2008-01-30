@@ -294,8 +294,8 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
                     downloadServices.download((new RemoteFileDesc[]{rfd}), 
                                            true, fGuid);
                 }
-                catch (Exception damn) {
-                    assertTrue(false);
+                catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
             }
         };

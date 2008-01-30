@@ -160,7 +160,7 @@ public class DownloadConversionTest extends BaseTestCase {
             SerialBTDownloader sbtd = (SerialBTDownloader)serialRead.get(6);
             Map<String, Serializable> properties = sbtd.getProperties();
             assertEquals("btName", properties.get("defaultFileName"));
-            BTMetaInfo info = (BTMetaInfo)properties.get("metainfo");
+            SerialBTMetaInfo info = (SerialBTMetaInfo)properties.get("metainfo");
             assertEquals("http://www.example.com/announce", info.getTrackers()[0].toString());
             assertEquals(UrnHelper.URNS[3].getBytes(), info.getInfoHash());
             assertEquals(123L, info.getFileSystem().getTotalSize());

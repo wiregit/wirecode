@@ -24,6 +24,7 @@ public abstract class BaseTestCase extends AssertComparisons {
     protected TestResult _testResult;
     protected TimerTask _testKiller;
     protected long _startTimeForTest;
+    protected Class<Throwable> expectedException;
 
     /**
      * bug 6435126
@@ -151,6 +152,17 @@ public abstract class BaseTestCase extends AssertComparisons {
             }
         }
         if ( deleteDirs ) dir.delete();
+    }
+
+    /**
+     * Used in conjunction with <code>BaseTestCase</code>'s implementation
+     * of <code>ErrorService</code>.  Allows a test to configure an expected
+     * <code>Exception</code>.
+     * @see #error(Throwable, String)
+     * @param t the expected Exception type
+     */
+    protected void setExpectedException(Class t) {
+        this.expectedException = t;
     }
     
     /*
@@ -287,6 +299,10 @@ public abstract class BaseTestCase extends AssertComparisons {
      * thread, we want the test results to remember the error, but we 
      * must allow the test to continue as normal, possibly succeeding, 
      * failing or erroring.
+     * 
+     * If an <code>expectedException</code> has been set, then
+     * this method will check to see if the incoming exception 
+     * is of the correct class.  If it is, then the call to this method is essentially ignored.
      *
      * Note that while the XML formatter can easily handle the case of
      * multiple failures/errors in a single test, the XML->HTML converter
@@ -296,6 +312,11 @@ public abstract class BaseTestCase extends AssertComparisons {
      * message/stacktrace.
      */
     public void error(Throwable ex, String detail) {
+        if(expectedException != null && ex != null) {
+            if(expectedException.isInstance(ex)) {
+                return;
+            }
+        }
         ex = new UnexpectedExceptionError(detail, ex); // remember the detail & stack trace of the ErrorService.
         if ( _testThread != Thread.currentThread() ) {
             // the Eclipse JUnit plug-in does not report multiple errors per test case: 
@@ -327,6 +348,12 @@ public abstract class BaseTestCase extends AssertComparisons {
     			fail(message);
     		}
     	};
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        setExpectedException(null);
     }
 }       
 

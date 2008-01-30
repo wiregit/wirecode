@@ -4,17 +4,20 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.io.StringReader;
-
+import java.net.URI;
+import java.net.URISyntaxException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.net.HttpClientManager;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.limewire.http.HttpClientManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
@@ -92,21 +95,34 @@ public abstract class AbstractLicense implements MutableLicense, Serializable, C
      * HTTP request.
      */
     protected String getBodyFromURL(String url) {
-        if(LOG.isTraceEnabled())
+        if (LOG.isTraceEnabled())
             LOG.trace("Contacting: " + url);
-        
-        HttpClient client = HttpClientManager.getNewClient();
-        GetMethod get = new GetMethod(url);
-        get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
+        HttpResponse response = null;
         try {
-            HttpClientManager.executeMethodRedirecting(client, get);
-            return get.getResponseBodyAsString();
-        } catch(IOException ioe) {
-            LOG.warn("Can't contact license server: " + url, ioe);
-            return null;
+            HttpClient client = HttpClientManager.getNewClient();
+            HttpGet get = new HttpGet(url);
+            get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
+
+            response = client.execute(get);
+            String result;
+            if (response.getEntity() != null) {
+                result = EntityUtils.toString(response.getEntity());
+            } else {
+                result = null;
+            }
+            return result;
+        } catch (IOException e) {
+            LOG.warn("Can't contact license server: " + url, e);
+        } catch (HttpException e) {
+            LOG.warn("Can't contact license server: " + url, e);
+        } catch (URISyntaxException e) {
+            LOG.warn("Can't contact license server: " + url, e);
+        } catch (InterruptedException e) {
+            LOG.warn("Can't contact license server: " + url, e);
         } finally {
-            get.releaseConnection();
+            HttpClientManager.releaseConnection(response);
         }
+        return null;
     }
     
     /** Parses the document node of the XML. */

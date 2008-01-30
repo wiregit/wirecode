@@ -12,6 +12,7 @@ import java.util.concurrent.ThreadFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.util.BaseTestCase;
 
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.util.URLDecoder;
 
 public class ServletAccessorTest extends BaseTestCase {
@@ -46,6 +47,7 @@ public class ServletAccessorTest extends BaseTestCase {
     public ServletAccessorTest(String name) {
         super(name);
         FACTORY = ExecutorsHelper.daemonThreadFactory(name);
+        LimeTestUtils.createInjector();
     }
 
     public void testGetRemoteBugInfo() {                                     
