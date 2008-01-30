@@ -15,7 +15,6 @@ import org.limewire.inject.AbstractModule;
 import org.limewire.net.EmptySocketBindingSettings;
 import org.limewire.net.LimeWireNetModule;
 import org.limewire.net.ProxySettings;
-import org.limewire.net.ProxySettingsStub;
 import org.limewire.net.SocketBindingSettings;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManagerImpl;
