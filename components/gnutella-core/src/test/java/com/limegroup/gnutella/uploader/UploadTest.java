@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
@@ -15,21 +16,24 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
-import org.apache.http.util.EntityUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.HttpRoute;
+import org.apache.http.conn.ManagedClientConnection;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.util.EntityUtils;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.http.HttpClientManager;
@@ -785,7 +789,7 @@ public class UploadTest extends LimeTestCase {
         try {
             response = client.execute(method);
             fail("Expected remote end to close connection, got: " + response);
-        } catch (Exception expected) {
+        } catch (IOException expected) {
             // expected result
         } finally {
             HttpClientManager.releaseConnection(response);
@@ -796,7 +800,7 @@ public class UploadTest extends LimeTestCase {
         try {
             response = client.execute(method);
             fail("Expected remote end to close connection, got: " + response);
-        } catch (Exception expected) {
+        } catch (IOException expected) {
             // expected result
         } finally {
             HttpClientManager.releaseConnection(response);
@@ -816,7 +820,7 @@ public class UploadTest extends LimeTestCase {
         try {
             response = client.execute(method);
             fail("Expected remote end to close connection, got: " + response);
-        } catch (Exception expected) {
+        } catch (IOException expected) {
             // expected result
         } finally {
             HttpClientManager.releaseConnection(response);
@@ -832,7 +836,7 @@ public class UploadTest extends LimeTestCase {
         try {
             response = client.execute(method);
             fail("Expected remote end to close connection, got: " + response);
-        } catch (Exception expected) {
+        } catch (IOException expected) {
             // expected result
         } finally {
             HttpClientManager.releaseConnection(response);
@@ -987,7 +991,7 @@ public class UploadTest extends LimeTestCase {
         } finally {
             HttpClientManager.releaseConnection(response);
         }
-        assertConnectionIsOpen(true);
+        assertConnectionIsOpen(true, method);
 
         method = new HttpGet(otherFileNameUrl);
         try {
@@ -1016,7 +1020,7 @@ public class UploadTest extends LimeTestCase {
             HttpClientManager.releaseConnection(response);
         }
 
-        assertConnectionIsOpen(true);
+        assertConnectionIsOpen(true, method);
 
         method = new HttpGet(host + "/uri-res/N2R?" + incompleteHash);
         try {
@@ -1048,7 +1052,7 @@ public class UploadTest extends LimeTestCase {
             HttpClientManager.releaseConnection(response);
         }
 
-        assertConnectionIsOpen(true);
+        assertConnectionIsOpen(true, method);
 
         // add another range and make sure we display it.
         iv = Range.createRange(150050, 252450);
@@ -1065,7 +1069,7 @@ public class UploadTest extends LimeTestCase {
             HttpClientManager.releaseConnection(response);
         }
 
-        assertConnectionIsOpen(true);
+        assertConnectionIsOpen(true, method);
 
         // add an interval too small to report and make sure we don't report
         iv = Range.createRange(102505, 150000);
@@ -1082,7 +1086,7 @@ public class UploadTest extends LimeTestCase {
             HttpClientManager.releaseConnection(response);
         }
 
-        assertConnectionIsOpen(true);
+        assertConnectionIsOpen(true, method);
 
         // add the glue between the other intervals and make sure we condense
         // the ranges into a single larger range.
@@ -1116,7 +1120,7 @@ public class UploadTest extends LimeTestCase {
             HttpClientManager.releaseConnection(response);
         }
 
-        assertConnectionIsOpen(true);
+        assertConnectionIsOpen(true, method);
     }
 
     public void testHTTP11WrongURI() throws Exception {
@@ -1130,7 +1134,7 @@ public class UploadTest extends LimeTestCase {
             HttpClientManager.releaseConnection(response);
         }
 
-        assertConnectionIsOpen(true);
+        assertConnectionIsOpen(true, method);
     }
 
     public void testHTTP10WrongURI() throws Exception {
@@ -1145,7 +1149,7 @@ public class UploadTest extends LimeTestCase {
             HttpClientManager.releaseConnection(response);
         }
 
-        assertConnectionIsOpen(false);
+        assertConnectionIsOpen(false, method);
     }
 
     public void testHTTP11MalformedURI() throws Exception {
@@ -1159,7 +1163,7 @@ public class UploadTest extends LimeTestCase {
             HttpClientManager.releaseConnection(response);
         }
 
-        assertConnectionIsOpen(false);
+        assertConnectionIsOpen(false, method);
     }
 
     public void testHTTP10MalformedURI() throws Exception {
@@ -1174,7 +1178,7 @@ public class UploadTest extends LimeTestCase {
             HttpClientManager.releaseConnection(response);
         }
 
-        assertConnectionIsOpen(false);
+        assertConnectionIsOpen(false, method);
     }
 
     public void testHTTP11MalformedGet() throws Exception {
@@ -1188,7 +1192,7 @@ public class UploadTest extends LimeTestCase {
             HttpClientManager.releaseConnection(response);
         }
 
-        assertConnectionIsOpen(false);
+        assertConnectionIsOpen(false, method);
     }
 
     public void testHTTP11MalformedHeader() throws Exception {
@@ -1203,7 +1207,7 @@ public class UploadTest extends LimeTestCase {
             HttpClientManager.releaseConnection(response);
         }
 
-        assertConnectionIsOpen(false);
+        assertConnectionIsOpen(false, method);
     }
 
     public void testHTTP11Post() throws Exception {
@@ -1218,7 +1222,7 @@ public class UploadTest extends LimeTestCase {
         } finally {
             HttpClientManager.releaseConnection(response);
         }
-        assertConnectionIsOpen(false);
+        assertConnectionIsOpen(false, method);
     }
 
     public void testHTTP11ExpectContinue() throws Exception {
@@ -1314,7 +1318,7 @@ public class UploadTest extends LimeTestCase {
             HttpClientManager.releaseConnection(response);
         }
 
-        assertConnectionIsOpen(true);
+        assertConnectionIsOpen(true, method);
 
         // feature headers are only sent with the first response
         ChatSettings.CHAT_ENABLED.setValue(false);
@@ -1328,7 +1332,7 @@ public class UploadTest extends LimeTestCase {
             HttpClientManager.releaseConnection(response);
         }
 
-        assertConnectionIsOpen(false);
+        assertConnectionIsOpen(false, method);
 
         // try a new connection
         method = new HttpGet(fileNameUrl);
@@ -1549,11 +1553,12 @@ public class UploadTest extends LimeTestCase {
         
     }
 
-    private void assertConnectionIsOpen(boolean open) {
-        // TODO HttpConnection connection = client.getHttpConnectionManager()
-        // TODO         .getConnection(hostConfig);
-        // TODO assertEquals(open, connection.isOpen());
-       // TODO  client.getHttpConnectionManager().releaseConnection(connection);
+    private void assertConnectionIsOpen(boolean open, HttpUriRequest request) throws InterruptedException {
+        URI uri = request.getURI();
+        HttpRoute route = new HttpRoute(new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme()));
+        ManagedClientConnection connection = client.getConnectionManager().getConnection(route);
+        assertEquals(open, connection.isOpen());
+        client.getConnectionManager().releaseConnection(connection);
     }
 
     private HashTree getThexTree(TigerTreeCache tigerTreeCache) throws Exception {

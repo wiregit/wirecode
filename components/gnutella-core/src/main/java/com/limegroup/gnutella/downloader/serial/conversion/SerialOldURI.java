@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+/**
+ * helps to migrate persistant org.apache.commons.httpclient.URI's to java.net.URI's
+ */
 public class SerialOldURI implements Serializable {
     private static final long serialVersionUID = 604752400577948726L;
 

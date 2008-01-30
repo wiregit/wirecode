@@ -19,12 +19,12 @@ public interface SocketController {
     /** 
      * Enqueue's this socket for wanting a connection.
      * @param socket The socket to conenct.
-     * @param bindingSettings the SocketBindingSettings to use
+     * @param localAddr the Socket address to bind to locally; can be null
      * @param addr The address the socket will connect to.
      * @param timeout The amount of time to wait before timing out the connection.
      * @param observer The ConnectObserver to notify about success or failure.
      */
-    Socket connect(NBSocket socket, PerCallSocketBindingSettings bindingSettings, InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException;
+    Socket connect(NBSocket socket, InetSocketAddress localAddr, InetSocketAddress addr, int timeout, ConnectObserver observer) throws IOException;
 
     /** 
      * Enqueue's this socket for wanting a connection.

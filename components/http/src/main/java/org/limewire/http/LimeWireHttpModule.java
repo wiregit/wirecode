@@ -6,10 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
-import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.LayeredSocketFactory;
 import org.apache.http.conn.PlainSocketFactory;
@@ -17,13 +14,11 @@ import org.apache.http.conn.Scheme;
 import org.apache.http.conn.SchemeRegistry;
 import org.apache.http.conn.SocketFactory;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.inject.AbstractModule;
-import org.limewire.net.PerCallSocketBindingSettingsImpl;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.NBSocket;
 
@@ -193,8 +188,12 @@ public class LimeWireHttpModule extends AbstractModule {
         public Socket connectSocket(Socket socket, String targetHost, int targetPort, InetAddress localAddress, int localPort, HttpParams httpParams) throws IOException, UnknownHostException, ConnectTimeoutException {
             if(socket == null) {
                 socket = createSocket();
-            }            
-            return socketsManager.get().connect((NBSocket)socket, new PerCallSocketBindingSettingsImpl(localAddress,  localPort), new InetSocketAddress(targetHost,targetPort), HttpConnectionParams.getConnectionTimeout(httpParams), type);
+            }
+            InetSocketAddress localSocketAddr = null;
+            if((localAddress != null && !localAddress.isAnyLocalAddress()) || localPort > 0) {
+                localSocketAddr = new InetSocketAddress(localAddress, localPort);
+            }
+            return socketsManager.get().connect((NBSocket)socket, localSocketAddr, new InetSocketAddress(targetHost,targetPort), HttpConnectionParams.getConnectionTimeout(httpParams), type);
         }
 
         public boolean isSecure(Socket socket) throws IllegalArgumentException {

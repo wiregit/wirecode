@@ -68,7 +68,6 @@ public class BTMetaInfo {
 	 * because at a later date we may want to be able to add trackers to a
 	 * torrent
 	 */
-    // TODO update serialization code
     private URI[] _trackers;
 
 	/**

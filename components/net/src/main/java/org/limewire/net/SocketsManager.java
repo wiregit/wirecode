@@ -52,7 +52,7 @@ public interface SocketsManager {
      * To connect with a TLS Socket, use ConnectType.TLS.
      *
      * @param socket the socket to connect; if <code>null</code> a new <code>Socket</code> will be created
-     * @param bindingSettings the <code>SocketBindingSettings</code> to use; can be null
+     * @param localAddr the Socket address to bind to locally; can be null
      * @param addr the host/port to connect to
      * @param timeout the desired timeout for connecting, in milliseconds,
      *  or 0 for no timeout. In case of a proxy connection, this timeout
@@ -63,7 +63,7 @@ public interface SocketsManager {
      *  requested time
      * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public Socket connect(NBSocket socket, PerCallSocketBindingSettings bindingSettings, InetSocketAddress addr, int timeout, ConnectType type) throws IOException;
+    public Socket connect(NBSocket socket, InetSocketAddress localAddr, InetSocketAddress addr, int timeout, ConnectType type) throws IOException;
     
     /**
      * Connects and returns a socket to the given host, with a timeout.

@@ -34,7 +34,6 @@ public class OldDownloadConverterImplTest extends BaseTestCase {
 
     public OldDownloadConverterImplTest(String name) {
         super(name);
-        Logger.getLogger("com.limegroup.gnutella.downloader.serial.conversion").setLevel(Level.DEBUG);
     }
 
     public static Test suite() {

@@ -32,8 +32,8 @@ public class SocketsManagerImpl implements SocketsManager {
         return type.getFactory().createSocket();
     }
 
-    public Socket connect(NBSocket socket, PerCallSocketBindingSettings bindingSettings, InetSocketAddress addr, int timeout, ConnectType type) throws IOException {
-        return connect(socket, bindingSettings, addr, timeout, null, type);    
+    public Socket connect(NBSocket socket, InetSocketAddress localAddr, InetSocketAddress addr, int timeout, ConnectType type) throws IOException {
+        return connect(socket, localAddr, addr, timeout, null, type);    
     }
 
     public Socket connect(InetSocketAddress addr, int timeout) throws IOException {
@@ -52,7 +52,7 @@ public class SocketsManagerImpl implements SocketsManager {
         return connect(null, null, addr, timeout, observer, type);    
     }
 
-    public Socket connect(NBSocket socket, PerCallSocketBindingSettings bindingSettings, InetSocketAddress addr, int timeout, ConnectObserver observer, ConnectType type) throws IOException {
+    public Socket connect(NBSocket socket, InetSocketAddress localAddr, InetSocketAddress addr, int timeout, ConnectObserver observer, ConnectType type) throws IOException {
         if(!NetworkUtils.isValidPort(addr.getPort()))  
             throw new IllegalArgumentException("port out of range: "+addr.getPort());
         if(addr.isUnresolved())
@@ -61,7 +61,7 @@ public class SocketsManagerImpl implements SocketsManager {
         if(socket == null) {
             return socketController.connect(type.getFactory(), addr, timeout, observer);
 	    } else {
-            return socketController.connect(socket, bindingSettings, addr, timeout, observer);
+            return socketController.connect(socket, localAddr, addr, timeout, observer);
         }
     }
 

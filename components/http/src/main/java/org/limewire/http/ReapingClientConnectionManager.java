@@ -23,11 +23,12 @@ import com.google.inject.Provider;
  */
 public class ReapingClientConnectionManager extends ThreadSafeClientConnManager {
     protected final ScheduledFuture connectionCloserTask;
-    protected IdleConnectionCloser connectionCloser;
+    protected final IdleConnectionCloser connectionCloser;
 
     public ReapingClientConnectionManager(Provider<SchemeRegistry> schemeRegistry, Provider<ScheduledExecutorService> scheduler) {
         super(new DefaultHttpParams(), schemeRegistry.get());
         connectionCloser = new IdleConnectionCloser();
+        // TODO revist - move this until later (eg., getConnection())
         connectionCloserTask = scheduler.get().scheduleAtFixedRate(connectionCloser, 0L, 10L, TimeUnit.SECONDS);
     }
 
@@ -62,7 +63,7 @@ public class ReapingClientConnectionManager extends ThreadSafeClientConnManager 
     // static - so that passing instances of it to the scheduler in 
     // the ReapingClientConnectionManager constructor
     // does not inadvertantly pass "this" inside a constructor
-    static class IdleConnectionCloser implements Runnable {
+    private static class IdleConnectionCloser implements Runnable {
 
         private static final long IDLE_TIME = 30 * 1000; // 30 seconds.
     

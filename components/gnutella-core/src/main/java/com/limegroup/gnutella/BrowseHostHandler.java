@@ -305,7 +305,6 @@ public class BrowseHostHandler {
         get.addHeader("Host", NetworkUtils.ip2string(socket.getInetAddress().getAddress()) + ":" + socket.getPort());
         get.addHeader("User-Agent", LimeWireUtils.getVendor());
         get.addHeader("Accept", Constants.QUERYREPLY_MIME_TYPE);
-        get.addHeader("Content-Length", "0");
         get.addHeader("Connection", "close");
         
         return client.execute(get);
