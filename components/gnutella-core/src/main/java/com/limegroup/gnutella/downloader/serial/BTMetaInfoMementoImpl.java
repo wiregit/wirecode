@@ -12,6 +12,7 @@ public class BTMetaInfoMementoImpl implements BTMetaInfoMemento{
     
     private Map<String, Object> serialObjects = new HashMap<String, Object>();
 
+    @SuppressWarnings("unchecked")
     public List<byte[]> getHashes() {
         return (List<byte[]>)serialObjects.get("hashes");    
     }

@@ -1,6 +1,5 @@
 package org.limewire.http;
 
-import org.apache.http.client.params.AllClientPNames;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.params.BasicHttpParams;

@@ -17,7 +17,6 @@ import org.limewire.util.GenericsUtils;
 import org.limewire.util.TestUtils;
 import org.limewire.util.GenericsUtils.ScanMode;
 
-import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.helpers.UrnHelper;
 

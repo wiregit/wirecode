@@ -2,6 +2,8 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 
+import junit.framework.Test;
+
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -23,8 +25,6 @@ import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
-
-import junit.framework.Test;
 
 //ITEST
 public class HTTPAcceptorTest extends BaseTestCase {

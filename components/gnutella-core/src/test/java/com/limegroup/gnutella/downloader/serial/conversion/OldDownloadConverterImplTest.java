@@ -7,28 +7,25 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import junit.framework.Test;
+
 import org.limewire.collection.NameValue;
 import org.limewire.collection.Range;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.TestUtils;
 
-import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMemento;
+import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.GnutellaDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.MagnetDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
-import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.gui.search.SearchInformation;
 import com.limegroup.gnutella.helpers.UrnHelper;
-
-import junit.framework.Test;
 
 public class OldDownloadConverterImplTest extends BaseTestCase {
 

@@ -1,7 +1,6 @@
 package org.limewire.http;
 
 import java.net.Socket;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;

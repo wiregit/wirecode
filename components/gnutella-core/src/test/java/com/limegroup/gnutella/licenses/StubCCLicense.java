@@ -1,9 +1,6 @@
 package com.limegroup.gnutella.licenses;
 
-import org.limewire.service.ErrorService;
-
 import java.net.URI;
-import java.net.URISyntaxException;
 
 class StubCCLicense extends CCLicense {
 

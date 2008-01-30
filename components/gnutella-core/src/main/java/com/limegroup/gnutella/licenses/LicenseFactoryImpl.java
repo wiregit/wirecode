@@ -6,7 +6,6 @@ import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.service.ErrorService;
 import org.limewire.http.URIUtils;
 
 import com.google.inject.Inject;

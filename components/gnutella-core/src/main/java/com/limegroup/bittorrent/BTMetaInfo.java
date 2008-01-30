@@ -2,17 +2,12 @@ package com.limegroup.bittorrent;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
-import java.io.ObjectStreamField;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +18,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.http.URIUtils;
 import org.limewire.io.InvalidDataException;
 import org.limewire.service.ErrorService;
-import org.limewire.util.GenericsUtils;
 
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.FileDesc;

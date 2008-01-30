@@ -24,7 +24,7 @@ public abstract class BaseTestCase extends AssertComparisons {
     protected TestResult _testResult;
     protected TimerTask _testKiller;
     protected long _startTimeForTest;
-    protected Class<Throwable> expectedException;
+    protected Class<? extends Throwable> expectedException;
 
     /**
      * bug 6435126
@@ -161,7 +161,7 @@ public abstract class BaseTestCase extends AssertComparisons {
      * @see #error(Throwable, String)
      * @param t the expected Exception type
      */
-    protected void setExpectedException(Class t) {
+    protected void setExpectedException(Class<? extends Throwable> t) {
         this.expectedException = t;
     }
     

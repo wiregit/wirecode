@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.downloader.DownloaderType;
 
 public class BTDownloadMementoImpl implements BTDownloadMemento, Serializable {
