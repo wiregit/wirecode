@@ -195,14 +195,14 @@ public class AltLocFinderTest extends DHTTestCase {
         }
     }
     
-    public void testGetPushAlternateLocation() throws Exception {
+    public void testGetGUIDAlternateLocation() throws Exception {
         URN urn = publishPushAltLoc(true);
         PushAltLoc expectedAltLoc = (PushAltLoc) alternateLocationFactory.createPushAltLoc(pushEndpointFactory.createForSelf(), urn);
         AlternateLocation result = altLocFinder.getAlternateLocation(new GUID(expectedAltLoc.getPushAddress().getClientGUID()), urn);
         assertEquals(expectedAltLoc, result);
     }
     
-    public void testGetUnavailablePushAlternateLocation() throws Exception {
+    public void testGetUnavailableGUIDAlternateLocation() throws Exception {
         URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         AlternateLocation result = altLocFinder.getAlternateLocation(new GUID(), urn);
         assertNull(result);
