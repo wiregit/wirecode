@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -97,9 +98,6 @@ public class UPnPManager  {
 	private static final String UDP_PREFIX = "LimeUDP";
 	private String _guidSuffix;
 	
-	/** amount of time to wait while looking for a NAT device. */
-    private static final int WAIT_TIME = 3 * 1000; // 3 seconds
-	
 	/** 
 	 * the router we have and the sub-device necessary for port mapping 
 	 *  LOCKING: DEVICE_LOCK
@@ -126,12 +124,23 @@ public class UPnPManager  {
 	
 	private final ControlPoint controlPoint;
 	
+	private final CopyOnWriteArrayList<UPnPListener> listeners = new CopyOnWriteArrayList<UPnPListener>();
+	
 	@Inject
 	UPnPManager(LifecycleManager lifecycleManager, Provider<Acceptor> acceptor) {
 	    this.lifecycleManager = lifecycleManager;	
 	    this.acceptor = acceptor;
 	    this.controlPoint = new ControlPoint();
     }
+	
+	public void addListener(UPnPListener uPnPListener) {
+	    listeners.add(uPnPListener);
+	}
+	
+	private void notifyListeners() {
+	    for(UPnPListener listener : listeners) 
+	        listener.natFound();
+	}
     
     public void start() {
         if (!started.getAndSet(true)) {
@@ -191,22 +200,6 @@ public class UPnPManager  {
 		Argument ret = getIP.getOutputArgumentList().getArgument("NewExternalIPAddress");
 		return InetAddress.getByName(ret.getValue());
 	}
-	
-	/**
-	 * Waits for a small amount of time before the device is discovered.
-	 */
-	public void waitForDevice() {
-        if(isNATPresent())
-            return;
-	    synchronized(DEVICE_LOCK) {
-    	    // already have it.
-            // otherwise, wait till we grab it.
-            try {
-                DEVICE_LOCK.wait(WAIT_TIME);
-            } catch(InterruptedException ie) {}
-        }
-        
-    }
 	
 	/**
 	 * Traverses the structure of the router device looking for 
@@ -425,6 +418,7 @@ public class UPnPManager  {
         public void deviceAdded(Device dev) {
             if (isNATPresent())
                 return;
+            
             synchronized(DEVICE_LOCK) {
                 if(LOG.isTraceEnabled())
                     LOG.trace("Device added: " + dev.getFriendlyName());
@@ -433,24 +427,25 @@ public class UPnPManager  {
                 if (dev.getDeviceType().equals(ROUTER_DEVICE) && dev.isRootDevice())
                     _router = dev;
                 
-                if (_router == null) {
-                    LOG.debug("didn't get router device");
-                    return;
-                }
-                
-                discoverService();
-                
-                // did we find the service we need?
-                if (_service == null) {
-                    LOG.debug("couldn't find service");
-                    _router=null;
+                if (_router != null) {
+                    discoverService();
+                    
+                    // did we find the service we need?
+                    if (_service == null) {
+                        LOG.debug("couldn't find service");
+                        _router=null;
+                    } else {
+                        if(LOG.isDebugEnabled())
+                            LOG.debug("Found service, router: " + _router.getFriendlyName() + ", service: " + _service);
+                        stop();
+                    }
                 } else {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("Found service, router: " + _router.getFriendlyName() + ", service: " + _service);
-                    DEVICE_LOCK.notify();
-                    stop();
+                    LOG.debug("didn't get router device");
                 }
             }
+            
+            if(isNATPresent())
+                notifyListeners();
         }
     	
     	public void deviceRemoved(Device dev) {}

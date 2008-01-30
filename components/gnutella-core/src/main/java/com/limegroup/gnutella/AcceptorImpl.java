@@ -287,20 +287,23 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             SettingsGroupManager.instance().save();
             networkManager.addressChanged();
         }
-
-        setupUPnP();
+       
+        // Make sure UPnP gets setup.
+        if(upnpManager.get().isNATPresent()) {
+            setupUPnP();
+        } else {
+            upnpManager.get().addListener(new UPnPListener() {
+                public void natFound() {
+                    setupUPnP();
+                }
+            });
+        }
 	}
 	
 	private void setupUPnP() {
         // if we created a socket and have a NAT, and the user is not 
         // explicitly forcing a port, create the mappings 
         if (_socket != null && isUPnPEnabled()) {
-            // wait a bit for the device.
-            upnpManager.get().waitForDevice();
-            
-        	// if we haven't discovered the router by now, its not there
-            upnpManager.get().stop();
-        	
         	boolean natted = upnpManager.get().isNATPresent();
         	boolean validPort = NetworkUtils.isValidPort(_port);
         	boolean forcedIP = ConnectionSettings.FORCE_IP_ADDRESS.getValue() &&
