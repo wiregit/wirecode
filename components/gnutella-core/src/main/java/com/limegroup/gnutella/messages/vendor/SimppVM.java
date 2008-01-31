@@ -2,7 +2,7 @@ package com.limegroup.gnutella.messages.vendor;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 
-public final class SimppVM extends AbstractVendorMessage {
+public final class SimppVM extends AbstractVendorMessage implements VendorMessage.ControlMessage {
     
     public static final int VERSION = 1;
 

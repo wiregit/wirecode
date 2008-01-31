@@ -13,12 +13,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Buffer;
 import org.limewire.collection.FixedSizeLIFOSet;
 import org.limewire.collection.FixedSizeLIFOSet.EjectionPolicy;
 import org.limewire.concurrent.ManagedThread;
@@ -100,6 +102,11 @@ public abstract class AbstractDHTController implements DHTController {
      * The random node adder.
      */
     private final RandomNodeAdder dhtNodeAdder = new RandomNodeAdder();
+    
+    /**
+     * The forwarder of nodes to passive leafs.
+     */
+    private final NodeForwarder nodeForwarder = new NodeForwarder();
     
     /**
      * The DHT event dispatcher
@@ -194,7 +201,7 @@ public abstract class AbstractDHTController implements DHTController {
                         case UPDATE_CONTACT:
                             Contact node = event.getContact();
                             if (mode == DHTMode.ACTIVE || !dht.getLocalNodeID().equals(node.getNodeID()))
-                                forwardContact(node);
+                                nodeForwarder.addContact(node);
                             break;
                     }
                 }
@@ -216,21 +223,6 @@ public abstract class AbstractDHTController implements DHTController {
      * A factory method to create MojitoDHTs
      */
     protected abstract MojitoDHT createMojitoDHT(Vendor vendor, Version version);
-    
-    private void forwardContact(Contact node) {
-        if (!DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.getValue()) {
-            return;
-        }
-        
-        DHTContactsMessage msg = new DHTContactsMessage(node);
-        List<RoutedConnection> list = dhtControllerFacade.getInitializedClientConnections();
-        for (RoutedConnection mc : list) {
-            if (mc.isPushProxyFor()
-                    && mc.getConnectionCapabilities().remoteHostIsPassiveLeafNode() > -1) {
-                mc.send(msg);
-            }
-        }
-    }
     
     public DHTMode getDHTMode() {
         return mode;
@@ -267,6 +259,8 @@ public abstract class AbstractDHTController implements DHTController {
             int port = dhtControllerFacade.getPort();
             dht.bind(new InetSocketAddress(addr, port));
             dht.start();
+            if (dhtControllerFacade.isActiveSupernode()) 
+                nodeForwarder.start();
             
             // Bootstrap only if we're not a passive leaf node
             if (getDHTMode() != DHTMode.PASSIVE_LEAF) {
@@ -291,6 +285,7 @@ public abstract class AbstractDHTController implements DHTController {
         
         bootstrapper.stop();
         dhtNodeAdder.stop();
+        nodeForwarder.stop();
         dht.close();
         
         dispatcher.dispatchEvent(new DHTEvent(this, Type.STOPPED));
@@ -503,6 +498,59 @@ public abstract class AbstractDHTController implements DHTController {
         
         public boolean allow(SocketAddress addr) {
             return dhtControllerFacade.allow(addr);
+        }
+    }
+    
+    /**
+     * Forwards contacts to passive leafs.
+     */
+    private class NodeForwarder implements Runnable {
+        /**
+         * Contacts to forward to passive leafs.
+         */
+        private final Buffer<Contact> contactsToForward = new Buffer<Contact>(10);
+        
+        /**
+         * Future that actually forwards.
+         */
+        private volatile Future<?> forwarderFuture;
+        
+        void start() {
+            forwarderFuture = dhtControllerFacade.scheduleWithFixedDelay(this, 60, 60, TimeUnit.SECONDS);
+        }
+        
+        synchronized void addContact(Contact contact) {
+            contactsToForward.add(contact);
+        }
+        
+        public void run() {
+            if (!DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.getValue() || !isRunning()) {
+                return;
+            }
+            Collection<Contact> contacts;
+            synchronized(this) {
+                if (contactsToForward.isEmpty())
+                    return;
+                contacts = new ArrayList<Contact>(10);
+                for(Contact c : contactsToForward)
+                    contacts.add(c);
+                // do not erase contacts - can be re-forwarded to new connections
+            }
+
+            DHTContactsMessage msg = new DHTContactsMessage(contacts);
+            List<RoutedConnection> list = dhtControllerFacade.getInitializedClientConnections();
+            for (RoutedConnection mc : list) {
+                if (mc.isPushProxyFor()
+                        && mc.getConnectionCapabilities().remoteHostIsPassiveLeafNode() > -1) {
+                    mc.send(msg);
+                }
+            }
+        }
+        
+        void stop() {
+            Future<?> f = forwarderFuture;
+            if (f != null)
+                f.cancel(false);
         }
     }
 

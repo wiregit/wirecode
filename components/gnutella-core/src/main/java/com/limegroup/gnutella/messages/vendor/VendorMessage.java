@@ -83,4 +83,6 @@ public interface VendorMessage extends Message {
     // INHERIT COMMENT
     public void recordDrop();
 
+    /** Marker interface for vendor messages which are also Control messages */
+    public static interface ControlMessage extends VendorMessage {}
 }
