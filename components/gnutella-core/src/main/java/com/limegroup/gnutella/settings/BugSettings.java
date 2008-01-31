@@ -67,6 +67,13 @@ public class BugSettings extends LimeProps {
     /** Setting for whether or not deadlock bugs should be sent. */
     public static final BooleanSetting SEND_DEADLOCK_BUGS =
         FACTORY.createBooleanSetting("SEND_DEADLOCK_BUGS", true);
+ 
+    /**
+     * Whether to send bugs with the java.net.URI class.
+     */
+    public static final BooleanSetting SEND_URI_BUGS =
+        FACTORY.createRemoteBooleanSetting("SEND_URI_BUGS", 
+                true, "BugSettings.sendURIBugsBeta");
     
 //    public static final BooleanSetting SEND_TREE_STORAGE_BUGS =
 //        FACTORY.createRemoteBooleanSetting("SEND_TREE_STORAGE_BUGS", 

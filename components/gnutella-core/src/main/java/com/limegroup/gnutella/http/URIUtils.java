@@ -1,8 +1,10 @@
-package org.limewire.http;
+package com.limegroup.gnutella.http;
 
 import java.net.URISyntaxException;
 
 import org.limewire.service.ErrorService;
+
+import com.limegroup.gnutella.settings.BugSettings;
 
 /**
  * Utilities for URIs
@@ -18,7 +20,7 @@ public class URIUtils {
      * @param e
      */
     public static void error(URISyntaxException e) {
-        // TODO temporary - to get feedback about the robustness java.net.URI()
-        ErrorService.error(e);
+        if (BugSettings.SEND_URI_BUGS.getValue())
+            ErrorService.error(e);
     }
 }

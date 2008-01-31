@@ -14,7 +14,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.http.URIUtils;
 import org.limewire.io.InvalidDataException;
 
 import com.limegroup.bittorrent.bencoding.Token;
@@ -23,6 +22,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMementoImpl;
+import com.limegroup.gnutella.http.URIUtils;
 import com.limegroup.gnutella.security.SHA1;
 
 /**
