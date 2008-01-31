@@ -229,7 +229,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
         if (extensions == null)
             extensions = createExtBytes(urns, ggepData, size);
 
-        return new Response(index, size, name, incomingNameByteArraySize, urns, doc,
+        return new ResponseImpl(index, size, name, incomingNameByteArraySize, urns, doc,
                 ggepData.locations, ggepData.createTime, extensions, ggepData.ranges, ggepData.verified);
     }
     

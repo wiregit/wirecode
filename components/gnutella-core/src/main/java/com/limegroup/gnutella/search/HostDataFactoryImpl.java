@@ -19,7 +19,7 @@ public class HostDataFactoryImpl implements HostDataFactory {
      * @see com.limegroup.gnutella.search.HostDataFactory#createHostData(com.limegroup.gnutella.messages.QueryReply)
      */
     public HostData createHostData(QueryReply reply) {
-        return new HostData(reply, networkManager);
+        return new HostDataImpl(reply, networkManager);
     }
 
 }

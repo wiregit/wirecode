@@ -12,6 +12,7 @@ import org.limewire.io.IpPort;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.ResponseImpl;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -195,7 +196,7 @@ public class KeywordFilterTest extends BaseTestCase {
         long creationTime = 0;
         byte[] extensions = null;
         
-        qrResponse = new Response(index,size,response, -1, emptyurns, emptyDoc, alternateLocations, creationTime, extensions,null, false);
+        qrResponse = new ResponseImpl(index,size,response, -1, emptyurns, emptyDoc, alternateLocations, creationTime, extensions,null, false);
                      
         /*
          * add Response to Response List
