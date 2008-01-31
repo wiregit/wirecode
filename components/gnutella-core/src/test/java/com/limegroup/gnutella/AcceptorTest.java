@@ -95,6 +95,7 @@ public class AcceptorTest extends LimeTestCase {
     }
     
     public void testValidateIncomingTimer() throws Exception {
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         int port = bindAcceptor();
         
         assertEquals(0, activityCallback.getChanges());
@@ -105,24 +106,30 @@ public class AcceptorTest extends LimeTestCase {
         // make sure we don't send it again which could screw the test!
         connectionManager.setShouldSendRequests(false);
         
+        Thread.sleep(500); // Make sure the resetter gets scheduled.
+        
         // Turn incoming on, make sure it triggers a change...
         acceptor.setIncoming(true);
         assertEquals(1, activityCallback.getChanges());
         assertTrue(activityCallback.getLastStatus());
         
         // Make sure we revert back to false, since no incoming came...
+        connectionManager.setShouldSendRequests(true);
+        assertTrue(connectionManager.awaitSend());
+        connectionManager.setShouldSendRequests(false);
         assertFalse(activityCallback.waitForNextChange());
         assertEquals(2, activityCallback.getChanges());
-                
+       
+        // Turn incoming on, make sure we get the status...
+        acceptor.setIncoming(true);
+        assertEquals(3, activityCallback.getChanges());
+        assertTrue(activityCallback.getLastStatus());
+        
         // Send another request, but this time we're gonna make sure
         // incoming stays on!
         connectionManager.setShouldSendRequests(true);
         assertTrue(connectionManager.awaitSend());
         connectionManager.setShouldSendRequests(false);
-        
-        acceptor.setIncoming(true);
-        assertEquals(3, activityCallback.getChanges());
-        assertTrue(activityCallback.getLastStatus());
         
         // Now send the connectback..
         Socket socket = socketsManager.connect(new InetSocketAddress(InetAddress.getLocalHost().getHostAddress(), port), 1000);
@@ -133,6 +140,13 @@ public class AcceptorTest extends LimeTestCase {
         // Sleep a bit, make sure incoming is still on!
         Thread.sleep(10000);
         
+        // Note that the last status of CM.shouldSendRequests is false,
+        // so that future checks won't schedule a resetter.
+        // We're only concerned with the one that we waited for 
+        // and send a connectback from.
+        // This just validates that if we receive a connectback,
+        // the resetter is cancelled.
+                
         assertTrue(acceptor.acceptedIncoming());
         assertEquals(3, activityCallback.getChanges());
         assertTrue(activityCallback.getLastStatus());

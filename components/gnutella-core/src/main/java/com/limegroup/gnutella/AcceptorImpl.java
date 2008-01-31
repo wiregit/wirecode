@@ -14,6 +14,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -713,13 +714,15 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
     /**
      * (Re)validates acceptedIncoming.
      */
+    
     private class IncomingValidator implements Runnable {
         private final AtomicBoolean validating = new AtomicBoolean(false);
-        private volatile Future<?> resetterFuture;
+        private AtomicReference<Future<?>> futureRef = new AtomicReference<Future<?>>();
         
         public void run() {
             if (validating.getAndSet(true))
                 return;
+            
             // clear and revalidate if we haven't done so in a while
             final long currTime = System.currentTimeMillis();
             if (currTime - _lastConnectBackTime > incomingExpireTime){
@@ -737,17 +740,24 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
                                 networkManager.incomingStatusChanged();
                         }
                     };
-                    resetterFuture = backgroundExecutor.schedule(resetter, 
-                                           waitTimeAfterRequests, TimeUnit.MILLISECONDS);
+                    // Cancel any old future before we schedule this one
+                    Future<?> oldRef = futureRef.get();
+                    if(oldRef != null)
+                        oldRef.cancel(false);
+                    futureRef.set(backgroundExecutor.schedule(resetter, 
+                                           waitTimeAfterRequests, TimeUnit.MILLISECONDS));
                 } 
             }
             validating.set(false);
         }
         
         void cancelReset() {
-            Future<?> resetter = resetterFuture;
-            if (resetter != null)
+            Future<?> resetter = futureRef.get();
+            if (resetter != null) {
                 resetter.cancel(false);
+                // unset the ref if it's still the current future
+                futureRef.compareAndSet(resetter, null);
+            }
         }
     }
 
