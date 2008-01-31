@@ -295,7 +295,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * The SHA1 hash of the file that this ManagedDownloader is controlling.
      */
-    private URN downloadSHA1;
+    private volatile URN downloadSHA1;
 	
     /**
      * The collection of alternate locations we successfully downloaded from
@@ -1723,11 +1723,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#getSHA1Urn()
      */
-    public synchronized URN getSha1Urn() {
+    public URN getSha1Urn() {
         return downloadSHA1;
     }
     
-    protected synchronized void setSha1Urn(URN sha1) {
+    protected void setSha1Urn(URN sha1) {
         if(!sha1.isSHA1())
             throw new IllegalArgumentException("not sha1: " + sha1);
         if(downloadSHA1 != null && !sha1.equals(downloadSHA1))
