@@ -24,6 +24,7 @@ import org.cybergarage.upnp.Service;
 import org.cybergarage.upnp.device.DeviceChangeListener;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
@@ -126,6 +127,16 @@ public class UPnPManager  {
 	
 	private final CopyOnWriteArrayList<UPnPListener> listeners = new CopyOnWriteArrayList<UPnPListener>();
 	
+	@InspectablePrimitive("upnp manager creation time")
+	@SuppressWarnings("unused")
+	private final long creationTime = System.currentTimeMillis();
+	@InspectablePrimitive("upnp manager start time")
+	@SuppressWarnings("unused")
+	private volatile long startTime;
+	@InspectablePrimitive("upnp manager device found time")
+	@SuppressWarnings("unused")
+	private volatile long deviceFoundTime;
+	
 	@Inject
 	UPnPManager(LifecycleManager lifecycleManager, Provider<Acceptor> acceptor) {
 	    this.lifecycleManager = lifecycleManager;	
@@ -144,6 +155,7 @@ public class UPnPManager  {
     
     public void start() {
         if (!started.getAndSet(true)) {
+            startTime = System.currentTimeMillis();
             LOG.debug("Starting UPnP Manager.");
             controlPoint.addDeviceChangeListener(new DeviceListener());
 
@@ -418,7 +430,7 @@ public class UPnPManager  {
         public void deviceAdded(Device dev) {
             if (isNATPresent())
                 return;
-            
+            deviceFoundTime = System.currentTimeMillis();
             synchronized(DEVICE_LOCK) {
                 if(LOG.isTraceEnabled())
                     LOG.trace("Device added: " + dev.getFriendlyName());
