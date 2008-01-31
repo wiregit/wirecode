@@ -7,6 +7,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,7 +137,7 @@ public class LimeXMLDocument implements Serializable, StringLookup {
         setFields(result.canonicalKeyPrefix);
         
         if(!isValid())
-            throw new IOException("Invalid XML: " + xml);
+            throw new IOException("Invalid XML: " + xml + ", fieldToValue: " + fieldToValue + ", attrString: " + getAttributeString() + ", schemaURI: " + schemaUri);
     }
 
     /**
@@ -190,7 +191,7 @@ public class LimeXMLDocument implements Serializable, StringLookup {
         scanFields();
         
         if(!isValid()) {
-            throw new IllegalArgumentException("Invalid Doc!  nameValueList: " + nameValueList + ", schema: " + schemaURI + ", attributeStrings: " + getAttributeString() + ", schemaFields: " + (schemaURI != null ? Arrays.asList(getSchema().getCanonicalizedFieldNames()) : "n/a"));
+            throw new IllegalArgumentException("Invalid Doc!  nameValueList: " + nameValueList + ", schema: " + schemaURI + ", attributeStrings: " + getAttributeString() + ", schemaFields: " + ((getSchema() != null) ? Arrays.asList(getSchema().getCanonicalizedFieldNames()) : "n/a"));
         }
     }
     
@@ -425,6 +426,9 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      * as is in the schema.
      */
     public List<NameValue<String>> getOrderedNameValueList() {
+        if(getSchema() == null)
+            return Collections.emptyList();
+        
         String[] fNames = getSchema().getCanonicalizedFieldNames();
         List<NameValue<String>> retList = new ArrayList<NameValue<String>>(fNames.length);
         for (int i = 0; i < fNames.length; i++) {

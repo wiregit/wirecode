@@ -60,7 +60,7 @@ public class NameValue <V> implements Map.Entry<String, V> {
 	}
         
     public String toString() {
-        return "name = " + _name + " value = " + _value;
+        return "name=" + _name + ", value=" + _value;
     }
     /**
      * Gives a {@link #compareTo(org.limewire.collection.NameValue.ComparableByName)} 
