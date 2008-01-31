@@ -1152,7 +1152,7 @@ public class UploadTest extends LimeTestCase {
             HttpClientManager.releaseConnection(response);
         }
 
-        assertConnectionIsOpen(false, method);
+        assertConnectionIsOpen(true, method);
     }
 
     public void testHTTP11MalformedURI() throws Exception {
