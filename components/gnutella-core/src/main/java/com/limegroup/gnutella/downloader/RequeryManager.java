@@ -19,7 +19,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  *  A manager for controlling how requeries are sent in downloads.
- *  This abstract class has specific functionality that differs for
+ *  This class has specific functionality that differs for
  *  Basic & PRO.
  *  
  *  The manager keeps track of what queries have been sent out,

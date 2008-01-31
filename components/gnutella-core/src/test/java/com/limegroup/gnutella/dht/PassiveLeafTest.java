@@ -32,7 +32,6 @@ import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 public class PassiveLeafTest extends DHTTestCase {
@@ -67,7 +66,7 @@ public class PassiveLeafTest extends DHTTestCase {
     }
     
     public void testLookup() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        setLocalIsPrivate(false);
         
         final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         

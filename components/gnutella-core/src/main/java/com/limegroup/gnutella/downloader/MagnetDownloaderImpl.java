@@ -170,7 +170,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     }
     
     /**
-     * Synchronously looks up alterante location for the set of guid urns,
+     * Synchronously looks up alternate locations for the set of guid urns,
      * creates remote file descriptions from them and adds them as possible sources.
      *
      * @param urns set of guid urns

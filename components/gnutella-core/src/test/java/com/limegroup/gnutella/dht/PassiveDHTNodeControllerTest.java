@@ -108,6 +108,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     }
     
     public void testAddRemoveLeafDHTNode() throws Exception {
+        setLocalIsPrivate(false);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
         // Initial State:
