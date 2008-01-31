@@ -9,20 +9,20 @@ import com.limegroup.gnutella.dht.DHTManager;
 @Singleton
 public class DHTPeerLocatorFactoryImpl implements PeerLocatorFactory {
 
-    private final DHTManager          manager;
-    private final ApplicationServices applicationServices;
-    private final NetworkManager      networkManager;
+    private final DHTManager          MANAGER;
+    private final ApplicationServices APPLICATION_SERVICES;
+    private final NetworkManager      NETWORK_MANAGER;
     
     @Inject
     public DHTPeerLocatorFactoryImpl(DHTManager manager, ApplicationServices applicationServices, NetworkManager networkManager) {
-        this.manager             = manager;
-        this.applicationServices = applicationServices;
-        this.networkManager      = networkManager;
+        this.MANAGER             = manager;
+        this.APPLICATION_SERVICES = applicationServices;
+        this.NETWORK_MANAGER      = networkManager;
     }    
     
     public PeerLocator create(ManagedTorrent torrent, BTMetaInfo torrentMeta) {
 
-        return new DHTPeerLocator(manager, applicationServices, networkManager, 
+        return new DHTPeerLocator(MANAGER, APPLICATION_SERVICES, NETWORK_MANAGER, 
                                     torrent, torrentMeta);
         
     }

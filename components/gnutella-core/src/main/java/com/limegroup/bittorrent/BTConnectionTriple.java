@@ -14,10 +14,10 @@ public class BTConnectionTriple {
     
     private static final Log LOG = LogFactory.getLog(BTConnectionTriple.class);
     
-    private final byte[] ip;
-    private final int    port;
-    private final byte[] peerID;
-    private final boolean success; 
+    private final byte[] IP;
+    private final int    PORT;
+    private final byte[] PEER_ID;
+    private final boolean SUCCESS; 
     
     private static final String IP_KEY      = "IP";
     private static final String PORT_KEY    = "PORT";
@@ -37,7 +37,7 @@ public class BTConnectionTriple {
             ip      = encoding.getBytes(IP_KEY);
             port    = encoding.getInt(PORT_KEY);
             peerID  = encoding.getBytes(PEER_ID_KEY);
-            success = true;
+            success = true;            
             
         } catch (BadGGEPBlockException e) {
             LOG.error("BadGGEPBlockException", e);
@@ -45,50 +45,50 @@ public class BTConnectionTriple {
             LOG.error("BadGGEPPropertyException", e);
         }
         
-        this.ip      = ip;
-        this.port    = port;
-        this.peerID  = peerID;
-        this.success = success;
+        this.IP      = ip;
+        this.PORT    = port;
+        this.PEER_ID  = peerID;
+        this.SUCCESS = success;
     }
     
     public BTConnectionTriple(byte[] ip, int port, byte[] peerID) {
-        this.ip      = ip;
-        this.port    = port;
-        this.peerID  = peerID;
-        this.success = true;
+        this.IP      = ip;
+        this.PORT    = port;
+        this.PEER_ID  = peerID;
+        this.SUCCESS = true;
     }
     
     public byte[] getIP() {
-        return this.ip;
+        return this.IP;
     }
     
     public int getPort() {
-        return this.port;
+        return this.PORT;
     }
     
     public byte[] getPeerID() {
-        return this.peerID;
+        return this.PEER_ID;
     }
     
     public byte[] getEncoded() {
-        if (!this.success) {
+        if (!this.SUCCESS) {
             return null;
         }
         
         GGEP encoding = new GGEP();
         
-        encoding.put(IP_KEY,      this.ip);
-        encoding.put(PORT_KEY,    this.port);
-        encoding.put(PEER_ID_KEY, this.peerID);
+        encoding.put(IP_KEY,      this.IP);
+        encoding.put(PORT_KEY,    this.PORT);
+        encoding.put(PEER_ID_KEY, this.PEER_ID);
         
         return encoding.toByteArray();
     }
     
     public boolean getSuccess() {
-        return this.success;
+        return this.SUCCESS;
     }
     
     public String toString() {
-        return "(" + this.ip + ":" + this.port + " - " + this.peerID + ")";
+        return "(" + this.IP + ":" + this.PORT + " - " + this.PEER_ID + ")";
     }
 }

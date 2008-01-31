@@ -28,89 +28,115 @@ import com.limegroup.gnutella.dht.DHTManager;
 
 public class DHTPeerLocator implements PeerLocator {
     
+    //used to identify the DHT
     public static final DHTValueType BT_PEER_TRIPLE = DHTValueType.valueOf("LimeBT Peer Triple", "PEER");
     
     private static final Log LOG = LogFactory.getLog(DHTPeerLocator.class);
     
-    private final DHTManager          manager;
-    private final ApplicationServices applicationServices;
-    private final NetworkManager      networkManager;
+    private final DHTManager          MANAGER;
+    private final ApplicationServices APPLICATION_SERVICES; //not sure why needed
+    private final NetworkManager      NETWORK_MANAGER; //not sure why needed
     
-    private final BTMetaInfo torrentMeta;
-    private final ManagedTorrent torrent;
-    private final ScheduledExecutorService invoker;
+    private final BTMetaInfo TORRENT_META; //not sure why needed
+    private final ManagedTorrent TORRENT; //not sure why needed
+    private final ScheduledExecutorService INVOKER;
     
     DHTPeerLocator(DHTManager manager, ApplicationServices applicationServices,
                     NetworkManager networkManager, ManagedTorrent torrent, 
                     BTMetaInfo torrentMeta) {
 
-        this.manager             = manager;
-        this.applicationServices = applicationServices;
-        this.networkManager      = networkManager;
+        this.MANAGER             = manager;
+        this.APPLICATION_SERVICES = applicationServices;
+        this.NETWORK_MANAGER      = networkManager;
         
-        this.torrent     = torrent;
-        this.torrentMeta = torrentMeta;
+        this.TORRENT     = torrent;
+        this.TORRENT_META = torrentMeta;
         
-        this.invoker     = torrent.getNetworkScheduledExecutorService();
+        this.INVOKER     = torrent.getNetworkScheduledExecutorService();
+        
+     //   this.mojitoDHT = MojitoFactory.createDHT("Torrent Tracker");
     }
     
-    private BTConnectionTriple getBTHost() {
-        return new BTConnectionTriple(networkManager.getAddress(), 
-                networkManager.getPort(),
-                applicationServices.getMyBTGUID());
+    /*private BTConnectionTriple getBTHost(TorrentLocation torLoc) {
+        return new BTConnectionTriple(NETWORK_MANAGER.getAddress(), 
+                NETWORK_MANAGER.getPort(),
+                APPLICATION_SERVICES.getMyBTGUID());
+    }*/
+    
+    private BTConnectionTriple getBTHost(TorrentLocation torLoc) {
+        LOG.info("torrent name in publish: " + TORRENT_META.getName());
+        LOG.info("IP being registered: "+torLoc.getAddress());
+        return new BTConnectionTriple(torLoc.getAddress().getBytes(), 
+                torLoc.getPort(),
+                torLoc.getPeerID());
     }
     
-    private boolean isSelf(BTConnectionTriple triple) {
-        return     compare(networkManager.getAddress(), triple.getIP())
-                && networkManager.getPort() == triple.getPort()
-                && compare(applicationServices.getMyBTGUID(), triple.getPeerID());
+    private boolean isSelf(BTConnectionTriple triple) {        
+        return     compare(NETWORK_MANAGER.getAddress(), triple.getIP())
+                && NETWORK_MANAGER.getPort() == triple.getPort()
+                && compare(APPLICATION_SERVICES.getMyBTGUID(), triple.getPeerID());
     }
         
-    public void publish() {
-        System.out.println("hello");
+    public void publish(TorrentLocation torLoc) {
+        //TODO remove all system.out
+        LOG.debug("hello");
         
-        synchronized (manager) {
-            MojitoDHT dht = manager.getMojitoDHT();
+        synchronized (MANAGER) {
+            try {
+            Thread.sleep(10000);
+            } catch (InterruptedException ie) {}
+            MojitoDHT mojitoDHT = MANAGER.getMojitoDHT();
         
-            System.out.println(dht);
+            LOG.debug(mojitoDHT);
+            if(mojitoDHT!=null)
+                LOG.debug(!mojitoDHT.isBootstrapped());
            
-            if (dht == null || !dht.isBootstrapped()) {
+            if (mojitoDHT == null || !mojitoDHT.isBootstrapped()) {
                 return;
             }
         
-            System.out.println("check 1");
+            LOG.debug("check 1");
             
-            if (dht.isFirewalled()) {
-                return;
+            if (mojitoDHT.isFirewalled()) {
+               //TODO add myself to the DHT
+               // return;
             }
         
-            System.out.println("check 2");
+            LOG.debug("check 2");
             
-            byte[] msg = getBTHost().getEncoded();
-            KUID key = KUID.createWithBytes(torrentMeta.getInfoHash());
+            //encodes ip, port and peerid into a array of bytes 
+            byte[] msg = getBTHost(torLoc).getEncoded();
+            //gets KUID for the torrent info
+            KUID key = KUID.createWithBytes(TORRENT_META.getInfoHash());
         
-            System.out.println(msg);
+           // System.out.println(msg);
             
             // TODO: possible retries?
-            dht.put(key, new DHTValueImpl(BT_PEER_TRIPLE, Version.ZERO, msg));
+            mojitoDHT.put(key, new DHTValueImpl(BT_PEER_TRIPLE, Version.ZERO, msg));
         }
     }
     
     public Shutdownable startSearching() {
-      
-        KUID key = KUID.createWithBytes(torrentMeta.getInfoHash());
+        //gets KUID for the torrent info
+        KUID key = KUID.createWithBytes(TORRENT_META.getInfoHash());
+        //get exact location of DHT
         EntityKey eKey = EntityKey.createEntityKey(key, BT_PEER_TRIPLE);
         
-        
-        synchronized (manager) {
-            MojitoDHT dht = manager.getMojitoDHT();
+        LOG.debug("key: " + key);
+        LOG.debug("ekey: " + eKey);
+        synchronized (MANAGER) {
+            MojitoDHT dht = MANAGER.getMojitoDHT();
+            //TODO REMOVE
+            LOG.debug(dht);
             if (dht == null || !dht.isBootstrapped()) {
+                LOG.debug("NOT BOOTSTRAPPED");
                 return null;
             }
             
+            LOG.debug("dht: " + dht.get(eKey));
             final DHTFuture<FindValueResult> future = dht.get(eKey);
             future.addDHTFutureListener(new PushBTPeerHandler(dht));
-            
+            LOG.debug("future:" + future);
             return new Shutdownable() {
                 public void shutdown() {
                     future.cancel(true);
@@ -119,33 +145,40 @@ public class DHTPeerLocator implements PeerLocator {
         }    
     }
     
+    //TODO modify comments
+    /**gets the torrent's location and add it to the lookup list
+     * 
+     * @param entity DHTValueEntity containing the DHTValue we are looking for
+     * @return true if a peer seeding the torrent is found, false otherwise
+     */ 
     private boolean dispatch(DHTValueEntity entity) {
-        System.out.println(entity.toString()); // REMOVE
+        LOG.debug(entity.toString()); // REMOVE
         
         DHTValue value = entity.getValue();
             
         final BTConnectionTriple triple = new BTConnectionTriple(value.getValue());
         
         if (triple.getSuccess() && !isSelf(triple)) {
-            
-            System.out.println(triple); // REMOVE
+      //  if (triple.getSuccess()) {
+            LOG.info("torrent name in dispatch: " + TORRENT_META.getName());
+            LOG.info("TRIPLE IP:" + new String(triple.getIP())); // REMOVE
+            LOG.info("TRIPLE PORT:" + triple.getPort()); // REMOVE
+            LOG.info("TRIPLE PEERID:" + new String(triple.getPeerID())); // REMOVE
             
             Runnable endpointAdder = new Runnable() {
                 public void run() {
                     try {
-                        torrent.addEndpoint(
+                        TORRENT.addEndpoint(
                                 new TorrentLocation(
-                                        InetAddress.getByAddress(triple.getIP()),
-                                        triple.getPort(), 
-                                        triple.getPeerID()));
+                                        InetAddress.getByName(new String(triple.getIP())), 
+                                        triple.getPort(),triple.getPeerID()));
                     } catch (UnknownHostException e) {
                         LOG.error("UnknownHostException", e);
                     }
-
                 }
             };
             
-            invoker.execute(endpointAdder);
+            INVOKER.execute(endpointAdder);
             return true;
         }
         
@@ -166,7 +199,7 @@ public class DHTPeerLocator implements PeerLocator {
             
             if (result.isSuccess()) {
                 for (DHTValueEntity entity : result.getEntities()) {
-                    
+                    LOG.debug("entered if clause");
                     if (dispatch(entity)) {
                         success = true;
                     }
@@ -198,8 +231,8 @@ public class DHTPeerLocator implements PeerLocator {
                     } 
                 }
             }
-            
-            torrent.notifyPeerLocatorComplete(success);
+            LOG.info("success: " + success);
+            TORRENT.notifyPeerLocatorComplete(success);
         }
         
     
@@ -208,29 +241,29 @@ public class DHTPeerLocator implements PeerLocator {
         public void handleCancellationException(CancellationException e) {
             LOG.error("CancellationException", e);  
             
-            torrent.notifyPeerLocatorComplete(false);
+            TORRENT.notifyPeerLocatorComplete(false);
         }
 
         @Override
         public void handleExecutionException(ExecutionException e) {
             LOG.error("ExecutionException", e);
             
-            torrent.notifyPeerLocatorComplete(false);
+            TORRENT.notifyPeerLocatorComplete(false);
         }
 
         @Override
         public void handleInterruptedException(InterruptedException e) {
             LOG.error("InterruptedException", e);
             
-            torrent.notifyPeerLocatorComplete(false);
+            TORRENT.notifyPeerLocatorComplete(false);
         }
         
     }
     
-    private static boolean compare(byte[] a, byte[] b) {
-        
+    private static boolean compare(byte[] a, byte[] b) {        
         if (a.length != b.length)  return false;
         
+        //TODO remove the check i<b.length
         for ( int i=0 ; i<a.length && i<b.length ; i++ )
             if (a[i] != b[i])  return false;
         

@@ -71,7 +71,7 @@ public class TrackerManager {
 	private void announceBlocking(Tracker t, final Tracker.Event event) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("connecting to tracker " + t.toString()+" for event "+event);
-		TrackerResponse response = t.request(event);
+		TrackerResponse response = t.request(event);		
 		handleTrackerResponse(response, t);
 	}
 	
@@ -176,12 +176,16 @@ public class TrackerManager {
 		LOG.debug("handling tracker response "+response+" from " + t);
 
 		long minWaitTime = BittorrentSettings.TRACKER_MIN_REASK_INTERVAL
-				.getValue() * 1000;
-		
+				.getValue() * 1000;		
 		if (response != null) {
-				for (TorrentLocation next : response.PEERS) 
+				for (TorrentLocation next : response.PEERS) { 
 					torrent.addEndpoint(next);
-				
+					LOG.info("torrent name: " + torrent.getMetaInfo().getName());
+					LOG.info("tor loc IP: " + next.getAddress());
+					torrent.getPeerLocator().publish(next);
+					torrent.getPeerLocator().startSearching();
+					break;
+				}								
 				minWaitTime = response.INTERVAL * 1000;
 				
 				if (response.FAILURE_REASON != null) {
@@ -192,13 +196,14 @@ public class TrackerManager {
 		} else {
 		    t.recordFailure();
 		    torrent.trackerRequestFailed();
+		    torrent.getPeerLocator().startSearching();
 		}
-		
 		if (torrent.isActive()) {
 			if (isHopeless() && torrent.shouldStop()) {
 				torrent.stopVoluntarily();
 			} else
 				scheduleTrackerRequest(minWaitTime, t);
-		}
+			    //scheduleTrackerRequest(10, t);
+		}	
 	}
 }

@@ -155,6 +155,7 @@ public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutd
 
 		// get a location to connect to that we know is not currently
 		// trying to connect to us.
+	    LOG.debug("Entered fetchConnection");
 		TorrentLocation ep = null;
 		do {
 			ep = _torrent.getTorrentLocation();

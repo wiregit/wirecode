@@ -139,5 +139,4 @@ public class RoutedConnectionFactoryImpl implements RoutedConnectionFactory {
                 simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory,
                 messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier.get());
     }
-
 }

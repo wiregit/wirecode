@@ -1040,29 +1040,8 @@ public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListe
 	    System.out.println("Complete: " + success);
 	    
 	}
-	
-	// TODO: Remove
-	void michaelTest() {
-	    System.out.println("starting test... waiting...");
 
-	    
-	    (new Thread(new Runnable() { 
-	        public void run() {
-	            
-	            try {
-                    Thread.sleep(100000);
-                } catch (InterruptedException e) {}
-                
-	            
-	            peerLocator.publish();
-	            
-	            try {
-	                Thread.sleep(10000);
-	            } catch (InterruptedException e) {}
-	            
-	            
-	            peerLocator.startSearching();
-	        }
-	    })).start();
-	}
+    public PeerLocator getPeerLocator() {
+        return peerLocator;
+    }
 }

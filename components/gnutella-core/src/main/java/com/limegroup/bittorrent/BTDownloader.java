@@ -463,7 +463,7 @@ public class BTDownloader extends AbstractDownloader
         ifm = manager.getIncompleteFileManager();
         _torrent = downloadReferences.getManagedTorrentFactory().create(context);
         torrentManager.get().addEventListener(this);
-        ifm.addTorrentEntry(_info.getURN());
+        ifm.addTorrentEntry(_info.getURN());          
     }
 	
 	public void startDownload() {
