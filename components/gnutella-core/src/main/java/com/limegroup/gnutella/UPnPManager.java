@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -79,8 +80,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  * 
  */
 @Singleton
-public class UPnPManager extends ControlPoint implements DeviceChangeListener {
-
+public class UPnPManager  {
     private static final Log LOG = LogFactory.getLog(UPnPManager.class);
 	
 	/** some schemas */
@@ -97,9 +97,6 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	private static final String TCP_PREFIX = "LimeTCP";
 	private static final String UDP_PREFIX = "LimeUDP";
 	private String _guidSuffix;
-	
-	/** amount of time to wait while looking for a NAT device. */
-    private static final int WAIT_TIME = 3 * 1000; // 3 seconds
 	
 	/** 
 	 * the router we have and the sub-device necessary for port mapping 
@@ -125,31 +122,44 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	
 	private final AtomicBoolean started = new AtomicBoolean(false);
 	
+	private final ControlPoint controlPoint;
+	
+	private final CopyOnWriteArrayList<UPnPListener> listeners = new CopyOnWriteArrayList<UPnPListener>();
+	
 	@Inject
 	UPnPManager(LifecycleManager lifecycleManager, Provider<Acceptor> acceptor) {
 	    this.lifecycleManager = lifecycleManager;	
 	    this.acceptor = acceptor;
+	    this.controlPoint = new ControlPoint();
     }
+	
+	public void addListener(UPnPListener uPnPListener) {
+	    listeners.add(uPnPListener);
+	}
+	
+	private void notifyListeners() {
+	    for(UPnPListener listener : listeners) 
+	        listener.natFound();
+	}
     
-	@Override
-    public boolean start() {
+    public void start() {
         if (!started.getAndSet(true)) {
             LOG.debug("Starting UPnP Manager.");
-
-            addDeviceChangeListener(this);
+            controlPoint.addDeviceChangeListener(new DeviceListener());
 
             synchronized (DEVICE_LOCK) {
                 try {
-                    return super.start();
+                    controlPoint.start();
                 } catch (Exception bad) {
                     ConnectionSettings.DISABLE_UPNP.setValue(true);
                     ErrorService.error(bad);
-                    return false;
                 }
             }
-        } else {
-            return false; // already started
         }
+    }
+    
+    public void stop() {
+        controlPoint.stop();
     }
 	
 	/**
@@ -189,56 +199,6 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		
 		Argument ret = getIP.getOutputArgumentList().getArgument("NewExternalIPAddress");
 		return InetAddress.getByName(ret.getValue());
-	}
-	
-	/**
-	 * Waits for a small amount of time before the device is discovered.
-	 */
-	public void waitForDevice() {
-        if(isNATPresent())
-            return;
-	    synchronized(DEVICE_LOCK) {
-    	    // already have it.
-            // otherwise, wait till we grab it.
-            try {
-                DEVICE_LOCK.wait(WAIT_TIME);
-            } catch(InterruptedException ie) {}
-        }
-        
-    }
-	
-	/**
-	 * this method will be called when we discover a UPnP device.
-	 */
-	public void deviceAdded(Device dev) {
-        if (isNATPresent())
-            return;
-	    synchronized(DEVICE_LOCK) {
-            if(LOG.isTraceEnabled())
-                LOG.trace("Device added: " + dev.getFriendlyName());
-    		
-    		// did we find a router?
-    		if (dev.getDeviceType().equals(ROUTER_DEVICE) && dev.isRootDevice())
-    			_router = dev;
-    		
-    		if (_router == null) {
-    			LOG.debug("didn't get router device");
-    			return;
-    		}
-    		
-    		discoverService();
-    		
-    		// did we find the service we need?
-    		if (_service == null) {
-    			LOG.debug("couldn't find service");
-    			_router=null;
-    		} else {
-    		    if(LOG.isDebugEnabled())
-    		        LOG.debug("Found service, router: " + _router.getFriendlyName() + ", service: " + _service);
-                DEVICE_LOCK.notify();
-    			stop();
-    		}
-        }
 	}
 	
 	/**
@@ -452,10 +412,44 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
     	    return _guidSuffix;
         }
 	}
-	/**
-	 * stub 
-	 */
-	public void deviceRemoved(Device dev) {}
+	
+	private class DeviceListener implements DeviceChangeListener {
+        /** this method will be called when we discover a UPnP device. */
+        public void deviceAdded(Device dev) {
+            if (isNATPresent())
+                return;
+            
+            synchronized(DEVICE_LOCK) {
+                if(LOG.isTraceEnabled())
+                    LOG.trace("Device added: " + dev.getFriendlyName());
+                
+                // did we find a router?
+                if (dev.getDeviceType().equals(ROUTER_DEVICE) && dev.isRootDevice())
+                    _router = dev;
+                
+                if (_router != null) {
+                    discoverService();
+                    
+                    // did we find the service we need?
+                    if (_service == null) {
+                        LOG.debug("couldn't find service");
+                        _router=null;
+                    } else {
+                        if(LOG.isDebugEnabled())
+                            LOG.debug("Found service, router: " + _router.getFriendlyName() + ", service: " + _service);
+                        stop();
+                    }
+                } else {
+                    LOG.debug("didn't get router device");
+                }
+            }
+            
+            if(isNATPresent())
+                notifyListeners();
+        }
+    	
+    	public void deviceRemoved(Device dev) {}
+	}
 	
 	private final class Mapping {
 		public final String _externalAddress;
