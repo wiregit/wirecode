@@ -138,6 +138,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
     private final ConnectionServices connectionServices;
     private final Provider<UPnPManager> upnpManager;
     
+    @InspectablePrimitive("upnp enabled")
     private final boolean upnpEnabled; 
     
     @Inject
