@@ -25,6 +25,7 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht.NullDHTController;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
+import com.limegroup.gnutella.dht.db.AltLocFinderImpl;
 import com.limegroup.gnutella.dht.db.AltLocSearchListener;
 import com.limegroup.gnutella.downloader.RequeryManager.QueryType;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -489,7 +490,7 @@ public class RequeryManagerTest extends LimeTestCase {
     }
     
     @Singleton    
-    private static class MyAltLocFinder extends AltLocFinder {
+    private static class MyAltLocFinder extends AltLocFinderImpl {
         
         @Inject
         public MyAltLocFinder(DHTManager manager,

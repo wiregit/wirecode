@@ -17,6 +17,7 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -27,9 +28,11 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.MagnetDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.MagnetDownloadMementoImpl;
@@ -68,6 +71,8 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     
 	private MagnetOptions magnet;
 
+    private final AltLocFinder altLocFinder;
+
     /**
      * Creates a new MAGNET downloader.  Immediately tries to download from
      * <tt>defaultURLs</tt>, if specified. If that fails, or if defaultURLs does
@@ -100,7 +105,8 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
             DiskController diskController, @Named("ipFilter")
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
-            Provider<TigerTreeCache> tigerTreeCache, ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory)
+            Provider<TigerTreeCache> tigerTreeCache, ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory,
+            AltLocFinder altLocFinder)
             throws SaveLocationException {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
@@ -108,6 +114,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
                 contentManager, sourceRankerFactory, urnCache, savedFileManager,
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
                 tigerTreeCache, applicationServices, remoteFileDescFactory);
+        this.altLocFinder = altLocFinder;
     }
     
     public void initialize() {
@@ -137,27 +144,56 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 		if (!hasRFD()) {
 			MagnetOptions magnet = getMagnet();
 			String[] defaultURLs = magnet.getDefaultURLs();
-			if (defaultURLs.length == 0 )
-				return DownloadStatus.GAVE_UP;
-
-			RemoteFileDesc rfd = null;
+			
+			boolean foundSource = false;
 			for (int i = 0; i < defaultURLs.length; i++) {
 				try {
-					 rfd = createRemoteFileDesc(defaultURLs[i],
+				    RemoteFileDesc rfd = createRemoteFileDesc(defaultURLs[i],
 													 getSaveFile().getName(), magnet.getSHA1Urn());
 							
 					initPropertiesMap(rfd);
 					addDownloadForced(rfd, true);
+					foundSource = true;
 				} catch (IOException badRFD) {}
 			}
         
+			URN urn = magnet.getSHA1Urn();
+			if (urn != null) {
+			    foundSource |= addLocationsFromGUIDUrns(magnet.getGUIDUrns(), urn);
+			}
+			
 			// if all locations included in the magnet URI fail we can't do much
-			if (rfd == null)
+			if (!foundSource)
 				return DownloadStatus.GAVE_UP;
 		}
         return super.initializeDownload();
     }
     
+    /**
+     * Synchronously looks up alterante location for the set of guid urns,
+     * creates remote file descriptions from them and adds them as possible sources.
+     *
+     * @param urns set of guid urns
+     * @param sha1Urn the sha1 urn identifying the resource on the alternate locations
+     * 
+     * @return true if at least one alternate location was added successfully
+     */
+    private boolean addLocationsFromGUIDUrns(Set<URN> urns, URN sha1Urn) {
+        boolean added = false;
+        // implementation note: alt locs are looked up one after the other, this could
+        // be parallelized, but normally there's only one location to look up
+        for (URN urn : urns) {
+            GUID guid = new GUID(GUID.fromHexString(urn.getNamespaceSpecificString()));
+            AlternateLocation altLoc = altLocFinder.getAlternateLocation(guid, sha1Urn);
+            if (LOG.isDebugEnabled())
+                LOG.debug(altLoc);
+            RemoteFileDesc rfd = altLoc.createRemoteFileDesc(getContentLength());
+            addDownloadForced(rfd, true);
+            added = true;
+        }
+        return added;
+    }
+
     /** 
      * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader.  If a URL
      * is provided, issues a HEAD request to get the file size.  If this fails,

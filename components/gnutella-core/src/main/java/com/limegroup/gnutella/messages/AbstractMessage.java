@@ -281,6 +281,14 @@ public abstract class AbstractMessage implements Message {
 	 */
 	public abstract void recordDrop();
 	
+	/**
+	 * Should return the most specific message interface that his class implements.
+	 * <p>
+	 * This is needed since listeners register themselves on the interface class id.
+	 * It can go away once listeners subscribe to the message id or instance of checks
+	 * are used.
+	 * </p>
+	 */
 	public Class<? extends Message> getHandlerClass() {
 	    return getClass();
 	}

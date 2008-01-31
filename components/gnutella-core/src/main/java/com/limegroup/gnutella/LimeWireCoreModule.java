@@ -92,6 +92,8 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.DHTNodeFetcherFactory;
 import com.limegroup.gnutella.dht.DHTNodeFetcherFactoryImpl;
+import com.limegroup.gnutella.dht.db.AltLocFinder;
+import com.limegroup.gnutella.dht.db.AltLocFinderImpl;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.AltLocValueFactoryImpl;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
@@ -329,6 +331,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UpdateMessageVerifier.class).to(UpdateMessageVerifierImpl.class);
         bind(InspectionResponseFactory.class).to(InspectionResponseFactoryImpl.class);
         bind(FECUtils.class).to(FECUtilsImpl.class);
+        bind(AltLocFinder.class).to(AltLocFinderImpl.class);
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);

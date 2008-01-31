@@ -6,6 +6,8 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.io.LocalSocketAddressService;
 
 import com.google.inject.AbstractModule;
@@ -18,6 +20,7 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
@@ -29,9 +32,11 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -51,6 +56,9 @@ public class MagnetDownloaderTest extends LimeTestCase {
 
 	//private static final Log LOG = LogFactory.getLog(MagnetDownloaderTest.class);
     private DownloadManager downloadManager;
+    private Mockery context;
+    private AltLocFinder altLocFinder;
+    private Injector injector;
 	
     /**
      * Creates a new test instance.
@@ -75,12 +83,16 @@ public class MagnetDownloaderTest extends LimeTestCase {
         localSocketAddressProviderStub.setLocalAddressPrivate(false);
         LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProviderStub);
         
-        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+        context = new Mockery();
+        altLocFinder = context.mock(AltLocFinder.class);
+        
+        injector = LimeTestUtils.createInjector(new AbstractModule() {
            @Override
             protected void configure() {
                bind(FileManager.class).to(FileManagerStub.class);
                bind(MessageRouter.class).to(MessageRouterStub.class);
                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
+               bind(AltLocFinder.class).toInstance(altLocFinder);
             } 
         });
         
@@ -189,8 +201,32 @@ public class MagnetDownloaderTest extends LimeTestCase {
         assertEquals(2, downloader.cachedRFDs.size());
     }
     
-    public void testDownloadsFromGUIDUrns() throws Exception {
+    public void testAltLocsFromGUIDUrnsAreAdded() throws Exception {
+        CoreDownloaderFactory coreDownloaderFactory = injector.getInstance(CoreDownloaderFactory.class);
         
+        final GUID guid = new GUID();
+        final MagnetOptions magnet = MagnetOptions.parseMagnet("magnet:?dn=filename&xt=urn:sha1:YRCIRZV5ZO56CWMNHFV4FRGNPWPPDVKT&xs=" + URN.createGUIDUrn(guid))[0];
+        assertTrue(magnet.isDownloadable());
+        
+        final AlternateLocation alternateLocation = context.mock(AlternateLocation.class);
+        // use a url remote file desc because it is easier to construct
+        final RemoteFileDesc rfd = new URLRemoteFileDesc("host", 80, "filename", 1000, new UrnSet(magnet.getSHA1Urn()), new URL("http://host:80/hello"));
+        
+        context.checking(new Expectations() {{
+            one(altLocFinder).getAlternateLocation(with(equal(guid)), with(equal(magnet.getSHA1Urn())));
+            will(returnValue(alternateLocation));
+            one(alternateLocation).createRemoteFileDesc(with(any(Long.class)));
+            will(returnValue(rfd));
+        }});
+        
+        MagnetDownloaderImpl downloader = (MagnetDownloaderImpl) coreDownloaderFactory.createMagnetDownloader(magnet, true, null, "test");
+        downloader.initialize();
+        downloader.initializeDownload();
+        
+        context.assertIsSatisfied();
+        
+        assertEquals(1, downloader.cachedRFDs.size());
+        assertSame(rfd, downloader.cachedRFDs.iterator().next());
     }
     
     private static class TestUrlMagnetDownloader extends MagnetDownloaderImpl {
@@ -208,14 +244,14 @@ public class MagnetDownloaderTest extends LimeTestCase {
                 VerifyingFileFactory verifyingFileFactory, DiskController diskController,
                 @Named("ipFilter") IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                 Provider<MessageRouter> messageRouter, Provider<TigerTreeCache> tigerTreeCache,
-                ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory)
+                ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory, AltLocFinder altLocFinder)
                 throws SaveLocationException {
             super(saveLocationManager, downloadManager, fileManager, incompleteFileManager, downloadCallback,
                     networkManager, alternateLocationFactory, requeryManagerFactory, queryRequestFactory,
                     onDemandUnicaster, downloadWorkerFactory, altLocManager, contentManager,
                     sourceRankerFactory, urnCache, savedFileManager, verifyingFileFactory, diskController,
                     ipFilter, backgroundExecutor, messageRouter, tigerTreeCache, applicationServices,
-                    remoteFileDescFactory);
+                    remoteFileDescFactory, altLocFinder);
         }
         
         @Override

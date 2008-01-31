@@ -36,6 +36,7 @@ import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
+import com.limegroup.gnutella.dht.db.AltLocFinderImpl;
 import com.limegroup.gnutella.dht.db.AltLocSearchListener;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
@@ -401,7 +402,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
     }
     
     @Singleton
-    private static class MyAltLocFinder extends AltLocFinder {
+    private static class MyAltLocFinder extends AltLocFinderImpl {
         private volatile AltLocSearchListener listener;
         
         volatile boolean cancelled;

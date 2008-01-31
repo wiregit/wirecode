@@ -9,10 +9,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.commons.httpclient.URI;
@@ -57,7 +59,7 @@ public class MagnetOptions implements Serializable {
 	private transient String localizedErrorMessage;
 	private transient URN urn;
 	private transient String extractedFileName;
-	private transient List<URN> guidUrns;
+	private transient Set<URN> guidUrns;
 	
 	/**
 	 * Creates a MagnetOptions object from file details.
@@ -453,22 +455,22 @@ public class MagnetOptions implements Serializable {
 	}
 	
 	/**
-	 * Returns immutable list of all valid GUID urns than can be tried for downloading.
+	 * Returns immutable set of all valid GUID urns than can be tried for downloading.
 	 * 
 	 * GUID urns denote possibly firewalled hosts in the network that can be looked up
 	 * as possible download sources for this magnet link.
 	 */
-    public List<URN> getGUIDUrns() {
+    public Set<URN> getGUIDUrns() {
         if (guidUrns != null) {
             return guidUrns;
         }
-        List<URN> urns = null;
+        Set<URN> urns = null;
         List<String> potentialUrns = getPotentialURNs();
         for (String candidate : potentialUrns) {
             try {
                 URN urn = URN.createGUIDUrn(candidate);
                 if (urns == null) {
-                    urns = new ArrayList<URN>(2);
+                    urns = new HashSet<URN>(2);
                 }
                 urns.add(urn);
             } catch (IOException ie) {
@@ -476,9 +478,9 @@ public class MagnetOptions implements Serializable {
             }
         }
         if (urns == null) {
-            urns = Collections.emptyList();
+            urns = Collections.emptySet();
         } else {
-            urns = Collections.unmodifiableList(urns);
+            urns = Collections.unmodifiableSet(urns);
         }
         // only set after list is full to avoid race condition where some other thread sees the partial list
         guidUrns = urns;

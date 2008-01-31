@@ -20,7 +20,7 @@ import com.limegroup.gnutella.util.DataUtils;
 /**
  * An alternate location that is directly reachable, i.e. not firewalled.
  */
-public class DirectAltLoc extends AlternateLocation {
+public class DirectAltLoc extends AbstractAlternateLocation {
 
     /**
      * A constant prepending a list of direct locations that is used

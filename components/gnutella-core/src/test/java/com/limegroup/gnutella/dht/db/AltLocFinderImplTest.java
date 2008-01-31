@@ -32,7 +32,7 @@ import com.limegroup.gnutella.security.TigerTree;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.MockUtils;
 
-public class AltLocFinderTest extends DHTTestCase {
+public class AltLocFinderImplTest extends DHTTestCase {
 
     private Mockery context;
     private MojitoDHT mojitoDHT;
@@ -46,12 +46,12 @@ public class AltLocFinderTest extends DHTTestCase {
     private PushProxiesValueFactory pushProxiesValueFactory;
     private PushEndpointFactory pushEndpointFactory;
 
-    public AltLocFinderTest(String name) {
+    public AltLocFinderImplTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(AltLocFinderTest.class);
+        return buildTestSuite(AltLocFinderImplTest.class);
     }
     
     @Override

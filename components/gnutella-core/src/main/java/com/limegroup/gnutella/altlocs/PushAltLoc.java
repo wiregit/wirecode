@@ -18,7 +18,7 @@ import com.limegroup.gnutella.http.HTTPConstants;
 /**
  * A firewalled altloc.
  */
-public class PushAltLoc extends AlternateLocation {
+public class PushAltLoc extends AbstractAlternateLocation {
 
 	
 	/**
@@ -64,7 +64,7 @@ public class PushAltLoc extends AlternateLocation {
 	}
 	
 	public synchronized AlternateLocation createClone() {
-        AlternateLocation ret = null;
+        PushAltLoc ret = null;
         try {
 
         		ret = new PushAltLoc(_pushAddress.createClone(),SHA1_URN, applicationServices);
