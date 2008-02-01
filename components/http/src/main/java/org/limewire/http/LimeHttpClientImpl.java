@@ -3,9 +3,6 @@ package org.limewire.http;
 import java.io.IOException;
 import java.net.Socket;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -18,14 +15,12 @@ import org.apache.http.protocol.HttpContext;
  * <code>SocketWrappingHttpClient</code> 
  */
 class LimeHttpClientImpl extends DefaultHttpClient implements SocketWrappingHttpClient {
-    
-    private static final Log LOG = LogFactory.getLog(LimeHttpClientImpl.class);
 
     public void setSocket(Socket socket) {
         ((ReapingClientConnectionManager)getConnectionManager()).setSocket(socket);
     }
 
-    public void releaseConnection(HttpRequest request, HttpResponse response) {
+    public void releaseConnection(HttpResponse response) {
         close(response);
     }
     
@@ -47,15 +42,8 @@ class LimeHttpClientImpl extends DefaultHttpClient implements SocketWrappingHttp
         };
     }
 
-    public static void close(HttpResponse response) {
-        if(response != null && response.getEntity() != null) {
-            try {
-                response.getEntity().consumeContent();
-                //IOUtils.close(response.getEntity().getContent());
-            } catch (IOException e) {
-                LOG.debug(e.toString(), e);
-            }            
-        }
+    private void close(HttpResponse response) {
+        HttpClientUtils.releaseConnection(response);
     }
 
         

@@ -7,14 +7,14 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
-import org.apache.http.HttpException;
-import org.apache.http.util.EntityUtils;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpProtocolParams;
-import org.limewire.http.HttpClientManager;
+import org.apache.http.util.EntityUtils;
+import org.limewire.http.SimpleLimeHttpClient;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 
@@ -135,14 +135,14 @@ public final class LocalServerDelegate {
     public void sendMessageToServer(String msg, Map<String, String> args, StringCallback cb, URLConstructor ctor) {
         try {
             int tmpPort = port;
-            Socket tmpSock = null;
             for (; tmpPort < port + 10; tmpPort++) {
+                Socket tmpSock;
                 try {
                     tmpSock = socketsManager.connect(new InetSocketAddress(host, port), 5000);
+                    tmpSock.close();
+                    break;
                 } catch (IOException e) { /* skip */ }
-                if (tmpSock != null) break;
             }
-            final Socket sock = tmpSock;
             //
             // We'll always be adding this from the web page
             // to ensure a new script is loaded
@@ -151,7 +151,7 @@ public final class LocalServerDelegate {
             newArgs.put("_f", String.valueOf(System.currentTimeMillis()));
             String request = ctor.constructURL(msg, newArgs);
 
-            HttpClient client = HttpClientManager.getNewClient(sock);
+            HttpClient client = new SimpleLimeHttpClient();
             HttpGet get = new HttpGet("http://" + host + ":" + port + "/" + request);
             HttpProtocolParams.setVersion(client.getParams(), HttpVersion.HTTP_1_1);
 

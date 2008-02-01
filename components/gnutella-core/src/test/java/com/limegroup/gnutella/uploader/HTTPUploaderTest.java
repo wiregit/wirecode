@@ -12,7 +12,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.limewire.http.HttpClientManager;
+import org.limewire.http.HttpClientUtils;
 import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.ConnectionDispatcher;
 
@@ -139,7 +139,7 @@ public class HTTPUploaderTest extends LimeTestCase {
             assertFalse(uploader.isBrowseHostEnabled());
             assertEquals("127.0.0.1", uploader.getHost());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         method = new HttpGet(host + "/uri-res/N2R?" + urn1);
@@ -154,7 +154,7 @@ public class HTTPUploaderTest extends LimeTestCase {
             assertEquals("127.0.0.1", uploader.getHost());
 
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         method = new HttpGet(host + "/uri-res/N2R?" + urn1);
@@ -170,7 +170,7 @@ public class HTTPUploaderTest extends LimeTestCase {
             assertEquals(456, uploader.getGnutellaPort());
             assertEquals("123.123.123.123", uploader.getHost());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         method = new HttpGet(host + "/uri-res/N2R?" + urn1);
@@ -185,7 +185,7 @@ public class HTTPUploaderTest extends LimeTestCase {
             assertEquals(456, uploader.getGnutellaPort());
             assertEquals("123.123.123.123", uploader.getHost());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -211,7 +211,7 @@ public class HTTPUploaderTest extends LimeTestCase {
             Thread.sleep(500);
             assertGreaterThanOrEquals(1000, uploader.amountUploaded());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
         LimeTestUtils.waitForNIO();
         assertEquals(UploadStatus.COMPLETE, uploader.getState());

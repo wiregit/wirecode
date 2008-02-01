@@ -18,7 +18,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.params.HttpProtocolParams;
-import org.limewire.http.HttpClientManager;
+import org.limewire.http.HttpClientUtils;
+import org.limewire.http.LimeHttpClient;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
@@ -97,10 +98,9 @@ public class BrowseTest extends LimeTestCase {
         
         fileManager = injector.getInstance(FileManager.class);
         messageFactory = injector.getInstance(MessageFactory.class);
+        client = injector.getInstance(LimeHttpClient.class);
         
         fileManager.loadSettingsAndWait(100000);
-
-        client = HttpClientManager.getNewClient();
         
         host = protocol + "://localhost:" + PORT;
     }
@@ -147,7 +147,7 @@ public class BrowseTest extends LimeTestCase {
             assertTrue("Browse returned more results than shared: " + files,
                     files.isEmpty());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -160,7 +160,7 @@ public class BrowseTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             assertNull(response.getEntity());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -171,7 +171,7 @@ public class BrowseTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         method = new HttpHead(host + "/");
@@ -180,7 +180,7 @@ public class BrowseTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response.getStatusLine().getStatusCode());
             assertNull(response.getEntity());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -192,7 +192,7 @@ public class BrowseTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         method = new HttpHead(host + "/");
@@ -202,7 +202,7 @@ public class BrowseTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_NOT_ACCEPTABLE, response.getStatusLine().getStatusCode());
             assertNull(response.getEntity());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 

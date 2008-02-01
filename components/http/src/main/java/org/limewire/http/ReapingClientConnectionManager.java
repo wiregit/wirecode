@@ -20,7 +20,7 @@ import com.google.inject.Provider;
 /**
  * A <code>ClientConnectionManager</code> that will close idle connections
  */
-public class ReapingClientConnectionManager extends ThreadSafeClientConnManager {
+class ReapingClientConnectionManager extends ThreadSafeClientConnManager {
     protected final ScheduledFuture connectionCloserTask;
     protected final IdleConnectionCloser connectionCloser;
 

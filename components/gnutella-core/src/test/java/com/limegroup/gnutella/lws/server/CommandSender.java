@@ -1,16 +1,16 @@
 package com.limegroup.gnutella.lws.server;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.limewire.http.HttpClientManager;
+import org.apache.http.util.EntityUtils;
+import org.limewire.http.LimeHttpClient;
+import org.limewire.http.SimpleLimeHttpClient;
 import org.limewire.lws.server.LWSDispatcher;
 import org.limewire.lws.server.LWSDispatcherSupport;
 
@@ -19,7 +19,7 @@ import org.limewire.lws.server.LWSDispatcherSupport;
  * Responsible for sending commands to the client, acting like a web page.
  */
 class CommandSender {
-    
+        
     /**
      * The prefix {@link LWSDispatcherSupport#PREFIX} is going to be put on
      * <code>msg</code>, so callers of this method cannot put the prefix on.
@@ -34,14 +34,14 @@ class CommandSender {
                 + LWSDispatcher.PREFIX
                 + LocalServerDelegate.NormalStyleURLConstructor.INSTANCE.constructURL(command, args);
         HttpResponse response = null;
+        LimeHttpClient client = new SimpleLimeHttpClient();
         try {
-            final HttpGet get = new HttpGet(url);
+            HttpGet get = new HttpGet(url);
             //
             // This is going to block, but that should be OK. This code will never
             // run in the client and really should be running outside, because it
             // represents making a call in Javascript from a web page
             //
-            HttpClient client = HttpClientManager.getNewClient();
             //get.addHeader("Connection", "close");
             response = client.execute(get);
             String result;
@@ -60,7 +60,7 @@ class CommandSender {
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            HttpClientManager.releaseConnection(response);
+            client.releaseConnection(response);
         }
         return null;
     }

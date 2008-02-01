@@ -2,6 +2,8 @@ package com.limegroup.gnutella.licenses;
 
 import java.net.URISyntaxException;
 
+import org.limewire.http.LimeHttpClient;
+import org.limewire.http.SimpleLimeHttpClient;
 import org.limewire.inject.Providers;
 import org.limewire.util.BaseTestCase;
 
@@ -13,6 +15,7 @@ public class LicenseFactoryTest extends BaseTestCase {
 
     private LicenseFactory licenseFactory;
     private LicenseCache licenseCache;
+    private LimeHttpClient httpClient;
     
 	public LicenseFactoryTest(String name) {
 		super(name);
@@ -30,6 +33,7 @@ public class LicenseFactoryTest extends BaseTestCase {
     protected void setUp() throws Exception {
         licenseCache = new LicenseCache();
         licenseFactory = new LicenseFactoryImpl(Providers.of(licenseCache));
+        httpClient = new SimpleLimeHttpClient();
     }
     
 	public void testCreateWithBadLicenses() throws Exception {
@@ -212,10 +216,10 @@ public class LicenseFactoryTest extends BaseTestCase {
         AbstractLicense l2 = new StubCCLicense(vf2, rdf2);
         AbstractLicense l3 = new StubCCLicense(vf3, rdf3);
         AbstractLicense l4 = new StubCCLicense(vf4, rdf4);
-        l1.verify(licenseCache);
-        l2.verify(licenseCache);
-        l3.verify(licenseCache);
-        l4.verify(licenseCache);
+        l1.verify(licenseCache, httpClient);
+        l2.verify(licenseCache, httpClient);
+        l3.verify(licenseCache, httpClient);
+        l4.verify(licenseCache, httpClient);
         
         // first do some sanity checks.
         assertTrue(l1.isValid(urn1));
@@ -276,8 +280,8 @@ public class LicenseFactoryTest extends BaseTestCase {
         assertFalse(licenseFactory.isVerifiedAndValid(null, v2));
         
         // Verify them.
-        l1.verify(licenseCache);
-        l2.verify(licenseCache);
+        l1.verify(licenseCache, httpClient);
+        l2.verify(licenseCache, httpClient);
 
         // Yes, verifying worked.
         assertTrue(l1.isVerified());

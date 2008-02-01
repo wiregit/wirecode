@@ -6,16 +6,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URI;
 
-import org.limewire.http.HttpClientManager;
+import junit.framework.Test;
+
+import org.limewire.http.LimeHttpClient;
+import org.limewire.http.SimpleLimeHttpClient;
 import org.limewire.inject.Providers;
 import org.limewire.util.BaseTestCase;
 
-import com.google.inject.AbstractModule;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
-
-import junit.framework.Test;
 
 public final class CCLicenseTest extends BaseTestCase {
     
@@ -45,6 +44,8 @@ public final class CCLicenseTest extends BaseTestCase {
     private LicenseFactoryImpl licenseFactory;
 
     private LicenseCache licenseCache;
+    
+    private LimeHttpClient httpClient;
 
 	public CCLicenseTest(String name) {
 		super(name);
@@ -65,14 +66,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	protected void setUp() throws Exception {
 	    licenseCache = new LicenseCache();
 	    licenseFactory = new LicenseFactoryImpl(Providers.of(licenseCache));
-	    
-	    // XXX HttpClient should be usable without static injection
-        LimeTestUtils.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                requestStaticInjection(HttpClientManager.class);
-            }            
-        });
+	    httpClient = new SimpleLimeHttpClient();
 	}
 	
 	@Override
@@ -86,7 +80,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    License l = new StubCCLicense(RDF_GOOD);
 	    assertFalse(l.isVerified());
 	    assertFalse(l.isVerifying());
-	    l.verify(licenseCache);
+	    l.verify(licenseCache, httpClient);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertTrue(l.isValid(good));
@@ -164,7 +158,7 @@ public final class CCLicenseTest extends BaseTestCase {
         
         // Now try with a full out parsed License.
 	    l = new StubCCLicense("good license text", RDF_GOOD);
-	    l.verify(licenseCache);
+	    l.verify(licenseCache, httpClient);
 	    assertEquals("good license text", l.getLicense());
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD")));
@@ -207,7 +201,7 @@ public final class CCLicenseTest extends BaseTestCase {
 "  <License />" +
 "</rdf:RDF>" +
 "--></html>");
-	    l.verify(licenseCache);
+	    l.verify(licenseCache, httpClient);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertEquals("http://creativecommons.org/licenses/by/2.0/", l.getLicenseDeed(null).toString());
@@ -215,26 +209,26 @@ public final class CCLicenseTest extends BaseTestCase {
 	    
 	    // BAD: No data.
 	    l = new StubCCLicense("<rdf:RDF/>");
-	    l.verify(licenseCache);
+	    l.verify(licenseCache, httpClient);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 
         // BAD: RDF not bound.
 	    l = new StubCCLicense("<rdf:RDF><Work/></rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(licenseCache, httpClient);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
 	    // BAD: Work, no license for it.
 	    l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"><Work/></rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(licenseCache, httpClient);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
 	    // BAD: Work, Valid for specific URN, but no license for it.
 	    l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
 	    "<Work rdf:about=\"urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD\"/></rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(licenseCache, httpClient);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    assertFalse(l.isValid(goodUrn));
@@ -244,7 +238,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    "<Work>" +
 	    "<license rdf:resource=\"http://creativecommons.org/licenses/by/2.0/\" />"  +
 	    "</Work></rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(licenseCache, httpClient);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertTrue(l.isValid(goodUrn));
@@ -255,7 +249,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    "<Work rdf:about=\"" + goodUrn + "\">" +
 	    "<license rdf:resource=\"http://mydeed.com\" />" +
 	    "</Work></rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(licenseCache, httpClient);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertTrue(l.isValid(goodUrn));
@@ -272,7 +266,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    "<license rdf:resource=\"http://deed2.com\" />" +
 	    "</Work>" +
 	    "</rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(licenseCache, httpClient);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertTrue(l.isValid(goodUrn));
@@ -284,7 +278,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    // No Work item.
         l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">"+
         "<License/></rdf:RDF>");
-        l.verify(licenseCache);
+        l.verify(licenseCache, httpClient);
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    
@@ -299,7 +293,7 @@ public final class CCLicenseTest extends BaseTestCase {
 "     <permits rdf:resource=\"http://web.resource.org/cc/Distribution\" />" +
 "     <permits rdf:resource=\"http://web.resource.org/cc/DerivativeWorks\" />" +
 "  </License></rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(licenseCache, httpClient);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertEquals("Permitted: Distribution, DerivativeWorks\n" +
@@ -316,7 +310,7 @@ public final class CCLicenseTest extends BaseTestCase {
 "     <unknown rdf:resource=\"http://web.resource.org/cc/Unknown\" />" +
 "     <permits rdf:resource=\"http://web.resource.org/cc/DerivativeWorks\" />" +
 "  </License></rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(licenseCache, httpClient);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertEquals("Permitted: Distribution, DerivativeWorks\n" +
@@ -342,7 +336,7 @@ public final class CCLicenseTest extends BaseTestCase {
         "     <permits rdf:resource=\"http://web.resource.org/cc/Happiness\" />" +
         "  </License>" +     
 	    "</rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(licenseCache, httpClient);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertTrue(l.isValid(goodUrn));
@@ -360,14 +354,14 @@ public final class CCLicenseTest extends BaseTestCase {
         l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
         "<Work><license rdf:resource=\"http://deed1.com\" /></Work>" +
         "<Unknown/></rdf:RDF>");
-        l.verify(licenseCache);
+        l.verify(licenseCache, httpClient);
         assertTrue(l.isVerified());
         assertTrue(l.isValid(null));
         
         // Invalid -- Work is inside an unknown element.
         l = new StubCCLicense("<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">" +
         "<Unknown><Work><license rdf:resource=\"http://deed1.com\" /></Work></Unknown></rdf:RDF>");
-        l.verify(licenseCache);
+        l.verify(licenseCache, httpClient);
         assertTrue(l.isVerified());
         assertFalse(l.isValid(null));
     }
@@ -395,7 +389,7 @@ public final class CCLicenseTest extends BaseTestCase {
         "     <permits rdf:resource=\"http://web.resource.org/cc/Happiness\" />" +
         "  </License>" +     
 	    "</rdf:RDF>");
-	    l.verify(licenseCache);
+	    l.verify(licenseCache, httpClient);
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertTrue(l.isValid(goodUrn));
@@ -414,7 +408,7 @@ public final class CCLicenseTest extends BaseTestCase {
                                    RDF_GOOD + "\n--></body></html>");
             
             License l = licenseFactory.create("verify at http://127.0.0.1:20181/");
-            l.verify(licenseCache);
+            l.verify(licenseCache, httpClient);
             assertTrue(l.isVerified());
     	    assertTrue(l.isValid(null));
     	    assertTrue(l.isValid(good));
@@ -514,7 +508,7 @@ public final class CCLicenseTest extends BaseTestCase {
                             deed3.setResponse("HTTP/1.1 200 OK\r\nContent-Length: " + data.length());
     
                             License l = licenseFactory.create("verify at http://127.0.0.1:44444/");
-                            l.verify(licenseCache);
+                            l.verify(licenseCache, httpClient);
                             assertTrue(l.isVerified());
                             assertTrue(l.isValid(null));
                             assertTrue(l.isValid(goodUrn1));
@@ -564,7 +558,7 @@ public final class CCLicenseTest extends BaseTestCase {
                             // addr).
 
                             l = licenseFactory.create("verify at http://127.0.0.1:55555/");
-                            l.verify(licenseCache);
+                            l.verify(licenseCache, httpClient);
                             assertTrue(l.isVerified());
                             assertTrue(l.isValid(null));
                             assertTrue(l.isValid(goodUrn1));

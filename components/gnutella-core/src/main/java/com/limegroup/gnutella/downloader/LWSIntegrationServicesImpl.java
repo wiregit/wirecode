@@ -154,8 +154,8 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                     String urlStr = URLDecoder.decode(baseURL);
                     URL url = new URL(urlStr); 
                     // this make the size looked up
-                    RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(
-                            remoteFileDescFactory, url, fileName, null, length);
+                    RemoteFileDesc rfd = remoteFileDescFactory.createUrlRemoteFileDesc(
+                            url, fileName, null, length);
                     //
                     // We'll associate the identity hash code of the downloader
                     // with this file so that the web page can keep track

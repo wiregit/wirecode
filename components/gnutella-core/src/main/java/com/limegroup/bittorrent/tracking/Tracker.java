@@ -233,7 +233,7 @@ class Tracker {
         } catch (InterruptedException e) {
             return null;
         } finally {
-            client.releaseConnection(get, response);
+            client.releaseConnection(response);
         }
     }
 

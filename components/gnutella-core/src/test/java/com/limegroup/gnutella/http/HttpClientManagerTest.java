@@ -2,22 +2,22 @@ package com.limegroup.gnutella.http;
 
 import java.io.IOException;
 
+import junit.framework.Test;
+
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.params.ClientPNames;
 import org.limewire.http.LimeHttpClient;
+import org.limewire.http.SimpleLimeHttpClient;
 import org.limewire.nio.NIODispatcher;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
-import com.google.inject.name.Names;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
 import com.limegroup.gnutella.util.LimeTestCase;
-
-import junit.framework.Test;
 
 /**
  * Tests various things of HttpClient / HttpClientManager.
@@ -142,7 +142,7 @@ public class HttpClientManagerTest extends LimeTestCase {
     }
     
     private void doExecuteMethodRedirectingNoNIOTest(String[] urls, TestBootstrapServer[] servers) throws Exception {
-        HttpClient client = injector.getInstance(Key.get(LimeHttpClient.class, Names.named("blockingClient")));
+        HttpClient client = new SimpleLimeHttpClient();
         HttpGet get = new HttpGet(urls[0]);
         
         servers[0].setResponse("HTTP/1.1 303 Redirect\r\nLocation: "+urls[1]);
@@ -273,7 +273,7 @@ public class HttpClientManagerTest extends LimeTestCase {
         try {
             response = client.execute(get);
         } finally {
-            client.releaseConnection(get, response);
+            client.releaseConnection(response);
         }
         
         get = new HttpGet(url);
@@ -281,7 +281,7 @@ public class HttpClientManagerTest extends LimeTestCase {
         try {
             response = client.execute(get);
         } finally {
-            client.releaseConnection(get, response);
+            client.releaseConnection(response);
         }
         
         assertEquals("wrong connection attempts", 1, server.getConnectionAttempts());
@@ -318,7 +318,7 @@ public class HttpClientManagerTest extends LimeTestCase {
         try {
             response = client.execute(get);
         } finally {
-            client.releaseConnection(get, response);
+            client.releaseConnection(response);
         }
         
         Thread.sleep(1000 * 70);
@@ -328,7 +328,7 @@ public class HttpClientManagerTest extends LimeTestCase {
         try {
             response = client.execute(get);
         } finally {
-            client.releaseConnection(get, response);
+            client.releaseConnection(response);
         }
         
         assertEquals("wrong connection attempts", 2, server.getConnectionAttempts());

@@ -16,7 +16,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.cybergarage.http.HTTPStatus;
 import org.limewire.http.HttpAcceptorListener;
-import org.limewire.http.HttpClientManager;
+import org.limewire.http.HttpClientUtils;
 import org.limewire.io.LocalSocketAddressService;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
@@ -74,7 +74,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
             response = client.execute(method);
             assertEquals(HTTPStatus.BAD_REQUEST, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         method = new HttpGet("http://localhost:" + PORT + "/update.xml");
@@ -82,7 +82,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
             response = client.execute(method);
             assertEquals(HTTPStatus.BAD_REQUEST, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -111,7 +111,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
             LimeTestUtils.waitForNIO();
             assertNotNull(listener.response);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         listener.opened = false;
@@ -128,7 +128,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
             assertNull(listener.request);
             assertNull(listener.response);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -150,7 +150,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_ACCEPTED, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         httpAcceptor.unregisterHandler("/");
@@ -159,7 +159,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 

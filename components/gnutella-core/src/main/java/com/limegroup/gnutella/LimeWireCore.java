@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.http.LimeHttpClient;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.NIODispatcher;
@@ -672,6 +673,10 @@ public class LimeWireCore {
 
     public RemoteFileDescFactory getRemoteFileDescFactory() {
         return injector.getInstance(RemoteFileDescFactory.class);
+    }
+
+    public LimeHttpClient getLimeHttpClient() {
+        return injector.getInstance(LimeHttpClient.class);
     }
     
 }

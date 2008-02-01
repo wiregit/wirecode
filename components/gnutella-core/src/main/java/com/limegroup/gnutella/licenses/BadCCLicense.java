@@ -3,6 +3,8 @@ package com.limegroup.gnutella.licenses;
 import java.net.URI;
 import java.net.URL;
 
+import org.limewire.http.LimeHttpClient;
+
 import com.limegroup.gnutella.URN;
 
 /**
@@ -32,7 +34,7 @@ public class BadCCLicense implements MutableLicense {
     public URI getLicenseURI() { return null; }
     public URL getLicenseDeed(URN urn) { return guessLicenseDeed(); }
     public String getLicense() { return license; }
-    public void verify(LicenseCache licenseCache) {}
+    public void verify(LicenseCache licenseCache, LimeHttpClient httpClient) {}
     public long getLastVerifiedTime() { return 0; }
     public String getLicenseName() { return name; }
     

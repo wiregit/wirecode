@@ -1,14 +1,10 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
 import java.net.URISyntaxException;
-import java.util.Set;
+import java.net.URL;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
 import org.limewire.io.InvalidDataException;
 
@@ -27,7 +23,6 @@ import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnCache;
-import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
@@ -65,9 +60,7 @@ import com.limegroup.gnutella.util.QueryUtils;
  * download.  
  */
 class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownloader {
-
-    private static final Log LOG = LogFactory.getLog(MagnetDownloaderImpl.class);
-    
+        
 	private MagnetOptions magnet;
 
     /**
@@ -102,8 +95,8 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
             DiskController diskController, 
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
-            Provider<HashTreeCache> tigerTreeCache, ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory)
-             {
+            Provider<HashTreeCache> tigerTreeCache, ApplicationServices applicationServices,
+            RemoteFileDescFactory remoteFileDescFactory) {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
@@ -175,29 +168,9 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      */
     @SuppressWarnings("deprecation")
     private RemoteFileDesc createRemoteFileDesc(String defaultURL,
-        String filename, URN urn) throws IOException, HttpException, InterruptedException, URISyntaxException {
-        if (defaultURL==null) {
-            LOG.debug("createRemoteFileDesc called with null URL");        
-            return null;
-        }
-
-        URL url = null;
-        // Use the URL class to do a little parsing for us.
-        url = new URL(defaultURL);
-        int port = url.getPort();
-        if (port<0)
-            port=80;      //assume default for HTTP (not 6346)
-        
-        Set<URN> urns= new UrnSet();
-        if (urn!=null)
-            urns.add(urn);
-        
-        URI uri = new URI(defaultURL);
-        
-        return remoteFileDescFactory.createUrlRemoteFileDesc(url.getHost(), port,
-                filename != null ? filename : MagnetOptions.extractFileName(uri), HTTPUtils
-                        .contentLength(uri), urns, url); // assume no
-                                                            // firewall transfer
+        String filename, URN urn)
+            throws IOException, HttpException, InterruptedException, URISyntaxException {
+        return remoteFileDescFactory.createUrlRemoteFileDesc(new URL(defaultURL), filename, urn, -1L);
     } 
 
     ////////////////////////////// Requery Logic ///////////////////////////

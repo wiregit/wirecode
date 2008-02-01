@@ -8,12 +8,9 @@ import java.net.UnknownHostException;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.http.conn.ConnectTimeoutException;
-//import org.apache.http.conn.LayeredSocketFactory;
-import org.apache.http.conn.PlainSocketFactory;
 import org.apache.http.conn.Scheme;
 import org.apache.http.conn.SchemeRegistry;
 import org.apache.http.conn.SocketFactory;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
@@ -33,16 +30,11 @@ import com.google.inject.name.Names;
  */
 public class LimeWireHttpModule extends AbstractModule {
     
-    protected void configure() {
-        //bindAll(Names.named("httpExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
-        requestStaticInjection(HttpClientManager.class);
+    protected void configure() {        
         bind(ReapingClientConnectionManager.class).annotatedWith(Names.named("nonBlockingConnectionManager")).toProvider(LimeClientConnectionManagerProvider.class).in(Scopes.SINGLETON);
-        bind(ReapingClientConnectionManager.class).annotatedWith(Names.named("blockingConnectionManager")).toProvider(DefaultClientConnectionManagerProvider.class).in(Scopes.SINGLETON);
         bind(ReapingClientConnectionManager.class).annotatedWith(Names.named("socketWrappingConnectionManager")).toProvider(SocketWrappingClientConnectionManagerProvider.class).in(Scopes.SINGLETON);
         bind(LimeHttpClient.class).toProvider(NonBlockingLimeHttpClientProvider.class);
-        bind(LimeHttpClient.class).annotatedWith(Names.named("blockingClient")).toProvider(BlockingLimeHttpClientProvider.class);
         bind(SocketWrappingHttpClient.class).toProvider(SocketWrappingLimeHttpClientProvider.class);
-        bind(SchemeRegistry.class).toProvider(DefaultSchemeRegistryProvider.class);
         bind(SchemeRegistry.class).annotatedWith(Names.named("limeSchemeRegistry")).toProvider(LimeSchemeRegistryProvider.class);
         bind(SchemeRegistry.class).annotatedWith(Names.named("socketWrappingSchemeRegistry")).toProvider(SocketWrappingSchemeRegistryProvider.class);
         bind(SocketWrapperProtocolSocketFactory.class);
@@ -58,14 +50,6 @@ public class LimeWireHttpModule extends AbstractModule {
         public SocketWrappingHttpClient get() {
             return new LimeHttpClientImpl(manager);
         }
-    }
-    
-    @Singleton
-    private static class BlockingLimeHttpClientProvider extends AbstractLimeHttpClientProvider {
-        @Inject
-        public BlockingLimeHttpClientProvider(@Named("blockingConnectionManager") ReapingClientConnectionManager manager) {
-            super(manager);
-        }        
     }
     
     @Singleton
@@ -85,19 +69,6 @@ public class LimeWireHttpModule extends AbstractModule {
     }
     
     @Singleton
-    private static class DefaultSchemeRegistryProvider extends AbstractLazySingletonProvider<SchemeRegistry> {
-
-        protected SchemeRegistry createObject() {
-            SchemeRegistry registry = new SchemeRegistry();
-            // TODO more injection?
-            registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-            registry.register(new Scheme("tls", SSLSocketFactory.getSocketFactory(),80)); // TODO no ssl?
-            registry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(),80)); // TODO no ssl?      
-            return registry;
-        }
-    }
-    
-    @Singleton
     private static class LimeSchemeRegistryProvider extends AbstractLazySingletonProvider<SchemeRegistry> {
         private final Provider<SocketsManager> socketsManager;
         
@@ -108,7 +79,6 @@ public class LimeWireHttpModule extends AbstractModule {
 
         protected SchemeRegistry createObject() {
             SchemeRegistry registry = new SchemeRegistry();
-            // TODO more injection?
             registry.register(new Scheme("http", new LimeSocketFactory(socketsManager, SocketsManager.ConnectType.PLAIN), 80));
             registry.register(new Scheme("tls", new LimeSocketFactory(socketsManager, SocketsManager.ConnectType.TLS),80));
             registry.register(new Scheme("https", new LimeSocketFactory(socketsManager, SocketsManager.ConnectType.TLS),80));
@@ -121,14 +91,12 @@ public class LimeWireHttpModule extends AbstractModule {
 
         protected SchemeRegistry createObject() {
             SchemeRegistry registry = new SchemeRegistry();
-            // TODO more injection?
             registry.register(new Scheme("http", new SocketWrapperProtocolSocketFactory(), 80));
             registry.register(new Scheme("tls", new SocketWrapperProtocolSocketFactory(),80));
             registry.register(new Scheme("https", new SocketWrapperProtocolSocketFactory(),80));
             return registry;
         }
-    }   
-    
+    }
     
     private abstract static class AbstractClientConnectionManagerProvider extends AbstractLazySingletonProvider<ReapingClientConnectionManager> {
         private final Provider<SchemeRegistry> registry;
@@ -141,15 +109,6 @@ public class LimeWireHttpModule extends AbstractModule {
 
         public ReapingClientConnectionManager createObject() {
             return new ReapingClientConnectionManager(registry, scheduler);
-        }
-    }
-    
-    @Singleton
-    private static class DefaultClientConnectionManagerProvider extends AbstractClientConnectionManagerProvider {
-
-        @Inject
-        public DefaultClientConnectionManagerProvider(Provider<SchemeRegistry> registry, @Named("backgroundExecutor") Provider<ScheduledExecutorService> scheduler) {
-            super(registry, scheduler);
         }
     }
     

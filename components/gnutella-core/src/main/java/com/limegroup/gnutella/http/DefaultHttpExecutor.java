@@ -10,7 +10,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.params.HttpParams;
 import org.limewire.collection.Cancellable;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.http.HttpClientManager;
+import org.limewire.http.HttpClientUtils;
 import org.limewire.http.LimeHttpClient;
 import org.limewire.nio.observer.Shutdownable;
 
@@ -68,7 +68,7 @@ public class DefaultHttpExecutor implements HttpExecutor {
     }
 	
 	public void releaseResources(HttpResponse response) {
-        HttpClientManager.releaseConnection(response);
+        HttpClientUtils.releaseConnection(response);
 	}
 
 	public Shutdownable executeAny(HttpClientListener listener, 

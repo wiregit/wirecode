@@ -15,7 +15,7 @@ import com.google.inject.Inject;
  * a <code>SocketFactory</code> that can be given 
  * a <code>Socket</code> to use
  */
-public class SocketWrapperProtocolSocketFactory implements SocketFactory {
+class SocketWrapperProtocolSocketFactory implements SocketFactory {
 
         private Socket socket;
 

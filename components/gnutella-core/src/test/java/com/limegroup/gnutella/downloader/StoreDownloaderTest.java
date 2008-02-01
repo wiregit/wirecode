@@ -87,7 +87,7 @@ public class StoreDownloaderTest extends LimeTestCase{
     public void testEmptyOverrides() throws Exception{
         URN urn = UrnHelper.URNS[0];
         URL url = new URL("http://test.com");
-        RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(remoteFileDescFactory, url, "test.txt", urn, 10L);
+        RemoteFileDesc rfd = remoteFileDescFactory.createUrlRemoteFileDesc(url, "test.txt", urn, 10L);
         
         //create a valid download
         StoreDownloaderImpl downloader = (StoreDownloaderImpl) downloadManager.downloadFromStore(rfd, false, _storeDir, "test.txt" );
@@ -118,9 +118,9 @@ public class StoreDownloaderTest extends LimeTestCase{
         URL url = new URL("http://test.com");
         
         // test invalid rfd
-        assertNull( RemoteFileDescUtils.createRemoteFileDesc(remoteFileDescFactory, null, "", null, -1) );
+        assertNull( remoteFileDescFactory.createUrlRemoteFileDesc(null, "", null, -1) );
         
-        RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(remoteFileDescFactory, url, "test.txt", urn, 10L);
+        RemoteFileDesc rfd = remoteFileDescFactory.createUrlRemoteFileDesc(url, "test.txt", urn, 10L);
         
         assertTrue(rfd.getUrns().contains(urn));
         
@@ -140,7 +140,7 @@ public class StoreDownloaderTest extends LimeTestCase{
 
         URN urn = UrnHelper.URNS[0];
         URL url = new URL("http://test.com");
-        RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(remoteFileDescFactory, url, "test.txt", urn, 10L);
+        RemoteFileDesc rfd = remoteFileDescFactory.createUrlRemoteFileDesc(url, "test.txt", urn, 10L);
                 
         //create a valid download
         downloadManager.downloadFromStore(rfd, false, _storeDir, "test.txt" );
@@ -162,7 +162,7 @@ public class StoreDownloaderTest extends LimeTestCase{
         
         URN urn = UrnHelper.URNS[0];
         URL url = new URL("http://test.com");
-        RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(remoteFileDescFactory, url, "test.txt", urn, 10L);
+        RemoteFileDesc rfd = remoteFileDescFactory.createUrlRemoteFileDesc(url, "test.txt", urn, 10L);
         
         
         downloadManager.downloadFromStore(rfd, false, _storeDir, "test.txt" );

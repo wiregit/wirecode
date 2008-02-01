@@ -35,7 +35,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.api.Action;
 import org.jmock.api.Invocation;
-import org.limewire.http.HttpClientManager;
+import org.limewire.http.HttpClientUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
@@ -248,7 +248,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             assertNull(response.getFirstHeader("X-Falt"));
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertEquals(1, uploadManager.activeUploads.size());
@@ -293,7 +293,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertTrue(value.contains(push.httpStringValue()));
             assertTrue(value.contains(pushFwt.httpStringValue()));
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertEquals(1, uploadManager.activeUploads.size());
@@ -336,7 +336,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-FAlt").getValue();
             assertEquals(pushFwt.httpStringValue(), value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertEquals(1, uploadManager.activeUploads.size());
@@ -366,7 +366,7 @@ public class AltLocUploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertEquals(2, altLocManager.getNumLocs(
@@ -396,7 +396,7 @@ public class AltLocUploadTest extends LimeTestCase {
            String value = response.getFirstHeader("X-Alt").getValue();
            assertEquals("1.1.1.1:1", value);
        } finally {
-           HttpClientManager.releaseConnection(response);
+           HttpClientUtils.releaseConnection(response);
        }
 
        // ensure that one removal doesn't stop it.
@@ -410,7 +410,7 @@ public class AltLocUploadTest extends LimeTestCase {
            String value = response.getFirstHeader("X-Alt").getValue();
            assertEquals("1.1.1.1:1", value);
        } finally {
-           HttpClientManager.releaseConnection(response);
+           HttpClientUtils.releaseConnection(response);
        }
 
        // add a second one, so we can check to make sure
@@ -428,7 +428,7 @@ public class AltLocUploadTest extends LimeTestCase {
            assertTrue(value.contains("1.1.1.1:1"));
            assertTrue(value.contains("2.2.2.2:2"));
        } finally {
-           HttpClientManager.releaseConnection(response);
+           HttpClientUtils.releaseConnection(response);
        }
 
        // remove the first guy again, should only have loc2 left.
@@ -442,7 +442,7 @@ public class AltLocUploadTest extends LimeTestCase {
            String value = response.getFirstHeader("X-Alt").getValue();
            assertEquals("2.2.2.2:2", value);
        } finally {
-           HttpClientManager.releaseConnection(response);
+           HttpClientUtils.releaseConnection(response);
        }
    }
 
@@ -460,7 +460,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // add a header that gives a new location.
@@ -475,7 +475,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // make sure the FD has that loc now.
@@ -501,7 +501,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertTrue(value.contains("1.1.1.1:1"));
             assertTrue(value.contains("2.2.2.2:2"));
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // demote the location (don't remove)
@@ -515,7 +515,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // should still have it.
@@ -536,7 +536,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
         assertEquals("unexpected number of locs", 1, alc.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
@@ -556,7 +556,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // now try a header without a port, should be 6346.
@@ -571,7 +571,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // nake sure the FD has that loc now.
@@ -604,7 +604,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // add a header that gives a new location.
@@ -622,7 +622,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // make sure the FD has that loc now.
@@ -646,7 +646,7 @@ public class AltLocUploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // should still have it
@@ -660,7 +660,7 @@ public class AltLocUploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
         assertEquals("wrong # locs", 1, alc.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
@@ -695,7 +695,7 @@ public class AltLocUploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // two of the proxies of bcd should be gone
@@ -713,7 +713,7 @@ public class AltLocUploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // all proxies should be gone, and bcd should be removed from
@@ -741,7 +741,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // add an invalid alt
@@ -756,7 +756,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
         // FD should still only have 1
         AlternateLocationCollection alc = altLocManager
@@ -775,7 +775,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
         // FD should still only have 1
         assertEquals("wrong # locs: " + alc, 1, alc.getAltLocsSize());
@@ -793,7 +793,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
         // FD should still only have 1
         assertEquals("wrong # locs: " + alc, 1, alc.getAltLocsSize());
@@ -810,7 +810,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
         // FD should still only have 1
         assertEquals("wrong # locs: " + alc, 1, alc.getAltLocsSize());
@@ -831,7 +831,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         for (int i = 0; i < 20; i++) {
@@ -862,7 +862,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertNotNull(response.getFirstHeader("X-Alt"));
             assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -897,7 +897,7 @@ public class AltLocUploadTest extends LimeTestCase {
                     String value = response.getFirstHeader("X-Alt").getValue();
                     assertEquals("1.1.1.1:1", value);
                 } finally {
-                    HttpClientManager.releaseConnection(response);
+                    HttpClientUtils.releaseConnection(response);
                 }
             }
             fail("altloc didn't expire");
@@ -976,7 +976,7 @@ public class AltLocUploadTest extends LimeTestCase {
                     String value = response.getFirstHeader("X-Alt").getValue();
                     assertEquals("1.1.1.1:1", value);
                 } finally {
-                    HttpClientManager.releaseConnection(response);
+                    HttpClientUtils.releaseConnection(response);
                 }
             }
             fail("altloc didn't expire");
@@ -1137,7 +1137,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         for (int i = 0; i < 20; i++) {
@@ -1170,7 +1170,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertNotNull(response.getFirstHeader("X-Alt"));
             assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         /*required = pre + 5 + post + comma + pre + 2 + post + comma
@@ -1191,7 +1191,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertNotNull(response.getFirstHeader("X-Alt"));
             assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         //required = pre + 9 + post;
@@ -1208,7 +1208,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertNotNull(response.getFirstHeader("X-Alt"));
             assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // Now if some more are added to file desc, make sure they're reported.
@@ -1229,7 +1229,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertNotNull(response.getFirstHeader("X-Alt"));
             assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -1247,7 +1247,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
         // get rid of it.
         altLocManager.remove(al, null);
@@ -1313,7 +1313,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertNotNull(response.getFirstHeader("X-Alt"));
             assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         /*required = pre + 16 + post + comma + pre + 13 + post
@@ -1333,7 +1333,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertNotNull(response.getFirstHeader("X-Alt"));
             assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         /*required = pre + 35 + post + comma + pre + 32 + post
@@ -1353,7 +1353,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertNotNull(response.getFirstHeader("X-Alt"));
             assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         /*required = pre + 5 + post + comma + pre + 2 + post + comma
@@ -1373,7 +1373,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertNotNull(response.getFirstHeader("X-Alt"));
             assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         /*required = pre + 24 + post + comma + pre + 21 + post
@@ -1393,7 +1393,7 @@ public class AltLocUploadTest extends LimeTestCase {
             assertNotNull(response.getFirstHeader("X-Alt"));
             assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -1415,7 +1415,7 @@ public class AltLocUploadTest extends LimeTestCase {
                 String value = response.getFirstHeader("X-Alt").getValue();
                 assertEquals("1.1.1.1:1", value);
             } finally {
-                HttpClientManager.releaseConnection(response);
+                HttpClientUtils.releaseConnection(response);
             }
             Thread.sleep(8 * 1000);
         }

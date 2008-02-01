@@ -90,7 +90,7 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
             result = client.execute(method);
             assertEquals(HttpStatus.SC_NOT_IMPLEMENTED, result.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(result);
+            HttpClientUtils.releaseConnection(result);
         }
     }
 
@@ -121,7 +121,7 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
             // TODO assertFalse(client.getHttpConnectionManager().getConnection(hostConfig).isOpen());
             assertLessThan("Expected connection close", data.length, i);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
     
@@ -153,7 +153,7 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
             }
             assertEquals(data.length, i);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
     
@@ -167,7 +167,7 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
             fail("Expected IOException, got: " + result.getStatusLine().getStatusCode());
         } catch (IOException expected) {
         } finally {
-            HttpClientManager.releaseConnection(result);
+            HttpClientUtils.releaseConnection(result);
         }
     }
 
