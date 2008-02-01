@@ -137,7 +137,12 @@ public class AltLocFinderImpl implements AltLocFinder {
             /** An alternate location has not been found and will not be found */
             NOT_FOUND(false),
             /** An alternate location has not yet been found but could still be found */
-            NOT_YET_FOUND(false);
+            NOT_YET_FOUND(false) {
+                @Override
+                public boolean isFound() {
+                    throw new UnsupportedOperationException("Should not have been called on " + this);
+                }  
+            };
             
             private final boolean value;
             
@@ -145,7 +150,7 @@ public class AltLocFinderImpl implements AltLocFinder {
                 this.value = value;
             }
             
-            public final boolean toBoolean() {
+            public boolean isFound() {
                 return value;
             }
         };
@@ -207,7 +212,7 @@ public class AltLocFinderImpl implements AltLocFinder {
                 // only notify if there if we already found something or there is 
                 // no chance of still finding a value
                 if (outcome != Result.NOT_YET_FOUND) {
-                    listener.handleAltLocSearchDone(outcome.toBoolean());
+                    listener.handleAltLocSearchDone(outcome.isFound());
                 }
             }
         }
