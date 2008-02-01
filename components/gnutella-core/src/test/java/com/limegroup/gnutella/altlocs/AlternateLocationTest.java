@@ -357,7 +357,7 @@ public final class AlternateLocationTest extends LimeTestCase {
 
     public void testDemotedEquals() throws Exception {
         AlternateLocation loc1 = alternateLocationFactory.create(equalLocs[0], URN.createSHA1Urn(HASH));
-        AlternateLocation loc2 = alternateLocationFactory.create(equalLocs[0], URN.createSHA1Urn(HASH));
+        AbstractAlternateLocation loc2 = (AbstractAlternateLocation)alternateLocationFactory.create(equalLocs[0], URN.createSHA1Urn(HASH));
         assertEquals("locations should be equal", loc1, loc2);
         loc2.demote();
         assertEquals("locations should be equal", loc1, loc2);
@@ -367,7 +367,7 @@ public final class AlternateLocationTest extends LimeTestCase {
     public void testCompareTo() throws Exception {
         TreeSet set = new TreeSet();
         
-        AlternateLocation direct1 = alternateLocationFactory.create(equalLocs[0], URN.createSHA1Urn(HASH));
+        AbstractAlternateLocation direct1 = (AbstractAlternateLocation) alternateLocationFactory.create(equalLocs[0], URN.createSHA1Urn(HASH));
         AlternateLocation direct2 = alternateLocationFactory.create(equalLocs[0], URN.createSHA1Urn(HASH));
         
         set.add(direct1);
@@ -391,7 +391,7 @@ public final class AlternateLocationTest extends LimeTestCase {
         URN urn =
 	        URN.createSHA1Urn("urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE");
         
-        AlternateLocation push1 = alternateLocationFactory.create(httpString,urn);
+        AbstractAlternateLocation push1 = (AbstractAlternateLocation) alternateLocationFactory.create(httpString,urn);
         AlternateLocation push2 = alternateLocationFactory.create(httpString,urn);
         
         assertTrue(push1.equals(push2));

@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
-import java.util.Collection;
 
+import org.limewire.io.LocalSocketAddressService;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.MojitoFactory;
@@ -18,6 +18,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public abstract class DHTTestCase extends LimeTestCase {
@@ -28,20 +29,9 @@ public abstract class DHTTestCase extends LimeTestCase {
     
     private boolean bootstrapped = false;
     
-    //protected static List<MojitoDHT> DHT_LIST = new ArrayList<MojitoDHT>();
-
-    // DPINJ: remove
-    protected static boolean startDHT = true;
-    
     public DHTTestCase(String name) {
         super(name);
     }
-    
-//    public static void globalSetUp() throws Exception {
-//        if (startDHT) {
-//            startServices(ProviderHacks.getLifecycleManager());
-//        }
-//    }
     
     protected MojitoDHT startBootstrapDHT(LifecycleManager lifeCycleManager) throws Exception {
         assertFalse("bootstrap DHT already started", bootstrapped);
@@ -81,29 +71,28 @@ public abstract class DHTTestCase extends LimeTestCase {
         // DHT Settings
         DHTSettings.PERSIST_ACTIVE_DHT_ROUTETABLE.setValue(false);
         DHTSettings.PERSIST_DHT_DATABASE.setValue(false);
+        DHTSettings.ENABLE_PUSH_PROXY_QUERIES.setValue(true);
         ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(0);
         
-        NetworkSettings.FILTER_CLASS_C.setValue(false);
-        NetworkSettings.LOCAL_IS_PRIVATE.setValue(false);
-        
-        // We're working on the loopback. Everything should be done
+         // We're working on the loopback. Everything should be done
         // in less than 500ms
         NetworkSettings.DEFAULT_TIMEOUT.setValue(500);
         
         // Nothing should take longer than 1.5 seconds. If we start seeing
         // LockTimeoutExceptions on the loopback then check this Setting!
         ContextSettings.WAIT_ON_LOCK.setValue(1500);
+        
+    }
+
+    protected void setLocalIsPrivate(boolean localIsPrivate) {
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(localIsPrivate);
+        NetworkSettings.FILTER_CLASS_C.setValue(localIsPrivate);
+        NetworkSettings.LOCAL_IS_PRIVATE.setValue(false);
+        LocalSocketAddressProviderStub localSocketAddressProviderStub = new LocalSocketAddressProviderStub();
+        localSocketAddressProviderStub.setLocalAddressPrivate(localIsPrivate);
+        LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProviderStub);
     }
     
-//    public static void globalTearDown() throws Exception {
-//        if (startDHT) {
-//            close(DHT_LIST);
-//        }
-//        
-//        DHT_LIST.clear();
-//        BOOTSTRAP_DHT = null;
-//    }
-
     protected void fillRoutingTable(RouteTable rt, int numNodes) {
         for(int i = 0; i < numNodes; i++) {
             KUID kuid = KUID.createRandomID();
@@ -119,10 +108,5 @@ public abstract class DHTTestCase extends LimeTestCase {
             rt.add(node);
         }
     }
-    
-    protected static void close(Collection<? extends MojitoDHT> dhts) {
-        for (MojitoDHT dht : dhts) {
-            dht.close();
-        }
-    }
+
 }

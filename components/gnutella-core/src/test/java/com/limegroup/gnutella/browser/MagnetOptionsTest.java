@@ -2,6 +2,7 @@ package com.limegroup.gnutella.browser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -203,7 +204,7 @@ public class MagnetOptionsTest extends BaseTestCase {
         }
         for (String magnet : magnets) {
             MagnetOptions options = MagnetOptions.parseMagnet(magnet)[0];
-            List<URN> urns = options.getGUIDUrns();
+            Collection<URN> urns = options.getGUIDUrns();
             assertFalse(urns.isEmpty());
             for (URN urn : urns) {
                 assertTrue(urn.isGUID());

@@ -441,7 +441,8 @@ public class GUID implements Comparable<GUID> {
     
     /**
      *  Create a GUID bytes from a hex string version.
-     *  Throws IllegalArgumentException if sguid is
+     *  
+     *  @throws IllegalArgumentException if sguid is
      *  not of the proper format.
      */
     public static byte[] fromHexString(String sguid)
@@ -454,9 +455,9 @@ public class GUID implements Comparable<GUID> {
             }
             return bytes;
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(sguid);
         } catch (IndexOutOfBoundsException e) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(sguid);
         }
     }
 

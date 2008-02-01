@@ -1,13 +1,14 @@
 package com.limegroup.gnutella.dht;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 import junit.framework.Test;
 
+import org.limewire.io.IOUtils;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
@@ -24,13 +25,13 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.util.MojitoUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 public class PassiveLeafTest extends DHTTestCase {
@@ -65,29 +66,14 @@ public class PassiveLeafTest extends DHTTestCase {
     }
     
     public void testLookup() throws Exception {
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        setLocalIsPrivate(false);
         
         final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         
         MojitoDHT passiveLeaf = null;
-        List<MojitoDHT> dhts = new ArrayList<MojitoDHT>();
+        List<MojitoDHT> dhts = Collections.emptyList();
         try {
-            
-            // Start some DHT Nodes
-            for (int i = 0; i < 3*k; i++) {
-                MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-                dht.bind(2000 + i);
-                dht.start();
-                
-                if (i > 0) {
-                    Thread.sleep(100);
-                    dht.bootstrap(dhts.get(i-1).getContactAddress()).get();
-                }
-                
-                dhts.add(dht);
-            }
-            dhts.get(0).bootstrap(dhts.get(1).getContactAddress()).get();
-            
+            dhts = MojitoUtils.createBootStrappedDHTs(3, 2000);
             // Store a DHTValue
             KUID key = KUID.createRandomID();
             DHTValue value = new DHTValueImpl(
@@ -132,7 +118,7 @@ public class PassiveLeafTest extends DHTTestCase {
             }
             
         } finally {
-            close(dhts);
+            IOUtils.close(dhts);
             
             if (passiveLeaf != null) {
                 passiveLeaf.close();

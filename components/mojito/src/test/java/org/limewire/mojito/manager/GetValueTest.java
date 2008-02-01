@@ -1,8 +1,7 @@
 package org.limewire.mojito.manager;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import junit.framework.TestSuite;
@@ -10,7 +9,6 @@ import junit.framework.TestSuite;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.MojitoTestCase;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
@@ -18,7 +16,7 @@ import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Version;
-import org.limewire.mojito.settings.KademliaSettings;
+import org.limewire.mojito.util.MojitoUtils;
 
 @SuppressWarnings("null")
 public class GetValueTest extends MojitoTestCase {
@@ -42,26 +40,10 @@ public class GetValueTest extends MojitoTestCase {
     }
     
     public void testGetValueByType() throws Exception {
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        
-        List<MojitoDHT> dhts = new ArrayList<MojitoDHT>();
-        
-        MojitoDHT first = null;
-        try {
-            for (int i = 0; i < k; i++) {
-                MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-                
-                dht.bind(new InetSocketAddress(3000 + i));
-                dht.start();
-                
-                if (i > 0) {
-                    dht.bootstrap(new InetSocketAddress("localhost", 3000)).get();
-                } else {
-                    first = dht;
-                }
-                dhts.add(dht);
-            }
-            first.bootstrap(new InetSocketAddress("localhost", 3001)).get();
+        List<MojitoDHT> dhts = Collections.emptyList();
+        try {        
+            dhts = MojitoUtils.createBootStrappedDHTs(1);
+            MojitoDHT first = dhts.get(0);
             Thread.sleep(250);
             
             KUID valueId = KUID.createRandomID();
@@ -110,25 +92,10 @@ public class GetValueTest extends MojitoTestCase {
     }
     
     public void testNotSameReference() throws Exception {
-        int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        
-        List<MojitoDHT> dhts = new ArrayList<MojitoDHT>();
-        MojitoDHT first = null;
+        List<MojitoDHT> dhts = Collections.emptyList();
         try {
-            for (int i = 0; i < k; i++) {
-                MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-                
-                dht.bind(new InetSocketAddress(3000 + i));
-                dht.start();
-                
-                if (i > 0) {
-                    dht.bootstrap(new InetSocketAddress("localhost", 3000)).get();
-                } else {
-                    first = dht;
-                }
-                dhts.add(dht);
-            }
-            first.bootstrap(new InetSocketAddress("localhost", 3001)).get();
+            dhts = MojitoUtils.createBootStrappedDHTs(1);
+            MojitoDHT first = dhts.get(0);
             Thread.sleep(250);
             
             KUID valueId = KUID.createRandomID();
