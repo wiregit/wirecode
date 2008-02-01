@@ -40,6 +40,10 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
 
+/**
+ * Default implementation of {@link AltLocFinder}, uses the DHT to find
+ * alternate locations.
+ */
 @Singleton
 public class AltLocFinderImpl implements AltLocFinder {
 

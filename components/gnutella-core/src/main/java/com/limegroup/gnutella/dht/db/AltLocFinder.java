@@ -7,28 +7,31 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 
 /**
- * The AltLocFinder queries the DHT for Alternate Locations.
+ * An AltLocFinder finds alternate locations for a urn or retrieves the 
+ * alternate location for a {@link GUID}.
  */
+// TODO this interface could be moved outside of the DHT component, it doesn't have to be the DHT
+// that does the lookup
 public interface AltLocFinder {
 
     /**
-     * Finds AlternateLocations for the given URN
+     * Finds alternate locations for the given URN.
      * 
      * @param urn for the alternate location
      * 
-     * @return <code>null</code> if <code>urn</code> is null or DHT is not bootstrapped
+     * @return <code>null</code> if <code>urn</code> is null or the search failed immediately
      */
     Shutdownable findAltLocs(URN urn, AltLocSearchListener listener);
 
     /**
-     * Finds push AlternateLocations for the given GUID and URN
+     * Finds push AlternateLocations for the given GUID and URN.
      * 
      * @param guid the guid of the (firewalled) client that constitutes an alternate location for the urn
      * @param urn the urn of the alternate location
      * @param listener listener that is notified of retrieved alternate locations 
      * 
      * @return <code>false</code> if <code>guid</code> or <code>urn</code> are null
-     * or DHT is not boostrapped, true if search was successfully started
+     * or search failed immediately, true if search was successfully started
      */
     boolean findPushAltLocs(GUID guid, URN urn, AltLocSearchListener listener);
 

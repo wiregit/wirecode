@@ -25,7 +25,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  *  The manager keeps track of what queries have been sent out,
  *  when queries can begin, and how long queries should wait for results.
  */
-class RequeryManager implements DHTEventListener, AltLocSearchListener {
+class RequeryManager implements DHTEventListener {
 
     private static final Log LOG = LogFactory.getLog(RequeryManager.class);
     
@@ -71,6 +71,11 @@ class RequeryManager implements DHTEventListener, AltLocSearchListener {
     private volatile Shutdownable dhtQuery;
     
     private final ConnectionServices connectionServices;
+    
+    /**
+     * Used to be notified of finished dht queries.
+     */
+    private final AltLocSearchHandler searchHandler = new AltLocSearchHandler();
     
     RequeryManager(RequeryListener requeryListener, 
             DownloadManager manager,
@@ -158,7 +163,7 @@ class RequeryManager implements DHTEventListener, AltLocSearchListener {
         }
     }
     
-    public void handleAltLocSearchDone(boolean success){
+    void handleAltLocSearchDone(boolean success){
         dhtQuery = null;
         // This changes the state to GAVE_UP regardless of success,
         // because even if this was a success (it found results),
@@ -194,7 +199,7 @@ class RequeryManager implements DHTEventListener, AltLocSearchListener {
         requeryListener.lookupStarted(QueryType.DHT, Math.max(TIME_BETWEEN_REQUERIES, 
                 LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue()));
       
-        dhtQuery = altLocFinder.findAltLocs(requeryListener.getSHA1Urn(), this);
+        dhtQuery = altLocFinder.findAltLocs(requeryListener.getSHA1Urn(), searchHandler);
     }
     
     /** Sends a Gnutella Query */
@@ -246,6 +251,15 @@ class RequeryManager implements DHTEventListener, AltLocSearchListener {
                     connectionServices.getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
     }
 
-    public void handleAlternateLocation(AlternateLocation alternateLocation) {
+    private class AltLocSearchHandler implements AltLocSearchListener {
+
+        public void handleAltLocSearchDone(boolean success) {
+            RequeryManager.this.handleAltLocSearchDone(success);
+        }
+
+        public void handleAlternateLocation(AlternateLocation alternateLocation) {
+            // ManagedDownloader installs its own AlternatelocationListener so it
+            // is notified of all results
+        }
     }
 }
