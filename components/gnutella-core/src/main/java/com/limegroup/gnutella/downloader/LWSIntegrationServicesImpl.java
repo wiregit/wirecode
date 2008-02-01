@@ -291,20 +291,37 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         });
         // =============================================================================================================
         // Add a handler for the LimeWire Store Server so that we can find the
-        // version of the client running
+        // info of the client running
         // INPUT
         //  --
         // OUTPUT
-        //  <version>
+        //  ( <name> '=' <value> '\t' )*
         // =============================================================================================================
-        lwsManager.registerHandler("GetVersion", new LWSManagerCommandResponseHandlerWithCallback("GetVersion") {
+        lwsManager.registerHandler("GetInfo", new LWSManagerCommandResponseHandlerWithCallback("GetInfo") {
+            
+            private void add(StringBuffer b, String name, Object value) {
+                b.append(name);
+                b.append('=');
+                b.append(value);
+                b.append('\t');
+            }
 
             @Override
             protected String handleRest(Map<String, String> args) {
-                return LimeWireUtils.getLimeWireVersion();
+                StringBuffer res = new StringBuffer();
+                add(res, "version"                  ,LimeWireUtils.getLimeWireVersion());
+                add(res, "major.version.number"     ,LimeWireUtils.getMajorVersionNumber());
+                add(res, "minor.version.number"     ,LimeWireUtils.getMinorVersionNumber());
+                add(res, "vendor"                   ,LimeWireUtils.getVendor());                
+                add(res, "service.version.number"   ,LimeWireUtils.getServiceVersionNumber());
+                add(res, "is.alpha.release"         ,LimeWireUtils.isAlphaRelease());
+                add(res, "is.beta.release"          ,LimeWireUtils.isBetaRelease());
+                add(res, "is.pro"                   ,LimeWireUtils.isPro());
+                add(res, "is.testing.version"       ,LimeWireUtils.isTestingVersion());
+                return res.toString();
             }
            
-        });          
+        });        
     }
     
     /**

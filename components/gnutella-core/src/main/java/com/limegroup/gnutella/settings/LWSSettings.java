@@ -18,7 +18,7 @@ public final class LWSSettings extends LimeProps {
      * The hostname to which we connect for authentication.
      */
     public static final StringSetting LWS_AUTHENTICATION_HOSTNAME = FACTORY.createRemoteStringSetting(
-            "LWS_AUTHENTICATION_HOSTNAME", "10.254.0.197", "LWSSettings.lwsAuthenticationHostname");
+            "LWS_AUTHENTICATION_HOSTNAME", "10.254.0.247", "LWSSettings.lwsAuthenticationHostname");
 
     /**
      * The port on which we connect for authentication. This can be
@@ -41,7 +41,7 @@ public final class LWSSettings extends LimeProps {
      * so needs to be all together.  This also makes it clearer.  <b>This HAS to end in a <code>/</code></b>.
      */
     public static final StringSetting LWS_DOWNLOAD_PREFIX = FACTORY.createRemoteStringSetting(
-            "LWS_DOWNLOAD_PREFIX", "10.254.0.197:8080", "LWSSettings.lwsDownloadPrefix"); 
+            "LWS_DOWNLOAD_PREFIX", "10.254.0.247:8080", "LWSSettings.lwsDownloadPrefix"); 
     
     /**
      * The hostname to which we connect for adding to playlists.
@@ -74,12 +74,12 @@ public final class LWSSettings extends LimeProps {
      * The username with which we use to connect the client to the Store web server.
      */
     public static final StringSetting LWS_AUTHENTICATION_USERNAME = FACTORY.createRemoteStringSetting(
-            "LWS_AUTHENTICATION_USERNAME", "browse", "LWSSettings.lwsAuthenticationUsername"); 
+            "LWS_AUTHENTICATION_USERNAME", "", "LWSSettings.lwsAuthenticationUsername"); 
     
     /**
      * The username with which we use to connect the client to the Store web server.
      */
     public static final StringSetting LWS_AUTHENTICATION_PASSWORD = FACTORY.createRemoteStringSetting(
-            "LWS_AUTHENTICATION_PASSWORD", "browse", "LWSSettings.lwsAuthenticationPassword");      
+            "LWS_AUTHENTICATION_PASSWORD", "", "LWSSettings.lwsAuthenticationPassword");      
 
 }
