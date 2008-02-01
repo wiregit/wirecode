@@ -12,8 +12,9 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.URIUtils;
-import com.limegroup.gnutella.metadata.WRMXML;
-import com.limegroup.gnutella.metadata.WeedInfo;
+import com.limegroup.gnutella.metadata.audio.reader.WRMXML;
+import com.limegroup.gnutella.metadata.audio.reader.WeedInfo;
+
 
 /**
  * A factory for constructing Licenses based on licenses.

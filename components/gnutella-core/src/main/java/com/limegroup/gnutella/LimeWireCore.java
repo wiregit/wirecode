@@ -73,6 +73,7 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPongFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
+import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
@@ -619,6 +620,10 @@ public class LimeWireCore {
 
     public LimeXMLDocumentFactory getLimeXMLDocumentFactory() {
         return injector.getInstance(LimeXMLDocumentFactory.class);
+    }
+
+    public MetaDataFactory getMetaDataFactory() {
+        return injector.getInstance(MetaDataFactory.class);
     }
 
     public LimeXMLDocumentHelper getLimeXMLDocumentHelper() {

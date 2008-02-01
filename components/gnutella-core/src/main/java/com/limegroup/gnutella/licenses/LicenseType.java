@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import com.limegroup.gnutella.metadata.AudioMetaData;
-import com.limegroup.gnutella.metadata.WRMXML;
-import com.limegroup.gnutella.metadata.WeedInfo;
+import com.limegroup.gnutella.metadata.audio.reader.AudioDataReader;
+import com.limegroup.gnutella.metadata.audio.reader.WRMXML;
+import com.limegroup.gnutella.metadata.audio.reader.WeedInfo;
 
 public enum LicenseType {    
     NO_LICENSE(""),
@@ -88,6 +88,6 @@ public enum LicenseType {
     
     private static boolean hasLWSLicense(String type) {
         return type != null &&
-               type.startsWith(AudioMetaData.MAGIC_KEY);
+               type.startsWith(AudioDataReader.MAGIC_KEY);
     }
 }

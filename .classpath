@@ -43,7 +43,6 @@
 	<classpathentry kind="lib" path="lib/jars/daap.jar"/>
 	<classpathentry kind="lib" path="lib/jars/foxtrot.jar"/>
 	<classpathentry kind="lib" path="lib/jars/icu4j.jar"/>
-	<classpathentry kind="lib" path="lib/jars/id3v2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jcraft.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jdic.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jmdns.jar"/>
@@ -94,5 +93,6 @@
 	<classpathentry kind="lib" path="lib/jars/httpcore-4.0-alpha6.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.0-alpha6.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-niossl-4.0-alpha6.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jaudiotagger.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

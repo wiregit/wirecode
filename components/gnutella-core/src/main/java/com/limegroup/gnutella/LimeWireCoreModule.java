@@ -146,6 +146,8 @@ import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactoryImpl;
 import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinder;
 import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinderImpl;
+import com.limegroup.gnutella.metadata.MetaDataFactory;
+import com.limegroup.gnutella.metadata.MetaDataFactoryImpl;
 import com.limegroup.gnutella.rudp.LimeRUDPContext;
 import com.limegroup.gnutella.rudp.LimeRUDPSettings;
 import com.limegroup.gnutella.rudp.LimeUDPService;
@@ -290,6 +292,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(LimeXMLReplyCollectionFactory.class).to(LimeXMLReplyCollectionFactoryImpl.class);
         bind(LicenseFactory.class).to(LicenseFactoryImpl.class);
         bind(LimeXMLDocumentFactory.class).to(LimeXMLDocumentFactoryImpl.class);
+        bind(MetaDataFactory.class).to(MetaDataFactoryImpl.class);
         bind(InstantMessengerFactory.class).to(InstantMessengerFactoryImpl.class);
         bind(SaveLocationManager.class).to(DownloadManager.class);
         bind(BTUploaderFactory.class).to(BTUploaderFactoryImpl.class);

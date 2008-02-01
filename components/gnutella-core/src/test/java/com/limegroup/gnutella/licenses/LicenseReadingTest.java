@@ -13,8 +13,9 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.metadata.AudioMetaData;
-import com.limegroup.gnutella.metadata.MetaData;
+import com.limegroup.gnutella.metadata.MetaDataFactory;
+import com.limegroup.gnutella.metadata.MetaReader;
+import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
@@ -22,6 +23,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 public final class LicenseReadingTest extends LimeTestCase {
 
 	private LimeXMLDocumentFactory limeXMLDocumentFactory;
+	private MetaDataFactory metaDataFactory;
 
     public LicenseReadingTest(String name) {
 		super(name);
@@ -42,17 +44,19 @@ public final class LicenseReadingTest extends LimeTestCase {
 	protected void setUp() throws Exception {
 		Injector injector = LimeTestUtils.createInjector();
 		limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
+		metaDataFactory = injector.getInstance(MetaDataFactory.class);
 	}
 	
 	public void testReadID3AndXML() throws Exception {
 	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/cc1.mp3");
 	    assertTrue(f.exists());
 	    
-	    AudioMetaData amd = (AudioMetaData)MetaData.parse(f);
-	    assertNotNull(amd);
+	    MetaReader data = metaDataFactory.parse(f);
+	    AudioMetaData amd = (AudioMetaData)data.getMetaData();
+	    assertNotNull(data);
 	    
 	    boolean foundLicense = false;
-	    List<NameValue<String>> nvList = amd.toNameValueList();
+	    List<NameValue<String>> nvList = data.toNameValueList();
 	    for(Iterator i = nvList.iterator(); i.hasNext(); ) {
 	        NameValue nv = (NameValue)i.next();
 	        assertFalse(AudioMetaData.isNonLimeAudioField(nv.getName()));
@@ -106,11 +110,12 @@ public final class LicenseReadingTest extends LimeTestCase {
  	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.ogg");
 	    assertTrue(f.exists());
 	    
-	    AudioMetaData amd = (AudioMetaData)MetaData.parse(f);
-	    assertNotNull(amd);
+	    MetaReader data = metaDataFactory.parse(f);
+	    AudioMetaData amd = (AudioMetaData)data.getMetaData();
+	    assertNotNull(data);
 	    
 	    boolean foundLicense = false;
-	    List nvList = amd.toNameValueList();
+	    List nvList = data.toNameValueList();
 	    for(Iterator i = nvList.iterator(); i.hasNext(); ) {
 	        NameValue nv = (NameValue)i.next();
 	        assertFalse(AudioMetaData.isNonLimeAudioField(nv.getName()));
@@ -126,11 +131,12 @@ public final class LicenseReadingTest extends LimeTestCase {
  	    f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest1.ogg");
 	    assertTrue(f.exists());
 	    
-	    amd = (AudioMetaData)MetaData.parse(f);
-	    assertNotNull(amd);
+	    data = metaDataFactory.parse(f);
+	    amd = (AudioMetaData)data.getMetaData();
+	    assertNotNull(data);
 	    
 	    foundLicense = false;
-	    nvList = amd.toNameValueList();
+	    nvList = data.toNameValueList();
 	    for(Iterator i = nvList.iterator(); i.hasNext(); ) {
 	        NameValue nv = (NameValue)i.next();
 	        assertFalse(AudioMetaData.isNonLimeAudioField(nv.getName()));
@@ -147,9 +153,10 @@ public final class LicenseReadingTest extends LimeTestCase {
 	    File f = TestUtils.getResourceFile("com/limegroup/gnutella/licenses/weed-PUSA-LoveEverybody.wma");
 	    assertTrue(f.exists());
 	    
-	    AudioMetaData amd = (AudioMetaData)MetaData.parse(f);
-	    assertNotNull(amd);
-	    LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(amd.toNameValueList(), amd.getSchemaURI());
+	    MetaReader data = metaDataFactory.parse(f);
+	    AudioMetaData amd = (AudioMetaData)data.getMetaData();
+	    assertNotNull(data);
+	    LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(data.toNameValueList(), data.getSchemaURI());
 	    assertTrue(doc.isLicenseAvailable());
 	    assertEquals(amd.getLicenseType(), doc.getLicenseString());
 	    assertEquals("<?xml version=\"1.0\"?>" +

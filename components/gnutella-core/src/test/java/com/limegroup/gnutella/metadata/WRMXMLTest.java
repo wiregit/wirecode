@@ -2,6 +2,7 @@ package com.limegroup.gnutella.metadata;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.metadata.audio.reader.WRMXML;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public final class WRMXMLTest extends LimeTestCase {

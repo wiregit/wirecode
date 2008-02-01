@@ -25,12 +25,15 @@ public class MetaDataReader {
     
     private final LimeXMLDocumentFactory limeXMLDocumentFactory;
     private final LimeXMLSchemaRepository limeXMLSchemaRepository;
+    private final MetaDataFactory metaDataFactory;
 
     @Inject
     MetaDataReader(LimeXMLDocumentFactory limeXMLDocumentFactory,
-            LimeXMLSchemaRepository limeXMLSchemaRepository) {
+            LimeXMLSchemaRepository limeXMLSchemaRepository,
+            MetaDataFactory metaDataFactory) {
         this.limeXMLDocumentFactory = limeXMLDocumentFactory;
         this.limeXMLSchemaRepository = limeXMLSchemaRepository;
+        this.metaDataFactory = metaDataFactory;
     }
 
     /**
@@ -38,7 +41,7 @@ public class MetaDataReader {
      * given schemaURI.
      */
     public LimeXMLDocument readDocument(File file) throws IOException {
-        MetaData data = MetaData.parse(file);
+        MetaReader data = metaDataFactory.parse(file);
         if (data == null)
             throw new IOException("unable to parse file");
 
