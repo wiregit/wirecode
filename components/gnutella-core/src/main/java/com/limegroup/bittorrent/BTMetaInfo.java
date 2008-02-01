@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -241,6 +242,12 @@ public class BTMetaInfo {
     
     public BTMetaInfo(BTMetaInfoMemento memento) throws InvalidDataException {
         _hashes =  memento.getHashes();
+        // make sure all 0-length hashes are correctly the VERIFIED_HASH
+        for(ListIterator<byte[]> hashIter = _hashes.listIterator(); hashIter.hasNext(); ) {
+            byte[] next = hashIter.next();
+            if(next.length == 0)
+                hashIter.set(VERIFIED_HASH);
+        }
 		Integer pieceLength = memento.getPieceLength();
 		fileSystem = new TorrentFileSystem(memento.getFileSystem());
 		_infoHash = memento.getInfoHash();
