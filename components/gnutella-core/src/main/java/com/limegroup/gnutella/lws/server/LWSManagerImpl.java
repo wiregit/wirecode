@@ -2,6 +2,8 @@ package com.limegroup.gnutella.lws.server;
 
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,7 @@ import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSSenderOfMessagesToServer;
 import org.limewire.lws.server.StringCallback;
+import org.limewire.lws.server.FakeJavascriptCodeInTheWebpage.Handler;
 import org.limewire.lws.server.LWSDispatcherSupport.Responses;
 
 import com.google.inject.Inject;
@@ -48,20 +51,13 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     private final String hostNameAndPort;
     
     private final HttpExecutor exe;
-    private boolean isConnected;
+    private boolean isConnected;  
     
     @Inject
-    public LWSManagerImpl(HttpExecutor exe) {
-        this(exe, new LWSDispatcherFactoryImpl()); //TODO: inject
-    }    
-    
-    //todo @Inject
     public LWSManagerImpl(HttpExecutor exe, LWSDispatcherFactory lwsDispatcherFactory) {
-        this(exe, LWSSettings.LWS_AUTHENTICATION_HOSTNAME.getValue(), 
-             LWSSettings.LWS_AUTHENTICATION_PORT.getValue(), lwsDispatcherFactory);
-    }
-    
-    public LWSManagerImpl(HttpExecutor exe, String host, int port, LWSDispatcherFactory lwsDispatcherFactory) {
+
+        String host = LWSSettings.LWS_AUTHENTICATION_HOSTNAME.getValue();
+        int port = LWSSettings.LWS_AUTHENTICATION_PORT.getValue(); 
         
         this.exe = exe;
         this.dispatcher = lwsDispatcherFactory.createDispatcher(this, new  AbstractReceivesCommandsFromDispatcher() {
@@ -158,6 +154,12 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
                                           final StringCallback cb) throws IOException {
         String url = constructURL(msg, args);
         final GetMethod get = new GetMethod(url);
+        //
+        // TODO: Need to do authentication
+        //       This is gross gross gross and needs changing, but can stay for now
+        //
+        get.setDoAuthentication(true);
+        LWSUtil.addAuthentication(get);        
         get.addRequestHeader("User-Agent", LimeWireUtils.getHttpServer());
         //
         // we don't care what this response is, because we are
@@ -182,10 +184,39 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         
     }
     
+    public void describe(OutputStream os) {
+        PrintStream out = new PrintStream(os);
+        out.println(System.identityHashCode(this));
+        out.println("LISTENERS");
+        for (Map.Entry<String,List<Listener>> e : commands2listenerLists.entrySet()) {
+            String cmd = e.getKey();
+            List<Listener> ls = e.getValue();
+            out.println(" * " + cmd + " ->");
+            for (Listener l : ls) {
+                out.println("   " + l);
+            }
+        }
+        out.println("HANDLERS");
+        for (Map.Entry<String,LWSManagerCommandResponseHandler> e : commands2handlers.entrySet()) {
+            String cmd = e.getKey();
+            LWSManagerCommandResponseHandler h = e.getValue();
+            out.println(" " + cmd + " -> " + h);
+        }
+    }
+    
+
+    // ---------------------------------------------------------------------------------
+    // Private
+    // ---------------------------------------------------------------------------------    
+    
     private String constructURL(final String msg, final Map<String, String> args) {
-        StringBuffer url = new StringBuffer("http://")
-            .append(hostNameAndPort)
-            .append(COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES);
+        StringBuffer url = new StringBuffer("http");
+        if (LWSSettings.LWS_USE_SSL.getValue()) {
+            url.append("s");
+        }
+        url.append("://")
+           .append(hostNameAndPort)
+           .append(COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES);
         url.append(msg);
         for (Map.Entry<String, String> e : args.entrySet()) {
             url.append("/");

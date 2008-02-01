@@ -11,8 +11,6 @@ import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.lws.server.StringCallback;
 import org.limewire.net.SocketsManager;
 
-import com.limegroup.gnutella.lws.server.AbstractServer;
-
 /**
  * A simple remote {@link RemoteServer}.
  */
@@ -145,7 +143,7 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
                 if (privateKey == null) {
                     cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER));
                     return;
-                }
+                }               
                 String ip = args.get(LWSDispatcherSupport.Parameters.IP);
                 if (ip == null) {
                     cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_IP_PARAMETER));

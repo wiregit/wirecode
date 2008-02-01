@@ -22,8 +22,9 @@ public class StartComTest extends AbstractCommunicationSupport {
         TestRunner.run(suite());
     }
     public void testStartCom() {
-        final String publicKey = getPublicKey();
-        assertTrue(publicKey, LWSServerUtil.isValidPublicKey(publicKey));
+        KeyPair kp = getPublicAndSharedKeys();
+        assertTrue(kp.getPublicKey(), LWSServerUtil.isValidPublicKey(kp.getPublicKey()));
+        assertTrue(kp.getSharedKey(), LWSServerUtil.isValidPublicKey(kp.getSharedKey()));
     }
 
 }

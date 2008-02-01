@@ -28,7 +28,7 @@ class CommandSender {
      */
     public String sendMessage(String command, Map<String, String> args) {
         String url = "http://localhost:" + LocalServerImpl.PORT + "/" 
-        + LWSDispatcher.PREFIX
+            + LWSDispatcher.PREFIX
             + LocalServerDelegate.NormalStyleURLConstructor.INSTANCE.constructURL(command,args);
         final GetMethod get = new GetMethod(url);
         //

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.lws.server;
 
 
+import java.io.OutputStream;
 import java.util.Map;
 
 import org.apache.http.protocol.HttpRequestHandler;
@@ -159,6 +160,14 @@ public interface LWSManager {
      *         <code>cmd</code>
      */
     boolean unregisterListener(String cmd);
+    
+    /**
+     * Describes itself to the passed in {@link OutputStream} and does <b>NOT</b>
+     * close the stream.
+     * 
+     * @param out stream to which <code>this</code> describes itself
+     */
+    void describe(OutputStream out);
     
     /**
      * An abstract implementation of {@link LWSManagerCommandResponseHandler} that abstracts away

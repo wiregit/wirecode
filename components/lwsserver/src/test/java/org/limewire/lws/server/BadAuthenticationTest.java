@@ -1,5 +1,8 @@
 package org.limewire.lws.server;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.limewire.lws.server.LWSDispatcherSupport;
 
 import junit.framework.Test;
@@ -22,9 +25,25 @@ public class BadAuthenticationTest extends AbstractCommunicationSupport {
         TestRunner.run(suite());
     }
 
-    public void testSendAuthenticationWithoutPrivateKey() {
+    public void testSendAuthenticationWithoutPrivateKeyOrSharedKey() {
         getCode().sendLocalMsg(LWSDispatcherSupport.Commands.AUTHENTICATE,
                                DUMMY_CALLBACK_ARGS,
+                               errorHandlerAny());
+    }
+    
+    public void testSendAuthenticationWithoutPrivateKey() {
+        Map<String,String> args = new HashMap<String,String>();
+        args.put(LWSDispatcherSupport.Parameters.SHARED, getSharedKey());
+        getCode().sendLocalMsg(LWSDispatcherSupport.Commands.AUTHENTICATE,
+                               args,
+                               errorHandlerAny());
+    }
+    
+    public void testSendAuthenticationWithoutSharedKey() {
+        Map<String,String> args = new HashMap<String,String>();
+        args.put(LWSDispatcherSupport.Parameters.PRIVATE, getPrivateKey());
+        getCode().sendLocalMsg(LWSDispatcherSupport.Commands.AUTHENTICATE,
+                               args,
                                errorHandlerAny());
     }
 

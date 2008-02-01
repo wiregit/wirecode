@@ -1254,6 +1254,7 @@ private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
     
     // ---------------------------------------------------------------
     // Implementation of LWSIntegrationServicesDelegate
+    // ---------------------------------------------------------------
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadMI#getAllDownloaders()

@@ -24,8 +24,7 @@ public class GiveKeyTest extends AbstractCommunicationSupportWithNoLocalServer {
 
     public void testGiveKey() {
         final String privateKey = getPrivateKey();
-        assertTrue("invalid private key '" + privateKey + "'", 
-                   LWSServerUtil.isValidPrivateKey(privateKey));
+        assertTrue(privateKey, LWSServerUtil.isValidPrivateKey(privateKey));
     }
 
 }
