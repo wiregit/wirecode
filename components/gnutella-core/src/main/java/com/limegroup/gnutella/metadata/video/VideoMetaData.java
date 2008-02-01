@@ -46,18 +46,27 @@ public class VideoMetaData implements MetaData {
     public void setHeight(int height) { this.height = height; }
     public void setLicenseType(String licensetype) { this.licensetype = licensetype; }
     
+    /**
+     * The XML schema this data represents
+     */
     public String getSchemaURI() {
         return LimeXMLNames.VIDEO_SCHEMA;
     }
 
+    /**
+     * Populates the fields with the values from the LimeXMLDocument
+     */
     public void populate(LimeXMLDocument doc) {
         title   = doc.getValue(LimeXMLNames.VIDEO_TITLE);
         year    = doc.getValue(LimeXMLNames.VIDEO_YEAR);
         comment = doc.getValue(LimeXMLNames.VIDEO_COMMENTS);
+        language = doc.getValue(LimeXMLNames.VIDEO_LANGUAGE);
         license = doc.getValue(LimeXMLNames.VIDEO_LICENSE);
-        
     }
 
+    /**
+     * @return the values as a Name Value List representation
+     */
     public List<NameValue<String>> toNameValueList() {
         List<NameValue<String>> list = new ArrayList<NameValue<String>>();
         add(list, title, LimeXMLNames.VIDEO_TITLE);

@@ -18,7 +18,7 @@ import com.limegroup.gnutella.metadata.video.VideoMetaData;
  */
 public class WMVMetaData implements MetaReader {
     
-    VideoMetaData videoData;
+    private final VideoMetaData videoData;
     
     /** Sets WMV data. */
     public WMVMetaData(File f) throws IOException {

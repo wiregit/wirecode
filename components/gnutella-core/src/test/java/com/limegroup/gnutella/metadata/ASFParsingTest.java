@@ -7,6 +7,8 @@ import junit.framework.Test;
 
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 import com.limegroup.gnutella.metadata.audio.reader.ASFParser;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -16,6 +18,8 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 public class ASFParsingTest extends LimeTestCase {
 	
+    private MetaDataFactory metaDataFactory;
+    
 	public ASFParsingTest(String name) {
 		super(name);
 	}
@@ -23,6 +27,11 @@ public class ASFParsingTest extends LimeTestCase {
 	public static Test suite() {
 		return buildTestSuite(ASFParsingTest.class);
 	}
+	
+    public void setUp(){
+        Injector injector = LimeTestUtils.createInjector();
+        metaDataFactory = injector.getInstance(MetaDataFactory.class);
+    }
 	
 	public void testWMASimpleDescription() throws IOException {
 	    File f = CommonUtils.getResourceFile("com/limegroup/gnutella/metadata/simple description.wma");
@@ -48,7 +57,7 @@ public class ASFParsingTest extends LimeTestCase {
 	    assertTrue(parser.hasAudio());
 	    assertFalse(parser.hasVideo());
 	    
-	    MetaReader data = MetaDataFactory.parse(f);
+	    MetaReader data = metaDataFactory.parse(f);
 	    AudioMetaData amd = (AudioMetaData) data.getMetaData();
 	    
 	    assertEquals("Normal Author", amd.getArtist());
@@ -92,7 +101,7 @@ public class ASFParsingTest extends LimeTestCase {
 	    assertTrue(parser.hasAudio());
 	    assertFalse(parser.hasVideo());
 	    
-	    MetaReader data = MetaDataFactory.parse(f);
+	    MetaReader data = metaDataFactory.parse(f);
 	    AudioMetaData amd = (AudioMetaData) data.getMetaData();
 	       
 	    assertEquals("An Artist", amd.getArtist());
@@ -135,7 +144,7 @@ public class ASFParsingTest extends LimeTestCase {
 	    assertTrue(parser.hasAudio());
 	    assertFalse(parser.hasVideo());
 	    
-	    MetaReader data = MetaDataFactory.parse(f);
+	    MetaReader data = metaDataFactory.parse(f);
 	    AudioMetaData amd = (AudioMetaData) data.getMetaData();
 	    
 	    assertEquals("Another Artist", amd.getArtist());

@@ -16,6 +16,11 @@ import org.jaudiotagger.tag.id3.ID3v1Tag;
 import org.jaudiotagger.tag.id3.ID3v24Frames;
 import org.jaudiotagger.tag.id3.framebody.AbstractFrameBodyTextInfo;
 
+/**
+ *  Reads MetaData from MP3 files. This extends AudioDataReader which also
+ *  handles this format. However, store files need to get checked and parsed
+ *  correctly so we do that here. 
+ */
 public class MP3MetaData extends AudioDataReader {
 	
 	static final String LICENSE_ID = "TCOP";
@@ -35,9 +40,7 @@ public class MP3MetaData extends AudioDataReader {
             audioData.setComment(tag.getFirstComment());
             audioData.setGenre(tag.getFirstGenre()); 
             try {
-                String trackTag = tag.getFirstTrack();
-                if( trackTag != null && trackTag.length() > 0 )
-                    audioData.setTrack(trackTag);
+                audioData.setTrack(tag.getFirstTrack());
             }
             catch(UnsupportedOperationException e) {
                 // id3v1.0 tags dont have tracks
@@ -45,6 +48,9 @@ public class MP3MetaData extends AudioDataReader {
 
             // for ID3v2 tags, check for additional values such as Copyright Info
             if( !(tag instanceof ID3v1Tag) ) {
+                // read the license if its a v2 tag
+                audioData.setLicense(tag.getFirst(ID3v24Frames.FRAME_ID_COPYRIGHTINFO));
+                
                 MP3File mp3File = ((MP3File)audioFile);
                 audioData.setGenre(parseGenre(tag.getFirstGenre()));
                 AbstractID3v2Tag vTag = mp3File.getID3v2Tag();
@@ -63,7 +69,7 @@ public class MP3MetaData extends AudioDataReader {
                         try {
                             isPRIVCheck(t.getRawContent());
                         } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
+                            // don't catch
                         }
                     }
                     AbstractID3v2Frame frame = vTag.getFirstField(ID3v24Frames.FRAME_ID_COPYRIGHTINFO);
@@ -99,6 +105,12 @@ public class MP3MetaData extends AudioDataReader {
             }
     }
     
+    /**
+     * Some genres in ID3v2 tags are displaying (XXX) numbers along side the genre.
+     * If this exists it hides the number from the user
+     * @param genre
+     * @return
+     */
     private String parseGenre(String genre){
         if( genre == null || genre.length() <= 0) 
             return genre;

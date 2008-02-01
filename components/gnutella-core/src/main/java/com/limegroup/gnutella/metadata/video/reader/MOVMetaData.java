@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
+import org.limewire.io.IOUtils;
 import org.limewire.io.Pools;
 
 
@@ -40,9 +41,7 @@ public class MOVMetaData extends VideoDataReader {
             in = new RandomAccessFile(f, "r");
             parseAtoms(in);
         } finally {
-            if (in != null) {
-                try { in.close(); } catch (IOException err) {}
-            }
+            IOUtils.close(in); 
         }
     }
     
@@ -52,14 +51,10 @@ public class MOVMetaData extends VideoDataReader {
     private void parseAtoms(DataInput in) throws IOException {
         Atom atom = null;
         while((atom = nextAtom(in)) != null) {
-            //System.out.println("parse: " + atom);
-            
             if (atom.isType("moov")) {
                 moov(atom, in);
                 break;
             }
-            
-            //System.out.println("Skipping: " + atom.remaining);
             skip(atom.remaining, in);
         }
     }
@@ -71,8 +66,6 @@ public class MOVMetaData extends VideoDataReader {
      * chapter_3_section_2.html#//apple_ref/doc/uid/TP40000939-CH204-BBCGDJID">MOOV</a>}
      */
     private void moov(Atom moov, DataInput in) throws IOException {
-        //System.out.println("EnteredMoov: " + moov);
-        
         long length = 0L;
         Atom atom = null;
         while(length < moov.remaining && (atom = nextAtom(in)) != null) {
@@ -85,11 +78,8 @@ public class MOVMetaData extends VideoDataReader {
             } else {
                 skip(atom.remaining, in);
             }
-            
             length += atom.size;
         }
-        
-        //System.out.println("ExitMoov: " + length);
     }
     
     /**
@@ -106,8 +96,6 @@ public class MOVMetaData extends VideoDataReader {
         int timeScale = in.readInt();
         int timeUnits = in.readInt();
         int length = timeUnits/timeScale;
-        
-        // System.out.println("Length: " + getLength());
         
         if (length > videoData.getLength()) {
             videoData.setLength(length);
@@ -149,12 +137,18 @@ public class MOVMetaData extends VideoDataReader {
     private void cmvd(Atom cmvd, DataInput in) throws IOException {
         int decompressedSize = in.readInt();
         
+        if( cmvd == null || cmvd.remaining - 4 > Integer.MAX_VALUE || cmvd.remaining < 4 )
+            throw new IOException("File smaller than expected");
+        
         byte[] compressed = new byte[(int)(cmvd.remaining - 4)];
         in.readFully(compressed);
         
         Inflater decompresser = Pools.getInflaterPool().borrowObject();
         try {
             decompresser.setInput(compressed);
+            
+            if( decompressedSize > Integer.MAX_VALUE || decompressedSize < 0)
+                throw new IOException("Illegal atom size");
             
             byte[] decompressed = new byte[decompressedSize];
             int num = -1;
@@ -190,8 +184,6 @@ public class MOVMetaData extends VideoDataReader {
      * chapter_3_section_3.html#//apple_ref/doc/uid/TP40000939-CH204-BBCBEAIF">TRAK</a>}
      */
     private void trak(Atom trak, DataInput in) throws IOException {
-        //System.out.println("EnteredTrak: " + trak);
-        
         long length = 0L;
         Atom atom = null;
         while(length < trak.remaining && (atom = nextAtom(in)) != null) {
@@ -204,8 +196,6 @@ public class MOVMetaData extends VideoDataReader {
             
             length += atom.size;
         }
-        
-        //System.out.println("ExitTrak: " + length);
     }
     
     /**
@@ -215,7 +205,6 @@ public class MOVMetaData extends VideoDataReader {
      * chapter_3_section_3.html#//apple_ref/doc/uid/TP40000939-CH204-25550">TKHD</a>}
      */
     private void tkhd(Atom tkhd, DataInput in) throws IOException {
-        //System.out.println(tkhd);
         
         assert (tkhd.remaining == 84);
         skip(76, in);
@@ -223,8 +212,6 @@ public class MOVMetaData extends VideoDataReader {
         // Width and Height are Fixpoint Ints!
         int width = toTwoCompliant(in.readInt());
         int height = toTwoCompliant(in.readInt());
-        
-        //System.out.println(width + "x" + height);
         
         if (width > videoData.getWidth()) {
             videoData.setWidth(width);
@@ -259,7 +246,6 @@ public class MOVMetaData extends VideoDataReader {
             
             skipped += s;
         }
-        
         return skipped;
     }
     

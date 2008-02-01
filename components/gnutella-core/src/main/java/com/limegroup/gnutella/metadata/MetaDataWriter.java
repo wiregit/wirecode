@@ -1,30 +1,40 @@
 package com.limegroup.gnutella.metadata;
 
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollection.MetaDataState;
 
 /**
  *  A utility class that writes modified LimeXMLDocuments as Meta-data to 
- *  and audio or video file
+ *  an audio or video file
  */
 public class MetaDataWriter {
 
+    /**
+     * File we're writing to
+     */
     private final String fileName;
     
+    /**
+     * The editor that we're using
+     */
     private final MetaWriter editor;
     
+    /**
+     * LimeXMLDocument that populated the MetaData
+     */
     protected LimeXMLDocument correctDocument= null;
     
-    public MetaDataWriter(String fileName) {
+    public MetaDataWriter(String fileName, MetaDataFactory metaDataFactory) {
         this.fileName = fileName;
-        editor = MetaDataFactory.getEditorForFile(fileName);
+        editor = metaDataFactory.getEditorForFile(fileName);
     }
     
-    public boolean needsToUpdate(LimeXMLDocument doc) {
-        if( correctDocument == null)
+    public boolean needsToUpdate(MetaData data) {
+        if( editor.getMetaData() == null)
             return false;
-        else if ( doc == null )
+        else if ( data == null )
             return true;
-        return doc.equals(correctDocument);
+        return !editor.getMetaData().equals(data);
     }
     
     /**
@@ -32,7 +42,7 @@ public class MetaDataWriter {
      * @param filename the file that should be annotated
      * @return status code as defined in LimeWireXMLReplyCollection
      */
-    public int commitMetaData(){
+    public MetaDataState commitMetaData(){
         return editor.commitMetaData(fileName);
     }
     

@@ -10,7 +10,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  * With the new meta-data reader, all classes can use the same interface allowing them
  * all to be tested with the same test case as well.
  */
-public abstract class AudioTest extends LimeTestCase {
+public abstract class AudioTestBase extends LimeTestCase {
 
     String dir = "com/limegroup/gnutella/metadata/";
     
@@ -22,14 +22,14 @@ public abstract class AudioTest extends LimeTestCase {
     protected static final String YEAR = "2007";
     protected static final String GENRE = "Bass";
     
-    public AudioTest(String name) {
+    public AudioTestBase(String name) {
         super(name);
     }
     
     /**
      * Tests the ID3 tag for the audio file
      */
-    protected void testTag(AudioMetaData data) throws IOException {    
+    protected void validateTag(AudioMetaData data) throws IOException {    
         assertEquals(TITLE, data.getTitle());
         assertEquals(ARTIST, data.getArtist());
         assertEquals(ALBUM, data.getAlbum());

@@ -11,8 +11,9 @@ import java.util.Set;
 import org.limewire.io.IOUtils;
 import org.limewire.util.ByteOrder;
 
-
-
+/**
+ * Reads MetaData from Ogg Media Formats
+ */
 public class OGMMetaData extends VideoDataReader {
 
 	public static final String TITLE_TAG = "title";

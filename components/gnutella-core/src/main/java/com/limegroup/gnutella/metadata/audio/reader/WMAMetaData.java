@@ -9,6 +9,7 @@ import org.limewire.collection.NameValue;
 import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.metadata.MetaReader;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
+import com.limegroup.gnutella.xml.LimeXMLNames;
 
 
 /**
@@ -32,7 +33,7 @@ public class WMAMetaData implements MetaReader {
     }
     
     /** Parse using the ASF Parser. */
-    protected void parseFile(File f) throws IOException {
+    private void parseFile(File f) throws IOException {
         ASFParser data = new ASFParser(f);
         set(data);
     }
@@ -63,8 +64,11 @@ public class WMAMetaData implements MetaReader {
         return audioData;
     }
 
+    /**
+     * @return the XML schema for this file
+     */
     public String getSchemaURI() {
-        return audioData.getSchemaURI();
+        return LimeXMLNames.AUDIO_SCHEMA;
     }
 
     public List<NameValue<String>> toNameValueList() {

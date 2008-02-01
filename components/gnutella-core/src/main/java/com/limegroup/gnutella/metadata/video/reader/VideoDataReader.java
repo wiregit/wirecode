@@ -11,6 +11,9 @@ import com.limegroup.gnutella.metadata.MetaReader;
 import com.limegroup.gnutella.metadata.video.VideoMetaData;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 
+/**
+ *
+ */
 public abstract class VideoDataReader implements MetaReader{
 
     protected final VideoMetaData videoData;

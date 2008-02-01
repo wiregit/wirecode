@@ -20,7 +20,8 @@ import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 import com.limegroup.gnutella.xml.LimeXMLNames;
 
 /**
- *  Handles the reading of most file
+ *  Handles the reading of most audio files. All file types supported by 
+ *  jAudioTagger can use this class to read their meta data
  */
 public class AudioDataReader implements MetaReader {
 
@@ -35,13 +36,22 @@ public class AudioDataReader implements MetaReader {
         parseFile(f);
     }
     
-    protected void readHeader(AudioHeader header) {
+    /**
+     * Reads header information about the file. All audio formats contain
+     * some sort of header information to describe how the audio file is encoded.
+     * This typically includes sample rate, bit rate, length, encoding scheme, etc..
+     */
+    private void readHeader(AudioHeader header) {
         audioData.setVBR(header.isVariableBitRate());
         audioData.setSampleRate(header.getSampleRateAsNumber());
         audioData.setBitrate((int)header.getBitRateAsNumber());
         audioData.setLength(header.getTrackLength());
     }
     
+    /**
+     * Reads any metadata the user may have added to this audio format. Each audio
+     * type has its own format for describing the audio file. 
+     */
     protected void readTag(AudioFile audioFile, Tag tag){
         audioData.setTitle(tag.getFirstTitle());
         audioData.setArtist(tag.getFirstArtist());
@@ -52,30 +62,45 @@ public class AudioDataReader implements MetaReader {
         audioData.setGenre(tag.getFirstGenre());
     }
     
-    protected void parseFile(File file) throws IOException { 
+    /**
+     * Handles the reading and parsing of this file
+     * @param file - file to read
+     * @throws IOException - thrown if the file can't be read, is corrupted, etc..
+     */
+    private void parseFile(File file) throws IOException { 
         try {
             AudioFile audioFile = AudioFileIO.read(file);
             readHeader(audioFile.getAudioHeader());          
             readTag(audioFile, audioFile.getTag());
         } catch (CannotReadException e) {
-            throw new IOException(e.getMessage());
+            throw (IOException)new IOException().initCause(e.getCause());
         } catch (TagException e) {
-            throw new IOException(e.getMessage());
+            throw (IOException)new IOException().initCause(e.getCause());
         } catch (ReadOnlyFileException e) {
-            throw new IOException(e.getMessage());
+            throw (IOException)new IOException().initCause(e.getCause());
         } catch (InvalidAudioFrameException e) {
-            throw new IOException(e.getMessage());
+            throw (IOException)new IOException().initCause(e.getCause());
         }
     }
 
+    /**
+     * @return the MetaData of this file
+     */
     public MetaData getMetaData() {
         return audioData;
     }
 
+    /**
+     * @return the XML schema of this file
+     */
     public String getSchemaURI() {
         return LimeXMLNames.AUDIO_SCHEMA;
     }
 
+    /**
+     * @return the MetaData of this file in a NameValue 
+     * List representation
+     */
     public List<NameValue<String>> toNameValueList() {
         return audioData.toNameValueList();
     }

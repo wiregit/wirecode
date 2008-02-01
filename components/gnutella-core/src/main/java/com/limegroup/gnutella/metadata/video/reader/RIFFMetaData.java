@@ -9,7 +9,9 @@ import java.io.InputStream;
 import org.limewire.io.IOUtils;
 import org.limewire.util.ByteOrder;
 
-
+/**
+ *  Reads RIFF files meta data 
+ */
 public class RIFFMetaData extends VideoDataReader {
 
 	public RIFFMetaData(File f) throws IOException {

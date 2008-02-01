@@ -18,7 +18,7 @@ import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.metadata.MetaWriter;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollection.MetaDataState;
 
 /**
  *  Handles the actual writing of the meta-information to the file. Thanks to the 
@@ -38,6 +38,10 @@ public abstract class AudioDataEditor implements MetaWriter {
         return audioData;
     }
 
+    /**
+     * Populates the fields in the MetaData with the values in the
+     * LimeXMLDocument
+     */
     public void populate(LimeXMLDocument doc) {
         audioData.populate(doc);
     }
@@ -50,7 +54,7 @@ public abstract class AudioDataEditor implements MetaWriter {
      * @throws FieldDataInvalidException - exception when there's a problem committing 
      *  a given tag field
      */
-    protected Tag updateTag(Tag tag) throws FieldDataInvalidException { 
+    protected Tag updateTag(Tag tag, AudioFile audioFile) throws FieldDataInvalidException { 
         tag.setAlbum(audioData.getAlbum());
         tag.setArtist(audioData.getArtist());
         tag.setComment(audioData.getComment()); 
@@ -80,9 +84,9 @@ public abstract class AudioDataEditor implements MetaWriter {
      * @return LimeXMLReplyCollection.NORMAL if write was successful or 
      *      a different value if write wasn't successful.
      */
-    public int commitMetaData(String fileName) {
+    public MetaDataState commitMetaData(String fileName) {
         if(!isValidFileType(fileName))
-            return LimeXMLReplyCollection.INCORRECT_FILETYPE;
+            return MetaDataState.INCORRECT_FILETYPE;
         
         File f = new File(fileName);
         FileUtils.setWriteable(f);
@@ -94,22 +98,22 @@ public abstract class AudioDataEditor implements MetaWriter {
         try {
             audioFile = AudioFileIO.read(f);
             audioTag = createTag(audioFile);
-            audioTag = updateTag(audioTag);
+            audioTag = updateTag(audioTag, audioFile);
             audioFile.setTag(audioTag);
             audioFile.commit();
         } catch (CannotReadException e) {
-            return LimeXMLReplyCollection.RW_ERROR;
+            return MetaDataState.RW_ERROR;
         } catch (IOException e) {
-            return LimeXMLReplyCollection.RW_ERROR;
+            return MetaDataState.RW_ERROR;
         } catch (TagException e) {
-            return LimeXMLReplyCollection.FAILED_ALBUM;
+            return MetaDataState.FAILED_ALBUM;
         } catch (ReadOnlyFileException e) {
-            return LimeXMLReplyCollection.RW_ERROR;
+            return MetaDataState.RW_ERROR;
         } catch (InvalidAudioFrameException e) {
-            return LimeXMLReplyCollection.FAILED_ALBUM;
+            return MetaDataState.FAILED_ALBUM;
         } catch (CannotWriteException e) {
-            return LimeXMLReplyCollection.RW_ERROR;
+            return MetaDataState.RW_ERROR;
         }        
-        return LimeXMLReplyCollection.NORMAL;
+        return MetaDataState.NORMAL;
     }
 }

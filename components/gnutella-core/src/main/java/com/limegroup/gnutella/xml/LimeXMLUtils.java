@@ -397,6 +397,14 @@ public class LimeXMLUtils {
         return isMP3File(file) || isOGGFile(file) || isM4AFile(file) || isWMAFile(file) || isFLACFile(file);
     }
     
+    /**
+     * Returns true if LimeWire can edit the meta data of this Audio file,
+     * false otherwise
+     */
+    public static boolean isSupportedAudioEditableFormat(String file) {
+        return isMP3File(file) || isOGGFile(file) || isM4AFile(file) || isFLACFile(file);
+    }
+    
     /** 
      * Returns true if LimeWire might be able to read the Meta Data of 
      * this Video file.
@@ -443,6 +451,14 @@ public class LimeXMLUtils {
      */
     public static boolean isSupportedFormat(String file) {
         return isSupportedAudioFormat(file) || isSupportedVideoFormat(file) || isSupportedMultipleFormat(file);
+    }
+    
+    /**
+     * Returns true if LimeWire can edit the meta data of this file,
+     * false otherwise
+     */
+    public static boolean isSupportedEditableFormat(String file) {
+        return isSupportedAudioEditableFormat(file);
     }
     
     /**

@@ -23,6 +23,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 public final class LicenseReadingTest extends LimeTestCase {
 
 	private LimeXMLDocumentFactory limeXMLDocumentFactory;
+	private MetaDataFactory metaDataFactory;
 
     public LicenseReadingTest(String name) {
 		super(name);
@@ -43,13 +44,14 @@ public final class LicenseReadingTest extends LimeTestCase {
 	protected void setUp() throws Exception {
 		Injector injector = LimeTestUtils.createInjector();
 		limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
+		metaDataFactory = injector.getInstance(MetaDataFactory.class);
 	}
 	
 	public void testReadID3AndXML() throws Exception {
 	    File f = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/cc1.mp3");
 	    assertTrue(f.exists());
 	    
-	    MetaReader data = MetaDataFactory.parse(f);
+	    MetaReader data = metaDataFactory.parse(f);
 	    AudioMetaData amd = (AudioMetaData)data.getMetaData();
 	    assertNotNull(data);
 	    
@@ -108,7 +110,7 @@ public final class LicenseReadingTest extends LimeTestCase {
  	    File f = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest0.ogg");
 	    assertTrue(f.exists());
 	    
-	    MetaReader data = MetaDataFactory.parse(f);
+	    MetaReader data = metaDataFactory.parse(f);
 	    AudioMetaData amd = (AudioMetaData)data.getMetaData();
 	    assertNotNull(data);
 	    
@@ -129,7 +131,8 @@ public final class LicenseReadingTest extends LimeTestCase {
  	    f = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/ccverifytest1.ogg");
 	    assertTrue(f.exists());
 	    
-	    data = MetaDataFactory.parse(f);
+	    data = metaDataFactory.parse(f);
+	    amd = (AudioMetaData)data.getMetaData();
 	    assertNotNull(data);
 	    
 	    foundLicense = false;
@@ -150,7 +153,7 @@ public final class LicenseReadingTest extends LimeTestCase {
 	    File f = CommonUtils.getResourceFile("com/limegroup/gnutella/licenses/weed-PUSA-LoveEverybody.wma");
 	    assertTrue(f.exists());
 	    
-	    MetaReader data = MetaDataFactory.parse(f);
+	    MetaReader data = metaDataFactory.parse(f);
 	    AudioMetaData amd = (AudioMetaData)data.getMetaData();
 	    assertNotNull(data);
 	    LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(data.toNameValueList(), data.getSchemaURI());

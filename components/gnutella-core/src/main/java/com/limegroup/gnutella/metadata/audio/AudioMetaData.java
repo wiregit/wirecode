@@ -19,13 +19,13 @@ import com.limegroup.gnutella.xml.LimeXMLNames;
  */
 public class AudioMetaData implements MetaData {
 
-    protected String title;
-    protected String artist;
-    protected String album;
-    protected String year;
-    protected String comment;
-    protected String track;
-    protected String genre;
+    private String title;
+    private String artist;
+    private String album;
+    private String year;
+    private String comment;
+    private String track;
+    private String genre;
     private int bitrate = -1;
     private int length = -1;
     private short totalTracks =-1;
@@ -37,20 +37,22 @@ public class AudioMetaData implements MetaData {
     private int sampleRate = -1;
     private boolean isVBR = false;
     
-    
+    /**
+     * @return the XML schema this data represents
+     */
     public String getSchemaURI() {
         return LimeXMLNames.AUDIO_SCHEMA;
     }
 
     public void populate(LimeXMLDocument doc) {
-        title   = doc.getValue(LimeXMLNames.AUDIO_TITLE);
-        artist  = doc.getValue(LimeXMLNames.AUDIO_ARTIST);
-        album   = doc.getValue(LimeXMLNames.AUDIO_ALBUM);
-        year    = doc.getValue(LimeXMLNames.AUDIO_YEAR);
-        track   = doc.getValue(LimeXMLNames.AUDIO_TRACK);
-        comment = doc.getValue(LimeXMLNames.AUDIO_COMMENTS);
-        genre   = doc.getValue(LimeXMLNames.AUDIO_GENRE);
-        license = doc.getValue(LimeXMLNames.AUDIO_LICENSE);
+        title   = (doc.getValue(LimeXMLNames.AUDIO_TITLE) == null ) ? "" : doc.getValue(LimeXMLNames.AUDIO_TITLE);
+        artist  = (doc.getValue(LimeXMLNames.AUDIO_ARTIST) == null) ? "" : doc.getValue(LimeXMLNames.AUDIO_ARTIST);
+        album   = (doc.getValue(LimeXMLNames.AUDIO_ALBUM) == null) ? "" : doc.getValue(LimeXMLNames.AUDIO_ALBUM);
+        year    = (doc.getValue(LimeXMLNames.AUDIO_YEAR) == null) ? "" : doc.getValue(LimeXMLNames.AUDIO_YEAR);
+        track   = (doc.getValue(LimeXMLNames.AUDIO_TRACK) == null) ? "" : doc.getValue(LimeXMLNames.AUDIO_TRACK);
+        comment = (doc.getValue(LimeXMLNames.AUDIO_COMMENTS) == null) ? "" : doc.getValue(LimeXMLNames.AUDIO_COMMENTS);
+        genre   = (doc.getValue(LimeXMLNames.AUDIO_GENRE) == null) ? "" : doc.getValue(LimeXMLNames.AUDIO_GENRE);
+        license = (doc.getValue(LimeXMLNames.AUDIO_LICENSE) == null) ? "" : doc.getValue(LimeXMLNames.AUDIO_LICENSE);
     }
 
     public List<NameValue<String>> toNameValueList() {

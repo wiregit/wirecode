@@ -5,7 +5,8 @@ import java.util.List;
 import org.limewire.collection.NameValue;
 
 /**
- *  Reads meta-data from a file
+ *  Reads meta-data from a file. Each type of media type reader
+ *  must implement this interface
  */
 public interface MetaReader {
     

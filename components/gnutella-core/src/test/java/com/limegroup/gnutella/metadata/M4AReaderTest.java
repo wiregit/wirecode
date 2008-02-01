@@ -6,19 +6,28 @@ import junit.framework.Test;
 
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 
 /**
  *  Tests M4A meta-data reader
  */
-public class M4AReaderTest extends AudioTest {
+public class M4AReaderTest extends AudioTestBase {
 
+    private MetaDataFactory metaDataFactory;
+    
     public M4AReaderTest(String name) {
         super(name);
     }
 
     public static Test suite() {
         return buildTestSuite(M4AReaderTest.class);
+    }
+    
+    public void setUp(){
+        Injector injector = LimeTestUtils.createInjector();
+        metaDataFactory = injector.getInstance(MetaDataFactory.class);
     }
 
     public static void main(String[] args) {
@@ -29,8 +38,8 @@ public class M4AReaderTest extends AudioTest {
         File file = CommonUtils.getResourceFile(dir+"M4A.m4a");
         assertTrue("file should exist", file.exists());
         
-        MetaReader data = MetaDataFactory.parse(file);
-        testTag((AudioMetaData) data.getMetaData());
+        MetaReader data = metaDataFactory.parse(file);
+        validateTag((AudioMetaData) data.getMetaData());
     }
 }
 

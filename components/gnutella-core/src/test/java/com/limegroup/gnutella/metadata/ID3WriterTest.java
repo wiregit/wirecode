@@ -14,12 +14,13 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
-import com.limegroup.gnutella.xml.LimeXMLDocumentFactoryImpl;
 import com.limegroup.gnutella.xml.LimeXMLNames;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollection.MetaDataState;
 
-public class ID3WriterTest extends AudioTest {
+public class ID3WriterTest extends AudioTestBase {
 
     private LimeXMLDocumentFactory limeXMLDocumentFactory;
+    private MetaDataFactory metaDataFactory;
     
     private String newTitle = "new title";
     private String newArtist = "new artist";
@@ -39,7 +40,8 @@ public class ID3WriterTest extends AudioTest {
     
     public void setUp(){
         Injector injector = LimeTestUtils.createInjector();
-        limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactoryImpl.class);
+        limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
+        metaDataFactory = injector.getInstance(MetaDataFactory.class);
     }
     
     /**
@@ -57,9 +59,9 @@ public class ID3WriterTest extends AudioTest {
         
         
         // read the meta data from the current audio file
-        MetaReader data = MetaDataFactory.parse(TEST_FILE);
+        MetaReader data = metaDataFactory.parse(TEST_FILE);
         // test the contents to be sure its valid
-        testTag((AudioMetaData) data.getMetaData());
+        validateTag((AudioMetaData) data.getMetaData());
         
         // get the meta-data and update some of the values
         List<NameValue<String>> nameValList = data.toNameValueList();
@@ -71,15 +73,15 @@ public class ID3WriterTest extends AudioTest {
         LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(nameValList, data.getSchemaURI());
  
         //2. Write data into the file 
-        MetaWriter editor = MetaDataFactory.getEditorForFile(TEST_FILE.getCanonicalPath());
+        MetaWriter editor = metaDataFactory.getEditorForFile(TEST_FILE.getCanonicalPath());
         editor.populate(doc);
 
-        int retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+        MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
         
-        assertEquals(0,retVal);
+        assertEquals(MetaDataState.NORMAL,retVal);
         
         // read the file again
-        data = MetaDataFactory.parse(TEST_FILE);
+        data = metaDataFactory.parse(TEST_FILE);
         AudioMetaData amd = (AudioMetaData) data.getMetaData();
         
         // test the values, changes values should be read
@@ -107,9 +109,9 @@ public class ID3WriterTest extends AudioTest {
         
         
         // read the meta data from the current audio file
-        MetaReader data = MetaDataFactory.parse(TEST_FILE);
+        MetaReader data = metaDataFactory.parse(TEST_FILE);
         // test the contents to be sure its valid
-        testTag((AudioMetaData) data.getMetaData());
+        validateTag((AudioMetaData) data.getMetaData());
         
         // get the meta-data and update some of the values
         List<NameValue<String>> nameValList = data.toNameValueList();
@@ -121,15 +123,15 @@ public class ID3WriterTest extends AudioTest {
         LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(nameValList, data.getSchemaURI());
  
         //2. Write data into the file 
-        MetaWriter editor = MetaDataFactory.getEditorForFile(TEST_FILE.getCanonicalPath());
+        MetaWriter editor = metaDataFactory.getEditorForFile(TEST_FILE.getCanonicalPath());
         editor.populate(doc);
 
-        int retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+        MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
         
-        assertEquals(0,retVal);
+        assertEquals(MetaDataState.NORMAL,retVal);
         
         // read the file again
-        data = MetaDataFactory.parse(TEST_FILE);
+        data = metaDataFactory.parse(TEST_FILE);
         AudioMetaData amd = (AudioMetaData) data.getMetaData();
         
         // test the values, changes values should be read
@@ -157,9 +159,9 @@ public class ID3WriterTest extends AudioTest {
         
         
         // read the meta data from the current audio file
-        MetaReader data = MetaDataFactory.parse(TEST_FILE);
+        MetaReader data = metaDataFactory.parse(TEST_FILE);
         // test the contents to be sure its valid
-        testTag((AudioMetaData) data.getMetaData());
+        validateTag((AudioMetaData) data.getMetaData());
         
         // get the meta-data and update some of the values
         List<NameValue<String>> nameValList = data.toNameValueList();
@@ -171,15 +173,15 @@ public class ID3WriterTest extends AudioTest {
         LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(nameValList, data.getSchemaURI());
  
         //2. Write data into the file 
-        MetaWriter editor = MetaDataFactory.getEditorForFile(TEST_FILE.getCanonicalPath());
+        MetaWriter editor = metaDataFactory.getEditorForFile(TEST_FILE.getCanonicalPath());
         editor.populate(doc);
 
-        int retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+        MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
         
-        assertEquals(0,retVal);
+        assertEquals(MetaDataState.NORMAL,retVal);
         
         // read the file again
-        data = MetaDataFactory.parse(TEST_FILE);
+        data = metaDataFactory.parse(TEST_FILE);
         AudioMetaData amd = (AudioMetaData) data.getMetaData();
         
         // test the values, changes values should be read
@@ -207,9 +209,9 @@ public class ID3WriterTest extends AudioTest {
         
         
         // read the meta data from the current audio file
-        MetaReader data = MetaDataFactory.parse(TEST_FILE);
+        MetaReader data = metaDataFactory.parse(TEST_FILE);
         // test the contents to be sure its valid
-        testTag((AudioMetaData) data.getMetaData());
+        validateTag((AudioMetaData) data.getMetaData());
         
         // get the meta-data and update some of the values
         List<NameValue<String>> nameValList = data.toNameValueList();
@@ -221,15 +223,15 @@ public class ID3WriterTest extends AudioTest {
         LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(nameValList, data.getSchemaURI());
  
         //2. Write data into the file 
-        MetaWriter editor = MetaDataFactory.getEditorForFile(TEST_FILE.getCanonicalPath());
+        MetaWriter editor = metaDataFactory.getEditorForFile(TEST_FILE.getCanonicalPath());
         editor.populate(doc);
 
-        int retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+        MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
         
-        assertEquals(0,retVal);
+        assertEquals(MetaDataState.NORMAL,retVal);
         
         // read the file again
-        data = MetaDataFactory.parse(TEST_FILE);
+        data = metaDataFactory.parse(TEST_FILE);
         AudioMetaData amd = (AudioMetaData) data.getMetaData();
         
         // test the values, changes values should be read
@@ -257,9 +259,9 @@ public class ID3WriterTest extends AudioTest {
         
         
         // read the meta data from the current audio file
-        MetaReader data = MetaDataFactory.parse(TEST_FILE);
+        MetaReader data = metaDataFactory.parse(TEST_FILE);
         // test the contents to be sure its valid
-        testTag((AudioMetaData) data.getMetaData());
+        validateTag((AudioMetaData) data.getMetaData());
         
         // get the meta-data and update some of the values
         List<NameValue<String>> nameValList = data.toNameValueList();
@@ -271,15 +273,15 @@ public class ID3WriterTest extends AudioTest {
         LimeXMLDocument doc = limeXMLDocumentFactory.createLimeXMLDocument(nameValList, data.getSchemaURI());
  
         //2. Write data into the file 
-        MetaWriter editor = MetaDataFactory.getEditorForFile(TEST_FILE.getCanonicalPath());
+        MetaWriter editor = metaDataFactory.getEditorForFile(TEST_FILE.getCanonicalPath());
         editor.populate(doc);
 
-        int retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
+        MetaDataState retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
         
-        assertEquals(0,retVal);
+        assertEquals(MetaDataState.NORMAL,retVal);
         
         // read the file again
-        data = MetaDataFactory.parse(TEST_FILE);
+        data = metaDataFactory.parse(TEST_FILE);
         AudioMetaData amd = (AudioMetaData) data.getMetaData();
         
         // test the values, changes values should be read

@@ -6,19 +6,28 @@ import junit.framework.Test;
 
 import org.limewire.util.CommonUtils;
 
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 
 /**
  *  Tests Ogg meta-data reader
  */
-public class OGGReaderTest extends AudioTest {
+public class OGGReaderTest extends AudioTestBase {
 
+    private MetaDataFactory metaDataFactory;
+    
     public OGGReaderTest(String name) {
         super(name);
     }
 
     public static Test suite() {
         return buildTestSuite(OGGReaderTest.class);
+    }
+    
+    public void setUp(){
+        Injector injector = LimeTestUtils.createInjector();
+        metaDataFactory = injector.getInstance(MetaDataFactory.class);
     }
 
     public static void main(String[] args) {
@@ -29,15 +38,15 @@ public class OGGReaderTest extends AudioTest {
         File file = CommonUtils.getResourceFile(dir+"oggAll.ogg");
         assertTrue("file should exist", file.exists());
         
-        MetaReader data = MetaDataFactory.parse(file);
-        testTag((AudioMetaData) data.getMetaData());
+        MetaReader data = metaDataFactory.parse(file);
+        validateTag((AudioMetaData) data.getMetaData());
     }
     
     public void testNoFieldsOgg() throws Exception {
         File file = CommonUtils.getResourceFile(dir+"oggNone.ogg");
         assertTrue("file should exist", file.exists());
         
-        MetaReader data = MetaDataFactory.parse(file);
+        MetaReader data = metaDataFactory.parse(file);
         AudioMetaData amd = (AudioMetaData) data.getMetaData();
         assertEquals("", amd.getTitle());
         assertEquals("", amd.getArtist());
