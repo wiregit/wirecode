@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.dht;
 
-import org.limewire.inject.AbstractModule;
-
+import com.google.inject.AbstractModule;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.AltLocFinderImpl;
 
