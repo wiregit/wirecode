@@ -8,15 +8,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import junit.framework.Test;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.PrivilegedAccessor;
 
-import junit.framework.Test;
-
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
@@ -26,17 +25,14 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
-import com.limegroup.gnutella.altlocs.AltLocManager;
-import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
-import com.limegroup.gnutella.dht.db.AltLocFinderImpl;
 import com.limegroup.gnutella.dht.db.AltLocSearchListener;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
@@ -402,17 +398,11 @@ public class RequeryBehaviorTest extends LimeTestCase {
     }
     
     @Singleton
-    private static class MyAltLocFinder extends AltLocFinderImpl {
+    private static class MyAltLocFinder implements AltLocFinder {
         private volatile AltLocSearchListener listener;
         
         volatile boolean cancelled;
-        @Inject
-        public MyAltLocFinder(DHTManager manager, AlternateLocationFactory alternateLocationFactory, AltLocManager altLocManager, PushEndpointFactory pushEndpointFactory) {
-            super(manager, alternateLocationFactory, altLocManager, pushEndpointFactory);
-        }
         
-        
-        @Override
         public Shutdownable findAltLocs(URN urn, AltLocSearchListener listener) {
             this.listener = listener;
             return new Shutdownable() {
@@ -422,9 +412,12 @@ public class RequeryBehaviorTest extends LimeTestCase {
             };
         }
 
-        @Override
         public boolean findPushAltLocs(GUID guid, URN urn, AltLocSearchListener listener) {
             return true;
+        }
+
+        public AlternateLocation getAlternateLocation(GUID guid, URN urn) {
+            return null;
         }
     }
     

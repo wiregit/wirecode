@@ -10,22 +10,19 @@ import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.altlocs.AltLocManager;
-import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht.NullDHTController;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
-import com.limegroup.gnutella.dht.db.AltLocFinderImpl;
 import com.limegroup.gnutella.dht.db.AltLocSearchListener;
 import com.limegroup.gnutella.downloader.RequeryManager.QueryType;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -490,21 +487,12 @@ public class RequeryManagerTest extends LimeTestCase {
     }
     
     @Singleton    
-    private static class MyAltLocFinder extends AltLocFinderImpl {
+    private static class MyAltLocFinder implements AltLocFinder {
         
-        @Inject
-        public MyAltLocFinder(DHTManager manager,
-                AlternateLocationFactory alternateLocationFactory, AltLocManager altLocManager,
-                PushEndpointFactory pushEndpointFactory) {
-            super(manager, alternateLocationFactory, altLocManager, pushEndpointFactory);
-            // TODO Auto-generated constructor stub
-        }
-
         private volatile AltLocSearchListener listener;
         
         volatile boolean cancelled;
         
-        @Override
         public Shutdownable findAltLocs(URN urn, AltLocSearchListener listener) {
             this.listener = listener;
             return new Shutdownable() {
@@ -512,6 +500,14 @@ public class RequeryManagerTest extends LimeTestCase {
                     cancelled = true;
                 }
             };
+        }
+
+        public boolean findPushAltLocs(GUID guid, URN urn, AltLocSearchListener listener) {
+            return false;
+        }
+
+        public AlternateLocation getAlternateLocation(GUID guid, URN urn) {
+            return null;
         }
  
     }
