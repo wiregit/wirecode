@@ -198,7 +198,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
         MagnetDownloaderImpl downloader = (MagnetDownloaderImpl) coreDownloaderFactory.createMagnetDownloader(magnet, true, null, "test");
         downloader.initialize();
         downloader.initializeDownload();
-        assertEquals(2, downloader.cachedRFDs.size());
+        assertEquals(2, downloader.getCachedRFDs().size());
     }
     
     public void testAltLocsFromGUIDUrnsAreAdded() throws Exception {
@@ -225,8 +225,8 @@ public class MagnetDownloaderTest extends LimeTestCase {
         
         context.assertIsSatisfied();
         
-        assertEquals(1, downloader.cachedRFDs.size());
-        assertSame(rfd, downloader.cachedRFDs.iterator().next());
+        assertEquals(1, downloader.getCachedRFDs().size());
+        assertSame(rfd, downloader.getCachedRFDs().iterator().next());
     }
     
     private static class TestUrlMagnetDownloader extends MagnetDownloaderImpl {

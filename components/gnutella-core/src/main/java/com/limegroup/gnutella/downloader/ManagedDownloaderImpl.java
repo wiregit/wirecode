@@ -226,10 +226,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /** The complete Set of files passed to the constructor.  Must be
      *  maintained in memory to support resume.  allFiles may only contain
      *  elements of type RemoteFileDesc and URLRemoteFileDesc
-     *  
-     *  Package access for testing.
      */
-    Set<RemoteFileDesc> cachedRFDs;
+    private Set<RemoteFileDesc> cachedRFDs;
 
 	/**
 	 * The ranker used to select the next host we should connect to
@@ -3146,5 +3144,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             rfds.add(remoteFileDescFactory.createFromMemento(memento));
         }
         return rfds;
+    }
+
+    /**
+     * Only for testing. 
+     */
+    Set<RemoteFileDesc> getCachedRFDs() {
+        return cachedRFDs;
     }
 }
