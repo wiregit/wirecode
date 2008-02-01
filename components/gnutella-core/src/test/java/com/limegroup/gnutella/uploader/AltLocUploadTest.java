@@ -11,7 +11,6 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -127,8 +126,6 @@ public class AltLocUploadTest extends LimeTestCase {
 
     private Injector injector;
 
-    private FileManager fileManager;
-    
     private LifecycleManager lifecycleManager;
 
     public AltLocUploadTest(String name) {
@@ -175,7 +172,7 @@ public class AltLocUploadTest extends LimeTestCase {
         uploadManager = (TestUploadManager) injector.getInstance(UploadManager.class);
         
 //        startServices();
-        fileManager = injector.getInstance(FileManager.class);
+        FileManager fileManager = injector.getInstance(FileManager.class);
         fileManager.loadSettingsAndWait(2000);
         fd = fileManager.getFileDescForFile(sharedFile);
         assertNotNull(fd);
@@ -486,8 +483,8 @@ public class AltLocUploadTest extends LimeTestCase {
                 .getDirect(fd.getSHA1Urn());
         assertEquals("unexpected number of locs", 2, alc.getAltLocsSize());
         List<DirectAltLoc> alts = new LinkedList<DirectAltLoc>();
-        for (Iterator<DirectAltLoc> it = alc.iterator(); it.hasNext();) {
-            alts.add(it.next());
+        for (DirectAltLoc anAlc : alc) {
+            alts.add(anAlc);
         }
         assertTrue(alts.contains(al));
         assertTrue(alts.contains(sendAl));
@@ -524,8 +521,7 @@ public class AltLocUploadTest extends LimeTestCase {
         // should still have it.
         assertEquals("unexpected number of locs", 2, alc.getAltLocsSize());
         alts = new LinkedList<DirectAltLoc>();
-        for (Iterator<DirectAltLoc> it = alc.iterator(); it.hasNext();)
-            alts.add(it.next());
+        for (DirectAltLoc anAlc : alc) alts.add(anAlc);
         assertTrue(alts.contains(al));
         assertTrue(alts.contains(sendAl));
 
@@ -583,8 +579,8 @@ public class AltLocUploadTest extends LimeTestCase {
                 .getDirect(fd.getSHA1Urn());
         assertEquals("wrong # locs", 2, alc.getAltLocsSize());
         List<DirectAltLoc> alts = new LinkedList<DirectAltLoc>();
-        for (Iterator<DirectAltLoc> it = alc.iterator(); it.hasNext();) {
-            alts.add(it.next());
+        for (DirectAltLoc anAlc : alc) {
+            alts.add(anAlc);
         }
         assertTrue(alts.contains(al));
         assertTrue(alts.contains(sendAl));
@@ -634,8 +630,8 @@ public class AltLocUploadTest extends LimeTestCase {
                 .getDirect(fd.getSHA1Urn());
         assertEquals("wrong # locs", 4, alc.getAltLocsSize());
         List<DirectAltLoc> alts = new LinkedList<DirectAltLoc>();
-        for (Iterator<DirectAltLoc> it = alc.iterator(); it.hasNext();) {
-            alts.add(it.next());
+        for (DirectAltLoc anAlc : alc) {
+            alts.add(anAlc);
         }
         assertTrue(alts.contains(al));
         assertTrue(alts.contains(al1));
@@ -846,8 +842,6 @@ public class AltLocUploadTest extends LimeTestCase {
                 fd.getSHA1Urn()).getAltLocsSize());
 
         String pre = "1.1.1.";
-        String post = "";
-        String comma = ", ";
         // note that this value can change depending on iterators,
         // so this is a very flaky test.
         /*String required = pre + 16 + post + comma + pre + 13 + post
@@ -1154,8 +1148,6 @@ public class AltLocUploadTest extends LimeTestCase {
                 fd.getSHA1Urn()));
 
         String pre = "1.1.1.";
-        String post = "";
-        String comma = ", ";
         // note that this value can change depending on iterators,
         // so this is a very flaky test.
         /*String required = null;
@@ -1300,8 +1292,6 @@ public class AltLocUploadTest extends LimeTestCase {
         // 20-29 returned next
 
         String pre = "1.1.1.";
-        String post = "";
-        String comma = ", ";
         // note that this value can change depending on iterators,
         // so this is a very flaky test.
         /*String required = null;

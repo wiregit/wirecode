@@ -23,7 +23,6 @@ import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.SocketAcceptor;
 import org.limewire.util.BaseTestCase;
 
-import com.google.inject.Injector;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 //ITEST
@@ -36,7 +35,6 @@ public class HTTPAcceptorTest extends BaseTestCase {
     private HttpClient client;
 
     private SocketAcceptor socketAcceptor;
-    private Injector injector;
 
     public HTTPAcceptorTest(String name) {
         super(name);

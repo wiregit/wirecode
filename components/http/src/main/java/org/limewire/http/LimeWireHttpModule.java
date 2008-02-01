@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.LayeredSocketFactory;
+//import org.apache.http.conn.LayeredSocketFactory;
 import org.apache.http.conn.PlainSocketFactory;
 import org.apache.http.conn.Scheme;
 import org.apache.http.conn.SchemeRegistry;
@@ -17,7 +17,6 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
-import org.limewire.concurrent.SimpleTimer;
 import org.limewire.inject.AbstractModule;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.NBSocket;
@@ -201,20 +200,14 @@ public class LimeWireHttpModule extends AbstractModule {
         }        
     }
     
-    private static class SecureLimeSocketFactory extends LimeSocketFactory implements LayeredSocketFactory {
-        public SecureLimeSocketFactory(Provider<SocketsManager> socketsManager, SocketsManager.ConnectType type) {
-            super(socketsManager, type);
-        }
-
-        public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException, UnknownHostException {
-            return socket;
-        }
-    }
-    
-    @Singleton
-    private static class BackgroundTimerProvider extends AbstractLazySingletonProvider<ScheduledExecutorService> {
-        protected ScheduledExecutorService createObject() {
-            return new SimpleTimer(true);
-        }
-    }
+// TODO    
+//    private static class SecureLimeSocketFactory extends LimeSocketFactory implements LayeredSocketFactory {
+//        public SecureLimeSocketFactory(Provider<SocketsManager> socketsManager, SocketsManager.ConnectType type) {
+//            super(socketsManager, type);
+//        }
+//
+//        public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException, UnknownHostException {
+//            return socket;
+//        }
+//    }
 }
