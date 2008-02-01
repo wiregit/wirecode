@@ -8,6 +8,8 @@ import org.limewire.setting.StringSetting;
  * Settings for The LimeWire Store&#8482;. This is used by
  * {@link LWSManagerImpl} for the host name to which we connect for
  * authentication.
+ * 
+ * A message for bobby -- does this stupid thing commit???
  */
 public final class LWSSettings extends LimeProps {
     
