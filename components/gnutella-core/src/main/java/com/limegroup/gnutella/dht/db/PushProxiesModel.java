@@ -11,9 +11,7 @@ import org.limewire.mojito.util.DatabaseUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
 
@@ -26,32 +24,24 @@ public class PushProxiesModel implements StorableModel {
     
     private Storable localhost = null;
     
-    private final NetworkManager networkManager;
     private final PushProxiesValueFactory pushProxiesValueFactory;
-    private final ApplicationServices applicationServices;
     
     @Inject
-    public PushProxiesModel(NetworkManager networkManager,
-            PushProxiesValueFactory pushProxiesValueFactory,
-            ApplicationServices applicationServices) {
-        this.networkManager = networkManager;
+    public PushProxiesModel(PushProxiesValueFactory pushProxiesValueFactory) {
         this.pushProxiesValueFactory = pushProxiesValueFactory;
-        this.applicationServices = applicationServices;
     }
     
     private synchronized Storable getPushProxyForSelf() {
-        if (networkManager.acceptedIncomingConnection()) {
-            return null;
-        }
-        
         if (localhost == null) {
-            GUID guid = new GUID(applicationServices.getMyGUID());
-            KUID primaryKey = KUIDUtils.toKUID(guid);
+            PushProxiesValue pushProxiesValueForSelf = pushProxiesValueFactory.createDHTValueForSelf();
+            if (pushProxiesValueForSelf.getPushProxies().isEmpty()) {
+                return null;
+            }
             
-            localhost = new Storable(
-                    primaryKey, pushProxiesValueFactory.createDHTValueForSelf());
+            GUID guid = new GUID(pushProxiesValueForSelf.getGUID());
+            KUID primaryKey = KUIDUtils.toKUID(guid);
+            localhost = new Storable(primaryKey, pushProxiesValueForSelf);
         }
-        
         return localhost;
     }
     
