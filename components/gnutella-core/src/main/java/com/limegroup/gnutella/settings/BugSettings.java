@@ -75,7 +75,7 @@ public class BugSettings extends LimeProps {
         FACTORY.createRemoteBooleanSetting("SEND_URI_BUGS", 
                 true, "BugSettings.sendURIBugsBeta");
     
-//    public static final BooleanSetting SEND_TREE_STORAGE_BUGS =
-//        FACTORY.createRemoteBooleanSetting("SEND_TREE_STORAGE_BUGS", 
-//                true, "BugSettings.sendTreeStorageBugsBeta");
+    public static final BooleanSetting SEND_TREE_STORAGE_BUGS =
+        FACTORY.createRemoteBooleanSetting("SEND_TREE_STORAGE_BUGS", 
+                true, "BugSettings.sendTreeStorageBugsBeta");
 }
