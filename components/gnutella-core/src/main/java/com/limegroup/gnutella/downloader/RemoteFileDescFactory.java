@@ -115,9 +115,9 @@ public interface RemoteFileDescFactory {
             Set<? extends URN> urns, URL url);
     
     /**
-     * Constructs a URLRemoteFileDesc, looking up the size from the URL if no size is known.
+     * Constructs a URLRemoteFileDesc, looking up the size from the URL if no size is known.<p>
      * 
-     * THIS METHOD CAN BLOCK!!!!
+     * <b>This method can block if the size is <= 0.</b>
      */
     public RemoteFileDesc createUrlRemoteFileDesc(URL url, String filename, URN urn, long size)
             throws IOException, URISyntaxException, HttpException, InterruptedException;

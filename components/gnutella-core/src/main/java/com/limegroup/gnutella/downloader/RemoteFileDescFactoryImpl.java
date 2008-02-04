@@ -177,11 +177,6 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
 
     public RemoteFileDesc createUrlRemoteFileDesc(URL url, String filename, URN urn, long size)
             throws IOException, URISyntaxException, HttpException, InterruptedException {
-        if (url == null) {
-            LOG.debug("createRemoteFileDesc called with null URL");
-            return null;
-        }
-
         // Use the URL class to do a little parsing for us.
         int port = url.getPort();
         if (port < 0)
