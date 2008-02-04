@@ -33,7 +33,7 @@ public abstract class AbstractToken implements Token {
 	public double getImportance() {
         // Avoid race conditions by using a local variable
         double importance = _importance;
-        if (importance == Double.NaN) {
+        if (Double.isNaN(importance)) {
             // This implements -1 * Gregorio's original misnamed "age()" method.
             // Store bad ratings longer than good ratings since our filter relies
             // mostly on bad ratings.
