@@ -32,6 +32,7 @@ public class ReplyNumberVendorMessageFactoryImpl implements ReplyNumberVendorMes
     }
 
     public ReplyNumberVendorMessage createV3ReplyNumberVendorMessage(GUID replyGUID, int numResults) {
+        assert numResults > 0;
         return new ReplyNumberVendorMessage(replyGUID, ReplyNumberVendorMessage.VERSION, numResults, networkManager.canReceiveUnsolicited());
     }
     
