@@ -15,6 +15,12 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.tigertree.ThexReaderFactory;
 
+/**
+ * Default implementation of {@link HTTPDownloaderFactory}.
+ * 
+ * This will create {@link HTTPDownloader HTTPDownloaders} with all the correctly
+ * injected fields.
+ */
 @Singleton
 public class HTTPDownloaderFactoryImpl implements HTTPDownloaderFactory {
 

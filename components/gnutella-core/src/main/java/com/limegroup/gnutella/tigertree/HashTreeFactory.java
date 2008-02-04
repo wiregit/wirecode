@@ -5,6 +5,9 @@ import java.util.List;
 
 import com.limegroup.gnutella.FileDesc;
 
+/**
+ * Defines the interface from which {@link HashTree HashTrees} can be created.
+ */
 public interface HashTreeFactory {
 
     HashTree createHashTree(List<List<byte[]>> allNodes, String sha1, long fileSize);
