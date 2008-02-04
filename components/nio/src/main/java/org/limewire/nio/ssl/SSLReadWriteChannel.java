@@ -53,7 +53,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
     /** The underlying channel to write to. */
     private volatile InterestWritableByteChannel writeSink;
     /** The last WriteObserver that indicated write interested. */
-    private WriteObserver writeWanter;
+    private volatile WriteObserver writeWanter;
     /** True if handshaking indicated we need to immediately perform a wrap. */
     private volatile boolean needsHandshakeWrap = false;
     /** True if handshaking indicated we need to immediately perform an unwrap. */
