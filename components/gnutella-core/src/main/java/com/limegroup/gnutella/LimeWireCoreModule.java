@@ -177,7 +177,6 @@ import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.version.UpdateHandlerImpl;
 import com.limegroup.gnutella.version.UpdateMessageVerifier;
 import com.limegroup.gnutella.version.UpdateMessageVerifierImpl;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactoryImpl;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
@@ -208,8 +207,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireCommonModule());
         binder().install(new LimeWireNetModule(SettingsBackedProxySettings.class, SettingsBackedSocketBindingSettings.class));
         binder().install(new LimeWireDownloadModule());
-        binder().install(new LimeWireHashTreeModule());
-        
+        binder().install(new LimeWireHashTreeModule());        
         binder().install(new LimeWireHttpModule());
         
         bind(LimeWireCore.class);
@@ -344,7 +342,6 @@ public class LimeWireCoreModule extends AbstractModule {
 
         // TODO: statically injecting these for now...
         requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
-        requestStaticInjection(LimeXMLDocument.class);
         requestStaticInjection(StatisticsManager.class);
         requestStaticInjection(Pools.class);
         requestStaticInjection(LocalSocketAddressService.class);

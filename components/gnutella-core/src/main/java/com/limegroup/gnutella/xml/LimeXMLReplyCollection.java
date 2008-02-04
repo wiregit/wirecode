@@ -26,6 +26,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
 import org.limewire.util.I18NConvert;
+import org.xml.sax.SAXException;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.FileDesc;
@@ -83,11 +84,6 @@ public class LimeXMLReplyCollection {
      * Whether or not data became dirty after we last wrote to disk.
      */
     private boolean dirty = false;
-    
-    /**
-     * The location on disk that information is serialized to.
-     */
-    private final File dataFile;
 
     public static enum MetaDataState {
         UNCHANGED,
@@ -113,6 +109,8 @@ public class LimeXMLReplyCollection {
     private final MetaDataFactory metaDataFactory;
 
     private final MetaDataReader metaDataReader;
+    
+    private final File savedDocsDir;
 
     /**
      * Creates a new LimeXMLReplyCollection.  The reply collection
@@ -131,8 +129,8 @@ public class LimeXMLReplyCollection {
         this.metaDataReader = metaDataReader;
         this.metaDataFactory = metaDataFactory;
         this.trieMap = new HashMap<String, StringTrie<List<LimeXMLDocument>>>();
-        this.dataFile = new File(path, LimeXMLSchema.getDisplayString(schemaURI)+ ".sxml");
         this.mainMap = new HashMap<URN, LimeXMLDocument>();
+        this.savedDocsDir = path;
         this.oldMap = readMapFromDisk();
     }
     
@@ -223,10 +221,11 @@ public class LimeXMLReplyCollection {
             if(LOG.isDebugEnabled())
                 LOG.debug("reconstructing old document: " + file);
             LimeXMLDocument tempDoc = constructDocument(file);
-            if (tempDoc != null)
+            if (tempDoc != null) {
                 doc = update(doc, tempDoc);
-            else
+            } else {
                 doc.setCurrent();
+            }
         }
         
         // Verify the doc has information in it.
@@ -646,27 +645,35 @@ public class LimeXMLReplyCollection {
     /** Serializes the current map to disk. */
     public boolean writeMapToDisk() {
         boolean wrote = false;
+        Map<URN, String> xmlMap;
         synchronized(mainMap) {
-            if(!dirty)
+            if(!dirty) {
+                LOG.debug("Not writing because not dirty.");
                 return true;
-            
-            File parent = dataFile.getParentFile();
-            if(parent != null)
-                parent.mkdirs();
-                
-            ObjectOutputStream out = null;
-            try {
-                out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(dataFile)));
-                out.writeObject(mainMap);
-                out.flush();
-                wrote = true;
-            } catch(Throwable ignored) {
-                LOG.trace("Unable to write", ignored);
-            } finally {
-                IOUtils.close(out);
             }
             
+            xmlMap = new HashMap<URN, String>(mainMap.size());
+            for(Map.Entry<URN, LimeXMLDocument> entry : mainMap.entrySet())
+                xmlMap.put(entry.getKey(), entry.getValue().getXmlWithVersion());
+            
             dirty = false;
+        }
+
+        File dataFile = new File(savedDocsDir, LimeXMLSchema.getDisplayString(schemaURI)+ ".sxml2");
+        File parent = dataFile.getParentFile();
+        if(parent != null)
+            parent.mkdirs();
+                
+        ObjectOutputStream out = null;
+        try {
+            out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(dataFile)));
+            out.writeObject(xmlMap);
+            out.flush();
+            wrote = true;
+        } catch(IOException ignored) {
+            LOG.trace("Unable to write", ignored);
+        } finally {
+            IOUtils.close(out);
         }
         
         return wrote;
@@ -674,17 +681,88 @@ public class LimeXMLReplyCollection {
     
     /** Reads the map off of the disk. */
     private Map<URN, LimeXMLDocument> readMapFromDisk() {
+        File newFile = new File(savedDocsDir, LimeXMLSchema.getDisplayString(schemaURI)+ ".sxml2");
+        Map<URN, LimeXMLDocument> map = null;
+        if(newFile.exists()) {
+            map = readNewFile(newFile);
+        } else {
+            File oldFile = new File(savedDocsDir, LimeXMLSchema.getDisplayString(schemaURI)+ ".sxml");
+            if(oldFile.exists()) {
+                map = readOldFile(oldFile);
+                oldFile.delete();
+            }
+        }
+        
+        return map == null ? new HashMap<URN, LimeXMLDocument>() : map;
+    }
+    
+    /** Reads a file in the new format off disk. */
+    private Map<URN, LimeXMLDocument> readNewFile(File input) {
+        if(LOG.isDebugEnabled())
+            LOG.debug("Reading new format from file: " + input);
+        
         ObjectInputStream in = null;
-        Map<URN, LimeXMLDocument> read = null;
+        Map<URN, String> read = null;
         try {
-            in = new ConverterObjectInputStream(new BufferedInputStream(new FileInputStream(dataFile)));
-            read = GenericsUtils.scanForMap(in.readObject(), URN.class, LimeXMLDocument.class, GenericsUtils.ScanMode.REMOVE);
+            in = new ObjectInputStream(new BufferedInputStream(new FileInputStream(input)));
+            read = GenericsUtils.scanForMap(in.readObject(), URN.class, String.class, GenericsUtils.ScanMode.REMOVE);
         } catch(Throwable t) {
             LOG.error("Unable to read LimeXMLCollection", t);
         } finally {
             IOUtils.close(in);
         }
         
-        return read == null ? new HashMap<URN, LimeXMLDocument>() : read;
+        if(read == null)
+            read = Collections.emptyMap();
+        
+        Map<URN, LimeXMLDocument> docMap = new HashMap<URN, LimeXMLDocument>(read.size());
+        for(Map.Entry<URN, String> entry : read.entrySet()) {
+            try {
+                docMap.put(entry.getKey(), limeXMLDocumentFactory.createLimeXMLDocument(entry.getValue()));
+            } catch(IOException ignored) {
+                LOG.warn("Error creating document for: " + entry.getValue(), ignored);
+            } catch(SchemaNotFoundException ignored) {
+                LOG.warn("Error creating document: " + entry.getValue(), ignored);
+            } catch (SAXException ignored) {
+                LOG.warn("Error creating document: " + entry.getValue(), ignored);
+            }
+        }
+        
+        return docMap;
+    }
+    
+    /** Reads a file in the old format off disk. */
+    private Map<URN, LimeXMLDocument> readOldFile(File input) {
+        if(LOG.isDebugEnabled())
+            LOG.debug("Reading old format from file: " + input);
+        ConverterObjectInputStream in = null;
+        Map<URN, SerialXml> read = null;
+        try {
+            in = new ConverterObjectInputStream(new BufferedInputStream(new FileInputStream(input)));
+            in.addLookup("com.limegroup.gnutella.xml.LimeXMLDocument", SerialXml.class.getName());
+            read = GenericsUtils.scanForMap(in.readObject(), URN.class, SerialXml.class, GenericsUtils.ScanMode.REMOVE);
+        } catch(Throwable t) {
+            LOG.error("Unable to read LimeXMLCollection", t);
+        } finally {
+            IOUtils.close(in);
+        }
+        
+        if(read == null)
+            read = Collections.emptyMap();
+        
+        Map<URN, LimeXMLDocument> docMap = new HashMap<URN, LimeXMLDocument>(read.size());
+        for(Map.Entry<URN, SerialXml> entry : read.entrySet()) {
+            try {
+                docMap.put(entry.getKey(), limeXMLDocumentFactory.createLimeXMLDocument(entry.getValue().getXml()));
+            } catch(IOException ignored) {
+                LOG.warn("Error creating document for: " + entry.getValue(), ignored);
+            } catch(SchemaNotFoundException ignored) {
+                LOG.warn("Error creating document: " + entry.getValue(), ignored);
+            } catch (SAXException ignored) {
+                LOG.warn("Error creating document: " + entry.getValue(), ignored);
+            }
+        }
+        
+        return docMap;
     }
 }

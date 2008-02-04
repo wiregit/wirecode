@@ -12,6 +12,7 @@ import org.limewire.util.GenericsUtils;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.xml.SerialXml;
 
 class SerialRemoteFileDesc4x16 implements Serializable, SerialRemoteFileDesc {
 

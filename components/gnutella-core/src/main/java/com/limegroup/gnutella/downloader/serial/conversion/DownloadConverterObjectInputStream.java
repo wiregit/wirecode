@@ -6,6 +6,8 @@ import java.io.InputStream;
 import org.limewire.collection.IntervalSet;
 import org.limewire.util.ConverterObjectInputStream;
 
+import com.limegroup.gnutella.xml.SerialXml;
+
 class DownloadConverterObjectInputStream extends ConverterObjectInputStream {
     
     static enum Version {

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.downloader.serial.conversion;
+package com.limegroup.gnutella.xml;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -16,7 +16,6 @@ public class SerialXml implements Serializable {
     
     private String schemaUri;
     
-    @SuppressWarnings("unused")
     private int version;
     
     public String getXml() {
@@ -47,7 +46,11 @@ public class SerialXml implements Serializable {
                    .append("=\"")
                    .append(LimeXMLUtils.encodeXML(entry.getValue()))
                    .append("\"");
-            }            
+            }
+
+            tag.append(" internal_version=\"")
+               .append(version)
+               .append("\"");
             
             tag.append("/></")
                .append(root)
