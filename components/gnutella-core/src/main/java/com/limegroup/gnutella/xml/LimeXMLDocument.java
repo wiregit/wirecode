@@ -7,6 +7,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -426,6 +427,9 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      * as is in the schema.
      */
     public List<NameValue<String>> getOrderedNameValueList() {
+        if (getSchema() == null)
+            return Collections.emptyList();
+        
         String[] fNames = getSchema().getCanonicalizedFieldNames();
         List<NameValue<String>> retList = new ArrayList<NameValue<String>>(fNames.length);
         for (int i = 0; i < fNames.length; i++) {
