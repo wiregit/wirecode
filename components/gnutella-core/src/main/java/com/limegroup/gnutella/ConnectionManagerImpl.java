@@ -26,7 +26,9 @@ import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
@@ -1187,16 +1189,6 @@ public class ConnectionManagerImpl implements ConnectionManager {
         return _connections;
     }
 
-    /**
-     * Accessor for the <tt>Set</tt> of push proxies for this node.  If
-     * there are no push proxies available, or if this node is an Ultrapeer,
-     * this will return an empty <tt>Set</tt>.
-     *
-     * @return a <tt>Set</tt> of push proxies with a maximum size of 4
-     *
-     *  TODO: should the set of pushproxy UPs be cached and updated as
-     *  connections are killed and created?
-     */
     public Set<? extends Connectable> getPushProxies() {
         if (isShieldedLeaf()) {
             // this should be fast since leaves don't maintain a lot of
@@ -1210,9 +1202,11 @@ public class ConnectionManagerImpl implements ConnectionManager {
                     proxies.add(currMC);
             }
             return proxies;
+        } else if (networkManager.acceptedIncomingConnection() && networkManager.isIpPortValid()) {
+            return Collections.singleton(new ConnectableImpl(new IpPortImpl(networkManager.getAddress(), networkManager.getPort()), SSLSettings.isOutgoingTLSEnabled()));
+        } else {
+            return Collections.emptySet();
         }
-
-        return Collections.emptySet();
     }
 
     /**

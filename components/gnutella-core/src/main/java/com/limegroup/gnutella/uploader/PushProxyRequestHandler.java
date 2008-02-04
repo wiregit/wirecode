@@ -205,7 +205,7 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
         return true;
     }
 
-    private class PushProxyRequest {
+    private static class PushProxyRequest {
 
         private String clientGUID;
 
