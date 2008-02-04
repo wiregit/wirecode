@@ -412,7 +412,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         LOG.trace("STOP DownloadManager.postGuiInit");
         
         LOG.trace("START LWSIntegrationServices.postGuiInit");
-        activityCallback.get().componentLoading(I18nMarker.marktr("Attaching LWS Listeners..."));
+        activityCallback.get().componentLoading(I18nMarker.marktr("Attaching LimeWire Store Listeners..."));
         lwsItegrationServices.get().init();
         LOG.trace("STOP LWSIntegrationServices.postGuiInit");
         
