@@ -291,7 +291,7 @@ public class ConnectionManagerTest extends LimeTestCase {
      * Tests that the ConnectionManager returns itself as a push proxy if
      * it is not firewalled.
      */
-    public void testGetPushProxiesForNonShileldedLeaf() throws Exception {
+    public void testGetPushProxiesForNonShieldedLeaf() throws Exception {
         final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
         networkManagerStub.setAcceptedIncomingConnection(true);
         doSetUp(new AbstractModule() {
