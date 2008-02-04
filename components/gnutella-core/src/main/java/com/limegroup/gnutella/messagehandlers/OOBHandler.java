@@ -69,7 +69,7 @@ public class OOBHandler implements MessageHandler, Runnable {
 
         int toRequest;
         
-        if (!router.isQueryAlive(g) || (toRequest = router.getNumOOBToRequest(msg)) < 0) {
+        if (!router.isQueryAlive(g) || (toRequest = router.getNumOOBToRequest(msg)) <= 0) {
             // remember as possible GUESS source though
             router.addBypassedSource(msg, handler);
             OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(msg.getNumResults());
