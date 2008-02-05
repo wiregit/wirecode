@@ -125,6 +125,8 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
         if(sha1 != null)
             setSha1Urn(sha1);
         super.initialize();
+        // activate requery manager to get urn lookups for magnet downloads
+        requeryManager.activate();
     }
 
 	protected synchronized MagnetOptions getMagnet() {
