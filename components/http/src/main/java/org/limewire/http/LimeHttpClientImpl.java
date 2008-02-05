@@ -6,8 +6,10 @@ import java.net.Socket;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
+
+import com.google.inject.Provider;
 
 /**
  * An <code>HttpClient</code> extension that supports utility methods defined
@@ -24,8 +26,8 @@ class LimeHttpClientImpl extends DefaultHttpClient implements SocketWrappingHttp
         close(response);
     }
     
-    public LimeHttpClientImpl(ReapingClientConnectionManager manager) {
-        super(manager, new BasicHttpParams(new DefaultHttpParams()));
+    public LimeHttpClientImpl(ReapingClientConnectionManager manager, Provider<HttpParams> defaultParams) {
+        super(manager, defaultParams.get());
     }
 
     /**

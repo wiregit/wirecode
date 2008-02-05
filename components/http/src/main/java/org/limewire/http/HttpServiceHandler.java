@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/main/java/org/apache/http/nio/protocol/BufferingHttpServiceHandler.java $
- * $Revision: 1.9 $
- * $Date: 2007-10-03 15:04:11 $
+ * $Revision: 1.10 $
+ * $Date: 2008-02-05 16:22:42 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -70,7 +70,6 @@ import org.apache.http.nio.util.HeapByteBufferAllocator;
 import org.apache.http.nio.util.SimpleInputBuffer;
 import org.apache.http.nio.util.SimpleOutputBuffer;
 import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpParamsLinker;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpProcessor;
@@ -144,7 +143,7 @@ public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttp
         HttpContext context = conn.getContext();
         
         HttpRequest request = conn.getHttpRequest();
-        HttpParamsLinker.link(request, this.params);
+        request.setParams(params);
 
         if (LOG.isDebugEnabled()) 
             LOG.debug("Received request: " + request.getRequestLine());
@@ -169,7 +168,7 @@ public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttp
                 if (((HttpEntityEnclosingRequest) request).expectContinue()) {
                     response = this.responseFactory.newHttpResponse(
                             ver, HttpStatus.SC_CONTINUE, context);
-                    HttpParamsLinker.link(response, this.params);
+                    response.setParams(params);
                     
                     if (this.expectationVerifier != null) {
                         try {
@@ -179,7 +178,7 @@ public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttp
                                     HttpVersion.HTTP_1_0, 
                                     HttpStatus.SC_INTERNAL_SERVER_ERROR, 
                                     context);
-                            HttpParamsLinker.link(response, this.params);
+                            response.setParams(params);
                             handleException(ex, response);
                         }
                     }
@@ -235,7 +234,7 @@ public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttp
         try {
             HttpResponse response = this.responseFactory.newHttpResponse(
                     HttpVersion.HTTP_1_0, HttpStatus.SC_INTERNAL_SERVER_ERROR, context);
-            HttpParamsLinker.link(response, this.params);
+            response.setParams(params);
             handleException(httpex, response);
             response.setEntity(null);
             sendResponse(conn, response);
@@ -383,7 +382,7 @@ public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttp
                 ver, 
                 HttpStatus.SC_OK, 
                 conn.getContext());
-        HttpParamsLinker.link(response, this.params);
+        response.setParams(params);
         
         context.setAttribute(ExecutionContext.HTTP_REQUEST, request);
         context.setAttribute(ExecutionContext.HTTP_CONNECTION, conn);
@@ -415,7 +414,7 @@ public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttp
         } catch (HttpException ex) {
             response = this.responseFactory.newHttpResponse(HttpVersion.HTTP_1_0, 
                     HttpStatus.SC_INTERNAL_SERVER_ERROR, context);
-            HttpParamsLinker.link(response, this.params);
+            response.setParams(params);
             handleException(ex, response);
         }
 
@@ -438,7 +437,7 @@ public class HttpServiceHandler extends NHttpServiceHandlerBase implements NHttp
                         public void run() {
                             HttpResponse errorResponse = HttpServiceHandler.this.responseFactory.newHttpResponse(HttpVersion.HTTP_1_0, 
                                     HttpStatus.SC_INTERNAL_SERVER_ERROR, context);
-                            HttpParamsLinker.link(response, HttpServiceHandler.this.params);
+                            response.setParams(params);
                             handleException(ex, response);
                             sendAsyncResponse(conn, errorResponse);
                         }                        

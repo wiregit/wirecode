@@ -11,8 +11,11 @@ import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.Scheme;
 import org.apache.http.conn.SchemeRegistry;
 import org.apache.http.conn.SocketFactory;
+import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
+import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.client.params.ClientPNames;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.inject.AbstractModule;
 import org.limewire.net.SocketsManager;
@@ -38,33 +41,36 @@ public class LimeWireHttpModule extends AbstractModule {
         bind(SchemeRegistry.class).annotatedWith(Names.named("limeSchemeRegistry")).toProvider(LimeSchemeRegistryProvider.class);
         bind(SchemeRegistry.class).annotatedWith(Names.named("socketWrappingSchemeRegistry")).toProvider(SocketWrappingSchemeRegistryProvider.class);
         bind(SocketWrapperProtocolSocketFactory.class);
+        bind(HttpParams.class).annotatedWith(Names.named("defaults")).toProvider(DefaultHttpParamsProvider.class);
     }
     
     private abstract static class AbstractLimeHttpClientProvider implements Provider<SocketWrappingHttpClient> {
         private ReapingClientConnectionManager manager;
+        private final Provider<HttpParams> defaultParams;
 
-        public AbstractLimeHttpClientProvider(ReapingClientConnectionManager manager) {
+        public AbstractLimeHttpClientProvider(ReapingClientConnectionManager manager, Provider<HttpParams> defaultParams) {
             this.manager = manager;
+            this.defaultParams = defaultParams;
         }
 
         public SocketWrappingHttpClient get() {
-            return new LimeHttpClientImpl(manager);
+            return new LimeHttpClientImpl(manager, defaultParams);
         }
     }
     
     @Singleton
     private static class NonBlockingLimeHttpClientProvider extends AbstractLimeHttpClientProvider {
         @Inject
-        public NonBlockingLimeHttpClientProvider(@Named("nonBlockingConnectionManager") ReapingClientConnectionManager manager) {
-            super(manager);
+        public NonBlockingLimeHttpClientProvider(@Named("nonBlockingConnectionManager") ReapingClientConnectionManager manager, @Named("defaults") Provider<HttpParams> defaultParams) {
+            super(manager, defaultParams);
         }        
     }
     
     @Singleton
     private static class SocketWrappingLimeHttpClientProvider extends AbstractLimeHttpClientProvider {
         @Inject
-        public SocketWrappingLimeHttpClientProvider(@Named("socketWrappingConnectionManager") ReapingClientConnectionManager manager) {
-            super(manager);
+        public SocketWrappingLimeHttpClientProvider(@Named("socketWrappingConnectionManager") ReapingClientConnectionManager manager, @Named("defaults") Provider<HttpParams> defaultParams) {
+            super(manager, defaultParams);
         }        
     }
     
@@ -101,14 +107,16 @@ public class LimeWireHttpModule extends AbstractModule {
     private abstract static class AbstractClientConnectionManagerProvider extends AbstractLazySingletonProvider<ReapingClientConnectionManager> {
         private final Provider<SchemeRegistry> registry;
         private final Provider<ScheduledExecutorService> scheduler;
+        private final Provider<HttpParams> defaultParams;
 
-        public AbstractClientConnectionManagerProvider(Provider<SchemeRegistry> registry, Provider<ScheduledExecutorService> scheduler) {
+        public AbstractClientConnectionManagerProvider(Provider<SchemeRegistry> registry, Provider<ScheduledExecutorService> scheduler, Provider<HttpParams> defaultParams) {
             this.registry = registry;
             this.scheduler = scheduler;
+            this.defaultParams = defaultParams;
         }
 
         public ReapingClientConnectionManager createObject() {
-            return new ReapingClientConnectionManager(registry, scheduler);
+            return new ReapingClientConnectionManager(registry, scheduler, defaultParams);
         }
     }
     
@@ -116,8 +124,8 @@ public class LimeWireHttpModule extends AbstractModule {
     private static class LimeClientConnectionManagerProvider extends AbstractClientConnectionManagerProvider {
 
         @Inject
-        public LimeClientConnectionManagerProvider(@Named("limeSchemeRegistry")Provider<SchemeRegistry> registry, @Named("backgroundExecutor") Provider<ScheduledExecutorService> scheduler) {
-            super(registry, scheduler);
+        public LimeClientConnectionManagerProvider(@Named("limeSchemeRegistry")Provider<SchemeRegistry> registry, @Named("backgroundExecutor") Provider<ScheduledExecutorService> scheduler, @Named("defaults") Provider<HttpParams> defaultParams) {
+            super(registry, scheduler, defaultParams);
         }
     }
     
@@ -125,8 +133,8 @@ public class LimeWireHttpModule extends AbstractModule {
     private static class SocketWrappingClientConnectionManagerProvider extends AbstractClientConnectionManagerProvider {
 
         @Inject
-        public SocketWrappingClientConnectionManagerProvider(@Named("socketWrappingSchemeRegistry")Provider<SchemeRegistry> registry, @Named("backgroundExecutor") Provider<ScheduledExecutorService> scheduler) {
-            super(registry, scheduler);
+        public SocketWrappingClientConnectionManagerProvider(@Named("socketWrappingSchemeRegistry")Provider<SchemeRegistry> registry, @Named("backgroundExecutor") Provider<ScheduledExecutorService> scheduler, @Named("defaults") Provider<HttpParams> defaultParams) {
+            super(registry, scheduler, defaultParams);
         }
     }
     
@@ -157,6 +165,39 @@ public class LimeWireHttpModule extends AbstractModule {
         public boolean isSecure(Socket socket) throws IllegalArgumentException {
             return false; // TODO type.equals(SocketsManager.ConnectType.TLS);  // TODO use socket instead?
         }        
+    }
+    
+    @Singleton
+    private class DefaultHttpParamsProvider implements Provider<HttpParams>{
+        /**
+         * The amount of time to wait while trying to connect to a specified
+         * host via TCP.  If we exceed this value, an IOException is thrown
+         * while trying to connect.
+         */
+        private static final int CONNECTION_TIMEOUT = 5000;
+        
+        /**
+         * The amount of time to wait while receiving data from a specified
+         * host.  Used as an SO_TIMEOUT.
+         */
+        private static final int TIMEOUT = 8000;
+        
+        /**
+         * The maximum number of times to allow redirects from hosts.
+         */
+        private static final int MAXIMUM_REDIRECTS = 10;
+        
+        @Inject
+        private DefaultHttpParamsProvider(){}
+        
+        public HttpParams get() {
+            BasicHttpParams params = new BasicHttpParams();
+            HttpConnectionParams.setConnectionTimeout(params, CONNECTION_TIMEOUT);
+            HttpConnectionParams.setSoTimeout(params, TIMEOUT);
+            HttpClientParams.setRedirecting(params, true);
+            params.setIntParameter(ClientPNames.MAX_REDIRECTS, MAXIMUM_REDIRECTS);
+            return params;
+        }
     }
     
 // TODO    

@@ -23,11 +23,12 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.collection.IntWrapper;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.http.DefaultHttpParams;
 import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
@@ -54,9 +55,9 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PushRequestImpl;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
@@ -98,6 +99,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      */
     private final Provider<SocketProcessor> socketProcessor;
     private final Provider<HttpExecutor> httpExecutor;
+    private final Provider<HttpParams> defaultParams;
     private final ScheduledExecutorService backgroundExecutor;    
     private final NetworkManager networkManager;
     private final Provider<MessageRouter> messageRouter;    
@@ -109,14 +111,16 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     public PushDownloadManager(
             Provider<MessageRouter> router,
             Provider<HttpExecutor> executor,
+            @Named("defaults") Provider<HttpParams> defaultParams,
             @Named("backgroundExecutor") ScheduledExecutorService scheduler,
             Provider<SocketProcessor> processor,
     		NetworkManager networkManager,
-    		 Provider<IPFilter> ipFilter,
+    		Provider<IPFilter> ipFilter,
     		Provider<UDPService> udpService) {
     	this.messageRouter = router;
     	this.httpExecutor = executor;
-    	this.backgroundExecutor = scheduler;
+        this.defaultParams = defaultParams;
+        this.backgroundExecutor = scheduler;
     	this.socketProcessor = processor;
     	this.networkManager = networkManager;
         this.ipFilter = ipFilter;
@@ -406,9 +410,10 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         
         if(!methods.isEmpty()) {
             HttpClientListener l = new PushHttpClientListener(methods, data);
-            HttpParams params = new DefaultHttpParams();
+            HttpParams params = new BasicHttpParams();
             HttpConnectionParams.setConnectionTimeout(params, 5000);
             HttpConnectionParams.setSoTimeout(params, 5000);
+            params = new DefaultedHttpParams(params, defaultParams.get());
             Shutdownable s = httpExecutor.get().executeAny(l, PUSH_THREAD_POOL, methods, params, data.getMultiShutdownable());
             data.getMultiShutdownable().addShutdownable(s);
         } else {

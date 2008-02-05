@@ -15,6 +15,7 @@ import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.nio.reactor.IOSession;
 import org.apache.http.nio.reactor.SessionRequest;
 import org.apache.http.nio.reactor.SessionRequestCallback;
+import org.apache.http.nio.reactor.IOReactorStatus;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.io.IOUtils;
@@ -166,7 +167,7 @@ public class HttpIOReactor implements ConnectingIOReactor {
     /** 
      * Throws {@link UnsupportedOperationException}.
      */
-    public int getStatus() {
+    public IOReactorStatus getStatus() {
         throw new UnsupportedOperationException();
     }
 

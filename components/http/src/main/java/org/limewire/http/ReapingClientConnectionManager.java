@@ -8,11 +8,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.ConnectionPoolTimeoutException;
-import org.apache.http.conn.HttpRoute;
 import org.apache.http.conn.ManagedClientConnection;
 import org.apache.http.conn.Scheme;
 import org.apache.http.conn.SchemeRegistry;
+import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.HttpParams;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Provider;
@@ -24,8 +25,8 @@ class ReapingClientConnectionManager extends ThreadSafeClientConnManager {
     protected final ScheduledFuture connectionCloserTask;
     protected final IdleConnectionCloser connectionCloser;
 
-    public ReapingClientConnectionManager(Provider<SchemeRegistry> schemeRegistry, Provider<ScheduledExecutorService> scheduler) {
-        super(new DefaultHttpParams(), schemeRegistry.get());
+    public ReapingClientConnectionManager(Provider<SchemeRegistry> schemeRegistry, Provider<ScheduledExecutorService> scheduler, Provider<HttpParams> defaultParams) {
+        super(defaultParams.get(), schemeRegistry.get());
         connectionCloser = new IdleConnectionCloser();
         // TODO revist - move this until later (eg., getConnection())
         connectionCloserTask = scheduler.get().scheduleAtFixedRate(connectionCloser, 0L, 10L, TimeUnit.SECONDS);
@@ -38,11 +39,11 @@ class ReapingClientConnectionManager extends ThreadSafeClientConnManager {
         return super.getConnection(httpRoute);
     }
 
-    public ManagedClientConnection getConnection(HttpRoute httpRoute, long l) throws ConnectionPoolTimeoutException, InterruptedException {
+    public ManagedClientConnection getConnection(HttpRoute httpRoute, long timeout, TimeUnit timeUnit) throws ConnectionPoolTimeoutException, InterruptedException {
         // The manager is set in this way b/c it is a
         // bad idea to pass "this" in a constructor
         connectionCloser.setManagerOnce(this);
-        return super.getConnection(httpRoute, l);
+        return super.getConnection(httpRoute, timeout, timeUnit);
     }
 
     public void shutdown() {
@@ -83,7 +84,7 @@ class ReapingClientConnectionManager extends ThreadSafeClientConnManager {
             try {
                 ClientConnectionManager manager = managerHolder.get();
                 if(manager != null) {
-                    manager.closeIdleConnections(IDLE_TIME);
+                    manager.closeIdleConnections(IDLE_TIME, TimeUnit.MILLISECONDS);
                 }
             } catch (Throwable t) {
                 ErrorService.error(t);

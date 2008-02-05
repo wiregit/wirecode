@@ -20,9 +20,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.limewire.http.DefaultHttpParams;
 import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
@@ -47,12 +48,12 @@ import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker;
+import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
@@ -144,6 +145,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
     private final Provider<ActivityCallback> activityCallback;
     private final ConnectionServices connectionServices;
     private final Provider<HttpExecutor> httpExecutor;
+    private final Provider<HttpParams> defaultParams;
     private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
     private final CapabilitiesVMFactory capabilitiesVMFactory;
     private final Provider<ConnectionManager> connectionManager;
@@ -174,6 +176,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
             Provider<ActivityCallback> activityCallback,
             ConnectionServices connectionServices,
             Provider<HttpExecutor> httpExecutor,
+            @Named("defaults") Provider<HttpParams> defaultParams,
             Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker,
             CapabilitiesVMFactory capabilitiesVMFactory,
             Provider<ConnectionManager> connectionManager,
@@ -188,6 +191,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
         this.activityCallback = activityCallback;
         this.connectionServices = connectionServices;
         this.httpExecutor = httpExecutor;
+        this.defaultParams = defaultParams;
         this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.capabilitiesVMFactory = capabilitiesVMFactory;
         this.connectionManager = connectionManager;
@@ -545,9 +549,10 @@ public class UpdateHandlerImpl implements UpdateHandler {
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         httpRequestControl.requestActive();
-        HttpParams params = new DefaultHttpParams();
+        HttpParams params = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(params, 10000);
         HttpConnectionParams.setSoTimeout(params, 10000);
+        params = new DefaultedHttpParams(params, defaultParams.get());
         httpExecutor.get().execute(get, params, new RequestHandler());
     }
     

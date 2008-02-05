@@ -24,7 +24,6 @@ import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpParamsLinker;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.ExecutionContext;
@@ -195,7 +194,7 @@ public class BasicHttpAcceptor implements ConnectionAcceptor {
         HttpContext context = new BasicHttpContext(null);
         HttpResponse response = responseFactory.newHttpResponse(request
                 .getRequestLine().getProtocolVersion(), HttpStatus.SC_OK, context);
-        HttpParamsLinker.link(response, this.params);
+        response.setParams(params);
 
         // HttpContextParams.setLocal(context, true);
         context.setAttribute(ExecutionContext.HTTP_REQUEST, request);
