@@ -73,13 +73,13 @@ public class AudioDataReader implements MetaReader {
             readHeader(audioFile.getAudioHeader());          
             readTag(audioFile, audioFile.getTag());
         } catch (CannotReadException e) { 
-            throw (IOException)new IOException().initCause(e.getCause());
+            throw (IOException)new IOException().initCause(e);
         } catch (TagException e) {
-            throw (IOException)new IOException().initCause(e.getCause());
+            throw (IOException)new IOException().initCause(e);
         } catch (ReadOnlyFileException e) {
-            throw (IOException)new IOException().initCause(e.getCause());
+            throw (IOException)new IOException().initCause(e);
         } catch (InvalidAudioFrameException e) {
-            throw (IOException)new IOException().initCause(e.getCause());
+            throw (IOException)new IOException().initCause(e);
         }
     }
 
