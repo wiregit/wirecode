@@ -753,7 +753,7 @@ public class LimeXMLReplyCollection {
         Map<URN, LimeXMLDocument> docMap = new HashMap<URN, LimeXMLDocument>(read.size());
         for(Map.Entry<URN, SerialXml> entry : read.entrySet()) {
             try {
-                docMap.put(entry.getKey(), limeXMLDocumentFactory.createLimeXMLDocument(entry.getValue().getXml()));
+                docMap.put(entry.getKey(), limeXMLDocumentFactory.createLimeXMLDocument(entry.getValue().getXml(true)));
             } catch(IOException ignored) {
                 LOG.warn("Error creating document for: " + entry.getValue(), ignored);
             } catch(SchemaNotFoundException ignored) {

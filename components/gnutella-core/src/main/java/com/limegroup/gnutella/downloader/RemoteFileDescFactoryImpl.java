@@ -8,8 +8,6 @@ import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -40,8 +38,6 @@ import com.limegroup.gnutella.xml.SchemaNotFoundException;
 
 @Singleton
 class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
-
-    private static final Log LOG = LogFactory.getLog(RemoteFileDescFactoryImpl.class);
 
     private static final int COPY_INDEX = Integer.MAX_VALUE;
 

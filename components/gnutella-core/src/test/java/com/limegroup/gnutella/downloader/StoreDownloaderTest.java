@@ -118,7 +118,10 @@ public class StoreDownloaderTest extends LimeTestCase{
         URL url = new URL("http://test.com");
         
         // test invalid rfd
-        assertNull( remoteFileDescFactory.createUrlRemoteFileDesc(null, "", null, -1) );
+        try {
+            remoteFileDescFactory.createUrlRemoteFileDesc(null, "", null, -1);
+            fail("expected NPE");
+        } catch(NullPointerException expected) {}
         
         RemoteFileDesc rfd = remoteFileDescFactory.createUrlRemoteFileDesc(url, "test.txt", urn, 10L);
         

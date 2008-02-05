@@ -44,6 +44,8 @@ public class LimeXMLDocument implements StringLookup {
     private static final String VERSION_STRING = "internal_version";
     private static final String XML_VERSION_ATTRIBUTE = VERSION_STRING + "__";
     
+    public static final List<LimeXMLDocument> EMPTY_LIST = Collections.emptyList();
+    
     /**
      * The current version of LimeXMLDocuments.
      *

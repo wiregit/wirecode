@@ -18,7 +18,7 @@ public class SerialXml implements Serializable {
     
     private int version;
     
-    public String getXml() {
+    public String getXml(boolean includeVersion) {
         if(fieldToValue != null && schemaUri != null && !fieldToValue.isEmpty()) {                
             StringBuilder tag = new StringBuilder(100);
             tag.append(LimeXMLDocumentHelper.XML_HEADER)
@@ -48,9 +48,11 @@ public class SerialXml implements Serializable {
                    .append("\"");
             }
 
-            tag.append(" internal_version=\"")
-               .append(version)
-               .append("\"");
+            if(includeVersion) {
+                tag.append(" internal_version=\"")
+                   .append(version)
+                   .append("\"");
+            }
             
             tag.append("/></")
                .append(root)
