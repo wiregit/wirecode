@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-12-19 12:38-0500\n"
-"PO-Revision-Date: 2008-01-21 22:42+0000\n"
+"POT-Creation-Date: 2008-01-29 11:10-0500\n"
+"PO-Revision-Date: 2008-02-02 21:29+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=n==1 ? 0 : n==2 ? 1 : (n != 8 || n != 11) ? "
 "2 : 3;\n"
-"X-Launchpad-Export-Date: 2008-01-29 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-02-05 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -34,6 +34,12 @@ msgstr ""
 #~ "yn iTunes) achos bod wal tan yn blocio mynediad. I ddal i'w ddefnyddio, "
 #~ "cicia 'Iawn' a newid dy wal tan i ganiatau 'LimeWire.exe' mynediad llawn i "
 #~ "gysylltiadau mewn ac allan. I hepgor a hwn, clicia 'Na'."
+
+#~ msgid "Modem"
+#~ msgstr "Modem"
+
+#~ msgid "Cable/DSL"
+#~ msgstr "Cabl/DSL"
 
 #~ msgid ""
 #~ "LimeWire is unable to find a license for this file. Download anyway?\n"
@@ -89,6 +95,18 @@ msgstr ""
 #~ msgid "Waiting"
 #~ msgstr "Yn Aros"
 
+#~ msgid "Finish Setup"
+#~ msgstr "Gorffen Trefnu"
+
+#~ msgid "Language Options"
+#~ msgstr "Dewisiadau Iaith"
+
+#~ msgid "Please choose the language you would like LimeWire to use."
+#~ msgstr "Dewis yr iaith rwyt eisiau LimeWire ei defnydio."
+
+#~ msgid "Choose Language:"
+#~ msgstr "Dewis Iaith:"
+
 #~ msgid ""
 #~ "Please choose a folder where you would like your files to be downloaded. "
 #~ "This folder will also be shared with other gnutella users by default."
@@ -99,8 +117,35 @@ msgstr ""
 #~ msgid "Save Folder:"
 #~ msgstr "Ffolder Cadw:"
 
+#~ msgid "Confirm Scan"
+#~ msgstr "Cadarnhau Sgan"
+
+#~ msgid "Scan for Files"
+#~ msgstr "Sganio am Ffeiliau"
+
+#~ msgid "Scan Hard Drive?"
+#~ msgstr "Sganio Disc Caled?"
+
 #~ msgid "Limewire Setup Dialog"
 #~ msgstr "Opsiynau Trefnu LimeWire"
+
+#~ msgid "Select Speed"
+#~ msgstr "Dewis Cyflymdra"
+
+#~ msgid "Scanning Hard Drive"
+#~ msgstr "Yn Sganio Disc Caled"
+
+#~ msgid "Please wait as LimeWire scans your hard drive..."
+#~ msgstr "Aros tra mae LimeWire yn Sganio'r Disc Caled"
+
+#~ msgid "Scan cancelled"
+#~ msgstr "Sgan wedi canslo"
+
+#~ msgid "Scanning Hard Drive..."
+#~ msgstr "Yn Sganio Disc Caled..."
+
+#~ msgid "Cancel Scan"
+#~ msgstr "Canslo Sgan"
 
 #~ msgid ""
 #~ "The selected folder cannot be shared.  Please select another folder to share."
@@ -144,6 +189,14 @@ msgstr ""
 #~ "You have some songs in the playlist.  Would you like to clear them and start "
 #~ "a new playlist?"
 #~ msgstr "Rwyt ti wedi newid rhai trefniadau. Wyt eisiau eu cadw?"
+
+#~ msgid ""
+#~ "Enter the IP address of a friend you'd like to connect to, click 'Direct "
+#~ "Connect', and LimeWire will try to browse the files of that user."
+#~ msgstr ""
+#~ "Rho gyfeiriad ffrind hoffet ti ei gysylltu, clicia 'Cysylltiad "
+#~ "Uniongyrchol', a bydd LimeWire yn ceisio chwilio am ffeiliau y defnyddiwr "
+#~ "yno."
 
 #~ msgid ""
 #~ "The default Internet Archive identifier for this file and username is "
@@ -1480,7 +1533,7 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"Mae LimeWire yn methu creu ffeil angenrheiddiol achos bod dy ddisc caled yn "
+"Roedd LimeWire yn methu creu ffeil angenrheiddiol am fod dy ddisc caled yn "
 "llawn. I LimeWire garo ymlaen rhaid gwneud lle ar dy ddisc caled."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
@@ -1488,9 +1541,9 @@ msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
-"Roedd LimeWire yn methu agor ffeil angenrheidiol achos bod rhaglen arall "
-"wedi'i gloi. Efallai fydd LimeWire yn gweithio mewn ffordd annisgwyl nes fod "
-"y ffeil wedi'i datgloi."
+"Roedd LimeWire yn methu agor ffeil angenrheidiol am fod rhaglen arall wedi'i "
+"gloi. Efallai fydd LimeWire yn gweithio mewn ffordd annisgwyl nes fod y "
+"ffeil wedi'i datgloi."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:54
 msgid ""
@@ -1498,9 +1551,9 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
-"Roedd LimeWire yn methu ysgrifennu ffeil angenrheidiol achos nid oes "
-"ganiatad gennyt. Efallai fydd dy opsiynau heb eu cadw y tro nesaf i LimeWire "
-"dechrau, neu efallai fydd LimeWire yn gweithio mewn ffyrdd annisgwyl."
+"Roedd LimeWire yn methu ysgrifennu ffeil angenrheidiol - nid oes ganiatad "
+"gennyt. Efallai fydd dy opsiynau heb eu cadw y tro nesaf i LimeWire dechrau, "
+"neu efallai fydd LimeWire yn gweithio mewn ffyrdd annisgwyl."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:56
 msgid ""
@@ -1508,7 +1561,7 @@ msgid ""
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
 msgstr ""
-"Roedd LimeWire yn methu agor ffeil angenrheidiol achos bod enw'r ffeil yn "
+"Roedd LimeWire yn methu agor ffeil angenrheidiol am fod enw'r ffeil yn "
 "cynnwys llythrennau sydd ddim yn cael eu cefnogi gan dy system. Efallai fydd "
 "LimeWire yn gweithio mewn ffyrdd annisgwyl."
 
@@ -1517,17 +1570,16 @@ msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
-"Mae LimeWire yn methu llwytho i lawr y ffeil wedi'i dewis achos bod dy ddisc "
-"caled yn llawn. I lwytho i lawr rhaid gwneud lle ar dy ddisc caled."
+"Mae LimeWire yn methu llwytho i lawr y ffeil wedi'i dewis am fod dy ddisc "
+"caled yn llawn. I lwythio i lawr rhaid gwneud lle ar dy ddisc caled."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:62
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr ""
-"Roedd LimeWire yn methu lwythio i lawr y ffeil wedi'i dewis achos bod "
-"rhaglen arall yn defnyddio'r ffeil. Cau'r rhaglen arall ac ail-drio i lwytho "
-"i lawr."
+"Roedd LimeWire yn methu lwythio i lawr y ffeil wedi'i dewis am fod rhaglen "
+"arall yn defnyddio'r ffeil. Cau'r rhaglen arall ac ail-drio i lwytho i lawr."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:64
 msgid ""
@@ -1536,7 +1588,7 @@ msgid ""
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
-"Roedd LimeWire yn methu creu neu ddal i ysgrifennu ffeil anghyflawn am y "
+"Roedd LimeWire yn methu creu neu'n ddal i ysgrifennu ffeil anghyflawn am y "
 "llwytho wedi'i dewis achos nad oes caniatad gennyt i ysgrifennu i ffolder "
 "anghyflawn. I LimeWire parhau, rhaid dewis Ffolder Cadw gwahanol."
 
@@ -1546,21 +1598,11 @@ msgid ""
 "because the filename contains characters which are not supported by your "
 "operating system."
 msgstr ""
-"Roedd LimeWire yn methu agor y ffeil anghyflawn i'r ffeil wedi'i dewis achos "
-"bod enw'r ffeil yn cynnwys llythrennau sydd ddim yn cael eu cefnogi gan dy "
-"system."
+"Roedd LimeWire yn methu agor y ffeil anghyflawn i'r llwythio wedi'i ddewis "
+"am fod enw'r ffeil yn cynnwys llythrennau sydd ddim yn cael eu cefnogi gan "
+"dy system."
 
-#. it was the "file or directory corrupted" exception
-#. revert to defaults
-#: components/setting/src/main/java/org/limewire/setting/SettingsFactory.java:187
-msgid ""
-"A file used to save your preferences was corrupted. LimeWire will use "
-"default values."
-msgstr ""
-"Mae ffeil sy'n cadw dy ddewisiadau wedi'i llygru. Mae LimeWire yn mynd i "
-"ddefnyddio yr opsiynau gwreiddiol."
-
-#: core/com/limegroup/gnutella/Acceptor.java:287
+#: core/com/limegroup/gnutella/AcceptorImpl.java:281
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:35
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
@@ -1569,91 +1611,108 @@ msgstr ""
 "Roedd LimeWire yn methu trefnu porth i wrando ar gysylltiadau i mewn. "
 "Efallai fydd rhai pethau yn LimeWire yn gweithio yn annisgwyl."
 
-#: core/com/limegroup/gnutella/DownloadManager.java:236
-msgid "Sorry, but LimeWire was unable to restart your old downloads."
-msgstr "Sori, ond mae LimeWire yn methu ail-ddechrau dy hen lwytho i lawr."
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:218
+msgid ""
+"Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
+"going to your Library, viewing your 'Incomplete Files', and clicking to "
+"'Resume' your downloads."
+msgstr ""
+"Yn anffodus, nid oedd LimeWire yn gallu darllen eich hen lawrlwythiadau. "
+"Gallwch eu cychwyn eto drwy fynd i'ch Llyfrgell, mynd at eich 'Ffeiliau "
+"Anghyflawn', a chlicio i 'Ailddechrau' eich lawrlwythiadau"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:309
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:220
+msgid ""
+"Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
+"them by going to your Library, viewing your 'Incomplete Files', and clicking "
+"to 'Resume' your downloads."
+msgstr ""
+"Yn anffodus, nid oedd LimeWire yn gallu darllen eich hen lawrlwythiadau. "
+"Gallwch eu cychwyn eto drwy fynd i'ch Llyfrgell, mynd at eich 'Ffeiliau "
+"Anghyflawn', a chlicio i 'Ailddechrau' eich lawrlwythiadau"
+
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:319
 msgid "Loading TLS Encryption..."
 msgstr "Llwytho TLS Encryption..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:321
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:331
 msgid "Loading Safe Content Management..."
 msgstr "Llwytho Rheolwr Cynnwys Diogel"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:326
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:336
 msgid "Loading Message Router..."
 msgstr "Llwytho Router Negeseuon..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:331
-msgid "Loading Upload Management..."
-msgstr "Llwytho Rheolwr Llwytho Fyny..."
-
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:341
-msgid "Loading Connection Listener..."
-msgstr "Llwytho Gwrandawr Cysylltiadau..."
-
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:350
-msgid "Loading Connection Management..."
-msgstr "Llwytho Rheolwr Cysylltiadau..."
-
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:355
-msgid "Loading Download Management..."
-msgstr "Llwytho Rheolwr Llwytho i lawr..."
-
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:361
-msgid "Loading Ultrapeer/DHT Management..."
-msgstr "Llwytho Rheolwr Uwch-bartner/DHT"
-
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:366
-msgid "Locating Peers..."
-msgstr "Ffeindio Partneriaid..."
-
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:382
-msgid "Loading Shared Files..."
-msgstr "Llwytho Ffeiliau Rhannu..."
-
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:387
-msgid "Loading bittorrent Management..."
-msgstr "Llwytho Rheolwr Bittorrent"
-
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:393
-msgid "Loading Old Downloads..."
-msgstr "Llwytho hen Lwythiadau i Lawr..."
-
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:398
-msgid "Attaching LWS Listeners..."
-msgstr "Ategu Gwrandawyr LWS..."
-
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:403
 msgid "Checking for Updates..."
 msgstr "Chwilio am fersiynau newydd"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:408
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:346
+msgid "Loading Upload Management..."
+msgstr "Llwytho Rheolwr Llwytho i Fyny..."
+
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:356
+msgid "Loading Connection Listener..."
+msgstr "Llwytho Gwrandawr Cysylltiadau..."
+
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:365
+msgid "Loading Connection Management..."
+msgstr "Llwytho Rheolwr Cysylltiadau..."
+
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
+msgid "Loading Download Management..."
+msgstr "Llwytho Rheolwr Llwytho i lawr..."
+
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:380
+msgid "Loading Ultrapeer/DHT Management..."
+msgstr "Llwytho Rheolwr Uwch-bartner/DHT"
+
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:385
+msgid "Locating Peers..."
+msgstr "Ffeindio Partneriaid..."
+
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:401
+msgid "Loading Shared Files..."
+msgstr "Llwytho Ffeiliau Rhannu..."
+
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:406
+#, fuzzy
+msgid "Loading BitTorrent Management..."
+msgstr "Yn llwytho Rheolaeth Bit Torrent..."
+
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:412
+msgid "Loading Old Downloads..."
+msgstr "Llwytho hen Lwythiadau i Lawr..."
+
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:417
+msgid "Attaching LWS Listeners..."
+msgstr "Ategu Gwrandawyr LWS..."
+
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:422
 msgid "Loading Directed Querier..."
 msgstr "Llwytho Holwr wedi'i Gyfeirio"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:413
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:427
 msgid "Loading Magnet Listener..."
 msgstr "Llwytho Gwrandawr Magnet..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:424
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:438
 msgid "Loading Peer Listener..."
 msgstr "Llwytho Gwrandawr Partner..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:429
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:443
 msgid "Loading Stale Connection Management..."
 msgstr "Llwytho Rheolwr Hen Gysylltiadau..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:434
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:448
 msgid "Loading Saved Files..."
 msgstr "Llwytho Ffeiliau  wedi'u Cadw..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:439
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:453
 msgid "Loading Spam Management..."
 msgstr "Llwytho Rheolaeth Spam..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:444
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:458
 msgid "Loading Network Listeners..."
 msgstr "Llwytho Gwandawyr Rhwydwaith..."
 
@@ -1938,11 +1997,11 @@ msgstr "Cyhoeddwr"
 msgid "Platform"
 msgstr "Platfform"
 
-#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:100
+#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:95
 msgid "The selected .torrent file may contain a security hazard."
 msgstr "Mae problem dioglelwch gan y ffeil .torrent wedi'i dewis"
 
-#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:102
+#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:97
 msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr "Roedd LimeWire yn methu llwytho ffeil .torrent o'r URL wedi'i rhoi"
 
@@ -1961,8 +2020,8 @@ msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
-"Torrent sy'n lwytho ond heb ei hadu yn ddigonol. Dylet ti ei adael i lwytho "
-"mwy. Ti'n siwr ti eisiau ei stopio?"
+"Torrent sy'n lwytho i fyny ond heb ei hadu yn ddigonol. Dylet ti ei adael i "
+"lwytho mwy. Ti'n siwr ti eisiau ei stopio?"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:16
 msgid "Automatically start torrents"
@@ -1986,14 +2045,14 @@ msgstr "Dewisiadau BitTorrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:38
 msgid ""
-"You can choose whether or not LimeWire should manage your Bittorrent "
+"You can choose whether or not LimeWire should manage your BitTorrent "
 "protocol settings. It is highly recommended that LimeWire manage these "
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
 "Ti'n gallu dewis i LimeWire rheoli dy drefniadau protocol Bittorrent neu "
 "beidio. Mae'n well syniad bod LimeWire yn rheoli'r dewisiadau yma. Mae "
-"gwerthoedd amhriodol neu anghywir yn gallu achosi problemau difrifol a/neu "
+"ffigyrau amhriodol neu anghywir yn gallu achosi problemau difrifol a/neu "
 "broblemau cof."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
@@ -2002,7 +2061,7 @@ msgid ""
 "memory problems. Unless you really know what you're doing, it is highly "
 "recommended that you let LimeWire manage these settings."
 msgstr ""
-"Mae gwerthoedd amhriodol neu anghywir yn gallu achosi problemau perfformiad "
+"Mae ffigyrau amhriodol neu anghywir yn gallu achosi problemau perfformiad "
 "ac/neu problemau cof. Oni bai dy fod di'n siwr iawn o beth ti'n gwneud, "
 "rydan ni'n argymell dy fod di'n gadael i LimeWire rheoli'r dewisiadau yma."
 
@@ -2026,11 +2085,11 @@ msgstr "Sicrhau darnau diogel"
 msgid "Experimental disk access"
 msgstr "Myneidad disc arbrofol"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:76
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:81
 msgid "Internal Error"
 msgstr "Gwall Mewnol"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:383
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:392
 msgid ""
 "LimeWire has encountered an internal error. It is possible for LimeWire to "
 "recover and continue running normally. To aid with debugging, please click "
@@ -2042,7 +2101,7 @@ msgstr ""
 "wrth LimeWire am y broblem. Os ti eisiau, gallet ti glicio 'Adolygu' i "
 "edrych ar y wybodaeth sy'n cael ei hanfon. Diolch iti."
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:385
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:394
 msgid ""
 "LimeWire has encountered an internal error. It is possible for LimeWire to "
 "recover and continue running normally. To continue using LimeWire, click "
@@ -2054,34 +2113,47 @@ msgstr ""
 "Os ti eisiau, gallet ti glicio 'Adolygu' i edrych ar y wybodaeth ynglyn a'r "
 "broblem."
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:396
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:412
+#, fuzzy
+msgid ""
+"Please add any comments you may have (e.g what caused the error). \n"
+"Thank you and please use English."
+msgstr ""
+"Rhowch unrhyw sylwadau (e.e. beth achosodd y gwall). \n"
+"A fyddech cystal â defnyddio'r Saesneg. Diolch."
+
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:414
+msgid " "
+msgstr " "
+
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:432
 msgid "Send"
 msgstr "Anfon"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:404
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:441
 msgid "Review"
 msgstr "Adolygu"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:417
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:455
 msgid "Discard"
 msgstr "Cael Gwared"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:434
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:472
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 msgid "Always Send Immediately"
-msgstr "Anfon yn ar unwaith bob tro"
+msgstr "Anfon ar unwaith bob tro"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:435
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:473
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
 msgid "Always Ask For Review"
 msgstr "Gofyn i adolygu pob tro"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:436
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:474
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Always Discard All Errors"
 msgstr "Cael gwared a phob gwall, bob tro"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:510
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:573
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
 "bug report. For further help and to aid with debugging, please visit "
@@ -2091,12 +2163,12 @@ msgstr ""
 "isod. Am gymorth pellach ac i helpu cael gwared a bygiau, edrych ar "
 "www.limewire.com a chlicia 'Support'. Diolch iti."
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:539
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:602
 msgid "Copy Report"
 msgstr "Copio Adroddiad"
 
 #. Add an OK button out of the window.
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:547
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:610
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:88
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:187
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:343
@@ -2106,7 +2178,7 @@ msgstr "Copio Adroddiad"
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:38
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:147
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:302
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:56
+#: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:52
 msgid "OK"
 msgstr "Iawn"
 
@@ -2168,7 +2240,7 @@ msgstr ""
 "ddatblygwyr LimeWire:"
 
 #. business developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:197
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:198
 msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
@@ -2177,7 +2249,7 @@ msgstr ""
 "datblygwyr busnes LimeWire:"
 
 #. web developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:207
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:209
 msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
@@ -2186,7 +2258,7 @@ msgstr ""
 "graffeg LimeWire yn waith caled criw gwe LimeWire:"
 
 #. support staff
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:215
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:216
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
 msgstr ""
@@ -2194,7 +2266,7 @@ msgstr ""
 "cefnogaeth technegol:"
 
 #. previous developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:223
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:224
 msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
@@ -2203,7 +2275,7 @@ msgstr ""
 "ond bellach wedi symud ymlaen at brosiectau eraill:"
 
 #. open source contributors
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:248
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:251
 msgid ""
 "LimeWire open source contributors have provided significant code and many "
 "bug fixes, ideas, research, etc. to the project as well. Those listed below "
@@ -2216,7 +2288,7 @@ msgstr ""
 "wedi darganfod bygs difrifol yn y cod, neu'r ddau:"
 
 #. internationalization contributors
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:285
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:288
 msgid ""
 "LimeWire would also like to thank the many contributors to the "
 "internationalization project, both for the application itself and for the "
@@ -2226,14 +2298,14 @@ msgstr ""
 "rhyngwladol, am y meddalwedd ei hun ac am wefan LimeWire."
 
 #. community VIPs
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:289
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:292
 msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
 msgstr "Mae sawl un yn y prosiect yn haeddu diolch arbennig. Yn cynnwys:"
 
 #. conclusion
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:310
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:313
 msgid ""
 "Finally, LimeWire would like to extend its sincere thanks to these "
 "developers, users, and all others who have contributed their ideas to the "
@@ -2243,7 +2315,7 @@ msgstr ""
 "phawb arall sydd wedi cyfrannu eu syniadau i'r prosiect. Heb ddefnyddwyr "
 "LimeWire, ni fyddai rhwydwaith LimeWire yn bod."
 
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:315
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:318
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc."
@@ -2274,23 +2346,30 @@ msgstr "Dad-ddewis Popeth ar y Rhestr"
 msgid "Clear History"
 msgstr "Clirio Hanes"
 
-#: gui/com/limegroup/gnutella/gui/Console.java:136
+#: gui/com/limegroup/gnutella/gui/Console.java:165
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:40
 msgid "Apply"
 msgstr "Defnyddio"
 
-#: gui/com/limegroup/gnutella/gui/Console.java:143
+#: gui/com/limegroup/gnutella/gui/Console.java:172
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:802
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:50
 msgid "Clear"
 msgstr "Clirio"
 
-#: gui/com/limegroup/gnutella/gui/Console.java:150
+#: gui/com/limegroup/gnutella/gui/Console.java:179
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:116
 msgid "Save"
 msgstr "Cadw"
 
-#: gui/com/limegroup/gnutella/gui/Console.java:545
+#. default the delay time to zero (ie, live
+#. updates).
+#: gui/com/limegroup/gnutella/gui/Console.java:188
+#, fuzzy
+msgid "Delay: "
+msgstr "Oedi: "
+
+#: gui/com/limegroup/gnutella/gui/Console.java:618
 msgid "Save As"
 msgstr "Cadw Fel"
 
@@ -2323,10 +2402,10 @@ msgid ""
 "'No' to disable this feature, or 'Cancel' to decide later."
 msgstr ""
 "Roedd LimeWire yn methu dechrau y Protcol Sain Digidol (i rannu ffeiliau yn "
-"iTunes) achos bod angen ategyn (patch) Microsoft neu am fod y wal tan yn "
-"blocio mynediad. Mae LimeWire yn gallu dy gyfeirio i dudalen Microsoft "
-"gyda'r wybodaeth. Cicia 'Iawn' i gael y darn, 'Na' i'w hepgor, neu 'Canslo' "
-"i benderfynu nes ymlaen."
+"iTunes) am fod angen ategyn (patch) Microsoft neu am fod y wal tan yn blocio "
+"mynediad. Mae LimeWire yn gallu dy gyfeirio i dudalen Microsoft gyda'r "
+"wybodaeth. Cicia 'Iawn' i gael y darn, 'Na' i'w hepgor, neu 'Canslo' i "
+"benderfynu nes ymlaen."
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:339
 msgid ""
@@ -2337,8 +2416,8 @@ msgid ""
 "click 'No'."
 msgstr ""
 "Roedd LimeWire yn methu dechrau'r   Protocol Sain Digidol (i rannu ffeiliau "
-"yn iTunes) achos bod wal tan yn blocio mynediad. I ddal i'w ddefnyddio, "
-"cicia 'Iawn' a newid dy wal tan i ganiatau 'LimeWire.exe' mynediad llawn i "
+"yn iTunes) am fod wal tan yn blocio mynediad. I ddal i'w ddefnyddio, cicia "
+"'Iawn' a newid dy wal tan i ganiatau 'LimeWire.exe' mynediad llawn i "
 "gysylltiadau mewn ac allan. I hepgor a hwn, clicia 'Na'."
 
 #. NOTE: The IDs are serialized to disk, and should never change.
@@ -2348,7 +2427,6 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/DialogOption.java:14
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:165
-#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:46
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:416
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:426
 msgid "Yes"
@@ -2359,7 +2437,6 @@ msgstr "Iawn"
 #. * in a message.
 #. 
 #: gui/com/limegroup/gnutella/gui/DialogOption.java:20
-#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:47
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:419
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:429
 msgid "No"
@@ -2378,16 +2455,16 @@ msgstr "Na"
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:877
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:377
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:239
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:503
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:794
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:800
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:423
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:785
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:791
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:159
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:39
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:244
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:118
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveIdentifierRetriever.java:112
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:201
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:57
+#: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:53
 msgid "Cancel"
 msgstr "Canslo"
 
@@ -2446,12 +2523,15 @@ msgid "Do not display this message again."
 msgstr "Peidio dangos y neges yma eto"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
-msgid "Modem"
-msgstr "Modem"
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:80
+#, fuzzy
+msgid "Dial Up"
+msgstr "Deialu"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:38
-msgid "Cable/DSL"
-msgstr "Cabl/DSL"
+#, fuzzy
+msgid "Broadband"
+msgstr "Band Eang"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:40
 msgid "T1"
@@ -2465,8 +2545,8 @@ msgstr "T3 neu Uwch"
 msgid "Ethernet"
 msgstr "Ethernet"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:111
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1498
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:117
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1534
 msgid ""
 "Your machine does not appear to have an active Internet connection or a "
 "firewall is blocking LimeWire from accessing the internet. LimeWire will "
@@ -2475,49 +2555,46 @@ msgid ""
 msgstr ""
 "Mae'n debyg bod dy gyfrifiadur heb gysylltiad gweithredol i'r we neu fod wal "
 "tan yn blocio LimeWire rhag gael mynediad i'r we. Mae LimeWire yn dal i fynd "
-"i drio'n awtomatig i gysylltu a'r rhwydwaith oni bai dy fod di'n dewis \\"
-"\"Datgysylltu\\\" o'r opsiynau Ffeil."
+"i drio'n awtomatig i gysylltu a'r rhwydwaith oni bai dy fod di'n dewis "
+"\"Datgysylltu\" o'r opsiynau Ffeil."
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:120
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:126
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:25
 msgid "&Search"
 msgstr "&Chwilio"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:121
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:127
 msgid "&Monitor"
 msgstr "Monitor"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:122
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:128
 msgid "&Connections"
 msgstr "Cysylltiad"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:123
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:129
 msgid "&Library"
 msgstr "&Llyfrgell"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:124
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:130
 msgid "C&onsole"
 msgstr "Consol"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:125
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:131
 msgid "Lo&gging"
 msgstr "Cofrestri"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:126
-msgid "&Browser"
-msgstr "Porwr"
-
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:140
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:148
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:172
 #, java-format
 msgid "Display the {0} Screen"
 msgstr "Dangos y Sgrin  {0}"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:227
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:263
 msgid "LimeWire: Enabling Open Information Sharing"
 msgstr "LimeWire: Yn Dechrau Rhannu Gwybodaeth"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:395
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:399
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:431
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:435
 msgid ""
 "LimeWire has encountered a problem during startup and cannot proceed. You "
 "may be able to fix this problem by changing LimeWire's Windows "
@@ -2530,12 +2607,12 @@ msgstr ""
 "Mae LimeWire wedi darganfod problem tra'n dechrau ac yn methu cario ymlaen. "
 "Efallai, byddet ti'n gallu dartrys y problem trwy newid sut mae Windows yn "
 "cyd-weithio gyda LimeWire. De-Clicia ar icon LimeWire ar dy fwrdd gwaith a "
-"dewis 'Properties' o'r dewislen. Cilia ar y tab 'Compatibility' yn y darn "
+"dewis 'Properties' o'r dewislen. Clicia ar y tab 'Compatibility' yn y darn "
 "uchaf, a wedyn clicia bocs 'Run this program in compatibility mode for', a "
 "dewis 'Windows 2000' yn y bocs isod. Wedyn clicia'r botwm 'OK' ar y gwaelod "
 "ac ail-ddechrau LimeWire."
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:488
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:524
 msgid ""
 "LimeWire is unable to find a license for this file. Download the file "
 "anyway?\n"
@@ -2544,12 +2621,12 @@ msgid ""
 "network. Please respect your local copyright laws."
 msgstr ""
 "Mae LimeWire yn methu darganfod trwydded i'r ffeil yma. Dal i'w Lwytho i "
-"lawr?\\n\n"
-"\\n\n"
+"lawr?\n"
+"\n"
 "Sylw: Mae Limewire yn methu monitro neu reoli cynnwys y rhwydwaith Gnutella. "
 "Cofia barchu rheolau hawlfraint lleol."
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1405
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1441
 #, java-format
 msgid ""
 "LimeWire could not locate your web browser to display the following webpage: "
@@ -2558,26 +2635,26 @@ msgstr ""
 "Roedd LimeWire yn methu ffeindio dy borwr we i ddangos y tudalen we "
 "canlynol: {0}"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1424
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1447
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1460
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1483
 msgid "LimeWire will not launch the specified file for security reasons."
 msgstr ""
 "Ni fydd LimeWire yn lansio'r ffeil  wedi'i dewis am resymau diogelwch."
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1426
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1449
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1462
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1485
 #, java-format
 msgid ""
 "LimeWire could not launch the specified file.\n"
 "\n"
 "Executed command: {0}."
 msgstr ""
-"Roedd LimeWire yn methu lansio'r ffeil wedi'i dewis.\\n\n"
-"\\n\n"
+"Roedd LimeWire yn methu lansio'r ffeil wedi'i dewis.\n"
+"\n"
 "Gorchymyn wedi gweithredu: {0}."
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1429
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1452
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1465
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1488
 msgid "LimeWire could not launch the specified file."
 msgstr "Roedd LimeWire yn methu lansio'r ffeil wedi'i dewis."
 
@@ -2603,41 +2680,33 @@ msgid "KB/s"
 msgstr "KB/eil"
 
 #. Load up the HTML engine.
-#: gui/com/limegroup/gnutella/gui/Initializer.java:341
+#: gui/com/limegroup/gnutella/gui/Initializer.java:340
 msgid "Loading HTML Engine..."
 msgstr "Llwytho Peiriant HTML"
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:389
+#: gui/com/limegroup/gnutella/gui/Initializer.java:388
 msgid "Loading User Interface..."
 msgstr "Llwytho Rhyngwyneb..."
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:408
+#: gui/com/limegroup/gnutella/gui/Initializer.java:407
 msgid "Loading Core Components..."
 msgstr "Llwytho Darnau Craidd..."
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:432
-msgid ""
-"LimeWire was unable to create your settings directory and is using a "
-"temporary directory.  Your settings may be deleted when you close LimeWire. "
-msgstr ""
-"Roedd LimeWire yn methu creu dy ffeil dewisiadau ac yn defnyddio ffeil dros "
-"dro. Efallai fydd dy ddewisiadau yn cael eu colli pan mae LimeWire yn cau. "
-
 #. Initialize IconManager.
-#: gui/com/limegroup/gnutella/gui/Initializer.java:466
+#: gui/com/limegroup/gnutella/gui/Initializer.java:460
 msgid "Loading Icons..."
 msgstr "Llwytho Iconau..."
 
 #. Touch the I18N stuff to ensure it loads properly.
-#: gui/com/limegroup/gnutella/gui/Initializer.java:471
+#: gui/com/limegroup/gnutella/gui/Initializer.java:469
 msgid "Loading Internationalization Support..."
 msgstr "Llwytho Cefnogaeth Rhwngwladol..."
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:505
+#: gui/com/limegroup/gnutella/gui/Initializer.java:503
 msgid "Loading Digital Audio Access Protocol..."
 msgstr "Llwytho Protocol Mynediad Sain Digidol..."
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:511
+#: gui/com/limegroup/gnutella/gui/Initializer.java:509
 msgid ""
 "LimeWire was unable to start the Digital Audio Access Protocol Service (for "
 "sharing files in iTunes). This feature will be turned off. You can turn it "
@@ -2647,25 +2716,24 @@ msgstr ""
 "iTunes). Mae hwn yn mynd i gael ei ddiffod. Gallet ti ei ail-ddechrau yn "
 "opsiynau, o dan iTunes -> Rhannu."
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:546
+#: gui/com/limegroup/gnutella/gui/Initializer.java:544
 msgid "This Alpha version has expired.  Press Ok to exit. "
 msgstr "Mae'r fersiwn Alpha yma wedi darfod. Clicia Iawn i adael. "
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:552
+#: gui/com/limegroup/gnutella/gui/Initializer.java:550
 msgid ""
 "LimeWire was unable to initialize and start. This is usually due to a "
 "firewall program blocking LimeWire's access to the internet or loopback "
 "connections on the local machine. Please allow LimeWire access to the "
 "internet and restart LimeWire."
 msgstr ""
-"Roedd LimeWire yn methu dechrau. Fel arfer achos bod rhaglen wal tan yn "
-"blocio LimeWire rhag gael mynediad i'r we neu i gysylltiadau loopback ar y "
-"peiriant lleol. Gadael i LimeWire gael mynediad i'r we ac ail-ddechrau "
-"LimeWire."
+"Roedd LimeWire yn methu dechrau. Fel arfer am fod rhaglen wal tan yn blocio "
+"LimeWire rhag gael mynediad i'r we neu i gysylltiadau loopback ar y peiriant "
+"lleol. Gadael i LimeWire gael mynediad i'r we ac ail-ddechrau LimeWire."
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:558
+#: gui/com/limegroup/gnutella/gui/Initializer.java:556
 msgid ""
-"LimeWire could not create a temporary preferences directory.\n"
+"LimeWire could not create a temporary preferences folder.\n"
 "\n"
 "This is generally caused by a lack of permissions.  Please make sure that "
 "LimeWire (and you) have access to create files/folders on your computer.  If "
@@ -2674,20 +2742,21 @@ msgid ""
 "\n"
 "LimeWire will now exit.  Thank You."
 msgstr ""
-"Mae LimeWire yn methu creu ffeil opsiynau dros dro.\\n\n"
-"\\n\n"
+"Mae LimeWire yn methu creu ffeil opsiynau dros dro.\n"
+"\n"
 "Mae'r broblem yma yw oherwydd diffyg caniatad. Sicrhau bod LimeWire (a "
 "thithau) yn gallu cael gafael ar y ffeiliau/ffolderi ar dy gyfrifiadur. Os "
 "mae'r problem yn parhau, edrych ar www.limewire.com a chlicia'r linc "
-"'Support'.\\n\n"
-"\\n\n"
+"'Support'.\n"
+"\n"
+"\n"
 "Mae LimeWire yn gadael yn awr. Diolch."
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:568
+#: gui/com/limegroup/gnutella/gui/Initializer.java:566
 #: gui/com/limegroup/gnutella/gui/MessageService.java:76
 #: gui/com/limegroup/gnutella/gui/MessageService.java:92
 #: gui/com/limegroup/gnutella/gui/MessageService.java:208
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:911
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:902
 msgid "Error"
 msgstr "Gwall"
 
@@ -2713,8 +2782,8 @@ msgid ""
 "the final 1.6.0 release.\n"
 msgstr ""
 "Ar hyn o bryd ti'n defnyddio fersiwn beta neu Java 1.6.0 Pre-Release. Mae'r "
-"fersiwn yma yn debygol o achos problemau i LimeWire. Rhaid defnyddio'r "
-"fersiwn terfynol o Java 1.6.0.\\n\n"
+"fersiwn yma yn debygol o achos problemau i LimeWire. Mae'n well cael y "
+"fersiwn terfynol o Java 1.6.0.\n"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:151
 msgid "Upgrade Java"
@@ -2883,9 +2952,9 @@ msgstr "Pastio"
 #. * The delete action.
 #. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:65
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:793
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:799
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1275
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:784
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:790
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1266
 #: gui/com/limegroup/gnutella/gui/xml/MetaEditorFrame.java:120
 msgid "Delete"
 msgstr "Dileu"
@@ -2941,7 +3010,7 @@ msgstr "Rhybudd"
 #: gui/com/limegroup/gnutella/gui/MessageService.java:458
 #: gui/com/limegroup/gnutella/gui/MessageService.java:495
 #: gui/com/limegroup/gnutella/gui/MessageService.java:547
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:849
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:840
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:25
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:264
 msgid "Message"
@@ -2994,12 +3063,27 @@ msgstr ""
 #, java-format
 msgid ""
 "Saving downloads to {0} may not function correctly.  To be sure downloads "
-"are saved properly you should save them to a sub-directory of {1}.  Would "
-"you like to choose another location?"
+"are saved properly you should save them to a sub-folder of {1}.  Would you "
+"like to choose another location?"
 msgstr ""
-"Efallai ni fydd hi'n bosib cadw yn iawn ffeiliau wedi'u llwytho i lawr i "
-"{0}. I sicrhau bod ffeiliau sy'n llwytho i lawr yn cael eu cadw'n iawn, "
-"dylet ti eu cadw mewn ffolder tu mewn i {1}. Eisiau dewis lle arall?"
+
+#: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:20
+msgid ""
+"LimeWire was unable to create your settings folder and is using a temporary "
+"folder.  Your settings may be deleted when you close LimeWire. "
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:35
+msgid ""
+"LimeWire has encountered problems in managing your settings.  Your settings "
+"changes may not be saved on shutdown."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:38
+msgid ""
+"LimeWire has encountered problems in loading your settings.  LimeWire will "
+"attempt to use the default values; however, may behave unexpectedly."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/ShutdownWindow.java:18
 msgid "Shutting down LimeWire..."
@@ -3018,7 +3102,7 @@ msgstr "Llwytho Adnoddau..."
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:43
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:218
 msgid "Add..."
-msgstr "Adio"
+msgstr "Adio..."
 
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:331
 msgid "Add New List Item"
@@ -3028,35 +3112,35 @@ msgstr "Adio eitem rhestr newydd"
 msgid "Remove Selected Item"
 msgstr "Dileu eitem wedi'i dewis"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:133
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:135
 msgid "Loading Status Window..."
 msgstr "Llwytho Ffenestr Statws..."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:487
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:489
 msgid "LimeWire has not detected a firewall"
 msgstr "Mae LimeWire heb ddarganfod wal tan"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:490
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:492
 msgid "LimeWire has detected a firewall"
 msgstr "Mae LimeWire wedi darganfod wal tan"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:500
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:502
 msgid "You are not connected to the LimeWire Store"
 msgstr "Ti heb  gysylltu i Storfa LimeWire"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:503
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:505
 msgid "You are connected to the LimeWire Store"
 msgstr "Ti wedi cysylltu i Storfa LimeWire"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:595
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:597
 msgid "Connection"
 msgstr "Cysylltiad"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:598
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:600
 msgid "Disconnected"
 msgstr "Wedi Datgysylltu"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:599
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:601
 msgid ""
 "You are disconnected from the network. To connect, choose Connect from the "
 "File menu."
@@ -3064,104 +3148,104 @@ msgstr ""
 "Rwyt ti wedi datgysylltu o'r rhwydwaith. I gysylltu, dewis Cysylltu o'r "
 "dewislen Ffeil."
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:602
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:604
 msgid "Starting"
 msgstr "Yn dechrau"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:603
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:605
 msgid "You are currently connecting to the network"
 msgstr "Wrthi'n cysylltu a'r rhwydwaith"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:606
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:608
 msgid "Poor"
 msgstr "Sal"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:607
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:609
 msgid ""
 "You are connected to few hosts and have an unstable connection the network"
 msgstr ""
 "Dim wedi cysylltu a digon o letywyr ac mae cysylltiad ansefydlog i'r "
 "rhwydwaith"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:610
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:612
 msgid "Fair"
 msgstr "Gweddol"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:611
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:613
 msgid "Your connection to the network is getting stronger"
 msgstr "Mae dy gysylltiad i'r rhwydwaith yn cryfhau"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:614
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:616
 msgid "Good"
 msgstr "Da"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:615
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:617
 msgid ""
 "You are not yet fully connected to the network, but have a very good "
 "connection"
 msgstr ""
 "Dim wedi gysylltu a'r rhwydwaith yn llawn, ond mae'r cysylltiad yn dda iawn"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:619
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:621
 msgid "Excellent"
 msgstr "Ardderchog"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:620
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:622
 msgid "Your connection to the network is very strong"
 msgstr "Mae dy gysylltiad i'r rhwydwaith yn gryf iawn"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:623
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:625
 msgid "Turbo-Charged"
 msgstr "Mega-Sydyn"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:624
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:626
 msgid "Your connection to the network is extremely strong"
 msgstr "Mae dy gysylltiad i'r rhwydwaith yn gryf iawn iawn!"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:625
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:627
 msgid ""
 "You can experience Turbo-Charged connections all the time with LimeWire PRO!"
 msgstr ""
 "Ti'n gallu cael cysylltiadau Mega-Sydyn trwy'r amser gyda LimeWire PRO!"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:632
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:634
 msgid "Waking Up"
 msgstr "Yn Deffro"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:633
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:635
 msgid "LimeWire is waking up from sleep mode"
 msgstr "Mae LimeWire yn deffro o'i gwsg"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:741
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:743
 msgid "Show Connection Quality"
 msgstr "Dangos Safon Cysylltiad"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:757
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:759
 msgid "Show Shared Files Count"
 msgstr "Dangos Cyfanswm Ffeiliau Rhannu"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:773
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:775
 msgid "Show Language Status"
 msgstr "Dangos Statws Iaith"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:794
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:796
 msgid "Show Firewall Status"
 msgstr "Dangos Statws y Wal Tan"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:810
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:812
 msgid "Show Store Indicator"
 msgstr "Dangos manylion y Storfa"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:826
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:828
 msgid "Show Bandwidth Consumption"
 msgstr "Dangos Defnydd Lled Band"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:842
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:844
 msgid "Show Media Player"
 msgstr "Dangos Chwaraewr"
 
 #. {0}: number of shared files
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:912
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:914
 #, java-format
 msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
@@ -3171,7 +3255,7 @@ msgstr[2] "Ti'n rhannu {0} ffeil"
 msgstr[3] "Ti'n rhannu {0} ffeil"
 
 #. {0}: number of shared files
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:915
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:917
 #, java-format
 msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
@@ -3180,13 +3264,21 @@ msgstr[1] "T'n rhannu {0} ffeil (Llwytho...)"
 msgstr[2] "T'n rhannu {0} ffeil (Llwytho...)"
 msgstr[3] "T'n rhannu {0} ffeil (Llwytho...)"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:986
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:992
 msgid "Downloads:"
 msgstr "Llwytho i Lawr:"
 
-#: gui/com/limegroup/gnutella/gui/StatusLine.java:988
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:999
 msgid "Uploads:"
 msgstr "Llwytho i Fyny:"
+
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:1006
+msgid "Total Downstream:"
+msgstr "Cyfanswm i lawr"
+
+#: gui/com/limegroup/gnutella/gui/StatusLine.java:1011
+msgid "Total Upstream:"
+msgstr "Cyfanswm i fyny"
 
 #. *
 #. * The title for the TOTD window.
@@ -3388,8 +3480,8 @@ msgid ""
 "Do you have a tip for effectively using LimeWire? Add it to <a "
 "href=\"{0}\">the wiki</a> and it may make it into future Tips of the Day!"
 msgstr ""
-"Oes gent ti awgrym am defnyddio LimeWire yn dda? Adio dy awgrym i <a href=\\"
-"\"{0}\\\">the wiki</a> a gallai ymddangos fel Awgrym y Dydd!"
+"Oes gennyt ti awgrym am defnyddio LimeWire yn dda? Adio dy awgrym i <a "
+"href=\\\"{0}\\\">the wiki</a> a gallai ymddangos fel Awgrym y Dydd!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:39
 msgid ""
@@ -3467,7 +3559,7 @@ msgid ""
 "help translation efforts! "
 msgstr ""
 "Mae LimeWire wedi'i gyfieithu i lawer o ieithoedd yn cynnwys Tsieineaidd,  "
-"Ffrangeg, Almaeneg, Japaneaid, Eidaleg, Sbaeneg a llawer fwy. Edrych ar<a "
+"Ffrangeg, Almaeneg, Japaneaid, Eidaleg, Sbaeneg a llawer fwy. Edrych ar <a "
 "href=\\\"{0}\\\">internationalization page</a> LimeWire i weld sut gallet ti "
 "helpu'r ymdrechion cyfieithu! "
 
@@ -3487,7 +3579,7 @@ msgid ""
 "all of the files returned will be from the selected genre."
 msgstr ""
 "Chwilia am fathau o gerddoriaeth!<br>Clicia ar y gair 'Sain' yn y ffenestr "
-"Chwlio, dewis y math o gerddoriaeth o'r rhestr, ac wedyn gwasgu 'Chwilio'. "
+"Chwlio, dewis y fath o gerddoriaeth o'r rhestr, ac wedyn gwasgu 'Chwilio'. "
 "Bydd y rhan mwyaf, neu efallai bob un ffeil, sy'n cael ei ffeindio o'r math "
 "yno."
 
@@ -3497,7 +3589,7 @@ msgid ""
 "recently been added to the network."
 msgstr ""
 "Dim yn gwybod am beth i chwilio? Trio 'Beth sy newydd' i weld beth sydd "
-"newydd dod i mewn."
+"newydd dod i'r rhydwaith."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:51
 msgid ""
@@ -3609,8 +3701,8 @@ msgid ""
 msgstr ""
 "Eisiau chwilio yn llyfrgell LimeWire dy ffrind? Os wyt ti'n mynd i Chwilio "
 "&gt; Cysylltiad Uniongyrchol, wedyn rhoi'r cyfeiriad ip a rhif porth "
-"cyfrifiadur dy ffrind yn y fformat canlynol: 'cyfeiriad ip:port'. Mae'r "
-"porth i'w gweld yn Opsiynau LimeWire o dan Uwch &gt; Trefnu Wal Tan."
+"cyfrifiadur dy ffrind yn y fformat canlynol: 'cyfeiriad ip:port'. Bydd y "
+"borth i'w gweld yn Opsiynau LimeWire o dan Uwch &gt; Trefnu Wal Tan."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:62
 msgid ""
@@ -3629,7 +3721,8 @@ msgid ""
 msgstr ""
 "Eisiau gwybod beth mae pobl yn chwilio amdano? Edrych ar y tab Monitor, a "
 "dewis Dangos Chwiliadau i Mewn i weld y chwiliadau eraill sydd yn dod i mewn "
-"i dy LimeWire. Clicia ddwy-waith ar ymholiad i weld y gair chwilio."
+"i dy LimeWire. Clicia ddwy-waith ar ymholiad sy'n dod i mewn i weld y gair "
+"chwilio."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:64
 msgid ""
@@ -3658,8 +3751,8 @@ msgid ""
 "the file's metadata to your heart's content. You can even edit many files at "
 "once by selecting more than one file before clicking Describe."
 msgstr ""
-"Wedi lawr llwytho ffeil gyda gwybodaeth anghyflawn neu gwbl anghywir am ei "
-"gynnwys? Dewis y ffeil yn y Llyfrgell a chlicia 'Disgrifio'. Gei di newid "
+"Wedi lawr llwytho ffeil gyda gwybodaeth anghyflawn neu gwbl anghywir am y "
+"cynnwys? Dewis y ffeil yn y Llyfrgell a chlicia 'Disgrifio'. Gallet ti newid "
 "manylion y ffeil cymaint sydd eisiau. Gallet ti hyd yn oed newid mwy nag un "
 "ffeil ar yr un pryd wrth dewis y fffeils cyn clicio 'Disgrifio'."
 
@@ -3807,7 +3900,7 @@ msgid ""
 "Want to share a large file? LimeWire supports file sizes up to 1 TB "
 "(terabyte)."
 msgstr ""
-"Eisiau rhannu ffel mawr? Mae LimeWire yn gweithio gyda ffeils hyda at 1 TB "
+"Eisiau rhannu ffel mawr? Mae LimeWire yn gweithio gyda ffeils hyd at 1 TB "
 "(terabyte)"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:81
@@ -3853,20 +3946,17 @@ msgid ""
 "anchor tags), and a user clicks the link, a download will start in LimeWire."
 msgstr ""
 "Mae linciau magnet yn canatau i ddefnyddwyr llwytho i lawr ffeiliau trwy "
-"LimeWire oddi ar dudalen we. Pan ti'n rhoi linc magnet ar dy dudalen we (yn "
-"y manylion 'href' o'r tagiau angor), ac mae defnyddiwr yn clicio ar y linc, "
+"LimeWire o dudalen we. Pan ti'n rhoi linc magnet ar dy dudalen we (yn y "
+"manylion 'href' o'r tagiau angor), ac mae defnyddiwr yn clicio ar y linc, "
 "bydd LimeWire yn llwytho i lawr."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:96
 msgid ""
 "You can customize LimeWire to your heart's content by changing various "
-"preferences such as your Save Directory, Shared Directory, Upload Bandwidth, "
+"preferences such as your Save Folder, Shared Folder, Upload Bandwidth, "
 "etc... These preferences (and more) are available at the Tools &gt; Options "
 "menu."
 msgstr ""
-"Ti'n gallu addasu LimeWire fel ti eisiau trwy newid rhai o'r Opsiynau fel y "
-"Ffolder Cadw, Ffolder Rhannu, Lled Band Lwytho fyny, ac yn y blaen... Mae'r "
-"opsiynau (ac eraill) ar gael yn Offer &gt; Opsiynau"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:97
 msgid ""
@@ -3895,8 +3985,9 @@ msgid ""
 "This can be done via Tools &gt; Options and altering the 'Sharing' options."
 msgstr ""
 "Nid yw LimeWire yn rhannu pob math o ffeil yn awtomatig. Os oes ffeil "
-"arbennig ti eisiau rhannu, sicrhau fod ei estyniad yn cael ei rannu. Gall "
-"wneud hyn trwy fynd i Offer &gt; Opsiynau ac yn newid y dewisiadau 'Rhannu'."
+"arbennig ti eisiau rhannu, sicrhau fod ei estyniad yn cael ei rannu. Ti'n "
+"gallu wneud hyn trwy fynd i Offer &gt; Opsiynau a newid y dewisiadau "
+"'Rhannu'."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:100
 msgid ""
@@ -3973,7 +4064,7 @@ msgid ""
 msgstr ""
 "Dim eisiau gweld colofnau sgwrsio (neu eraill) yn y llwytho i lawr? Dde-"
 "clicia ar bennawd y golofn a dad-ddewis y colofn yna. Ti'n gallu llusgo'r "
-"colofnau o gwmpas i'w cael i ddangos yn y trefn ti eisiau."
+"colofnau o gwmpas i'w dangos yn y trefn ti eisiau."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:107
 msgid ""
@@ -4060,8 +4151,8 @@ msgid ""
 "Did you just download a file that you don't want to share? In the Library, "
 "right-click it and choose Stop Sharing File. "
 msgstr ""
-"Newydd llwytho i lawr ffeil ti ddim eisiau rhanu? Yn y Llyfrgell, dde-glicia "
-"arno a dewis Stopio Rhannu Ffeil. "
+"Newydd llwytho i lawr ffeil ti ddim eisiau rhannu? Yn y Llyfrgell, dde-"
+"glicia arno a dewis Stopio Rhannu Ffeil. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:115
 msgid ""
@@ -4115,13 +4206,10 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:129
 msgid ""
 "You can customize LimeWire to your heart's content by changing various "
-"preferences such as your Save Directory, Shared Directory, Upload Bandwidth, "
+"preferences such as your Save Folder, Shared Folder, Upload Bandwidth, "
 "etc... These preferences (and more) are available at the LimeWire &gt; "
 "Preferences menu. "
 msgstr ""
-"Ti'n gallu addasu LimeWire fel ti eisiau trwy newid rhai o'r Opsiynau fel y "
-"Ffolder Cadw, Ffolder Rhannu, Lled Band Lwytho fyny, ac yn y blaen... Mae'r "
-"opsiynau (ac eraill) ar gael yn LimeWire &gt; Opsiynau. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:130
 msgid ""
@@ -4161,9 +4249,9 @@ msgid ""
 "highlight the file and click 'Explore'. LimeWire will open that folder in "
 "the Finder. "
 msgstr ""
-"Want to see where on your computer a shared file is? Go to the Library, "
-"highlight the file and click 'Explore'. LimeWire will open that folder in "
-"the Finder. "
+"Eisiau gweld i ble ar dy gyfrifiadur mae ffeil sy'n cael ei rannu? Edrych yn "
+"y Llyfrgell, dewis y ffeil a chlicia 'Ymchwilio'. Bydd LimeWire yn agor y "
+"ffolder yn y Finder "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:134
 msgid ""
@@ -4515,9 +4603,6 @@ msgid ""
 "upgrading to <a href=\"{0}\">LimeWire PRO</a> to help support our ongoing "
 "development to make LimeWire and the network even better. "
 msgstr ""
-"Thank you for helping the network by running LimeWire. Please consider "
-"upgrading to <a href=\"{0}\">LimeWire PRO</a> to help support our ongoing "
-"development to make LimeWire and the network even better. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:207
 msgid ""
@@ -4647,7 +4732,7 @@ msgstr ""
 "LimeWire.</html>"
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:34
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
 msgid "Lookup File with Bitzi"
 msgstr "Edrych Fyny'r Ffeil gyda Bitzi"
 
@@ -4708,7 +4793,7 @@ msgid "Open:"
 msgstr "Agor:"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:234
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:204
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:219
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:117
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:200
 msgid "Browse..."
@@ -4742,7 +4827,7 @@ msgstr "Gweld Fy {0} Ffeils i Rannu"
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:759
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:531
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:534
 #, java-format
 msgid "Search for Keywords: {0}"
 msgstr "Chwilio am y Geiriau {0}"
@@ -4819,7 +4904,7 @@ msgstr "Blocio Lletywr Presennol"
 #. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:71
 msgid "Send a Message to a Host"
-msgstr "Blocio Lletywr Presennol"
+msgstr "Anfon Neges i Letywr"
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:73
 msgid "Chatting with"
@@ -4845,8 +4930,8 @@ msgstr "Yn methu chwilio'r partner {0} ."
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:231
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:921
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:43
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:44
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:53
 msgid "Browse Host"
@@ -5089,7 +5174,7 @@ msgid "Queue"
 msgstr "Ciw"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:60
-#: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:59
+#: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:61
 msgid "Queued"
 msgstr "Mewn Ciw"
 
@@ -5302,12 +5387,12 @@ msgstr "BitTorrent"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1023
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:808
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1236
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1227
 msgid "Launch"
 msgstr "Lansio"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1025
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1238
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1229
 msgid "Launch Selected Files"
 msgstr "Lansio ffeiliau wedi'u dewis"
 
@@ -5352,7 +5437,7 @@ msgstr "Ail-ddechrau'r Llwytho i Lawr"
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:277
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:793
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:953
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1331
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1322
 msgid "Resume"
 msgstr "Ail-ddechrau"
 
@@ -5361,6 +5446,14 @@ msgstr "Ail-ddechrau"
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:955
 msgid "Reattempt Selected Downloads"
 msgstr "Trio'r Llwythau Wedi'u Dewis Eto"
+
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:405
+#, java-format
+msgid ""
+"You have downloaded a skin titled \"{0}\", you can activate the new skin by "
+"clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
+"list of available skins."
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:407
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:179
@@ -5376,14 +5469,6 @@ msgstr "&Gweld"
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:61
 msgid "&Apply Skins"
 msgstr "Gosod &Crwyn"
-
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:405
-#, java-format
-msgid ""
-"You have downloaded a skin titled \"{0}\", you can activate the new skin by "
-"clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
-"list of available skins."
-msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:413
 #, java-format
@@ -5420,7 +5505,7 @@ msgstr "Clirio'r Llwythau wedi'u Dewis"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:806
 msgid "Launch Download"
-msgstr "Lansio Llwytho"
+msgstr "Lansio Llwytho i lawr"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:810
 msgid "Launch Selected Downloads"
@@ -5583,7 +5668,7 @@ msgstr ""
 "chwilio amdano eto."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:186
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1026
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1017
 #, java-format
 msgid "You are already downloading this file to \"{0}\"."
 msgstr "Rwyt ti'n llwythio i lawr y ffeil yma'n barod i \"{0}\"."
@@ -5615,7 +5700,7 @@ msgid "No Filename"
 msgstr "Dim Enw Ffeil"
 
 #: gui/com/limegroup/gnutella/gui/download/PriorityHolder.java:33
-#: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:57
+#: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:59
 msgid "Active"
 msgstr "Gweithredol"
 
@@ -5648,39 +5733,6 @@ msgstr "Anwybyddu pob cysylltiad colledig."
 msgid "Ask me what to do when an association is missing."
 msgstr "Gofyn imi beth i wneud pan mae cysylltiad ar goll."
 
-#: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:26
-msgid "Content Filtering"
-msgstr "Ffiltro Cynnwys"
-
-#: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:27
-msgid ""
-"LimeWire can filter files that copyright owners request not be shared. By "
-"enabling filtering, you are telling LimeWire to confirm all files you "
-"download or share with a list of removed content. You can change this at any "
-"time by choosing Filters -> Configure Content Filters from the main menu."
-msgstr ""
-"Mae LimeWire yn gallu ffiltro'r ffeiliau mae'r perchenogion wedi gofyn "
-"iddynt beidio cael eu rhannu. Wrth alluogi ffiltro, ti'n dweud wrth LimeWire "
-"i gadarnhau pob ffeil ti'n ei lwytho i lawr neu'n ei rannu gyda rhestr o "
-"gynnwys a dynnwyd. Ti'n gallu newid hwn ar unrhyw adeg trwy ddewis Ffiltrau -"
-"> Trefnu Ffiltrau Cynnwys o'r brif ddewisiadau."
-
-#: gui/com/limegroup/gnutella/gui/init/FilterWindow.java:38
-msgid "Enable Content Filtering"
-msgstr "Defnyddio Ffiltro Cynnwys"
-
-#: gui/com/limegroup/gnutella/gui/init/FinishWindow.java:17
-msgid "Finish Setup"
-msgstr "Gorffen Trefnu"
-
-#: gui/com/limegroup/gnutella/gui/init/FinishWindow.java:18
-msgid ""
-"Your LimeWire setup has successfully completed. Please press the \"Finish\" "
-"button to begin using LimeWire."
-msgstr ""
-"Mae dy LimeWire wedi cael ei drefnu'n llwyddianus. Clicia'r botom \\"
-"\"Gorffen\\\" i ddechrau defnyddio LimeWire."
-
 #: gui/com/limegroup/gnutella/gui/init/FirewallWindow.java:23
 msgid "Firewall Setup"
 msgstr "Trefnu Wal Tan"
@@ -5695,17 +5747,84 @@ msgstr ""
 "wal tan neu ddiogelwch yn dangos, dad-flocia LimeWire a dewis i gofio'r "
 "opsiwn. Efallai fydd dy wal tan yn ymddangos yn wahanol i'r isod."
 
-#: gui/com/limegroup/gnutella/gui/init/LanguageWindow.java:50
-msgid "Language Options"
-msgstr "Dewisiadau Iaith"
+#: gui/com/limegroup/gnutella/gui/init/LanguagePanel.java:78
+#: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:44
+#: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:66
+msgid "Language:"
+msgstr "Iaith:"
 
-#: gui/com/limegroup/gnutella/gui/init/LanguageWindow.java:51
-msgid "Please choose the language you would like LimeWire to use."
-msgstr "Dewis yr iaith rwyt eisiau LimeWire ei defnydio."
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:62
+msgid "Miscellaneous Settings"
+msgstr "Gosodiadau Amrywiol"
 
-#: gui/com/limegroup/gnutella/gui/init/LanguageWindow.java:81
-msgid "Choose Language:"
-msgstr "Dewis Iaith:"
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:64
+msgid ""
+"Below, are several options that affect the performance and functionality of "
+"LimeWire."
+msgstr ""
+"Isod, mae sawl dewis sy'n effeithio ar berfformiad a sut mae LimeWire yn "
+"gweithio."
+
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:77
+msgid "Network Speed"
+msgstr "Cyflymder y Rhwydwaith"
+
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:81
+msgid "Broadband (or unsure)"
+msgstr "Bandllydan (neu ddim yn siwr)"
+
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:87
+msgid ""
+"Please choose the speed of your internet connection. Setting this speed "
+"correctly is important for optimum network performance."
+msgstr ""
+"Dewis cyflymdra dy gysylltiad i'r we. Mae dewis y cyflymdra iawn yn bwysig "
+"i'r perfformiad gorau ar y rhwydwaith."
+
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:117
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:407
+#: gui/com/limegroup/gnutella/gui/options/panes/StartupPaneItem.java:22
+msgid "System Startup"
+msgstr "Dechrau'r System"
+
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:119
+msgid "Start Automatically"
+msgstr "Dechrau'n Awtomatig"
+
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:123
+msgid ""
+"Would you like LimeWire to start when you log into your computer? This will "
+"cause LimeWire to start faster when you use it later."
+msgstr ""
+"Wyt eisiau LimeWire i ddechrau pan ti'n cofnodi mewn ar dy gyfrifiadur? "
+"Mae'n helpu LimeWire i weithio'n gynt nes ymlaen"
+
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:146
+msgid "Content Filtering"
+msgstr "Ffiltro Cynnwys"
+
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:148
+msgid "Enable Content Filtering"
+msgstr "Defnyddio Ffiltro Cynnwys"
+
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:152
+msgid ""
+"LimeWire can filter files that copyright owners request not be shared. By "
+"enabling filtering, you are telling LimeWire to confirm all files you "
+"download or share with a list of removed content. You can change this at any "
+"time by choosing Filters -> Configure Content Filters from the main menu."
+msgstr ""
+"Mae LimeWire yn gallu ffiltro'r ffeiliau mae'r perchenogion wedi gofyn "
+"iddynt beidio cael eu rhannu. Wrth alluogi ffiltro, ti'n dweud wrth LimeWire "
+"i gadarnhau pob ffeil ti'n ei lwytho i lawr neu'n ei rannu gyda rhestr o "
+"gynnwys a dynnwyd. Ti'n gallu newid hwn ar unrhyw adeg trwy ddewis Ffiltrau -"
+"> Trefnu Ffiltrau Cynnwys o'r brif ddewisiadau."
+
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:163
+#: gui/com/limegroup/gnutella/gui/init/SetupWindow.java:127
+#: gui/com/limegroup/gnutella/gui/options/panes/AbstractPaneItem.java:66
+msgid "Learn more about this option..."
+msgstr "Dysgu mwy am y opsiwn yma..."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:59
 msgid "Save Folder and Shared Folders"
@@ -5722,29 +5841,29 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:74
 msgid ""
-"LimeWire now downloads files to a new, different, directory.  Please confirm "
-"the folder where you would like your files to be downloaded. You can also "
-"choose folders you would like to share with other users running LimeWire."
+"LimeWire now downloads files to a new, different folder.  Please confirm the "
+"folder where you would like your files to be downloaded. You can also choose "
+"folders you would like to share with other users running LimeWire."
 msgstr ""
-"Yn awr mae LimeWire yn llwytho i lawr ffeiliau i ffolder newydd, gwahanol. "
-"Cadarnhau y ffolder ble ti eisiau llwytho i lawr dy ffeiliau. Ti hefyd yn "
-"gallu dewis ffolderi ti eisiau rhannu gyda defnyddwyr LimeWire eraill."
+"Mae LimeWire yn nawr yn lawr llwytho ffeiliau i ffolder newydd, gwahannol. "
+"Cadarnah y ffolder ble wyt eisiau i dy ffeiliau lawrllwytho. Ti'n gallu "
+"dewis hefyd ffolderi ti eisiau rhannu gyda phobl eraill sy'n defnyddio "
+"LimeWire."
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:93
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:96
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:327
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirDataLine.java:48
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:30
 msgid "Save Folder"
 msgstr "Ffolder Cadw"
 
-#. center
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:112
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:115
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:118
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:140
 #: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:31
 msgid "Shared Folders"
 msgstr "Ffolderi Wedi'u Rhannu"
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:167
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:180
 msgid ""
 "LimeWire was unable to use the specified folder for saving files. Please try "
 "a different folder."
@@ -5752,7 +5871,7 @@ msgstr ""
 "Roedd LimeWire yn methu defnyddio'r ffolder wedi dewis ar gyfer cadw "
 "ffeiliau. Tria ffolder arall."
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:174
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:187
 #, java-format
 msgid ""
 "LimeWire could not create default share folder {0}, a file with that name "
@@ -5761,7 +5880,7 @@ msgstr ""
 "Mae LimeWire yn methu creu ffolder rhannu rhagosodiedig {0}, mae ffeil "
 "gyda'r un enw yn barod."
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:178
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:191
 #, java-format
 msgid ""
 "LimeWire could not create default share folder {0}, it will not be shared."
@@ -5769,149 +5888,40 @@ msgstr ""
 "Mae LimeWire yn methu creu ffolder rhannu rhagosodiedig {0}, Dim yn mynd i "
 "gael ei rannu"
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:192
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:207
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:87
 msgid "Use Default"
 msgstr "Defnyddio'r Gwreiddiol"
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:193
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:208
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:88
 msgid "Use the Default Folder"
 msgstr "Defnyddio'r ffolder gwreiddiol"
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:205
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:220
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:118
 msgid "Choose Another Folder"
 msgstr "Dewis Ffolder Arall"
 
-#: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:46
-msgid "Confirm Scan"
-msgstr "Cadarnhau Sgan"
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:218
+msgid "LimeWire Setup Wizard"
+msgstr "Dewin Dechrau LimeWire"
 
-#: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:47
-msgid ""
-"We identified the folders below as ones that you might like to share. If you "
-"would like to share one of these folders, simply check its associated "
-"checkbox. Subfolders of shared folders will also be shared."
-msgstr ""
-"Rydan ni wedi sylw ar y ffolderi isod fel rhai efallai byddet ti am eu "
-"rhannu. Os wyt ti eisiau rhannu un o'r ffolderi yma, cleciau'r bocs. Mae "
-"ffolderi tu mewn y ffolder yma yn cael eu rhannu hefyd."
-
-#: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:62
-msgid ""
-"LimeWire was unable to locate any files that may be shared. To continue "
-"configuring LimeWire, click \"Next\"."
-msgstr ""
-"Mae LimeWire yn methu darganfod unrhyw ffeiliau i'w rhannu. I gario ymlaen i "
-"drefnu LimeWire clicia \"Nesaf\"."
-
-#: gui/com/limegroup/gnutella/gui/init/ScanConfirmWindow.java:73
-msgid "The selected folders below (and their subfolders) will be shared."
-msgstr ""
-"Mae'r ffolderi wedi'u dewis isod (a ffolderi tu mewn iddynt) i'w rhannu."
-
-#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:34
-msgid "Scan for Files"
-msgstr "Sganio am Ffeiliau"
-
-#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:35
-msgid ""
-"Would you like LimeWire to quickly scan your hard drive for other media "
-"files? You will have the opportunity to specify which folders you would like "
-"to share when the scan is complete."
-msgstr ""
-"Eisiau i LimeWire sganio dy ddisc caled yn gyflym ar gyfer ffeiliau "
-"cyfryngau eraill? Ti'n mynd i gael y cyfle i ddweud pa ffolderi ti eisiau eu "
-"rhannu pan mae'r sgan wedi gorffen."
-
-#: gui/com/limegroup/gnutella/gui/init/ScanWindow.java:52
-msgid "Scan Hard Drive?"
-msgstr "Sganio Disc Caled?"
-
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:265
-msgid "LimeWire Setup Dialog"
-msgstr "Deialog Trefnu LimeWire"
-
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:514
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:434
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:255
 msgid "Next >>"
 msgstr "Nesaf >>"
 
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:525
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:445
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:266
 msgid "<< Back"
 msgstr "<<Nol"
 
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:536
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:456
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:277
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:164
 msgid "Finish"
 msgstr "Gorffen"
-
-#: gui/com/limegroup/gnutella/gui/init/SetupWindow.java:131
-#: gui/com/limegroup/gnutella/gui/options/panes/AbstractPaneItem.java:66
-msgid "Learn more about this option..."
-msgstr "Dysgu mwy am y opsiwn yma..."
-
-#: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:40
-#: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:23
-msgid "Connection Speed"
-msgstr "Cyflymdra'r Cysylltiad"
-
-#: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:41
-msgid ""
-"Please choose the speed of your Internet connection. Setting this speed "
-"correctly is important for optimum network performance. If you are not sure "
-"what type of Internet connection you have, or if your connection type is not "
-"listed, simply select whichever one seems the most appropriate."
-msgstr ""
-"Dewis cyflymdra dy gysylltiad i'r we. Mae'n bwysig i wneud y dewis iawn i "
-"gael y canlyniadau gorau. Os nad wyt ti'n siwr pa fath o gysylltiad sydd "
-"gennyt ti, neu os ydy dy gysylltiad heb ei rhestri, dewis yr un sy'n edrych "
-"fel yr un mwyaf addas."
-
-#: gui/com/limegroup/gnutella/gui/init/SpeedWindow.java:49
-msgid "Select Speed"
-msgstr "Dewis Cyflymdra"
-
-#: gui/com/limegroup/gnutella/gui/init/StartupWindow.java:31
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:407
-#: gui/com/limegroup/gnutella/gui/options/panes/StartupPaneItem.java:22
-msgid "System Startup"
-msgstr "Dechrau'r System"
-
-#: gui/com/limegroup/gnutella/gui/init/StartupWindow.java:32
-msgid ""
-"Would you like LimeWire to start when you log into your computer? This will "
-"cause LimeWire to start faster when you use it later."
-msgstr ""
-"Wyt eisiau LimeWire i ddechrau pan ti'n cofnodi mewn ar dy gyfrifiadur? "
-"Mae'n helpu LimeWire i weithio'n gynt nes ymlaen"
-
-#: gui/com/limegroup/gnutella/gui/init/StartupWindow.java:39
-msgid "Start Automatically"
-msgstr "Dechrau'n Awtomatig"
-
-#: gui/com/limegroup/gnutella/gui/init/WaitWindow.java:38
-msgid "Scanning Hard Drive"
-msgstr "Yn Sganio Disc Caled"
-
-#: gui/com/limegroup/gnutella/gui/init/WaitWindow.java:38
-msgid "Please wait as LimeWire scans your hard drive..."
-msgstr "Aros tra mae LimeWire yn Sganio'r Disc Caled"
-
-#: gui/com/limegroup/gnutella/gui/init/WaitWindow.java:87
-msgid "Scan cancelled"
-msgstr "Sgan wedi canslo"
-
-#: gui/com/limegroup/gnutella/gui/init/WaitWindow.java:107
-msgid "Scanning Hard Drive..."
-msgstr "Yn Sganio Disc Caled..."
-
-#: gui/com/limegroup/gnutella/gui/init/WaitWindow.java:160
-msgid "Cancel Scan"
-msgstr "Canslo Sgan"
 
 #: gui/com/limegroup/gnutella/gui/init/WelcomeWindow.java:20
 msgid "Welcome"
@@ -5923,17 +5933,17 @@ msgid ""
 "features that require your configuration. LimeWire will guide you through a "
 "series of steps to configure these new features."
 msgstr ""
-"Croeso i Ddewin LimeWire. Mae LimeWire wedi adio mwy o bethau'n ddiweddar "
-"sydd angen iti eu trefnu. Mae LimeWire yn mynd i dy arwain trwy nifer o "
-"ddewisiadau i drefnu'r opsiynau newydd."
+"Croeso i Ddewin Dechrau LimeWire. Mae LimeWire wedi ychwanegu mwy o bethau'n "
+"ddiweddar sydd angen dy eu trefnu. Mae LimeWire yn mynd i dy arwain trwy "
+"nifer o ddewisiadau."
 
 #: gui/com/limegroup/gnutella/gui/init/WelcomeWindow.java:23
 msgid ""
 "Welcome to the LimeWire setup wizard. LimeWire will guide you through a "
 "series of steps to configure LimeWire for optimum performance."
 msgstr ""
-"Croeso i Ddewin LimeWire. Mae LimeWire yn mynd i dy arwain trwy gyfres o "
-"gamau er mwyn trefnu LimeWire i weithio orau."
+"Croeso i Ddewin Dechrau LimeWire. Mae LimeWire yn mynd i dy arwain trwy "
+"gyfres o gamau er mwyn drefnu LimeWire i weithio gorau."
 
 #: gui/com/limegroup/gnutella/gui/library/IncompleteDirectoryHolder.java:16
 #: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:21
@@ -5977,21 +5987,6 @@ msgstr "Chwilio yn Ffeiliau i'w Rhannu:"
 msgid "Search"
 msgstr "Chwilio"
 
-#: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:81
-msgid ""
-"Your search must be at least three characters long to avoid too many "
-"meaningless results."
-msgstr ""
-"Rhaid i dy chwiliad cael o leiaf 3 llythyren er mwyn peidio tagu'r "
-"rhwydwaith gyda chanlyniadau di-ystyr."
-
-#: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:84
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:429
-msgid ""
-"Your search is too long. Please make your search smaller and try again."
-msgstr ""
-"Mae dy chwiliad yn rhy hir. Rhaid gwneud y chwilio'n llai a thrio eto."
-
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchResultsHolder.java:29
 msgid "Search Results"
 msgstr "Canlyniadau Chwilio"
@@ -6014,7 +6009,7 @@ msgstr "Llwybr"
 #. upload options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:155
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:335
-#: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:55
+#: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:57
 msgid "Uploads"
 msgstr "Llwytho i Fyny"
 
@@ -6034,6 +6029,22 @@ msgstr "Dyddiad wedi newid"
 msgid "Shared"
 msgstr "Wedi Rhannu"
 
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:475
+msgid "This file is shared."
+msgstr "Ffolder sy'n cael ei rhannu"
+
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:477
+msgid "This file is not shared."
+msgstr "Ffeil yma heb ei rannu"
+
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:479
+msgid "This folder is shared."
+msgstr "Ffolder sy'n cael ei rhannu"
+
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:481
+msgid "This folder is not shared."
+msgstr "Y Ffolder yma heb ei rannu"
+
 #. for sharing gnutella
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:230
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:320
@@ -6049,25 +6060,33 @@ msgstr "Yn rhannu"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:347
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:397
 #: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:201
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:55
+#: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:51
 msgid "Advanced"
 msgstr "Uwch"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:789
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:674
+msgid ""
+"LimeWire cannot publish this file because it was unable to find a schema for "
+"audio files."
+msgstr ""
+"Mae LimeWire yn methu cyhoeddi'r ffeil - methu ffeindio cynllun am y "
+"ffeiliau sain"
+
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:780
 msgid "Move to Recycle Bin"
 msgstr "Symud i'r Ail-gylchu"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:790
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:781
 msgid "Move to Trash"
 msgstr "Symud i'r Ysbwriel"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:838
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:829
 msgid ""
 "Are you sure you want to delete the selected file(s), thus removing it from "
 "your computer?"
 msgstr "Wyt ti'n siwr dy fod di eisiau dileu y ffeil(iau) wedi'u dewis?"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:904
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:895
 msgid ""
 "The following files could not be deleted. They may be in use by another "
 "application or are currently being downloaded to."
@@ -6076,81 +6095,81 @@ msgstr ""
 "raglen arall neu mae llwytho i lawr yn mynd iddynt."
 
 #. notify the user that renaming failed
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:976
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:967
 msgid ""
 "Unable to rename the file '{0}'. It may be in use by another application."
 msgstr ""
 "Yn methu ail-enwi'r ffeil {0} Rhaglen arall yn ei ddefnyddio efallai?"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1034
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1025
 #, java-format
 msgid ""
 "The file \"{0}\" is not a valid incomplete file and cannot be resumed."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1251
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1242
 msgid "Enqueue"
 msgstr "Ciwio"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1253
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1244
 msgid "Add Selected Files to the Playlist"
 msgstr "Adio Ffeiliau wedi'u dewis i'r Rhestr Chwarae"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1277
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1268
 msgid "Delete Selected Files"
 msgstr "Dileu Ffeiliau wedi'u dewis"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1290
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1281
 msgid "Describe..."
 msgstr "Disgrifio..."
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1292
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1283
 msgid "Add Description to Selected File"
 msgstr "Adio Disgrifiad i Ffeil wedi'i Dewis"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1305
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1296
 msgid "Publish..."
 msgstr "Cyhoeddu..."
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1307
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1298
 msgid "Publish under Creative Commons License"
 msgstr "Cyhoeddu o dan trwyddyd Creative Commons"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1320
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1311
 msgid "Edit License..."
 msgstr "Golygu Trwydded"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1333
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1324
 msgid "Continue Downloading Selected Incomplete File"
 msgstr "Dal i lwythio y ffeil anghyflawn wedi'u dewis"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1346
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1337
 msgid "Rename"
 msgstr "Ail-enwi"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1360
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1351
 msgid "Share File"
 msgstr "Rhannu Ffeil"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1387
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1378
 msgid "Stop Sharing File"
 msgstr "Stopio Rhannu Ffeil"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1414
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1405
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:859
 msgid "Share Folder"
 msgstr "Rhannu Ffolder"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1444
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1435
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:800
 msgid "Stop Sharing Folder"
 msgstr "Stopio Rhannu Ffolder"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1471
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1462
 msgid "Show Magnet Details"
 msgstr "Dangos Canlyniadau Magnet"
 
-#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1483
+#: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1474
 #: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:170
 msgid "View License"
 msgstr "Gweld Trwydded"
@@ -6180,7 +6199,7 @@ msgid "Shared Files"
 msgstr "Ffeiliau wedi Rhannu"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:811
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:360
+#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:374
 msgid "Store"
 msgstr "Storfa"
 
@@ -6226,20 +6245,19 @@ msgstr ""
 "gallu dad-ddewis unrhyw ffolderi ti ddim am rannu. (Ti'n gallu newid dy "
 "ffolderi rhannu ar unrhyw adeg yn opsiynnau LimeWire.)"
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:255
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:293
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:302
 msgid "Legend"
 msgstr "Allwedd"
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:302
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:311
 msgid "Folder is fully shared including all subfolders."
 msgstr "Mae'r ffolder i gyd yn cael ei rannu yn cynnwys y ffolderi tu mewn."
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:316
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:325
 msgid "Folder is not shared and no subfolders are shared."
 msgstr "Nid yw'r ffolder neu ffolderi tu mewn yn cael eu rannu."
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:324
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:333
 msgid "Folder's files and some subfolders are shared."
 msgstr "Mae ffeiliau yn y ffolder a rhai ffolderi tu mewn yn cael eu rhannu."
 
@@ -6268,15 +6286,15 @@ msgstr "Cofnodi"
 msgid "Loading Logging Window..."
 msgstr "Llwytho  Ffenestr Cofnodi..."
 
-#: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:19
+#: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:27
 msgid "&Advanced"
 msgstr "&Uwch"
 
-#: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:28
+#: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:76
 msgid "Mojito &DHT Arcs View"
 msgstr "Golwg Mojito &DHT Arcs"
 
-#: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:29
+#: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:78
 msgid "Display a view of the incoming and outgoing DHT messages"
 msgstr "Dangos golwg o'r negeseuon DHT sy'n mynd mewn ac allan"
 
@@ -6384,11 +6402,12 @@ msgstr "&Ffiltriau Canlyniad"
 msgid "Show Search Result Filters"
 msgstr "Dangos Canlyniadau'r Chiwilo"
 
-#: gui/com/limegroup/gnutella/gui/menu/ShowHideMenu.java:30
+#: gui/com/limegroup/gnutella/gui/menu/ShowHideMenu.java:31
 msgid "Sho&w/Hide"
 msgstr "&Dangos/Cuddio"
 
-#: gui/com/limegroup/gnutella/gui/menu/ShowHideMenu.java:46
+#: gui/com/limegroup/gnutella/gui/menu/ShowHideMenu.java:47
+#: gui/com/limegroup/gnutella/gui/menu/ShowHideMenu.java:53
 #, java-format
 msgid "Show {0} Window"
 msgstr "Dangos Ffenestr {0}"
@@ -6476,7 +6495,7 @@ msgstr "Chwarae"
 #. * Constant for the stop button.
 #. 
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:101
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:356
+#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:370
 msgid "Stop"
 msgstr "Stopio"
 
@@ -6520,7 +6539,7 @@ msgid "Exit"
 msgstr "Gadael"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:54
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:517
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:510
 msgid "Restore Defaults"
 msgstr "Adfer Gwreiddiol"
 
@@ -6646,9 +6665,9 @@ msgstr "Cynnwys"
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:20
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:315
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:469
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:568
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:590
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:571
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:593
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
 msgid "Junk"
 msgstr "Ysbwriel"
 
@@ -6692,7 +6711,7 @@ msgid "Loading Options Window..."
 msgstr "Llwythio  Ffenestr Opsiynau..."
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsMediator.java:166
-#: gui/com/limegroup/gnutella/gui/options/OptionsPaneManager.java:125
+#: gui/com/limegroup/gnutella/gui/options/OptionsPaneManager.java:126
 msgid ""
 "One or more options will take effect the next time LimeWire is restarted."
 msgstr ""
@@ -6832,7 +6851,6 @@ msgstr "Ti'n gallu dewis pa raglen chwilio i ddefnyddio"
 #. * this <tt>PaneItem</tt>.
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:37
-#: gui/com/limegroup/gnutella/gui/tabs/SWTBrowserSearchTab.java:18
 msgid "Browser"
 msgstr "Rhaglen Chwilio"
 
@@ -7127,7 +7145,7 @@ msgid "Use Defaults"
 msgstr "Defnyddio'r Gwreiddiol"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:63
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:518
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:511
 msgid "Share the Default File Extensions"
 msgstr "Rhannu'r Estyniad Ffeil Rhagosodiedig"
 
@@ -7721,6 +7739,10 @@ msgstr "Agored"
 msgid "Strict"
 msgstr "Cyfyng"
 
+#: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:23
+msgid "Connection Speed"
+msgstr "Cyflymdra'r Cysylltiad"
+
 #: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:25
 msgid ""
 "You can specify your connection speed so that LimeWire can optimize "
@@ -7734,7 +7756,7 @@ msgstr ""
 #. * label on the component that allows to user to change the setting for
 #. * this <tt>PaneItem</tt>.
 #. 
-#: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:39
+#: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:37
 msgid "Speed:"
 msgstr "Cyflymdra:"
 
@@ -7997,42 +8019,42 @@ msgstr "#"
 msgid "Comment"
 msgstr "Sylw"
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:152
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:153
 msgid "Playlist"
 msgstr "Rhestr chwarae"
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:174
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:175
 msgid "Loading Playlist Window..."
 msgstr "Llwytho Ffenestr Rhestr Chwarae..."
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:522
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:535
 msgid "Play Options:"
 msgstr "Opsiynau Chwarae:"
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:525
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:538
 msgid "Shuffle"
 msgstr "Cymysu"
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:530
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:543
 msgid "Continuous"
 msgstr "Tryw'r Amser"
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:600
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:613
 msgid "Open Playlist (.m3u)"
 msgstr "Agor Rhestr Chwarae (.m3u)"
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:675
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:690
 msgid "Save Playlist As"
 msgstr "Cadw'r Rhestr Chwarae Fel"
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:687
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:702
 #, java-format
 msgid ""
-"Warning: a file with the name {0} already exists in the directory. Overwrite "
+"Warning: a file with the name {0} already exists in the folder. Overwrite "
 "this file?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:796
+#: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:831
 msgid "Playlist Files (*.m3u)"
 msgstr "Ffeiliau Rhestr Chwarae (*.m3u)"
 
@@ -8085,11 +8107,11 @@ msgstr "Trefnu"
 msgid "Library"
 msgstr "Llyfrgell"
 
-#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:175
+#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:203
 msgid "Getting Started"
 msgstr "Sut i Ddechrau"
 
-#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:180
+#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:208
 msgid ""
 "To start using LimeWire, find the text field on the left, type in what you "
 "are looking for and click the \"Search\" button. If you are looking for only "
@@ -8101,11 +8123,11 @@ msgstr ""
 "chwilio am un fath o beth yn arbennig (Cerddoriaeth, Fideo, etc...) gallet "
 "ti chwilio'n fwy penodol gyda'r botymau uwchben."
 
-#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:212
+#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:240
 msgid "The Most Advanced File Sharing Program on the Planet!"
 msgstr "Y Rhaglen Rhannu Ffeiliau Mwya Blaenllaw y Byd!"
 
-#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:217
+#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:245
 msgid ""
 "Better search results\n"
 "Turbo-Charged download speeds\n"
@@ -8122,32 +8144,32 @@ msgstr ""
 #. mark 'em red
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:313
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:455
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:587
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:590
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
 msgid "Not Junk"
 msgstr "Dim yn Ysbwriel"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:316
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:470
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:569
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:591
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:572
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:594
 msgid "Mark selected search results as Junk"
 msgstr "Marcio canlyniadau wedi'u dewis fel Ysbwriel"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:456
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:588
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:591
 msgid "Mark selected search results as Not Junk"
 msgstr "Marcio canlyniadau wedi'u dewis fel Nid Ysbwriel"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:515
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:518
 msgid "Search More"
 msgstr "Chwilio Mwy"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:674
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:677
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr "Eisiau blocio canlyniadau'r chwilio o'r rhestr canlynol o letywyr?"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1020
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1023
 msgid "More Info..."
 msgstr "Mwy o Wybodaeth..."
 
@@ -8176,12 +8198,12 @@ msgid "Search for Program Files, Including exe, zip, gz, and More"
 msgstr "Chwilio am Ffeiliau Rhaglenni, yn cynnwys exe. zip, gz a Mwy"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:42
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:83
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:85
 msgid "Download"
 msgstr "Llwytho i lawr"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:44
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:87
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:89
 msgid "Stop Search"
 msgstr "Stopio'r Chwilio"
 
@@ -8216,12 +8238,10 @@ msgstr "Oes Ffrindiau?"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:330
 msgid ""
-"Enter the IP address of a friend you'd like to connect to, click 'Direct "
-"Connect', and LimeWire will try to browse the files of that user."
+"Enter the IP address and port number (i.e. ip:port) of a friend you'd like "
+"to connect to, click 'Direct Connect', and LimeWire will try to browse that "
+"user's shared files."
 msgstr ""
-"Rho gyfeiriad ffrind hoffet ti ei gysylltu, clicia 'Cysylltiad "
-"Uniongyrchol', a bydd LimeWire yn ceisio chwilio am ffeiliau y defnyddiwr "
-"yno."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:367
 msgid "When your friends want to connect to you, they should enter"
@@ -8271,39 +8291,43 @@ msgstr "Chwilio y Rhwydwaith am y Geiriau"
 msgid "The address format is incorrect, please use host:port."
 msgstr "Mae fformat y cyfeiriad yn anghywir, defnyddia letywr:porth."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:85
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:87
 msgid "Close Search"
 msgstr "Cau'r Chwilio"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:89
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
 msgid "Launch Action"
 msgstr "Lansio"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
 msgid "Chat With Host"
 msgstr "Sgwrsio gyda Lletywr"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
 msgid "Repeat Search"
 msgstr "Chwilio eto"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
 msgid "Block Hosts"
 msgstr "Blocio Partner"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
 msgid "Mark As"
 msgstr "Marcio Fel"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
 msgid "Get More Results"
 msgstr "Cael Mwy o Ganlyniadau"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:143
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:145
 msgid "Loading Search Window..."
 msgstr "Llwytho Ffenestr Chwilio..."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:424
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:346
+msgid "Firewalled Host"
+msgstr "Lletywr gyda Wal Tan"
+
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:438
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
 "network."
@@ -8311,22 +8335,28 @@ msgstr ""
 "Rhaid i dy chwiliad cael o leiaf 3 llythyren i er mwyn peidio tagu'r "
 "rhwydwaith."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:432
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:436
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:443
+msgid ""
+"Your search is too long. Please make your search smaller and try again."
+msgstr ""
+"Mae dy chwiliad yn rhy hir. Rhaid gwneud y chwilio'n llai a thrio eto."
+
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:446
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:450
 msgid ""
 "Your search is too specific. Please make your search smaller and try again."
 msgstr ""
 "Mae dy chwiliad yn rhy benodol. Rhaid gwneud y chwilio'n llai ac wedyn trio "
 "eto."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:441
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:455
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
 "Plis aros, mae rhaid i LimeWire gorffen llwytho cyn ddechrau chwilio."
 
 #. if not connected or connecting, show one message.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:450
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:464
 msgid ""
 "You are not connected to the network. To connect, select \"Connect\" from "
 "the \"File\" menu. Your search may not return any results until you connect."
@@ -8336,7 +8366,7 @@ msgstr ""
 "iti gysylltu."
 
 #. if attempting to connect, show another.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:453
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:467
 msgid ""
 "LimeWire is currently connecting to the network. Your search may not return "
 "many results until you are fully connected to the network."
@@ -8344,7 +8374,7 @@ msgstr ""
 "Mae LimeWire wrthi'n cysylltu a'r rhwydwaith. Efallai fydd dy chwilio ddim "
 "yn darganfod unrhyw ganlynadau nes iti gysylltu."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:762
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:769
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
@@ -8352,7 +8382,7 @@ msgstr ""
 "Mae un o'r ffeiliau'n raglen gweithredol a gall cynnwys firws. Wyt ti'n siwr "
 "dy fod di am ei Lwytho i Lawr?"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:386
+#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:470
 #, java-format
 msgid "Could not browse host {0}."
 msgstr ""
@@ -8388,10 +8418,50 @@ msgid "View in Browser..."
 msgstr "Gweld Mewn Rhaglen Chwilio..."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:56
+msgid "Sharing Extensions"
+msgstr "Rhannu Estyniadau"
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:59
+msgid ""
+"Select the types of files on your computer that you wish to share with "
+"LimeWire."
+msgstr ""
+"Dewis y fath o ffeiliau ar dy gyfrifiadur ti eisiau rhannu gyda LimeWire."
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:82
+msgid "My Extensions"
+msgstr "Fy Estyniadau"
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:83
+msgid "Other"
+msgstr "Arall"
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:292
+msgid "To allow selection enable sharing of sensitive types."
+msgstr "I ganiatau dewis sy'n galluogi rhannu ffeiliau sensitif."
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:430
+msgid "The extension name was not valid, could not add."
+msgstr "Enw yr estyniad dim yn ddilys, methu adio."
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:486
+msgid "Add New Extension"
+msgstr "Adio Estyniad Newydd"
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:487
+msgid "Add a New Extension to My Extensions"
+msgstr "Adio Estyniad Newydd i fy Estyniadau"
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:491
+msgid "Enter the extension pattern:"
+msgstr "Rho batrwm yr estyniad:"
+
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:492
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:518
 msgid "Extension Sharing Settings"
 msgstr "Trefniadau Rhannu Estyniadau"
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:58
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:517
 msgid ""
 "This options clears any extension sharing changes you made and sets "
 "LimeWire's extension sharing preferences to the original preferences. Do you "
@@ -8401,50 +8471,11 @@ msgstr ""
 "wedi'u gwneud ac yn gosod dewisiadau rhannu LimeWire i'r trefniadau "
 "gwreiddiol. Eisiau cario ymlaen?"
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:59
-msgid "Enter the extension pattern:"
-msgstr "Rho batrwm yr estyniad:"
-
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:60
-msgid "The extension name was not valid, could not add."
-msgstr "Enw yr estyniad dim yn ddilys, methu adio."
-
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:61
-msgid "To allow selection enable sharing of sensitive types."
-msgstr "I ganiatau dewis sy'n galluogi rhannu ffeiliau sensitif."
-
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:65
-msgid "Sharing Extensions"
-msgstr "Rhannu Estyniadau"
-
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:68
-msgid ""
-"Select the types of files on your computer that you wish to share with "
-"LimeWire."
-msgstr ""
-"Dewis y fath o ffeiliau ar dy gyfrifiadur ti eisiau rhannu gyda LimeWire."
-
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:91
-msgid "My Extensions"
-msgstr "Fy Estyniadau"
-
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:92
-msgid "Other"
-msgstr "Arall"
-
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:493
-msgid "Add New Extension"
-msgstr "Adio Estyniad Newydd"
-
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:494
-msgid "Add a New Extension to My Extensions"
-msgstr "Adio Estyniad Newydd i fy Estyniadau"
-
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:536
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:530
 msgid "Do Not Share Sensitive File Types"
 msgstr "Peidio a rhannu ffeiliau sensitif"
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:537
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:531
 msgid ""
 "This stops LimeWire from sharing certain files that may contain sensitive "
 "information."
@@ -8452,11 +8483,11 @@ msgstr ""
 "Mae hwn yn stopio LimeWire rhag rannu rhai ffeiliau arbennig sy'n cynnwys "
 "gwybodaeth sensitif"
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:753
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:747
 msgid "File types you added to share."
 msgstr "Mathau o ffeiliau ti wedi adio i rhannu."
 
-#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:757
+#: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:751
 msgid "Other types of files."
 msgstr "Mathau eraill o ffeil."
 
@@ -8515,24 +8546,24 @@ msgstr ""
 msgid "Details"
 msgstr "Manylion"
 
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:119
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:222
+#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:122
+#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:236
 msgid "Idle"
 msgstr "Segur"
 
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:278
+#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:292
 msgid "Sorry, the browser could not be loaded."
 msgstr "Sori, Methu llwytho rhaglen chwilio'r we."
 
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:306
+#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:320
 msgid "Go"
 msgstr "Mynd"
 
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:352
+#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:366
 msgid "Back"
 msgstr "Nôl"
 
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:364
+#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:378
 msgid "Forward"
 msgstr "Ymlaen"
 
@@ -8587,10 +8618,6 @@ msgstr "Monitor"
 #: gui/com/limegroup/gnutella/gui/tabs/MonitorUploadTab.java:36
 msgid "View Searches and Uploads"
 msgstr "Gweld Chwiliadau a Llwytho i Fyny"
-
-#: gui/com/limegroup/gnutella/gui/tabs/SWTBrowserSearchTab.java:19
-msgid "Shop at the LimeWire Store"
-msgstr "Siopa yn Stofra LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/tabs/SearchDownloadTab.java:42
 msgid "Search and Download Files"
@@ -8700,7 +8727,7 @@ msgstr "Aros am ymholiadau"
 msgid "Swarm for {0}"
 msgstr "Heidio am {0}"
 
-#: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:128
+#: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:130
 msgid "Loading Upload Window..."
 msgstr "Llwytho Ffenestr Llwytho i fyny..."
 
@@ -9085,8 +9112,8 @@ msgstr ""
 "gair-pas yn gywir - wedyn trio eto."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:128
-msgid "There was an error while trying to access the upload directory."
-msgstr "Roedd problem wrth drio cael mynediad i'r ffolder llwytho i fyny."
+msgid "There was an error while trying to access the upload folder."
+msgstr "Roedd gwall tra'n ceisio mynd mewn i'r ffolder llwytho i fyny."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/InternetArchiveUploader.java:131
 msgid ""
@@ -9130,7 +9157,7 @@ msgstr "Byte o"
 msgid "Nothing to save."
 msgstr "Dim byd i gadw."
 
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:63
+#: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:59
 msgid "Multiple File Information"
 msgstr "Gwybodaeth am sawl Ffeil"
 
@@ -9167,11 +9194,6 @@ msgstr "Math:"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:43
 msgid "Track:"
 msgstr "Trac:"
-
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:44
-#: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:66
-msgid "Language:"
-msgstr "Iaith:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:45
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:59
