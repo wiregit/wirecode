@@ -290,10 +290,10 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 
 	/**
 	 * Overridden to make sure it calls the super method only if 
-	 * the filesize is known.
+	 * the filesize or sha1 are known.
 	 */
 	protected void initializeIncompleteFile() throws IOException {
-		if (getContentLength() != -1) {
+		if (getSha1Urn() != null || getContentLength() != -1) {
 			super.initializeIncompleteFile();
 		}
 	}

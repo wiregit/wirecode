@@ -92,21 +92,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * multiple hosts.  See the accompanying white paper for details.<p>
  *
  * Subclasses may refine the requery behavior by overriding the 
- * newRequery(n), allowAddition(..), and addDownload(..)  methods.
- * MagnetDownloader also redefines the tryAllDownloads(..) method to handle
- * default locations, and the getFileName() method to specify the completed
- * file name.<p>
- * 
- * Subclasses that pass this RemoteFileDesc arrays of size 0 MUST override
- * the getFileName method, otherwise an assert will fail.<p>
- * 
- * This class implements the Serializable interface but defines its own
- * writeObject and readObject methods.  This is necessary because parts of the
- * ManagedDownloader (e.g., sockets) are inherently unserializable.  For this
- * reason, serializing and deserializing a ManagedDownloader M results in a
- * ManagedDownloader M' that is the same as M except it is
- * unconnected. <b>Furthermore, it is necessary to explicitly call
- * initialize(..) after reading a ManagedDownloader from disk.</b>
+ * newRequery(), allowAddition(..), and addDownload(..)  methods.
  */
 class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocListener,
         ManagedDownloader, DownloadWorkerSupport {
@@ -967,10 +953,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             return;
         
         URN sha1 = getSha1Urn();
-        if (sha1 != null)
+        if (sha1 != null) {
             incompleteFile = incompleteFileManager.getFileForUrn(sha1);
-        
-        if (incompleteFile == null) { 
+        } else {
             incompleteFile = getIncompleteFile(getSaveFile().getName(), sha1,
                                                getContentLength());
         }
@@ -982,6 +967,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * Retrieves an incomplete file from the given incompleteFileManager with the
      * given name, URN & content-length.
+     * <p>
+     * It can be overridden in subclasses.
+     * </p> 
      */
     protected File getIncompleteFile(String name, URN urn,
                                      long length) throws IOException {
