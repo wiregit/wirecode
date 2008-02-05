@@ -49,7 +49,7 @@ public class FLACWriterTest extends AudioTestBase {
      */
     public void testFLACTagsWriting() throws Exception {
         
-        File f = TestUtils.getResourceFile(dir + "FLAC.flac");
+        File f = TestUtils.getResourceFile(dir + "Flac.flac");
         assertTrue(f.exists());
         File TEST_FILE = new File("test0012321.flac");
         TEST_FILE.delete();
