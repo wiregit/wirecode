@@ -128,7 +128,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 }
                 for (String idToRemove: idsToRemove) {
                     everActiveDownloaderIDs2Downloaders.remove(idToRemove);                    
-                }
+                }System.out.println("GetDownloadProgress:\n" + res);
                 return res.toString(); 
             }  
             

@@ -137,12 +137,7 @@ public final class LWSServerUtil {
     }
 
     private static boolean isValidKey(final String key) {
-        if (key == null)
-            return false;
-        //
-        // Check the length
-        //
-        if (key.length() != LWSDispatcherSupport.Constants.KEY_LENGTH) return false;
+        if (key == null || key.equals("")) return false;
         //
         // No periods, this is an indication of an error
         //
