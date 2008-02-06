@@ -275,11 +275,6 @@ public abstract class AbstractMessage implements Message {
              +", hops="+hops
              +", priority="+getPriority()+"}";
     }
-
-	/**
-	 * Records the dropping of this message in statistics.
-	 */
-	public abstract void recordDrop();
 	
 	public Class<? extends Message> getHandlerClass() {
 	    return getClass();

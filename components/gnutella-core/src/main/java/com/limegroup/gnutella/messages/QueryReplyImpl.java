@@ -40,9 +40,6 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.util.DataUtils;
 
@@ -117,18 +114,15 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         this._payload = payload;
         
 		if(!NetworkUtils.isValidPort(getPort())) {
-		    ReceivedErrorStat.REPLY_INVALID_PORT.incrementStat();
 			throw new BadPacketException("invalid port");
 		}
 		if( (getSpeed() & 0xFFFFFFFF00000000L) != 0) {
-		    ReceivedErrorStat.REPLY_INVALID_SPEED.incrementStat();
 			throw new BadPacketException("invalid speed: " + getSpeed());
 		} 		
 		
 		setAddress();
 		
 		if(!NetworkUtils.isValidAddress(getIPBytes())) {
-		    ReceivedErrorStat.REPLY_INVALID_ADDRESS.incrementStat();
 		    throw new BadPacketException("invalid address");
 		}
 		
@@ -306,7 +300,6 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 	// inherit doc comment
     public void writePayload(OutputStream out) throws IOException {
         out.write(_payload);
-		SentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
     }
     
     /**
@@ -1018,11 +1011,6 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 	 * firewalled, otherwise <tt>false</tt> */
 	public static boolean isFirewalledQuality(int quality) {
         return quality==0 || quality==2;
-	}
-
-	// inherit doc comment
-	public void recordDrop() {
-		DroppedSentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
 	}
 
     /** Handles all our GGEP stuff.  Caches potential GGEP blocks for efficiency.

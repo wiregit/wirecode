@@ -14,7 +14,6 @@ import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.GGEP;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "LIME/11".
  *  This message acknowledges (ACKS) the guid contained in the message (i.e. A 
@@ -176,13 +175,6 @@ public final class LimeACKVendorMessage extends AbstractVendorMessage {
      */
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
-        SentMessageStatHandler.UDP_LIME_ACK.addMessage(this);
-    }
-
-    /** Overridden purely for stats handling.
-     */
-    public void recordDrop() {
-        super.recordDrop();
     }
     
     @Override

@@ -35,9 +35,6 @@ public abstract class AbstractLimeRUDPMessage<T extends RUDPMessage>
         this.delegate = delegate;
     }
 
-    public void recordDrop() {
-    }
-
     public OpCode getOpCode() {
         return delegate.getOpCode();
     }

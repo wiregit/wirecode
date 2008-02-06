@@ -107,11 +107,5 @@ public final class TCPConnectBackRedirect extends AbstractVendorMessage {
         super.writePayload(out);
     }
 
-    /** Overridden purely for stats handling.
-     */
-    public void recordDrop() {
-        super.recordDrop();
-    }
-
 
 }

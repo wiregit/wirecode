@@ -7,7 +7,6 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.util.URLDecoder;
 
 /**
@@ -77,7 +76,6 @@ class FileRequestParser {
             } catch (IllegalArgumentException e) {
                 fileName = uri.substring(d + 1);
             }
-            UploadStat.TRADITIONAL_GET.incrementStat();
     
             return new FileRequest(index, fileName);
         } catch (NumberFormatException e) {
@@ -112,11 +110,9 @@ class FileRequestParser {
     
         FileDesc desc = fileManager.getFileDescForUrn(urn);
         if (desc == null) {
-            UploadStat.UNKNOWN_URN_GET.incrementStat();
             return null;
         }
     
-        UploadStat.URN_GET.incrementStat();
         return new FileRequest(desc.getIndex(), desc.getFileName(), requestType);
     }
 

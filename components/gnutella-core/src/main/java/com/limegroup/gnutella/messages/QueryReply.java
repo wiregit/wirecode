@@ -222,9 +222,6 @@ public interface QueryReply extends Message, SecureMessage {
     public int calculateQualityOfService(boolean iFirewalled,
             NetworkManager networkManager);
 
-    // inherit doc comment
-    public void recordDrop();
-
     public byte[] getPayload();
     
     /**

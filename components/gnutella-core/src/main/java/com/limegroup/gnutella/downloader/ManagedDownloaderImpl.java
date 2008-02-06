@@ -75,7 +75,6 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.util.QueryUtils;
@@ -1644,20 +1643,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 //spurious count increments in the local
                 //AlternateLocationCollections
                 if(!validAlts.contains(local)) {
-                    if(rfd.isFromAlternateLocation() )
-                        if (rfd.needsPush())
-                            DownloadStat.PUSH_ALTERNATE_WORKED.incrementStat();
-                        else
-                            DownloadStat.ALTERNATE_WORKED.incrementStat(); 
                     validAlts.add(local);
                 }
             }  else {
-                    if(rfd.isFromAlternateLocation() )
-                        if(local instanceof PushAltLoc)
-                                DownloadStat.PUSH_ALTERNATE_NOT_ADDED.incrementStat();
-                        else
-                                DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
-                    
                     validAlts.remove(local);
                     invalidAlts.add(rfd.getRemoteHostData());
                     recentInvalidAlts.add(local);

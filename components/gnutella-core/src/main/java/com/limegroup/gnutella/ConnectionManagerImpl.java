@@ -63,7 +63,6 @@ import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
@@ -387,15 +386,10 @@ public class ConnectionManagerImpl implements ConnectionManager {
 
 
     public void acceptConnection(String word, Socket socket) {
-        if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) 
-            HTTPStat.GNUTELLA_REQUESTS.incrementStat();
-        else if (ConnectionSettings.CONNECT_STRING.isDefault() &&
-                word.equals("LIMEWIRE") ) 
-            HTTPStat.GNUTELLA_LIMEWIRE_REQUESTS.incrementStat();
-        else
-            return; //drop it.
-        
-        acceptConnection(socket);
+        if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)
+                || (ConnectionSettings.CONNECT_STRING.isDefault() && word.equals("LIMEWIRE"))) {
+            acceptConnection(socket);
+        }
     }
     
     /**

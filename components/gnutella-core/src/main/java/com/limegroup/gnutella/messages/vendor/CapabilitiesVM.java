@@ -15,7 +15,6 @@ import org.limewire.util.ByteOrder;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.FeatureSearchData;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /** 
  * The message that lets other know what capabilities you support.  Everytime 
@@ -282,13 +281,6 @@ public final class CapabilitiesVM extends AbstractVendorMessage implements Vendo
      */
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
-        SentMessageStatHandler.TCP_MESSAGES_SUPPORTED.addMessage(this);
-    }
-
-    /** Overridden purely for stats handling.
-     */
-    public void recordDrop() {
-        super.recordDrop();
     }
 
     public String toString() {

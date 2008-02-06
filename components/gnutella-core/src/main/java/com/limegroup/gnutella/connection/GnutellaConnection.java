@@ -96,7 +96,6 @@ import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
-import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
@@ -860,7 +859,6 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     private void handleMessageInternal(Message m) {
         // Run through the route spam filter and drop accordingly.
         if (isSpam(m)) {
-            ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
             _connectionStats.addReceivedDropped();
         } else {
             if (m instanceof QueryReply) {

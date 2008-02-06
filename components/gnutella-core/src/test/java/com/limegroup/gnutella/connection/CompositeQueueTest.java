@@ -72,10 +72,8 @@ public class CompositeQueueTest extends LimeTestCase {
         mockery.checking(new Expectations() {{
             allowing(m).getCreationTime();
             will(returnValue(System.currentTimeMillis() - 100000)); // long ago doesn't matter
-            exactly(0).of(m).recordDrop(); // no dropping!
             allowing(m2).getCreationTime();
             will(returnValue(System.currentTimeMillis() - 900000));
-            exactly(0).of(m2).recordDrop(); 
         }});
         
         

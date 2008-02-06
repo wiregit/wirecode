@@ -28,8 +28,6 @@ import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
-import com.limegroup.gnutella.statistics.HTTPStat;
-import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -51,8 +49,6 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
         this.notFoundHandler = new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
-                UploadStat.FILE_NOT_FOUND.incrementStat();
-
                 response.setReasonPhrase("Feature Not Active");
                 response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             }
@@ -74,8 +70,6 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
         registerHandler("*", new HttpRequestHandler() {
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
-                UploadStat.MALFORMED_REQUEST.incrementStat();
-
                 response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
             }
         });
@@ -122,12 +116,6 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
         }
 
         public void fatalIOException(IOException e, NHttpConnection conn) {
-            if (HttpContextParams.isPush(conn.getContext())) {
-                if (HttpContextParams.isFirewalled(conn.getContext())) {
-                    UploadStat.FW_FW_FAILURE.incrementStat();
-                }
-                UploadStat.PUSH_FAILED.incrementStat();
-            }
         }
 
         public void fatalProtocolException(HttpException e, NHttpConnection conn) {
@@ -154,31 +142,8 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
 
         public void process(HttpRequest request, HttpContext context)
                 throws HttpException, IOException {
-            String method = request.getRequestLine().getMethod();
             if (HttpContextParams.isSubsequentRequest(context)) {
-                if ("GET".equals(method))
-                    UploadStat.SUBSEQUENT_GET.incrementStat();
-                else if ("HEAD".equals(method))
-                    UploadStat.SUBSEQUENT_HEAD.incrementStat();
-                else
-                    UploadStat.SUBSEQUENT_UNKNOWN.incrementStat();
                 HttpContextParams.setSubsequentRequest(context, true);
-            } else {
-                if (HttpContextParams.isPush(context)) {
-                    if ("GET".equals(method))
-                        UploadStat.PUSHED_GET.incrementStat();
-                    else if ("HEAD".equals(method))
-                        UploadStat.PUSHED_HEAD.incrementStat();
-                    else
-                        UploadStat.PUSHED_UNKNOWN.incrementStat();
-                } else {
-                    if ("GET".equals(method))
-                        HTTPStat.GET_REQUESTS.incrementStat();
-                    else if ("HEAD".equals(method))
-                        HTTPStat.HEAD_REQUESTS.incrementStat();
-                    else
-                        HTTPStat.UNKNOWN_REQUESTS.incrementStat();
-                }
             }
         }
 

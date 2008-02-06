@@ -56,8 +56,6 @@ import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.statistics.ReceivedMessageStat;
-import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
@@ -304,9 +302,6 @@ public class StandardMessageRouter extends MessageRouterImpl {
         //Only respond if we understand the actual feature, if it had a feature.
         if(!FeatureSearchData.supportsFeature(queryRequest.getFeatureSelector()))
             return false;
-
-        if (queryRequest.isWhatIsNewRequest())
-            ReceivedMessageStat.WHAT_IS_NEW_QUERY_MESSAGES.incrementStat();
                                                 
         // Only send results if we're not busy.  Note that this ignores
         // queue slots -- we're considered busy if all of our "normal"
@@ -326,14 +321,6 @@ public class StandardMessageRouter extends MessageRouterImpl {
                                                      
         // Run the local query
         Response[] responses = fileManager.query(queryRequest);
-        
-        if( connectionServices.isShieldedLeaf() && queryRequest.isTCP() ) {
-            if( responses != null && responses.length > 0 )
-                RoutedQueryStat.LEAF_HIT.incrementStat();
-            else
-                RoutedQueryStat.LEAF_FALSE_POSITIVE.incrementStat();
-        }
-
         return sendResponses(responses, queryRequest, handler);
         
     }

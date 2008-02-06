@@ -29,8 +29,6 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.statistics.DownloadStat;
-import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.MultiShutdownable;
 
@@ -454,15 +452,7 @@ public class DownloadWorker {
                 protected void handleState(boolean success) {
                     if (success) {
                         _rfd.resetFailedCount();
-                        if (_currentState.isHttp11())
-                            DownloadStat.SUCCESSFUL_HTTP11.incrementStat();
-                        else
-                            DownloadStat.SUCCESSFUL_HTTP10.incrementStat();
                     } else {
-                        if (_currentState.isHttp11())
-                            DownloadStat.FAILED_HTTP11.incrementStat();
-                        else
-                            DownloadStat.FAILED_HTTP10.incrementStat();
                         _manager.workerFailed(DownloadWorker.this);
                     }
 
@@ -701,7 +691,6 @@ public class DownloadWorker {
                     + _rfd.getPort());
 
         _manager.incrementTriedHostsCount();
-        DownloadStat.CONNECTION_ATTEMPTS.incrementStat();
 
         if (_rfd.isReplyToMulticast()) {
             // Start with a push connect, fallback to a direct connect, and do
@@ -899,7 +888,6 @@ public class DownloadWorker {
                 completeAssignGrey(victim, range);
 
         } catch (NoSuchElementException nsex) {
-            DownloadStat.NSE_EXCEPTION.incrementStat();
             LOG.debug(_downloader, nsex);
 
             return handleNoMoreDownloaders();
@@ -910,55 +898,46 @@ public class DownloadWorker {
             return handleNoRanges();
 
         } catch (TryAgainLaterException talx) {
-            DownloadStat.TAL_EXCEPTION.incrementStat();
             LOG.debug(_downloader, talx);
 
             return handleTryAgainLater();
 
         } catch (RangeNotAvailableException rnae) {
-            DownloadStat.RNA_EXCEPTION.incrementStat();
             LOG.debug(_downloader, rnae);
 
             return handleRangeNotAvailable();
 
         } catch (FileNotFoundException fnfx) {
-            DownloadStat.FNF_EXCEPTION.incrementStat();
             LOG.debug(_downloader, fnfx);
 
             return handleFileNotFound();
 
         } catch (NotSharingException nsx) {
-            DownloadStat.NS_EXCEPTION.incrementStat();
             LOG.debug(_downloader, nsx);
 
             return handleNotSharing();
 
         } catch (QueuedException qx) {
-            DownloadStat.Q_EXCEPTION.incrementStat();
             LOG.debug(_downloader, qx);
 
             return handleQueued(qx.getQueuePosition(), qx.getMinPollTime());
 
         } catch (ProblemReadingHeaderException prhe) {
-            DownloadStat.PRH_EXCEPTION.incrementStat();
             LOG.debug(_downloader, prhe);
 
             return handleProblemReadingHeader();
 
         } catch (UnknownCodeException uce) {
-            DownloadStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
             LOG.debug(_downloader, uce);
 
             return handleUnknownCode();
 
         } catch (ContentUrnMismatchException cume) {
-            DownloadStat.CONTENT_URN_MISMATCH_EXCEPTION.incrementStat();
             LOG.debug(_downloader, cume);
 
             return ConnectionStatus.getNoFile();
 
         } catch (IOException iox) {
-            DownloadStat.IO_EXCEPTION.incrementStat();
             LOG.debug(_downloader, iox);
 
             return handleIO();
@@ -966,10 +945,6 @@ public class DownloadWorker {
         }
 
         // did not throw exception? OK. we are downloading
-        DownloadStat.RESPONSE_OK.incrementStat();
-        if (_rfd.getFailedCount() > 0)
-            DownloadStat.RETRIED_SUCCESS.incrementStat();
-
         _rfd.resetFailedCount();
 
         synchronized (_manager) {
@@ -1607,11 +1582,7 @@ public class DownloadWorker {
                     _manager instanceof InNetworkDownloader);
             try {
                 dl.initializeTCP();
-                DownloadStat.CONNECT_PUSH_SUCCESS.incrementStat();
             } catch (IOException iox) {
-                // LOG.debug(_rfd + " -- IOX after starting connected from
-                // PushConnector.");
-                DownloadStat.PUSH_FAILURE_LOST.incrementStat();
                 failed();
                 return;
             }
@@ -1633,8 +1604,6 @@ public class DownloadWorker {
             Shutdownable canceller = toCancel;
             if (canceller != null)
                 canceller.shutdown();
-            // LOG.debug(_rfd + " -- Handling shutdown from PushConnector");
-            DownloadStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
             failed();
         }
 
@@ -1666,8 +1635,6 @@ public class DownloadWorker {
      * A ConnectObserver for starting the download via a direct connect.
      */
     private class DirectConnector extends HTTPConnectObserver {
-        private long createTime = System.currentTimeMillis();
-
         private boolean pushConnectOnFailure;
 
         private Socket connectingSocket;
@@ -1692,10 +1659,6 @@ public class DownloadWorker {
         public void handleConnect(Socket socket) {
             this.connectingSocket = null;
 
-            // LOG.debug(_rfd + " -- Handling connect from DirectConnector");
-            NumericalDownloadStat.TCP_CONNECT_TIME.addData((int) (System
-                    .currentTimeMillis() - createTime));
-            DownloadStat.CONNECT_DIRECT_SUCCESS.incrementStat();
             HTTPDownloader dl = httpDownloaderFactory.create(socket, _rfd, _commonOutFile,
                     _manager instanceof InNetworkDownloader);
             try {
@@ -1717,8 +1680,6 @@ public class DownloadWorker {
             this.shutdown = true;
             this.connectingSocket = null;
 
-            // LOG.debug(_rfd + " -- Handling shutdown from DirectConnnector");
-            DownloadStat.CONNECT_DIRECT_FAILURES.incrementStat();
             if (pushConnectOnFailure) {
                 connectWithPush(new PushConnector(false, false));
             } else {

@@ -6,8 +6,6 @@ import java.io.OutputStream;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 
 /**
@@ -76,8 +74,7 @@ public class PatchTableMessage extends RouteTableMessage {
         buf[2]=compressor;
         buf[3]=entryBits;
         System.arraycopy(data, 0, buf, 4, data.length); //TODO3: avoid
-        out.write(buf);  
-		SentMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(this);
+        out.write(buf);
     }
 
     
@@ -136,11 +133,6 @@ public class PatchTableMessage extends RouteTableMessage {
     public byte[] getData() {
         return data;
     }
-
-	// inherit doc comment
-	public void recordDrop() {
-		DroppedSentMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(this);
-	}
 
     public String toString() {
         StringBuilder buf=new StringBuilder();

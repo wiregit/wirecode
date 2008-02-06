@@ -37,7 +37,6 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
-import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
 
 /**
  * Handles {@link ReplyNumberVendorMessage} and {@link QueryReply} for 
@@ -168,9 +167,6 @@ public class OOBHandler implements MessageHandler, Runnable {
                 router.handleQueryReply(reply, handler);
             return;
         }
-
-        // from here on, it's OOBv3 specific code
-        ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(reply);
         
         int numResps = reply.getResultCount();
         OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);

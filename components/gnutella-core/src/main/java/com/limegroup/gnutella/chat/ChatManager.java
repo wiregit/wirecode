@@ -9,7 +9,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.SpamServices;
 import com.limegroup.gnutella.settings.ChatSettings;
-import com.limegroup.gnutella.statistics.HTTPStat;
 
 /**
  * This class establishes a connection for a chat, either
@@ -40,8 +39,6 @@ public final class ChatManager implements ConnectionAcceptor {
      * messenger.
      */
     public void acceptConnection(String word, Socket socket) {
-        HTTPStat.CHAT_REQUESTS.incrementStat();
-
 		boolean allowChats = ChatSettings.CHAT_ENABLED.getValue();
 		if (!allowChats) {
 		    IOUtils.close(socket);

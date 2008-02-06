@@ -54,10 +54,4 @@ public final class QueryStatusRequest extends AbstractVendorMessage {
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
     }
-
-    /** Overridden purely for stats handling.
-     */
-    public void recordDrop() {
-        super.recordDrop();
-    }
 }

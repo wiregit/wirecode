@@ -10,8 +10,6 @@ import org.limewire.collection.NameValue;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**
@@ -83,15 +81,7 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
         if(payload != null && payload.length > 0 ) {
             out.write(payload);
         }
-        // the ping is still written even if there's no payload
-        SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
-        //Do nothing...there is no payload!
     }
-
-	// inherit doc comment
-	public void recordDrop() {
-		DroppedSentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
-	}
 
     public String toString() {
         return "PingRequest("+super.toString()+")";

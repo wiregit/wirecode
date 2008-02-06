@@ -115,11 +115,6 @@ public interface Message extends Comparable<Message> {
     public void setPriority(int priority);
 
     /**
-     * Records the dropping of this message in statistics.
-     */
-    public void recordDrop();
-
-    /**
      * Returns the class that message handlers for it should register upon, i.e.
      * the interface class that it implements. 
      */

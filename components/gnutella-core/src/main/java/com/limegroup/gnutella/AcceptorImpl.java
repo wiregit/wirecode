@@ -39,7 +39,6 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.statistics.HTTPStat;
 
 /**
  * Listens on ports, accepts incoming connections, and dispatches threads to
@@ -631,7 +630,6 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         } else if (!ipFilter.get().allow(address.getAddress())) {
             if (LOG.isWarnEnabled())
                 LOG.warn("Ignoring banned host: " + address);
-            HTTPStat.BANNED_REQUESTS.incrementStat();
             IOUtils.close(client);
         } else {
             if (LOG.isDebugEnabled())
@@ -650,22 +648,10 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
 
             // Dispatch asynchronously if possible.
             if (client instanceof NIOMultiplexor) {// supports non-blocking reads
-                ((NIOMultiplexor) client).setReadObserver(new AsyncConnectionDispatcher(connectionDispatcher.get(), client, allowedProtocol) {
-                    @Override
-                    public void shutdown() {
-                        super.shutdown();
-                        HTTPStat.CLOSED_REQUESTS.incrementStat();
-                    }
-                });
+                ((NIOMultiplexor) client).setReadObserver(new AsyncConnectionDispatcher(connectionDispatcher.get(), client, allowedProtocol));
             } else {
-                HTTPStat.CLOSED_REQUESTS.incrementStat();
-                ThreadExecutor.startThread(new BlockingConnectionDispatcher(connectionDispatcher.get(), client, allowedProtocol) {
-                    @Override
-                    public void shutdown() {
-                        super.shutdown();
-                        HTTPStat.CLOSED_REQUESTS.incrementStat();
-                    }                    
-                }, "ConnectionDispatchRunner");
+                ThreadExecutor.startThread(new BlockingConnectionDispatcher(connectionDispatcher
+                        .get(), client, allowedProtocol), "ConnectionDispatchRunner");
             }
         }
     }

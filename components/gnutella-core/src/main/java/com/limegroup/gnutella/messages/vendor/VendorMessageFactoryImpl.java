@@ -16,7 +16,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 
 /**
  * Factory to turn binary input as read from Network to VendorMessage
@@ -108,7 +107,6 @@ public class VendorMessageFactoryImpl implements VendorMessageFactory {
 
         // sanity check
         if (fromNetwork.length < VendorMessage.LENGTH_MINUS_PAYLOAD) {
-            ReceivedErrorStat.VENDOR_INVALID_PAYLOAD.incrementStat();
             throw new BadPacketException("Not enough bytes for a VM!!");
         }
 
@@ -133,7 +131,6 @@ public class VendorMessageFactoryImpl implements VendorMessageFactory {
 
         VendorMessageParser parser = getParser(selector, vendorID);
         if (parser == null) {
-            ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();
             throw UNRECOGNIZED_EXCEPTION;
         }
         

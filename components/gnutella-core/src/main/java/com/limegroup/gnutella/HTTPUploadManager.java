@@ -34,7 +34,6 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.uploader.FileRequestHandler;
 import com.limegroup.gnutella.uploader.HTTPUploadSession;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
@@ -276,9 +275,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             HttpContext context, HTTPUploader uploader) throws HttpException,
             IOException {
         assert started;
-        
-        UploadStat.FREELOADER.incrementStat();
-
         uploader.setState(UploadStatus.FREELOADER);
         freeLoaderRequestHandler.handle(request, response, context);
     }
@@ -324,18 +320,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             localUploads.remove(uploader);
         }
 
-        switch (state) {
-        case COMPLETE:
-            UploadStat.COMPLETED.incrementStat();
-            if (lastState == UploadStatus.UPLOADING
-                    || lastState == UploadStatus.THEX_REQUEST)
-                UploadStat.COMPLETED_FILE.incrementStat();
-            break;
-        case INTERRUPTED:
-            UploadStat.INTERRUPTED.incrementStat();
-            break;
-        }
-
         if (uploader.getUploadType() != null
                 && !uploader.getUploadType().isInternal()) {
             FileDesc fd = uploader.getFileDesc();
@@ -369,10 +353,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         if (uploader.isVisible()) {
             return;
         }
-
-        // We want to increment attempted only for uploads that may
-        // have a chance of failing.
-        UploadStat.ATTEMPTED.incrementStat();
 
         // We are going to notify the gui about the new upload, and let
         // it decide what to do with it - will act depending on it's
@@ -494,7 +474,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 && hostLimitReached(session.getHost())) {
             if (LOG.isDebugEnabled())
                 LOG.debug("host limit reached for " + session.getHost());
-            UploadStat.LIMIT_REACHED_GREEDY.incrementStat();
             return QueueStatus.REJECTED;
         }
 

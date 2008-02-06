@@ -23,7 +23,6 @@ import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
-import com.limegroup.gnutella.statistics.NodeAssignerStat;
 
 
 /**
@@ -301,7 +300,6 @@ public class NodeAssigner {
             final int demotes = 4 * _ultrapeerTries;
             Runnable ultrapeerRunner = new Runnable() {
                 public void run() {
-                    NodeAssignerStat.ULTRAPEER_ASSIGNMENTS.incrementStat();
                     connectionManager.get().tryToBecomeAnUltrapeer(demotes);
                 }
             };
@@ -347,12 +345,9 @@ public class NodeAssigner {
         // If I'm in ACTIVE mode and Ultrapeers are excluded
         // from running in ACTIVE mode then switch with a
         // certain probability...
-        if (DHTSettings.EXCLUDE_ULTRAPEERS.getValue() && acceptUltrapeer()) {
-            
-            if (LOG.isDebugEnabled()) {
+        if (DHTSettings.EXCLUDE_ULTRAPEERS.getValue() && acceptUltrapeer()) {            
+            if (LOG.isDebugEnabled())
                 LOG.debug("Randomly switching from DHT node to ultrapeer!");
-            }
-            NodeAssignerStat.UP_TO_DHT_SWITCHES.incrementStat();
             return true;
         }
         
@@ -477,34 +472,6 @@ public class NodeAssigner {
      * Switches the mode of the DHT
      */
     private void switchDHTMode(final DHTMode from, final DHTMode to) {
-        if (from != null) {
-            switch(from) {
-                case ACTIVE:
-                    NodeAssignerStat.ACTIVE_DHT_DISCONNECTIONS.incrementStat();
-                    break;
-                case PASSIVE:
-                    NodeAssignerStat.PASSIVE_DHT_DISCONNECTIONS.incrementStat();
-                    break;
-                case PASSIVE_LEAF:
-                    NodeAssignerStat.PASSIVE_LEAF_DHT_DISCONNECTIONS.incrementStat();
-                    break;
-                // INACTIVE
-            }
-        }
-        
-        switch(to) {
-            case ACTIVE:
-                NodeAssignerStat.ACTIVE_DHT_ASSIGNMENTS.incrementStat();
-                break;
-            case PASSIVE:
-                NodeAssignerStat.PASSIVE_DHT_ASSIGNMENTS.incrementStat();
-                break;
-            case PASSIVE_LEAF:
-                NodeAssignerStat.PASSIVE_LEAF_DHT_ASSIGNMENTS.incrementStat();
-                break;
-            // INACTIVE
-        }
-        
         Runnable init = new Runnable() {
             public void run() {
                 if (to != DHTMode.INACTIVE) {

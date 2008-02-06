@@ -28,7 +28,6 @@ import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 
 @Singleton
 public class PingReplyFactoryImpl implements PingReplyFactory {
@@ -251,12 +250,10 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
             throw new NullPointerException("null payload");
         }
         if (payload.length < PingReply.STANDARD_PAYLOAD_SIZE) {
-            ReceivedErrorStat.PING_REPLY_INVALID_PAYLOAD.incrementStat();
             throw new BadPacketException("invalid payload length");
         }
         int port = ByteOrder.ushort2int(ByteOrder.leb2short(payload, 0));
         if (!NetworkUtils.isValidPort(port)) {
-            ReceivedErrorStat.PING_REPLY_INVALID_PORT.incrementStat();
             throw new BadPacketException("invalid port: " + port);
         }
 
@@ -273,7 +270,6 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
                 try {
                     ggep.getBytes(GGEP.GGEP_HEADER_CLIENT_LOCALE);
                 } catch (BadGGEPPropertyException e) {
-                    ReceivedErrorStat.PING_REPLY_INVALID_GGEP.incrementStat();
                     throw new BadPacketException("GGEP error : creating from"
                             + " network : client locale");
                 }
@@ -313,7 +309,6 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         }
 
         if (!NetworkUtils.isValidAddress(ipString)) {
-            ReceivedErrorStat.PING_REPLY_INVALID_ADDRESS.incrementStat();
             throw new BadPacketException("invalid address: " + ipString);
         }
 

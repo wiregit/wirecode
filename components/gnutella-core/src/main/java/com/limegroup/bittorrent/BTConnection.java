@@ -33,7 +33,6 @@ import com.limegroup.bittorrent.messages.BTRequest;
 import com.limegroup.bittorrent.messages.BTUnchoke;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 import com.limegroup.bittorrent.reader.BTMessageReader;
-import com.limegroup.bittorrent.statistics.BTMessageStat;
 import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.uploader.UploadSlotListener;
@@ -369,8 +368,6 @@ PieceSendListener, PieceReadListener {
 	 * Handles IOExceptions for this connection
 	 */
 	public void handleIOException(IOException iox) {
-		if (iox instanceof BadBTMessageException)
-			BTMessageStat.INCOMING_BAD.incrementStat();
 		if (LOG.isDebugEnabled())
 			LOG.debug(iox);
 		shutdown();

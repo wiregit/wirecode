@@ -115,11 +115,6 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.statistics.LimeSentMessageStat;
-import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
-import com.limegroup.gnutella.statistics.RouteErrorStat;
-import com.limegroup.gnutella.statistics.RoutedQueryStat;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 
@@ -831,7 +826,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
 		    return;
 
         udpService.send(reply, addr.getAddress(), addr.getPort());
-		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
 	}
 
 	/**
@@ -945,7 +939,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     }
 
     private void tallyDupQuery(QueryRequest request) {
-        ReceivedMessageStatHandler.TCP_DUPLICATE_QUERIES.addMessage(request);
+        // Used to add to a statistic, now is a noop.
     }
 
 	/**
@@ -1694,9 +1688,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
                 hitConnections.subList(startIndex, startIndex+hitConnections.size()/4);
         }
         
-        int notSent = list.size() - hitConnections.size();
-        RoutedQueryStat.LEAF_DROP.addData(notSent);
-        
         for(int i=0; i<hitConnections.size(); i++) {
             RoutedConnection mc = hitConnections.get(i);
             
@@ -1704,7 +1695,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
             // we have already ensured it hits the routing table
             // by filling up the 'hitsConnection' list.
             mc.send(query);
-            RoutedQueryStat.LEAF_SEND.incrementStat();
         }
 	}
 
@@ -1749,8 +1739,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     protected void multicastQueryRequest(QueryRequest query) {
 		// set the TTL on outgoing udp queries to 1
 		query.setTTL((byte)1);
-		// record the stat
-		SentMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(query);
 				
 		multicastService.send(query);
 	}	
@@ -1861,13 +1849,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
            
         // if it's the last hop to an Ultrapeer that sends
         // query route tables, route it.
-        if(lastHop &&
-           ultrapeer.isUltrapeerQueryRoutingConnection()) {
-            boolean sent = sendRoutedQueryToHost(query, ultrapeer, handler);
-            if(sent)
-                RoutedQueryStat.ULTRAPEER_SEND.incrementStat();
-            else
-                RoutedQueryStat.ULTRAPEER_DROP.incrementStat();
+        if(lastHop && ultrapeer.isUltrapeerQueryRoutingConnection()) {
+            sendRoutedQueryToHost(query, ultrapeer, handler);
         } else {
             // otherwise, just send it out
             ultrapeer.send(query);
@@ -1983,14 +1966,12 @@ public abstract class MessageRouterImpl implements MessageRouter {
         ReplyHandler replyHandler =
             _pingRouteTable.getReplyHandler(reply.getGUID());
 
-        if(replyHandler != null) {
+        if (replyHandler != null) {
             replyHandler.handlePingReply(reply, handler);
-        }
-        else {
-            RouteErrorStat.PING_REPLY_ROUTE_ERRORS.incrementStat();
+        } else {
             handler.countDroppedMessage();
         }
-		boolean supportsUnicast = reply.supportsUnicast();
+        boolean supportsUnicast = reply.supportsUnicast();
         
         //Then, if a marked pong from an Ultrapeer that we've never seen before,
         //send to all leaf connections except replyHandler (which may be null),
@@ -2064,17 +2045,9 @@ public abstract class MessageRouterImpl implements MessageRouter {
                 queryUnicaster.handleQueryReply(queryReply);
 
             } else {
-				RouteErrorStat.HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
-                final byte ttl = queryReply.getTTL();
-                if (ttl < RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL.length)
-				    RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL[ttl].incrementStat();
-                else
-				    RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL[RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL.length-1].incrementStat();
                 handler.countDroppedMessage();
             }
-        }
-        else {
-			RouteErrorStat.NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+        } else {
             handler.countDroppedMessage();
         }
     }
@@ -2300,7 +2273,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         assert push.getTTL() == 1 : "multicast push ttl not 1";
         
         multicastService.send(push);
-        SentMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(push);
     }
 
 
@@ -2521,7 +2493,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
             qr.setTTL((byte)(request.getHops()+1));
             try {
                 sendQueryReply(qr);
-                LimeSentMessageStat.LIME_REPLIES_SENT.incrementStat();
             } catch (IOException ignored) {}
         }
         
@@ -3007,21 +2978,18 @@ public abstract class MessageRouterImpl implements MessageRouter {
      */
     private class PingRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
             handlePingRequestPossibleDuplicate((PingRequest)msg, handler);
         }
     }
     
     private class PingReplyHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
             handlePingReply((PingReply)msg, handler);
         }
     }
     
     private class QueryRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
             handleQueryRequestPossibleDuplicate(
                 (QueryRequest)msg, (RoutedConnection)handler);
         }
@@ -3029,7 +2997,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     
     private class QueryReplyHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
             // if someone sent a TCP QueryReply with the MCAST header,
             // that's bad, so ignore it.
             QueryReply qmsg = (QueryReply)msg;
@@ -3039,7 +3006,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     
     private class ResetTableHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
             handleResetTableMessage((ResetTableMessage)msg,
                     (RoutedConnection)handler);
         }
@@ -3047,7 +3013,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     
     private class PatchTableHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(msg);
             handlePatchTableMessage((PatchTableMessage)msg,
                     (RoutedConnection)handler); 
         }
@@ -3055,7 +3020,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     
     private class TCPConnectBackHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_TCP_CONNECTBACK.addMessage(msg);
             handleTCPConnectBackRequest((TCPConnectBackVendorMessage) msg,
                     (RoutedConnection)handler);
         }
@@ -3063,7 +3027,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     
     private class UDPConnectBackHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_UDP_CONNECTBACK.addMessage(msg);
             handleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
                     (RoutedConnection)handler);
         }
@@ -3162,32 +3125,25 @@ public abstract class MessageRouterImpl implements MessageRouter {
                 // a TTL above zero may indicate a malicious client, as UDP
                 // messages queries should not be sent with TTL above 1.
                 //if(msg.getTTL() > 0) return;
-                if (!handleUDPQueryRequestPossibleDuplicate(
-                  (QueryRequest)msg, handler) ) {
-                    ReceivedMessageStatHandler.UDP_DUPLICATE_QUERIES.addMessage(msg);
-                }  
+                handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, handler);
             }
-            ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
         }
     }
     
     private class UDPPingRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
             handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler, addr);
         }
     }
     
     private class UDPPingReplyHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
             handleUDPPingReply((PingReply)msg, handler, addr.getAddress(), addr.getPort());
         }
     }
     
     private class UDPLimeACKVendorMessageHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.UDP_LIME_ACK.addMessage(msg);
             handleLimeACKMessage((LimeACKVendorMessage)msg, addr);
         }
     }
@@ -3219,18 +3175,13 @@ public abstract class MessageRouterImpl implements MessageRouter {
     public class MulticastQueryRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr,
                 ReplyHandler handler) {
-            if (!handleUDPQueryRequestPossibleDuplicate((QueryRequest) msg, handler)) {
-                ReceivedMessageStatHandler.MULTICAST_DUPLICATE_QUERIES
-                        .addMessage(msg);
-            }
-            ReceivedMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(msg);
+            handleUDPQueryRequestPossibleDuplicate((QueryRequest) msg, handler);
         }
     }
     
     public class MulticastQueryReplyHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, 
                 ReplyHandler handler) {
-            ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
             handleQueryReply((QueryReply)msg, handler);
         }
     }
@@ -3238,7 +3189,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     public class MulticastPingRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, 
                 ReplyHandler handler) {
-            ReceivedMessageStatHandler.MULTICAST_PING_REQUESTS.addMessage(msg);
             handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler, addr);
         }
     }
@@ -3246,7 +3196,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     public class MulticastPingReplyHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, 
                 ReplyHandler handler) {
-            ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
             handleUDPPingReply((PingReply)msg, handler, addr.getAddress(), addr.getPort());
         }
     }

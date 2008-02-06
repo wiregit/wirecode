@@ -27,9 +27,6 @@ import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.messages.HUGEExtension.GGEPBlock;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
@@ -393,24 +390,20 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
 		if(QUERY.length() == 0 &&
 		   parser.richQuery.length() == 0 &&
 		   QUERY_URNS.size() == 0) {
-		    ReceivedErrorStat.QUERY_EMPTY.incrementStat();
 			throw new BadPacketException("empty query");
 		}       
         if(QUERY.length() > MAX_QUERY_LENGTH) {
-            ReceivedErrorStat.QUERY_TOO_LARGE.incrementStat();
             //throw BadPacketException.QUERY_TOO_BIG;
             throw new BadPacketException("query too big: " + QUERY);
         }        
 
         if(parser.richQuery.length() > MAX_XML_QUERY_LENGTH) {
-            ReceivedErrorStat.QUERY_XML_TOO_LARGE.incrementStat();
             //throw BadPacketException.XML_QUERY_TOO_BIG;
             throw new BadPacketException("xml too big: " + parser.richQuery);
         }
 
         if(!(QUERY_URNS.size() > 0 && QUERY.equals(QueryRequestImpl.DEFAULT_URN_QUERY))
            && hasIllegalChars(QUERY)) {
-            ReceivedErrorStat.QUERY_ILLEGAL_CHARS.incrementStat();
             //throw BadPacketException.ILLEGAL_CHAR_IN_QUERY;
             throw new BadPacketException("illegal chars: " + QUERY);
         }
@@ -435,7 +428,6 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
 
     protected void writePayload(OutputStream out) throws IOException {
         out.write(PAYLOAD);
-		SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
     }
 
     /**
@@ -748,11 +740,6 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
             return _metaMask.intValue();
         return 0;
     }
-
-	// inherit doc comment
-	public void recordDrop() {
-		DroppedSentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
-	}
     
     /** Marks this as being an re-originated query. */
     public void originate() {

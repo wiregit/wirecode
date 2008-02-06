@@ -22,9 +22,6 @@ public interface PingRequest extends Message {
      */
     public static final GUID UDP_GUID = new GUID();
 
-    // inherit doc comment
-    public void recordDrop();
-
     /**
      * Accessor for whether or not this ping meets the criteria for being a
      * "heartbeat" ping, namely having ttl=0 and hops=1.

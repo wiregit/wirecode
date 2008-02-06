@@ -55,13 +55,11 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PushRequestImpl;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.statistics.DownloadStat;
-import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.MultiShutdownable;
 import com.limegroup.gnutella.util.URLDecoder;
 
@@ -147,7 +145,6 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      * @requires "GIV " is already read from the socket
      */
     public void acceptConnection(String word, Socket socket) {
-        HTTPStat.GIV_REQUESTS.incrementStat();
         ((NIOMultiplexor)socket).setReadObserver(new GivParser(socket));
     }
     
@@ -702,12 +699,10 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         public void handleIOException(IOException iox) {}
 
         public void handleConnect(Socket socket) throws IOException {
-            DownloadStat.FW_FW_SUCCESS.incrementStat();
             processor.processSocket(socket, "GIV");
         }
 
         public void shutdown() {
-            DownloadStat.FW_FW_FAILURE.incrementStat();
         }
     }
     

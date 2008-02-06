@@ -13,8 +13,6 @@ import org.limewire.service.ErrorService;
 
 import com.limegroup.bittorrent.messages.BTBitField;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
-import com.limegroup.bittorrent.statistics.BTMessageStat;
-import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 
 /**
  * State that parses the Bitfield message. 
@@ -71,9 +69,6 @@ class BitFieldState extends BTReadMessageState {
 		
 	private void countAndProcess(ByteBuffer b) {
 		BTBitField field = new BTBitField(b);
-		BTMessageStat.INCOMING_BITFIELD.incrementStat();
-		BTMessageStatBytes.INCOMING_BITFIELD.addData(5 + 
-				length);
 		readerState.getHandler().processMessage(field);
 	}
 

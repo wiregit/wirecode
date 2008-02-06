@@ -79,9 +79,6 @@ public interface VendorMessage extends Message {
     public static final byte[] F_NULL_VENDOR_ID = { (byte) 0, (byte) 0, (byte) 0, (byte) 0 };
 
     public int getVersion();
-
-    // INHERIT COMMENT
-    public void recordDrop();
     
     /** Marker interface for vendor messages which are also Control messages */
     public static interface ControlMessage extends VendorMessage {}

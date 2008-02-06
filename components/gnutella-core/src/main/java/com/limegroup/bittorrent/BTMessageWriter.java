@@ -17,9 +17,6 @@ import org.limewire.nio.timeout.StalledUploadWatchdog;
 import org.limewire.util.BufferUtils;
 
 import com.limegroup.bittorrent.messages.BTMessage;
-import com.limegroup.bittorrent.statistics.BTMessageStat;
-import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
-import com.limegroup.bittorrent.statistics.BandwidthStat;
 import com.limegroup.gnutella.BandwidthManager;
 
 public class BTMessageWriter implements BTChannelWriter {
@@ -260,10 +257,9 @@ public class BTMessageWriter implements BTChannelWriter {
 	}
 
 	/**
-	 * count written bytes in statistics and for banwdidth tracking
+	 * count written bytes for banwdidth tracking
 	 */
 	private void count(int written) {
-		BandwidthStat.BITTORRENT_MESSAGE_UPSTREAM_BANDWIDTH.addData(written);
 		pieceListener.wroteBytes(written);
 	}
 	
@@ -289,51 +285,7 @@ public class BTMessageWriter implements BTChannelWriter {
 		_out[0].putInt(_out[1].remaining() + 1); // message size
 		_out[0].put(currentMessage.getType());
 		_out[0].flip();
-		countMessage(currentMessage, _out[1].remaining()+5);
 		return true;
-	}
-	
-	/**
-	 * update statistics
-	 */
-	private void countMessage(BTMessage message, int length) {
-		switch (message.getType()) {
-		case BTMessage.CHOKE:
-			BTMessageStat.OUTGOING_CHOKE.incrementStat();
-			BTMessageStatBytes.OUTGOING_CHOKE.addData(length);
-			break;
-		case BTMessage.UNCHOKE:
-			BTMessageStat.OUTGOING_UNCHOKE.incrementStat();
-			BTMessageStatBytes.OUTGOING_UNCHOKE.addData(length);
-			break;
-		case BTMessage.INTERESTED:
-			BTMessageStat.OUTGOING_INTERESTED.incrementStat();
-			BTMessageStatBytes.OUTGOING_INTERESTED.addData(length);
-			break;
-		case BTMessage.NOT_INTERESTED:
-			BTMessageStat.OUTGOING_NOT_INTERESTED.incrementStat();
-			BTMessageStatBytes.OUTGOING_NOT_INTERESTED.addData(length);
-			break;
-		case BTMessage.HAVE:
-			BTMessageStat.OUTGOING_HAVE.incrementStat();
-			BTMessageStatBytes.OUTGOING_HAVE.addData(length);
-			break;
-		case BTMessage.BITFIELD:
-			BTMessageStat.OUTGOING_BITFIELD.incrementStat();
-			BTMessageStatBytes.OUTGOING_BITFIELD.addData(length);
-			break;
-		case BTMessage.CANCEL:
-			BTMessageStat.OUTGOING_CANCEL.incrementStat();
-			BTMessageStatBytes.OUTGOING_CANCEL.addData(length);
-			break;
-		case BTMessage.PIECE:
-			BTMessageStat.OUTGOING_PIECE.incrementStat();
-			BTMessageStatBytes.OUTGOING_PIECE.addData(length);
-			break;
-		case BTMessage.REQUEST:
-			BTMessageStat.OUTGOING_REQUEST.incrementStat();
-			BTMessageStatBytes.OUTGOING_REQUEST.addData(length);
-		}
 	}
 	
 	public String toString() {

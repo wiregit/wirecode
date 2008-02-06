@@ -2,9 +2,6 @@ package com.limegroup.bittorrent.messages;
 
 import java.nio.ByteBuffer;
 
-import com.limegroup.bittorrent.statistics.BTMessageStat;
-import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
-
 public abstract class BTMessage {
 	// private static final Log LOG = LogFactory.getLog(BTMessage.class);
 
@@ -81,14 +78,6 @@ public abstract class BTMessage {
 	}
 
 	/**
-	 * Notification that a keepAlive was received 
-	 */
-	public static void countKeepAlive() {
-		BTMessageStat.INCOMING_KEEP_ALIVE.incrementStat();
-		BTMessageStatBytes.INCOMING_KEEP_ALIVE.addData(4);
-	}
-
-	/**
 	 * Reads a BTMessage from a given <tt>ByteBuffer</tt>. Removes the ranges
 	 * read from the buffer and moves the rest to the front of the Buffer.
 	 * 
@@ -107,36 +96,22 @@ public abstract class BTMessage {
 		
 		switch (type) {
 		case CHOKE:
-			BTMessageStat.INCOMING_CHOKE.incrementStat();
-			BTMessageStatBytes.INCOMING_CHOKE.addData(5);
 			return BTChoke.createMessage();
 		case UNCHOKE:
-			BTMessageStat.INCOMING_UNCHOKE.incrementStat();
-			BTMessageStatBytes.INCOMING_UNCHOKE.addData(5);
 			return BTUnchoke.createMessage();
 		case INTERESTED:
-			BTMessageStat.INCOMING_INTERESTED.incrementStat();
-			BTMessageStatBytes.INCOMING_INTERESTED.addData(5);
 			return BTInterested.createMessage();
 		case NOT_INTERESTED:
-			BTMessageStat.INCOMING_NOT_INTERESTED.incrementStat();
-			BTMessageStatBytes.INCOMING_NOT_INTERESTED.addData(5);
 			return BTNotInterested.createMessage();
 		case HAVE:
-			BTMessageStat.INCOMING_HAVE.incrementStat();
-			BTMessageStatBytes.INCOMING_HAVE.addData(9);
 			return BTHave.readMessage(in);
 		case BITFIELD:
 			throw new BadBTMessageException("unexpected bitfield");
 		case REQUEST:
-			BTMessageStat.INCOMING_REQUEST.incrementStat();
-			BTMessageStatBytes.INCOMING_REQUEST.addData(17);
 			return BTRequest.readMessage(in);
 		case PIECE:
 			throw new IllegalArgumentException("do not parse pieces here");
 		case CANCEL:
-			BTMessageStat.INCOMING_CANCEL.incrementStat();
-			BTMessageStatBytes.INCOMING_CANCEL.addData(17);
 			return BTCancel.readMessage(in);
 		default:
 			throw new BadBTMessageException("unknown message, type " + type);

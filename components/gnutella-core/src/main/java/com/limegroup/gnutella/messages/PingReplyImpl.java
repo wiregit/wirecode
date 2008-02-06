@@ -26,8 +26,6 @@ import org.limewire.util.ByteOrder;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /**
  * A ping reply message, aka, "pong".  This implementation provides a way
@@ -463,7 +461,6 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
 
     protected void writePayload(OutputStream out) throws IOException {
         out.write(PAYLOAD);
-		SentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
     }
 
     /**
@@ -648,11 +645,6 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
         else
             return (x&(x - 1)) == 0;
     }
-
-	// inherit doc comment
-	public void recordDrop() {
-		DroppedSentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
-	}
 
     // overrides Object.toString
     public String toString() {

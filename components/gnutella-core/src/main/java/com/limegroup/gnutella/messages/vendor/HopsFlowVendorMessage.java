@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "BEAR/4".
  *  Used to ask a host you connect to to not send queries above the specified
@@ -64,12 +63,5 @@ public final class HopsFlowVendorMessage extends AbstractVendorMessage {
      */
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
-        SentMessageStatHandler.TCP_HOPS_FLOW.addMessage(this);
-    }
-
-    /** Overridden purely for stats handling.
-     */
-    public void recordDrop() {
-        super.recordDrop();
     }
 }

@@ -3,7 +3,6 @@ package com.limegroup.bittorrent.reader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.bittorrent.messages.BTMessage;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 
 class LengthState extends BTReadMessageState {
@@ -34,7 +33,6 @@ class LengthState extends BTReadMessageState {
 			throw new BadBTMessageException("bad message size " + length);
 		
 		if (length == 0) {
-			BTMessage.countKeepAlive();
 			readerState.dataRead(); 
 			return this;
 		}

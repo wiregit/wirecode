@@ -8,9 +8,6 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
-import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.DataUtils;
 
 /** A Gnutella push request, used to download files behind a firewall. */
@@ -37,17 +34,14 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
              byte[] payload, Network network) throws BadPacketException {
         super(guid, Message.F_PUSH, ttl, hops, payload.length, network);
         if (payload.length < STANDARD_PAYLOAD_SIZE) {
-            ReceivedErrorStat.PUSH_INVALID_PAYLOAD.incrementStat();
             throw new BadPacketException("Payload too small: "+payload.length);
         }
         this.payload=payload;
 		if(!NetworkUtils.isValidPort(getPort())) {
-		    ReceivedErrorStat.PUSH_INVALID_PORT.incrementStat();
 			throw new BadPacketException("invalid port");
 		}
 		String ip = NetworkUtils.ip2string(payload, 20);
 		if(!NetworkUtils.isValidAddress(ip)) {
-		    ReceivedErrorStat.PUSH_INVALID_ADDRESS.incrementStat();
 		    throw new BadPacketException("invalid address: " + ip);
 		}
     }
@@ -140,7 +134,6 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
 
     protected void writePayload(OutputStream out) throws IOException {
 		out.write(payload);
-		SentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(this);
     }
 
     /* (non-Javadoc)
@@ -184,14 +177,6 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
     public int getPort() {
         return ByteOrder.ushort2int(ByteOrder.leb2short(payload, 24));
     }
-
-	// inherit doc comment
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.messages.PushRequest#recordDrop()
-     */
-	public void recordDrop() {
-		DroppedSentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(this);
-	}
 
 	@Override
 	public Class<? extends Message> getHandlerClass() {

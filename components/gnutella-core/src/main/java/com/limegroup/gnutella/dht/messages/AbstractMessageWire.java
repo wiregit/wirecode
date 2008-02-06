@@ -36,9 +36,6 @@ abstract class AbstractMessageWire<T extends DHTMessage>
         this.delegate = delegate;
     }
 
-    public void recordDrop() {
-    }
-
     public Contact getContact() {
         return delegate.getContact();
     }

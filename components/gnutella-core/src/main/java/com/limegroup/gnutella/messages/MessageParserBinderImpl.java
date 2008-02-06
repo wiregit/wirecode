@@ -9,7 +9,6 @@ import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.MessageFactory.MessageParser;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 
 @Singleton
 public class MessageParserBinderImpl implements MessageParserBinder {
@@ -61,14 +60,11 @@ public class MessageParserBinderImpl implements MessageParserBinder {
             byte hops = header[18];
 
             if (hops < 0) {
-                ReceivedErrorStat.INVALID_HOPS.incrementStat();
                 throw new BadPacketException("Negative (or very large) hops");
             } else if (ttl < 0) {
-                ReceivedErrorStat.INVALID_TTL.incrementStat();
                 throw new BadPacketException("Negative (or very large) TTL");
             } else if ((hops > max) 
                     && (func != Message.F_PING_REPLY)) {
-                ReceivedErrorStat.HOPS_EXCEED_SOFT_MAX.incrementStat();
                 throw new BadPacketException("func: " + func + ", ttl: " + ttl
                         + ", hops: " + hops);
             } else if ((ttl + hops > max) 

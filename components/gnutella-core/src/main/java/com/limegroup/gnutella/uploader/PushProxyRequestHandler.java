@@ -26,7 +26,6 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.statistics.UploadStat;
 
 /**
  * Handles push proxy requests by sending a push request to the requested
@@ -66,14 +65,12 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
         HTTPUploader uploader = null;
         
         PushProxyRequest pushProxyRequest = parsePushProxyRequest(request);
-        UploadStat.PUSH_PROXY.incrementStat();
         if (pushProxyRequest == null) {
             response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
             uploader = sessionManager.getOrCreateUploader(request,
                     context, UploadType.MALFORMED_REQUEST,
                     "Malformed Request");
             uploader.setState(UploadStatus.MALFORMED_REQUEST);
-            UploadStat.PUSH_PROXY_REQ_BAD.incrementStat();
         } else {
             uploader = sessionManager.getOrCreateUploader(request,
                     context, UploadType.PUSH_PROXY, pushProxyRequest.clientGUID);
@@ -81,11 +78,9 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
             if (!sendRequest(pushProxyRequest)) {
                 response.setStatusCode(HttpStatus.SC_GONE);
                 response.setReasonPhrase("Servent not connected");
-                UploadStat.PUSH_PROXY_REQ_FAILED.incrementStat();
             } else {
                 response.setStatusCode(HttpStatus.SC_ACCEPTED);
                 response.setReasonPhrase("Message sent");
-                UploadStat.PUSH_PROXY_REQ_SUCCESS.incrementStat();
             }
         }
         

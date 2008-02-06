@@ -76,10 +76,9 @@ import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
-import com.limegroup.gnutella.statistics.DownloadStat;
+import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexReader;
 import com.limegroup.gnutella.tigertree.ThexReaderFactory;
-import com.limegroup.gnutella.tigertree.HashTree;
 
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as
@@ -945,12 +944,7 @@ public class HTTPDownloader implements BandwidthTracker {
         AltLocUtils.parseAlternateLocations(_rfd.getSHA1Urn(), altStr, allowTLS, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             public Void apply(AlternateLocation location) {
                 RemoteFileDesc rfd = location.createRemoteFileDesc(_rfd.getSize(), remoteFileDescFactory);
-                if(_locationsReceived.add(rfd)) {
-                    if (location instanceof DirectAltLoc)
-                        DownloadStat.ALTERNATE_COLLECTED.incrementStat();
-                    else
-                        DownloadStat.PUSH_ALTERNATE_COLLECTED.incrementStat();
-                }
+                _locationsReceived.add(rfd);
                 return null;
             }
         });

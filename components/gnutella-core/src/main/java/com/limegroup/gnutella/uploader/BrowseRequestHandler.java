@@ -31,7 +31,6 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
-import com.limegroup.gnutella.statistics.UploadStat;
 
 /**
  * Responds to Gnutella browse requests by returning a list of all shared files.
@@ -59,7 +58,6 @@ public class BrowseRequestHandler implements HttpRequestHandler {
 
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
-        UploadStat.BROWSE_HOST.incrementStat();
         
         HTTPUploader uploader = sessionManager.getOrCreateUploader(request,
                 context, UploadType.BROWSE_HOST, "Browse-File");

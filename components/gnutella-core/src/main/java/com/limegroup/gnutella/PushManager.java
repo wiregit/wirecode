@@ -21,7 +21,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.statistics.UploadStat;
 
 /**
  * Manages state for push upload requests.
@@ -119,7 +118,6 @@ public final class PushManager {
                 ConnectType type = tlsCapable && SSLSettings.isOutgoingTLSEnabled() ? ConnectType.TLS : ConnectType.PLAIN;
                 socketsManager.get().connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT, new PushObserver(data, false, httpAcceptor.get()), type);
             } catch(IOException iox) {
-                UploadStat.PUSH_FAILED.incrementStat();
             }
         }
     }
@@ -170,19 +168,12 @@ public final class PushManager {
         public void shutdown() {
             if(LOG.isDebugEnabled())
                 LOG.debug("Push (fwt: " + fwt + ") connect to: " + data.getHost() + ":" + data.getPort() + " failed");
-            if(fwt)
-                UploadStat.FW_FW_FAILURE.incrementStat();
-            else
-                UploadStat.PUSH_FAILED.incrementStat();
         }
 
         /** Starts a new thread that'll do the pushing. */
         public void handleConnect(Socket socket) throws IOException {
             if(LOG.isDebugEnabled())
                 LOG.debug("Push (fwt: " + fwt + ") connect to: " + data.getHost() + ":" + data.getPort() + " succeeded");
-            if (fwt) {
-                UploadStat.FW_FW_SUCCESS.incrementStat();
-            }
             ((NIOMultiplexor) socket).setWriteObserver(new PushConnector(socket, data, fwt, httpAcceptor));
         }
     }    
