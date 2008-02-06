@@ -61,7 +61,6 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
@@ -370,13 +369,12 @@ public class RequeryDownloadTest extends LimeTestCase {
                 UDPReplyHandlerCache udpReplyHandlerCache,
                 Provider<InspectionRequestHandler> inspectionRequestHandlerFactory,
                 Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
-                Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
                 Statistics statistics,
                 ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory,
                 PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
                 Provider<OOBHandler> oobHandlerFactory,
                 Provider<MACCalculatorRepositoryManager> macManager) {
-            super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder, oobHandlerFactory, macManager);
+            super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder, oobHandlerFactory, macManager);
         } 
         
         public void sendDynamicQuery(QueryRequest query) {

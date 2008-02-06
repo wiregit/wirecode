@@ -36,7 +36,6 @@ import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SettingsProvider;
-import org.limewire.statistic.StatisticsManager;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -342,7 +341,6 @@ public class LimeWireCoreModule extends AbstractModule {
 
         // TODO: statically injecting these for now...
         requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
-        requestStaticInjection(StatisticsManager.class);
         requestStaticInjection(Pools.class);
         requestStaticInjection(LocalSocketAddressService.class);
                         

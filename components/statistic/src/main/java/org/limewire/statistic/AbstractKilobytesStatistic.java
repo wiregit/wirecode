@@ -56,10 +56,11 @@ public abstract class AbstractKilobytesStatistic extends AbstractStatistic {
 	 * @return the average for this statistic in kilobytes per unit of
 	 *  measurement (KB/s)
 	 */
-	public double getAverage() {
-		if(_totalStatsRecorded == 0) return 0;
-		return (_total/_totalStatsRecorded)/BYTES_PER_KILOBYTE;
-	}
+    public double getAverage() {
+        if (_totalStatsRecorded == 0)
+            return 0;
+        return (_total / _totalStatsRecorded) / BYTES_PER_KILOBYTE;
+    }
 
 	/** 
 	 * Overridden to report the maximum for this statistic in kilobyes.

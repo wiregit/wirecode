@@ -7,7 +7,6 @@ import java.net.Socket;
 import java.util.Properties;
 
 import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.statistics.HandshakingStat;
 
 /**
  * An outgoing handshaker that blocks while handshaking.
@@ -72,7 +71,6 @@ public class BlockingOutgoingHandshaker implements Handshaker {
     private void concludeOutgoingHandshake() throws IOException {
         String connectLine = support.readLine();
         if (!support.isConnectLineValid(connectLine)) {
-            HandshakingStat.OUTGOING_BAD_CONNECT.incrementStat();
             throw new IOException("Bad connect string");
         }
         
@@ -85,10 +83,8 @@ public class BlockingOutgoingHandshaker implements Handshaker {
         case HandshakeResponse.OK:
             break;
         case HandshakeResponse.SLOTS_FULL:
-            handleSlotsFullStats(theirResponse);
             throw NoGnutellaOkException.SERVER_REJECT;
         default: 
-            HandshakingStat.OUTGOING_SERVER_UNKNOWN.incrementStat();
             throw NoGnutellaOkException.createServerUnknown(theirResponse.getStatusCode());
         }
 
@@ -97,10 +93,8 @@ public class BlockingOutgoingHandshaker implements Handshaker {
 
         switch(ourResponse.getStatusCode()) {
         case HandshakeResponse.OK:
-            HandshakingStat.SUCCESSFUL_OUTGOING.incrementStat();
             break;
         case HandshakeResponse.SLOTS_FULL:
-            HandshakingStat.OUTGOING_CLIENT_REJECT.incrementStat();
             throw NoGnutellaOkException.CLIENT_REJECT;
         case HandshakeResponse.LOCALE_NO_MATCH:
             //if responder's locale preferencing was set 
@@ -108,23 +102,7 @@ public class BlockingOutgoingHandshaker implements Handshaker {
             //(currently in use by the dedicated connectionfetcher)
             throw NoGnutellaOkException.CLIENT_REJECT_LOCALE;
         default: 
-            HandshakingStat.OUTGOING_CLIENT_UNKNOWN.incrementStat();
             throw NoGnutellaOkException.createClientUnknown(ourResponse.getStatusCode());
-        }
-    }
-    
-    /** Increments various HandshakingStats because of a slots full response. */
-    private void handleSlotsFullStats(HandshakeResponse theirResponse) {
-        if (theirResponse.isLimeWire()) {
-            if (theirResponse.isUltrapeer())
-                HandshakingStat.OUTGOING_LIMEWIRE_ULTRAPEER_REJECT.incrementStat();
-            else
-                HandshakingStat.OUTGOING_LIMEWIRE_LEAF_REJECT.incrementStat();
-        } else {
-            if (theirResponse.isUltrapeer())
-                HandshakingStat.OUTGOING_OTHER_ULTRAPEER_REJECT.incrementStat();
-            else
-                HandshakingStat.OUTGOING_OTHER_LEAF_REJECT.incrementStat();
         }
     }
 }

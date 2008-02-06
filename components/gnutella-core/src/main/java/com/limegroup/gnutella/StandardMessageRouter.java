@@ -32,7 +32,6 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
@@ -101,7 +100,6 @@ public class StandardMessageRouter extends MessageRouterImpl {
             UDPReplyHandlerCache udpReplyHandlerCache,
             Provider<InspectionRequestHandler> inspectionRequestHandlerFactory,
             Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
-            Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
             Statistics statistics,
             ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory,
             PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
@@ -117,7 +115,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
                 activityCallback, connectionServices, applicationServices,
                 backgroundExecutor, pongCacher, simppManager, updateHandler,
                 guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, 
-                udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory,
+                udpCrawlerPingHandlerFactory, 
                 pingRequestFactory, messageHandlerBinder, oobHandlerFactory, 
                 MACCalculatorRepositoryManager);
         this.statistics = statistics;

@@ -59,7 +59,6 @@ import com.limegroup.gnutella.licenses.LicenseCache;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.licenses.LicenseVerifier;
 import com.limegroup.gnutella.lws.server.LWSManager;
-import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -581,10 +580,6 @@ public class LimeWireCore {
     
     public Provider<UDPCrawlerPingHandler> getUDPCrawlerPingHandlerFactory() {
         return injector.getProvider(UDPCrawlerPingHandler.class);
-    }
-    
-    public Provider<AdvancedToggleHandler> getAdvancedToggleHandlerFactory() {
-        return injector.getProvider(AdvancedToggleHandler.class);
     }
 
     public FileResponseEntityFactory getFileRepsoneEntityFactory() {

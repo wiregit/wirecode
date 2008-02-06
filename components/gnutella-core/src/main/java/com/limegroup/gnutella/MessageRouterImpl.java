@@ -59,7 +59,6 @@ import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
 import com.limegroup.gnutella.messagehandlers.DualMessageHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
@@ -77,7 +76,6 @@ import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
-import com.limegroup.gnutella.messages.vendor.AdvancedStatsToggle;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
@@ -340,7 +338,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     protected final GuidMap multicastGuidMap;
     private final Provider<InspectionRequestHandler> inspectionRequestHandlerFactory;
     private final Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory;
-    private final Provider<AdvancedToggleHandler> advancedToggleHandlerFactory;
     private final Provider<OOBHandler> oobHandlerFactory;
     private final Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager;
 
@@ -391,7 +388,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
             UDPReplyHandlerCache udpReplyHandlerCache,
             Provider<InspectionRequestHandler> inspectionRequestHandlerFactory,
             Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
-            Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
             PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
             Provider<OOBHandler> oobHandlerFactory,
             Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager) {
@@ -425,7 +421,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         this.simppManager = simppManager;
         this.updateHandler = updateHandler;
         this.udpCrawlerPingHandlerFactory = udpCrawlerPingHandlerFactory;
-        this.advancedToggleHandlerFactory = advancedToggleHandlerFactory;
         this.pingRequestFactory = pingRequestFactory;
         this.messageHandlerBinder = messageHandlerBinder;
         this.multicastGuidMap = guidMapManager.getMap();
@@ -605,7 +600,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
         setUDPMessageHandler(ContentResponse.class, new UDPContentResponseHandler());
         setUDPMessageHandler(InspectionRequest.class, inspectionHandler);
-        setUDPMessageHandler(AdvancedStatsToggle.class, advancedToggleHandlerFactory.get());
         
         setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
         //setMulticastMessageHandler(QueryReply.class, new MulticastQueryReplyHandler());

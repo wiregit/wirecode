@@ -5,8 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import com.limegroup.gnutella.statistics.HandshakingStat;
-
 /**
  * An incoming handshaker that blocks while handshaking.
  */
@@ -87,16 +85,13 @@ public class BlockingIncomingHandshaker implements Handshaker {
         case HandshakeResponse.OK:
             break;
         case HandshakeResponse.SLOTS_FULL:
-            HandshakingStat.INCOMING_CLIENT_REJECT.incrementStat();
             throw NoGnutellaOkException.CLIENT_REJECT;
         default: 
-            HandshakingStat.INCOMING_CLIENT_UNKNOWN.incrementStat();
             throw NoGnutellaOkException.createClientUnknown(ourResponse.getStatusCode());
         }
                 
         String connectLine = support.readLine();
         if (!support.isConnectLineValid(connectLine)) {
-            HandshakingStat.INCOMING_BAD_CONNECT.incrementStat();
             throw new IOException("Bad connect string");
         }
 
@@ -104,10 +99,8 @@ public class BlockingIncomingHandshaker implements Handshaker {
         HandshakeResponse theirResponse = support.createRemoteResponse(connectLine);
         switch(theirResponse.getStatusCode()) {
         case HandshakeResponse.OK:
-            HandshakingStat.SUCCESSFUL_INCOMING.incrementStat();
             break;
         default:
-            HandshakingStat.INCOMING_SERVER_UNKNOWN.incrementStat();
             throw NoGnutellaOkException.createServerUnknown(theirResponse.getStatusCode());
         }
     }

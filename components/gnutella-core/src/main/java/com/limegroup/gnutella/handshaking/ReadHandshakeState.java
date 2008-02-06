@@ -5,7 +5,6 @@ import java.io.IOException;
 import com.limegroup.gnutella.http.ReadHeadersIOState;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.BandwidthStat;
-import com.limegroup.gnutella.statistics.HandshakingStat;
 
 /**
  * Superclass for HandshakeStates that are reading.
@@ -58,7 +57,6 @@ abstract class ReadHandshakeState extends ReadHeadersIOState {
                 throw new IOException("crawler");
             
             if (!((HandshakeSupport)support).isConnectLineValid(connectLine)) {
-                HandshakingStat.INCOMING_BAD_CONNECT.incrementStat();
                 throw new IOException("Bad connect string");
             }
         }
@@ -68,10 +66,8 @@ abstract class ReadHandshakeState extends ReadHeadersIOState {
             HandshakeResponse theirResponse = ((HandshakeSupport)support).createRemoteResponse(connectLine);
             switch(theirResponse.getStatusCode()) {
             case HandshakeResponse.OK:
-                HandshakingStat.SUCCESSFUL_INCOMING.incrementStat();
                 break;
             default:
-                HandshakingStat.INCOMING_SERVER_UNKNOWN.incrementStat();
                 throw NoGnutellaOkException.createServerUnknown(theirResponse.getStatusCode());
             }
         }        
