@@ -94,5 +94,6 @@
 	<classpathentry kind="lib" path="lib/jars/httpcore-4.0-alpha6.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.0-alpha6.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-niossl-4.0-alpha6.jar"/>
+	<classpathentry kind="lib" path="lib/jars/google-collect-snapshot-20071022.jar" sourcepath="lib/sources/google-collect-snapshot-20071022-src.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

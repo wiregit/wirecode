@@ -91,6 +91,11 @@
       <artifactId>id3v2</artifactId>
       <version>0.3-lw-1</version>
     </dependency>
+    <dependency>
+      <groupId>com.google.common</groupId>
+      <artifactId>google-collections</artifactId>
+      <version>snapshot-20071022</version>
+    </dependency>	
 	<!-- Other Non-Ibiblio Jars -->
     <dependency>
       <groupId>com.jcraft</groupId>
