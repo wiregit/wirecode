@@ -2124,7 +2124,10 @@ public abstract class MessageRouterImpl implements MessageRouter {
         if( rh == forMeReplyHandler ) return false;
         
         // Reason 3 -- drop if TTL is 0.
-        if( ttl == 0 ) return true;                
+        if( ttl == 0 ) {
+            droppedReplyCounter.dropTTL0();
+            return true;                
+        }
 
         // Reason 1 ...
         
@@ -3357,6 +3360,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         private final Buffer<Short> tooManyResults = new Buffer<Short>(50);
         private final Buffer<Byte> ttls = new Buffer<Byte>(50);
         private final Buffer<Integer> bytesRouted = new Buffer<Integer>(50);
+        private long totalDropped, droppedTTL0;
         
         public synchronized Object inspect() {
             byte [] tooManyResultsByte = new byte[tooManyResults.getSize() * 2];
@@ -3371,23 +3375,34 @@ public abstract class MessageRouterImpl implements MessageRouter {
             for (int i = 0; i < bytesRouted.getSize(); i++)
                 ByteOrder.int2beb(bytesRouted.get(i), bytesRoutedByte, i * 4);
             
-            Map<String,byte []> ret = new HashMap<String,byte []>();
+            Map<String,Object> ret = new HashMap<String,Object>();
             ret.put("tooMany",tooManyResultsByte);
             ret.put("ttls",ttlsByte);
             ret.put("bytes",bytesRoutedByte);
+            ret.put("total",totalDropped);
+            ret.put("ttl0",droppedTTL0);
             return ret;
         }
         
         public synchronized void tooManyResults(short numResults) {
-            if (LimeWireUtils.isBetaRelease())
-                tooManyResults.add(numResults);
+            if (!LimeWireUtils.isBetaRelease())
+                return;
+            totalDropped++;
+            tooManyResults.add(numResults);
         }
         
         public synchronized void ttlByteDrop(byte ttl, int bytes) {
             if (!LimeWireUtils.isBetaRelease())
                 return;
+            totalDropped++;
             ttls.add(ttl);
             bytesRouted.add(bytes);
+        }
+        
+        public synchronized void dropTTL0() {
+            // not checking isBeta since these fields are already allocated
+            totalDropped++;
+            droppedTTL0++;
         }
     }
     
