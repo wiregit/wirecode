@@ -22,6 +22,7 @@ import java.util.StringTokenizer;
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.FileDetails;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.EncodingUtils;
 import com.limegroup.gnutella.util.URLDecoder;
@@ -71,9 +72,7 @@ public class MagnetOptions implements Serializable {
 	 */
 	public static MagnetOptions createMagnet(FileDetails fileDetails) {
 		Map<Option, List<String>> map = new EnumMap<Option, List<String>>(Option.class);
-        List<String> name = new ArrayList<String>(1);
-        name.add(fileDetails.getFileName());
-		map.put(Option.DN, name);
+		map.put(Option.DN, Collections.singletonList(fileDetails.getFileName()));
 		URN urn = fileDetails.getSHA1Urn();
 		if (urn != null) {
 			addAppend(map, Option.XT, urn.httpStringValue());
@@ -88,11 +87,20 @@ public class MagnetOptions implements Serializable {
 			url = addr.toString();
 			addAppend(map, Option.XS, url);
 		}
+		byte[] clientGuid = fileDetails.getClientGUID();
+		URN guidUrn = null;
+		if (clientGuid != null) {
+		    guidUrn = URN.createGUIDUrn(new GUID(clientGuid));
+		    addAppend(map, Option.XS, guidUrn.httpStringValue());
+		}
 		MagnetOptions magnet = new MagnetOptions(map);
 		// set already known values
 		magnet.urn = urn;
 		if (url != null) {
 			magnet.defaultURLs = new String[] { url };
+		}
+		if (guidUrn != null) {
+		    magnet.guidUrns = Collections.singleton(guidUrn);
 		}
 		return magnet;
 	}

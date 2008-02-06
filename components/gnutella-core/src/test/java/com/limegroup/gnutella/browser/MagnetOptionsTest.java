@@ -1,13 +1,17 @@
 package com.limegroup.gnutella.browser;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.util.BaseTestCase;
 
+import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.EncodingUtils;
@@ -16,6 +20,7 @@ public class MagnetOptionsTest extends BaseTestCase {
 
     MagnetOptions[] validMagnets;
     private String[] guidMagnets;
+    private Mockery context;
     
     public void setUp() {
         validMagnets = MagnetOptions.parseMagnet("magnet:?xt.1=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xt.2=urn:sha1:TXGCZQTH26NL6OUQAJJPFALHG2LTGBC7");
@@ -25,6 +30,7 @@ public class MagnetOptionsTest extends BaseTestCase {
                 "magnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&as=" + URN.createGUIDUrn(new GUID()),
                 "magnet:?xt=urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C&xs=" + URN.createGUIDUrn(new GUID()),
         };
+        context = new Mockery();
     }
 
 	public MagnetOptionsTest(String name) {
@@ -216,9 +222,40 @@ public class MagnetOptionsTest extends BaseTestCase {
             assertTrue(magnet.getGUIDUrns().isEmpty());
         }
     }
+    
+    public void testCreateMagnetWithGUIDUrn() throws Exception {
+        final GUID guid = new GUID();
+        final URN urn = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKOZWUGZQYPFB");
+        final FileDetails fileDetails = context.mock(FileDetails.class);
+        context.checking(new Expectations() {{
+            allowing(fileDetails).getClientGUID();
+            will(returnValue(guid.bytes()));
+            allowing(fileDetails).getFileName();
+            will(returnValue("filename"));
+            allowing(fileDetails).getSHA1Urn();
+            will(returnValue(urn));
+            one(fileDetails).getInetSocketAddress();
+            will(returnValue(null));
+            // second time around with url
+            allowing(fileDetails).getInetSocketAddress();
+            will(returnValue(new InetSocketAddress("127.0.0.1", 5555)));
+        }});
+        MagnetOptions magnet = MagnetOptions.createMagnet(fileDetails);
+        assertTrue(magnet.toExternalForm().contains(guid.toHexString()));
+        assertEquals(urn, magnet.getSHA1Urn());
+        assertEquals(URN.createGUIDUrn(guid), magnet.getGUIDUrns().iterator().next());
+        
+        magnet = MagnetOptions.createMagnet(fileDetails);
+        assertTrue(magnet.toExternalForm().contains(guid.toHexString()));
+        assertEquals(urn, magnet.getSHA1Urn());
+        assertEquals(URN.createGUIDUrn(guid), magnet.getGUIDUrns().iterator().next());
+        assertEquals(2, magnet.getXS().size());
+        assertTrue(magnet.toExternalForm().contains("127.0.0.1:5555"));
+        assertEquals(1, magnet.getDefaultURLs().length);
+    }
      
     private String createMultiLineMagnetLinks(MagnetOptions[] opts) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for (int i = 0; i < opts.length; i++) {
             if (i > 0) {
                 buffer.append(System.getProperty("line.separator"));
