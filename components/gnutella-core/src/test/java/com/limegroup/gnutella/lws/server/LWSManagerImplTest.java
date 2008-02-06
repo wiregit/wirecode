@@ -30,8 +30,9 @@ public class LWSManagerImplTest extends LimeTestCase {
                 public void process(String response) {
                 }
             });
-        } catch (IllegalArgumentException iae) {
-            fail("IllegalArgumentException should not have been thrown: " + iae);
+            fail("expected iox");
+        } catch(IOException iox) {
+            assertEquals("null host!", iox.getMessage());
         }
     }
 

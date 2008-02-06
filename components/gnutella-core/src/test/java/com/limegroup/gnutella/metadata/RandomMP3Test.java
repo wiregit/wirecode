@@ -5,7 +5,10 @@ import java.io.File;
 
 import junit.framework.Test;
 
+import org.limewire.util.TestUtils;
+
 import com.limegroup.gnutella.metadata.audio.AudioMetaData;
+import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
  * Test MP3Info class
@@ -14,31 +17,28 @@ import com.limegroup.gnutella.metadata.audio.AudioMetaData;
  * @author  cHANCE mOORE, ctmoore@gottapee.com - 30 July 2002
  */
 //34567890123456789012345678901234567890123456789012345678901234567890123456789
-public class RandomMP3Test extends com.limegroup.gnutella.util.LimeTestCase {
-    
-    private static final int runs = 900;
-    
-    private static final String d = "com/limegroup/gnutella/metadata/";
+public class RandomMP3Test extends LimeTestCase {
+      
     
     private static final String file[] = new String[] {
-    d+"mpg1layIII_96k-RIFFWAV_441000hz_joint_Xing.wav",
-    d+"mpg1layI_0h_448k_frame14_48000hz_dual_fl5Orig.mp3",
-    d+"mpg1layI_43h_32k_f256_44100hz_dual_50-15emph_CRCcopyOrig_sectest.mp3",
-    d+"mpg1layII_0h_384k_frame24_48000hz_stereo_CRCOrig_Gogo1sectest.mp3",
-    d+"mpg1layIII_212k-VBRq0_f1655_441hz_stereo_FhgTAGID3v1_waterson.mp3",
-    d+"mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3",
-    d+"mpg1layIII_138k-VBRq44_f2895_44100hz_joint_XingTAG_ID3v2_Lame.mp3",
-    d+"mpg1layIII_170k-VBRq66_f1721_441hz_stereo_XingTAGcopyID3v1_mutter.mp3",  
-    d+"mpg1layII_0h_192k_frame44_44100hz_joint_CRCfl11.mp2",
-    d+"mpg2.5layIII_8k-VBRq95_f149_8000khz_mono_ID3v2Orig_XingTAG_Lame.mp3",
-    d+"mpg2layI_0h_128k_frame54_22050hz_joint_CRCOrig_test33.mp3",
-    d+"mpg2layII_1504h_16k_frame56_24000hz_joint_CRCOrigID3v1&2_test27.mp3",
-    d+"mpg2layIII_0h_40k_764or744frame_22050hz_mono_Orig_Fhgl3Frank.mp3",
-    d+"mpg2layIII_12kABRq55_f1202_16hz_stereo_XingLameTAG_CRCOrigwaterson.mp3",
-    d+"mpgPlus_210k-VBR_f1149_441hz_joint_copy__NOTmp1lay_448k_f540_5015.mpc",
-    d+"mpgPRO2layIII_0h_64k_frame2036or2015_22050hz_joint_thomson.mp3",
-    d+"mpg4_golem160x90first120.avi",
-    d+"corruptFileWithBadHeaders.mp3"};
+    "mpg1layIII_96k-RIFFWAV_441000hz_joint_Xing.wav",
+    "mpg1layI_0h_448k_frame14_48000hz_dual_fl5Orig.mp3",
+    "mpg1layI_43h_32k_f256_44100hz_dual_50-15emph_CRCcopyOrig_sectest.mp3",
+    "mpg1layII_0h_384k_frame24_48000hz_stereo_CRCOrig_Gogo1sectest.mp3",
+    "mpg1layIII_212k-VBRq0_f1655_441hz_stereo_FhgTAGID3v1_waterson.mp3",
+    "mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3",
+    "mpg1layIII_138k-VBRq44_f2895_44100hz_joint_XingTAG_ID3v2_Lame.mp3",
+    "mpg1layIII_170k-VBRq66_f1721_441hz_stereo_XingTAGcopyID3v1_mutter.mp3",  
+    "mpg1layII_0h_192k_frame44_44100hz_joint_CRCfl11.mp2",
+    "mpg2.5layIII_8k-VBRq95_f149_8000khz_mono_ID3v2Orig_XingTAG_Lame.mp3",
+    "mpg2layI_0h_128k_frame54_22050hz_joint_CRCOrig_test33.mp3",
+    "mpg2layII_1504h_16k_frame56_24000hz_joint_CRCOrigID3v1&2_test27.mp3",
+    "mpg2layIII_0h_40k_764or744frame_22050hz_mono_Orig_Fhgl3Frank.mp3",
+    "mpg2layIII_12kABRq55_f1202_16hz_stereo_XingLameTAG_CRCOrigwaterson.mp3",
+    "mpgPlus_210k-VBR_f1149_441hz_joint_copy__NOTmp1lay_448k_f540_5015.mpc",
+    "mpgPRO2layIII_0h_64k_frame2036or2015_22050hz_joint_thomson.mp3",
+    "mpg4_golem160x90first120.avi",
+    "corruptFileWithBadHeaders.mp3"};
 
     public RandomMP3Test(String name) {
         super(name);
@@ -48,28 +48,20 @@ public class RandomMP3Test extends com.limegroup.gnutella.util.LimeTestCase {
      * 
      * @param args java.lang.String[]
      */
-    public static void main(String[] args) {
-        
+    public static void main(String[] args) {        
         junit.textui.TestRunner.run(suite());
-        
-        
     }
-    protected void setUp() {
-        
-    }
+    
     public static Test suite() {
         return buildTestSuite(RandomMP3Test.class);
     }
-    protected void tearDown() {
-        
-    }
     
-    private AudioMetaData newMP3Info(String loc) throws Exception {
+    private AudioMetaData newMP3Info(String resource) throws Exception {
         MetaDataFactory factory = new MetaDataFactoryImpl();
-        MetaReader reader = factory.parse(new File(loc));
+        File file = TestUtils.getResourceInPackage(resource, RandomMP3Test.class);
+        MetaReader reader = factory.parse(file);
         return (AudioMetaData)reader.getMetaData();
     }
-
     
     /**
      *
@@ -90,7 +82,6 @@ public class RandomMP3Test extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(0, info.getLength()); 
         assertTrue(!info.isVBR());
         
-     // TODO: no audio header found.
           //mpg1layI_32k_f256_441hz_dual_5015emph_CRCcopyOrig_sectest.mp3
         info  = newMP3Info(file[2]);
         assertEquals(32, info.getBitrate());   
@@ -128,7 +119,6 @@ public class RandomMP3Test extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(1, info.getLength());   
         assertTrue(!info.isVBR());
     
-     // TODO: this can't parse right now!
         //  mpg2layII_16k_f56_24000hz_joint_CRCOrigID3v1&2_test27.mp3
         info  = newMP3Info(file[11]);
         assertEquals(16, info.getBitrate()); 
@@ -172,26 +162,6 @@ public class RandomMP3Test extends com.limegroup.gnutella.util.LimeTestCase {
 //        }
 //        catch (IOException e) {}
     
-    }
-    /**
-     * timing new code
-     */
-    public void notestTIME()
-        throws Exception {
-
-        int i = runs;
-        long start = 0;
-    
-        newMP3Info(file[5]);
-    
-        start = System.currentTimeMillis();
-        while (--i >= 0) {
-        
-            newMP3Info(file[i%9]);
-    
-        }
-
-        System.out.println("NEW time:" + (System.currentTimeMillis()-start));
     }
 }
 

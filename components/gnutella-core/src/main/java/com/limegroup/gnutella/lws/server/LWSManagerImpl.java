@@ -170,6 +170,10 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
             ioe.initCause(e);
             throw ioe;
         }
+        
+        if(get.getURI().getHost() == null)
+            throw new IOException("null host!");
+        
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         //
         // we don't care what this response is, because we are
