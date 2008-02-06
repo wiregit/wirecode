@@ -566,6 +566,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         messageRouter.get().stop();
         
+        localAcceptor.get().stop();
+        
         runShutdownItems();
         
         shutdownDone.set(true);

@@ -89,7 +89,7 @@
 	<classpathentry kind="lib" path="lib/jars/tests/xerces.jar"/>
 	<classpathentry kind="lib" path="lib/jars/onion-common.jar"/>
 	<classpathentry kind="lib" path="lib/jars/onion-fec.jar"/>
-	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-alpha3.jar"/>
+	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-alpha3.jar" sourcepath="lib/sources/httpclient-4.0-alpha2-HTTPCLIENT-730-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-4.0-beta2.jar" sourcepath="lib/sources/httpcore-4.0-alpha6-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.0-beta2.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-niossl-4.0-alpha7.jar"/>

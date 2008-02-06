@@ -5,10 +5,13 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.lf5.viewer.LogFactor5Dialog;
 import org.limewire.http.LimeHttpClient;
 import org.limewire.http.SimpleLimeHttpClient;
 import org.limewire.lws.server.LWSDispatcher;
@@ -20,6 +23,8 @@ import org.limewire.lws.server.LWSDispatcherSupport;
  */
 class CommandSender {
         
+    private static final Log LOG = LogFactory.getLog(CommandSender.class);
+    
     /**
      * The prefix {@link LWSDispatcherSupport#PREFIX} is going to be put on
      * <code>msg</code>, so callers of this method cannot put the prefix on.
@@ -52,13 +57,13 @@ class CommandSender {
             }
             return result;
         } catch (HttpException e) {
-            e.printStackTrace();
+            LOG.warn("exception", e);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.warn("exception", e);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            LOG.warn("exception", e);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.warn("exception", e);
         } finally {
             client.releaseConnection(response);
         }

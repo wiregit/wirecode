@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSServerUtil;
@@ -31,8 +32,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCase {
     
-    private final static org.apache.commons.logging.Log LOG 
-        = LogFactory.getLog(AbstractCommunicationSupportWithNoLocalServer.class);
+    private final static Log LOG = LogFactory.getLog(AbstractCommunicationSupportWithNoLocalServer.class);
     
     public final static int LOCAL_PORT  = LocalServerImpl.PORT;
     public final static int REMOTE_PORT = RemoteServerImpl.PORT;
@@ -55,7 +55,7 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     private Thread remoteThread;
     
     private CommandSender sender;
-    private static LWSManager lwsManager;
+    private LWSManager lwsManager;
     private LifecycleManager lifecycleManager;
     
     private String privateKey;
@@ -86,11 +86,11 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
      * This is not a {@link Collections#emptyMap()} because we may want to add
      * to it.
      */
-    protected static final Map<String, String> NULL_ARGS = new HashMap<String,String>();
+    protected final Map<String, String> NULL_ARGS = new HashMap<String,String>();
     
-    protected static final Map<String, String> DUMMY_CALLBACK_ARGS;
+    protected final Map<String, String> DUMMY_CALLBACK_ARGS;
     
-    static {
+    {
         DUMMY_CALLBACK_ARGS = new HashMap<String,String>();
         DUMMY_CALLBACK_ARGS.put(LWSDispatcherSupport.Parameters.CALLBACK, "dummy");        
     }
@@ -122,24 +122,12 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
         LWSSettings.LWS_AUTHENTICATION_HOSTNAME.setValue("localhost");
         LWSSettings.LWS_AUTHENTICATION_PORT.setValue(8080);
         
-        Injector inj = LimeTestUtils.createInjector(new AbstractModule() {
-            protected void configure() {
-                requestStaticInjection(LWSManager.class);
-                requestStaticInjection(SocketsManager.class);
-            }
-        });
-        //
-        if (remoteServer == null) {
-            remoteServer = new RemoteServerImpl(inj.getInstance(SocketsManager.class), LOCAL_PORT);
-        }
+        Injector inj = LimeTestUtils.createInjector();
+        remoteServer = new RemoteServerImpl(inj.getInstance(SocketsManager.class), LOCAL_PORT);
         lifecycleManager = inj.getInstance(LifecycleManager.class);
         lifecycleManager.start();
         remoteThread = remoteServer.start();
-        //
-        // This should persist over tests, because you can't register/unregister/register
-        // handlers for the local http acceptor
-        //
-        if (lwsManager == null) lwsManager = inj.getInstance(LWSManager.class);
+        lwsManager = inj.getInstance(LWSManager.class);
         sender = new CommandSender();
 
         afterSetup();
@@ -154,9 +142,9 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
 
         beforeTearDown();
 
-        stop(remoteServer);
+        remoteServer.shutDown();
         
-        if (lifecycleManager != null) lifecycleManager.shutdown();
+        lifecycleManager.shutdown();
         
         privateKey = null;
         remoteThread = null;
@@ -233,15 +221,4 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
         String responseWithCallback = sender.sendMessage(cmd, args);
         return LWSServerUtil.removeCallback(responseWithCallback);
     }
-
-
-    // -----------------------------------------------------------
-    // Private
-    // -----------------------------------------------------------
-    
-    private void stop(final AbstractServer t) {
-        if (t != null) {
-          t.shutDown();
-        }
-    }    
 }
