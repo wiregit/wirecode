@@ -10,7 +10,6 @@ import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.net.SocketsManager;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
