@@ -1,18 +1,12 @@
 package org.limewire.statistic;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.limewire.collection.Buffer;
 import org.limewire.inspection.Inspectable;
-import org.limewire.service.ErrorService;
 
 /**
  * Provides a default implementation of the <code>Statistic</code> interface as an
@@ -67,20 +61,6 @@ public abstract class AbstractStatistic implements Statistic, Inspectable {
 	 * The maximum value ever recorded for any time period.
 	 */
 	protected volatile double _max = 0;
-
-	private Writer _writer;
-
-	private boolean _writeStat = false;
-	
-	private int _numWriters = 0;
-
-
-	/**
-	 * The file name to write stat data to.  If this is null or the empty
-	 * string, we attempt to derive the appropriate file name via
-	 * reflection.
-	 */
-	protected String _fileName;
 
 	// inherit doc comment
 	public double getTotal() {
@@ -147,17 +127,7 @@ public abstract class AbstractStatistic implements Statistic, Inspectable {
 		if(_current > _max) {
 			_max = _current;
 		}
-		if(_writeStat) {
-			if(_writer != null) {
-				try {
-					_writer.write(Integer.toString(_current));
-					_writer.write(",");
-					_writer.flush();
-				} catch(IOException e) {
-				    ErrorService.error(e);
-				}
-			}
-		}
+		
 		_lastStored = _current;
 		_current = 0;
 		_totalStatsRecorded++;
@@ -173,56 +143,6 @@ public abstract class AbstractStatistic implements Statistic, Inspectable {
         writer.write(Double.toString(getMax()));
         writer.flush();
     }
-
-	// inherit doc comment
-	public synchronized void setWriteStatToFile(boolean write) {
-		if(write) {			
-			_numWriters++;
-			_writeStat = true;
-			if(_numWriters == 1) {
-				try {
-					if(_fileName == null || _fileName.equals("")) {
-						Class superclass = getClass().getSuperclass();
-						Class declaringClass = getClass().getDeclaringClass();
-						List<Field> fieldsList = new LinkedList<Field>();
-						if(superclass != null) {
-							fieldsList.addAll(Arrays.asList(superclass.getFields()));
-						}
-						if(declaringClass != null) {
-							fieldsList.addAll(Arrays.asList(declaringClass.getFields()));
-						}
-						fieldsList.addAll(Arrays.asList(getClass().getFields()));
-						Field[] fields = fieldsList.toArray(new Field[0]);
-						for(int i=0; i<fields.length; i++) {
-							try {
-								Object fieldObject = fields[i].get(null);
-								if(fieldObject.equals(this)) {
-									StringTokenizer st = 
-										new StringTokenizer(fields[i].toString());
-									while(st.hasMoreTokens()) {
-										_fileName = st.nextToken();
-									}
-									_fileName = _fileName.substring(34);
-								}
-							} catch(IllegalAccessException e) {
-								continue;
-							}
-						}
-					}					 
-					_writer = new FileWriter(_fileName, false);
-					
-				} catch(IOException e) {
-				    ErrorService.error(e);
-				}
-			}
-		} else if(_numWriters != 0) {
-			_numWriters--;
-		} 
-		if(_numWriters == 0) {
-			_writeStat = false;
-			_writer = null;
-		}
-	}
 
 	/**
 	 * Constructs the <tt>IntBuffer</tt> with 0 for all values if it is

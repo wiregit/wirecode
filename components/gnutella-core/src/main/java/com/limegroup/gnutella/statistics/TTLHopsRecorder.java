@@ -13,26 +13,26 @@ public final class TTLHopsRecorder {
 	 * message identifier name for deriving the file name to use when
 	 * writing statistics data out to files.
 	 */
-	TTLHopsRecorder(final String NAME) {
-		TTL0 = new GeneralStatHandler(NAME+"_TTL0");
-		TTL1 = new GeneralStatHandler(NAME+"_TTL1");
-		TTL2 = new GeneralStatHandler(NAME+"_TTL2");
-		TTL3 = new GeneralStatHandler(NAME+"_TTL3");
-		TTL4 = new GeneralStatHandler(NAME+"_TTL4");
-		TTL5 = new GeneralStatHandler(NAME+"_TTL5");
-		TTL6 = new GeneralStatHandler(NAME+"_TTL6");
-		TTL7 = new GeneralStatHandler(NAME+"_TTL7");
-		TTL8 = new GeneralStatHandler(NAME+"_TTL8");
+	TTLHopsRecorder() {
+		TTL0 = new GeneralStatHandler();
+		TTL1 = new GeneralStatHandler();
+		TTL2 = new GeneralStatHandler();
+		TTL3 = new GeneralStatHandler();
+		TTL4 = new GeneralStatHandler();
+		TTL5 = new GeneralStatHandler();
+		TTL6 = new GeneralStatHandler();
+		TTL7 = new GeneralStatHandler();
+		TTL8 = new GeneralStatHandler();
 
-		HOPS0 = new GeneralStatHandler(NAME+"_HOPS0");
-		HOPS1 = new GeneralStatHandler(NAME+"_HOPS1");
-		HOPS2 = new GeneralStatHandler(NAME+"_HOPS2");
-		HOPS3 = new GeneralStatHandler(NAME+"_HOPS3");
-		HOPS4 = new GeneralStatHandler(NAME+"_HOPS4");
-		HOPS5 = new GeneralStatHandler(NAME+"_HOPS5");
-		HOPS6 = new GeneralStatHandler(NAME+"_HOPS6");
-		HOPS7 = new GeneralStatHandler(NAME+"_HOPS7");
-		HOPS8 = new GeneralStatHandler(NAME+"_HOPS8");
+		HOPS0 = new GeneralStatHandler();
+		HOPS1 = new GeneralStatHandler();
+		HOPS2 = new GeneralStatHandler();
+		HOPS3 = new GeneralStatHandler();
+		HOPS4 = new GeneralStatHandler();
+		HOPS5 = new GeneralStatHandler();
+		HOPS6 = new GeneralStatHandler();
+		HOPS7 = new GeneralStatHandler();
+		HOPS8 = new GeneralStatHandler();
 	}
 
 	/**

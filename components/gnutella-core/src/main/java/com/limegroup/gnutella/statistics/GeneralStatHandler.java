@@ -7,7 +7,7 @@ package com.limegroup.gnutella.statistics;
  */
 final class GeneralStatHandler extends AbstractStatHandler {
 
-	GeneralStatHandler(String fileName) {
-		super(fileName);
+	GeneralStatHandler() {
+		super();
 	}
 }

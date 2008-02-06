@@ -75,11 +75,11 @@ public abstract class AbstractStatHandler {
 	 * required fields.  For the bandwidth stat, it uses the stub that
 	 * does not record bandwidth data.
 	 */
-	protected AbstractStatHandler(String fileName) {
-		NUMBER_STAT      = new AdvancedStatistic(fileName);	
-		BYTE_STAT        = new AdvancedKilobytesStatistic(fileName);		
-		LIME_NUMBER_STAT = new AdvancedStatistic(fileName);		
-		LIME_BYTE_STAT   = new AdvancedKilobytesStatistic(fileName);	
+	protected AbstractStatHandler() {
+		NUMBER_STAT      = new AdvancedStatistic();	
+		BYTE_STAT        = new AdvancedKilobytesStatistic();		
+		LIME_NUMBER_STAT = new AdvancedStatistic();		
+		LIME_BYTE_STAT   = new AdvancedKilobytesStatistic();	
 		BANDWIDTH_BYTE_STAT = BANDWIDTH_BYTE_STAT_STUB;	
 	}
 

@@ -18,10 +18,9 @@ abstract class AbstractMessageStatHandler extends AbstractStatHandler {
 										 Statistic byteStat,
 										 Statistic limeNumberStat,
 										 Statistic limeByteStat,
-										 Statistic bandwidthStat,
-										 String fileName) {
+										 Statistic bandwidthStat) {
 		super(numberStat, byteStat, limeNumberStat, limeByteStat, bandwidthStat);
-		TTL_HOPS = new TTLHopsRecorder(fileName);
+		TTL_HOPS = new TTLHopsRecorder();
 	}
 
 	/**
