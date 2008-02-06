@@ -1,30 +1,28 @@
 package org.limewire.listener;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import com.google.common.base.ReferenceType;
+import com.google.common.collect.ReferenceMap;
 
 /**
  * Maintains event listeners and broadcasts events to all listeners.
  * Listeners are kept by weak references to a key value, allowing anonymous
  * listeners to be used while still allowing the list to time out.
  */
-// TODO: This isn't synchronized right now, which is bad -- listener list should really be CoW,
-//       or a ConcurrentMap.  (See Google Collection's ReferenceMap.)
 public class WeakEventListenerList<E extends Event> implements WeakEventListenerSupport<E> {
     
-    private final Map<Object, List<EventListener<E>>> listenerMap;
+    private final Map<Object, List<EventListener<E>>> listenerMap = new ReferenceMap<Object, List<EventListener<E>>>(ReferenceType.WEAK, ReferenceType.STRONG);
 
-    public WeakEventListenerList() {
-        this.listenerMap = new WeakHashMap<Object, List<EventListener<E>>>();
-    }
-    
     /** Adds the listener. */
     public void addListener(Object strongRef, EventListener<E> listener) {
         List<EventListener<E>> listeners = listenerMap.get(strongRef);
-        if(listeners == null)
-            listeners = new ArrayList<EventListener<E>>();
+        if (listeners == null) {
+            listeners = new CopyOnWriteArrayList<EventListener<E>>();
+            listenerMap.put(strongRef, listeners);
+        }
         listeners.add(listener);
     }
     
@@ -32,12 +30,11 @@ public class WeakEventListenerList<E extends Event> implements WeakEventListener
     public boolean removeListener(Object strongRef, EventListener<E> listener) {
         List<EventListener<E>> listeners = listenerMap.get(strongRef);
         if(listeners != null) {
-            listeners.remove(listener);
+            boolean removed = listeners.remove(listener);
             if(listeners.isEmpty())
                 listenerMap.remove(strongRef);
-            return true;
+            return removed;
         }
-        
         return false;
     }
     
