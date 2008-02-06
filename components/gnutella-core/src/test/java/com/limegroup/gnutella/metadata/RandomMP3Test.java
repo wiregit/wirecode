@@ -92,10 +92,10 @@ public class RandomMP3Test extends com.limegroup.gnutella.util.LimeTestCase {
         
      // TODO: no audio header found.
           //mpg1layI_32k_f256_441hz_dual_5015emph_CRCcopyOrig_sectest.mp3
-//        info  = newMP3Info(file[2]);
-//        assertEquals(32, info.getBitrate());   
-//        assertEquals(6, info.getLength()); 
-//        assertTrue(!info.isVBR());
+        info  = newMP3Info(file[2]);
+        assertEquals(32, info.getBitrate());   
+        assertEquals(7, info.getLength()); 
+        assertTrue(!info.isVBR());
         
           //mpg1layII_384k_f24_48hz_stereo_CRCOrig_Gogo1sectest.mp3
         info  = newMP3Info(file[3]);
@@ -110,7 +110,7 @@ public class RandomMP3Test extends com.limegroup.gnutella.util.LimeTestCase {
         assertTrue(info.isVBR());
             
      // TODO: mp2 extension??
-        //  mpg1layII_0h_192k_frame44_44100hz_joint_CRCfl11.mp2
+//          mpg1layII_0h_192k_frame44_44100hz_joint_CRCfl11.mp2
 //        info  = newMP3Info(file[8]);
 //        assertEquals(192, info.getBitrate());    
 //        assertEquals(1, info.getLength());    
@@ -132,7 +132,7 @@ public class RandomMP3Test extends com.limegroup.gnutella.util.LimeTestCase {
         //  mpg2layII_16k_f56_24000hz_joint_CRCOrigID3v1&2_test27.mp3
         info  = newMP3Info(file[11]);
         assertEquals(16, info.getBitrate()); 
-        assertEquals(12, info.getLength()); //1-winamp 43-musicmatch(correct)//////////////////////////
+        assertEquals(1, info.getLength()); //1-winamp 43-musicmatch(correct)//////////////////////////
         assertTrue(!info.isVBR());
     
      
