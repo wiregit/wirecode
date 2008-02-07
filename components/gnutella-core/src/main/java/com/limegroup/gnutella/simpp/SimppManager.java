@@ -52,15 +52,15 @@ public class SimppManager {
     private final List<SimppListener> listeners = new CopyOnWriteArrayList<SimppListener>();
    
     /** Cached Simpp bytes in case we need to sent it out on the wire */
-    private byte[] _simppBytes;
+    private volatile byte[] _simppBytes;
 
-    private String _propsStream;
+    private volatile String _propsStream;
 
     private final ExecutorService _processingQueue;
     
     private final CopyOnWriteArrayList<SimppSettingsManager> simppSettingsManagers;
     
-    private int _latestVersion;
+    private volatile int _latestVersion;
     
     private Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
     
