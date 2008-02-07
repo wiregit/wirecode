@@ -9,6 +9,8 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.limewire.io.IpPort;
+import org.limewire.util.Version;
+import org.limewire.util.VersionFormatException;
 
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -201,6 +203,8 @@ public class HandshakeResponse {
     
     /** The port the response says it's listening on. */
     private final int LISTEN_PORT;
+    
+    private final Version limeVersion;
 
     /**
      * Constant for the number of hosts to return in X-Try-Ultrapeer headers.
@@ -274,8 +278,16 @@ public class HandshakeResponse {
             isVersionOrHigher(headers, HeaderNames.X_GUESS, 0.1F);
         IS_CRAWLER = 
         	isVersionOrHigher(headers, HeaderNames.CRAWLER, 0.1F);
-        IS_OLD_LIMEWIRE = IS_LIMEWIRE && 
-        oldVersion(extractStringHeaderValue(headers, HeaderNames.USER_AGENT));
+        String version = extractStringHeaderValue(headers, HeaderNames.USER_AGENT);
+        Version v = null;
+        if (IS_LIMEWIRE) {
+            try {
+                v = new Version(version);
+            } catch (VersionFormatException vfe) {}
+        }
+        limeVersion = v;
+        IS_OLD_LIMEWIRE = IS_LIMEWIRE && oldVersion(version); 
+        
 
         String loc  = extractStringHeaderValue(headers, 
                                                HeaderNames.X_LOCALE_PREF);
@@ -722,6 +734,14 @@ public class HandshakeResponse {
         return IS_OLD_LIMEWIRE;
     }
 
+    /**
+     * @return the version of this connection if its limewire.
+     * null if not limewire or could not be parsed.
+     */
+    public Version getLimeVersion() {
+        return limeVersion;
+    }
+    
     /**
      * Returns whether or not this is connection passed the headers to be
      * considered a "good" leaf.
