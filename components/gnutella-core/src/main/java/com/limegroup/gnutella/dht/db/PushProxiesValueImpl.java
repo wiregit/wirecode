@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.ConnectableImpl;
@@ -78,7 +77,7 @@ class PushProxiesValueImpl extends AbstractPushProxiesValue {
         this.features = features;
         this.fwtVersion = fwtVersion;
         this.port = port;
-        this.proxies = new CopyOnWriteArraySet<IpPort>(proxies);
+        this.proxies = new IpPortSet(proxies);
         this.tlsInfo = AbstractPushProxiesValue.getNumbersFromProxies(proxies);
         this.data = AbstractPushProxiesValue.serialize(this);
     }

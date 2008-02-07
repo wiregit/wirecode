@@ -113,4 +113,8 @@ public class BitNumbersTest extends BaseTestCase {
         }
         assertEquals(new byte[] { 0x10 }, bn.toByteArray() );
     }
+    
+    public void testEquals() {
+        fail("Implement me");
+    }
 }

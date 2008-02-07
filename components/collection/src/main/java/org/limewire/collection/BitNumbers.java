@@ -1,5 +1,7 @@
 package org.limewire.collection;
 
+import java.util.Arrays;
+
 
 /** 
  * Allows storage & retrieval of numbers based on the index of an
@@ -113,6 +115,20 @@ public class BitNumbers {
             if(data[i] != 0)
                 return false;
         return true;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof BitNumbers) {
+            BitNumbers other = (BitNumbers)obj;
+            return Arrays.equals(toByteArray(), other.toByteArray());
+        }
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(toByteArray());
     }
     
     /** A hexadecimal representation of the byte[] */

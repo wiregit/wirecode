@@ -1203,7 +1203,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
             }
             return proxies;
         } else if (networkManager.acceptedIncomingConnection() && networkManager.isIpPortValid()) {
-            return Collections.singleton(new ConnectableImpl(new IpPortImpl(networkManager.getAddress(), networkManager.getPort()), SSLSettings.isIncomingTLSEnabled()));
+            return new StrictIpPortSet<Connectable>(new ConnectableImpl(new IpPortImpl(networkManager.getAddress(), networkManager.getPort()), SSLSettings.isIncomingTLSEnabled()));
         } else {
             return Collections.emptySet();
         }

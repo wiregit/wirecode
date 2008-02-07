@@ -2,6 +2,7 @@ package com.limegroup.gnutella.dht.db;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
@@ -48,68 +49,62 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
         this.version = version;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#getValueType()
-     */
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.dht.db.PushProxiesValue#getValueType()
-     */
     public DHTValueType getValueType() {
         return PUSH_PROXIES;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#getVersion()
-     */
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.dht.db.PushProxiesValue#getVersion()
-     */
     public Version getVersion() {
         return version;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#size()
-     */
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.dht.db.PushProxiesValue#size()
-     */
     public int size() {
         return getValue().length;
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.dht.db.PushProxiesValue#getGUID()
-     */
     public abstract byte[] getGUID();
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.dht.db.PushProxiesValue#getPort()
-     */
     public abstract int getPort();
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.dht.db.PushProxiesValue#getFeatures()
-     */
     public abstract byte getFeatures();
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.dht.db.PushProxiesValue#getFwtVersion()
-     */
     public abstract int getFwtVersion();
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.dht.db.PushProxiesValue#getPushProxies()
-     */
     public abstract Set<? extends IpPort> getPushProxies();
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.dht.db.PushProxiesValue#getTLSInfo()
-     */
     public abstract BitNumbers getTLSInfo();
+    
+    /**
+     * Value based comparison with other object.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof PushProxiesValue) {
+            PushProxiesValue other = (PushProxiesValue)obj;
+            return Arrays.equals(getGUID(), other.getGUID()) 
+            && getPort() == other.getPort()
+            && getFeatures() == other.getFeatures()
+            && getFwtVersion() == other.getFwtVersion()
+            && getPushProxies().equals(other.getPushProxies())
+            && getTLSInfo().equals(other.getTLSInfo());
+        }
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        return getPort() + getFeatures() * 31 + + getFwtVersion() * 31 * 31 
+        + computeHashCode(getPushProxies()) * 31 * 31 * 31
+        + getTLSInfo().hashCode() * 31 * 31 * 31 * 31;
+    }
+    
+    private static final int computeHashCode(Set<? extends IpPort> pushProxies) {
+        int hashCode = 1;
+        // in case of connectables: we ignore the tls info
+        for (IpPort ipPort : pushProxies) {
+            hashCode *= 31 * ipPort.getInetSocketAddress().hashCode();
+        }
+        return hashCode;
+    }
     
     /*
      * (non-Javadoc)

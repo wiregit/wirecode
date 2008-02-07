@@ -24,6 +24,8 @@ public class PushProxiesModel implements StorableModel {
     
     private Storable localhost = null;
     
+    private PushProxiesValue lastPublishedValue;
+    
     private final PushProxiesValueFactory pushProxiesValueFactory;
     
     @Inject
@@ -37,10 +39,21 @@ public class PushProxiesModel implements StorableModel {
             if (pushProxiesValueForSelf.getPushProxies().isEmpty()) {
                 return null;
             }
+    
+            // create value based clone so we can actually track if values have changed
+            lastPublishedValue = new PushProxiesValueImpl(pushProxiesValueForSelf.getVersion(), pushProxiesValueForSelf.getGUID(),
+                    pushProxiesValueForSelf.getFeatures(), pushProxiesValueForSelf.getFwtVersion(), pushProxiesValueForSelf.getPort(),
+                    pushProxiesValueForSelf.getPushProxies());
             
             GUID guid = new GUID(pushProxiesValueForSelf.getGUID());
             KUID primaryKey = KUIDUtils.toKUID(guid);
             localhost = new Storable(primaryKey, pushProxiesValueForSelf);
+        } else {
+            // also create new storable if our info has changed
+            PushProxiesValue pushProxiesValueForSelf = pushProxiesValueFactory.createDHTValueForSelf();
+            if (!pushProxiesValueForSelf.equals(lastPublishedValue)) {
+                localhost = new Storable(KUIDUtils.toKUID(new GUID(pushProxiesValueForSelf.getGUID())), pushProxiesValueForSelf);
+            }
         }
         return localhost;
     }

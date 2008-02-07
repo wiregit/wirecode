@@ -11,6 +11,9 @@ import org.limewire.mojito.routing.Contact;
 /**
  * Does not contain external address information since it can be retrieved
  * from the {@link Contact} that created the value.
+ * <p>
+ * Implementations should provide a value based {@link #equals(Object)} method.
+ * </p>
  */
 public interface PushProxiesValue extends DHTValue, Serializable  {
 
@@ -42,8 +45,8 @@ public interface PushProxiesValue extends DHTValue, Serializable  {
 
     /**
      * @return BitNumbers for tls status of push proxies,
-     * null if none are tls-capable.
+     * or empty Bitnumbers
      */
     public BitNumbers getTLSInfo();
-
+    
 }
