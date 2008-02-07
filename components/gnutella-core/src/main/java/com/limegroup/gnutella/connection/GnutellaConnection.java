@@ -870,10 +870,11 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
                     clientGUID = reply.getClientGUID();
                 
                 if (MessageSettings.RETURN_PATH_IN_REPLIES.getValue() && 
-                        connectionManager.isActiveSupernode() && 
+                        connectionManager.isActiveSupernode() &&
                         !reply.hasSecureData()) {
                     m = queryReplyFactory.createWithReturnPathInfo(reply, 
-                            new IpPortImpl(myIp,networkManager.getPort()), this);
+                            myIp == null ? null : new IpPortImpl(myIp,networkManager.getPort()), 
+                                    this);
                 }
             }
 

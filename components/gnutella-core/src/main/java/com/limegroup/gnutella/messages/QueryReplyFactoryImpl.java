@@ -337,7 +337,12 @@ public class QueryReplyFactoryImpl implements QueryReplyFactory {
             baos.write(control);
             baos.write(flags);
             // copy the rest of the common area until start of GGEP
+            try {
             baos.write(payload,qhdOffset+3, length - 2);
+            } catch (Throwable bleh) {
+                System.out.println("payload length "+payload.length+" qhdOffset "+qhdOffset+" length "+length);
+                bleh.printStackTrace();
+            }
         }
         
         try {
@@ -379,13 +384,15 @@ public class QueryReplyFactoryImpl implements QueryReplyFactory {
         String suffix = getReturnPathSuffix(ggep);
         if (suffix == null)
             return;
-        byte [] myAddr = new byte[6];
-        System.arraycopy(me.getInetAddress().getAddress(),0,myAddr,0,4);
-        ByteOrder.short2beb((short)me.getPort(), myAddr, 4);
+        if (me != null) {
+            byte [] myAddr = new byte[6];
+            System.arraycopy(me.getInetAddress().getAddress(),0,myAddr,0,4);
+            ByteOrder.short2beb((short)me.getPort(), myAddr, 4);
+            ggep.put(GGEP.GGEP_HEADER_RETURN_PATH_ME+suffix,myAddr);
+        }
         byte [] theirAddr = new byte[6];
         System.arraycopy(source.getInetAddress().getAddress(),0,theirAddr,0,4);
         ByteOrder.short2beb((short)source.getPort(), theirAddr, 4);
-        ggep.put(GGEP.GGEP_HEADER_RETURN_PATH_ME+suffix,myAddr);
         ggep.put(GGEP.GGEP_HEADER_RETURN_PATH_SOURCE+suffix,theirAddr);
         ggep.put(GGEP.GGEP_HEADER_RETURN_PATH_HOPS+suffix,hops);
         ggep.put(GGEP.GGEP_HEADER_RETURN_PATH_TTL+suffix,ttl);
