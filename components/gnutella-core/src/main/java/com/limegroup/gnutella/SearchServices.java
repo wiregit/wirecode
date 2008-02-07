@@ -5,6 +5,8 @@ import java.util.Set;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 
+import com.limegroup.gnutella.search.SearchResultStats;
+
 public interface SearchServices {
 
     /**
@@ -64,7 +66,7 @@ public interface SearchServices {
     /**
      * Sends a 'What Is New' query on the network.
      */
-    public void queryWhatIsNew(final byte[] guid, final MediaType type);
+    public SearchResultStats queryWhatIsNew(final byte[] guid, final MediaType type);
 
     /**
      * Searches the network for files with the given metadata.
@@ -73,7 +75,7 @@ public interface SearchServices {
      *  typically in XML format
      * @see query(byte[], String, MediaType)
      */
-    public void query(final byte[] guid, final String query,
+    public SearchResultStats query(final byte[] guid, final String query,
             final String richQuery, final MediaType type);
 
     /** 
@@ -82,7 +84,7 @@ public interface SearchServices {
      *
      * @see query(byte[], String, MediaType)
      */
-    public void query(byte[] guid, String query);
+    public SearchResultStats query(byte[] guid, String query);
 
     /**
      * Searches the network for files of the given type with the given
@@ -103,7 +105,7 @@ public interface SearchServices {
      * @param type the desired type of result (e.g., audio, video), or
      *  null if you don't care 
      */
-    public void query(byte[] guid, String query, MediaType type);
+    public SearchResultStats query(byte[] guid, String query, MediaType type);
 
     /** 
      * Returns a new GUID for passing to query.
