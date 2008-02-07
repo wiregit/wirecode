@@ -116,6 +116,8 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
      */ 
     public SearchResultStats addQuery(QueryRequest qr) {
         LOG.trace("entered SearchResultHandler.addQuery(QueryRequest)");
+        System.out.println(" *** SearchResultHandlerImpl::addQuery().. POINT A; guid = " + new GUID(qr.getGUID()).toString());
+        
         if (!qr.isBrowseHostQuery() && !qr.isWhatIsNewRequest())
             spamManager.get().startedQuery(qr);
         GuidCount gc = new GuidCount(qr);
@@ -392,12 +394,21 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
 
 
     public GuidCount retrieveGuidCount(GUID guid) {
+        System.out.println(" *** SearchResultHandlerImpl::retrieveGuidCount().. POINT A; guid = " + guid.toString());
+        
         synchronized (GUID_COUNTS) {
             for(GuidCount currGC : GUID_COUNTS) {
-                if (currGC.getGUID().equals(guid))
+                if (currGC.getGUID().equals(guid)) {
+                    System.out.println(" *** SearchResultHandlerImpl::retrieveGuidCount().. POINT B");
                     return currGC;
+                }
+                else
+                    System.out.println(" *** SearchResultHandlerImpl::retrieveGuidCount().. POINT C; guid = " + guid.toString());
             }
         }
+        
+        System.out.println(" *** SearchResultHandlerImpl::retrieveGuidCount().. POINT D");
+
         return null;
     }
     
@@ -619,7 +630,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                     }
                     else {
                         System.out.println(" *** GuidCount::addQueryReply().. POINT J");
-                        numGood++;
+                        numGood += addLocation(response.getUrns());
                     }
                 }
                 else {
@@ -649,7 +660,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
          *         given Set<URN> based on the IntervalSet.
          * 
          */
-        private int addIntervalSet (Set<URN> urns, IntervalSet is) {
+        private int addIntervalSet(Set<URN> urns, IntervalSet is) {
             ResourceLocationCounter rlc = null;
             
             int count_before = 0;
@@ -667,6 +678,29 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                 count_before = rlc.getLocationCount();
                 rlc.addIntervalSet( is );
                 count_after = rlc.getLocationCount();
+                
+                break;
+            }
+            
+            return count_after - count_before;
+        }
+        
+        private int addLocation(Set<URN> urns) {
+            ResourceLocationCounter rlc = null;
+            
+            int count_before = 0;
+            int count_after = 1;
+            
+            for (URN urn : urns) {
+                if (!urn.isSHA1()) {
+                    System.out.println(" *** GuidCount::addLocation().. POINT A");
+                    continue;
+                }
+                
+                if (null == (rlc = _isets.get(urn)))
+                    _isets.put(urn, (rlc = new ResourceLocationCounter(urn)));
+                
+                rlc.incrementCount();
                 
                 break;
             }

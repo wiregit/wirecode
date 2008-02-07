@@ -3,7 +3,6 @@ package com.limegroup.gnutella.search;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,10 +12,8 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.jmock.Sequence;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.KeyValue;
-import org.limewire.collection.LongInterval;
 import org.limewire.collection.NameValue;
 import org.limewire.io.IpPort;
 import org.limewire.security.SecureMessage;
@@ -28,7 +25,6 @@ import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ForMeReplyHandler;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
@@ -184,8 +180,10 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     /**
-     * 
-     * 
+     * Tests the adding of a partial search result (as defined by
+     * the presence of an IntervalSet in the QueryResponse), to a
+     * SearchResultHandler; verifies that the SearchResultStats
+     * indicates the presence of a single available location.
      * 
      * @throws Exception
      */
