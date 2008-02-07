@@ -337,12 +337,7 @@ public class QueryReplyFactoryImpl implements QueryReplyFactory {
             baos.write(control);
             baos.write(flags);
             // copy the rest of the common area until start of GGEP
-            try {
             baos.write(payload,qhdOffset+3, length - 2);
-            } catch (Throwable bleh) {
-                System.out.println("payload length "+payload.length+" qhdOffset "+qhdOffset+" length "+length);
-                bleh.printStackTrace();
-            }
         }
         
         try {
