@@ -16,7 +16,6 @@ import org.limewire.inspection.Inspector;
 import org.limewire.inspection.InspectorImpl;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.LocalSocketAddressService;
-import org.limewire.io.Pools;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
@@ -346,7 +345,6 @@ public class LimeWireCoreModule extends AbstractModule {
 
         // TODO: statically injecting these for now...
         requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
-        requestStaticInjection(Pools.class);
         requestStaticInjection(LocalSocketAddressService.class);
                         
         // TODO: This is odd -- move to initialize & LifecycleManager?

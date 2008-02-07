@@ -16,7 +16,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.CompressingOutputStream;
 import org.limewire.io.IOUtils;
-import org.limewire.io.Pools;
 import org.limewire.io.UncompressingInputStream;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -159,12 +158,12 @@ public class BlockingConnection extends AbstractConnection {
         // implicitly in the finalization of the Deflater & Inflater)
         // releases these buffers.
         if (isWriteDeflated()) {
-            _deflater = Pools.getDeflaterPool().borrowObject();
+            _deflater = new Deflater();
             _out = new CompressingOutputStream(_out, _deflater);
         }
 
         if (isReadDeflated()) {
-            _inflater = Pools.getInflaterPool().borrowObject();
+            _inflater = new Inflater();
             _in = new UncompressingInputStream(_in, _inflater);
         }
         
@@ -317,11 +316,8 @@ public class BlockingConnection extends AbstractConnection {
      * @see com.limegroup.gnutella.Connection#close()
      */
     protected void closeImpl() {
-        if (_deflater != null)
-            Pools.getDeflaterPool().returnObject(_deflater);
-        if (_inflater != null)
-            Pools.getInflaterPool().returnObject(_inflater);
-
+        IOUtils.close(_deflater);
+        IOUtils.close(_inflater);
         IOUtils.close(_in);
         IOUtils.close(_out);
     }

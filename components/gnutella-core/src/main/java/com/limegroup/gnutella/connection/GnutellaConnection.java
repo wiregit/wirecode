@@ -14,9 +14,9 @@ import java.util.zip.Inflater;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
+import org.limewire.io.IOUtils;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
-import org.limewire.io.Pools;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.NBThrottle;
@@ -520,11 +520,11 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         handshakeInitialized(shaker);
 
         if (isWriteDeflated()) {
-            deflater = Pools.getDeflaterPool().borrowObject();
+            deflater = new Deflater();
         }
 
         if (isReadDeflated()) {
-            inflater = Pools.getInflaterPool().borrowObject();
+            inflater = new Inflater();
         }
 
         getConnectionBandwidthStatistics().setCompressionOption(isWriteDeflated(),
@@ -782,10 +782,8 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      * @see com.limegroup.gnutella.RoutedConnection#close()
      */
     protected void closeImpl() {
-        if (deflater != null)
-            Pools.getDeflaterPool().returnObject(deflater);
-        if (inflater != null)
-            Pools.getInflaterPool().returnObject(inflater);
+        IOUtils.close(deflater);
+        IOUtils.close(inflater);
 
         if (_outputRunner != null)
             _outputRunner.shutdown();

@@ -24,7 +24,6 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 import org.limewire.io.IOUtils;
-import org.limewire.io.Pools;
 import org.limewire.util.I18NConvert;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -677,7 +676,7 @@ public class LimeXMLUtils {
         DeflaterOutputStream gos = null;
         Deflater def = null;
         try {
-            def = Pools.getDeflaterPool().borrowObject();
+            def = new Deflater();
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             gos=new DeflaterOutputStream(baos, def);
             gos.write(data, 0, data.length);
@@ -692,7 +691,7 @@ public class LimeXMLUtils {
             return null;
         } finally {
             IOUtils.close(gos);
-            Pools.getDeflaterPool().returnObject(def);
+            IOUtils.close(def);
         }
     }
 
@@ -810,7 +809,7 @@ public class LimeXMLUtils {
         InflaterInputStream gis = null;
         Inflater inf = null;
         try {
-            inf = Pools.getInflaterPool().borrowObject();
+            inf = new Inflater();
             gis =new InflaterInputStream(bais, inf);
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             while (true) {
@@ -822,7 +821,7 @@ public class LimeXMLUtils {
             return baos.toByteArray();
         } finally {
             IOUtils.close(gis);
-            Pools.getInflaterPool().returnObject(inf);
+            IOUtils.close(inf);
         }
     }
 

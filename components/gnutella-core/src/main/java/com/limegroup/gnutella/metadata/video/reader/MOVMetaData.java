@@ -12,7 +12,6 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
 import org.limewire.io.IOUtils;
-import org.limewire.io.Pools;
 
 
 
@@ -143,7 +142,7 @@ public class MOVMetaData extends VideoDataReader {
         byte[] compressed = new byte[(int)(cmvd.remaining - 4)];
         in.readFully(compressed);
         
-        Inflater decompresser = Pools.getInflaterPool().borrowObject();
+        Inflater decompresser = new Inflater();
         try {
             decompresser.setInput(compressed);
             
@@ -173,7 +172,7 @@ public class MOVMetaData extends VideoDataReader {
                 dis.close();
             }
         } finally {
-            Pools.getInflaterPool().returnObject(decompresser);
+            IOUtils.close(decompresser);
         }
     }
     

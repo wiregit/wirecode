@@ -11,7 +11,6 @@ import java.util.zip.Inflater;
 
 import org.limewire.collection.BitSet;
 import org.limewire.io.IOUtils;
-import org.limewire.io.Pools;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -112,11 +111,6 @@ public class QueryRouteTable {
      *  in message N.) */
     private volatile Inflater uncompressor;
     
-    /** A cleaner to ensure we return the uncompressor. */
-    private Cleaner cleaner;
-
-
-
     /////////////////////////////// Basic Methods ///////////////////////////
 
 
@@ -472,9 +466,7 @@ public class QueryRouteTable {
             try {
                 //a) If first message, create uncompressor (if needed).
                 if (m.getSequenceNumber()==1) {
-                    if(cleaner == null)
-                        cleaner = new Cleaner(this);
-                    uncompressor = Pools.getInflaterPool().borrowObject();
+                    uncompressor = new Inflater();
                 }       
                 assert uncompressor!=null : 
                     "Null uncompressor.  Sequence: "+m.getSequenceNumber();
@@ -523,7 +515,7 @@ public class QueryRouteTable {
             this.nextPatch=0; //TODO: is this right?
             // if this last message was compressed, release the uncompressor.
             if( this.uncompressor != null ) {
-                Pools.getInflaterPool().returnObject(uncompressor);
+                IOUtils.close(uncompressor);
                 this.uncompressor = null;
             }
         }   
@@ -721,24 +713,5 @@ public class QueryRouteTable {
             return (byte)(0xF0 | b);
         else
             return b;        
-    }
-    
-    /**
-     * A simple cleaner that will ensure inflater objects are returned.
-     * This is used so that only QueryRouteTables that have ever received
-     * an inflater are scheduled for finalization.
-     */
-    private static class Cleaner {
-        private final QueryRouteTable qrt;
-        
-        Cleaner(QueryRouteTable toClean) {
-            this.qrt = toClean;
-        }
-        
-        protected void finalize() {
-            Inflater inf = qrt.uncompressor;
-            if(inf != null)
-                Pools.getInflaterPool().returnObject(inf);
-        }
     }
 }

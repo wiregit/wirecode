@@ -264,6 +264,18 @@ public class IOUtils {
         }
     }
     
+    public static void close(Deflater deflater) {
+        if(deflater != null) {
+            deflater.end();
+        }
+    }
+    
+    public static void close(Inflater inflater) {
+        if(inflater != null) {
+            inflater.end();
+        }
+    }
+    
     /**
      * Deflates (compresses) the data.
      */
@@ -271,7 +283,7 @@ public class IOUtils {
         OutputStream dos = null;
         Deflater def = null;
         try {
-            def = Pools.getDeflaterPool().borrowObject();
+            def = new Deflater();
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             dos = new DeflaterOutputStream(baos, def);
             dos.write(data, 0, data.length);
@@ -282,7 +294,7 @@ public class IOUtils {
             return null;
         } finally {
             close(dos);
-            Pools.getDeflaterPool().returnObject(def);
+            close(def);
         }
     }
     
@@ -293,7 +305,7 @@ public class IOUtils {
         InputStream in = null;
         Inflater inf = null;
         try {
-            inf = Pools.getInflaterPool().borrowObject();
+            inf = new Inflater();
             in = new InflaterInputStream(new ByteArrayInputStream(data), inf);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buf = new byte[64];
@@ -308,7 +320,7 @@ public class IOUtils {
             throw new IOException(oome.getMessage());
         } finally {
             close(in);
-            Pools.getInflaterPool().returnObject(inf);
+            close(inf);
         }
     } 
     
