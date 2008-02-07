@@ -107,6 +107,12 @@ public class GGEP {
     /** The extension header (key) to determine if the encoded ranges are unverified */
     public static final String GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED = "PRU";
     
+    /** Various information contained in a return path entry GGEP block */
+    public static final String GGEP_HEADER_RETURN_PATH_SOURCE = "RPS";
+    public static final String GGEP_HEADER_RETURN_PATH_HOPS = "RPH";
+    public static final String GGEP_HEADER_RETURN_PATH_ME = "RPI";
+    public static final String GGEP_HEADER_RETURN_PATH_TTL = "RPT";
+    
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
 

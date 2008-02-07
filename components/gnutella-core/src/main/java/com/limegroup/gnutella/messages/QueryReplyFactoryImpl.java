@@ -1,10 +1,13 @@
 package com.limegroup.gnutella.messages;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 
 import org.limewire.io.IpPort;
 import org.limewire.security.SecurityToken;
+import org.limewire.util.ByteOrder;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -300,6 +303,108 @@ public class QueryReplyFactoryImpl implements QueryReplyFactory {
         } catch (BadPacketException bpe) {
             throw new IllegalArgumentException("Invalid QR", bpe);
         }
+    }
+    
+    /**
+     * Copy constructor
+     * @param ggep new ggep byte [] to add to this reply
+     * @return original reply but with the ggep in it.
+     */
+    QueryReply createWithNewGGEP(QueryReplyImpl original, byte [] ggep) {
+        int qhdOffset = original.getQHDOffset();
+        if (qhdOffset == -1)
+            return original; // weird
+        
+        byte [] payload = original.getPayload();
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        baos.write(original.getPayload(),0,qhdOffset);
+
+        int length = ByteOrder.ubyte2int(payload[qhdOffset]);
+
+        // some special cases:
+        // length == 1 requires adding the second flag byte manually
+        if (length == 1) {
+            baos.write(2);
+            byte flag = payload[qhdOffset+1];
+            flag |= QueryReplyImpl.GGEP_MASK;
+            baos.write(flag); // control 
+            baos.write(flag); // flags
+        } else {
+            baos.write(length); // same length
+            byte control = (byte)(payload[qhdOffset + 1] | QueryReplyImpl.GGEP_MASK);
+            byte flags = (byte)(payload[qhdOffset + 2] | QueryReplyImpl.GGEP_MASK);
+            baos.write(control);
+            baos.write(flags);
+            // copy the rest of the common area until start of GGEP
+            baos.write(payload,qhdOffset+3, length - 2);
+        }
+        
+        try {
+            baos.write(ggep);
+        } catch (IOException impossible){
+            return original;
+        }
+        
+        if (original.getGGEPEnd() != -1)
+            baos.write(payload, original.getGGEPEnd(), payload.length - original.getGGEPEnd());
+        else 
+            baos.write(payload, payload.length - 16, 16); // client guid
+        
+        byte [] newPayload = baos.toByteArray();
+        try {
+            return createFromNetwork(original.getGUID(), original.getTTL(), original.getHops(), newPayload, original.getNetwork());
+        } catch (BadPacketException bad) {
+            throw new RuntimeException(bad);
+        }
+    }
+    
+    public QueryReply createWithReturnPathInfo(QueryReply query, IpPort me, IpPort source) {
+        QueryReplyImpl original = (QueryReplyImpl)query;
+        byte [] payload = original.getPayload();
+        GGEP toAdd;
+        if (original.getGGEPStart() != -1 && original.getGGEPEnd() != -1) {
+            try {
+                toAdd = new GGEP(payload,original.getGGEPStart());
+            } catch (BadGGEPBlockException bad) {
+                return original;
+            }
+        } else
+            toAdd = new GGEP();
+        addReturnPathInfo(me, source, original.getHops(), original.getTTL(), toAdd);
+        return createWithNewGGEP(original, toAdd.toByteArray());
+    }
+    
+    private void addReturnPathInfo(IpPort me, IpPort source, byte hops, byte ttl, GGEP ggep) {
+        String suffix = getReturnPathSuffix(ggep);
+        if (suffix == null)
+            return;
+        byte [] myAddr = new byte[6];
+        System.arraycopy(me.getInetAddress().getAddress(),0,myAddr,0,4);
+        ByteOrder.short2beb((short)me.getPort(), myAddr, 4);
+        byte [] theirAddr = new byte[6];
+        System.arraycopy(source.getInetAddress().getAddress(),0,theirAddr,0,4);
+        ByteOrder.short2beb((short)source.getPort(), theirAddr, 4);
+        ggep.put(GGEP.GGEP_HEADER_RETURN_PATH_ME+suffix,myAddr);
+        ggep.put(GGEP.GGEP_HEADER_RETURN_PATH_SOURCE+suffix,theirAddr);
+        ggep.put(GGEP.GGEP_HEADER_RETURN_PATH_HOPS+suffix,hops);
+        ggep.put(GGEP.GGEP_HEADER_RETURN_PATH_TTL+suffix,ttl);
+    }
+    
+    /**
+     * @param ggep the ggep we should add the return path info to
+     * @return the suffix we should use, null if we can't add for some reason.
+     */
+    private String getReturnPathSuffix(GGEP ggep) {
+        for (int i = 0; i < 100000; i++) { // large number to make it impractical to avoid
+            if (ggep.hasKey(GGEP.GGEP_HEADER_RETURN_PATH_ME+i) ||
+                    ggep.hasKey(GGEP.GGEP_HEADER_RETURN_PATH_SOURCE+i) ||
+                    ggep.hasKey(GGEP.GGEP_HEADER_RETURN_PATH_HOPS+i) ||
+                    ggep.hasKey(GGEP.GGEP_HEADER_RETURN_PATH_TTL+i))
+                continue;
+            return String.valueOf(i);
+        }
+        return null;
     }
     
     ///   The only two methods that actually end up constructing a QR!

@@ -17,6 +17,8 @@ public class GGEPParser {
     private GGEP secure  = null;
     private int secureStart = -1;
     private int secureEnd = -1;
+    private int normalStart = -1;
+    private int normalEnd = -1;
     
     /**
      * Scans through the data, starting at idx, looking for the first
@@ -56,6 +58,8 @@ public class GGEPParser {
                     secureEnd = storage[0];
                     break;
                 } else {
+                    normalStart = idx;
+                    normalEnd = storage[0];
                     if(normal == null)
                         normal = ggep;
                     else
@@ -90,5 +94,12 @@ public class GGEPParser {
     public int getSecureEndIndex() {
         return secureEnd;
     }
-
+    
+    public int getNormalStartIndex() {
+        return normalStart;
+    }
+    
+    public int getNormalEndIndex() {
+        return normalEnd;
+    }
 }

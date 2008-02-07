@@ -225,6 +225,15 @@ public interface QueryReplyFactory {
      *        constructed query reply
      */
     public QueryReply createQueryReply(byte[] guid, QueryReply reply);
+    
+    /**
+     * Copy constructor, appending information about the return path. 
+     * @param original the original query
+     * @param me this host.
+     * @param source the source that the reply came from
+     * @return original reply with return path info.
+     */
+    public QueryReply createWithReturnPathInfo(QueryReply original, IpPort me, IpPort source);
 
     /**
      * Copy constructor.

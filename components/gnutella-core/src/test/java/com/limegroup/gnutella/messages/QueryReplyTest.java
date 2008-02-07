@@ -129,7 +129,6 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         _token = new AddressSecurityToken(data, injector.getInstance(MACCalculatorRepositoryManager.class));
 	}
 		
-
 	/**
 	 * Runs the legacy unit test that was formerly in QueryReply.
 	 */
@@ -1627,5 +1626,277 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         protected boolean engineVerify(byte[] arg0) throws SignatureException {
             return false;
         }
+    }
+    
+
+    public void testAddGGEP() throws Exception {
+           QueryReplyFactoryImpl queryReplyFactory = (QueryReplyFactoryImpl) injector.getInstance(QueryReplyFactory.class);
+            //Normal case: basic metainfo with no vendor data
+            payload=new byte[11+11+(4+1+1)+16];
+            payload[0]=1;            //Number of results
+            payload[1]=1;            //non-zero port
+            payload[3]=1;            //non-blank ip     
+            payload[11+8]=(byte)65;  //The character 'A'
+            payload[11+11+0]=(byte)76;   //The character 'L'
+            payload[11+11+1]=(byte)105;  //The character 'i'
+            payload[11+11+2]=(byte)77;   //The character 'M'
+            payload[11+11+3]=(byte)69;   //The character 'E'
+            payload[11+11+4+0]=(byte)1;  //The size of public area
+            payload[11+11+4+1]=(byte)0x1; // interestingly, we don't parse these...
+            
+            byte [] guid = GUID.makeGuid();
+            System.arraycopy(guid,0,payload,11+11+4+2,16);
+            
+            QueryReplyImpl qr=(QueryReplyImpl)queryReplyFactory.createFromNetwork(new byte[16], (byte)5,
+                    (byte)0, payload);
+            
+            assertTrue(Arrays.equals(guid, qr.getClientGUID()));
+            
+            iter=qr.getResults();
+            Response response=(Response)iter.next();
+            assertEquals("A", response.getName());
+            assertFalse(iter.hasNext());
+            
+            // no ggep present
+            assertEquals(-1, qr.getGGEPStart());
+            assertEquals(-1, qr.getGGEPEnd());
+            
+            // add some ggep
+            GGEP g = new GGEP();
+            g.put("badger");
+            byte [] ggepB = g.toByteArray();
+            QueryReplyImpl patched = (QueryReplyImpl)queryReplyFactory.createWithNewGGEP(qr, ggepB);
+            assertNotEquals(-1, patched.getGGEPStart());
+            assertEquals(patched.getGGEPStart() + ggepB.length, patched.getGGEPEnd());
+            assertTrue(Arrays.equals(guid, patched.getClientGUID()));
+            
+            iter=patched.getResults();
+            assertTrue(patched.getNeedsPush());
+            response=(Response)iter.next();
+            assertEquals("A", response.getName());
+            assertFalse(iter.hasNext());
+    }
+    
+    public void testReplaceGGEP() throws Exception {
+        
+        // create a query with all kinds of ggep fields in it
+        QueryReplyFactoryImpl queryReplyFactory = (QueryReplyFactoryImpl) injector.getInstance(QueryReplyFactory.class);
+        MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
+
+        String[] hosts = {"www.limewire.com", "www.limewire.org",
+                "www.susheeldaswani.com", "www.berkeley.edu"};
+
+        //PushProxyInterface[] proxies = new PushProxyInterface[outer+1];
+        Set proxies = new TreeSet(IpPort.COMPARATOR);
+        for (int i = 0; i < hosts.length; i++)
+            proxies.add(
+                    new IpPortImpl(hosts[i], 6346));
+
+        // is multicast, has proxies, supports chat...
+        QueryReply qr = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
+                IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
+                true, true, true, true, proxies);
+
+        QueryReplyImpl readQR = reparse(qr, messageFactory);
+        assertTrue(readQR.getSupportsChat());
+        assertTrue(readQR.isFakeMulticast());
+
+        // test read from network            
+        Set retProxies = readQR.getPushProxies();
+        assertNotNull(retProxies);
+        assertTrue(retProxies != proxies);
+        assertEquals(retProxies.size(), proxies.size());
+        assertEquals(retProxies, proxies);
+        assertEquals(proxies, retProxies);
+
+        // replace the new ggep field
+        
+        GGEP g = new GGEP();
+        g.put("badger");
+        byte [] ggepB = g.toByteArray();
+        QueryReply replaced = queryReplyFactory.createWithNewGGEP(readQR, ggepB);
+        
+        // we have no proxies anymore as ggep got replaced.
+        assertEquals(0,replaced.getPushProxies().size());
+        // not multicast either
+        assertFalse(replaced.isFakeMulticast());
+        // still support chat since that's in the QHD area
+        assertTrue(replaced.getSupportsChat());
+    }
+    
+    public void testPatchGGEPWithReturnPath() throws Exception {
+           // create a query with all kinds of ggep fields in it
+        QueryReplyFactoryImpl queryReplyFactory = (QueryReplyFactoryImpl) injector.getInstance(QueryReplyFactory.class);
+        MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
+
+        String[] hosts = {"www.limewire.com", "www.limewire.org",
+                "www.susheeldaswani.com", "www.berkeley.edu"};
+
+        //PushProxyInterface[] proxies = new PushProxyInterface[outer+1];
+        Set proxies = new TreeSet(IpPort.COMPARATOR);
+        for (int i = 0; i < hosts.length; i++)
+            proxies.add(
+                    new IpPortImpl(hosts[i], 6346));
+
+        // is multicast, has proxies, supports chat...
+        QueryReply qr = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
+                IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
+                true, true, true, true, proxies);
+
+        
+        QueryReplyImpl readQR = reparse(qr, messageFactory);
+        assertTrue(readQR.getSupportsChat());
+        assertTrue(readQR.isFakeMulticast());
+
+        // test read from network            
+        Set retProxies = readQR.getPushProxies();
+        assertNotNull(retProxies);
+        assertTrue(retProxies != proxies);
+        assertEquals(retProxies.size(), proxies.size());
+        assertEquals(retProxies, proxies);
+        assertEquals(proxies, retProxies);
+        
+        // add some uknown GGEP fields
+        GGEP g = new GGEP(readQR.getPayload(),readQR.getGGEPStart());
+        g.put("badger","mushroom".getBytes());
+     
+        // all ggep-carried information is preserved
+        QueryReplyImpl unknownGGEP = 
+            reparse(queryReplyFactory.createWithNewGGEP(readQR, g.toByteArray()),messageFactory);
+        assertTrue(unknownGGEP.getSupportsChat());
+        assertTrue(unknownGGEP.isFakeMulticast());
+        retProxies = unknownGGEP.getPushProxies();
+        assertNotNull(retProxies);
+        assertFalse(retProxies.isEmpty());
+        
+        // now patch in some return path info
+        IpPort me = new IpPortImpl("1.1.1.1",1);
+        IpPort source = new IpPortImpl("2.2.2.2",2);
+        
+        QueryReplyImpl returnPath = reparse(queryReplyFactory.createWithReturnPathInfo(unknownGGEP, me, source),messageFactory);
+        // all previous ggep info is there
+        assertTrue(returnPath.getSupportsChat());
+        assertTrue(returnPath.isFakeMulticast());
+        retProxies = returnPath.getPushProxies();
+        assertNotNull(retProxies);
+        assertFalse(retProxies.isEmpty());
+        
+        // also, we'll find the unknown entry there
+        GGEP parsedGGEP = new GGEP(returnPath.getPayload(),returnPath.getGGEPStart());
+        byte [] mushroom = parsedGGEP.get("badger");
+        assertTrue(Arrays.equals("mushroom".getBytes(),mushroom));
+        
+        // and we'll find some return-path specific entries as well
+        byte [] meParsed = parsedGGEP.get("RPI0");
+        assertEquals(6, meParsed.length);
+        assertEquals(1,meParsed[0]);
+        assertEquals(1,meParsed[1]);
+        assertEquals(1,meParsed[2]);
+        assertEquals(1,meParsed[3]);
+        assertEquals(1,ByteOrder.beb2short(meParsed, 4));
+        
+        byte[] sourceParsed = parsedGGEP.get("RPS0");
+        assertEquals(6, sourceParsed.length);
+        assertEquals(2,sourceParsed[0]);
+        assertEquals(2,sourceParsed[1]);
+        assertEquals(2,sourceParsed[2]);
+        assertEquals(2,sourceParsed[3]);
+        assertEquals(2,ByteOrder.beb2short(sourceParsed, 4));
+        
+        // tll
+        assertEquals(unknownGGEP.getTTL(),parsedGGEP.getInt("RPT0"));
+        // hops
+        assertEquals(unknownGGEP.getHops(),parsedGGEP.getInt("RPH0"));
+    }
+    
+    public void testMultipleReturnPaths() throws Exception {
+        // create a query with all kinds of ggep fields in it
+        QueryReplyFactory queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+        MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
+
+        String[] hosts = {"www.limewire.com", "www.limewire.org",
+                "www.susheeldaswani.com", "www.berkeley.edu"};
+
+        //PushProxyInterface[] proxies = new PushProxyInterface[outer+1];
+        Set proxies = new TreeSet(IpPort.COMPARATOR);
+        for (int i = 0; i < hosts.length; i++)
+            proxies.add(
+                    new IpPortImpl(hosts[i], 6346));
+
+        // is multicast, has proxies, supports chat...
+        QueryReply qr = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte) 4, 6346,
+                IP, 0, new Response[0], GUID.makeGuid(), new byte[0], false, false,
+                true, true, true, true, proxies);
+
+        
+        QueryReply readQR = reparse(qr, messageFactory);
+        
+        // add a bunch of return nodes
+        IpPort hop0 = new IpPortImpl("0.0.0.0",0);
+        IpPort hop1 = new IpPortImpl("1.1.1.1",1);
+        IpPort hop2 = new IpPortImpl("2.2.2.2",2);
+        IpPort hop3 = new IpPortImpl("3.3.3.3",3);
+        
+        QueryReplyImpl qr1 = reparse(queryReplyFactory.createWithReturnPathInfo(readQR, hop1, hop0), messageFactory);
+        QueryReplyImpl qr2 = reparse(queryReplyFactory.createWithReturnPathInfo(qr1, hop2, hop1), messageFactory);
+        QueryReplyImpl qr3 = reparse(queryReplyFactory.createWithReturnPathInfo(qr2, hop3, hop2), messageFactory);
+        
+        GGEP parsedGGEP1 = new GGEP(qr1.getPayload(), qr1.getGGEPStart());
+        GGEP parsedGGEP2 = new GGEP(qr2.getPayload(), qr2.getGGEPStart());
+        GGEP parsedGGEP3 = new GGEP(qr3.getPayload(), qr3.getGGEPStart());
+        
+        // make sure that data is preserved in every message
+        byte [] parsedHop1 = parsedGGEP1.get("RPI0");
+        assertTrue(Arrays.equals(parsedHop1,parsedGGEP2.get("RPI0")));
+        assertTrue(Arrays.equals(parsedHop1,parsedGGEP3.get("RPI0")));
+        
+        assertNull(parsedGGEP1.get("RPI1"));
+        byte [] parsedHop2 = parsedGGEP2.get("RPI1");
+        assertTrue(Arrays.equals(parsedHop2,parsedGGEP3.get("RPI1")));
+        
+        assertNull(parsedGGEP1.get("RPI2"));
+        assertNull(parsedGGEP2.get("RPI2"));
+        byte [] parsedHop3 = parsedGGEP3.get("RPI2");
+        
+        // qr1 came from hop0 
+        byte [] parsedHop0 = parsedGGEP1.get("RPS0");
+        
+        // qr2 came from hop1
+        assertTrue(Arrays.equals(parsedHop1,parsedGGEP2.get("RPS1")));
+        // it also carries the source of qr1 (hop0)
+        assertTrue(Arrays.equals(parsedHop0,parsedGGEP2.get("RPS0")));
+        
+        // qr3 came from hop2
+        assertTrue(Arrays.equals(parsedHop2,parsedGGEP3.get("RPS2")));
+        // it carries the sources of qr1 (hop0) and qr2 (hop1)
+        assertTrue(Arrays.equals(parsedHop0,parsedGGEP2.get("RPS0")));
+        assertTrue(Arrays.equals(parsedHop1,parsedGGEP2.get("RPS1")));
+        
+        // check that the addresses are valid
+        assertEquals(6,parsedHop0.length);
+        assertEquals(6,parsedHop1.length);
+        assertEquals(6,parsedHop2.length);
+        assertEquals(6,parsedHop3.length);
+        
+        for (int i = 0;i < 4; i++) {
+            assertEquals((byte )0,parsedHop0[i]);
+            assertEquals((byte )1,parsedHop1[i]);
+            assertEquals((byte )2,parsedHop2[i]);
+            assertEquals((byte )3,parsedHop3[i]);
+        }
+        
+        assertEquals((short)0,ByteOrder.beb2short(parsedHop0,4));
+        assertEquals((short)1,ByteOrder.beb2short(parsedHop1,4));
+        assertEquals((short)2,ByteOrder.beb2short(parsedHop2,4));
+        assertEquals((short)3,ByteOrder.beb2short(parsedHop3,4));
+    }
+    
+    
+    private QueryReplyImpl reparse(QueryReply original, MessageFactory messageFactory) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        original.write(baos);
+        ByteArrayInputStream bais = 
+            new ByteArrayInputStream(baos.toByteArray());
+        return (QueryReplyImpl) messageFactory.read(bais, Network.TCP);
     }
 }

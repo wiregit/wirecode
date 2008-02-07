@@ -14,6 +14,7 @@ import java.util.zip.Inflater;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
+import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.io.Pools;
 import org.limewire.net.SocketsManager;
@@ -862,9 +863,18 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             _connectionStats.addReceivedDropped();
         } else {
             if (m instanceof QueryReply) {
-                _connectionStats.replyReceived((QueryReply) m);
+                QueryReply reply = (QueryReply)m;
+                _connectionStats.replyReceived(reply);
+                
                 if (m.getHops() == 0)
-                    clientGUID = ((QueryReply) m).getClientGUID();
+                    clientGUID = reply.getClientGUID();
+                
+                if (MessageSettings.RETURN_PATH_IN_REPLIES.getValue() && 
+                        connectionManager.isActiveSupernode() && 
+                        !reply.hasSecureData()) {
+                    m = queryReplyFactory.createWithReturnPathInfo(reply, 
+                            new IpPortImpl(myIp,networkManager.getPort()), this);
+                }
             }
 
             if (m instanceof QueryRequest)

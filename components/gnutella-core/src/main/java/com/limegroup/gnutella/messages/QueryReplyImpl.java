@@ -70,7 +70,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     /** The mask for extracting the busy flag from the QHD common area. */
     private static final byte SPEED_MASK=(byte)0x10;
     /** The mask for extracting the GGEP flag from the QHD common area. */
-    private static final byte GGEP_MASK=(byte)0x20;
+    static final byte GGEP_MASK=(byte)0x20;
     /** The mask for extracting the chat flag from the QHD private area. */
     private static final byte CHAT_MASK=(byte)0x01;
     
@@ -753,6 +753,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 			if (i >= (_payload.length-16)) {   //see above
                 throw new BadPacketException("No QHD");
             }
+			
             //Attempt to verify.  Results are not copied to this until verified.
             String vendorT=null;
             int pushFlagT=UNDEFINED;
@@ -781,6 +782,8 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             int length=ByteOrder.ubyte2int(_payload[i]);
             if (length<=0)
                 throw new BadPacketException("Common payload length zero.");
+            
+            _data.setQHDOffset(i);
             i++;
             if ((i + length) > (_payload.length-16)) // 16 is trailing GUID size
                 throw new BadPacketException("Common payload length imprecise!");
@@ -804,6 +807,8 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
                     parser.scanForGGEPs(_payload, i + 2);
                     GGEP ggep = parser.getNormalGGEP();
                     if (ggep != null) {
+                        _data.setGGEPStart(parser.getNormalStartIndex());
+                        _data.setGGEPEnd(parser.getNormalEndIndex());
                         try {
                             supportsBrowseHostT = ggep.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST);
                             if (ggep.hasKey(GGEP.GGEP_HEADER_FW_TRANS)) {
@@ -1206,5 +1211,20 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
  
     public boolean isLocal() {
         return local;
+    }
+    
+    int getGGEPStart() {
+        parseResults();
+        return _data.getGGEPStart();
+    }
+    
+    int getGGEPEnd() {
+        parseResults();
+        return _data.getGGEPEnd();
+    }
+    
+    int getQHDOffset() {
+        parseResults();
+        return _data.getQHDOffset();
     }
 }

@@ -55,4 +55,11 @@ public class MessageSettings extends LimeProps {
      */
     public static final BooleanSetting OOB_REDUNDANCY =
         FACTORY.createRemoteBooleanSetting("OOB_REDUNDANCY", false, "MessageSettings.OOBRedundancy");
+    
+    /**
+     * Whether to add return path in replies.
+     */
+    public static final BooleanSetting RETURN_PATH_IN_REPLIES = 
+        FACTORY.createRemoteBooleanSetting("RETURN_PATH_IN_REPLIES",
+                true,"MessageSettings.returnPathInReplies");
 }

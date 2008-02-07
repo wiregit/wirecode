@@ -74,6 +74,15 @@ class QueryReplyData {
     /** Whether or not this QueryReply supports TLS. */
     private volatile boolean supportsTLS;
     
+    /** Offset of the start of a GGEP block contained in this reply */
+    private volatile int ggepStart = -1;
+    
+    /** Offset of the end of a GGEP block contained in this reply */
+    private volatile int ggepEnd = -1;
+    
+    /** Offset of the control flag in the QHD */
+    private volatile int qhdOffset = -1;
+    
     public int getBusyFlag() {
         return busyFlag;
     }
@@ -232,5 +241,29 @@ class QueryReplyData {
     
     public boolean isTLSCapable() {
         return supportsTLS;
+    }
+    
+    public void setGGEPStart(int offset) {
+        this.ggepStart = offset;
+    }
+    
+    public int getGGEPStart() {
+        return ggepStart;
+    }
+    
+    public void setGGEPEnd(int offset) {
+        this.ggepEnd = offset;
+    }
+    
+    public int getGGEPEnd() {
+        return ggepEnd;
+    }
+    
+    public void setQHDOffset(int offset) {
+        qhdOffset = offset;
+    }
+    
+    public int getQHDOffset() {
+        return qhdOffset;
     }
 }
