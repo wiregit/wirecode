@@ -783,10 +783,10 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             if (length<=0)
                 throw new BadPacketException("Common payload length zero.");
             
-            _data.setQHDOffset(i);
             i++;
             if ((i + length) > (_payload.length-16)) // 16 is trailing GUID size
                 throw new BadPacketException("Common payload length imprecise!");
+            _data.setQHDOffset(i-1);
 
             //c) extract push and busy bits from common payload
             // REMEMBER THAT THE PUSH BIT IS SET OPPOSITE THAN THE OTHERS.
