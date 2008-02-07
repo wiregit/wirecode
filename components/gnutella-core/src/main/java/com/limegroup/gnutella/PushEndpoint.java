@@ -138,11 +138,11 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
     private final PushEndpointCache pushEndpointCache;
 
     public PushEndpoint(byte[] guid, Set<? extends IpPort> proxies, byte features,
-            int version, IpPort addr, PushEndpointCache pushEndpointCache) {
+            int fwtVersion, IpPort addr, PushEndpointCache pushEndpointCache) {
         this.pushEndpointCache = pushEndpointCache;
         
-		_features = ((features & FEATURES_MASK) | (version << 3));
-		_fwtVersion=version;
+		_features = ((features & FEATURES_MASK) | (fwtVersion << 3));
+		_fwtVersion=fwtVersion;
 		_clientGUID=guid;
 		_guid = new GUID(_clientGUID);
 		if (proxies != null) {
@@ -426,6 +426,8 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
     /**
      * Implements the IpPort interface, returning a bogus ip if we don't know
      * it.
+     * 
+     * @return the external address if known otherwise {@link RemoteFileDesc#BOGUS_IP}
      */
     public String getAddress() {
         IpPort addr = getIpPort();
@@ -439,6 +441,8 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
     
     /**
      * Implements the IpPort interface, returning a bogus port if we don't know it
+     * 
+     * @return the port of the external address if known otherwise 6346
      */
     public int getPort() {
         IpPort addr = getIpPort();
