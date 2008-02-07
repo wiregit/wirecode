@@ -32,6 +32,8 @@ import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.SystemUtils;
+import org.limewire.util.Version;
+import org.limewire.util.VersionFormatException;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -275,6 +277,9 @@ public class ConnectionManagerImpl implements ConnectionManager {
     private final CopyOnWriteArrayList<ConnectionLifecycleListener> connectionLifeCycleListeners = 
         new CopyOnWriteArrayList<ConnectionLifecycleListener>();
 
+    /** The last version of LimeWire we'll connect to */
+    private final Version lastGoodVersion;
+    
     private final NetworkManager networkManager;
     private final Provider<HostCatcher> hostCatcher;
     private final Provider<ConnectionDispatcher> connectionDispatcher;
@@ -321,6 +326,12 @@ public class ConnectionManagerImpl implements ConnectionManager {
         this.ipFilter = ipFilter;
         this.connectionCheckerManager = connectionCheckerManager;
         this.pingRequestFactory = pingRequestFactory;
+        
+        Version v = null;
+        try {
+            v = new Version("4.14.0");
+        } catch (VersionFormatException impossible){};
+        lastGoodVersion = v;
     }
 
 
@@ -1053,9 +1064,11 @@ public class ConnectionManagerImpl implements ConnectionManager {
      *  
      *  Default access for testing.
      */
-    static boolean allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
-        if(hr.isLimeWire())
-            return true;
+    boolean allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
+        if(hr.isLimeWire()) {
+            return hr.getLimeVersion() == null || 
+            hr.getLimeVersion().compareTo(lastGoodVersion) >= 0;
+        }
         
         String userAgent = hr.getUserAgent();
         if(userAgent == null)
