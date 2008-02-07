@@ -305,6 +305,9 @@ public abstract class MessageRouterImpl implements MessageRouter {
     @InspectionPoint("dropped replies")
     private final DroppedReplyCounter droppedReplyCounter = new DroppedReplyCounter(); 
     
+    @InspectionPoint("duplicate queries")
+    private final DuplicateQueryCounter duplicateQueryCounter = new DuplicateQueryCounter();
+    
     protected final NetworkManager networkManager;
     protected final QueryRequestFactory queryRequestFactory;
     protected final QueryHandlerFactory queryHandlerFactory;
@@ -933,7 +936,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     }
 
     private void tallyDupQuery(QueryRequest request) {
-        // Used to add to a statistic, now is a noop.
+        duplicateQueryCounter.duplicateQuery(request);
     }
 
 	/**
@@ -3346,6 +3349,64 @@ public abstract class MessageRouterImpl implements MessageRouter {
             // not checking isBeta since these fields are already allocated
             totalDropped++;
             droppedTTL0++;
+        }
+    }
+    
+    private static class DuplicateQueryCounter implements Inspectable {
+        private final Buffer<Long> duplicateTimes = new Buffer<Long>(100);
+        private final Buffer<Byte> duplicateHops = new Buffer<Byte>(100);
+        private final Buffer<Byte> duplicateTTLs = new Buffer<Byte>(100);
+        private long totalDropped;
+        
+        private final Buffer<GUID> lastNGUIDs = new Buffer<GUID>(100);
+        private final Map<GUID, Integer> counts = new HashMap<GUID,Integer>();
+        private int highestEver;
+        
+        
+        public synchronized void duplicateQuery(QueryRequest r) {
+            totalDropped++;
+            if (!LimeWireUtils.isBetaRelease())
+                return;
+            
+            duplicateTimes.add(System.currentTimeMillis());
+            duplicateHops.add(r.getHops());
+            duplicateTTLs.add(r.getTTL());
+            GUID g = new GUID(r.getGUID());
+            Integer num = counts.get(g);
+            if (num != null) {
+                num++;
+                highestEver = Math.max(highestEver, num);
+                return;
+            }
+            
+            num = 1;
+            counts.put(g, num);
+            GUID ejected = lastNGUIDs.add(g);
+            if (ejected != null)
+                counts.remove(ejected);
+        }
+        
+        public synchronized Object inspect() {
+            Map<String,Object> ret = new HashMap<String,Object>();
+            ret.put("total",totalDropped);
+            ret.put("highest",highestEver);
+            
+            byte [] ttlsByte = new byte[duplicateTTLs.getSize()];
+            for (int i = 0; i < duplicateTTLs.getSize(); i++)
+                ttlsByte[i] = duplicateTTLs.get(i);
+            
+            byte [] hopsByte = new byte[duplicateHops.getSize()];
+            for (int i = 0; i < duplicateHops.getSize(); i++)
+                hopsByte[i] = duplicateHops.get(i);
+            
+            byte [] timesByte = new byte[duplicateTimes.getSize() * 8];
+            for (int i = 0; i < duplicateTimes.getSize(); i++)
+                ByteOrder.long2beb(duplicateTimes.get(i), timesByte, i * 8);
+            
+            ret.put("ttls",ttlsByte);
+            ret.put("hops",hopsByte);
+            ret.put("times",timesByte);
+            return ret;
         }
     }
     
