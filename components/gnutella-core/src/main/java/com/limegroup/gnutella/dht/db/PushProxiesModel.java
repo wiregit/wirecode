@@ -41,9 +41,7 @@ public class PushProxiesModel implements StorableModel {
             }
     
             // create value based clone so we can actually track if values have changed
-            lastPublishedValue = new PushProxiesValueImpl(pushProxiesValueForSelf.getVersion(), pushProxiesValueForSelf.getGUID(),
-                    pushProxiesValueForSelf.getFeatures(), pushProxiesValueForSelf.getFwtVersion(), pushProxiesValueForSelf.getPort(),
-                    pushProxiesValueForSelf.getPushProxies());
+            lastPublishedValue = createCopy(pushProxiesValueForSelf); 
             
             GUID guid = new GUID(pushProxiesValueForSelf.getGUID());
             KUID primaryKey = KUIDUtils.toKUID(guid);
@@ -52,10 +50,16 @@ public class PushProxiesModel implements StorableModel {
             // also create new storable if our info has changed
             PushProxiesValue pushProxiesValueForSelf = pushProxiesValueFactory.createDHTValueForSelf();
             if (!pushProxiesValueForSelf.equals(lastPublishedValue)) {
+                lastPublishedValue = createCopy(pushProxiesValueForSelf); 
                 localhost = new Storable(KUIDUtils.toKUID(new GUID(pushProxiesValueForSelf.getGUID())), pushProxiesValueForSelf);
             }
         }
         return localhost;
+    }
+    
+    private static final PushProxiesValue createCopy(PushProxiesValue original) {
+        return new PushProxiesValueImpl(original.getVersion(), original.getGUID(),
+                original.getFeatures(), original.getFwtVersion(), original.getPort(), original.getPushProxies());
     }
     
     /*
