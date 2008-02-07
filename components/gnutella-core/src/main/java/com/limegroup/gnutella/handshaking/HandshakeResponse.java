@@ -31,6 +31,18 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  */
 public class HandshakeResponse {
 
+
+    /**
+     * Version of LimeWire we consider old.
+     */
+    private static final Version OLD_LIME_VERSION;
+    static {
+        Version v = null;
+        try {
+            v = new Version("3.4.0");
+        } catch (VersionFormatException impossible){}
+        OLD_LIME_VERSION = v;
+    }
     /**
      * The "default" status code in a connection handshake indicating that
      * the handshake was successful and the connection can be established.
@@ -204,6 +216,7 @@ public class HandshakeResponse {
     /** The port the response says it's listening on. */
     private final int LISTEN_PORT;
     
+    /** This connection's lime version */
     private final Version limeVersion;
 
     /**
@@ -278,15 +291,13 @@ public class HandshakeResponse {
             isVersionOrHigher(headers, HeaderNames.X_GUESS, 0.1F);
         IS_CRAWLER = 
         	isVersionOrHigher(headers, HeaderNames.CRAWLER, 0.1F);
-        String version = extractStringHeaderValue(headers, HeaderNames.USER_AGENT);
-        Version v = null;
+        Version version = null;
         if (IS_LIMEWIRE) {
-            try {
-                v = new Version(version);
-            } catch (VersionFormatException vfe) {}
-        }
-        limeVersion = v;
-        IS_OLD_LIMEWIRE = IS_LIMEWIRE && oldVersion(version); 
+            version = extractVersion(extractStringHeaderValue(headers, HeaderNames.USER_AGENT));
+            IS_OLD_LIMEWIRE = version != null && version.compareTo(OLD_LIME_VERSION) < 0;
+        } else
+            IS_OLD_LIMEWIRE = false;
+        limeVersion = version;
         
 
         String loc  = extractStringHeaderValue(headers, 
@@ -298,31 +309,23 @@ public class HandshakeResponse {
         LISTEN_PORT = extractIntHeaderValueAfter(headers, HeaderNames.LISTEN_IP, ":", -1);
     }
     
-    /**
-     * @return true if the version of limewire we are connected to is old
-     */
-    private boolean oldVersion(String userAgent) {
-        StringTokenizer tok = new StringTokenizer(userAgent,"/.");
-            int major = -1;
-            int minor = -1;
-            boolean ret = false;
-            boolean error = false;
-            if(tok.countTokens() < 3) //not limewire
-                return false;
-            try {
-                String str = tok.nextToken();//"limewire"
-                str = tok.nextToken();
-                major = Integer.parseInt(str);
-                str = tok.nextToken();
-                minor = Integer.parseInt(str);
-            } catch (NumberFormatException nfx) {
-                error = true;
-            } 
-            if(!error && (major<3 || (major==3 && minor < 4)) )
-                ret  = true;
-            return ret;
+    private Version extractVersion(String userAgent) {
+        StringTokenizer tok = new StringTokenizer(userAgent,"/. ");
+        if(tok.countTokens() < 3) 
+            return null;
+        tok.nextToken(); // limewire
+        String v = tok.nextToken()+ "."+tok.nextToken()+".";
+        if (tok.hasMoreTokens())
+            v += tok.nextToken();
+        else
+            v += "0";
+        try {
+            return new Version(v);
+        } catch (VersionFormatException vfe) {
+            return null;
+        }
     }
-
+    
     private static final HandshakeResponse EMPTY_RESPONSE = new HandshakeResponse(new Properties());
     /**
      * Creates an empty response with no headers.  This is useful, for 
