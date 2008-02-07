@@ -990,7 +990,7 @@ public class ConnectionManagerTest extends LimeTestCase {
                     simppManager, updateHandler,
                     connectionServices, guidMapManager, spamFilterFactory,
                     messageReaderFactory, messageFactory,
-                    applicationServices, null);
+                    applicationServices, null, null);
         }
 
         @Override

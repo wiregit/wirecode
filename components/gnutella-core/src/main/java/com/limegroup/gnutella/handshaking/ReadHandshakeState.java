@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import com.limegroup.gnutella.http.ReadHeadersIOState;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.statistics.BandwidthStat;
 
 /**
  * Superclass for HandshakeStates that are reading.
@@ -13,7 +12,7 @@ abstract class ReadHandshakeState extends ReadHeadersIOState {
     
     protected ReadHandshakeState(HandshakeSupport support) {
         super(support,
-              BandwidthStat.GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH,
+              null,
               ConnectionSettings.MAX_HANDSHAKE_HEADERS.getValue(),
               ConnectionSettings.MAX_HANDSHAKE_LINE_SIZE.getValue());
     }

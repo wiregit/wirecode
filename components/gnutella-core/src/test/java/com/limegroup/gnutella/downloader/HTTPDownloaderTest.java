@@ -58,6 +58,7 @@ import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.SimpleReadHeaderState;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.stubs.IOStateObserverStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
@@ -88,6 +89,8 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     private PushEndpointFactory pushEndpointFactory;
     
     private RemoteFileDescFactory remoteFileDescFactory;
+    
+    private TcpBandwidthStatistics tcpBandwidthStatistics;
 
     public HTTPDownloaderTest(String name) {
         super(name);
@@ -114,12 +117,15 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
 		alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
 		verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
 		pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
+		tcpBandwidthStatistics = injector.getInstance(TcpBandwidthStatistics.class);
+		
         
 		httpDownloaderFactory = new SocketlessHTTPDownloaderFactory(networkManager,
                 alternateLocationFactory, downloadManager, creationTimeCache, bandwidthManager,
-                Providers.of(pushEndpointCache), pushEndpointFactory, remoteFileDescFactory, injector.getInstance(ThexReaderFactory.class));
-		
-		return injector;
+                Providers.of(pushEndpointCache), pushEndpointFactory, remoteFileDescFactory,
+                injector.getInstance(ThexReaderFactory.class), tcpBandwidthStatistics);
+
+        return injector;
     }
 
     /**

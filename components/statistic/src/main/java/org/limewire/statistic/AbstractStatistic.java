@@ -25,12 +25,6 @@ import org.limewire.inspection.Inspectable;
 public abstract class AbstractStatistic implements Statistic, Inspectable {
 
 	/**
-	 * Constant for the <tt>StatisticsManager</tt> for use in subclasses.
-	 */
-	protected static final StatisticsManager STATS_MANAGER = 
-		StatisticsManager.instance();
-
-	/**
 	 * <tt>IntBuffer</tt> for recording stats data -- initialized to
      * an empty buffer until stats are actually recorded.
 	 */

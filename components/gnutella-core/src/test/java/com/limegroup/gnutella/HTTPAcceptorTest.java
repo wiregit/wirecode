@@ -51,7 +51,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
 
         ConnectionDispatcher connectionDispatcher = new ConnectionDispatcherImpl();
         socketAcceptor = new SocketAcceptor(connectionDispatcher);
-        httpAcceptor = new HTTPAcceptor();
+        httpAcceptor = new HTTPAcceptor(null);
         connectionDispatcher.addConnectionAcceptor(httpAcceptor, false, httpAcceptor.getHttpMethods());
         
         socketAcceptor.bind(PORT);

@@ -80,6 +80,7 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class AltLocUploadTest extends LimeTestCase {
@@ -1443,9 +1444,10 @@ public class AltLocUploadTest extends LimeTestCase {
                 Provider<ContentManager> contentManager,
                 Provider<HTTPAcceptor> httpAcceptor,
                 Provider<FileManager> fileManager,
-                Provider<ActivityCallback> activityCallback) {
+                Provider<ActivityCallback> activityCallback, 
+                TcpBandwidthStatistics tcpBandwidthStatistics) {
             super(slotManager, httpRequestHandlerFactory, contentManager, httpAcceptor,
-                    fileManager, activityCallback);
+                    fileManager, activityCallback, tcpBandwidthStatistics);
         }
 
         @Override

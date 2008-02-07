@@ -77,7 +77,7 @@ public abstract class TestConnection extends GnutellaConnection {
             MessageFactory messageFactory,
             ApplicationServices applicationServices,
             SecureMessageVerifier secureMessageVerifier) {
-        super("60.76.5.3", 4444, ConnectType.PLAIN, connectionManager, networkManager, queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory, messageDispatcher, networkUpdateSanityChecker, searchResultHandler, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage, simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier);
+        super("60.76.5.3", 4444, ConnectType.PLAIN, connectionManager, networkManager, queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory, messageDispatcher, networkUpdateSanityChecker, searchResultHandler, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage, simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier, null);
 
         this.queriesMustBeInRoutingTables = queriesMustBeInRoutingTable;
         this.connections = connections;

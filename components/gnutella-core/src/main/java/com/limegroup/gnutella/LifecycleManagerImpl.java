@@ -22,6 +22,7 @@ import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsGroupManager;
+import org.limewire.statistic.StatisticAccumulator;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
@@ -119,6 +120,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<OutOfBandThroughputMeasurer> outOfBandThroughputMeasurer;
     private final Provider<BrowseHostHandlerManager> browseHostHandlerManager;
     private final Provider<DownloadUpgradeTask> downloadUpgradeTask;
+    private final Provider<StatisticAccumulator> statisticAccumulator;
     
     /** A list of items that require running prior to shutting down LW. */
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
@@ -177,7 +179,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<LWSIntegrationServices> lwsItegrationServices,
             Provider<OutOfBandThroughputMeasurer> outOfBandThroughputMeasurer,
             Provider<BrowseHostHandlerManager> browseHostHandlerManager,
-            Provider<DownloadUpgradeTask> downloadUpgradeTask) { 
+            Provider<DownloadUpgradeTask> downloadUpgradeTask,
+            Provider<StatisticAccumulator> statisticAccumulator) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -223,6 +226,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.outOfBandThroughputMeasurer = outOfBandThroughputMeasurer;
         this.browseHostHandlerManager = browseHostHandlerManager;
         this.downloadUpgradeTask = downloadUpgradeTask;
+        this.statisticAccumulator = statisticAccumulator;
     }
     
     /* (non-Javadoc)
@@ -311,6 +315,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         loadBackgroundTasksBlocking();
         
 	    LOG.trace("START RouterService");
+	    
+	    statisticAccumulator.get().start();
 
         if(SSLSettings.isIncomingTLSEnabled() || SSLSettings.isOutgoingTLSEnabled()) {
             LOG.trace("START SSL Test");
@@ -567,6 +573,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         messageRouter.get().stop();
         
         localAcceptor.get().stop();
+        
+        statisticAccumulator.get().stop();
         
         runShutdownItems();
         

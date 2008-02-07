@@ -96,7 +96,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
+import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
@@ -317,8 +317,10 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     @SuppressWarnings("unused")
     private final SecureMessageVerifier secureMessageVerifier;
     
+    private final OutOfBandStatistics outOfBandStatistics;
+    
     /** writers of statistics if any */
-    enum StatsWriters {TOP, DEFLATER, DELAYER, THROTTLE }
+    private static enum StatsWriters {TOP, DEFLATER, DELAYER, THROTTLE }
     private final Map<StatsWriters,StatisticGatheringWriter> statsWriters = new HashMap<StatsWriters,StatisticGatheringWriter>();
     private volatile MessageCounter incoming, outgoing;
 
@@ -344,7 +346,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
             SpamFilterFactory spamFilterFactory, MessageReaderFactory messageReaderFactory,
             MessageFactory messageFactory, ApplicationServices applicationServices,
-            SecureMessageVerifier secureMessageVerifier) {
+            SecureMessageVerifier secureMessageVerifier, OutOfBandStatistics outOfBandStatistics) {
         super(host, port, type, capabilitiesVMFactory, supportedVendorMessage, networkManager,
                 acceptor);
         this.connectionManager = connectionManager;
@@ -367,6 +369,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         this._personalFilter = spamFilterFactory.createPersonalFilter();
         this.secureMessageVerifier = secureMessageVerifier;
         this.socketsManager = socketsManager;
+        this.outOfBandStatistics = outOfBandStatistics;
     }
 
     /**
@@ -389,7 +392,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
             SpamFilterFactory spamFilterFactory, MessageReaderFactory messageReaderFactory,
             MessageFactory messageFactory, ApplicationServices applicationServices,
-            SecureMessageVerifier secureMessageVerifier) {
+            SecureMessageVerifier secureMessageVerifier, OutOfBandStatistics outOfBandStatistics) {
         super(socket, capabilitiesVMFactory, supportedVendorMessage, networkManager, acceptor);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
@@ -411,6 +414,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         this._personalFilter = spamFilterFactory.createPersonalFilter();
         this.secureMessageVerifier = secureMessageVerifier;
         this.socketsManager = null;
+        this.outOfBandStatistics = outOfBandStatistics;
     }
 
     /*
@@ -943,8 +947,8 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             }
         }
 
-        if (!networkManager.isOOBCapable() || !OutOfBandThroughputStat.isSuccessRateGreat()
-                || !OutOfBandThroughputStat.isOOBEffectiveForProxy())
+        if (!networkManager.isOOBCapable() || !outOfBandStatistics.isSuccessRateGreat()
+                || !outOfBandStatistics.isOOBEffectiveForProxy())
             return query;
 
         // everything is a go - we need to do the following:
@@ -969,7 +973,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         // 2) set up mappings between the guids
         guidMap.addMapping(origGUID, oobGUID);
 
-        OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
+        outOfBandStatistics.addSentQuery();
         return query;
     }
 

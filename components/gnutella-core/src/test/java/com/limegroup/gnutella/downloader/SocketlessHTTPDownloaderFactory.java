@@ -11,6 +11,7 @@ import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.tigertree.ThexReaderFactory;
 
 public class SocketlessHTTPDownloaderFactory implements HTTPDownloaderFactory {
@@ -24,6 +25,7 @@ public class SocketlessHTTPDownloaderFactory implements HTTPDownloaderFactory {
     private final PushEndpointFactory pushEndpointFactory;
     private final RemoteFileDescFactory remoteFileDescFactory;
     private final ThexReaderFactory thexReaderFactory;
+    private final TcpBandwidthStatistics tcpBandwidthStatistics;
 
     public SocketlessHTTPDownloaderFactory(NetworkManager networkManager,
             AlternateLocationFactory alternateLocationFactory,
@@ -33,7 +35,8 @@ public class SocketlessHTTPDownloaderFactory implements HTTPDownloaderFactory {
             Provider<PushEndpointCache> pushEndpointCache,
             PushEndpointFactory pushEndpointFactory,
             RemoteFileDescFactory remoteFileDescFactory,
-            ThexReaderFactory thexReaderFactory) {
+            ThexReaderFactory thexReaderFactory, 
+            TcpBandwidthStatistics tcpBandwidthStatistics) {
         this.networkManager = networkManager;
         this.alternateLocationFactory = alternateLocationFactory;
         this.downloadManager = downloadManager;
@@ -43,13 +46,14 @@ public class SocketlessHTTPDownloaderFactory implements HTTPDownloaderFactory {
         this.pushEndpointFactory = pushEndpointFactory;
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.thexReaderFactory = thexReaderFactory;
+        this.tcpBandwidthStatistics = tcpBandwidthStatistics;
     }
 
     public HTTPDownloader create(Socket socket, RemoteFileDesc rfd,
             VerifyingFile incompleteFile, boolean inNetwork) {
         return new HTTPDownloader(socket, rfd, incompleteFile, inNetwork,
                 false, networkManager, alternateLocationFactory,
-                downloadManager, creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory, remoteFileDescFactory, thexReaderFactory);
+                downloadManager, creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory, remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics);
     }
 
 }

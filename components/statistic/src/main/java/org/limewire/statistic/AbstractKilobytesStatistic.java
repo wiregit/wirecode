@@ -56,6 +56,7 @@ public abstract class AbstractKilobytesStatistic extends AbstractStatistic {
 	 * @return the average for this statistic in kilobytes per unit of
 	 *  measurement (KB/s)
 	 */
+	@Override
     public double getAverage() {
         if (_totalStatsRecorded == 0)
             return 0;
@@ -68,6 +69,7 @@ public abstract class AbstractKilobytesStatistic extends AbstractStatistic {
 	 * @return the maximum for a recorded time period for this statistic 
 	 *  in kilobytes 
 	 */
+	@Override
 	public double getMax() {
 		return _max/BYTES_PER_KILOBYTE;
 	}
@@ -77,6 +79,7 @@ public abstract class AbstractKilobytesStatistic extends AbstractStatistic {
 	 *
 	 * @return the total for this statistic in kilobytes 
 	 */
+	@Override
 	public double getTotal() {
 		return _total/BYTES_PER_KILOBYTE;
 	}

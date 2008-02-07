@@ -83,6 +83,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.statistics.QueryStats;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
@@ -672,6 +673,10 @@ public class LimeWireCore {
 
     public LimeHttpClient getLimeHttpClient() {
         return injector.getInstance(LimeHttpClient.class);
+    }
+
+    public TcpBandwidthStatistics getTcpBandwidthStatistics() {
+        return injector.getInstance(TcpBandwidthStatistics.class);
     }
     
 }

@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpStatus;
@@ -21,13 +20,15 @@ import org.limewire.http.BasicHttpAcceptor;
 import org.limewire.http.HttpAcceptorListener;
 import org.limewire.http.HttpIOSession;
 import org.limewire.nio.NIODispatcher;
+import org.limewire.statistic.Statistic;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.statistics.BandwidthStat;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics.StatisticType;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -43,7 +44,7 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
     private final HttpRequestHandler notFoundHandler;
 
     @Inject
-    public HTTPAcceptor() {
+    public HTTPAcceptor(TcpBandwidthStatistics tcpBandwidthStatistics) {
         super(createDefaultParams(LimeWireUtils.getHttpServer(), Constants.TIMEOUT), SUPPORTED_METHODS);
 
         this.notFoundHandler = new HttpRequestHandler() {
@@ -55,8 +56,10 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
         };
         
         addAcceptorListener(new ConnectionEventListener());
-        addRequestInterceptor(new RequestStatisticTracker());
-        addResponseInterceptor(new HeaderStatisticTracker());
+        if(tcpBandwidthStatistics != null)
+            addResponseInterceptor(new HeaderStatisticTracker(tcpBandwidthStatistics));
+        else
+            LOG.warn("Not tracking TCP header bandwidth!");
 
         inititalizeDefaultHandlers();
     }
@@ -125,26 +128,9 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
         }
 
         public void responseSent(NHttpConnection conn, HttpResponse response) {
-            HttpIOSession session = HttpContextParams.getIOSession(conn
-                    .getContext());
-            session
-                    .setSocketTimeout(SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT
-                            .getValue());
+            HttpIOSession session = HttpContextParams.getIOSession(conn.getContext());
+            session.setSocketTimeout(SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT.getValue());
             session.setThrottle(null);
-        }
-
-    }
-
-    /**
-     * Updates statistics when a request is received.
-     */
-    private class RequestStatisticTracker implements HttpRequestInterceptor {
-
-        public void process(HttpRequest request, HttpContext context)
-                throws HttpException, IOException {
-            if (HttpContextParams.isSubsequentRequest(context)) {
-                HttpContextParams.setSubsequentRequest(context, true);
-            }
         }
 
     }
@@ -153,6 +139,11 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
      * Tracks the bandwidth used when sending a response.
      */
     private class HeaderStatisticTracker implements HttpResponseInterceptor {
+        private final Statistic headerUpstream;
+        
+        HeaderStatisticTracker(TcpBandwidthStatistics tcpBandwidthStatistics) {
+            this.headerUpstream = tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_UPSTREAM);
+        }
 
         /*
          * XXX iterating over all headers is rather inefficient since the size
@@ -160,13 +151,11 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
          * DefaultNHttpServerConnection.submitResponse() but can't be easily
          * made accessible
          */
-        public void process(HttpResponse response, HttpContext context)
-                throws HttpException, IOException {
+        public void process(HttpResponse response, HttpContext context) throws HttpException,
+                IOException {
             for (Iterator it = response.headerIterator(); it.hasNext();) {
                 Header header = (Header) it.next();
-                BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header
-                        .getName().length()
-                        + 2 + header.getValue().length());
+                headerUpstream.addData(header.getName().length() + 2 + header.getValue().length());
             }
         }
 

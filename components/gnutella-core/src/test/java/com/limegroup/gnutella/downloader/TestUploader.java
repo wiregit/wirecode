@@ -16,6 +16,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
@@ -43,7 +44,10 @@ import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.filters.IPList;
 import com.limegroup.gnutella.http.FeaturesWriter;
 import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HTTPHeaderValue;
+import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import com.limegroup.gnutella.http.HTTPUtils;
+import com.limegroup.gnutella.http.HttpTestUtils;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.tigertree.HashTreeWriteHandler;
 import com.limegroup.gnutella.tigertree.HashTreeWriteHandlerFactory;
@@ -830,7 +834,7 @@ public class TestUploader {
 		if(storedGoodLocs != null && storedGoodLocs.hasAlternateLocations()) {
 
             LOG.debug("Writing alternate location header:\n"+storedGoodLocs+"\n");      
-            HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
+            TestUploader.writeHeader(HTTPHeaderName.ALT_LOCATION,
                                   storedGoodLocs, out);
         } else {
             LOG.debug("Did not write alt locs:\n"+storedGoodLocs+"\n");
@@ -838,31 +842,36 @@ public class TestUploader {
 		if(storedBadLocs != null && storedBadLocs.hasAlternateLocations()) {
 
             LOG.debug("Writing alternate location header:\n"+storedBadLocs+"\n");      
-            HTTPUtils.writeHeader(HTTPHeaderName.NALTS,
+            TestUploader.writeHeader(HTTPHeaderName.NALTS,
                                   storedBadLocs, out);
         } else {
             LOG.debug("Did not write alt locs:\n"+storedBadLocs+"\n");
         }
         if(creationTime != null) {
             LOG.debug("Writing out Creation Time.");
-            HTTPUtils.writeHeader(HTTPHeaderName.CREATION_TIME, ""+creationTime,
+            TestUploader.writeHeader(HTTPHeaderName.CREATION_TIME, ""+creationTime,
                                   out);
         }
         if(sendThexTreeHeader) {
-            HTTPUtils.writeHeader(HTTPHeaderName.THEX_URI,
+            TestUploader.writeHeader(HTTPHeaderName.THEX_URI,
                                   TestFile.tree(),
                                   out);
         }
         if(interestedInFalts) {
             FeaturesWriter featuresWriter = new FeaturesWriter(networkManager);
-            featuresWriter.writeFeatures(out);
+            Set<HTTPHeaderValue> features = featuresWriter.getFeaturesValue();
+            // Write X-Features header.
+            if (features.size() > 0) {
+                TestUploader.writeHeader(HTTPHeaderName.FEATURES, new HTTPHeaderValueCollection(
+                        features), out);
+            }
         }
         
 
         if (isFirewalled && _proxiesString!=null) {
-            HTTPUtils.writeHeader(HTTPHeaderName.PROXIES,_proxiesString,out);
+            TestUploader.writeHeader(HTTPHeaderName.PROXIES,_proxiesString,out);
             if (FWTPort != -1) {
-                HTTPUtils.writeHeader(HTTPHeaderName.FWTPORT, FWTPort, out);
+                TestUploader.writeHeader(HTTPHeaderName.FWTPORT, FWTPort, out);
             }
         }
         
@@ -1042,7 +1051,7 @@ public class TestUploader {
 	 *  locations should be added to
 	 */
 	private void readAlternateLocations (String altHeader, final boolean good) {
-        String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
+        String alternateLocations=HttpTestUtils.extractHeaderValue(altHeader);
         AltLocUtils.parseAlternateLocations(_sha1, alternateLocations, true, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             public Void apply(AlternateLocation location) {
                 if(location instanceof PushAltLoc)
@@ -1068,7 +1077,7 @@ public class TestUploader {
 	 *  <tt>null</tt> if there was any problem creating it
 	 */
 	private static URN readContentUrn(final String contentUrnStr) {
-		String urnStr = HTTPUtils.extractHeaderValue(contentUrnStr);
+		String urnStr = HttpTestUtils.extractHeaderValue(contentUrnStr);
 		
 		// return null if the header value could not be extracted
 		if(urnStr == null) return null;
@@ -1163,6 +1172,85 @@ public class TestUploader {
 
     public void setQueuePos(int queuePos) {
         this.queuePos = queuePos;
+    }
+
+    /**
+     * Create a single http header String with the specified header name 
+     * and the specified header value.
+     *
+     * @param name the <tt>HTTPHeaderName</tt> instance containing the
+     *  header name 
+     * @param valueStr the value of the header, generally the httpStringValue
+     *  or a HttpHeaderValue, or just a String.
+     */
+    public static String createHeader(HTTPHeaderName name, String valueStr) {
+        return HTTPUtils.createHeader(name.httpStringValue(), valueStr);
+    }
+
+    /**
+     * Utility method for writing a header with an integer value.  This removes
+     * the burden to the caller of converting integer HTTP values to strings.
+     * 
+     * @param name the <tt>HTTPHeaderName</tt> of the header to write
+     * @param value the int value of the header
+     * @param stream the <tt>OutputStream</tt> instance to write the header to
+     * @throws IOException if an IO error occurs during the write
+     */
+    public static void writeHeader(HTTPHeaderName name, int value, OutputStream stream) throws IOException {
+        writeHeader(name, String.valueOf(value), stream);
+    }
+
+    /**
+     * Writes an single http header to the specified 
+     * <tt>OutputStream</tt> instance, with the specified header name 
+     * and the specified header value.
+     *
+     * @param name the <tt>HTTPHeaderName</tt> instance containing the
+     *  header name to write to the stream
+     * @param name the <tt>HTTPHeaderValue</tt> instance containing the
+     *  header value to write to the stream
+     * @param os the <tt>OutputStream</tt> instance to write to
+     */
+    public static void writeHeader(HTTPHeaderName name, HTTPHeaderValue value, OutputStream os) 
+      throws IOException {
+    	if(name == null) {
+    		throw new NullPointerException("null name in writing http header");
+    	} else if(value == null) {
+    		throw new NullPointerException("null value in writing http header: "+
+    									   name);
+    	} else if(os == null) {
+    		throw new NullPointerException("null os in writing http header: "+
+    									   name);
+    	}
+    	String header = TestUploader.createHeader(name, value.httpStringValue());
+    	os.write(header.getBytes());
+    }
+
+    /**
+     * Writes an single http header to the specified 
+     * <tt>OutputStream</tt> instance, with the specified header name 
+     * and the specified header value.
+     *
+     * @param name the <tt>HTTPHeaderName</tt> instance containing the
+     *  header name to write to the stream
+     * @param value the <tt>String</tt> instance containing the
+     *  header value to write to the stream
+     * @param os the <tt>OutputStream</tt> instance to write to
+     */
+    public static void writeHeader(HTTPHeaderName name, String value, 
+    							   OutputStream os) 
+    	throws IOException {
+    	if(name == null) {
+    		throw new NullPointerException("null name in writing http header");
+    	} else if(value == null) {
+    		throw new NullPointerException("null value in writing http header: "+
+    									   name);
+    	} else if(os == null) {
+    		throw new NullPointerException("null os in writing http header: "+
+    									   name);
+    	}
+    	String header = TestUploader.createHeader(name, value);
+    	os.write(header.getBytes());
     }
     
 }

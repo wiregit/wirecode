@@ -15,7 +15,7 @@ import org.limewire.util.FileUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPUtils;
+import com.limegroup.gnutella.http.HttpTestUtils;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -259,7 +259,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
                     .matchesStartOfString(curString)) {
                 URN curUrn = null;
                 try {
-                    String tmpString = HTTPUtils.extractHeaderValue(curString);
+                    String tmpString = HttpTestUtils.extractHeaderValue(curString);
                     curUrn = URN.createSHA1Urn(tmpString);
                 } catch (IOException e) {
                     assertTrue("unexpected exception: " + e, false);
@@ -276,7 +276,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
                 continue;
             } else if (HTTPHeaderName.CONTENT_LENGTH
                     .matchesStartOfString(curString)) {
-                String value = HTTPUtils.extractHeaderValue(curString);
+                String value = HttpTestUtils.extractHeaderValue(curString);
                 assertEquals("sizes should match for " + fd, (int) fd
                         .getFileSize(), Integer.parseInt(value));
             } else if (HTTPHeaderName.SERVER.matchesStartOfString(curString)) {

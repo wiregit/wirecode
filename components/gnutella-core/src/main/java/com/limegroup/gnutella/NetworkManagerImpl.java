@@ -14,7 +14,7 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
+import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 
 @Singleton
 public class NetworkManagerImpl implements NetworkManager {
@@ -24,18 +24,21 @@ public class NetworkManagerImpl implements NetworkManager {
     private Provider<DHTManager> dhtManager;
     private Provider<ConnectionManager> connectionManager;
     private Provider<ActivityCallback> activityCallback;
+    private final OutOfBandStatistics outOfBandStatistics;
     
     @Inject
     public NetworkManagerImpl(Provider<UDPService> udpService,
             Provider<Acceptor> acceptor,
             Provider<DHTManager> dhtManager,
             Provider<ConnectionManager> connectionManager,
-            Provider<ActivityCallback> activityCallback) {
+            Provider<ActivityCallback> activityCallback,
+            OutOfBandStatistics outOfBandStatistics) {
         this.udpService = udpService;
         this.acceptor = acceptor;
         this.dhtManager = dhtManager;
         this.connectionManager = connectionManager;
         this.activityCallback = activityCallback;
+        this.outOfBandStatistics = outOfBandStatistics;
     }
     
 
@@ -58,7 +61,7 @@ public class NetworkManagerImpl implements NetworkManager {
      * @see com.limegroup.gnutella.NetworkManager#isOOBCapable()
      */
     public boolean isOOBCapable() {
-        return isGUESSCapable() && OutOfBandThroughputStat.isSuccessRateGood()&&
+        return isGUESSCapable() && outOfBandStatistics.isSuccessRateGood()&&
                !NetworkUtils.isPrivate() &&
                SearchSettings.OOB_ENABLED.getValue() &&
                acceptor.get().isAddressExternal() && isIpPortValid();

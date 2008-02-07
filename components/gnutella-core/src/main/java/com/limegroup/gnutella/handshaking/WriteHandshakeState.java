@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.util.Properties;
 
 import com.limegroup.gnutella.http.WriteHeadersIOState;
-import com.limegroup.gnutella.statistics.BandwidthStat;
 
 /** Superclass for HandshakeStates that are written out. */
 public abstract class WriteHandshakeState extends WriteHeadersIOState {
@@ -14,7 +13,7 @@ public abstract class WriteHandshakeState extends WriteHeadersIOState {
     protected final HandshakeSupport support;
     
     protected WriteHandshakeState(HandshakeSupport support) {
-        super(BandwidthStat.GNUTELLA_HEADER_UPSTREAM_BANDWIDTH);
+        super(null);
         this.support = support;
     }
     

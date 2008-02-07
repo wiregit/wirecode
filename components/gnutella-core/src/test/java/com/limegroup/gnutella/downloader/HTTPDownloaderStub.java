@@ -16,6 +16,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.tigertree.ThexReaderFactory;
 
 /**
@@ -24,20 +25,22 @@ import com.limegroup.gnutella.tigertree.ThexReaderFactory;
 public class HTTPDownloaderStub extends HTTPDownloader {
 
     public HTTPDownloaderStub(RemoteFileDesc rfd, VerifyingFile incompleteFile,
-            NetworkManager networkManager,
-            AlternateLocationFactory alternateLocationFactory, DownloadManager downloadManager,
-            CreationTimeCache creationTimeCache, BandwidthManager bandwidthManager,
-            Provider<PushEndpointCache> pushEndpointCache, PushEndpointFactory pushEndpointFactory,
-            RemoteFileDescFactory remoteFileDescFactory, ThexReaderFactory thexReaderFactory) {
-        super(null, rfd, incompleteFile, false, false, networkManager,
-                alternateLocationFactory, downloadManager, creationTimeCache, bandwidthManager,
-                pushEndpointCache, pushEndpointFactory, remoteFileDescFactory, thexReaderFactory);
+            NetworkManager networkManager, AlternateLocationFactory alternateLocationFactory,
+            DownloadManager downloadManager, CreationTimeCache creationTimeCache,
+            BandwidthManager bandwidthManager, Provider<PushEndpointCache> pushEndpointCache,
+            PushEndpointFactory pushEndpointFactory, RemoteFileDescFactory remoteFileDescFactory,
+            ThexReaderFactory thexReaderFactory, TcpBandwidthStatistics tcpBandwidthStatistics) {
+        super(null, rfd, incompleteFile, false, false, networkManager, alternateLocationFactory,
+                downloadManager, creationTimeCache, bandwidthManager, pushEndpointCache,
+                pushEndpointFactory, remoteFileDescFactory, thexReaderFactory,
+                tcpBandwidthStatistics);
     }
-	
-	public void addFailedAltLoc(AlternateLocation loc) {
 
-	}
-	public void addSuccessfulAltLoc(AlternateLocation loc) {
+    public void addFailedAltLoc(AlternateLocation loc) {
+
+    }
+
+    public void addSuccessfulAltLoc(AlternateLocation loc) {
 
 	}
 	public boolean browseEnabled() {

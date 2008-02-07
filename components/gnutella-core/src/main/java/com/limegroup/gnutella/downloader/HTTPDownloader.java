@@ -75,7 +75,8 @@ import com.limegroup.gnutella.http.SimpleWriteHeaderState;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.statistics.BandwidthStat;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics.StatisticType;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexReader;
 import com.limegroup.gnutella.tigertree.ThexReaderFactory;
@@ -286,6 +287,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private final PushEndpointFactory pushEndpointFactory;
     private final RemoteFileDescFactory remoteFileDescFactory;
     private final ThexReaderFactory thexReaderFactory;
+    private final TcpBandwidthStatistics tcpBandwidthStatistics;
 
     HTTPDownloader(Socket socket, RemoteFileDesc rfd,
             VerifyingFile incompleteFile, boolean inNetwork,
@@ -294,12 +296,11 @@ public class HTTPDownloader implements BandwidthTracker {
             DownloadManager downloadManager,
             CreationTimeCache creationTimeCache,
             BandwidthManager bandwidthManager,
-            Provider<PushEndpointCache> pushEndpointCache,
-            PushEndpointFactory pushEndpointFactory,
-            RemoteFileDescFactory remoteFileDescFactory,
-            ThexReaderFactory thexReaderFactory) {
-        
-        if(requireSocket && socket == null)
+            Provider<PushEndpointCache> pushEndpointCache, PushEndpointFactory pushEndpointFactory,
+            RemoteFileDescFactory remoteFileDescFactory, ThexReaderFactory thexReaderFactory,
+            TcpBandwidthStatistics tcpBandwidthStatistics) {
+
+        if (requireSocket && socket == null)
             throw new NullPointerException("null socket");
         
         this.networkManager = networkManager;
@@ -311,6 +312,7 @@ public class HTTPDownloader implements BandwidthTracker {
         this.pushEndpointFactory = pushEndpointFactory;
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.thexReaderFactory = thexReaderFactory;
+        this.tcpBandwidthStatistics = tcpBandwidthStatistics;
         _rfd= Objects.nonNull(rfd, "rfd");
         _socket=socket;
         _incompleteFile=incompleteFile;
@@ -567,11 +569,11 @@ public class HTTPDownloader implements BandwidthTracker {
         SimpleWriteHeaderState writer = new SimpleWriteHeaderState(
                 "GET " + _rfd.getUrl().getFile() + " HTTP/1.1",
                 headers,
-                _inNetwork ? BandwidthStat.HTTP_HEADER_UPSTREAM_INNETWORK_BANDWIDTH :
-                             BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH);
+                _inNetwork ? tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_INNETWORK_UPSTREAM) :
+                             tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_UPSTREAM));
         SimpleReadHeaderState reader = new SimpleReadHeaderState(
-                _inNetwork ? BandwidthStat.HTTP_HEADER_DOWNSTREAM_INNETWORK_BANDWIDTH :
-                             BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH,
+                _inNetwork ? tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_INNETWORK_DOWNSTREAM) :
+                             tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_DOWNSTREAM),
                              DownloadSettings.MAX_HEADERS.getValue(),
                              DownloadSettings.MAX_HEADER_SIZE.getValue());
         
@@ -670,9 +672,9 @@ public class HTTPDownloader implements BandwidthTracker {
         SimpleWriteHeaderState writer = new SimpleWriteHeaderState(
                 "GET " + _thexUri + " HTTP/1.1",
                 headers,
-                BandwidthStat.GNUTELLA_UPSTREAM_BANDWIDTH);
+                tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_UPSTREAM));
         SimpleReadHeaderState reader = new SimpleReadHeaderState(
-                BandwidthStat.GNUTELLA_DOWNSTREAM_BANDWIDTH,
+                tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_DOWNSTREAM),
                 DownloadSettings.MAX_HEADERS.getValue(),
                 DownloadSettings.MAX_HEADER_SIZE.getValue());
         
@@ -1514,9 +1516,9 @@ public class HTTPDownloader implements BandwidthTracker {
                 
                 int totalRead = buffer.position();
                 if (_inNetwork)
-                    BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(totalRead);
+                    tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_BODY_INNETWORK_DOWNSTREAM).addData(totalRead);
                 else
-                    BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(totalRead);
+                    tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_BODY_DOWNSTREAM).addData(totalRead);
                 
                 // If nothing could be read at all, leave.
                 if(totalRead == 0) {

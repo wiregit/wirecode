@@ -25,6 +25,7 @@ import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.http.HttpAcceptorListener;
 import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
+import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -34,6 +35,7 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.uploader.FileRequestHandler;
 import com.limegroup.gnutella.uploader.HTTPUploadSession;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
@@ -191,29 +193,22 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     private final Provider<HTTPAcceptor> httpAcceptor;
     
+    private final TcpBandwidthStatistics tcpBandwidthStatistics;
+    
     @Inject
-    public HTTPUploadManager(UploadSlotManager slotManager, HttpRequestHandlerFactory httpRequestHandlerFactory, Provider<ContentManager> contentManager,
-            Provider<HTTPAcceptor> httpAcceptor, Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback) {
-        if (slotManager == null) {
-            throw new IllegalArgumentException("slotManager may not be null");
-        }
-        if (httpAcceptor == null) {
-            throw new IllegalArgumentException("acceptor may not be null");
-        }
-        if (activityCallback == null) {
-            throw new IllegalArgumentException("activityCallback may not be null");
-        }        
-        if (fileManager == null) {
-            throw new IllegalArgumentException("fileManager may not be null");
-        }
-
-        this.slotManager = slotManager;
+    public HTTPUploadManager(UploadSlotManager slotManager,
+            HttpRequestHandlerFactory httpRequestHandlerFactory,
+            Provider<ContentManager> contentManager, Provider<HTTPAcceptor> httpAcceptor,
+            Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback,
+            TcpBandwidthStatistics tcpBandwidthStatistics) {
+        this.slotManager = Objects.nonNull(slotManager, "slotManager");
         this.httpRequestHandlerFactory = httpRequestHandlerFactory;
         this.contentManager = contentManager;
         this.freeLoaderRequestHandler = httpRequestHandlerFactory.createFreeLoaderRequestHandler();
-        this.httpAcceptor = httpAcceptor;
-        this.fileManager = fileManager;
-        this.activityCallback = activityCallback;
+        this.httpAcceptor = Objects.nonNull(httpAcceptor, "httpAcceptor");
+        this.fileManager = Objects.nonNull(fileManager, "fileManager");
+        this.activityCallback = Objects.nonNull(activityCallback, "activityCallback");
+        this.tcpBandwidthStatistics = Objects.nonNull(tcpBandwidthStatistics, "tcpBandwidthStatistics");
     }
 
     /**
@@ -722,7 +717,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
                 cleanupFinishedUploader(uploader);
 
-                uploader = new HTTPUploader(filename, session);
+                uploader = new HTTPUploader(filename, session, tcpBandwidthStatistics);
             } else {
                 // reuse existing uploader object
                 uploader.reinitialize();

@@ -36,7 +36,7 @@ import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SettingsProvider;
-import org.limewire.statistic.StatisticsManager;
+import org.limewire.statistic.LimeWireStatisticsModule;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -160,6 +160,7 @@ import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
 import com.limegroup.gnutella.settings.SettingsBackedProxySettings;
 import com.limegroup.gnutella.settings.SettingsBackedSocketBindingSettings;
+import com.limegroup.gnutella.statistics.LimeWireGnutellaStatisticsModule;
 import com.limegroup.gnutella.tigertree.LimeWireHashTreeModule;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactoryImpl;
@@ -209,6 +210,8 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireDownloadModule());
         binder().install(new LimeWireHashTreeModule());        
         binder().install(new LimeWireHttpModule());
+        binder().install(new LimeWireStatisticsModule());
+        binder().install(new LimeWireGnutellaStatisticsModule());
         
         bind(LimeWireCore.class);
         
@@ -333,6 +336,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UpdateMessageVerifier.class).to(UpdateMessageVerifierImpl.class);
         bind(InspectionResponseFactory.class).to(InspectionResponseFactoryImpl.class);
         bind(FECUtils.class).to(FECUtilsImpl.class);
+        bind(NodeAssigner.class).to(NodeAssignerImpl.class);
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
@@ -344,7 +348,6 @@ public class LimeWireCoreModule extends AbstractModule {
         requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
         requestStaticInjection(Pools.class);
         requestStaticInjection(LocalSocketAddressService.class);
-        requestStaticInjection(StatisticsManager.class);
                         
         // TODO: This is odd -- move to initialize & LifecycleManager?
         bind(Statistics.class).asEagerSingleton();

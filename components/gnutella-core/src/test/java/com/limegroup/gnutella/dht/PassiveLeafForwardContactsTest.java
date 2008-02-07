@@ -18,7 +18,6 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ConnectionManager;
@@ -411,22 +410,17 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         return c;
     }
     
-    private class NodeAssignerStub extends NodeAssigner {
-        @Inject
-        public NodeAssignerStub() {
-            super(null,null,null,null,null,null,null,null,null);
-        }
+    private class NodeAssignerStub implements NodeAssigner {
 
-        @Override
         public boolean isTooGoodUltrapeerToPassUp() {
             return false;
         }
 
-        @Override
+
         public void start() {
         }
 
-        @Override
+
         public void stop() {
         }
         

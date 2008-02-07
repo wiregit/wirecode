@@ -31,7 +31,6 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.UDPService;
@@ -172,8 +171,7 @@ public class DownloadTestCase extends LimeTestCase {
 
         ScheduledExecutorService scheduledExecutorService = injector.getInstance(Key.get(
                 ScheduledExecutorService.class, Names.named("backgroundExecutor")));
-        scheduledExecutorService.scheduleWithFixedDelay(click, 0, NodeAssigner.TIMER_DELAY,
-                TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(click, 0, 1000, TimeUnit.MILLISECONDS);
 
         LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
         lifecycleManager.start();

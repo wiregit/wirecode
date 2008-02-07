@@ -76,6 +76,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
+import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 //ITEST
@@ -549,18 +550,18 @@ public class PushUploadTest extends LimeTestCase {
         private boolean acceptedIncomingConnection = true;
 
         @Inject
-        public MyNetworkManager(Provider<UDPService> udpService,
-                Provider<Acceptor> acceptor, Provider<DHTManager> dhtManager,
-                Provider<ConnectionManager> connectionManager,
-                Provider<ActivityCallback> activityCallback) {
-            super(udpService, acceptor, dhtManager, connectionManager, activityCallback);
+        public MyNetworkManager(Provider<UDPService> udpService, Provider<Acceptor> acceptor,
+                Provider<DHTManager> dhtManager, Provider<ConnectionManager> connectionManager,
+                Provider<ActivityCallback> activityCallback, OutOfBandStatistics outOfBandStatistics) {
+            super(udpService, acceptor, dhtManager, connectionManager, activityCallback,
+                    outOfBandStatistics);
         }
-        
+
         @Override
         public boolean acceptedIncomingConnection() {
             return acceptedIncomingConnection;
         }
-        
+
     }
 
     @Singleton

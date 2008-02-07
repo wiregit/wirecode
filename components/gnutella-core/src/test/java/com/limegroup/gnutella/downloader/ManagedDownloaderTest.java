@@ -61,6 +61,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
@@ -647,16 +648,16 @@ public class ManagedDownloaderTest extends LimeTestCase {
         private final PushEndpointFactory pushEndpointFactory;
         private final RemoteFileDescFactory remoteFileDescFactory;
         private final ThexReaderFactory thexReaderFactory;
+        private final TcpBandwidthStatistics tcpBandwidthStatistics;
 
         @Inject
         public AltLocDownloaderStubFactory(NetworkManager networkManager,
-                AlternateLocationFactory alternateLocationFactory,
-                DownloadManager downloadManager,
-                Provider<CreationTimeCache> creationTimeCache,
-                BandwidthManager bandwidthManager,
+                AlternateLocationFactory alternateLocationFactory, DownloadManager downloadManager,
+                Provider<CreationTimeCache> creationTimeCache, BandwidthManager bandwidthManager,
                 Provider<PushEndpointCache> pushEndpointCache,
                 PushEndpointFactory pushEndpointFactory,
-                RemoteFileDescFactory remoteFileDescFactory, ThexReaderFactory thexReaderFactory) {
+                RemoteFileDescFactory remoteFileDescFactory, ThexReaderFactory thexReaderFactory,
+                TcpBandwidthStatistics tcpBandwidthStatistics) {
             this.networkManager = networkManager;
             this.alternateLocationFactory = alternateLocationFactory;
             this.downloadManager = downloadManager;
@@ -666,13 +667,15 @@ public class ManagedDownloaderTest extends LimeTestCase {
             this.pushEndpointFactory = pushEndpointFactory;
             this.remoteFileDescFactory = remoteFileDescFactory;
             this.thexReaderFactory = thexReaderFactory;
+            this.tcpBandwidthStatistics = tcpBandwidthStatistics;
         }
         
         public HTTPDownloader create(Socket socket, RemoteFileDesc rfd,
                 VerifyingFile incompleteFile, boolean inNetwork) {
-            return new AltLocDownloaderStub(rfd, incompleteFile,
-                    networkManager, alternateLocationFactory, downloadManager,
-                    creationTimeCache.get(), bandwidthManager, pushEndpointCache, pushEndpointFactory, remoteFileDescFactory, thexReaderFactory);
+            return new AltLocDownloaderStub(rfd, incompleteFile, networkManager,
+                    alternateLocationFactory, downloadManager, creationTimeCache.get(),
+                    bandwidthManager, pushEndpointCache, pushEndpointFactory,
+                    remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics);
         }
 
     }
@@ -685,9 +688,12 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 NetworkManager networkManager, AlternateLocationFactory alternateLocationFactory,
                 DownloadManager downloadManager, CreationTimeCache creationTimeCache,
                 BandwidthManager bandwidthManager, Provider<PushEndpointCache> pushEndpointCache,
-                PushEndpointFactory pushEndpointFactory, RemoteFileDescFactory remoteFileDescFactory, ThexReaderFactory thexReaderFactory) {
+                PushEndpointFactory pushEndpointFactory,
+                RemoteFileDescFactory remoteFileDescFactory, ThexReaderFactory thexReaderFactory,
+                TcpBandwidthStatistics tcpBandwidthStatistics) {
             super(rfd, null, networkManager, alternateLocationFactory, downloadManager,
-                    creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory, remoteFileDescFactory, thexReaderFactory);
+                    creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory,
+                    remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics);
             this.rfd = rfd;
         }
     	

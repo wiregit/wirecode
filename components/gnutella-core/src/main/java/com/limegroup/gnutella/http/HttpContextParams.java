@@ -12,18 +12,6 @@ public class HttpContextParams {
     /** Key for the connection flags. */
     public final static String CONNECTION_DATA = "org.limewire.connectionData";
 
-    /** Key for the subsequent request flag. */
-    public final static String SUBSEQUENT_REQUEST = "org.limewire.subsequentRequest";
-
-    public static boolean isSubsequentRequest(final HttpContext context) {
-        Object o = context.getAttribute(SUBSEQUENT_REQUEST);
-        return (o != null) ? (Boolean) o : false;
-    }
-
-    public static void setSubsequentRequest(final HttpContext context, final boolean local) {
-        context.setAttribute(SUBSEQUENT_REQUEST, local);
-    }
-
     /** Indicates a connection from the local network. */
     public static boolean isLocal(final HttpContext context) {
         Object o = context.getAttribute(CONNECTION_DATA);

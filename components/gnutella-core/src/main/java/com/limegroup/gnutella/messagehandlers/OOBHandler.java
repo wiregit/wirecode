@@ -36,7 +36,7 @@ import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
+import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 
 /**
  * Handles {@link ReplyNumberVendorMessage} and {@link QueryReply} for 
@@ -53,6 +53,8 @@ public class OOBHandler implements MessageHandler, Runnable {
 	private final MACCalculatorRepositoryManager MACCalculatorRepositoryManager;
     
     private final ScheduledExecutorService executor;
+    
+    private final OutOfBandStatistics outOfBandStatistics;
 	
     private final Map<Integer,OOBSession> OOBSessions =
         Collections.synchronizedMap(new HashMap<Integer, OOBSession>());
@@ -60,10 +62,12 @@ public class OOBHandler implements MessageHandler, Runnable {
     @Inject
 	public OOBHandler(MessageRouter router, 
             MACCalculatorRepositoryManager MACCalculatorRepositoryManager,
-            @Named("backgroundExecutor") ScheduledExecutorService executor) {
+            @Named("backgroundExecutor") ScheduledExecutorService executor,
+            OutOfBandStatistics outOfBandStatistics) {
 		this.router = router;
 		this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
         this.executor = executor;
+        this.outOfBandStatistics = outOfBandStatistics;
 	}
 
 	public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
@@ -89,7 +93,7 @@ public class OOBHandler implements MessageHandler, Runnable {
         if (!router.isQueryAlive(g) || (toRequest = router.getNumOOBToRequest(msg)) <= 0) {
             // remember as possible GUESS source though
             router.addBypassedSource(msg, handler);
-            OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(msg.getNumResults());
+            outOfBandStatistics.addBypassedResponse(msg.getNumResults());
             return;
         }
 				
@@ -108,7 +112,7 @@ public class OOBHandler implements MessageHandler, Runnable {
             ack = new LimeACKVendorMessage(g, toRequest);
         
         if (ack != null) {
-            OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(toRequest);
+            outOfBandStatistics.addRequestedResponse(toRequest);
             handler.reply(ack);
             if (MessageSettings.OOB_REDUNDANCY.getValue()) {
                 final LimeACKVendorMessage ackf = ack;
@@ -169,7 +173,7 @@ public class OOBHandler implements MessageHandler, Runnable {
         }
         
         int numResps = reply.getResultCount();
-        OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
+        outOfBandStatistics.addReceivedResponse(numResps);
         
         int requestedResponseCount = token.getBytes()[0] & 0xFF;
         

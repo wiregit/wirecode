@@ -1181,7 +1181,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
                     networkUpdateSanityChecker, searchResultHandler, capabilitiesVMFactory, socketsManager,
                     acceptor, supportedVendorMessage, simppManager, updateHandler, connectionServices,
                     guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
-                    applicationServices, secureMessageVerifier);
+                    applicationServices, secureMessageVerifier, null);
             
         }
         

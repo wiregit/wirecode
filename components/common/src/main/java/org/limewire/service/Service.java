@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package org.limewire.service;
 
 /**
  * Defines the interface for services that need to be started and stop.

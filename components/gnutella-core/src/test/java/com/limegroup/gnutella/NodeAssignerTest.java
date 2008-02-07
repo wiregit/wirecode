@@ -71,7 +71,7 @@ public class NodeAssignerTest extends LimeTestCase {
 
             @Override
             public ScheduledFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
-                if (delay == NodeAssigner.TIMER_DELAY && initialDelay == 0)
+                if (delay == NodeAssignerImpl.TIMER_DELAY && initialDelay == 0)
                     assignerRunnable = command;
                 return null;
             }
