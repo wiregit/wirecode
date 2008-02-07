@@ -3376,6 +3376,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             if (num != null) {
                 num++;
                 highestEver = Math.max(highestEver, num);
+                counts.put(g,num);
                 return;
             }
             
@@ -3406,6 +3407,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             ret.put("ttls",ttlsByte);
             ret.put("hops",hopsByte);
             ret.put("times",timesByte);
+            ret.put("hist", new HashMap<GUID,Integer>(counts));
             return ret;
         }
     }
