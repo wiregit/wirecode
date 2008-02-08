@@ -955,9 +955,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         URN sha1 = getSha1Urn();
         if (sha1 != null) {
             incompleteFile = incompleteFileManager.getFileForUrn(sha1);
-        } else {
+        }
+        if (incompleteFile == null) { 
             incompleteFile = getIncompleteFile(getSaveFile().getName(), sha1,
-                                               getContentLength());
+                    getContentLength());
         }
         
         if(LOG.isWarnEnabled())

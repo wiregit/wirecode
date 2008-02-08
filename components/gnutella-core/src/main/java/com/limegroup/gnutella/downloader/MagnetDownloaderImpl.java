@@ -165,7 +165,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
         
 			URN urn = magnet.getSHA1Urn();
 			if (urn != null) {
-			    foundSource |= addLocationsFromGUIDUrns(magnet.getGUIDUrns(), urn);
+			    foundSource |= addLocationsFromGUIDUrns(magnet, urn);
 			}
 			
 			// if all locations included in the magnet URI fail we can't do much
@@ -178,22 +178,30 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     /**
      * Synchronously looks up alternate locations for the set of guid urns,
      * creates remote file descriptions from them and adds them as possible sources.
+     * <p>
+     * {@link MagnetOptions#getFileSize()} must have a valid value for a source
+     * to be added.
+     * </p>
      *
      * @param urns set of guid urns
      * @param sha1Urn the sha1 urn identifying the resource on the alternate locations
      * 
      * @return true if at least one alternate location was added successfully
      */
-    private boolean addLocationsFromGUIDUrns(Set<URN> urns, URN sha1Urn) {
+    private boolean addLocationsFromGUIDUrns(MagnetOptions magnet, URN sha1Urn) {
+        long size = magnet.getFileSize();
+        if (size == -1) {
+            return false;
+        }
         boolean added = false;
         // implementation note: alt locs are looked up one after the other, this could
         // be parallelized, but normally there's only one location to look up
-        for (URN urn : urns) {
+        for (URN urn : magnet.getGUIDUrns()) {
             GUID guid = new GUID(GUID.fromHexString(urn.getNamespaceSpecificString()));
             AlternateLocation altLoc = altLocFinder.getAlternateLocation(guid, sha1Urn);
             if (LOG.isDebugEnabled())
                 LOG.debug(altLoc);
-            RemoteFileDesc rfd = altLoc.createRemoteFileDesc(getContentLength(), remoteFileDescFactory);
+            RemoteFileDesc rfd = altLoc.createRemoteFileDesc(size, remoteFileDescFactory);
             addDownloadForced(rfd, true);
             added = true;
         }
