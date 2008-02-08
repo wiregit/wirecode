@@ -16,7 +16,7 @@ import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageParser;
 
 /** The parts necessary for linking together LimeWire & RUDP. */
 @Singleton
-public class LimeRUDPContext implements RUDPContext {
+class LimeRUDPContext implements RUDPContext {
 
     private final RUDPMessageFactory rudpMessageFactory;
     private final RUDPSettings rudpSettings;

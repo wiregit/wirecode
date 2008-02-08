@@ -16,7 +16,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 @Singleton
-public class LimeRUDPMessageFactory implements RUDPMessageFactory {
+class LimeRUDPMessageFactory implements RUDPMessageFactory {
     private final RUDPMessageFactory delegate;
 
     @Inject

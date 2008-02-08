@@ -3,6 +3,7 @@ package org.limewire.rudp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,7 +21,7 @@ public class UStandalone {
      * Writes numbers to <code>usock</code> and expects to read the same
      * numbers back.
      */
-	public static void echoClient(UDPConnection usock, int numBytes) 
+	public static void echoClient(Socket usock, int numBytes) 
 	  throws IOException {
 		OutputStream ostream = usock.getOutputStream();
 		InputStream  istream = usock.getInputStream();
@@ -73,7 +74,7 @@ public class UStandalone {
 	/**
 	 * Echos data read from <code>usock</code> back to <code>usock</code>. 
 	 */
-	public static void echoServer(UDPConnection usock, int numBytes) 
+	public static void echoServer(Socket usock, int numBytes) 
 	  throws IOException {
 		OutputStream ostream = usock.getOutputStream();
 		InputStream  istream = usock.getInputStream();
@@ -89,7 +90,7 @@ public class UStandalone {
 		LOG.trace("Done echo");
 	}
 
-	public static void echoClientBlock(UDPConnection usock, int numBlocks) 
+	public static void echoClientBlock(Socket usock, int numBlocks) 
 	  throws IOException {
 		OutputStream ostream = usock.getOutputStream();
 		InputStream  istream = usock.getInputStream();
@@ -160,7 +161,7 @@ public class UStandalone {
 		}
 	}
 
-	public static void echoServerBlock(UDPConnection usock, int numBlocks) 
+	public static void echoServerBlock(Socket usock, int numBlocks) 
 	  throws IOException {
 		OutputStream ostream = usock.getOutputStream();
 		InputStream  istream = usock.getInputStream();

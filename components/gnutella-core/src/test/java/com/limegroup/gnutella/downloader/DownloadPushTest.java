@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
-import org.limewire.rudp.UDPConnection;
+import org.limewire.rudp.RUDPUtils;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.GUID;
@@ -385,7 +385,7 @@ public class DownloadPushTest extends DownloadTestCase {
 
         PushAltLoc pushLoc = (PushAltLoc) alc.iterator().next();
 
-        assertEquals(UDPConnection.VERSION, pushLoc.supportsFWTVersion());
+        assertEquals(RUDPUtils.VERSION, pushLoc.supportsFWTVersion());
 
         RemoteFileDesc readRFD = pushLoc.createRemoteFileDesc(1, remoteFileDescFactory);
         assertTrue(readRFD.getPushAddr().supportsFWTVersion() > 0);

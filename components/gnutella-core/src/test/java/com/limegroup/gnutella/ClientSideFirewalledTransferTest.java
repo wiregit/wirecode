@@ -25,7 +25,7 @@ import junit.framework.Test;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.rudp.UDPConnection;
+import org.limewire.rudp.RUDPUtils;
 import org.limewire.rudp.messages.SynMessage;
 import org.limewire.util.Base32;
 
@@ -193,7 +193,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         // confirm it has proxy info
         QueryReply reply = (QueryReply) m;
         assertTrue(reply.getSupportsFWTransfer());
-        assertEquals(UDPConnection.VERSION, reply.getFWTransferVersion());
+        assertEquals(RUDPUtils.VERSION, reply.getFWTransferVersion());
         assertNotNull(reply.getPushProxies());
 
         // check out PushProxy info

@@ -40,7 +40,7 @@ import org.limewire.nio.statemachine.IOStateMachine;
 import org.limewire.nio.statemachine.IOStateObserver;
 import org.limewire.nio.statemachine.ReadSkipState;
 import org.limewire.nio.statemachine.ReadState;
-import org.limewire.rudp.UDPConnection;
+import org.limewire.rudp.RUDPSocket;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Provider;
@@ -1421,7 +1421,7 @@ public class HTTPDownloader implements BandwidthTracker {
     }
     
     private void updatePEAddress() throws IOException {
-        if (_socket instanceof UDPConnection) {
+        if (_socket instanceof RUDPSocket) {
             IpPort newAddr = new IpPortImpl(_socket.getInetAddress(), _socket.getPort()); 
             if (NetworkUtils.isValidExternalIpPort(newAddr))
                 pushEndpointCache.get().setAddr(_rfd.getClientGUID(),newAddr);

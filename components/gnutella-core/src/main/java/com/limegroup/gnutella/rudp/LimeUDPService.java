@@ -16,7 +16,7 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.Message;
 
 @Singleton
-public class LimeUDPService implements org.limewire.rudp.UDPService {
+class LimeUDPService implements org.limewire.rudp.UDPService {
     
     private final NetworkManager networkManager;
     private final Provider<UDPService> udpService;

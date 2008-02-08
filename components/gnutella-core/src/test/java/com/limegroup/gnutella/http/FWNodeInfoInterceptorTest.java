@@ -8,7 +8,7 @@ import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.io.IpPortImpl;
-import org.limewire.rudp.UDPConnection;
+import org.limewire.rudp.RUDPUtils;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.GUID;
@@ -39,7 +39,7 @@ public class FWNodeInfoInterceptorTest extends BaseTestCase {
         HTTPUploader uploader = new HTTPUploader("filename", session); 
         FWNodeInfoInterceptor interceptor = new FWNodeInfoInterceptor(uploader, pushEndpointFactory);
         
-        final PushEndpoint pe = new PushEndpoint(GUID.makeGuid(), Collections.singleton(new IpPortImpl("192.168.0.1:5555")), PushEndpoint.PLAIN, UDPConnection.VERSION, null, pushEndpointCache);
+        final PushEndpoint pe = new PushEndpoint(GUID.makeGuid(), Collections.singleton(new IpPortImpl("192.168.0.1:5555")), PushEndpoint.PLAIN, RUDPUtils.VERSION, null, pushEndpointCache);
         
         // test success full construction
         context.checking(new Expectations() {{

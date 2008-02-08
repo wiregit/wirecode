@@ -1,7 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.nio.channels.SelectableChannel;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,15 +20,7 @@ import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.LimeWireNetModule;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
-import org.limewire.rudp.DefaultUDPSelectorProviderFactory;
-import org.limewire.rudp.RUDPContext;
-import org.limewire.rudp.RUDPSettings;
-import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.rudp.UDPSelectorProvider;
-import org.limewire.rudp.UDPSelectorProviderFactory;
-import org.limewire.rudp.UDPService;
-import org.limewire.rudp.messages.RUDPMessageFactory;
-import org.limewire.rudp.messages.impl.DefaultMessageFactory;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
 import org.limewire.security.SecurityToken;
@@ -147,10 +137,7 @@ import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinder;
 import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinderImpl;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaDataFactoryImpl;
-import com.limegroup.gnutella.rudp.LimeRUDPContext;
-import com.limegroup.gnutella.rudp.LimeRUDPSettings;
-import com.limegroup.gnutella.rudp.LimeUDPService;
-import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageFactory;
+import com.limegroup.gnutella.rudp.LimeWireGnutellaRudpModule;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.HostDataFactoryImpl;
 import com.limegroup.gnutella.search.QueryDispatcher;
@@ -211,6 +198,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireHttpModule());
         binder().install(new LimeWireStatisticsModule());
         binder().install(new LimeWireGnutellaStatisticsModule());
+        binder().install(new LimeWireGnutellaRudpModule());
         
         bind(LimeWireCore.class);
         
@@ -247,14 +235,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(QueryReplyFactory.class).to(QueryReplyFactoryImpl.class);
         bind(MessageDispatcherFactory.class).to(LimeMessageDispatcherFactoryImpl.class);
         bind(CapabilitiesVMFactory.class).to(CapabilitiesVMFactoryImpl.class);
-        bind(UDPSelectorProviderFactory.class).to(DefaultUDPSelectorProviderFactory.class);
-        bind(RUDPContext.class).to(LimeRUDPContext.class);
-        bind(UDPSelectorProvider.class).toProvider(DefaultUDPSelectorProviderFactory.class);
-        bind(UDPMultiplexor.class).toProvider(UDPMultiplexorProvider.class);
-        bind(UDPService.class).to(LimeUDPService.class);
-        bind(RUDPMessageFactory.class).to(LimeRUDPMessageFactory.class);
-        bind(RUDPSettings.class).to(LimeRUDPSettings.class);
-        bind(RUDPMessageFactory.class).annotatedWith(Names.named("delegate")).to(DefaultMessageFactory.class);
         bind(BTContextFactory.class).to(BTContextFactoryImpl.class);
         bind(LifecycleManager.class).to(LifecycleManagerImpl.class);
         bind(LocalPongInfo.class).to(LocalPongInfoImpl.class);
@@ -389,30 +369,6 @@ public class LimeWireCoreModule extends AbstractModule {
                     "PW5RS7QJUGSINVNG4OTDO4FWJY5C3MQBQP7DXNOPQFJAVBCUE2VG3HWA34FPSLRIYBBGQVSQDQTQUS4" +
                     "T6HW3OQNG2DPVGCIIWTCK6XMW3SK6PEQBWH6MIAL4FX3OYVWRG2ZKVBHBMJ564CKEPYDW3" +
                     "TJRPIU4UA24I", null);
-        }
-    }
-    
-    @Singleton
-    private static class UDPMultiplexorProvider extends AbstractLazySingletonProvider<UDPMultiplexor> {
-        private final UDPSelectorProvider provider;
-        private final NIODispatcher nioDispatcher;
-        
-        @Inject
-        public UDPMultiplexorProvider(UDPSelectorProvider provider,
-                NIODispatcher nioDispatcher) {
-            this.provider = provider;
-            this.nioDispatcher = nioDispatcher;
-        }
-        
-        @Override
-        protected UDPMultiplexor createObject() {
-            UDPMultiplexor multiplexor = provider.openSelector();
-            SelectableChannel socketChannel = provider.openSocketChannel();
-            try {
-                socketChannel.close();
-            } catch(IOException ignored) {}
-            nioDispatcher.registerSelector(multiplexor, socketChannel.getClass());
-            return multiplexor;
         }
     }
     

@@ -34,11 +34,12 @@ import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.ConnectionAcceptor;
+import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.Shutdownable;
-import org.limewire.rudp.UDPConnection;
+import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.util.Base32;
 import org.limewire.util.BufferUtils;
 
@@ -104,7 +105,8 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     private final Provider<IPFilter> ipFilter;
     private final Provider<UDPService> udpService;
     private final CopyOnWriteArrayList<PushedSocketHandler> pushHandlers = new CopyOnWriteArrayList<PushedSocketHandler>();
-  
+    private final Provider<UDPSelectorProvider> udpSelectorProvider;
+    
     @Inject
     public PushDownloadManager(
             Provider<MessageRouter> router,
@@ -114,7 +116,8 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             Provider<SocketProcessor> processor,
     		NetworkManager networkManager,
     		Provider<IPFilter> ipFilter,
-    		Provider<UDPService> udpService) {
+    		Provider<UDPService> udpService,
+    		Provider<UDPSelectorProvider> udpSelectorProvider) {
     	this.messageRouter = router;
     	this.httpExecutor = executor;
         this.defaultParams = defaultParams;
@@ -123,6 +126,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     	this.networkManager = networkManager;
         this.ipFilter = ipFilter;
         this.udpService = udpService;
+        this.udpSelectorProvider = udpSelectorProvider;
     }
 
     public void register(PushedSocketHandler handler) {
@@ -452,7 +456,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     				LOG.info("Succesful push proxy: " + request);
     			
     			if (data.isFWTransfer()) {
-    				UDPConnection socket = new UDPConnection();
+    			    AbstractNBSocket socket = udpSelectorProvider.get().openSocketChannel().socket();
                     data.getMultiShutdownable().addShutdownable(socket);
     				socket.connect(data.getFile().getInetSocketAddress(), 20000, new FWTConnectObserver(socketProcessor.get()));
                 }
