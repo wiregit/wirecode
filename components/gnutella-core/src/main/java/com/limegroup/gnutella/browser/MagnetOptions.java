@@ -43,7 +43,23 @@ public class MagnetOptions implements Serializable {
 	private final Map<Option, List<String>> optionsMap;
     
     private enum Option {
-        XS, XT, AS, DN, KT;
+        /** eXact Source of the magnet, can be a url or a urn. */
+        XS,
+        /** 
+         * eXact Topic of the magnet, should be urn that uniquely 
+         * identifies the resource, e.g. a sha1 urn. */
+        XT, 
+        /** Alternate Source of the magnet, a url or a urn. */
+        AS, 
+        /** Display Name of the file. */
+        DN, 
+        /** 
+         * Keyword Topic, a short description or name for the file, can be
+         * used for searching.
+         */
+        KT, 
+        /** Length of the file denoted by the magnet. */
+        XL;
         
         public static Option valueFor(String str) {
             for(Option option : values()) {
@@ -61,6 +77,17 @@ public class MagnetOptions implements Serializable {
 	private transient URN urn;
 	private transient String extractedFileName;
 	private transient Set<URN> guidUrns;
+	/**
+	 * Cached field of file size of magnet, values meant the following:
+	 * -1   - magnet doesn't have a size field
+	 * -2   - magnet has not been parsed for size field yet
+	 * >= 0 - size of magnet 
+	 * 
+	 * Volatile, to have threadsafe assignments:
+	 * 
+	 * http://java.sun.com/docs/books/jvms/second_edition/html/Threads.doc.html#22244
+	 */
+    private transient volatile long fileSize = -2;
 	
 	/**
 	 * Creates a MagnetOptions object from file details.
@@ -93,6 +120,10 @@ public class MagnetOptions implements Serializable {
 		    guidUrn = URN.createGUIDUrn(new GUID(clientGuid));
 		    addAppend(map, Option.XS, guidUrn.httpStringValue());
 		}
+		long fileSize = fileDetails.getFileSize();
+		if (fileSize >= 0) {
+		    addAppend(map, Option.XL, Long.toString(fileSize));
+		}
 		MagnetOptions magnet = new MagnetOptions(map);
 		// set already known values
 		magnet.urn = urn;
@@ -102,6 +133,7 @@ public class MagnetOptions implements Serializable {
 		if (guidUrn != null) {
 		    magnet.guidUrns = Collections.singleton(guidUrn);
 		}
+		magnet.fileSize = fileSize >= 0 ? fileSize : -1;
 		return magnet;
 	}
 	
@@ -282,6 +314,9 @@ public class MagnetOptions implements Serializable {
         
         for(String as : getAS())
 			ret.append("&as=").append(as);
+        
+        for(String xl : getXL())
+            ret.append("&xl=").append(xl);
 
 		return ret.toString();	
 	}
@@ -577,6 +612,26 @@ public class MagnetOptions implements Serializable {
     }
     
     /**
+     * Returns the file size of the file of this magnet.
+     * @return -1 if file size is not specified for this magnet
+     */
+    public long getFileSize() {
+        if (fileSize == -2) {
+            List<String> lengthValues = getList(Option.XL);
+            long size = -1; 
+            for (String value : lengthValues) {
+                try {
+                    size = Long.parseLong(value);
+                } catch (NumberFormatException nfe) {
+                    // ignore
+                }
+            }
+            fileSize = size >= 0 ? size : -1;
+        }
+        return fileSize;
+    }
+    
+    /**
      * Returns a list of exact topic strings, they can be url or urn string.
      * @return
      */
@@ -590,6 +645,13 @@ public class MagnetOptions implements Serializable {
      */
     public List<String> getXS() {
         return getList(Option.XS);
+    }
+    
+    /**
+     * Returns the list of exact source strings, they should be a singleton list.
+     */
+    public List<String> getXL() {
+        return getList(Option.XL);
     }
 	
     /**

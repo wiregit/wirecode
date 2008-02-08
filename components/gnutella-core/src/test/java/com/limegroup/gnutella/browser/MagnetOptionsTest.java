@@ -239,11 +239,18 @@ public class MagnetOptionsTest extends BaseTestCase {
             // second time around with url
             allowing(fileDetails).getInetSocketAddress();
             will(returnValue(new InetSocketAddress("127.0.0.1", 5555)));
+            // first time a zero file size
+            one(fileDetails).getFileSize();
+            will(returnValue(-1L));
+            one(fileDetails).getFileSize();
+            will(returnValue(123456789L));
         }});
         MagnetOptions magnet = MagnetOptions.createMagnet(fileDetails);
         assertTrue(magnet.toExternalForm().contains(guid.toHexString()));
         assertEquals(urn, magnet.getSHA1Urn());
         assertEquals(URN.createGUIDUrn(guid), magnet.getGUIDUrns().iterator().next());
+        assertFalse(magnet.toExternalForm().contains("xl"));
+        assertEquals(-1, magnet.getFileSize());
         
         magnet = MagnetOptions.createMagnet(fileDetails);
         assertTrue(magnet.toExternalForm().contains(guid.toHexString()));
@@ -252,6 +259,8 @@ public class MagnetOptionsTest extends BaseTestCase {
         assertEquals(2, magnet.getXS().size());
         assertTrue(magnet.toExternalForm().contains("127.0.0.1:5555"));
         assertEquals(1, magnet.getDefaultURLs().length);
+        assertTrue(magnet.toExternalForm().contains("xl=123456789"));
+        assertEquals(123456789, magnet.getFileSize());
     }
      
     private String createMultiLineMagnetLinks(MagnetOptions[] opts) {
