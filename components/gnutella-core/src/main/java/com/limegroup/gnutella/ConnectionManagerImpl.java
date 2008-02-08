@@ -1061,7 +1061,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
     boolean allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
         if(hr.isLimeWire()) {
             return hr.getLimeVersion() == null ||
-            hr.getLimeVersion().compareTo(lastGoodVersion) > 1;
+            hr.getLimeVersion().compareTo(lastGoodVersion) >= 0;
         }
         
         String userAgent = hr.getUserAgent();

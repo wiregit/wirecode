@@ -171,7 +171,19 @@ public class ConnectionManagerTest extends LimeTestCase {
         
         hr = createTestResponse("LimeWire 3.3");
         allow = ((ConnectionManagerImpl)connectionManager).allowUltrapeer2UltrapeerConnection(hr);
-        assertTrue("connection should have been allowed", allow);
+        assertFalse("connection should not have been allowed", allow);
+        
+        hr = createTestResponse("LimeWire 4.13.9");
+        allow = ((ConnectionManagerImpl)connectionManager).allowUltrapeer2UltrapeerConnection(hr);
+        assertFalse("connection should not have been allowed", allow);
+        
+        hr = createTestResponse("LimeWire 4.14.8");
+        allow = ((ConnectionManagerImpl)connectionManager).allowUltrapeer2UltrapeerConnection(hr);
+        assertTrue("connection should not have been allowed", allow);
+        
+        hr = createTestResponse("LimeWire 5.6.7");
+        allow = ((ConnectionManagerImpl)connectionManager).allowUltrapeer2UltrapeerConnection(hr);
+        assertTrue("connection should not have been allowed", allow);
         
         hr = createTestResponse("Shareaza 3.3");
         allow = ((ConnectionManagerImpl)connectionManager).allowUltrapeer2UltrapeerConnection(hr);
