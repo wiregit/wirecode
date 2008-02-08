@@ -273,7 +273,6 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
             @Override
             protected void takeAction(Downloader d) {
                 d.stop();
-                d.discardCorruptDownload(false);
             }              
         }); 
         // =============================================================================================================
