@@ -5,10 +5,15 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+@Singleton
 public class SimpleNetworkInstanceUtils implements NetworkInstanceUtils {
 
     private final boolean localIsPrivate;
     
+    @Inject
     public SimpleNetworkInstanceUtils() {
         this(true);
     }

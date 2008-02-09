@@ -13,6 +13,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.io.IOUtils;
+import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.net.EmptySocketBindingSettings;
 import org.limewire.net.LimeWireNetModule;
 import org.limewire.net.ProxySettings;
@@ -65,7 +67,8 @@ public class ProxyTest extends BaseTestCase {
                 SimpleTimer timer = new SimpleTimer(true);
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(timer);
                 bind(ExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(timer);
-                bind(Executor.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(timer);                
+                bind(Executor.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(timer);
+                bind(NetworkInstanceUtils.class).to(SimpleNetworkInstanceUtils.class);
             }
         });        
         
