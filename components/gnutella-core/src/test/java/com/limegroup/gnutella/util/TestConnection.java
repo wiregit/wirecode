@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.security.SecureMessageVerifier;
@@ -76,8 +77,9 @@ public abstract class TestConnection extends GnutellaConnection {
             MessageReaderFactory messageReaderFactory,
             MessageFactory messageFactory,
             ApplicationServices applicationServices,
-            SecureMessageVerifier secureMessageVerifier) {
-        super("60.76.5.3", 4444, ConnectType.PLAIN, connectionManager, networkManager, queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory, messageDispatcher, networkUpdateSanityChecker, searchResultHandler, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage, simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier, null);
+            SecureMessageVerifier secureMessageVerifier,
+            NetworkInstanceUtils networkInstanceUtils) {
+        super("60.76.5.3", 4444, ConnectType.PLAIN, connectionManager, networkManager, queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory, messageDispatcher, networkUpdateSanityChecker, searchResultHandler, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage, simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier, null, networkInstanceUtils);
 
         this.queriesMustBeInRoutingTables = queriesMustBeInRoutingTable;
         this.connections = connections;

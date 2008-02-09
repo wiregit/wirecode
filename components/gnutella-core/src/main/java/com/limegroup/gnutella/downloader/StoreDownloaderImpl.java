@@ -49,13 +49,13 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
             VerifyingFileFactory verifyingFileFactory, DiskController diskController,
              IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<MessageRouter> messageRouter, Provider<HashTreeCache> tigerTreeCache,
-            ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory) {
+            ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider) {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
                 contentManager, sourceRankerFactory, urnCache, savedFileManager,
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
-                tigerTreeCache, applicationServices, remoteFileDescFactory);
+                tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider);
     } 
            
     

@@ -7,7 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 
-import org.limewire.service.ErrorService;
+import com.google.inject.Inject;
 
 
 
@@ -27,24 +27,26 @@ import org.limewire.service.ErrorService;
  */
 public class IpPortForSelf implements IpPort, Connectable {
 	
-	private static final IpPort INSTANCE = new IpPortForSelf();
-	private static final InetAddress localhost;
-	static {
-		byte [] b = new byte[] {(byte)127,(byte)0,(byte)0,(byte)1};
-		InetAddress addr = null;
-		try {
-			addr = InetAddress.getByAddress(b);
-		} catch (UnknownHostException impossible) {
-			ErrorService.error(impossible);
-		}
-		localhost = addr;
-	}
+	private final InetAddress localhost;
 	
-	public static IpPort instance() { return INSTANCE;}
-	private IpPortForSelf() {}
-    
+	private final LocalSocketAddressProvider localSocketAddressProvider;
+	
+	@Inject
+	IpPortForSelf(LocalSocketAddressProvider localSocketAddressProvider) {
+        this.localSocketAddressProvider = localSocketAddressProvider;
+
+        byte [] b = new byte[] {(byte)127,(byte)0,(byte)0,(byte)1};
+        InetAddress addr = null;
+        try {
+            addr = InetAddress.getByAddress(b);
+        } catch (UnknownHostException impossible) {
+            throw new RuntimeException(impossible);
+        }
+        localhost = addr;
+    }
+	
     public byte[] getAddressAsBytes() {
-        return LocalSocketAddressService.getLocalAddress();
+        return localSocketAddressProvider.getLocalAddress();
     }
 
 	public String getAddress() {
@@ -53,14 +55,14 @@ public class IpPortForSelf implements IpPort, Connectable {
 
 	public InetAddress getInetAddress() {
 		try {
-			return InetAddress.getByAddress(LocalSocketAddressService.getLocalAddress());
+			return InetAddress.getByAddress(localSocketAddressProvider.getLocalAddress());
 		} catch (UnknownHostException bad) {
 			return localhost;
 		}
 	}
 
 	public int getPort() {
-		return LocalSocketAddressService.getLocalPort();
+		return localSocketAddressProvider.getLocalPort();
 	}
     
     public InetSocketAddress getInetSocketAddress() {
@@ -71,6 +73,6 @@ public class IpPortForSelf implements IpPort, Connectable {
 		return getAddress() +":"+getPort();
 	}
     public boolean isTLSCapable() {
-        return LocalSocketAddressService.isTLSCapable();
+        return localSocketAddressProvider.isTLSCapable();
     }
 }

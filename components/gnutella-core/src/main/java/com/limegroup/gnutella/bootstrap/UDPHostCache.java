@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Cancellable;
 import org.limewire.collection.FixedSizeExpiringSet;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 
 import com.google.inject.Provider;
@@ -86,28 +87,35 @@ public class UDPHostCache {
 
     private final ConnectionServices connectionServices;
     
-    /**
-     * Constructs a new UDPHostCache that remembers attempting hosts for 10 
-	 * minutes.
-     */
-    protected UDPHostCache(UDPPinger pinger, Provider<MessageRouter> messageRouter, PingRequestFactory pingRequestFactory,
-            ConnectionServices connectionServices) {
-        this(10 * 60 * 1000, pinger, messageRouter, pingRequestFactory, connectionServices);
-        
-    }
+    private final NetworkInstanceUtils networkInstanceUtils;
     
     /**
-     * Constructs a new UDPHostCache that remembers attempting hosts for
-     * the given amount of time, in msecs.
-     * @param connectionServices 
+     * Constructs a new UDPHostCache that remembers attempting hosts for 10
+     * minutes.
      */
-    protected UDPHostCache(long expiryTime, UDPPinger pinger, Provider<MessageRouter> messageRouter,
-            PingRequestFactory pingRequestFactory, ConnectionServices connectionServices) {
+    protected UDPHostCache(UDPPinger pinger, Provider<MessageRouter> messageRouter,
+            PingRequestFactory pingRequestFactory, ConnectionServices connectionServices,
+            NetworkInstanceUtils networkInstanceUtils) {
+        this(10 * 60 * 1000, pinger, messageRouter, pingRequestFactory, connectionServices,
+                networkInstanceUtils);
+
+    }
+
+    /**
+     * Constructs a new UDPHostCache that remembers attempting hosts for the
+     * given amount of time, in msecs.
+     * 
+     * @param connectionServices
+     */
+    protected UDPHostCache(long expiryTime, UDPPinger pinger,
+            Provider<MessageRouter> messageRouter, PingRequestFactory pingRequestFactory,
+            ConnectionServices connectionServices, NetworkInstanceUtils networkInstanceUtils) {
         this.connectionServices = connectionServices;
         attemptedHosts = new FixedSizeExpiringSet<ExtendedEndpoint>(PERMANENT_SIZE, expiryTime);
         this.pinger = pinger;
         this.messageRouter = messageRouter;
         this.pingRequestFactory = pingRequestFactory;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
     
     /**
@@ -185,9 +193,9 @@ public class UDPHostCache {
                 continue;
                 
             // if it was private (couldn't look up too) drop it.
-            if(!NetworkUtils.isValidExternalIpPort(next) || 
+            if(!networkInstanceUtils.isValidExternalIpPort(next) || 
                     !NetworkUtils.isValidIpPort(next) || // this does explicit resolving.
-                    NetworkUtils.isPrivateAddress(next.getAddress())) {
+                    networkInstanceUtils.isPrivateAddress(next.getAddress())) {
                 invalidHosts.add(next);
                 continue;
             }

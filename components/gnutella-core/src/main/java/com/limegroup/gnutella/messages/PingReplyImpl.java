@@ -17,6 +17,7 @@ import org.limewire.io.Connectable;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
@@ -159,21 +160,23 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
     private int FREE_LOCALE_SLOTS;
 
     /**
-     * Sole <tt>PingReply</tt> constructor.  This establishes all ping
-     * reply invariants.
+     * Sole <tt>PingReply</tt> constructor. This establishes all ping reply
+     * invariants.
+     * 
      * @param guid the Globally Unique Identifier (GUID) for this message
      * @param ttl the time to live for this message
      * @param hops the hops for this message
      * @param payload the message payload
-     * @throws BadPacketException 
+     * @throws BadPacketException
      */
-    protected PingReplyImpl(byte[] guid, byte ttl, byte hops, byte[] payload,
-                      GGEP ggep, InetAddress ip, Network network, MACCalculatorRepositoryManager manager) throws BadPacketException {
+    protected PingReplyImpl(byte[] guid, byte ttl, byte hops, byte[] payload, GGEP ggep,
+            InetAddress ip, Network network, MACCalculatorRepositoryManager manager,
+            NetworkInstanceUtils networkInstanceUtils) throws BadPacketException {
         super(guid, Message.F_PING_REPLY, ttl, hops, payload.length, network);
         PAYLOAD = payload;
-        PORT = ByteOrder.ushort2int(ByteOrder.leb2short(PAYLOAD,0));
-        FILES = ByteOrder.uint2long(ByteOrder.leb2int(PAYLOAD,6));
-        KILOBYTES = ByteOrder.uint2long(ByteOrder.leb2int(PAYLOAD,10));
+        PORT = ByteOrder.ushort2int(ByteOrder.leb2short(PAYLOAD, 0));
+        FILES = ByteOrder.uint2long(ByteOrder.leb2int(PAYLOAD, 6));
+        KILOBYTES = ByteOrder.uint2long(ByteOrder.leb2int(PAYLOAD, 10));
 
         IP = ip;
 
@@ -278,7 +281,7 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
                             myIP = InetAddress.getByAddress(myip);
                             myPort = ByteOrder.ushort2int(ByteOrder.leb2short(data,4));
                             
-                            if (NetworkUtils.isPrivateAddress(myIP) ||
+                            if (networkInstanceUtils.isPrivateAddress(myIP) ||
                                     !NetworkUtils.isValidPort(myPort) ) {
                                 // liars, or we are behind a NAT and there is LAN outside
                                 // either way we can't use it

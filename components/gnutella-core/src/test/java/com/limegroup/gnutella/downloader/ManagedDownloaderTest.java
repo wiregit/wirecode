@@ -22,7 +22,8 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Range;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
@@ -103,6 +104,8 @@ public class ManagedDownloaderTest extends LimeTestCase {
     private void doSetUp(Module... modules) throws Exception {
         
         List<Module> allModules = new LinkedList<Module>();
+        final LocalSocketAddressProviderStub localSocketAddressProvider = new LocalSocketAddressProviderStub();
+        localSocketAddressProvider.setLocalAddressPrivate(false);
         allModules.add(new AbstractModule() {
            @Override
             protected void configure() {
@@ -110,17 +113,14 @@ public class ManagedDownloaderTest extends LimeTestCase {
                bind(MessageRouter.class).to(MessageRouterStub.class);
                bind(FileManager.class).to(FileManagerStub.class);
                bind(NetworkManager.class).to(NetworkManagerStub.class);
+               bind(LocalSocketAddressProvider.class).toInstance(localSocketAddressProvider);
             } 
         });
         allModules.addAll(Arrays.asList(modules));
         injector = LimeTestUtils.createInjector(allModules.toArray(new Module[0]));
         ConnectionManagerStub connectionManager = (ConnectionManagerStub)injector.getInstance(ConnectionManager.class);
         connectionManager.setConnected(true);
-        
-        LocalSocketAddressProviderStub localSocketAddressProvider = new LocalSocketAddressProviderStub();
-        localSocketAddressProvider.setLocalAddressPrivate(false);
-        LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProvider);
-        
+                
         downloadManager = (DownloadManagerImpl)injector.getInstance(DownloadManager.class);
         fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
         gnutellaDownloaderFactory = injector.getInstance(CoreDownloaderFactory.class);
@@ -649,6 +649,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         private final RemoteFileDescFactory remoteFileDescFactory;
         private final ThexReaderFactory thexReaderFactory;
         private final TcpBandwidthStatistics tcpBandwidthStatistics;
+        private final NetworkInstanceUtils networkInstanceUtils;
 
         @Inject
         public AltLocDownloaderStubFactory(NetworkManager networkManager,
@@ -657,7 +658,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 Provider<PushEndpointCache> pushEndpointCache,
                 PushEndpointFactory pushEndpointFactory,
                 RemoteFileDescFactory remoteFileDescFactory, ThexReaderFactory thexReaderFactory,
-                TcpBandwidthStatistics tcpBandwidthStatistics) {
+                TcpBandwidthStatistics tcpBandwidthStatistics, NetworkInstanceUtils networkInstanceUtils) {
             this.networkManager = networkManager;
             this.alternateLocationFactory = alternateLocationFactory;
             this.downloadManager = downloadManager;
@@ -668,6 +669,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
             this.remoteFileDescFactory = remoteFileDescFactory;
             this.thexReaderFactory = thexReaderFactory;
             this.tcpBandwidthStatistics = tcpBandwidthStatistics;
+            this.networkInstanceUtils = networkInstanceUtils;
         }
         
         public HTTPDownloader create(Socket socket, RemoteFileDesc rfd,
@@ -675,7 +677,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
             return new AltLocDownloaderStub(rfd, incompleteFile, networkManager,
                     alternateLocationFactory, downloadManager, creationTimeCache.get(),
                     bandwidthManager, pushEndpointCache, pushEndpointFactory,
-                    remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics);
+                    remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics, networkInstanceUtils);
         }
 
     }
@@ -690,10 +692,10 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 BandwidthManager bandwidthManager, Provider<PushEndpointCache> pushEndpointCache,
                 PushEndpointFactory pushEndpointFactory,
                 RemoteFileDescFactory remoteFileDescFactory, ThexReaderFactory thexReaderFactory,
-                TcpBandwidthStatistics tcpBandwidthStatistics) {
+                TcpBandwidthStatistics tcpBandwidthStatistics, NetworkInstanceUtils networkInstanceUtils) {
             super(rfd, null, networkManager, alternateLocationFactory, downloadManager,
                     creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory,
-                    remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics);
+                    remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics, networkInstanceUtils);
             this.rfd = rfd;
         }
     	

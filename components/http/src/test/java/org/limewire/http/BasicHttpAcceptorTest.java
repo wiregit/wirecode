@@ -13,6 +13,7 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.limewire.http.handler.BasicMimeTypeProvider;
 import org.limewire.http.handler.FileRequestHandler;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.SocketAcceptor;
@@ -57,7 +58,7 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
     }
 
     private void initializeAcceptor(int timeout, String... methods) throws Exception {
-        connectionDispatcher = new ConnectionDispatcherImpl();
+        connectionDispatcher = new ConnectionDispatcherImpl(new SimpleNetworkInstanceUtils());
         
         acceptor = new SocketAcceptor(connectionDispatcher);
         acceptor.bind(PORT);

@@ -21,6 +21,7 @@ import org.limewire.io.IPPortCombo;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
@@ -65,17 +66,19 @@ public class ResponseFactoryImpl implements ResponseFactory {
     private final AltLocManager altLocManager;
     private final Provider<CreationTimeCache> creationTimeCache;
     private final IPFilter ipFilter;
+    private final NetworkInstanceUtils networkInstanceUtils;
 
     private final LimeXMLDocumentFactory limeXMLDocumentFactory;
 
     @Inject
     public ResponseFactoryImpl(AltLocManager altLocManager,
-            Provider<CreationTimeCache> creationTimeCache, 
-             IPFilter ipFilter, LimeXMLDocumentFactory limeXMLDocumentFactory) {
+            Provider<CreationTimeCache> creationTimeCache, IPFilter ipFilter,
+            LimeXMLDocumentFactory limeXMLDocumentFactory, NetworkInstanceUtils networkInstanceUtils) {
         this.altLocManager = altLocManager;
         this.creationTimeCache = creationTimeCache;
         this.ipFilter = ipFilter;
         this.limeXMLDocumentFactory = limeXMLDocumentFactory;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
 
     /* (non-Javadoc)
@@ -392,7 +395,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
                 DirectAltLoc al = iter.next();
                 if (al.canBeSent(AlternateLocation.MESH_RESPONSE)) {
                     IpPort host = al.getHost();
-                    if (!NetworkUtils.isMe(host)) {
+                    if (!networkInstanceUtils.isMe(host)) {
                         if (endpoints == null)
                             endpoints = new IpPortSet();
 
@@ -549,7 +552,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
             }
 
             // if we're me or banned, ignore.
-            if (!ipFilter.allow(ipp.getAddress()) || NetworkUtils.isMe(ipp))
+            if (!ipFilter.allow(ipp.getAddress()) || networkInstanceUtils.isMe(ipp))
                 continue;
 
             if (locations == null)

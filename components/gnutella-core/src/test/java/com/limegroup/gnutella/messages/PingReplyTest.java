@@ -16,6 +16,7 @@ import junit.framework.Test;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.AddressSecurityToken;
@@ -1092,12 +1093,13 @@ public class PingReplyTest extends LimeTestCase {
                 Provider<NodeAssigner> nodeAssigner, 
                  Provider<IPFilter> ipFilter,
                 ConnectionCheckerManager connectionCheckerManager,
-                PingRequestFactory pingRequestFactory) {
+                PingRequestFactory pingRequestFactory,
+                NetworkInstanceUtils networkInstanceUtils) {
             super(networkManager, hostCatcher, connectionDispatcher, 
                     backgroundExecutor, simppManager, capabilitiesVMFactory,
                     managedConnectionFactory, messageRouter, queryUnicaster, 
                     socketsManager, connectionServices, nodeAssigner, 
-                    ipFilter, connectionCheckerManager, pingRequestFactory);
+                    ipFilter, connectionCheckerManager, pingRequestFactory, networkInstanceUtils);
         }
         
         public int getNumFreeNonLeafSlots() {

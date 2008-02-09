@@ -7,6 +7,7 @@ import java.net.Socket;
 
 import junit.framework.Test;
 
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.net.ProxySettings.ProxyType;
 import org.limewire.nio.NBSocketFactory;
 import org.limewire.nio.NIOSocketFactory;
@@ -45,7 +46,7 @@ public class LimitedSocketControllerTest extends BaseTestCase {
         listenSocket = new ServerSocket(LISTEN_PORT);
         listenSocket.setReuseAddress(true);
         proxySettings = new ProxySettingsStub();
-        proxyManager = new ProxyManagerImpl(proxySettings);
+        proxyManager = new ProxyManagerImpl(proxySettings, new SimpleNetworkInstanceUtils());
         controller = new LimitedSocketController(proxyManager, new EmptySocketBindingSettings(), 2);
     }
     

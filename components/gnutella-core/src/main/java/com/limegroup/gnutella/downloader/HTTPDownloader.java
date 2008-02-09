@@ -30,6 +30,7 @@ import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.InterestReadableByteChannel;
@@ -288,6 +289,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private final RemoteFileDescFactory remoteFileDescFactory;
     private final ThexReaderFactory thexReaderFactory;
     private final TcpBandwidthStatistics tcpBandwidthStatistics;
+    private final NetworkInstanceUtils networkInstanceUtils;
 
     HTTPDownloader(Socket socket, RemoteFileDesc rfd,
             VerifyingFile incompleteFile, boolean inNetwork,
@@ -298,7 +300,8 @@ public class HTTPDownloader implements BandwidthTracker {
             BandwidthManager bandwidthManager,
             Provider<PushEndpointCache> pushEndpointCache, PushEndpointFactory pushEndpointFactory,
             RemoteFileDescFactory remoteFileDescFactory, ThexReaderFactory thexReaderFactory,
-            TcpBandwidthStatistics tcpBandwidthStatistics) {
+            TcpBandwidthStatistics tcpBandwidthStatistics,
+            NetworkInstanceUtils networkInstanceUtils) {
 
         if (requireSocket && socket == null)
             throw new NullPointerException("null socket");
@@ -313,6 +316,7 @@ public class HTTPDownloader implements BandwidthTracker {
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.thexReaderFactory = thexReaderFactory;
         this.tcpBandwidthStatistics = tcpBandwidthStatistics;
+        this.networkInstanceUtils = networkInstanceUtils;
         _rfd= Objects.nonNull(rfd, "rfd");
         _socket=socket;
         _incompleteFile=incompleteFile;
@@ -536,7 +540,7 @@ public class HTTPDownloader implements BandwidthTracker {
         headers.add(HTTPHeaderName.RANGE.create("bytes=" + _initialReadingPoint + "-" + (stop-1)));
         
 		if (networkManager.acceptedIncomingConnection() &&
-           !NetworkUtils.isPrivateAddress(networkManager.getAddress())) {
+           !networkInstanceUtils.isPrivateAddress(networkManager.getAddress())) {
             int port = networkManager.getPort();
             String host = NetworkUtils.ip2string(networkManager.getAddress());
             headers.add(HTTPHeaderName.NODE.create(host + ":" + port));
@@ -1423,7 +1427,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private void updatePEAddress() throws IOException {
         if (_socket instanceof RUDPSocket) {
             IpPort newAddr = new IpPortImpl(_socket.getInetAddress(), _socket.getPort()); 
-            if (NetworkUtils.isValidExternalIpPort(newAddr))
+            if (networkInstanceUtils.isValidExternalIpPort(newAddr))
                 pushEndpointCache.get().setAddr(_rfd.getClientGUID(),newAddr);
         }
     }

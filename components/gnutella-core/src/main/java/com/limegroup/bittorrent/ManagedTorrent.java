@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SyncWrapper;
 import org.limewire.io.DiskException;
-import org.limewire.io.NetworkUtils;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 
@@ -49,10 +49,9 @@ import com.limegroup.gnutella.util.StrictIpPortSet;
  * It keeps track of the known and connected peers and contains the
  * logic for starting and stopping the torrent.
  */
-public class ManagedTorrent implements Torrent, DiskManagerListener,
-BTLinkListener {
-	
-	private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
+public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListener {
+
+    private static final Log LOG = LogFactory.getLog(ManagedTorrent.class);
 	
 	/**
 	 * A shared processing queue for disk-related tasks.
@@ -136,6 +135,8 @@ BTLinkListener {
 
     private final FileManager fileManager;
     
+    private final NetworkInstanceUtils networkInstanceUtils;
+    
 	/**
 	 * Constructs new ManagedTorrent
 	 * 
@@ -158,7 +159,8 @@ BTLinkListener {
             ContentManager contentManager,
             IPFilter ipFilter,
             TorrentManager torrentManager, 
-            FileManager fileManager) {
+            FileManager fileManager,
+            NetworkInstanceUtils networkInstanceUtils) {
 		this.context = context;
 		this.networkInvoker = networkInvoker;
 		this.dispatcher = dispatcher;
@@ -169,6 +171,7 @@ BTLinkListener {
         this.ipFilter = ipFilter;
         this.torrentManager = torrentManager;
         this.fileManager = fileManager;
+        this.networkInstanceUtils = networkInstanceUtils;
 		_info = context.getMetaInfo();
 		_folder = getContext().getDiskManager();
 		_peers = Collections.emptySet();
@@ -582,7 +585,7 @@ BTLinkListener {
 			return;
 		if (!ipFilter.allow(to.getAddress()))
 			return;
-		if (NetworkUtils.isMe(to.getAddress(), to.getPort()))
+		if (networkInstanceUtils.isMe(to.getAddress(), to.getPort()))
 			return;
 		if (_peers.add(to)) {
 			synchronized(state.getLock()) {

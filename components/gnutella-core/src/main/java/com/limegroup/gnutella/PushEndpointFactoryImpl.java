@@ -11,6 +11,7 @@ import org.limewire.io.IPPortCombo;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 
 import com.google.inject.Inject;
@@ -25,13 +26,16 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
 
     private final Provider<PushEndpointCache> pushEndpointCache;
     private final Provider<SelfEndpoint> selfProvider;
+    private final NetworkInstanceUtils networkInstanceUtils;
     
     @Inject
     public PushEndpointFactoryImpl(
             Provider<PushEndpointCache> pushEndpointCache,
-            Provider<SelfEndpoint> selfProvider) {
+            Provider<SelfEndpoint> selfProvider, 
+            NetworkInstanceUtils networkInstanceUtils) {
         this.pushEndpointCache = pushEndpointCache;
         this.selfProvider = selfProvider;
+        this.networkInstanceUtils = networkInstanceUtils;
     }       
     
     public PushEndpoint createPushEndpoint(byte[] guid) {
@@ -47,7 +51,7 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
     }
 
     public PushEndpoint createPushEndpoint(byte[] guid, Set<? extends IpPort> proxies, byte features, int version, IpPort addr) {
-        return new PushEndpoint(guid, proxies, features, version, addr, pushEndpointCache.get());
+        return new PushEndpoint(guid, proxies, features, version, addr, pushEndpointCache.get(), networkInstanceUtils);
     }
 
     public PushEndpoint createPushEndpoint(String httpString) throws IOException {
@@ -120,7 +124,7 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
         }
         
         // if address isn't there or private, reset address and fwt
-        if (addr == null || !NetworkUtils.isValidExternalIpPort(addr)) {
+        if (addr == null || !networkInstanceUtils.isValidExternalIpPort(addr)) {
             fwtVersion = 0;
             addr = null;
         }

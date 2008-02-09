@@ -26,6 +26,7 @@ import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicLineParser;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.TestUtils;
@@ -552,9 +553,10 @@ public class PushUploadTest extends LimeTestCase {
         @Inject
         public MyNetworkManager(Provider<UDPService> udpService, Provider<Acceptor> acceptor,
                 Provider<DHTManager> dhtManager, Provider<ConnectionManager> connectionManager,
-                Provider<ActivityCallback> activityCallback, OutOfBandStatistics outOfBandStatistics) {
+                Provider<ActivityCallback> activityCallback, OutOfBandStatistics outOfBandStatistics, 
+                NetworkInstanceUtils networkInstanceUtils) {
             super(udpService, acceptor, dhtManager, connectionManager, activityCallback,
-                    outOfBandStatistics);
+                    outOfBandStatistics, networkInstanceUtils);
         }
 
         @Override
@@ -584,11 +586,12 @@ public class PushUploadTest extends LimeTestCase {
                 Provider<NodeAssigner> nodeAssigner,
                 Provider<IPFilter> ipFilter,
                 ConnectionCheckerManager connectionCheckerManager,
-                PingRequestFactory pingRequestFactory) {
+                PingRequestFactory pingRequestFactory,
+                NetworkInstanceUtils networkInstanceUtils) {
             super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor,
                     simppManager, capabilitiesVMFactory, managedConnectionFactory,
                     messageRouter, queryUnicaster, socketsManager, connectionServices,
-                    nodeAssigner, ipFilter, connectionCheckerManager, pingRequestFactory);
+                    nodeAssigner, ipFilter, connectionCheckerManager, pingRequestFactory, networkInstanceUtils);
         }
         
         @Override

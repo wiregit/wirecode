@@ -3,6 +3,7 @@ package com.limegroup.gnutella.filters;
 import junit.framework.Test;
 
 import org.limewire.io.IP;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 
 public class IPListTest extends com.limegroup.gnutella.util.LimeTestCase {
     public IPListTest(String name) {
@@ -22,13 +23,13 @@ public class IPListTest extends com.limegroup.gnutella.util.LimeTestCase {
         
         //try a private address
         list.add("192.168.1.1");
-        assertFalse(list.isValidFilter(false));
-        assertTrue(list.isValidFilter(true));
+        assertFalse(list.isValidFilter(false, new SimpleNetworkInstanceUtils()));
+        assertTrue(list.isValidFilter(true, null));
         
         //try filling up the space
         list = new IPList();
         list.add("*.*.*.*");
-        assertFalse(list.isValidFilter(false));
+        assertFalse(list.isValidFilter(false, new SimpleNetworkInstanceUtils()));
         
         //try below max space - 2.5% of 4GB = 6 class A networks
         list = new IPList();
@@ -38,9 +39,9 @@ public class IPListTest extends com.limegroup.gnutella.util.LimeTestCase {
         list.add("4.*.*.*");
         list.add("5.*.*.*");
         list.add("6.*.*.*");
-        assertTrue(list.isValidFilter(false));
+        assertTrue(list.isValidFilter(false, new SimpleNetworkInstanceUtils()));
         list.add("7.*.*.*");
-        assertFalse(list.isValidFilter(false));
+        assertFalse(list.isValidFilter(false, new SimpleNetworkInstanceUtils()));
     }
     
     public void testIPListLegacy() {

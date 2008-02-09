@@ -8,7 +8,7 @@ import java.util.Set;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortForSelf;
-import org.limewire.io.NetworkUtils;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -43,15 +43,21 @@ public class DirectAltLoc extends AlternateLocation {
      * other like the uploader may rely on it.
      */
     protected volatile boolean _demoted = false;
+    
+    private final NetworkInstanceUtils networkInstanceUtils;
+    private final IpPortForSelf ipPortForSelf;
 	
-	protected DirectAltLoc(IpPort address, URN sha1) throws IOException{
-		super(sha1);
-		if (!NetworkUtils.isValidExternalIpPort(address))
+	protected DirectAltLoc(IpPort address, URN sha1, NetworkInstanceUtils networkInstanceUtils,
+            IpPortForSelf ipPortForSelf) throws IOException {
+        super(sha1);
+        this.networkInstanceUtils = networkInstanceUtils;
+        this.ipPortForSelf = ipPortForSelf;
+		if (!networkInstanceUtils.isValidExternalIpPort(address))
 		    throw new IOException("not a valid external address:port in direct altloc "+address);
 		
 		_node=address;
-		if (_node == IpPortForSelf.instance())
-			hashCode = IpPortForSelf.instance().hashCode();
+		if (_node == ipPortForSelf)
+			hashCode = ipPortForSelf.hashCode();
 	}
 	
 	protected String generateHTTPString() {
@@ -64,17 +70,19 @@ public class DirectAltLoc extends AlternateLocation {
 	public RemoteFileDesc createRemoteFileDesc(long size, RemoteFileDescFactory remoteFileDescFactory) {
 		Set<URN> urnSet = new UrnSet(getSHA1Urn());
         int quality = 3;
-		RemoteFileDesc ret = remoteFileDescFactory.createRemoteFileDesc(_node.getAddress(), _node.getPort(), 0, HTTPConstants.URI_RES_N2R+SHA1_URN, size, DataUtils.EMPTY_GUID, 1000, true, quality, false, null, urnSet,
-                false, false, ALT_VENDOR, null, -1, _node instanceof Connectable ? ((Connectable)_node).isTLSCapable() : false // TLS
-);
-		
-		return ret;
+		RemoteFileDesc ret = remoteFileDescFactory.createRemoteFileDesc(_node.getAddress(), _node
+                .getPort(), 0, HTTPConstants.URI_RES_N2R + SHA1_URN, size, DataUtils.EMPTY_GUID,
+                1000, true, quality, false, null, urnSet, false, false, ALT_VENDOR, null, -1,
+                _node instanceof Connectable ? ((Connectable) _node).isTLSCapable() : false // TLS
+                );
+
+        return ret;
 	}
 	
 	public synchronized AlternateLocation createClone() {
         DirectAltLoc ret = null;
         try {
-        	ret = new DirectAltLoc(_node, this.SHA1_URN);
+        	ret = new DirectAltLoc(_node, this.SHA1_URN, networkInstanceUtils, ipPortForSelf);
 
         } catch(IOException ioe) {
             ErrorService.error(ioe);
@@ -86,7 +94,7 @@ public class DirectAltLoc extends AlternateLocation {
     }
 	
 	public boolean isMe(){
-	    return NetworkUtils.isMe(_node);
+	    return networkInstanceUtils.isMe(_node);
 	}
 	
 	/**

@@ -16,6 +16,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteOrder;
 
@@ -68,7 +69,8 @@ public class PushEndpointTest extends BaseTestCase {
         tls6 = new ConnectableImpl("1.2.3.9", 1235, true);
         
         pushEndpointCache = new PushEndpointCacheImpl(new ScheduledExecutorServiceStub());
-        factory = new PushEndpointFactoryImpl(Providers.of((PushEndpointCache) pushEndpointCache), null);
+        factory = new PushEndpointFactoryImpl(Providers.of((PushEndpointCache) pushEndpointCache),
+                null, new SimpleNetworkInstanceUtils());
     }
     
     public void testConstructorGUID() throws Exception {

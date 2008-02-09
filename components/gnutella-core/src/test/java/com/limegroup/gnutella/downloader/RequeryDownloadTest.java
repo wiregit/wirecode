@@ -14,7 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.PrivilegedAccessor;
@@ -130,12 +130,15 @@ public class RequeryDownloadTest extends LimeTestCase {
     
     
     public void setUp() throws Exception {
+        final LocalSocketAddressProviderStub localSocketAddressProviderStub = new LocalSocketAddressProviderStub();
+        localSocketAddressProviderStub.setLocalAddressPrivate(false);
         injector = LimeTestUtils.createInjector(new AbstractModule() {
           @Override
             protected void configure() {
               bind(MessageRouter.class).to(TestMessageRouter.class);
               bind(ConnectionManager.class).to(ConnectionManagerStub.class);
               bind(NetworkManager.class).to(NetworkManagerStub.class);
+              bind(LocalSocketAddressProvider.class).toInstance(localSocketAddressProviderStub);
             }  
         });
         
@@ -157,9 +160,6 @@ public class RequeryDownloadTest extends LimeTestCase {
         testUploader.start("uploader 6666", 6666, false);
         testUploader.setRate(Integer.MAX_VALUE);
         
-        LocalSocketAddressProviderStub localSocketAddressProviderStub = new LocalSocketAddressProviderStub();
-        localSocketAddressProviderStub.setLocalAddressPrivate(false);
-        LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProviderStub);
         RequeryManager.NO_DELAY = true;
 
         new File(getSaveDirectory(), filename).delete();

@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.rudp.RUDPUtils;
 
@@ -19,12 +20,13 @@ import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 @Singleton
 public class NetworkManagerImpl implements NetworkManager {
     
-    private Provider<UDPService> udpService;
-    private Provider<Acceptor> acceptor;
-    private Provider<DHTManager> dhtManager;
-    private Provider<ConnectionManager> connectionManager;
-    private Provider<ActivityCallback> activityCallback;
+    private final Provider<UDPService> udpService;
+    private final Provider<Acceptor> acceptor;
+    private final Provider<DHTManager> dhtManager;
+    private final Provider<ConnectionManager> connectionManager;
+    private final Provider<ActivityCallback> activityCallback;
     private final OutOfBandStatistics outOfBandStatistics;
+    private final NetworkInstanceUtils networkInstanceUtils;
     
     @Inject
     public NetworkManagerImpl(Provider<UDPService> udpService,
@@ -32,13 +34,15 @@ public class NetworkManagerImpl implements NetworkManager {
             Provider<DHTManager> dhtManager,
             Provider<ConnectionManager> connectionManager,
             Provider<ActivityCallback> activityCallback,
-            OutOfBandStatistics outOfBandStatistics) {
+            OutOfBandStatistics outOfBandStatistics,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.udpService = udpService;
         this.acceptor = acceptor;
         this.dhtManager = dhtManager;
         this.connectionManager = connectionManager;
         this.activityCallback = activityCallback;
         this.outOfBandStatistics = outOfBandStatistics;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
     
 
@@ -62,7 +66,7 @@ public class NetworkManagerImpl implements NetworkManager {
      */
     public boolean isOOBCapable() {
         return isGUESSCapable() && outOfBandStatistics.isSuccessRateGood()&&
-               !NetworkUtils.isPrivate() &&
+               !networkInstanceUtils.isPrivate() &&
                SearchSettings.OOB_ENABLED.getValue() &&
                acceptor.get().isAddressExternal() && isIpPortValid();
     }
@@ -119,7 +123,7 @@ public class NetworkManagerImpl implements NetworkManager {
         int port = getPort();
         if(!NetworkUtils.isValidAddress(addr))
             return false;
-        if(NetworkUtils.isPrivateAddress(addr))
+        if(networkInstanceUtils.isPrivateAddress(addr))
             return false;            
         if(!NetworkUtils.isValidPort(port))
             return false;
@@ -139,7 +143,7 @@ public class NetworkManagerImpl implements NetworkManager {
         int port = getPort();
         if(!NetworkUtils.isValidAddress(addr))
             return false;
-        if(NetworkUtils.isPrivateAddress(addr))
+        if(networkInstanceUtils.isPrivateAddress(addr))
             return false;            
         if(!NetworkUtils.isValidPort(port))
             return false;
@@ -212,8 +216,11 @@ public class NetworkManagerImpl implements NetworkManager {
         return udpService.get().getSolicitedGUID();
     }
 
-
     public int supportsFWTVersion() {
         return udpService.get().canDoFWT() ? RUDPUtils.VERSION : 0;
+    }
+    
+    public boolean isPrivateAddress(byte[] addr) {
+        return networkInstanceUtils.isPrivateAddress(addr);
     }
 }

@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import junit.framework.Test;
 
 import org.limewire.inject.Providers;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.SocketAcceptor;
@@ -18,7 +18,6 @@ import org.limewire.util.BaseTestCase;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.StubSpamServices;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 //ITEST
 public class ChatTest extends BaseTestCase {
@@ -53,12 +52,9 @@ public class ChatTest extends BaseTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        // make sure local connections are accepted
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
-
         receiverCallback = new MyActivityCallback();
         
-        connectionDispatcher = new ConnectionDispatcherImpl();
+        connectionDispatcher = new ConnectionDispatcherImpl(new SimpleNetworkInstanceUtils(false));
 
         factory = new InstantMessengerFactoryImpl(Providers.of((ActivityCallback) receiverCallback),
                 Providers.of((SocketsManager)new SocketsManagerImpl()));

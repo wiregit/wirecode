@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.rudp.RUDPUtils;
 
@@ -18,17 +19,20 @@ public class SelfEndpoint extends PushEndpoint {
     private final NetworkManager networkManager;
     private final Provider<ConnectionManager> connectionManager;
     private final Provider<UDPService> udpService;
+    private final NetworkInstanceUtils networkInstanceUtils;
     
     @Inject
     SelfEndpoint(NetworkManager networkManager,
             ApplicationServices applicationServices,
             Provider<ConnectionManager> connectionManager,
-            Provider<UDPService> udpService) {
+            Provider<UDPService> udpService,
+            NetworkInstanceUtils networkInstanceUtils) {
         super(applicationServices.getMyGUID(), IpPort.EMPTY_SET,
-                PushEndpoint.PLAIN, RUDPUtils.VERSION, null, null);
+                PushEndpoint.PLAIN, RUDPUtils.VERSION, null, null, networkInstanceUtils);
         this.networkManager = networkManager;
         this.connectionManager = connectionManager;
         this.udpService = udpService;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
 
     /**
@@ -64,7 +68,7 @@ public class SelfEndpoint extends PushEndpoint {
         byte[] addr = networkManager.getExternalAddress();
 
         if (NetworkUtils.isValidAddress(addr)
-                && !NetworkUtils.isPrivateAddress(addr))
+                && !networkInstanceUtils.isPrivateAddress(addr))
             return NetworkUtils.ip2string(addr);
 
         return RemoteFileDesc.BOGUS_IP;

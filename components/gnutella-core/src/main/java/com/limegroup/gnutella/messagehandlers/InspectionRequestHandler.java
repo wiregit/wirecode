@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.collection.Periodic;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.Inject;
@@ -52,15 +53,16 @@ public class InspectionRequestHandler extends RestrictedResponder {
     private ReplyHandler currentHandler;
     
     @Inject
-    public InspectionRequestHandler(Provider<MessageRouter> router, NetworkManager networkManager, 
-            SimppManager simppManager, 
-            UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache,
-            InspectionResponseFactory factory, @Named("inspection") SecureMessageVerifier inspectionVerifier,
-            @Named("messageExecutor") ExecutorService dispatch,
-            @Named("backgroundExecutor") ScheduledExecutorService background) {
-        super(FilterSettings.INSPECTOR_IP_ADDRESSES, 
-                inspectionVerifier,
-                MessageSettings.INSPECTION_VERSION, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache, dispatch);
+    public InspectionRequestHandler(Provider<MessageRouter> router, NetworkManager networkManager,
+            SimppManager simppManager, UDPReplyHandlerFactory udpReplyHandlerFactory,
+            UDPReplyHandlerCache udpReplyHandlerCache, InspectionResponseFactory factory,
+            @Named("inspection")
+            SecureMessageVerifier inspectionVerifier, @Named("messageExecutor")
+            ExecutorService dispatch, @Named("backgroundExecutor")
+            ScheduledExecutorService background, NetworkInstanceUtils networkInstanceUtils) {
+        super(FilterSettings.INSPECTOR_IP_ADDRESSES, inspectionVerifier,
+                MessageSettings.INSPECTION_VERSION, networkManager, simppManager,
+                udpReplyHandlerFactory, udpReplyHandlerCache, dispatch, networkInstanceUtils);
         this.router = router;
         this.factory = factory;
         sender = new Periodic(new Runnable() {

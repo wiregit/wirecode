@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.concurrent.Executor;
 
 import org.limewire.io.IP;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
@@ -39,11 +40,14 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
     private final UDPReplyHandlerFactory udpReplyHandlerFactory;
     private final UDPReplyHandlerCache udpReplyHandlerCache;
     private final Executor messageExecutorService; 
+    private final NetworkInstanceUtils networkInstanceUtils;
     
     public RestrictedResponder(StringArraySetting setting, NetworkManager networkManager,
-            SimppManager simppManager, UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache,
-            Executor messageExecutor) {
-        this(setting, null, null, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache,messageExecutor);
+            SimppManager simppManager, UDPReplyHandlerFactory udpReplyHandlerFactory,
+            UDPReplyHandlerCache udpReplyHandlerCache, Executor messageExecutor,
+            NetworkInstanceUtils networkInstanceUtils) {
+        this(setting, null, null, networkManager, simppManager, udpReplyHandlerFactory,
+                udpReplyHandlerCache, messageExecutor, networkInstanceUtils);
     }
     
     /**
@@ -56,11 +60,10 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
     // and also cleaned up
     public RestrictedResponder(StringArraySetting setting, 
             SecureMessageVerifier verifier,
-            LongSetting lastRoutedVersion,
-            NetworkManager networkManager,
-            SimppManager simppManager,
-            UDPReplyHandlerFactory udpReplyHandlerFactory,
-            UDPReplyHandlerCache udpReplyHandlerCache, Executor messageExecutorService) {
+            LongSetting lastRoutedVersion, NetworkManager networkManager,
+            SimppManager simppManager, UDPReplyHandlerFactory udpReplyHandlerFactory,
+            UDPReplyHandlerCache udpReplyHandlerCache, Executor messageExecutorService,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.setting = setting;
         this.verifier = verifier;
         this.lastRoutedVersion = lastRoutedVersion;
@@ -68,6 +71,7 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
         this.udpReplyHandlerFactory = udpReplyHandlerFactory;
         this.udpReplyHandlerCache = udpReplyHandlerCache;
         this.messageExecutorService = messageExecutorService;
+        this.networkInstanceUtils = networkInstanceUtils;
         allowed = new IPList();
         allowed.add("*.*.*.*");
         simppManager.addListener(this);
@@ -79,7 +83,7 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
         try {
             for (String ip : setting.getValue())
                 newCrawlers.add(new IP(ip));
-            if (newCrawlers.isValidFilter(false))
+            if (newCrawlers.isValidFilter(false, networkInstanceUtils))
                 allowed = newCrawlers;
         } catch (IllegalArgumentException badSimpp) {}
     }

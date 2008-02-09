@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
-import org.limewire.io.NetworkUtils;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.ProxySettings.ProxyType;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
@@ -45,10 +45,12 @@ class ProxyManagerImpl implements ProxyManager {
     private static final Log LOG = LogFactory.getLog(ProxyManagerImpl.class);
     
     private final ProxySettings proxySettings;
+    private final NetworkInstanceUtils networkInstanceUtils;
     
     @Inject
-    public ProxyManagerImpl(ProxySettings proxySettings) {
+    public ProxyManagerImpl(ProxySettings proxySettings, NetworkInstanceUtils networkInstanceUtils) {
         this.proxySettings = proxySettings;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
         
     /* (non-Javadoc)
@@ -61,7 +63,7 @@ class ProxyManagerImpl implements ProxyManager {
         ProxyType connectionType = proxySettings.getCurrentProxyType();
         assert connectionType != null;
 		boolean valid =  connectionType != ProxyType.NONE &&
-                        (!NetworkUtils.isPrivateAddress(address) ||
+                        (!networkInstanceUtils.isPrivateAddress(address) ||
                          proxySettings.isProxyForPrivateEnabled());
         if(valid)
             return connectionType;

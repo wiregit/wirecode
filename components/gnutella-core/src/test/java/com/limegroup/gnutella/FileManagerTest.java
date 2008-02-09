@@ -20,7 +20,7 @@ import junit.framework.Test;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.Range;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
@@ -88,8 +88,6 @@ public class FileManagerTest extends LimeTestCase {
     protected void setUp() throws Exception {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
         
         cleanFiles(_incompleteDir, false);
         cleanFiles(_storeDir, false);
@@ -99,6 +97,7 @@ public class FileManagerTest extends LimeTestCase {
             @Override
             protected void configure() {
                 bind(FileManager.class).to(SimpleFileManager.class);
+                bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
             }
         });
         fman = (FileManagerImpl)injector.getInstance(FileManager.class);

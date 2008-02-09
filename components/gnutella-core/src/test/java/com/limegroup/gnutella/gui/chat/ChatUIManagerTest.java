@@ -4,10 +4,11 @@ import java.awt.event.WindowEvent;
 
 import junit.framework.Test;
 
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.util.BaseTestCase;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
@@ -57,12 +58,18 @@ public class ChatUIManagerTest extends BaseTestCase {
 
         // make sure local connections are accepted
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
         
-        Injector injector = LimeTestUtils.createInjector(VisualConnectionCallback.class, new LimeWireGUIModule());
-        
+        Injector injector = LimeTestUtils.createInjector(VisualConnectionCallback.class,
+                new LimeWireGUIModule(), new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
+            }
+        });
+
         // initialize chat classes
-        ConnectionDispatcher connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
+        ConnectionDispatcher connectionDispatcher = injector.getInstance(Key.get(
+                ConnectionDispatcher.class, Names.named("global")));
         chatManager = injector.getInstance(ChatManager.class);
         connectionDispatcher.addConnectionAcceptor(chatManager, false, "CHAT");
         acceptor = injector.getInstance(Acceptor.class);

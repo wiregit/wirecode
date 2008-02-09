@@ -28,20 +28,9 @@ public abstract class DHTTestCase extends LimeTestCase {
     
     private boolean bootstrapped = false;
     
-    //protected static List<MojitoDHT> DHT_LIST = new ArrayList<MojitoDHT>();
-
-    // DPINJ: remove
-    protected static boolean startDHT = true;
-    
     public DHTTestCase(String name) {
         super(name);
     }
-    
-//    public static void globalSetUp() throws Exception {
-//        if (startDHT) {
-//            startServices(ProviderHacks.getLifecycleManager());
-//        }
-//    }
     
     protected MojitoDHT startBootstrapDHT(LifecycleManager lifeCycleManager) throws Exception {
         assertFalse("bootstrap DHT already started", bootstrapped);

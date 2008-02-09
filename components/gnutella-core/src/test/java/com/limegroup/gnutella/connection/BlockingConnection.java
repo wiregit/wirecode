@@ -16,6 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.CompressingOutputStream;
 import org.limewire.io.IOUtils;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.UncompressingInputStream;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -84,8 +85,10 @@ public class BlockingConnection extends AbstractConnection {
     BlockingConnection(String host, int port, ConnectType connectType,
             CapabilitiesVMFactory capabilitiesVMFactory, SocketsManager socketsManager,
             Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
-            MessageFactory messageFactory, NetworkManager networkManager) {
-        super(host, port, connectType, capabilitiesVMFactory, supportedVendorMessage, networkManager, acceptor);
+            MessageFactory messageFactory, NetworkManager networkManager,
+            NetworkInstanceUtils networkInstanceUtils) {
+        super(host, port, connectType, capabilitiesVMFactory, supportedVendorMessage,
+                networkManager, acceptor, networkInstanceUtils);
         this.messageFactory = messageFactory;
         this.socketsManager = socketsManager;
     }
@@ -103,8 +106,10 @@ public class BlockingConnection extends AbstractConnection {
      */
     BlockingConnection(Socket socket, CapabilitiesVMFactory capabilitiesVMFactory,
             Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
-            MessageFactory messageFactory, NetworkManager networkManager) {
-        super(socket, capabilitiesVMFactory, supportedVendorMessage, networkManager, acceptor);
+            MessageFactory messageFactory, NetworkManager networkManager,
+            NetworkInstanceUtils networkInstanceUtils) {
+        super(socket, capabilitiesVMFactory, supportedVendorMessage, networkManager, acceptor,
+                networkInstanceUtils);
         this.socketsManager = null;
         this.messageFactory = messageFactory;
     }

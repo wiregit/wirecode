@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import org.limewire.io.NetworkUtils;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.nio.NBSocket;
 import org.limewire.nio.observer.ConnectObserver;
 
@@ -20,7 +21,7 @@ public class SocketsManagerImpl implements SocketsManager {
     private final SocketController socketController;
     
     public SocketsManagerImpl() {
-        this(new SimpleSocketController(new ProxyManagerImpl(new EmptyProxySettings()), new EmptySocketBindingSettings()));
+        this(new SimpleSocketController(new ProxyManagerImpl(new EmptyProxySettings(), new SimpleNetworkInstanceUtils()), new EmptySocketBindingSettings()));
     }
     
     @Inject

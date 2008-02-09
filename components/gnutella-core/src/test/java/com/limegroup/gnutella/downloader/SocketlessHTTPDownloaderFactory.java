@@ -2,6 +2,8 @@ package com.limegroup.gnutella.downloader;
 
 import java.net.Socket;
 
+import org.limewire.io.NetworkInstanceUtils;
+
 import com.google.inject.Provider;
 import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.CreationTimeCache;
@@ -26,6 +28,7 @@ public class SocketlessHTTPDownloaderFactory implements HTTPDownloaderFactory {
     private final RemoteFileDescFactory remoteFileDescFactory;
     private final ThexReaderFactory thexReaderFactory;
     private final TcpBandwidthStatistics tcpBandwidthStatistics;
+    private final NetworkInstanceUtils networkInstanceUtils;
 
     public SocketlessHTTPDownloaderFactory(NetworkManager networkManager,
             AlternateLocationFactory alternateLocationFactory,
@@ -36,7 +39,8 @@ public class SocketlessHTTPDownloaderFactory implements HTTPDownloaderFactory {
             PushEndpointFactory pushEndpointFactory,
             RemoteFileDescFactory remoteFileDescFactory,
             ThexReaderFactory thexReaderFactory, 
-            TcpBandwidthStatistics tcpBandwidthStatistics) {
+            TcpBandwidthStatistics tcpBandwidthStatistics,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.networkManager = networkManager;
         this.alternateLocationFactory = alternateLocationFactory;
         this.downloadManager = downloadManager;
@@ -47,13 +51,14 @@ public class SocketlessHTTPDownloaderFactory implements HTTPDownloaderFactory {
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.thexReaderFactory = thexReaderFactory;
         this.tcpBandwidthStatistics = tcpBandwidthStatistics;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
 
     public HTTPDownloader create(Socket socket, RemoteFileDesc rfd,
             VerifyingFile incompleteFile, boolean inNetwork) {
         return new HTTPDownloader(socket, rfd, incompleteFile, inNetwork,
                 false, networkManager, alternateLocationFactory,
-                downloadManager, creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory, remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics);
+                downloadManager, creationTimeCache, bandwidthManager, pushEndpointCache, pushEndpointFactory, remoteFileDescFactory, thexReaderFactory, tcpBandwidthStatistics, networkInstanceUtils);
     }
 
 }

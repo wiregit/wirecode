@@ -17,13 +17,11 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.cybergarage.http.HTTPStatus;
 import org.limewire.http.HttpAcceptorListener;
 import org.limewire.http.HttpClientUtils;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.SocketAcceptor;
 import org.limewire.util.BaseTestCase;
-
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 //ITEST
 public class HTTPAcceptorTest extends BaseTestCase {
@@ -46,10 +44,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        // make sure local connections are accepted
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
-
-        ConnectionDispatcher connectionDispatcher = new ConnectionDispatcherImpl();
+        ConnectionDispatcher connectionDispatcher = new ConnectionDispatcherImpl(new SimpleNetworkInstanceUtils(false));
         socketAcceptor = new SocketAcceptor(connectionDispatcher);
         httpAcceptor = new HTTPAcceptor(null);
         connectionDispatcher.addConnectionAcceptor(httpAcceptor, false, httpAcceptor.getHttpMethods());

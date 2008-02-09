@@ -11,7 +11,6 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -174,12 +173,11 @@ public final class NetworkUtils {
     /**
      * @return whether the IpPort is a valid external address.
      */
-    public static boolean isValidExternalIpPort(IpPort addr) {
+    static boolean isValidExternalIpPort(IpPort addr) {
         InetAddress address = addr.getInetAddress();
         return address != null 
             && isValidAddress(address) 
-            && isValidPort(addr.getPort())
-            && !isPrivateAddress(address);
+            && isValidPort(addr.getPort());
     }
     
     /**
@@ -269,51 +267,14 @@ public final class NetworkUtils {
      * @param addr0 the first address to compare
      * @param addr1 the second address to compare
      */
-    public static boolean isVeryCloseIP(byte[] addr0, byte[] addr1) {
-        // if 0 is not a private address but 1 is, then the next
-        // check will fail anyway, so this is okay.
-        if ( isPrivateAddress(addr0) ) {
-            return false;
-            
-        } else if ((isIPv4Address(addr0) && isIPv4Address(addr1)) 
+    static boolean isVeryCloseIP(byte[] addr0, byte[] addr1) {
+        if ((isIPv4Address(addr0) && isIPv4Address(addr1)) 
                 || (isIPv4MappedAddress(addr0) && isIPv4MappedAddress(addr1))) {
             
             return addr0[/* 0 */ addr0.length - 4] == addr1[/* 0 */ addr1.length - 4]
                 && addr0[/* 1 */ addr0.length - 3] == addr1[/* 1 */ addr1.length - 3];
         }
         return false;
-    }
-    
-    /**
-     * Returns whether or not the given IP address shares the same
-     * first three octets as the address for this node -- the most 
-     * common indication that they may be on the same network.
-     *
-     * @param addr the address to compare
-     */
-    public static boolean isVeryCloseIP(InetAddress addr) {
-        return isVeryCloseIP(addr.getAddress());
-    }
-    
-    /**
-     * Returns whether or not the given IP address shares the same
-     * first three octets as the address for this node -- the most 
-     * common indication that they may be on the same network.
-     *
-     * @param addr the address to compare
-     */
-    public static boolean isVeryCloseIP(byte[] addr) {
-        return isVeryCloseIP(LocalSocketAddressService.getLocalAddress(), addr);
-    }
-    
-    /**
-     * Returns whether or not this node has a private address.
-     *
-     * @return <tt>true</tt> if this node has a private address,
-     *  otherwise <tt>false</tt>
-     */
-    public static boolean isPrivate() {
-        return isPrivateAddress(LocalSocketAddressService.getLocalAddress());
     }
     
     /**
@@ -326,11 +287,7 @@ public final class NetworkUtils {
      * @return <tt>true</tt> if the specified address is private,
      *  otherwise <tt>false</tt>
      */
-    public static boolean isPrivateAddress(InetAddress address) {
-        if (!LocalSocketAddressService.isLocalAddressPrivate()) {
-            return false;
-        }
-        
+    static boolean isPrivateAddress(InetAddress address) {
         if (address.isAnyLocalAddress() 
                 || address.isLoopbackAddress() 
                 || address.isLinkLocalAddress() 
@@ -352,11 +309,7 @@ public final class NetworkUtils {
      * 
      * @param address the address to check
      */
-    public static boolean isPrivateAddress(byte[] address) {
-        if (!LocalSocketAddressService.isLocalAddressPrivate()) {
-            return false;
-        }
-        
+    static boolean isPrivateAddress(byte[] address) {
         if (isAnyLocalAddress(address) 
                 || isInvalidAddress(address)
                 || isLoopbackAddress(address) 
@@ -369,37 +322,6 @@ public final class NetworkUtils {
         }
         
         return false;
-    }
-    
-    /**
-     * Utility method for determining whether or not the given 
-     * address is private.  Delegates to 
-     * <tt>isPrivateAddress(InetAddress)</tt>.
-     *
-     * Returns true if the host is unknown.
-     *
-     * @return <tt>true</tt> if the specified address is private,
-     *  otherwise <tt>false</tt>
-     */
-    public static boolean isPrivateAddress(String address) {
-        try {
-            return isPrivateAddress(InetAddress.getByName(address));
-        } catch(UnknownHostException uhe) {
-            return true;
-        }
-    }
-
-    /**
-     * Utility method for determining whether or not the given 
-     * address is private taking an InetAddress object as argument
-     * like the isLocalAddress(InetAddress) method. Delegates to 
-     * <tt>isPrivateAddress(byte[] address)</tt>.
-     *
-     * @return <tt>true</tt> if the specified address is private,
-     *  otherwise <tt>false</tt>
-     */
-    public static boolean isPrivateAddress(SocketAddress address) {
-        return isPrivateAddress(((InetSocketAddress)address).getAddress());
     }
     
     /** 
@@ -435,53 +357,6 @@ public final class NetworkUtils {
         return sbuf.toString();
     }
     
-    /**
-     * If host is not a valid host address, returns false.
-     * Otherwise, returns true if connecting to host:port would connect to
-     *  this servent's listening port.
-     *
-     * @return <tt>true</tt> if the specified host/port combo is this servent,
-     *         otherwise <tt>false</tt>.
-     */
-    public static boolean isMe(String host, int port) {
-        try {
-            return isMe(InetAddress.getByName(host).getAddress(), port);
-        } catch (UnknownHostException e) {
-            return false;
-        }
-    }
-    
-    /**
-     * If host is not a valid host address, returns false.
-     * Otherwise, returns true if connecting to host:port would connect to
-     *  this servent's listening port.
-     *
-     * @return <tt>true</tt> if the specified host/port combo is this servent,
-     *         otherwise <tt>false</tt>.
-     */
-    public static boolean isMe(byte[] address, int port) {
-        //Don't allow connections to yourself.  We have to special
-        //case connections to "127.*.*.*" since
-        //they are aliases this machine.
-
-        if (isLoopbackAddress(address)) {
-            return port == LocalSocketAddressService.getLocalPort();
-        } else {
-            byte[] local = LocalSocketAddressService.getLocalAddress();
-            return port == LocalSocketAddressService.getLocalPort() 
-                    && Arrays.equals(address, local);
-        }
-    }
-    
-    /**
-     * Returns true if the given IpPort is the local host
-     */
-    public static boolean isMe(IpPort me) {
-    	if (me == IpPortForSelf.instance())
-    	    return true;
-    	return isMe(me.getInetAddress().getAddress(), me.getPort());
-    }
-
     /**
      * Determines if the given socket is from a local host.
      * 

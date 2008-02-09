@@ -17,7 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.io.NetworkUtils;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
@@ -55,6 +55,8 @@ public class OOBHandler implements MessageHandler, Runnable {
     private final ScheduledExecutorService executor;
     
     private final OutOfBandStatistics outOfBandStatistics;
+    
+    private final NetworkInstanceUtils networkInstanceUtils;
 	
     private final Map<Integer,OOBSession> OOBSessions =
         Collections.synchronizedMap(new HashMap<Integer, OOBSession>());
@@ -63,11 +65,13 @@ public class OOBHandler implements MessageHandler, Runnable {
 	public OOBHandler(MessageRouter router, 
             MACCalculatorRepositoryManager MACCalculatorRepositoryManager,
             @Named("backgroundExecutor") ScheduledExecutorService executor,
-            OutOfBandStatistics outOfBandStatistics) {
+            OutOfBandStatistics outOfBandStatistics,
+            NetworkInstanceUtils networkInstanceUtils) {
 		this.router = router;
 		this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
         this.executor = executor;
         this.outOfBandStatistics = outOfBandStatistics;
+        this.networkInstanceUtils = networkInstanceUtils;
 	}
 
 	public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
@@ -152,7 +156,7 @@ public class OOBHandler implements MessageHandler, Runnable {
             try {
                 // needs a push, we can update: works for fw-fw case and classic push
                 // or not private, we can update
-                if (reply.getNeedsPush() || !NetworkUtils.isPrivateAddress(reply.getIPBytes())) {
+                if (reply.getNeedsPush() || !networkInstanceUtils.isPrivateAddress(reply.getIPBytes())) {
                     reply.setOOBAddress(handler.getInetAddress(), handler.getPort());
                 }
                 else {

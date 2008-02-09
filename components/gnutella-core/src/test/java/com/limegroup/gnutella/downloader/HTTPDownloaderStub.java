@@ -3,6 +3,8 @@ package com.limegroup.gnutella.downloader;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import org.limewire.io.NetworkInstanceUtils;
+
 import com.google.inject.Provider;
 import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.CreationTimeCache;
@@ -29,11 +31,12 @@ public class HTTPDownloaderStub extends HTTPDownloader {
             DownloadManager downloadManager, CreationTimeCache creationTimeCache,
             BandwidthManager bandwidthManager, Provider<PushEndpointCache> pushEndpointCache,
             PushEndpointFactory pushEndpointFactory, RemoteFileDescFactory remoteFileDescFactory,
-            ThexReaderFactory thexReaderFactory, TcpBandwidthStatistics tcpBandwidthStatistics) {
+            ThexReaderFactory thexReaderFactory, TcpBandwidthStatistics tcpBandwidthStatistics,
+            NetworkInstanceUtils networkInstanceUtils) {
         super(null, rfd, incompleteFile, false, false, networkManager, alternateLocationFactory,
                 downloadManager, creationTimeCache, bandwidthManager, pushEndpointCache,
                 pushEndpointFactory, remoteFileDescFactory, thexReaderFactory,
-                tcpBandwidthStatistics);
+                tcpBandwidthStatistics, networkInstanceUtils);
     }
 
     public void addFailedAltLoc(AlternateLocation loc) {

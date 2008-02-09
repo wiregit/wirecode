@@ -41,7 +41,7 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
      * constructor has preconditions on several parameters; putting the burden
      * on the caller makes the method easier to implement, since the superclass
      * constructor immediately starts a download thread.
-     *
+     * @param pushListProvider TODO
      * @param incompleteFile the incomplete file to resume to, which
      *  MUST be the result of IncompleteFileManager.getFile.
      * @param name the name of the completed file, which MUST be the result of
@@ -60,13 +60,13 @@ class ResumeDownloaderImpl extends ManagedDownloaderImpl implements ResumeDownlo
             VerifyingFileFactory verifyingFileFactory, DiskController diskController,
              IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<MessageRouter> messageRouter, Provider<HashTreeCache> tigerTreeCache,
-            ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory) {
+            ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider) {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
                 contentManager, sourceRankerFactory, urnCache, savedFileManager,
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
-                tigerTreeCache, applicationServices, remoteFileDescFactory);
+                tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider);
     }
     
     /* (non-Javadoc)

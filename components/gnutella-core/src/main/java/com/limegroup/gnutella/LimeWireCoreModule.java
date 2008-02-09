@@ -12,15 +12,15 @@ import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
 import org.limewire.inspection.Inspector;
 import org.limewire.inspection.InspectorImpl;
+import org.limewire.io.LimeWireIOModule;
 import org.limewire.io.LocalSocketAddressProvider;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.mojito.LimeWireMojitoModule;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.LimeWireNetModule;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
-import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
 import org.limewire.security.SecurityToken;
@@ -199,6 +199,8 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireStatisticsModule());
         binder().install(new LimeWireGnutellaStatisticsModule());
         binder().install(new LimeWireGnutellaRudpModule());
+        binder().install(new LimeWireIOModule());
+        binder().install(new LimeWireMojitoModule());
         
         bind(LimeWireCore.class);
         
@@ -322,10 +324,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bindAll(Names.named("dhtExecutor"), ExecutorService.class, DHTExecutorProvider.class, Executor.class);
         bindAll(Names.named("messageExecutor"), ExecutorService.class, MessageExecutorProvider.class, Executor.class);
         bindAll(Names.named("nioExecutor"), ScheduledExecutorService.class, NIOScheduledExecutorServiceProvider.class, ExecutorService.class, Executor.class);
-
-        // TODO: statically injecting these for now...
-        requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
-        requestStaticInjection(LocalSocketAddressService.class);
                         
         // TODO: This is odd -- move to initialize & LifecycleManager?
         bind(Statistics.class).asEagerSingleton();

@@ -17,6 +17,7 @@ import org.limewire.io.Connectable;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkInstanceUtils;
 import org.xml.sax.SAXException;
 
 import com.google.inject.Inject;
@@ -46,13 +47,17 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
     private final PushEndpointFactory pushEndpointFactory;
 
     private final Provider<LimeHttpClient> httpClientProvider;
+    
+    private final NetworkInstanceUtils networkInstanceUtils;
 
     @Inject
     public RemoteFileDescFactoryImpl(LimeXMLDocumentFactory limeXMLDocumentFactory,
-            PushEndpointFactory pushEndpointFactory, Provider<LimeHttpClient> httpClientProvider) {
+            PushEndpointFactory pushEndpointFactory, Provider<LimeHttpClient> httpClientProvider,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.limeXMLDocumentFactory = limeXMLDocumentFactory;
         this.pushEndpointFactory = pushEndpointFactory;
         this.httpClientProvider = httpClientProvider;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
 
     public RemoteFileDesc createRemoteFileDesc(RemoteFileDesc rfd, IpPort ep) {
@@ -163,12 +168,12 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
 
         return new RemoteFileDescImpl(host, port, index, filename, size, clientGUID, speed, chat,
                 quality, browseHost, xmlDoc, urns, replyToMulticast, firewalled, vendor, proxies,
-                createTime, FWTVersion, pe, tlsCapable, http11);
+                createTime, FWTVersion, pe, tlsCapable, http11, networkInstanceUtils);
     }
 
     public RemoteFileDesc createUrlRemoteFileDesc(String host, int port, String filename,
             long size, Set<? extends URN> urns, URL url) {
-        return new UrlRemoteFileDescImpl(host, port, filename, size, urns, url);
+        return new UrlRemoteFileDescImpl(host, port, filename, size, urns, url, networkInstanceUtils);
     }
 
     public RemoteFileDesc createUrlRemoteFileDesc(URL url, String filename, URN urn, long size)

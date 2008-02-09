@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.ByteBufferOutputStream;
 import org.limewire.io.IpPort;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.ReadWriteObserver;
@@ -163,12 +164,9 @@ public class UDPService implements ReadWriteObserver {
     private final Provider<QueryUnicaster> queryUnicaster;
     private final ScheduledExecutorService backgroundExecutor;
     private final ConnectionServices connectionServices;
-
-
     private final MessageFactory messageFactory;
-
-
     private final PingRequestFactory pingRequestFactory;
+    private final NetworkInstanceUtils networkInstanceUtils;
     
     @InspectionPoint("udp sent messages")
     private final Message.MessageCounter sentMessageCounter = new Message.MessageCounter(50);
@@ -183,7 +181,8 @@ public class UDPService implements ReadWriteObserver {
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             ConnectionServices connectionServices,
             MessageFactory messageFactory,
-            PingRequestFactory pingRequestFactory) {
+            PingRequestFactory pingRequestFactory,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.networkManager = networkManager;
         this.messageDispatcher = messageDispatcher;
         this.hostileFilter = hostileFilter;
@@ -195,6 +194,7 @@ public class UDPService implements ReadWriteObserver {
         this.connectionServices = connectionServices;
         this.messageFactory = messageFactory;
         this.pingRequestFactory = pingRequestFactory;
+        this.networkInstanceUtils = networkInstanceUtils;
 
         OUTGOING_MSGS = new LinkedList<SendBundle>();
 	    byte[] backing = new byte[BUFFER_SIZE];
@@ -457,7 +457,7 @@ public class UDPService implements ReadWriteObserver {
         //      2) the non-connected party _is_ private, and the LOCAL_IS_PRIVATE is set to false
         return
                 !connectionManager.get().isConnectedTo(host)
-            &&  !NetworkUtils.isPrivateAddress(addr.getAddress())
+            &&  !networkInstanceUtils.isPrivateAddress(addr.getAddress())
              ;
 
     }

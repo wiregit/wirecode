@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
 import org.limewire.io.IpPort;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
 
@@ -143,6 +144,8 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     
     private final long _size;
     
+    private final NetworkInstanceUtils networkInstanceUtils;
+    
     /**
      * Actual constructor.  If the firewalled flag is set and a PE object is passed it is used, if 
      * no PE object is passed a new one is created.
@@ -151,7 +154,8 @@ class RemoteFileDescImpl implements RemoteFileDesc {
             long size, byte[] clientGUID, int speed,boolean chat, int quality, boolean browseHost,
             LimeXMLDocument xmlDoc, Set<? extends URN> urns, boolean replyToMulticast,
             boolean firewalled, String vendor, Set<? extends IpPort> proxies, long createTime,
-            int FWTVersion, PushEndpoint pe, boolean tlsCapable, boolean http11) {
+            int FWTVersion, PushEndpoint pe, boolean tlsCapable, boolean http11,
+            NetworkInstanceUtils networkInstanceUtils) {
         Objects.nonNull(filename, "filename");
         Objects.nonNull(host, "host");
         if (!NetworkUtils.isValidPort(port))
@@ -184,6 +188,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
         _xmlDoc = xmlDoc;
         _http11 = http11;
         _urns = Collections.unmodifiableSet(urns);
+        this.networkInstanceUtils = networkInstanceUtils;
 	}
 
     /* (non-Javadoc)
@@ -232,7 +237,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     public boolean isMe(byte[] myClientGUID) {
         return needsPush() ? 
                 Arrays.equals(_clientGUID, myClientGUID) :
-                    NetworkUtils.isMe(getHost(),getPort());
+                    networkInstanceUtils.isMe(getHost(),getPort());
     }
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#getAvailableRanges()
@@ -468,7 +473,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
      * @see com.limegroup.gnutella.RemoteFileDesc#isPrivate()
      */
 	public final boolean isPrivate() {
-        return NetworkUtils.isPrivateAddress(_host);
+        return networkInstanceUtils.isPrivateAddress(_host);
 	}
     
     public boolean isFirewalled() {
@@ -492,7 +497,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
         
         if (_host.equals(BOGUS_IP) ||
                 !NetworkUtils.isValidAddress(_host) || 
-                NetworkUtils.isPrivateAddress(_host))
+                networkInstanceUtils.isPrivateAddress(_host))
             return false;
         
         return _pushAddr == null ? false : _pushAddr.supportsFWTVersion() > 0;
@@ -521,7 +526,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 		else
              ret= ret &&  
 			    NetworkUtils.isValidPort(_port) &&
-                !NetworkUtils.isPrivateAddress(_host) &&
+                !networkInstanceUtils.isPrivateAddress(_host) &&
                 NetworkUtils.isValidAddress(_host);
         
         return ret;

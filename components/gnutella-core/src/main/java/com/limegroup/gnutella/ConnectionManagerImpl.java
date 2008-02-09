@@ -27,6 +27,7 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
@@ -292,8 +293,8 @@ public class ConnectionManagerImpl implements ConnectionManager {
     private final Provider<NodeAssigner> nodeAssigner;
     private final Provider<IPFilter> ipFilter;
     private final ConnectionCheckerManager connectionCheckerManager;
-
     private final PingRequestFactory pingRequestFactory;
+    private final NetworkInstanceUtils networkInstanceUtils;
     
     @Inject
     public ConnectionManagerImpl(NetworkManager networkManager,
@@ -310,7 +311,8 @@ public class ConnectionManagerImpl implements ConnectionManager {
             Provider<NodeAssigner> nodeAssigner, 
              Provider<IPFilter> ipFilter,
             ConnectionCheckerManager connectionCheckerManager,
-            PingRequestFactory pingRequestFactory) {
+            PingRequestFactory pingRequestFactory, 
+            NetworkInstanceUtils networkInstanceUtils) {
         this.networkManager = networkManager;
         this.hostCatcher = hostCatcher;
         this.connectionDispatcher = connectionDispatcher;
@@ -325,6 +327,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
         this.ipFilter = ipFilter;
         this.connectionCheckerManager = connectionCheckerManager;
         this.pingRequestFactory = pingRequestFactory;
+        this.networkInstanceUtils = networkInstanceUtils;
         
         Version v = null;
         try {
@@ -455,7 +458,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
      *  mode disabled AND we are not exclusively a DHT node.
      */
     public boolean isSupernodeCapable() {
-        return !NetworkUtils.isPrivate() &&
+        return !networkInstanceUtils.isPrivate() &&
                UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
                !isShieldedLeaf() &&
                !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() &&

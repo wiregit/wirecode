@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.http.LimeHttpClient;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.NIODispatcher;
@@ -677,6 +678,10 @@ public class LimeWireCore {
 
     public TcpBandwidthStatistics getTcpBandwidthStatistics() {
         return injector.getInstance(TcpBandwidthStatistics.class);
+    }
+    
+    public NetworkInstanceUtils getNetworkInstanceUtils() {
+        return injector.getInstance(NetworkInstanceUtils.class);
     }
     
 }

@@ -8,9 +8,10 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.limewire.collection.NameValue;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GUID;
@@ -46,12 +47,15 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
+            }
+        });
         pingRequestFactory = injector.getInstance(PingRequestFactory.class);
         messageFactory = injector.getInstance(MessageFactory.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
-        
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
     }
 
     public void testQueryKeyPing() throws Exception {

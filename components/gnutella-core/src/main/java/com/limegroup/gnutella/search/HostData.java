@@ -4,12 +4,6 @@ package com.limegroup.gnutella.search;
 import java.util.Set;
 
 import org.limewire.io.IpPort;
-import org.limewire.io.NetworkUtils;
-import org.limewire.util.ByteOrder;
-
-import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.QueryReply;
 
 /**
  * This class contains data about a host that has returned a query hit,
@@ -126,74 +120,6 @@ public final class HostData {
         this.FWT_VERSION = fwtVersion;
         this.TLS_CAPABLE = tlsCapable;
     }
-         
-	/**
-     * Constructs a new <tt>HostData</tt> instance from a <tt>QueryReply</tt>.
-     * 
-     * @param reply the <tt>QueryReply</tt> instance from which host data
-     *        should be extracted.
-     */
-	protected HostData(QueryReply reply, NetworkManager networkManager) {
-		CLIENT_GUID = reply.getClientGUID();
-		MESSAGE_GUID = reply.getGUID();
-		IP = reply.getIP();
-		PORT = reply.getPort();
-
-		boolean firewalled        = true;
-		boolean busy              = true;
-		boolean browseHostEnabled = false;
-		boolean chatEnabled       = false;
-		boolean measuredSpeed     = false;
-		boolean multicast         = false;
-        String  vendor = "";
-
-		try {
-			firewalled = reply.getNeedsPush() || 
-                NetworkUtils.isPrivateAddress(IP);
-		} catch(BadPacketException e) {
-			firewalled = true;
-		}
-		
-		try { 
-			measuredSpeed = reply.getIsMeasuredSpeed();
-		} catch (BadPacketException e) { 
-			measuredSpeed = false;
-		}
-		try {
-			busy = reply.getIsBusy();
-		} catch (BadPacketException bad) {
-			busy = true;
-		}
-		
-        
-		try {
-            vendor = reply.getVendor();
-		} catch(BadPacketException bad) {
-		}
-
-    	browseHostEnabled = reply.getSupportsBrowseHost();
-		chatEnabled = reply.getSupportsChat() && !firewalled;
-		multicast = reply.isReplyToMulticastQuery();
-
-		FIREWALLED = firewalled && !multicast;
-		BUSY = busy;
-		BROWSE_HOST_ENABLED = browseHostEnabled;
-		CHAT_ENABLED = chatEnabled;
-		MEASURED_SPEED = measuredSpeed || multicast;
-		MULTICAST = multicast;
-        VENDOR_CODE = vendor;
-		boolean ifirewalled = !networkManager.acceptedIncomingConnection();
-        QUALITY = reply.calculateQualityOfService(ifirewalled, networkManager);
-        PROXIES = reply.getPushProxies();
-        CAN_DO_FWTRANSFER = reply.getSupportsFWTransfer();
-        FWT_VERSION = reply.getFWTransferVersion();
-        TLS_CAPABLE = reply.isTLSCapable();
-
-        if ( multicast )
-            SPEED = Integer.MAX_VALUE;
-        else
-            SPEED = ByteOrder.long2int(reply.getSpeed()); //safe cast
-	}
 
 	/**
 	 * Accessor for the client guid for the host.

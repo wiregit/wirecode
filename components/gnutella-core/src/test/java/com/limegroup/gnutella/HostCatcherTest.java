@@ -19,7 +19,7 @@ import junit.framework.Test;
 import org.limewire.collection.FixedsizePriorityQueue;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.LocalSocketAddressProvider;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -50,7 +50,6 @@ public class HostCatcherTest extends LimeTestCase {
     
     private HostCatcher hostCatcher;
     private Injector injector;
-    private LocalSocketAddressProvider oldProvider;
 
     public HostCatcherTest(String name) {
         super(name);
@@ -78,11 +77,6 @@ public class HostCatcherTest extends LimeTestCase {
         injector = LimeTestUtils.createInjector();
         hostCatcher = injector.getInstance(HostCatcher.class);
         hostCatcher.initialize();
-        oldProvider = LocalSocketAddressService.getSharedProvider();
-    }
-    
-    public void tearDown() {
-        LocalSocketAddressService.setSocketAddressProvider(oldProvider);
     }
     
     /**
@@ -824,30 +818,30 @@ public class HostCatcherTest extends LimeTestCase {
 
     @SuppressWarnings("unchecked")
     public void testPingTagging() throws Exception {
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
-            public byte[] getLocalAddress() {
-                return null;
-            }
-
-            public int getLocalPort() {
-                return 0;
-            }
-
-            public boolean isLocalAddressPrivate() {
-                return false;
-            };
-
-            public boolean isTLSCapable() {
-                return false;
-            }
-        });
-        
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);
+                bind(LocalSocketAddressProvider.class).toInstance(new LocalSocketAddressProvider() {
+                    public byte[] getLocalAddress() {
+                        return null;
+                    }
+
+                    public int getLocalPort() {
+                        return 0;
+                    }
+
+                    public boolean isLocalAddressPrivate() {
+                        return false;
+                    };
+
+                    public boolean isTLSCapable() {
+                        return false;
+                    }
+                });
             }
         });
+        
         hostCatcher = injector.getInstance(HostCatcher.class);
         hostCatcher.initialize();       
         
@@ -1013,19 +1007,22 @@ public class HostCatcherTest extends LimeTestCase {
         private final PingRequestFactory pingRequestFactory;
         private final ConnectionServices connectionServices;
         private final Provider<HostCatcher> hostCatcher;
+        private final NetworkInstanceUtils networkInstanceUtils;
 
         @Inject
         public UDPHostCacheFactoryStub(Provider<MessageRouter> messageRouter,
                 PingRequestFactory pingRequestFactory, ConnectionServices connectionServices,
-                Provider<HostCatcher> hostCatcher) {
+                Provider<HostCatcher> hostCatcher, NetworkInstanceUtils networkInstanceUtils) {
             this.messageRouter = messageRouter;
             this.pingRequestFactory = pingRequestFactory;
             this.connectionServices = connectionServices;
             this.hostCatcher = hostCatcher;
+            this.networkInstanceUtils = networkInstanceUtils;
         }
 
         public UDPHostCache createUDPHostCache(UDPPinger pinger) {
-            return new StubUDPBootstrapper(pinger, messageRouter, pingRequestFactory, connectionServices, hostCatcher);
+            return new StubUDPBootstrapper(pinger, messageRouter, pingRequestFactory,
+                    connectionServices, hostCatcher, networkInstanceUtils);
         }
 
         public UDPHostCache createUDPHostCache(long expiryTime, UDPPinger pinger) {
@@ -1040,8 +1037,9 @@ public class HostCatcherTest extends LimeTestCase {
         
         public StubUDPBootstrapper(UDPPinger pinger, Provider<MessageRouter> messageRouter,
                 PingRequestFactory pingRequestFactory, ConnectionServices connectionServices,
-                Provider<HostCatcher> hostCatcher) {
-            super(pinger, messageRouter, pingRequestFactory, connectionServices);
+                Provider<HostCatcher> hostCatcher, NetworkInstanceUtils networkInstanceUtils) {
+            super(pinger, messageRouter, pingRequestFactory, connectionServices,
+                    networkInstanceUtils);
             this.hostCatcher = hostCatcher;
         }
 

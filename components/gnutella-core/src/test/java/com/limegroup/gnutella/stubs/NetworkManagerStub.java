@@ -3,6 +3,7 @@ package com.limegroup.gnutella.stubs;
 import java.io.IOException;
 
 import org.limewire.io.NetworkUtils;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
@@ -170,6 +171,10 @@ public class NetworkManagerStub implements NetworkManager {
 
     public void setExternalAddress(byte[] externalAddress) {
         this.externalAddress = externalAddress;
+    }
+    
+    public boolean isPrivateAddress(byte[] addr) {
+        return new SimpleNetworkInstanceUtils().isPrivateAddress(addr);
     }
 
 }

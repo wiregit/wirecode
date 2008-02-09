@@ -71,14 +71,14 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      * non-null.)  If <tt>filename</tt> is specified, it will be used as the
      * name of the complete file; otherwise it will be taken from any search
      * results or guessed from <tt>defaultURLs</tt>.
-     *
+     * @param saveLocationManager 
+     * @param pushListProvider TODO
      * @param magnet contains all the information for the download, must be
      * {@link MagnetOptions#isDownloadable() downloadable}.
      * @param overwrite whether file at download location should be overwritten
      * @param saveDir can be null, then the default save directory is used
-	 * @param fileName the final file name, can be <code>null</code>
-     * @param saveLocationManager 
-	 *
+     * @param fileName the final file name, can be <code>null</code>
+     *
      * @throws SaveLocationException if there was an error setting the downloads
      * final file location 
      */
@@ -96,13 +96,13 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
             Provider<HashTreeCache> tigerTreeCache, ApplicationServices applicationServices,
-            RemoteFileDescFactory remoteFileDescFactory) {
+            RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider) {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
                 contentManager, sourceRankerFactory, urnCache, savedFileManager,
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
-                tigerTreeCache, applicationServices, remoteFileDescFactory);
+                tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider);
     }
     
     public void initialize() {

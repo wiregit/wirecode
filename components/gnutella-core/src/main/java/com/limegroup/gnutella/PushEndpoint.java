@@ -12,6 +12,7 @@ import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.ByteOrder;
 
@@ -137,9 +138,13 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
     
     private final PushEndpointCache pushEndpointCache;
 
-    public PushEndpoint(byte[] guid, Set<? extends IpPort> proxies, byte features,
-            int version, IpPort addr, PushEndpointCache pushEndpointCache) {
+    private final NetworkInstanceUtils networkInstanceUtils;
+
+    public PushEndpoint(byte[] guid, Set<? extends IpPort> proxies, byte features, int version,
+            IpPort addr, PushEndpointCache pushEndpointCache,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.pushEndpointCache = pushEndpointCache;
+        this.networkInstanceUtils = networkInstanceUtils;
         
 		_features = ((features & FEATURES_MASK) | (version << 3));
 		_fwtVersion=version;
@@ -269,7 +274,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 */
 	protected IpPort getValidExternalAddress() {
         IpPort ret = getIpPort();
-	    if (ret == null || !NetworkUtils.isValidExternalIpPort(ret))
+	    if (ret == null || !networkInstanceUtils.isValidExternalIpPort(ret))
 	        return null;
         
         assert !ret.getAddress().equals(RemoteFileDesc.BOGUS_IP) : 
@@ -469,7 +474,8 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
     }
     
     public PushEndpoint createClone() {
-        return new PushEndpoint(_guid.bytes(), getProxies(), getFeatures(), supportsFWTVersion(), getIpPort(), pushEndpointCache);
+        return new PushEndpoint(_guid.bytes(), getProxies(), getFeatures(), supportsFWTVersion(),
+                getIpPort(), pushEndpointCache, networkInstanceUtils);
     }
-	
+
 }

@@ -2,6 +2,9 @@ package com.limegroup.gnutella.stubs;
 
 import org.limewire.io.LocalSocketAddressProvider;
 
+import com.google.inject.Singleton;
+
+@Singleton
 public class LocalSocketAddressProviderStub implements LocalSocketAddressProvider {
 
     private byte[] localAddress;

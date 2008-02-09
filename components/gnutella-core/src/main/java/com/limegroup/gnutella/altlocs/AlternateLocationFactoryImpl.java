@@ -6,6 +6,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortForSelf;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
@@ -28,16 +29,22 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     private final PushEndpointFactory pushEndpointFactory;
     private final ApplicationServices applicationServices;
     private final ConnectionServices connectionServices;
+    private final NetworkInstanceUtils networkInstanceUtils;
+    private final IpPortForSelf ipPortForSelf;
     
     @Inject
     public AlternateLocationFactoryImpl(NetworkManager networkManager,
             PushEndpointFactory pushEndpointFactory,
             ApplicationServices applicationServices,
-            ConnectionServices connectionServices) {
+            ConnectionServices connectionServices,
+            NetworkInstanceUtils networkInstanceUtils, 
+            IpPortForSelf ipPortForSelf) {
         this.networkManager = networkManager;
         this.pushEndpointFactory = pushEndpointFactory;
         this.applicationServices = applicationServices;
         this.connectionServices = connectionServices;
+        this.networkInstanceUtils = networkInstanceUtils;
+        this.ipPortForSelf = ipPortForSelf;
     }
 
     /* (non-Javadoc)
@@ -64,12 +71,12 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     	        open = ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue();
     	    
     	    
-    		if (open && NetworkUtils.isValidExternalIpPort(IpPortForSelf.instance())) {
+    		if (open && networkInstanceUtils.isValidExternalIpPort(ipPortForSelf)) {
     		    return new DirectAltLoc(new ConnectableImpl(
     		                NetworkUtils.ip2string(networkManager.getAddress()),
     		                networkManager.getPort(),
     		                SSLSettings.isIncomingTLSEnabled())
-    		            , urn);
+    		            , urn, networkInstanceUtils, ipPortForSelf);
     		} else { 
     			return new PushAltLoc(pushEndpointFactory.createForSelf(), urn, applicationServices);
     		}
@@ -93,9 +100,10 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     	    throw new NullPointerException("cannot accept null URN");
     
     	if (!rfd.needsPush()) {
-    		return new DirectAltLoc(new ConnectableImpl(rfd.getHost(),rfd.getPort(), rfd.isTLSCapable()), urn);
-    	} else {
-    	    PushEndpoint copy;
+            return new DirectAltLoc(new ConnectableImpl(rfd.getHost(), rfd.getPort(), rfd
+                    .isTLSCapable()), urn, networkInstanceUtils, ipPortForSelf);
+        } else {
+            PushEndpoint copy;
             if (rfd.getPushAddr() != null) 
                 copy = rfd.getPushAddr();
             else 
@@ -116,14 +124,14 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
      */
     public AlternateLocation createDirectDHTAltLoc(IpPort ipp, URN urn, 
             long fileSize, byte[] ttroot) throws IOException {
-        return new DirectDHTAltLoc(ipp, urn, fileSize, ttroot);
+        return new DirectDHTAltLoc(ipp, urn, fileSize, ttroot, networkInstanceUtils, ipPortForSelf);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.altlocs.AlternateLocationFactory#createDirectAltLoc(org.limewire.io.IpPort, com.limegroup.gnutella.URN)
      */
     public AlternateLocation createDirectAltLoc(IpPort ipp, URN urn) throws IOException {
-        return new DirectAltLoc(ipp, urn);
+        return new DirectAltLoc(ipp, urn, networkInstanceUtils, ipPortForSelf);
     }
 
     /* (non-Javadoc)
@@ -139,8 +147,8 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
          
         // Case 1. Direct Alt Loc
         if (location.indexOf(";")==-1) {
-        	IpPort addr = AlternateLocationFactoryImpl.createUrlFromMini(location, urn, tlsCapable);
-    		return new DirectAltLoc(addr, urn);
+        	IpPort addr = createUrlFromMini(location, urn, tlsCapable);
+    		return new DirectAltLoc(addr, urn, networkInstanceUtils, ipPortForSelf);
         }
         
         //Case 2. Push Alt loc
@@ -160,8 +168,8 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
      * Creates a new <tt>URL</tt> based on the IP and port in the location
      * The location MUST be a dotted IP address.
      */
-    private static IpPort createUrlFromMini(final String location, URN urn, boolean tlsCapable)
-      throws IOException {
+    private IpPort createUrlFromMini(final String location, URN urn, boolean tlsCapable)
+            throws IOException {
         int port = location.indexOf(':');
         final String loc =
             (port == -1 ? location : location.substring(0, port));

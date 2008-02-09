@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 
@@ -139,16 +140,17 @@ public class TestConnectionManager extends ConnectionManagerImpl {
              Provider<IPFilter> ipFilter,
             ConnectionCheckerManager connectionCheckerManager,
             PingRequestFactory pingRequestFactory, QueryRequestFactory queryRequestFactory,
-            TestConnectionFactory testConnectionFactory) {
-        super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor,
-                simppManager, capabilitiesVMFactory, managedConnectionFactory,
-                messageRouter, queryUnicaster, socketsManager, connectionServices,
-                nodeAssigner, ipFilter, connectionCheckerManager, pingRequestFactory);
+            TestConnectionFactory testConnectionFactory,
+            NetworkInstanceUtils networkInstanceUtils) {
+        super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor, simppManager,
+                capabilitiesVMFactory, managedConnectionFactory, messageRouter, queryUnicaster,
+                socketsManager, connectionServices, nodeAssigner, ipFilter,
+                connectionCheckerManager, pingRequestFactory, networkInstanceUtils);
         this.queryRequestFactory = queryRequestFactory;
         this.testConnectionFactory = testConnectionFactory;
         configureDefaultManager();
     }
-    
+
     public void configureDefaultManager() {
         setNumNewConnections(20);
         setUltraPeer(true);

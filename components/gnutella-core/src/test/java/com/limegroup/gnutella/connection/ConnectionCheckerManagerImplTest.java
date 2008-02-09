@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.BaseTestCase;
@@ -81,11 +82,12 @@ public class ConnectionCheckerManagerImplTest extends BaseTestCase {
                 Provider<NodeAssigner> nodeAssigner, 
                  Provider<IPFilter> ipFilter,
                 ConnectionCheckerManager connectionCheckerManager,
-                PingRequestFactory pingRequestFactory) {
+                PingRequestFactory pingRequestFactory,
+                NetworkInstanceUtils networkInstanceUtils) {
             super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor, simppManager,
                     capabilitiesVMFactory, managedConnectionFactory, messageRouter, queryUnicaster,
                     socketsManager, connectionServices, nodeAssigner, ipFilter, connectionCheckerManager,
-                    pingRequestFactory);
+                    pingRequestFactory, networkInstanceUtils);
         }
         
         @Override

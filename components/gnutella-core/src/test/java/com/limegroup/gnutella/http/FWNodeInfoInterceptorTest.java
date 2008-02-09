@@ -8,6 +8,7 @@ import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.util.BaseTestCase;
 
@@ -34,16 +35,20 @@ public class FWNodeInfoInterceptorTest extends BaseTestCase {
     public void testProcess() throws Exception {
         final PushEndpointFactory pushEndpointFactory = context.mock(PushEndpointFactory.class);
         final PushEndpointCache pushEndpointCache = context.mock(PushEndpointCache.class);
+        final NetworkInstanceUtils networkInstanceUtils = context.mock(NetworkInstanceUtils.class);
         
         HTTPUploadSession session = new HTTPUploadSession(null, null, null);
         HTTPUploader uploader = new HTTPUploader("filename", session); 
         FWNodeInfoInterceptor interceptor = new FWNodeInfoInterceptor(uploader, pushEndpointFactory);
         
-        final PushEndpoint pe = new PushEndpoint(GUID.makeGuid(), Collections.singleton(new IpPortImpl("192.168.0.1:5555")), PushEndpoint.PLAIN, RUDPUtils.VERSION, null, pushEndpointCache);
+        final PushEndpoint pe = new PushEndpoint(GUID.makeGuid(), Collections
+                .singleton(new IpPortImpl("192.168.0.1:5555")), PushEndpoint.PLAIN,
+                RUDPUtils.VERSION, null, pushEndpointCache, networkInstanceUtils);
         
         // test success full construction
         context.checking(new Expectations() {{
             ignoring(pushEndpointCache);
+            ignoring(networkInstanceUtils);
             one(pushEndpointFactory).createPushEndpoint(with(new TypeSafeMatcher<String>() {
                 // not using equal matcher, so we can evaluate lazily, due 
                 // to circular dependency: PushEndPoint needs mocked cache to generate httpStringValue()

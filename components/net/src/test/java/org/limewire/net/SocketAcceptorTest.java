@@ -3,10 +3,12 @@ package org.limewire.net;
 import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 import junit.framework.Test;
 
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.util.BaseTestCase;
 
 public class SocketAcceptorTest extends BaseTestCase {
@@ -32,7 +34,7 @@ public class SocketAcceptorTest extends BaseTestCase {
     }
     
     public void testSetPort() throws Exception {
-        acceptor = new SocketAcceptor(new ConnectionDispatcherImpl());
+        acceptor = new SocketAcceptor(new ConnectionDispatcherImpl(new SimpleNetworkInstanceUtils()));
         acceptor.bind(LISTEN_PORT);
         write(LISTEN_PORT, "Hello");
         acceptor.bind(LISTEN_PORT + 1);
@@ -40,11 +42,14 @@ public class SocketAcceptorTest extends BaseTestCase {
             write(LISTEN_PORT, "Hello");
             fail("Expected connect exception");
         } catch (ConnectException expected) {            
+        } catch(SocketTimeoutException expected) {
+            // STE is thrown on Windows instead of CE?!?
         }
     }
 
     private void write(final int port, final String text) throws Exception {
         final Exception[] error = new Exception[1];
+        final Throwable throwable = new Throwable();
         Thread t = new ManagedThread() {
             @Override
             public void run() {
@@ -62,7 +67,7 @@ public class SocketAcceptorTest extends BaseTestCase {
         t.join();
         
         if (error[0] != null) {
-            throw error[0];
+            throw (Exception)error[0].initCause(throwable);
         }
     }
     

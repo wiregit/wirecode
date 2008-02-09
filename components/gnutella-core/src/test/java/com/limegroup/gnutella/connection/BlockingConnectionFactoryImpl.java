@@ -2,6 +2,7 @@ package com.limegroup.gnutella.connection;
 
 import java.net.Socket;
 
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 
@@ -21,28 +22,31 @@ public class BlockingConnectionFactoryImpl implements BlockingConnectionFactory 
     private final MessagesSupportedVendorMessage supportedVendorMessage;
     private final MessageFactory messageFactory;
     private final NetworkManager networkManager;
+    private final NetworkInstanceUtils networkInstanceUtils;
     
 
     @Inject
     public BlockingConnectionFactoryImpl(CapabilitiesVMFactory capabilitiesVMFactory,
-            Provider<SocketsManager> socketsManager,
-            Provider<Acceptor> acceptor,
-            MessagesSupportedVendorMessage supportedVendorMessage,
-            MessageFactory messageFactory, NetworkManager networkManager) {
+            Provider<SocketsManager> socketsManager, Provider<Acceptor> acceptor,
+            MessagesSupportedVendorMessage supportedVendorMessage, MessageFactory messageFactory,
+            NetworkManager networkManager, NetworkInstanceUtils networkInstanceUtils) {
         this.capabilitiesVMFactory = capabilitiesVMFactory;
         this.socketsManager = socketsManager;
         this.acceptor = acceptor;
         this.supportedVendorMessage = supportedVendorMessage;
         this.messageFactory = messageFactory;
         this.networkManager = networkManager;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.limegroup.gnutella.ConnectionFactory#createConnection(java.net.Socket)
      */
     public BlockingConnection createConnection(Socket socket) {
         return new BlockingConnection(socket, capabilitiesVMFactory, acceptor.get(),
-                supportedVendorMessage, messageFactory, networkManager);
+                supportedVendorMessage, messageFactory, networkManager, networkInstanceUtils);
     }
     
     /* (non-Javadoc)
@@ -59,7 +63,7 @@ public class BlockingConnectionFactoryImpl implements BlockingConnectionFactory 
             ConnectType connectType) {
         return new BlockingConnection(host, port, connectType, capabilitiesVMFactory,
                 socketsManager.get(), acceptor.get(), supportedVendorMessage,
-                messageFactory, networkManager);
+                messageFactory, networkManager, networkInstanceUtils);
     }
 
 }

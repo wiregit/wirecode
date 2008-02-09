@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.NetworkUtils;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -114,6 +114,7 @@ class NodeAssignerImpl implements NodeAssigner {
     private final Executor unlimitedExecutor;
     private final ConnectionServices connectionServices;
     private final TcpBandwidthStatistics tcpBandwidthStatistics;
+    private final NetworkInstanceUtils networkInstanceUtils;
     
 
     /** 
@@ -135,7 +136,8 @@ class NodeAssignerImpl implements NodeAssigner {
                         @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                         @Named("unlimitedExecutor") Executor unlimitedExecutor,
                         ConnectionServices connectionServices,
-                        TcpBandwidthStatistics tcpBandwidthStatistics) {
+                        TcpBandwidthStatistics tcpBandwidthStatistics,
+                        NetworkInstanceUtils networkInstanceUtils) {
         this.uploadTracker = uploadTracker;
         this.downloadTracker = downloadTracker;  
         this.connectionManager = connectionManager;
@@ -146,6 +148,7 @@ class NodeAssignerImpl implements NodeAssigner {
         this.connectionServices = connectionServices;
         this.unlimitedExecutor = unlimitedExecutor;
         this.tcpBandwidthStatistics = tcpBandwidthStatistics;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
     
     /* (non-Javadoc)
@@ -230,7 +233,7 @@ class NodeAssignerImpl implements NodeAssigner {
         //AND am I a capable OS?
         ULTRAPEER_OS &&
         //AND I do not have a private address
-        !NetworkUtils.isPrivate());
+        !networkInstanceUtils.isPrivate());
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("Hardcore capable: "+_isHardcoreCapable);

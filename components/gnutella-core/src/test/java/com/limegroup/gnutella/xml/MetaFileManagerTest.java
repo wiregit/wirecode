@@ -7,9 +7,10 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.util.I18NConvert;
 
+import com.google.inject.AbstractModule;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
@@ -48,11 +49,14 @@ public class MetaFileManagerTest extends FileManagerTest {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
        
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
-        
 	    cleanFiles(_sharedDir, false);
 	    
-        injector = LimeTestUtils.createInjector();
+        injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
+            }
+        });
 
         injector.getInstance(Acceptor.class).setAddress(InetAddress.getLocalHost());
 

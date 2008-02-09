@@ -39,12 +39,13 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.http.HttpClientUtils;
 import org.limewire.http.LimeHttpClient;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
@@ -155,7 +156,12 @@ public class UploadTest extends LimeTestCase {
         assertGreaterThan("Expected file to contain data", 0, target.length());
 
         // initialize services
-        injector = LimeTestUtils.createInjector();
+        injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
+            }
+        });
         
         startServices();
 
@@ -225,8 +231,6 @@ public class UploadTest extends LimeTestCase {
     }
 
     private void startServices() throws Exception {
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
-        
         HTTPAcceptor httpAcceptor = injector.getInstance(HTTPAcceptor.class);
         httpAcceptor.start();
         

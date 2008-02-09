@@ -2,7 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import junit.framework.Test;
 
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.LocalSocketAddressProvider;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -47,16 +47,15 @@ public class MagnetDownloaderTest extends LimeTestCase {
     
     
     public void setUp() throws Exception {
-        LocalSocketAddressProviderStub localSocketAddressProviderStub = new LocalSocketAddressProviderStub();
+        final LocalSocketAddressProviderStub localSocketAddressProviderStub = new LocalSocketAddressProviderStub();
         localSocketAddressProviderStub.setLocalAddressPrivate(false);
-        LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProviderStub);
-        
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
            @Override
             protected void configure() {
                bind(FileManager.class).to(FileManagerStub.class);
                bind(MessageRouter.class).to(MessageRouterStub.class);
                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
+               bind(LocalSocketAddressProvider.class).toInstance(localSocketAddressProviderStub);
             } 
         });
         

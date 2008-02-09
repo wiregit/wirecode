@@ -2,6 +2,7 @@ package com.limegroup.gnutella.connection;
 
 import java.net.Socket;
 
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.security.SecureMessageVerifier;
@@ -81,6 +82,8 @@ public class RoutedConnectionFactoryImpl implements RoutedConnectionFactory {
     private final Provider<SecureMessageVerifier> secureMessageVerifier;
     
     private final OutOfBandStatistics outOfBandStatistics;
+    
+    private final NetworkInstanceUtils networkInstanceUtils;
 
     @Inject
     public RoutedConnectionFactoryImpl(Provider<ConnectionManager> connectionManager,
@@ -95,7 +98,8 @@ public class RoutedConnectionFactoryImpl implements RoutedConnectionFactory {
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
             SpamFilterFactory spamFilterFactory, MessageFactory messageFactory,
             MessageReaderFactory messageReaderFactory, ApplicationServices applicationServices,
-            Provider<SecureMessageVerifier> secureMessageVerifier, OutOfBandStatistics outOfBandStatistics) {
+            Provider<SecureMessageVerifier> secureMessageVerifier, OutOfBandStatistics outOfBandStatistics,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -119,6 +123,7 @@ public class RoutedConnectionFactoryImpl implements RoutedConnectionFactory {
         this.messageReaderFactory = messageReaderFactory;
         this.secureMessageVerifier = secureMessageVerifier;
         this.outOfBandStatistics = outOfBandStatistics;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
 
     public RoutedConnection createRoutedConnection(String host, int port) {
@@ -132,7 +137,7 @@ public class RoutedConnectionFactoryImpl implements RoutedConnectionFactory {
                         .get(), capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
                 supportedVendorMessage, simppManager, updateHandler, connectionServices,
                 guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
-                applicationServices, secureMessageVerifier.get(), outOfBandStatistics);
+                applicationServices, secureMessageVerifier.get(), outOfBandStatistics, networkInstanceUtils);
     }
 
     public RoutedConnection createRoutedConnection(Socket socket) {
@@ -142,7 +147,7 @@ public class RoutedConnectionFactoryImpl implements RoutedConnectionFactory {
                         .get(), capabilitiesVMFactory, acceptor.get(), supportedVendorMessage,
                 simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory,
                 messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier
-                        .get(), outOfBandStatistics);
+                        .get(), outOfBandStatistics, networkInstanceUtils);
     }
 
 }

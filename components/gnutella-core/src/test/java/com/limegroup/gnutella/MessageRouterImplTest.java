@@ -23,6 +23,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
@@ -1106,6 +1107,8 @@ public final class MessageRouterImplTest extends LimeTestCase {
         private final ApplicationServices applicationServices;
         
         private final Provider<SecureMessageVerifier> secureMessageVerifier;
+        
+        private final NetworkInstanceUtils networkInstanceUtils;
 
         @Inject
         public ManagedConnectionStubFactory(Provider<ConnectionManager> connectionManager,
@@ -1120,7 +1123,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
                 Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
                 SpamFilterFactory spamFilterFactory, MessageFactory messageFactory,
                 MessageReaderFactory messageReaderFactory, ApplicationServices applicationServices,
-                Provider<SecureMessageVerifier> secureMessageVerifier) {
+                Provider<SecureMessageVerifier> secureMessageVerifier, NetworkInstanceUtils networkInstanceUtils) {
             this.connectionManager = connectionManager;
             this.networkManager = networkManager;
             this.queryRequestFactory = queryRequestFactory;
@@ -1143,6 +1146,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
             this.messageFactory = messageFactory;
             this.messageReaderFactory = messageReaderFactory;
             this.secureMessageVerifier = secureMessageVerifier;
+            this.networkInstanceUtils = networkInstanceUtils;
         }
 
         
@@ -1153,7 +1157,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
                             .get(), capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
                     supportedVendorMessage, simppManager, updateHandler, connectionServices,
                     guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
-                    applicationServices, secureMessageVerifier.get());
+                    applicationServices, secureMessageVerifier.get(), networkInstanceUtils);
         }
         
     }
@@ -1175,13 +1179,13 @@ public final class MessageRouterImplTest extends LimeTestCase {
                 Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
                 SpamFilterFactory spamFilterFactory, MessageReaderFactory messageReaderFactory,
                 MessageFactory messageFactory, ApplicationServices applicationServices,
-                SecureMessageVerifier secureMessageVerifier) {
+                SecureMessageVerifier secureMessageVerifier, NetworkInstanceUtils networkInstanceUtils) {
             super(host, port, type, connectionManager, networkManager, queryRequestFactory, headersFactory,
                     handshakeResponderFactory, queryReplyFactory, messageDispatcher,
                     networkUpdateSanityChecker, searchResultHandler, capabilitiesVMFactory, socketsManager,
                     acceptor, supportedVendorMessage, simppManager, updateHandler, connectionServices,
                     guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
-                    applicationServices, secureMessageVerifier, null);
+                    applicationServices, secureMessageVerifier, null, networkInstanceUtils);
             
         }
         

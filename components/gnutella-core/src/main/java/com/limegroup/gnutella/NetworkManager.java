@@ -94,4 +94,7 @@ public interface NetworkManager {
     public GUID getSolicitedGUID();
     
     public int supportsFWTVersion();
+    
+    /** A convenience stub. */
+    public boolean isPrivateAddress(byte[] addr);
 }

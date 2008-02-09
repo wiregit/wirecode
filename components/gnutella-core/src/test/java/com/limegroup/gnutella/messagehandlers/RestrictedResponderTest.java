@@ -11,6 +11,7 @@ import junit.framework.Test;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
@@ -246,7 +247,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         ReplyHandler handler;
         public TestResponder(SecureMessageVerifier verifier) {
             super(ipSetting, verifier, versionSetting, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache, 
-                    new ImmediateExecutor());
+                    new ImmediateExecutor(), new SimpleNetworkInstanceUtils());
         }
 
         @Override

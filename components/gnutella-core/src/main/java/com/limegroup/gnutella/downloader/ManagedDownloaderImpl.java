@@ -441,6 +441,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final Provider<HashTreeCache> tigerTreeCache;
     protected final ApplicationServices applicationServices;
     protected final RemoteFileDescFactory remoteFileDescFactory;
+    protected final Provider<PushList> pushListProvider;
 
     /**
      * Creates a new ManagedDownload to download the given files.
@@ -448,6 +449,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * You must set initial source via {@link #addInitialSources},
      * set the save file via {@link #setSaveFile(File, String, boolean)},
      * and call {@link #initialize} prior to starting this download.
+     * @param pushListProvider TODO
      */
     @Inject
     protected ManagedDownloaderImpl(SaveLocationManager saveLocationManager,
@@ -463,7 +465,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
             Provider<HashTreeCache> tigerTreeCache, ApplicationServices applicationServices,
-            RemoteFileDescFactory remoteFileDescFactory) {
+            RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider) {
         super(saveLocationManager);
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
@@ -489,6 +491,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.applicationServices = applicationServices;
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.cachedRFDs = new HashSet<RemoteFileDesc>();
+        this.pushListProvider = pushListProvider;
     }
     
     public synchronized void addInitialSources(Collection<RemoteFileDesc> rfds, String defaultFileName) {
@@ -529,7 +532,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         stopped=false;
         paused = false;
         setState(DownloadStatus.QUEUED);
-        pushes = new PushList();
+        pushes = pushListProvider.get();
         corruptState=NOT_CORRUPT_STATE;
         corruptStateLock=new Object();
         altLock = new Object();

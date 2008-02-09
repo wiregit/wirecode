@@ -4,6 +4,8 @@ package com.limegroup.gnutella.downloader;
 import java.net.URL;
 import java.util.Set;
 
+import org.limewire.io.NetworkInstanceUtils;
+
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.URN;
@@ -25,9 +27,10 @@ class UrlRemoteFileDescImpl extends RemoteFileDescImpl implements RemoteFileDesc
      * @param url the url
      */
     UrlRemoteFileDescImpl(String host, int port, String filename, long size,
-            Set<? extends URN> urns, URL url) {
+            Set<? extends URN> urns, URL url, NetworkInstanceUtils networkInstanceUtils) {
         super(host, port, 1, filename, size, new byte[16], SpeedConstants.T3_SPEED_INT, false, 3,
-                false, null, urns, false, false, "", null, -1, 0, null, false, true);
+                false, null, urns, false, false, "", null, -1, 0, null, false, true,
+                networkInstanceUtils);
         this._url = url;
     }
 

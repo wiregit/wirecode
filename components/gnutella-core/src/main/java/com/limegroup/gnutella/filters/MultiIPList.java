@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.filters;
 
 import org.limewire.io.IP;
+import org.limewire.io.NetworkInstanceUtils;
 
 /**
  * A view over several IPLists.
@@ -38,9 +39,9 @@ public class MultiIPList extends IPList {
     }
     
     @Override
-    public synchronized boolean isValidFilter(boolean allowPrivateIPs) {
+    public synchronized boolean isValidFilter(boolean allowPrivateIPs, NetworkInstanceUtils networkInstanceUtils) {
         for (IPList ipl : lists) {
-            if (!ipl.isValidFilter(allowPrivateIPs))
+            if (!ipl.isValidFilter(allowPrivateIPs, networkInstanceUtils))
                 return false;
         }
         return true;

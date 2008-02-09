@@ -23,8 +23,8 @@ public class URLRemoteFileDescImplTest extends BaseTestCase {
     public void testFileDescsWithSameURLAreEqual() throws Exception {
         URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         URL url = new URL("http://magnet2.limewire.com:6346/uri-res/N2R?urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-        RemoteFileDesc desc1 = new UrlRemoteFileDescImpl("host1.com", 80, "filename", 1000, new UrnSet(urn), url);
-        RemoteFileDesc desc2 = new UrlRemoteFileDescImpl("host1.com", 80, "filename", 1000, new UrnSet(urn), url);
+        RemoteFileDesc desc1 = new UrlRemoteFileDescImpl("host1.com", 80, "filename", 1000, new UrnSet(urn), url, null);
+        RemoteFileDesc desc2 = new UrlRemoteFileDescImpl("host1.com", 80, "filename", 1000, new UrnSet(urn), url, null);
         assertEquals(desc1, desc2);
         assertEquals(desc1.hashCode(), desc2.hashCode());
     }

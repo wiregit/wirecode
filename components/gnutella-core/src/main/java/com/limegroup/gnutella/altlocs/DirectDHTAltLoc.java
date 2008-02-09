@@ -3,6 +3,8 @@ package com.limegroup.gnutella.altlocs;
 import java.io.IOException;
 
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortForSelf;
+import org.limewire.io.NetworkInstanceUtils;
 
 import com.limegroup.gnutella.URN;
 
@@ -15,9 +17,10 @@ public class DirectDHTAltLoc extends DirectAltLoc {
     
     private final byte[] ttroot;
     
-    public DirectDHTAltLoc(IpPort address, URN sha1, 
-            long fileSize, byte[] ttroot) throws IOException {
-        super(address, sha1);
+    public DirectDHTAltLoc(IpPort address, URN sha1, long fileSize, byte[] ttroot,
+            NetworkInstanceUtils networkInstanceUtils, IpPortForSelf ipPortForSelf)
+            throws IOException {
+        super(address, sha1, networkInstanceUtils, ipPortForSelf);
         
         this.fileSize = fileSize;
         this.ttroot = ttroot;

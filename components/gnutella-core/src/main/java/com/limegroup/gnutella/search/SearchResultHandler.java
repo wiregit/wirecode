@@ -16,7 +16,7 @@ import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IpPort;
-import org.limewire.io.NetworkUtils;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.util.ByteOrder;
 
@@ -91,6 +91,7 @@ public final class SearchResultHandler {
     private final ConnectionServices connectionServices;
     private final Provider<SpamManager> spamManager;
     private final RemoteFileDescFactory remoteFileDescFactory;
+    private final NetworkInstanceUtils networkInstanceUtils;
 
     @Inject
     public SearchResultHandler(NetworkManager networkManager,
@@ -99,7 +100,8 @@ public final class SearchResultHandler {
             Provider<ConnectionManager> connectionManager,
             ConnectionServices connectionServices,
             Provider<SpamManager> spamManager,
-            RemoteFileDescFactory remoteFileDescFactory) {
+            RemoteFileDescFactory remoteFileDescFactory,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.networkManager = networkManager;
         this.searchServices = searchServices;
         this.activityCallback = activityCallback;
@@ -107,6 +109,7 @@ public final class SearchResultHandler {
         this.connectionServices = connectionServices;
         this.spamManager = spamManager;
         this.remoteFileDescFactory = remoteFileDescFactory;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
 
     /*---------------------------------------------------    
@@ -239,9 +242,9 @@ public final class SearchResultHandler {
             // (we are firewalled OR we are a private IP) AND 
             // no chance for FW transfer then drop the reply.
             if(data.isFirewalled() && 
-               !NetworkUtils.isVeryCloseIP(qr.getIPBytes()) &&               
+               !networkInstanceUtils.isVeryCloseIP(qr.getIPBytes()) &&               
                (!networkManager.acceptedIncomingConnection() ||
-                NetworkUtils.isPrivateAddress(networkManager.getAddress())) &&
+                       networkInstanceUtils.isPrivateAddress(networkManager.getAddress())) &&
                !(networkManager.canDoFWT() && 
                  qr.getSupportsFWTransfer())
                )  {

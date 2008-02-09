@@ -16,7 +16,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPortImpl;
-import org.limewire.io.NetworkUtils;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.NBThrottle;
@@ -319,6 +319,8 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     
     private final OutOfBandStatistics outOfBandStatistics;
     
+    private final NetworkInstanceUtils networkInstanceUtils;
+    
     /** writers of statistics if any */
     private static enum StatsWriters {TOP, DEFLATER, DELAYER, THROTTLE }
     private final Map<StatsWriters,StatisticGatheringWriter> statsWriters = new HashMap<StatsWriters,StatisticGatheringWriter>();
@@ -346,9 +348,10 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
             SpamFilterFactory spamFilterFactory, MessageReaderFactory messageReaderFactory,
             MessageFactory messageFactory, ApplicationServices applicationServices,
-            SecureMessageVerifier secureMessageVerifier, OutOfBandStatistics outOfBandStatistics) {
+            SecureMessageVerifier secureMessageVerifier, OutOfBandStatistics outOfBandStatistics,
+            NetworkInstanceUtils networkInstanceUtils) {
         super(host, port, type, capabilitiesVMFactory, supportedVendorMessage, networkManager,
-                acceptor);
+                acceptor, networkInstanceUtils);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -370,6 +373,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         this.secureMessageVerifier = secureMessageVerifier;
         this.socketsManager = socketsManager;
         this.outOfBandStatistics = outOfBandStatistics;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
 
     /**
@@ -392,8 +396,10 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
             SpamFilterFactory spamFilterFactory, MessageReaderFactory messageReaderFactory,
             MessageFactory messageFactory, ApplicationServices applicationServices,
-            SecureMessageVerifier secureMessageVerifier, OutOfBandStatistics outOfBandStatistics) {
-        super(socket, capabilitiesVMFactory, supportedVendorMessage, networkManager, acceptor);
+            SecureMessageVerifier secureMessageVerifier, OutOfBandStatistics outOfBandStatistics,
+            NetworkInstanceUtils networkInstanceUtils) {
+        super(socket, capabilitiesVMFactory, supportedVendorMessage, networkManager, acceptor,
+                networkInstanceUtils);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -415,6 +421,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         this.secureMessageVerifier = secureMessageVerifier;
         this.socketsManager = null;
         this.outOfBandStatistics = outOfBandStatistics;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
 
     /*
@@ -996,7 +1003,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         if (m instanceof QueryReply && m.getHops() == 0) {
             QueryReply reply = (QueryReply)m;
             byte [] ip = reply.getIPBytes();
-            if (!NetworkUtils.isPrivateAddress(ip) &&
+            if (!networkInstanceUtils.isPrivateAddress(ip) &&
                     !reply.hasSecureData() &&
                     !Arrays.equals(ip, getAddressBytes()))
                     return true;
@@ -1047,7 +1054,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         // its source ip matches.
         if (myIp != null && 
                 queryReply.isLocal() &&
-                !NetworkUtils.isPrivateAddress(queryReply.getIPBytes()) &&
+                !networkInstanceUtils.isPrivateAddress(queryReply.getIPBytes()) &&
                 !queryReply.hasSecureData()) // don't mess with signed results
             queryReply = queryReplyFactory.createWithNewAddress(myIp, queryReply);
         send(queryReply);
