@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.stubs;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
@@ -38,7 +39,7 @@ public class ConnectionManagerStub extends ConnectionManagerImpl {
 
     private Boolean connected;
 
-    private Set<? extends Connectable> pushProxies;
+    private Set<Connectable> pushProxies;
 
     private Boolean fullyConnected;
 
@@ -103,11 +104,11 @@ public class ConnectionManagerStub extends ConnectionManagerImpl {
     }
 
     public void setPushProxies(Set<? extends Connectable> pushProxies) {
-        this.pushProxies = pushProxies;
+        this.pushProxies = Collections.unmodifiableSet(pushProxies);
     }
 
     @Override
-    public Set<? extends Connectable> getPushProxies() {
+    public Set<Connectable> getPushProxies() {
         if (pushProxies != null)
             return pushProxies;
         else

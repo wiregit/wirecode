@@ -192,7 +192,7 @@ public class ConnectionManagerAdapter implements ConnectionManager {
         return 0;
     }
 
-    public Set<? extends Connectable> getPushProxies() {
+    public Set<Connectable> getPushProxies() {
         return Collections.emptySet();
     }
 

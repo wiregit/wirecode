@@ -7,19 +7,23 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
 
-import org.limewire.inject.Providers;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteOrder;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.name.Names;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 
 /**
@@ -68,9 +72,16 @@ public class PushEndpointTest extends BaseTestCase {
         tls5 = new ConnectableImpl("1.2.3.8", 1235, true);
         tls6 = new ConnectableImpl("1.2.3.9", 1235, true);
         
-        pushEndpointCache = new PushEndpointCacheImpl(new ScheduledExecutorServiceStub());
-        factory = new PushEndpointFactoryImpl(Providers.of((PushEndpointCache) pushEndpointCache),
-                null, new SimpleNetworkInstanceUtils());
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(new ScheduledExecutorServiceStub());
+                bind(NetworkInstanceUtils.class).toInstance(new SimpleNetworkInstanceUtils());
+            }
+        });
+        
+        pushEndpointCache = (PushEndpointCacheImpl)injector.getInstance(PushEndpointCache.class);
+        factory = injector.getInstance(PushEndpointFactory.class);
     }
     
     public void testConstructorGUID() throws Exception {

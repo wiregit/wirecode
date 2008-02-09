@@ -44,9 +44,13 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
     private final Map<GUID, PushEndpointCache.CachedPushEndpoint> GUID_PROXY_MAP = 
         Collections.synchronizedMap(new WeakHashMap<GUID, CachedPushEndpoint>());
     
+    private final HTTPHeaderUtils httpHeaderUtils;
+    
     @Inject
-    PushEndpointCacheImpl(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+    PushEndpointCacheImpl(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+                          HTTPHeaderUtils httpHeaderUtils) {
         backgroundExecutor.scheduleWithFixedDelay(new WeakCleaner(),30*1000,30*1000, TimeUnit.MILLISECONDS);
+        this.httpHeaderUtils = httpHeaderUtils;
     }
 
     /**
@@ -57,7 +61,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
      * @param httpString comma-separated list of proxies and possible proxy features
      */
     public void overwriteProxies(byte [] guid, String httpString) {
-        Set<? extends Connectable> newSet = HTTPHeaderUtils.decodePushProxies(httpString, ",");
+        Set<? extends Connectable> newSet = httpHeaderUtils.decodePushProxies(httpString, ",");
         overwriteProxies(guid, newSet);
     }
 

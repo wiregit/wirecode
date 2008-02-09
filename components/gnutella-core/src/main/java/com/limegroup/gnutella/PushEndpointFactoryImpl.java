@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IPPortCombo;
 import org.limewire.io.InvalidDataException;
@@ -106,7 +107,9 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
                 boolean tlsCapable = tlsProxies != null && tlsProxies.isSet(proxies.size());
                 // if its not the header, try to parse it as a push proxy
                 try {
-                    proxies.add(NetworkUtils.parseIpPort(current, tlsCapable));
+                    Connectable ipp = NetworkUtils.parseIpPort(current, tlsCapable);
+                    if(!networkInstanceUtils.isPrivateAddress(ipp.getInetAddress()))
+                        proxies.add(ipp);
                     continue;
                 } catch(IOException ohWell) {
                     tlsProxies = null; // stop adding TLS, since our index may be off
@@ -117,7 +120,9 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
             // only the first occurence of port:ip is parsed
             if (addr==null) {
                 try {
-                    addr = NetworkUtils.parsePortIp(current);
+                    IpPort ipp = NetworkUtils.parsePortIp(current);
+                    if(!networkInstanceUtils.isPrivateAddress(ipp.getInetAddress()))
+                        addr = ipp;
                 }catch(IOException notBad) {}
             }
             

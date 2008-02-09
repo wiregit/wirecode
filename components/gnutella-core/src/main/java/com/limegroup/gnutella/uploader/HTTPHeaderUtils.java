@@ -15,6 +15,7 @@ import org.apache.http.HttpResponse;
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 
 import com.google.inject.Inject;
@@ -45,12 +46,15 @@ public class HTTPHeaderUtils {
     private final NetworkManager networkManager;
     private final FeaturesWriter featuresWriter;
     private final Provider<ConnectionManager> connectionManager;
+    private final NetworkInstanceUtils networkInstanceUtils;
     
     @Inject
-    public HTTPHeaderUtils(FeaturesWriter featuresWriter, NetworkManager networkManager, Provider<ConnectionManager> connectionManager) {
+    public HTTPHeaderUtils(FeaturesWriter featuresWriter, NetworkManager networkManager,
+            Provider<ConnectionManager> connectionManager, NetworkInstanceUtils networkInstanceUtils) {
         this.networkManager = networkManager;
         this.featuresWriter = featuresWriter;
         this.connectionManager = connectionManager;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
     
     /**
@@ -112,7 +116,7 @@ public class HTTPHeaderUtils {
      * 
      * @return an empty set if no pushproxies could be decoded
      */
-    public static Set<? extends Connectable> decodePushProxies(String httpValue, String separator) {
+    public Set<Connectable> decodePushProxies(String httpValue, String separator) {
         Set<Connectable> newSet = new HashSet<Connectable>();
         StringTokenizer tok = new StringTokenizer(httpValue, separator);
         BitNumbers tlsProxies = null;
@@ -133,7 +137,9 @@ public class HTTPHeaderUtils {
             
             boolean tlsCapable = tlsProxies != null && tlsProxies.isSet(newSet.size());
             try {
-                newSet.add(NetworkUtils.parseIpPort(proxy, tlsCapable));
+                Connectable ipp = NetworkUtils.parseIpPort(proxy, tlsCapable);
+                if(!networkInstanceUtils.isPrivateAddress(ipp.getInetAddress()))
+                    newSet.add(ipp);
             } catch(IOException ohWell){
                 tlsProxies = null; // unset, since index may be off.
             }

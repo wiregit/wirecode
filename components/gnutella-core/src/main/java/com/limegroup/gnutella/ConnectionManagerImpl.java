@@ -1207,7 +1207,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
      *  TODO: should the set of pushproxy UPs be cached and updated as
      *  connections are killed and created?
      */
-    public Set<? extends Connectable> getPushProxies() {
+    public Set<Connectable> getPushProxies() {
         if (isShieldedLeaf()) {
             // this should be fast since leaves don't maintain a lot of
             // connections and the test for proxy support is cached boolean

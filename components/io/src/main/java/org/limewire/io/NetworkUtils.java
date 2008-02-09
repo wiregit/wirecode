@@ -865,11 +865,11 @@ public final class NetworkUtils {
     
     /**
      * Gets {@link InetAddress} and checks if it's valid.
-     * @throws IOException if the address is not valid or a private address
+     * @throws IOException if the address is not valid address
      */
     static InetAddress getAndCheckAddress(String addressString) throws IOException {
         InetAddress address = InetAddress.getByName(addressString);
-        if (!isValidAddress(address) || isPrivateAddress(address))
+        if (!isValidAddress(address))
             throw new IOException("invalid addr: " + address);
         
         return address;

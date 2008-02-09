@@ -377,7 +377,7 @@ public interface ConnectionManager extends ConnectionAcceptor,
      *  TODO: should the set of pushproxy UPs be cached and updated as
      *  connections are killed and created?
      */
-    public Set<? extends Connectable> getPushProxies();
+    public Set<Connectable> getPushProxies();
 
     /**
      * Sends a TCPConnectBack request to (up to) 2 connected Ultrapeers.

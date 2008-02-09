@@ -284,7 +284,7 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
         private Set<Connectable> proxies;
         
         @Override
-        public Set<? extends Connectable> getPushProxies() {
+        public Set<Connectable> getPushProxies() {
             return proxies;
         }
         
