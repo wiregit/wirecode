@@ -1,8 +1,5 @@
 package org.limewire.http;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-
 import junit.framework.TestCase;
 
 import org.apache.http.params.BasicHttpParams;
@@ -38,26 +35,6 @@ public class HttpIOReactorTest extends TestCase {
         }
     }
 
-    public void testConnect() {
-        HttpParams params = new BasicHttpParams();
-        HttpIOReactor reactor = new HttpIOReactor(params);
-        SocketAddress remoteAddress = new InetSocketAddress(9999);
-        try {
-            reactor.connect(remoteAddress, null, null, null);
-            fail("Expected UnsupportedOperationException");
-        } catch (UnsupportedOperationException expected) {
-        }
-    }
-
-    public void testAcceptConnection() {
-        HttpParams params = new BasicHttpParams();
-        HttpIOReactor reactor = new HttpIOReactor(params);
-        SocketAddress remoteAddress = new InetSocketAddress(9999);
-        try {
-            reactor.connect(remoteAddress, null, null, null);
-            fail("Expected UnsupportedOperationException");
-        } catch (UnsupportedOperationException expected) {
-        }
-    }
+    // TODO: Test acceptConnection!
 
 }

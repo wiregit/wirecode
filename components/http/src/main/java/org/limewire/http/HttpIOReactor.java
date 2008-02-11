@@ -1,21 +1,16 @@
 package org.limewire.http;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.impl.nio.DefaultNHttpServerConnection;
 import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
-import org.apache.http.impl.nio.reactor.SessionRequestImpl;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOEventDispatch;
-import org.apache.http.nio.reactor.IOSession;
-import org.apache.http.nio.reactor.SessionRequest;
-import org.apache.http.nio.reactor.SessionRequestCallback;
 import org.apache.http.nio.reactor.IOReactorStatus;
+import org.apache.http.nio.reactor.IOSession;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.io.IOUtils;
@@ -52,53 +47,6 @@ public class HttpIOReactor implements DispatchedIOReactor {
             throw new IllegalArgumentException("Event dispatch must be of type DefaultServerIOEventDispatch");
         }
         this.eventDispatch = eventDispatch;
-    }
-    
-    /** 
-     * Throws {@link UnsupportedOperationException}.
-     */
-    public SessionRequest connect(SocketAddress remoteAddress,
-            SocketAddress localAddress, Object attachment,
-            SessionRequestCallback callback) {
-        if (remoteAddress == null || (!(remoteAddress instanceof InetSocketAddress))) {
-            throw new IllegalArgumentException("Unsupported address type");
-        }
-        
-        final SessionRequestImpl sessionRequest = new SessionRequestImpl(
-                remoteAddress, localAddress, attachment, callback);
-        connect(sessionRequest);
-        return sessionRequest;
-    }   
-
-    // FIXME SocketsManager class needs to be moved from LimeWire core to NIO
-    // component before this can work
-    protected void connect(final SessionRequestImpl sessionRequest) {
-//        try {
-//            Sockets.connect((InetSocketAddress) sessionRequest.getRemoteAddress(), 
-//                    sessionRequest.getConnectTimeout(),
-//                    new ConnectObserver() {
-//                        public void handleConnect(Socket socket) throws IOException {                          
-//                            prepareSocket(socket);
-//                            DefaultNHttpServerConnection conn = connectSocket((NIOSocket) socket, sessionRequest.getAttachment(), "");
-//                            sessionRequest.completed((IOSession) conn.getContext().getAttribute(IO_SESSION_KEY));
-//                        }
-//
-//                        public void handleIOException(IOException e) {
-//                            LOG.error("Unexpected exception", e);
-//                            sessionRequest.failed(e);
-//                        }
-//
-//                        public void shutdown() {
-//                            sessionRequest.timedout();
-//                        }
-//
-//                    });
-//        } catch (IOException e) {
-//            // should never happen since we are connecting in the background
-//            LOG.error("Unexpected exception", e);
-//            sessionRequest.failed(e);
-//        }
-        throw new UnsupportedOperationException();
     }
 
     /**
