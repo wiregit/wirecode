@@ -1,5 +1,9 @@
 package com.limegroup.gnutella.dht;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -639,6 +643,21 @@ public class DHTManagerImpl implements DHTManager {
               }
               return ret;
           }
+        };
+        
+        @InspectionPoint("dht internal format stats")
+        public Inspectable mojitoStats = new Inspectable() {
+            public Object inspect() {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                Writer w = new OutputStreamWriter(baos);
+                try {
+                    getMojitoDHT().getDHTStats().dump(w, false);
+                    w.flush();
+                    return baos.toByteArray();
+                } catch (IOException impossible) {
+                    return impossible.getMessage();
+                }
+            }
         };
         
         /** Histograms of the stored keys with various detail */
