@@ -325,6 +325,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     private static enum StatsWriters {TOP, DEFLATER, DELAYER, THROTTLE }
     private final Map<StatsWriters,StatisticGatheringWriter> statsWriters = new HashMap<StatsWriters,StatisticGatheringWriter>();
     private volatile MessageCounter incoming, outgoing;
+    private volatile long droppedBadHops, droppedBadAddress;
 
     /**
      * Creates a new outgoing connection to the specified host on the specified
@@ -996,8 +997,10 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             return !_routeFilter.allow(m);
         
         // leafs can only send hops == 0
-        if (isSupernodeClientConnection() && m.getHops() != 0)
+        if (isSupernodeClientConnection() && m.getHops() != 0) {
+            droppedBadHops++;
             return true;
+        }
         
         // replies with hops 0 must match the address.
         if (m instanceof QueryReply && m.getHops() == 0) {
@@ -1005,8 +1008,10 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             byte [] ip = reply.getIPBytes();
             if (!networkInstanceUtils.isPrivateAddress(ip) &&
                     !reply.hasSecureData() &&
-                    !Arrays.equals(ip, getAddressBytes()))
-                    return true;
+                    !Arrays.equals(ip, getAddressBytes())) {
+                droppedBadAddress++;
+                return true;
+            }
         }
         return !_routeFilter.allow(m);
     }
@@ -1401,6 +1406,11 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         // message counters
         data.put("incoming",incoming.inspect());
         data.put("outgoing",outgoing.inspect());
+        
+        
+        // dropped replies
+        data.put("badHops",droppedBadHops);
+        data.put("badAddr",droppedBadAddress);
         
         return data;
     }
