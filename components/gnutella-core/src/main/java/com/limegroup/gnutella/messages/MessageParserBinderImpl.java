@@ -3,6 +3,8 @@ package com.limegroup.gnutella.messages;
 import java.io.IOException;
 import java.net.SocketAddress;
 
+import org.limewire.inspection.InspectablePrimitive;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -19,6 +21,17 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     private final VendorMessageFactory vendorMessageFactory;
     private final PingRequestFactory pingRequestFactory;
 
+    @InspectablePrimitive("bad hops messages")
+    private static volatile long badHops;
+    @InspectablePrimitive("bad ttl messages")
+    private static volatile long badTTL;
+    @InspectablePrimitive("high hops messages")
+    private static volatile long highHops;
+    @InspectablePrimitive("adjusted ttl messages")
+    private static volatile long adjustings;
+    @InspectablePrimitive("parsed messages")
+    private static volatile long parsings;
+    
     @Inject
     public MessageParserBinderImpl(PingReplyFactory pingReplyFactory,
             QueryRequestFactory queryRequestFactory,
@@ -60,20 +73,25 @@ public class MessageParserBinderImpl implements MessageParserBinder {
             byte hops = header[18];
 
             if (hops < 0) {
+                badHops++;
                 throw new BadPacketException("Negative (or very large) hops");
             } else if (ttl < 0) {
+                badTTL++;
                 throw new BadPacketException("Negative (or very large) TTL");
             } else if ((hops > max) 
                     && (func != Message.F_PING_REPLY)) {
+                highHops++;
                 throw new BadPacketException("func: " + func + ", ttl: " + ttl
                         + ", hops: " + hops);
             } else if ((ttl + hops > max) 
                     && (func != Message.F_PING_REPLY)) {
+                adjustings++;
                 ttl = (byte) (max - hops); // overzealous client;
                 // readjust accordingly
                 assert(ttl >= 0); // should hold since hops<=softMax ==>
                 // new ttl>=0
-            }
+            } else
+                parsings++;
 
             // Delayed GUID allocation
             byte[] guid = new byte[16];
