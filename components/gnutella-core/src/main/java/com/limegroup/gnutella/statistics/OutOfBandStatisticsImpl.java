@@ -2,6 +2,8 @@ package com.limegroup.gnutella.statistics;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.limewire.inspection.InspectablePrimitive;
+
 import com.google.inject.Singleton;
 
 /** A default implementation of {@link OutOfBandStatistics} */
@@ -13,10 +15,15 @@ class OutOfBandStatisticsImpl implements OutOfBandStatistics {
     private static final int PROXY_SUCCESS_RATE = 80;
     private static final int TERRIBLE_SUCCESS_RATE = 40;
     
+    @InspectablePrimitive("oob sample size")
     private AtomicInteger sampleSize = new AtomicInteger(START_MIN_SAMPLE_SIZE);
+    @InspectablePrimitive("oob requested")
     private AtomicInteger requested = new AtomicInteger(0);
+    @InspectablePrimitive("oob received")
     private AtomicInteger received = new AtomicInteger(0);
+    @InspectablePrimitive("oob bypassed")
     private AtomicInteger bypassed = new AtomicInteger(0);
+    @InspectablePrimitive("oob sent")
     private AtomicInteger sent = new AtomicInteger(0);
     
     public void addBypassedResponse(int numBypassed) {
