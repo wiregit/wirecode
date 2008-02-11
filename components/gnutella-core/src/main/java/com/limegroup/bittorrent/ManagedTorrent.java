@@ -136,6 +136,10 @@ BTLinkListener {
 
     private final FileManager fileManager;
     
+    private final DHTPeerLocatorFactory peerLocatorFactory;
+    
+    private final DHTPeerLocator peerLocator;
+    
 	/**
 	 * Constructs new ManagedTorrent
 	 * 
@@ -158,7 +162,8 @@ BTLinkListener {
             ContentManager contentManager,
             IPFilter ipFilter,
             TorrentManager torrentManager, 
-            FileManager fileManager) {
+            FileManager fileManager,
+            DHTPeerLocatorFactory peerLocatorFactory) {
 		this.context = context;
 		this.networkInvoker = networkInvoker;
 		this.dispatcher = dispatcher;
@@ -169,11 +174,14 @@ BTLinkListener {
         this.ipFilter = ipFilter;
         this.torrentManager = torrentManager;
         this.fileManager = fileManager;
+        this.peerLocatorFactory = peerLocatorFactory;
 		_info = context.getMetaInfo();
 		_folder = getContext().getDiskManager();
 		_peers = Collections.emptySet();
 		linkManager = linkManagerFactory.getLinkManager(); 
 		trackerManager = trackerManagerFactory.getTrackerManager(this);
+		
+		peerLocator = this.peerLocatorFactory.create(this, this.getMetaInfo());
 	}
 
 	/**
@@ -578,6 +586,8 @@ BTLinkListener {
 	 * @param to a TorrentLocation for this download
 	 */
 	public void addEndpoint(TorrentLocation to) {
+	    LOG.info("TORRENT ADDRESS:" + to.getAddress());
+	    
 		if (_peers.contains(to) || linkManager.isConnectedTo(to))
 			return;
 		if (!ipFilter.allow(to.getAddress()))
@@ -585,6 +595,7 @@ BTLinkListener {
 		if (NetworkUtils.isMe(to.getAddress(), to.getPort()))
 			return;
 		if (_peers.add(to)) {
+		    LOG.info("Torrent Location " + to + "added to the list of peers");
 			synchronized(state.getLock()) {
 				if (state.get() == TorrentState.SCRAPING)
 					state.set(TorrentState.CONNECTING);
@@ -1022,4 +1033,17 @@ BTLinkListener {
 		return isComplete() && linkManager.hasInterested() &&
 		!linkManager.hasUnchoked();
 	}
+	
+	/**
+	 * Call back to notify that secondary peer searching is complete
+	 */
+	void notifyPeerLocatorComplete(boolean success) {
+	    
+	    System.out.println("Complete: " + success);
+	    
+	}
+
+    public DHTPeerLocator getPeerLocator() {
+        return peerLocator;
+    }
 }

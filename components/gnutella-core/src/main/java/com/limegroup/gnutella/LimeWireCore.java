@@ -667,6 +667,5 @@ public class LimeWireCore {
 
     public RemoteFileDescFactory getRemoteFileDescFactory() {
         return injector.getInstance(RemoteFileDescFactory.class);
-    }
-    
+    }    
 }

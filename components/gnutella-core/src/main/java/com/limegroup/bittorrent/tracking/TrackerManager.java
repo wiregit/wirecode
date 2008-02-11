@@ -1,6 +1,8 @@
 package com.limegroup.bittorrent.tracking;
 
+import java.net.InetAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -19,7 +21,9 @@ import com.limegroup.bittorrent.settings.BittorrentSettings;
 
 public class TrackerManager {
 	
-	private static final Log LOG = LogFactory.getLog(TrackerManager.class);
+    boolean recievedResponse = false;
+    
+    private static final Log LOG = LogFactory.getLog(TrackerManager.class);
 	
 	/**
 	 * the number of failures after which we consider giving up
@@ -176,29 +180,48 @@ public class TrackerManager {
 		LOG.debug("handling tracker response "+response+" from " + t);
 
 		long minWaitTime = BittorrentSettings.TRACKER_MIN_REASK_INTERVAL
-				.getValue() * 1000;
+				.getValue() * 1000;		
 		
 		if (response != null) {
-				for (TorrentLocation next : response.PEERS) 
+				for (TorrentLocation next : response.PEERS) {
 					torrent.addEndpoint(next);
-				
+					LOG.info("torrent name: " + torrent.getMetaInfo().getName());
+					LOG.info("tor loc IP: " + next.getAddress());
+					torrent.getPeerLocator().publish(next);									
+				}								
 				minWaitTime = response.INTERVAL * 1000;
 				
 				if (response.FAILURE_REASON != null) {
 					t.recordFailure();
                     lastFailureReason = response.FAILURE_REASON;
-				} else
+                    try {
+                    torrent.getPeerLocator().publish(new TorrentLocation(InetAddress.getByName("127.0.0.1"), 4444, new byte[0]));
+                    LOG.info("PUBLISHED");
+                    } catch (UnknownHostException UHE) {
+                        LOG.info(UHE);
+                    }
+                    torrent.getPeerLocator().startSearching();
+                    LOG.info("searcheD");
+                    //recievedResponse = false;
+				} else {
 					t.recordSuccess();
+					//recievedResponse = true;
+				}
 		} else {
 			t.recordFailure();
 			torrent.trackerRequestFailed();
 		}
+		
+//		if(recievedResponse) {
+//	        LOG.info("search LAUNCHED");  
+//		    torrent.getPeerLocator().startSearching();
+//		}
 
 		if (torrent.isActive()) {
 			if (isHopeless() && torrent.shouldStop()) {
 				torrent.stopVoluntarily();
 			} else
-				scheduleTrackerRequest(minWaitTime, t);
+				scheduleTrackerRequest(minWaitTime/1000, t); //TODO remove 1000
 		}
 	}
 }
