@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.statistics;
 
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.statistic.BasicKilobytesStatistic;
 import org.limewire.statistic.Statistic;
 import org.limewire.statistic.StatisticAccumulator;
@@ -12,19 +13,33 @@ class TcpBandwidthStatisticsImpl implements TcpBandwidthStatistics {
 
     private final StatisticAccumulator statisticAccumulator;
 
+    @InspectionPoint("tcp upstream")
     private final Statistic UPSTREAM;
+    @InspectionPoint("tcp downstream")
     private final Statistic DOWNSTREAM;
+    @InspectionPoint("http downstream")
     private final Statistic HTTP_DOWNSTREAM;
+    @InspectionPoint("http upstream")
     private final Statistic HTTP_UPSTREAM;
+    @InspectionPoint("http downstream innetwork")
     private final Statistic HTTP_DOWNSTREAM_INNETWORK;
+    @InspectionPoint("http upstream innetwork")
     private final Statistic HTTP_UPSTREAM_INNETWORK;
+    @InspectionPoint("http header downstream")
     private final Statistic HTTP_HEADER_DOWNSTREAM;
+    @InspectionPoint("http header downstream innetwork")
     private final Statistic HTTP_HEADER_DOWNSTREAM_INNETWORK;
+    @InspectionPoint("http body downstream")
     private final Statistic HTTP_BODY_DOWNSTREAM;
+    @InspectionPoint("http body downstream innetwork")
     private final Statistic HTTP_BODY_DOWNSTREAM_INNETWORK;
+    @InspectionPoint("http header upstream")
     private final Statistic HTTP_HEADER_UPSTREAM;
+    @InspectionPoint("http header upstream innetwork")
     private final Statistic HTTP_HEADER_UPSTREAM_INNETWORK;
+    @InspectionPoint("http body upstream")
     private final Statistic HTTP_BODY_UPSTREAM;
+    @InspectionPoint("http body upstream innetwork")
     private final Statistic HTTP_BODY_UPSTREAM_INNETWORK;
 
     @Inject

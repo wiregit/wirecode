@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.limewire.collection.Buffer;
+import org.limewire.inspection.Inspectable;
 
 /**
  * Defines an interface for generalized access to store and summarize numeric
  * data.
  */
-public interface Statistic {
+public interface Statistic extends Inspectable {
 
 	/**
 	 * Constant for the number of records to hold for each statistic.

@@ -1,9 +1,11 @@
 package org.limewire.statistic;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.limewire.collection.Buffer;
 import org.limewire.inspection.Inspectable;
@@ -22,7 +24,7 @@ import org.limewire.inspection.Inspectable;
  *<a href="http://www.limewire.org/wiki/index.php?title=Org.limewire.statistic">org.limewire.statistic</a>
  *package.
  */
-public abstract class AbstractStatistic implements Statistic, Inspectable {
+public abstract class AbstractStatistic implements Statistic {
 
 	/**
 	 * <tt>IntBuffer</tt> for recording stats data -- initialized to
@@ -151,13 +153,25 @@ public abstract class AbstractStatistic implements Statistic, Inspectable {
 	}
     
     public Object inspect() {
-        List<Double> r = new ArrayList<Double>(_buffer.size());
-        for (Double d : _buffer) {
-            if (d.equals(Double.NaN))
-                continue;
-            r.add(d);
+        Map<String,Object> ret = new HashMap<String,Object>();
+        ret.put("current",_current);
+        ret.put("lastStored",_lastStored);
+        ret.put("max",Double.doubleToLongBits(_max));
+        ret.put("total",Double.doubleToLongBits(_total));
+        ret.put("recorded",_totalStatsRecorded);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream daos = new DataOutputStream(baos);
+        try {
+            for (Double d : _buffer) {
+                if (Double.isNaN(d))
+                    continue;
+                daos.writeDouble(d);
+            }
+            daos.flush();
+            ret.put("buffer",baos.toByteArray());
+        } catch (IOException impossible) {
+            ret.put("impossible",impossible.getMessage());
         }
-        
-        return StatsUtils.quickStatsDouble(r).getMap();
+        return ret;
     }
 }
