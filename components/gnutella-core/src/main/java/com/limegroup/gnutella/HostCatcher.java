@@ -945,7 +945,6 @@ public class HostCatcher {
         }
         
         if(networkInstanceUtils.isPrivateAddress(addr)) {
-            System.out.println("DROPPING BECAUSE NOT VALID!");
             return false;
         }
 
