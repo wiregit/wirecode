@@ -121,13 +121,11 @@ public class ConnectionDispatcherImpl implements ConnectionDispatcher {
     		boolean localHost = NetworkUtils.isLocalHost(sock);
     		boolean drop = false;
     		if (localOnly && !localHost) {
-    		    System.out.println("A");
                 LOG.debug("Dropping because we want a local connection, and this isn't localhost");
     			drop = true;
             }
             
     		if (!localOnly && localHost && networkInstanceUtils.isPrivateAddress(sock.getLocalAddress())) {
-    		    System.out.println("B");
                 LOG.debug("Dropping because we want an external connection, and this is localhost");
     			drop = true;
             }

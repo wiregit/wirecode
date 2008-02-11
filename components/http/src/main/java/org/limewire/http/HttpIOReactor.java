@@ -26,7 +26,7 @@ import org.limewire.nio.channel.ThrottleWriter;
  * An implementation of the {@link ConnectingIOReactor} interface that
  * establishes connections through LimeWire's NIO layer.
  */
-public class HttpIOReactor implements ConnectingIOReactor {
+public class HttpIOReactor implements DispatchedIOReactor {
 
     public static final String IO_SESSION_KEY = "org.limewire.iosession";
 
@@ -52,10 +52,6 @@ public class HttpIOReactor implements ConnectingIOReactor {
             throw new IllegalArgumentException("Event dispatch must be of type DefaultServerIOEventDispatch");
         }
         this.eventDispatch = eventDispatch;
-    }
-
-    public HttpParams getHttpParams() {
-        return params;
     }
     
     /** 

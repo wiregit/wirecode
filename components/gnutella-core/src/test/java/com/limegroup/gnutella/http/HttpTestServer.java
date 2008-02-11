@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/test/java/org/apache/http/nio/mockup/TestHttpServer.java $
- * $Revision: 1.3 $
- * $Date: 2007-07-05 17:27:47 $
+ * $Revision: 1.4 $
+ * $Date: 2008-02-11 20:19:09 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -80,7 +80,7 @@ public class HttpTestServer {
 
         reactor = new HttpIOReactor(params);
         IOEventDispatch ioEventDispatch = new DefaultServerIOEventDispatch(
-                serviceHandler, reactor.getHttpParams());
+                serviceHandler, params);
         reactor.execute(ioEventDispatch);
     }
 

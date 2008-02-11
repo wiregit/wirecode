@@ -65,7 +65,7 @@ public class BasicHttpAcceptor implements ConnectionAcceptor {
 
     private final HttpParams params; 
     
-    private HttpIOReactor reactor;
+    private DispatchedIOReactor reactor;
 
     private ConnectionEventListener connectionListener;
 
@@ -126,7 +126,7 @@ public class BasicHttpAcceptor implements ConnectionAcceptor {
 
         this.reactor = new HttpIOReactor(params);
         IOEventDispatch ioEventDispatch = new DefaultServerIOEventDispatch(
-                serviceHandler, reactor.getHttpParams());
+                serviceHandler, params);
         try {
             this.reactor.execute(ioEventDispatch);
         } catch (IOException e) {
@@ -182,7 +182,7 @@ public class BasicHttpAcceptor implements ConnectionAcceptor {
      * 
      * @return null, if the acceptor has not been started, yet.
      */
-    protected HttpIOReactor getReactor() {
+    protected DispatchedIOReactor getReactor() {
         assert NIODispatcher.instance().isDispatchThread();
         
         return reactor;

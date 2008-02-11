@@ -12,7 +12,6 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpStatus;
-import org.apache.http.impl.nio.DefaultNHttpServerConnection;
 import org.apache.http.nio.NHttpConnection;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
@@ -90,8 +89,7 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
             return;
         }
         
-        DefaultNHttpServerConnection conn = getReactor().acceptConnection(null,
-                socket);
+        NHttpConnection conn = getReactor().acceptConnection(null, socket);
         if (conn != null)
             HttpContextParams.setConnectionData(conn.getContext(), data);
     }

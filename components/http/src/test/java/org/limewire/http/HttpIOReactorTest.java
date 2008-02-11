@@ -28,12 +28,6 @@ public class HttpIOReactorTest extends TestCase {
         }
     }
 
-    public void testGetHttpParams() {
-        HttpParams params = new BasicHttpParams();
-        HttpIOReactor reactor = new HttpIOReactor(params);
-        assertSame(params, reactor.getHttpParams());
-    }
-
     public void testShutdown() throws Exception {
         HttpParams params = new BasicHttpParams();
         HttpIOReactor reactor = new HttpIOReactor(params);
