@@ -179,7 +179,6 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
         
         /** this adds the read set to the existing proxies */
         PushEndpoint pe = createPushEndpoint(guid, proxies, features, version, addr);
-        pe.updateProxies(true);
         return pe;
     }    
     
