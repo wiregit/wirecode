@@ -85,6 +85,8 @@ public class InspectionRequestHandlerTest extends BaseTestCase {
             one(messageRouter).forwardInspectionRequestToLeaves(request);
             one(factory).createResponses(request);
             will(returnValue(responses));
+            one(request).getSendInterval();
+            will(returnValue(500));
         }});
         InspectionRequestHandler irh = injector.getInstance(InspectionRequestHandler.class);
         irh.handleMessage(request, new InetSocketAddress("1.2.3.4",1), replyHandler);

@@ -33,9 +33,6 @@ import com.limegroup.gnutella.simpp.SimppManager;
  */
 public class InspectionRequestHandler extends RestrictedResponder {
     
-    /** Send back encoded responses this often */
-    private final static int SEND_INTERVAL = 500;
-    
     private final Provider<MessageRouter> router;
     private final InspectionResponseFactory factory;
     private final Periodic sender;
@@ -51,6 +48,11 @@ public class InspectionRequestHandler extends RestrictedResponder {
      * (no need to support multiple destinations at present)  
      */
     private ReplyHandler currentHandler;
+    
+    /**
+     * The current interval at which to send encoded responses.
+     */
+    private int currentInterval;
     
     @Inject
     public InspectionRequestHandler(Provider<MessageRouter> router, NetworkManager networkManager,
@@ -89,21 +91,25 @@ public class InspectionRequestHandler extends RestrictedResponder {
             return;
         
         synchronized(this) {
+            queue.clear();
             for (int i = 1; i < r.length; i++)
                 queue.add(r[i]);
             currentHandler = handler;
+            currentInterval = ir.getSendInterval();
         }
-        sender.rescheduleIfSooner(SEND_INTERVAL);
+        sender.rescheduleIfSooner(currentInterval);
     }
     
     private void send() {
         InspectionResponse resp = null;
         ReplyHandler handler = null;
+        int interval;
         synchronized(this) {
             if (!queue.isEmpty()) {
                 resp = queue.remove(0);
                 handler = currentHandler;
             }
+            interval = currentInterval;
         }
         
         if (resp == null || handler == null) {
@@ -113,6 +119,6 @@ public class InspectionRequestHandler extends RestrictedResponder {
         
         if (resp.shouldBeSent())
             handler.reply(resp);
-        sender.rescheduleIfLater(SEND_INTERVAL);
+        sender.rescheduleIfLater(interval);
     }
 }

@@ -23,5 +23,11 @@ public interface InspectionRequest extends VendorMessage.ControlMessage {
     public long getRoutableVersion();
     
     public boolean supportsEncoding();
+    
+    /**
+     * @return the interval at which to send encoded responses.  Only makes
+     * sense if supportsEncoding() returns true.
+     */
+    public int getSendInterval();
 
 }

@@ -24,8 +24,12 @@ public class InspectionRequestImpl extends RoutableGGEPMessage implements Inspec
     static final String TIMESTAMP_KEY = "T";
     static final String ENCODING_KEY = "E";
 
+    /** Send back encoded responses this often */
+    private final static int DEFAULT_INTERVAL = 500;
+    
     private final String[] requested;
     private final boolean timestamp, encoding;
+    private final int sendInterval;
     
     public InspectionRequestImpl(byte[] guid, byte ttl, byte hops, 
             int version, byte[] payload, Network network)
@@ -36,6 +40,11 @@ public class InspectionRequestImpl extends RoutableGGEPMessage implements Inspec
             requested = ggep.getString(INSPECTION_KEY);
             timestamp = ggep.hasKey(TIMESTAMP_KEY);
             encoding = ggep.hasKey(ENCODING_KEY);
+            int interval = DEFAULT_INTERVAL;
+            try {
+                interval = ggep.getInt(ENCODING_KEY);
+            } catch (BadGGEPPropertyException noTime) {}
+            sendInterval = interval;
         } catch (BadGGEPPropertyException bad) {
             throw new BadPacketException();
         }
@@ -44,7 +53,7 @@ public class InspectionRequestImpl extends RoutableGGEPMessage implements Inspec
     }
     
     InspectionRequestImpl(GGEPSigner signer, String... requested) {
-        this(new GUID(),signer, false, false, 1, null, null, requested);
+        this(new GUID(),signer, false, false, DEFAULT_INTERVAL, 1, null, null, requested);
     }
     /**
      * @param timestamp true if the response should contain a timestamp.
@@ -52,13 +61,14 @@ public class InspectionRequestImpl extends RoutableGGEPMessage implements Inspec
      * See <tt>InspectionUtils</tt> for description of the format.
      */
     public InspectionRequestImpl(GUID g, GGEPSigner signer, boolean timestamp, 
-            boolean encoding, long version, IpPort returnAddr, IpPort destAddress, String... requested) {
+            boolean encoding, int sendInterval, long version, IpPort returnAddr, IpPort destAddress, String... requested) {
         super(F_LIME_VENDOR_ID, F_INSPECTION_REQ, VERSION, signer,
-                deriveGGEP(timestamp, encoding, version, returnAddr, destAddress, requested));
+                deriveGGEP(timestamp, encoding, sendInterval, version, returnAddr, destAddress, requested));
         setGUID(g);
         this.requested = requested;
         this.timestamp = timestamp;
         this.encoding = encoding;
+        this.sendInterval = sendInterval;
     }
 
     /* (non-Javadoc)
@@ -86,7 +96,7 @@ public class InspectionRequestImpl extends RoutableGGEPMessage implements Inspec
         super.setGUID(g);
     }
     
-    private static GGEP deriveGGEP(boolean timestamp, boolean encoding, long version, IpPort returnAddr, IpPort destAddr, String... requested) {
+    private static GGEP deriveGGEP(boolean timestamp, boolean encoding, int sendInterval, long version, IpPort returnAddr, IpPort destAddr, String... requested) {
         /*
          * The selected fields are catenated and put in a compressed
          * ggep entry.
@@ -106,7 +116,7 @@ public class InspectionRequestImpl extends RoutableGGEPMessage implements Inspec
             g.put(TIMESTAMP_KEY);
 
         if (encoding)
-            g.put(ENCODING_KEY);
+            g.put(ENCODING_KEY, sendInterval);
         
         if (returnAddr != null) {
             try {
@@ -137,5 +147,9 @@ public class InspectionRequestImpl extends RoutableGGEPMessage implements Inspec
     @Override
     public Class<? extends Message> getHandlerClass() {
         return InspectionRequest.class;
+    }
+    
+    public int getSendInterval() {
+        return sendInterval;
     }
 }
