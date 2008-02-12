@@ -5,7 +5,7 @@ import java.net.Socket;
 
 import junit.framework.Test;
 
-import org.apache.http.impl.nio.DefaultNHttpServerConnection;
+import org.apache.http.nio.NHttpConnection;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpProtocolParams;
@@ -79,7 +79,7 @@ public class HttpIOReactorTest extends BaseTestCase {
         
         Socket socket = socketsManager.connect(new InetSocketAddress("localhost", ACCEPTOR_PORT), 500);
         try {
-            DefaultNHttpServerConnection conn = reactor.acceptConnection(null, socket);
+            NHttpConnection conn = reactor.acceptConnection(null, socket);
             assertNotNull(conn.getContext().getAttribute(HttpIOReactor.IO_SESSION_KEY));
             assertEquals(2222, socket.getSoTimeout());
         } finally {

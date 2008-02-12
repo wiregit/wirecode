@@ -11,11 +11,14 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.nio.ContentEncoder;
+import org.apache.http.nio.IOControl;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.http.HttpCoreUtils;
-import org.limewire.nio.observer.WriteObserver;
+import org.limewire.http.nio.ContentEncoderChannel;
+import org.limewire.nio.channel.NoInterestWritableByteChannel;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.Constants;
@@ -108,7 +111,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         }
         
         @Override
-        public void initialize() throws IOException {
+        public void initialize(ContentEncoder contentEncoder, IOControl ioctrl) throws IOException {
             SentMessageHandler sentMessageHandler = new SentMessageHandler() {
                 public void processSentMessage(Message m) {
                     uploader.addAmountUploaded(m.getTotalLength());
@@ -117,20 +120,16 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             };
             
             sender = new MessageWriter(new ConnectionStats(), new BasicQueue(), sentMessageHandler);
-            sender.setWriteChannel(this);
-            
+            sender.setWriteChannel(new NoInterestWritableByteChannel(new ContentEncoderChannel(
+                    contentEncoder)));
+
             query = queryRequestFactory.createBrowseHostQuery();
             iterable = fileManager.getIndexingIterator(query.desiresXMLResponses() || 
                     query.desiresOutOfBandReplies());
         }
         
         @Override
-        public void interestWrite(WriteObserver observer, boolean status) {
-            // we are never interested in turning write interest off 
-        }
-        
-        @Override
-        public boolean handleWrite() throws IOException {
+        public boolean writeContent(ContentEncoder contentEncoder, IOControl ioctrl) throws IOException {
             addMessages();
             
             boolean more = sender.handleWrite();

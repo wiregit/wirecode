@@ -5,8 +5,8 @@ import java.net.Socket;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.impl.nio.DefaultNHttpServerConnection;
 import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
+import org.apache.http.nio.NHttpConnection;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.nio.reactor.IOReactorStatus;
@@ -63,7 +63,7 @@ public class HttpIOReactor implements DispatchedIOReactor {
     /**
      * Connects <code>socket</code> to LimeWire's NIO layer. 
      */
-    protected DefaultNHttpServerConnection connectSocket(AbstractNBSocket socket, Object attachment, String word) {
+    protected NHttpConnection connectSocket(AbstractNBSocket socket, Object attachment, String word) {
         final HttpIOSession session = new HttpIOSession(socket);        
         
         session.setAttribute(IOSession.ATTACHMENT_KEY, attachment);
@@ -79,7 +79,7 @@ public class HttpIOReactor implements DispatchedIOReactor {
         this.eventDispatch.connected(session);
         
         // need to enable access to the channel for throttling support
-        DefaultNHttpServerConnection conn = (DefaultNHttpServerConnection) session.getAttribute(NHTTP_CONN);
+        NHttpConnection conn = (NHttpConnection) session.getAttribute(NHTTP_CONN);
         assert conn != null;
         conn.getContext().setAttribute(IO_SESSION_KEY, session);
         
@@ -97,7 +97,7 @@ public class HttpIOReactor implements DispatchedIOReactor {
      * @param socket the socket
      * @return the HttpCore connection object
      */
-    public DefaultNHttpServerConnection acceptConnection(String word, Socket socket) {
+    public NHttpConnection acceptConnection(String word, Socket socket) {
         try {
             prepareSocket(socket);
             return connectSocket((AbstractNBSocket) socket, null, word);

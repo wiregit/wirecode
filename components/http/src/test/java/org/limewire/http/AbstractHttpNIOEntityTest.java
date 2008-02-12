@@ -2,6 +2,9 @@ package org.limewire.http;
 
 import java.io.IOException;
 
+import org.apache.http.nio.ContentEncoder;
+import org.apache.http.nio.IOControl;
+
 import junit.framework.TestCase;
 
 public class AbstractHttpNIOEntityTest extends TestCase {
@@ -10,11 +13,6 @@ public class AbstractHttpNIOEntityTest extends TestCase {
         MockHttpNIOEntity entity = new MockHttpNIOEntity();
         try {
             entity.getContent();
-            fail("Expected UnsupportedOperationException");
-        } catch (UnsupportedOperationException e) {
-        }
-        try {
-            entity.isOpen();
             fail("Expected UnsupportedOperationException");
         } catch (UnsupportedOperationException e) {
         }
@@ -58,12 +56,12 @@ public class AbstractHttpNIOEntityTest extends TestCase {
         }
 
         @Override
-        public boolean handleWrite() throws IOException {
+        public boolean writeContent(ContentEncoder contentEncoder, IOControl ioctrl) throws IOException {
             return false;
         }
 
         @Override
-        public void initialize() throws IOException {
+        public void initialize(ContentEncoder contentEncoder, IOControl ioctrl) throws IOException {
         }
 
         @Override
