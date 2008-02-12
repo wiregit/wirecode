@@ -25,6 +25,7 @@ import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.URIUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 class Tracker {
@@ -134,11 +135,7 @@ class Tracker {
 	/**
 	 * helper method creating the query string for a HTTP tracker request
 	 * 
-	 * @param info
-	 *            BTMetaInfo for the torrent
-	 * @param torrent
-	 *            ManagedTorrent for the torrent
-	 * @param event
+     * @param event
 	 *            the event code to send
 	 * @return string, the HTTP GET query string we send to the tracker
 	 */
@@ -186,7 +183,7 @@ class Tracker {
 	/**
 	 * connects to a tracker via HTTP
 	 * 
-	 * @param url
+	 * @param uri
 	 *            the URL for the tracker
 	 * @param query
 	 *            the HTTP GET query string, sent to the tracker
@@ -197,7 +194,7 @@ class Tracker {
         HttpGet get = null;
         LimeHttpClient client = clientProvider.get();
         try {
-            URI requestURI = new URI(uri.toASCIIString() + query);
+            URI requestURI = URIUtils.toURI(uri.toASCIIString() + query);
             get = new HttpGet(requestURI);
             get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
             get.addHeader("Cache-Control", "no-cache");

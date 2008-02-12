@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import com.limegroup.gnutella.http.URIUtils;
+
 /**
  * helps to migrate persistant org.apache.commons.httpclient.URI's to java.net.URI's
  */
@@ -36,6 +38,6 @@ public class SerialOldURI implements Serializable {
     private boolean _is_IPv6reference;
 
     public URI toURI() throws URISyntaxException {
-        return (_uri == null) ? null : new URI(new String(_uri));    
+        return (_uri == null) ? null : URIUtils.toURI(new String(_uri));    
     }
 }

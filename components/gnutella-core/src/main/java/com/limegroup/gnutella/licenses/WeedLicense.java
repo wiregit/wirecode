@@ -43,9 +43,9 @@ class WeedLicense extends AbstractLicense {
     private boolean valid;
     
     /** Builds the URI from the given cid & vid. */
-    public static final URI buildURI(String cid, String vid) {
+    public static URI buildURI(String cid, String vid) {
         try {
-            return new URI((URI + "?" + VID + "=" + vid + "&" + CID + "=" + cid));
+            return URIUtils.toURI((URI + "?" + VID + "=" + vid + "&" + CID + "=" + cid));
         } catch(URISyntaxException bad) {
             URIUtils.error(bad);
             return null;

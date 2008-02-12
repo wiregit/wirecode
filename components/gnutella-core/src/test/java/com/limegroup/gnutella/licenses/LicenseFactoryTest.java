@@ -72,14 +72,6 @@ public class LicenseFactoryTest extends BaseTestCase {
 	    assertTrue(l.isVerified());
 	    assertFalse(l.isValid(null));
 	    assertEquals("Creative Commons License", l.getLicenseName());
-	    
-	    // lookup URI isn't the end.
-	    l = licenseFactory.create("verify at http://life.org is not fair.");
-        assertNotNull(l);
-	    assertEquals(BadCCLicense.class, l.getClass());
-	    assertTrue(l.isVerified());
-	    assertFalse(l.isValid(null));
-	    assertEquals("Creative Commons License", l.getLicenseName());
     }
     
     public void testCreateForCCLicenses() throws Exception {
@@ -99,6 +91,14 @@ public class LicenseFactoryTest extends BaseTestCase {
 	    
 	    l = licenseFactory.create("this license should verify at http://nowhere.com");
 	    assertNotNull(l);
+	    assertEquals(CCLicense.class, l.getClass());
+	    assertFalse(l.isVerified());
+	    assertFalse(l.isValid(null));
+	    assertEquals("Creative Commons License", l.getLicenseName());
+        
+        // lookup URI isn't the end.
+	    l = licenseFactory.create("verify at http://life.org is not fair.");
+        assertNotNull(l);
 	    assertEquals(CCLicense.class, l.getClass());
 	    assertFalse(l.isVerified());
 	    assertFalse(l.isValid(null));

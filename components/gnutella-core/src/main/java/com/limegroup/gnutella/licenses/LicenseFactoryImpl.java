@@ -143,8 +143,8 @@ public final class LicenseFactoryImpl implements LicenseFactory {
         String url = license.substring(urlStart).trim();
         URI uri = null;
         try {
-            uri = new URI(url);
-            
+            uri = URIUtils.toURI(url);
+
             // Make sure the scheme is HTTP.
             String scheme = uri.getScheme();
             if(scheme == null || !scheme.equalsIgnoreCase("http"))

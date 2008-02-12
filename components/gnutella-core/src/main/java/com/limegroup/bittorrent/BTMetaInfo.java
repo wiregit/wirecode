@@ -286,7 +286,7 @@ public class BTMetaInfo {
 	 */
 	public BTMetaInfo(BTData data) throws IOException {
 		try {
-			URI trackerURI = new URI(data.getAnnounce());
+			URI trackerURI = URIUtils.toURI(data.getAnnounce());
 			validateURI(trackerURI);
 			_trackers = new URI[] { trackerURI };
 		} catch (URISyntaxException e) {

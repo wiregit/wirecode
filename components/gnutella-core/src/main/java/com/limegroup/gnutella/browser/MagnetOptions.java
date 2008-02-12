@@ -20,6 +20,7 @@ import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.FileDetails;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.http.URIUtils;
 import com.limegroup.gnutella.util.EncodingUtils;
 import com.limegroup.gnutella.util.URLDecoder;
 
@@ -308,7 +309,7 @@ public class MagnetOptions implements Serializable {
 	private URN extractSHA1URNFromURLS(String[] defaultURLs) {
 		for (int i = 0; i < defaultURLs.length; i++) {
 			try {
-				URI uri = new URI(defaultURLs[i]);
+				URI uri = URIUtils.toURI(defaultURLs[i]);
 				String query = uri.getQuery();
 				if (query != null) {
 					return URN.createSHA1Urn(uri.getQuery());
@@ -440,7 +441,7 @@ public class MagnetOptions implements Serializable {
 			for(Iterator<String> it = urls.iterator(); it.hasNext(); ) {
 				try {
 					String nextURL = it.next();
-					new URI(nextURL);  // is it a valid URI?
+					URIUtils.toURI(nextURL);  // is it a valid URI?
 				} catch(URISyntaxException e) {
 					it.remove(); // if not, remove it from the list.
 					localizedErrorMessage = e.getLocalizedMessage();
@@ -534,7 +535,7 @@ public class MagnetOptions implements Serializable {
         String[] urls = getDefaultURLs();
         if (urls.length > 0) {
             try {
-                URI uri = new URI(urls[0]);
+                URI uri = URIUtils.toURI(urls[0]);
                 tempFileName = extractFileName(uri);
                 if (tempFileName != null && tempFileName.length() > 0) {
                     return tempFileName;

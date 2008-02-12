@@ -28,6 +28,7 @@ import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.http.URIUtils;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
@@ -187,7 +188,7 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
         if (urn != null)
             urns.add(urn);
 
-        URI uri = new URI(url.toExternalForm());
+        URI uri = URIUtils.toURI(url.toExternalForm());
 
         return createUrlRemoteFileDesc(url.getHost(), port, filename != null ? filename
                 : MagnetOptions.extractFileName(uri), size <= 0 ? contentLength(uri) : size, urns,
