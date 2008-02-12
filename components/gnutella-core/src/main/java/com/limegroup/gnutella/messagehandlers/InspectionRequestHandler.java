@@ -86,12 +86,14 @@ public class InspectionRequestHandler extends RestrictedResponder {
             handler.reply(r[0]);
         router.get().forwardInspectionRequestToLeaves(ir);
         
-        // schedule the rest of the responses if any
-        if (r.length < 2)
-            return;
-        
         synchronized(this) {
+            // clear any previously scheduled responses
             queue.clear();
+            
+            if (r.length < 2)
+                return;
+            // schedule the rest of the responses if any
+
             for (int i = 1; i < r.length; i++)
                 queue.add(r[i]);
             currentHandler = handler;
