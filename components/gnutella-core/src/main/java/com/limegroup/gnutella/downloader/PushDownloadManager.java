@@ -52,6 +52,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SocketProcessor;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -363,9 +364,6 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             return;
         }
 
-        byte[] addr = networkManager.getAddress();
-        int port = networkManager.getPort();
-
         //TODO: send push msg directly to a proxy if you're connected to it.
 
         // set up the request string --
@@ -375,10 +373,10 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
           (data.isFWTransfer() ? ("&file=" + PushRequest.FW_TRANS_INDEX) : "") +
           (SSLSettings.isIncomingTLSEnabled() ? "&tls=true" : "");
             
-        final String nodeString = "X-Node";
-        final String nodeValue =
-            NetworkUtils.ip2string(data.isFWTransfer() ? externalAddr : addr) +
-            ":" + port;
+        final String nodeString = HTTPHeaderName.NODE.httpStringValue();
+        final String nodeValue = data.isFWTransfer() ?
+                NetworkUtils.ip2string(externalAddr) + ":" + networkManager.getStableUDPPort() : 
+                    NetworkUtils.ip2string(networkManager.getAddress()) + ":" + networkManager.getPort();
 
         // the methods to execute
         final List<HttpHead> methods = new ArrayList<HttpHead>();
