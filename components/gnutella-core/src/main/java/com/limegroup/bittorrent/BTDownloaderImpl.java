@@ -59,12 +59,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
     private final BTUploaderFactory btUploaderFactory;
     private final ManagedTorrentFactory managedTorrentFactory;
     private final BTContextFactory btContextFactory;
+    private final BTMetaInfoFactory btMetaInfoFactory;
 
     @Inject
 	BTDownloaderImpl(BTContextFactory btContextFactory,
             SaveLocationManager saveLocationManager, Provider<TorrentManager> torrentManager,
             BTUploaderFactory btUploaderFactory, DownloadManager downloadManager,
-            ManagedTorrentFactory managedTorrentFactory) {
+            ManagedTorrentFactory managedTorrentFactory, BTMetaInfoFactory btMetaInfoFactory) {
 	    super(saveLocationManager);        
         this.downloadManager = downloadManager;
         this.torrentManager = torrentManager;
@@ -72,6 +73,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
         this.incompleteFileManager = downloadManager.getIncompleteFileManager();
         this.managedTorrentFactory = managedTorrentFactory;
         this.btContextFactory = btContextFactory;
+        this.btMetaInfoFactory = btMetaInfoFactory;
     }
     
     /* (non-Javadoc)
@@ -509,6 +511,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
     public synchronized void initFromMemento(DownloadMemento memento) throws InvalidDataException {
         super.initFromMemento(memento);
         BTDownloadMemento bmem = (BTDownloadMemento)memento;
-        initBtMetaInfo(new BTMetaInfo(bmem.getBtMetaInfoMemento()));
+        initBtMetaInfo(btMetaInfoFactory.create(bmem.getBtMetaInfoMemento()));
     }
 }

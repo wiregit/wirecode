@@ -37,8 +37,12 @@ import com.limegroup.bittorrent.BTConnectionFactory;
 import com.limegroup.bittorrent.BTConnectionFactoryImpl;
 import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.BTContextFactoryImpl;
+import com.limegroup.bittorrent.BTMetaInfoFactory;
+import com.limegroup.bittorrent.BTMetaInfoFactoryImpl;
 import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.BTUploaderFactoryImpl;
+import com.limegroup.bittorrent.DHTPeerLocatorFactory;
+import com.limegroup.bittorrent.DHTPeerLocatorFactoryImpl;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactoryImpl;
 import com.limegroup.bittorrent.TorrentEvent;
@@ -311,6 +315,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ConnectionManager.class).to(ConnectionManagerImpl.class);
         bind(MessageHandlerBinder.class).to(MessageHandlerBinderImpl.class);
         bind(QueryDispatcher.class).to(QueryDispatcherImpl.class);
+        bind(DHTPeerLocatorFactory.class).to(DHTPeerLocatorFactoryImpl.class);
         bind(Acceptor.class).to(AcceptorImpl.class);        
         bind(UpdateHandler.class).to(UpdateHandlerImpl.class);
         bind(SecurityToken.TokenProvider.class).to(SecurityToken.AddressSecurityTokenProvider.class);
@@ -318,6 +323,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(InspectionResponseFactory.class).to(InspectionResponseFactoryImpl.class);
         bind(FECUtils.class).to(FECUtilsImpl.class);
         bind(NodeAssigner.class).to(NodeAssignerImpl.class);
+        bind(BTMetaInfoFactory.class).to(BTMetaInfoFactoryImpl.class);
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);

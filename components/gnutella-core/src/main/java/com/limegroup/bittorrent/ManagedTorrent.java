@@ -137,6 +137,10 @@ public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListe
     
     private final NetworkInstanceUtils networkInstanceUtils;
     
+    private final DHTPeerLocatorFactory peerLocatorFactory;
+    
+    private final DHTPeerLocator peerLocator;
+    
 	/**
 	 * Constructs new ManagedTorrent
 	 * 
@@ -160,6 +164,7 @@ public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListe
             IPFilter ipFilter,
             TorrentManager torrentManager, 
             FileManager fileManager,
+            DHTPeerLocatorFactory peerLocatorFactory,
             NetworkInstanceUtils networkInstanceUtils) {
 		this.context = context;
 		this.networkInvoker = networkInvoker;
@@ -171,12 +176,15 @@ public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListe
         this.ipFilter = ipFilter;
         this.torrentManager = torrentManager;
         this.fileManager = fileManager;
+        this.peerLocatorFactory = peerLocatorFactory;
         this.networkInstanceUtils = networkInstanceUtils;
 		_info = context.getMetaInfo();
 		_folder = getContext().getDiskManager();
 		_peers = Collections.emptySet();
 		linkManager = linkManagerFactory.getLinkManager(); 
 		trackerManager = trackerManagerFactory.getTrackerManager(this);
+		
+		peerLocator = this.peerLocatorFactory.create(this, this.getMetaInfo());
 	}
 
 	/**
@@ -581,6 +589,8 @@ public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListe
 	 * @param to a TorrentLocation for this download
 	 */
 	public void addEndpoint(TorrentLocation to) {
+	    LOG.info("TORRENT ADDRESS:" + to.getAddress());
+	    
 		if (_peers.contains(to) || linkManager.isConnectedTo(to))
 			return;
 		if (!ipFilter.allow(to.getAddress()))
@@ -588,6 +598,7 @@ public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListe
 		if (networkInstanceUtils.isMe(to.getAddress(), to.getPort()))
 			return;
 		if (_peers.add(to)) {
+		    LOG.info("Torrent Location " + to + "added to the list of peers");
 			synchronized(state.getLock()) {
 				if (state.get() == TorrentState.SCRAPING)
 					state.set(TorrentState.CONNECTING);
@@ -1025,4 +1036,17 @@ public class ManagedTorrent implements Torrent, DiskManagerListener, BTLinkListe
 		return isComplete() && linkManager.hasInterested() &&
 		!linkManager.hasUnchoked();
 	}
+	
+	/**
+	 * Call back to notify that secondary peer searching is complete
+	 */
+	void notifyPeerLocatorComplete(boolean success) {
+	    
+	    System.out.println("Complete: " + success);
+	    
+	}
+
+    public DHTPeerLocator getPeerLocator() {
+        return peerLocator;
+    }
 }

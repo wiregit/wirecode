@@ -32,6 +32,7 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
     private final Provider<TorrentManager> torrentManager;
     private final Provider<FileManager> fileManager;
     private final NetworkInstanceUtils networkInstanceUtils;
+    private final DHTPeerLocatorFactory peerLocatorFactory;
 
     @Inject
     public ManagedTorrentFactoryImpl(
@@ -46,6 +47,7 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
              Provider<IPFilter> ipFilter,
             Provider<TorrentManager> torrentManager,
             Provider<FileManager> fileManager,
+            DHTPeerLocatorFactory peerLocatorFactory,
             NetworkInstanceUtils networkInstanceUtils) {
         this.eventDispatcher = eventDispatcher;
         this.scheduledExecutorService = scheduledExecutorService;
@@ -58,6 +60,7 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
         this.ipFilter = ipFilter;
         this.torrentManager = torrentManager;
         this.fileManager = fileManager;
+        this.peerLocatorFactory = peerLocatorFactory;
         this.networkInstanceUtils = networkInstanceUtils;
     }
 
@@ -68,7 +71,7 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
         return new ManagedTorrent(context, eventDispatcher, scheduledExecutorService,
                 networkManager, trackerManagerFactory, chokerFactory, linkManagerFactory,
                 connectionFetcherFactory, contentManager.get(), ipFilter.get(), torrentManager.get(),
-                fileManager.get(), networkInstanceUtils);
+                fileManager.get(), peerLocatorFactory, networkInstanceUtils);
     }
 
 
