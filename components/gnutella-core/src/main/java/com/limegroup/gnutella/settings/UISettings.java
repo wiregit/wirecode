@@ -110,7 +110,7 @@ public final class UISettings extends LimeProps {
     
     /** Whether or not to use network-based images, or just always use built-in ones. */
     private static final BooleanSetting USE_NETWORK_IMAGES = FACTORY.createRemoteBooleanSetting("USE_NETWORK_IMAGES",
-            false, "UI.useNetworkImages");
+            true, "UI.useNetworkImages");
     
     /** Collection of info for the 'Getting Started' image. */
     public static final ImageInfo INTRO_IMAGE_INFO = new ImageInfoImpl(true);
@@ -146,7 +146,7 @@ public final class UISettings extends LimeProps {
         ImageInfoImpl(boolean intro) {
             this.intro = intro;
             imageUrl = FACTORY.createRemoteStringSetting(key("URL"), 
-                "http://clientpix.limewire.com/pix/" + (intro ? "intro" : "afterSearch") + ".png", remoteKey("Url"));
+                "http://clientpix.limewire.com/pix/" + (intro ? "intro" : "afterSearch"), remoteKey("Url"));
             proShowPic = FACTORY.createRemoteBooleanSetting(key("PRO_SHOW"), 
                 false, remoteKey("ProShow"));
             canLink = FACTORY.createRemoteBooleanSetting(key("HAS_LINK"), 
