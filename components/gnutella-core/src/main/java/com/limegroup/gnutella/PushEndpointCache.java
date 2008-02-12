@@ -52,8 +52,16 @@ public interface PushEndpointCache {
     public GUID updateProxiesFor(GUID guid, PushEndpoint pushEndpoint, boolean valid);
 
     public interface CachedPushEndpoint {
-        void updateProxies(Set<? extends IpPort> s, boolean add);        
-        void overwriteProxies(Set<? extends IpPort> s) ;        
+        /**
+         * Adds or removes the given set of ip ports depending on <code>add</code>.
+         * 
+         * @param add if false removes <code>proxies</code> otherwise adds them
+         */
+        void updateProxies(Set<? extends IpPort> proxies, boolean add);
+        /**
+         * Sets a new set of proxies overwriting the exiting one. 
+         */
+        void overwriteProxies(Set<? extends IpPort> proxies) ;        
         Set<IpPort> getProxies();        
         int getFeatures();        
         int getFWTVersion();        

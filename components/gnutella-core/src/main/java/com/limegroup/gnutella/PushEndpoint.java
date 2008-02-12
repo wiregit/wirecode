@@ -287,8 +287,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	}
 	
 	/**
-	 * 
-	 * @return a view of the current set of proxies.
+	 * @return a view of the current set of proxies, never returns null
 	 */
 	public Set<? extends IpPort> getProxies() {
 
