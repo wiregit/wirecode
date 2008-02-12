@@ -22,6 +22,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
@@ -34,7 +35,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.dht.db.AltLocFinder;
+import com.limegroup.gnutella.dht.db.PushEndpointService;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.MagnetDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.MagnetDownloadMementoImpl;
@@ -73,7 +74,9 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     
 	private MagnetOptions magnet;
 
-    private final AltLocFinder altLocFinder;
+    private final PushEndpointService pushEndpointManager;
+
+    private final AlternateLocationFactory alternateLocationFactory;
 
     /**
      * Creates a new MAGNET downloader.  Immediately tries to download from
@@ -108,7 +111,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
             Provider<HashTreeCache> tigerTreeCache, ApplicationServices applicationServices, 
-            RemoteFileDescFactory remoteFileDescFactory, AltLocFinder altLocFinder)
+            RemoteFileDescFactory remoteFileDescFactory, @Named ("pushEndpointManager") PushEndpointService pushEndpointManager)
 	{
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
@@ -116,7 +119,8 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
                 contentManager, sourceRankerFactory, urnCache, savedFileManager,
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
                 tigerTreeCache, applicationServices, remoteFileDescFactory);
-        this.altLocFinder = altLocFinder;
+        this.alternateLocationFactory = alternateLocationFactory;
+        this.pushEndpointManager = pushEndpointManager;
     }
     
     public void initialize() {
@@ -198,12 +202,20 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
         // be parallelized, but normally there's only one location to look up
         for (URN urn : magnet.getGUIDUrns()) {
             GUID guid = new GUID(GUID.fromHexString(urn.getNamespaceSpecificString()));
-            AlternateLocation altLoc = altLocFinder.getAlternateLocation(guid, sha1Urn);
+            PushEndpoint pushEndpoint = pushEndpointManager.getPushEndpoint(guid);
             if (LOG.isDebugEnabled())
-                LOG.debug(altLoc);
-            RemoteFileDesc rfd = altLoc.createRemoteFileDesc(size, remoteFileDescFactory);
-            addDownloadForced(rfd, true);
-            added = true;
+                LOG.debug(pushEndpoint);
+            AlternateLocation alternateLocation;
+            try {
+                alternateLocation = alternateLocationFactory.createPushAltLoc(pushEndpoint, sha1Urn);
+                RemoteFileDesc rfd = alternateLocation.createRemoteFileDesc(size, remoteFileDescFactory);
+                addDownloadForced(rfd, true);
+                added = true;
+            } catch (IOException e) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(e);
+                }
+            }
         }
         return added;
     }

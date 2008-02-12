@@ -62,7 +62,7 @@ class PushProxiesValueForSelf extends AbstractPushProxiesValue {
     }
 
     public int getFwtVersion() {
-        return self.supportsFWTVersion();
+        return self.getFWTVersion();
     }
     
     public int getPort() {

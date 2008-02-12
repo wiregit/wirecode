@@ -54,9 +54,9 @@ public class SelfEndpointTest extends BaseTestCase {
     public void testNetworkManagerChangesAreReflected() {
         // for fwt version
         networkManagerStub.setSupportsFWTVersion(0);
-        assertEquals(0, selfEndpoint.supportsFWTVersion());
+        assertEquals(0, selfEndpoint.getFWTVersion());
         networkManagerStub.setSupportsFWTVersion(1);
-        assertEquals(1, selfEndpoint.supportsFWTVersion());
+        assertEquals(1, selfEndpoint.getFWTVersion());
         
         // for external address
         networkManagerStub.setExternalAddress(new byte[4]);

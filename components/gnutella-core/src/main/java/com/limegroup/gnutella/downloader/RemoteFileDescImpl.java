@@ -495,7 +495,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
                 NetworkUtils.isPrivateAddress(_host))
             return false;
         
-        return _pushAddr == null ? false : _pushAddr.supportsFWTVersion() > 0;
+        return _pushAddr == null ? false : _pushAddr.getFWTVersion() > 0;
     }
 
     /* (non-Javadoc)

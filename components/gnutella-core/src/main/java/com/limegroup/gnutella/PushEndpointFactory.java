@@ -43,7 +43,9 @@ public interface PushEndpointFactory {
     public PushEndpoint createPushEndpoint(String httpString) throws IOException;
 
     /**
-     * Constructs a PushEndpoint from binary representation
+     * Constructs a PushEndpoint from binary representation and also updates all
+     * other cached {@link PushEndpoint} instances that are cached with the
+     * set of read proxies.
      */
     public PushEndpoint createFromBytes(DataInputStream dais) throws BadPacketException, IOException;
 

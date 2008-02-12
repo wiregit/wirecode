@@ -51,7 +51,7 @@ public class SelfEndpoint extends PushEndpoint {
      * we support the same FWT version if we support FWT at all
      */
     @Override
-    public int supportsFWTVersion() {
+    public int getFWTVersion() {
         return networkManager.supportsFWTVersion();
     }
 

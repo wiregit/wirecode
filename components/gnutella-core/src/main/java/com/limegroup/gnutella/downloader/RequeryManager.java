@@ -12,7 +12,7 @@ import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
-import com.limegroup.gnutella.dht.db.AltLocSearchListener;
+import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -79,8 +79,10 @@ class RequeryManager implements DHTEventListener {
     
     /**
      * Used to be notified of finished dht queries.
+     * 
+     * Package access for tests.
      */
-    private final AltLocSearchHandler searchHandler = new AltLocSearchHandler();
+    final AltLocSearchHandler searchHandler = new AltLocSearchHandler();
     
     RequeryManager(RequeryListener requeryListener, 
             DownloadManager manager,
@@ -256,13 +258,13 @@ class RequeryManager implements DHTEventListener {
                     connectionServices.getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
     }
 
-    private class AltLocSearchHandler implements AltLocSearchListener {
+    private class AltLocSearchHandler implements SearchListener<AlternateLocation> {
 
-        public void handleAltLocSearchDone(boolean success) {
+        public void handleSearchDone(boolean success) {
             RequeryManager.this.handleAltLocSearchDone(success);
         }
 
-        public void handleAlternateLocation(AlternateLocation alternateLocation) {
+        public void handleResult(AlternateLocation alternateLocation) {
             // ManagedDownloader installs its own AlternatelocationListener so it
             // is notified of all results
         }

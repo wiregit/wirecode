@@ -162,7 +162,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	    Set<? extends IpPort> proxies = getProxies();
 	    int payloadSize = getSizeBytes(proxies, includeTLS);
 	    IpPort addr = getValidExternalAddress();
-        int FWTVersion = supportsFWTVersion();
+        int FWTVersion = getFWTVersion();
 	    if (addr != null && FWTVersion > 0)
 	        payloadSize+=6;
 		byte [] ret = new byte[payloadSize];
@@ -176,7 +176,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * @param offset the offset within that byte [] to serialize
 	 */
 	public void toBytes(byte [] where, int offset, boolean includeTLS) {
-		toBytes(where, offset, getProxies(), getValidExternalAddress(),supportsFWTVersion(), includeTLS);
+		toBytes(where, offset, getProxies(), getValidExternalAddress(),getFWTVersion(), includeTLS);
 	}
 	
 	private void toBytes(byte []where, int offset, Set<? extends IpPort> proxies,
@@ -330,7 +330,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	 * This always returns the most current version we know the PE supports
 	 * unless it has never been put in the map.
 	 */
-	public int supportsFWTVersion() {
+	public int getFWTVersion() {
 		CachedPushEndpoint current = pushEndpointCache.getCached(_guid);
 		int currentVersion = current == null ? 
 				_fwtVersion : current.getFWTVersion();
@@ -357,7 +357,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
 	}
 	
 	public String toString() {
-		String ret = "PE [FEATURES:"+getFeatures()+", FWT Version:"+supportsFWTVersion()+
+		String ret = "PE [FEATURES:"+getFeatures()+", FWT Version:"+getFWTVersion()+
 			", GUID:"+_guid+", address: "+
             getAddress()+":"+getPort()+", proxies:{ "; 
         for(IpPort ppi : getProxies()) {
@@ -371,7 +371,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
         StringBuilder httpString =new StringBuilder(_guid.toHexString()).append(";");
 		
 		//if version is not 0, append it to the http string
-	    int fwtVersion=supportsFWTVersion();
+	    int fwtVersion=getFWTVersion();
 		if (fwtVersion!=0) {
 			httpString.append(HTTPConstants.FW_TRANSFER)
 				.append("/")
@@ -473,7 +473,7 @@ public class PushEndpoint implements HTTPHeaderValue, IpPort {
     }
     
     public PushEndpoint createClone() {
-        return new PushEndpoint(_guid.bytes(), getProxies(), getFeatures(), supportsFWTVersion(), getIpPort(), pushEndpointCache);
+        return new PushEndpoint(_guid.bytes(), getProxies(), getFeatures(), getFWTVersion(), getIpPort(), pushEndpointCache);
     }
 	
 }

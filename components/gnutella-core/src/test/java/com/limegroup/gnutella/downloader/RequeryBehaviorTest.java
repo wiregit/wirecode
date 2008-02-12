@@ -33,7 +33,7 @@ import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
-import com.limegroup.gnutella.dht.db.AltLocSearchListener;
+import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -131,7 +131,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         assertSame("time spent querying dht"+dhtQueryTime,DownloadStatus.QUERYING_DHT, downloader.getState());
         
         LOG.debug("dht query fails");
-        myAltFinder.listener.handleAltLocSearchDone(false);
+        myAltFinder.listener.handleSearchDone(false);
         assertSame(DownloadStatus.GAVE_UP,downloader.getState());
         waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.QUEUED,downloader.getState());
@@ -214,7 +214,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         // now tell them the dht query failed
         LOG.debug("dht query fails");
         assertNotNull(myAltFinder.listener);
-        myAltFinder.listener.handleAltLocSearchDone(false);
+        myAltFinder.listener.handleSearchDone(false);
         assertSame(DownloadStatus.GAVE_UP,downloader.getState());
         waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.QUEUED,downloader.getState());
@@ -308,7 +308,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         // now tell them the dht query failed
         LOG.debug("dht query fails");
         assertNotNull(myAltFinder.listener);
-        myAltFinder.listener.handleAltLocSearchDone(false);
+        myAltFinder.listener.handleSearchDone(false);
         assertSame(DownloadStatus.GAVE_UP, downloader.getState());
         waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.QUEUED, downloader.getState());
@@ -399,11 +399,11 @@ public class RequeryBehaviorTest extends LimeTestCase {
     
     @Singleton
     private static class MyAltLocFinder implements AltLocFinder {
-        private volatile AltLocSearchListener listener;
+        private volatile SearchListener<AlternateLocation> listener;
         
         volatile boolean cancelled;
         
-        public Shutdownable findAltLocs(URN urn, AltLocSearchListener listener) {
+        public Shutdownable findAltLocs(URN urn, SearchListener<AlternateLocation> listener) {
             this.listener = listener;
             return new Shutdownable() {
                 public void shutdown() {
@@ -412,12 +412,8 @@ public class RequeryBehaviorTest extends LimeTestCase {
             };
         }
 
-        public boolean findPushAltLocs(GUID guid, URN urn, AltLocSearchListener listener) {
+        public boolean findPushAltLocs(GUID guid, URN urn, SearchListener<AlternateLocation> listener) {
             return true;
-        }
-
-        public AlternateLocation getAlternateLocation(GUID guid, URN urn) {
-            return null;
         }
     }
     

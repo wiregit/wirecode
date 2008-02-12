@@ -41,6 +41,7 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -53,7 +54,7 @@ import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.util.LimeTestCase;
 
-public class DownloadTestCase extends LimeTestCase {
+public abstract class DownloadTestCase extends LimeTestCase {
 
     private static final Log LOG = LogFactory.getLog(DownloadTestCase.class);
 
@@ -282,8 +283,20 @@ public class DownloadTestCase extends LimeTestCase {
     protected void tGeneric(RemoteFileDesc[] rfds, RemoteFileDesc[] later,
             List<? extends RemoteFileDesc> alts) throws Exception {
         Downloader download = null;
-
         download = downloadServices.download(rfds, alts, null, false);
+        tGeneric(download, later, rfds);
+    }
+    
+    protected void tGeneric(MagnetOptions magnet) throws Exception {
+        Downloader download = downloadServices.download(magnet, false);
+        tGeneric(download, null, null);
+    }
+    
+    /**
+     * Performs a generic download of the file specified in <tt>rfds</tt>.
+     */
+    protected void tGeneric(Downloader download, RemoteFileDesc[] later,
+            RemoteFileDesc[] rfds) throws Exception {
         if (later != null) {
             Thread.sleep(100);
             for (int i = 0; i < later.length; i++)
@@ -297,7 +310,7 @@ public class DownloadTestCase extends LimeTestCase {
             fail("FAILED: complete corrupt");
 
         IncompleteFileManager ifm = downloadManager.getIncompleteFileManager();
-        for (int i = 0; i < rfds.length; i++) {
+        for (int i = 0; rfds != null && i < rfds.length; i++) {
             File incomplete = ifm.getFile(rfds[i]);
             VerifyingFile vf = ifm.getEntry(incomplete);
             assertNull("verifying file should be null", vf);

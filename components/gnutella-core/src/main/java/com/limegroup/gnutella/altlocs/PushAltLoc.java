@@ -39,7 +39,7 @@ public class PushAltLoc extends AbstractAlternateLocation {
 		super(sha1);
 		
 		if (address == null)
-			throw new IOException("null address");
+			throw new NullPointerException("null address");
 		
 		_pushAddress = address;
         this.applicationServices = applicationServices;
@@ -105,7 +105,7 @@ public class PushAltLoc extends AbstractAlternateLocation {
      * 0 if its not supported.
      */
     public int supportsFWTVersion() {
-    	return _pushAddress.supportsFWTVersion();
+    	return _pushAddress.getFWTVersion();
     }
     
     // stubbed out -- no demotion or promotion for push locs.

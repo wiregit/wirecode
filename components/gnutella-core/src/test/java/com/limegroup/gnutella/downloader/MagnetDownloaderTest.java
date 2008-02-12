@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadCallback;
@@ -37,6 +38,8 @@ import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
+import com.limegroup.gnutella.dht.db.PushEndpointManager;
+import com.limegroup.gnutella.dht.db.PushEndpointService;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -57,8 +60,8 @@ public class MagnetDownloaderTest extends LimeTestCase {
 	//private static final Log LOG = LogFactory.getLog(MagnetDownloaderTest.class);
     private DownloadManager downloadManager;
     private Mockery context;
-    private AltLocFinder altLocFinder;
     private Injector injector;
+    private PushEndpointService pushEndpointService;
 	
     /**
      * Creates a new test instance.
@@ -84,7 +87,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
         LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProviderStub);
         
         context = new Mockery();
-        altLocFinder = context.mock(AltLocFinder.class);
+        pushEndpointService = context.mock(PushEndpointService.class);
         
         injector = LimeTestUtils.createInjector(new AbstractModule() {
            @Override
@@ -92,7 +95,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
                bind(FileManager.class).to(FileManagerStub.class);
                bind(MessageRouter.class).to(MessageRouterStub.class);
                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
-               bind(AltLocFinder.class).toInstance(altLocFinder);
+               bind(PushEndpointService.class).annotatedWith(Names.named("pushEndpointManager")).toInstance(pushEndpointService);
             } 
         });
         
@@ -213,7 +216,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
         final RemoteFileDesc rfd = new UrlRemoteFileDescImpl("host", 80, "filename", 1000, new UrnSet(magnet.getSHA1Urn()), new URL("http://host:80/hello"));
         
         context.checking(new Expectations() {{
-            one(altLocFinder).getAlternateLocation(with(equal(guid)), with(equal(magnet.getSHA1Urn())));
+            one(pushEndpointService).getPushEndpoint(with(equal(guid)));
             will(returnValue(alternateLocation));
             one(alternateLocation).createRemoteFileDesc(with(any(Long.class)), with(any(RemoteFileDescFactory.class)));
             will(returnValue(rfd));
@@ -244,14 +247,14 @@ public class MagnetDownloaderTest extends LimeTestCase {
                 VerifyingFileFactory verifyingFileFactory, DiskController diskController,
                 IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                 Provider<MessageRouter> messageRouter, Provider<HashTreeCache> tigerTreeCache,
-                ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory, AltLocFinder altLocFinder)
+                ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory, PushEndpointManager pushEndpointManager)
                 throws SaveLocationException {
             super(saveLocationManager, downloadManager, fileManager, incompleteFileManager, downloadCallback,
                     networkManager, alternateLocationFactory, requeryManagerFactory, queryRequestFactory,
                     onDemandUnicaster, downloadWorkerFactory, altLocManager, contentManager,
                     sourceRankerFactory, urnCache, savedFileManager, verifyingFileFactory, diskController,
                     ipFilter, backgroundExecutor, messageRouter, tigerTreeCache, applicationServices,
-                    remoteFileDescFactory, altLocFinder);
+                    remoteFileDescFactory, pushEndpointManager);
         }
         
         @Override

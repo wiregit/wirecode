@@ -1,50 +1,22 @@
 package com.limegroup.gnutella.dht.db;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
-import org.jmock.Expectations;
-import org.jmock.Mockery;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.util.MojitoUtils;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
-import com.limegroup.gnutella.altlocs.PushAltLoc;
-import com.limegroup.gnutella.dht.DHTManager;
-import com.limegroup.gnutella.dht.DHTTestCase;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.security.MerkleTree;
-import com.limegroup.gnutella.stubs.NetworkManagerStub;
-import com.limegroup.gnutella.util.MockUtils;
 
-public class AltLocFinderImplTest extends DHTTestCase {
+public class AltLocFinderImplTest extends DHTFinderTestCase {
 
-    private Mockery context;
-    private MojitoDHT mojitoDHT;
-    private List<MojitoDHT> dhts = Collections.emptyList();
-    private Injector injector;
-    private AltLocValueFactory altLocValueFactory;
     private AltLocFinder altLocFinder;
-    private DHTManager dhtManager;
-    private AlternateLocationFactory alternateLocationFactory;
-    private NetworkManagerStub networkManager;
-    private PushProxiesValueFactory pushProxiesValueFactory;
-    private PushEndpointFactory pushEndpointFactory;
 
     public AltLocFinderImplTest(String name) {
         super(name);
@@ -56,49 +28,8 @@ public class AltLocFinderImplTest extends DHTTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        setSettings();
-        setLocalIsPrivate(false);
-        
-        context = new Mockery();
-        dhtManager = context.mock(DHTManager.class);
-        dhts = MojitoUtils.createBootStrappedDHTs(1);
-        
-        mojitoDHT = dhts.get(0);
-        context.checking(new Expectations() {{
-            allowing(dhtManager).getMojitoDHT();
-            will(returnValue(mojitoDHT));
-        }});
-        assertTrue(dhtManager.getMojitoDHT().isBootstrapped());
-
-        networkManager = new NetworkManagerStub();
-
-        // to have non-empty push proxies to send
-        final ConnectionManager connectionManager = MockUtils.createConnectionManagerWithPushProxies(context);
-        
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(DHTManager.class).toInstance(dhtManager);
-                bind(NetworkManager.class).toInstance(networkManager);
-                bind(ConnectionManager.class).toInstance(connectionManager);
-            }
-        });
-        altLocValueFactory = injector.getInstance(AltLocValueFactory.class);
+        super.setUp();
         altLocFinder = injector.getInstance(AltLocFinder.class);
-        alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
-        pushProxiesValueFactory = injector.getInstance(PushProxiesValueFactory.class);
-        pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
-        
-        // register necessary factories
-        mojitoDHT.getDHTValueFactoryManager().addValueFactory(AbstractAltLocValue.ALT_LOC, altLocValueFactory);
-        mojitoDHT.getDHTValueFactoryManager().addValueFactory(AbstractPushProxiesValue.PUSH_PROXIES, pushProxiesValueFactory);
-    }
-    
-    @Override
-    protected void tearDown() throws Exception {
-        for (MojitoDHT dht : dhts) {
-            dht.close();
-        }
     }
     
     public void testAltLocListenerIsNotifiedOfNonFirewalledLocations() throws Exception {
@@ -195,32 +126,19 @@ public class AltLocFinderImplTest extends DHTTestCase {
         }
     }
     
-    public void testGetGUIDAlternateLocation() throws Exception {
-        URN urn = publishPushAltLoc(true);
-        PushAltLoc expectedAltLoc = (PushAltLoc) alternateLocationFactory.createPushAltLoc(pushEndpointFactory.createForSelf(), urn);
-        AlternateLocation result = altLocFinder.getAlternateLocation(new GUID(expectedAltLoc.getPushAddress().getClientGUID()), urn);
-        assertEquals(expectedAltLoc, result);
-    }
-    
-    public void testGetUnavailableGUIDAlternateLocation() throws Exception {
-        URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-        AlternateLocation result = altLocFinder.getAlternateLocation(new GUID(), urn);
-        assertNull(result);
-    }
-    
-    private static class AltLocSearchHandler implements AltLocSearchListener {
+    private static class AltLocSearchHandler implements SearchListener<AlternateLocation> {
 
         CountDownLatch doneLatch = new CountDownLatch(1);
         CountDownLatch alternateLocationLatch = new CountDownLatch(1);
         volatile AlternateLocation altLoc;
         volatile boolean success;
         
-        public void handleAltLocSearchDone(boolean success) {
+        public void handleSearchDone(boolean success) {
             this.success = success;
             doneLatch.countDown();
         }
 
-        public void handleAlternateLocation(AlternateLocation alternateLocation) {
+        public void handleResult(AlternateLocation alternateLocation) {
             altLoc = alternateLocation;
             alternateLocationLatch.countDown();
         }

@@ -21,7 +21,7 @@ import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 public class PushEndpointCacheImpl implements PushEndpointCache {
     
     /**
-     * A mapping from GUID to a GUIDSetWrapper.  This is used to ensure
+     * A mapping from GUID to a CachedPushEndpoint.  This is used to ensure
      * that all PE's will have access to the same PushProxies, even if
      * multiple PE's exist for a single GUID.  Because access to the proxies
      * is referenced from this GUID_PROXY_MAP, the PE will always receive the
@@ -36,7 +36,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
      * object that is stored in the map -- to ensure that the map will not GC
      * the GUID while it is still in use by a PE.
      *
-     * The value is a GUIDSetWrapper (containing a WeakReference to the
+     * The value is a CachedPushEndpoint SetWrapper (containing a WeakReference to the
      * GUID key as well as the Set of proxies) so that subsequent PEs can 
      * reference the true key object.  A WeakReference is used to allow
      * GC'ing to still work and the map to ultimately remove unused keys.
@@ -113,9 +113,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
     }
 
     public CachedPushEndpoint getCached(GUID guid) {
-        synchronized(GUID_PROXY_MAP) {
-            return GUID_PROXY_MAP.get(guid);
-        }
+        return GUID_PROXY_MAP.get(guid);
     }
 
     public GUID updateProxiesFor(GUID guid, PushEndpoint pushEndpoint, boolean valid) {
@@ -133,7 +131,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
             // add a new one atomically
             // (we don't care about the proxies of the expired mapping)
             if (existing == null || guidRef==null) {                
-                existing = new CachedPushEndpointImpl(guid, pushEndpoint.getFeatures(), pushEndpoint.supportsFWTVersion());
+                existing = new CachedPushEndpointImpl(guid, pushEndpoint.getFeatures(), pushEndpoint.getFWTVersion());
                 if (valid)
                     existing.updateProxies(pushEndpoint.getProxies(), true);
                 else
@@ -151,9 +149,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
     }
 
     public void clear() {
-        synchronized (GUID_PROXY_MAP) {
-            GUID_PROXY_MAP.clear();
-        }
+        GUID_PROXY_MAP.clear();
     }
     
     private final class WeakCleaner implements Runnable {
@@ -162,7 +158,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
         }
     }
     
-    static class CachedPushEndpointImpl implements CachedPushEndpoint {
+    class CachedPushEndpointImpl implements CachedPushEndpoint {
         private final WeakReference<GUID> _guidRef;
         private Set<IpPort> _proxies;
         private int _features,_fwtVersion;
@@ -229,6 +225,10 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
         
         public GUID getGuid() {
             return _guidRef.get();
+        }
+
+        public PushEndpoint createPushEndpoint() {
+            return new PushEndpoint(getGuid().bytes(), getProxies(), (byte)getFeatures(), getFWTVersion(), getIpPort(), PushEndpointCacheImpl.this);
         }
     }
 

@@ -388,7 +388,7 @@ public class DownloadPushTest extends DownloadTestCase {
         assertEquals(UDPConnection.VERSION, pushLoc.supportsFWTVersion());
 
         RemoteFileDesc readRFD = pushLoc.createRemoteFileDesc(1, remoteFileDescFactory);
-        assertTrue(readRFD.getPushAddr().supportsFWTVersion() > 0);
+        assertTrue(readRFD.getPushAddr().getFWTVersion() > 0);
         assertTrue(readRFD.supportsFWTransfer());
         assertEquals(readRFD.getPushAddr().getPort(), FWTPort);
 

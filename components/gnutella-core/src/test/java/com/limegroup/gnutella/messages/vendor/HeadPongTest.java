@@ -1152,9 +1152,9 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(-1, in.read());
         
         // Make sure it went in round-robin order for writing.
-        assertEquals(0, pe1.supportsFWTVersion());
-        assertEquals(1, pe2.supportsFWTVersion());
-        assertEquals(0, pe3.supportsFWTVersion());
+        assertEquals(0, pe1.getFWTVersion());
+        assertEquals(1, pe2.getFWTVersion());
+        assertEquals(0, pe3.getFWTVersion());
         
         // Ok, it's easy enough to test the FWT one, since there's only one.
         assertEquals(peFwtGUID.bytes(), pe2.getClientGUID());
@@ -1294,7 +1294,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(0, in.available());
         assertEquals(-1, in.read());
         
-        assertEquals(1, pe1.supportsFWTVersion());
+        assertEquals(1, pe1.getFWTVersion());
         assertEquals(peFwtGUID.bytes(), pe1.getClientGUID());
         assertEquals("20.21.23.23", pe1.getAddress());
         assertEquals(10, pe1.getPort());
