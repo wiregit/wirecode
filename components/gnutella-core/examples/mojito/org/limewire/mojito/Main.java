@@ -11,6 +11,8 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.io.LocalSocketAddressService;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.BootstrapResult.ResultType;
@@ -40,6 +42,24 @@ public class Main {
                 bootstrapHost = new InetSocketAddress(args[2], Integer.parseInt(args[3]));
             }
         }
+        
+        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
+            public byte[] getLocalAddress() {
+                throw new UnsupportedOperationException("Mojito does not use this method and if it does implement it!");
+            }
+
+            public int getLocalPort() {
+                throw new UnsupportedOperationException("Mojito does not use this method and if it does implement it!");
+            }
+
+            public boolean isLocalAddressPrivate() {
+                return NetworkSettings.LOCAL_IS_PRIVATE.getValue();
+            }
+
+            public boolean isTLSCapable() {
+                throw new UnsupportedOperationException("Mojito does not use this method and if it does implement it!");
+            }
+        });
         
         RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(1.0f);
         NetworkSettings.LOCAL_IS_PRIVATE.setValue(false);
