@@ -127,7 +127,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
     }
 
     /**
-     * Removes the Query frome the list of queries kept track of.  You should do
+     * Removes the Query from the list of queries kept track of.  You should do
      * this EVERY TIME you stop a query.
      *
      * @param guid the guid of the query that has been removed.
