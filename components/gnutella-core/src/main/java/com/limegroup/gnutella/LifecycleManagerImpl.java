@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jivesoftware.launcher.Startup;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.InspectablePrimitive;
@@ -26,6 +27,7 @@ import org.limewire.statistic.StatisticAccumulator;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
+import org.limewire.xmpp.LimeWirePlugin;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -475,7 +477,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
             LOG.trace("END StoreServer");
         } else {
             LOG.trace("Disabling the StoreServer");
-        }      
+        }
+
+        Startup.main(new String[]{});
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
             startManualGCThread();
