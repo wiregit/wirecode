@@ -162,6 +162,7 @@ public final class UISettings extends LimeProps {
         }
         
         private String remoteKey(String key) {
+                                        // DO NOT CHANGE THIS -- A BUG THAT MUST STAY.
             return intro ? "UI.intro" + key : " + UI.afterSearch" + key;
         }
 
