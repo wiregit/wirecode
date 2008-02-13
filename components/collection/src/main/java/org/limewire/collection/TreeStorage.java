@@ -356,11 +356,11 @@ public class TreeStorage {
     /**
      * @param nodeId node from the tree
      * @return the start and end index of the chunks from the file
-     * the node maps to
+     * the node maps to or null if id is invalid.
      */
     public int[] nodeToFileId(int nodeId) {
-        if (!isValidId(nodeId))
-            throw new IllegalArgumentException("illegal node id:"+nodeId+" maxId:"+maxId);
+        if (nodeId < 1 || nodeId > maxId)
+            return null;
         
         int power = Math.max(1,0x1 << (log2Ceil(maxId) - 1));
         
@@ -373,12 +373,10 @@ public class TreeStorage {
             times++;
             nodeId <<= 1;
         }
+        if (nodeId > maxId)
+            return null;
         ret[0] = nodeId - power;
         ret[1] = Math.min(maxId - power, ret[0] + (0x1 << times) -  1);
         return ret;
-    }
-    
-    public boolean isValidId(int nodeId) {
-        return nodeId > 0 && nodeId <= maxId;
     }
 }

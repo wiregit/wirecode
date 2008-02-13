@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.collection.IntervalSet;
-import org.limewire.util.Base32;
 import org.limewire.util.ByteOrder;
 
-import com.limegroup.gnutella.settings.BugSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 
 
@@ -115,20 +113,7 @@ public class IntervalEncoder {
                         nodeId |= (b[j + k] & 0xFF);
                     }
                     
-                    try {
-                        ret.decode(size, nodeId);
-                    } catch (IllegalArgumentException bad) {
-                        if (!BugSettings.SEND_TREE_STORAGE_BUGS.getValue())
-                            continue; // just ignore the interval
-                        
-                        StringBuilder report = new StringBuilder();
-                        report.append("intervalset decoding problem");
-                        report.append("\nsize ").append(size).append(" nodeId ").append(nodeId);
-                        report.append("\nkey ").append(key).append(" raw data ").append(Base32.encode(b));
-                        report.append("\ni ").append(i).append(" j ").append(j);
-                        report.append("\ndecoded so far ").append(ret);
-                        throw new IllegalArgumentException(report.toString(),bad);
-                    }
+                    ret.decode(size, nodeId);
                 }
             }
         }
