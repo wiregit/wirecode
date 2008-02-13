@@ -441,7 +441,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	}
 	
 	public boolean conflicts(URN urn, long fileSize, File... file) {
-		if (urn.equals(urn))
+		if (this.urn.equals(urn))
 			return true;
 		for (File f : file) {
 			if (conflictsSaveFile(f))
