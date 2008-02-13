@@ -21,7 +21,7 @@ public interface PushEndpointFactory {
 
     /**
      * @param guid the client guid  
-     * @param proxies the push proxies for that host
+     * @param proxies the push proxies for that host, can be empty, see {@link IpPort#EMPTY_SET}.
      */
     public PushEndpoint createPushEndpoint(byte[] guid, Set<? extends IpPort> proxies);
 
