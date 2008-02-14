@@ -116,7 +116,6 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
      */ 
     public SearchResultStats addQuery(QueryRequest qr) {
         LOG.trace("entered SearchResultHandler.addQuery(QueryRequest)");
-        System.out.println(" *** SearchResultHandlerImpl::addQuery().. POINT A; guid = " + new GUID(qr.getGUID()).toString());
         
         if (!qr.isBrowseHostQuery() && !qr.isWhatIsNewRequest())
             spamManager.get().startedQuery(qr);
@@ -246,14 +245,11 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
      *  otherwise <tt>false</tt> 
      */
     public void handleQueryReply(final QueryReply qr) {
-        System.out.println(" *** SecureResultHandlerImpl::handleQueryReply().. POINT A");
-        
         HostData data;
         try {
             data = qr.getHostData();
         } catch(BadPacketException bpe) {
             LOG.debug("bad packet reading qr", bpe);
-            System.out.println(" *** SecureResultHandlerImpl::handleQueryReply().. POINT B");
             return;
         }
 
@@ -264,12 +260,10 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             // displayed
             if(data.getQuality() < SearchSettings.MINIMUM_SEARCH_QUALITY.getValue()) {
                 LOG.debug("Ignoring because low quality");
-                System.out.println(" *** SecureResultHandlerImpl::handleQueryReply().. POINT C");
                 return;
             }
             if(data.getSpeed() < SearchSettings.MINIMUM_SEARCH_SPEED.getValue()) {
                 LOG.debug("Ignoring because low speed");
-                System.out.println(" *** SecureResultHandlerImpl::handleQueryReply().. POINT D");
                 return;
             }
             // if the other side is firewalled AND
@@ -284,19 +278,14 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                  qr.getSupportsFWTransfer())
                )  {
                LOG.debug("Ignoring from firewall funkiness");
-               System.out.println(" *** SecureResultHandlerImpl::handleQueryReply().. POINT E");
                return;
             }
         }
 
         // throw away results that aren't secure.
         int secureStatus = qr.getSecureStatus();
-        if(secureStatus == SecureMessage.FAILED) {
-            System.out.println(" *** SecureResultHandlerImpl::handleQueryReply().. POINT F");
+        if(secureStatus == SecureMessage.FAILED)
             return;
-        }
-        
-        System.out.println(" *** SecureResultHandlerImpl::handleQueryReply().. POINT G");
         
         // XXX
         //
@@ -329,19 +318,15 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                                                  final int numGoodSentToFrontEnd */ ) {
 
         LOG.trace("SRH.accountAndUpdateDynamicQueriers(): entered.");
-        System.out.println(" *** SecureResultHandlerImpl::accountAndUpdateDynamicQueriers().. POINT A");
         
         // get the correct GuidCount
         GuidCount gc = retrieveGuidCount(new GUID(qr.getGUID()));
         
-        if (gc == null) {
-            System.out.println(" *** SecureResultHandlerImpl::accountAndUpdateDynamicQueriers().. POINT B");
-            
+        if (gc == null)
             // 0. probably just hit lag, or....
             // 1. we could be under attack - hits not meant for us
             // 2. programmer error - ejected a query we should not have
             return;
-        }
         
         int numGoodSentToFrontEnd = gc.addQueryReply(this, qr, data);
             
@@ -374,7 +359,6 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             }
         }
         LOG.trace("SRH.accountAndUpdateDynamicQueriers(): returning.");
-        System.out.println(" *** SecureResultHandlerImpl::accountAndUpdateDynamicQueriers().. POINT Z");
     }
 
 
@@ -394,21 +378,13 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
 
 
     public GuidCount retrieveGuidCount(GUID guid) {
-        System.out.println(" *** SearchResultHandlerImpl::retrieveGuidCount().. POINT A; guid = " + guid.toString());
-        
         synchronized (GUID_COUNTS) {
             for(GuidCount currGC : GUID_COUNTS) {
-                if (currGC.getGUID().equals(guid)) {
-                    System.out.println(" *** SearchResultHandlerImpl::retrieveGuidCount().. POINT B");
+                if (currGC.getGUID().equals(guid))
                     return currGC;
-                }
-                else
-                    System.out.println(" *** SearchResultHandlerImpl::retrieveGuidCount().. POINT C; guid = " + guid.toString());
             }
         }
         
-        System.out.println(" *** SearchResultHandlerImpl::retrieveGuidCount().. POINT D");
-
         return null;
     }
     
@@ -525,10 +501,8 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
         public int getNumberOfLocations (URN urn) {
             ResourceLocationCounter rlc = _isets.get(urn);
             
-            if (rlc == null) {
-                System.out.println(" *** GuidCount::getNumberOfLocations().. POINT A; isets.size = " + _isets.size());
+            if (rlc == null)
                 return 0;
-            }
             
             return rlc.getLocationCount();
         }
@@ -558,8 +532,6 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
          * @param qr
          */
         public int addQueryReply(SearchResultHandler srh, QueryReply qr, HostData data) {
-            System.out.println(" *** GuidCount::addQueryReply().. POINT A");
-            
             List<Response> results = null;
             double numBad = 0;
             int numGood = 0;
@@ -568,45 +540,33 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                 results = qr.getResultsAsList();
             } catch (BadPacketException e) {
                 LOG.debug("Error gettig results", e);
-                System.out.println(" *** GuidCount::addQueryReply().. POINT B");
                 return 0;
             }
 
             // throw away results that aren't secure.
             int secureStatus = qr.getSecureStatus();
-            if(secureStatus == SecureMessage.FAILED) {
-                System.out.println(" *** GuidCount::addQueryReply().. POINT C");
+            if(secureStatus == SecureMessage.FAILED)
                 return 0;
-            }
             
             boolean skipSpam = srh.isWhatIsNew(qr) || qr.isBrowseHostReply();
 
             for (Response response : results) {
-                System.out.println(" *** GuidCount::addQueryReply().. POINT D");
-                
                 if (!qr.isBrowseHostReply() && secureStatus != SecureMessage.SECURE) {
-                    if (!srh.getSearchServices().matchesType(data.getMessageGUID(), response)) {
-                        System.out.println(" *** GuidCount::addQueryReply().. POINT E");
+                    if (!srh.getSearchServices().matchesType(data.getMessageGUID(), response))
                         continue;
-                    }
 
-                    if (!srh.getSearchServices().matchesQuery(data.getMessageGUID(), response)) {
-                        System.out.println(" *** GuidCount::addQueryReply().. POINT F");
+                    if (!srh.getSearchServices().matchesQuery(data.getMessageGUID(), response))
                         continue;
-                    }
                 }
 
                 // Throw away results from Mandragore Worm
-                if (srh.getSearchServices().isMandragoreWorm(data.getMessageGUID(), response)) {
-                    System.out.println(" *** GuidCount::addQueryReply().. POINT G");
+                if (srh.getSearchServices().isMandragoreWorm(data.getMessageGUID(), response))
                     continue;
-                }
                 
                 // If there was an action, only allow it if it's a secure message.
                 LimeXMLDocument doc = response.getDocument();
                 if (ApplicationSettings.USE_SECURE_RESULTS.getValue() &&
                    doc != null && !"".equals(doc.getAction()) && secureStatus != SecureMessage.SECURE) {
-                   System.out.println(" *** GuidCount::addQueryReply().. POINT H");
                    continue;
                 }
                 
@@ -624,27 +584,17 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                 srh.getActivityCallback().get().handleQueryResult(rfd, data, alts);
                 
                 if (skipSpam || !srh.getSpamManager().get().isSpam(rfd)) {
-                    if (is != null) {
-                        System.out.println(" *** GuidCount::addQueryReply().. POINT I");
+                    if (is != null)
                         numGood += addIntervalSet(response.getUrns(), is);
-                    }
-                    else {
-                        System.out.println(" *** GuidCount::addQueryReply().. POINT J");
+                    else
                         numGood += addLocation(response.getUrns());
-                    }
                 }
-                else {
-                    System.out.println(" *** GuidCount::addQueryReply().. POINT K");
+                else
                     numBad++;
-                }
-                
-                System.out.println(" *** GuidCount::addQueryReply().. POINT L");
             } //end of response loop
             
             numGood += Math.ceil(numBad * SearchSettings.SPAM_RESULT_RATIO.getValue());
             _numGoodResults += numGood;
-            
-            System.out.println(" *** GuidCount::addQueryReply().. POINT Z");
             
             return numGood;
         }
@@ -667,10 +617,8 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             int count_after = 0;
             
             for (URN urn : urns) {
-                if (!urn.isSHA1()) {
-                    System.out.println(" *** GuidCount::addIntervalSet().. POINT A");
+                if (!urn.isSHA1())
                     continue;
-                }
                 
                 if (null == (rlc = _isets.get(urn)))
                     _isets.put(urn, (rlc = new ResourceLocationCounter(urn)));
@@ -692,10 +640,8 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             int count_after = 1;
             
             for (URN urn : urns) {
-                if (!urn.isSHA1()) {
-                    System.out.println(" *** GuidCount::addLocation().. POINT A");
+                if (!urn.isSHA1())
                     continue;
-                }
                 
                 if (null == (rlc = _isets.get(urn)))
                     _isets.put(urn, (rlc = new ResourceLocationCounter(urn)));

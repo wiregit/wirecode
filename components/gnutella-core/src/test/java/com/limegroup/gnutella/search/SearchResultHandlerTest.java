@@ -656,7 +656,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
             atLeast(1).of(queryRequest).isWhatIsNewRequest();
             
             atLeast(1).of(queryRequest).getGUID();
-            will(returnValue(new byte[16]));
+            will(returnValue(guid));
             
             atLeast(1).of(queryReply).getGUID();
             will(returnValue(guid));
@@ -782,6 +782,45 @@ public class SearchResultHandlerTest extends LimeTestCase {
         assertEquals(0, searchResultHandler.getNumResultsForQuery(new GUID(guid)));
         srs.addQueryReply(searchResultHandler, queryReply, hostData);
         assertEquals(1, searchResultHandler.getNumResultsForQuery(new GUID(guid)));
+        
+        m.assertIsSatisfied();
+    }
+    
+    /**
+     * 
+     * @throws Exception
+     */
+    public void testIsWhatIsNew() throws Exception {
+        // add query request
+        //   is what is new request
+        // use query reply to call isWhatIsNew
+        // verify that it is true
+        
+        Mockery m = new Mockery();
+        
+        final QueryRequest queryRequest = m.mock(QueryRequest.class);
+        final QueryReply queryReply = m.mock(QueryReply.class);
+        
+        List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
+        map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
+        final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        
+        m.checking(new Expectations() {{
+            atLeast(1).of(queryRequest).isBrowseHostQuery();
+            
+            atLeast(1).of(queryRequest).isWhatIsNewRequest();
+            will(returnValue(true));
+            
+            atLeast(1).of(queryRequest).getGUID();
+            will(returnValue(guid));
+            
+            atLeast(1).of(queryReply).getGUID();
+            will(returnValue(guid));
+        }});
+        
+        assertEquals(false, searchResultHandler.isWhatIsNew(queryReply));
+        searchResultHandler.addQuery(queryRequest);
+        assertEquals(true, searchResultHandler.isWhatIsNew(queryReply));
         
         m.assertIsSatisfied();
     }
