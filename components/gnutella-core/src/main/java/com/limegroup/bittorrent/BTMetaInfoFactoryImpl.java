@@ -25,13 +25,7 @@ public class BTMetaInfoFactoryImpl implements BTMetaInfoFactory {
         return new BTMetaInfoImpl(data);
     }
     
-    /**
-     * Reads a BTMetaInfo from byte []
-     * 
-     * @param torrent byte array with the contents of .torrent
-     * @return new instance of BTMetaInfo if all went well
-     * @throws IOException if parsing or reading failed.
-     */
+
     public BTMetaInfo createBTMetaInfoFromBytes(byte []torrent) throws IOException {
         try {
             Object metaInfo = Token.parse(torrent);

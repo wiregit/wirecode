@@ -18,9 +18,7 @@ import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 
 public class TrackerManager {
-	
-    boolean recievedResponse = false;
-    
+	        
     private static final Log LOG = LogFactory.getLog(TrackerManager.class);
 	
 	/**
@@ -182,32 +180,21 @@ public class TrackerManager {
 		
 		if (response != null) {
 				for (TorrentLocation next : response.PEERS) {
-					torrent.addEndpoint(next);
-					LOG.info("torrent name: " + torrent.getMetaInfo().getName());
-					LOG.info("tor loc IP: " + next.getAddress());
-					torrent.getPeerLocator().publish(next);									
+					torrent.addEndpoint(next);								
 				}				
 				minWaitTime = response.INTERVAL * 1000;
 				
 				if (response.FAILURE_REASON != null) {
 					t.recordFailure();
                     lastFailureReason = response.FAILURE_REASON;
-                    //TODO remove this
-//                    try {
-//                    torrent.getPeerLocator().publish(new TorrentLocation(InetAddress.getByName("127.0.0.1"), 4444, new byte[0]));
-//                    LOG.info("PUBLISHED");
-//                    } catch (UnknownHostException UHE) {
-//                        LOG.info(UHE);
-//                    }
-                    torrent.getPeerLocator().startSearching();
-                    LOG.info("searcheD");
+                    torrent.getDHTPeerLocator().startSearching();
 				} else {
-					t.recordSuccess();		
+					t.recordSuccess();
 				}
 		} else {
 			t.recordFailure();			
 			torrent.trackerRequestFailed();
-			torrent.getPeerLocator().startSearching();
+			torrent.getDHTPeerLocator().startSearching();
 		}
 
 		if (torrent.isActive()) {

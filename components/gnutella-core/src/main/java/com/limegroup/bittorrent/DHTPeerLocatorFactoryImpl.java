@@ -20,7 +20,7 @@ public class DHTPeerLocatorFactoryImpl implements DHTPeerLocatorFactory {
         this.NETWORK_MANAGER      = networkManager;
     }    
     
-    public DHTPeerLocator create(ManagedTorrent torrent, BTMetaInfo torrentMeta) {
+    public DHTPeerLocator createDHTPeerLocator(ManagedTorrent torrent, BTMetaInfo torrentMeta) {
 
         return new DHTPeerLocatorImpl(MANAGER, APPLICATION_SERVICES, NETWORK_MANAGER, 
                                     torrent, torrentMeta);

@@ -1,12 +1,18 @@
 package com.limegroup.bittorrent;
 
-import org.limewire.nio.observer.Shutdownable;
 
 
 public interface DHTPeerLocator {
 
-    public void publish(TorrentLocation torLoc);
+    /**
+     * Stores the local node in the DHT
+     * 
+     */
+    public void publishYourSelf();
 
-    public Shutdownable startSearching();
+    /**
+     * Searches for peers sharing the given torrent file
+     */
+    public void startSearching();
 
 }

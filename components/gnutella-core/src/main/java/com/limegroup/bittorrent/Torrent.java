@@ -82,5 +82,5 @@ interface Torrent {
 	/**
 	 * Pauses the torrent.
 	 */
-	public abstract void pause();
+	public abstract void pause();		
 }

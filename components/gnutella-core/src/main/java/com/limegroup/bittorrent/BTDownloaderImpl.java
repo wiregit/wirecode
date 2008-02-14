@@ -87,7 +87,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 		    setDefaultFileName(btMetaInfo.getName());
 		}
         this.torrentContext = btContextFactory.createBTContext(btMetaInfo);
-        this.torrent = managedTorrentFactory.create(torrentContext);
+        this.torrent = managedTorrentFactory.create(torrentContext);        
 	}
 	
 	/**
@@ -400,7 +400,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 
 	private void torrentStarted() {
 		startTime = System.currentTimeMillis();
-		stopTime = 0;
+		stopTime = 0;		
 	}
 
 	private void torrentStopped(String description) {
