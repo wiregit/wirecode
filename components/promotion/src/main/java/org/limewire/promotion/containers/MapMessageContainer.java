@@ -1,0 +1,127 @@
+package org.limewire.promotion.containers;
+
+import java.util.Date;
+
+import com.limegroup.gnutella.messages.BadGGEPBlockException;
+import com.limegroup.gnutella.messages.BadGGEPPropertyException;
+import com.limegroup.gnutella.messages.GGEP;
+
+/**
+ * Provides an abstract generic message container to store arbitrary key/value
+ * pairs without the GGEP exception handling overhead.
+ */
+public abstract class MapMessageContainer implements MessageContainer {
+    private GGEP payload = new GGEP();
+
+    /**
+     * Stores the given key/value pair, overwriting any previous value if
+     * present. Neither key or value may be null.
+     */
+    protected void put(String key, String value) {
+        if (value == null || key == null)
+            throw new NullPointerException("key and value must not be null.");
+        payload.put(key, ByteUtil.toUTF8Bytes(value));
+    }
+
+    /**
+     * Stores the given key/value pair, overwriting any previous value if
+     * present. Neither key or value may be null.
+     */
+    protected void put(String key, Date value) {
+        if (value == null || key == null)
+            throw new NullPointerException("key and value must not be null.");
+        payload.put(key, value.getTime());
+    }
+
+    /**
+     * Stores the given key/value pair, overwriting any previous value if
+     * present. Neither key or value may be null.
+     */
+    protected void put(String key, byte[] value) {
+        if (value == null || key == null)
+            throw new NullPointerException("key and value must not be null.");
+        payload.put(key, value);
+    }
+
+    /**
+     * Stores the given key/value pair, overwriting any previous value if
+     * present. Key may not be null.
+     */
+    protected void put(String key, long value) {
+        if (key == null)
+            throw new NullPointerException("key must not be null.");
+        payload.put(key, value);
+    }
+
+    /**
+     * @return the value corresponding to the given key, or null if the key is
+     *         not set or there is a problem parsing.
+     */
+    protected String getString(String key) {
+        if (key == null)
+            throw new NullPointerException("key must not be null.");
+        if (!payload.hasKey(key))
+            return null;
+        return ByteUtil.toStringFromUTF8Bytes(payload.get(key));
+    }
+
+    /**
+     * @return the value corresponding to the given key, or null if the key is
+     *         not set or there is a problem parsing.
+     */
+    protected byte[] getBytes(String key) {
+        if (key == null)
+            throw new NullPointerException("key must not be null.");
+        if (!payload.hasKey(key))
+            return null;
+        try {
+            return payload.getBytes(key);
+        } catch (BadGGEPPropertyException ex) {
+            return null;
+        }
+    }
+
+    /**
+     * @return the value corresponding to the given key, or null if the key is
+     *         not set or there is a problem parsing.
+     */
+    protected Long getLong(String key) {
+        if (key == null)
+            throw new NullPointerException("key must not be null.");
+        if (!payload.hasKey(key))
+            return null;
+        try {
+            return payload.getLong(key);
+        } catch (BadGGEPPropertyException ex) {
+            return null;
+        }
+    }
+
+    /**
+     * @return the value corresponding to the given key, or null if the key is
+     *         not set or there is a problem parsing.
+     */
+    protected Date getDate(String key) {
+        if (key == null)
+            throw new NullPointerException("key must not be null.");
+        if (!payload.hasKey(key))
+            return null;
+        try {
+            return new Date(payload.getLong(key));
+        } catch (BadGGEPPropertyException ex) {
+            return null;
+        }
+    }
+
+    public byte[] getEncoded() {
+        payload.put(TYPE_KEY, getType());
+        return payload.toByteArray();
+    }
+
+    public void parse(GGEP rawGGEP) throws BadGGEPBlockException {
+        if (!ByteUtil.areEqual(getType(), rawGGEP.get(TYPE_KEY)))
+            throw new BadGGEPBlockException("Incorrect type.");
+        this.payload = rawGGEP;
+    }
+
+}

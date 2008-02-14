@@ -6,32 +6,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
 
 /**
  * Wraps multiple messages into one message, generally so you can stuff a bunch
  * of messages inside a {@link SignedMessageContainer}.
  */
-public class MultiMessageContainer implements MessageContainer {
-    private GGEP payload = new GGEP();
-
+public class MultiMessageContainer extends MapMessageContainer {
     private static final String KEY_WRAPPED_BYTES = "W";
 
     public byte[] getType() {
-        return ByteUtil.toUTF8Bytes("MM");
+        return ByteUtil.toUTF8Bytes("MULT");
     }
 
+    @Override
     public void parse(GGEP rawGGEP) throws BadGGEPBlockException {
-        if (!ByteUtil.areEqual(getType(), rawGGEP.get(TYPE_KEY)))
-            throw new BadGGEPBlockException("Incorrect type.");
         if (!rawGGEP.hasKey(KEY_WRAPPED_BYTES))
             throw new BadGGEPBlockException("Missing wrappedBytes");
-    }
-
-    public byte[] getEncoded() {
-        payload.put(TYPE_KEY, getType());
-        return payload.toByteArray();
+        super.parse(rawGGEP);
     }
 
     /**
@@ -39,12 +31,10 @@ public class MultiMessageContainer implements MessageContainer {
      *         loading the array.
      */
     private byte[] getWrappedBytes() {
-        if (payload.hasKey(KEY_WRAPPED_BYTES))
-            try {
-                return payload.getBytes(KEY_WRAPPED_BYTES);
-            } catch (BadGGEPPropertyException ignored) {
-            }
-        return new byte[0];
+        byte[] bytes = getBytes(KEY_WRAPPED_BYTES);
+        if(bytes == null)
+            return new byte[0];
+        return bytes;
     }
 
     /**
@@ -85,6 +75,6 @@ public class MultiMessageContainer implements MessageContainer {
                 throw new RuntimeException("IOException? WTF?", ex);
             }
         }
-        payload.put(KEY_WRAPPED_BYTES, out.toByteArray());
+        put(KEY_WRAPPED_BYTES, out.toByteArray());
     }
 }

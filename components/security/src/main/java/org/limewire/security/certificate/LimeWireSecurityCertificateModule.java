@@ -1,6 +1,6 @@
 package org.limewire.security.certificate;
 
-import com.google.inject.AbstractModule;
+import org.limewire.inject.AbstractModule;
 
 public class LimeWireSecurityCertificateModule extends AbstractModule {
 

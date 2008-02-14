@@ -14,6 +14,7 @@ public class MessageContainerParser {
         addParser(new SignedMessageContainer());
         addParser(new MultiMessageContainer());
         addParser(new PromotionMessageContainer());
+        addParser(new BucketMessageContainer());
     }
 
     /**

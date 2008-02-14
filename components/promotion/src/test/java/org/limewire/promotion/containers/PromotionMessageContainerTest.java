@@ -1,14 +1,19 @@
 package org.limewire.promotion.containers;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import junit.framework.Test;
 
+import org.limewire.promotion.LatitudeLongitude;
+import org.limewire.promotion.containers.PromotionMessageContainer.GeoRestriction;
 import org.limewire.promotion.containers.PromotionMessageContainer.PromotionMediaType;
 import org.limewire.promotion.containers.PromotionMessageContainer.PromotionOptions;
+import org.limewire.promotion.exceptions.PromotionException;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
@@ -317,5 +322,66 @@ public class PromotionMessageContainerTest extends BaseTestCase {
 
         // This should work now, since we've set every field we think we need.
         message.parse(new GGEP(message.getEncoded(), 0));
+    }
+
+    public void testGeoRestrictionWithin() {
+        LatitudeLongitude latlon = new LatitudeLongitude(45, 45);
+        PromotionMessageContainer.GeoRestriction gr = new GeoRestriction(latlon, 1000);
+        assertTrue(gr.isWithin(latlon));
+        assertFalse(gr.isWithin(new LatitudeLongitude(1, 1)));
+    }
+
+    public void testGeoRestrictionDecodeRadius() {
+        assertEquals(169, PromotionMessageContainer.GeoRestriction.decodeRadius((byte) 0));
+        assertEquals(676, PromotionMessageContainer.GeoRestriction.decodeRadius((byte) 1));
+        assertEquals(11075584, PromotionMessageContainer.GeoRestriction.decodeRadius((byte) -1));
+    }
+
+    public void testGeoRestrictionEncodeRadius() {
+        LatitudeLongitude latlon = new LatitudeLongitude(45, 45);
+        PromotionMessageContainer.GeoRestriction gr = new GeoRestriction(latlon, 169);
+        assertEquals(0, gr.getEncodedRadius());
+
+        gr = new GeoRestriction(latlon, 676);
+        assertEquals(1, gr.getEncodedRadius());
+        gr = new GeoRestriction(latlon, 1520);
+        assertEquals(1, gr.getEncodedRadius());
+
+        gr = new GeoRestriction(latlon, 1521);
+        assertEquals(2, gr.getEncodedRadius());
+
+        gr = new GeoRestriction(latlon, 11075584);
+        assertEquals(-1, gr.getEncodedRadius());
+    }
+
+    public void testGeoRestrictionByteConstruction() throws PromotionException {
+        PromotionMessageContainer.GeoRestriction geo = new PromotionMessageContainer.GeoRestriction(
+                new byte[] { 0, 0, 0, -128, 0, 0, 1 });
+        assertTrue(geo.isWithin(new LatitudeLongitude(0, 180)));
+        assertFalse(geo.isWithin(new LatitudeLongitude(0, 181)));
+    }
+
+    public void testGeoRestrictionsCycle() {
+        PromotionMessageContainer message = new PromotionMessageContainer();
+        List<GeoRestriction> list = new ArrayList<GeoRestriction>();
+        list.add(new GeoRestriction(new LatitudeLongitude(180, 0), 2000));
+        list.add(new GeoRestriction(new LatitudeLongitude(180, 180), 20000));
+        list.add(new GeoRestriction(new LatitudeLongitude(0, 180), 2000000));
+        message.setGeoRestrictions(list);
+
+        List<GeoRestriction> list2 = message.getGeoRestrictions();
+        assertEquals(3, list2.size());
+        // Test the first entry
+        assertTrue(list2.get(0).isWithin(new LatitudeLongitude(180, 0)));
+        assertTrue(list2.get(0).isWithin(new LatitudeLongitude(180.013, 0)));
+        assertFalse(list2.get(0).isWithin(new LatitudeLongitude(180.014, 0)));
+        // Test the second entry
+        assertTrue(list2.get(1).isWithin(new LatitudeLongitude(180, 180)));
+        assertTrue(list2.get(1).isWithin(new LatitudeLongitude(180.152, 180)));
+        assertFalse(list2.get(1).isWithin(new LatitudeLongitude(180.153, 180)));
+        // Test the third entry
+        assertTrue(list2.get(2).isWithin(new LatitudeLongitude(0, 180)));
+        assertTrue(list2.get(2).isWithin(new LatitudeLongitude(0, 197.727)));
+        assertFalse(list2.get(2).isWithin(new LatitudeLongitude(0, 197.728)));
     }
 }

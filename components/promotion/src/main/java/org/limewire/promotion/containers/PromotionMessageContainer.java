@@ -1,5 +1,7 @@
 package org.limewire.promotion.containers;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -7,6 +9,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
+
+import org.limewire.promotion.LatitudeLongitude;
+import org.limewire.promotion.exceptions.PromotionException;
 
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
@@ -29,6 +34,8 @@ public class PromotionMessageContainer implements MessageContainer {
     private static final String KEY_URL = "U";
 
     private static final String KEY_KEYWORDS = "K";
+
+    private static final String KEY_GEO_RESTRICT = "G";
 
     private static final String KEY_DATE_RANGE = "d";
 
@@ -353,6 +360,41 @@ public class PromotionMessageContainer implements MessageContainer {
         return properties;
     }
 
+    /** Sets the {@link GeoRestriction} list for this message. Optional. */
+    public void setGeoRestrictions(List<GeoRestriction> restrictions) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        for (GeoRestriction restriction : restrictions)
+            try {
+                out.write(restriction.toBytes());
+            } catch (IOException ignored) {
+                // This stream won't throw this
+            }
+        payload.put(KEY_GEO_RESTRICT, out.toByteArray());
+    }
+
+    /**
+     * Gets a list of {@link GeoRestriction} entries for this message, or an
+     * empty list if there are none.
+     */
+    public List<GeoRestriction> getGeoRestrictions() {
+        List<GeoRestriction> list = new ArrayList<GeoRestriction>();
+        if (payload.hasKey(KEY_GEO_RESTRICT)) {
+            byte[] encoded = payload.get(KEY_GEO_RESTRICT);
+            for (int i = 0; i < encoded.length - 6; i += 7) {
+                byte[] geoBytes = new byte[7];
+                System.arraycopy(encoded, i, geoBytes, 0, 7);
+                try {
+                    list.add(new GeoRestriction(geoBytes));
+                } catch (PromotionException ex) {
+                    // Only happens if we miscalculated the array size
+                    throw new RuntimeException(
+                            "PromotionException while parsing geo restrictions.", ex);
+                }
+            }
+        }
+        return list;
+    }
+
     /**
      * Sets an individual validity range for this promotion, OPTIONAL (if not
      * set, promotion inherits validity range from its parent container).
@@ -467,6 +509,27 @@ public class PromotionMessageContainer implements MessageContainer {
         this.payload = rawGGEP;
     }
 
+    /**
+     * Checks the UID, validity dates, keywords and URL to decide equality.
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof PromotionMessageContainer))
+            return false;
+        PromotionMessageContainer compare = (PromotionMessageContainer) obj;
+        if (!new Long(getUniqueID()).equals(compare.getUniqueID()))
+            return false;
+        if (!getKeywords().equals(compare.getKeywords()))
+            return false;
+        if (!getURL().equals(compare.getURL()))
+            return false;
+        if (!getValidStart().equals(compare.getValidStart()))
+            return false;
+        if (!getValidEnd().equals(compare.getValidEnd()))
+            return false;
+        return true;
+    }
+
     public static enum PromotionMediaType {
         /** audio content */
         AUDIO(1),
@@ -506,6 +569,78 @@ public class PromotionMessageContainer implements MessageContainer {
                     return type;
             }
             return UNKNOWN;
+        }
+    }
+
+    public static class GeoRestriction {
+        private LatitudeLongitude center;
+
+        private int radiusInMeters;
+
+        /**
+         * Constructs an instance with the given center point and radius.
+         */
+        public GeoRestriction(LatitudeLongitude center, int radiusInMeters) {
+            this.center = center;
+            this.radiusInMeters = radiusInMeters;
+        }
+
+        /**
+         * Decodes a 7-byte array, first 3 bytes are latitude, second 3 are
+         * longitude, and final byte encodes radius using the rules discussed in
+         * {@link #getEncodedRadius()}. Package visible for unit testing, but
+         * should only be called during promo message parsing.
+         * 
+         * @throws PromotionException if the array is not exactly 7 bytes long.
+         */
+        GeoRestriction(byte[] bytes) throws PromotionException {
+            if (bytes == null || bytes.length != 7)
+                throw new PromotionException("expected exactly 7 bytes for construction.");
+            byte[] lat = new byte[3];
+            byte[] lon = new byte[3];
+            System.arraycopy(bytes, 0, lat, 0, 3);
+            System.arraycopy(bytes, 3, lon, 0, 3);
+
+            this.center = new LatitudeLongitude(lat, lon);
+            this.radiusInMeters = decodeRadius(bytes[6]);
+        }
+
+        /**
+         * @return true if point is within this restriction.
+         */
+        public boolean isWithin(LatitudeLongitude point) {
+            return center.distanceFrom(point) <= (radiusInMeters / 1000.0);
+        }
+
+        /**
+         * @return a 7-byte array, the first 3 bytes encode latitude, next 3
+         *         encode longitude, and final byte encodes radius using the
+         *         following formula (b is byte, 1-256): (b*13)^2 meters
+         */
+        public byte[] toBytes() {
+            byte[] bytes = new byte[7];
+            System.arraycopy(center.toBytes(), 0, bytes, 0, 6);
+            bytes[6] = getEncodedRadius();
+            return bytes;
+        }
+
+        /**
+         * Encodes the radius to a single byte. The byte can be inflated by
+         * multiplying it by 13 and then squaring the result. Package visible
+         * for unit testing.
+         */
+        byte getEncodedRadius() {
+            long value = (long) (Math.sqrt(radiusInMeters) / 13);
+            return ByteUtil.convertToBytes(value - 1, 1)[0];
+        }
+
+        /**
+         * @return the radius in meters that the byte represents, as defined by
+         *         {@link #getEncodedRadius()}.
+         */
+        static int decodeRadius(byte radiusByte) {
+            long radius = ByteUtil.toLongFromBytes(new byte[] { radiusByte }) + 1;
+            return (int) Math.pow(13 * radius, 2);
         }
     }
 
@@ -591,4 +726,5 @@ public class PromotionMessageContainer implements MessageContainer {
             this.openInClientTab = openInClientTab;
         }
     }
+
 }
