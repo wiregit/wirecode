@@ -553,8 +553,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     /**
-     * 
-     * 
+     * Add a QueryRequest and then a QueryReply. Mark the
+     * SearchResultStats as finished and verify that its
+     * state is in deed updated accordingly.
      * 
      * @throws Exception
      */
