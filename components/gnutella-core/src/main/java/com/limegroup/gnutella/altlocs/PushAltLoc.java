@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 
-import org.limewire.service.ErrorService;
-
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
@@ -34,8 +32,7 @@ public class PushAltLoc extends AbstractAlternateLocation {
 	 * @param sha1
 	 * @throws IOException
 	 */
-	protected PushAltLoc(final PushEndpoint address, final URN sha1, ApplicationServices applicationServices) 
-		throws IOException {
+	protected PushAltLoc(final PushEndpoint address, final URN sha1, ApplicationServices applicationServices) { 
 		super(sha1);
 		
 		if (address == null)
@@ -61,14 +58,7 @@ public class PushAltLoc extends AbstractAlternateLocation {
 	}
 	
 	public synchronized AlternateLocation createClone() {
-        PushAltLoc ret = null;
-        try {
-
-        		ret = new PushAltLoc(_pushAddress.createClone(),SHA1_URN, applicationServices);
-        } catch(IOException ioe) {
-            ErrorService.error(ioe);
-            return null;
-        }
+        PushAltLoc ret = new PushAltLoc(_pushAddress.createClone(),SHA1_URN, applicationServices);
         ret._count = this._count;
         return ret;
     }

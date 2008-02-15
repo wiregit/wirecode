@@ -107,7 +107,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.altlocs.AlternateLocationFactory#createPushAltLoc(com.limegroup.gnutella.PushEndpoint, com.limegroup.gnutella.URN)
      */
-    public AlternateLocation createPushAltLoc(PushEndpoint pe, URN urn) throws IOException {
+    public AlternateLocation createPushAltLoc(PushEndpoint pe, URN urn) {
         return new PushAltLoc(pe, urn, applicationServices);
     }
 

@@ -133,7 +133,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
         requeryManager.activate();
     }
 
-	protected synchronized MagnetOptions getMagnet() {
+	public synchronized MagnetOptions getMagnet() {
 	    return magnet;
 	}
 	
@@ -206,16 +206,10 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
             if (LOG.isDebugEnabled())
                 LOG.debug(pushEndpoint);
             AlternateLocation alternateLocation;
-            try {
-                alternateLocation = alternateLocationFactory.createPushAltLoc(pushEndpoint, sha1Urn);
-                RemoteFileDesc rfd = alternateLocation.createRemoteFileDesc(size, remoteFileDescFactory);
-                addDownloadForced(rfd, true);
-                added = true;
-            } catch (IOException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(e);
-                }
-            }
+            alternateLocation = alternateLocationFactory.createPushAltLoc(pushEndpoint, sha1Urn);
+            RemoteFileDesc rfd = alternateLocation.createRemoteFileDesc(size, remoteFileDescFactory);
+            addDownloadForced(rfd, true);
+            added = true;
         }
         return added;
     }

@@ -1,8 +1,7 @@
 package com.limegroup.gnutella.altlocs;
 
 
-import java.io.IOException;
-
+import com.google.common.base.Objects;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
@@ -48,10 +47,8 @@ public abstract class AbstractAlternateLocation implements AlternateLocation {
      */
     private final Average legacy, ping, response;
 	
-	protected AbstractAlternateLocation(URN sha1) throws IOException {
-		if(sha1 == null)
-            throw new IOException("null sha1");	
-		SHA1_URN=sha1;
+	protected AbstractAlternateLocation(URN sha1) {
+		SHA1_URN= Objects.nonNull(sha1, "sha1 must not be null");
         legacy = new Average();
         ping = new Average();
         response = new Average();

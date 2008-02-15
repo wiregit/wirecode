@@ -9,6 +9,7 @@ import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.CoreDownloader;
+import com.limegroup.gnutella.downloader.DownloadManagerListener;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
 import com.limegroup.gnutella.downloader.PushedSocketHandler;
@@ -278,4 +279,7 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
      *  successfully written. */
     public void writeSnapshot();
 
+    public void addDownloadManagerListener(DownloadManagerListener listener);
+    
+    public void removeDownloadManagerListener(DownloadManagerListener listener);
 }

@@ -107,14 +107,9 @@ public class AltLocFinderImpl implements AltLocFinder {
                         return;
                     }
                 }
-                AlternateLocation alternateLocation;
-                try {
-                    alternateLocation = alternateLocationFactory.createPushAltLoc(pushEndpoint, urn);
-                    listener.handleResult(alternateLocation);
-                    listener.handleSearchDone(true);
-                } catch (IOException e) {
-                    listener.handleSearchDone(false);
-                }
+                AlternateLocation alternateLocation = alternateLocationFactory.createPushAltLoc(pushEndpoint, urn);
+                listener.handleResult(alternateLocation);
+                listener.handleSearchDone(true);
             }
 
             public void handleSearchDone(boolean success) {

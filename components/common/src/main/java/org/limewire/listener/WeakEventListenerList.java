@@ -1,7 +1,7 @@
 package org.limewire.listener;
 
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.google.common.base.ReferenceType;
@@ -14,26 +14,27 @@ import com.google.common.collect.ReferenceMap;
  */
 public class WeakEventListenerList<E extends Event> implements WeakEventListenerSupport<E> {
     
-    private final Map<Object, List<EventListener<E>>> listenerMap = new ReferenceMap<Object, List<EventListener<E>>>(ReferenceType.WEAK, ReferenceType.STRONG);
+    private final ConcurrentMap<Object, List<EventListener<E>>> listenerMap = new ReferenceMap<Object, List<EventListener<E>>>(ReferenceType.WEAK, ReferenceType.STRONG);
 
     /** Adds the listener. */
     public void addListener(Object strongRef, EventListener<E> listener) {
-        List<EventListener<E>> listeners = listenerMap.get(strongRef);
-        if (listeners == null) {
-            listeners = new CopyOnWriteArrayList<EventListener<E>>();
-            listenerMap.put(strongRef, listeners);
+        List<EventListener<E>> newListenerList = new CopyOnWriteArrayList<EventListener<E>>();
+        List<EventListener<E>> oldlistenerList = listenerMap.putIfAbsent(strongRef, newListenerList);
+        if (oldlistenerList != null) {
+            oldlistenerList.add(listener);
+        } else {
+            newListenerList.add(listener);
         }
-        listeners.add(listener);
     }
     
     /** Returns true if the listener was removed. */
     public boolean removeListener(Object strongRef, EventListener<E> listener) {
         List<EventListener<E>> listeners = listenerMap.get(strongRef);
         if(listeners != null) {
-            boolean removed = listeners.remove(listener);
-            if(listeners.isEmpty())
-                listenerMap.remove(strongRef);
-            return removed;
+            return listeners.remove(listener);
+            // we can't remove the list from the map without synchronizing on it, since we would need
+            // to find out if it's empty and then remove it while ensuring no other thread adds
+            // a listener to it in the meantime.
         }
         return false;
     }
@@ -48,6 +49,4 @@ public class WeakEventListenerList<E extends Event> implements WeakEventListener
             }
         }
     }
-    
-
 }
