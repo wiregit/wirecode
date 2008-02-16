@@ -11,7 +11,7 @@ import org.limewire.util.BaseTestCase;
  */
 public class WeakEventListenerListTest extends BaseTestCase {
     
-    private WeakEventListenerList<DefaultEvent<Object, Enum>> weakList;
+    private WeakEventListenerList<EventListener<DefaultEvent<Object, Enum>>, DefaultEvent<Object, Enum>> weakList;
 
     public WeakEventListenerListTest(String name) {
         super(name);
@@ -23,7 +23,7 @@ public class WeakEventListenerListTest extends BaseTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        weakList = new WeakEventListenerList<DefaultEvent<Object, Enum>>();
+        weakList = new WeakEventListenerList<EventListener<DefaultEvent<Object, Enum>>, DefaultEvent<Object, Enum>>();
     }
 
     /**

@@ -84,10 +84,8 @@ public class AltLocFinderImpl implements AltLocFinder {
     }
     
     /**
-     * @return <code>false</code> if <code>guid</code> or <code>urn</code> are null
-     * or DHT is not boostrapped
      */
-    private boolean findPushAltLocs(final GUID guid, final URN urn, 
+    private void findPushAltLocs(final GUID guid, final URN urn, 
             final DHTValueEntity altLocEntity, final SearchListener<AlternateLocation> listener) {
         
         SearchListener<PushEndpoint> pushEndpointListener = new SearchListener<PushEndpoint>() {
@@ -119,7 +117,7 @@ public class AltLocFinderImpl implements AltLocFinder {
             }  
             
         };
-        return pushEndpointManager.findPushEndpoint(guid, pushEndpointListener);
+        pushEndpointManager.findPushEndpoint(guid, pushEndpointListener);
     }
     
     /**
@@ -153,7 +151,8 @@ public class AltLocFinderImpl implements AltLocFinder {
             if (altLoc.isFirewalled()) {
                 if (DHTSettings.ENABLE_PUSH_PROXY_QUERIES.getValue()) {
                     GUID guid = new GUID(altLoc.getGUID());
-                    return findPushAltLocs(guid, urn, entity, listener) ? Result.NOT_YET_FOUND : Result.NOT_FOUND;
+                    findPushAltLocs(guid, urn, entity, listener);
+                    return Result.NOT_YET_FOUND;
                 }
             // If it's not then create just an AlternateLocation
             // from the info

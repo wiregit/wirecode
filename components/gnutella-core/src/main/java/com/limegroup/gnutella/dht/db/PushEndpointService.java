@@ -9,7 +9,7 @@ import com.limegroup.gnutella.PushEndpoint;
  */
 public interface PushEndpointService {
 
-    boolean findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener);
+    void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener);
     
     PushEndpoint getPushEndpoint(GUID guid);    
 }

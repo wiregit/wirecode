@@ -36,28 +36,25 @@ public class DHTPushEndpointFinder implements PushEndpointService {
         this.pushEndpointFactory = pushEndpointFactory;
     }
     
-    public boolean findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
+    public void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
         listener = SearchListenerAdapter.nonNullListener(listener);
         synchronized (dhtManager) {
             MojitoDHT dht = dhtManager.getMojitoDHT();
             if (dht == null || !dht.isBootstrapped()) {
-                return false;
+                listener.handleSearchDone(false);
+                return;
             }
             KUID key = KUIDUtils.toKUID(guid);
             EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractPushProxiesValue.PUSH_PROXIES);
             DHTFuture<FindValueResult> future = dht.get(lookupKey);
             future.addDHTFutureListener(new PushEndpointHandler(dht, guid, key, listener));
-            return true;
         }
     }
 
     public PushEndpoint getPushEndpoint(GUID guid) {
         BlockingSearchListener<PushEndpoint> listener = new BlockingSearchListener<PushEndpoint>();
-        if (findPushEndpoint(guid, listener)) {
-            return listener.getResult();
-        } else {
-            return null;
-        }
+        findPushEndpoint(guid, listener);
+        return listener.getResult();
     }
 
     /**
