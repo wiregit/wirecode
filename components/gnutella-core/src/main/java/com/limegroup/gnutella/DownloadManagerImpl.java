@@ -120,8 +120,8 @@ public class DownloadManagerImpl implements DownloadManager {
      */
     private Runnable _waitingPump;
     
-    private final WeakEventListenerList<DefaultEvent<CoreDownloader, DownloadManagerEvent>> listeners =
-        new WeakEventListenerList<DefaultEvent<CoreDownloader,DownloadManagerEvent>>();
+    private final WeakEventListenerList<DownloadManagerListener, DefaultEvent<CoreDownloader, DownloadManagerEvent>> listeners =
+        new WeakEventListenerList<DownloadManagerListener, DefaultEvent<CoreDownloader, DownloadManagerEvent>>();
     
     private final NetworkManager networkManager;
     private final DownloadCallback innetworkCallback;
