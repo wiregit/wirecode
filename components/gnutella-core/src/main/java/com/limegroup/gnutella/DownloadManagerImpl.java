@@ -22,6 +22,7 @@ import org.limewire.i18n.I18nMarker;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.listener.DefaultEvent;
+import org.limewire.listener.Event;
 import org.limewire.listener.WeakEventListenerList;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
@@ -120,8 +121,8 @@ public class DownloadManagerImpl implements DownloadManager {
      */
     private Runnable _waitingPump;
     
-    private final WeakEventListenerList<DownloadManagerListener, DefaultEvent<CoreDownloader, DownloadManagerEvent>> listeners =
-        new WeakEventListenerList<DownloadManagerListener, DefaultEvent<CoreDownloader, DownloadManagerEvent>>();
+    private final WeakEventListenerList<DownloadManagerListener, Event<CoreDownloader, DownloadManagerEvent>> listeners =
+        new WeakEventListenerList<DownloadManagerListener, Event<CoreDownloader, DownloadManagerEvent>>();
     
     private final NetworkManager networkManager;
     private final DownloadCallback innetworkCallback;

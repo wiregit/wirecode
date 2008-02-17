@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.listener.DefaultEvent;
+import org.limewire.listener.Event;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -40,7 +40,7 @@ public class MagnetDownloaderPushEndpointFinder implements DownloadManagerListen
         this.altLocManager = altLocManager;
     }
 
-    public void handleEvent(DefaultEvent<CoreDownloader, DownloadManagerEvent> event) {
+    public void handleEvent(Event<CoreDownloader, DownloadManagerEvent> event) {
         switch (event.getType()) {
         case ADDED:
             CoreDownloader downloader = event.getSource();
