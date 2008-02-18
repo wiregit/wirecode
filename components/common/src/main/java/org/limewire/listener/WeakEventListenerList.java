@@ -13,7 +13,7 @@ import com.google.common.collect.ReferenceMap;
  * listeners to be used while still allowing the list to time out.
  * @param <E>
  */
-public class WeakEventListenerList<L extends EventListener<E>, E extends Event> implements WeakEventListenerSupport<L> {
+public class WeakEventListenerList<L extends EventListener<E>, E> implements WeakEventListenerSupport<L> {
     
     private final ConcurrentMap<Object, List<L>> listenerMap = new ReferenceMap<Object, List<L>>(ReferenceType.WEAK, ReferenceType.STRONG);
 
