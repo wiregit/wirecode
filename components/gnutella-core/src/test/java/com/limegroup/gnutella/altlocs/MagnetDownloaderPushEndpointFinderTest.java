@@ -27,13 +27,16 @@ public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
         final MagnetDownloader downloader = context.mock(MagnetDownloader.class);
         // use magnet without sha1 so we can just check if 
         final MagnetOptions magnet = MagnetOptions.parseMagnet("magnet:?dn=file&kt=hello")[0];
+        final MagnetDownloaderPushEndpointFinder endpointFinder = new MagnetDownloaderPushEndpointFinder(null, null, null, null);
         
         context.checking(new Expectations() {{
-            one(downloader).getMagnet();
+            atLeast(1).of(downloader).getMagnet();
             will(returnValue(magnet));
+            atLeast(1).of(downloader).getContentLength();
+            will(returnValue(1l));
+            atLeast(1).of(downloader).addListener(endpointFinder, endpointFinder.downloadStatusListener);
+            atLeast(1).of(downloader).removeListener(endpointFinder, endpointFinder.downloadStatusListener);
         }});
-        
-        MagnetDownloaderPushEndpointFinder endpointFinder = new MagnetDownloaderPushEndpointFinder(null, null, null, null);
         
         // iterate through all events
         for (DownloadManagerEvent event : DownloadManagerEvent.values()) {
@@ -53,7 +56,7 @@ public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
             new MagnetDownloaderPushEndpointFinder(downloadManager, null, null, null);
         
         context.checking(new Expectations() {{
-            one(downloadManager).addDownloadManagerListener(endpointFinder);
+            one(downloadManager).addListener(endpointFinder, endpointFinder);
         }});
         
         endpointFinder.start();
@@ -67,7 +70,7 @@ public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
             new MagnetDownloaderPushEndpointFinder(downloadManager, null, null, null);
         
         context.checking(new Expectations() {{
-            one(downloadManager).removeDownloadManagerListener(endpointFinder);
+            one(downloadManager).removeListener(endpointFinder, endpointFinder);
         }});
         
         endpointFinder.stop();
