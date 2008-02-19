@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.ByteBufferOutputStream;
 import org.limewire.io.IpPort;
@@ -170,6 +171,14 @@ public class UDPService implements ReadWriteObserver {
     
     @InspectionPoint("udp sent messages")
     private final Message.MessageCounter sentMessageCounter = new Message.MessageCounter(50);
+    
+    @InspectionPoint("fwt capable")
+    @SuppressWarnings("unused")
+    private final Inspectable fwtCapable = new Inspectable() {
+        public Object inspect() {
+            return canDoFWT();
+        }
+    };
 
 	@Inject
     public UDPService(NetworkManager networkManager,
