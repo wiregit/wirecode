@@ -190,7 +190,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             CompositeQueue.QUEUE_TIME);
 
     /** The OutputRunner */
-    private OutputRunner _outputRunner;
+    private volatile OutputRunner _outputRunner;
 
     /** Keeps track of sent/received [dropped] & bandwidth. */
     private final ConnectionStats _connectionStats = new ConnectionStats();
@@ -1371,7 +1371,9 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         data.put("nmr", getNumMessagesReceived());
         data.put("nms", getNumMessagesSent());
         _connectionStats.addStats(data);
-        data.put("or", _outputRunner.inspect());
+        Inspectable or = _outputRunner;
+        if (or != null)
+            data.put("or", or.inspect());
         data.put("nrmd", getNumReceivedMessagesDropped());
         data.put("nsmd", getNumSentMessagesDropped());
         data.put("qrteu", getQueryRouteTableEmptyUnits());
