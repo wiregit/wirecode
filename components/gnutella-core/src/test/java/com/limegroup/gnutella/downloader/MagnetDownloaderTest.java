@@ -37,7 +37,6 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.dht.db.AltLocFinder;
 import com.limegroup.gnutella.dht.db.PushEndpointManager;
 import com.limegroup.gnutella.dht.db.PushEndpointService;
 import com.limegroup.gnutella.filters.IPFilter;

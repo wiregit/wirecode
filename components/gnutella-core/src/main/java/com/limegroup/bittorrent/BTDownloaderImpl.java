@@ -19,6 +19,7 @@ import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractCoreDownloader;
+import com.limegroup.gnutella.downloader.DownloadStatusListener;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMemento;
@@ -510,5 +511,15 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
         super.initFromMemento(memento);
         BTDownloadMemento bmem = (BTDownloadMemento)memento;
         initBtMetaInfo(new BTMetaInfo(bmem.getBtMetaInfoMemento()));
+    }
+
+    public void addListener(Object strongRef, DownloadStatusListener listener) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public boolean removeListener(Object strongRef, DownloadStatusListener listener) {
+        // TODO Auto-generated method stub
+        return false;
     }
 }

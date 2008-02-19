@@ -25,6 +25,9 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.DiskException;
 import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
+import org.limewire.listener.DefaultEvent;
+import org.limewire.listener.Event;
+import org.limewire.listener.WeakEventListenerList;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 
@@ -406,6 +409,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     
     private long contentLength = -1;
     
+    private final WeakEventListenerList<DownloadStatusListener, Event<CoreDownloader, DownloadStatus>> listeners = 
+        new WeakEventListenerList<DownloadStatusListener, Event<CoreDownloader,DownloadStatus>>(); 
+    
     protected final DownloadManager downloadManager;
     protected final FileManager fileManager;
     protected final IncompleteFileManager incompleteFileManager;
@@ -508,6 +514,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#initialize()
      */
     public void initialize() {
+        setState(DownloadStatus.INITIALIZING);
         currentRFDs = new HashSet<RemoteFileDesc>();
         _activeWorkers=new LinkedList<DownloadWorker>();
         _workers=new ArrayList<DownloadWorker>();
@@ -2555,7 +2562,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
     /////////////////////////////Display Variables////////////////////////////
 
-    public synchronized void setState(DownloadStatus newState) {
+    public void setState(DownloadStatus newState) {
         setState(newState, Long.MAX_VALUE);
     }
 
@@ -2566,9 +2573,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @param time the time we expect to state in this state, in 
      *  milliseconds. 
      */
-    synchronized void setState(DownloadStatus newState, long time) {
+    void setState(DownloadStatus newState, long time) {
+        synchronized (this) {
             this.state=newState;
             this.stateTime=System.currentTimeMillis()+time;
+        }
+        listeners.broadcast(new DefaultEvent<CoreDownloader, DownloadStatus>(this, newState));
     }
     
     /**
@@ -3122,5 +3132,13 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     Set<RemoteFileDesc> getCachedRFDs() {
         return cachedRFDs;
+    }
+
+    public void addListener(Object strongRef, DownloadStatusListener listener) {
+        listeners.addListener(strongRef, listener);
+    }
+
+    public boolean removeListener(Object strongRef, DownloadStatusListener listener) {
+        return listeners.removeListener(strongRef, listener);
     }
 }
