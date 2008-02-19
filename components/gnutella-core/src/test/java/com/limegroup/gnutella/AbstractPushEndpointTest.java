@@ -22,11 +22,15 @@ import org.limewire.util.ByteOrder;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 
 /**
- * Tests {@link PushEndpoint}, {@link PushEndpointFactory} and {@link PushEndpointCacheImpl}.
+ * Tests {@link AbstractPushEndpoint}, {@link PushEndpointImpl}, {@link PushEndpointFactory} 
+ * and {@link PushEndpointCacheImpl}.
+ * 
+ * Most actual methods are in {@link AbstractPushEndpoint}, but are tested through
+ * instantiating its subclass {@link PushEndpointImpl}. 
  * 
  * TODO split into separate unit tests
  */
-public class PushEndpointTest extends BaseTestCase {
+public class AbstractPushEndpointTest extends BaseTestCase {
 
     private IpPort ppi1;
     private IpPort ppi2;
@@ -44,12 +48,12 @@ public class PushEndpointTest extends BaseTestCase {
     private PushEndpointFactory factory;
     private PushEndpointCacheImpl pushEndpointCache;
     
-	public PushEndpointTest(String name) {
+	public AbstractPushEndpointTest(String name) {
 		super(name);
 	}
     
     public static Test suite() {
-        return buildTestSuite(PushEndpointTest.class);
+        return buildTestSuite(AbstractPushEndpointTest.class);
     }
     
     public void setUp() throws Exception {
@@ -75,8 +79,8 @@ public class PushEndpointTest extends BaseTestCase {
         GUID guid1 = new GUID(GUID.makeGuid());        
         PushEndpoint empty = factory.createPushEndpoint(guid1.bytes()); 
         assertEquals(guid1, new GUID(empty.getClientGUID()));
-        assertEquals(PushEndpoint.HEADER_SIZE,PushEndpoint.getSizeBytes(empty.getProxies(), false));
-        assertEquals(PushEndpoint.HEADER_SIZE,PushEndpoint.getSizeBytes(empty.getProxies(), true));
+        assertEquals(PushEndpoint.HEADER_SIZE,AbstractPushEndpoint.getSizeBytes(empty.getProxies(), false));
+        assertEquals(PushEndpoint.HEADER_SIZE,AbstractPushEndpoint.getSizeBytes(empty.getProxies(), true));
         assertEquals(0, empty.getProxies().size());
     }
     
@@ -91,14 +95,14 @@ public class PushEndpointTest extends BaseTestCase {
         set2.add(ppi2);
         
         PushEndpoint one = factory.createPushEndpoint(guid2.bytes(), set1);
-        assertEquals(PushEndpoint.HEADER_SIZE+PushEndpoint.PROXY_SIZE, PushEndpoint.getSizeBytes(one.getProxies(), false));
-        assertEquals(PushEndpoint.HEADER_SIZE+PushEndpoint.PROXY_SIZE, PushEndpoint.getSizeBytes(one.getProxies(), true));
+        assertEquals(PushEndpoint.HEADER_SIZE+PushEndpoint.PROXY_SIZE, AbstractPushEndpoint.getSizeBytes(one.getProxies(), false));
+        assertEquals(PushEndpoint.HEADER_SIZE+PushEndpoint.PROXY_SIZE, AbstractPushEndpoint.getSizeBytes(one.getProxies(), true));
         assertEquals(1,one.getProxies().size());
         assertEquals(0,one.getFWTVersion());
         
         PushEndpoint two = factory.createPushEndpoint(guid2.bytes(), set2);
-        assertEquals(PushEndpoint.HEADER_SIZE+2*PushEndpoint.PROXY_SIZE, PushEndpoint.getSizeBytes(two.getProxies(), false));
-        assertEquals(PushEndpoint.HEADER_SIZE+2*PushEndpoint.PROXY_SIZE, PushEndpoint.getSizeBytes(two.getProxies(), true));
+        assertEquals(PushEndpoint.HEADER_SIZE+2*PushEndpoint.PROXY_SIZE, AbstractPushEndpoint.getSizeBytes(two.getProxies(), false));
+        assertEquals(PushEndpoint.HEADER_SIZE+2*PushEndpoint.PROXY_SIZE, AbstractPushEndpoint.getSizeBytes(two.getProxies(), true));
         assertEquals(2,two.getProxies().size());
         assertEquals(0,two.getFWTVersion());
     }
@@ -118,8 +122,8 @@ public class PushEndpointTest extends BaseTestCase {
         set3.add(ppi3);
     	
         PushEndpoint tls = factory.createPushEndpoint(guid4.bytes(), set3);
-        assertEquals(PushEndpoint.HEADER_SIZE+3*PushEndpoint.PROXY_SIZE, PushEndpoint.getSizeBytes(tls.getProxies(), false));
-        assertEquals(PushEndpoint.HEADER_SIZE+3*PushEndpoint.PROXY_SIZE+1, PushEndpoint.getSizeBytes(tls.getProxies(), true));
+        assertEquals(PushEndpoint.HEADER_SIZE+3*PushEndpoint.PROXY_SIZE, AbstractPushEndpoint.getSizeBytes(tls.getProxies(), false));
+        assertEquals(PushEndpoint.HEADER_SIZE+3*PushEndpoint.PROXY_SIZE+1, AbstractPushEndpoint.getSizeBytes(tls.getProxies(), true));
         assertEquals(3,tls.getProxies().size());
         assertEquals(0,tls.getFWTVersion());
         Set proxies = tls.getProxies();
@@ -195,7 +199,7 @@ public class PushEndpointTest extends BaseTestCase {
         assertEquals(expected, network2, 2, expected.length);
     	
         // Test fromBytes
-    	assertEquals(PushEndpoint.getSizeBytes(one.getProxies(), false), expected.length);
+    	assertEquals(AbstractPushEndpoint.getSizeBytes(one.getProxies(), false), expected.length);
     	PushEndpoint one_prim = factory.createFromBytes(new DataInputStream(new ByteArrayInputStream(expected)));
     	assertEquals(one, one_prim);
     	// And make sure none of the proxies are TLS capable.
@@ -277,7 +281,7 @@ public class PushEndpointTest extends BaseTestCase {
         assertEquals(network, network2, 2, network.length);
         
         // Test fromBytes
-        assertEquals(PushEndpoint.getSizeBytes(one.getProxies(), true), expected.length);
+        assertEquals(AbstractPushEndpoint.getSizeBytes(one.getProxies(), true), expected.length);
         PushEndpoint one_prim = factory.createFromBytes(new DataInputStream(new ByteArrayInputStream(expected)));
         assertEquals(one, one_prim);
         
@@ -523,7 +527,7 @@ public class PushEndpointTest extends BaseTestCase {
         PushEndpoint six = factory.createPushEndpoint(guid2.bytes(), set6, (byte)0, 2);
         assertEquals(2,six.getFWTVersion());
         byte[] network = six.toBytes(false);
-        assertEquals(PushEndpoint.getSizeBytes(six.getProxies(), false),network.length);
+        assertEquals(AbstractPushEndpoint.getSizeBytes(six.getProxies(), false),network.length);
         
         pushEndpointCache.clear();
         PushEndpoint four = factory.createFromBytes(new DataInputStream(new ByteArrayInputStream(network)));
@@ -538,7 +542,7 @@ public class PushEndpointTest extends BaseTestCase {
         pushEndpointCache.clear();
         PushEndpoint ext = factory.createPushEndpoint(guid2.bytes(), set6, (byte)0, 2, new IpPortImpl("1.2.3.4",5));
         network = ext.toBytes(false);
-        assertEquals(PushEndpoint.getSizeBytes(set6, false)+6,network.length);
+        assertEquals(AbstractPushEndpoint.getSizeBytes(set6, false)+6,network.length);
         
         pushEndpointCache.clear();
         PushEndpoint ext2 = factory.createFromBytes(new DataInputStream(new ByteArrayInputStream(network)));
@@ -553,7 +557,7 @@ public class PushEndpointTest extends BaseTestCase {
         pushEndpointCache.clear();
         PushEndpoint noFWT = factory.createPushEndpoint(guid2.bytes(), set6, (byte)0, 0, new IpPortImpl("1.2.3.4",5));
         network = noFWT.toBytes(false);
-        assertEquals(PushEndpoint.getSizeBytes(set6, false),network.length);
+        assertEquals(AbstractPushEndpoint.getSizeBytes(set6, false),network.length);
         
         pushEndpointCache.clear();
         PushEndpoint noFWT2 = factory.createFromBytes(new DataInputStream(new ByteArrayInputStream(network)));

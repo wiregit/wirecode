@@ -15,6 +15,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.PushEndpointFactory;
+import com.limegroup.gnutella.PushEndpointImpl;
 import com.limegroup.gnutella.uploader.HTTPUploadSession;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 
@@ -38,8 +39,9 @@ public class FWNodeInfoInterceptorTest extends BaseTestCase {
         HTTPUploadSession session = new HTTPUploadSession(null, null, null);
         HTTPUploader uploader = new HTTPUploader("filename", session); 
         FWNodeInfoInterceptor interceptor = new FWNodeInfoInterceptor(uploader, pushEndpointFactory);
-        
-        final PushEndpoint pe = new PushEndpoint(GUID.makeGuid(), Collections.singleton(new IpPortImpl("192.168.0.1:5555")), PushEndpoint.PLAIN, UDPConnection.VERSION, null, pushEndpointCache);
+
+        // TODO mock, stems from time where there was no interface
+        final PushEndpoint pe = new PushEndpointImpl(GUID.makeGuid(), Collections.singleton(new IpPortImpl("192.168.0.1:5555")), PushEndpoint.PLAIN, UDPConnection.VERSION, null, pushEndpointCache);
         
         // test success full construction
         context.checking(new Expectations() {{

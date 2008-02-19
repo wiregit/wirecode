@@ -221,10 +221,6 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
         public GUID getGuid() {
             return _guidRef.get();
         }
-
-        public PushEndpoint createPushEndpoint() {
-            return new PushEndpoint(getGuid().bytes(), getProxies(), (byte)getFeatures(), getFWTVersion(), getIpPort(), PushEndpointCacheImpl.this);
-        }
     }
 
 }
