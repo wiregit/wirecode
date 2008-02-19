@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-11 10:51-0500\n"
+"POT-Creation-Date: 2008-02-17 23:59-0500\n"
 "PO-Revision-Date: 2008-02-10 14:55+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-02-12 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-02-19 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -1947,7 +1947,7 @@ msgstr ""
 "A LimeWire, term�szetesen, a fejleszt�k �ldozatos munk�j�nak eredm�nye:"
 
 #. business developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:198
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:199
 msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
@@ -1956,7 +1956,7 @@ msgstr ""
 "LimeWire �zleti fejleszt�"
 
 #. web developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:209
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:211
 msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
@@ -1965,7 +1965,7 @@ msgstr ""
 "LimeWire k�ls� megjelen�se a LimeWire web-fejleszt�g�rda munk�j�t dics�ri:"
 
 #. support staff
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:216
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:218
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
 msgstr ""
@@ -1973,7 +1973,7 @@ msgstr ""
 "LimeWire technikai t�mogat�sa:"
 
 #. previous developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:224
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:228
 msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
@@ -1982,7 +1982,7 @@ msgstr ""
 "m�s projektekben vesznek r�szt:"
 
 #. open source contributors
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:251
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:258
 msgid ""
 "LimeWire open source contributors have provided significant code and many "
 "bug fixes, ideas, research, etc. to the project as well. Those listed below "
@@ -1995,7 +1995,7 @@ msgstr ""
 "k�dot �rtak, vagy komoly hib�kat azonos�tottak, esetleg mindkett�"
 
 #. internationalization contributors
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:288
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:295
 msgid ""
 "LimeWire would also like to thank the many contributors to the "
 "internationalization project, both for the application itself and for the "
@@ -2005,14 +2005,14 @@ msgstr ""
 "r�sztvev�j�nek, akik az alkalmaz�st �s/vagy a weboldalt ford�tott�k."
 
 #. community VIPs
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:292
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:299
 msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
 msgstr "T�bb Gnutella-k�z�ss�gi tag k�l�n k�sz�netet �rdemel, n�v szerint:"
 
 #. conclusion
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:313
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:320
 msgid ""
 "Finally, LimeWire would like to extend its sincere thanks to these "
 "developers, users, and all others who have contributed their ideas to the "
@@ -2022,7 +2022,7 @@ msgstr ""
 "felhaszn�l�knak �s mindenkinek, aki �tleteikkel hozz�j�rultak a projekt "
 "siker�hez. A LimeWire-felhaszn�l�k n�lk�l a LimeWire h�l�zat nem l�tezne."
 
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:318
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:325
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc."
@@ -4239,11 +4239,11 @@ msgid ""
 "then try again."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:335
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:344
 msgid "&Close"
 msgstr "&Bez�r�"
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:336
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:345
 msgid "Close the Program"
 msgstr "Program bez�r�sa"
 
@@ -4878,6 +4878,17 @@ msgstr "Folytatás"
 msgid "Reattempt Selected Downloads"
 msgstr "Let�lt�s ism�telt megk�s�rl�se"
 
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:405
+#, java-format
+msgid ""
+"You have downloaded a skin titled \"{0}\", you can activate the new skin by "
+"clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
+"list of available skins."
+msgstr ""
+"A \"{0}\" nev� kin�zet sikeresen let�lt�d�tt, az �j kin�zet aktiv�l�s�hoz "
+"kattints a \"{1}\"-re a \"{2}\"->\"{3}\" men�ben, �s v�laszd ki a kin�zetet "
+"a megjelen� list�b�"
+
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:407
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:179
 msgid "&Refresh Skins"
@@ -4892,17 +4903,6 @@ msgstr "&N�zet"
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:61
 msgid "&Apply Skins"
 msgstr "K&in�zet alkalmaz�sa"
-
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:405
-#, java-format
-msgid ""
-"You have downloaded a skin titled \"{0}\", you can activate the new skin by "
-"clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
-"list of available skins."
-msgstr ""
-"A \"{0}\" nev� kin�zet sikeresen let�lt�d�tt, az �j kin�zet aktiv�l�s�hoz "
-"kattints a \"{1}\"-re a \"{2}\"->\"{3}\" men�ben, �s v�laszd ki a kin�zetet "
-"a megjelen� list�b�"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:413
 #, java-format
@@ -5567,6 +5567,7 @@ msgid "Share File"
 msgstr "F�jl megoszt�sa"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1379
+#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:162
 msgid "Stop Sharing File"
 msgstr "Megoszt�s megsz�ntet�se"
 
@@ -7469,10 +7470,6 @@ msgstr "Szeretn�l let�lt�st kezdeni a k�vetkez� m�gnesekr�"
 msgid "All"
 msgstr "Mind"
 
-#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:162
-msgid "Stop Sharing File(s)"
-msgstr ""
-
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:258
 #, java-format
 msgid ""
@@ -7504,11 +7501,11 @@ msgstr ""
 "gombot. Ha csak egyf�le t�pus� tartalomra vagy k�v�ncsi, lesz�k�theted "
 "keres�si eredm�nyeidet a fel�l l�that� gombok seg�ts�g�vel."
 
-#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:274
+#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:277
 msgid "The Most Advanced File Sharing Program on the Planet!"
 msgstr "A Bolyg� legfejlettebb f�jlmegoszt� szoftvere!"
 
-#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:279
+#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:282
 msgid ""
 "Better search results\n"
 "Turbo-Charged download speeds\n"

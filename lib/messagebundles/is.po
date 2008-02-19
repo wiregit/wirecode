@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-11 10:51-0500\n"
+"POT-Creation-Date: 2008-02-17 23:59-0500\n"
 "PO-Revision-Date: 2008-01-08 19:03+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-02-12 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-02-19 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -1105,34 +1105,34 @@ msgid ""
 msgstr ""
 
 #. business developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:198
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:199
 msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
 msgstr ""
 
 #. web developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:209
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:211
 msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
 msgstr ""
 
 #. support staff
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:216
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:218
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
 msgstr ""
 
 #. previous developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:224
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:228
 msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
 msgstr ""
 
 #. open source contributors
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:251
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:258
 msgid ""
 "LimeWire open source contributors have provided significant code and many "
 "bug fixes, ideas, research, etc. to the project as well. Those listed below "
@@ -1141,7 +1141,7 @@ msgid ""
 msgstr ""
 
 #. internationalization contributors
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:288
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:295
 msgid ""
 "LimeWire would also like to thank the many contributors to the "
 "internationalization project, both for the application itself and for the "
@@ -1149,21 +1149,21 @@ msgid ""
 msgstr ""
 
 #. community VIPs
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:292
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:299
 msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
 msgstr ""
 
 #. conclusion
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:313
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:320
 msgid ""
 "Finally, LimeWire would like to extend its sincere thanks to these "
 "developers, users, and all others who have contributed their ideas to the "
 "project. Without LimeWire users, the LimeWire network would not exist."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:318
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:325
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc."
@@ -3212,11 +3212,11 @@ msgid ""
 "then try again."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:335
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:344
 msgid "&Close"
 msgstr "&Loka"
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:336
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:345
 msgid "Close the Program"
 msgstr "Lokar forritinu."
 
@@ -3880,6 +3880,14 @@ msgstr "Reyna aftur"
 msgid "Reattempt Selected Downloads"
 msgstr "Endurtaka niðurhal."
 
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:405
+#, java-format
+msgid ""
+"You have downloaded a skin titled \"{0}\", you can activate the new skin by "
+"clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
+"list of available skins."
+msgstr ""
+
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:407
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:179
 #, fuzzy
@@ -3894,14 +3902,6 @@ msgstr "S&já"
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:409
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:61
 msgid "&Apply Skins"
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:405
-#, java-format
-msgid ""
-"You have downloaded a skin titled \"{0}\", you can activate the new skin by "
-"clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
-"list of available skins."
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:413
@@ -4582,6 +4582,7 @@ msgid "Share File"
 msgstr "Deila skrá"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1379
+#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:162
 msgid "Stop Sharing File"
 msgstr "Hætta að deila skrá"
 
@@ -6501,10 +6502,6 @@ msgstr ""
 msgid "All"
 msgstr "Allar"
 
-#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:162
-msgid "Stop Sharing File(s)"
-msgstr ""
-
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:258
 #, java-format
 msgid ""
@@ -6536,11 +6533,11 @@ msgstr ""
 "ákveðnu efni (music, video, etc...), getur þú hnitmiðað hana með því að nýta "
 "möguleikana fyrir ofan textareitinn."
 
-#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:274
+#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:277
 msgid "The Most Advanced File Sharing Program on the Planet!"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:279
+#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:282
 msgid ""
 "Better search results\n"
 "Turbo-Charged download speeds\n"

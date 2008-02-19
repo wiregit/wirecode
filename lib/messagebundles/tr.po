@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2008-02-11 10:51-0500\n"
-"PO-Revision-Date: 2008-02-10 15:44+0000\n"
+"POT-Creation-Date: 2008-02-17 23:59-0500\n"
+"PO-Revision-Date: 2008-02-19 01:19+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Turkish <tr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2008-02-12 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-02-19 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
@@ -724,7 +724,7 @@ msgstr ""
 "çalışmasının sonucudur."
 
 #. business developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:198
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:199
 msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
@@ -733,7 +733,7 @@ msgstr ""
 "geliştiricileri tarafından takip edildi."
 
 #. web developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:209
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:211
 msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
@@ -742,7 +742,7 @@ msgstr ""
 "grafik tasarımı LimeWire'nin web takımının sıkı çalışmasıdır:"
 
 #. support staff
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:216
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:218
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
 msgstr ""
@@ -750,7 +750,7 @@ msgstr ""
 "tam olarak cevaplanmaktadır."
 
 #. previous developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:224
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:228
 msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
@@ -759,7 +759,7 @@ msgstr ""
 "diğer projelerde çalışmaktalar."
 
 #. open source contributors
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:251
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:258
 msgid ""
 "LimeWire open source contributors have provided significant code and many "
 "bug fixes, ideas, research, etc. to the project as well. Those listed below "
@@ -773,7 +773,7 @@ msgstr ""
 "yaptılar."
 
 #. internationalization contributors
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:288
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:295
 msgid ""
 "LimeWire would also like to thank the many contributors to the "
 "internationalization project, both for the application itself and for the "
@@ -783,7 +783,7 @@ msgstr ""
 "sitesine destek veren pek çok destekçisine teşekkürü borç bilir."
 
 #. community VIPs
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:292
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:299
 msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
@@ -792,7 +792,7 @@ msgstr ""
 "Bunlar:"
 
 #. conclusion
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:313
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:320
 msgid ""
 "Finally, LimeWire would like to extend its sincere thanks to these "
 "developers, users, and all others who have contributed their ideas to the "
@@ -802,7 +802,7 @@ msgstr ""
 "fikirlerini katan kişilere en içten teşekkürlerini sunar. LimeWire "
 "kullanıcıları olmaksızın, LimeWire ağı var olamaz."
 
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:318
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:325
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc."
@@ -2554,6 +2554,10 @@ msgid ""
 "sorting behavior off by right-clicking on a column header, choosing 'More "
 "Options' and un-checking 'Sort Automatically'."
 msgstr ""
+"Indirilenleri, gonderilenleri,.. bir sütuna tiklayarak siralayabilirsiniz. "
+"Bir dahaki sefer girildiginde siralama bilginiz hatirlanacaktir. Bu otomatik "
+"siralamayi bir sutun basligina tiklayarak More Options kisminda Sort "
+"Automatically isaretini kaldirarak kapatabilirsiniz."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:106
 msgid ""
@@ -2620,6 +2624,10 @@ msgid ""
 "download in progress by right-clicking the download and choosing Change File "
 "Location. "
 msgstr ""
+"Kişisel yüklemeleri müşteri konumuna kaydedebilirsiniz. Arama sonucuna sağ "
+"tıklayın ve \"...olarak indir\" i seçin. Hatta yükelmeye sağ tıklayıp ve "
+"\"Dosya Konumunu Değiştir\" i seçerek ilerlemede olan bir yüklemenin yerini "
+"değiştirebilirsiniz. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:113
 msgid ""
@@ -2649,6 +2657,10 @@ msgid ""
 "images, in different folders on your computer automatically? Just go to "
 "Tools &gt; Options &gt; Saving to choose the location for each type of file. "
 msgstr ""
+"Ses, video veya resim gibi farkli tipteki dosyalari bilgisayarinizda garkli "
+"klasörler icine otomatik olarak kaydedebileceginizi biliyor muydunuz? Sadece "
+"Araclar - Secenekler - Kaydetme kisminda her tipteki dosyanin nereye "
+"kaydedilecegini belirtmeniz yeterli. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:116
 #, fuzzy
@@ -3102,11 +3114,15 @@ msgid "Upgrade to PRO"
 msgstr "PRO Sürüme Yükselt"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:66
+#, fuzzy
 msgid ""
 "For Turbo-Charged downloads, get LimeWire PRO. We guarantee that you will "
 "love the improved performance of PRO. Thank you for helping keep the "
 "Internet open by running LimeWire."
 msgstr ""
+"Turbo Hızlandırılmış yüklemeler için LimeWire PRO edinin. Garanti ediyoruzki "
+"PRO'nun geliştirilmiş perfonmansını seveceksiniz. LimeWire çalıştırarak "
+"internete bağlı kaldığınız için teşekkürler."
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:67
 msgid "Upgrade to LimeWire PRO?"
@@ -3117,12 +3133,17 @@ msgid "Upgrade Your Java"
 msgstr "Java'nızı Yükseltin"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:76
+#, fuzzy
 msgid ""
 "LimeWire has detected that you are using an out-of-date version of Java. "
 "LimeWire looks and acts much better with newer versions of Java. Features "
 "include support for scroll-wheels on mice, a Windows XP look, and many other "
 "improvements."
 msgstr ""
+"Limewire bilgisayarinizdaki Java versiyonunun eski oldugunu farketti. "
+"Limewire Javanin yeni versiyonlari ile daha iyi görünür ve calisir. Yeni "
+"versiyonlar mouselarin uzerindeki top ile calisma, Windows XP görünürlülügü "
+"ve daha bircok gelistirmeleri icermektedir."
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:77
 msgid "Would you like to get your free Java upgrade?"
@@ -3246,11 +3267,11 @@ msgstr ""
 "LimeWire bu adresi indiremez. doğru şekilde yazdığına emin ol ve sonra  "
 "yeniden dene."
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:335
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:344
 msgid "&Close"
 msgstr "&Kapat"
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:336
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:345
 msgid "Close the Program"
 msgstr "Programı Kapat"
 
@@ -3575,6 +3596,8 @@ msgid ""
 "You dropped the following files/folders on LimeWire, please select the ones "
 "you would like to share."
 msgstr ""
+"Asagidaki dosya/klasörleri Limewire üzerine sürüklediniz, lütfen paylasmak "
+"istediklerinizi seçiniz."
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:94
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:259
@@ -3583,7 +3606,7 @@ msgstr "Seçmiş olduğunuz dizinlerin altdizinleri de paylaşılacak."
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:99
 msgid "Share Dropped Files?"
-msgstr ""
+msgstr "Sürüklenen Dosyalar Paylasima Açilacak mi?"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:115
 msgid "Yes, Try Again"
@@ -3736,7 +3759,7 @@ msgstr "Parçalar"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:226
 msgid "Lost To Corruption"
-msgstr ""
+msgstr "Paket Kaybi"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:238
 msgid "hosts"
@@ -3882,6 +3905,17 @@ msgstr "Devam Et"
 msgid "Reattempt Selected Downloads"
 msgstr "Seçilileri Tekrar İndirmeyi Dene"
 
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:405
+#, java-format
+msgid ""
+"You have downloaded a skin titled \"{0}\", you can activate the new skin by "
+"clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
+"list of available skins."
+msgstr ""
+"\"{0}\" isimli bir tema indirdiniz. Bir tema uygulamak için \"{2}\"->\"{3} "
+"menüsünden \"{1}\" yolunu izleyin ve listelenen mevcut temalardan "
+"istediğinizi seçin."
+
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:407
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:179
 msgid "&Refresh Skins"
@@ -3896,17 +3930,6 @@ msgstr "&Görünüm"
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:61
 msgid "&Apply Skins"
 msgstr "&Temaları Uygula"
-
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:405
-#, java-format
-msgid ""
-"You have downloaded a skin titled \"{0}\", you can activate the new skin by "
-"clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
-"list of available skins."
-msgstr ""
-"\"{0}\" isimli bir tema indirdiniz. Bir tema uygulamak için \"{2}\"->\"{3} "
-"menüsünden \"{1}\" yolunu izleyin ve listelenen mevcut temalardan "
-"istediğinizi seçin."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:413
 #, java-format
@@ -3924,6 +3947,8 @@ msgid ""
 "LimeWire was unable to load the torrent file \"{0}\", - it may be malformed "
 "or LimeWire does not have permission to access this file."
 msgstr ""
+"LimeWire \"{0}\" torrent dosyasini açamiyor, - kötü biçimlendirilmi_ veya "
+"LimeWire'in ilgili dosya üzerinde yetkisi olmayabilir."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:627
 msgid "Choose Save Location"
@@ -4280,6 +4305,9 @@ msgid ""
 "folder where you would like your files to be downloaded. You can also choose "
 "folders you would like to share with other users running LimeWire."
 msgstr ""
+"LimeWire simdi dosyalari yeni ve farkli bir klasöre indiriyor. Lütfen "
+"dosyalarinizi indirmek istediginiz klasörü onaylayiniz. Ayrica LimeWire "
+"kullanan diger kullanicilar ile paylasmak istediginiz klasörleri de seciniz."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:96
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:327
@@ -4499,6 +4527,7 @@ msgid ""
 "LimeWire cannot publish this file because it was unable to find a schema for "
 "audio files."
 msgstr ""
+"LimeWire ses dosyasina bir sema bulamadigi için bu dosyayi publish edemez."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:779
 msgid "Move to Recycle Bin"
@@ -4585,6 +4614,7 @@ msgid "Share File"
 msgstr "Dosya Paylaş"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1379
+#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:162
 msgid "Stop Sharing File"
 msgstr "Dosya Paylaşımını Durdur"
 
@@ -6467,10 +6497,6 @@ msgstr "takip eden mıknatıslardan indirmelere başlamayı beğenir miydin?"
 msgid "All"
 msgstr "Hepsi"
 
-#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:162
-msgid "Stop Sharing File(s)"
-msgstr "Dosya paylaşımını durdur."
-
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:258
 #, java-format
 msgid ""
@@ -6500,11 +6526,11 @@ msgid ""
 "results by using the buttons above the text field."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:274
+#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:277
 msgid "The Most Advanced File Sharing Program on the Planet!"
 msgstr "gezegende en ileri dosya paylaşma programı!"
 
-#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:279
+#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:282
 msgid ""
 "Better search results\n"
 "Turbo-Charged download speeds\n"

@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-11 10:51-0500\n"
-"PO-Revision-Date: 2008-01-27 22:52+0000\n"
+"POT-Creation-Date: 2008-02-17 23:59-0500\n"
+"PO-Revision-Date: 2008-02-14 21:55+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-02-12 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-02-19 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Sorry, but LimeWire was unable to restart your old downloads."
@@ -1886,11 +1886,15 @@ msgstr ""
 "λειτουργήσουν όπως θα αναμενόταν."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:219
+#, fuzzy
 msgid ""
 "Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
+"Συγγνώμη, το Limewire δεν μπόρεσε να διαβάσει τα παλιά αντικείμενα που "
+"κατεβάσατε.Μπορείτε να επανεκκινήσετε αυτά΄πηγαίνοντας ''Βιβλιοθήκη'',μετά "
+"''Ανολοκλήρωτα Αρχεία'' και πατώντας ''Συνέχεια'' στις καταφορτώσεις σας."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:221
 msgid ""
@@ -1908,8 +1912,9 @@ msgid "Loading Safe Content Management..."
 msgstr "Γίνεται φόρτωση των ρυθμίσεων διαχείρησης ασφαλούς περιεχομένου..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:340
+#, fuzzy
 msgid "Loading Message Router..."
-msgstr "Φόρτωση router μηνύματος..."
+msgstr "Φόρτωση του δρομολογητή μηνυμάτων"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:345
 msgid "Checking for Updates..."
@@ -1921,17 +1926,19 @@ msgid "Loading Upload Management..."
 msgstr "Γίνεται φόρτωση των ρυθμίσεων διαχείρησης δημοσιοποίησης αρχείων..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:360
+#, fuzzy
 msgid "Loading Connection Listener..."
-msgstr "Φόρτωση ακροατή σύνδεσης..."
+msgstr "Φόρτωση ακροατή συνδέσεων"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:369
+#, fuzzy
 msgid "Loading Connection Management..."
-msgstr "Φόρτωση οργάνωσης της σύνδεσης..."
+msgstr "Φόρτωση διαχείρισης συνδέσεων"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:378
 #, fuzzy
 msgid "Loading Download Management..."
-msgstr "Γίνεται φόρτωση των ρυθμίσεων διαχείρησης κατεβάσματος αρχείων..."
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:384
 msgid "Loading Ultrapeer/DHT Management..."
@@ -1946,8 +1953,9 @@ msgid "Loading Shared Files..."
 msgstr "Γίνεται φόρτωση των αρχείων που μοιράζεστε..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:410
+#, fuzzy
 msgid "Loading BitTorrent Management..."
-msgstr ""
+msgstr "Φόρτωση διαχείρισης BitTorrent"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:416
 msgid "Loading Old Downloads..."
@@ -2338,6 +2346,10 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"Μπορείτε να διαλέξετε αν το LimeWire θα διαχειρίζεται ή όχι τις ρυθμίσεις "
+"για το πρωτόκολλο BitTorrent. Προτείνεται η διαχείριση από το LimeWire. "
+"Άκυρες ή ακατάλληλες τιμές μπορεί να προκαλέσουν σοβαρά προβλήματα στη "
+"λειτουργία και/ή στη μνήμη."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
 msgid ""
@@ -2404,6 +2416,9 @@ msgid ""
 "Please add any comments you may have (e.g what caused the error). \n"
 "Thank you and please use English."
 msgstr ""
+"Παρακαλώ προσθέστε οποιαδήποτε σχόλια μπορεί να έχετε (π.χ. τι προκάλεσε το "
+"σφάλμα). \n"
+"Σας ευχαριστούμε και σας παρακαλούμε να χρησιμοποιήσετε την αγγλική γλώσσα."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:432
 msgid "Send"
@@ -2519,14 +2534,14 @@ msgstr ""
 "προγραμματιστών του LimeWire."
 
 #. business developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:198
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:199
 msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
 msgstr ""
 
 #. web developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:209
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:211
 msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
@@ -2535,7 +2550,7 @@ msgstr ""
 "γραφική επένδυση είναι σκληρή δουλειά της διαδυκτιακής ομάδας του LimeWire."
 
 #. support staff
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:216
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:218
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
 msgstr ""
@@ -2543,7 +2558,7 @@ msgstr ""
 "ομάδα υποστήριξης του LimeWire."
 
 #. previous developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:224
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:228
 msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
@@ -2552,7 +2567,7 @@ msgstr ""
 "παρελθόν αλλά τώρα έχουν μετακινηθεί σε άλλα project."
 
 #. open source contributors
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:251
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:258
 msgid ""
 "LimeWire open source contributors have provided significant code and many "
 "bug fixes, ideas, research, etc. to the project as well. Those listed below "
@@ -2566,7 +2581,7 @@ msgstr ""
 "προβλήματα στον κώδικα ή και τα δύο:"
 
 #. internationalization contributors
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:288
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:295
 msgid ""
 "LimeWire would also like to thank the many contributors to the "
 "internationalization project, both for the application itself and for the "
@@ -2577,7 +2592,7 @@ msgstr ""
 "του LimeWire."
 
 #. community VIPs
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:292
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:299
 msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
@@ -2586,7 +2601,7 @@ msgstr ""
 "αυτούς περιλαμβάνονται:"
 
 #. conclusion
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:313
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:320
 msgid ""
 "Finally, LimeWire would like to extend its sincere thanks to these "
 "developers, users, and all others who have contributed their ideas to the "
@@ -2597,7 +2612,7 @@ msgstr ""
 "παραθέσει τις ιδέες του στο project. Χωρίς τους χρήστες του LimeWire, το "
 "δίκτυο του LimeWire δεν θα υπήρχε."
 
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:318
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:325
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc."
@@ -2651,7 +2666,7 @@ msgstr "Αποθήκευση ως"
 #. updates).
 #: gui/com/limegroup/gnutella/gui/Console.java:188
 msgid "Delay: "
-msgstr ""
+msgstr "Καθυστέρηση: "
 
 #: gui/com/limegroup/gnutella/gui/Console.java:618
 msgid "Save As"
@@ -2825,7 +2840,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:38
 msgid "Broadband"
-msgstr ""
+msgstr "Ευρυζωνική σύνδεση"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:40
 msgid "T1"
@@ -2904,6 +2919,15 @@ msgid ""
 "then select 'Windows 2000' in the box below the check box. Then click the "
 "'OK' button at the bottom and restart LimeWire."
 msgstr ""
+"Το LimeWire αντιμετώπισε κάποιο πρόβλημα κατά την εκκίνηση και δεν μπορεί να "
+"συνεχίσει. Υπάρχει πιθανότητα να το επιδιορθώσετε αλλάζοντας την συμβατότητα "
+"του LimeWire με τα Windows. Κάντε δεξί κλικ στο εικονίδιό του που βρίσκεται "
+"στην επιφάνεια εργασίας και επιλέξτε \"Ιδιότητες (Properties)\" από το "
+"αναδυόμενο μενού. Επιλέξτε την ετικέτα \"Συμβατότητα (Compatib;ility)\" στο "
+"επάνω μέρος και μετά ενεργοποιήστε το κουτάκι \"Εκτέλεση προγράμματος σε "
+"λειτουργία συμγατότητας για: (Run this program in compatibility mode for). "
+"Επιλέξτε \"Windows 2000\" στην αναδυόμενη λίστα που βρίσκεται από κάτω και "
+"πιέστε \"ΟΚ\". Μετά επανεκκινήστε το LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:524
 msgid ""
@@ -3037,6 +3061,15 @@ msgid ""
 "\n"
 "LimeWire will now exit.  Thank You."
 msgstr ""
+"To LimeWire δεν κατόρθωσε να δημιουργήσει ένα προσωρινό κατάλογο "
+"προτιμήσεων.\n"
+"\n"
+"Αυτό γενικά προκαλείται από έλλειψη δικαιωμάτων. Σιγουρευτείτε ότι το "
+"LimeWire (και εσείς) έχετε την δυνατότητα δημιουργίας αρχείων και καταλόγων "
+"στον υπολογιστή σας. Αν το πρόβλημα επιμείνει παρακαλούμε να επισκεφθείτε το "
+"www.limewire.com και να επιλέξετε τον δεσμό \"Support\".\n"
+"\n"
+"Το LimeWire θα τερματίσει τώρα. Ευχαριστούμε"
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:566
 #: gui/com/limegroup/gnutella/gui/MessageService.java:76
@@ -3112,7 +3145,7 @@ msgstr "Βοηθήστε να μεταφραστεί το LimeWire [B]"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:190
 msgid "Show Language in status bar"
-msgstr ""
+msgstr "Προβολή της γλώσσας στην γραμμή κατάστασης"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:381
 msgid "Verify"
@@ -3139,7 +3172,7 @@ msgstr "Επισκόπηση πράξης διεκδικούμενης άδει�
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:498
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:566
 msgid "View Verification Page"
-msgstr ""
+msgstr "Προβολή της σελίδας επαλήθευσης"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:445
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:503
@@ -3253,7 +3286,7 @@ msgstr "Επικόλληση"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:789
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1267
 msgid "Delete"
-msgstr ""
+msgstr "Διαγραφή"
 
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:229
 #: gui/com/limegroup/gnutella/gui/actions/SelectSharedDirectoryAction.java:26
@@ -3365,24 +3398,38 @@ msgid ""
 "are saved properly you should save them to a sub-folder of {1}.  Would you "
 "like to choose another location?"
 msgstr ""
+"Η αποθήκευση των αρχείων που κατεβάζετε στο {0} μπορεί να μη λειτουργήσει "
+"σωστά. Για να βεβαιωθείτε ότι τα αρχεία αποθηκεύονται σωστά, να τα "
+"αποθηκεύετε σε έναν υποφάκελλο του {1}. Θέλετε να επιλέξετε έναν άλλο "
+"προορισμό;"
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:20
 msgid ""
 "LimeWire was unable to create your settings folder and is using a temporary "
 "folder.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
+"Το LimeWire δεν κατόρθωσε να δημιουργήσει τον κατάλογο ρυθμίσεών σας και "
+"χρησιμοποιεί έναν προσωρινό. Οι ρυθμίσεις σας μπορεί να διαγραφούν όταν θα "
+"κλείσετε το πρόγραμμα. "
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:35
+#, fuzzy
 msgid ""
 "LimeWire has encountered problems in managing your settings.  Your settings "
 "changes may not be saved on shutdown."
 msgstr ""
+"Το Limewire αντιμετωπισε προβληματα στην διαχειρηση των ρυθμισεων σας. Ειναι "
+"πιθανον, οι αλλαγες των ρυθμισεων σας να μην αποθηκευτουν κατα το κλεισιμο "
+"του προγραματος."
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:38
 msgid ""
 "LimeWire has encountered problems in loading your settings.  LimeWire will "
 "attempt to use the default values; however, may behave unexpectedly."
 msgstr ""
+"Το LimeWire αντιμετώπισε προβλήματα κατά τη φόρτωση των ρυθμίσεών σας και θα "
+"προσπαθήσει να χρησιμοποιήσει τις προκαθορισμένες τιμές. Μπορεί όμως να "
+"συμπεριφέρεται απροσδόκητα."
 
 #: gui/com/limegroup/gnutella/gui/ShutdownWindow.java:18
 msgid "Shutting down LimeWire..."
@@ -3534,7 +3581,7 @@ msgstr "Δείξε στοιχεία τοίχους προστασίας"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:811
 msgid "Show Store Indicator"
-msgstr ""
+msgstr "Προβολή του δείκτη αποθήκευσης"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:827
 msgid "Show Bandwidth Consumption"
@@ -3570,11 +3617,11 @@ msgstr "Ανεβάσματα:"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:1007
 msgid "Total Downstream:"
-msgstr ""
+msgstr "Συνολική εισερχόμενη κίνηση"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:1012
 msgid "Total Upstream:"
-msgstr ""
+msgstr "Συνολική εξερχόμενη κίνηση"
 
 #. *
 #. * The title for the TOTD window.
@@ -3667,6 +3714,10 @@ msgid ""
 "column to sort by is the '#' column, which can put the results that have the "
 "highest chance of downloading at the top of the list."
 msgstr ""
+"Μπορείτε να ταξινομίσσετε τα αποτελέσματα κάνοντας κλικ πάνω σε μια "
+"επικεφαλίδα. Η πιο χρήσιμη στήλη για ταξινόμηση είναι η \"#\", η οποία "
+"μπορεί να τοποθετήσει τα αποτελέσματα σύμφωνα με την υψηλότερη πιθανότητα "
+"επιτυχούς λήψης."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:29
 msgid ""
@@ -3675,6 +3726,10 @@ msgid ""
 "stars and a speed of 'Ethernet'. These results have the greatest chance of "
 "completing successfully."
 msgstr ""
+"Όσο περισσότερα αστέρια έχει κάποιο αποτέλεσμα έρευνας, τόσο μεγαλύτερη "
+"είναι η πιθανότητα επιτυχούς λήψης του! Μερικά αποτελέσματα μπορεί να "
+"εμφανιστούν με τέσσερα μπλε αστέρια και με ένδειξη ταχύτητας \"Ethernet\". "
+"Αυτά τα αποτελέσματα έχουν τη μεγαλύτερη πιθανότητα επιτυχούς λήψης."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:30
 msgid ""
@@ -3684,6 +3739,11 @@ msgid ""
 "that file, and 'X' is the number of people that have successfully uploaded "
 "it."
 msgstr ""
+"Μπορείτε να δείτε πόσες φορές έχει κάποιος ανεβάσει ένα αρχείο, επιλέγοντας "
+"την ετικέτα \"Αρχειοθήκη\" και εξετάζοντας τη στήλη \"Uploads\". Η "
+"πληροφορία είναι αποθηκευμένη με τη μορχή \"Χ/Υ\", όπου \"Υ\" είναι ο "
+"αριθμός των ατόμων που έχουν προσπαθήσει να λάβουν το αρχείο και \"Χ\" ο "
+"αριθμός των ατόμων που είχαν επιτυχημένη λήψη."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:31
 msgid ""
@@ -3699,16 +3759,22 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:33
+#, fuzzy
 msgid ""
 "Looking for something rare? The more detailed your search is, the better "
 "your chances of getting a result you want!"
 msgstr ""
+"Ψαχνετε για κατι σπανιο; Οσο πιο λεπτομερης ειναι η ερευνα σας, τοσο "
+"καλυτερες ειναι οι πιθανοτητες να εχετε το αποτελεσμα που θελετε!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:34
+#, fuzzy
 msgid ""
 "Want to open this Tip Of The Day dialog after you've closed it? Go to the "
 "Help menu and choose 'Tip of the Day'."
 msgstr ""
+"Θελετε να ανοιξετε την Συμβουλη της ημερας, αφου την εχετε κλεισει; Επιλεξτε "
+"\"Συμβουλη της ημερας\" απο το μενου Βοηθειας."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:35
 msgid ""
@@ -3734,6 +3800,10 @@ msgid ""
 "resume downloading and click resume. LimeWire will automatically search for "
 "that file and begin downloading it again."
 msgstr ""
+"Σταματήσατε κατά λάθος τη λήψη κάποιου αρχείου; Κάντε κλικ στην ετικέτα "
+"\"Αρχειοθήκη\", επιλέξτε τον φάκελο \"Ημιτελή αρχεία\" (Incoplete Files) και "
+"κατόπιν επιλέξτε το αρχείο του οποίου θέλετε να ξαναρχίσετε το κατέβασμα. Το "
+"LimeWire θα ψάξει το αρχείο και θα αρχίσει να το κατεβάζει εκ νέου αυτόματα."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:38
 #, java-format
@@ -3917,6 +3987,8 @@ msgid ""
 "If you try to download a file that you already have, LimeWire lets you know, "
 "even if the file has a different name."
 msgstr ""
+"Αν προσπαθήσετε να κατεβάσετε ένα αρχείο πού ήδη έχετε, τό Limewire σάς "
+"ειδοποιεί, ακόμη καί άν τό αρχείο έχει διαφορετικό όνομα."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:63
 msgid ""
@@ -4050,6 +4122,8 @@ msgid ""
 "Want to share a large file? LimeWire supports file sizes up to 1 TB "
 "(terabyte)."
 msgstr ""
+"Θέλετε να μοιραστείτε ένα μεγάλο αρχείο; Τό Limewire υποστηρίζει μέγεθος "
+"αρχείων εώς 1TB (terabyte)."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:81
 msgid ""
@@ -4097,6 +4171,8 @@ msgid ""
 "You can find out which version of LimeWire you are using by choosing 'About "
 "LimeWire' from the Help menu. "
 msgstr ""
+"Μρορείτε νά δείτε ποιά έκδοση τού Limewire χρησιμοποιήτε, επιλέγοντας 'Περί "
+"τού Limewire' από τό μενού Βοήθειας. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:98
 msgid ""
@@ -4739,11 +4815,11 @@ msgid ""
 "then try again."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:335
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:344
 msgid "&Close"
 msgstr "Κλείσιμο [&K]"
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:336
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:345
 msgid "Close the Program"
 msgstr "Κλείσιμο του προγράμματος."
 
@@ -5408,6 +5484,17 @@ msgstr "Μετονομασία"
 msgid "Reattempt Selected Downloads"
 msgstr "Προσπάθεια για επανάληψη μιας λήψης."
 
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:405
+#, java-format
+msgid ""
+"You have downloaded a skin titled \"{0}\", you can activate the new skin by "
+"clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
+"list of available skins."
+msgstr ""
+"Έχετε κατεβάσει μια εμφάνιση με όνομα \"{0}\", μπορείτε να ενεργοποιήσετε τη "
+"νέα εμφάνιση κάνοντας κλικ στο \"{1}\" στο \"{2}\"->\"{3}\" μενού και μετά "
+"επιλέγοντάς το από τη λίστα των διαθέσιμων εμφανίσεων."
+
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:407
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:179
 msgid "&Refresh Skins"
@@ -5422,17 +5509,6 @@ msgstr "Εμφάνιση [&E]"
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:61
 msgid "&Apply Skins"
 msgstr "Αλλαγή εμφάνισης [&A]"
-
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:405
-#, java-format
-msgid ""
-"You have downloaded a skin titled \"{0}\", you can activate the new skin by "
-"clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
-"list of available skins."
-msgstr ""
-"Έχετε κατεβάσει μια εμφάνιση με όνομα \"{0}\", μπορείτε να ενεργοποιήσετε τη "
-"νέα εμφάνιση κάνοντας κλικ στο \"{1}\" στο \"{2}\"->\"{3}\" μενού και μετά "
-"επιλέγοντάς το από τη λίστα των διαθέσιμων εμφανίσεων."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:413
 #, java-format
@@ -6123,6 +6199,7 @@ msgid "Share File"
 msgstr "Μοιραστείτε το αρχείο"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1379
+#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:162
 msgid "Stop Sharing File"
 msgstr "Σταματήστε να μοιράζεστε το αρχείο"
 
@@ -8095,10 +8172,6 @@ msgstr "Θα θέλατε να αρχίσετε το download από τους α
 msgid "All"
 msgstr "Όλα"
 
-#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:162
-msgid "Stop Sharing File(s)"
-msgstr ""
-
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:258
 #, java-format
 msgid ""
@@ -8131,11 +8204,11 @@ msgstr ""
 "ταινίες, κτλ...), μπορείτε να περιορίσετε τα αποτελέσματα της αναζήτησής σας "
 "χρησιμοποιώντας τα κουμπιά πάνω από την επιφάνεια για το κείμενο."
 
-#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:274
+#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:277
 msgid "The Most Advanced File Sharing Program on the Planet!"
 msgstr "Το πιο εξελιγμένο πρόγραμμα μοιράσματος αρχείων στον πλανήτη!"
 
-#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:279
+#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:282
 msgid ""
 "Better search results\n"
 "Turbo-Charged download speeds\n"

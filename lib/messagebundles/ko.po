@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-11 10:51-0500\n"
+"POT-Creation-Date: 2008-02-17 23:59-0500\n"
 "PO-Revision-Date: 2007-09-16 01:13+0000\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2008-02-12 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-02-19 04:50+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -2175,14 +2175,14 @@ msgid ""
 msgstr "LimeWire는 또 당연한 일이면서, LimeWire 개발자가 장기에 걸치는 일의 결과에서도 있습니다."
 
 #. business developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:198
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:199
 msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
 msgstr "비지니스 전략과 일상적인 업무는, LimeWire의 비지니스 개발자가 관리하고 있습니다."
 
 #. web developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:209
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:211
 msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
@@ -2191,20 +2191,20 @@ msgstr ""
 "디자인은 LimeWire의 웹 팀의 노력의 산물입니다."
 
 #. support staff
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:216
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:218
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
 msgstr "LimeWire Pro에 관한 요청은 LimeWire의 기술 서포트가 담당합니다："
 
 #. previous developers
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:224
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:228
 msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
 msgstr "과거에 LimeWire 팀에서 일한 개발자들은 그 외 프로젝트에서 작업하고 있습니다."
 
 #. open source contributors
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:251
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:258
 msgid ""
 "LimeWire open source contributors have provided significant code and many "
 "bug fixes, ideas, research, etc. to the project as well. Those listed below "
@@ -2215,7 +2215,7 @@ msgstr ""
 "도움을 주셨습니다. 아래는 LimeWire의 각 버전에 기입된 코드, 코드상의 중대한 버그로서 확인된 것, 혹은 둘다 해당됩니다."
 
 #. internationalization contributors
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:288
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:295
 msgid ""
 "LimeWire would also like to thank the many contributors to the "
 "internationalization project, both for the application itself and for the "
@@ -2223,14 +2223,14 @@ msgid ""
 msgstr "LimeWire는 또, 어플리케이션 자체와 LimeWire 웹 사이트에대해 많은 국제적 프로젝트 공헌자에게 감사드립니다."
 
 #. community VIPs
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:292
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:299
 msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
 msgstr "그누테라 커뮤니티의 모든 동료분들께 감사의 말씀 올립니다. 참조："
 
 #. conclusion
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:313
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:320
 msgid ""
 "Finally, LimeWire would like to extend its sincere thanks to these "
 "developers, users, and all others who have contributed their ideas to the "
@@ -2240,7 +2240,7 @@ msgstr ""
 "href=\"http://cafe.daum.net/onlymyU\">라임와이어 코리아</a> 여태한님, 그 외 공헌자에게 깊게 감사의 "
 "말씀을 드립니다. LimeWire의 네트워크는 LimeWire 사용자없이는 존재할 수 없습니다."
 
-#: gui/com/limegroup/gnutella/gui/AboutWindow.java:318
+#: gui/com/limegroup/gnutella/gui/AboutWindow.java:325
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc."
@@ -4290,11 +4290,11 @@ msgid ""
 "then try again."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:335
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:344
 msgid "&Close"
 msgstr "닫기 (&C)"
 
-#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:336
+#: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:345
 msgid "Close the Program"
 msgstr "프로그램을 닫기"
 
@@ -4949,6 +4949,14 @@ msgstr "이름 변경"
 msgid "Reattempt Selected Downloads"
 msgstr "다운로드의 재개를 재시행"
 
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:405
+#, java-format
+msgid ""
+"You have downloaded a skin titled \"{0}\", you can activate the new skin by "
+"clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
+"list of available skins."
+msgstr ""
+
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:407
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:179
 msgid "&Refresh Skins"
@@ -4963,14 +4971,6 @@ msgstr "보기 (&V)"
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:61
 msgid "&Apply Skins"
 msgstr "스킨을 적용 (&A)"
-
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:405
-#, java-format
-msgid ""
-"You have downloaded a skin titled \"{0}\", you can activate the new skin by "
-"clicking \"{1}\" in the \"{2}\"->\"{3}\" menu and then selecting it from the "
-"list of available skins."
-msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:413
 #, java-format
@@ -5638,6 +5638,7 @@ msgid "Share File"
 msgstr "파일 공유"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1379
+#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:162
 msgid "Stop Sharing File"
 msgstr "파일 공유를 정지"
 
@@ -7519,10 +7520,6 @@ msgstr "마그넷으로부터 다운로드를 계속 실행하겠습니까?"
 msgid "All"
 msgstr "모두"
 
-#: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:162
-msgid "Stop Sharing File(s)"
-msgstr ""
-
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:258
 #, java-format
 msgid ""
@@ -7552,11 +7549,11 @@ msgstr ""
 "LimeWire 사용을 시작하려면, 왼쪽의 텍스트 필드에 무엇인가 찾고 싶은 단어를 입력한 후, \"검색\" 버튼을 클릭하세요. 한 "
 "종류만의 컨텐츠(음악, 동영상 등)를 찾고 싶을 때는, 텍스트 필드아래에 있는 검색종류 버튼을 사용해 결과 내용을 분류할 수 있습니다."
 
-#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:274
+#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:277
 msgid "The Most Advanced File Sharing Program on the Planet!"
 msgstr "지구상에서 가장 뛰어난 파일 공유 프로그램!"
 
-#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:279
+#: gui/com/limegroup/gnutella/gui/search/OverlayAd.java:282
 msgid ""
 "Better search results\n"
 "Turbo-Charged download speeds\n"
