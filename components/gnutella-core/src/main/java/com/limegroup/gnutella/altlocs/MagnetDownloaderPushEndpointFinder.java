@@ -12,6 +12,7 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.dht.db.PushEndpointManager;
 import com.limegroup.gnutella.dht.db.SearchListener;
@@ -22,7 +23,7 @@ import com.limegroup.gnutella.downloader.DownloadStatusListener;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
 
 @Singleton
-public class MagnetDownloaderPushEndpointFinder implements DownloadManagerListener, DownloadStatusListener {
+public class MagnetDownloaderPushEndpointFinder implements DownloadManagerListener {
 
     static final Log LOG = LogFactory.getLog(MagnetDownloaderPushEndpointFinder.class);
     
@@ -30,6 +31,15 @@ public class MagnetDownloaderPushEndpointFinder implements DownloadManagerListen
     private final PushEndpointManager pushEndpointManager;
     private final AlternateLocationFactory alternateLocationFactory;
     private final AltLocManager altLocManager;
+    
+    /**
+     * Package access for testing.
+     */
+    final DownloadStatusListener downloadStatusListener = new DownloadStatusListener() {
+        public void handleEvent(Event<CoreDownloader, DownloadStatus> event) {
+            handleStatusEvent(event);
+        }
+    };
     
     @Inject
     public MagnetDownloaderPushEndpointFinder(DownloadManager downloadManager, 
@@ -45,17 +55,54 @@ public class MagnetDownloaderPushEndpointFinder implements DownloadManagerListen
         switch (event.getType()) {
         case ADDED:
             CoreDownloader downloader = event.getSource();
-            // TODO also when running out of sources
             if (downloader instanceof MagnetDownloader) {
                 MagnetDownloader magnetDownloader = (MagnetDownloader)downloader;
-                MagnetOptions magnet = magnetDownloader.getMagnet();
-                URN sha1Urn = magnet.getSHA1Urn();
-                if (sha1Urn == null) {
-                    return;
+                long size = getSize(magnetDownloader);
+                if (size != -1) {
+                    // subscribe for status events so we can search when waiting for user
+                    magnetDownloader.addListener(this, downloadStatusListener);
                 }
-                searchForPushEndpoints(sha1Urn, magnet.getGUIDUrns());
+                searchForPushEndpoinns(magnetDownloader);
             }
+            break;
+        case REMOVED:
+            downloader = event.getSource();
+            if (downloader instanceof MagnetDownloader) {
+                downloader.removeListener(this, downloadStatusListener);
+            }
+            break;
         } 
+    }
+    
+    private long getSize(MagnetDownloader downloader) {
+        long size = downloader.getMagnet().getFileSize();
+        if (size == -1) {
+            size = downloader.getContentLength();
+        }
+        return size;
+    }
+    
+    private void searchForPushEndpoinns(MagnetDownloader magnetDownloader) {
+        MagnetOptions magnet = magnetDownloader.getMagnet();
+        URN sha1Urn = magnet.getSHA1Urn();
+        if (sha1Urn == null) {
+            return;
+        }
+        long size = getSize(magnetDownloader);
+        if (size == -1) {
+            return;
+        }
+        searchForPushEndpoints(sha1Urn, magnet.getGUIDUrns());
+    }
+    
+    void handleStatusEvent(Event<CoreDownloader, DownloadStatus> event) {
+        if (event.getType() == DownloadStatus.WAITING_FOR_USER) {
+            CoreDownloader downloader = event.getSource();
+            if (downloader instanceof MagnetDownloader) {
+                MagnetDownloader magnetDownloader = (MagnetDownloader)downloader;
+                searchForPushEndpoinns(magnetDownloader);
+            }
+        }
     }
     
     void searchForPushEndpoints(URN sha1Urn, Set<URN> guidUrns) {

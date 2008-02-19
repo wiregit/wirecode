@@ -124,10 +124,15 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     }
     
     public void initialize() {
-        assert (getMagnet() != null);
-        URN sha1 = getMagnet().getSHA1Urn();
+        MagnetOptions magnet = getMagnet();
+        assert (magnet != null);
+        URN sha1 = magnet.getSHA1Urn();
         if(sha1 != null)
             setSha1Urn(sha1);
+        long size = magnet.getFileSize();
+        if (size != -1) {
+            setContentLength(size);
+        }
         super.initialize();
         // activate requery manager to get urn lookups for magnet downloads
         requeryManager.activate();
