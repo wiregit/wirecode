@@ -5,6 +5,8 @@ import java.net.Socket;
 import java.util.Collection;
 import java.util.List;
 
+import org.limewire.listener.WeakEventListenerSupport;
+
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
@@ -34,7 +36,8 @@ import com.limegroup.gnutella.version.DownloadInformation;
  * completed downloads.  Downloads in the COULDNT_DOWNLOAD state are not 
  * serialized.  
  */
-public interface DownloadManager extends BandwidthTracker, SaveLocationManager, LWSIntegrationServicesDelegate, PushedSocketHandler {
+public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
+LWSIntegrationServicesDelegate, PushedSocketHandler, WeakEventListenerSupport<DownloadManagerListener> {
     
     /**
      * Adds a new downloader that this will manager.
@@ -279,7 +282,4 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
      *  successfully written. */
     public void writeSnapshot();
 
-    public void addDownloadManagerListener(DownloadManagerListener listener);
-    
-    public void removeDownloadManagerListener(DownloadManagerListener listener);
 }

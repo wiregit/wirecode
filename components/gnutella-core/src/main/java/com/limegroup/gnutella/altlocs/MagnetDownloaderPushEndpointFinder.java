@@ -18,10 +18,11 @@ import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadManagerEvent;
 import com.limegroup.gnutella.downloader.DownloadManagerListener;
+import com.limegroup.gnutella.downloader.DownloadStatusListener;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
 
 @Singleton
-public class MagnetDownloaderPushEndpointFinder implements DownloadManagerListener {
+public class MagnetDownloaderPushEndpointFinder implements DownloadManagerListener, DownloadStatusListener {
 
     static final Log LOG = LogFactory.getLog(MagnetDownloaderPushEndpointFinder.class);
     
@@ -71,11 +72,11 @@ public class MagnetDownloaderPushEndpointFinder implements DownloadManagerListen
     }
 
     public void start() {
-        downloadManager.addDownloadManagerListener(this);
+        downloadManager.addListener(this, this);
     }
 
     public void stop() {
-        downloadManager.removeDownloadManagerListener(this);
+        downloadManager.removeListener(this, this);
     }
     
     private class PushendpointHandler implements SearchListener<PushEndpoint> {

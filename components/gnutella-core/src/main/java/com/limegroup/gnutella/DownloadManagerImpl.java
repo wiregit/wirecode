@@ -1105,22 +1105,19 @@ public class DownloadManagerImpl implements DownloadManager {
     // ---------------------------------------------------------------
     // Implementation of LWSIntegrationServicesDelegate
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#getAllDownloaders()
-     */
     public final Iterable<CoreDownloader> getAllDownloaders() {
         return activeAndWaiting;
     }
 
-    public void addDownloadManagerListener(DownloadManagerListener listener) {
-        listeners.addListener(this, listener);
-    }
-
-    public void removeDownloadManagerListener(DownloadManagerListener listener) {
-        listeners.removeListener(this, listener);
-    }    
-
     private void fireEvent(CoreDownloader downloader, DownloadManagerEvent type) {
         listeners.broadcast(new DefaultEvent<CoreDownloader, DownloadManagerEvent>(downloader, type));
+    }
+
+    public void addListener(Object strongRef, DownloadManagerListener listener) {
+        listeners.addListener(strongRef, listener);
+    }
+
+    public boolean removeListener(Object strongRef, DownloadManagerListener listener) {
+        return listeners.removeListener(strongRef, listener);
     }
 }
