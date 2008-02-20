@@ -30,7 +30,6 @@ public class PushEndpointCacheImplTest extends BaseTestCase {
         return buildTestSuite(PushEndpointCacheImplTest.class);
     }    
    
-
     @Override
     protected void setUp() throws Exception {
         context = new Mockery();
