@@ -4,6 +4,8 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.api.Invocation;
+import org.jmock.lib.action.CustomAction;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.GUID;
@@ -26,15 +28,7 @@ public class PushEndpointManagerTest extends BaseTestCase {
     protected void setUp() throws Exception {
         context = new Mockery();
     }
-
-    public void testFindPushEndpoint() {
-        fail("Not yet implemented");
-    }
-
-    public void testGetPushEndpoint() {
-        fail("Not yet implemented");
-    }
-    
+  
     /**
      * Asserts that {@link PushEndpointManager#startSearch(com.limegroup.gnutella.GUID, SearchListener)}
      * starts a search and notifies the cache of results.
@@ -51,12 +45,20 @@ public class PushEndpointManagerTest extends BaseTestCase {
         final GUID guid = new GUID();
         
         context.checking(new Expectations() {{
-            one(pushEndpointFinder).findPushEndpoint(guid, listener);
+            one(pushEndpointFinder).findPushEndpoint(with(same(guid)), with(any(SearchListener.class)));
+            will(new CustomAction("call listener") {
+                public Object invoke(Invocation invocation) throws Throwable {
+                    ((SearchListener<PushEndpoint>)invocation.getParameter(1)).handleResult(result);
+                    ((SearchListener<PushEndpoint>)invocation.getParameter(1)).handleSearchDone(true);
+                    return null;
+                }
+            });
+            one(listener).handleResult(result);
+            one(listener).handleSearchDone(true);
             one(result).updateProxies(true);
         }});
         
         pushEndpointManager.startSearch(guid, listener);
-        listener.handleResult(result);
         
         context.assertIsSatisfied();
     }
