@@ -7,11 +7,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 
 public interface SearchResultStats {
 
-    /*
-    public int getPercentAvailable (URN urn);
-    public int getNumberOfLocations (URN urn);
-    */
-    
     public GUID getGUID();
     
     public int getNumResults();

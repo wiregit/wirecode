@@ -39,11 +39,17 @@ public class ResourceLocationCounter {
     private int _percentAvailable = 0;
     
     /**
+     * Size of the file.
+     */
+    private long _fileSize = 0;
+    
+    /**
      * 
      * @param urn
      */
-    public ResourceLocationCounter (URN urn) {
+    public ResourceLocationCounter (URN urn, long fileSize) {
        _urn = urn;
+       _fileSize = fileSize;
     }
     
     /**
@@ -52,7 +58,7 @@ public class ResourceLocationCounter {
      */
     public void addIntervalSet (IntervalSet is) {
         _isets.add( is );
-        _partialCount = calculateLocationCount(_isets);
+        _partialCount = calculateLocationCount( _isets );
     }
     
     /**
@@ -97,6 +103,18 @@ public class ResourceLocationCounter {
         
         if (isets.size() == 0)
             return 0;
+        
+        IntervalSet iset = new IntervalSet();
+        
+        for (IntervalSet is : isets)
+            iset.add( is );
+        
+        // compare iset with _fileSize
+        //   what percent of _fileSize is represented by iset?
+        //   
+        
+        
+        
         
         return 1;
         

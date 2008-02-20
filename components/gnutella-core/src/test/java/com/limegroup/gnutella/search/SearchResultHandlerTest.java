@@ -357,6 +357,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         Response actionResponse = responseFactory.createResponse(0, 1, "test", actionDoc);
         QueryReply reply = newQueryReply(new Response[] { actionResponse } );
         reply.setSecureStatus(SecureMessage.SECURE);
+        
         assertEquals(0, callback.results.size());
         searchResultHandler.handleQueryReply(reply);
         assertEquals(0, callback.results.size());

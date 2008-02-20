@@ -585,9 +585,9 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                 
                 if (skipSpam || !srh.getSpamManager().get().isSpam(rfd)) {
                     if (is != null)
-                        numGood += addIntervalSet(response.getUrns(), is);
+                        numGood += addIntervalSet(response.getUrns(), is, response.getSize());
                     else
-                        numGood += addLocation(response.getUrns());
+                        numGood += addLocation(response.getUrns(), response.getSize());
                 }
                 else
                     numBad++;
@@ -610,7 +610,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
          *         given Set<URN> based on the IntervalSet.
          * 
          */
-        private int addIntervalSet(Set<URN> urns, IntervalSet is) {
+        private int addIntervalSet(Set<URN> urns, IntervalSet is, long size) {
             ResourceLocationCounter rlc = null;
             
             int count_before = 0;
@@ -621,7 +621,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                     continue;
                 
                 if (null == (rlc = _isets.get(urn)))
-                    _isets.put(urn, (rlc = new ResourceLocationCounter(urn)));
+                    _isets.put(urn, (rlc = new ResourceLocationCounter(urn, size)));
                 
                 count_before = rlc.getLocationCount();
                 rlc.addIntervalSet( is );
@@ -633,7 +633,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             return count_after - count_before;
         }
         
-        private int addLocation(Set<URN> urns) {
+        private int addLocation(Set<URN> urns, long size) {
             ResourceLocationCounter rlc = null;
             
             int count_before = 0;
@@ -644,7 +644,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                     continue;
                 
                 if (null == (rlc = _isets.get(urn)))
-                    _isets.put(urn, (rlc = new ResourceLocationCounter(urn)));
+                    _isets.put(urn, (rlc = new ResourceLocationCounter(urn, size)));
                 
                 rlc.incrementCount();
                 
