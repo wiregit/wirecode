@@ -58,7 +58,7 @@ public class ResourceLocationCounter {
      */
     public void addIntervalSet (IntervalSet is) {
         _isets.add( is );
-        _partialCount = calculateLocationCount( _isets );
+        calculateLocationCount();
     }
     
     /**
@@ -92,45 +92,64 @@ public class ResourceLocationCounter {
     }
     
     /**
+     * Determine the percentage of the file that is accessible
+     * via the partial search results.
+     * 
+     * If the entire file is available, then _partialCount will
+     * be set to 1; otherwise 0.
      * 
      * @param isets
      * @return
      */
-    private int calculateLocationCount (Vector<IntervalSet> isets) {
+    private void calculateLocationCount () {
+        long sum = 0;
         
-        if (isets == null)
-            return 0;
-        
-        if (isets.size() == 0)
-            return 0;
+        // if there are no partial result interval sets,
+        // then the partial count is zero and the percent
+        // available is also zero, unless there is at least
+        // one whole result - then the percent available is
+        // 100.
+        //
+        if (_isets == null || _isets.size() == 0) {
+            _partialCount = 0;
+            _percentAvailable = _wholeCount > 0 ? 100 : 0;
+            System.out.println(" *** ResourceLocationCounter::calculateLocationCount().. [POINT-A] pc=" + _partialCount + "; pa=" + _percentAvailable + ";");
+            return;
+        }
         
         IntervalSet iset = new IntervalSet();
         
-        for (IntervalSet is : isets)
+        // take all of the interval sets that we have for
+        // the various URNs and "flatten" them into a single
+        // interval set.
+        //
+        for (IntervalSet is : _isets)
             iset.add( is );
         
-        // compare iset with _fileSize
-        //   what percent of _fileSize is represented by iset?
-        //   
-        
-        
-        
-        
-        return 1;
-        
-        /*
-        for (IntervalSet is : isets) {
-            List<Range> ranges = is.getAllIntervalsAsList();
-            
-            
-            
-        }
-        */
-        
-        // TODO
+        // if the flattened interval set contains the entire
+        // range for the file, then we have enough sources
+        // to obtain the entire file.
         //
-        // don't need to adjust _percentAvailable if it is already
-        // at 100.
+        if (iset.contains(Range.createRange(0, _fileSize-1))) {
+            _partialCount = 1;
+            _percentAvailable = 100;
+            System.out.println(" *** ResourceLocationCounter::calculateLocationCount().. [POINT-B] pc=" + _partialCount + "; pa=" + _percentAvailable + ";");
+            return;
+        }
+        
+        // sum the amount of the file represented by this
+        // flattened interval set. we must add the +1 
+        // because the range is inclusive and not strictly
+        // the difference between the two points of the
+        // range.
+        //
+        for (Range range : iset.getAllIntervalsAsList())
+            sum += (range.getHigh() - range.getLow()) + 1;
+        
+        _partialCount = 0;
+        _percentAvailable = (int)(100.0 / ((float)_fileSize / (float)sum));
+        
+        System.out.println(" *** ResourceLocationCounter::calculateLocationCount().. [POINT-C] pc=" + _partialCount + "; pa=" + _percentAvailable + ";");
     }
     
 }

@@ -584,10 +584,14 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                 srh.getActivityCallback().get().handleQueryResult(rfd, data, alts);
                 
                 if (skipSpam || !srh.getSpamManager().get().isSpam(rfd)) {
-                    if (is != null)
+                    if (is != null) {
                         numGood += addIntervalSet(response.getUrns(), is, response.getSize());
-                    else
+                        System.out.println(" *** GuidCount::addQueryReply().. [POINT-A] partial result");
+                    }
+                    else {
                         numGood += addLocation(response.getUrns(), response.getSize());
+                        System.out.println(" *** GuidCount::addQueryReply().. [POINT-B] whole result");
+                    }
                 }
                 else
                     numBad++;

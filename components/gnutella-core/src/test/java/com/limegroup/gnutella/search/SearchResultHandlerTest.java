@@ -15,6 +15,7 @@ import org.jmock.Mockery;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.KeyValue;
 import org.limewire.collection.NameValue;
+import org.limewire.collection.Range;
 import org.limewire.io.IpPort;
 import org.limewire.security.SecureMessage;
 
@@ -33,7 +34,6 @@ import com.limegroup.gnutella.ResponseVerifier;
 import com.limegroup.gnutella.ResponseVerifierImpl;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -189,7 +189,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
      * 
      * @throws Exception
      */
-    public void testAddPartialSearchResult() throws Exception {
+    public void testAddPartialSearchResultGetNumOfLoc() throws Exception {
        Mockery m = new Mockery();
        
        final QueryRequest queryRequest = m.mock(QueryRequest.class);
@@ -207,7 +207,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
        final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
        final IntervalSet intervalSet = new IntervalSet();
        
-       intervalSet.add( new BTInterval(10,15) );
+       intervalSet.add( Range.createRange(0,15) );
        
        m.checking(new Expectations() {{
            atLeast(1).of(queryRequest).isBrowseHostQuery();
@@ -215,7 +215,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
            atLeast(1).of(queryRequest).isWhatIsNewRequest();
            
            atLeast(1).of(queryRequest).getGUID();
-           will(returnValue(new byte[16]));
+           will(returnValue(guid));
            
            atLeast(1).of(queryReply).getGUID();
            will(returnValue(guid));
@@ -241,6 +241,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
            atLeast(1).of(response).getLocations();
            will(returnValue(ipPorts));
            
+           atLeast(1).of(response).getSize();
+           will(returnValue((long)15));
+           
            atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
            will(returnValue(remoteFileDesc));
            
@@ -261,6 +264,81 @@ public class SearchResultHandlerTest extends LimeTestCase {
        m.assertIsSatisfied();
     }
     
+    public void testAddPartialSearchResultGetPercentAvailable() throws Exception {
+        Mockery m = new Mockery();
+        
+        final QueryRequest queryRequest = m.mock(QueryRequest.class);
+        final QueryReply queryReply = m.mock(QueryReply.class);
+        final HostData hostData = m.mock(HostData.class);
+        final Response response = m.mock(Response.class);
+        final List<Response> responses = Collections.singletonList(response);
+        final Set<URN> urns = URN.createSHA1AndTTRootUrns(new File("/Users/cjones/Desktop/Equipment.txt"));
+        final Set<IpPort> ipPorts = new HashSet<IpPort>();
+        final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
+        
+        List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
+        map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
+        final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
+        final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        final IntervalSet intervalSet = new IntervalSet();
+        
+        intervalSet.add( Range.createRange(10,14) );
+        
+        m.checking(new Expectations() {{
+            atLeast(1).of(queryRequest).isBrowseHostQuery();
+            
+            atLeast(1).of(queryRequest).isWhatIsNewRequest();
+            
+            atLeast(1).of(queryRequest).getGUID();
+            will(returnValue(guid));
+            
+            atLeast(1).of(queryReply).getGUID();
+            will(returnValue(guid));
+            
+            atLeast(1).of(queryReply).isBrowseHostReply();
+            will(returnValue(false));
+            
+            atLeast(1).of(queryReply).getResultsAsList();
+            will(returnValue(responses));
+            
+            atLeast(1).of(queryReply).getIPBytes();
+            will(returnValue(new byte[]{127,0,0,1}));
+            
+            atLeast(1).of(response).getRanges();
+            will(returnValue(intervalSet));
+            
+            atLeast(1).of(response).getDocument();
+            will(returnValue(limeXmlDocument));
+            
+            atLeast(1).of(response).getUrns();
+            will(returnValue(urns));
+            
+            atLeast(1).of(response).getLocations();
+            will(returnValue(ipPorts));
+            
+            atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
+            will(returnValue(remoteFileDesc));
+            
+            atLeast(1).of(response).getSize();
+            will(returnValue((long)15));
+            
+            atLeast(1).of(remoteFileDesc).setSecureStatus(0);
+            
+            atLeast(1).of(queryReply).getSecureStatus();
+            
+            atLeast(1).of(hostData).getMessageGUID();
+            will(returnValue(guid));
+        }});
+        
+        SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
+        
+        assertEquals(0, srs.getPercentAvailable(urns.iterator().next()));
+        srs.addQueryReply(searchResultHandler, queryReply, hostData);
+        assertEquals(33, srs.getPercentAvailable(urns.iterator().next()));
+        
+        m.assertIsSatisfied();
+     }
+     
     /**
      * Add a QueryRequest and a QueryReply that represents
      * a whole search result and make sure that it is
@@ -319,6 +397,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
             
             atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
             will(returnValue(remoteFileDesc));
+            
+            atLeast(1).of(response).getSize();
+            will(returnValue((long)15));
             
             atLeast(1).of(remoteFileDesc).setSecureStatus(0);
             
@@ -420,6 +501,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
             
             atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
             will(returnValue(remoteFileDesc));
+            
+            atLeast(1).of(response).getSize();
+            will(returnValue((long)15));
             
             atLeast(1).of(remoteFileDesc).setSecureStatus(0);
             
@@ -534,6 +618,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
             
             atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
             will(returnValue(remoteFileDesc));
+            
+            atLeast(1).of(response).getSize();
+            will(returnValue((long)15));
             
             atLeast(1).of(remoteFileDesc).setSecureStatus(0);
             
@@ -687,6 +774,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
             atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
             will(returnValue(remoteFileDesc));
             
+            atLeast(1).of(response).getSize();
+            will(returnValue((long)15));
+            
             atLeast(1).of(remoteFileDesc).setSecureStatus(0);
             
             atLeast(1).of(queryReply).getSecureStatus();
@@ -767,6 +857,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
             
             atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
             will(returnValue(remoteFileDesc));
+            
+            atLeast(1).of(response).getSize();
+            will(returnValue((long)15));
             
             atLeast(1).of(remoteFileDesc).setSecureStatus(0);
             
