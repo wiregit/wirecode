@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.dht.db;
 
+import junit.framework.Test;
+
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
@@ -12,6 +14,10 @@ public class DHTPushEndpointFinderTest extends DHTFinderTestCase {
         super(name);
     }
     
+    public static Test suite() {
+        return buildTestSuite(DHTPushEndpointFinderTest.class);
+    }
+
     protected void setUp() throws Exception {
         super.setUp();
         pushEndpointFinder = injector.getInstance(DHTPushEndpointFinder.class);

@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointCache;
@@ -22,7 +23,7 @@ import com.limegroup.gnutella.PushEndpointCache;
 public class PushEndpointManager implements PushEndpointService {
 
     private final PushEndpointCache pushEndpointCache;
-    private final DHTPushEndpointFinder pushEndpointFinder;
+    private final PushEndpointService pushEndpointFinder;
     private ConcurrentMap<GUID, AtomicLong> lastSearchTimeByGUID = new ConcurrentHashMap<GUID, AtomicLong>(); 
     
     public static final long TIME_BETWEEN_SEARCHES = 5L * 60L * 1000L;
@@ -30,7 +31,8 @@ public class PushEndpointManager implements PushEndpointService {
     private long timeBetweenSearches = TIME_BETWEEN_SEARCHES;
     
     @Inject
-    public PushEndpointManager(PushEndpointCache pushEndpointCache, DHTPushEndpointFinder pushEndpointFinder) {
+    public PushEndpointManager(PushEndpointCache pushEndpointCache, 
+            @Named("dhtPuhPushEndpointService") PushEndpointService pushEndpointFinder) {
         this.pushEndpointCache = pushEndpointCache;
         this.pushEndpointFinder = pushEndpointFinder;
     }
@@ -46,6 +48,7 @@ public class PushEndpointManager implements PushEndpointService {
         return timeBetweenSearches;
     }
     
+    // TODO this leaks atomic longs in the long run
     public void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
         listener = SearchListenerAdapter.nonNullListener(listener);
         PushEndpoint cachedPushEndpoint = pushEndpointCache.getPushEndpoint(guid);
@@ -62,18 +65,21 @@ public class PushEndpointManager implements PushEndpointService {
                 long lastSearch = lastSearchTime.longValue();
                 // check if we can start a new search
                 if (currentTime - lastSearch > timeBetweenSearches) {
-                    // only start a search if we set the current time
+                    // only start a search if we set the current time and it was still the last time
                     if (lastSearchTime.compareAndSet(lastSearch, currentTime)) {
                         startSearch(guid, listener);
+                    } else {
+                        listener.handleSearchDone(false);
                     }
                 }
             }
         }
     }
     
-    private void startSearch(GUID guid, final SearchListener<PushEndpoint> listener) {
+    void startSearch(GUID guid, final SearchListener<PushEndpoint> listener) {
         pushEndpointFinder.findPushEndpoint(guid, new SearchListener<PushEndpoint>() {
                 public void handleResult(PushEndpoint result) {
+                    // notify cache about it
                     result.updateProxies(true);
                     listener.handleResult(result);
                 }
