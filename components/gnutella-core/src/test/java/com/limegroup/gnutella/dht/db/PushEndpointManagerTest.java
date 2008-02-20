@@ -19,7 +19,6 @@ public class PushEndpointManagerTest extends BaseTestCase {
     public PushEndpointManagerTest(String name) {
         super(name);
     }
-
     
     public static Test suite() {
         return buildTestSuite(PushEndpointManagerTest.class);
@@ -28,7 +27,11 @@ public class PushEndpointManagerTest extends BaseTestCase {
     protected void setUp() throws Exception {
         context = new Mockery();
     }
-  
+    
+    public void testNoSearchIfPushEndpointInCache() {
+        fail("implement me");
+    }
+    
     /**
      * Asserts that {@link PushEndpointManager#startSearch(com.limegroup.gnutella.GUID, SearchListener)}
      * starts a search and notifies the cache of results.
