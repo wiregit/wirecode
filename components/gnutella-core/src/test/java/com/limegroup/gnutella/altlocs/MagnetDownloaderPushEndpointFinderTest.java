@@ -2,13 +2,11 @@ package com.limegroup.gnutella.altlocs;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.listener.DefaultEvent;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.DownloadManagerEvent;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.downloader.CoreDownloader;
-import com.limegroup.gnutella.downloader.DownloadManagerEvent;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
 
 public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
@@ -39,8 +37,8 @@ public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
         }});
         
         // iterate through all events
-        for (DownloadManagerEvent event : DownloadManagerEvent.values()) {
-            endpointFinder.handleEvent(new DefaultEvent<CoreDownloader, DownloadManagerEvent>(downloader, event));
+        for (DownloadManagerEvent.Type type : DownloadManagerEvent.Type.values()) {
+            endpointFinder.handleEvent(new DownloadManagerEvent(downloader, type));
         }
         
         context.assertIsSatisfied();
