@@ -6,7 +6,7 @@ import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 
-public interface PushEndpoint extends HTTPHeaderValue {
+public interface PushEndpoint extends HTTPHeaderValue, IpPort {
 
     public static final int HEADER_SIZE = 17; //guid+# of proxies, maybe other things too
 

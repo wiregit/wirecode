@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.limewire.collection.NumericBuffer;
 import org.limewire.io.InvalidDataException;
+import org.limewire.listener.EventListener;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -19,7 +20,7 @@ import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.AbstractCoreDownloader;
-import com.limegroup.gnutella.downloader.DownloadStatusListener;
+import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.serial.BTDownloadMemento;
@@ -513,13 +514,11 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
         initBtMetaInfo(new BTMetaInfo(bmem.getBtMetaInfoMemento()));
     }
 
-    public void addListener(Object strongRef, DownloadStatusListener listener) {
-        // TODO Auto-generated method stub
-        
+    public void addListener(Object strongRef, EventListener<DownloadStatusEvent> listener) {
     }
 
-    public boolean removeListener(Object strongRef, DownloadStatusListener listener) {
-        // TODO Auto-generated method stub
+    public boolean removeListener(Object strongRef, EventListener<DownloadStatusEvent> listener) {
         return false;
     }
+
 }

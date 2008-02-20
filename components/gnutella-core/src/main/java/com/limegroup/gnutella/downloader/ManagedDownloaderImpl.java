@@ -25,8 +25,7 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.DiskException;
 import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
-import org.limewire.listener.DefaultEvent;
-import org.limewire.listener.Event;
+import org.limewire.listener.EventListener;
 import org.limewire.listener.WeakEventListenerList;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
@@ -409,8 +408,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     
     private long contentLength = -1;
     
-    private final WeakEventListenerList<DownloadStatusListener, Event<CoreDownloader, DownloadStatus>> listeners = 
-        new WeakEventListenerList<DownloadStatusListener, Event<CoreDownloader,DownloadStatus>>(); 
+    private final WeakEventListenerList<DownloadStatusEvent> listeners = 
+        new WeakEventListenerList<DownloadStatusEvent>(); 
     
     protected final DownloadManager downloadManager;
     protected final FileManager fileManager;
@@ -2578,7 +2577,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             this.state=newState;
             this.stateTime=System.currentTimeMillis()+time;
         }
-        listeners.broadcast(new DefaultEvent<CoreDownloader, DownloadStatus>(this, newState));
+        listeners.broadcast(new DownloadStatusEvent(this, newState));
     }
     
     /**
@@ -3134,11 +3133,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return cachedRFDs;
     }
 
-    public void addListener(Object strongRef, DownloadStatusListener listener) {
+    public void addListener(Object strongRef, EventListener<DownloadStatusEvent> listener) {
         listeners.addListener(strongRef, listener);
     }
 
-    public boolean removeListener(Object strongRef, DownloadStatusListener listener) {
+    public boolean removeListener(Object strongRef, EventListener<DownloadStatusEvent> listener) {
         return listeners.removeListener(strongRef, listener);
     }
+
 }

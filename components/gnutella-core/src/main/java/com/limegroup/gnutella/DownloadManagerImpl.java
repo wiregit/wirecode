@@ -21,8 +21,7 @@ import org.limewire.collection.MultiIterable;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
-import org.limewire.listener.DefaultEvent;
-import org.limewire.listener.Event;
+import org.limewire.listener.EventListener;
 import org.limewire.listener.WeakEventListenerList;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
@@ -38,8 +37,6 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.CoreDownloaderFactory;
-import com.limegroup.gnutella.downloader.DownloadManagerEvent;
-import com.limegroup.gnutella.downloader.DownloadManagerListener;
 import com.limegroup.gnutella.downloader.DownloaderType;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
@@ -121,8 +118,8 @@ public class DownloadManagerImpl implements DownloadManager {
      */
     private Runnable _waitingPump;
     
-    private final WeakEventListenerList<DownloadManagerListener, Event<CoreDownloader, DownloadManagerEvent>> listeners =
-        new WeakEventListenerList<DownloadManagerListener, Event<CoreDownloader, DownloadManagerEvent>>();
+    private final WeakEventListenerList<DownloadManagerEvent> listeners =
+        new WeakEventListenerList<DownloadManagerEvent>();
     
     private final NetworkManager networkManager;
     private final DownloadCallback innetworkCallback;
@@ -190,7 +187,7 @@ public class DownloadManagerImpl implements DownloadManager {
             downloader.initialize();
             callback(downloader).addDownload(downloader);
         }
-        fireEvent(downloader, DownloadManagerEvent.ADDED);
+        fireEvent(downloader, DownloadManagerEvent.Type.ADDED);
     }
 
     /* (non-Javadoc)
@@ -525,7 +522,7 @@ public class DownloadManagerImpl implements DownloadManager {
         }
         for(CoreDownloader md : buf ) { 
             md.stop();
-            fireEvent(md, DownloadManagerEvent.REMOVED);
+            fireEvent(md, DownloadManagerEvent.Type.REMOVED);
         }
     }
            
@@ -806,7 +803,7 @@ public class DownloadManagerImpl implements DownloadManager {
                 writeSnapshot(); // Save state for crash recovery.
             }
         });
-        fireEvent(md, DownloadManagerEvent.ADDED);
+        fireEvent(md, DownloadManagerEvent.Type.ADDED);
     }
     
     /**
@@ -1016,7 +1013,7 @@ public class DownloadManagerImpl implements DownloadManager {
         if(active.isEmpty() && waiting.isEmpty())
             callback(dl).downloadsComplete();
         
-        fireEvent(dl, DownloadManagerEvent.REMOVED);
+        fireEvent(dl, DownloadManagerEvent.Type.REMOVED);
     }           
     
     /* (non-Javadoc)
@@ -1109,15 +1106,15 @@ public class DownloadManagerImpl implements DownloadManager {
         return activeAndWaiting;
     }
 
-    private void fireEvent(CoreDownloader downloader, DownloadManagerEvent type) {
-        listeners.broadcast(new DefaultEvent<CoreDownloader, DownloadManagerEvent>(downloader, type));
+    private void fireEvent(CoreDownloader downloader, DownloadManagerEvent.Type type) {
+        listeners.broadcast(new DownloadManagerEvent(downloader, type));
     }
 
-    public void addListener(Object strongRef, DownloadManagerListener listener) {
+    public void addListener(Object strongRef, EventListener<DownloadManagerEvent> listener) {
         listeners.addListener(strongRef, listener);
     }
 
-    public boolean removeListener(Object strongRef, DownloadManagerListener listener) {
+    public boolean removeListener(Object strongRef, EventListener<DownloadManagerEvent> listener) {
         return listeners.removeListener(strongRef, listener);
     }
 }

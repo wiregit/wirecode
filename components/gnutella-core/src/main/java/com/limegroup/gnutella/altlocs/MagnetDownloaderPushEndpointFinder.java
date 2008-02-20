@@ -5,10 +5,12 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.listener.Event;
+import org.limewire.listener.EventListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.DownloadManagerEvent;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
@@ -17,13 +19,11 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.dht.db.PushEndpointManager;
 import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.downloader.CoreDownloader;
-import com.limegroup.gnutella.downloader.DownloadManagerEvent;
-import com.limegroup.gnutella.downloader.DownloadManagerListener;
-import com.limegroup.gnutella.downloader.DownloadStatusListener;
+import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
 
 @Singleton
-public class MagnetDownloaderPushEndpointFinder implements DownloadManagerListener {
+public class MagnetDownloaderPushEndpointFinder implements EventListener<DownloadManagerEvent> {
 
     static final Log LOG = LogFactory.getLog(MagnetDownloaderPushEndpointFinder.class);
     
@@ -35,8 +35,8 @@ public class MagnetDownloaderPushEndpointFinder implements DownloadManagerListen
     /**
      * Package access for testing.
      */
-    final DownloadStatusListener downloadStatusListener = new DownloadStatusListener() {
-        public void handleEvent(Event<CoreDownloader, DownloadStatus> event) {
+    final EventListener<DownloadStatusEvent> downloadStatusListener = new EventListener<DownloadStatusEvent>() { 
+        public void handleEvent(DownloadStatusEvent event) {
             handleStatusEvent(event);
         }
     };
@@ -51,7 +51,7 @@ public class MagnetDownloaderPushEndpointFinder implements DownloadManagerListen
         this.altLocManager = altLocManager;
     }
 
-    public void handleEvent(Event<CoreDownloader, DownloadManagerEvent> event) {
+    public void handleEvent(DownloadManagerEvent event) {
         switch (event.getType()) {
         case ADDED:
             CoreDownloader downloader = event.getSource();
