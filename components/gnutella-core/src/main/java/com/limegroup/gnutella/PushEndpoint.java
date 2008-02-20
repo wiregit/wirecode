@@ -76,8 +76,9 @@ public interface PushEndpoint extends HTTPHeaderValue, IpPort {
      */
     byte getFeatures();
 
-    int getPort();
-
+    /**
+     * @return true if this is the push endpoint for the local node
+     */
     boolean isLocal();
 
     /**
@@ -102,4 +103,9 @@ public interface PushEndpoint extends HTTPHeaderValue, IpPort {
      * this push endpoint if it is known, otherwise <code>null</code>. 
      */
     IpPort getValidExternalAddress();
+    
+    /**
+     * @return the external address if known otherwise {@link RemoteFileDesc#BOGUS_IP}
+     */
+    String getAddress();
 }

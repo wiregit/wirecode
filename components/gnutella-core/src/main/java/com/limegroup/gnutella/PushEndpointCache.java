@@ -4,10 +4,18 @@ import java.util.Set;
 
 import org.limewire.io.IpPort;
 
-public interface PushEndpointCache {
+import com.limegroup.gnutella.dht.db.PushEndpointService;
+
+public interface PushEndpointCache extends PushEndpointService {
 
     void clear();
     
+    /**
+     * Should only be used internally by {@link PushEndpoint} implementations.
+     * <p>
+     * For retrieving a value from the cache use {@link #getPushEndpoint()}.
+     * </p>
+     */
     PushEndpoint getCached(GUID guid);    
     
     /**
