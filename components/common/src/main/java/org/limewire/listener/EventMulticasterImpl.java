@@ -4,7 +4,7 @@ package org.limewire.listener;
  * An implementation of an event multicaster.
  * This forwards all received events all any listener.
  */
-public class EventMulticasterImpl<L extends EventListener<E>, E> implements EventMulticaster<L, E> {
+public class EventMulticasterImpl<E> implements EventMulticaster<E> {
 
     private final WeakEventListenerList<L, E> listeners = new WeakEventListenerList<L, E>();
     

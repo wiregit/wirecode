@@ -10,7 +10,6 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointCache;
-import com.limegroup.gnutella.PushEndpointCache.CachedPushEndpoint;
 
 /**
  * Transparently interfaces with {@link PushEndpointService} 
@@ -26,6 +25,7 @@ public class PushEndpointManager implements PushEndpointService {
     private final PushEndpointCache pushEndpointCache;
     private final DHTPushEndpointFinder pushEndpointFinder;
     private ConcurrentMap<GUID, List<SearchListener<PushEndpoint>>> listenersByGuid = new ConcurrentHashMap<GUID, List<SearchListener<PushEndpoint>>>();
+    
     @Inject
     public PushEndpointManager(PushEndpointCache pushEndpointCache, DHTPushEndpointFinder pushEndpointFinder) {
         this.pushEndpointCache = pushEndpointCache;
@@ -34,10 +34,10 @@ public class PushEndpointManager implements PushEndpointService {
     
     public void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
         listener = SearchListenerAdapter.nonNullListener(listener);
-        CachedPushEndpoint cachedPushEndpoint = pushEndpointCache.getCached(guid);
+        PushEndpoint cachedPushEndpoint = pushEndpointCache.getCached(guid);
         if (cachedPushEndpoint != null) {
             // TODO create a PushEndpoint here
-            listener.handleResult(null);
+            listener.handleResult(cachedPushEndpoint);
             listener.handleSearchDone(true);
         } else {
             // TODO check for timing requirements,

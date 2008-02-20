@@ -1,6 +1,8 @@
 package com.limegroup.gnutella;
 
 import java.lang.ref.WeakReference;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +43,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
      * reference the true key object.  A WeakReference is used to allow
      * GC'ing to still work and the map to ultimately remove unused keys.
      */
-    private final Map<GUID, PushEndpointCache.CachedPushEndpoint> GUID_PROXY_MAP = 
+    private final Map<GUID, CachedPushEndpoint> GUID_PROXY_MAP = 
         Collections.synchronizedMap(new WeakHashMap<GUID, CachedPushEndpoint>());
     
     @Inject
@@ -74,7 +76,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
         synchronized(GUID_PROXY_MAP) {
             wrapper = GUID_PROXY_MAP.get(g);
             if (wrapper==null) {
-                wrapper = new CachedPushEndpointImpl(g, newSet);
+                wrapper = new CachedPushEndpoint(g, newSet);
                 GUID_PROXY_MAP.put(g, wrapper);
             } else {
                 wrapper.overwriteProxies(newSet);
@@ -90,16 +92,6 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
         CachedPushEndpoint current = getCached(g);
         if (current!=null)
             current.setIpPort(addr);
-    }
-
-    /**
-     * updates the features of all PushEndpoints for the given guid 
-     */
-    public void setFeatures(byte [] guid,int features) {
-    	GUID g = new GUID(guid);
-    	CachedPushEndpoint current = getCached(g);
-    	if (current!=null)
-    		current.setFeatures(features);
     }
 
     /**
@@ -132,7 +124,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
             // add a new one atomically
             // (we don't care about the proxies of the expired mapping)
             if (existing == null || guidRef==null) {                
-                existing = new CachedPushEndpointImpl(guid, pushEndpoint.getFeatures(), pushEndpoint.getFWTVersion(), 
+                existing = new CachedPushEndpoint(guid, pushEndpoint.getFeatures(), pushEndpoint.getFWTVersion(), 
                         valid ? pushEndpoint.getProxies() : IpPort.EMPTY_SET);
                 GUID_PROXY_MAP.put(guid, existing);
                 return guid;
@@ -155,21 +147,24 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
         }
     }
     
-    class CachedPushEndpointImpl implements CachedPushEndpoint {
+    class CachedPushEndpoint extends AbstractPushEndpoint {
         
         private final WeakReference<GUID> _guidRef;
         /**
          * Class invariant: never null
          */
         private Set<IpPort> _proxies;
-        private int _features,_fwtVersion;
+        private byte _features;
+        private int _fwtVersion;
         private IpPort _externalAddr;
+        private final byte[] guid;
         
-        CachedPushEndpointImpl(GUID guid, Set<? extends IpPort> proxies) {
-            this(guid,0,0, proxies);
+        CachedPushEndpoint(GUID guid, Set<? extends IpPort> proxies) {
+            this(guid, (byte)0, 0, proxies);
         }
         
-        CachedPushEndpointImpl(GUID guid,int features, int version, Set<? extends IpPort> proxies) {
+        CachedPushEndpoint(GUID guid, byte features, int version, Set<? extends IpPort> proxies) {
+            this.guid = guid.bytes();
             _guidRef = new WeakReference<GUID>(guid);
             _features=features;
             _fwtVersion=version;
@@ -194,7 +189,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
             return _proxies;
         }
         
-        public synchronized int getFeatures() {
+        public synchronized byte getFeatures() {
             return _features;
         }
         
@@ -202,7 +197,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
             return _fwtVersion;
         }
         
-        public synchronized void setFeatures(int features) {
+        public synchronized void setFeatures(byte features) {
             _features=features;
         }
         
@@ -220,6 +215,43 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
         
         public GUID getGuid() {
             return _guidRef.get();
+        }
+
+        public PushEndpoint createClone() {
+            return new PushEndpointImpl(guid, getProxies(), 
+                    getFeatures(), getFWTVersion(), 
+                    getValidExternalAddress(), PushEndpointCacheImpl.this);
+        }
+
+        public byte[] getClientGUID() {
+            return guid;
+        }
+
+        public int getPort() {
+            return 0;
+        }
+
+        public IpPort getValidExternalAddress() {
+            return null;
+        }
+
+        public boolean isLocal() {
+            return false;
+        }
+
+        public void updateProxies(boolean good) {
+        }
+
+        public String getAddress() {
+            return null;
+        }
+
+        public InetAddress getInetAddress() {
+            return null;
+        }
+
+        public InetSocketAddress getInetSocketAddress() {
+            return null;
         }
     }
 

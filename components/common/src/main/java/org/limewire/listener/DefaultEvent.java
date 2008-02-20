@@ -3,7 +3,7 @@ package org.limewire.listener;
 /**
  * A default, simple implementation of Event.
  */
-public class DefaultEvent<T, E extends Enum> implements Event<T, E> {
+public class DefaultEvent<T, E> implements Event<T, E> {
     
     private final T source;
     private final E event;

@@ -9,8 +9,6 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 
-import com.limegroup.gnutella.PushEndpointCache.CachedPushEndpoint;
-
 
 /**
  * a class that represents an endpoint behind one or more PushProxies.
@@ -153,7 +151,7 @@ public class PushEndpointImpl extends AbstractPushEndpoint {
 	        	return _proxies;
 	    }
 
-	    CachedPushEndpoint current = pushEndpointCache.getCached(_guid);
+	    PushEndpoint current = pushEndpointCache.getCached(_guid);
 	    if (current == null)
             return Collections.emptySet();        
 	    return current.getProxies();
@@ -161,22 +159,22 @@ public class PushEndpointImpl extends AbstractPushEndpoint {
 	
 	
 	public int getFWTVersion() {
-		CachedPushEndpoint current = pushEndpointCache.getCached(_guid);
+		PushEndpoint current = pushEndpointCache.getCached(_guid);
 		int currentVersion = current == null ? 
 				_fwtVersion : current.getFWTVersion();
 		return currentVersion;
 	}
 	
 	public byte getFeatures() {
-		CachedPushEndpoint current = pushEndpointCache.getCached(_guid);
+		PushEndpoint current = pushEndpointCache.getCached(_guid);
 		int currentFeatures = current==null ? _features : current.getFeatures();
 		return (byte)(currentFeatures & FEATURES_MASK);
 	}
 
 	private IpPort getIpPort() {
-        CachedPushEndpoint current = pushEndpointCache.getCached(_guid);
-        return current == null || current.getIpPort() == null ? 
-                _externalAddr : current.getIpPort();
+        PushEndpoint current = pushEndpointCache.getCached(_guid);
+        return current == null || current.getValidExternalAddress() == null ?
+                _externalAddr :         current.getValidExternalAddress();
     }
     
 	/**

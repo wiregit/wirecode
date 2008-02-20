@@ -6,7 +6,7 @@ import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 
-public interface PushEndpoint extends HTTPHeaderValue, IpPort {
+public interface PushEndpoint extends HTTPHeaderValue {
 
     public static final int HEADER_SIZE = 17; //guid+# of proxies, maybe other things too
 
@@ -92,6 +92,9 @@ public interface PushEndpoint extends HTTPHeaderValue, IpPort {
     // TODO remove this in the long run and use the cache explicitly
     void updateProxies(boolean good);
 
+    /**
+     * Can return null if no valid push endpoint can be cloned. 
+     */
     PushEndpoint createClone();
     
     /**

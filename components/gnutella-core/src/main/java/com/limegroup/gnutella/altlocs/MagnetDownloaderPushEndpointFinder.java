@@ -62,7 +62,7 @@ public class MagnetDownloaderPushEndpointFinder implements DownloadManagerListen
                     // subscribe for status events so we can search when waiting for user
                     magnetDownloader.addListener(this, downloadStatusListener);
                 }
-                searchForPushEndpoinns(magnetDownloader);
+                searchForPushEndpoints(magnetDownloader);
             }
             break;
         case REMOVED:
@@ -82,7 +82,7 @@ public class MagnetDownloaderPushEndpointFinder implements DownloadManagerListen
         return size;
     }
     
-    private void searchForPushEndpoinns(MagnetDownloader magnetDownloader) {
+    private void searchForPushEndpoints(MagnetDownloader magnetDownloader) {
         MagnetOptions magnet = magnetDownloader.getMagnet();
         URN sha1Urn = magnet.getSHA1Urn();
         if (sha1Urn == null) {
@@ -100,7 +100,7 @@ public class MagnetDownloaderPushEndpointFinder implements DownloadManagerListen
             CoreDownloader downloader = event.getSource();
             if (downloader instanceof MagnetDownloader) {
                 MagnetDownloader magnetDownloader = (MagnetDownloader)downloader;
-                searchForPushEndpoinns(magnetDownloader);
+                searchForPushEndpoints(magnetDownloader);
             }
         }
     }
