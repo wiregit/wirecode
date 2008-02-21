@@ -62,4 +62,6 @@ public interface PushEndpointCache extends PushEndpointService {
      */
     public GUID updateProxiesFor(GUID guid, PushEndpoint pushEndpoint, boolean valid);
 
+    void removePushProxy(byte[] bytes, IpPort pushProxy);
+
 }

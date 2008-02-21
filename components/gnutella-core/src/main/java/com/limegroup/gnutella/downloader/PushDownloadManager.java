@@ -4,6 +4,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,12 +27,12 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.limewire.collection.IntWrapper;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.http.DefaultHttpParams;
 import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.ConnectionAcceptor;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
@@ -48,6 +50,7 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SocketProcessor;
 import com.limegroup.gnutella.UDPService;
@@ -87,8 +90,8 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      * number of files that we have sent a udp push for and are waiting a connection.
      * LOCKING: obtain UDP_FAILOVER if manipulating the contained sets as well!
      */
-    private final Map<byte[], IntWrapper>  
-        UDP_FAILOVER = new TreeMap<byte[], IntWrapper>(new GUID.GUIDByteComparator());
+    private final Map<byte[], AtomicInteger>  
+        UDP_FAILOVER = new TreeMap<byte[], AtomicInteger>(new GUID.GUIDByteComparator());
     
 
     /**
@@ -105,6 +108,8 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     private final Provider<IPFilter> ipFilter;
     private final Provider<UDPService> udpService;
     private final CopyOnWriteArrayList<PushedSocketHandler> pushHandlers = new CopyOnWriteArrayList<PushedSocketHandler>();
+
+    private final PushEndpointCache pushEndpointCache;
   
     @Inject
     public PushDownloadManager(
@@ -113,8 +118,9 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             @Named("backgroundExecutor") ScheduledExecutorService scheduler,
             Provider<SocketProcessor> processor,
     		NetworkManager networkManager,
-    		 Provider<IPFilter> ipFilter,
-    		Provider<UDPService> udpService) {
+    		Provider<IPFilter> ipFilter,
+    		Provider<UDPService> udpService,
+    		PushEndpointCache pushEndpointCache) {
     	this.messageRouter = router;
     	this.httpExecutor = executor;
     	this.backgroundExecutor = scheduler;
@@ -122,6 +128,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     	this.networkManager = networkManager;
         this.ipFilter = ipFilter;
         this.udpService = udpService;
+        this.pushEndpointCache = pushEndpointCache;
     }
 
     public void register(PushedSocketHandler handler) {
@@ -276,6 +283,8 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         for(IpPort ppi : file.getPushProxies()) {
             if (ipFilter.get().allow(ppi.getAddress())) {
                 udpService.send(pr, ppi.getInetSocketAddress());
+            } else {
+                removePushProxy(file.getClientGUID(), ppi);
             }
         }
         
@@ -383,8 +392,10 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
 
         // try to contact each proxy
         for(IpPort ppi : proxies) {
-            if (!ipFilter.get().allow(ppi.getAddress()))
+            if (!ipFilter.get().allow(ppi.getAddress())) {
+                removePushProxy(data.file.getClientGUID(), ppi);
                 continue;
+            }
             String protocol = "http://";
             if(ppi instanceof Connectable) {
                 if(((Connectable)ppi).isTLSCapable())
@@ -414,6 +425,10 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         }
     }
     
+    private void removePushProxy(byte[] guid, IpPort pushProxy) {
+        pushEndpointCache.removePushProxy(guid, pushProxy);
+    }
+    
     /**
      * Listener for callbacks from http requests succeeding or failing.
      * This will ensure that only enough proxies are contacted as necessary,
@@ -434,6 +449,17 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     		LOG.warn("PushProxy request exception", exc);
     		httpExecutor.get().releaseResources(response);
     		methods.remove(request);
+
+    		URI uri = request.getURI();
+    		try {
+                IpPort pushProxy = new IpPortImpl(uri.getHost(), uri.getPort());
+                removePushProxy(data.file.getClientGUID(), pushProxy);
+            } catch (UnknownHostException e) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(e);
+                }
+            }
+    		
     		if (methods.isEmpty()) // all failed
                 sendPushThroughNetwork(data);
             return true;
@@ -496,12 +522,12 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     private void addUDPFailover(RemoteFileDesc file) {
         synchronized (UDP_FAILOVER) {
             byte[] key = file.getClientGUID();
-            IntWrapper requests = UDP_FAILOVER.get(key);
+            AtomicInteger requests = UDP_FAILOVER.get(key);
             if (requests == null) {
-                requests = new IntWrapper(0);
+                requests = new AtomicInteger(0);
                 UDP_FAILOVER.put(key, requests);
             }
-            requests.addInt(1);
+            requests.addAndGet(1);
         }
     }
     
@@ -513,10 +539,10 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     private void cancelUDPFailover(byte[] clientGUID) {
         synchronized (UDP_FAILOVER) {
             byte[] key = clientGUID;
-            IntWrapper requests = UDP_FAILOVER.get(key);
+            AtomicInteger requests = UDP_FAILOVER.get(key);
             if (requests != null) {
-            	requests.addInt(-1);
-                if (requests.getInt() <= 0)
+            	requests.addAndGet(-1);
+                if (requests.get() <= 0)
                     UDP_FAILOVER.remove(key);
             }
         }
@@ -583,10 +609,10 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     		byte[] key =_file.getClientGUID();
 
     		synchronized(UDP_FAILOVER) {
-    			IntWrapper requests = UDP_FAILOVER.get(key);
-    			if (requests!=null && requests.getInt() > 0) {
-    				requests.addInt(-1);
-    				if (requests.getInt() == 0)
+    			AtomicInteger requests = UDP_FAILOVER.get(key);
+    			if (requests!=null && requests.get() > 0) {
+    				requests.addAndGet(-1);
+    				if (requests.get() == 0)
     					UDP_FAILOVER.remove(key);
     				return true;
     			}

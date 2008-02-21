@@ -158,6 +158,10 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
         existing.updateProxies(pushEndpoint.getProxies(), valid);
         return guidRef;
     }
+    
+
+    public void removePushProxy(byte[] bytes, IpPort pushProxy) {
+    }
 
     public void clear() {
         GUID_PROXY_MAP.clear();
