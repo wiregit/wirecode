@@ -24,7 +24,7 @@ public class LocalAcceptor {
 
     @Inject
     public LocalAcceptor(@Named("local") ConnectionDispatcher connectionDispatcher) {
-        this.acceptor = new SocketAcceptor(connectionDispatcher);
+        this.acceptor = new SocketAcceptor(connectionDispatcher) ;
     }
 
     /**

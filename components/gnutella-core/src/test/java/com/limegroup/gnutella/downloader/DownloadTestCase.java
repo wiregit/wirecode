@@ -26,6 +26,7 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.TestUtil;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LifecycleManager;
@@ -239,26 +240,7 @@ public class DownloadTestCase extends LimeTestCase {
     }
 
     protected void deleteAllFiles() {
-        if (!dataDir.exists())
-            return;
-
-        File[] files = dataDir.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            if (files[i].isDirectory()) {
-                if (files[i].getName().equalsIgnoreCase("incomplete"))
-                    deleteDirectory(files[i]);
-                else if (files[i].getName().equals(saveDir.getName()))
-                    deleteDirectory(files[i]);
-            }
-        }
-        dataDir.delete();
-    }
-
-    protected void deleteDirectory(File dir) {
-        File[] files = dir.listFiles();
-        for (int i = 0; i < files.length; i++)
-            files[i].delete();
-        dir.delete();
+        new TestUtil().deleteAllFiles(dataDir, saveDir);
     }
 
     protected void tGeneric(RemoteFileDesc[] rfds) throws Exception {
@@ -392,18 +374,22 @@ public class DownloadTestCase extends LimeTestCase {
     }
 
     /** Returns true if the complete file exists and is complete */
-    protected boolean isComplete() {
-        LOG.debug("file is " + savedFile.getPath());
-        if (savedFile.length() < TestFile.length()) {
-            LOG.debug("File too small by: " + (TestFile.length() - savedFile.length()));
+    protected final boolean isComplete() {
+        return isComplete(savedFile, TestFile.length());
+    }
+    
+    protected final boolean isComplete(File f, long length) {
+        LOG.debug("file is " + f.getPath());
+        if (f.length() < length) {
+            LOG.debug("File too small by: " + (length - f.length()));
             return false;
         } else if (savedFile.length() > TestFile.length()) {
-            LOG.debug("File too large by: " + (savedFile.length() - TestFile.length()));
+            LOG.debug("File too large by: " + (length - f.length()));
             return false;
         }
         FileInputStream stream = null;
         try {
-            stream = new FileInputStream(savedFile);
+            stream = new FileInputStream(f);
             for (int i = 0;; i++) {
                 int c = stream.read();
                 if (c == -1)//eof

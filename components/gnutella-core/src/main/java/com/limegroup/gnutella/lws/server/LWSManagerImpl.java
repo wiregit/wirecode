@@ -2,6 +2,8 @@ package com.limegroup.gnutella.lws.server;
 
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
+import com.limegroup.gnutella.lws.server.LWSManager.Listener;
 import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.util.EncodingUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -118,7 +121,7 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     // Implementation of LWSManager
     // -----------------------------------------------------------------
 
-    public final HttpRequestHandler getHandler() {
+    public final HttpRequestHandler getHandler() {System.out.println("handler:"+dispatcher);
         return dispatcher;
     }
     
@@ -175,6 +178,7 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
             throw new IOException("null host!");
         
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
+        LWSUtil.addAuthentication(get);
         //
         // we don't care what this response is, because we are
         // always talking to the remote web server, so process it
@@ -201,10 +205,38 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         
     }
     
+    public void describe(OutputStream os) {
+        PrintStream out = new PrintStream(os);
+        out.println(System.identityHashCode(this));
+        out.println("LISTENERS");
+        for (Map.Entry<String,List<Listener>> e : commands2listenerLists.entrySet()) {
+            String cmd = e.getKey();
+            List<Listener> ls = e.getValue();
+            out.println(" * " + cmd + " ->");
+            for (Listener l : ls) {
+                out.println("   " + l);
+            }
+        }
+        out.println("HANDLERS");
+        for (Map.Entry<String,LWSManagerCommandResponseHandler> e : commands2handlers.entrySet()) {
+            String cmd = e.getKey();
+            LWSManagerCommandResponseHandler h = e.getValue();
+            out.println(" " + cmd + " -> " + h);
+        }
+    }    
+    
+    // ---------------------------------------------------------------------------------
+    // Private
+    // ---------------------------------------------------------------------------------    
+    
     private String constructURL(final String msg, final Map<String, String> args) {
-        StringBuffer url = new StringBuffer("http://")
-            .append(hostNameAndPort)
-            .append(COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES);
+        StringBuffer url = new StringBuffer("http");
+        if (LWSSettings.LWS_USE_SSL.getValue()) {
+            url.append("s");
+        }
+        url.append("://")
+           .append(hostNameAndPort)
+           .append(COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES);
         url.append(msg);
         for (Map.Entry<String, String> e : args.entrySet()) {
             url.append("/");
@@ -240,5 +272,5 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
                 return res;
             }
         }
-    }  
+    } 
 }

@@ -3,8 +3,12 @@ package com.limegroup.gnutella.lws.server;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpMessage;
+import org.apache.http.client.methods.HttpGet;
 import org.limewire.lws.server.LWSDispatcherSupport;
 
+import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.util.Tagged;
 import com.limegroup.gnutella.util.URLDecoder;
 
@@ -38,4 +42,24 @@ public final class LWSUtil {
         }
         return new Tagged<String>(result, true);
     }
+    
+    /**
+     * Adds the authentication we need to a request since we are using HTTP authentication
+     * during testing.
+     * 
+     * @param method the method to which the authentication is added
+     */
+    public static void addAuthentication(HttpMessage method) {
+        //
+        // We will just return if these are null, so that we can
+        // set them null remotely when we don't need them anymore
+        //
+        String username = LWSSettings.LWS_AUTHENTICATION_USERNAME.getValue();
+        if (username == null || username.equals("")) return;
+        String password = LWSSettings.LWS_AUTHENTICATION_PASSWORD.getValue();
+        if (password == null || password.equals("")) return;
+        String unecrypted = username + ":" + password;
+        String encrypted = new String(new Base64().encode(unecrypted.getBytes()));
+        method.addHeader("Authorization", "Basic " + encrypted);
+    }    
 }

@@ -31,6 +31,7 @@ import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
+import com.limegroup.gnutella.lws.server.LWSUtil;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -197,6 +198,7 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
     private long contentLength(URI uri) throws HttpException, IOException, InterruptedException {
         HttpHead head = new HttpHead(uri);
         head.addHeader("User-Agent", LimeWireUtils.getHttpServer());
+        LWSUtil.addAuthentication(head); // TODO: We need authentication to do this
         HttpResponse response = null;
         LimeHttpClient client = httpClientProvider.get();
         try {

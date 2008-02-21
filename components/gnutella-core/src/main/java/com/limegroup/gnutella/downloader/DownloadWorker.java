@@ -1057,6 +1057,7 @@ public class DownloadWorker {
         // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
         if (!_downloader.getRemoteFileDesc().isPartialSource()) {
             if (_currentState.isHttp11()) {
+                //TODO: findChunkSize is screwing up
                 interval = _commonOutFile.leaseWhite(findChunkSize());
             } else
                 interval = _commonOutFile.leaseWhite();
