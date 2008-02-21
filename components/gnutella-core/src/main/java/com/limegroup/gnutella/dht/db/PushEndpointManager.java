@@ -69,7 +69,7 @@ public class PushEndpointManager implements PushEndpointService {
                 long lastSearch = lastSearchTime.longValue();
                 // check if we can start a new search
                 if (currentTime - lastSearch > timeBetweenSearches) {
-                    // only start a search if we set the current time and it was still the last time
+                    // only start a search if we succeed setting the current time and it was still the last time
                     if (lastSearchTime.compareAndSet(lastSearch, currentTime)) {
                         startSearch(guid, listener);
                         return;

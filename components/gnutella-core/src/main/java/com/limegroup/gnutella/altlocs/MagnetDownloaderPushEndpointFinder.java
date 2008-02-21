@@ -8,11 +8,13 @@ import org.limewire.listener.Event;
 import org.limewire.listener.EventListener;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerEvent;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.Service;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -23,11 +25,11 @@ import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
 
 @Singleton
-public class MagnetDownloaderPushEndpointFinder implements EventListener<DownloadManagerEvent> {
+public class MagnetDownloaderPushEndpointFinder implements Service, EventListener<DownloadManagerEvent> {
 
     static final Log LOG = LogFactory.getLog(MagnetDownloaderPushEndpointFinder.class);
     
-    private final DownloadManager downloadManager;
+    private final Provider<DownloadManager> downloadManager;
     private final PushEndpointManager pushEndpointManager;
     private final AlternateLocationFactory alternateLocationFactory;
     private final AltLocManager altLocManager;
@@ -42,7 +44,7 @@ public class MagnetDownloaderPushEndpointFinder implements EventListener<Downloa
     };
     
     @Inject
-    public MagnetDownloaderPushEndpointFinder(DownloadManager downloadManager, 
+    public MagnetDownloaderPushEndpointFinder(Provider<DownloadManager> downloadManager, 
             PushEndpointManager pushEndpointManager, AlternateLocationFactory alternateLocationFactory,
             AltLocManager altLocManager) {
         this.downloadManager = downloadManager;
@@ -119,11 +121,11 @@ public class MagnetDownloaderPushEndpointFinder implements EventListener<Downloa
     }
 
     public void start() {
-        downloadManager.addListener(this, this);
+        downloadManager.get().addListener(this, this);
     }
 
     public void stop() {
-        downloadManager.removeListener(this, this);
+        downloadManager.get().removeListener(this, this);
     }
     
     private class PushendpointHandler implements SearchListener<PushEndpoint> {
