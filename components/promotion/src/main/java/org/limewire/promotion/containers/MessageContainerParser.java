@@ -3,6 +3,8 @@ package org.limewire.promotion.containers;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.util.ByteUtil;
+
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.GGEP;
 

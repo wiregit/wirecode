@@ -1,8 +1,9 @@
-package org.limewire.promotion.containers;
+package org.limewire.util;
 
 import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.ByteUtil;
 
 public class ByteUtilTest extends BaseTestCase {
     public ByteUtilTest(String name) {

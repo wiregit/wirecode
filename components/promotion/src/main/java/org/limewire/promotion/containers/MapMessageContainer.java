@@ -2,6 +2,8 @@ package org.limewire.promotion.containers;
 
 import java.util.Date;
 
+import org.limewire.util.ByteUtil;
+
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;

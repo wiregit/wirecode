@@ -16,7 +16,6 @@ import java.security.cert.CertificateException;
 
 import junit.framework.Test;
 
-import org.limewire.promotion.containers.ByteUtil;
 import org.limewire.promotion.containers.MessageContainer;
 import org.limewire.promotion.containers.MessageContainerParser;
 import org.limewire.promotion.containers.SignedMessageContainer;
@@ -24,6 +23,7 @@ import org.limewire.security.certificate.CertificateVerifier;
 import org.limewire.security.certificate.CipherProviderImpl;
 import org.limewire.security.certificate.KeyStoreProvider;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.ByteUtil;
 
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;

@@ -2,7 +2,6 @@ package org.limewire.promotion;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.limewire.promotion.containers.BucketMessageContainer;
@@ -34,8 +33,6 @@ public class PromotionBinder {
     private SignedMessageContainer backingSignedMessage = null;
 
     private List<PromotionMessageContainer> promoMessageList = null;
-
-    private Date endDate = new Date(0);
 
     @Inject
     public PromotionBinder(CipherProvider cipherProvider, KeyStoreProvider keyStore,
@@ -103,8 +100,6 @@ public class PromotionBinder {
         if (bucket.getPromoMessages().size() == 0)
             throw new PromotionException("Bucket '" + bucket.getName() + "' has no messages.");
 
-        endDate = bucket.getValidEnd();
-
         List<PromotionMessageContainer> promos = bucket.getPromoMessages();
         promoMessageList = new ArrayList<PromotionMessageContainer>();
         for (PromotionMessageContainer message : promos) {
@@ -134,13 +129,40 @@ public class PromotionBinder {
     /**
      * @return true if the passed in message is a member of this bucket, and it
      *         has not expired.
+     * @param reverifySignature If true, the signed container will be re-parsed
+     *        and checked.
      */
-    public boolean isValidMember(PromotionMessageContainer message) {
+    public boolean isValidMember(PromotionMessageContainer message, boolean reverifySignature) {
         if (isExpired(message))
             return false;
         // Now see if we can find this message in our list (using ID)
-        for (PromotionMessageContainer promo : promoMessageList) {
-            if (promo.equals(message))
+        if (!reverifySignature) {
+            // Just check to make sure it's in our list and hasn't expired
+            return isValidMember(message, promoMessageList);
+        } else {
+            MessageContainer wrappedMessage;
+            try {
+                wrappedMessage = backingSignedMessage.getAndVerifyWrappedMessage(cipherProvider,
+                        keyStore, certificateVerifier);
+            } catch (IOException ex) {
+                return false;
+            }
+            if (!(wrappedMessage instanceof BucketMessageContainer)) {
+                return false;
+            }
+            BucketMessageContainer bucket = (BucketMessageContainer) wrappedMessage;
+            return isValidMember(message, bucket.getWrappedMessages());
+        }
+    }
+
+    /**
+     * @return true if the given message is a member of the given list, and is
+     *         within its valid date range.
+     */
+    private boolean isValidMember(PromotionMessageContainer message,
+            List<? extends MessageContainer> list) {
+        for (MessageContainer promo : list) {
+            if (promo.equals(message) && !isExpired(message))
                 return true;
         }
         return false;

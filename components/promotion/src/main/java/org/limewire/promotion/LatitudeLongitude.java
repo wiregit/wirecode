@@ -1,6 +1,6 @@
 package org.limewire.promotion;
 
-import org.limewire.promotion.containers.ByteUtil;
+import org.limewire.util.ByteUtil;
 
 public class LatitudeLongitude {
     private final double AVERAGE_EARTH_RADIUS_KM = 6371.0;

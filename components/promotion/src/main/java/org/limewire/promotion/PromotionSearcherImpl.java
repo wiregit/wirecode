@@ -2,8 +2,6 @@ package org.limewire.promotion;
 
 import java.io.IOException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -17,8 +15,15 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Searcher;
 import org.apache.lucene.store.RAMDirectory;
+import org.limewire.concurrent.ManagedThread;
 
-public class TestClass {
+public class PromotionSearcherImpl implements PromotionSearcher {
+    public void search(String query, PromotionSearchResultsCallback callback) {
+        ManagedThread searchThread = new ManagedThread();
+        // TODO Auto-generated method stub
+
+    }
+
     public static void main(String[] args) {
         // Construct a RAMDirectory to hold the in-memory representation
         // of the index.
@@ -94,7 +99,6 @@ public class TestClass {
      */
     private static void search(Searcher searcher, String queryString) throws ParseException,
             IOException {
-        Log log = LogFactory.getLog(TestClass.class);
         // Build a Query object
         QueryParser parser = new QueryParser("content", new StandardAnalyzer());
         Query query = parser.parse(queryString);

@@ -12,6 +12,7 @@ import java.util.StringTokenizer;
 
 import org.limewire.promotion.LatitudeLongitude;
 import org.limewire.promotion.exceptions.PromotionException;
+import org.limewire.util.ByteUtil;
 
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;

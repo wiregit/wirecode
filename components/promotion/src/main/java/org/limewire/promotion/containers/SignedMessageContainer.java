@@ -9,6 +9,7 @@ import org.limewire.security.certificate.CertificateVerifier;
 import org.limewire.security.certificate.CipherProvider;
 import org.limewire.security.certificate.KeyStoreProvider;
 import org.limewire.security.certificate.CipherProvider.SignatureType;
+import org.limewire.util.ByteUtil;
 
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;

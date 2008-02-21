@@ -1,4 +1,4 @@
-package org.limewire.promotion.containers;
+package org.limewire.util;
 
 import java.io.UnsupportedEncodingException;
 

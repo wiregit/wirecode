@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.limewire.util.ByteUtil;
+
 /**
  * A container that extends the {@link MultiMessageContainer}, adding start and
  * end validity dates along with an enforcement of the types of messages that

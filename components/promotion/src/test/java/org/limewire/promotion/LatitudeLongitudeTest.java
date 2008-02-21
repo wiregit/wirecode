@@ -2,8 +2,8 @@ package org.limewire.promotion;
 
 import junit.framework.Test;
 
-import org.limewire.promotion.containers.ByteUtil;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.ByteUtil;
 
 public class LatitudeLongitudeTest extends BaseTestCase {
     public LatitudeLongitudeTest(String name) {
