@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.search;
 
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.QueryResultHandler;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -75,5 +76,12 @@ public interface SearchResultStats {
      * @param qr
      */
     public int addQueryReply(SearchResultHandler srh, QueryReply qr, HostData data);
+    
+    /**
+     * 
+     * @param urn
+     * @return
+     */
+    public QueryResultHandler getResultHandler (final URN urn);
     
 }

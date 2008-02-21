@@ -282,7 +282,10 @@ public class SearchResultHandlerTest extends LimeTestCase {
         final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         final IntervalSet intervalSet = new IntervalSet();
         
-        intervalSet.add( Range.createRange(10,14) );
+        intervalSet.add( Range.createRange( 0, 2) );
+        intervalSet.add( Range.createRange( 4, 6) );
+        intervalSet.add( Range.createRange( 8,10) );
+        intervalSet.add( Range.createRange(12,14) );
         
         m.checking(new Expectations() {{
             atLeast(1).of(queryRequest).isBrowseHostQuery();
@@ -334,7 +337,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         assertEquals(0, srs.getPercentAvailable(urns.iterator().next()));
         srs.addQueryReply(searchResultHandler, queryReply, hostData);
-        assertEquals(33, srs.getPercentAvailable(urns.iterator().next()));
+        assertEquals(80, srs.getPercentAvailable(urns.iterator().next()));
         
         m.assertIsSatisfied();
      }

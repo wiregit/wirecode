@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.search;
 
-import java.util.List;
 import java.util.Vector;
 
 import org.limewire.collection.IntervalSet;
@@ -76,6 +75,8 @@ public class ResourceLocationCounter {
      * @return
      */
     public int getLocationCount () {
+        // System.out.println(" *** ResourceLocationCounter::getLocationCount().. [POINT-A] whole=" + _wholeCount + "; partial=" + _partialCount + ";");
+        
         return _wholeCount + _partialCount;
     }
     
@@ -103,6 +104,9 @@ public class ResourceLocationCounter {
      */
     private void calculateLocationCount () {
         long sum = 0;
+        
+        if (_urn != null)
+            ;
         
         // if there are no partial result interval sets,
         // then the partial count is zero and the percent
@@ -143,13 +147,31 @@ public class ResourceLocationCounter {
         // the difference between the two points of the
         // range.
         //
-        for (Range range : iset.getAllIntervalsAsList())
+        for (Range range : iset.getAllIntervalsAsList()) {
             sum += (range.getHigh() - range.getLow()) + 1;
+            System.out.println(" *** ResourceLocationCounter::calculateLocationCount().. [POINT-C] high=" + range.getHigh() + "; low=" + range.getLow() + "; sum=" + sum + ";");
+        }
+        
+        System.out.println(" *** ResourceLocationCounter::calculateLocationCount().. [POINT-D] fileSize=" + _fileSize + "; sum=" + sum + ";");
         
         _partialCount = 0;
-        _percentAvailable = (int)(100.0 / ((float)_fileSize / (float)sum));
         
-        System.out.println(" *** ResourceLocationCounter::calculateLocationCount().. [POINT-C] pc=" + _partialCount + "; pa=" + _percentAvailable + ";");
+        // if the total number of bytes available in the
+        // partial search result is greater than zero, then
+        // determine what percentage of the file is available,
+        // rounding appropriately and if it rounds down to 
+        // zero, set it to 1%.
+        //
+        if (sum > 0) {
+            _percentAvailable = (int)Math.round(100.0 / ((float)_fileSize / (float)sum));
+            
+            if (_percentAvailable == 0)
+                _percentAvailable = 1;
+        }
+        else
+            _percentAvailable = 0;
+        
+        System.out.println(" *** ResourceLocationCounter::calculateLocationCount().. [POINT-E] count=" + _partialCount + "; percent=" + _percentAvailable + ";");
     }
     
 }

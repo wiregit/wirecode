@@ -28,6 +28,7 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.QueryResultHandler;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.SearchServices;
@@ -413,7 +414,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
     /** A container that simply pairs a GUID and an int.  The int should
      *  represent the number of non-filtered results for the GUID.
      */
-    private static class GuidCount implements SearchResultStats {
+    static class GuidCount implements SearchResultStats {
 
         private final long _time;
         private final GUID _guid;
@@ -621,6 +622,8 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             int count_after = 0;
             
             for (URN urn : urns) {
+                System.out.println(" *** GuidCount::addIntervalSet().. [POINT-A] urn.isSHA1 = " + urn.isSHA1() + ";");
+                
                 if (!urn.isSHA1())
                     continue;
                 
@@ -633,6 +636,8 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                 
                 break;
             }
+            
+            System.out.println(" *** GuidCount::addIntervalSet().. [POINT-B] b=" + count_before + "; a=" + count_after + ";");
             
             return count_after - count_before;
         }
@@ -656,6 +661,24 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             }
             
             return count_after - count_before;
+        }
+        
+        /**
+         * Returns a handler which can be used to easily access the
+         * location count information for the given URN.
+         * 
+         */
+        public QueryResultHandler getResultHandler (final URN urn) {
+            final GuidCount gc = this;
+            
+            return new QueryResultHandler () {
+                public int getPercentAvailable() {
+                    return gc.getPercentAvailable(urn);
+                }
+                public int getNumberOfLocations() {
+                    return gc.getNumberOfLocations(urn);
+                }
+            };
         }
         
     }
