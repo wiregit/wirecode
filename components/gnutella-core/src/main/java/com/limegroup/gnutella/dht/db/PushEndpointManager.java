@@ -10,6 +10,7 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointCache;
+import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
  * Transparently interfaces with {@link PushEndpointService} 
@@ -26,9 +27,7 @@ public class PushEndpointManager implements PushEndpointService {
     private final PushEndpointService pushEndpointFinder;
     private ConcurrentMap<GUID, AtomicLong> lastSearchTimeByGUID = new ConcurrentHashMap<GUID, AtomicLong>(); 
     
-    public static final long TIME_BETWEEN_SEARCHES = 5L * 60L * 1000L;
-    
-    private long timeBetweenSearches = TIME_BETWEEN_SEARCHES;
+    private long timeBetweenSearches = DHTSettings.TIME_BETWEEN_PUSH_PROXY_QUERIES.getValue();
     
     @Inject
     public PushEndpointManager(PushEndpointCache pushEndpointCache, 
@@ -38,12 +37,17 @@ public class PushEndpointManager implements PushEndpointService {
     }
     
     /**
+     * Set time in milliseconds between searches.
+     * 
      * Mainly for testing but could be exposed if necessary. 
      */
     void setTimeBetweenSearches(long timeBetweenSearches) {
         this.timeBetweenSearches = timeBetweenSearches;
     }
     
+    /**
+     * Gets time between searches in milliseconds.  
+     */
     long getTimeBetweenSearches() {
         return timeBetweenSearches;
     }
@@ -68,10 +72,10 @@ public class PushEndpointManager implements PushEndpointService {
                     // only start a search if we set the current time and it was still the last time
                     if (lastSearchTime.compareAndSet(lastSearch, currentTime)) {
                         startSearch(guid, listener);
-                    } else {
-                        listener.handleSearchDone(false);
+                        return;
                     }
                 }
+                listener.handleSearchDone(false);
             }
         }
     }

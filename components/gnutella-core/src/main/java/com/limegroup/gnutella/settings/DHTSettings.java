@@ -308,6 +308,14 @@ public class DHTSettings extends LimeProps {
                 false, "DHT.EnablePushProxyQueriesV2");
     
     /**
+     * Time between push proxy queries.
+     */
+    public static final LongSetting TIME_BETWEEN_PUSH_PROXY_QUERIES
+        = FACTORY.createRemoteLongSetting("TIME_BETWEEN_PUSH_PROXY_QUERIES",
+                5L * 60L * 1000L, "DHT.TimeBetweenPushProxyQueries",
+                10L * 1000L, Long.MAX_VALUE);
+    
+    /**
      * This setting is storing the most recent DHT Node ID for debugging purposes.
      * The setting is actually never read!
      */
