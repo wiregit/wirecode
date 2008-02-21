@@ -56,6 +56,8 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
                 return parseMultipleFormat(f);
         } catch (OutOfMemoryError e) {
             LOG.warn("Ran out of memory while parsing.",e);
+        } catch (IllegalArgumentException e) {
+            return null;
         }
         return null;
     }
@@ -92,7 +94,7 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
      * Reads the meta data for the audio file if LimeWire can parse
      * it, otherwise return null if file type is not supported
      */
-    private MetaReader parseAudioFile(File f) throws IOException { 
+    private MetaReader parseAudioFile(File f) throws IOException, IllegalArgumentException { 
         if (LimeXMLUtils.isMP3File(f))
             return new MP3MetaData(f);
         if (LimeXMLUtils.isOGGFile(f))

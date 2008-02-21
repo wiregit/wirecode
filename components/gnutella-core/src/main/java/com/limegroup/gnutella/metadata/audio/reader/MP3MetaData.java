@@ -26,7 +26,7 @@ public class MP3MetaData extends AudioDataReader {
 	static final String LICENSE_ID = "TCOP";
     static final String PRIV_ID = "PRIV";
 	
-	public MP3MetaData(File f) throws IOException {
+	public MP3MetaData(File f) throws IOException, IllegalArgumentException {
 		super(f);
 	}
 	

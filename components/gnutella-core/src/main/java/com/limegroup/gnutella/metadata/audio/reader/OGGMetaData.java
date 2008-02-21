@@ -9,7 +9,7 @@ import org.jaudiotagger.tag.TagFieldKey;
 
 public class OGGMetaData extends AudioDataReader {
 
-    public OGGMetaData(File f) throws IOException {
+    public OGGMetaData(File f) throws IOException, IllegalArgumentException {
         super(f);
     }
 

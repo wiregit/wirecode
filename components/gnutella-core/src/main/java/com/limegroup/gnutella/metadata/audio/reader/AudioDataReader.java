@@ -31,7 +31,7 @@ public class AudioDataReader implements MetaReader {
     
     protected final AudioMetaData audioData;
     
-    public AudioDataReader(File f) throws IOException{
+    public AudioDataReader(File f) throws IOException, IllegalArgumentException {
         audioData = new AudioMetaData();
         parseFile(f);
     }
@@ -67,7 +67,7 @@ public class AudioDataReader implements MetaReader {
      * @param file - file to read
      * @throws IOException - thrown if the file can't be read, is corrupted, etc..
      */
-    private void parseFile(File file) throws IOException { 
+    private void parseFile(File file) throws IOException, IllegalArgumentException { 
         try { 
             AudioFile audioFile = AudioFileIO.read(file);
             readHeader(audioFile.getAudioHeader());          
