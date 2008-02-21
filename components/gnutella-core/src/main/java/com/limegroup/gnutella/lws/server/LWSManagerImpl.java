@@ -21,7 +21,6 @@ import org.limewire.lws.server.LWSDispatcherSupport;
 import org.limewire.lws.server.LWSReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSSenderOfMessagesToServer;
 import org.limewire.lws.server.StringCallback;
-import org.limewire.lws.server.FakeJavascriptCodeInTheWebpage.Handler;
 import org.limewire.lws.server.LWSDispatcherSupport.Responses;
 
 import com.google.inject.Inject;
@@ -54,10 +53,17 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     private boolean isConnected;  
     
     @Inject
+    public LWSManagerImpl(HttpExecutor exe) {
+        this(exe, new LWSDispatcherFactoryImpl()); //TODO: inject
+    }    
+    
+    //todo @Inject
     public LWSManagerImpl(HttpExecutor exe, LWSDispatcherFactory lwsDispatcherFactory) {
-
-        String host = LWSSettings.LWS_AUTHENTICATION_HOSTNAME.getValue();
-        int port = LWSSettings.LWS_AUTHENTICATION_PORT.getValue(); 
+        this(exe, LWSSettings.LWS_AUTHENTICATION_HOSTNAME.getValue(), 
+             LWSSettings.LWS_AUTHENTICATION_PORT.getValue(), lwsDispatcherFactory);
+    }
+    
+    public LWSManagerImpl(HttpExecutor exe, String host, int port, LWSDispatcherFactory lwsDispatcherFactory) {
         
         this.exe = exe;
         this.dispatcher = lwsDispatcherFactory.createDispatcher(this, new  AbstractReceivesCommandsFromDispatcher() {
@@ -140,7 +146,6 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     public final boolean unregisterListener(String cmd) {
         String hash = hash(cmd);
         boolean result = commands2listenerLists.remove(hash) != null;
-        
         return result;
     }
     

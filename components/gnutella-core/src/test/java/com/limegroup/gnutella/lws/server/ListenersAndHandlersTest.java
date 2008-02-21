@@ -49,7 +49,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
                 handled[0] = true;
             }
         };
-        getLWSManager().registerListener(cmd1, lis1);
+        assertTrue(getLWSManager().registerListener(cmd1, lis1));
 
         String cmd2 = "Foo1";
         LWSManager.AbstractListener lis2 = new LWSManager.AbstractListener(cmd2) {
@@ -60,7 +60,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
                 handled[1] = true;
             }
         };
-        getLWSManager().registerListener(cmd2, lis2);
+        assertTrue(getLWSManager().registerListener(cmd2, lis2));
 
         String cmd3 = "Foo2";
         LWSManager.AbstractListener lis3 = new LWSManager.AbstractListener(cmd3) {
@@ -71,7 +71,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
                 handled[2] = true;
             }
         };
-        getLWSManager().registerListener(cmd3, lis3);
+        assertTrue(getLWSManager().registerListener(cmd3, lis3));
 
         final boolean[] handledHandler = { false, false, false };
 
@@ -118,6 +118,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args1 = new HashMap<String, String>();
         args1.put(Parameters.PRIVATE, privateKey);
+        args1.put(Parameters.SHARED, getSharedKey());
         args1.put(Parameters.CALLBACK, "dummy");
         args1.put(Parameters.COMMAND, cmd1Handler);
         args1.put("a1", "A1");
@@ -129,6 +130,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args2 = new HashMap<String, String>();
         args2.put(Parameters.PRIVATE, privateKey);
+        args2.put(Parameters.SHARED, getSharedKey());
         args2.put(Parameters.CALLBACK, "dummy");
         args2.put(Parameters.COMMAND, cmd2Handler);
         args2.put("a2", "A2");
@@ -140,6 +142,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args3 = new HashMap<String, String>();
         args3.put(Parameters.PRIVATE, privateKey);
+        args3.put(Parameters.SHARED, getSharedKey());
         args3.put(Parameters.CALLBACK, "dummy");
         args3.put(Parameters.COMMAND, cmd3Handler);
         args3.put("a3", "A3");
@@ -210,6 +213,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args1 = new HashMap<String, String>();
         args1.put(Parameters.PRIVATE, privateKey);
+        args1.put(Parameters.SHARED, getSharedKey());
         args1.put(Parameters.CALLBACK, "dummy");
         args1.put(Parameters.COMMAND, cmd1);
         args1.put("a1", "A1");
@@ -221,6 +225,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args2 = new HashMap<String, String>();
         args2.put(Parameters.PRIVATE, privateKey);
+        args2.put(Parameters.SHARED, getSharedKey());
         args2.put(Parameters.CALLBACK, "dummy");
         args2.put(Parameters.COMMAND, cmd2);
         args2.put("a2", "A2");
@@ -232,6 +237,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args3 = new HashMap<String, String>();
         args3.put(Parameters.PRIVATE, privateKey);
+        args3.put(Parameters.SHARED, getSharedKey());
         args3.put(Parameters.CALLBACK, "dummy");
         args3.put(Parameters.COMMAND, cmd3);
         args3.put("a3", "A3");
@@ -291,6 +297,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args1 = new HashMap<String, String>();
         args1.put(Parameters.PRIVATE, privateKey);
+        args1.put(Parameters.SHARED, getSharedKey());
         args1.put(Parameters.CALLBACK, "dummy");
         args1.put(Parameters.COMMAND, cmd1);
         args1.put("a1", "A1");
@@ -302,6 +309,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args2 = new HashMap<String, String>();
         args2.put(Parameters.PRIVATE, privateKey);
+        args2.put(Parameters.SHARED, getSharedKey());
         args2.put(Parameters.CALLBACK, "dummy");
         args2.put(Parameters.COMMAND, cmd2);
         args2.put("a1", "A1");
@@ -360,6 +368,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args1 = new HashMap<String, String>();
         args1.put(Parameters.PRIVATE, privateKey);
+        args1.put(Parameters.SHARED, getSharedKey());
         args1.put(Parameters.CALLBACK, "dummy");
         args1.put(Parameters.COMMAND, cmd1);
         args1.put("a1", "A1");
@@ -373,6 +382,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args2 = new HashMap<String, String>();
         args2.put(Parameters.PRIVATE, privateKey);
+        args2.put(Parameters.SHARED, getSharedKey());
         args2.put(Parameters.CALLBACK, "dummy");
         args2.put(Parameters.COMMAND, cmd2);
         args2.put("a2", "A2");
@@ -481,6 +491,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args1 = new HashMap<String, String>();
         args1.put(Parameters.PRIVATE, privateKey);
+        args1.put(Parameters.SHARED, getSharedKey());
         args1.put(Parameters.CALLBACK, "dummy");
         args1.put(Parameters.COMMAND, cmd1);
         args1.put("a1", "A1");
@@ -494,6 +505,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args2 = new HashMap<String, String>();
         args2.put(Parameters.PRIVATE, privateKey);
+        args2.put(Parameters.SHARED, getSharedKey());
         args2.put(Parameters.CALLBACK, "dummy");
         args2.put(Parameters.COMMAND, cmd2);
         args2.put("a2", "A2");
@@ -507,6 +519,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args3 = new HashMap<String, String>();
         args3.put(Parameters.PRIVATE, privateKey);
+        args3.put(Parameters.SHARED, getSharedKey());
         args3.put(Parameters.CALLBACK, "dummy");
         args3.put(Parameters.COMMAND, cmd3);
         args3.put("a3", "A3");
@@ -582,6 +595,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args1 = new HashMap<String, String>();
         args1.put(Parameters.PRIVATE, privateKey);
+        args1.put(Parameters.SHARED, getSharedKey());
         args1.put(Parameters.CALLBACK, "dummy");
         args1.put(Parameters.COMMAND, cmd1);
         args1.put("a1", "A1");
@@ -686,6 +700,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args1 = new HashMap<String, String>();
         args1.put(Parameters.PRIVATE, privateKey);
+        args1.put(Parameters.SHARED, getSharedKey());
         args1.put(Parameters.CALLBACK, "dummy");
         args1.put(Parameters.COMMAND, cmd1);
         args1.put("a1", "A1");
@@ -699,6 +714,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args2 = new HashMap<String, String>();
         args2.put(Parameters.PRIVATE, privateKey);
+        args2.put(Parameters.SHARED, getSharedKey());
         args2.put(Parameters.CALLBACK, "dummy");
         args2.put(Parameters.COMMAND, cmd2);
         args2.put("a1", "A1");
@@ -712,6 +728,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args3 = new HashMap<String, String>();
         args3.put(Parameters.PRIVATE, privateKey);
+        args3.put(Parameters.SHARED, getSharedKey());
         args3.put(Parameters.CALLBACK, "dummy");
         args3.put(Parameters.COMMAND, cmd3);
         args3.put("a2", "A2");
@@ -742,6 +759,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args1Handler = new HashMap<String, String>();
         args1Handler.put(Parameters.PRIVATE, privateKey);
+        args1Handler.put(Parameters.SHARED, getSharedKey());
         args1Handler.put(Parameters.CALLBACK, "dummy");
         args1Handler.put(Parameters.COMMAND, cmd1Handler);
         args1Handler.put("a1", "A1");
@@ -754,6 +772,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args2Handler = new HashMap<String, String>();
         args2Handler.put(Parameters.PRIVATE, privateKey);
+        args2Handler.put(Parameters.SHARED, getSharedKey());
         args2Handler.put(Parameters.CALLBACK, "dummy");
         args2Handler.put(Parameters.COMMAND, cmd2Handler);
         args2Handler.put("a2", "A2");
@@ -766,6 +785,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args3Handler = new HashMap<String, String>();
         args3Handler.put(Parameters.PRIVATE, privateKey);
+        args3Handler.put(Parameters.SHARED, getSharedKey());
         args3Handler.put(Parameters.CALLBACK, "dummy");
         args3Handler.put(Parameters.COMMAND, cmd3Handler);
         args3Handler.put("a3", "A3");
@@ -814,6 +834,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args1 = new HashMap<String, String>();
         args1.put(Parameters.PRIVATE, privateKey);
+        args1.put(Parameters.SHARED, getSharedKey());
         args1.put(Parameters.CALLBACK, "dummy");
         args1.put(Parameters.COMMAND, cmd1);
         args1.put("a1", "A1");
@@ -825,6 +846,7 @@ public class ListenersAndHandlersTest extends AbstractCommunicationSupportWithNo
 
         Map<String, String> args2 = new HashMap<String, String>();
         args2.put(Parameters.PRIVATE, privateKey);
+        args2.put(Parameters.SHARED, getSharedKey());
         args2.put(Parameters.CALLBACK, "dummy");
         args2.put(Parameters.COMMAND, cmd2);
         args2.put("a2", "A2");

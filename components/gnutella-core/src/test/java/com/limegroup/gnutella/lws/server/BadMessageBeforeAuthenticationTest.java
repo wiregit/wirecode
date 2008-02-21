@@ -30,9 +30,9 @@ public class BadMessageBeforeAuthenticationTest extends AbstractCommunicationSup
         final Map<String, String> args = new HashMap<String, String>();
         args.put(LWSDispatcherSupport.Parameters.MSG, "badMsg");
         args.put(LWSDispatcherSupport.Parameters.CALLBACK, "callback");
-        args.put(LWSDispatcherSupport.Parameters.PRIVATE, "asdfasdfasdfasdf");
         String res = sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.AUTHENTICATE, 
                 args);
         assertTrue("invalid message '" + res + "'", LWSServerUtil.isError(res));
+
     }
 }

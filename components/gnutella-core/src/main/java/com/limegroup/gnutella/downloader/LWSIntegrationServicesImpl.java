@@ -2,8 +2,8 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,76 +13,153 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.service.ErrorService;
-import org.limewire.util.Version;
+import org.apache.http.HttpException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.lws.server.LWSManager;
 import com.limegroup.gnutella.lws.server.LWSManagerCommandResponseHandlerWithCallback;
 import com.limegroup.gnutella.lws.server.LWSUtil;
 import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.EncodingUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.Tagged;
-import com.limegroup.gnutella.util.URLDecoder;
+
 
 @Singleton
 public final class LWSIntegrationServicesImpl implements LWSIntegrationServices {
     
-    private static final Log LOG = LogFactory.getLog(HTTPDownloader.class);
+    private static final Log LOG = LogFactory.getLog(LWSIntegrationServicesImpl.class);
     
     private final LWSManager lwsManager;
     private final DownloadServices downloadServices;
     private final LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate;
     
+    private String downloadPrefix;
+    
     @Inject
     public LWSIntegrationServicesImpl(LWSManager lwsManager, 
+            DownloadServices downloadServices,
+            LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate) {
+        this(lwsManager,downloadServices,lwsIntegrationServicesDelegate,LWSSettings.LWS_DOWNLOAD_PREFIX.getValue());
+
+    }    
+    
+    /** For testing. */
+    LWSIntegrationServicesImpl(LWSManager lwsManager, 
                                       DownloadServices downloadServices,
-                                      LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate) {
+                                      LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate,
+                                      String downloadPrefix) {
         this.lwsManager = lwsManager;
         this.downloadServices = downloadServices;
         this.lwsIntegrationServicesDelegate = lwsIntegrationServicesDelegate;
+        this.downloadPrefix = downloadPrefix;
+    }
+    
+    public void setDownloadPrefix(String downloadPrefix) {
+        this.downloadPrefix = downloadPrefix;
+    }
+    
+    public RemoteFileDesc createRemoteFileDescriptor(String fileName, String urlString, long length) throws IOException, URISyntaxException, HttpException, InterruptedException {
+        //
+        // We don't want to pass in a full URL and download it, so have
+        // the remote setting LWSSettings.LWS_DOWNLOAD_PREFIX specifying
+        // the entire prefix of where we're getting the file from and
+        // construct
+        // the full URL from that
+        //
+        String baseDir = "http://" + downloadPrefix;
+        if (fileName == null) {
+            fileName = fileNameFromURL(urlString);
+        }
+        String urlStr = baseDir + urlString;
+        //
+        // This will need NO url encoding, and will contain ?'s and
+        // &'s
+        // which we want to keep. So for testing, we can only pass
+        // in
+        // URLs that don't contain spaces
+        //
+        URL url = new URL(urlStr);
+        // this make the size looked up
+        RemoteFileDesc rfd = StoreDownloader.createRemoteFileDesc(url, fileName, null, length);
+        rfd.setHTTP11(false);
+        return rfd;
+    }
+    
+    public Downloader createDownloader(RemoteFileDesc rfd, File saveDir) throws SaveLocationException {
+        //
+        // We'll associate the identity hash code of the downloader
+        // with this file so that the web page can keep track
+        // of this downloader w.r.t this file
+        //
+        //
+        // Make sure we aren't already downloading this
+        //
+        String fileName = rfd.getFileName();
+        Downloader downloader = null;
+        synchronized (lwsIntegrationServicesDelegate) {
+            File saveFile = new File(saveDir, fileName);
+            for (AbstractDownloader d : lwsIntegrationServicesDelegate.getAllDownloaders()) {
+                if (d.conflictsSaveFile(saveFile)) {
+                    downloader = d;
+                    break;
+                }
+            }
+        }
+        if (downloader == null) {
+            downloader = downloadServices.downloadFromStore(rfd, true, saveDir, fileName);
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Have downloader " + downloader.toString());
+        }
+        return downloader;
     }
     
 
     public void init() {
-        // =============================================================================================================
+        // ====================================================================================================================================
         // Add a handler for the LimeWire Store Server so that
         // we can keep track of downloads that were made on the
         // DownloadMediator
         // 
         // INPUT
         // OUTPUT
-        //  ID of download - a string of form
-        //          <ID> ' ' <percentage-downloaded> ':' <download-status> [ '|' <ID> ' ' <percentage-downloaded> ':' <download-status> ]
-        //  This ID is the identity hash code
-        // =============================================================================================================
+        // ID of download - a string of form
+        // <ID> ' ' <percentage-downloaded> ':' <download-status> [ '|' <ID> ' '
+        // <percentage-downloaded> ':' <download-status> ]
+        // This ID is the identity hash code
+        // ====================================================================================================================================
         lwsManager.registerHandler("GetDownloadProgress", new LWSManagerCommandResponseHandlerWithCallback("GetDownloadProgress") {
             
-            /** 
-             * We maintain a collection of ever-active downloaders, so that when we iterate
-             * over all the current downloaders, we know that if one appears in the ever-active
-             * collection, but not the current we need to inspect further.
+            /**
+             * We maintain a collection of ever-active downloaders, so that when
+             * we iterate over all the current downloaders, we know that if one
+             * appears in the ever-active collection, but not the current we
+             * need to inspect further.
              * 
-             * More specifically, that downloader could have completed normally or it could have 
-             * been completed by being cancelled. If the downloader completed:
-             *  - Normally: Remove it from the ever-active collection and pass back a progress of 1.0
-             *  - By being cancelled: Pass back the String 'X' denoting it was cancelled.
+             * More specifically, that downloader could have completed normally
+             * or it could have been completed by being cancelled. If the
+             * downloader completed: - Normally: Remove it from the ever-active
+             * collection and pass back a progress of 1.0 - By being cancelled:
+             * Pass back the String 'X' denoting it was cancelled.
              * 
-             * The reason we need to do this is because, when the Store is on the download page and connected
-             * to the Client, it will poll the Client for the progress of all active and waiting downloads.
-             * In the case that a downloader is either (1) finished normally or (2) cancelled, and the Client polls
-             * after this occurs, we don't know which occured.  Basically this allows the Store to
-             * sync with the Client, so we know when a download actually completes. 
+             * The reason we need to do this is because, when the Store is on
+             * the download page and connected to the Client, it will poll the
+             * Client for the progress of all active and waiting downloads. In
+             * the case that a downloader is either (1) finished normally or (2)
+             * cancelled, and the Client polls after this occurs, we don't know
+             * which occured. Basically this allows the Store to sync with the
+             * Client, so we know when a download actually completes.
              * 
-             * Furthermore, if the download is at 99% and then completes, and the Store polls after this occurs
-             * the progress bars on the Store web site will remain at 99%, because we never passed back
+             * Furthermore, if the download is at 99% and then completes, and
+             * the Store polls after this occurs the progress bars on the Store
+             * web site will remain at 99%, because we never passed back
              * notification that the download completed.
              */
             private final Map<String, AbstractDownloader> everActiveDownloaderIDs2Downloaders = new HashMap<String, AbstractDownloader>();            
@@ -93,8 +170,10 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 //
                 StringBuffer res = new StringBuffer();
                 //
-                // Remember the downloader that are actually active, so we see if there are any that once existed
-                // but are completed and take the correct action.  See the comment for 'everActiveDownloaderIDs'
+                // Remember the downloader that are actually active, so we see
+                // if there are any that once existed
+                // but are completed and take the correct action. See the
+                // comment for 'everActiveDownloaderIDs'
                 // for why we have to do this
                 //
                 final Set<String> activeDownloaderIDS = new HashSet<String>();
@@ -110,7 +189,8 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                     }
                 }
                 //
-                // Now check whether the list of ever-active downloaders contains a downloader
+                // Now check whether the list of ever-active downloaders
+                // contains a downloader
                 // not in the current list
                 //
                 final Collection<String> idsToRemove = new ArrayList<String>();
@@ -118,8 +198,10 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                     AbstractDownloader d = everActiveDownloaderIDs2Downloaders.get(downloaderID);
                     if (!activeDownloaderIDS.contains(downloaderID)) {
                         //
-                        // We must have removed one of the previous from the list, so record it
-                        // once then remove it from this list so we don't put it on again -- because
+                        // We must have removed one of the previous from the
+                        // list, so record it
+                        // once then remove it from this list so we don't put it
+                        // on again -- because
                         // that isn't neeed
                         //
                         recordProgress(d, res, downloaderID);
@@ -145,19 +227,19 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 res.append("|");                
             }
         }); 
-        // =============================================================================================================
+        // ====================================================================================================================================
         // Add a handler for the LimeWire Store Server so that
         // we can download songs from The Store
         // INPUT
-        //  url - to download
-        //  file - name of file (optional)
-        //  id - id of progress bar to update on the way back
-        //  length - length of the track (optional)
+        // url - to download
+        // file - name of file (optional)
+        // id - id of progress bar to update on the way back
+        // length - length of the track (optional)
         // OUTPUT
-        //  URN - of downloader for keeping track of progress
-        //   -or-
-        //  timeout - if we timeout
-        // =============================================================================================================
+        // URN - of downloader for keeping track of progress
+        // -or-
+        // timeout - if we timeout
+        // ====================================================================================================================================
         lwsManager.registerHandler("Download", new LWSManagerCommandResponseHandlerWithCallback("Download") {
 
             protected String handleRest(Map<String, String> args) {
@@ -167,7 +249,8 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 Tagged<String> urlString = LWSUtil.getArg(args, "url", "downloading");
                 if (!urlString.isValid()) return urlString.getValue();
                 //
-                // The file name.  If this isn't given (mainly for testing), we'll let it
+                // The file name. If this isn't given (mainly for testing),
+                // we'll let it
                 // go, but note that it was missing
                 //
                 Tagged<String> fileString = LWSUtil.getArg(args, "file", "downloading");
@@ -187,116 +270,75 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                         length = Long.parseLong(lengthString.getValue());
                     } catch (NumberFormatException e) { /* ignore */ }
                 } 
-                //
-                // We don't want to pass in a full URL and download it, so have
-                // the remote setting LWSSettings.LWS_DOWNLOAD_PREFIX specifying
-                // the entire prefix of where we're getting the file from and construct
-                // the full URL from that
-                //
-                String baseDir = "http://" + LWSSettings.LWS_DOWNLOAD_PREFIX.getValue();
-                String fileName = fileString.getValue();
-                if (fileName == null) {
-                    fileName = fileNameFromURL(urlString.getValue());
-                }
-                String urlStr = baseDir + urlString.getValue();
                 try {
-                    //
-                    // This will need NO url encoding, and will contain ?'s and &'s
-                    // which we want to keep.  So for testing, we can only pass in
-                    // URLs that don't contain spaces
-                    //
-                    URL url = new URL(urlStr); 
-                    RemoteFileDesc rfd = StoreDownloader.createRemoteFileDesc(url, 
-                            fileName, null, length); // this make the size looked up
-                    //
-                    // We'll associate the identity hash code of the downloader
-                    // with this file so that the web page can keep track
-                    // of this downloader w.r.t this file
-                    //
                     File saveDir = SharingSettings.getSaveLWSDirectory();
-                    //
-                    // Make sure we aren't already downloading this
-                    //
-                    Downloader theDownloader = null;
-                    synchronized (lwsIntegrationServicesDelegate) {
-                        File saveFile = new File(saveDir, fileName);
-                        for (AbstractDownloader d : lwsIntegrationServicesDelegate.getAllDownloaders()) {
-                            if (d.conflictsSaveFile(saveFile)) {
-                                theDownloader = d;
-                                break;
-                            }
-                        }
-                    }
-                    if (theDownloader == null) {
-                        theDownloader = downloadServices.downloadFromStore(rfd, true, saveDir, fileName);
-                    }
+                    RemoteFileDesc rfd = createRemoteFileDescriptor(fileString.getValue(), urlString.getValue(), length); 
+                    Downloader theDownloader = createDownloader(rfd, saveDir);
                     long idOfTheDownloader = System.identityHashCode(theDownloader);
                     return idOfTheDownloader + " " + idOfTheProgressBarString.getValue();
                 } catch (IOException e) {
-                    ErrorService.error(e, "Invalid URL: " + urlStr);
+                    // invalid url or other causes, fail silently
+                } catch (HttpException e) {
+                    // invalid url or other causes, fail silently
+                } catch (InterruptedException e) {
+                    // invalid url or other causes, fail silently
+                } catch (URISyntaxException e) {
+                    // invalid url or other causes, fail silently
                 }
 
                 return "invalid.download";
-            }
-            
-            private String fileNameFromURL(String urlString) {
-                int ilast = urlString.lastIndexOf("/");
-                if (ilast == -1) {
-                    ilast = urlString.lastIndexOf("\\");                    
-                }
-                return urlString.substring(ilast+1);
-            }            
+            }          
         });
-        // =============================================================================================================
+        // ====================================================================================================================================
         // Add a handler for the LimeWire Store Server so that
         // we can download songs from The Store
         // INPUT
-        //  id - to pause
+        // id - to pause
         // OUTPUT
-        //  OK | ID of downloader paused
-        // =============================================================================================================
+        // OK | ID of downloader paused
+        // ====================================================================================================================================
         lwsManager.registerHandler("PauseDownload", new LWSManagerCommandResponseForDownloading("PauseDownload", lwsIntegrationServicesDelegate) {
             @Override
             protected void takeAction(Downloader d) {
                 d.pause();
             }          
         });
-        // =============================================================================================================
+        // ====================================================================================================================================
         // Add a handler for the LimeWire Store Server so that
         // we can download songs from The Store
         // INPUT
-        //  id - to stop
+        // id - to stop
         // OUTPUT
-        //  OK | ID of downloader stopped
-        // =============================================================================================================
+        // OK | ID of downloader stopped
+        // ====================================================================================================================================
         lwsManager.registerHandler("StopDownload", new LWSManagerCommandResponseForDownloading("StopDownload", lwsIntegrationServicesDelegate) {
             @Override
             protected void takeAction(Downloader d) {
                 d.stop();
             }              
         }); 
-        // =============================================================================================================
+        // ====================================================================================================================================
         // Add a handler for the LimeWire Store Server so that
         // we can download songs from The Store
         // INPUT
-        //  id - to resume
+        // id - to resume
         // OUTPUT
-        //  OK | ID of downloader resumed
-        // =============================================================================================================
+        // OK | ID of downloader resumed
+        // ====================================================================================================================================
         lwsManager.registerHandler("ResumeDownload", new LWSManagerCommandResponseForDownloading("ResumeDownload", lwsIntegrationServicesDelegate) {
             @Override
             protected void takeAction(Downloader d) {
                 d.resume();
             }           
         });
-        // =============================================================================================================
+        // ====================================================================================================================================
         // Add a handler for the LimeWire Store Server so that we can find the
         // info of the client running
         // INPUT
-        //  --
+        // --
         // OUTPUT
-        //  ( <name> '=' <value> '\t' )*
-        // =============================================================================================================
+        // ( <name> '=' <value> '\t' )*
+        // ====================================================================================================================================
         lwsManager.registerHandler("GetInfo", new LWSManagerCommandResponseHandlerWithCallback("GetInfo") {
             
             private void add(StringBuffer b, String name, Object value) {
@@ -325,8 +367,8 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
     }
     
     /**
-     * A class to find a downloader, given an identity hashcode and take an action.
-     * Returns the ID of the downloader upon which was taken action.
+     * A class to find a downloader, given an identity hashcode and take an
+     * action. Returns the ID of the downloader upon which was taken action.
      */
     private abstract class LWSManagerCommandResponseForDownloading extends LWSManagerCommandResponseHandlerWithCallback {
         
@@ -444,4 +486,14 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         }
         return null;
     }
+    
+    private String fileNameFromURL(String urlString) {
+        int ilast = urlString.lastIndexOf("/");
+        if (ilast == -1) {
+            ilast = urlString.lastIndexOf("\\");                    
+        }
+        return urlString.substring(ilast+1);
+    }      
+
+
 }

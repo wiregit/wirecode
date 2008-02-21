@@ -458,7 +458,6 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
         // Allow us to disable this remotely is needed
         if (LWSSettings.LWS_IS_ENABLED.getValue()) {
-            LOG.trace("START StoreServer");
             localHttpAcceptor.get().registerHandler("/" + LWSManager.PREFIX + "*",  lwsManager.get().getHandler());
             LOG.trace("END StoreServer");
         } else {
@@ -559,6 +558,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         contentManager.get().stop();
         
         messageRouter.get().stop();
+        
+        localAcceptor.get().stop();
         
         runShutdownItems();
         

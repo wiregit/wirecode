@@ -387,18 +387,22 @@ public class DownloadTestCase extends LimeTestCase {
     }
 
     /** Returns true if the complete file exists and is complete */
-    protected boolean isComplete() {
-        LOG.debug("file is " + savedFile.getPath());
-        if (savedFile.length() < TestFile.length()) {
-            LOG.debug("File too small by: " + (TestFile.length() - savedFile.length()));
+    protected final boolean isComplete() {
+        return isComplete(savedFile, TestFile.length());
+    }
+    
+    protected final boolean isComplete(File f, long length) {
+        LOG.debug("file is " + f.getPath());
+        if (f.length() < length) {
+            LOG.debug("File too small by: " + (length - f.length()));
             return false;
         } else if (savedFile.length() > TestFile.length()) {
-            LOG.debug("File too large by: " + (savedFile.length() - TestFile.length()));
+            LOG.debug("File too large by: " + (length - f.length()));
             return false;
         }
         FileInputStream stream = null;
         try {
-            stream = new FileInputStream(savedFile);
+            stream = new FileInputStream(f);
             for (int i = 0;; i++) {
                 int c = stream.read();
                 if (c == -1)//eof
@@ -428,23 +432,23 @@ public class DownloadTestCase extends LimeTestCase {
 
     protected final int INVALID = 3;
 
-    protected void waitForComplete(boolean corrupt) {
+    protected final void waitForComplete(boolean corrupt) {
         waitForCompleteImpl(corrupt ? CORRUPT : COMPLETE);
     }
 
-    protected void waitForCorrupt() {
+    protected final void waitForCorrupt() {
         waitForCompleteImpl(CORRUPT);
     }
 
-    protected void waitForInvalid() {
+    protected final void waitForInvalid() {
         waitForCompleteImpl(INVALID);
     }
 
-    protected void waitForComplete() {
+    protected final void waitForComplete() {
         waitForCompleteImpl(COMPLETE);
     }
 
-    protected void waitForCompleteImpl(int state) {
+    protected final void waitForCompleteImpl(int state) {
         synchronized (COMPLETE_LOCK) {
             try {
                 REMOVED = false;

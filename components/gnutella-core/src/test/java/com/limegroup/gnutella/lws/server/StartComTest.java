@@ -22,9 +22,8 @@ public class StartComTest extends AbstractCommunicationSupportWithNoLocalServer 
         TestRunner.run(suite());
     }
     public void testStartCom() {
-        KeyPair kp = getPublicAndSharedKeys();
-        assertTrue(kp.getPublicKey(), LWSServerUtil.isValidPublicKey(kp.getPublicKey()));
-        assertTrue(kp.getSharedKey(), LWSServerUtil.isValidPublicKey(kp.getSharedKey()));
+        final String publicKey = getPublicKey();
+        assertTrue("invalid public key '" + publicKey + "'", LWSServerUtil.isValidPublicKey(publicKey));
     }
 
 }

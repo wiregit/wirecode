@@ -27,7 +27,6 @@ public final class LWSSettings extends LimeProps {
      * <code><= 0</code> for no port.
      */
     public static final IntSetting LWS_AUTHENTICATION_PORT = FACTORY.createRemoteIntSetting(
-            //"LWS_AUTHENTICATION_PORT", 8443, "LWSSettings.lwsAuthenticationPort", -Integer.MIN_VALUE,
             "LWS_AUTHENTICATION_PORT", 8080, "LWSSettings.lwsAuthenticationPort", -Integer.MIN_VALUE,
             10000);
     
@@ -76,12 +75,12 @@ public final class LWSSettings extends LimeProps {
      * The username with which we use to connect the client to the Store web server.
      */
     public static final StringSetting LWS_AUTHENTICATION_USERNAME = FACTORY.createRemoteStringSetting(
-            "LWS_AUTHENTICATION_USERNAME", "", "LWSSettings.lwsAuthenticationUsername"); 
+            "LWS_AUTHENTICATION_USERNAME", "browse", "LWSSettings.lwsAuthenticationUsername"); 
     
     /**
      * The username with which we use to connect the client to the Store web server.
      */
     public static final StringSetting LWS_AUTHENTICATION_PASSWORD = FACTORY.createRemoteStringSetting(
-            "LWS_AUTHENTICATION_PASSWORD", "", "LWSSettings.lwsAuthenticationPassword");      
+            "LWS_AUTHENTICATION_PASSWORD", "browse", "LWSSettings.lwsAuthenticationPassword");      
 
 }

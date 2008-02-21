@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.lws.server.FakeJavascriptCodeInTheWebpage;
 import org.limewire.lws.server.LWSDispatcherSupport;
@@ -13,7 +14,6 @@ import org.limewire.net.SocketsManager;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.downloader.LWSIntegrationServices;
 import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -32,13 +32,12 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCase {
     
-    private final static org.apache.commons.logging.Log LOG 
-        = LogFactory.getLog(AbstractCommunicationSupportWithNoLocalServer.class);
+    private final Log LOG = LogFactory.getLog(AbstractCommunicationSupportWithNoLocalServer.class);
     
-    public final static int LOCAL_PORT  = LocalServerImpl.PORT;
-    public final static int REMOTE_PORT = RemoteServerImpl.PORT;
+    public final int LOCAL_PORT  = LocalServerImpl.PORT;
+    public final int REMOTE_PORT = RemoteServerImpl.PORT;
     
-    protected final static Map<String,String> EMPTY_ARGS = new HashMap<String,String>();
+    protected final Map<String,String> EMPTY_ARGS = new HashMap<String,String>();
     
     /**
      * The number of times we'll try for a private key. Because we can't respond
@@ -57,15 +56,14 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     private RemoteServerImpl remoteServer;
     private Thread remoteThread;
     
+    private Injector inj;
     private CommandSender sender;
-    private static LWSManager lwsManager;
+    private LWSManager lwsManager;
     private LifecycleManager lifecycleManager;
     
     private String privateKey;
     private String sharedKey;
     
-        
-
     public AbstractCommunicationSupportWithNoLocalServer(String s) {
         super(s);
     }
@@ -90,11 +88,11 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
      * This is not a {@link Collections#emptyMap()} because we may want to add
      * to it.
      */
-    protected static final Map<String, String> NULL_ARGS = new HashMap<String,String>();
+    protected final Map<String, String> NULL_ARGS = new HashMap<String,String>();
     
-    protected static final Map<String, String> DUMMY_CALLBACK_ARGS;
+    protected final Map<String, String> DUMMY_CALLBACK_ARGS;
     
-    static {
+    {
         DUMMY_CALLBACK_ARGS = new HashMap<String,String>();
         DUMMY_CALLBACK_ARGS.put(LWSDispatcherSupport.Parameters.CALLBACK, "dummy");        
     }
@@ -115,8 +113,6 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     protected final Thread getRemoteThread() {
         return remoteThread;
     }
-    
-    private Injector inj;
 
     @Override
     protected final void setUp() throws Exception {
@@ -128,23 +124,13 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
         LWSSettings.LWS_AUTHENTICATION_HOSTNAME.setValue("localhost");
         LWSSettings.LWS_AUTHENTICATION_PORT.setValue(8080);
         
-        inj = LimeTestUtils.createInjector();
-
-        if (remoteServer == null) {
-            remoteServer = new RemoteServerImpl(inj.getInstance(SocketsManager.class), LOCAL_PORT);
-        }
+        Injector inj = LimeTestUtils.createInjector();
+        remoteServer = new RemoteServerImpl(inj.getInstance(SocketsManager.class), LOCAL_PORT);
         lifecycleManager = inj.getInstance(LifecycleManager.class);
         lifecycleManager.start();
         remoteThread = remoteServer.start();
-        //
-        // This should persist over tests, because you can't register/unregister/register
-        // handlers for the local http acceptor
-        //
-        if (lwsManager == null) lwsManager = inj.getInstance(LWSManager.class);
+        lwsManager = inj.getInstance(LWSManager.class);
         sender = new CommandSender();
-        
-        //LWSIntegrationServices lwsIs = getInstance(LWSIntegrationServices.class);
-        //lwsIs.init();
 
         afterSetup();
         
@@ -157,15 +143,15 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
         note("begin tearDown");
 
         beforeTearDown();
-
-        stop(remoteServer);
         
-        if (lifecycleManager != null) lifecycleManager.shutdown();
+        doDetatch();
+
+        remoteServer.shutDown();
+        
+        lifecycleManager.shutdown();
         
         privateKey = null;
         remoteThread = null;
-        
-        doDetatch();
 
         afterTearDown();
         
@@ -173,23 +159,25 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     }    
     
     protected final void doDetatch() {
-        getCommandSender().detach();
+        getCommandSender().detach(getPrivateKey(), getSharedKey());
         lwsManager.clearHandlersAndListeners();
     }
 
     protected final String doAuthenticate() {
         note("Authenticating");
-        return doAuthenticate(getPrivateKey());
+        return doAuthenticate(getPrivateKey(), getSharedKey());
     }
 
     protected final void note(Object str) {
         LOG.debug(str);
     }
 
-    protected final String doAuthenticate(final String privateKey) {
+    protected final String doAuthenticate(final String privateKey, final String sharedKey) {
         Map<String, String> args = new HashMap<String, String>();
         args.put("private", privateKey);
-        return sendMessageFromWebpageToClient("authenticate", args);        
+        args.put("shared", sharedKey);
+        note("Authenticating with private key '" + privateKey + "' and shared key '" + sharedKey + "'");
+        return sendMessageFromWebpageToClient("Authenticate", args);        
     }
 
     protected final String getPrivateKey() {
@@ -204,7 +192,7 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
             requestPrivateAndSharedKeys();
         }
         return sharedKey;
-    }    
+    }
     
     protected final static class KeyPair {
         
@@ -247,12 +235,12 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
             return new KeyPair(null, null, false);
         }
         return new KeyPair(parts[0], sharedKey = parts[1], true);
-    }
+    }    
    
 
     protected final String getPublicKey() {
-        String publicKey = sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.START_COM, NULL_ARGS);
-        return publicKey;
+        return sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.START_COM, NULL_ARGS);
+
     }
     
     /**
@@ -262,19 +250,45 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
      * <p>
      * Also, the only generic command the client understands is <code>Msg</code>,
      * with a argument of <code>command=</code><em>Command</em> where
-     * <em>Command</em> would be something like <code>Download</code> or <code>GetInfo</code>.
+     * <em>Command</em> would be something like <code>Download</code> or
+     * <code>GetInfo</code>.
      * 
+     * @param cmd Command to send
+     * @param args arguments
+     * @param includeDummyCallback <code>true</code> to include the callback
+     *        <code>dummy</code>. This is used as a convenience in testing
+     *        handlers when we don't need to have an explicit callback function.
      * @return the response after calling
      *         {@link #sendMessageFromWebpageToClient(String, Map)} after adding
      *         the private and shared keys.
      */
-    protected final String sendCommandToClient(String cmd, Map<String,String> args) {
-        Map<String,String> newArgs = new HashMap<String,String>(args);
-        newArgs.put("command" , cmd);
-        newArgs.put("private" , getPrivateKey());
-        newArgs.put("shared"  , getSharedKey());
-        return sendMessageFromWebpageToClient("Msg",newArgs);
+    protected final String sendCommandToClient(String cmd, Map<String, String> args,
+            boolean includeDummyCallback) {
+        Map<String, String> newArgs = new HashMap<String, String>(args);
+        newArgs.put("command", cmd);
+        newArgs.put("private", getPrivateKey());
+        newArgs.put("shared", getSharedKey());
+        if (includeDummyCallback) {
+            newArgs.put("callback", "dummy");
+        }
+        return sendMessageFromWebpageToClient("Msg", newArgs);
     }
+
+    /**
+     * Returns the value of calling
+     * {@link #sendCommandToClient(String, Map, boolean)} with the last argument
+     * <code>false</code>, so this method requires an explicit callback
+     * function in <code>args</code>.
+     * 
+     * @return the value of calling
+     *         {@link #sendCommandToClient(String, Map, boolean)} with the last
+     *         argument <code>false</code>, so this method requires an
+     *         explicit callback function in <code>args</code>.
+     * @see #sendCommandToClient(String, Map, boolean) *
+     */
+    protected final String sendCommandToClient(String cmd, Map<String, String> args) {
+        return sendCommandToClient(cmd, args, false);
+    }    
     
     protected final String sendMessageFromWebpageToClient(String cmd, Map<String, String> args) {
         args.put("callback", "dummy");
@@ -338,11 +352,5 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
                 // ignore
             }
         }        
-    }     
-    
-    private void stop(final AbstractServer t) {
-        if (t != null) {
-          t.shutDown();
-        }
-    }    
+    }         
 }
