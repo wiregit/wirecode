@@ -31,7 +31,7 @@ public class PushEndpointManager implements PushEndpointService {
     
     @Inject
     public PushEndpointManager(PushEndpointCache pushEndpointCache, 
-            @Named("dhtPuhPushEndpointService") PushEndpointService pushEndpointFinder) {
+            @Named("dhtPushEndpointFinder") PushEndpointService pushEndpointFinder) {
         this.pushEndpointCache = pushEndpointCache;
         this.pushEndpointFinder = pushEndpointFinder;
     }
@@ -56,7 +56,7 @@ public class PushEndpointManager implements PushEndpointService {
     public void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
         listener = SearchListenerAdapter.nonNullListener(listener);
         PushEndpoint cachedPushEndpoint = pushEndpointCache.getPushEndpoint(guid);
-        if (cachedPushEndpoint != null) {
+        if (cachedPushEndpoint != null && !cachedPushEndpoint.getProxies().isEmpty()) {
             listener.handleResult(cachedPushEndpoint);
             listener.handleSearchDone(true);
         } else {

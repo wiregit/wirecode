@@ -134,7 +134,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     public void register(PushedSocketHandler handler) {
         pushHandlers.add(handler);
     }
-
+    
     public boolean isBlocking() {
         return true;
     }
@@ -541,8 +541,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             byte[] key = clientGUID;
             AtomicInteger requests = UDP_FAILOVER.get(key);
             if (requests != null) {
-            	requests.addAndGet(-1);
-                if (requests.get() <= 0)
+                if (requests.decrementAndGet() <= 0)
                     UDP_FAILOVER.remove(key);
             }
         }
@@ -611,13 +610,12 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     		synchronized(UDP_FAILOVER) {
     			AtomicInteger requests = UDP_FAILOVER.get(key);
     			if (requests!=null && requests.get() > 0) {
-    				requests.addAndGet(-1);
-    				if (requests.get() == 0)
-    					UDP_FAILOVER.remove(key);
-    				return true;
+    			    if (requests.decrementAndGet() == 0) {
+    			        UDP_FAILOVER.remove(key);
+    			    }
+                    return true;
     			}
     		}
-
     		return false;
     	}
    }
