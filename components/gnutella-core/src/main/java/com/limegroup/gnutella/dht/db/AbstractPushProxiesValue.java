@@ -77,7 +77,7 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
      * Value based comparison with other object.
      */
     @Override
-    public boolean equals(Object obj) {
+    public final boolean equals(Object obj) {
         if (obj instanceof PushProxiesValue) {
             PushProxiesValue other = (PushProxiesValue)obj;
             return Arrays.equals(getGUID(), other.getGUID()) 
@@ -91,7 +91,7 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
     }
     
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return getPort() + getFeatures() * 31 + + getFwtVersion() * 31 * 31 
         + computeHashCode(getPushProxies()) * 31 * 31 * 31
         + getTLSInfo().hashCode() * 31 * 31 * 31 * 31;

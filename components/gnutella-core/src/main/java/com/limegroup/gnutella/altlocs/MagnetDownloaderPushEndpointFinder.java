@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.listener.Event;
 import org.limewire.listener.EventListener;
 
 import com.google.inject.Inject;
@@ -99,8 +98,8 @@ public class MagnetDownloaderPushEndpointFinder implements Service, EventListene
         searchForPushEndpoints(sha1Urn, magnet.getGUIDUrns());
     }
     
-    void handleStatusEvent(Event<CoreDownloader, DownloadStatus> event) {
-        if (event.getType() == DownloadStatus.WAITING_FOR_USER) {
+    void handleStatusEvent(DownloadStatusEvent event) {
+        if (event.getType() == DownloadStatus.QUEUED) {
             CoreDownloader downloader = event.getSource();
             if (downloader instanceof MagnetDownloader) {
                 MagnetDownloader magnetDownloader = (MagnetDownloader)downloader;
@@ -139,6 +138,7 @@ public class MagnetDownloaderPushEndpointFinder implements Service, EventListene
         }
 
         public void handleResult(PushEndpoint result) {
+            // TODO instantly create alternate locations for all sha1s that have the same guid urn as a source
             AlternateLocation alternateLocation = alternateLocationFactory.createPushAltLoc(result, sha1);
             altLocManager.add(alternateLocation, null);
         }
