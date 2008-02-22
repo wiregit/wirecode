@@ -1,12 +1,22 @@
 package com.limegroup.gnutella.altlocs;
 
+import java.util.Collections;
+
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.api.Invocation;
+import org.jmock.lib.action.CustomAction;
+import org.limewire.inject.Providers;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerEvent;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.dht.db.PushEndpointService;
+import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
 
 public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
@@ -44,14 +54,47 @@ public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
 
-    public void testSearchForPushEndpoints() {
-        fail("Not yet implemented");
+    @SuppressWarnings("unchecked")
+    public void testSearchForPushEndpoints() throws Exception {
+        final AlternateLocationFactory alternateLocationFactory = context.mock(AlternateLocationFactory.class);
+        final PushEndpointService pushEndpointManager = context.mock(PushEndpointService.class);
+        final AltLocManager altLocManager = new AltLocManager();
+        final PushEndpoint result = context.mock(PushEndpoint.class);
+        final AlternateLocation alternateLocation = context.mock(AlternateLocation.class);
+        
+        final MagnetDownloaderPushEndpointFinder endpointFinder = 
+            new MagnetDownloaderPushEndpointFinder(null, pushEndpointManager, alternateLocationFactory, altLocManager);
+        
+        final URN sha1Urn = URN.createSHA1Urn("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
+        final GUID guid = new GUID();
+        final URN guidUrn = URN.createGUIDUrn(guid);
+        
+        context.checking(new Expectations() {{
+            one(pushEndpointManager).findPushEndpoint(with(equal(guid)), with(any(SearchListener.class)));
+            will(new CustomAction("call listener") {
+                public Object invoke(Invocation invocation) throws Throwable {
+                    ((SearchListener<PushEndpoint>)invocation.getParameter(1)).handleResult(result);
+                    return null;
+                }
+            });
+            one(alternateLocationFactory).createPushAltLoc(result, sha1Urn);
+            will(returnValue(alternateLocation));
+            allowing(alternateLocation).getSHA1Urn();
+            will(returnValue(sha1Urn));
+        }});
+        
+        try {
+            endpointFinder.searchForPushEndpoints(sha1Urn, Collections.singleton(guidUrn));
+            fail("AltLocManager was not called, which should have caused an IllegalState exception for an invalid AlternateLocation");
+        } catch (IllegalStateException ise) {
+        }
+        context.assertIsSatisfied();
     }
 
     public void testAddsListener() {
         final DownloadManager downloadManager = context.mock(DownloadManager.class);
         final MagnetDownloaderPushEndpointFinder endpointFinder = 
-            new MagnetDownloaderPushEndpointFinder(downloadManager, null, null, null);
+            new MagnetDownloaderPushEndpointFinder(Providers.of(downloadManager), null, null, null);
         
         context.checking(new Expectations() {{
             one(downloadManager).addListener(endpointFinder, endpointFinder);
@@ -65,7 +108,7 @@ public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
     public void testRemoveListener() {
         final DownloadManager downloadManager = context.mock(DownloadManager.class);
         final MagnetDownloaderPushEndpointFinder endpointFinder = 
-            new MagnetDownloaderPushEndpointFinder(downloadManager, null, null, null);
+            new MagnetDownloaderPushEndpointFinder(Providers.of(downloadManager), null, null, null);
         
         context.checking(new Expectations() {{
             one(downloadManager).removeListener(endpointFinder, endpointFinder);

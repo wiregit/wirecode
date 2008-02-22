@@ -10,6 +10,7 @@ import org.limewire.listener.EventListener;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerEvent;
 import com.limegroup.gnutella.GUID;
@@ -18,7 +19,7 @@ import com.limegroup.gnutella.Service;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.dht.db.PushEndpointManager;
+import com.limegroup.gnutella.dht.db.PushEndpointService;
 import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
@@ -30,7 +31,7 @@ public class MagnetDownloaderPushEndpointFinder implements Service, EventListene
     static final Log LOG = LogFactory.getLog(MagnetDownloaderPushEndpointFinder.class);
     
     private final Provider<DownloadManager> downloadManager;
-    private final PushEndpointManager pushEndpointManager;
+    private final PushEndpointService pushEndpointManager;
     private final AlternateLocationFactory alternateLocationFactory;
     private final AltLocManager altLocManager;
     
@@ -45,7 +46,8 @@ public class MagnetDownloaderPushEndpointFinder implements Service, EventListene
     
     @Inject
     public MagnetDownloaderPushEndpointFinder(Provider<DownloadManager> downloadManager, 
-            PushEndpointManager pushEndpointManager, AlternateLocationFactory alternateLocationFactory,
+            @Named("pushEndpointManager") PushEndpointService pushEndpointManager, 
+            AlternateLocationFactory alternateLocationFactory,
             AltLocManager altLocManager) {
         this.downloadManager = downloadManager;
         this.pushEndpointManager = pushEndpointManager;
