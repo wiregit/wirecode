@@ -12,6 +12,7 @@ import org.limewire.mojito.util.DatabaseUtils;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.Service;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
 
@@ -20,7 +21,7 @@ import com.limegroup.gnutella.settings.DHTSettings;
  * the localhost in the DHT
  */
 @Singleton
-public class PushProxiesModel implements StorableModel {
+public class PushProxiesModel implements Service {
     
     private Storable localhost = null;
     
@@ -98,5 +99,11 @@ public class PushProxiesModel implements StorableModel {
         StringBuilder buffer = new StringBuilder("PushProxiesPublisher: ");
         buffer.append(getPushProxyForSelf());
         return buffer.toString();
+    }
+
+    public void start() {
+    }
+
+    public void stop() {
     }
 }

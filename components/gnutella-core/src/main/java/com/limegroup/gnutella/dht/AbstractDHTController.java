@@ -180,14 +180,6 @@ public abstract class AbstractDHTController implements DHTController {
         dht.getStorableModelManager().addStorableModel(
                 AbstractAltLocValue.ALT_LOC, dhtControllerFacade.getAltLocModel());
         
-        // There's no point in publishing my push proxies if I'm
-        // not a passive leaf Node (ultrapeers and active nodes
-        // do not push proxies as they're not firewalled).
-        if (mode == DHTMode.PASSIVE_LEAF) {
-            dht.getStorableModelManager().addStorableModel(
-                    AbstractPushProxiesValue.PUSH_PROXIES, dhtControllerFacade.getPushProxyModel());
-        }
-        
         this.bootstrapper = dhtControllerFacade.getDHTBootstrapper(this);
         
         // If we're an Ultrapeer we want to notify our firewalled

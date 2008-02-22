@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.mojito.db.DHTValueFactory;
 import org.limewire.mojito.db.StorableModel;
 import org.limewire.mojito.io.MessageDispatcherFactory;
-
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
 
@@ -24,7 +23,6 @@ import com.limegroup.gnutella.SpamServices;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.db.AltLocModel;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
-import com.limegroup.gnutella.dht.db.PushProxiesModel;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
@@ -42,7 +40,6 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
     private final Provider<AltLocValueFactory> altLocValueFactory;
     private final Provider<PushProxiesValueFactory> pushProxyValueFactory;
     private final Provider<AltLocModel> altLocModel;
-    private final Provider<PushProxiesModel> pushProxyModel;
     private final Provider<MessageDispatcherFactory> messageDispatcherFactory;
     private final DHTBootstrapperFactory dhtBootstrapperFactory;
     private final Provider<SecurityToken.TokenProvider> securityTokenProvider;
@@ -59,7 +56,6 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
             Provider<AltLocValueFactory> altLocValueFactory,
             Provider<PushProxiesValueFactory> pushProxyValueFactory,
             Provider<AltLocModel> altLocModel,
-            Provider<PushProxiesModel> pushProxyModel,
             Provider<MessageDispatcherFactory> messageDispatcherFactory,
             DHTBootstrapperFactory dhtBootstrapperFactory,
             Provider<SecurityToken.TokenProvider> securityTokenProvider,
@@ -74,7 +70,6 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
         this.altLocValueFactory = altLocValueFactory;
         this.pushProxyValueFactory = pushProxyValueFactory;
         this.altLocModel = altLocModel;
-        this.pushProxyModel = pushProxyModel;
         this.messageDispatcherFactory = messageDispatcherFactory;
         this.dhtBootstrapperFactory = dhtBootstrapperFactory;
         this.securityTokenProvider = securityTokenProvider;
@@ -108,11 +103,7 @@ public class DHTControllerFacadeImpl implements DHTControllerFacade {
     public int getPort() {
         return networkManager.getPort();
     }
-    
-    public StorableModel getPushProxyModel() {
-        return pushProxyModel.get();
-    }
-    
+
     public DHTValueFactory getPushProxyValueFactory() {
         return pushProxyValueFactory.get();
     }
