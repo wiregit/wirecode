@@ -288,11 +288,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
         if(secureStatus == SecureMessage.FAILED)
             return;
         
-        // XXX
-        //
-        // add in a count of partial search results
-        //
-        accountAndUpdateDynamicQueriers(qr, data /*, numGoodSentToFrontEnd + (int)numBadSentToFrontEnd */ );
+        accountAndUpdateDynamicQueriers(qr, data);
     }
 
     public void countClassC(QueryReply qr, Response r) {
