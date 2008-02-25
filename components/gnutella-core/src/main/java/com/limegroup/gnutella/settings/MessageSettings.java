@@ -62,4 +62,11 @@ public class MessageSettings extends LimeProps {
     public static final BooleanSetting RETURN_PATH_IN_REPLIES = 
         FACTORY.createRemoteBooleanSetting("RETURN_PATH_IN_REPLIES",
                 true,"MessageSettings.returnPathInReplies");
+    
+    /**
+     * Whether to zero the OOB bytes of the guid as described in experiment LWC-1313
+     */
+    public static final BooleanSetting GUID_ZERO_EXPERIMENT = 
+        FACTORY.createRemoteBooleanSetting("GUID_ZERO_EXPERIMENT", true, 
+                "MessageSettings.guidZeroExperiment");
 }
