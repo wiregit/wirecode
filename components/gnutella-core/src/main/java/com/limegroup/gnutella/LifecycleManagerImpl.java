@@ -108,7 +108,6 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<HashTreeCache> tigerTreeCache;
     private final Provider<DHTManager> dhtManager;
     private final Provider<ByteBufferCache> byteBufferCache;
-    private final Provider<ScheduledExecutorService> backgroundExecutor;
     private final Provider<NetworkManager> networkManager;
     private final Provider<Statistics> statistics;
     private final Provider<ConnectionServices> connectionServices;
@@ -128,7 +127,6 @@ public class LifecycleManagerImpl implements LifecycleManager {
     @InspectablePrimitive("time lifecycle finished starting") 
     private long startFinishedTime;
 
-    private final Provider<IncomingConnectionHandler> incomingConnectionHandler;
 
     private final Provider<LicenseFactory> licenseFactory;
 
@@ -212,13 +210,11 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.tigerTreeCache = tigerTreeCache;
         this.dhtManager = dhtManager;
         this.byteBufferCache = byteBufferCache;
-        this.backgroundExecutor = backgroundExecutor;
         this.networkManager = networkManager;
         this.statistics = statistics;
         this.connectionServices = connectionServices;
         this.spamServices = spamServices;
         this.controlRequestAcceptor = controlRequestAcceptor;
-        this.incomingConnectionHandler = incomingConnectionHandler;
         this.licenseFactory = licenseFactory;
         this.limeCoreGlue = limeCoreGlue;
         this.lwsManager = lwsManager;
@@ -408,7 +404,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
         LOG.trace("START TorrentManager");
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading BitTorrent Management..."));
-		torrentManager.get().initialize(fileManager.get(), connectionDispatcher.get(), backgroundExecutor.get(), incomingConnectionHandler.get());
+		torrentManager.get().initialize(connectionDispatcher.get());
 		LOG.trace("STOP TorrentManager");
         
         // Restore any downloads in progress.

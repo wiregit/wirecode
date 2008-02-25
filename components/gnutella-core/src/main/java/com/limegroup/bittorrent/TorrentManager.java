@@ -18,7 +18,9 @@ import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.bittorrent.Torrent.TorrentState;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.FileDesc;
@@ -57,40 +59,47 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 	/**
 	 * The set of active torrents.
 	 */
-	private Set <ManagedTorrent>_active = new HashSet<ManagedTorrent>();
+	private final Set <ManagedTorrent>_active = new HashSet<ManagedTorrent>();
 	
 	/**
 	 * The set of active torrents that are seeding.
 	 * INVARIANT: subset of _active.
 	 */
-	private Set <ManagedTorrent>_seeding = new HashSet<ManagedTorrent>();
+	private final Set <ManagedTorrent>_seeding = new HashSet<ManagedTorrent>();
 	
 	/**
 	 * Set of torrents that are about to get started.
 	 */
-	private Set <ManagedTorrent> _starting = new HashSet<ManagedTorrent>();
+	private final Set <ManagedTorrent> _starting = new HashSet<ManagedTorrent>();
 	
-	private List <TorrentEventListener> listeners = 
+	private final List <TorrentEventListener> listeners = 
 		new CopyOnWriteArrayList<TorrentEventListener>();
 
     /** The File Manager */
-    private FileManager fileManager;
+    private final FileManager fileManager;
     
     /** Thread pool used to dispatch file manager events. These involve disk IO 
      *  and acquiring locks in the FileManager and should therefore not be executed
      *  on the NIODispatcher thread */
-    private ScheduledExecutorService threadPool;
+    private final ScheduledExecutorService threadPool;
 
-    private IncomingConnectionHandler incomingConnectionHandler;
+    private final IncomingConnectionHandler incomingConnectionHandler;
+    
+    @Inject
+    public TorrentManager(FileManager fileManager,
+            @Named("backgroundExecutor") ScheduledExecutorService threadPool,
+            IncomingConnectionHandler incomingConnectionHandler) {
+        this.incomingConnectionHandler = incomingConnectionHandler;
+        this.fileManager = fileManager;
+        this.threadPool = threadPool;
+        // we are a torrent event listener too.
+        listeners.add(this);
+    }
     
     /**
 	 * Initializes this. Always call this method before starting any torrents.
 	 */
-	public void initialize(FileManager fileManager
-            , ConnectionDispatcher dispatcher
-            , ScheduledExecutorService threadPool,
-            IncomingConnectionHandler incomingConnectionHandler) {
-		this.incomingConnectionHandler = incomingConnectionHandler;
+	public void initialize(ConnectionDispatcher dispatcher) {
         if (LOG.isDebugEnabled())
 			LOG.debug("initializing TorrentManager");
 		
@@ -104,11 +113,6 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
 				word.toString());
         
         FileUtils.addFileLocker(this);
-		
-        this.fileManager = fileManager;
-        this.threadPool = threadPool;
-		// we are a torrent event listener too.
-		listeners.add(this);
 	}
 	
 	public boolean isBlocking() {
