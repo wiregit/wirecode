@@ -67,6 +67,6 @@ public class MessageSettings extends LimeProps {
      * Whether to zero the OOB bytes of the guid as described in experiment LWC-1313
      */
     public static final BooleanSetting GUID_ZERO_EXPERIMENT = 
-        FACTORY.createRemoteBooleanSetting("GUID_ZERO_EXPERIMENT", true, 
+        FACTORY.createRemoteBooleanSetting("GUID_ZERO_EXPERIMENT", false, 
                 "MessageSettings.guidZeroExperiment");
 }
