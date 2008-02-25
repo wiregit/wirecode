@@ -34,7 +34,7 @@ public class LowLevelLWSDownloadTest extends DownloadTestCase {
     // Tests
     // -----------------------------------------------------------
 
-    public void testSimpleDownload() throws Exception {
+    public void _testSimpleDownload() throws Exception {
         RemoteFileDesc rfd = services.createRemoteFileDescriptor(constants.FILE, constants.URL, constants.LENGTH);
         RemoteFileDesc[] rfds = { rfd };
         runGenericLWSTest(rfds);

@@ -121,7 +121,7 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     // Implementation of LWSManager
     // -----------------------------------------------------------------
 
-    public final HttpRequestHandler getHandler() {System.out.println("handler:"+dispatcher);
+    public final HttpRequestHandler getHandler() {
         return dispatcher;
     }
     

@@ -26,7 +26,6 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.TestUtil;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LifecycleManager;
@@ -239,8 +238,27 @@ public class DownloadTestCase extends LimeTestCase {
                     .shutdownNow();
     }
 
-    protected void deleteAllFiles() {
-        new TestUtil().deleteAllFiles(dataDir, saveDir);
+    private void deleteAllFiles() {
+        if (!dataDir.exists())
+            return;
+
+        File[] files = dataDir.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].isDirectory()) {
+                if (files[i].getName().equalsIgnoreCase("incomplete"))
+                    deleteDirectory(files[i]);
+                else if (files[i].getName().equals(saveDir.getName()))
+                    deleteDirectory(files[i]);
+            }
+        }
+        dataDir.delete();
+    }
+
+    private void deleteDirectory(File dir) {
+        File[] files = dir.listFiles();
+        for (int i = 0; i < files.length; i++)
+            files[i].delete();
+        dir.delete();
     }
 
     protected void tGeneric(RemoteFileDesc[] rfds) throws Exception {

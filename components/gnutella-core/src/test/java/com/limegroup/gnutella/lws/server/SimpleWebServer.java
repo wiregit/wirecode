@@ -25,13 +25,17 @@ import com.limegroup.gnutella.downloader.TestFile;
 final class SimpleWebServer {
 
     private final Log LOG = LogFactory.getLog(SimpleWebServer.class);
+
     private final int port;
+
     private final long length;
+
     private long bytesWritten;
+
     private Thread thread;
+
     private ServerSocket serverSocket;
-    
-    
+
     SimpleWebServer(LWSDownloadTestConstants constants) {
         this(constants.PORT, constants.LENGTH);
     }
@@ -56,8 +60,8 @@ final class SimpleWebServer {
                     LOG.info("Have socket " + socket);
                     InputStream is = socket.getInputStream();
                     OutputStream os = socket.getOutputStream();
-                    handle(new BufferedReader(new InputStreamReader(socket
-                            .getInputStream())), new PrintStream(os));
+                    handle(new BufferedReader(new InputStreamReader(socket.getInputStream())),
+                            new PrintStream(os));
                     socket.close();
                     is.close();
                     os.close();
@@ -73,15 +77,17 @@ final class SimpleWebServer {
 
     public void stop() {
         try {
-            if (serverSocket != null)
+            if (serverSocket != null) {
                 serverSocket.close();
+            }
         } catch (IOException e) {
             LOG.error(e);
             throw new RuntimeException(e);
         }
         try {
-            if (thread != null)
+            if (thread != null) {
                 thread.join();
+            }
         } catch (InterruptedException e) {
             LOG.error(e);
             throw new RuntimeException(e);

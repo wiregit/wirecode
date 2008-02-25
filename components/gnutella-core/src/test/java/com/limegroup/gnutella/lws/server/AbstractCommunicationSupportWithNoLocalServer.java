@@ -152,7 +152,7 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
         remoteServer.shutDown();
         
         lifecycleManager.shutdown();
-        
+                
         privateKey = null;
         sharedKey = null;
         remoteThread = null;
@@ -181,7 +181,7 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
         args.put("private", privateKey);
         args.put("shared", sharedKey);
         note("Authenticating with private key '" + privateKey + "' and shared key '" + sharedKey + "'");
-        return sendMessageFromWebpageToClient("authenticate", args);        
+        return sendMessageFromWebpageToClient("Authenticate", args);        
     }
 
     protected final String getPrivateKey() {
@@ -233,7 +233,7 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     }
 
     protected final KeyPair getPublicAndSharedKeys() {
-        String res = sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.START_COM, NULL_ARGS);
+        String res = sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.START_COM, NULL_ARGS);System.out.println("getPublicAndSharedKeys:"+res);
         String parts[] = res.split(" ");
         if (parts.length < 2) {
             return new KeyPair(null, null, false);

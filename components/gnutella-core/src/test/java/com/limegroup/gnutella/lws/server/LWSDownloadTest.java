@@ -7,7 +7,6 @@ import java.util.Map;
 import junit.framework.Test;
 import junit.textui.TestRunner;
 
-import com.limegroup.gnutella.TestUtil;
 import com.limegroup.gnutella.downloader.LWSIntegrationServices;
 
 /**
@@ -48,8 +47,9 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
 
         // Do a busy wait until we've run out of time or the file we wanted
         // was downloaded and is the size we wanted
+        File savedFile = new File(new File(dataDir, "store"), constants.FILE);
         for (long toStop = System.currentTimeMillis() + constants.DOWNLOAD_WAIT_TIME; System.currentTimeMillis() < toStop;) {
-            if (server.getBytesWritten() == length) {
+            if (server.getBytesWritten() == length && savedFile.length() == length) {
                 break;
             }
             try {
@@ -57,8 +57,6 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
             } catch (InterruptedException ignore) {
             }
         }
-
-        File savedFile = new File(new File(dataDir, "store"), constants.FILE);
         assertEquals(savedFile.getAbsolutePath(), length, savedFile.length());
         assertEquals(String.valueOf(savedFile.length()), length, server.getBytesWritten());
     }
@@ -84,7 +82,29 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
     }
 
     private void deleteAllFiles() {
-        new TestUtil().deleteAllFiles(dataDir, new File(dataDir, "saved"));
+        deleteAllFiles(dataDir);
+    }
+    
+    private void deleteAllFiles(File d) {
+        if (!d.exists()) {
+            return;
+        }
+        File[] files = d.listFiles();
+        for (int i = 0; i < files.length; i++) {
+            File f = files[i];
+            if (files[i].isDirectory()) {
+                deleteAllFiles(f);
+            } else {
+                f.delete();
+            }
+        }
+    }
+
+    private void deleteDirectory(File dir) {
+        File[] files = dir.listFiles();
+        for (int i = 0; i < files.length; i++)
+            files[i].delete();
+        dir.delete();
     }
     /**
      * Tear down the little web server.
