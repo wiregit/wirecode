@@ -174,6 +174,7 @@ EventDispatcher<TorrentEvent, TorrentEventListener> {
         case DOWNLOADING: shareTorrent(t); break;
 		case STOPPED: torrentStopped(t); break;
 		case COMPLETE: torrentComplete(t); break;
+        case CHUNK_VERIFIED: 
         
         // the below aren't handled specially...
         case STOP_APPROVED:

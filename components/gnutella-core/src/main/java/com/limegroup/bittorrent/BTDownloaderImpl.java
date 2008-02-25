@@ -59,12 +59,13 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
     private final BTUploaderFactory btUploaderFactory;
     private final ManagedTorrentFactory managedTorrentFactory;
     private final BTContextFactory btContextFactory;
+    private final BTMetaInfoFactory btMetaInfoFactory;
 
     @Inject
 	BTDownloaderImpl(BTContextFactory btContextFactory,
             SaveLocationManager saveLocationManager, Provider<TorrentManager> torrentManager,
             BTUploaderFactory btUploaderFactory, DownloadManager downloadManager,
-            ManagedTorrentFactory managedTorrentFactory) {
+            ManagedTorrentFactory managedTorrentFactory, BTMetaInfoFactory btMetaInfoFactory) {
 	    super(saveLocationManager);        
         this.downloadManager = downloadManager;
         this.torrentManager = torrentManager;
@@ -72,6 +73,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
         this.incompleteFileManager = downloadManager.getIncompleteFileManager();
         this.managedTorrentFactory = managedTorrentFactory;
         this.btContextFactory = btContextFactory;
+        this.btMetaInfoFactory = btMetaInfoFactory;
     }
     
     /* (non-Javadoc)
@@ -85,7 +87,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 		    setDefaultFileName(btMetaInfo.getName());
 		}
         this.torrentContext = btContextFactory.createBTContext(btMetaInfo);
-        this.torrent = managedTorrentFactory.create(torrentContext);
+        this.torrent = managedTorrentFactory.create(torrentContext);        
 	}
 	
 	/**
@@ -386,6 +388,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
         case STARTING:
         case STOP_APPROVED:
         case STOP_REQUESTED:
+        // handled in TorrentDHTManagerImpl
+        case CHUNK_VERIFIED:
 		}
 	}
 	
@@ -398,7 +402,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 
 	private void torrentStarted() {
 		startTime = System.currentTimeMillis();
-		stopTime = 0;
+		stopTime = 0;		
 	}
 
 	private void torrentStopped(String description) {
@@ -441,7 +445,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	}
 	
 	public boolean conflicts(URN urn, long fileSize, File... file) {
-		if (this.urn.equals(urn))
+		if (urn.equals(urn))
 			return true;
 		for (File f : file) {
 			if (conflictsSaveFile(f))
@@ -509,6 +513,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
     public synchronized void initFromMemento(DownloadMemento memento) throws InvalidDataException {
         super.initFromMemento(memento);
         BTDownloadMemento bmem = (BTDownloadMemento)memento;
-        initBtMetaInfo(new BTMetaInfo(bmem.getBtMetaInfoMemento()));
+        initBtMetaInfo(btMetaInfoFactory.create(bmem.getBtMetaInfoMemento()));
     }
 }

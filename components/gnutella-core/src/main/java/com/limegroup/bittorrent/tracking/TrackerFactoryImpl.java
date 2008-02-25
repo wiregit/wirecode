@@ -37,7 +37,7 @@ public class TrackerFactoryImpl implements TrackerFactory {
      */
     public Tracker create(URI uri, TorrentContext context,
             ManagedTorrent torrent) {
-        return new Tracker(uri, context, torrent, networkManager, applicationServices, httpClientProvider);
+        return new TrackerImpl(uri, context, torrent, networkManager, applicationServices, httpClientProvider);
     }
 
 }

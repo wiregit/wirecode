@@ -18,8 +18,8 @@ import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 
 public class TrackerManager {
-	
-	private static final Log LOG = LogFactory.getLog(TrackerManager.class);
+	        
+    private static final Log LOG = LogFactory.getLog(TrackerManager.class);
 	
 	/**
 	 * the number of failures after which we consider giving up
@@ -176,21 +176,23 @@ public class TrackerManager {
 		LOG.debug("handling tracker response "+response+" from " + t);
 
 		long minWaitTime = BittorrentSettings.TRACKER_MIN_REASK_INTERVAL
-				.getValue() * 1000;
+				.getValue() * 1000;		
 		
 		if (response != null) {
-				for (TorrentLocation next : response.PEERS) 
-					torrent.addEndpoint(next);
-				
+				for (TorrentLocation next : response.PEERS) {
+					torrent.addEndpoint(next);								
+				}				
 				minWaitTime = response.INTERVAL * 1000;
 				
 				if (response.FAILURE_REASON != null) {
 					t.recordFailure();
                     lastFailureReason = response.FAILURE_REASON;
-				} else
+                    torrent.trackerRequestFailed();
+				} else {
 					t.recordSuccess();
+				}
 		} else {
-			t.recordFailure();
+			t.recordFailure();			
 			torrent.trackerRequestFailed();
 		}
 

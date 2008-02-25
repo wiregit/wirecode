@@ -161,7 +161,7 @@ public class AltLocFinder {
                 for (EntityKey entityKey : result.getEntityKeys()) {
                     if (!entityKey.getDHTValueType().equals(valueType)) {
                         continue;
-                    }
+                    }                    
                         
                     try {
                         DHTFuture<FindValueResult> future = dht.get(entityKey);
