@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-02-17 23:59-0500\n"
-"PO-Revision-Date: 2008-02-08 02:53+0000\n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2008-02-22 15:40+0000\n"
+"Last-Translator: Arielle B Cruz <me@abcruz.com>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2008-02-19 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-02-26 04:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -582,7 +582,7 @@ msgstr "Nagkakarga ng mga lumang download..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:421
 msgid "Attaching LimeWire Store Listeners..."
-msgstr ""
+msgstr "Ikinakabit ang mga Tagapakinig sa Tindahan ng LimeWire"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:426
 msgid "Loading Directed Querier..."
@@ -862,7 +862,7 @@ msgstr "Mga tama"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:120
 msgid "Width"
-msgstr ""
+msgstr "Lapad"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
@@ -872,7 +872,7 @@ msgstr "Mga larawan"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
 msgid "Description"
-msgstr ""
+msgstr "Pagsasalarawan"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:127
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:134
@@ -896,7 +896,7 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
 msgid "Author"
-msgstr ""
+msgstr "May-Akda"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
@@ -916,19 +916,21 @@ msgstr "Bigyan ng ibang pangalan"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Publisher"
-msgstr ""
+msgstr "Naglimbag"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 msgid "Platform"
-msgstr ""
+msgstr "Plataporma"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:105
 msgid "The selected .torrent file may contain a security hazard."
 msgstr ""
+"Ang hinirang na .torrent file ay maaaring naglalaman ng isang balakid sa "
+"seguridad."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:107
 msgid "LimeWire could not download a .torrent file from the provided URL."
-msgstr ""
+msgstr "Hindi makuha ng LimeWire ang .torrent file mula sa URL na ibinigay."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:35
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:539
@@ -936,6 +938,8 @@ msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
+"Kung ihihinto niyo ang pamamahagi, ang pagkuha sa .torrent na ito ay hihinto "
+"din. Nais niyo ba talaga itong gawin?"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:38
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:544
@@ -943,6 +947,9 @@ msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
+"Ang ipinamamahaging file ay isang torrent at hindi pa ito sapat na "
+"nabibinnhian. Makabubuting ipagpatuloy niyo muna ang pamamahagi nito. Nais "
+"ba talaga ninyong ihinto ang pamamahagi?"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:16
 #, fuzzy
@@ -954,6 +961,8 @@ msgid ""
 "You can choose whether to automatically start torrents downloaded from "
 "Gnutella."
 msgstr ""
+"Maaari ninyong piliing magsimula nang kusa ang pagkuha ng mga torrent mula "
+"sa Gnutella."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:26
 #, fuzzy
@@ -962,7 +971,7 @@ msgstr "Awtomatikong mag-simula"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:36
 msgid "BitTorrent Settings"
-msgstr ""
+msgstr "Mga Kaayusan ng BitTorrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:38
 msgid ""
@@ -971,6 +980,11 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"Maaari ninyong hayaan o hindi hayaan ang LimeWire na pangasiwaan ang "
+"kaayusan ng inyong BitTorrent protocol. Ipinapayong hayaan ang LimeWire na "
+"mangasiwa dito upang maiwasan ang paggamit ng mga maling halaga na "
+"makapagbibigay balakid sa pagtakbo ng programa at/o mga suliranin sa paggana "
+"ng memory."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
 msgid ""
@@ -978,10 +992,15 @@ msgid ""
 "memory problems. Unless you really know what you're doing, it is highly "
 "recommended that you let LimeWire manage these settings."
 msgstr ""
+"Ang paggamit ng mga halagang hindi akma o hindi kilala ay maaaring magbigay "
+"balakid sa pagtakbo ng programa at/o mga suliranin sa paggana ng memory. "
+"Maliban kung alam niyo talaga ang ginagawa ninyo, ipinapayong hayaan na "
+"lamang ang LimeWire na mangasiwa sa mga bagay na ito."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:77
 msgid "Let LimeWire manage my BitTorrent settings. (Recommended)"
 msgstr ""
+"Hayaan ang LimeWire na mangasiwa sa kaayusan ng BitTorrent. (Ipinapayo)"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:85
 msgid "Maximum uploads per torrent"
@@ -993,7 +1012,7 @@ msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:97
 msgid "Safe chunk verification"
-msgstr ""
+msgstr "Pagsusuri sa safe chunk"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:103
 msgid "Experimental disk access"
@@ -1024,6 +1043,9 @@ msgid ""
 "Please add any comments you may have (e.g what caused the error). \n"
 "Thank you and please use English."
 msgstr ""
+"Pakilagay lamang ang mga karagdagang puna ninyo (hal. ang pinagmulan ng "
+"pagkakamali). \n"
+"Sumulat lamang sa salitang Ingles. Salamat."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:432
 msgid "Send"
@@ -1058,6 +1080,9 @@ msgid ""
 "bug report. For further help and to aid with debugging, please visit "
 "www.limewire.com and click 'Support'. Thank you."
 msgstr ""
+"Nabigong kumabit ang LimeWire sa bug server upang mag-ulat tungkol sa na sa "
+"ibabang bug. Para sa karagdagang kaalaman at tulog sa pagde-debug, bumisita "
+"lamang sa www.limewire.com at mag-click sa 'Support'. Salamat."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:602
 msgid "Copy Report"
@@ -1075,7 +1100,7 @@ msgstr "Kopyahin ang ulat"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:144
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:221
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
 msgid "Automatically Scroll"
@@ -1125,6 +1150,8 @@ msgid ""
 "LimeWire is also, of course, the result of the countless hours of work by "
 "LimeWire's developers:"
 msgstr ""
+"Ang LimeWire ay produkto din ng di-mabilang na oras ng pagtatrabaho ng mga "
+"developer ng LimeWire:"
 
 #. business developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:199
@@ -1132,6 +1159,8 @@ msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
 msgstr ""
+"Ang mga plano sa pangangalakal at mga pangaraw-araw na kabagayan ay "
+"isinasagawa ng mga business developer ng LimeWire:"
 
 #. web developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:211
@@ -1139,12 +1168,16 @@ msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
 msgstr ""
+"Ang <a href=\"http://www.limewire.com/\">web site</a> ng LimeWire  at "
+"LimeWire graphic design ay bunga ng kasipagan ng LimeWire web team:"
 
 #. support staff
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:218
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
 msgstr ""
+"Ang mga katanungan tungkol sa LimeWire PRO ay walang-pagod na sinasagot ng "
+"LimeWire technical support:"
 
 #. previous developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:228
@@ -1152,6 +1185,8 @@ msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
 msgstr ""
+"Ang mga sumusod ay dating kasali din sa LimeWire team ngunit sila'y lumipat "
+"na sa ibang mga gawain:"
 
 #. open source contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:258
@@ -1161,6 +1196,10 @@ msgid ""
 "have either written code that is distributed with every version of LimeWire, "
 "have identified serious bugs in the code, or both:"
 msgstr ""
+"Maraming mahahalagang code, pag-aayos sa mga bug, mga kaisipan, "
+"pagsasaliksik, atbp. ang nagmula sa mga open source contributor ng LimeWire. "
+"Ang mga binabanggit sa ibaba ay nagsulat ng code na isinasama sa bawat "
+"bersyon ng LimeWire at/o nagbigay ng mga pag-aayos sa mga bug sa code:"
 
 #. internationalization contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:295
@@ -1169,6 +1208,8 @@ msgid ""
 "internationalization project, both for the application itself and for the "
 "LimeWire web site."
 msgstr ""
+"Nais din pasalamatan ng LimeWire ang mga nakikibahagi sa gawaing "
+"internasyonalisasyon, ng mismong programa at para sa web site ng LimeWire."
 
 #. community VIPs
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:299
@@ -1176,6 +1217,8 @@ msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
 msgstr ""
+"Maraming kasamahan sa pamayanan ng Gnutella ay marapat ding bigyang "
+"pasasalamat. Kasama dito sila:"
 
 #. conclusion
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:320
@@ -1184,12 +1227,18 @@ msgid ""
 "developers, users, and all others who have contributed their ideas to the "
 "project. Without LimeWire users, the LimeWire network would not exist."
 msgstr ""
+"Sa katapusan, ibig din ipaabot ng LimeWire ang pasasalamat nito sa mga "
+"developer, gumagamit, at sa lahat pa ng ibang nagbibigay ng kanilang mga "
+"kaisipan para sa gawaing ito. Kung hindi dahil sa mga gumagamit ng LimeWire, "
+"ang LimeWire network ay hindi iiral."
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:325
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc."
 msgstr ""
+"BitTorrent, ang BitTorrent Logo, at Torrent ay mga tatak pangkalakalan ng "
+"BitTorrent, Inc."
 
 #. *
 #. * The select all action.
@@ -1329,7 +1378,7 @@ msgstr "Hindi"
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:244
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:136
 msgid "Cancel"
-msgstr ""
+msgstr "Huwag ituloy"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:80
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:98
@@ -1364,7 +1413,7 @@ msgstr "Pumili ng direktoryo"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:48
 msgid "View My Shared Files."
-msgstr ""
+msgstr "Tignan ang \"My Shared Files\"."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:81
 #, java-format
@@ -1373,6 +1422,10 @@ msgid ""
 "indicates a potential security problem, so please review your \"My Shared "
 "Files\" to ensure you aren't sharing any sensitive files."
 msgstr ""
+"Namamahagi kayo ng maraming subfolder sa loob ng inyong shared folder: {0}. "
+"Nagpapakita ito ng isang posibleng suliranin sa kaligtasan, maari lamang "
+"suriin ang inyong \"My Shared Files\" upang makasigurong hindi kayo "
+"namamahagi ng mga sensitibong file."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:94
 #, java-format
@@ -1381,20 +1434,25 @@ msgid ""
 "you mean to share all these files? Please review your sharing settings and "
 "which files are shared to ensure you aren't sharing any sensitive files."
 msgstr ""
+"Kayo ay namamahagi ng napakaraming file gamit ang LimeWire, {0} file at "
+"binibilang pa. Talaga bang nais niyong ipamahagi lahat ng mga ito? Maari "
+"lamang suriin ang inyong mga kaayusan sa pamamahagi at anu-anong mga file "
+"ang ipinapamahagi upang makasigurong hindi kayo namamahagi ng mga "
+"sensitibong file."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:106
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:107
 msgid "Do not display this message again."
-msgstr ""
+msgstr "Huwag na muling ipakita ang mensaheng ito."
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:80
 msgid "Dial Up"
-msgstr ""
+msgstr "Dial Up"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:38
 msgid "Broadband"
-msgstr ""
+msgstr "Broadband"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:40
 msgid "T1"
@@ -1449,13 +1507,13 @@ msgstr "&Kumabit"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:131
 msgid "Lo&gging"
-msgstr ""
+msgstr "Lo&gging"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:148
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:172
 #, java-format
 msgid "Display the {0} Screen"
-msgstr ""
+msgstr "Ipakita ang Tabing ng {0}."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:263
 msgid "LimeWire: Enabling Open Information Sharing"
@@ -1481,6 +1539,11 @@ msgid ""
 "Please note: LimeWire cannot monitor or control the content of the Gnutella "
 "network. Please respect your local copyright laws."
 msgstr ""
+"Hindi makahanap ang LimeWire ng pahintulot para sa file na ito. Ituloy "
+"lamang ang pagkuha?\n"
+"\n"
+"Mahalaga: walang kakayahan ang LimeWire na pangasiwaan ang mga nilalaman ng "
+"Gnutella network. Galangin ang mga batas copyright sa inyong lugar."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1441
 #, java-format
@@ -1488,6 +1551,8 @@ msgid ""
 "LimeWire could not locate your web browser to display the following webpage: "
 "{0}."
 msgstr ""
+"Hindi natagpuan ng LimeWire ang inyong web browser upang maipakita ang "
+"sumusunod na webpage: {0}."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1460
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1483
@@ -1504,6 +1569,9 @@ msgid ""
 "\n"
 "Executed command: {0}."
 msgstr ""
+"Hindi nabuksan ng LimeWire ang nabanggit na file.\n"
+"\n"
+"Command na pinatakbo: {0}."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1465
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1488
@@ -1639,15 +1707,15 @@ msgstr "Karagdagang pagpipilian"
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:169
 #, java-format
 msgid "Visit {0}"
-msgstr ""
+msgstr "Bisita {0}"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:177
 msgid "Remind Me Later"
-msgstr ""
+msgstr "Paalalahanan Ako Mamaya"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:184
 msgid "Do not Show Again"
-msgstr ""
+msgstr "Huwag na Muling Ipakita"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:173
 msgid "LimeWire must be restarted for the new language to take effect."
@@ -1655,7 +1723,7 @@ msgstr "Dapat buksan uli ang LimeWire para gumana ang bagong wika."
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:186
 msgid "Change Language"
-msgstr ""
+msgstr "Palitan ang Wika"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:189
 msgid "Help Translate LimeWire"
@@ -1663,7 +1731,7 @@ msgstr "Tulungan ang LimeWire magsalin sa ibang wika"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:190
 msgid "Show Language in status bar"
-msgstr ""
+msgstr "Ipakita ang Wika sa status bar"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:381
 msgid "Verify"
@@ -1735,11 +1803,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:493
 msgid "View Weedshare Usage Rights"
-msgstr ""
+msgstr "Ipakita ang mga Karapatan sa Paggamit ng Weedshare"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:508
 msgid "View Usage Rights"
-msgstr ""
+msgstr "Ipakita ang mga Karapatan sa Paggamit"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:513
 #, fuzzy
@@ -1765,6 +1833,7 @@ msgstr "Mga detalye ng lisensiya:"
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:551
 msgid "This file may require a license in order to open and view."
 msgstr ""
+"Maaaring maghanap ang file na ito ng pahintulot upang mabuksan at makita."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:591
 #, fuzzy
@@ -1808,7 +1877,7 @@ msgstr "Ipagdikit"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:789
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1267
 msgid "Delete"
-msgstr ""
+msgstr "Burahin"
 
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:229
 #: gui/com/limegroup/gnutella/gui/actions/SelectSharedDirectoryAction.java:26
@@ -1920,24 +1989,35 @@ msgid ""
 "are saved properly you should save them to a sub-folder of {1}.  Would you "
 "like to choose another location?"
 msgstr ""
+"Ang pagtatago ng mga kinuha sa {0} ay maaaring hindi gumana. Upang "
+"makasigurong maitatago nang maayos ang mga kinukuha, itago ang mga ito sa "
+"isang subfolder ng {1}. Nais niyo bang pumili ng ibang lugar?"
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:20
 msgid ""
 "LimeWire was unable to create your settings folder and is using a temporary "
 "folder.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
+"Nabigo ang LimeWire na maglikha ng folder para sa inyong mga kaayusan at "
+"ngayon ay gumagamit ng pansamantalang folder. Ang mga kaayusan ninyo ay "
+"maaaring mawala sa pagsara ninyo ng LimeWire. "
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:35
 msgid ""
 "LimeWire has encountered problems in managing your settings.  Your settings "
 "changes may not be saved on shutdown."
 msgstr ""
+"May nakaharap na suliranin ang LimeWire sa pangangasiwa sa inyong mga "
+"kaayusan. Maaaring mawala ang mga pagbabagong ginawa ninyo sa pagsara."
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:38
 msgid ""
 "LimeWire has encountered problems in loading your settings.  LimeWire will "
 "attempt to use the default values; however, may behave unexpectedly."
 msgstr ""
+"May nakaharap na suliranin ang LimeWire sa pagbukas ng inyong mga kaayusan. "
+"Susubukan ng LimeWire gamitin ang sarili nitong mga halaga; subalit, maaari "
+"itong umasal sa di-inaasahang paraan."
 
 #: gui/com/limegroup/gnutella/gui/ShutdownWindow.java:18
 msgid "Shutting down LimeWire..."
@@ -1975,19 +2055,19 @@ msgstr "Nagkakarga ng bintanang pang-status..."
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:488
 msgid "LimeWire has not detected a firewall"
-msgstr ""
+msgstr "Hindi nakakita ng firewall ang LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:491
 msgid "LimeWire has detected a firewall"
-msgstr ""
+msgstr "May nakitang firewall ang LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:501
 msgid "You are not connected to the LimeWire Store"
-msgstr ""
+msgstr "Hindi kayo nakakabit sa Tindahan ng LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:504
 msgid "You are connected to the LimeWire Store"
-msgstr ""
+msgstr "Kayo ay nakakabit sa Tindahan ng LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:596
 msgid "Connection"
@@ -2101,7 +2181,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:827
 msgid "Show Bandwidth Consumption"
-msgstr ""
+msgstr "Ipakita ang Paggamit ng Bandwidth"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:843
 #, fuzzy
@@ -2113,16 +2193,16 @@ msgstr "LimeWire Media Player"
 #, java-format
 msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Kayo ay namamahagi ng {0} file"
+msgstr[1] "Kayo ay namamahagi ng {0} file"
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:916
 #, java-format
 msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Kayo ay namamahagi ng {0} file (Binubuksan...)"
+msgstr[1] "Kayo ay namamahagi ng {0} file (Binubuksan...)"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:993
 #, fuzzy

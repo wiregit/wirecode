@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-02-17 23:59-0500\n"
-"PO-Revision-Date: 2008-02-19 02:25+0000\n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2008-02-24 19:35+0000\n"
+"Last-Translator: Daries <RDaries@gmail.com>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-02-19 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-02-26 04:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Sorry, but LimeWire was unable to restart your old downloads."
@@ -1803,20 +1803,19 @@ msgid ""
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
-"DIsculpe, pero LimeWire no ha podido leer/reanudar sus anteriores descargas. "
-" Puede tratar de re-empezar chequeando bajo su \"Libreria / Incompleto\", "
-"despues oprima \"Resumir (Resume)\" para reanudar/completar su descarga(s)."
+"Disculpe.  LimeWire no pudo leer sus descargas anteriores.  Puede "
+"reiniciarlas viendo sus \"Archivos Incompletos\" y haciendo clic en "
+"\"Continuar\" en la Librería."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:221
-#, fuzzy
 msgid ""
 "Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
 "to 'Resume' your downloads."
 msgstr ""
-"Lo sentimos, LimeWire podría no leer alguna de sus antiguas descargas. Puede "
-"reiniciarlas yendo a su Librería, buscando sus \"Archivos Incompletos\", y "
-"hacer clic en \"Resumir\" sus descargas."
+"Disculpe.  LimeWire no pudo leer algunas de sus descargas anteriores.  Puede "
+"reiniciarlas viendo sus \"Archivos Incompletos\" y haciendo clic en "
+"\"Continuar\" en la Librería."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:323
 msgid "Loading TLS Encryption..."
@@ -1827,46 +1826,44 @@ msgid "Loading Safe Content Management..."
 msgstr "Cargando Gestor de Contenido Seguro..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:340
-#, fuzzy
 msgid "Loading Message Router..."
-msgstr "Cargando direccionador de mensajes..."
+msgstr "Cargando distribuidor de mensajes..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:345
 msgid "Checking for Updates..."
-msgstr "Buscando Actualizaciones..."
+msgstr "Buscando actualizaciones..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:350
 msgid "Loading Upload Management..."
-msgstr "Cargando Gestor de Subida..."
+msgstr "Cargando gestor de subida de archivos..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:360
-#, fuzzy
 msgid "Loading Connection Listener..."
-msgstr "Cargando Oyente de Conexión..."
+msgstr "Cargando oyente de conexión..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:369
 msgid "Loading Connection Management..."
-msgstr "Cargando Gestor de Conexión..."
+msgstr "Cargando gestión de conexión..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:378
 msgid "Loading Download Management..."
-msgstr "Cargando Gestor de Descarga..."
+msgstr "Cargando gestión de descarga..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:384
 msgid "Loading Ultrapeer/DHT Management..."
-msgstr "Cargando Gestor de Ultrapeer/DHT..."
+msgstr "Cargando gestión de Ultrapeer/DHT"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:389
 msgid "Locating Peers..."
-msgstr "Localizando Pares..."
+msgstr "Localizando pares..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:405
 msgid "Loading Shared Files..."
-msgstr "Cargando Archivos Compartidos..."
+msgstr "Cargando archivos compartidos..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:410
 msgid "Loading BitTorrent Management..."
-msgstr ""
+msgstr "Cargando gestión de BitTorrent..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:416
 msgid "Loading Old Downloads..."
@@ -1874,24 +1871,23 @@ msgstr "Cargando descargas anteriores..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:421
 msgid "Attaching LimeWire Store Listeners..."
-msgstr ""
+msgstr "Adjuntando oyentes de tienda LimeWire..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:426
-#, fuzzy
 msgid "Loading Directed Querier..."
-msgstr "Cargando consulta enviada..."
+msgstr "Cargando consulta direccionada..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:431
 msgid "Loading Magnet Listener..."
-msgstr "Cargando escuchador MAGNET..."
+msgstr "Cargando oyente de Magnet..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:442
 msgid "Loading Peer Listener..."
-msgstr "Cargando escuchador par..."
+msgstr "Cargando oyente de pares..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:447
 msgid "Loading Stale Connection Management..."
-msgstr "Cargando Gestor de Conexiones Obsoletas..."
+msgstr "Cargando gestión de conexiones fallidas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:452
 msgid "Loading Saved Files..."
@@ -1899,16 +1895,16 @@ msgstr "Cargando archivos guardados..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:457
 msgid "Loading Spam Management..."
-msgstr "Cargando Gestor de Spam..."
+msgstr "Cargando gestión de spam..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:462
 msgid "Loading Network Listeners..."
-msgstr "Cargando Oyentes en la Red"
+msgstr "Cargando oyentes de red..."
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
 msgid "All Types"
-msgstr "Todos los tipos"
+msgstr "Cualquier tipo"
 
 #: core/com/limegroup/gnutella/MediaType.java:46
 msgid "Documents"
@@ -1949,38 +1945,40 @@ msgid ""
 "One or more URLs in the MAGNET link were invalid. Your file may not download "
 "correctly."
 msgstr ""
-"Una o más URLs del enlace MAGNET no son válidos. Es posible que su archivo "
-"no se descargue correctamente."
+"Una o más direcciones del enlace MAGNET son inválidas.  Es posible que su "
+"archivo no se descargue correctamente."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:200
 #, java-format
 msgid "You have already downloaded {0}"
-msgstr "Ya has descargado este archivo \"{0}\"."
+msgstr "Ya descargó \"{0}\"."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:205
 #, java-format
 msgid "You are already downloading this file to {0}"
-msgstr "Ya esta descargando este archivo a \"{0}\"."
+msgstr "Ya está descargando este archivo en la carpeta \"{0}\"."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:71
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:42
 msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "Obtenga LimeWire Pro para búsquedas con carga TURBO."
+msgstr "Para búsquedas mucho más rápidas, obtenga LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:75
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:46
 msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr "Apoye el desarrollo de redes entre pares de LimeWire. Obtenga PRO."
+msgstr ""
+"Apoye el desarrollo de redes (italic) peer-to-peer (/italic).  Obtenga "
+"LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:79
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:50
 msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr "Compre LimeWire Pro para ayudarnos a acelerar las descargas."
+msgstr "Adquiera LimeWire PRO para ayudarnos a acelerar las descargas."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:82
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:53
 msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr "Obtenga LimeWire PRO para descargas con carga TURBO."
+msgstr "Para descargas mucho más rápidas, obtenga LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:85
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:56
@@ -1995,18 +1993,17 @@ msgstr "Apoye fuente abierta y protocolos abiertos. Obtenga LimeWire PRO."
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:92
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:63
 msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr "Obtenga LimeWire PRO para un rendimiento con carga TURBO."
+msgstr "Para un rendimiento mucho más rápido, obtenga LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:95
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:66
 msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr "Mantenga la Internet abierta. Obtenga Pro."
+msgstr "Mantenga la Internet abierta.  Obtenga LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:98
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:69
 msgid "Developing LimeWire costs real money. Get PRO."
-msgstr ""
-"El desarrollo de LimeWire tiene un valor real en dinero. Obtenga Pro."
+msgstr "Desarrollar LimeWire cuesta dinero.  Obtenga LimeWire PRO."
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:88
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:104
@@ -2030,7 +2027,7 @@ msgstr "Artista"
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:58
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:65
 msgid "Album"
-msgstr "Álbum"
+msgstr "Disco"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:91
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:288
@@ -2124,7 +2121,7 @@ msgstr "Subtítulos"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 msgid "Rating"
-msgstr "Puntuación"
+msgstr "Evaluación"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:119
 msgid "Height"
@@ -2132,7 +2129,7 @@ msgstr "Altura"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:120
 msgid "Width"
-msgstr "Anchura"
+msgstr "Ancho"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
@@ -2189,14 +2186,13 @@ msgstr "Plataforma"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:105
 msgid "The selected .torrent file may contain a security hazard."
-msgstr ""
-"El archivo '.torrent'  seleccionado puede contener códigos que pondrían en "
-"riesgo su seguridad."
+msgstr "El archivo .torrent seleccionado puede ser inseguro."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:107
 msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr ""
-"LimeWire no puede bajar el archivo '.torrent' de la URL proporcionada."
+"LimeWire no pudo descargar un archivo .torrent desde la dirección "
+"proporcionada."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:35
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:539
@@ -2204,8 +2200,8 @@ msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
-"Si usted detiene esta carga, la descarga del '.torrent' se detendrá. ¿Estas "
-"seguro que deseas hacer esto?"
+"Si usted detiene la carga de este archivo, la descarga torrent se detendrá.  "
+"¿Está seguro de que desea detenerlo?"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:38
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:544
@@ -2214,8 +2210,8 @@ msgid ""
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
 "Esta carga es una carga tipo torrent y no ha encontrado suficientes fuentes "
-"completas. Usted deberia permitir que la carga continue un poco mas. ¿Esta "
-"seguro que desea detenerlo?"
+"completas.  Usted debería permitir que la carga continúe un poco más.  ¿Está "
+"seguro de que desea detenerla?"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:16
 msgid "Automatically start torrents"
@@ -2244,6 +2240,10 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"Puede elegir si desea que LimeWire administre los ajustes de protocolo de "
+"BitTorrent.  Es altamente recomendado que LimeWire administre estos ajustes. "
+" Valores inválidos o inadecuados podrían causar graves problemas de "
+"funcionamiento y/o memoria."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
 msgid ""
@@ -2251,26 +2251,28 @@ msgid ""
 "memory problems. Unless you really know what you're doing, it is highly "
 "recommended that you let LimeWire manage these settings."
 msgstr ""
-"Valores personalizados que estén erróneos o inapropiados pueden causar mal "
-"desempeño de su equipo. A menos que usted este seguro de lo que haces, es "
-"recomendable que LimeWire maneje estas configuraciones."
+"Valores personalizados inválidos o inapropiados podrían causar graves "
+"problemas de funcionamiento y/o memoria.  A menos de que usted realmente "
+"sepa lo que está haciendo, es altamente recomendado que permita a LimeWire "
+"gestionar estos ajustes."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:77
 msgid "Let LimeWire manage my BitTorrent settings. (Recommended)"
 msgstr ""
-"Dejar que LimeWire maneje mis configuraciones de 'BitTorrent'. (Recomendado)"
+"Permitir que LimeWire administre mi configuración de BitTorrent (Recomendado)"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:85
+#, fuzzy
 msgid "Maximum uploads per torrent"
-msgstr "Máximas cargas por archivo 'torrent'."
+msgstr "Cantidad máxima de cargas por torrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:91
 msgid "Minimum uploads per torrent"
-msgstr "Mínimas cargas por archivo ‘torrent’."
+msgstr "Cantidad mínima de cargas por torrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:97
 msgid "Safe chunk verification"
-msgstr "Verificacion seguro de paquete"
+msgstr "Verificación segura de paquete"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:103
 msgid "Experimental disk access"
@@ -2291,7 +2293,7 @@ msgstr ""
 "contine ejecutándose normalmente. Para ayudar a corregir los errores, haga "
 "clic en \"enviar\" para informar a LimeWire acerca del problema. Si lo "
 "desea, puede hacer clic en \"revisar\" para ver la información que se "
-"enviará, Gracias."
+"enviará.  Gracias."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:394
 msgid ""
@@ -2330,7 +2332,7 @@ msgstr "Descartar"
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:472
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 msgid "Always Send Immediately"
-msgstr "Enviar siempre inmediatamente"
+msgstr "Enviar siempre de inmediato"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:473
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
@@ -2340,7 +2342,7 @@ msgstr "Preguntar siempre si deseo revisar"
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:474
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Always Discard All Errors"
-msgstr "Siempre descartar errores"
+msgstr "Descartar siempre todos los errores"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:573
 msgid ""
@@ -2369,7 +2371,7 @@ msgstr "Copiar informe"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:144
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:221
 msgid "OK"
-msgstr "ACEPTAR"
+msgstr "Aceptar"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
 msgid "Automatically Scroll"
@@ -2396,7 +2398,7 @@ msgstr "Cerrar"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:106
 msgid "Close This Window"
-msgstr "Cerrar la ventana Acerca de."
+msgstr "Cerrar esta ventana"
 
 #. introduction
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:177
@@ -2412,13 +2414,13 @@ msgid ""
 msgstr ""
 "Inspirado por el creador de LimeWire, Mark Gorton, el Projecto LimeWire es "
 "un esfuerzo colaborativo de <a href=\"http://www.limewire.org/\">Código "
-"Abierto</a> que envuelve a programadores e investigadores de todas partes "
-"del mundo. La naturaleza colaborativa de Gnutella se ver reflajada tambien "
-"en el foro de desarrolladores Gnutella (GDF), en el cual LimeWire es un "
-"participante. Los miembros del GDF trabajan en las trincheras todos los días "
-"para hacer que Gnutella sea una colección innovadora de protocolos que "
-"siempre esta en constante mejoramiento -- un testimonio del poder de los "
-"protocolos abiertos y de los estándares abiertos."
+"Abierto</a> que cuenta con la colaboración de programadores e investigadores "
+"de todas partes del mundo. La naturaleza colaborativa de Gnutella se ve "
+"reflajada tambien en el foro de desarrolladores Gnutella (GDF), en el cual "
+"LimeWire participa. Los miembros del GDF trabajan arduamente todos los días "
+"para hacer que Gnutella sea una colección innovadora de protocolos que se "
+"mejora constantemente -- un testimonio del poder de los protocolos abiertos "
+"y de los estándares abiertos."
 
 #. developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:181
@@ -2435,8 +2437,8 @@ msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
 msgstr ""
-"Los tras camara de la estrategia de negocios y los asuntos del dia a dia son "
-"manejados por los desarrolladores de negocios:"
+"Los tras bastidores estratégicos y los asuntos del día a día son manejados "
+"por los desarrolladores de negocios de LimeWire:"
 
 #. web developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:211
@@ -2444,8 +2446,8 @@ msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
 msgstr ""
-"El <a href=\"http://www.limewire.com\">sitio web</a> de LimeWire, y el "
-"diseño gráfico de LimeWire son producto del arduo trabajo del equipo web de "
+"El <a href=\"http://www.limewire.com\">sitio Web</a> de LimeWire, y el "
+"diseño gráfico de LimeWire son producto del arduo trabajo del equipo Web de "
 "LimeWire:"
 
 #. support staff
@@ -2515,7 +2517,7 @@ msgid ""
 "Inc."
 msgstr ""
 "BitTorrent, el logo BitTorrent y Torrent son marcas registradas de "
-"bitTorrent, Inc."
+"BitTorrent, Inc."
 
 #. *
 #. * The select all action.
@@ -2727,8 +2729,9 @@ msgstr "No mostrar este mensajes otra ves."
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:80
+#, fuzzy
 msgid "Dial Up"
-msgstr ""
+msgstr "Marcación"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:38
 msgid "Broadband"
@@ -3267,6 +3270,9 @@ msgid ""
 "are saved properly you should save them to a sub-folder of {1}.  Would you "
 "like to choose another location?"
 msgstr ""
+"Guardar archivos descargados en {0} puede funcionar incorrectamente. Para "
+"asegurarse de que las descargas son archivadas correctamente, debe "
+"guardarlas en una sub-carpeta de {1}. Desea elegir otra ubicación?"
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:20
 #, fuzzy
@@ -3291,6 +3297,9 @@ msgid ""
 "LimeWire has encountered problems in loading your settings.  LimeWire will "
 "attempt to use the default values; however, may behave unexpectedly."
 msgstr ""
+"LimeWire ha encontrado problemas al cargar sus ajustes. LimeWire intentará "
+"utilizar los valores predeterminados; aunque podría presentar un "
+"comportamiento inesperado."
 
 #: gui/com/limegroup/gnutella/gui/ShutdownWindow.java:18
 msgid "Shutting down LimeWire..."
@@ -3479,8 +3488,9 @@ msgid "Total Downstream:"
 msgstr "Total de Procesamiento en Cadena"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:1012
+#, fuzzy
 msgid "Total Upstream:"
-msgstr ""
+msgstr "Volumen de Carga Total"
 
 #. *
 #. * The title for the TOTD window.
@@ -3659,6 +3669,10 @@ msgid ""
 "href=\"{1}\">FAQ</a> for answers to commonly asked questions or the <a "
 "href=\"{2}\">User Guide</a> for more information."
 msgstr ""
+"Necesita más ayuda? Visite <a herf=\"{0}\"> nuestros páneles de mensajes "
+"</a> y vea si otras personas han respondido a su pregunta! Puede también "
+"revisar las <a href=\"{1}\">FAQa> para encontrar respuestas a preguntas "
+"frecuentes ó el<a href=\"{2}\">Manuel del Usuario</a> para mayor información."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:37
 msgid ""
@@ -3667,6 +3681,10 @@ msgid ""
 "resume downloading and click resume. LimeWire will automatically search for "
 "that file and begin downloading it again."
 msgstr ""
+"Anuló su descarga por accidente? haga un click sobre la pestaña de "
+"'Librería', elija el folder 'Incompleto', seleccione el nombre del archivo "
+"que desea continuar descargando y de click en 'Continuar'. LimeWire buscará "
+"automáticamente el archivo y comenzará a descargarlo de nuevo."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:38
 #, java-format
@@ -3683,6 +3701,9 @@ msgid ""
 "file again. LimeWire will automatically restart the download if it finds any "
 "matching results."
 msgstr ""
+"Puede re-comenzar las descargas que indiquen 'Esperando fuentes' si busca "
+"nuevamente el archivo. LimeWire re-comenzará la descarga automáticamente si "
+"encuentra resultados iguales."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:40
 #, java-format
@@ -3691,20 +3712,28 @@ msgid ""
 "on LimeWire's <a href=\"{0}\">message boards</a> and it may be added to "
 "future versions!"
 msgstr ""
+"Tiene alguna característica que le gustaría ver añadida en LimeWire? "
+"Sugiérala en los <a href=\"{0}\">páneles de mensajes</a> de LimeWire y "
+"podría ser agregada en versiones futuras."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:41
-#, java-format
+#, fuzzy, java-format
 msgid ""
 "You can make your own LimeWire skins! Visit <a href=\"{0}\">LimeWire's "
 "website</a> for detailed information about how skins are created."
 msgstr ""
+"Puede hacer sus propios 'skins' de LimeWire! Visite el <a "
+"href=\"{0}\">website de LimeWire</a> para obtener información detallada de "
+"cómo se crean las 'skins'."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
-#, java-format
+#, fuzzy, java-format
 msgid ""
 "Want to know more about the development of LimeWire? Visit <a "
 "href=\"{0}\">LimeWire's open-source website</a> and look around!"
 msgstr ""
+"Quiere conocer más sobre el desarrollo de LimeWire? visite el <a "
+"href=\"{0}\">website de fuente-abierta de LimeWire </a> y eche un vistazo."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:43
 msgid ""
@@ -3734,11 +3763,14 @@ msgstr ""
 "Chat, y pulsa en \"Chat\""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:46
-#, java-format
+#, fuzzy, java-format
 msgid ""
 "Passionate about digital rights? Visit the <a href=\"{0}\">Electronic "
 "Frontier Foundation</a> and see what you can do to help."
 msgstr ""
+"Es un apasionado de los derechos digitales? Visite <a "
+"href=\"{0}\">Electronic Frontier Foundation</a> y vea lo que puede hacer "
+"para ayudar."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:47
 #, fuzzy
@@ -3754,11 +3786,13 @@ msgstr ""
 "información sobre cómo nos puedes ayudar en la traducción! "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:48
-#, java-format
+#, fuzzy, java-format
 msgid ""
 "Sport the LimeWire look! Visit our <a href=\"{0}\">LimeWire gear</a> page "
 "and purchase a t-shirt or hat!"
 msgstr ""
+"Vista con el estilo LimeWire! Visite nuestra página de <a "
+"href=\"{0}\">LimeWire gear</a> y adquiera una camiseta o gorra!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:49
 msgid ""
@@ -3766,6 +3800,10 @@ msgid ""
 "choose a genre from the drop-down box, and then press 'Search'. Most if not "
 "all of the files returned will be from the selected genre."
 msgstr ""
+"Intente buscar por género de audio! <br> Haga un click sobre la ventana de "
+"búsqueda de metadata 'Audio', elija un género del menú desplegable y "
+"presione 'Buscar'. La mayoría, si no es que todos los archivos encontrados, "
+"serán del género que haya seleccionado."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:50
 msgid ""
@@ -3782,6 +3820,11 @@ msgid ""
 "Go to Advanced &gt; Firewall Config in LimeWire's Options window to find the "
 "port. Review your router's configuration to set it up correctly."
 msgstr ""
+"Utiliza un 'router' (ruteador)? Asegúrese de añadir el puerto especificado "
+"en los ajustes de LimeWire  al 'firewall' del ruteador, UDP y TCP, entrante "
+"y saliente. Vaya a 'configuración de firewall avanzada' dentro de la ventana "
+"de opciones de LimeWire para encontrar el puerto. Revise la configuración de "
+"su ruter y ajústela adecuadamente."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:52
 msgid ""
@@ -3790,6 +3833,9 @@ msgid ""
 "&gt; Advanced &gt; Statistics, choosing 'Advanced', and opting to view "
 "Advanced Statistics."
 msgstr ""
+"La búsqueda tiene como resultado LimeWire viene de otros usuarios como "
+"usted. La búsqueda resulta marcado con un icono de la cerradura en la "
+"columna de la Calidad son comunicaciones oficiales del Alambre de Cal, LLC."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:53
 #, fuzzy, java-format
@@ -3809,6 +3855,12 @@ msgid ""
 "LimeWire learns what to block and what not to block. After a short training "
 "period, LimeWire automatically blocks most junk results. Try it!"
 msgstr ""
+"¿Bombardeado con tonterías busca los resultados? Escoja el resultado de la "
+"búsqueda, y entonces haga clic el botón de Trastos. Cuando usted marca los "
+"resultados de la búsqueda como Trastos o no Trastos, LimeWire aprende lo que "
+"bloquear y lo que no bloquear. Después de que un período corto de la "
+"instrucción, LimeWire bloquee automáticamente la mayoría de los resultados "
+"de trastos. ¡Trátelo!"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:55
 msgid ""
@@ -3816,6 +3868,9 @@ msgid ""
 "buddy is sharing 'Limers' but you searched for 'The Limers', your buddy's "
 "file will still be found. "
 msgstr ""
+"Pequeñas variaciones en el título de la búsqueda trabajarán todavía. Por "
+"ejemplo, si su compañero comparte \"Limers\" pero usted buscó para 'El "
+"Limers', su archivo de compañero será encontrado todavía. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:56
 msgid ""
@@ -3851,6 +3906,9 @@ msgid ""
 "marked with a lock icon in the Quality column are official communications "
 "from Lime Wire, LLC."
 msgstr ""
+"La búsqueda tiene como resultado LimeWire viene de otros usuarios como "
+"usted. La búsqueda resulta marcado con un icono de la cerradura en la "
+"columna de la Calidad son comunicaciones oficiales del Alambre de Cal, LLC."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:60
 msgid ""
@@ -3859,14 +3917,24 @@ msgid ""
 "Click the circle in the upper left corner of a box, and choose a new option "
 "from the menu."
 msgstr ""
+"Después de que empezar una búsqueda, usted pueda personalizar las tres cajas "
+"a la izquierda con títulos como Medios, como el Artista, y como el Album. "
+"Usted puede cambiar lo que estas cajas muestran. Haga clic el círculo en el "
+"rincón izquierdo superior de una caja, y escoja una nueva opción del menú."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:61
+#, fuzzy
 msgid ""
 "Do you want to browse your friend's LimeWire Library? Go to Search &gt; "
 "Direct Connect, then enter the ip address and port number of your friend's "
 "computer in the following format: 'ip address:port'. The port can be found "
 "in LimeWire's Options in the Advanced &gt; Firewall Config section."
 msgstr ""
+"¿Do que usted quiere hojear su Biblioteca de amigo LimeWire? Vaya a Buscar "
+"&gt; Dirija Conecte, entonces entre la dirección de ip y número de puerto de "
+"su computadora de amigo en el formato siguiente: 'La dirección de ip: el "
+"puerto'. El puerto puede ser encontrado en Opciones de LimeWire en el "
+"Avanzado &gt; la sección de Cortafuegos Config."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:62
 msgid ""
@@ -3883,11 +3951,17 @@ msgid ""
 "entering your LimeWire. Double-click an incoming query to perform a search "
 "for that keyword."
 msgstr ""
+"¿Curiosas qué personas buscan para? Vaya a la etiqueta del Monitor, y escoja "
+"la Exposición las Búsquedas Entrantes para ver otras preguntas de la "
+"búsqueda de personas que entran su LimeWire. Haga doble clic una pregunta "
+"entrante realizar una búsqueda para esa palabra clave."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:64
 msgid ""
 "Have a lot of files? Try an instant search at the top of the Library window."
 msgstr ""
+"¿Tiene muchos archivos? Trate una búsqueda instantánea a la cabeza de la "
+"ventana de la Biblioteca."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:65
 #, java-format
@@ -3897,6 +3971,10 @@ msgid ""
 "click the Publish button. Visit the <a href=\"{0}\">creative commons "
 "website</a> for more information."
 msgstr ""
+"Usted puede publicar su trabajo original en la red de Gnutella con una "
+"licencia Común Creadora. Escoja el. ogg o. mp3 compartió el archivo en la "
+"Biblioteca y hace clic el Publica el botón. Visite el <a href=\"{0}\">sitio "
+"web común creador</a> Para más información."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:66
 msgid ""
@@ -3905,6 +3983,11 @@ msgid ""
 "the file's metadata to your heart's content. You can even edit many files at "
 "once by selecting more than one file before clicking Describe."
 msgstr ""
+"¿Has descargado un archivo que contiene incompleta o total información "
+"errónea? Selecciona el archivo en la biblioteca y has click en describir. "
+"Edita el archivo con datos de tu gusto.  Incluso puedes editar  varios "
+"archivos  a la vez seleccionando mas de uno antes de hacer click en "
+"describir."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:67
 msgid ""
@@ -3912,6 +3995,9 @@ msgid ""
 "for the globe. If there is a brick wall in front of it, your Internet "
 "connection is firewalled."
 msgstr ""
+"¿Estas detrás de un Cortafuegos? En la parte inferior de LimeWire en la "
+"barra de estado, busca el globo. Si hay un muro en frente de este, tu "
+"conexión esta siendo restringida."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:68
 msgid ""
@@ -3919,6 +4005,10 @@ msgid ""
 "the number in a green oval. A beige oval means LimeWire is still building "
 "your Library. A red oval means files are not being shared."
 msgstr ""
+"¿Preguntándote cuantos archivos estas compartiendo?Mira en la barra de "
+"estado de LimeWie el numero en un ovalo verde. Un ovalo beige significa que "
+"LimeWire sigue cargando tu biblioteca. Si el ovalo es rojo significa que no "
+"estas compartiendo."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:69
 msgid ""
@@ -3926,6 +4016,9 @@ msgid ""
 "of LimeWire show how fast all of your files are downloading or uploading "
 "combined."
 msgstr ""
+"Los números cerca a las flecha de arriba y abajo en la parte baja de "
+"LimeWire muestran de forma combinada cuan rápido tus archivos están siendo "
+"descargados o subidos."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:70
 msgid ""
@@ -3942,6 +4035,11 @@ msgid ""
 "select a Media Type like Audio, and click the Browse button. You can group "
 "files by media type in the Library even if all saved files are in one folder."
 msgstr ""
+"En vez de estar poniendo todos tus archivos en una sola carpeta, LimeWIre "
+"puede agruparlos automáticamente por tipo de archivo. En la ventana Opciones "
+"> Guardar, selecciona  un tipo de archivo como de Audio, y click en el botón "
+"Examinar. Puedes  agrupar archivos por tipo  multimedia en la biblioteca "
+"incluso si todos están guardadados esta en un una sola carpeta."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:72
 msgid ""
@@ -3983,6 +4081,13 @@ msgid ""
 "can disable OOB (out-of-band) searching in the Options for more reliable "
 "results."
 msgstr ""
+"La búsqueda de tus consultas viaja a través de un red de computadoras "
+"interconectadas,  razón por la cual toma tiempo en recibir todos los "
+"resultados de la búsqueda. LimeWire a menudo toma atajos para entregar los "
+"resultados mas rápido, pero si piensas que los resultados están bloqueados "
+"porque tu computadora tiene problemas con los paquetes UDP, puedes "
+"desabilitar la busqueda OOB(out-of-band) en Opciones para resultados mas "
+"fiables."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:76
 msgid ""
@@ -4012,6 +4117,10 @@ msgid ""
 "In order to be eligible for inclusion in the DHT, make sure you are not "
 "behind a firewall, and leave LimeWire running for as long as possible."
 msgstr ""
+"LimeWare usa una tecnología llamada DHT(Distributed Hash Table) para ayudar "
+"a los usuarios a encontrar mejor archivos raros. Con el fin de ser elegible "
+"para la inclusion en el DHT, asegúrese que no esta detrás de un cortafuegos, "
+"y deje correr LimeWare tanto como le sea posible."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:80
 msgid ""
@@ -5102,7 +5211,7 @@ msgstr "En cola"
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:69
 #, java-format
 msgid "Connecting ({0} hosts tried)..."
-msgstr ""
+msgstr "Conectando ({0} anfitriones tratados"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:75
 msgid "Waiting On Busy Hosts"
@@ -9122,6 +9231,9 @@ msgid "Ogg Vorbis"
 msgstr "Ogg Vorbis"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:111
+#, fuzzy
 msgid ""
 "Unknown file type. Please choose the type that best describes this file."
 msgstr ""
+"Tipo de archivo desconocido. Por favor elija el tipo que mejor describa este "
+"archivo."

@@ -10,14 +10,14 @@ msgstr ""
 "Project-Id-Version: fr\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-02-17 23:59-0500\n"
-"PO-Revision-Date: 2008-02-18 05:04+0000\n"
-"Last-Translator: Philippe Verdy <verdy_p(at)wanadoo.fr>\n"
+"PO-Revision-Date: 2008-02-21 16:26+0000\n"
+"Last-Translator: verdy_p <verdy_p@wanadoo.fr>\n"
 "Language-Team: <fr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2008-02-19 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-02-26 04:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Sorry, but LimeWire was unable to restart your old downloads."
@@ -1792,7 +1792,7 @@ msgstr "Chargement des anciens chargements incomplets..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:421
 msgid "Attaching LimeWire Store Listeners..."
-msgstr ""
+msgstr "Attachement des auditeurs du Dépot LimeWire..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:426
 msgid "Loading Directed Querier..."
@@ -2163,6 +2163,11 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"Vous pouvez déterminer si LimeWire devrait gérer lui-même vos paramètres de "
+"protocole BitTorrent. Il est vivement recommandé de laisser LimeWire gérer "
+"et ajuster ces paramètres ; des valeurs invalides ou inappropriées "
+"pourraient causer de sévères problèmes de performance et/ou de consommation "
+"mémoire."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
 msgid ""
@@ -2646,7 +2651,7 @@ msgstr "Ne plus afficher ce message."
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:80
 msgid "Dial Up"
-msgstr ""
+msgstr "Accès ligne analogique"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:38
 msgid "Broadband"
@@ -4163,6 +4168,10 @@ msgid ""
 "etc... These preferences (and more) are available at the Tools &gt; Options "
 "menu."
 msgstr ""
+"Vous pouvez personnaliser LimeWire selon vos désirs en ajustant divers "
+"paramètres tels que votre dossier de sauvegarde, les dossiers partagés, la "
+"bande passante dédiée aux transferts, etc. Ces préférences (et d’autres) "
+"sont disponibles dans le menu Outils &gt; Options."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:97
 msgid ""
@@ -4443,6 +4452,10 @@ msgid ""
 "etc... These preferences (and more) are available at the LimeWire &gt; "
 "Preferences menu. "
 msgstr ""
+"Vous pouvez personnaliser LimeWire selon vos désirs en ajustant divers "
+"paramètres tels que votre dossier de sauvegarde, les dossiers partagés, la "
+"bande passante dédiée aux transferts, etc. Ces préférences (et d’autres) "
+"sont disponibles dans le menu LimeWire &gt; Préférences. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:130
 msgid ""
@@ -6067,7 +6080,7 @@ msgstr "Vitesse du réseau"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:81
 msgid "Broadband (or unsure)"
-msgstr ""
+msgstr "Accès large bande (ou inconnu)"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:87
 msgid ""
@@ -8645,6 +8658,10 @@ msgid ""
 "to connect to, click 'Direct Connect', and LimeWire will try to browse that "
 "user's shared files."
 msgstr ""
+"Entrez l’adresse IP et le numéro de port (au format : “AdresseIP:Port”) d’un "
+"ami avec qui vous souhaiteriez établir une connexion et cliquez « Connexion "
+"directe », LimeWire tentera alors de parcourir et afficher les fichiers "
+"partagés de cet utilisateur."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:370
 msgid "When your friends want to connect to you, they should enter"
@@ -9373,7 +9390,7 @@ msgstr "Titre de l’œuvre :"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:474
 msgid "Comment:"
-msgstr ""
+msgstr "Commentaire :"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:495
 msgid "Please enter the copyright holder, copright year and title."
@@ -9626,3 +9643,5 @@ msgstr "Ogg Vorbis"
 msgid ""
 "Unknown file type. Please choose the type that best describes this file."
 msgstr ""
+"Type de fichier inconnu. Veuillez sélectionner le type qui correspond le "
+"mieux à ce fichier."

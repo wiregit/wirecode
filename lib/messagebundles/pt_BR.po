@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-02-17 23:59-0500\n"
-"PO-Revision-Date: 2008-02-09 23:36+0000\n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2008-02-24 22:21+0000\n"
+"Last-Translator: Felipe <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2008-02-19 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-02-26 04:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -2006,7 +2006,7 @@ msgstr "Carregando downloads antigos..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:421
 msgid "Attaching LimeWire Store Listeners..."
-msgstr ""
+msgstr "Anexando os Ouvidores da Loja LimeWire..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:426
 msgid "Loading Directed Querier..."
@@ -4187,6 +4187,8 @@ msgid ""
 "Don't strain your eyes to use LimeWire! You can adjust the text size by "
 "going to View &gt; Increase Font Size."
 msgstr ""
+"Não abuse dos seus olhos por usar o LimeWire! Você pode ajustar o tamanho do "
+"texto indo em Visualizar &gt; Aumentar o Tamanho da Fonte."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:71
 msgid ""
@@ -4195,6 +4197,11 @@ msgid ""
 "select a Media Type like Audio, and click the Browse button. You can group "
 "files by media type in the Library even if all saved files are in one folder."
 msgstr ""
+"Em vez de pôr todos os seus arquivos em uma única pasta, LimeWire pode "
+"automaticamente organizá-los pelo tipo de mídia. Na janela &gt; Salvando "
+"Opções, selecione um Tipo de Mídia como Áudio, e clique no botão Procurar. "
+"Você pode agrupar os arquivos pelo tipo de mídia na Biblioteca mesmo se "
+"todos os arquivos salvos estão em uma pasta."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:72
 msgid ""
@@ -4257,6 +4264,10 @@ msgid ""
 "In order to be eligible for inclusion in the DHT, make sure you are not "
 "behind a firewall, and leave LimeWire running for as long as possible."
 msgstr ""
+"LimeWire usa uma tecnologia chamada DHT para ajudar melhor os usuários a "
+"acharem arquivos raros. De modo que para ser elegível para a inclusão no "
+"DHT, tenha certeza de que você não está atrás de um firewall, e deixe o "
+"LimeWire rodando tanto quanto possível."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:80
 #, fuzzy
@@ -4289,6 +4300,8 @@ msgid ""
 "Wondering if someone browsed your shared library? Go to View &gt; Show/Hide "
 "&gt; Logging to see the recent activity. "
 msgstr ""
+"Imaginando se alguém vasculhou sua biblioteca compartilhada? Vá em "
+"Visualizar &gt; Mostrar/Esconder &gt; Logging para ver a atividade recente. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:84
 msgid ""
@@ -4356,6 +4369,9 @@ msgid ""
 "'Options' from the 'Tools' menu and adding new words to those listed under "
 "Filters &gt; Keywords."
 msgstr ""
+"Você pode banir certas palavras de aparecerem nos seus resultados de busca "
+"indo em 'Opções' no menu 'Ferramentas' e adicionando novas palavras a "
+"aquelas listadas sob Filtrar &gt; as Palavras-chave."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:103
 msgid ""
@@ -4416,6 +4432,9 @@ msgid ""
 "Are you unhappy with the small number of search results you received? Right-"
 "click a search result, then choose Search More, then Get More Results. "
 msgstr ""
+"Você está infeliz com o pequeno nº de resultados de busca que você recebeu? "
+"Clique com o direito em um resultado de busca, então escolha Procurar Mais, "
+"então Obter Mais Resultados. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:111
 msgid ""
@@ -4447,6 +4466,8 @@ msgid ""
 "Did you just download a file that you don't want to share? In the Library, "
 "right-click it and choose Stop Sharing File. "
 msgstr ""
+"Você baixou um arquivo que você não quer compartilhar? Na Biblioteca, clique "
+"com o direito e escolha Parar de Compartilhar Arquivo. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:115
 msgid ""
@@ -4461,6 +4482,9 @@ msgid ""
 "stricter. Adjust that and more by going to Tools &gt; Options &gt; Filters "
 "&gt; Junk. "
 msgstr ""
+"Faça o filtro de Lixo do LimeWire bloquear mais resultados tornando o filtro "
+"mais rigoroso. Ajuste isso e mais indo em Ferramentas &gt; Opções &gt; "
+"Filtros &gt; Lixo. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:117
 msgid ""
@@ -4481,6 +4505,8 @@ msgid ""
 "Tired of the OSX Aqua look? Try using a new theme, available from the View "
 "&gt; Apply Themes menu. "
 msgstr ""
+"Cansado do look OSX Aqua? Tente usar um novo tema, disponível no menu "
+"Visualizar &gt; Aplicar Temas. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:129
 msgid ""
@@ -4495,6 +4521,8 @@ msgid ""
 "You can find out which version of LimeWire you are using by choosing 'About "
 "LimeWire' from the LimeWire menu. "
 msgstr ""
+"Você pode descobrir qual versão do LimeWire você está usando indo em 'Sobre "
+"o LimeWire' no menu do LimeWire. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:131
 msgid ""
@@ -4518,6 +4546,9 @@ msgid ""
 "highlight the file and click 'Explore'. LimeWire will open that folder in "
 "the Finder. "
 msgstr ""
+"Quer ver aonde no seu computador um arquivo compartilhado está? Vá na "
+"Biblioteca, destaque o arquivo e clique em 'Explorar'. LimeWire abrirá "
+"aquela pasta no Descobridor. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:134
 msgid ""
@@ -4532,6 +4563,9 @@ msgid ""
 "from the 'LimeWire' menu, and changing the value of 'Autocomplete Text' "
 "under the 'View' option. "
 msgstr ""
+"Você pode ligar ou desligar o autocompletar para a busca indo em "
+"'Preferências' no menu 'LimeWire', e mudando o valor de 'Autocompletar "
+"Texto' sob a opção 'Visualizar'. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:136
 msgid ""

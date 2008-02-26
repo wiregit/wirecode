@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-02-17 23:59-0500\n"
-"PO-Revision-Date: 2008-02-09 08:33+0000\n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2008-02-21 15:45+0000\n"
+"Last-Translator: ZiLviA <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-02-19 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-02-26 04:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Loading bittorrent Management..."
@@ -1841,14 +1841,12 @@ msgstr ""
 "Per continuare ad usare LimeWIre devi liberare spazio nel tuo disco fisso."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
-#, fuzzy
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
-"Limewire non può aprire il file che è bloccato da un'altra applicazione. "
-"LimeWire potrebbe agire in modo inatteso prima che l'altra applicazione "
-"sblocchi il file."
+"Limewire non può aprire il file perchè un altro programma lo ha bloccato. "
+"Limewire può rimanere in attesa fino a che il file venga rilasciato."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:54
 msgid ""
@@ -1871,12 +1869,13 @@ msgstr ""
 "potrebbe essere in una situazione non prevista."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:60
+#, fuzzy
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
 "Limewire non può scaricare il file selezionato perchè il disco fisso è "
-"pieno. Per recivare altri file, devi liberare spazio fisico nel tuo disco "
+"pieno. Per ricevere altri file, devi liberare spazio fisico nel tuo disco "
 "fisso."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:62
@@ -1918,15 +1917,14 @@ msgstr ""
 "funzioni di Limewire potrebbero non funzionare correttamente."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:219
-#, fuzzy
 msgid ""
 "Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
 "Siamo spiacenti, LimeWire non potrebbe leggere i  vecchi download. E' "
-"possibile riavviare andando nella libreria, mostrando i vostri \"File "
-"incompleti\", e cliccando su 'Ripristina' per i download."
+"possibile riscaricare i file andando nella libreria, mostrando i vostri "
+"\"File incompleti\", e cliccando su 'Ripristina' per i download."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:221
 #, fuzzy
@@ -1948,7 +1946,6 @@ msgid "Loading Safe Content Management..."
 msgstr "Caricamento Gestore Contenuti Sicuri..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:340
-#, fuzzy
 msgid "Loading Message Router..."
 msgstr "Caricamento Router Messaggi..."
 
@@ -1985,18 +1982,17 @@ msgid "Loading Shared Files..."
 msgstr "Caricamento file condivisi..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:410
-#, fuzzy
 msgid "Loading BitTorrent Management..."
 msgstr "Caricamento in corso gestione BitTorrent"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:416
-#, fuzzy
 msgid "Loading Old Downloads..."
-msgstr "Caricamento Vecchie Ricezioni..."
+msgstr "Caricamento vecchi Download..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:421
+#, fuzzy
 msgid "Attaching LimeWire Store Listeners..."
-msgstr ""
+msgstr "Allegando LimeWire Store ascoltatori..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:426
 msgid "Loading Directed Querier..."
@@ -2011,9 +2007,8 @@ msgid "Loading Peer Listener..."
 msgstr "Caricamento Analizzatore Nodi..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:447
-#, fuzzy
 msgid "Loading Stale Connection Management..."
-msgstr "Caricamento Gestore Connessioni Corrotte..."
+msgstr "Caricamento gestore connessioni..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:452
 msgid "Loading Saved Files..."

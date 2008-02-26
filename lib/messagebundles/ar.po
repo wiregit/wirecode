@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-02-17 23:59-0500\n"
-"PO-Revision-Date: 2008-01-31 20:38+0000\n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2008-02-23 16:39+0000\n"
+"Last-Translator: Yiya <yeryani@hotmail.com>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n == 2 ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2008-02-19 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-02-26 04:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -2411,6 +2411,8 @@ msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
 msgstr ""
+"و بالإضافة هؤلاء الأفراد عملوا على فريق Limewire في الماضي و لكن منذ ذاك "
+"الوقت تم نقلهم لمشاريعٍ اخرى"
 
 #. open source contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:258
@@ -2428,6 +2430,8 @@ msgid ""
 "internationalization project, both for the application itself and for the "
 "LimeWire web site."
 msgstr ""
+"و تود LimeWire أن تشكر كل من ساهم في مشروع الترجمة في البرنامج نفسه و موقع "
+"LimeWire"
 
 #. community VIPs
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:299
@@ -8646,7 +8650,7 @@ msgstr "تم إدخال هيئة غير صحيحة. لن يتم حفظ التغ�
 #. unable to remove or write to disk
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:227
 msgid "Unable to remove data."
-msgstr "غير قادر على إزالة البيانات"
+msgstr "غير قادر على حذف البيانات"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:37
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:55
@@ -8689,7 +8693,7 @@ msgstr "الطول:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:46
 msgid "Bitrate:"
-msgstr "معدل البت:"
+msgstr "معدّل البِتّات:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:47
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:60
@@ -8770,7 +8774,7 @@ msgstr "الناشر:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:81
 msgid "Platform:"
-msgstr "المنصة:"
+msgstr "الجهاز:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:87
 #, fuzzy
@@ -8792,4 +8796,4 @@ msgstr "Ogg Vorbis"
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:111
 msgid ""
 "Unknown file type. Please choose the type that best describes this file."
-msgstr ""
+msgstr "لم يتم التعرف على نوع الملف الرجاء اختيار النوع الذي يناسب هذا الملف"

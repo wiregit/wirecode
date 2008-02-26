@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-02-17 23:59-0500\n"
-"PO-Revision-Date: 2007-09-13 11:10+0000\n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2008-02-21 16:35+0000\n"
+"Last-Translator: nishizhen <nishizhen@gmail.com>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2008-02-19 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-02-26 04:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Modem"
@@ -378,10 +378,11 @@ msgstr ""
 #~ msgstr "路由 错误"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
+#, fuzzy
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
-msgstr "由於您的硬盘容量已满，因此LimeWire无法记录有关文档。如要继续使用LimeWire，请腾出硬盘容量。"
+msgstr "由于您的硬盘空间已满，因此LimeWire不能够写入文件。如果要继续使用LimeWare，您必须清理出空闲空间在硬盘上。"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
 msgid ""

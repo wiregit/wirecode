@@ -8,15 +8,15 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-02-17 23:59-0500\n"
-"PO-Revision-Date: 2008-02-11 17:40+0000\n"
-"Last-Translator: Automatically generated\n"
+"PO-Revision-Date: 2008-02-25 19:10+0000\n"
+"Last-Translator: mike555 <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2008-02-19 04:50+0000\n"
+"X-Launchpad-Export-Date: 2008-02-26 04:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Modem"
@@ -6819,7 +6819,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:389
 msgid "Don't Know"
-msgstr ""
+msgstr "Nie wiem"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:393
 msgid "What To Look For?"
@@ -6950,7 +6950,7 @@ msgstr "Producent"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:88
 msgid "Created"
-msgstr ""
+msgstr "Utworzony"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:93
 msgid "Junk Rating"
@@ -6958,7 +6958,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:267
 msgid "Media"
-msgstr ""
+msgstr "Media"
 
 #: gui/com/limegroup/gnutella/gui/search/TableLine.java:723
 msgid ""
@@ -6981,11 +6981,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:82
 msgid "My Extensions"
-msgstr ""
+msgstr "Moje rozszerzenia"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:83
 msgid "Other"
-msgstr ""
+msgstr "Inne"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:292
 msgid "To allow selection enable sharing of sensitive types."
@@ -6997,15 +6997,15 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:486
 msgid "Add New Extension"
-msgstr ""
+msgstr "Dodaj nowe rozszerzenie"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:487
 msgid "Add a New Extension to My Extensions"
-msgstr ""
+msgstr "Dodaj nowe rozszerzenie do Moich Rozszerzeń"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:491
 msgid "Enter the extension pattern:"
-msgstr ""
+msgstr "Wpisz wzór rozszerzenia"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:492
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:518
@@ -7031,11 +7031,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:747
 msgid "File types you added to share."
-msgstr ""
+msgstr "Typy plików, które dodałeś do współdzielenia"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:751
 msgid "Other types of files."
-msgstr ""
+msgstr "Inne typy plików."
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:29
 #, java-format
@@ -7064,11 +7064,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:75
 msgid "\".torrent\" files"
-msgstr ""
+msgstr "pliki \".torrent\""
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:87
 msgid "\"magnet:\" links"
-msgstr ""
+msgstr "odnośniki \"magnet:\""
 
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:48
 msgid ""
@@ -7078,29 +7078,29 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:50
 msgid "Details"
-msgstr ""
+msgstr "Szczegóły"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:122
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:236
 msgid "Idle"
-msgstr ""
+msgstr "Bezczynny"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:292
 msgid "Sorry, the browser could not be loaded."
-msgstr ""
+msgstr "Przykro mi, przeglądarka nie mogła być wczytana"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:320
 msgid "Go"
-msgstr ""
+msgstr "Idź"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:366
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:134
 msgid "Back"
-msgstr ""
+msgstr "Wstecz"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:378
 msgid "Forward"
-msgstr ""
+msgstr "Dalej"
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:46
 #, fuzzy
@@ -7186,10 +7186,11 @@ msgid ""
 "The skin you selected is out of date. Please download the latest version of "
 "the skin."
 msgstr ""
+"Skórka, którą wybrałeś jest przestarzała. Ściągnij najnowszą wersję skórki."
 
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:199
 msgid "Get New Skins"
-msgstr ""
+msgstr "Zdobądź nowe skórki"
 
 #. invalid theme, tell the user.
 #: gui/com/limegroup/gnutella/gui/themes/ThemeSettings.java:252
@@ -7197,6 +7198,8 @@ msgid ""
 "The theme you are applying is invalid. LimeWire will revert to the default "
 "theme."
 msgstr ""
+"Temat, który chcesz wybrać nie jest ważny. LimeWire powróci do domyślnych "
+"ustawień."
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:43
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:39
@@ -7243,7 +7246,7 @@ msgstr "Host nieosi?galny"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:96
 msgid "Malformed Request"
-msgstr ""
+msgstr "Źle sformułowane zapytanie"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:102
 msgid "Banned Greedy Servent"
@@ -7288,7 +7291,7 @@ msgstr "?ci?ganie zosta?o juz uko?czone"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:43
 msgid "No Write Permission"
-msgstr ""
+msgstr "Brak zgody na zapis"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:46
 msgid "Folder Does Not Exist"
@@ -7296,7 +7299,7 @@ msgstr "Ten folder nie istnieje"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:49
 msgid "File Already Exists"
-msgstr ""
+msgstr "Plik już istnieje"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:52
 #, fuzzy
@@ -7347,12 +7350,12 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:102
 #, java-format
 msgid "A file already exists at {0}."
-msgstr ""
+msgstr "Plik aktualnie istnieje w {0}."
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:106
 #, java-format
 msgid "Another download is already saving to {0}."
-msgstr ""
+msgstr "Inne zadanie jest teraz zapisywane do {0}."
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:110
 #, java-format
@@ -7385,7 +7388,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/util/GUILauncher.java:67
 #, java-format
 msgid "There is nothing to preview for file {0}."
-msgstr ""
+msgstr "Nie ma podglądu dla pliku {0}."
 
 #: gui/com/limegroup/gnutella/gui/xml/IndentingPanel.java:131
 msgid "More Search Options"
@@ -7402,7 +7405,7 @@ msgstr "Informacje"
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:443
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:534
 msgid "Publish License"
-msgstr ""
+msgstr "Publikuj Licencję"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:108
 #, fuzzy
