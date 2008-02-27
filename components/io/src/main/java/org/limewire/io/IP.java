@@ -23,15 +23,18 @@ public class IP {
     public final int addr;
     public final int mask;
     
+    public IP(byte [] b, int offset) throws IllegalArgumentException {
+        if( b.length < offset + 4 )
+            throw new IllegalArgumentException(MSG);
+        this.addr = bytesToInt(b, offset);
+        this.mask = -1; /* 255.255.255.255 == 0xFFFFFFFF */
+    }
     /**
      * Creates an IP object out of a four byte array of the IP in
      * BIG ENDIAN format (most significant byte first).
      */
     public IP(byte[] ip_bytes) throws IllegalArgumentException {
-        if( ip_bytes.length != 4 )
-            throw new IllegalArgumentException(MSG);
-        this.addr = bytesToInt(ip_bytes, 0);
-        this.mask = -1; /* 255.255.255.255 == 0xFFFFFFFF */
+        this(ip_bytes,0);
     }
 
     /**
