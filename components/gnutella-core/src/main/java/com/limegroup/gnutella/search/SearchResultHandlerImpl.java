@@ -583,11 +583,9 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                 if (skipSpam || !srh.getSpamManager().get().isSpam(rfd)) {
                     if (is != null) {
                         numGood += addIntervalSet(response.getUrns(), is, response.getSize());
-                        System.out.println(" *** GuidCount::addQueryReply().. [POINT-A] partial result");
                     }
                     else {
                         numGood += addLocation(response.getUrns(), response.getSize());
-                        System.out.println(" *** GuidCount::addQueryReply().. [POINT-B] whole result");
                     }
                 }
                 else
@@ -618,8 +616,6 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             int count_after = 0;
             
             for (URN urn : urns) {
-                System.out.println(" *** GuidCount::addIntervalSet().. [POINT-A] urn.isSHA1 = " + urn.isSHA1() + ";");
-                
                 if (!urn.isSHA1())
                     continue;
                 
@@ -632,8 +628,6 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                 
                 break;
             }
-            
-            System.out.println(" *** GuidCount::addIntervalSet().. [POINT-B] b=" + count_before + "; a=" + count_after + ";");
             
             return count_after - count_before;
         }

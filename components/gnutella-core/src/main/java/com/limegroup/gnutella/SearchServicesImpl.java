@@ -122,7 +122,7 @@ public class SearchServicesImpl implements SearchServices {
      * 
      * @param qr
      * @param type
-     * @return The new GuidCount for this query.
+     * @return The new stats object for this query.
      */
     private SearchResultStats recordAndSendQuery(final QueryRequest qr, 
                                            final MediaType type) {
@@ -171,6 +171,7 @@ public class SearchServicesImpl implements SearchServices {
     						 final String query, 
     						 final String richQuery, 
     						 final MediaType type) {
+    
     	try {
             QueryRequest qr = null;
             if (networkManager.get().isIpPortValid() && (new GUID(guid)).addressesMatch(networkManager.get().getAddress(), 
@@ -206,12 +207,6 @@ public class SearchServicesImpl implements SearchServices {
      * @see com.limegroup.gnutella.SearchServices#query(byte[], java.lang.String, com.limegroup.gnutella.MediaType)
      */
     public SearchResultStats query(byte[] guid, String query, MediaType type) {
-        
-        // TODO
-        //
-        // get qrh from recordAndSendQuery
-        // return qrh
-        
     	return query(guid, query, "", type);
     }
 

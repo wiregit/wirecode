@@ -33,6 +33,7 @@ import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.ResponseVerifier;
 import com.limegroup.gnutella.ResponseVerifierImpl;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
@@ -197,9 +198,12 @@ public class SearchResultHandlerTest extends LimeTestCase {
        final HostData hostData = m.mock(HostData.class);
        final Response response = m.mock(Response.class);
        final List<Response> responses = Collections.singletonList(response);
-       final Set<URN> urns = URN.createSHA1AndTTRootUrns(new File("/Users/cjones/Desktop/Equipment.txt"));
+       final Set<URN> urns = new UrnSet();
        final Set<IpPort> ipPorts = new HashSet<IpPort>();
        final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
+       
+       urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
+       urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
        
        List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
        map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
@@ -272,9 +276,12 @@ public class SearchResultHandlerTest extends LimeTestCase {
         final HostData hostData = m.mock(HostData.class);
         final Response response = m.mock(Response.class);
         final List<Response> responses = Collections.singletonList(response);
-        final Set<URN> urns = URN.createSHA1AndTTRootUrns(new File("/Users/cjones/Desktop/Equipment.txt"));
+        final Set<URN> urns = new UrnSet();
         final Set<IpPort> ipPorts = new HashSet<IpPort>();
         final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
+        
+        urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
+        urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
         
         List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
         map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
@@ -357,9 +364,12 @@ public class SearchResultHandlerTest extends LimeTestCase {
         final HostData hostData = m.mock(HostData.class);
         final Response response = m.mock(Response.class);
         final List<Response> responses = Collections.singletonList(response);
-        final Set<URN> urns = URN.createSHA1AndTTRootUrns(new File("/Users/cjones/Desktop/Equipment.txt"));
+        final Set<URN> urns = new UrnSet();
         final Set<IpPort> ipPorts = new HashSet<IpPort>();
         final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
+        
+        urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
+        urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
         
         List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
         map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
@@ -422,34 +432,11 @@ public class SearchResultHandlerTest extends LimeTestCase {
     }
     
     /**
-     * We will test the receiving of a QueryReply without
-     * having received a QueryRequest previous to the QueryReply.
-     * This will fail in SearchResultHandler::accountAndUpdateDynamicQueriers(),
-     * but not in a fashion that we can directly detect (like quantum state), 
-     * other than that of a result count that will remain unchanged (ie, zero 
-     * in this case).
+     * Add a QueryRequest and a QueryReply then remove the associated
+     * GUID and verify that the GUID was successfully removed.
      * 
      * (cjones@moo.limewire.com:~/Projects/limewire-psr-2/tests <Mon Feb 11> <16:59:54>)
      * $ [60|560] >> ant -Dclass=search/SearchResultHandlerTest test
-     *
-     * @throws Exception
-     */
-    public void testAddReplyWithoutRequest() throws Exception {
-        List<NameValue<String>> list = new LinkedList<NameValue<String>>();
-        list.add(new NameValue<String>("audios__audio__action__", "http://somewhere.com"));
-        LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
-        Response actionResponse = responseFactory.createResponse(0, 1, "test", actionDoc);
-        QueryReply reply = newQueryReply(new Response[] { actionResponse } );
-        reply.setSecureStatus(SecureMessage.SECURE);
-        
-        assertEquals(0, callback.results.size());
-        searchResultHandler.handleQueryReply(reply);
-        assertEquals(0, callback.results.size());
-    }
-    
-    /**
-     * Add a QueryRequest and a QueryReply then remove the associated
-     * GUID and verify that the GUID was successfully removed.
      * 
      * @throws Exception
      */
@@ -461,9 +448,12 @@ public class SearchResultHandlerTest extends LimeTestCase {
         final HostData hostData = m.mock(HostData.class);
         final Response response = m.mock(Response.class);
         final List<Response> responses = Collections.singletonList(response);
-        final Set<URN> urns = URN.createSHA1AndTTRootUrns(new File("/Users/cjones/Desktop/Equipment.txt"));
+        final Set<URN> urns = new UrnSet();
         final Set<IpPort> ipPorts = new HashSet<IpPort>();
         final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
+        
+        urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
+        urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
         
         List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
         map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
@@ -578,9 +568,12 @@ public class SearchResultHandlerTest extends LimeTestCase {
         final HostData hostData = m.mock(HostData.class);
         final Response response = m.mock(Response.class);
         final List<Response> responses = Collections.singletonList(response);
-        final Set<URN> urns = URN.createSHA1AndTTRootUrns(new File("/Users/cjones/Desktop/Equipment.txt"));
+        final Set<URN> urns = new UrnSet();
         final Set<IpPort> ipPorts = new HashSet<IpPort>();
         final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
+        
+        urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
+        urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
         
         List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
         map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
@@ -733,9 +726,12 @@ public class SearchResultHandlerTest extends LimeTestCase {
         final HostData hostData = m.mock(HostData.class);
         final Response response = m.mock(Response.class);
         final List<Response> responses = Collections.singletonList(response);
-        final Set<URN> urns = URN.createSHA1AndTTRootUrns(new File("/Users/cjones/Desktop/Equipment.txt"));
+        final Set<URN> urns = new UrnSet();
         final Set<IpPort> ipPorts = new HashSet<IpPort>();
         final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
+        
+        urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
+        urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
         
         List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
         map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
@@ -817,9 +813,12 @@ public class SearchResultHandlerTest extends LimeTestCase {
         final HostData hostData = m.mock(HostData.class);
         final Response response = m.mock(Response.class);
         final List<Response> responses = Collections.singletonList(response);
-        final Set<URN> urns = URN.createSHA1AndTTRootUrns(new File("/Users/cjones/Desktop/Equipment.txt"));
+        final Set<URN> urns = new UrnSet();
         final Set<IpPort> ipPorts = new HashSet<IpPort>();
         final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
+        
+        urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
+        urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
         
         List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
         map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));

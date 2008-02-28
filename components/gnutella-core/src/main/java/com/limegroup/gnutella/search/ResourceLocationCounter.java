@@ -75,8 +75,6 @@ public class ResourceLocationCounter {
      * @return
      */
     public int getLocationCount () {
-        // System.out.println(" *** ResourceLocationCounter::getLocationCount().. [POINT-A] whole=" + _wholeCount + "; partial=" + _partialCount + ";");
-        
         return _wholeCount + _partialCount;
     }
     
@@ -117,7 +115,6 @@ public class ResourceLocationCounter {
         if (_isets == null || _isets.size() == 0) {
             _partialCount = 0;
             _percentAvailable = _wholeCount > 0 ? 100 : 0;
-            System.out.println(" *** ResourceLocationCounter::calculateLocationCount().. [POINT-A] pc=" + _partialCount + "; pa=" + _percentAvailable + ";");
             return;
         }
         
@@ -137,7 +134,6 @@ public class ResourceLocationCounter {
         if (iset.contains(Range.createRange(0, _fileSize-1))) {
             _partialCount = 1;
             _percentAvailable = 100;
-            System.out.println(" *** ResourceLocationCounter::calculateLocationCount().. [POINT-B] pc=" + _partialCount + "; pa=" + _percentAvailable + ";");
             return;
         }
         
@@ -149,10 +145,7 @@ public class ResourceLocationCounter {
         //
         for (Range range : iset.getAllIntervalsAsList()) {
             sum += (range.getHigh() - range.getLow()) + 1;
-            System.out.println(" *** ResourceLocationCounter::calculateLocationCount().. [POINT-C] high=" + range.getHigh() + "; low=" + range.getLow() + "; sum=" + sum + ";");
         }
-        
-        System.out.println(" *** ResourceLocationCounter::calculateLocationCount().. [POINT-D] fileSize=" + _fileSize + "; sum=" + sum + ";");
         
         _partialCount = 0;
         
@@ -170,8 +163,6 @@ public class ResourceLocationCounter {
         }
         else
             _percentAvailable = 0;
-        
-        System.out.println(" *** ResourceLocationCounter::calculateLocationCount().. [POINT-E] count=" + _partialCount + "; percent=" + _percentAvailable + ";");
     }
     
 }
