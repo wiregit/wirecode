@@ -14,6 +14,10 @@ public class FinishedTorrentDownload implements Torrent {
 		this.state = active.getState();
 	}
 	
+	public void init() {
+	    
+	}
+	
 	public List<BTLink> getConnections() {
 		return Collections.emptyList();
 	}

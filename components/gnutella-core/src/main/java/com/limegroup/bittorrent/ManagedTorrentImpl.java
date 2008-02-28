@@ -182,10 +182,14 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
 		trackerManager = trackerManagerFactory.getTrackerManager(this);
 		this.torrentDHTManager = torrentDHTManager;
 		
-		//listens to event chunk_verified so peer could be published in DHT
-		torrentManager.addEventListener(this.torrentDHTManager);
 	}
 
+	public void init() {
+	    torrentDHTManager.init();
+	    //listens to event chunk_verified so peer could be published in DHT
+        torrentManager.addEventListener(this.torrentDHTManager);
+	}
+	
 	/* (non-Javadoc)
      * @see com.limegroup.bittorrent.ManagedTorrent#setScraping()
      */
@@ -405,9 +409,16 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
 		FileUtils.writeObject(path, context.getMetaInfo().toMemento());
 	}
 	
-    private void dispatchEvent(TorrentEvent.Type type, String description) {
-        TorrentEvent evt = new TorrentEvent(this, type, this, description);
+	//Wrote this method to test that for a given torrent event,
+	//handleTorrentEvent gets called properly.
+	//This method is package private for testing purposes.
+    void dispatchEvent(TorrentEvent evt) {
         dispatcher.dispatchEvent(evt);
+    }
+	
+	private void dispatchEvent(TorrentEvent.Type type, String description) {
+        TorrentEvent evt = new TorrentEvent(this, type, this, description);
+        dispatchEvent(evt);
     }
     
 	private void dispatchEvent(TorrentEvent.Type type) {
@@ -508,7 +519,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
      * @see com.limegroup.bittorrent.ManagedTorrent#trackerRequestFailed()
      */
 	public void trackerRequestFailed() {
-        //dhtPeerLocator.startSearching();
+        dispatchEvent(TorrentEvent.Type.TRACKER_FAILED);
 	    synchronized(state.getLock()) {	        
 	        if (state.get() == TorrentState.SCRAPING)
 	            state.set(TorrentState.WAITING_FOR_TRACKER);
@@ -625,6 +636,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
 		if (networkInstanceUtils.isMe(to.getAddress(), to.getPort()))
 			return;
 		if (_peers.add(to)) {
+		    LOG.debug("Peer Added: " + to);
 			synchronized(state.getLock()) {
 				if (state.get() == TorrentState.SCRAPING)
 					state.set(TorrentState.CONNECTING);

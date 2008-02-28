@@ -87,7 +87,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 		    setDefaultFileName(btMetaInfo.getName());
 		}
         this.torrentContext = btContextFactory.createBTContext(btMetaInfo);
-        this.torrent = managedTorrentFactory.create(torrentContext);        
+        this.torrent = managedTorrentFactory.create(torrentContext);
+        this.torrent.init();
 	}
 	
 	/**

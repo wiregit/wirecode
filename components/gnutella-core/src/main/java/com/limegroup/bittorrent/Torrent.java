@@ -28,6 +28,8 @@ interface Torrent {
     INVALID // ss
 	};
 	
+	public void init();
+	
 	/**
 	 * @return true if the torrent is complete.
 	 */

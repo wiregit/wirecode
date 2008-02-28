@@ -18,20 +18,22 @@ public class BTConnectionTriple {
     
     private final byte[] ip;
     private final int    port;
-    private final byte[] peerID;
-    private final boolean success; 
+    private final byte[] peerID;    
     
     private static final String IP_KEY      = "IP";
     private static final String PORT_KEY    = "PORT";
     private static final String PEER_ID_KEY = "PEER_ID";
     
-    //TODO throw exception so that the object won't be created
+    /**
+     * Creates a BTConnection instance given an GGEP encoded network information.
+     * @param payload GGEP Encoded network information.
+     * @throws IOException
+     */
     public BTConnectionTriple(byte[] payload) throws IOException{
 
         byte[]  ip      = null;
         int     port    = -1;
         byte[]  peerID  = null;
-        boolean success = false;
         
         try {
             
@@ -39,26 +41,30 @@ public class BTConnectionTriple {
 
             ip      = encoding.getBytes(IP_KEY);
             port    = encoding.getInt(PORT_KEY);
-            peerID  = encoding.getBytes(PEER_ID_KEY);
-            success = true;            
+            peerID  = encoding.getBytes(PEER_ID_KEY);        
             
         } catch (BadGGEPBlockException e) {
-            
-        } catch (BadGGEPPropertyException e) {
+            throw new IOException();
+        } catch (BadGGEPPropertyException e) {            
             LOG.error("BadGGEPPropertyException", e);
+            throw new IOException();
         }
         
         this.ip      = ip;
         this.port    = port;
         this.peerID  = peerID;
-        this.success = success;
     }
     
+    /**
+     * Creates a BTConnection instance for the given network information
+     * @param ip ip address
+     * @param port port number
+     * @param peerID peer id
+     */
     public BTConnectionTriple(byte[] ip, int port, byte[] peerID) {
         this.ip      = ip;
         this.port    = port;
         this.peerID  = peerID;
-        this.success = true;
     }
     
     public byte[] getIP() {
@@ -81,13 +87,5 @@ public class BTConnectionTriple {
         encoding.put(PEER_ID_KEY, this.peerID);
         
         return encoding.toByteArray();
-    }
-    
-    public boolean getSuccess() {
-        return this.success;
-    }
-    
-    public String toString() {
-        return "(" + this.ip + ":" + this.port + " - " + this.peerID + ")";
-    }
+    }   
 }

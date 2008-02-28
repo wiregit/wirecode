@@ -8,6 +8,7 @@ public class DHTEventDispatcherStub implements EventDispatcher<DHTEvent, DHTEven
     }
 
     public void dispatchEvent(DHTEvent event) {
+        System.out.println("torrentmanaged");
     }
 
     public void removeEventListener(DHTEventListener listener) {

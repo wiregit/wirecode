@@ -19,6 +19,7 @@ import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.result.FindValueResult;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.gnutella.ApplicationServices;
@@ -29,13 +30,16 @@ import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 
+@Singleton
 public class DHTPeerLocatorImpl implements DHTPeerLocator {
 
-    // used to identify the DHT
+    /**
+     * Value type associated with DHT lookup for a peer seeding a torrent.
+     */
     private static final DHTValueType BT_PEER_TRIPLE = DHTValueType.valueOf("LimeBT Peer Triple",
             "PEER");
 
-    private static final Log LOG = LogFactory.getLog(DHTPeerPublisher.class);
+    private static final Log LOG = LogFactory.getLog(DHTPeerLocator.class);
 
     private final DHTManager dhtManager;
 
@@ -43,16 +47,23 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
 
     private final NetworkManager networkManager;
 
-    private final ArrayList<ManagedTorrent> torrentWaitingList = new ArrayList<ManagedTorrent>();
+    /**
+     * List of torrents for which a peer is trying to locate a seeder in DHT;
+     * but unable since DHT is unavailable.
+     */
+    private final ArrayList<ManagedTorrent> torrentsWaitingForDHTList = new ArrayList<ManagedTorrent>();
+
 
     @Inject
     DHTPeerLocatorImpl(DHTManager dhtManager, ApplicationServices applicationServices,
             NetworkManager networkManager) {
-
         this.dhtManager = dhtManager;
         this.applicationServices = applicationServices;
         this.networkManager = networkManager;
-        dhtManager.addEventListener(new SearchDHTEventListener());
+    }
+
+    public void init() {
+        dhtManager.addEventListener(new dhtEventListenerForLocator());
     }
 
     /*
@@ -60,43 +71,66 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
      * 
      * @see com.limegroup.bittorrent.DHTPeerLocator#startSearching()
      */
-    public void startSearching(ManagedTorrent managedTorrent) {
+    public void locatePeer(ManagedTorrent managedTorrent) {
+        LOG.debug("In locatePeer");
+        if (managedTorrent.isActive() && !torrentsWaitingForDHTList.contains(managedTorrent)) {
+            LOG.debug("Passed Initial checks");
 
-        LOG.debug("started searching");
-
-        // TODO revise when to release the lock
-        synchronized (dhtManager) {
             URN urn = managedTorrent.getMetaInfo().getURN();
 
             if (urn == null) {
+                LOG.debug("urn not available");
                 return;
             }
 
-            MojitoDHT dht = dhtManager.getMojitoDHT();
-            if (LOG.isDebugEnabled())
-                LOG.debug(dht);
-            if (dht == null || !dht.isBootstrapped()) {
-                LOG.debug("DHT is null or unable to bootstrap"
-                        + torrentWaitingList.contains(managedTorrent));
-                LOG.debug(torrentWaitingList.indexOf(managedTorrent));
-                LOG.debug(managedTorrent);
-                if (!torrentWaitingList.contains(managedTorrent)) {
-                    LOG.debug("Waiting to retry searching");
-                    torrentWaitingList.add(managedTorrent);
+            // holding a lock on DHT to ensure dht does not change status after
+            // we acquired it
+            synchronized (dhtManager) {
+
+                MojitoDHT mojitoDHT = dhtManager.getMojitoDHT();
+                if (LOG.isDebugEnabled())
+                    LOG.debug("DHT:" + mojitoDHT);
+                if (mojitoDHT == null || !mojitoDHT.isBootstrapped()) {
+                    LOG.debug("DHT is null or unable to bootstrap");
+                    torrentsWaitingForDHTList.add(managedTorrent);
+                    return;
                 }
-                return;
+
+                // creates a KUID from torrent's metadata
+                KUID key = KUIDUtils.toKUID(urn);
+                // creates an entity key from the KUID and DHTValueType
+                EntityKey eKey = EntityKey.createEntityKey(key, BT_PEER_TRIPLE);
+
+                // retrieves the future
+                final DHTFuture<FindValueResult> future = mojitoDHT.get(eKey);
+                // handle the result retrieved in the future
+                future.addDHTFutureListener(new PushBTPeerHandler(managedTorrent, mojitoDHT));                
             }
-
-            // creates a KUID from torrent's metadata
-            KUID key = KUIDUtils.toKUID(urn);
-            // creates an entity key from the KUID and DHTValueType
-            EntityKey eKey = EntityKey.createEntityKey(key, BT_PEER_TRIPLE);
-
-            final DHTFuture<FindValueResult> future = dht.get(eKey);
-            future.addDHTFutureListener(new PushBTPeerHandler(managedTorrent, dht));
         }
     }
 
+    /**
+     * Implements the DHTEventListener to perform future attempts at locating a
+     * peer based on DHTEvent.
+     */
+    private class dhtEventListenerForLocator implements DHTEventListener {
+        /**
+         * This method is invoked when a DHTEvent occurs and if DHT is connected
+         * then it tries to locate a peer again.
+         */
+        public void handleDHTEvent(DHTEvent evt) {
+            LOG.debug("In handle event");
+            if (evt.getType() == DHTEvent.Type.CONNECTED) {
+                while (!torrentsWaitingForDHTList.isEmpty()) {
+                    locatePeer(torrentsWaitingForDHTList.remove(0));
+                }
+            }
+        }
+    }
+
+    /**
+     * This class listens to see a result was successfully retrieved.
+     */
     private class PushBTPeerHandler extends DHTFutureAdapter<FindValueResult> {
         private final ManagedTorrent managedTorrent;
 
@@ -109,7 +143,9 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
 
         @Override
         public void handleFutureSuccess(FindValueResult result) {
+            LOG.debug("handle result");
             if (result.isSuccess()) {
+                LOG.debug("successful result");
                 for (DHTValueEntity entity : result.getEntities()) {
                     dispatch(managedTorrent, entity);
                 }
@@ -136,34 +172,31 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
                 }
             }
         }
+        
     }
 
     /**
-     * gets the torrent's location and adds it as an endPoint
+     * Gets the torrent's location and adds it as an endPoint.
      * 
-     * @param entity DHTValueEntity containing the DHTValue we are looking for
-     * @return true if a peer seeding the torrent is found, false otherwise
+     * @param managedTorrent The torrent we are dealing with.
+     * @param entity DHTValueEntity containing the DHTValue we are looking for.
      */
     private void dispatch(ManagedTorrent managedTorrent, DHTValueEntity entity) {
         DHTValue value = entity.getValue();
+        LOG.debug("dispatch entered");
         try {
             final BTConnectionTriple triple = new BTConnectionTriple(value.getValue());
 
-            // TODO check if triple.getSuccess() is needed
-            if (triple.getSuccess() && !isSelf(triple)) {
-                LOG.debug("torrent name in dispatch: " + value);
-                LOG.debug("TRIPLE IP:" + new String(triple.getIP()));
-                LOG.debug("TRIPLE PORT:" + triple.getPort());
-                LOG.debug("TRIPLE PEERID:" + new String(triple.getPeerID()));
+            if (!isSelf(triple)) {
                 try {
-                    LOG.debug("ADDING TORRENT TO PEER LIST");
+                    LOG.debug("Adding torrent location as end point");
                     managedTorrent.addEndpoint(new TorrentLocation(InetAddress
                             .getByName(new String(triple.getIP())), triple.getPort(), triple
                             .getPeerID()));
                 } catch (UnknownHostException e) {
                     LOG.error("UnknownHostException", e);
                 }
-                LOG.debug("DISPATCH SUCCESSFULL");
+                LOG.debug("Successful dispatch");
             }
         } catch (IOException exception) {
             // if the network information stored was incorrect
@@ -171,24 +204,17 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
         }
     }
 
+    /**
+     * Verifies if the network information found in the DHT is not about the
+     * local host.
+     * 
+     * @param triple BTConnectionTriple instance of a peer found in the DHT.
+     * @return Returns whether the location found is the same as local host or
+     *         not
+     */
     private boolean isSelf(BTConnectionTriple triple) {
         return networkManager.getAddress().equals(triple.getIP())
                 && networkManager.getPort() == triple.getPort()
                 && applicationServices.getMyBTGUID().equals(triple.getPeerID());
     }
-
-    private class SearchDHTEventListener implements DHTEventListener {
-
-        public SearchDHTEventListener() {
-        }
-
-        public void handleDHTEvent(DHTEvent evt) {
-            if (evt.getType() == DHTEvent.Type.CONNECTED) {
-                while (!torrentWaitingList.isEmpty()) {
-                    startSearching(torrentWaitingList.remove(0));
-                }
-            }
-        }
-    }
-
 }

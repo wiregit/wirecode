@@ -30,47 +30,7 @@ public interface ManagedTorrent extends Torrent, BTLinkListener {
      */
     TorrentContext getContext();
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#isComplete()
-     */
-    boolean isComplete();
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#start()
-     */
-    void start();
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#stop()
-     */
-    void stop();
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#pause()
-     */
-    void pause();
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#resume()
-     */
-    boolean resume();
-
     void trackerRequestFailed();
-
-    /**
-     * @return the state of this torrent
-     */
-    TorrentState getState();
 
     /**
      * adds location to try
@@ -102,81 +62,21 @@ public interface ManagedTorrent extends Torrent, BTLinkListener {
     boolean addConnection(final BTLink btc);
 
     /**
-     * @return the next time we should announce to the tracker
-     */
-    long getNextTrackerRequestTime();
-
-    /**
      * @return a peer we should try to connect to next
      */
     TorrentLocation getTorrentLocation();
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#isPaused()
-     */
-    boolean isPaused();
 
     /**
      * two torrents are equal if their infoHashes are.
      */
     boolean equals(Object o);
 
-    /**
-     * @return if the torrent is active - either downloading or seeding, saving
-     *         or verifying
-     */
-    boolean isActive();
-
-    /**
-     * @return if the torrent can be paused
-     */
-    boolean isPausable();
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#getNumConnections()
-     */
-    int getNumConnections();
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#getNumPeers()
-     */
-    int getNumPeers();
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#getNumBusyPeers()
-     */
-    int getNumNonInterestingPeers();
-
-    int getNumChockingPeers();
-
     long getTotalUploaded();
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#getTotalDownloaded()
-     */
-    long getTotalDownloaded();
 
     /**
      * @return the ratio of uploaded / downloaded data.
      */
     float getRatio();
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#getAmountLost()
-     */
-    long getAmountLost();
 
     boolean hasNonBusyLocations();
 
@@ -202,22 +102,6 @@ public interface ManagedTorrent extends Torrent, BTLinkListener {
      */
     ScheduledExecutorService getNetworkScheduledExecutorService();
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#measureBandwidth()
-     */
-    void measureBandwidth();
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.Torrent#getMeasuredBandwidth(boolean)
-     */
-    float getMeasuredBandwidth(boolean downstream);
-
-    int getTriedHostCount();
-
     /**
      * @return true if this torrent is currently uploading
      */
@@ -230,35 +114,5 @@ public interface ManagedTorrent extends Torrent, BTLinkListener {
      */
     boolean isSuspended();
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.BTLinkListener#linkClosed(com.limegroup.bittorrent.BTLink)
-     */
-    public void linkClosed(BTLink closed);
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.BTLinkListener#countDownloaded(int)
-     */
-    public void countDownloaded(int downloaded);
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.BTLinkListener#linkInterested(com.limegroup.bittorrent.BTLink)
-     */
-    public void linkInterested(BTLink interested);
-
-    /*
-     * 0
-     * (non-Javadoc)
-     * 
-     * @see com.limegroup.bittorrent.BTLinkListener#linkNotInterested(com.limegroup.bittorrent.BTLink)
-     */
-    public void linkNotInterested(BTLink notInterested);
-    
     public void chunkVerified(int in);
-
 }

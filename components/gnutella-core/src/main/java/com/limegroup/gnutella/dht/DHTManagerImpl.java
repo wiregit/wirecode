@@ -276,7 +276,7 @@ public class DHTManagerImpl implements DHTManager {
      * event was dispatched and the time the event is received
      * by a listener.
      */
-    public synchronized void addEventListener(DHTEventListener listener) {
+    public synchronized void addEventListener(DHTEventListener listener) {        
         if(dhtEventListeners.contains(listener))
             throw new IllegalArgumentException("Listener " + listener + " already registered");
         
@@ -293,7 +293,7 @@ public class DHTManagerImpl implements DHTManager {
      * No events will be received in a different order than they were
      * dispatched, though.
      */
-    public synchronized void dispatchEvent(final DHTEvent event) {
+    public synchronized void dispatchEvent(final DHTEvent event) {        
         if(!dhtEventListeners.isEmpty()) {
             final List<DHTEventListener> listeners = new ArrayList<DHTEventListener>(dhtEventListeners);
             dispatchExecutor.execute(new Runnable() {

@@ -1,6 +1,7 @@
 package com.limegroup.bittorrent.dht;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -17,7 +18,7 @@ import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.impl.DHTValueImpl;
-import org.limewire.mojito.result.StoreResult;
+import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
 import org.limewire.util.BaseTestCase;
@@ -27,6 +28,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.ManagedTorrent;
+import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
@@ -34,8 +36,8 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 
-public class DHTPeerPublisherImplTest extends BaseTestCase {
-    private static String HASH = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
+public class DHTPeerLocatorImplTest extends BaseTestCase {
+    private static final String HASH = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
 
     private static final DHTValueType BT_PEER_TRIPLE = DHTValueType.valueOf("LimeBT Peer Triple",
             "PEER");
@@ -44,12 +46,12 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
 
     final byte[] id = (new String("123")).getBytes();
 
-    public DHTPeerPublisherImplTest(String name) {
+    public DHTPeerLocatorImplTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(DHTPeerPublisherImplTest.class);
+        return buildTestSuite(DHTPeerLocatorImplTest.class);
     }
 
     private Mockery context;
@@ -74,13 +76,14 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
 
     private Module module;
 
-    private DHTPeerPublisher dhtPeerPublisher;
+    private DHTPeerLocator dhtPeerLocator;
 
     private KUID kuid;
 
-    private EntityKey eKey;
+    private EntityKey eKey;    
 
     public void setUp() throws Exception {
+        context = new Mockery();
         context = new Mockery();
         managedTorrentOne = context.mock(ManagedTorrent.class);
         managedTorrentTwo = context.mock(ManagedTorrent.class);
@@ -109,16 +112,16 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
         };
 
         Injector inj = LimeTestUtils.createInjector(module);
-
-        dhtPeerPublisher = inj.getInstance(DHTPeerPublisher.class);
+        dhtPeerLocator = inj.getInstance(DHTPeerLocator.class);
+        
         kuid = KUIDUtils.toKUID(urn);
         eKey = EntityKey.createEntityKey(kuid, BT_PEER_TRIPLE);
     }
 
-    // Tests if publishYourself properly stores the torrents in waiting list if
-    // a DHT was not available or did not support bootstrapping. It also test to
+    // Tests if locatePeer properly stores the torrents in waiting list if a DHT
+    // was not available or did not support bootstrapping. It also test to
     // ensure duplicate torrents do not get stored in the waiting list.
-    public void testpublishYourselfWhichShouldPutTorrentsInWaitingList() throws Exception {
+    public void testLocatePeerWhichShouldPutTorrentsInWaitingList() throws Exception {
 
         context.checking(new Expectations() {
             {
@@ -141,31 +144,26 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
                 exactly(2).of(btMetaInfo).getURN();
                 will(returnValue(urn));
 
-                exactly(3).of(networkManager).acceptedIncomingConnection();
-                will(returnValue(true));
-
                 never(dht).get(with(any(EntityKey.class)));
             }
         });
 
         // should store these torrents in the waiting list
-        dhtPeerPublisher.publishYourself(managedTorrentOne);
-        dhtPeerPublisher.publishYourself(managedTorrentTwo);
+        dhtPeerLocator.locatePeer(managedTorrentOne);
+        dhtPeerLocator.locatePeer(managedTorrentTwo);
         // should not store this in waiting list as it should already be stored
-        dhtPeerPublisher.publishYourself(managedTorrentOne);
-        context.assertIsSatisfied();
+        dhtPeerLocator.locatePeer(managedTorrentOne);
 
+        context.assertIsSatisfied();
     }
 
-    // Tests if publishYourself properly publishes the local host in DHT.
-    public void testpublishYourselfWhichShouldPubilshAPeerInDHT() throws Exception {
+    // Tests if locatePeer properly locates a peer in DHT.
+    public void testLocatePeerWhichShouldLocateAPeerInDHT() throws Exception {          
 
         context.checking(new Expectations() {
             {
                 atLeast(2).of(networkManager).getAddress();
                 will(returnValue(ip));
-                atLeast(1).of(networkManager).getPort();
-                will(returnValue(5555));
                 atLeast(1).of(applicationServices).getMyBTGUID();
                 will(returnValue(id));
 
@@ -180,6 +178,9 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
         BTConnectionTriple btct = new BTConnectionTriple(networkManager.getAddress(), 4444,
                 applicationServices.getMyBTGUID());
 
+        final TorrentLocation torLoc = new TorrentLocation(InetAddress.getByName(new String(btct
+                .getIP())), btct.getPort(), btct.getPeerID());
+
         byte[] msg = btct.getEncoded();
 
         final DHTValue dhtValue = new DHTValueImpl(BT_PEER_TRIPLE, Version.ZERO, msg);
@@ -192,8 +193,8 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
         Collection<EntityKey> entityKeys = new ArrayList<EntityKey>();
         entityKeys.add(eKey);
 
-        StoreResult result = new StoreResult(null, entities);
-        final DHTFuture<StoreResult> future = new FixedDHTFuture<StoreResult>(result);
+        FindValueResult result = new FindValueResult(eKey, null, entities, entityKeys, 123123L, 10);
+        final DHTFuture<FindValueResult> future = new FixedDHTFuture<FindValueResult>(result);
 
         context.checking(new Expectations() {
             {
@@ -203,27 +204,24 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
                 one(dht).isBootstrapped();
                 will(returnValue(true));
 
-                atLeast(2).of(managedTorrentOne).isActive();
+                one(managedTorrentOne).isActive();
                 will(returnValue(true));
                 one(managedTorrentOne).getMetaInfo();
                 will(returnValue(btMetaInfo));
 
-                one(btMetaInfo).getURN();
+                exactly(1).of(btMetaInfo).getURN();
                 will(returnValue(urn));
 
-                atLeast(1).of(dht).put(with(any(KUID.class)), with(any(DHTValue.class)));
+                atLeast(1).of(dht).get(with(equal(eKey)));
                 will(returnValue(future));
 
-                atLeast(2).of(networkManager).acceptedIncomingConnection();
-                will(returnValue(true));
+                atLeast(1).of(managedTorrentOne).addEndpoint(with(equal(torLoc)));                
+
             }
         });
 
         // store in waiting list
-        dhtPeerPublisher.publishYourself(managedTorrentOne);
-
-        // call made to ensure the torrent got stored as published
-        dhtPeerPublisher.publishYourself(managedTorrentOne);
+        dhtPeerLocator.locatePeer(managedTorrentOne);        
 
         context.assertIsSatisfied();
     }
