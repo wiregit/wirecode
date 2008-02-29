@@ -31,15 +31,15 @@ public class LimeWirePlugin implements Plugin {
     }
 
     public void shutdown() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        //ProviderManager.getInstance().removeExtensionProvider(LW_SERVICE_NAME, LW_SERVICE_NS);
     }
 
     public boolean canShutDown() {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        return true;
     }
 
     public void uninstall() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        ProviderManager.getInstance().removeExtensionProvider(LW_SERVICE_NAME, LW_SERVICE_NS);
     }
     
     private static class LimeWirePacketFilter implements PacketFilter {
