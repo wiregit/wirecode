@@ -88,8 +88,7 @@ public class QueryHandler extends IQHandler {
         keyword = keyword.toLowerCase();
         String fileName = shared.getName().toLowerCase();
         if(fileName.contains(keyword)) {
-            DefaultElement reply = new DefaultElement("reply");
-            
+            DefaultElement reply = new DefaultElement("reply");            
             queryReply.add();
         }
         
