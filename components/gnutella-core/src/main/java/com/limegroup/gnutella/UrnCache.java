@@ -235,22 +235,26 @@ public final class UrnCache {
     
     /**
      * Loads values from cache file, if available.
+     * 
+     * @return null if the file does not exist or there was an error
+     * reading the map from the file.
      */
     private static Map readMap(File file) {
-        Map result;
+        if (!file.exists()) {
+            return null;
+        }
         ObjectInputStream ois = null;
 		try {
             ois = new ConverterObjectInputStream(
                     new BufferedInputStream(
                         new FileInputStream(file)));
-            result = (Map)ois.readObject();
+            return (Map)ois.readObject();
 	    } catch(Throwable t) {
 	        LOG.error("Unable to read UrnCache", t);
-	        result = null;
+	        return null;
 	    } finally {
             IOUtils.close(ois);
         }
-        return result;
 	}
 
 	/**

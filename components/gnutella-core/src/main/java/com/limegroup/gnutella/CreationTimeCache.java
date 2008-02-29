@@ -413,9 +413,13 @@ public final class CreationTimeCache {
 
 
     /**
-     * Loads values from cache file, if available
+     * Loads values from cache file, if available.
      */
-    private Map<URN, Long> createMap() {
+    Map<URN, Long> createMap() {
+        if (!CTIME_CACHE_FILE.exists()) {
+            dirty = true;
+            return new HashMap<URN, Long>();
+        }
         ObjectInputStream ois = null;
 		try {
             ois = new ConverterObjectInputStream(new BufferedInputStream(

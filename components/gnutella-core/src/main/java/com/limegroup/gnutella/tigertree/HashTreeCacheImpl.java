@@ -205,8 +205,8 @@ public final class HashTreeCacheImpl implements HashTreeCache {
         Object roots;
         Object trees;
         try {
-            roots = FileUtils.readObject(ROOT_CACHE_FILE);
-            trees = FileUtils.readObject(TREE_CACHE_FILE);
+            roots = ROOT_CACHE_FILE.exists() ? FileUtils.readObject(ROOT_CACHE_FILE) : new HashMap();
+            trees = TREE_CACHE_FILE.exists() ? FileUtils.readObject(TREE_CACHE_FILE) : new HashMap();
         } catch (Throwable t) {
             LOG.debug("Error reading from disk.", t);
             roots = new HashMap();

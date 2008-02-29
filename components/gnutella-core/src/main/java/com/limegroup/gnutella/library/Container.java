@@ -165,11 +165,14 @@ class Container {
      * Reads a Map from disk.
      */
     private Map<String, Collection<File>> readFromDisk() {
-        File f = new File(CommonUtils.getUserSettingsDir(), filename);
+        File file = new File(CommonUtils.getUserSettingsDir(), filename);
+        if (!file.exists()) {
+            return new HashMap<String, Collection<File>>();
+        }
         ObjectInputStream ois = null;
         Map map = null;
         try {
-            ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
+            ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
             map = (Map)ois.readObject();
         } catch(ClassCastException cce) {
             LOG.warn("Not a map!", cce);
@@ -181,39 +184,39 @@ class Container {
             IOUtils.close(ois);
         }
         
-        if (map != null) {
-        	HashMap<String, Collection<File>> toReturn = new HashMap<String, Collection<File>>(map.size());
-        	for (Iterator i = map.entrySet().iterator(); i.hasNext();) {
-        		Map.Entry entry = (Map.Entry)i.next();
-                if(!(entry.getKey() instanceof String)) {
-                    if(LOG.isWarnEnabled())
-                        LOG.warn("Ignoring key: " + entry.getKey());
-                    continue;
-                }
-                String k = (String)entry.getKey();
-                if(!(entry.getValue() instanceof Collection)) {
-                    if(LOG.isWarnEnabled())
-                        LOG.warn("Ignoring value: " + entry.getValue());
-                    continue;
-                }
-                Collection<File> v = GenericsUtils.scanForCollection(entry.getValue(), File.class,
-                                                                     GenericsUtils.ScanMode.REMOVE);
-        		if(v instanceof SortedSet)
-        			toReturn.put(k, Collections.synchronizedSortedSet((SortedSet<File>)v));
-        		else if(v instanceof Set)
-        			toReturn.put(k, Collections.synchronizedSet((Set<File>)v));
-        		else if(v instanceof List)
-        			toReturn.put(k, Collections.synchronizedList((List<File>)v));
-        		else {
-        			if(LOG.isWarnEnabled())
-        				LOG.warn("Update to clone! key: " + k);
-        			toReturn.put(k, v);
-        		}
-        	}
-        	return toReturn;
+        if (map == null) {
+            return new HashMap<String, Collection<File>>();
         }
-        else {
-        	return new HashMap<String, Collection<File>>();
+        
+        HashMap<String, Collection<File>> toReturn = new HashMap<String, Collection<File>>(map.size());
+        for (Iterator i = map.entrySet().iterator(); i.hasNext();) {
+            Map.Entry entry = (Map.Entry)i.next();
+            if(!(entry.getKey() instanceof String)) {
+                if(LOG.isWarnEnabled())
+                    LOG.warn("Ignoring key: " + entry.getKey());
+                continue;
+            }
+            String k = (String)entry.getKey();
+            if(!(entry.getValue() instanceof Collection)) {
+                if(LOG.isWarnEnabled())
+                    LOG.warn("Ignoring value: " + entry.getValue());
+                continue;
+            }
+            Collection<File> v = GenericsUtils.scanForCollection(entry.getValue(), File.class,
+                    GenericsUtils.ScanMode.REMOVE);
+            if(v instanceof SortedSet)
+                toReturn.put(k, Collections.synchronizedSortedSet((SortedSet<File>)v));
+            else if(v instanceof Set)
+                toReturn.put(k, Collections.synchronizedSet((Set<File>)v));
+            else if(v instanceof List)
+                toReturn.put(k, Collections.synchronizedList((List<File>)v));
+            else {
+                if(LOG.isWarnEnabled())
+                    LOG.warn("Update to clone! key: " + k);
+                toReturn.put(k, v);
+            }
         }
+        return toReturn;
     }
+
 }
