@@ -58,6 +58,7 @@ import com.limegroup.gnutella.downloader.VerifyingFileFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
+import com.limegroup.gnutella.geocode.Geocoder;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
@@ -724,4 +725,7 @@ public class LimeWireCore {
         return injector.getInstance(LWSManager.class);
     }
     
+    public Geocoder getGeocoder() {
+        return injector.getInstance(Geocoder.class);
+    }
 }

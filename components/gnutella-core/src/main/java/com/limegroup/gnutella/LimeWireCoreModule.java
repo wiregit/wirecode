@@ -124,6 +124,8 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.LocalIPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.filters.SpamFilterFactoryImpl;
+import com.limegroup.gnutella.geocode.Geocoder;
+import com.limegroup.gnutella.geocode.GeocoderImpl;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactoryImpl;
 import com.limegroup.gnutella.handshaking.HandshakeServices;
@@ -321,6 +323,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ConnectionCapabilities.class).to(ConnectionCapabilitiesImpl.class);
         bind(ConnectionBandwidthStatistics.class).to(ConnectionBandwidthStatisticsImpl.class);
         bind(LWSManager.class).to(LWSManagerImpl.class);
+        bind(Geocoder.class).to(GeocoderImpl.class);
         bind(LWSIntegrationServices.class).to(LWSIntegrationServicesImpl.class);
         bind(LWSIntegrationServicesDelegate.class).to(DownloadManager.class);
         bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderImpl.class);
