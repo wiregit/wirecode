@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.apache.http.entity.AbstractHttpEntity;
-import org.apache.http.nio.ContentDecoder;
 import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.IOControl;
 import org.apache.http.nio.entity.ProducingNHttpEntity;
@@ -75,11 +74,6 @@ public abstract class AbstractProducingNHttpEntity extends AbstractHttpEntity im
      * Throws <code>UnsupportedOperationException</code>.
      */
     public void writeTo(OutputStream outstream) throws IOException {
-        throw new UnsupportedOperationException();
-    }
-
-    public int consumeContent(ContentDecoder decoder, IOControl ioctrl)
-            throws IOException {
         throw new UnsupportedOperationException();
     }
 
