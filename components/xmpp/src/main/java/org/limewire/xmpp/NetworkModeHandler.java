@@ -31,6 +31,10 @@ public class NetworkModeHandler extends IQHandler {
     public List<JID> getUltrapeers() {
         return ultrapeers;
     }
+    
+    public List<JID> getLeaves() {
+        return leaves;
+    }
 
     public IQ handleIQ(IQ packet) throws UnauthorizedException {
         String mode = packet.getChildElement().getText();
