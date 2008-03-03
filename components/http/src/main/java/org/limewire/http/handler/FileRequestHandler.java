@@ -4,13 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.ProtocolException;
+import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.entity.BasicFileTransferMonitor;
 import org.limewire.http.entity.FileNIOEntity;
 import org.limewire.http.entity.NotFoundEntity;
@@ -21,7 +23,7 @@ import org.limewire.http.entity.NotFoundEntity;
  * served. Requests that contain relative path names are rejected. Browsing of
  * directories is not supported.
  */
-public class FileRequestHandler implements HttpRequestHandler {
+public class FileRequestHandler extends SimpleNHttpRequestHandler {
 
     private String indexFilename = "index.html";
     
@@ -64,6 +66,11 @@ public class FileRequestHandler implements HttpRequestHandler {
     
     public int getTimeout() {
         return timeout;
+    }
+    
+    public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+            HttpContext context) throws HttpException, IOException {
+        return null;
     }
     
     public void handle(HttpRequest request, HttpResponse response,

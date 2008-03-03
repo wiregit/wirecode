@@ -7,17 +7,19 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.nio.ContentEncoder;
+import org.apache.http.nio.ContentEncoderChannel;
 import org.apache.http.nio.IOControl;
+import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestHandler;
-import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.http.HttpCoreUtils;
-import org.limewire.http.nio.ContentEncoderChannel;
+import org.limewire.http.entity.AbstractProducingNHttpEntity;
 import org.limewire.nio.channel.NoInterestWritableByteChannel;
 
 import com.google.inject.Inject;
@@ -40,7 +42,7 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
  * Only supports the application/x-gnutella-packets mime-type, browsing through
  * HTML is not supported.
  */
-public class BrowseRequestHandler implements HttpRequestHandler {
+public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
 
     private static final Log LOG = LogFactory.getLog(BrowseRequestHandler.class);
     
@@ -57,6 +59,11 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         this.queryRequestFactory = queryRequestFactory;
         this.fileManager = fileManager;
         this.messageRouter = messageRouter;
+    }
+    
+    public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+            HttpContext context) throws HttpException, IOException {
+        return null;
     }
 
     public void handle(HttpRequest request, HttpResponse response,
@@ -80,7 +87,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         sessionManager.sendResponse(uploader, response);
     }
 
-    public class BrowseResponseEntity extends AbstractHttpNIOEntity {
+    public class BrowseResponseEntity extends AbstractProducingNHttpEntity {
 
         private static final int RESPONSES_PER_REPLY = 10;
         
@@ -161,8 +168,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             }
         }
 
-        @Override
-        public void finished() {
+        public void finish() {
             deactivateTimeout();
             sender = null;
         }

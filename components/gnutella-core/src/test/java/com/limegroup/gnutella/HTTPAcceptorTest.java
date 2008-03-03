@@ -4,16 +4,19 @@ import java.io.IOException;
 
 import junit.framework.Test;
 
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.nio.NHttpConnection;
+import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.protocol.NHttpRequestHandler;
+import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestHandler;
 import org.cybergarage.http.HTTPStatus;
 import org.limewire.http.HttpAcceptorListener;
 import org.limewire.http.HttpClientUtils;
@@ -98,10 +101,6 @@ public class HTTPAcceptorTest extends BaseTestCase {
             assertTrue(listener.opened);
             // bad request, so connection should have been closed
             assertTrue(listener.closed);
-            assertNotNull(listener.request);
-            assertEquals("GET", listener.request.getRequestLine().getMethod());
-            assertEquals("/", listener.request.getRequestLine().getUri());
-            assertEquals(HttpVersion.HTTP_1_1, listener.request.getRequestLine().getProtocolVersion());
             LimeTestUtils.waitForNIO();
             LimeTestUtils.waitForNIO();
             assertNotNull(listener.response);
@@ -111,7 +110,6 @@ public class HTTPAcceptorTest extends BaseTestCase {
 
         listener.opened = false;
         listener.closed = false;
-        listener.request = null;
         listener.response = null;
 
         httpAcceptor.removeAcceptorListener(listener);
@@ -120,7 +118,6 @@ public class HTTPAcceptorTest extends BaseTestCase {
             client.execute(method);
             assertFalse(listener.opened);
             assertFalse(listener.closed);
-            assertNull(listener.request);
             assertNull(listener.response);
         } finally {
             HttpClientUtils.releaseConnection(response);
@@ -128,7 +125,12 @@ public class HTTPAcceptorTest extends BaseTestCase {
     }
 
     public void testRegisterUnregisterHandler() throws Exception {
-        HttpRequestHandler handler = new HttpRequestHandler() {
+        NHttpRequestHandler handler = new SimpleNHttpRequestHandler() {
+            public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+                    HttpContext context) throws HttpException, IOException {
+                return null;
+            }
+            
             public void handle(HttpRequest request, HttpResponse response,
                                HttpContext context) throws org.apache.http.HttpException,
                     IOException {
@@ -168,8 +170,6 @@ public class HTTPAcceptorTest extends BaseTestCase {
 
         HttpResponse response;
 
-        HttpRequest request;
-
         public void connectionClosed(NHttpConnection conn) {
             this.conn = conn;
             this.closed = true;
@@ -178,11 +178,6 @@ public class HTTPAcceptorTest extends BaseTestCase {
         public void connectionOpen(NHttpConnection conn) {
             this.conn = conn;
             this.opened = true;
-        }
-
-        public void requestReceived(NHttpConnection conn, HttpRequest request) {
-            this.conn = conn;
-            this.request = request;
         }
 
         public void responseSent(NHttpConnection conn, HttpResponse response) {

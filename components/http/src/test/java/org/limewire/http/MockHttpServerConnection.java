@@ -18,6 +18,7 @@ public class MockHttpServerConnection extends DefaultNHttpServerConnection {
     public MockHttpServerConnection(IOSession session,
             HttpRequestFactory requestFactory, HttpParams params) {
         super(session, requestFactory, new HeapByteBufferAllocator(), params);
+        getContext().setAttribute(HttpIOReactor.IO_SESSION_KEY, session);
     }
 
     public void setHttpRequest(HttpRequest request) {

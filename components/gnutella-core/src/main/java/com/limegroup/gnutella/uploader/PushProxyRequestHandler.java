@@ -9,12 +9,14 @@ import java.util.StringTokenizer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.Base32;
 
@@ -31,7 +33,7 @@ import com.limegroup.gnutella.messages.Message.Network;
  * Handles push proxy requests by sending a push request to the requested
  * client.
  */
-public class PushProxyRequestHandler implements HttpRequestHandler {
+public class PushProxyRequestHandler extends SimpleNHttpRequestHandler {
 
     private static final Log LOG = LogFactory.getLog(PushProxyRequestHandler.class);
 
@@ -58,6 +60,11 @@ public class PushProxyRequestHandler implements HttpRequestHandler {
         
         this.sessionManager = sessionManager;
         this.messageRouter = messageRouter;
+    }
+    
+    public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+            HttpContext context) throws HttpException, IOException {
+        return null;
     }
 
     public void handle(HttpRequest request, HttpResponse response,

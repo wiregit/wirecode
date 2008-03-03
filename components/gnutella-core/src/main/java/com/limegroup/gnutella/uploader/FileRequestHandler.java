@@ -5,13 +5,15 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.BasicHeaderProcessor;
 import org.limewire.http.MalformedHeaderException;
 import org.limewire.http.RangeHeaderInterceptor;
@@ -51,7 +53,7 @@ import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;
  * @see FileResponseEntity
  * @see THEXResponseEntity
  */
-public class FileRequestHandler implements HttpRequestHandler {
+public class FileRequestHandler extends SimpleNHttpRequestHandler {
 
     private static final Log LOG = LogFactory.getLog(FileRequestHandler.class);
 
@@ -110,6 +112,11 @@ public class FileRequestHandler implements HttpRequestHandler {
         this.tigerTreeCache = tigerTreeCache;
         this.pushEndpointFactory = pushEndpointFactory;
         this.tigerWriteHandlerFactory = tigerWriteHandlerFactory;
+    }
+    
+    public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+            HttpContext context) throws HttpException, IOException {
+        return null;
     }
 
     public void handle(HttpRequest request, HttpResponse response, HttpContext context)

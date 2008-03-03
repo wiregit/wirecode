@@ -6,7 +6,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 
@@ -33,7 +33,7 @@ public class FreeLoaderRequestHandler implements HttpRequestHandler {
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
         response.setStatusCode(HttpStatus.SC_OK);
-        StringEntity entity = new StringEntity(FREELOADER_RESPONSE_PAGE);
+        NStringEntity entity = new NStringEntity(FREELOADER_RESPONSE_PAGE);
         entity.setContentType(Constants.HTML_MIME_TYPE);
         response.setEntity(entity);
     }

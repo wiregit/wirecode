@@ -2,6 +2,7 @@ package org.limewire.http;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.Executor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,16 +31,19 @@ public class HttpIOReactor implements DispatchedIOReactor {
     private final HttpParams params;
     
     protected volatile IOEventDispatch eventDispatch = null;
+    
+    private final Executor ioExecutor;
 
     // copied from DefaultServerIOEventDispatch
     private static final String NHTTP_CONN = "NHTTP_CONN";
     
-    public HttpIOReactor(final HttpParams params) {
+    public HttpIOReactor(final HttpParams params, final Executor ioExecutor) {
         if (params == null) {
             throw new IllegalArgumentException();
         }
         
         this.params = params;
+        this.ioExecutor = ioExecutor;
     }
     
     public void execute(IOEventDispatch eventDispatch) throws IOException {
@@ -64,7 +68,7 @@ public class HttpIOReactor implements DispatchedIOReactor {
      * Connects <code>socket</code> to LimeWire's NIO layer. 
      */
     protected NHttpConnection connectSocket(AbstractNBSocket socket, Object attachment, String word) {
-        final HttpIOSession session = new HttpIOSession(socket);        
+        final HttpIOSession session = new HttpIOSession(socket, ioExecutor);        
         
         session.setAttribute(IOSession.ATTACHMENT_KEY, attachment);
         session.setSocketTimeout(HttpConnectionParams.getSoTimeout(this.params));

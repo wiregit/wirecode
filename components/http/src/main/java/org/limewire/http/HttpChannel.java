@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.nio.reactor.IOEventDispatch;
-import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelWriter;
 import org.limewire.nio.channel.InterestReadableByteChannel;
@@ -135,7 +134,7 @@ public class HttpChannel implements ByteChannel, ChannelReadObserver,
      */
     public void shutdown() {
         if (!closed.getAndSet(true)) {
-            NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
+            session.getIoExecutor().execute(new Runnable() {
                 public void run() {
                     eventDispatch.disconnected(session);
                 }               

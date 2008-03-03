@@ -9,7 +9,7 @@ public class HttpIOReactorTest extends TestCase {
 
     public void testHttpIOReactor() throws Exception {
         try {
-            new HttpIOReactor(null);
+            new HttpIOReactor(null, null);
             fail("Expected IllegalArgumentException");
         } catch (IllegalArgumentException expected) {
         }
@@ -17,7 +17,7 @@ public class HttpIOReactorTest extends TestCase {
 
     public void testExecute() throws Exception {
         HttpParams params = new BasicHttpParams();
-        HttpIOReactor reactor = new HttpIOReactor(params);
+        HttpIOReactor reactor = new HttpIOReactor(params, null);
         try {
             reactor.execute(null);
             fail("Expected IllegalArgumentException");
@@ -27,7 +27,7 @@ public class HttpIOReactorTest extends TestCase {
 
     public void testShutdown() throws Exception {
         HttpParams params = new BasicHttpParams();
-        HttpIOReactor reactor = new HttpIOReactor(params);
+        HttpIOReactor reactor = new HttpIOReactor(params, null);
         try {
             reactor.shutdown();
             fail("Expected UnsupportedOperationException");

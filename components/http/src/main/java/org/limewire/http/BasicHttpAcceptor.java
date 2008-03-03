@@ -11,24 +11,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.HttpStatus;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
 import org.apache.http.nio.NHttpConnection;
+import org.apache.http.nio.protocol.NHttpRequestHandler;
+import org.apache.http.nio.protocol.NHttpRequestHandlerRegistry;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpProcessor;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandlerRegistry;
@@ -57,7 +54,7 @@ public class BasicHttpAcceptor implements ConnectionAcceptor {
 
     private final String[] supportedMethods;
 
-    private final HttpRequestHandlerRegistry registry;
+    private final NHttpRequestHandlerRegistry registry;
 
     private final SynchronizedHttpProcessor processor;
 
@@ -77,7 +74,7 @@ public class BasicHttpAcceptor implements ConnectionAcceptor {
         this.params = params;
         this.supportedMethods = supportedMethods;
         
-        this.registry = new SynchronizedHttpRequestHandlerRegistry();
+        this.registry = new SynchronizedNHttpRequestHandlerRegistry();
         this.processor = new SynchronizedHttpProcessor();
         
         initializeDefaultInterceptor();
@@ -119,12 +116,12 @@ public class BasicHttpAcceptor implements ConnectionAcceptor {
 
         responseFactory = new DefaultHttpResponseFactory();
 
-        HttpServiceHandler serviceHandler = new HttpServiceHandler(processor,
+        ExtendedAsyncNHttpServiceHandler serviceHandler = new ExtendedAsyncNHttpServiceHandler(processor,
                 responseFactory, new DefaultConnectionReuseStrategy(), params);
         serviceHandler.setEventListener(connectionListener);
         serviceHandler.setHandlerResolver(this.registry);
 
-        this.reactor = new HttpIOReactor(params);
+        this.reactor = new HttpIOReactor(params, NIODispatcher.instance().getScheduledExecutorService());
         IOEventDispatch ioEventDispatch = new DefaultServerIOEventDispatch(
                 serviceHandler, params);
         try {
@@ -187,34 +184,6 @@ public class BasicHttpAcceptor implements ConnectionAcceptor {
         
         return reactor;
     }
-    
-    /* Simulates the processing of request for testing. */
-    public HttpResponse testProcess(HttpRequest request) throws IOException,
-            HttpException {
-        HttpContext context = new BasicHttpContext(null);
-        HttpResponse response = responseFactory.newHttpResponse(request
-                .getRequestLine().getProtocolVersion(), HttpStatus.SC_OK, context);
-        response.setParams(params);
-
-        // HttpContextParams.setLocal(context, true);
-        context.setAttribute(ExecutionContext.HTTP_REQUEST, request);
-        context.setAttribute(ExecutionContext.HTTP_RESPONSE, response);
-
-        processor.process(request, context);
-
-        HttpRequestHandler handler = null;
-        if (this.registry != null) {
-            String requestURI = request.getRequestLine().getUri();
-            handler = this.registry.lookup(requestURI);
-        }
-        if (handler != null) {
-            handler.handle(request, response, context);
-        } else {
-            response.setStatusCode(HttpStatus.SC_NOT_IMPLEMENTED);
-        }
-
-        return response;
-    }
 
     /**
      * Removes <code>listener</code> from the list of acceptor listeners.
@@ -256,7 +225,7 @@ public class BasicHttpAcceptor implements ConnectionAcceptor {
      * @param handler the handler that processes the request
      */
     public void registerHandler(final String pattern,
-            final HttpRequestHandler handler) {
+            final NHttpRequestHandler handler) {
         registry.register(pattern, handler);
     }
 
@@ -352,17 +321,6 @@ public class BasicHttpAcceptor implements ConnectionAcceptor {
             LOG.debug("HTTP protocol error", e);
             for (HttpAcceptorListener listener : acceptorListeners) {
                 listener.connectionClosed(conn);
-            }
-        }
-
-        public void requestReceived(NHttpConnection conn, HttpRequest request) {
-            assert NIODispatcher.instance().isDispatchThread();
-            
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Processing request: " + request.getRequestLine());
-            }
-            for (HttpAcceptorListener listener : acceptorListeners) {
-                listener.requestReceived(conn, request);
             }
         }
 

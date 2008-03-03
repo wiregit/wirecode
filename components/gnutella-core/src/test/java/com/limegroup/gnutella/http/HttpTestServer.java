@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/test/java/org/apache/http/nio/mockup/TestHttpServer.java $
- * $Revision: 1.4 $
- * $Date: 2008-02-11 20:19:09 $
+ * $Revision: 1.5 $
+ * $Date: 2008-03-03 22:04:47 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -36,8 +36,10 @@ import java.io.IOException;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
+import org.apache.http.nio.protocol.AsyncNHttpServiceHandler;
 import org.apache.http.nio.protocol.BufferingHttpServiceHandler;
 import org.apache.http.nio.protocol.EventListener;
+import org.apache.http.nio.protocol.NHttpRequestHandlerRegistry;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
@@ -49,10 +51,11 @@ import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 import org.limewire.http.HttpIOReactor;
+import org.limewire.nio.NIODispatcher;
 
 public class HttpTestServer {
 
-    private final HttpRequestHandlerRegistry registry;
+    private final NHttpRequestHandlerRegistry registry;
 
     private HttpIOReactor reactor;
 
@@ -60,7 +63,7 @@ public class HttpTestServer {
 
     public HttpTestServer(HttpParams params) throws IOException {
         this.params = params;
-        this.registry = new HttpRequestHandlerRegistry();
+        this.registry = new NHttpRequestHandlerRegistry();
     }
 
     public void execute(EventListener listener) throws IOException {
@@ -70,7 +73,7 @@ public class HttpTestServer {
         processor.addInterceptor(new ResponseContent());
         processor.addInterceptor(new ResponseConnControl());
 
-        BufferingHttpServiceHandler serviceHandler = new BufferingHttpServiceHandler(
+        AsyncNHttpServiceHandler serviceHandler = new AsyncNHttpServiceHandler(
                 processor, new DefaultHttpResponseFactory(),
                 new DefaultConnectionReuseStrategy(), params);
 
@@ -78,7 +81,7 @@ public class HttpTestServer {
 
         serviceHandler.setHandlerResolver(this.registry);
 
-        reactor = new HttpIOReactor(params);
+        reactor = new HttpIOReactor(params, NIODispatcher.instance().getScheduledExecutorService());
         IOEventDispatch ioEventDispatch = new DefaultServerIOEventDispatch(
                 serviceHandler, params);
         reactor.execute(ioEventDispatch);
@@ -86,11 +89,6 @@ public class HttpTestServer {
 
     public HttpIOReactor getReactor() {
         return reactor;
-    }
-    
-    public void registerHandler(final String pattern,
-            final HttpRequestHandler handler) {
-        this.registry.register(pattern, handler);
     }
 
 }

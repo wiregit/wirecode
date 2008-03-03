@@ -3,6 +3,7 @@ package com.limegroup.gnutella.lws.server;
 
 import java.util.Map;
 
+import org.apache.http.nio.protocol.NHttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.lws.server.LWSConnectionListener;
 import org.limewire.lws.server.LWSDispatcher;
@@ -67,7 +68,7 @@ public interface LWSManager {
      * @return the instance of {@link HttpRequestHandler} responsible for
      *         passing along messages
      */
-    HttpRequestHandler getHandler();
+    NHttpRequestHandler getHandler();
         
     /**
      * Returns <code>true</code> if <code>this</code> is connected.

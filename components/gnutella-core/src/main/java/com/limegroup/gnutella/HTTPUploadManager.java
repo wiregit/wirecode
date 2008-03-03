@@ -17,6 +17,7 @@ import org.apache.http.HttpInetConnection;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.nio.NHttpConnection;
+import org.apache.http.nio.protocol.NHttpRequestHandler;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
@@ -230,7 +231,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         httpAcceptor.get().registerHandler("/", httpRequestHandlerFactory.createBrowseRequestHandler());
 
         // push-proxy requests
-        HttpRequestHandler pushProxyHandler = httpRequestHandlerFactory.createPushProxyRequestHandler();
+        NHttpRequestHandler pushProxyHandler = httpRequestHandlerFactory.createPushProxyRequestHandler();
         httpAcceptor.get().registerHandler("/gnutella/push-proxy", pushProxyHandler);
         httpAcceptor.get().registerHandler("/gnet/push-proxy", pushProxyHandler);
 
@@ -813,10 +814,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 }
             }
         }
-
-        public void requestReceived(NHttpConnection conn, HttpRequest request) {
-        }
-
+        
         public void responseSent(NHttpConnection conn, HttpResponse response) {
             assert started;
             

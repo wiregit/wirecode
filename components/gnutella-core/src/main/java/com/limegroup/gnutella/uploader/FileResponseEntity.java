@@ -9,8 +9,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.IOControl;
-import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.http.HttpIOSession;
+import org.limewire.http.entity.AbstractProducingNHttpEntity;
 import org.limewire.http.entity.FilePieceReader;
 import org.limewire.http.entity.Piece;
 import org.limewire.http.entity.PieceListener;
@@ -24,7 +24,7 @@ import com.limegroup.gnutella.Constants;
  * An event based {@link HttpEntity} that uploads a {@link File}. A
  * corresponding {@link HTTPUploader} is updated with progress.
  */
-public class FileResponseEntity extends AbstractHttpNIOEntity {
+public class FileResponseEntity extends AbstractProducingNHttpEntity {
 
     private static final Log LOG = LogFactory.getLog(FileResponseEntity.class);
     
@@ -90,8 +90,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
         reader.start();
     }
     
-    @Override
-    public void finished() {
+    public void finish() {
         if (LOG.isDebugEnabled())
             LOG.debug("Finished upload of " + file.getName() + " [begin=" + begin + ",length=" + length + ",remaining=" + remaining + "]");
 

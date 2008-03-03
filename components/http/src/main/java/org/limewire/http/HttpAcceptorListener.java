@@ -1,6 +1,5 @@
 package org.limewire.http;
 
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.nio.NHttpConnection;
 
@@ -20,11 +19,6 @@ public interface HttpAcceptorListener {
      * Invoked when a HTTP connection has been closed.
      */
     void connectionOpen(NHttpConnection conn);
-
-    /**
-     * Invoked when a request has been received.
-     */
-    void requestReceived(NHttpConnection conn, HttpRequest request);
 
     /**
      * Invoked when a response has been sent.

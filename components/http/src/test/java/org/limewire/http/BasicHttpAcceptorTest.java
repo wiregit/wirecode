@@ -82,10 +82,23 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
         HttpTestUtils.waitForNIO();
     }
 
-    public void testDefaultHandler() throws IOException, Exception {
+    public void testDefaultHandlerHead() throws IOException, Exception {
         initializeAcceptor(TIMEOUT, "HEAD");
 
         HttpHead method = new HttpHead("http://localhost:" + PORT + "/");
+        HttpResponse result = null;
+        try {
+            result = client.execute(method);
+            assertEquals(HttpStatus.SC_NOT_IMPLEMENTED, result.getStatusLine().getStatusCode());
+        } finally {
+            HttpClientUtils.releaseConnection(result);
+        }
+    }
+    
+    public void testDefaultHandlerGet() throws IOException, Exception {
+        initializeAcceptor(TIMEOUT, "GET");
+
+        HttpGet method = new HttpGet("http://localhost:" + PORT + "/");
         HttpResponse result = null;
         try {
             result = client.execute(method);

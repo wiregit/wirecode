@@ -53,26 +53,19 @@
 	  <scope>test</scope>
     </dependency>
 	<dependency>
-	  <groupId>org.limewire</groupId>
-	  <artifactId>lw-httpcore</artifactId>
-      <version>4.0-beta2</version>
+	  <groupId>org.apache.httpcomponents</groupId>
+	  <artifactId>httpcore</artifactId>
+      <version>4.0-beta2-20080303.182830-4</version>
     </dependency>
     <dependency>
-      <groupId>org.limewire</groupId>
-      <artifactId>lw-httpcore-nio</artifactId>
-      <version>4.0-beta2</version>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore-nio</artifactId>
+      <version>4.0-beta2-20080303.182830-4</version>
     </dependency>
-    <dependency>
-      <groupId>org.limewire</groupId>
-      <artifactId>lw-httpcore-niossl</artifactId>
-      <version>4.0-alpha7</version>
-    </dependency>
-     <!-- Customized LimeWire Jars -->
     <dependency> 
-      <groupId>org.limewire</groupId>
-      <artifactId>lw-httpclient</artifactId>
-      <version>4.0-alpha3</version>
-      <!--scope>test</scope-->
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.0-alpha4-20080303.184117-1</version>
     </dependency>    
   </dependencies>
 </project>

@@ -10,7 +10,7 @@ public class HttpIOSessionTest extends TestCase {
 
     public void testEventMask() {
         StubSocket socket = new StubSocket();
-        HttpIOSession session = new HttpIOSession(socket);
+        HttpIOSession session = new HttpIOSession(socket, null);
         HttpChannel channel = new StubHttpChannel(session, new MockIOEventDispatch());
         session.setHttpChannel(channel);
         
@@ -80,19 +80,19 @@ public class HttpIOSessionTest extends TestCase {
 
     public void testConstructor() {
         try {
-            new HttpIOSession(null);
+            new HttpIOSession(null, null);
             fail("Expected IllegalArgumentException");
         } catch (IllegalArgumentException expected) {
         }
         
         StubSocket socket = new StubSocket();
-        HttpIOSession session = new HttpIOSession(socket);
+        HttpIOSession session = new HttpIOSession(socket, null);
         assertSame(socket, session.getSocket());
     }
     
     public void testAttributes() {
         StubSocket socket = new StubSocket();
-        HttpIOSession session = new HttpIOSession(socket);
+        HttpIOSession session = new HttpIOSession(socket, null);
         
         assertNull(session.getAttribute("foo"));
         session.setAttribute("foo", "bar");
@@ -106,7 +106,7 @@ public class HttpIOSessionTest extends TestCase {
 
     public void testSocketTimeout() throws Exception {
         StubSocket socket = new StubSocket();
-        HttpIOSession session = new HttpIOSession(socket);
+        HttpIOSession session = new HttpIOSession(socket, null);
         
         assertEquals(0, session.getSocketTimeout());
         session.setSocketTimeout(100);
@@ -116,7 +116,7 @@ public class HttpIOSessionTest extends TestCase {
 
     public void testBufferStatus() throws Exception {
         StubSocket socket = new StubSocket();
-        HttpIOSession session = new HttpIOSession(socket);
+        HttpIOSession session = new HttpIOSession(socket, null);
         
         assertFalse(session.hasBufferedInput());
         assertFalse(session.hasBufferedOutput());
@@ -142,7 +142,7 @@ public class HttpIOSessionTest extends TestCase {
 
     public void testShutdown() {        
         StubSocket socket = new StubSocket();
-        HttpIOSession session = new HttpIOSession(socket);
+        HttpIOSession session = new HttpIOSession(socket, null);
         assertFalse(session.isClosed());
         session.shutdown();
         assertTrue(session.isClosed());
@@ -152,7 +152,7 @@ public class HttpIOSessionTest extends TestCase {
 
     public void testClose() {        
         StubSocket socket = new StubSocket();
-        HttpIOSession session = new HttpIOSession(socket);
+        HttpIOSession session = new HttpIOSession(socket, null);
         StubHttpChannel channel = new StubHttpChannel(session, new MockIOEventDispatch());
         session.setHttpChannel(channel);
         

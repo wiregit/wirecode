@@ -7,6 +7,7 @@ import java.nio.channels.ByteChannel;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -42,8 +43,10 @@ public class HttpIOSession implements IOSession {
     private ThrottleWriter throttleWriter;
 
     private AtomicBoolean closed = new AtomicBoolean(false);
+    
+    private final Executor ioExecutor;
 
-    public HttpIOSession(AbstractNBSocket socket) {
+    public HttpIOSession(AbstractNBSocket socket, Executor ioExecutor) {
         if (socket == null) {
             throw new IllegalArgumentException();
         }
@@ -52,6 +55,7 @@ public class HttpIOSession implements IOSession {
                 .synchronizedMap(new HashMap<String, Object>());
         this.socketTimeout = 0;
         this.socket = socket;
+        this.ioExecutor = ioExecutor;
     }
 
     public void setHttpChannel(HttpChannel channel) {
@@ -223,6 +227,10 @@ public class HttpIOSession implements IOSession {
 
     public int getStatus() {
         throw new UnsupportedOperationException();
+    }
+    
+    public Executor getIoExecutor() {
+        return ioExecutor;
     }
     
 }

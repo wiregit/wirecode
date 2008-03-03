@@ -15,7 +15,7 @@ import org.apache.http.entity.FileEntity;
 import org.apache.http.nio.ContentDecoder;
 import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.IOControl;
-import org.limewire.http.HttpNIOEntity;
+import org.apache.http.nio.entity.ProducingNHttpEntity;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.nio.timeout.StalledUploadWatchdog;
@@ -24,7 +24,7 @@ import org.limewire.nio.timeout.StalledUploadWatchdog;
  * An event based {@link HttpEntity} that uploads a {@link File}. A
  * corresponding {@link FileTransferMonitor} is updated with progress.
  */
-public class FileNIOEntity extends FileEntity implements HttpNIOEntity {
+public class FileNIOEntity extends FileEntity implements ProducingNHttpEntity {
 
     private static final Log LOG = LogFactory.getLog(FileNIOEntity.class);
 
@@ -164,7 +164,7 @@ public class FileNIOEntity extends FileEntity implements HttpNIOEntity {
         throw new UnsupportedOperationException();
     }
 
-    public void finished() {
+    public void finish() {
         deactivateTimeout();
         
         if (reader != null) {

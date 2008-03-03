@@ -7,14 +7,17 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpStatus;
 import org.apache.http.nio.NHttpConnection;
+import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.protocol.NHttpRequestHandler;
+import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.BasicHttpAcceptor;
 import org.limewire.http.HttpAcceptorListener;
 import org.limewire.http.HttpIOSession;
@@ -40,13 +43,18 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
 
     private static final String[] SUPPORTED_METHODS = new String[] { "GET", "HEAD", };
 
-    private final HttpRequestHandler notFoundHandler;
+    private final NHttpRequestHandler notFoundHandler;
 
     @Inject
     public HTTPAcceptor(TcpBandwidthStatistics tcpBandwidthStatistics) {
         super(createDefaultParams(LimeWireUtils.getHttpServer(), Constants.TIMEOUT), SUPPORTED_METHODS);
 
-        this.notFoundHandler = new HttpRequestHandler() {
+        this.notFoundHandler = new SimpleNHttpRequestHandler() {
+            public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+                    HttpContext context) throws HttpException, IOException {
+                return null;
+            }
+            
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
                 response.setReasonPhrase("Feature Not Active");
@@ -69,7 +77,12 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
         registerHandler("/gnutella/res/*", notFoundHandler);
 
         // return 400 for unmatched requests
-        registerHandler("*", new HttpRequestHandler() {
+        registerHandler("*", new SimpleNHttpRequestHandler() {
+            public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+                    HttpContext context) throws HttpException, IOException {
+                return null;
+            }
+            
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
                 response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
@@ -97,7 +110,7 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
     /**
      * Returns a handler that responds with a HTTP 404 error.
      */
-    public HttpRequestHandler getNotFoundHandler() {
+    public NHttpRequestHandler getNotFoundHandler() {
         return notFoundHandler;
     }
 
@@ -120,9 +133,6 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
         }
 
         public void fatalProtocolException(HttpException e, NHttpConnection conn) {
-        }
-
-        public void requestReceived(NHttpConnection conn, HttpRequest request) {
         }
 
         public void responseSent(NHttpConnection conn, HttpResponse response) {

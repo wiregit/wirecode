@@ -8,8 +8,9 @@ import java.nio.ByteBuffer;
 
 import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.IOControl;
+import org.limewire.http.entity.AbstractProducingNHttpEntity;
 
-public class MockHttpNIOEntity extends AbstractHttpNIOEntity {
+public class MockHttpNIOEntity extends AbstractProducingNHttpEntity {
 
     IOException exception;
     
@@ -30,8 +31,7 @@ public class MockHttpNIOEntity extends AbstractHttpNIOEntity {
         this.contentLength = data.length();
     }
     
-    @Override
-    public void finished() {
+    public void finish() {
         this.finished = true;
     }
 

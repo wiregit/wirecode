@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.IOControl;
+import org.limewire.http.entity.AbstractProducingNHttpEntity;
 
 import junit.framework.TestCase;
 
@@ -44,10 +45,9 @@ public class AbstractHttpNIOEntityTest extends TestCase {
         assertFalse(entity.isChunked());
     }
 
-    private class MockHttpNIOEntity extends AbstractHttpNIOEntity {
+    private class MockHttpNIOEntity extends AbstractProducingNHttpEntity {
 
-        @Override
-        public void finished() {
+        public void finish() {
         }
 
         @Override

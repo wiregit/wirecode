@@ -11,15 +11,19 @@ import java.net.Socket;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.entity.NStringEntity;
+import org.apache.http.nio.protocol.NHttpResponseTrigger;
 import org.apache.http.protocol.HttpContext;
-import org.limewire.service.ErrorService;
+import org.limewire.concurrent.ExecutorsHelper;
 
 /**
  * Instances of this class will receive HTTP requests and are responsible to
@@ -31,6 +35,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     private final static Log LOG = LogFactory.getLog(LWSDispatcherSupport.class);
     private final Map<String, Handler> names2handlers = new HashMap<String, Handler>();
     private LWSReceivesCommandsFromDispatcher commandReceiver;
+    private final Executor handlerExecutor = ExecutorsHelper.newProcessingQueue("lws-handlers");
     
     public LWSDispatcherSupport() {
         Handler[] hs = createHandlers();
@@ -128,29 +133,43 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     // Interface
     // ------------------------------------------------------
     
-    public final void handle(HttpRequest httpReq, final HttpResponse res, HttpContext c) throws HttpException, IOException {
+    public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+            HttpContext context) throws HttpException, IOException {
+        return null;
+    }
+    
+    
+    public final void handle(HttpRequest httpReq, final HttpResponse response,
+            final NHttpResponseTrigger trigger, HttpContext c) throws HttpException, IOException {
         String request = httpReq.getRequestLine().getUri();
         final String command = getCommand(request); //getOnlytheFileRequestPortionOfURL(request);
         final Handler h = names2handlers.get(command.toLowerCase());
         if (h == null) {
-            if (LOG.isErrorEnabled()) LOG.error("Couldn't create a handler for " + command);
+            if (LOG.isErrorEnabled())
+                LOG.error("Couldn't create a handler for " + command);
             String str = report(LWSDispatcherSupport.ErrorCodes.UNKNOWN_COMMAND);
-            res.setEntity(new StringEntity(str));
+            response.setEntity(new NStringEntity(str));
+            trigger.submitResponse(response);
             return;
         }
-        if (LOG.isDebugEnabled()) LOG.debug("have handler: " + h.name());
+        if (LOG.isDebugEnabled())
+            LOG.debug("have handler: " + h.name());
         final Map<String, String> args = getArgs(request);
-        h.handle(args, new StringCallback() {
-
-            public void process(String response) {
-                try {
-                    res.setEntity(new StringEntity(response));
-                } catch (UnsupportedEncodingException e) {
-                    ErrorService.error(e);
-                }
+        handlerExecutor.execute(new Runnable() {
+            public void run() {
+                h.handle(args, new StringCallback() {
+                    public void process(String input) {
+                        try {
+                            response.setEntity(new NStringEntity(input));
+                            trigger.submitResponse(response);
+                        } catch (UnsupportedEncodingException e) {
+                            trigger.handleException(e);
+                        }
+                    }                
+                });
             }
-            
         });
+            
     }
     
     public final boolean addConnectionListener(LWSConnectionListener lis) {

@@ -29,9 +29,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ManagedClientConnection;
 import org.apache.http.conn.routing.HttpRoute;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpRequest;
+import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.util.EntityUtils;
@@ -1240,7 +1240,7 @@ public class UploadTest extends LimeTestCase {
              }
         };
         // TODO method.setUseExpectHeader(true);
-        method.setEntity(new StringEntity("Foo"));
+        method.setEntity(new NStringEntity("Foo"));
         HttpResponse response = null;
         try {
             response = client.execute(method);

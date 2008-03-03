@@ -6,13 +6,10 @@ package org.limewire.http;
 import java.io.IOException;
 
 import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.nio.NHttpConnection;
 
 public class MockHttpServiceEventListener implements HttpServiceEventListener {
-
-    boolean requestReceived;
 
     boolean responseSent;
 
@@ -22,14 +19,7 @@ public class MockHttpServiceEventListener implements HttpServiceEventListener {
 
     Exception exception;
 
-    HttpRequest request;
-
     HttpResponse response;
-
-    public void requestReceived(NHttpConnection conn, HttpRequest request) {
-        this.requestReceived = true;
-        this.request = request;
-    }
 
     public void responseSent(NHttpConnection conn, HttpResponse response) {
         this.responseSent = true;
