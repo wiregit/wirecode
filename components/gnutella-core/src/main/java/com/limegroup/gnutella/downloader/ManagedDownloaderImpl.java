@@ -1010,7 +1010,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                            "\nour hash    : " + getSha1Urn() +
                            "\ntheir hashes: " + ifd.getUrns()+
                            "\nifm.hashes : "+incompleteFileManager.dumpHashes()));
-                fileManager.removeFileIfShared(incompleteFile);
+                fileManager.removeFileIfSharedOrStore(incompleteFile);
             }
         }
         
@@ -1985,7 +1985,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         // unshare the file if we didn't have a tree
         // otherwise we will have shared only the parts that verified
         if (commonOutFile.getHashTree() == null) 
-            fileManager.removeFileIfShared(incompleteFile);
+            fileManager.removeFileIfSharedOrStore(incompleteFile);
         
         // purge the tree
         tigerTreeCache.get().purgeTree(getSha1Urn());
@@ -2056,7 +2056,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         //Add file to library.
         // first check if it conflicts with the saved dir....
         if (saveFile.exists())
-            fileManager.removeFileIfShared(saveFile);
+            fileManager.removeFileIfSharedOrStore(saveFile);
 
         // add file hash to manager for fast lookup
         addFileHash(fileHash, saveFile);

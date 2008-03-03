@@ -588,7 +588,7 @@ public class ServerSideWhatIsNewTest
         }
         
         // tempFile1 and 2 have the same URN
-        fm.removeFileIfShared(tempFile1);
+        fm.removeFileIfSharedOrStore(tempFile1);
         {
             Map urnToLong = creationTimeCache.getUrnToTime();  
             assertEquals(3, urnToLong.size());
@@ -598,7 +598,7 @@ public class ServerSideWhatIsNewTest
         
         // tempFile2 should result in a removal of an URN
         // as well as a timestamp
-        fm.removeFileIfShared(tempFile2);
+        fm.removeFileIfSharedOrStore(tempFile2);
 
         {
             Map urnToLong = creationTimeCache.getUrnToTime();
@@ -639,7 +639,7 @@ public class ServerSideWhatIsNewTest
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
         for (FileDesc fd : fileManager.getAllSharedFileDescriptors()) {
-            fileManager.removeFileIfShared(fd.getFile());
+            fileManager.removeFileIfSharedOrStore(fd.getFile());
             fd.getFile().delete();
         }
         
@@ -689,7 +689,7 @@ public class ServerSideWhatIsNewTest
         CreationTimeCache ctCache = creationTimeCache;
         
         for (FileDesc fd : fileManager.getAllSharedFileDescriptors()) {
-            fileManager.removeFileIfShared(fd.getFile());
+            fileManager.removeFileIfSharedOrStore(fd.getFile());
             fd.getFile().delete();
         }
 

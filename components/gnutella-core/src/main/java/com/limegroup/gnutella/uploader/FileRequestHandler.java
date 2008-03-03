@@ -440,7 +440,7 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         // first verify the file index
         synchronized (fileManager) {
-            if (fileManager.isValidIndex(index)) {
+            if (fileManager.isValidSharedIndex(index)) {
                 fd = fileManager.get(index);
             }
         }
@@ -505,7 +505,7 @@ public class FileRequestHandler implements HttpRequestHandler {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("File has changed on disk, resharing: " + file);
                 }
-                fileManager.removeFileIfShared(file);
+                fileManager.removeFileIfSharedOrStore(file);
                 fileManager.addFileIfShared(file);
                 return false;
             }

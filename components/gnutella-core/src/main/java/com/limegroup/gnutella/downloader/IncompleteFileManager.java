@@ -99,7 +99,7 @@ public class IncompleteFileManager  {
             File file = iter.next();
             if (!file.exists() ) {
                 ret=true;
-                fileManager.get().removeFileIfShared(file);
+                fileManager.get().removeFileIfSharedOrStore(file);
                 file.delete();  //always safe to call; return value ignored
                 iter.remove();
             }
@@ -126,7 +126,7 @@ public class IncompleteFileManager  {
             }
             if (!file.exists() || (isOld(file) && !activeFiles.contains(file))) {
                 ret=true;
-                fileManager.get().removeFileIfShared(file);
+                fileManager.get().removeFileIfSharedOrStore(file);
                 file.delete();
                 iter.remove();
             }
@@ -360,7 +360,7 @@ public class IncompleteFileManager  {
         }
         
         //Remove the entry from FileManager
-        fileManager.get().removeFileIfShared(incompleteFile);
+        fileManager.get().removeFileIfSharedOrStore(incompleteFile);
     }
     
     /**

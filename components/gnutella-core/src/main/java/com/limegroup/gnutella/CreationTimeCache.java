@@ -299,7 +299,12 @@ public final class CreationTimeCache {
                         if(urnList.size() >= max)
                             break;
                         
+                        // we only want shared FDs, store files also have cached urns
                         FileDesc fd = fileManager.getFileDescForUrn(currURN);
+                        
+                    	// don't remove store files from the urn cache list
+                    	if( fd != null && fileManager.isStoreFile(fd.getFile()))
+                    		continue;
                         // unfortunately fds can turn into ifds so ignore
                         if ((fd == null) || (fd instanceof IncompleteFileDesc)) {
                             if (toRemove == null)

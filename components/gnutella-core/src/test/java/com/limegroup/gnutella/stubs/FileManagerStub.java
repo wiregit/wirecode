@@ -53,7 +53,7 @@ public class FileManagerStub extends FileManagerImpl {
     }
     
     @Override
-    public boolean isValidIndex(int i) {
+    public boolean isValidSharedIndex(int i) {
         return true;
     }
     

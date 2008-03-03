@@ -93,7 +93,7 @@ public class FileManagerControllerAdapter implements FileManagerController {
         return null;
     }
 
-    public List<URN> getNewestUrns(QueryRequest qr, int number) {
+    public List<URN> getNewestSharedUrns(QueryRequest qr, int number) {
         return null;
     }
 

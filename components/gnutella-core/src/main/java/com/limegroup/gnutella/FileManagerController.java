@@ -34,7 +34,11 @@ public interface FileManagerController {
 
     public void lastUrnRemoved(URN urn);
 
-    public List<URN> getNewestUrns(QueryRequest qr, int number);
+    /**
+     * NOTE: this is only returning newest URNs of shared files, store
+     * file are ignored here even if they are part of the newest files
+     */
+    public List<URN> getNewestSharedUrns(QueryRequest qr, int number);
 
     public ContentResponseData getResponseDataFor(URN urn);
 
