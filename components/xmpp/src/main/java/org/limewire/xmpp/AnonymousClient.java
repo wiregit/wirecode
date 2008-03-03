@@ -26,11 +26,11 @@ public class AnonymousClient {
         conn.sendPacket(ping);
 
         CommandDispatcher dispatcher = new CommandDispatcher();
-        dispatcher.add(new DownloadCommand());
-        dispatcher.add(new InitiateChatCommand());
-        dispatcher.add(new RosterCommand());
-        dispatcher.add(new SearchCommand());
-        dispatcher.add(new SendMessageCommand());
+        dispatcher.add(new DownloadCommand(conn));
+        dispatcher.add(new InitiateChatCommand(conn));
+        dispatcher.add(new RosterCommand(conn));
+        dispatcher.add(new SearchCommand(conn));
+        dispatcher.add(new SendMessageCommand(conn));
         Thread t = new Thread(dispatcher);
         t.setDaemon(false);
         t.start();

@@ -9,6 +9,7 @@ import java.util.StringTokenizer;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
+import org.dom4j.tree.DefaultAttribute;
 import org.dom4j.tree.DefaultElement;
 import org.jivesoftware.openfire.IQHandlerInfo;
 import org.jivesoftware.openfire.RoutingTable;
@@ -20,8 +21,10 @@ import org.xmpp.packet.JID;
 
 public class QueryHandler extends IQHandler {
     private final List<JID> ultrapeers;
+    private final List<JID> leaves;
     private final RoutingTable routingTable;
-    private final boolean ultrapeer;
+    private final boolean isUltrapeer;
+    // TODO map data structure
     private final List<File> sharedResources;
     private final HashMap<String, IQ> queryRoutes;
 
@@ -30,11 +33,12 @@ public class QueryHandler extends IQHandler {
      *
      * @param moduleName The name for the module or null to use the default
      */
-    public QueryHandler(String moduleName, List<JID> ultrapeers, RoutingTable routingTable, boolean isUltrapeer, List<File> sharedResources) {
+    public QueryHandler(String moduleName, List<JID> ultrapeers, List<JID> leaves, RoutingTable routingTable, boolean isUltrapeer, List<File> sharedResources) {
         super(moduleName);
         this.ultrapeers = ultrapeers;
+        this.leaves = leaves;
         this.routingTable = routingTable;
-        ultrapeer = isUltrapeer;
+        this.isUltrapeer = isUltrapeer;
         this.sharedResources = sharedResources;
         this.queryRoutes = new HashMap<String, IQ>();
     }
@@ -53,8 +57,32 @@ public class QueryHandler extends IQHandler {
         }
     }
 
+    private IQ sendError(IQ packet) {
+        return null;  //To change body of created methods use File | Settings | File Templates.
+    }
+
+    private IQ handleError(IQ packet) {
+        System.out.println("ERROR:\n" + packet.toXML());
+        return null;
+    }
+
+    private IQ handleSet(IQ packet) {
+        return sendError(packet);
+    }
+
+    private IQ handleResult(IQ packet) {
+        IQ original = queryRoutes.get(packet.getID());
+        if(original != null) {
+            IQ queryResult = IQ.createResultIQ(original);
+            queryResult.setChildElement(packet.getChildElement());
+            ClientSession client = routingTable.getClientRoute(original.getFrom());
+            client.process(queryResult);
+        }
+        return null;
+    }
+
     private IQ handleGet(IQ packet) {
-        if(ultrapeer) {
+        if(isUltrapeer) {
             propagateSearchToUltrapeers(packet);
             searchLeaves(packet);
         }
@@ -64,9 +92,39 @@ public class QueryHandler extends IQHandler {
         return queryResult;
     }
 
+    private void searchLeaves(IQ incoming) {
+        // TODO add bloom filter
+        Element query = incoming.getChildElement();
+        query = query.createCopy();
+        Element ttl = query.element("ttl");
+        Integer ttlValue = Integer.parseInt(ttl.getText());
+        ttlValue--;
+        if(ttlValue > 0) {
+//            Element source = query.element(new QName("source", new Namespace("iq:jabber:lw-query", "")));
+//            if(source == null) {
+//                source = new DefaultElement("source");
+//                source.addAttribute("jid", incoming.getFrom().toString());
+//                source.addAttribute("iq-id", incoming.getID());
+//                query.add(source);
+//            }
+            ttl.setText(ttlValue.toString());
+            Element hops = query.element("hops");
+            Integer hopsValue = Integer.parseInt(hops.getText());
+            hopsValue++;
+            hops.setText(hopsValue.toString());
+            synchronized (leaves) {
+                for(JID leaf : leaves) {
+                    if(!leaf.equals(incoming.getFrom())) {
+                        send(query, leaf, incoming);
+                    }
+                }
+            }
+        } 
+    }
+
     private Element searchLocalResources(Element childElement) {
-        DefaultElement queryReply = new DefaultElement("query-reply", new Namespace("iq:jabber:lw-query-reply", ""));
-        Element keywords = childElement.element(new QName("keywords", new Namespace("iq:jabber:lw-query", "")));
+        DefaultElement queryReply = new DefaultElement("query-reply", new Namespace("", "iq:jabber:lw-query-reply"));
+        Element keywords = childElement.element("keywords");
         String[] keywordsList = parseKeywords(keywords.getText());
         if(keywordsList != null) {
             for(String keyword : keywordsList) {
@@ -75,7 +133,7 @@ public class QueryHandler extends IQHandler {
                         if(shared.isFile()) {
                             searchFile(keyword, shared, queryReply);
                         } else if(shared.isDirectory()) {
-                            searchDir(keyword, queryReply);
+                            searchDir(keyword, shared, queryReply);
                         }
                     }
                 }
@@ -84,12 +142,27 @@ public class QueryHandler extends IQHandler {
         return queryReply;
     }
 
+    private void searchDir(String keyword, File shared, DefaultElement queryReply) {
+        File [] files = shared.listFiles();
+        if(files != null) {
+            for(File f : files) {
+                if(f.isFile()) {
+                    searchFile(keyword, f, queryReply);
+                } else if(f.isDirectory()){
+                    // TODO eliminate infinite recursion from symbolic links
+                    searchDir(keyword, f, queryReply);    
+                }
+            }
+        }
+    }
+
     private void searchFile(String keyword, File shared, DefaultElement queryReply) {
         keyword = keyword.toLowerCase();
         String fileName = shared.getName().toLowerCase();
         if(fileName.contains(keyword)) {
-            DefaultElement reply = new DefaultElement("reply");            
-            queryReply.add();
+            DefaultElement reply = new DefaultElement("reply", new Namespace("", "iq:jabber:lw-query-reply"));            
+            reply.add(new DefaultAttribute("file", shared.getPath()));
+            queryReply.add(reply);
         }
         
     }
@@ -106,7 +179,7 @@ public class QueryHandler extends IQHandler {
     private void propagateSearchToUltrapeers(IQ incoming) {
         Element query = incoming.getChildElement();
         query = query.createCopy();
-        Element ttl = query.element(new QName("ttl", new Namespace("iq:jabber:lw-query", "")));
+        Element ttl = query.element("ttl");
         Integer ttlValue = Integer.parseInt(ttl.getText());
         ttlValue--;
         if(ttlValue > 0) {
@@ -118,7 +191,7 @@ public class QueryHandler extends IQHandler {
 //                query.add(source);
 //            }
             ttl.setText(ttlValue.toString());
-            Element hops = query.element(new QName("hops", new Namespace("iq:jabber:lw-query", "")));
+            Element hops = query.element("hops");
             Integer hopsValue = Integer.parseInt(hops.getText());
             hopsValue++;
             hops.setText(hopsValue.toString());
@@ -135,12 +208,17 @@ public class QueryHandler extends IQHandler {
     private void send(Element query, JID to, IQ incoming) {
         // TODO in a separate Thread
         ClientSession client = routingTable.getClientRoute(to);
-        IQ iq = new IQ();
-        iq.setTo(to);
-        iq.setFrom(incoming.getTo());
-        iq.setChildElement(query);
-        client.process(iq);
-        queryRoutes.put(iq.getID(), incoming);
+        if(client != null) {
+            IQ iq = new IQ();
+            iq.setTo(to);
+            iq.setFrom(incoming.getTo());
+            iq.setChildElement(query);
+            client.process(iq);
+            queryRoutes.put(iq.getID(), incoming);
+        } else {
+            // TODO log error
+            // TODO remove from list
+        }
     }
 
     public IQHandlerInfo getInfo() {

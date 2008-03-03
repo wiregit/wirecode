@@ -1,6 +1,8 @@
 package org.limewire.xmpp;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.jivesoftware.smack.packet.IQ;
 
@@ -11,13 +13,27 @@ public class Query extends IQ {
     private int hops = 0;
     private List<String> keywords;
     // TODO exact word / phrase match
+    // TODO match case
     
     public Query(List<String> keywords) {
         this.keywords = keywords;
     }
-    
+
+    public Query(String args) {
+        this(getList(args));
+    }
+
+    private static List<String> getList(String args) {
+        StringTokenizer st = new StringTokenizer(args);
+        ArrayList<String> tokens = new ArrayList<String>();
+        while(st.hasMoreElements()) {
+            tokens.add(st.nextToken());
+        }
+        return tokens;
+    }
+
     public String getChildElementXML() {
-        return "<query xmlns=\"jabber:iq:query\"><hops>" + hops + "</hops>" + "<ttl>" + ttl + "</ttl>" + getKeywordsElement(keywords) + "</query>";
+        return "<query xmlns=\"jabber:iq:lw-query\"><hops>" + hops + "</hops>" + "<ttl>" + ttl + "</ttl>" + getKeywordsElement(keywords) + "</query>";
     }
 
     private String getKeywordsElement(List<String> keywords) {

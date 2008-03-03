@@ -1,6 +1,7 @@
 package org.limewire.xmpp;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import org.jivesoftware.openfire.IQRouter;
 import org.jivesoftware.openfire.XMPPServer;
@@ -16,6 +17,13 @@ public class ServerPlugin implements Plugin {
         
         IQHandler pingHandler = new PingHandler("limewire module", modeHandler.getUltrapeers());
         iqRouter.addHandler(pingHandler);
+
+
+        ArrayList<File> shared = new ArrayList<File>();
+        // TODO lookup shared dirs in config
+        shared.add(new File("C:/shared/"));
+        QueryHandler queryHandler = new QueryHandler("limewire module", modeHandler.getUltrapeers(), modeHandler.getLeaves(), XMPPServer.getInstance().getRoutingTable(), true, shared);
+        iqRouter.addHandler(queryHandler);
         
         // TODO establish connections with other ultrapeers
     }
