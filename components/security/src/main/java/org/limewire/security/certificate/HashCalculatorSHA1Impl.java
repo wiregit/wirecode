@@ -17,17 +17,17 @@ public class HashCalculatorSHA1Impl implements HashCalculator {
 
     public byte[] calculate(InputStream in) throws IOException {
         try {
-            final MessageDigest outputMd5 = MessageDigest.getInstance("SHA-1");
+            final MessageDigest outputSHA1 = MessageDigest.getInstance("SHA-1");
             final byte[] data = new byte[64 * 1024]; // 64k Chunks
 
             while (true) {
                 final int bytesRead = in.read(data);
                 if (bytesRead < 0)
                     break;
-                outputMd5.update(data, 0, bytesRead);
+                outputSHA1.update(data, 0, bytesRead);
             }
             // Done, let's compute the hash
-            return outputMd5.digest();
+            return outputSHA1.digest();
         } catch (NoSuchAlgorithmException ex) {
             throw new IOException("NoSuchAlgorithmException during computation: " + ex.getMessage());
         }

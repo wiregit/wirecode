@@ -24,8 +24,8 @@ public class BucketMessageContainer extends MultiMessageContainer {
     }
 
     /**
-     * Set a simple description for this bucket, such as "[0103]20080201", for
-     * debugging purposes. Defaults to currentTimeMillis/1000. Cannot be null.
+     * Set a unique name for this bucket, such as "[0103]20080201", for future
+     * lookups. Defaults to currentTimeMillis/1000. Cannot be null.
      */
     public void setName(String bucketName) {
         put(KEY_NAME, bucketName);
@@ -33,8 +33,10 @@ public class BucketMessageContainer extends MultiMessageContainer {
 
     public String getName() {
         String name = getString(KEY_NAME);
-        if (name == null)
-            return (System.currentTimeMillis() / 1000) + "";
+        if (name == null) {
+            setName((System.currentTimeMillis() / 1000) + "");
+            return getName();
+        }
         return name;
     }
 

@@ -18,6 +18,10 @@ import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
 
+/**
+ * The unit of work for the promotion system, this message contains the
+ * keywords, target URL and restrictions that define a promotion.
+ */
 public class PromotionMessageContainer implements MessageContainer {
     /**
      * Since internal dates are stored in 4-bytes, seconds since Unix epoch,
@@ -76,10 +80,6 @@ public class PromotionMessageContainer implements MessageContainer {
         setHeader(header);
     }
 
-    /**
-     * @return the 8 byte array.
-     * @see #setUniqueID(byte[])
-     */
     public long getUniqueID() {
         byte[] header = getHeader();
         byte[] id = new byte[8];
