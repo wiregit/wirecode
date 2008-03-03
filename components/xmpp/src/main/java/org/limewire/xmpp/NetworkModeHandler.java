@@ -22,7 +22,7 @@ public class NetworkModeHandler extends IQHandler {
         super(moduleName);
         leaves = new ArrayList<JID>();
         ultrapeers = new ArrayList<JID>();
-        // dummy values
+        // TODO remove these dummy values
         ultrapeers.add(new JID("12345", "tjulien-pc", "up"));
         ultrapeers.add(new JID("678910", "tjulien-pc", "up"));
         ultrapeers.add(new JID("1112131415", "tjulien-pc", "up"));

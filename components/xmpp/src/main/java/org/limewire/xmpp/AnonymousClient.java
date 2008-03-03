@@ -13,6 +13,7 @@ public class AnonymousClient {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         XMPPConnection.DEBUG_ENABLED = true;
         
+        // TODO read connection host info from config OR cmd-line OR UHCs
         XMPPConnection conn = new XMPPConnection("tjulien-pc");        
         conn.connect();
         conn.loginAnonymously();
@@ -24,6 +25,8 @@ public class AnonymousClient {
         Ping ping = new Ping();
         ping.setType(IQ.Type.GET);
         conn.sendPacket(ping);
+        
+        // TODO listen for pongs
 
         CommandDispatcher dispatcher = new CommandDispatcher();
         dispatcher.add(new DownloadCommand(conn));
