@@ -12,7 +12,6 @@ import com.limegroup.gnutella.downloader.DownloadTestCase;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.LWSIntegrationServices;
 import com.limegroup.gnutella.downloader.VerifyingFile;
-import com.limegroup.gnutella.settings.SharingSettings;
 
 public class LowLevelLWSDownloadTest extends DownloadTestCase {
 
@@ -34,7 +33,7 @@ public class LowLevelLWSDownloadTest extends DownloadTestCase {
     // Tests
     // -----------------------------------------------------------
 
-    public void _testSimpleDownload() throws Exception {
+    public void testSimpleDownload() throws Exception {
         RemoteFileDesc rfd = services.createRemoteFileDescriptor(constants.FILE, constants.URL, constants.LENGTH);
         RemoteFileDesc[] rfds = { rfd };
         runGenericLWSTest(rfds);
@@ -45,7 +44,6 @@ public class LowLevelLWSDownloadTest extends DownloadTestCase {
     // -----------------------------------------------------------
 
     private final LWSDownloadTestConstants constants = new LWSDownloadTestConstants();
-    private File saveDir;
     private LWSIntegrationServices services;
     private SimpleWebServer server;
 
@@ -57,8 +55,6 @@ public class LowLevelLWSDownloadTest extends DownloadTestCase {
         
         server = new SimpleWebServer(constants);
         server.start();
-        
-        saveDir = SharingSettings.getSaveLWSDirectory();
     }
 
     @Override
@@ -75,13 +71,13 @@ public class LowLevelLWSDownloadTest extends DownloadTestCase {
     private void runGenericLWSTest(RemoteFileDesc[] rfds) throws Exception {
 
         for (RemoteFileDesc rfd : rfds) {
-            services.createDownloader(rfd, saveDir);
+            services.createDownloader(rfd, _storeDir);
         }
 
         waitForComplete();
         boolean isComplete = true;
         for (RemoteFileDesc rfd : rfds) {
-            File f = new File(saveDir, rfd.getFileName());
+            File f = new File(_storeDir, rfd.getFileName());
             isComplete &= isComplete(f, rfd.getFileSize());
         }
         if (isComplete)

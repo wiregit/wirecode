@@ -45,14 +45,24 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
      * web page code the public key before giving it to the server. So it may
      * have not arrived yet.
      */
-    private final static int TIMES_TO_TRY_FOR_PRIVATE_KEY = 3;
+    private final int TIMES_TO_TRY_FOR_PRIVATE_KEY = 3;
+    
+    /**
+     * Public key analogy for {@link TIMES_TO_TRY_FOR_PRIVATE_KEY}
+     */
+    private final int TIMES_TO_TRY_FOR_PUBLIC_KEY = 3;
     
     /**
      * Time to sleep between tries for the private key if we haven't gotten it
      * yet.
      */
-    private final static int SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES = 300;
-
+    private final int SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES = 300;
+    
+    /**
+     * Public key analogy for {@link SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES}
+     */    
+    private final int SLEEP_TIME_BETWEEN_PUBLIC_KEY_TRIES = 300;
+    
     private RemoteServerImpl remoteServer;
     private Thread remoteThread;
     
@@ -233,7 +243,8 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     }
 
     protected final KeyPair getPublicAndSharedKeys() {
-        String res = sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.START_COM, NULL_ARGS);System.out.println("getPublicAndSharedKeys:"+res);
+        String res = sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.START_COM, NULL_ARGS);
+        LOG.debug("have public and shared keys " + res);
         String parts[] = res.split(" ");
         if (parts.length < 2) {
             return new KeyPair(null, null, false);
@@ -329,15 +340,22 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
     // -----------------------------------------------------------
     
     private void requestPrivateAndSharedKeys() {
-        KeyPair kp = getPublicAndSharedKeys();
-        String publicKey = kp.getPublicKey();
-        try {
-            Thread.sleep(100);
-        } catch (Exception e) {
-            //
-            // Not crucial, but would like to see the error
-            //
-            e.printStackTrace();
+        //
+        // We'll try this a few times to make up for the race condition that exists and in unavoidable
+        //
+        String publicKey = null;
+        for (int i=0; i<TIMES_TO_TRY_FOR_PUBLIC_KEY; i++) {
+            KeyPair kp = getPublicAndSharedKeys();
+            publicKey = kp.getPublicKey();
+            if (publicKey != null) break;
+            try {
+                Thread.sleep(SLEEP_TIME_BETWEEN_PUBLIC_KEY_TRIES);
+            } catch (Exception e) {
+                //
+                // Not crucial, but would like to see the error
+                //
+                e.printStackTrace();
+            }
         }
         Map<String, String> args = new HashMap<String, String>();
         args.put(LWSDispatcherSupport.Parameters.PUBLIC, publicKey);

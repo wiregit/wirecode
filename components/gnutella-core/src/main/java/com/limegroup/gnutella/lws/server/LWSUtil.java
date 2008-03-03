@@ -41,25 +41,5 @@ public final class LWSUtil {
             // no the end of the world
         }
         return new Tagged<String>(result, true);
-    }
-    
-    /**
-     * Adds the authentication we need to a request since we are using HTTP authentication
-     * during testing.
-     * 
-     * @param method the method to which the authentication is added
-     */
-    public static void addAuthentication(HttpMessage method) {
-        //
-        // We will just return if these are null, so that we can
-        // set them null remotely when we don't need them anymore
-        //
-        String username = LWSSettings.LWS_AUTHENTICATION_USERNAME.getValue();
-        if (username == null || username.equals("")) return;
-        String password = LWSSettings.LWS_AUTHENTICATION_PASSWORD.getValue();
-        if (password == null || password.equals("")) return;
-        String unecrypted = username + ":" + password;
-        String encrypted = new String(new Base64().encode(unecrypted.getBytes()));
-        method.addHeader("Authorization", "Basic " + encrypted);
-    }    
+    } 
 }

@@ -237,7 +237,7 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
 
     public String lookupPrivateKey(String publicKey, String ip) {
         if (publicKey == null) {
-            throw new NullPointerException("null public key");
+            return LWSDispatcherSupport.ErrorCodes.INVALID_PUBLIC_KEY_OR_IP;
         }
         Pair p = new Pair(publicKey, ip);
         String privateKey = pairs2privateKeys.get(p);

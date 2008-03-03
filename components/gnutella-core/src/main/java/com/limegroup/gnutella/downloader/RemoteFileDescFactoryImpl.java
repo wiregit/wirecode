@@ -198,7 +198,6 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
     private long contentLength(URI uri) throws HttpException, IOException, InterruptedException {
         HttpHead head = new HttpHead(uri);
         head.addHeader("User-Agent", LimeWireUtils.getHttpServer());
-        LWSUtil.addAuthentication(head); // TODO: We need authentication to do this
         HttpResponse response = null;
         LimeHttpClient client = httpClientProvider.get();
         try {

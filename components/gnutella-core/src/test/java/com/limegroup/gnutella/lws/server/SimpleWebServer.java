@@ -16,6 +16,7 @@ import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
 
 import com.limegroup.gnutella.downloader.TestFile;
 
@@ -76,21 +77,13 @@ final class SimpleWebServer {
     }
 
     public void stop() {
-        try {
-            if (serverSocket != null) {
-                serverSocket.close();
-            }
-        } catch (IOException e) {
-            LOG.error(e);
-            throw new RuntimeException(e);
-        }
+        IOUtils.close(serverSocket);
         try {
             if (thread != null) {
                 thread.join();
             }
         } catch (InterruptedException e) {
             LOG.error(e);
-            throw new RuntimeException(e);
         }
     }
 

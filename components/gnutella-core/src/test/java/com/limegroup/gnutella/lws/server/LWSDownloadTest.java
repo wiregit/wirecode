@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.limewire.util.FileUtils;
+import org.limewire.util.TestUtils;
+
 import junit.framework.Test;
 import junit.textui.TestRunner;
 
@@ -15,9 +18,7 @@ import com.limegroup.gnutella.downloader.LWSIntegrationServices;
 public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServer {
 
     private final LWSDownloadTestConstants constants = new LWSDownloadTestConstants();
-    protected final String filePath = "../testData/" + getClass().getName();
-    protected File dataDir = new File(filePath);
-
+  
     public LWSDownloadTest(String s) {
         super(s);
     }
@@ -47,7 +48,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
 
         // Do a busy wait until we've run out of time or the file we wanted
         // was downloaded and is the size we wanted
-        File savedFile = new File(new File(dataDir, "store"), constants.FILE);
+        File savedFile = new File(_storeDir, constants.FILE);
         for (long toStop = System.currentTimeMillis() + constants.DOWNLOAD_WAIT_TIME; System.currentTimeMillis() < toStop;) {
             if (server.getBytesWritten() == length && savedFile.length() == length) {
                 break;
@@ -74,38 +75,11 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         // Start up the server
         server = new SimpleWebServer(constants);
         server.start();
-        
-        deleteAllFiles();
 
         // Reset and authenticate
         doAuthenticate();
     }
 
-    private void deleteAllFiles() {
-        deleteAllFiles(dataDir);
-    }
-    
-    private void deleteAllFiles(File d) {
-        if (!d.exists()) {
-            return;
-        }
-        File[] files = d.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            File f = files[i];
-            if (files[i].isDirectory()) {
-                deleteAllFiles(f);
-            } else {
-                f.delete();
-            }
-        }
-    }
-
-    private void deleteDirectory(File dir) {
-        File[] files = dir.listFiles();
-        for (int i = 0; i < files.length; i++)
-            files[i].delete();
-        dir.delete();
-    }
     /**
      * Tear down the little web server.
      */
