@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.14.10\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-17 23:59-0500\n"
-"PO-Revision-Date: 2008-02-13 14:06+0000\n"
-"Last-Translator: Tim van der Meij <timvandermeij@gmail.com>\n"
+"POT-Creation-Date: 2008-03-03 00:51-0500\n"
+"PO-Revision-Date: 2008-02-29 17:31+0000\n"
+"Last-Translator: ToonVanDijck <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-02-26 04:53+0000\n"
+"X-Launchpad-Export-Date: 2008-03-04 04:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -234,6 +234,12 @@ msgstr ""
 
 #~ msgid ". The file cannot be parsed."
 #~ msgstr ". Het probleem kan niet verholpen worden."
+
+#~ msgid "Firewall Config"
+#~ msgstr "Firewallconfiguratie"
+
+#~ msgid "Autocompletion"
+#~ msgstr "Automatisch tekst aanvullen"
 
 #~ msgid ""
 #~ "You have made changes to some settings. Would you like to save these changes?"
@@ -1734,8 +1740,8 @@ msgid ""
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
 "LimeWire kon een vereist bestand niet wegschrijven omdat u niet de benodigde "
-"toestemming heeft. Uw voorkeursinstellingen worden misschien niet bewaard "
-"voor een volgende keer, of LimeWire kan onverwachte handelingen uitvoeren."
+"rechten heeft. Uw voorkeursinstellingen worden misschien niet bewaard voor "
+"een volgende keer, of LimeWire kan onverwachte handelingen uitvoeren."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:56
 msgid ""
@@ -1814,87 +1820,87 @@ msgstr ""
 "herstarten door naar de Bibliotheek te gaan en bij 'Incomplete bestanden' op "
 "'Hervatten' te klikken."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:323
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:319
 msgid "Loading TLS Encryption..."
 msgstr "TLS-encryptie wordt geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:335
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:331
 msgid "Loading Safe Content Management..."
 msgstr "Veilig inhoudsbeheer wordt geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:340
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:336
 msgid "Loading Message Router..."
 msgstr "Berichtenrouter wordt geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:345
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:341
 msgid "Checking for Updates..."
 msgstr "Controleert op updates..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:350
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:346
 msgid "Loading Upload Management..."
 msgstr "Upload instellingen worden geladen"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:360
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:356
 msgid "Loading Connection Listener..."
 msgstr "Connectie-overzicht wordt geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:369
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:365
 msgid "Loading Connection Management..."
 msgstr "Verbindingsbeheer wordt geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:378
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
 msgid "Loading Download Management..."
 msgstr "Downloadbeheer wordt geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:384
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:380
 msgid "Loading Ultrapeer/DHT Management..."
 msgstr "Ultrapeer-/DHT-beheer wordt geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:389
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:385
 msgid "Locating Peers..."
 msgstr "Peers worden gelokaliseerd..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:405
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:401
 msgid "Loading Shared Files..."
 msgstr "Gedeelde bestanden worden geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:410
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:406
 msgid "Loading BitTorrent Management..."
 msgstr "BitTorrent-beheer wordt geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:416
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:412
 msgid "Loading Old Downloads..."
 msgstr "Oude downloads worden geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:421
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:417
 msgid "Attaching LimeWire Store Listeners..."
 msgstr "LimeWire Store-luisteraards worden toegevoegd..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:426
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:422
 msgid "Loading Directed Querier..."
 msgstr "Vragenlijst wordt geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:431
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:427
 msgid "Loading Magnet Listener..."
 msgstr "Magnet-luisteraar wordt geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:442
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:438
 msgid "Loading Peer Listener..."
 msgstr "Peerluisteraar wordt geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:447
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:443
 msgid "Loading Stale Connection Management..."
 msgstr "Staal verbindingsbeheer wordt geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:452
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:448
 msgid "Loading Saved Files..."
 msgstr "Opgeslagen bestanden worden geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:457
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:453
 msgid "Loading Spam Management..."
 msgstr "Spambeheer wordt geladen..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:462
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:458
 msgid "Loading Network Listeners..."
 msgstr "Netwerkluisteraars worden geladen..."
 
@@ -2713,7 +2719,7 @@ msgid "Do not display this message again."
 msgstr "Dit bericht niet meer weergeven."
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
-#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:80
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:81
 msgid "Dial Up"
 msgstr "Inbelverbinding"
 
@@ -3159,6 +3165,7 @@ msgstr "Toevoegen"
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:282
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:94
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:104
+#: gui/com/limegroup/gnutella/gui/actions/RemoveSharedDirectoryAction.java:20
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:44
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:224
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:49
@@ -3520,55 +3527,40 @@ msgid ""
 "Tired of downloads stopping halfway through? It helps to pick search results "
 "with a higher number in the '#' column. The # is the amount of unique places "
 "on the network that are hosting the file. The more sources, the better the "
-"chance of getting your file! In case a junk result appears to have a lot of "
-"sources, use the 'Junk' button to train LimeWire's junk filter."
+"chance of getting your file. In cases where a junk result appears to have a "
+"lot of sources, use the <font color=\"1E8E44\">Junk</font> button to train "
+"LimeWire's junk filter."
 msgstr ""
-"Moe van downloads die stoppen bij de helft? Het helpt om zoekresulaten met "
-"een hoger nummer in de kolom '#' te pikken. De # is het aantal unieke "
-"plaatsen op het netwerk dat het bestand host. Hoe meer bronnen, hoe meer "
-"kans om uw bestand te krijgen! Als een ongewenst resultaat veel bronnen "
-"geeft gebruikt u de 'Ongewenst'-knop om de ongewenste bestanden-filter van "
-"LimeWire te trainen."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:25
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:31
 msgid ""
-"When your downloads say 'Needs More Sources', try choosing that download and "
-"then clicking 'Find More Sources'. LimeWire will search the network for more "
-"places to download the file and automatically resume downloading if it finds "
-"any matches."
+"When your downloads say <font color=\"1E8E44\">Needs More Sources</font>, "
+"try choosing that download and then clicking <font color=\"1E8E44\">Find "
+"More Sources</font>. LimeWire will search the network for more places to "
+"download the file and automatically resume downloading if it finds any "
+"matches."
 msgstr ""
-"Als uw downloads meer bronnen nodig hebben, kies dan die download en klik op "
-"'Zoek voor meer resultaten'. LimeWire zal het netwerk afzoeken voor meer "
-"plaatsen om het bestand te downloaden en wil automatisch verdergaan met "
-"downloaden als het een bron vindt."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:26
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:37
 msgid ""
-"When LimeWire starts up it has to connect to the network. During this time, "
+"When LimeWire starts up, it has to connect to the network. During this time, "
 "the bar in the bottom-left corner will change colors. Once all bars are "
-"green (or blue!), LimeWire has completely connected."
+"green (or blue to indicate aLimeWire PRO or an Ultrapeer connection), "
+"LimeWire has completely connected."
 msgstr ""
-"Als LimeWire opstart moet het verbinding kunnen maken met het netwerk. "
-"Tijdens deze periode kan de balk in linker benedenhoek veranderen van kleur. "
-"Als alle balken groen (of blauw!) zijn heeft LimeWire toegang tot het "
-"netwerk."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:27
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
 msgid ""
-"You can change the look and feel of LimeWire by going to View &gt; Apply "
-"Skins and choosing a new skin. Brand new skins are on LimeWire's website, "
-"available by choosing 'Get More Skins'. If you download skins by the "
-"'Download into LimeWire' links, LimeWire will automatically ask if you want "
-"to use the new skin when the download completes."
+"You can change the look and feel of LimeWire by going to <font "
+"color=\"1E8E44\">View</font> &gt; <font color=\"1E8E44\">Apply Skins</font> "
+"and choosing a new skin. Additional skins are on LimeWire's website, "
+"available by choosing <font color=\"1E8E44\">Get More Skins</font>. If you "
+"download skins by the <font color=\"1E8E44\">Download via LimeWire</font> "
+"link, LimeWire will automatically ask if you want to use the new skin when "
+"the download completes."
 msgstr ""
-"U kunt de skins van LimeWire aanpassen door te kiezen voor 'Weergave' > "
-"'Skins toepassen' en te kiezen voor een nieuwe skin. Nieuwe skins zijn "
-"beschikbaar op de website van LimeWire door te kiezen voor 'Meer skins "
-"verkrijgen'.' Als u skins download via de links 'Downloaden in LimeWire' zal "
-"LimeWire u er automatisch op attenderen, als u de nieuwe skin wilt "
-"gebruiken, wanneer de download voltooid is."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:28
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:51
 msgid ""
 "You can sort your search results by clicking on a column. The most useful "
 "column to sort by is the '#' column, which can put the results that have the "
@@ -3578,351 +3570,211 @@ msgstr ""
 "bruikbare kolom is de '#' kolom, die de beste resultaten bovenaan de lijst "
 "zet."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:29
-msgid ""
-"The more stars a search result has, the better the chances of the download "
-"completing successfully! Some search results may even appear with four blue "
-"stars and a speed of 'Ethernet'. These results have the greatest chance of "
-"completing successfully."
-msgstr ""
-"Hoe meer sterren een zoekresultaat heeft, hoe hoger de kans is dat het"
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:30
-msgid ""
-"You can find out how many times someone has uploaded a file by choosing the "
-"'Library' tab and looking at the Uploads column. The information is listed "
-"as 'X / Y', where 'Y' is the number of people that have attempted to upload "
-"that file, and 'X' is the number of people that have successfully uploaded "
-"it."
-msgstr ""
-"U kunt zien hoeveel keer een persoon een bestand heeft geüpload door te "
-"kiezen voor de 'Bibliotheek'-tab en te kijken in de 'Uploads'-kolom. De "
-"informatie is geordend als ' X /  Y', waarbij 'Y'  het aantal mensen is dat "
-"geprobeerd heeft het bestand te uploaden. 'X' is het aantal mensen die het "
-"bestand succesvol hebben geüpload."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:31
-msgid ""
-"Curious how many people are searching for your files? The 'hits' column in "
-"the Library will count how many times LimeWire has returned a result from "
-"someone searching for that file."
-msgstr ""
-"Nieuwsgierig hoeveel mensen zoeken voor uw bestanden? De 'Treffers'-kolom in "
-"de Bibliotheek telt hoeveel keer LimeWire een resultaat heeft teruggestuurd "
-"van iemand die voor dat bestand zocht."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:32
-msgid ""
-"It helps the network if you keep your LimeWire running. Others will connect "
-"to the network easier and searches will perform better. "
-msgstr ""
-"Het helpt voor het netwerk als u LimeWire laat uitvoeren op de achtergrond. "
-"Anderen zullen makkelijker verbinding maken met het netwerk en de "
-"zoekopdrachten zullen beter gaan. "
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:33
-msgid ""
-"Looking for something rare? The more detailed your search is, the better "
-"your chances of getting a result you want!"
-msgstr ""
-"Zoekt u voor een bijna niet voorkomend bestand? Hoe meer gedetailleerd uw "
-"zoekopdracht is, hoe sneller u iets zult vinden!"
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:34
-msgid ""
-"Want to open this Tip Of The Day dialog after you've closed it? Go to the "
-"Help menu and choose 'Tip of the Day'."
-msgstr ""
-"Wilt u het 'Tip van de dag'-venster zien nadat u hem gesloten heeft? Ga naar "
-"het 'Help'-menu en kies 'Tip van de dag'."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:35
-msgid ""
-"When LimeWire says your download is 'Waiting In Line', that means that "
-"source you are downloading from is temporarily busy and has queued your "
-"download. In order to successfully complete your download, wait while your "
-"request advances in line and is eventually serviced."
-msgstr ""
-"Als LimeWire zegt dat uw download 'In de wachtrij...' is, betekent dat dat "
-"de bron waarvan u aan het downloaden bent tijdelijk bezig is en uw download "
-"in de wachtrij gezet heeft. Om uw download succesvol te voltooien moet u "
-"wachten tot uw download opnieuw gestart wordt."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:36
-#, java-format
-msgid ""
-"Need more help? Visit <a href=\"{0}\">our message boards</a> and see if "
-"others have already answered your question! You can also review the <a "
-"href=\"{1}\">FAQ</a> for answers to commonly asked questions or the <a "
-"href=\"{2}\">User Guide</a> for more information."
-msgstr ""
-"Meer hulp nodig? Bezoek <a href=\"{0}\">ons forum</a> en kijk of anderen uw "
-"vraag al hebben beantwoord! U kunt ook de <a href=\"{1}\">FAQ</a> bekijken "
-"voor antwoorden op veelgestelde vragen of de <a "
-"href=\"{2}\">gebruikershandleiding</a> raadplegen voor meer informatie."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:37
-msgid ""
-"Accidentally killed your download? Click the library tab, choose the "
-"Incomplete folder, and then highlight the filename of the file you'd like to "
-"resume downloading and click resume. LimeWire will automatically search for "
-"that file and begin downloading it again."
-msgstr ""
-"Per ongeluk uw download geaunnuleerd? Klik de 'Bibliotheek'-tab, kies de "
-"incomplete bestanden, selecteer de bestandsnaam van het bestand dat u wilt "
-"hervatten en klik op 'Hervatten'. LimeWire zal automatisch zoeken voor dat "
-"bestand en het verder downloaden."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:38
-#, java-format
-msgid ""
-"Do you have a tip for effectively using LimeWire? Add it to <a "
-"href=\"{0}\">the wiki</a> and it may make it into future Tips of the Day!"
-msgstr ""
-"Heeft u een tip over het efficiënt gebruiken van LimeWire? Voeg het to aan "
-"<a href=\"{0}\">de wikipagina</a> en uw tip verschijnt misschien in de "
-"toekomstige tips van de dag!"
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:39
-msgid ""
-"You can restart downloads that say 'Awaiting Sources' by searching for that "
-"file again. LimeWire will automatically restart the download if it finds any "
-"matching results."
-msgstr ""
-"U kunt downloads met de status 'Bronnen afwachten...' herstarten door "
-"opnieuw een zoekopdracht te starten naar dat bestand. LimeWire zal de "
-"download automatisch herstarten als er overeenkomstige resultaten gevonden "
-"worden."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:40
-#, java-format
-msgid ""
-"Do you have a cool feature you'd like to see added to LimeWire? Suggest it "
-"on LimeWire's <a href=\"{0}\">message boards</a> and it may be added to "
-"future versions!"
-msgstr ""
-"Heeft u een gave functie die u graag in LimeWire wilt zien? Maak een "
-"suggestie aan op de <a href=\"{0}\">forums</a> van LimeWire en wellicht zal "
-"deze toegevoegd worden aan verdere versies!"
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:41
-#, java-format
-msgid ""
-"You can make your own LimeWire skins! Visit <a href=\"{0}\">LimeWire's "
-"website</a> for detailed information about how skins are created."
-msgstr ""
-"U kunt uw eigen LimeWire-skins maken. Bezoek de <a href=\"{0}\">LimeWire-"
-"website</a> voor meer informatie over hoe u skins kunt maken."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
-#, java-format
-msgid ""
-"Want to know more about the development of LimeWire? Visit <a "
-"href=\"{0}\">LimeWire's open-source website</a> and look around!"
-msgstr ""
-"Wilt u meer weten over de ontwikkeling van LimeWire? Bezoek <a "
-"href=\"{0}\">LimeWire's open-source-website</a> en kijk even rond!"
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:43
-msgid ""
-"You can preview downloaded files to make sure they're what you expect. Just "
-"select the download and click 'Preview'!"
-msgstr ""
-"U kunt bestanden die u gedownload heeft voorvertonen om zeker te weten dat "
-"het is wat u van het bestand verwacht had. U hoeft enkel de download te "
-"selecteren en op 'Voorvertonen' te klikken!"
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:44
-msgid ""
-"Curious what hosts LimeWire is connecting or connected to? Enable the "
-"Connections tab from View &gt; Show/Hide, and take a look at LimeWire's "
-"connections."
-msgstr ""
-"Bent u nieuwsgierig met welke hosts LimeWire verbonden is? Vink de "
-"'Verbindingen'-tab in het menu Weergave &gt; Tonen/verbergen aan en neem een "
-"kijkje in de LimeWire-verbindingen."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:45
-msgid ""
-"You can chat with other people who are running LimeWire. Choose any download "
-"or search result that has a smiley in the Chat column and then click 'Chat'."
-msgstr ""
-"U kunt chatten met andere mensen die LimeWire hebben. Kies een download of "
-"zoek resultaat dat een smiley heeft in de chatkolom en klik 'Chatten'."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:46
-#, java-format
-msgid ""
-"Passionate about digital rights? Visit the <a href=\"{0}\">Electronic "
-"Frontier Foundation</a> and see what you can do to help."
-msgstr ""
-"Gepassioneerd door digitale rechten? Bezoek de <a href=\"{0}\"> Electronic "
-"Frontier Foundation</a> en zie wat u kunt doen om te helpen."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:47
-msgid ""
-"LimeWire is translated into many different languages including Chinese, "
-"French, German, Japanese, Italian, Spanish and many more. Visit LimeWire's "
-"<a href=\"{0}\">internationalization page</a> for information on how you can "
-"help translation efforts! "
-msgstr ""
-"Limewire is vertaald in vele verschillende talen waaronder Chinees, Frans, "
-"Duits, Japans, Italiaans, Spaans en nog veel meer. Bezoek de <a "
-"href=\"{0}\">internationale pagina</a> van LimeWire voor informatie over hoe "
-"u kunt helpen met vertalen! "
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:48
-#, java-format
-msgid ""
-"Sport the LimeWire look! Visit our <a href=\"{0}\">LimeWire gear</a> page "
-"and purchase a t-shirt or hat!"
-msgstr ""
-"Ondersteun de LimeWire-look! Bezoek onze <a href=\"{0}\">LimeWire-"
-"gear</a>pagina en koop een t-shirt of een hoed!"
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:49
-msgid ""
-"Try an audio genre search!<br>Click on the 'Audio' Metadata search window, "
-"choose a genre from the drop-down box, and then press 'Search'. Most if not "
-"all of the files returned will be from the selected genre."
-msgstr ""
-"Probeer eens een zoekopdracht in het audiogenre!<br>Klik op het 'Audio'-"
-"zoekvenster, kies een genre uit de lijst en klik vervolgens op 'Zoeken'. De "
-"meeste bestanden zullen van het geselecteerde genre zijn."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:50
-msgid ""
-"Don't know what to look for? Try a 'What's New' search and see what's "
-"recently been added to the network."
-msgstr ""
-"Weet u niet waar u naar zoekt? Probeer eens een 'Wat is nieuw'-zoekopdracht "
-"en zie wat recent is toegevoegd aan het netwerk."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:51
-msgid ""
-"Are you using a router? Be sure to add the port specified in LimeWire's "
-"settings to the firewall in the router, UDP and TCP, incoming and outgoing. "
-"Go to Advanced &gt; Firewall Config in LimeWire's Options window to find the "
-"port. Review your router's configuration to set it up correctly."
-msgstr ""
-"Gebruikt u een router? Zorg ervoor dat de poort die gespecificeerd is in de "
-"instellingen van LimeWire toegevoegd wordt aan de firewall in de router voor "
-"UDP, TCP, inkomend en uitgaand. Ga naar 'Geavanceerd' &gt; "
-"'Firewallconfiguratie' in het 'Opties'-venster van LimeWire om de poort te "
-"vinden. Controleer de configuratie van uw router en pas deze indien nodig "
-"aan."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:52
-msgid ""
-"Want to know more detailed information about the inner workings of LimeWire? "
-"You can view the same statistics that the developers use by choosing Tools "
-"&gt; Advanced &gt; Statistics, choosing 'Advanced', and opting to view "
-"Advanced Statistics."
-msgstr ""
-"Wilt u gedetailleerde informatie over de activiteiten van LimeWire? U kunt "
-"dezelfde statistieken bekijken die ontwikkelaars gebruiken door te gaan naar "
-"'Hulpmiddelen' &gt; 'Geavanceerd' &gt; 'Statistieken' &gt; 'Geavanceerd'. "
-"Hier gaat u vervolgens naar 'Geavanceerde statistieken'."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:53
-#, java-format
-msgid ""
-"Did you know LimeWire is completely open-source? Visit <a "
-"href=\"{0}\">www.limewire.org</a> for information on how to join developer "
-"mailing lists or to review the code."
-msgstr ""
-"Wist u dat LimeWire volledig open-source is? Bezoek <a "
-"href=\"{0}\">www.limewire.org</a> voor meer informatie over hoe u toe kunt "
-"treden tot maillinglijsten van ontwikkelaars of hoe u de code kunt "
-"beoordelen."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:54
-msgid ""
-"Bombarded with nonsense search results? Select the search result, and then "
-"click the Junk button. As you mark search results as Junk or Not Junk, "
-"LimeWire learns what to block and what not to block. After a short training "
-"period, LimeWire automatically blocks most junk results. Try it!"
-msgstr ""
-"Wordt u gebombardeerd met onzinnige zoekresultaten? Selecteer het "
-"zoekresultaat en klik op de 'Ongewenst'-knop. Indien u zoekresultaten "
-"markeert als 'Ongewenst' of 'Niet ongewenst' leert LimeWire wat er "
-"geblokkeerd moet worden en wat niet. Na een korte trainingsperiode zal "
-"LimeWire de meeste ongewenste resultaten automatisch blokkeren. Probeer het "
-"eens uit!"
-
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:55
 msgid ""
-"Small variations in the search title will still work. For example, if your "
-"buddy is sharing 'Limers' but you searched for 'The Limers', your buddy's "
-"file will still be found. "
+"The more stars a search result has, the better the chances of the download "
+"completing successfully. Four blue stars signal 'Ethernet' speed and have "
+"the greatest chance of completing successfully."
 msgstr ""
-"Kleine variaties in de zoekopdracht werken nog steeds. Bijvoorbeeld: als uw "
-"vriend 'Limers' deelt maar u naar 'The Limers' zoekt, kunt u het bestand van "
-"uw vriend nog steeds vinden. "
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:56
-msgid ""
-"Did you know? LimeWire supports two different peer-to-peer file sharing "
-"protocols: Gnutella and BitTorrent."
-msgstr ""
-"Wist u dat LimeWire twee verschillende peer-to-peer-"
-"bestandsdelingsprotocollen ondersteunt? Dit zijn Gnutella en BitTorrent."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:57
-msgid ""
-"To download a file with BitTorrent, just click a link to a .torrent file on "
-"the Web, or drag a .torrent file to LimeWire's Downloads section."
-msgstr ""
-"Om een BitTorrent-bestand te downloaden hoeft u enkel op de link van het "
-".torrent-bestand op het web klikken of het .torrent-bestand naar het "
-"downloadgedeelte van LimeWire te slepen."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:58
-msgid ""
-"Want to share a file on your desktop with LimeWire? Simply drag the file or "
-"folder from your desktop to the LimeWire Library. Select Individually Shared "
-"Files to see your newly shared file in the Library."
-msgstr ""
-"Wilt u een bestand van uw bureaublad delen met LimeWire? Sleep enkel het "
-"bestand naar de LimeWire-bibliotheek. Selecteer 'Afzonderlijk gedeelde "
-"bestanden' om uw nieuwe gedeelde bestanden in uw Bibliotheek te zien."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:59
 msgid ""
-"Search results in LimeWire come from other users like you. Search results "
-"marked with a lock icon in the Quality column are official communications "
-"from Lime Wire, LLC."
+"To find out how many times someone has uploaded a file from you, choose the "
+"<font color=\"1E8E44\">Library</font> tab and look at the <font "
+"color=\"1E8E44\">Uploads</font> column. The information is listed as 'X / "
+"Y', where 'Y' is the number of people who have attempted to upload that "
+"file, and 'X' is the number of people who have successfully uploaded it."
 msgstr ""
-"Zoekresultaten in LimeWire komen van andere gebruikers zoals u. "
-"Zoekresultaten gemarkeerd met een slot in de 'Kwaliteit'-kolom zijn "
-"officiële bestanden van Lime Wire, LLC."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:60
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:65
+msgid ""
+"Curious how many people are searching for your files? The <font "
+"color=\"1E8E44\">Hits</font> column in the <font "
+"color=\"1E8E44\">Library</font> tab counts how many times LimeWire has "
+"returned a result from someone searching for that file."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:70
+msgid ""
+"It helps the network if you keep your LimeWire running; other users will "
+"connect to the network easier and searches will perform better."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:73
+msgid ""
+"When LimeWire says your download is <font color=\"1E8E44\">Waiting In "
+"Line</font>, the source you are downloading from is temporarily busy and has "
+"queued your download. In order to successfully complete your download, wait "
+"while your request advances in line and is eventually serviced."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:78
+#, java-format
+msgid ""
+"If you need more help, visit <a href=\"{0}\">our message boards</a> to see "
+"if others have already answered your question. You can also review the <a "
+"href=\"{1}\">FAQ</a> for answers to commonly asked questions or the <a "
+"href=\"{2}\">User Guide</a> for more information."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:83
+msgid ""
+"You can resume an accidental cancel of a download by clicking the <font "
+"color=\"1E8E44\">Library</font> tab, then selecting <font "
+"color=\"1E8E44\">Incomplete</font> folder. Then highlight the filename and "
+"click <font color=\"1E8E44\">Resume</font>. LimeWire automatically searches "
+"for that file and begins downloading it again."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:89
+#, java-format
+msgid ""
+"If you have any tips on using LimeWire, add it to <a href=\"{0}\">the "
+"wiki</a> and it may make it into a future tip of the day."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:92
+msgid ""
+"You can restart downloads that say <font color=\"1E8E44\">Awaiting "
+"Sources</font> by searching for that file again. LimeWire will automatically "
+"restart the download if it finds any matching results."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:96
+msgid ""
+"Post feature suggestions on LimeWire's <a href=\"{0}\">message boards</a> "
+"and it may be added to future versions."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:98
+#, java-format
+msgid ""
+"Visit <a href=\"{0}\">LimeWire's website</a> for detailed information about "
+"how skins are created."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:100
+msgid ""
+"Do you want to be part of LimeWire's development? Visit <a "
+"href=\"{0}\">LimeWire's Open Source website</a>."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:102
+msgid ""
+"You can preview downloading files to make sure they are what you expect; "
+"select the download and click <font color=\"1E8E44\">Preview</font>."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:104
+msgid ""
+"Curious what hosts LimeWire is connecting or connected to you? Select <font "
+"color=\"1E8E44\">View</font> &gt; <font color=\"1E8E44\">Show/Hide</font>, "
+"<font color=\"1E8E44\">Connections</font> to take a look at LimeWire's "
+"connections."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:108
+#, java-format
+msgid ""
+"Passionate about digital rights? Visit the <a href=\"{0}\">Electronic "
+"Frontier Foundation</a> to see what you can do to help."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:110
+msgid ""
+"LimeWire is translated into many different languages including French, "
+"German, Greek, Italian, and many more. Visit LimeWire's <a "
+"href=\"{0}\">internationalization page</a> for information on how you can "
+"help translation efforts."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:114
+#, java-format
+msgid ""
+"Do you want to sport the LimeWire look? Visit our <a href=\"{0}\">LimeWire "
+"gear</a> page and purchase a T-shirt or hat."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:117
+msgid ""
+"You can do an audio genre search?<br>Click on the <font "
+"color=\"1E8E44\">Audio</font> metadata search window, choose a genre from "
+"the drop-down box and then press <font color=\"1E8E44\">Search</font>. Most, "
+"if not all, of the files returned will be from the selected genre."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:122
+msgid ""
+"Try a <font color=\"1E8E44\">What's New</font> search and see what's "
+"recently been added to the Gnutella network."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:124
+msgid ""
+"Wondering how to avoid a bombardment of nonsense search results? Select the "
+"search result and then click the <font color=\"1E8E44\">Junk</font> button. "
+"As you mark search results as <font color=\"1E8E44\">Junk</font> or <font "
+"color=\"1E8E44\">Not Junk</font>, LimeWire learns what to block and what not "
+"to block. After a short training period, LimeWire automatically blocks most "
+"junk results."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:131
+msgid ""
+"Small variations in the search terms will still work. For example, if your "
+"buddy is sharing 'Limers' but you searched for 'The Limers', your buddy's "
+"file will still be found."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:134
+msgid ""
+"LimeWire supports Gnutella and BitTorrent peer-to-peer file sharing "
+"protocols."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:136
+msgid ""
+"You can download a file with BitTorrent by clicking a link to a .torrent "
+"file on the Internet, or dragging a .torrent file to anywhere on the <font "
+"color=\"1E8E44\">Search</font> tab."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:140
+msgid ""
+"You can drag a file or folder to the <font color=\"1E8E44\">Library</font> "
+"tab to individually share files. In the <font "
+"color=\"1E8E44\">Library</font> tab, select <font "
+"color=\"1E8E44\">Individually Shared Files</font> to see your newly shared "
+"file."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:145
+msgid ""
+"Search results come from other users like you. Search results marked with a "
+"lime icon in the <font color=\"1E8E44\">Quality</font> column are official "
+"communications from Lime Wire LLC."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:149
 msgid ""
 "After starting a search, you can customize the three boxes on the left with "
-"titles like Media, Artist, and Album. You can change what these boxes show. "
-"Click the circle in the upper left corner of a box, and choose a new option "
-"from the menu."
+"titles like Media, Artist and Album for more customized search results. "
+"Also, you can change what these boxes show. Click the circle in the upper "
+"left corner of a box and choose a new option from the menu."
 msgstr ""
-"Nadat u een zoekopdracht gestart heeft kunt u de drie ruimtes links met "
-"titels zoals 'Media', 'Artiest' en 'Album' aanpassen. U kunt specificeren "
-"wat deze ruimtes weer moeten geven. Klik op de cirkel in de linksbovenhoek "
-"van een ruimte en kies een nieuwe optie uit het menu."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:61
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:154
 msgid ""
-"Do you want to browse your friend's LimeWire Library? Go to Search &gt; "
-"Direct Connect, then enter the ip address and port number of your friend's "
-"computer in the following format: 'ip address:port'. The port can be found "
-"in LimeWire's Options in the Advanced &gt; Firewall Config section."
+"You can browse your friend's Library through a <font color=\"1E8E44\">Direct "
+"Connect</font>. Go to <font color=\"1E8E44\">Search</font> &gt; <font "
+"color=\"1E8E44\">Direct Connect</font>, then enter the ip address and port "
+"number of your friend's computer in the following format: 'ip address:port'. "
+"You can find the port value via the <font color=\"1E8E44\">Options</font> "
+"&gt; <font color=\"1E8E44\">Advanced</font> &gt; <font "
+"color=\"1E8E44\">Firewall</font> section."
 msgstr ""
-"Wilt u in de Bibliotheek van uw vriend bladeren? Ga naar 'Zoeken' &gt; "
-"'Direct contact' en voer het IP-adres en poortnummer van de computer van uw "
-"vriend in in het volgende formaat: 'ip-adres:poort'. De poort kan gevonden "
-"worden in 'Hulpmiddelen'> 'Opties' > 'Geavanceerd' &gt; "
-"'Firewallconfiguratie'."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:62
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:164
 msgid ""
 "If you try to download a file that you already have, LimeWire lets you know, "
 "even if the file has a different name."
@@ -3930,389 +3782,271 @@ msgstr ""
 "Als u een bestand probeert te downloaden dat u al heeft laat LimeWire het u "
 "weten, zelfs als het bestand een andere naam heeft."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:63
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:166
 msgid ""
-"Curious what people are searching for? Go to the Monitor tab, and select "
-"Show Incoming Searches to see other people's search queries that are "
-"entering your LimeWire. Double-click an incoming query to perform a search "
-"for that keyword."
+"Curious what are people's keyword searches? Go to the <font "
+"color=\"1E8E44\">Monitor</font> tab and select <font color=\"1E8E44\">Show "
+"Incoming Searches</font> to see other people's search queries. Double-click "
+"an incoming query to perform a search for that keyword."
 msgstr ""
-"Bent u nieuwsgierig voor waar mensen naar zoeken? Ga naar de 'Monitor'-tab "
-"en selecteer 'Inkomende zoekopdrachten tonen' om de zoekopdrachten van "
-"andere mensen te zien die in uw LimeWire komen. Dubbelklik op een inkomende "
-"zoekopdracht om zelf een zoekopdracht voor dat sleutelwoord te doen."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:64
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:171
 msgid ""
-"Have a lot of files? Try an instant search at the top of the Library window."
+"Have a lot of files in your Saved or Shared folder? Try a <font "
+"color=\"1E8E44\">Search in Shared files</font> search at the top of the "
+"<font color=\"1E8E44\">Library</font> tab to find a file."
 msgstr ""
-"Heeft u veel bestanden? Probeer een zoekopdracht aan de top van het "
-"'Bibliotheek'-venster."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:65
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:175
 #, java-format
 msgid ""
 "You can publish your original work on the Gnutella network with a Creative "
-"Commons license. Select the .ogg or .mp3 shared file in the Library and "
-"click the Publish button. Visit the <a href=\"{0}\">creative commons "
-"website</a> for more information."
+"Commons license. Select the .ogg or .mp3 shared file in the <font "
+"color=\"1E8E44\">Library</font> tab and click the <font "
+"color=\"1E8E44\">Publish</font> button to publish your original work. Visit "
+"the <a href=\"{0}\">Creative Commons website</a> for more information."
 msgstr ""
-"U kunt uw originele werk publiceren op het Gnutella-netwerk met een Creative "
-"Commons-licentie. Selecteer het .ogg- or .mp3-bestand in de Bibliotheek en "
-"klik op de 'Publiceren'-knop. Bezoek de <a href=\"{0}\">Creative Commons-"
-"website</a> voor meer informatie."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:66
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:183
 msgid ""
-"Have you downloaded a file with incomplete or totally wrong information "
-"about its contents? Select the file in the Library and click Describe. Edit "
-"the file's metadata to your heart's content. You can even edit many files at "
-"once by selecting more than one file before clicking Describe."
+"You can fix a file's incomplete or totally wrong information about its "
+"contents by selecting the file in the <font color=\"1E8E44\">Library</font> "
+"tab and clicking <font color=\"1E8E44\">Describe</font>. You can even edit "
+"many files at once by selecting more than one file before clicking <font "
+"color=\"1E8E44\">Describe</font>."
 msgstr ""
-"Heeft u een bestand gedownload met incomplete of totaal verkeerde informatie "
-"over de inhoud? Selecteer het bestand in de Bibliotheek en klik op "
-"'Omschrijving...'. Wijzig de data van het bestand naar wat u vind dat het "
-"is. U kunt ook veel bestanden tegelijk wijzigen door er meerdere te "
-"selecteren voordat u 'Omschrijving...' kiest."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:67
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:190
 msgid ""
-"Are you behind a firewall? At the bottom of LimeWire in the status bar, look "
-"for the globe. If there is a brick wall in front of it, your Internet "
-"connection is firewalled."
+"To see if you are you behind a firewall, look for the globe at the bottom of "
+"LimeWire in the status bar. If there is a brick wall in front of the globe, "
+"your Internet connection is firewalled."
 msgstr ""
-"Heeft u een firewall? Zoek naar de wereldbol in de LimeWire-statusbalk. "
-"Staat er een stenen muur voor, dan zit uw internetverbinding achter een "
-"firewall."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:68
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:194
 msgid ""
-"Wondering how many files you are sharing? Look in LimeWire's status bar at "
-"the number in a green oval. A beige oval means LimeWire is still building "
-"your Library. A red oval means files are not being shared."
+"The number in the green oval in LimeWire's status bar specifies the number "
+"of files you are sharing. A beige oval means LimeWire is still building your "
+"Library and a red oval means you aren't sharing any files."
 msgstr ""
-"Wilt u weten hoeveel bestanden u deelt? Kijk in de LimeWire-statusbalk naar "
-"het nummer in een groene ovaal. Een beige ovaal betekent dat LimeWire uw "
-"Bibliotheek aan het maken is. Een rode ovaal betekent dat uw bestanden niet "
-"worden gedeeld."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:69
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:198
 msgid ""
-"The numbers next to the up and down arrows in the status bar at the bottom "
-"of LimeWire show how fast all of your files are downloading or uploading "
-"combined."
+"The numbers next to the up and down arrows at the bottom of LimeWire show "
+"how fast all of your files are downloading or uploading."
 msgstr ""
-"De nummers naast de pijlen in de statusbalk van LimeWire tonen hoe snel u "
-"bestanden van LimeWire kunt downloaden of uploaden."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:70
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:201
 msgid ""
-"Don't strain your eyes to use LimeWire! You can adjust the text size by "
-"going to View &gt; Increase Font Size."
+"You can increase the text size via <font color=\"1E8E44\">View</font> &gt; "
+"<font color=\"1E8E44\">Increase Font Size</font>."
 msgstr ""
-"Laat uw ogen niet te veel inspannen bij het gebruik van LimeWire! U kunt "
-"eenvoudig de grootte aanpassen door naar 'Weergave' &gt; 'Lettertype "
-"vergroten' te gaan."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:71
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:204
 msgid ""
-"Instead of putting all your files in a single folder, LimeWire can "
-"automatically sort them by media type. In the Options &gt; Saving window, "
-"select a Media Type like Audio, and click the Browse button. You can group "
-"files by media type in the Library even if all saved files are in one folder."
+"Instead of putting all of your files in a single folder, LimeWire can "
+"automatically sort downloads by media type. In the <font "
+"color=\"1E8E44\">Options</font> &gt; <font color=\"1E8E44\">Saving</font> "
+"window, select a media type like 'Audio', and click the <font "
+"color=\"1E8E44\">Browse</font> button. You can sort files by media type in "
+"the <font color=\"1E8E44\">Library</font> tab even if all saved files are in "
+"one folder."
 msgstr ""
-"In plaats van al uw bestanden in één map te plaatsen kan LimeWire ze ook "
-"automatisch sorteren. In 'Opties' &gt; 'Opslagvenster', selecteer een "
-"mediatype zoals 'Audio' en klik op 'Bladeren'. U kunt uw bestanden ook per "
-"mediatype sorteren in de Bibliotheek, ook al zijn alle bestanden in dezelfde "
-"mqp opgeslagen."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:72
-msgid ""
-"LimeWire autocompletes what you type in the search box. To prevent "
-"autocompletion, open the Options window. Under View, choose Autocompletion. "
-"Uncheck the box Enable Autocompletion of Text Fields, and click OK."
-msgstr ""
-"LimeWire vult wat u in de zoekruimte intypt automatisch aan. Om automatische "
-"tekstvoltooiing uit te schakelen opent u het 'Opties'-venster. Onder "
-"'Weergave' kiest u 'Automatisch tekst aanvullen'. Haal het vinkje weg bij de "
-"vinkruimte 'Automatische voltooiing van tekstvelden inschakelen' en klik op "
-"OK."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:73
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:213
 msgid ""
 "While LimeWire is running, your audio and video files are automatically "
 "shared with iTunes and other programs that support the DAAP protocol. You "
-"can disable this sharing in the Options window by going to iTunes &gt; "
-"Sharing."
+"can disable this sharing via <font color=\"1E8E44\">Options</font> &gt; "
+"<font color=\"1E8E44\">iTunes</font> &gt; <font "
+"color=\"1E8E44\">Sharing</font>."
 msgstr ""
-"Als LimeWire uitgevoerd is worden uw audio- en videobestanden automatisch "
-"gedeeld met  iTunes en andere programma's die het DAAP-protocol "
-"ondersteunen. U kunt het delen uitschakelen in het 'Opties'-venster onder "
-"'iTunes' &gt; 'Delen'."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:74
-msgid ""
-"Do you connect to the Internet both wired and wirelessly? At the same time? "
-"Just want LimeWire to use one of the connections? Piece of cake! You can "
-"change your network interface by going to Tools &gt; Options &gt; Advanced "
-"&gt; Network Interface."
-msgstr ""
-"Gebruikt u draadloos en bedraad internet? Op hetzelfde moment? U wilt "
-"LimeWire met slechts één verbinding gebruiken? Een fluitje van een cent! U "
-"kunt uw netwerkverbindingen wijzigen door naar Hulpmiddelen &gt; Opties &gt; "
-"Geavanceerd &gt; Netwerkomgeving te gaan."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:75
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:219
 msgid ""
 "Your search queries travel through a network of interconnected computers, "
 "which is why it takes time to receive all of the search results. LimeWire "
 "often takes shortcuts to deliver results faster, but if you think search "
 "results are blocked because your computer has problems with UDP packets, you "
-"can disable OOB (out-of-band) searching in the Options for more reliable "
-"results."
+"can disable OOB (out-of-band) searching in the <font "
+"color=\"1E8E44\">Options</font> for more reliable results."
 msgstr ""
-"Uw zoekopdrachten reizen door een netwerk van veel verbonden computers "
-"waardoor het een tijdje duurt om alle resultaten te ontvangen. LimeWire "
-"snijdt vaak stukken af om resultaten sneller te leveren, maar als u denkt "
-"dat resultaten geblokkeerd zijn omdat uw computer problemen heeft met UDP-"
-"pakketten, kunt ui OOB-zoeken (Out Of Band) uitschakelen, om meer juiste "
-"resultaten te vinden."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:76
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:227
 msgid ""
-"If you own the copyright to a file that is being shared on the network, and "
+"If you own the copyright to a file that is being shared on the network and "
 "you don't want it to be shared, you can have it filtered out of the network "
 "search results. <a href=\"{0}\">More information</a> is available."
 msgstr ""
-"Als u een auteursrechtelijk bestand van uzelf vindt en u wilt niet dat het "
-"gedeeld word, kunt u het uit de netwerkzoekopdrachten filteren. <a "
-"href=\"{0}\">Meer informatie</a> is beschikbaar."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:77
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:232
 msgid ""
 "Unlike other peer-to-peer file-sharing programs, LimeWire can transfer files "
 "even if both parties are behind a firewall. You don't have to do anything "
-"extra because it happens automatically!"
+"extra because it happens automatically."
 msgstr ""
-"In tegenstelling tot andere peer-to-peer-bestandsdelingsprogramma's kan "
-"LimeWire ook bestanden versturen en ontvangen als bijde partijen achter een "
-"firewall zijn. U hoeft hier niets extra's voor te doen, want het gebeurt "
-"automatisch!"
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:78
-msgid ""
-"Start sharing files without knowing anything about how to configure a "
-"firewall! If you use the Windows firewall, LimeWire automatically adds "
-"itself to the list of exceptions. All this is done in the background to make "
-"your experience as smooth as possible."
-msgstr ""
-"Begin met het delen van bestanden zonder iets te weten van hoe u uw firewall "
-"moet configureren! Als u Windows Firewall gebruikt voegt LimeWire zichzelf "
-"automatisch toe aan de lijst met uitzonderingen. Dit wordt allemaal gedaan "
-"op de achtergrond om uw ervaring met LimeWire zo goed mogelijk te maken."
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:79
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:236
 msgid ""
 "LimeWire uses a technology called DHT to help users better find rare files. "
 "In order to be eligible for inclusion in the DHT, make sure you are not "
-"behind a firewall, and leave LimeWire running for as long as possible."
+"behind a firewall. Running LimeWire for as long as possible will improve "
+"your chances of being in the DHT."
 msgstr ""
-"LimeWire gebuikt een technologie, genaamd DHT, om gebruikers sneller "
-"onbekende bestanden te laten vinden. Om optimaal van DHT gebruik te kunnen "
-"maken moet u ervoor zorgen dat u niet achter een firewall zit en dat u "
-"LimeWire zo lang mogelijk op de achtergrond laat draaien."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:80
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:241
+msgid "LimeWire supports file sizes up to 1 TB (terabyte)."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:242
 msgid ""
-"Want to share a large file? LimeWire supports file sizes up to 1 TB "
-"(terabyte)."
+"Want to become an Ultrapeer? If you have a fast connection without a "
+"firewall, you will be promoted to Ultrapeer status after a while (keep "
+"LimeWire running as long as possible.). Also, make sure you have not "
+"disabled Ultrapeer capabilties in the <font color=\"1E8E44\">Options</font>."
 msgstr ""
-"Wilt u een groot bestand delen? LimeWire ondersteunt bestanden tot 1TB "
-"(terabyte)."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:81
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:248
 msgid ""
-"Want to be an Ultrapeer? Leave LimeWire running as long as possible. If you "
-"have a fast connection without a firewall, you will be promoted to Ultrapeer "
-"status after a while. Make sure that you have not disabled Ultrapeer "
-"capabilties in the Options."
+"Curious about the inner workings of LimeWire? Go to <font "
+"color=\"1E8E44\">View</font> &gt; <font color=\"1E8E44\">Show/Hide</font> "
+"&gt; <font color=\"1E8E44\">Console</font> to see LimeWire's log statements."
 msgstr ""
-"Wilt u een ultrapeer zijn? Laat LimeWire dan zo lang mogelijk lopen. Als u "
-"een snelle verbinding zonder firewall heeft wordt u na een tijdje tot "
-"ultrapeer gepromoveerd. Zorg ervoor dat u de ultrapeermogelijkheden niet "
-"heeft uitgeschakeld in 'Opties'."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:82
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:252
 msgid ""
-"Curious about the inner workings of LimeWire? Go to View &gt; Show/Hide &gt; "
-"Console to see LimeWire's source code in action! (not for the faint of heart)"
+"Wondering if someone browsed your shared Library? Go to <font "
+"color=\"1E8E44\">View</font> &gt; <font color=\"1E8E44\">Show/Hide</font> "
+"&gt; <font color=\"1E8E44\">Logging</font> to see recent activity."
 msgstr ""
-"Bent u nieuwsgierig over de onzichtbare verbindingen van LimeWire? Ga naar "
-"Weergave &gt; Tonen/verbergen &gt; Logboek om de LimeWire-broncode in actie "
-"te zien (niet voor de gewone gebruiker)!"
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:83
-msgid ""
-"Wondering if someone browsed your shared library? Go to View &gt; Show/Hide "
-"&gt; Logging to see the recent activity. "
-msgstr ""
-"Wilt u weten of iemand in uw gedeelde bibliotheek gekeken heeft? Ga naar "
-"Weergave &gt; Tonen/verbergen &gt; Logging om de recente activiteiten te "
-"bekijken. "
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:84
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:256
 msgid ""
 "Ultrapeers help the network by distributing only pertinent network traffic "
-"to the leaf nodes. "
+"to the leaf nodes."
 msgstr ""
-"Ultrapeers helpen het netwerk door enkel permanent netwerkverkeer naar de "
-"leafnodes te distribueren. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:85
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:258
+msgid ""
+"How do you see which files in shared folders are indeed shared? In the <font "
+"color=\"1E8E44\">Library</font> tab, the column <font "
+"color=\"1E8E44\">Shared</font> displays an icon to show shared (two arrows "
+"forming a circle) or not shared (an X mark)."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:263
 msgid ""
 "Magnet links allow users to download files through LimeWire from a web page. "
 "When you put a magnet link on your web page (in the 'href' attribute of "
-"anchor tags), and a user clicks the link, a download will start in LimeWire."
+"anchor tags) and a user clicks the link, a download will start in LimeWire. "
+"Also, you can copy and paste the magnet link through <font "
+"color=\"1E8E44\">File</font> &gt <font color=\"1E8E44\">Open Magnet or "
+"Torrent</font> to download."
 msgstr ""
-"Magnet-links zorgen ervoor dat gebruikers bestanden kunnen downloaden met "
-"LimeWire en via een webpagina. Als u een Magnet-link op uw webpagina plaatst "
-"(in het 'href'-attribuut of in ankertags) en een gebruiker klikt de link "
-"aan, zal de download in LimeWire starten."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:96
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:280
 msgid ""
 "You can customize LimeWire to your heart's content by changing various "
-"preferences such as your Save Folder, Shared Folder, Upload Bandwidth, "
-"etc... These preferences (and more) are available at the Tools &gt; Options "
+"preferences such as your saved folder, shared folder, upload bandwidth, etc. "
+"These preferences (and more) are available at the <font "
+"color=\"1E8E44\">Tools</font> &gt; <font color=\"1E8E44\">Options</font> "
 "menu."
 msgstr ""
-"U kunt LimeWire aan uw wensen aanpassen door verschillende voorkeuren te "
-"wijzigen, zoals uw opslagmap, uw gedeelde map, uw uploadbandbreedte, enz... "
-"Deze voorkeuren (en meer) zijn beschikbaar in het menu 'Hulpmiddelen' &gt; "
-"'Opties'."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:97
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:286
 msgid ""
-"You can find out which version of LimeWire you are using by choosing 'About "
-"LimeWire' from the Help menu. "
+"You can find out which version of LimeWire you are using by choosing <font "
+"color=\"1E8E44\">Help</font> &gt; <font color=\"1E8E44\">About "
+"LimeWire</font>. "
 msgstr ""
-"U kunt uitzoeken welke LimeWire-versie u gebruikt door 'Over LimeWire...' te "
-"kiezen in het 'Help'-menu. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:98
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:289
 msgid ""
 "Be a good network participant, don't close LimeWire if someone is uploading "
 "from you. You can tell LimeWire to automatically close after all downloads "
-"and uploads are complete by going to Tools &gt; Options and looking at the "
-"'Shutdown' options."
+"and uploads (transfers) are complete via <font color=\"1E8E44\">Tools</font> "
+"&gt; <font color=\"1E8E44\">Options</font> &gt; <font "
+"color=\"1E8E44\">System Tray</font>, <font color=\"1E8E44\">Shutdown "
+"Behavior</font>."
 msgstr ""
-"Wees een goede netwerkdeelnemer en sluit LimeWire niet als iemand iets is "
-"aan het uploaden van u. U kunt LimeWire zo instellen dat het automatisch "
-"sluit nadat alle downloads en uploads zijn voltooid. Ga naar 'Hulpmiddelen' "
-"&gt; 'Opties' en zoek naar de afsluitgedragsinstellingen."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:99
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:297
 msgid ""
-"LimeWire does not automatically share all types of files. If you have a "
-"specific file you'd like to share, make sure its extension is being shared. "
-"This can be done via Tools &gt; Options and altering the 'Sharing' options."
+"LimeWire does not automatically share all types of files. Therefore, if you "
+"have a specific file you'd like to share, either share the file individually "
+"or make sure its extension is being shared. Select <font "
+"color=\"1E8E44\">Tools</font> &gt; <font color=\"1E8E44\">Options</font> "
+"&gt; <font color=\"1E8E44\">Sharing</font>, <font "
+"color=\"1E8E44\">Types</font> to modify the file extensions to share."
 msgstr ""
-"LimeWire deelt niet automatisch alle types bestanden. Indien u een specifiek "
-"bestanden heeft dat u wilt delen moet u ervoor zorgen dat de extensie "
-"gedeeld wordt. Dit kan gedaan worden via 'Hulpmiddelen' &gt; 'Opties' &gt; "
-"'Delen'."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:100
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:306
 msgid ""
-"You can turn autocomplete for searching on or off by choosing 'Options' from "
-"the 'Tools' menu, and changing the value of 'Autocomplete Text' under the "
-"'View' option."
+"You can turn autocomplete for searching on or off through <font "
+"color=\"1E8E44\">Tools</font> &gt; <font color=\"1E8E44\">Options</font> "
+"&gt; <font color=\"1E8E44\">View</font>, <font "
+"color=\"1E8E44\">Autocomplete</font> and change the <font "
+"color=\"1E8E44\">Text Autocomplete</font> option."
 msgstr ""
-"U kunt de automatische tekstvoltooiingsoptie voor zoekvelden in- of "
-"uitschakelen door 'Opties' te kiezen in het 'Hulpmiddelen'-menu  en de "
-"waarde aan te passen onder de 'Bekijken'-optie."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:101
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:313
 msgid ""
-"Want to see dialogs for questions which you previously marked 'Do not "
-"display this message again' or 'Always Use This Answer'? Go to Tools &gt; "
-"Options, and check 'Revert To Default' under View &gt; Popups."
+"You can see dialogs for questions you previously marked <font "
+"color=\"1E8E44\">Do not display this message again</font> or <font "
+"color=\"1E8E44\">Always use this answer</font> by going to <font "
+"color=\"1E8E44\">Tools</font> &gt; <font color=\"1E8E44\">Options</font> and "
+"checking under <font color=\"1E8E44\">Revert To Default</font> under <font "
+"color=\"1E8E44\">View</font> &gt; <font color=\"1E8E44\">Popus</font>."
 msgstr ""
-"Wilt u vensters voor vragen weergeven die u eerder gemarkeerd heeft als 'Dit "
-"bericht niet meer tonen' of 'Altijd dit antwoord gebruiken'? Ga naar "
-"'Hulpmiddelen' &gt; 'Opties' en klik op 'Standaardinstellingen herstellen' "
-"onder 'Bekijken' &gt; 'Popups'."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:102
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:322
 msgid ""
-"You can ban certain words from appearing in your search results by choosing "
-"'Options' from the 'Tools' menu and adding new words to those listed under "
-"Filters &gt; Keywords."
+"You can ban certain words from appearing in your search results by going to "
+"<font color=\"1E8E44\">Tools</font> &gt; <font "
+"color=\"1E8E44\">Options</font> &gt; <font color=\"1E8E44\">Filters</font> "
+"&gt; <font color=\"1E8E44\">Keywords</font>, and adding new words."
 msgstr ""
-"U kunt bepaalde woorden verbannen zodat ze niet meer verschijnen in uw "
-"zoekresultaten door te gaan naar 'Hulpmiddelen' > 'Opties' > 'Filters' > "
-"'Sleutelwoorden' en door nieuwe woorden toe te voegen aan de lijst."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:103
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:327
 msgid ""
-"You can change the columns that display search result information. Columns "
-"you can choose include, 'Title', 'Genre', 'Track', 'Length', and many more. "
-"Just right-click on the search result column headers, choose audio or video, "
-"and check the columns you want to see!"
+"You can change the columns that display search result information (columns "
+"include 'Title', 'Genre', 'Track', 'Length', and many more). Right-click on "
+"the search result column header, and check the columns you want to see."
 msgstr ""
-"U kunt de kolommen aanpassen die zoekresultaatinformatie weergeven. U kunt "
-"kiezen uit de volgende kolommen: 'Titel', 'Genre', 'Track', 'Lengte' en nog "
-"veel meer. Rechtsklik gewoon op de kolomtitels van het zoekresultaat, kies "
-"audio of video en vink de kolommen aan die u wilt zien!"
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:104
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:332
 msgid ""
-"Hate tool tips? Love tool tips? You can turn them on or off in most tables "
-"by right-clicking on the column headers and choosing 'More Options'. You can "
-"toggle other options here too, like whether or not to sort tables "
+"You can turn tool tips on or off in most tables by right-clicking on the "
+"column header and choosing <font color=\"1E8E44\">More Options</font>. You "
+"can toggle other options here too, like whether or not to sort tables "
 "automatically and if you prefer the rows to be striped."
 msgstr ""
-"Haat u tooltipteksten? Houdt u van tooltipteksten? U kunt ze in- of "
-"uitschakelen in de meeste tabellen door rechts te klikken op de kolomtitels "
-"en 'Meer opties' te kiezen'. U kunt hier ook andere opties aanpassen, zoals "
-"het automatisch sorteren van tabellen en of u gestreepte rijen wilt."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:105
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:338
 msgid ""
-"You can sort uploads, downloads, etc..., by clicking on a column. The table "
-"keeps resorting as the information changes. You can turn this automatic-"
-"sorting behavior off by right-clicking on a column header, choosing 'More "
-"Options' and un-checking 'Sort Automatically'."
+"You can sort uploads, downloads, etc., by clicking on a column. You can turn "
+"this automatic sorting behavior off by right-clicking on a column header, "
+"choosing <font color=\"1E8E44\">More Options</font> and un-checking <font "
+"color=\"1E8E44\">Sort Automatically</font>."
 msgstr ""
-"U kunt uploads, downloads, enz. sorteren door op een kolom te klikken. De "
-"tabel blijft hersorteren als de informatie aangepast wordt. U kunt dit "
-"gedrag uitschakelen door rechts te klikken op een kolomtitel, 'Meer opties' "
-"te kiezen en 'Automatisch sorteren' uitschakelen."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:106
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:343
 msgid ""
-"Don't want to see the Chat (or other) columns in downloads? Right-click on "
-"the column headers and uncheck that column. You can also drag the columns "
-"around to make them appear in the order you'd like."
+"You can hide the <font color=\"1E8E44\">Icon</font> (or other) column in "
+"downloads by right-clicking on the column header and unchecking that column. "
+"You can also drag the columns around to make them appear in the order you'd "
+"like."
 msgstr ""
-"Wilt u de chatkolom (of een andere kolom) niet in downloads zien? Rechtsklik "
-"op de kolomtitels en vink die kolom uit. U kunt de kolommen ook slepen om ze "
-"in persoonlijke volgorde neer te zetten."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:107
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:347
 msgid ""
-"You can tell LimeWire which downloads to start next. Right-click on the "
-"column headers in the download area and check the 'Priority' column. Select "
-"the download you want to start next and click the up arrow until it's at the "
-"top!"
+"You can tell LimeWire which downloads to start next by right-clicking on the "
+"column header in the download area and checking the <font "
+"color=\"1E8E44\">Priority</font> column. Select the download you want to "
+"start next and click the up arrow until it's at the top."
 msgstr ""
-"U kunt LimeWire vertellen welke download als volgende gestart moet worden. "
-"Klik met uw rechtermuisknop op de titels van de rij en vink 'Prioriteit' "
-"aan. Selecteer de download die u als volgende wilt en druk op het pijltje "
-"naar boven tot de download bovenaan staat!"
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:108
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:352
 msgid ""
 "LimeWire is written in Java, which means that having the latest version of "
 "Java will improve LimeWire's speed and stability. You can find the most "
@@ -4322,527 +4056,366 @@ msgstr ""
 "de snelheid en stabiliteit van LimeWire beter maakt. U kunt de meest recente "
 "Java-uitgave op <a href=\"{0}\">www.java.com</a> vinden."
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:109
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:356
 msgid ""
 "Do you reach your search limit and all the results are spam or not related "
-"to your search? Try using the keyword filter by going to Tools &gt; Options "
-"&gt; Filters &gt; Keywords. Any search result that contains a word from the "
-"keyword filter will not even reach your computer. "
+"to your search? Use the keyword filter via <font "
+"color=\"1E8E44\">Tools</font> &gt; <font color=\"1E8E44\">Options</font> "
+"&gt; <font color=\"1E8E44\">Filters</font> &gt; <font "
+"color=\"1E8E44\">Keywords</font> to filter searches. Search results that "
+"contain a word from the keyword filter will not reach your computer. "
 msgstr ""
-"Bereikt u uw zoeklimiet en alle resultaten zijn spam of niet gerelateerd aan "
-"uw zoekopdracht? Probeer de sleutelwoordfilter eens door te gaan naar "
-"'Hulpmiddelen' &gt; 'Opties' &gt; 'Filters' &gt; 'Sleutelwoorden'. Ieder "
-"zoekresultaat dat een woord uit de sleutelwoordfilter bevat zal uw computer "
-"niet eens bereiken. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:110
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:364
 msgid ""
-"Are you unhappy with the small number of search results you received? Right-"
-"click a search result, then choose Search More, then Get More Results. "
+"You can expand search results by right-clicking a search result, then "
+"choosing <font color=\"1E8E44\">Search More</font>, then <font "
+"color=\"1E8E44\">Get More Results</font>. "
 msgstr ""
-"Bent u ontevreden met het kleine aantal zoekresultaten dat u ontvangt? "
-"Rechtsklik op een zoekresultaat, kies 'Meer zoeken' en daarna 'Meer bronnen "
-"zoeken'. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:111
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:368
 msgid ""
 "Can't connect to the Gnutella network? If you are using a firewall, make "
 "sure that a port is opened for LimeWire (both incoming and outgoing, UPD and "
-"TCP). Go to Tools &gt; Options &gt; Advanced &gt; Firewall Config to find "
-"the port number. "
+"TCP). Go to <font color=\"1E8E44\">Tools</font> &gt; <font "
+"color=\"1E8E44\">Options</font> &gt; <font color=\"1E8E44\">Advanced</font> "
+"&gt; <font color=\"1E8E44\">Firewall Config</font> to find the port number. "
 msgstr ""
-"Kunt u geen verbinding maken met het Gnutella-netwerk? Indien u een firewall "
-"gebruikt moet u ervoor zorgen dat er een poort is geopend voor LimeWire "
-"(beide inkomende en uitgaande, UDP en TCP). Ga naar Hulpmiddelen > Opties >  "
-"Geavanceerd >  Firewallconfiguratie om het poortnummer te bekijken. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:112
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:375
 msgid ""
-"You can save individual downloads to custom locations. Right-click a search "
-"result and choose Download As. You can even change the location of a "
-"download in progress by right-clicking the download and choosing Change File "
-"Location. "
+"You can save individual downloads to custom locations by right-clicking a "
+"search result and choosing <font color=\"1E8E44\">Download As...</font>. You "
+"can even change the location of a download in progress by right-clicking the "
+"download and choosing <font color=\"1E8E44\">Change File Location...</font>. "
 msgstr ""
-"U kunt individuele downloads opslaan naar aangepaste locaties. Rechtsklik op "
-"een zoekresultaat en kies 'Downloaden als'. U kunt zelfs de locatie van een "
-"lopende download aanpassen door rechts te klikken op de download en "
-"'Bestandslocatie veranderen' te kiezen. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:113
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:381
 msgid ""
-"Do you want some files to download before others? You can adjust the "
-"priority of specific downloads by right-clicking the column headers in the "
-"Downloads section, and select the Priority column. Then click the Queue Up "
-"arrow to increase the priority. LimeWire attempts to download files of "
-"higher priority first. "
+"You can stop sharing a recently download file through the <font "
+"color=\"1E8E44\">Library</font> tab; right-click the file and choose <font "
+"color=\"1E8E44\">Stop Sharing File</font>. "
 msgstr ""
-"Wilt u bepaalde bestanden eerder laten downloaden dan andere bestanden? U "
-"kunt de prioriteit van specifieke downloads aanpassen door rechts te klikken "
-"op de kolomtitels in de 'Downloads'-sectie en de 'Prioriteit'-kolom te "
-"kiezen. Klik dan op de 'Omhoog'-pijl om de prioriteit te verhogen. LimeWire "
-"zal bestanden met hoge prioriteit als eerste downloaden. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:114
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:384
 msgid ""
-"Did you just download a file that you don't want to share? In the Library, "
-"right-click it and choose Stop Sharing File. "
+"You can save different types of files, such as audio, video or images, in "
+"different folders on your computer automatically. Go to <font "
+"color=\"1E8E44\">Tools</font> &gt; <font color=\"1E8E44\">Options</font> "
+"&gt; <font color=\"1E8E44\">Saving</font> to choose the location for each "
+"type of file. "
 msgstr ""
-"Heeft u recentelijk een bestand gedownload dat u niet wilt delen? Rechtsklik "
-"erop in de Bibliotheek en kies 'Bestand delen stoppen'. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:115
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:390
 msgid ""
-"Did you know you can save different types of files, such as audio, video, or "
-"images, in different folders on your computer automatically? Just go to "
-"Tools &gt; Options &gt; Saving to choose the location for each type of file. "
+"You can make LimeWire's Junk filter block more results; adjust that and more "
+"via <font color=\"1E8E44\">Tools</font> &gt; <font "
+"color=\"1E8E44\">Options</font> &gt; <font color=\"1E8E44\">Filters</font> "
+"&gt; <font color=\"1E8E44\">Junk</font>. "
 msgstr ""
-"Wist u dat u verschillende types bestanden, zoals audio, video of "
-"afbeeldingen, automatisch in verschillende mappen op uw computer kunt laten "
-"opslaan? Ga naar 'Hulpmiddelen' &gt; 'Opties' &gt; 'Opslaan' om de locatie "
-"voor elk bestandstype te kiezen. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:116
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:396
 msgid ""
-"Make LimeWire's Junk filter block more results by making the filter "
-"stricter. Adjust that and more by going to Tools &gt; Options &gt; Filters "
-"&gt; Junk. "
+"Do you like trying out new product features as soon as they are released? Go "
+"to <font color=\"1E8E44\">Tools</font> &gt; <font "
+"color=\"1E8E44\">Options</font> &gt; <font color=\"1E8E44\">Updates</font> "
+"to get notified of beta releases. "
 msgstr ""
-"Zorg ervoor dat de 'ongewenste bestanden'-filter vam LimeWire meer "
-"resultaten blokkeert door de filter strenger af te stellen. Pas dit aan door "
-"naar 'Hulpmiddelen' &gt; 'Opties' &gt; 'Filters' &gt; 'Ongewenst' te gaan. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:117
-msgid ""
-"Do you like trying out new product features as soon as they are released? "
-"Feedback on new features is always welcomed and appreciated! Go to Tools "
-"&gt; Options &gt; Updates to get notified of beta releases. "
-msgstr ""
-"Wilt u onze nieuwe productfuncties uitproberen zodra deze uitgegeven zijn? "
-"Feedback over onze nieuwe functies is altijd welkom en is altijd "
-"gewaardeerd! Ga naar 'Hulpmiddelen' &gt; 'Opties' &gt; 'Updates' om een "
-"melding te krijgen als er een beta-uitgave beschikbaar is. "
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:127
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:411
 msgid ""
 "LimeWire is written in Java, which means that having the latest version of "
 "Java will improve LimeWire's speed and stability. You can upgrade to the "
-"latest Java release by using Software Update. "
+"latest Java release by using 'Software Update'. "
 msgstr ""
-"LimeWire is geschreven in Java, wat betekent dat de nieuwste versie van Java "
-"de snelheid en stabiliteit van LimeWire beter maakt. U kunt naar de laatste "
-"Java-uitgave upgraden door gebruik te maken van Java Software Update. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:128
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:415
 msgid ""
-"Tired of the OSX Aqua look? Try using a new theme, available from the View "
-"&gt; Apply Themes menu. "
+"Tired of the OS X Aqua look? Try using a new theme; themes are available "
+"from the <font color=\"1E8E44\">View</font> &gt; <font "
+"color=\"1E8E44\">Apply Skins</font> menu. "
 msgstr ""
-"Heeft u genoeg van de OSX Aqua-weergave? Probeert u eens een nieuwe skin "
-"uit! Deze zijn beschikbaar in 'Weergave' &gt; 'Skins toepassen'. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:129
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:419
 msgid ""
 "You can customize LimeWire to your heart's content by changing various "
-"preferences such as your Save Folder, Shared Folder, Upload Bandwidth, "
-"etc... These preferences (and more) are available at the LimeWire &gt; "
-"Preferences menu. "
+"preferences such as your saved folder, shared folder, upload bandwidth, etc. "
+"These preferences (and more) are available at the <font "
+"color=\"1E8E44\">Preferences</font> menu. "
 msgstr ""
-"U kunt LimeWire aan uw wensen aanpassen door verschillende voorkeuren te "
-"wijzigen, zoals uw opslagmap, uw gedeelde map, uw uploadbandbreedte, enz... "
-"Deze voorkeuren (en meer) zijn beschikbaar in het menu 'LimeWire' &gt; "
-"'Voorkeuren'. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:130
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:424
 msgid ""
-"You can find out which version of LimeWire you are using by choosing 'About "
-"LimeWire' from the LimeWire menu. "
+"You can find out which version of LimeWire you are using at the <font "
+"color=\"1E8E44\">About LimeWire</font> menu. "
 msgstr ""
-"U kunt uitzoeken welke versie van LimeWire u gebruikt door 'Over "
-"LimeWire...' uit het 'Help'-menu te kiezen. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:131
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:426
 msgid ""
 "Be a good network participant, don't close LimeWire if someone is uploading "
 "from you. You can tell LimeWire to automatically close after all downloads "
-"and uploads are complete by going to LimeWire &gt; Preferences and looking "
-"at the 'Shutdown' options. "
+"and uploads (transfers) are complete at the <font "
+"color=\"1E8E44\">Preferences</font> menu and looking at the <font "
+"color=\"1E8E44\">System Tray</font> options. "
 msgstr ""
-"Wees een goede netwerkdeelnemer en sluit LimeWire niet als iemand iets is "
-"aan het uploaden van u. U kunt LimeWire zo instellen dat het automatisch "
-"sluit nadat alle downloads en uploads zijn voltooid. Ga naar 'LimeWire' &gt; "
-"'Voorkeuren' en zoek naar de afsluitgedragsinstellingen. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:132
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:432
 msgid ""
-"LimeWire does not automatically share all types of files. If you have a "
-"specific file you'd like to share, make sure its extension is being shared. "
-"This can be done via LimeWire &gt; Preferences and altering the 'Sharing' "
-"options. "
+"LimeWire does not automatically share all types of files. Therefore, if you "
+"have a specific file you'd like to share, either individually share the "
+"file, or make sure its extension is being shared. Select <font "
+"color=\"1E8E44\">Preferences</font> &gt; <font "
+"color=\"1E8E44\">Sharing</font> &gt; <font color=\"1E8E44\">Types</font> to "
+"modify the file extensions to share. "
 msgstr ""
-"LimeWire deelt niet automatisch alle types bestanden. Indien u een specifiek "
-"bestanden heeft dat u wilt delen moet u ervoor zorgen dat de extensie "
-"gedeeld wordt. Dit kan gedaan worden via 'LimeWire' &gt; 'Voorkeuren' &gt; "
-"'Delen'. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:133
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:440
 msgid ""
-"Want to see where on your computer a shared file is? Go to the Library, "
-"highlight the file and click 'Explore'. LimeWire will open that folder in "
-"the Finder. "
+"You can locate a shared file on your computer through the <font "
+"color=\"1E8E44\">Library</font> tab; highlight the file and click <font "
+"color=\"1E8E44\">Explore</font>. LimeWire will open the folder containing "
+"the file in the Finder. "
 msgstr ""
-"Wilt u zien waar een gedeeld bestand zich bevindt op uw computer? Ga naar de "
-"Bibliotheek, selecteer het bestand en klik op 'Verkennen'. LimeWire zal de "
-"map dan in de Vinder openen. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:134
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:444
 msgid ""
-"Using OSX's built-in firewall? Make sure that LimeWire's port is opened by "
-"clicking on the Apple Menu &gt; System Preferences &gt; Sharing &gt; "
+"Are you using OS X's built-in firewall? Make sure LimeWire's port is opened "
+"by clicking on the Apple Menu &gt; System Preferences &gt; Sharing &gt; "
 "Firewall &gt; New &gt; and choosing to open 'Gnutella/Limewire (6346)'. "
 msgstr ""
-"Gebruikt u de ingebouwde firewall van OSX? Zorg ervoor dat de poort van "
-"LimeWire geopend is door te gaan naar Apple-menu &gt; Systeemvoorkeuren &gt; "
-"Delen &gt; Firewall &gt; Nieuw &gt. Hier kies u 'Gnutella/Limewire (6346)' "
-"en opent u deze. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:135
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:449
 msgid ""
-"You can turn autocomplete for searching on or off by choosing 'Preferences' "
-"from the 'LimeWire' menu, and changing the value of 'Autocomplete Text' "
-"under the 'View' option. "
+"You can turn autocomplete for searching on or off by choosing <font "
+"color=\"1E8E44\">Preferences</font> &gt; <font color=\"1E8E44\">View</font>, "
+"<font color=\"1E8E44\">Autocomplete</font>, <font color=\"1E8E44\">Text "
+"Autocomplete</font>, and changing the value. "
 msgstr ""
-"U kunt automatische tekstvoltooiing voor zoekopdrachten in- of uitschakelen "
-"door te gaan naar 'LimeWire' > 'Voorkeuren' en de waarde van 'Automatische "
-"tekstvoltooiing' onder de 'Bekijken'-optie aan te passen. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:136
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:455
 msgid ""
-"Want to see dialogs for questions which you previously marked 'Do not "
-"display this message again' or 'Always Use This Answer'? Go to LimeWire &gt; "
-"Preferences, and check 'Revert To Default' under View &gt; Popups. "
+"You can see dialogs for questions you previously marked <font "
+"color=\"1E8E44\">Do not display this message again</font> or <font "
+"color=\"1E8E44\">Always use this answer</font> by going to <font "
+"color=\"1E8E44\">Preferences</font> and checking <font "
+"color=\"1E8E44\">Revert To Default</font> under <font "
+"color=\"1E8E44\">View</font> &gt; <font color=\"1E8E44\">Popups</font>. "
 msgstr ""
-"Wilt u vensters voor vragen weergeven die u eerder gemarkeerd heeft als 'Dit "
-"bericht niet meer tonen' of 'Altijd dit antwoord gebruiken'? Ga naar "
-"'LimeWire' &gt; 'Voorkeuren' en klik op 'Standaardinstellingen herstellen' "
-"onder 'Bekijken' &gt; 'Popups'. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:137
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:462
 msgid ""
-"You can ban certain words from appearing in your search results by choosing "
-"'Preferences' from the 'LimeWire' menu and adding new words to those listed "
-"under Filters &gt; Keywords. "
+"You can ban certain words from appearing in your search results from the "
+"<font color=\"1E8E44\">Preferences</font> &gt; <font "
+"color=\"1E8E44\">Filters</font>, and adding new keywords. "
 msgstr ""
-"U kunt bepaalde woorden verbannen zodat ze niet meer verschijnen in uw "
-"zoekresultaten door te gaan naar 'LimeWire' > 'Voorkeuren' > 'Filters' > "
-"'Sleutelwoorden' en door nieuwe woorden toe te voegen aan de lijst. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:138
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:466
 msgid ""
-"You can change the columns that display search result information. Columns "
-"you can choose from include, 'Title', 'Genre', 'Track', 'Length', and many "
-"more. Just control-click on the search result column headers, choose audio "
-"or video, and check the columns you want to see! "
+"You can change the columns that display search result information (columns "
+"include 'Title', 'Genre', 'Track', 'Length', and many more). Right-click (or "
+"control-click) on the search result column header, and check the columns you "
+"want to see. "
 msgstr ""
-"U kunt de kolommen aanpassen die zoekresultaatinformatie weergeven. U kunt "
-"kiezen uit de volgende kolommen: 'Titel', 'Genre', 'Track', 'Lengte' en nog "
-"veel meer. Controlklik gewoon op de kolomtitels van het zoekresultaat, kies "
-"audio of video en vink de kolommen aan die u wilt zien! "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:139
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:471
 msgid ""
-"Hate tool tips? Love tool tips? You can turn them on or off in most tables "
-"by control-clicking on the column headers and choosing 'More Options'. You "
-"can toggle other options here too, like whether or not to sort tables "
-"automatically and if you prefer the rows to be striped. "
+"You can turn tool tips on or off in most tables by right-clicking (or "
+"control-clicking) on the column header and choosing <font "
+"color=\"1E8E44\">More Options</font>. You can toggle other options here too, "
+"like whether or not to sort tables automatically and if you prefer the rows "
+"to be striped. "
 msgstr ""
-"Haat u tooltipteksten? Houdt u van tooltipteksten? U kunt ze in- of "
-"uitschakelen in de meeste tabellen door te controlklikken op de kolomtitels "
-"en 'Meer opties' te kiezen'. U kunt hier ook andere opties aanpassen, zoals "
-"het automatisch sorteren van tabellen en of u gestreepte rijen wilt. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:140
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:477
 msgid ""
-"You can sort uploads, downloads, etc..., by clicking on a column. The table "
-"keeps resorting as the information changes. You can turn this automatic-"
-"sorting behavior off by control-clicking on a column header, choosing 'More "
-"Options' and un-checking 'Sort Automatically'. "
+"You can sort uploads, downloads, etc., by clicking on a column. The table "
+"keeps resorting as the information changes. You can turn this automatic "
+"sorting behavior off by right-clicking (or control-clicking) on a column "
+"header, choosing <font color=\"1E8E44\">More Options</font> and un-checking "
+"<font color=\"1E8E44\">Sort Automatically</font>. "
 msgstr ""
-"U kunt uploads, downloads, enz. sorteren door op een kolom te klikken. De "
-"tabel blijft hersorteren als de informatie aangepast wordt. U kunt dit "
-"gedrag uitschakelen door control te klikken op een kolomtitel, 'Meer opties' "
-"te kiezen en 'Automatisch sorteren' uitschakelen. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:141
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:484
 msgid ""
-"Don't want to see the Chat (or other) columns in downloads? Control-click on "
-"the column headers and uncheck that column. You can also drag the columns "
-"around to make them appear in the order you'd like. "
+"You can hide the <font color=\"1E8E44\">Icon</font> (or other) column in "
+"downloads by right-clicking (or control-clicking) on the column header and "
+"unchecking that column. You can also drag the columns around to make them "
+"appear in the order you'd like. "
 msgstr ""
-"Wilt u de chatkolom (of een andere kolom) niet in downloads zien? "
-"Controlklik op de kolomtitels en vink die kolom uit. U kunt de kolommen ook "
-"slepen om ze in persoonlijke volgorde neer te zetten. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:142
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:489
 msgid ""
-"Do you reach your search limit and all the results are spam or not related "
-"to your search? Try using the keyword filter by going to LimeWire &gt; "
-"Preferences &gt; Filters &gt; Keywords. Any search result that contains a "
-"word from the keyword filter will not even reach your computer. "
+"Use the keyword filter to get more accurate search results and less spam via "
+"<font color=\"1E8E44\">Preferences</font> &gt; <font "
+"color=\"1E8E44\">Filters</font> &gt; <font color=\"1E8E44\">Keywords</font>. "
+"Any search result that contains a word from the keyword filter will not even "
+"reach your computer. "
 msgstr ""
-"Bereikt u uw zoeklimiet en alle resultaten zijn spam of niet gerelateerd aan "
-"uw zoekopdracht? Probeer de sleutelwoordfilter eens door te gaan naar "
-"'LimeWire' &gt; 'Voorkeuren' &gt; 'Filters' &gt; 'Sleutelwoorden'. Ieder "
-"zoekresultaat dat een woord uit de sleutelwoordfilter bevat zal uw computer "
-"niet eens bereiken. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:143
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:495
 msgid ""
-"Are you unhappy with the small number of search results you received? "
-"Control-click a search result, then choose Search More, then Get More "
-"Results. "
+"You can expand search results by right-clicking (or control-clicking) then "
+"choosing <font color=\"1E8E44\">Search More</font>, then <font "
+"color=\"1E8E44\">Get More Results</font>. "
 msgstr ""
-"Bent u ontevreden met het kleine aantal zoekresultaten dat u ontvangt? "
-"Controlklik op een zoekresultaat, ga naar 'Meer zoeken' en daarna naar 'Met "
-"resultaten zoeken'. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:144
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:499
 msgid ""
 "Be careful not to share sensitive information like tax documents, passwords, "
-"etc. If you attempt to share a folder that people generally use to store "
-"sensitive data (such as Users, System, Desktop, etc), LimeWire will warn "
-"you. To share a single file instead of the whole folder, just drag that file "
-"to LimeWire's Library. "
+"etc. LimeWire will warn you if you attempt to share a folder that people "
+"generally use to store sensitive data (such as Users, System, Desktop, etc). "
 msgstr ""
-"Kijk voorzichtig na of u geen gevoelige informatie zoals "
-"belastingsdocumenten, wachtwoorden enz. deelt. Als u een map wilt delen die "
-"mensen vaak gebruiken om gevoelige data in op te slaan (zoals 'Gebruikers', "
-"'Systeem', 'Bureaublad', enz.) zal LimeWire u waarschuwen. Om een los "
-"bestand te delen in plaats van een complete map kunt u dat bestand gewoon "
-"naar de Bibliotheek slepen. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:145
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:504
 msgid ""
-"You can tell LimeWire which downloads to start next. Control-click on the "
-"column headers in the download area and check the 'Priority' column. Select "
-"the download you want to start next and click the up arrow until it's at the "
-"top. "
+"You can save individual downloads to custom locations by right-clicking (or "
+"control-clicking) a search result and choosing <font "
+"color=\"1E8E44\">Download As...</font>. You can even change the location of "
+"a download in progress by right-clicking (or control-clicking) the download "
+"and choosing <font color=\"1E8E44\">Change File Location...</font>. "
 msgstr ""
-"U kunt LimeWire vertellen welke download als volgende gestart moet worden. "
-"Controlklik op de kolomtitels in het downloadgebied en vink de 'Prioriteit'-"
-"kolom aan. Selecteer de download die u als volgende wilt starten en klik op "
-"de 'Omhoog'-pijl totdat deze bovenaan is. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:146
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:511
 msgid ""
-"You can save individual downloads to custom locations. Control-click a "
-"search result and choose Download As. You can even change the location of a "
-"download in progress by control-clicking the download and choosing Change "
-"File Location. "
+"You stop sharing a recently download file via the <font "
+"color=\"1E8E44\">Library</font> tab; right-click (or control-click) the file "
+"and choose <font color=\"1E8E44\">Stop Sharing File</font>"
 msgstr ""
-"U kunt individuele downloads opslaan naar aangepaste locaties. Rechtsklik op "
-"een zoekresultaat en kies 'Downloaden als'. U kunt zelfs de locatie van een "
-"lopende download aanpassen door control te klikken op de download en "
-"'Bestandslocatie veranderen' te kiezen. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:147
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:515
 msgid ""
-"Do you want some files to download before others? You can adjust the "
-"priority of specific downloads by control-clicking the column headers in the "
-"Downloads section, and select the Priority column. Then click the Queue Up "
-"arrow to increase the priority. LimeWire attempts to download files of "
-"higher priority first. "
+"The Library is a file manager. That means when you delete a file from the "
+"Library, you have the option to either permanently delete the file from your "
+"computer or move it to the Trash. "
 msgstr ""
-"Wilt u bepaalde bestanden eerder laten downloaden dan andere bestanden? U "
-"kunt de prioriteit van specifieke downloads aanpassen door te controlklikken "
-"op de kolomtitels in de 'Downloads'-sectie en de 'Prioriteit'-kolom te "
-"kiezen. Klik dan op de 'Omhoog'-pijl om de prioriteit te verhogen. LimeWire "
-"zal bestanden met hoge prioriteit als eerste downloaden. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:148
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:519
 msgid ""
-"Did you just download a file that you don't want to share? In the Library, "
-"control-click it and choose Stop Sharing File. "
+"You can play music in your default media player instead of in LimeWire by "
+"right-clicking (or control-clicking) the LimeWire status bar and deselecting "
+"<font color=\"1E8E44\">Show Media Player</font>. "
 msgstr ""
-"Heeft u recentelijk een bestand gedownload dat u niet wilt delen? Control-"
-"klik erop in de Bibliotheek en kies 'Bestand delen stoppen'. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:149
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:523
 msgid ""
-"LimeWire's Library is a file manager, not just an MP3 Playlist. That means "
-"that when you delete a file from the Library, you have the option to either "
-"permanently delete the file from your computer or move it to the Trash. "
+"You can save different types of files, such as audio, video or images, in "
+"different folders on your computer automatically. Go to <font "
+"color=\"1E8E44\">Preferences</font> &gt; <font "
+"color=\"1E8E44\">Saving</font> to choose the location for each type of file. "
 msgstr ""
-"De Bibliotheek van LimeWire is een bestandsbeheerder, niet enkel een MP3-"
-"afspeellijst. Dit betekent dat als u een bestand uit de Bibliotheek "
-"verwijdert u de optie heeft om óf het bestand permanent van uw computer te "
-"verwijderen óf het te verplaatsen naar de Prullenbak. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:150
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:529
 msgid ""
-"Want to play music in your default media player instead of in LimeWire? "
-"Control-click the LimeWire status bar and deselect 'Show Media Player'. "
+"You can adjust LimeWire's Junk filter to block more results (and more) via "
+"<font color=\"1E8E44\">Preferences</font> &gt; <font "
+"color=\"1E8E44\">Filters</font> &gt; <font color=\"1E8E44\">Junk</font>. "
 msgstr ""
-"Wilt u muziek afspelen met uw standaard mediaspeler in plaats van met "
-"LimeWire? Control-klik op de LimeWire-statusbalk en deselecteer 'Toon "
-"mediaspeler'. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:151
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:533
 msgid ""
-"Did you know you can save different types of files, such as audio, video, or "
-"images, in different folders on your computer automatically? Just go to "
-"LimeWire &gt; Preferences &gt; Saving to choose the location for each type "
-"of file. "
+"Do you like trying out new product features as soon as they are released? Go "
+"to <font color=\"1E8E44\">Preferences</font> &gt; <font "
+"color=\"1E8E44\">Updates</font> to get notified of beta releases. "
 msgstr ""
-"Wist u dat u verschillende types bestanden, zoals audio, video of "
-"afbeeldingen, automatisch in verschillende mappen op uw computer kunt laten "
-"opslaan? Ga naar 'LimeWire' &gt; 'Voorkeuren' &gt; 'Opslaan' om de locatie "
-"voor elk bestandstype te kiezen. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:152
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:546
 msgid ""
-"Make LimeWire's Junk filter block more results by making the filter "
-"stricter. Adjust that and more by going to LimeWire &gt; Preferences &gt; "
-"Filters &gt; Junk. "
+"LimeWire automatically adds itself to the list of exceptions for your "
+"Windows firewall. All this is done in the background to make your experience "
+"as smooth as possible."
 msgstr ""
-"Zorg ervoor dat de ongewenste bestanden-filter van LimeWire meer resultaten "
-"blokkeert door de filter strenger af te stellen. Pas dat en meer aan door te "
-"gaan naar 'LimeWire' &gt; 'Voorkeuren' &gt; 'Filters' &gt; 'Ongewenste "
-"bestanden'. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:153
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:550
 msgid ""
-"Do you like trying out new product features as soon as they are released? "
-"Feedback on new features is always welcomed and appreciated! Go to LimeWire "
-"&gt; Preferences &gt; Updates to get notified of beta releases. "
+"You can make LimeWire look like your other Windows programs via themes. "
+"Choose the Windows theme, available from the <font "
+"color=\"1E8E44\">View</font> &gt; <font color=\"1E8E44\">Apply Skins</font> "
+"menu."
 msgstr ""
-"Wilt u onze nieuwe productfuncties uitproberen zodra deze uitgegeven zijn? "
-"Feedback over onze nieuwe functies is altijd welkom en is altijd "
-"gewaardeerd! Ga naar 'LimeWire' &gt; 'Voorkeuren' &gt; 'Updates' om een "
-"melding te krijgen als er een beta-uitgave beschikbaar is. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:162
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:554
 msgid ""
-"Want LimeWire to look like your other Windows programs? Choose the Windows "
-"theme, available from the View &gt; Apply Themes menu. "
+"You can play music in your default media player instead of in LimeWire by "
+"right-clicking the LimeWire status bar and deselecting <font "
+"color=\"1E8E44\">Show Media Player</font>."
 msgstr ""
-"Wilt u dat LimeWire er uit ziet als uw andere Windows-programma's? Kies het "
-"Windows-thema in het menu 'Weergave' &gt; 'Thema's toepassen'. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:163
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:558
 msgid ""
-"Want to play music in your default media player instead of in LimeWire? "
-"Right-click the LimeWire status bar and deselect 'Show Media Player'. "
+"You can find a shared file on your computer by going to the <font "
+"color=\"1E8E44\">Library</font> tab, highlight the file and click <font "
+"color=\"1E8E44\">Explore</font>. LimeWire will open the folder containing "
+"the file in the Windows Explorer."
 msgstr ""
-"Wilt u muziek afspelen in uw standaard mediaspeler in plaats van in "
-"LimeWire? Rechtsklik op de LimeWire-statusbalk en deselecteer 'Mediaspeler "
-"tonen'. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:164
-msgid ""
-"Want to see where on your computer a shared file is? Go to the Library, "
-"highlight the file and click 'Explore'. LimeWire will open that folder in "
-"the Explorer. "
-msgstr ""
-"Wilt u zien waar een gedeeld bestand zich bevindt op uw computer? Ga naar de "
-"Bibliotheek, selecteer het bestand en klik op 'Verkennen'. LimeWire zal de "
-"map dan in de Verkenner openen. "
-
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:165
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:563
 msgid ""
 "Be careful not to share sensitive information like tax documents, passwords, "
-"etc. If you attempt to share a folder that people generally use to store "
-"sensitive data (such as My Documents, Desktop, Program Files, etc), LimeWire "
-"will warn you. To share a single file instead of the whole folder, just drag "
-"that file to LimeWire's Library. "
+"etc. LimeWire will warn you if you attempt to share a folder that people "
+"generally use to store sensitive data (such as My Documents, Desktop, "
+"Program Files, etc.)."
 msgstr ""
-"Kijk voorzichtig na of u geen gevoelige informatie zoals "
-"belastingsdocumenten, wachtwoorden enz. deelt. Als u een map wilt delen die "
-"mensen vaak gebruiken om gevoelige data in op te slaan (zoals 'Mijn "
-"documenten', 'Bureaublad', 'Program Files', enz.) zal LimeWire u "
-"waarschuwen. Om een los bestand te delen in plaats van een complete map kunt "
-"u dat bestand gewoon naar de Bibliotheek slepen. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:166
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:568
 msgid ""
 "The icons that you see next to your search results in the '?' column are "
 "symbols of the program used to open that particular type of file. To change "
-"the program associated with a file, go to the Folder Options in Windows "
-"Explorer (from the Tools menu). This is a Windows setting, not a LimeWire "
-"setting. "
+"the program associated with a file, from Windows Explorer, select <font "
+"color=\"1E8E44\">Tools</font> &gt; <font color=\"1E8E44\">Folder "
+"Options...</font> (This is a Windows setting, not a LimeWire setting)."
 msgstr ""
-"De iconen die u naast uw zoekresultaten in de '?'-kolom ziet zijn de iconen "
-"van het programma dat gebruikt wordt om dat bepaalde type bestand te openen. "
-"Om het geassocieerde programma van een bestand te veranderen gaat u naar "
-"'Mapopties' in Windows Verkenner (uit het menu 'Extra'). Dit is een Windows-"
-"instelling, geen LimeWire-instelling. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:167
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:575
 msgid ""
-"LimeWire's Library is a file manager, not just an MP3 Playlist. That means "
-"that when you delete a file from the Library, you have the option to either "
-"permanently delete the file from your computer or move it to the Recycle "
-"Bin. "
+"The Library is a file manager. That means that when you delete a file from "
+"the Library, you have the option to either permanently delete the file from "
+"your computer or move it to the Recycle Bin."
 msgstr ""
-"De Bibliotheek van LimeWire is een bestandsbeheerder, niet enkel een MP3-"
-"afspeellijst. Dat betekent dat als u een bestand uit de Bibliotheek "
-"verwijdert, u de optie krijgt om óf het bestand permanent van uw computer te "
-"verwijderen óf het te verplaatsen naar de Prullenbak. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:168
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:579
 msgid ""
-"Set LimeWire to be your default program for opening magnet links and "
-".torrent files for the smoothest experience using LimeWire with the web. Go "
-"to Tools &gt; Options &gt; Advanced &gt; File Associations. "
+"You can make LimeWire your default program for opening magnet links and "
+".torrent files to get the smoothest Internet experience.Go to <font "
+"color=\"1E8E44\">Tools</font> &gt; <font color=\"1E8E44\">Options</font> "
+"&gt; <font color=\"1E8E44\">Advanced</font> &gt; <font color=\"1E8E44\">File "
+"Associations</font> to set LimeWire as the default application to open "
+"magnet links and .torrent files."
 msgstr ""
-"Maak LimeWire uw standaardprogramma voor het openen van Magnet-links en "
-".torrent-bestanden voor de beste ervaring van LimeWire gebruiken in "
-"combinatie met het web. Ga naar 'Hulpmiddelen' &gt; 'Opties' &gt; "
-"'Geavanceerd' &gt; 'Bestandsaccosiaties'. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:169
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:588
 msgid ""
 "When you close LimeWire, it minimizes to the system tray. To exit, right-"
-"click the system tray icon (next to the time), and select Exit. You can "
-"change this behavior by going to Tools &gt; Options &gt; System Tray. "
+"click the system tray lime icon (next to the time), and select <font "
+"color=\"1E8E44\">Exit</font>. You can change this behavior via <font "
+"color=\"1E8E44\">Tools</font> &gt; <font color=\"1E8E44\">Options</font> "
+"&gt; <font color=\"1E8E44\">System Tray</font>."
 msgstr ""
-"Als u LimeWire sluit wordt LimeWire geminimaliseerd naar de systeemtray. Om "
-"LimeWire af te sluiten moet u rechtsklikken op het systeemtrayicoon (naast "
-"de tijd) en 'Afsluiten' selecteren. U kunt dit gedrag veranderen door naar "
-"'Humpmiddelen' &gt; 'Opties' &gt; 'Systeemtray'. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:178
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:603
 msgid ""
-"Be careful not to share sensitive information like tax documents, passwords, "
-"etc. If you attempt to share a folder that people generally use to store "
-"sensitive data (such as bin, dev, home, etc), LimeWire will warn you. To "
-"share a single file instead of the whole folder, just drag that file to "
-"LimeWire's Library. "
+"Are you aware of what you are sharing? Be careful not to share sensitive "
+"information like tax documents, passwords, etc. LimeWire will warn you if "
+"you attempt to share a folder that people generally use to store sensitive "
+"data (such as bin, dev, home, etc.). "
 msgstr ""
-"Kijk voorzichtig na of u geen gevoelige informatie zoals "
-"belastingsdocumenten, wachtwoorden enz. deelt. Als u een map wilt delen die "
-"mensen vaak gebruiken om gevoelige data in op te slaan (zoals 'bin', 'dev', "
-"'home', enz.) zal LimeWire u waarschuwen. Om een los bestand te delen in "
-"plaats van een complete map kunt u dat bestand gewoon naar de Bibliotheek "
-"slepen. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:179
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:609
 msgid ""
-"Want to play music in your preferred media player instead of in LimeWire? "
-"Right-click the LimeWire status bar and deselect 'Show Media Player'. Then "
-"go to Tools &gt; Options &gt; Helper Apps to set the program of your choice. "
+"You can play music in your preferred media player instead of in LimeWire by "
+"right-clicking the LimeWire status bar and deselecting <font "
+"color=\"1E8E44\">Show Media Player</font>. Then go to <font "
+"color=\"1E8E44\">Tools</font> &gt; <font color=\"1E8E44\">Options</font> "
+"&gt; <font color=\"1E8E44\">Helper Apps</font> to set the program of your "
+"choice."
 msgstr ""
-"Wilt u muziek afspelen met uw eigen mediaspeler in plaats van met die van "
-"LimeWire? Rechtsklik op de LimeWire-statusbalk en vink 'Toon de mediaspeler' "
-"uit. Ga dan naar 'Hulpmiddelen' &gt; 'Opties' &gt; 'Hulpapplicaties' om het "
-"programma van uw keuze te configureren. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:196
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:633
 msgid "Thank you for supporting LimeWire! We hope you enjoy LimeWire PRO. "
 msgstr ""
 "Bedankt voor het ondersteunen van LimeWire! Wij hopen dat u plezier heeft "
 "van LimeWire Pro. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:197
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:635
 msgid ""
 "The blinking plug in the top-right corner of LimeWire indicates that a "
 "search is in progress. "
@@ -4850,7 +4423,7 @@ msgstr ""
 "De blinkende stekker in de hoek rechtsboven van LimeWire geeft aan dat er "
 "een zoekopdracht bezig is. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:206
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:645
 #, java-format
 msgid ""
 "Thank you for helping the network by running LimeWire. Please consider "
@@ -4862,13 +4435,11 @@ msgstr ""
 "doorgaande ontwikkeling te ondersteunen en om LimeWire en het netwerk beter "
 "te maken. "
 
-#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:207
+#: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:649
 msgid ""
-"The spinning lime in the top-right corner of LimeWire indicates that a "
+"The spinning lime in the top-right corner of LimeWire Basic indicates that a "
 "search is in progress. "
 msgstr ""
-"De ronddraaiende limoen in de hoek rechtsboven van LimeWire geeft aan dat er "
-"een zoekopdracht bezig is. "
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:36
 msgid "New Version Available!"
@@ -5051,7 +4622,7 @@ msgid "Open:"
 msgstr "Openen:"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:235
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:219
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:225
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:117
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:200
 msgid "Browse..."
@@ -6021,11 +5592,11 @@ msgstr ""
 msgid "Language:"
 msgstr "Taal:"
 
-#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:62
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:63
 msgid "Miscellaneous Settings"
 msgstr "Extra instellingen"
 
-#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:64
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:65
 msgid ""
 "Below, are several options that affect the performance and functionality of "
 "LimeWire."
@@ -6033,15 +5604,15 @@ msgstr ""
 "Hieronder staan enkele opties die de prestaties en functionaliteiten van "
 "LimeWire bepalen."
 
-#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:77
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:78
 msgid "Network Speed"
 msgstr "Netwerksnelheid"
 
-#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:81
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:82
 msgid "Broadband (or unsure)"
 msgstr "Broadband (of onzeker)"
 
-#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:87
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:88
 msgid ""
 "Please choose the speed of your internet connection. Setting this speed "
 "correctly is important for optimum network performance."
@@ -6049,17 +5620,16 @@ msgstr ""
 "Kies a.u.b. de snelheid van uw internetverbinding. Het correct instellen van "
 "de snelheid is belangrijk voor optimale netwerkprestaties."
 
-#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:117
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:407
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:118
 #: gui/com/limegroup/gnutella/gui/options/panes/StartupPaneItem.java:22
 msgid "System Startup"
 msgstr "Systeemopstart"
 
-#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:119
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:120
 msgid "Start Automatically"
 msgstr "Automatisch opstarten"
 
-#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:123
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:124
 msgid ""
 "Would you like LimeWire to start when you log into your computer? This will "
 "cause LimeWire to start faster when you use it later."
@@ -6067,15 +5637,15 @@ msgstr ""
 "Wilt u dat LimeWire direct opstart als u uw computer aanzet? Dit zal "
 "LimeWire helpen sneller te beginnen wanneer u het later gebruikt."
 
-#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:146
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:147
 msgid "Content Filtering"
 msgstr "Bestanden filtreren"
 
-#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:148
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:149
 msgid "Enable Content Filtering"
 msgstr "Inhoudsfiltrering toestaan"
 
-#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:152
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:153
 msgid ""
 "LimeWire can filter files that copyright owners request not be shared. By "
 "enabling filtering, you are telling LimeWire to confirm all files you "
@@ -6088,17 +5658,17 @@ msgstr ""
 "verwijderde bestanden controleren. U kunt dit ten alle tijden nog veranderen "
 "door Filters -> 'Configureer de inhoudsfilters' in het hoofdmenu te kiezen."
 
-#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:163
+#: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:164
 #: gui/com/limegroup/gnutella/gui/init/SetupWindow.java:127
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractPaneItem.java:66
 msgid "Learn more about this option..."
 msgstr "Meer informatie over deze optie..."
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:59
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:60
 msgid "Save Folder and Shared Folders"
 msgstr "Opslagmap en gedeelde mappen"
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:72
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:73
 msgid ""
 "Please choose a folder where you would like your files to be downloaded. You "
 "can also choose folders you would like to share with other users running "
@@ -6107,7 +5677,7 @@ msgstr ""
 "Kies a.u.b. een map waar u uw bestanden heen wilt downloaden. U kunt ook "
 "mappen kiezen die u wilt delen met andere LimeWire-gebruikers."
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:74
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:75
 msgid ""
 "LimeWire now downloads files to a new, different folder.  Please confirm the "
 "folder where you would like your files to be downloaded. You can also choose "
@@ -6117,20 +5687,20 @@ msgstr ""
 "waarheen u uw bestanden wilt downloaden. U kunt ook mappen kiezen die u wilt "
 "delen met andere LimeWire-gebruikers."
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:96
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:97
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:327
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirDataLine.java:48
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:30
 msgid "Save Folder"
 msgstr "Map opslaan"
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:118
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:140
-#: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:31
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:119
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:146
+#: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:33
 msgid "Shared Folders"
 msgstr "Gedeelde mappen"
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:180
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:186
 msgid ""
 "LimeWire was unable to use the specified folder for saving files. Please try "
 "a different folder."
@@ -6138,7 +5708,7 @@ msgstr ""
 "LimeWire kan de gespecificeerde map voor het opslaan van bestanden niet "
 "gebruiken. Kies a.u.b. een andere map."
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:187
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:193
 #, java-format
 msgid ""
 "LimeWire could not create default share folder {0}, a file with that name "
@@ -6147,7 +5717,7 @@ msgstr ""
 "LimeWire kon de standaard deelmap {0} niet aanmaken, en bestand met die naam "
 "bestaat al."
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:191
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:197
 #, java-format
 msgid ""
 "LimeWire could not create default share folder {0}, it will not be shared."
@@ -6155,17 +5725,17 @@ msgstr ""
 "LimeWire kon de standaard deelmap {0} niet aanmaken, het zal niet gedeeld "
 "worden."
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:207
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:213
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:87
 msgid "Use Default"
 msgstr "Gebruik standaard"
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:208
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:214
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:88
 msgid "Use the Default Folder"
 msgstr "Gebruik de standaardmap"
 
-#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:220
+#: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:226
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:118
 msgid "Choose Another Folder"
 msgstr "Kies een andere map"
@@ -6517,19 +6087,19 @@ msgstr ""
 "uitvinken die u niet wilt delen (u kunt uw gedeelde mappen altijd in de "
 "opties van LimeWire veranderen)."
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:302
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:320
 msgid "Legend"
 msgstr "Geschiedenis"
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:311
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:329
 msgid "Folder is fully shared including all subfolders."
 msgstr "De map is helemaal gedeeld inclusief alle submappen!"
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:325
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:343
 msgid "Folder is not shared and no subfolders are shared."
 msgstr "De map is NIET gedeelt en ook geen een van de submappen!"
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:333
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:351
 msgid "Folder's files and some subfolders are shared."
 msgstr "De bestanden en enkele submappen van de hoofdmap zijn gedeeld."
 
@@ -6910,13 +6480,12 @@ msgid "View"
 msgstr "Bekijken"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:380
-#: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:20
 msgid "Popups"
 msgstr "Popups"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:381
-msgid "Autocompletion"
-msgstr "Automatisch tekst aanvullen"
+msgid "Autocomplete"
+msgstr ""
 
 #. search options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:384
@@ -6938,7 +6507,6 @@ msgid "Content"
 msgstr "Inhoud"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:392
-#: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:20
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:315
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:469
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:571
@@ -6960,11 +6528,10 @@ msgid "Preferencing"
 msgstr "Voorkeuren"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:399
-msgid "Firewall Config"
-msgstr "Firewallconfiguratie"
+msgid "Firewall"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:400
-#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:28
 msgid "Proxy"
 msgstr "Proxy"
 
@@ -6981,6 +6548,10 @@ msgstr "Bestandsassociaties"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:405
 msgid "Performance"
 msgstr "Prestaties"
+
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:407
+msgid "System Boot"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsMediator.java:70
 msgid "Loading Options Window..."
@@ -7382,6 +6953,10 @@ msgstr ""
 msgid "Show License Warning:"
 msgstr "Licentiewaarschuwing tonen:"
 
+#: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:20
+msgid "Display"
+msgstr ""
+
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:22
 msgid ""
 "You can disable LimeWire's junk filter and delete all previously collected "
@@ -7738,6 +7313,10 @@ msgstr ""
 msgid "Use LimeWire Media Player:"
 msgstr "Gebruik de LimeWire Media Player:"
 
+#: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:20
+msgid "LimeWire Popups"
+msgstr ""
+
 #: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:22
 msgid ""
 "Redisplay messages for which you have chosen 'Do not display this message "
@@ -7799,6 +7378,10 @@ msgstr "Authenticatie inschakelen (werkt niet voor HTTP-proxy)."
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:41
 msgid "Username:"
 msgstr "Gebruikersnaam:"
+
+#: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:28
+msgid "Proxy Options"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:30
 msgid "Configure Proxy Options for LimeWire."
@@ -7955,7 +7538,7 @@ msgstr "U kunt .torrent-bestanden automatisch delen."
 msgid "Share .torrent files"
 msgstr ".Torrent-bestanden delen"
 
-#: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:33
+#: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:35
 msgid ""
 "You can choose the folders for sharing files. Files in these folders are "
 "displayed in the library."
