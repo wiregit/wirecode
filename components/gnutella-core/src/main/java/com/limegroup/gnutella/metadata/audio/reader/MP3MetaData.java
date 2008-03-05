@@ -4,17 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
-import java.util.List;
 
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.mp3.MP3File;
 import org.jaudiotagger.tag.Tag;
-import org.jaudiotagger.tag.TagField;
 import org.jaudiotagger.tag.id3.AbstractID3v2Frame;
 import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
 import org.jaudiotagger.tag.id3.ID3v1Tag;
-import org.jaudiotagger.tag.id3.ID3v24Frames;
-import org.jaudiotagger.tag.id3.framebody.AbstractFrameBodyTextInfo;
 
 /**
  *  Reads MetaData from MP3 files. This extends AudioDataReader which also
@@ -23,71 +19,92 @@ import org.jaudiotagger.tag.id3.framebody.AbstractFrameBodyTextInfo;
  */
 public class MP3MetaData extends AudioDataReader {
 	
-	static final String LICENSE_ID = "TCOP";
-    static final String PRIV_ID = "PRIV";
-	
 	public MP3MetaData(File f) throws IOException, IllegalArgumentException {
 		super(f);
 	}
 	
     @Override
     protected void readTag(AudioFile audioFile, Tag tag) {
-        if(tag != null ) {
+        
+        MP3File mp3File = ((MP3File)audioFile);
+        mp3File.getID3v1Tag();
+        
+        AbstractID3v2Tag v2Tag = mp3File.getID3v2Tag();
+        ID3v1Tag v1Tag = mp3File.getID3v1Tag();
+        
+        // check v2 tags first if they exist
+        if( v2Tag != null )
+            readV2Tag(v2Tag);
+
+        // check v1 tags next
+        if( v1Tag != null )
+            readV1Tag(v1Tag);
+    }
+    
+    /**
+     * Reads v1 tags from the mp3. Only writes the field to the AudioData if
+     * it has not been filled in by v2 tags
+     */
+    private void readV1Tag(ID3v1Tag tag){
+        if( audioData.getTitle() == null || audioData.getTitle().length() == 0)
             audioData.setTitle(tag.getFirstTitle());
+        if( audioData.getArtist() == null || audioData.getArtist().length() == 0)
             audioData.setArtist(tag.getFirstArtist());
+        if( audioData.getAlbum() == null || audioData.getAlbum().length() == 0)
             audioData.setAlbum(tag.getFirstAlbum());
+        if( audioData.getYear() == null || audioData.getYear().length() == 0)
             audioData.setYear(tag.getFirstYear()); 
+        if( audioData.getComment() == null || audioData.getComment().length() == 0)
             audioData.setComment(tag.getFirstComment());
+        if( audioData.getGenre() == null || audioData.getGenre().length() == 0)
             audioData.setGenre(tag.getFirstGenre()); 
+        if( audioData.getTrack() == null || audioData.getTrack().length() == 0) {
             try {
                 audioData.setTrack(tag.getFirstTrack());
             }
             catch(UnsupportedOperationException e) {
                 // id3v1.0 tags dont have tracks
             }
+        }
+    }
+    
+    /**
+     * Reads v2 tags from the mp3. 
+     */
+    private void readV2Tag(AbstractID3v2Tag tag){
+        audioData.setTitle(tag.getFirstTitle());
+        audioData.setArtist(tag.getFirstArtist());
+        audioData.setAlbum(tag.getFirstAlbum());
+        audioData.setYear(tag.getFirstYear()); 
+        audioData.setComment(tag.getFirstComment());
+        audioData.setGenre(parseGenre(tag.getFirstGenre()));
+        audioData.setTrack(tag.getFirstTrack());
+        
+        Iterator iter = tag.iterator();
+        while(iter.hasNext()) {
+            if( audioData.getLicenseType() != null && audioData.getLicenseType().equals(MAGIC_KEY) )
+                return;
+            AbstractID3v2Frame o = (AbstractID3v2Frame)iter.next();
+            
 
-            // for ID3v2 tags, check for additional values such as Copyright Info
-            if( !(tag instanceof ID3v1Tag) ) {
-                // read the license if its a v2 tag
-                audioData.setLicense(tag.getFirst(ID3v24Frames.FRAME_ID_COPYRIGHTINFO));
-                
-                MP3File mp3File = ((MP3File)audioFile);
-                audioData.setGenre(parseGenre(tag.getFirstGenre()));
-                AbstractID3v2Tag vTag = mp3File.getID3v2Tag();
-                if( vTag != null ) {
-                    List<TagField> license = vTag.get(PRIV_ID);
-                    List<TagField> priv = vTag.get(PRIV_ID); 
-                    Iterator<TagField> iter = license.iterator();
-                    while(iter.hasNext()) {
-                        TagField t = iter.next();
-                        checkLWS(t.toString());
-                    }
-                    iter = priv.iterator();
-                    while(iter.hasNext()) {
-                        TagField t = iter.next(); 
-                        checkLWS(t.toString());
-                        try {
-                            isPRIVCheck(t.getRawContent());
-                        } catch (UnsupportedEncodingException e) {
-                            // don't catch
-                        }
-                    }
-                    AbstractID3v2Frame frame = vTag.getFirstField(ID3v24Frames.FRAME_ID_COPYRIGHTINFO);
-                    if( frame != null 
-                      && !frame.isEmpty() && frame.getBody() instanceof AbstractFrameBodyTextInfo )
-                        audioData.setLicense(((AbstractFrameBodyTextInfo)frame.getBody()).getText());
-                }
-            }
+            if( !(o.getId().equals("TIT2") || o.getId().equals("TALB") || o.getId().equals("TOAL") ||
+                    o.getId().equals("TOPE") || o.getId().equals("TPE1") || o.getId().equals("TPE2")
+                    || o.getId().equals("TPE3") || o.getId().equals("TPE4")) )
+            
+            if( o.getBody().getObject("Text") != null )
+                checkLWS(o.getBody().getObject("Text").toString());
+            else 
+                isRawCheck(o.getRawContent());
         }
     }
        
     /**
-     * Checks the PRIV field for the magic String. This is always in UTF-8 encoding so use the 
+     * Checks a raw content field for the magic String. This is always in UTF-8 encoding so use the 
      * content byte array instead. 
      */
-    private void isPRIVCheck(byte[] contentBytes) {
+    private void isRawCheck(byte[] contentBytes) {
         try {
-            String content = new String(contentBytes,"UTF-8");
+            String content = new String(contentBytes,"UTF-8"); 
             checkLWS(content);
         } catch (UnsupportedEncodingException e) {
         }
@@ -108,8 +125,6 @@ public class MP3MetaData extends AudioDataReader {
     /**
      * Some genres in ID3v2 tags are displaying (XXX) numbers along side the genre.
      * If this exists it hides the number from the user
-     * @param genre
-     * @return
      */
     private String parseGenre(String genre){
         if( genre == null || genre.length() <= 0) 
