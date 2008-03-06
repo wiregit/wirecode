@@ -116,6 +116,11 @@ public class PromotionBinder {
         backingSignedMessage = signedMessage;
     }
 
+    /** @return The list of contained {@link PromotionMessageContainer} entries. */
+    public List<PromotionMessageContainer> getPromoMessageList() {
+        return new ArrayList<PromotionMessageContainer>(promoMessageList);
+    }
+
     /**
      * @return true if the given message's date range has expired, regardless of
      *         whether it is a member of this group.

@@ -1,5 +1,7 @@
 package org.limewire.promotion;
 
+import java.util.List;
+
 import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
@@ -29,7 +31,7 @@ public class KeywordUtilImplTest extends BaseTestCase {
         assertSameHash("I shot the sherriff", "sherriff shot");
         assertSameHash("I shot the sherriff", "sherriff shot");
         assertSameHash("I shot the sherriff", "sherriff shot's");
-        
+
         assertSameHash("The Low Lows", "low lows");
         assertSameHash("vacation Hawaii golf", "vacation Hawaii");
         assertSameHash("britney's going crazy", "britney is crazy");
@@ -40,7 +42,6 @@ public class KeywordUtilImplTest extends BaseTestCase {
         assertSameHash("", "");
         assertSameHash(" ", "");
         assertSameHash(" ", ",.");
-        
 
         // Make sure we never get a negative value....
         for (int i = 0; i < 10000; i++) {
@@ -92,5 +93,13 @@ public class KeywordUtilImplTest extends BaseTestCase {
         KeywordUtilImpl keywordUtil = new KeywordUtilImpl();
         assertEquals("a b c", keywordUtil.stripPunctuation("a,b,c"));
         assertEquals("a b", keywordUtil.stripPunctuation("a'b"));
+    }
+
+    public void testSplitKeywords() {
+        KeywordUtilImpl keywordUtil = new KeywordUtilImpl();
+        List<String> words = keywordUtil.splitKeywords("foo\tBAR\tfoo bar");
+        assertEquals("foo", words.get(0));
+        assertEquals("bar", words.get(1));
+        assertEquals("bar foo", words.get(2));
     }
 }

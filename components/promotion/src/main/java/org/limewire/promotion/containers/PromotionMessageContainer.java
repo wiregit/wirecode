@@ -2,6 +2,7 @@ package org.limewire.promotion.containers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -22,7 +23,7 @@ import com.limegroup.gnutella.messages.GGEP;
  * The unit of work for the promotion system, this message contains the
  * keywords, target URL and restrictions that define a promotion.
  */
-public class PromotionMessageContainer implements MessageContainer {
+public class PromotionMessageContainer implements MessageContainer, Serializable {
     /**
      * Since internal dates are stored in 4-bytes, seconds since Unix epoch,
      * this is the maximum value that can be encoded, which works out to be
@@ -552,7 +553,7 @@ public class PromotionMessageContainer implements MessageContainer {
         private byte value;
 
         /** The value this enum encodes to in the message. */
-        byte getValue() {
+        public byte getValue() {
             return value;
         }
 

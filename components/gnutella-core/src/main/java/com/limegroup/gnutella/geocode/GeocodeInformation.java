@@ -9,7 +9,7 @@ import java.util.Map;
  * names to values. Access to these values is through the method
  * {@link #getProperty(com.limegroup.gnutella.geocode.GeocodeInformation.Property)}.
  */
-interface GeocodeInformation {
+public interface GeocodeInformation {
     
     /**
      * Maps {@link Property} names to values so that we can turn {@link String}s

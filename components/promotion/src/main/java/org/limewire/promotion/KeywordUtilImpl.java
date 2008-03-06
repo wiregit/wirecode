@@ -22,11 +22,18 @@ public class KeywordUtilImpl implements KeywordUtil {
         initEnglishStopwords();
     }
 
+    public List<String> splitKeywords(String keywords) {
+        List<String> list = new ArrayList<String>();
+        for (String word : keywords.split("\t"))
+            list.add(normalizeQuery(word));
+        return list;
+    }
+
     private void initEnglishStopwords() {
-        for (String word : new String[] { "i", "a", "s", "about", "an", "are", "as", "at",
-                "be", "by", "com", "de", "en", "for", "from", "how", "in", "is", "it", "la", "of",
-                "on", "or", "that", "the", "this", "to", "was", "what", "when", "where", "who",
-                "will", "with", "und", "the", "www" })
+        for (String word : new String[] { "i", "a", "s", "about", "an", "are", "as", "at", "be",
+                "by", "com", "de", "en", "for", "from", "how", "in", "is", "it", "la", "of", "on",
+                "or", "that", "the", "this", "to", "was", "what", "when", "where", "who", "will",
+                "with", "und", "the", "www" })
             addEnglishStopword(word);
     }
 

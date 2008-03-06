@@ -1,5 +1,9 @@
 package org.limewire.promotion;
 
+import java.util.List;
+
+import org.limewire.promotion.containers.PromotionMessageContainer;
+
 /**
  * Provides methods for massaging keywords and keyword sets, hashing keywords
  * into buckets, etc.
@@ -25,4 +29,11 @@ public interface KeywordUtil {
      *         normalized the query using {@link #normalizeQuery(String)}.
      */
     long getHashValue(String query);
+
+    /**
+     * Takes as an input the String returned from
+     * {@link PromotionMessageContainer#getKeywords()} and splits it on the tab
+     * character, then normalizes each phrase and returns the normalized list.
+     */
+    List<String> splitKeywords(String keywords);
 }
