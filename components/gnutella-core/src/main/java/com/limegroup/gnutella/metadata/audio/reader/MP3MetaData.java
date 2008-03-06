@@ -11,6 +11,7 @@ import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.id3.AbstractID3v2Frame;
 import org.jaudiotagger.tag.id3.AbstractID3v2Tag;
 import org.jaudiotagger.tag.id3.ID3v1Tag;
+import org.jaudiotagger.tag.id3.ID3v24Frames;
 
 /**
  *  Reads MetaData from MP3 files. This extends AudioDataReader which also
@@ -31,7 +32,7 @@ public class MP3MetaData extends AudioDataReader {
         
         AbstractID3v2Tag v2Tag = mp3File.getID3v2Tag();
         ID3v1Tag v1Tag = mp3File.getID3v1Tag();
-        
+
         // check v2 tags first if they exist
         if( v2Tag != null )
             readV2Tag(v2Tag);
@@ -79,13 +80,18 @@ public class MP3MetaData extends AudioDataReader {
         audioData.setComment(tag.getFirstComment());
         audioData.setGenre(parseGenre(tag.getFirstGenre()));
         audioData.setTrack(tag.getFirstTrack());
+        audioData.setLicense(tag.getFirst(ID3v24Frames.FRAME_ID_COPYRIGHTINFO));
         
         Iterator iter = tag.iterator();
         while(iter.hasNext()) {
             if( audioData.getLicenseType() != null && audioData.getLicenseType().equals(MAGIC_KEY) )
                 return;
-            AbstractID3v2Frame o = (AbstractID3v2Frame)iter.next();
-            
+            Object nextFrame = iter.next();
+
+            if( !(nextFrame instanceof AbstractID3v2Frame)) 
+                continue;
+
+            AbstractID3v2Frame o = (AbstractID3v2Frame)nextFrame;           
 
             if( !(o.getId().equals("TIT2") || o.getId().equals("TALB") || o.getId().equals("TOAL") ||
                     o.getId().equals("TOPE") || o.getId().equals("TPE1") || o.getId().equals("TPE2")
