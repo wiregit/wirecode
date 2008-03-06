@@ -2,13 +2,13 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,6 +41,12 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
     private final DownloadServices downloadServices;
     private final LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate;
     private final RemoteFileDescFactory remoteFileDescFactory;
+    
+    /**
+     * Maintain a map from downloader IDs to progress bar IDs, because the client sometimes
+     * cannot keep this state.  Clear them whenever the downloader finishes.
+     */
+    private final Map<String,String> downloaderIDs2progressBarIDs = new HashMap<String,String>();
     
     private String downloadPrefix;
     
@@ -214,7 +220,8 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                     }
                 }
                 for (String idToRemove: idsToRemove) {
-                    everActiveDownloaderIDs2Downloaders.remove(idToRemove);                    
+                    everActiveDownloaderIDs2Downloaders.remove(idToRemove);
+                    downloaderIDs2progressBarIDs.remove(idToRemove);
                 }
                 return res.toString(); 
             }  
@@ -224,7 +231,10 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 long total = d.getContentLength();
                 String ratio = String.valueOf((float)read / (float)total);
                 String status = downloadStatusToString(d.getState());
+                String progressBarID = downloaderIDs2progressBarIDs.get(id);
                 res.append(id);
+                res.append(" ");
+                res.append(progressBarID);
                 res.append(" ");
                 res.append(ratio);
                 res.append(":");
@@ -280,6 +290,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                     RemoteFileDesc rfd = createRemoteFileDescriptor(fileString.getValue(), urlString.getValue(), length); 
                     Downloader theDownloader = createDownloader(rfd, saveDir);
                     long idOfTheDownloader = System.identityHashCode(theDownloader);
+                    downloaderIDs2progressBarIDs.put(String.valueOf(idOfTheDownloader), idOfTheProgressBarString.getValue());
                     return idOfTheDownloader + " " + idOfTheProgressBarString.getValue();
                 } catch (IOException e) {
                     // invalid url or other causes, fail silently
@@ -336,6 +347,48 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 d.resume();
             }           
         });
+        
+        
+        // ====================================================================================================================================
+        // Add a handler for the LimeWire Store Server so that
+        // we can download songs from The Store
+        // INPUT
+        // OUTPUT
+        // OK | IDs of downloader paused
+        // ====================================================================================================================================
+        lwsManager.registerHandler("PauseAllDownloads", new LWSManagerCommandResponseForDownloadingAll("PauseAllDownloads", lwsIntegrationServicesDelegate) {
+            @Override
+            protected void takeAction(Downloader d) {
+                d.pause();
+            }          
+        });
+        // ====================================================================================================================================
+        // Add a handler for the LimeWire Store Server so that
+        // we can download songs from The Store
+        // INPUT
+        // OUTPUT
+        // OK | IDs of downloader stopped
+        // ====================================================================================================================================
+        lwsManager.registerHandler("StopAllDownloads", new LWSManagerCommandResponseForDownloadingAll("StopAllDownloads", lwsIntegrationServicesDelegate) {
+            @Override
+            protected void takeAction(Downloader d) {
+                d.stop();
+            }              
+        }); 
+        // ====================================================================================================================================
+        // Add a handler for the LimeWire Store Server so that
+        // we can download songs from The Store
+        // INPUT
+        // OUTPUT
+        // OK | IDs of downloader resumed
+        // ====================================================================================================================================
+        lwsManager.registerHandler("ResumeAllDownloads", new LWSManagerCommandResponseForDownloadingAll("ResumeAllDownloads", lwsIntegrationServicesDelegate) {
+            @Override
+            protected void takeAction(Downloader d) {
+                d.resume();
+            }           
+        });        
+        
         // ====================================================================================================================================
         // Add a handler for the LimeWire Store Server so that we can find the
         // info of the client running
@@ -408,6 +461,50 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
             //
             return "OK";
         }         
+    }
+    
+    /**
+     * A class to find all the downloaders, given an identity hashcode and take an
+     * action.  Returns the list of ids took action upon.
+     */
+    private abstract class LWSManagerCommandResponseForDownloadingAll extends LWSManagerCommandResponseHandlerWithCallback {
+        
+        private final LWSIntegrationServicesDelegate del;
+        
+        LWSManagerCommandResponseForDownloadingAll(String name, LWSIntegrationServicesDelegate del) {
+            super(name);
+            this.del = del;
+        }
+        
+        protected abstract void takeAction(Downloader d);
+        
+        protected final String handleRest(Map<String, String> args) {
+            //
+            // Find the downloaders and compare by System.identityHashCode()
+            //
+            StringBuffer res = new StringBuffer();
+            //
+            // Use another list to avoid concurrent modification errors
+            //
+            List<Downloader> downloadersToAffect = new ArrayList<Downloader>();
+            for (Downloader downloader : del.getAllDownloaders()) {
+                String hash = String.valueOf(System.identityHashCode(downloader));
+                for (String id : downloaderIDs2progressBarIDs.keySet()) {
+                    if (hash.equals(id)) {
+                        downloadersToAffect.add(downloader);
+                        if (res.length() > 0) {
+                            res.append(" ");
+                        }
+                        res.append(id);
+                        continue;
+                    }
+                }
+            }
+            for (int i=0; i<downloadersToAffect.size(); i++) {
+                takeAction(downloadersToAffect.get(i));
+            }
+            return res.toString();
+        }
     }     
     
     /**

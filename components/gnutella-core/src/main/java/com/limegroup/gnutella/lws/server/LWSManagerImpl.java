@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -42,6 +44,8 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  */
 @Singleton
 public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToServer {
+    
+    private final static Log LOG = LogFactory.getLog(LWSManager.class);
     
     /** The page for making commands to The LimeWire Store server. */
     final static String COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES 
@@ -164,6 +168,9 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
                                           final Map<String, String> args, 
                                           final StringCallback cb) throws IOException {
         String url = constructURL(msg, args);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("sending URL " + url);
+        }
         final HttpGet get;
         try {
             get = new HttpGet(url);
@@ -190,11 +197,17 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         exe.execute(get, params, new HttpClientListener() {
             
             public boolean requestComplete(HttpUriRequest request, HttpResponse response) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("requestComplete");
+                }
                 exe.releaseResources(response);
                 return false;
             }
             
-            public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
+            public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {System.out.println("requestFailed:"+response);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("requestFailed");
+                }            
                 exe.releaseResources(response);
                 return false;
             }
