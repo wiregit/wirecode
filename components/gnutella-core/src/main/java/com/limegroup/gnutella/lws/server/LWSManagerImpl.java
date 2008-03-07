@@ -45,7 +45,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 @Singleton
 public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToServer {
     
-    private final static Log LOG = LogFactory.getLog(LWSManager.class);
+    private final static Log LOG = LogFactory.getLog(LWSManagerImpl.class);
     
     /** The page for making commands to The LimeWire Store server. */
     final static String COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES 
@@ -73,10 +73,10 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     }
     
     public LWSManagerImpl(HttpExecutor exe, String host, int port, LWSDispatcherFactory lwsDispatcherFactory) {
-        
         this.exe = exe;
         this.dispatcher = lwsDispatcherFactory.createDispatcher(this, new  AbstractReceivesCommandsFromDispatcher() {
             public String receiveCommand(String cmd, Map<String, String> args) {
+                System.out.println("cmd: " + cmd + ": " + args);
                 return LWSManagerImpl.this.dispatch(cmd, args);
             }            
         });
@@ -86,6 +86,7 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         StringBuffer hostNameAndPortBuffer = new StringBuffer(host);
         if (port > 0) hostNameAndPortBuffer.append(":").append(port);
         this.hostNameAndPort = hostNameAndPortBuffer.toString();
+        LOG.debug("hostname and port: " + hostNameAndPort);
         //
         // remember when we're connected
         //
@@ -175,13 +176,16 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         try {
             get = new HttpGet(url);
         } catch (URISyntaxException e) {
+            LOG.error(e);
             IOException ioe = new IOException();
             ioe.initCause(e);
             throw ioe;
         }
         
-        if(get.getURI().getHost() == null)
+        if(get.getURI().getHost() == null) {
+            LOG.error("null host!");
             throw new IOException("null host!");
+        }
         
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         //

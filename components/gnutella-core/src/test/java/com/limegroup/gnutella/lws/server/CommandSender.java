@@ -3,6 +3,7 @@ package com.limegroup.gnutella.lws.server;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,7 +17,6 @@ import org.limewire.http.LimeHttpClient;
 import org.limewire.http.SimpleLimeHttpClient;
 import org.limewire.lws.server.LWSDispatcher;
 import org.limewire.lws.server.LWSDispatcherSupport;
-
 
 /**
  * Send commands via the the {@link LimeHttpClient}.
@@ -45,9 +45,12 @@ final class CommandSender {
             // represents making a call in Javascript from a web page
             //
             response = client.execute(get);
+            LOG.debug(response.getStatusLine());
+            LOG.debug(Arrays.asList(response.getAllHeaders()));
             String result;
             if (response.getEntity() != null) {
                 result = EntityUtils.toString(response.getEntity());
+                LOG.debug(result);
             } else {
                 result = null;
             }

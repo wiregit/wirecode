@@ -173,7 +173,7 @@ public class DownloadTestCase extends LimeTestCase {
                 ScheduledExecutorService.class, Names.named("backgroundExecutor")));
         scheduledExecutorService.scheduleWithFixedDelay(click, 0, 1000, TimeUnit.MILLISECONDS);
 
-        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
+        lifecycleManager = injector.getInstance(LifecycleManager.class);
         lifecycleManager.start();
 
         acceptor = injector.getInstance(Acceptor.class);
@@ -223,6 +223,8 @@ public class DownloadTestCase extends LimeTestCase {
     }
 
     protected void tearDown() throws Exception {
+        lifecycleManager.shutdown();
+        
         for (int i = 0; i < testUploaders.length; i++) {
             if (testUploaders[i] != null) {
                 testUploaders[i].reset();
@@ -436,6 +438,8 @@ public class DownloadTestCase extends LimeTestCase {
     protected final int COMPLETE = 2;
 
     protected final int INVALID = 3;
+
+    private LifecycleManager lifecycleManager;
 
     protected void waitForComplete(boolean corrupt) {
         waitForCompleteImpl(corrupt ? CORRUPT : COMPLETE);

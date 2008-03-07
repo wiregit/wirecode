@@ -1,8 +1,11 @@
 package com.limegroup.gnutella.http;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.AbortableHttpRequest;
@@ -25,6 +28,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class DefaultHttpExecutor implements HttpExecutor {
 
+    private static final Log LOG = LogFactory.getLog(DefaultHttpExecutor.class);
+    
 	private static final ExecutorService POOL = 
         ExecutorsHelper.newThreadPool("HttpClient pool");
     private final Provider<LimeHttpClient> clientProvider;
@@ -87,6 +92,10 @@ public class DefaultHttpExecutor implements HttpExecutor {
      * false if another request should be processed.
      */
 	private boolean performRequest(HttpUriRequest method, HttpParams params, HttpClientListener listener) {
+	    if (LOG.isDebugEnabled()) {
+	        LOG.debug("requesting: " + method.getMethod() + Arrays.asList(method.getAllHeaders()));
+	        LOG.debug("params: " + params);
+	    }
 		LimeHttpClient client = clientProvider.get();
         if(params != null) {
             client.setParams(params);

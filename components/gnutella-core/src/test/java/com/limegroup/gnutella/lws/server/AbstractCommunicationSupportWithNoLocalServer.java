@@ -6,8 +6,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.lws.server.FakeJavascriptCodeInTheWebpage;
 import org.limewire.lws.server.LWSDispatcherSupport;
+import org.limewire.lws.server.FakeJavascriptCodeInTheWebpage;
 import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.net.SocketsManager;
 
@@ -32,7 +32,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCase {
     
-    private final Log LOG = LogFactory.getLog(AbstractCommunicationSupportWithNoLocalServer.class);
+    protected final Log LOG = LogFactory.getLog(getClass());
     
     public final int LOCAL_PORT  = LocalServerImpl.PORT;
     public final int REMOTE_PORT = RemoteServerImpl.PORT;
