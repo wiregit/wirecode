@@ -28,10 +28,10 @@ import junit.framework.Test;
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.IPPortCombo;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkUtils;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecureMessage;
@@ -907,7 +907,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
         // trying to input
         try {
-            new IPPortCombo("0.0.0.0", 6346);
+            NetworkUtils.getBytes(new IpPortImpl("0.0.0.0", 6346), java.nio.ByteOrder.LITTLE_ENDIAN);
             fail("allowed bad PPI");
         } catch (IllegalArgumentException expected) {}
 
@@ -926,7 +926,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
         // trying to input is the only case
         try {
-            new IPPortCombo("0.0.0.0", 634600);
+            NetworkUtils.getBytes(new IpPortImpl("1.2.3.4", 634600), java.nio.ByteOrder.LITTLE_ENDIAN);
             fail("allowed bad PPI");
         } catch (IllegalArgumentException expected) {}
 

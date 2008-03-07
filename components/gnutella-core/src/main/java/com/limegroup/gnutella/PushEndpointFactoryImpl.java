@@ -2,13 +2,13 @@ package com.limegroup.gnutella;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.nio.ByteOrder;
 import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.IPPortCombo;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
@@ -155,7 +155,7 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
             byte [] host = new byte[6];
             dais.readFully(host);
             try {
-                addr = IPPortCombo.getCombo(host);
+                addr = NetworkUtils.getIpPort(host, ByteOrder.LITTLE_ENDIAN);
             } catch(InvalidDataException ide) {
                 throw new BadPacketException(ide);
             }
@@ -177,7 +177,7 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
         for (int i = 0; i < number; i++) {
             dais.readFully(tmp);
             try {
-                IpPort ipp = IPPortCombo.getCombo(tmp);
+                IpPort ipp = NetworkUtils.getIpPort(tmp, ByteOrder.LITTLE_ENDIAN);
                 if(bn != null && bn.isSet(i))
                     ipp = new ConnectableImpl(ipp, true);
                 proxies.add(ipp);

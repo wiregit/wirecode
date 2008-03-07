@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import java.net.UnknownHostException;
+import java.nio.ByteOrder;
 
-import org.limewire.io.IPPortCombo;
 import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
@@ -119,17 +119,13 @@ public class InspectionRequestImpl extends RoutableGGEPMessage implements Inspec
             g.put(ENCODING_KEY, sendInterval);
         
         if (returnAddr != null) {
-            try {
-                IPPortCombo ipc = new IPPortCombo(returnAddr.getAddress(), returnAddr.getPort());
-                g.put(RETURN_ADDRESS_KEY, ipc.toBytes());
-            } catch (UnknownHostException ignore){}
+            g.put(RETURN_ADDRESS_KEY, NetworkUtils.getBytes(returnAddr.getInetAddress(), returnAddr
+                    .getPort(), ByteOrder.LITTLE_ENDIAN));
         }
         
         if (destAddr != null) {
-            try {
-                IPPortCombo ipc = new IPPortCombo(destAddr.getAddress(), destAddr.getPort());
-                g.put(TO_ADDRESS_KEY, ipc.toBytes());
-            } catch (UnknownHostException ignore){}
+            g.put(TO_ADDRESS_KEY, NetworkUtils.getBytes(destAddr.getInetAddress(), destAddr
+                    .getPort(), ByteOrder.LITTLE_ENDIAN));
         }
         
         if (version >= 0)

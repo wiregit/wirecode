@@ -3,10 +3,11 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.nio.ByteOrder;
 
-import org.limewire.io.IPPortCombo;
 import org.limewire.io.InvalidDataException;
+import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -49,8 +50,8 @@ public final class PushProxyAcknowledgement extends AbstractVendorMessage {
                                          payload.length);
         // get the ip and  port from the payload....
         try {
-            IPPortCombo combo = 
-                IPPortCombo.getCombo(getPayload());
+            IpPort combo = 
+                NetworkUtils.getIpPort(getPayload(), ByteOrder.LITTLE_ENDIAN);
             _addr = combo.getInetAddress();
             _port = combo.getPort();
         } catch(InvalidDataException ide) {
@@ -101,14 +102,7 @@ public final class PushProxyAcknowledgement extends AbstractVendorMessage {
     }
 
     private static byte[] derivePayload(InetAddress addr, int port) {
-        try {
-            // i do it during construction....
-            IPPortCombo combo = 
-                new IPPortCombo(addr.getHostAddress(), port);
-            return combo.toBytes();
-        } catch (UnknownHostException uhe) {
-            throw new IllegalArgumentException(uhe.getMessage());
-        }
+        return NetworkUtils.getBytes(addr, port, ByteOrder.LITTLE_ENDIAN);
     }
 
     /** Overridden purely for stats handling.

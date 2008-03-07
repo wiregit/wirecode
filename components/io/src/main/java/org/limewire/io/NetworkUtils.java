@@ -414,7 +414,7 @@ public final class NetworkUtils {
     	byte [] current = new byte[6];
     	for (int i=0;i<size;i++) {
     		System.arraycopy(data,i*6,current,0,6);
-            IpPort ipp = IPPortCombo.getCombo(current);
+            IpPort ipp = NetworkUtils.getIpPort(current, java.nio.ByteOrder.LITTLE_ENDIAN);
             if(decorator != null) {
                 ipp = decorator.decorate(ipp);
                 if(ipp == null)
@@ -529,9 +529,10 @@ public final class NetworkUtils {
      * This method is IPv6 compliant
      */
     public static byte[] getBytes(InetAddress addr, int port, java.nio.ByteOrder order) {
-        if (!isValidPort(port)) {
+        if (!isValidPort(port))
             throw new IllegalArgumentException("Port out of range: " + port);
-        }
+        if(!isValidAddress(addr))
+            throw new IllegalArgumentException("invalid addr: " + addr);
         
         byte[] address = addr.getAddress();
 
@@ -543,6 +544,44 @@ public final class NetworkUtils {
             ByteOrder.short2leb((short)port, dst, dst.length-2);
         return dst;
     }
+
+    /**
+     * Creates an IpPort out of network data. The ByteOrder is used to determine
+     * the order of the port. Throws <code>InvalidDataException</code> if the
+     * data is invalid.
+     * 
+     * This method is IPv6 compliant.
+     */
+    public static IpPort getIpPort(byte[] ipport, java.nio.ByteOrder order)
+      throws InvalidDataException {
+        if(ipport.length < 6)
+            throw new InvalidDataException("length must be >= 6, is: " + ipport.length);
+        
+        short shortport;
+        if(order == java.nio.ByteOrder.BIG_ENDIAN)
+            shortport = ByteOrder.beb2short(ipport, ipport.length - 2);
+        else // if order == LITTLE_ENDIAN
+            shortport = ByteOrder.leb2short(ipport, ipport.length - 2);
+        int port = ByteOrder.ushort2int(shortport);
+        
+        if (!NetworkUtils.isValidPort(port))
+            throw new InvalidDataException("Bad Port: " + port);
+        
+        InetAddress host;
+        try {
+            byte[] ip = new byte[ipport.length - 2];
+            System.arraycopy(ipport, 0, ip, 0, ip.length);
+            host = InetAddress.getByAddress(ip);
+        } catch(UnknownHostException uhe) {
+            throw new InvalidDataException("bad host.");
+        }
+        
+        if (!NetworkUtils.isValidAddress(host))
+            throw new InvalidDataException("invalid addr: " + host);
+        
+        return new IpPortImpl(new InetSocketAddress(host, port));
+    }
+    
     
     /**
      * Returns true if both SocketAddresses are either IPv4 or IPv6 addresses

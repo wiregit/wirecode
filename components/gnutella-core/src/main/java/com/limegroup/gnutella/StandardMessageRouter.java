@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.IPPortCombo;
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.MACCalculatorRepositoryManager;
@@ -209,11 +209,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
         
         IpPort ipport = null;
         if (request.requestsIP()) {
-            try {
-                ipport = new IPPortCombo(
-                            addr.getAddress().getHostAddress(),
-                            addr.getPort());
-            } catch(IOException tooBad) { }
+            ipport = new IpPortImpl(addr);
         }
         
         List<IpPort> dhthosts = Collections.emptyList();

@@ -20,7 +20,6 @@ import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.IPPortCombo;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
@@ -1116,9 +1115,8 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
                     Iterator<? extends IpPort> iter = proxies.iterator();
                     while(iter.hasNext() && (numWritten < MAX_PROXIES)) {
                         IpPort ppi = iter.next();
-                        IPPortCombo combo = new IPPortCombo(ppi.getInetSocketAddress());
                         try {
-                            baos.write(combo.toBytes());
+                            baos.write(NetworkUtils.getBytes(ppi, java.nio.ByteOrder.LITTLE_ENDIAN));
                             numWritten++;
                         } catch (IOException ignored) { } // cannot happen on ByteArrayOutputStream
                     }
@@ -1189,7 +1187,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
                             try {
                                 if(proxies == null)
                                     proxies = new IpPortSet();
-                                IpPort ipp = IPPortCombo.getCombo(combo);
+                                IpPort ipp = NetworkUtils.getIpPort(combo, java.nio.ByteOrder.LITTLE_ENDIAN);
                                 // make it a connectable if the TLS bit is set.
                                 if(bn != null && bn.isSet(i))
                                     ipp = new ConnectableImpl(ipp, true);

@@ -2,12 +2,13 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteOrder;
 import java.security.Signature;
 import java.security.SignatureException;
 
-import org.limewire.io.IPPortCombo;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.service.ErrorService;
 
@@ -87,7 +88,7 @@ public class RoutableGGEPMessage extends AbstractVendorMessage implements Secure
         try {
             byte [] returnAddress = ggep.get(RETURN_ADDRESS_KEY);
             if (returnAddress != null)
-                retAddr = IPPortCombo.getCombo(returnAddress);
+                retAddr = NetworkUtils.getIpPort(returnAddress, ByteOrder.LITTLE_ENDIAN);
         } catch (InvalidDataException bleh) {}
         this.returnAddress = retAddr;
 
@@ -96,7 +97,7 @@ public class RoutableGGEPMessage extends AbstractVendorMessage implements Secure
         try {
             byte [] destAddress = ggep.get(TO_ADDRESS_KEY);
             if (destAddress != null)
-                destAddr = IPPortCombo.getCombo(destAddress);
+                destAddr = NetworkUtils.getIpPort(destAddress, ByteOrder.LITTLE_ENDIAN);
         } catch (InvalidDataException bleh) {}
         this.destAddress = destAddr;
     }

@@ -17,7 +17,6 @@ import org.limewire.collection.BitNumbers;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.NameValue;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.IPPortCombo;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
@@ -545,7 +544,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
             System.arraycopy(data, i * 6, current, 0, 6);
             IpPort ipp;
             try {
-                ipp = IPPortCombo.getCombo(current);
+                ipp = NetworkUtils.getIpPort(current, java.nio.ByteOrder.LITTLE_ENDIAN);
             } catch (InvalidDataException ide) {
                 tlsHosts = null; // turn off TLS
                 continue;
