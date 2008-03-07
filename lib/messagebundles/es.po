@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-03 08:41+0000\n"
-"Last-Translator: FERMEX <fernando14_pena@hotmail.com>\n"
+"PO-Revision-Date: 2008-03-06 07:53+0000\n"
+"Last-Translator: Chilango <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-03-04 04:49+0000\n"
+"X-Launchpad-Export-Date: 2008-03-07 16:25+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Sorry, but LimeWire was unable to restart your old downloads."
@@ -1716,7 +1716,6 @@ msgstr ""
 #~ "Por favor introduzca una URL de verificación válida para las licencias."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
-#, fuzzy
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
@@ -1755,7 +1754,6 @@ msgstr ""
 "funcionar de manera inesperada."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:60
-#, fuzzy
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
@@ -1816,7 +1814,6 @@ msgstr ""
 "\"Continuar\" en la Librería."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:221
-#, fuzzy
 msgid ""
 "Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
@@ -2271,7 +2268,6 @@ msgstr ""
 "Permitir que LimeWire administre mi configuración de BitTorrent (Recomendado)"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:85
-#, fuzzy
 msgid "Maximum uploads per torrent"
 msgstr "Cantidad máxima de cargas por torrent"
 
@@ -2317,7 +2313,6 @@ msgstr ""
 "información sobre el error."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:412
-#, fuzzy
 msgid ""
 "Please add any comments you may have (e.g what caused the error). \n"
 "Thank you and please use English."
@@ -2533,9 +2528,8 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:606
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:74
-#, fuzzy
 msgid "Select All"
-msgstr "Deseleccionarlo todo"
+msgstr "Seleccionar todo"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:608
 msgid "Marks all Items as Selected"
@@ -2695,9 +2689,8 @@ msgstr "Seleccionar directorio"
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:465
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:486
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:508
-#, fuzzy
 msgid "Select"
-msgstr "Escoja la velocidad"
+msgstr "Seleccione"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:812
 msgid "All Folders"
@@ -2945,7 +2938,6 @@ msgstr ""
 "LimeWire a internet y reinicie LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:556
-#, fuzzy
 msgid ""
 "LimeWire could not create a temporary preferences folder.\n"
 "\n"

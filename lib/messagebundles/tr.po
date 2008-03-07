@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-02 00:36+0000\n"
-"Last-Translator: canerik <erikcan@gmail.com>\n"
+"PO-Revision-Date: 2008-03-07 14:20+0000\n"
+"Last-Translator: emrearin <Unknown>\n"
 "Language-Team: Turkish <tr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2008-03-04 04:49+0000\n"
+"X-Launchpad-Export-Date: 2008-03-07 16:25+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
@@ -77,7 +77,7 @@ msgid ""
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
-"LimeWire daha önceden tamamlanmamış dosyaya kaydetmeye devam edemiyor çünkü "
+"LimeWire tamamlanmamış dosyaya kaydetmeye devam edemiyor, çünkü "
 "tamamlanmamış dosyalar klasörüne yazma iznine sahip değilsiniz. LimeWire "
 "kullanmaya devam etmek ve dosya kaydedebilmek için farklı bir klasör seçin."
 
@@ -87,8 +87,8 @@ msgid ""
 "because the filename contains characters which are not supported by your "
 "operating system."
 msgstr ""
-"LimeWire seçili tamamlanmamış dosyayı işletim sisteminin desteklemediği "
-"karakterler içerdiğinden dolayı açamıyor."
+"LimeWire seçilen indirmenin tamamlanmamış dosyasını açamadı, çünkü dosya adı "
+"işletim sisteminiz tarafından desteklenmeyen karakterler içeriyor."
 
 #: core/com/limegroup/gnutella/AcceptorImpl.java:283
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:35
@@ -96,18 +96,19 @@ msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
-"LimeWire, gelen bağlantıları dinlemek için port ayarı yapamıyor. LimeWire'ın "
-"bazı özellikleri beklendiği gibi çalışmayabilir."
+"LimeWire, gelen bağlantıları dinlemek için bağlantı noktası kuramıyor. "
+"LimeWire'ın bazı özellikleri beklendiği gibi çalışmayabilir."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:219
+#, fuzzy
 msgid ""
 "Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
-"Üzgünüz,Limewire önceden indirdiğiniz dosyaları okuyamadı. Kütüphaneye gidip "
-"\"Tamamlanmamış dosyaları\" görebilir ve \"Devam et\"e tıklayarak bu "
-"dosyaları indirmeye tekrar başlayabilirsiniz."
+"Üzgünüz, LimeWire önceden indirmekte olduğunuz dosyaları okuyamadı. "
+"Kütüphaneye gidip 'Tamamlanmayan Dosyalar'a girebilir ve 'Devam Et'e "
+"tıklayarak bu dosyaları indirmeye tekrar başlayabilirsiniz."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:221
 msgid ""
@@ -115,8 +116,8 @@ msgid ""
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
 "to 'Resume' your downloads."
 msgstr ""
-"Üzgünüz,Limewire önceden indirdiğiniz dosyaları okuyamadı. Kütüphaneye gidip "
-"\"Tamamlanmamış dosyaları\" görebilir ve \"Devam et\"e tıklayarak bu "
+"Üzgünüz, Limewire önceden indirdiğiniz dosyaları okuyamadı. Kütüphaneye "
+"gidip 'Tamamlanmayan Dosyalar'ı görebilir ve 'Devam Et'e tıklayarak bu "
 "dosyaları indirmeye tekrar başlayabilirsiniz."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:319
@@ -133,7 +134,7 @@ msgstr "Mesaj Yönlendirici yükleniyor..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:341
 msgid "Checking for Updates..."
-msgstr "Güncellemeler Kontrol Ediliyor..."
+msgstr "Güncellemeler kontrol ediliyor..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:346
 msgid "Loading Upload Management..."
@@ -158,7 +159,7 @@ msgstr "Ultrapeer/DHT yöneticisi yükleniyor..."
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:385
 #, fuzzy
 msgid "Locating Peers..."
-msgstr "Paylaşımcılar yerleştiriliyor..."
+msgstr "Paylaşımcılar bulunuyor..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:401
 msgid "Loading Shared Files..."
@@ -202,7 +203,7 @@ msgstr "Spam Yönetimi yükleniyor..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:458
 msgid "Loading Network Listeners..."
-msgstr "Network Kullanıcıları Yükleniyor.."
+msgstr "Ağ Kullanıcıları yükleniyor.."
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
@@ -264,24 +265,24 @@ msgstr "Bu dosyayı zaten {0}e indiriyorsunuz"
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:71
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:42
 msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "Turbo Hızlı aramalar  için Limewire Pro'yu seçin."
+msgstr "Turbo Hızlı aramalar için LimeWire PRO'yu seçin."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:75
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:46
 msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr "LimeWire p2p gelişimini destekleyin. PRO versiyonuna geçin.."
+msgstr "LimeWire p2p gelişimini destekleyin. PRO versiyonuna geçin."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:79
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:50
 msgid "Purchase LimeWire PRO to help us make downloads faster."
 msgstr ""
-"İndirmeleri daha hızlı yapmak için bize yardım edin. LimeWire PRO 'yu satın "
+"İndirmeleri daha hızlı yapmak için bize yardım edin. LimeWire PRO'yu satın "
 "alın."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:82
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:53
 msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr "Turbo Hızlı indirmeler  için Limewire Pro'yu seçin."
+msgstr "Turbo Hızlı indirmeler  için LimeWire PRO'yu seçin."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:85
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:56
@@ -291,17 +292,19 @@ msgstr "Açık ağları destekleyin... LimeWire PRO edinin."
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:89
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:60
 msgid "Support open source and open protocols. Get LimeWire PRO."
-msgstr "Support open source and open protocols. Get LimeWire PRO."
+msgstr ""
+"Açık kaynak yazılımları ve açık protokolleri destekleyin. LimeWire PRO "
+"edinin."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:92
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:63
 msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr "Turbo Hızlı performans için Limewire Pro'yu seçin."
+msgstr "Turbo Hızlı performans için LimeWire PRO'yu seçin."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:95
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:66
 msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr "İnterneti açık tutun. LimeWire PRO yu satın alın..."
+msgstr "İnterneti açık tutun. LimeWire PRO'yu satın alın..."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:98
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:69
@@ -422,11 +425,11 @@ msgstr "Oyuncular"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
-msgstr "Altyazılar"
+msgstr "Alt Yazılar"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 msgid "Rating"
-msgstr "Degerlendirme"
+msgstr "Değerlendirme"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:119
 msgid "Height"
@@ -439,7 +442,7 @@ msgstr "Genişlik"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
 msgid "Image"
-msgstr "resim"
+msgstr "Resim"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
 msgid "Description"
@@ -543,9 +546,9 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
-"BitTorrent protocol ayarlarınızı kendiniz yapmayı ya da LimeWire yapmasını "
-"seçebilirsiniz. LimeWire 'in bu ayarları yapması önemle tavsiye edilir. "
-"Geçersiz ya da uygunsuz değerler şiddetli performans ve/veya hafıza "
+"BitTorrent protokol ayarlarınızı kendiniz yapmayı ya da LimeWire'ın "
+"yapmasını seçebilirsiniz. LimeWire'ın bu ayarları yapması önemle tavsiye "
+"edilir. Geçersiz ya da uygunsuz değerler ciddi performans ve/veya hafıza "
 "problemlerine yol açabilir."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
@@ -555,7 +558,7 @@ msgid ""
 "recommended that you let LimeWire manage these settings."
 msgstr ""
 "Geçersiz veya uygunsuz değerler ciddi performans ve/veya hafıza sorunlarına "
-"yol açabilir. Ne yaptığınızı tam olarak bilmedikçe, LimeWire'nin bu ayarları "
+"yol açabilir. Ne yaptığınızı tam olarak bilmedikçe, LimeWire'ın bu ayarları "
 "yönetmesi önemle tavsiye olunur."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:77
@@ -589,9 +592,9 @@ msgid ""
 "'Send' to notify LimeWire about the problem. If desired, you can click "
 "'Review' to look at the information that will be sent. Thank you."
 msgstr ""
-"LimeWire bir iç hata ile karşılaştı. LimeWire'nin kurtarılması ve normal "
+"LimeWire bir iç hata ile karşılaştı. LimeWire'ın kurtarılması ve normal "
 "olarak çalışmaya devam etmesi olasıdır. Hata ayıklamaya yardımcı olmak ve "
-"LimeWire'ye sorun hakkında bilgi göndermek için lütfen 'Gönder' (Send) "
+"LimeWire'a sorun hakkında bilgi göndermek için lütfen 'Gönder' (Send) "
 "butonuna tıklayınız."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:394
@@ -1812,6 +1815,7 @@ msgid "Loading tips..."
 msgstr "İpuçları yükleniyor..."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:7
+#, fuzzy
 msgid ""
 "Tired of downloads stopping halfway through? It helps to pick search results "
 "with a higher number in the '#' column. The # is the amount of unique places "
@@ -1820,6 +1824,13 @@ msgid ""
 "lot of sources, use the <font color=\"1E8E44\">Junk</font> button to train "
 "LimeWire's junk filter."
 msgstr ""
+"İndirmelerinizin yarıda kesilmesinden yoruldunuz mu? '#' sütununda daha "
+"yüksek bir sayıya sahip olan arama sonuçlarını seçmek daha yararlıdır. '#' "
+"ağda dosyayı bulunduran farklı kaynakların sayısını gösterir. Daha fazla "
+"kaynak demek, dosyanızı indirme şansınızın daha yüksek olması demektir. Bir "
+"gereksiz sonucun çok fazla kaynağı olması durumunda, <font "
+"color=\"1E8E44\">Gereksiz</font> düğmesini kullanarak LimeWire'ın hurda "
+"filtresini geliştirin."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:31
 msgid ""
@@ -1829,6 +1840,11 @@ msgid ""
 "download the file and automatically resume downloading if it finds any "
 "matches."
 msgstr ""
+"İndirmeleriniz <font color=\"1E8E44\">Daha Fazla Kaynak Gerekli</font> "
+"durumundaysa indirmeyi sağ tıklayarak <font color=\"1E8E44\">İndirme için "
+"Daha Fazla Kaynak Bulunuz</font>'u seçin. LimeWire ağı araştırarak "
+"indirilebilecek daha fazla yer bulmaya çalışacak ve eşleşen bir kaynak "
+"bulursa otomatik olarak indirmeye başlayacaktır."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:37
 msgid ""
@@ -1837,6 +1853,10 @@ msgid ""
 "green (or blue to indicate aLimeWire PRO or an Ultrapeer connection), "
 "LimeWire has completely connected."
 msgstr ""
+"LimeWire başladığında ağa bağlanmak zorundadır. Bu süre içinde, sol alt "
+"köşedeki çubukların renkleri değişecektir. Tüm çubuklar yeşil olduğunda "
+"(veya LimeWire PRO ya da Ultrapeer bağlantısını belirtmek için mavi) "
+"LimeWire tam olarak bağlanmış demektir."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
 msgid ""
@@ -1848,6 +1868,13 @@ msgid ""
 "link, LimeWire will automatically ask if you want to use the new skin when "
 "the download completes."
 msgstr ""
+"LimeWire'ın görünümünü <font color=\"1E8E44\">Görünüm</font> &gt; <font "
+"color=\"1E8E44\">Temaları Uygula</font>'dan yeni bir arayüz (skin) seçerek "
+"değiştirebilirsiniz. Daha fazla arayüze <font color=\"1E8E44\">Daha Fazla "
+"Arayüz (Skin)</font>'ü seçerek, LimeWire'ın websitesinden ulaşabilirsiniz. "
+"Eğer arayüzleri <font color=\"1E8E44\">Download via LimeWire</font> "
+"bağlantısıyla indirmeyi seçerseniz, LimeWire indirme bittiğinde otomatik "
+"olarak yeni arayüzü kullanmak isteyip istemediğinizi soracaktır."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:51
 msgid ""
@@ -1864,6 +1891,9 @@ msgid ""
 "completing successfully. Four blue stars signal 'Ethernet' speed and have "
 "the greatest chance of completing successfully."
 msgstr ""
+"Arama sonucunuzun sahip olduğu yıldızlar ne kadar fazla ise o dosyanın "
+"tamamen inme ihtimali o kadar fazladır. 4 mavi yıldız 'ethernet' hızıdır ve "
+"başarıyla tamamlanma ihtimali en yüksek olandır."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:59
 msgid ""
@@ -1873,6 +1903,11 @@ msgid ""
 "Y', where 'Y' is the number of people who have attempted to upload that "
 "file, and 'X' is the number of people who have successfully uploaded it."
 msgstr ""
+"Sizden ne kadar dosya yüklendiğini bulmak için <font "
+"color=\"1E8E44\">Kitaplık</font> tabındaki <font "
+"color=\"1E8E44\">Yüklemeler</font> sütununu seçin. X/Y şeklinde listelenen "
+"bilgide 'Y' o dosyayı indirme girişiminde bulunan kişi sayısını 'X'  ise "
+"yüklemeyi başarı ile tamamlayan kişi sayısını gösterir."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:65
 msgid ""
@@ -1881,12 +1916,18 @@ msgid ""
 "color=\"1E8E44\">Library</font> tab counts how many times LimeWire has "
 "returned a result from someone searching for that file."
 msgstr ""
+"Kaç kişinin sizin dosyalarınızı aradığını mı merak ediyorsunuz? <font "
+"color=\"1E8E44\">Kitaplık</font>< sütunundaki font "
+"color=\"1E8E44\">Hit</font> tabı  Sizin dosyalarınızın Limewire'den kaç kişi "
+"tarafından ne kadar arandığını gösterir."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:70
 msgid ""
 "It helps the network if you keep your LimeWire running; other users will "
 "connect to the network easier and searches will perform better."
 msgstr ""
+"Eğer Limewire'yi çalışır durumda tutarsanız, diğer kullanıcılar ağda daha "
+"çabuk ve etkili sonuçlar alırlar."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:73
 msgid ""
@@ -1895,6 +1936,11 @@ msgid ""
 "queued your download. In order to successfully complete your download, wait "
 "while your request advances in line and is eventually serviced."
 msgstr ""
+"LimeWire indirmeniz için <font color=\"1E8E44\">Kuyruğa Eklendi</font> "
+"dediğinde, indirmekte olduğunuz kaynağın geçici olarak meşgul olduğunu ve "
+"indirmenizin sıraya konulduğunu belirtir. İndirmenizi başarılı bir şekilde "
+"tamamlamak için, talebinizin sırada ilerlemesini ve işleme konulmasını "
+"bekleyin."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:78
 #, java-format
@@ -1913,6 +1959,12 @@ msgid ""
 "click <font color=\"1E8E44\">Resume</font>. LimeWire automatically searches "
 "for that file and begins downloading it again."
 msgstr ""
+"Yanlışlıkla iptal edilmiş bir indirmenize <font "
+"color=\"1E8E44\">Kütüphane</font> sekmesine tıklayıp <font "
+"color=\"1E8E44\">Tamamlanmayan Dosyalar</font> klasörünü seçerek devam "
+"edebilirsiniz. Dosya adını seçin ve <font color=\"1E8E44\">Başlat</font>'a "
+"tıklayın. LimeWire otomatik olarak dosyayı araştırır ve tekrar indirmeye "
+"başlar."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:89
 #, java-format
@@ -1920,6 +1972,8 @@ msgid ""
 "If you have any tips on using LimeWire, add it to <a href=\"{0}\">the "
 "wiki</a> and it may make it into a future tip of the day."
 msgstr ""
+"Limewire hakkında bir tavsiyeniz varsa <a href=\"{0}\">the wiki</a>  "
+"ekleyin, ilerde günün tavsiyesi olabilir."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:92
 msgid ""
@@ -1927,12 +1981,17 @@ msgid ""
 "Sources</font> by searching for that file again. LimeWire will automatically "
 "restart the download if it finds any matching results."
 msgstr ""
+"<font color=\"1E8E44\">Kaynak Bekliyor</font> diyen dosyaları tekrar "
+"aratarak indirebilirsiniz. Eğer uygun sonuç bulunursa, Limewire otomatik "
+"olarak indirmeyi baştan başlatacaktır."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:96
 msgid ""
 "Post feature suggestions on LimeWire's <a href=\"{0}\">message boards</a> "
 "and it may be added to future versions."
 msgstr ""
+"Limewire hakkındaki tavsiyelerinizi  <a href=\"{0}\">mesaj tahtası</a> "
+"postalayınız, gelecek versiyonlara eklenebilir."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:98
 #, java-format
@@ -1940,18 +1999,25 @@ msgid ""
 "Visit <a href=\"{0}\">LimeWire's website</a> for detailed information about "
 "how skins are created."
 msgstr ""
+"Kabukların nasıl oluşturulduğunu merak ediyorsanız <a "
+"href=\"{0}\">LimeWire'nin websitesini</a> ziyaret ediniz."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:100
 msgid ""
 "Do you want to be part of LimeWire's development? Visit <a "
 "href=\"{0}\">LimeWire's Open Source website</a>."
 msgstr ""
+"Limewire'nin geliştirilmesinde katkı sağlamak ister misiniz? <a "
+"href=\"{0}\">LimeWire'nin Açık Kaynakları Websitesini</a> ziyaret ediniz."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:102
 msgid ""
 "You can preview downloading files to make sure they are what you expect; "
 "select the download and click <font color=\"1E8E44\">Preview</font>."
 msgstr ""
+"İndirmeye çalıştığınız dosyaların, istediğiniz dosyalar olup ulmadığını "
+"kontrol etmek için dosyayı seçin ve <font color=\"1E8E44\">Önizleme</font>. "
+"tıklayın."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:104
 msgid ""
@@ -1960,6 +2026,11 @@ msgid ""
 "<font color=\"1E8E44\">Connections</font> to take a look at LimeWire's "
 "connections."
 msgstr ""
+"LimeWire'ın bağlandığı veya size bağlanan bilgisayarları merak ediyor "
+"musunuz? <font color=\"1E8E44\">Görünüm</font> &gt; <font "
+"color=\"1E8E44\">Göster/Gizle</font>'den <font "
+"color=\"1E8E44\">Bağlantılar</font>'ı seçerek LimeWire'ın bağlantılarına göz "
+"atın."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:108
 #, java-format
@@ -1967,6 +2038,8 @@ msgid ""
 "Passionate about digital rights? Visit the <a href=\"{0}\">Electronic "
 "Frontier Foundation</a> to see what you can do to help."
 msgstr ""
+"Dİjital haklar konusunda istekli misiniz? <a href=\"{0}\">Electronic "
+"Frontier Foundation</a> ziyaret edip nasıl yardım edeceğinizi öğrenin"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:110
 msgid ""
@@ -1975,6 +2048,10 @@ msgid ""
 "href=\"{0}\">internationalization page</a> for information on how you can "
 "help translation efforts."
 msgstr ""
+"Limewire aralarında Fransıza, Almanca, Yunanca, İtalyancanında olduğu birçok "
+"dile çevrilmiş durumda. Çevirilere nasıl yardımcı olabileceğinizi öğrenmek "
+"için LimeWire'nin<a href=\"{0}\">uluslararası hale getirme sayfası</a> "
+"ziyaret ediniz."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:114
 #, java-format
@@ -1982,6 +2059,8 @@ msgid ""
 "Do you want to sport the LimeWire look? Visit our <a href=\"{0}\">LimeWire "
 "gear</a> page and purchase a T-shirt or hat."
 msgstr ""
+"LimeWire tarzını taşımak ister misiniz? <a href=\"{0}\">LimeWire "
+"eşyaları</a> sayfamızı ziyaret ederek bir tişört ya da şapka alın."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:117
 msgid ""
@@ -1990,6 +2069,10 @@ msgid ""
 "the drop-down box and then press <font color=\"1E8E44\">Search</font>. Most, "
 "if not all, of the files returned will be from the selected genre."
 msgstr ""
+"Ses dosyalarını tarza göre arayabilirsiniz. Seçkin arama tipi penceresinde "
+"<font color=\"1E8E44\">Ses</font>'e tıklayın, açılır pencereden bir tarz "
+"seçin ve <font color=\"1E8E44\">Ara</font>'ya basın. Çıkan sonuçların hepsi "
+"değilse de çoğunluğu seçilen tarzda olacaktır."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:122
 msgid ""
@@ -2006,6 +2089,13 @@ msgid ""
 "to block. After a short training period, LimeWire automatically blocks most "
 "junk results."
 msgstr ""
+"Saçma arama sonuçları bombardımanından nasıl kurtulacağınızı merak ediyor "
+"musunuz? Arama sonucunu seçin ve <font color=\"1E8E44\">Gereksiz</font> "
+"düğmesine basın. Siz arama sonuçlarını <font "
+"color=\"1E8E44\">Gereksiz</font> veya <font color=\"1E8E44\">Gereksiz "
+"Değil</font> olarak işaretledikçe, LimeWire neyi engelleyip, neyi "
+"engellememeyi öğrenir. Kısa bir eğitim döneminden sonra LimeWire çoğu "
+"gereksiz sonucu otomatik olarak engeller."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:131
 msgid ""
@@ -2123,12 +2213,16 @@ msgid ""
 "The numbers next to the up and down arrows at the bottom of LimeWire show "
 "how fast all of your files are downloading or uploading."
 msgstr ""
+"Limewire'nin altındaki, yukarı ve aşağı oklarının yanındaki rakamlar, "
+"dosyalarınızın hangi hızda yüklenilip indirildiğini göstermektedir."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:201
 msgid ""
 "You can increase the text size via <font color=\"1E8E44\">View</font> &gt; "
 "<font color=\"1E8E44\">Increase Font Size</font>."
 msgstr ""
+"Yazı büyüklüğünü <font color=\"1E8E44\">Görünüm</font> &gt; <font "
+"color=\"1E8E44\">Font büyüklüğünü arttır</font>. ile arttırabilirsiniz."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:204
 msgid ""
@@ -2184,7 +2278,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:241
 msgid "LimeWire supports file sizes up to 1 TB (terabyte)."
-msgstr ""
+msgstr "Limewire 1 TB a kadar dosyalarınızı destekler."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:242
 msgid ""
@@ -2195,11 +2289,16 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:248
+#, fuzzy
 msgid ""
 "Curious about the inner workings of LimeWire? Go to <font "
 "color=\"1E8E44\">View</font> &gt; <font color=\"1E8E44\">Show/Hide</font> "
 "&gt; <font color=\"1E8E44\">Console</font> to see LimeWire's log statements."
 msgstr ""
+"Limewiredeki gizli çalışmaları görmek için, Go to <font "
+"color=\"1E8E44\">Görünüm</font> &gt; <font "
+"color=\"1E8E44\">Göster/Gizle</font> &gt; <font "
+"color=\"1E8E44\">Konsol</font>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:252
 msgid ""
@@ -2247,6 +2346,9 @@ msgid ""
 "color=\"1E8E44\">Help</font> &gt; <font color=\"1E8E44\">About "
 "LimeWire</font>. "
 msgstr ""
+"Limewirenin hangi versiyonunu kullandığınızı öğrenmek için: <font "
+"color=\"1E8E44\">Yardım</font> &gt; <font color=\"1E8E44\">LimeWire "
+"Hakkında</font>. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:289
 msgid ""
@@ -2360,6 +2462,9 @@ msgid ""
 "choosing <font color=\"1E8E44\">Search More</font>, then <font "
 "color=\"1E8E44\">Get More Results</font>. "
 msgstr ""
+"Arama sonuçlarınızı artırmak için sonucu sağ tıklayıp önce <font "
+"color=\"1E8E44\">Daha Ara</font>'yı, sonra <font color=\"1E8E44\">Daha Fazla "
+"Sonuç Göster</font>'i seçiniz. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:368
 msgid ""
@@ -2369,6 +2474,13 @@ msgid ""
 "color=\"1E8E44\">Options</font> &gt; <font color=\"1E8E44\">Advanced</font> "
 "&gt; <font color=\"1E8E44\">Firewall Config</font> to find the port number. "
 msgstr ""
+"Gnutella ağına bağlanamıyor musunuz? Eğer bir güvenlik duvarı "
+"kullanıyorsanız, LimeWire için bir bağlantı noktası açtığınızdan emin olun "
+"(gelen ve gönderilen, UPD ve TCP). Bağlantı noktası numarasını öğrenmek için "
+"<font color=\"1E8E44\">Araçlar</font> &gt; <font "
+"color=\"1E8E44\">Seçenekler</font> &gt; <font "
+"color=\"1E8E44\">Gelişmiş</font> &gt; <font color=\"1E8E44\">Güvenlik Duvarı "
+"Ayarları</font>'na gidin. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:375
 msgid ""
@@ -2377,6 +2489,11 @@ msgid ""
 "can even change the location of a download in progress by right-clicking the "
 "download and choosing <font color=\"1E8E44\">Change File Location...</font>. "
 msgstr ""
+"İndirmeleri bilgisayarınızda tercih ettiğiniz yere kaydetmek için arama "
+"sonucuna sağ tıklayın ve <font color=\"1E8E44\">Öyle İndir</font>'i seçin. "
+"İndirilmekte olan bir dosyanın yerini dahi indirmenin ismine sağ tıklayıp "
+"<font color=\"1E8E44\">Dosya Yolunu Değiştir...</font>'i seçerek "
+"değiştirebilirsiniz. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:381
 msgid ""
@@ -2384,6 +2501,9 @@ msgid ""
 "color=\"1E8E44\">Library</font> tab; right-click the file and choose <font "
 "color=\"1E8E44\">Stop Sharing File</font>. "
 msgstr ""
+"İndirilmiş bir dosyayı paylaşmayı durdurmak için <font "
+"color=\"1E8E44\">Kütüphane</font> sekmesine girin, dosyaya sağ tıklayın ve "
+"<font color=\"1E8E44\">Dosya Paylaşımını Durdur</font>'u seçin. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:384
 msgid ""
@@ -2393,6 +2513,11 @@ msgid ""
 "&gt; <font color=\"1E8E44\">Saving</font> to choose the location for each "
 "type of file. "
 msgstr ""
+"Ses, video veya resim gibi farklı tipte dosyaları, bilgisayarınızda farklı "
+"yerlere otomatik olarak kaydedebilirsiniz. Farklı dosya tiplerinin "
+"kaydedileceği yerleri seçmek için <font color=\"1E8E44\">Araçlar</font> &gt; "
+"<font color=\"1E8E44\">Seçenekler</font> &gt; <font "
+"color=\"1E8E44\">Kaydediliyor</font>'a gidin. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:390
 msgid ""
@@ -2401,6 +2526,12 @@ msgid ""
 "color=\"1E8E44\">Options</font> &gt; <font color=\"1E8E44\">Filters</font> "
 "&gt; <font color=\"1E8E44\">Junk</font>. "
 msgstr ""
+"LimeWire'ın Gereksiz Dosya filtresinin daha fazla sonucu engellemesini "
+"sağlayabilirsiniz. Bu seçeneği ve daha fazlasını <font "
+"color=\"1E8E44\">Araçlar</font> &gt; <font "
+"color=\"1E8E44\">Seçenekler</font> &gt; <font "
+"color=\"1E8E44\">Filtreler</font> &gt; <font "
+"color=\"1E8E44\">Gereksiz</font>'den ayarlayabilirsiniz. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:396
 msgid ""
@@ -2409,6 +2540,11 @@ msgid ""
 "color=\"1E8E44\">Options</font> &gt; <font color=\"1E8E44\">Updates</font> "
 "to get notified of beta releases. "
 msgstr ""
+"Yeni ürün özelliklerini çıktıkları gibi denemeyi ister misiniz? Beta "
+"sürümler hakkında bilgilendirilmek için <font "
+"color=\"1E8E44\">Araçlar</font> &gt; <font "
+"color=\"1E8E44\">Seçenekler</font> &gt; <font "
+"color=\"1E8E44\">Güncellemeler</font>'e gidin. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:411
 msgid ""
@@ -2416,6 +2552,9 @@ msgid ""
 "Java will improve LimeWire's speed and stability. You can upgrade to the "
 "latest Java release by using 'Software Update'. "
 msgstr ""
+"LimeWire Java ile yazılmıştır ve bu da Java'nın en son sürümüne sahip "
+"olmanın LimeWire'ın hızını ve kararlılığını artıracağı anlamına gelir. "
+"'Program Güncelleme'yi kullanarak en son Java sürümüne sahip olabilirsiniz. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:415
 msgid ""
@@ -2423,6 +2562,9 @@ msgid ""
 "from the <font color=\"1E8E44\">View</font> &gt; <font "
 "color=\"1E8E44\">Apply Skins</font> menu. "
 msgstr ""
+"OS X Aqua görünümünden sıkıldınız mı? Yeni bir tema kullanmayı deneyin; "
+"temalara <font color=\"1E8E44\">Görünüm</font> &gt; <font "
+"color=\"1E8E44\">Temaları Uygula</font>'dan ulaşın. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:419
 msgid ""
@@ -2431,6 +2573,10 @@ msgid ""
 "These preferences (and more) are available at the <font "
 "color=\"1E8E44\">Preferences</font> menu. "
 msgstr ""
+"Kaydedilenler klasörü, paylaşılanlar klasörü, yükleme bant genişliği vb. "
+"seçenekleri değiştirerek LimeWire'ı keyfinizin istediği gibi "
+"kişiselleştirebilirsiniz. Bu seçenekler (ve daha fazlası) <font "
+"color=\"1E8E44\">Seçenekler</font> menüsünde bulunmaktadır. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:424
 msgid ""
@@ -2776,9 +2922,9 @@ msgid ""
 "love the improved performance of PRO. Thank you for helping keep the "
 "Internet open by running LimeWire."
 msgstr ""
-"Turbo Hızlandırılmış yüklemeler için LimeWire PRO edinin. Garanti ediyoruzki "
-"PRO'nun geliştirilmiş perfonmansını seveceksiniz. LimeWire çalıştırarak "
-"internete bağlı kaldığınız için teşekkürler."
+"Turbo hızlandırılmış yüklemeler için LimeWire PRO edinin. Garanti ediyoruz "
+"ki PRO'nun geliştirilmiş performansını seveceksiniz. LimeWire kullanarak "
+"internetin devamlılığını sağladığınız için teşekkürler."
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:67
 msgid "Upgrade to LimeWire PRO?"
@@ -2789,17 +2935,16 @@ msgid "Upgrade Your Java"
 msgstr "Java'nızı Yükseltin"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:76
-#, fuzzy
 msgid ""
 "LimeWire has detected that you are using an out-of-date version of Java. "
 "LimeWire looks and acts much better with newer versions of Java. Features "
 "include support for scroll-wheels on mice, a Windows XP look, and many other "
 "improvements."
 msgstr ""
-"Limewire bilgisayarinizdaki Java versiyonunun eski oldugunu farketti. "
-"Limewire Javanin yeni versiyonlari ile daha iyi görünür ve calisir. Yeni "
-"versiyonlar mouselarin uzerindeki top ile calisma, Windows XP görünürlülügü "
-"ve daha bircok gelistirmeleri icermektedir."
+"LimeWire bilgisayarınızdaki Java sürümünün eski olduğunu tespit etti. "
+"LimeWire Java'nın yeni sürümleri ile çok daha iyi görünür ve çalışır. Yeni "
+"sürümler fare tekerleği desteği, Windows XP görünümü ve daha birçok "
+"geliştirmeyi sağlamaktadır."
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:77
 msgid "Would you like to get your free Java upgrade?"
@@ -3835,7 +3980,7 @@ msgstr "Ne çeşit kaynaklar LimeWire ile açılsın?"
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:69
 #, fuzzy
 msgid "What should LimeWire do with the selected associations on startup?"
-msgstr "LimeWire startupta seçilen birliklerle neyi yapmalıydı?"
+msgstr "LimeWire seçilen ilişkilendirmelerle başlangıçta ne yapmalı?"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:67
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:71
@@ -3879,7 +4024,6 @@ msgid "Miscellaneous Settings"
 msgstr "Çeşitli Ayarlar"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:65
-#, fuzzy
 msgid ""
 "Below, are several options that affect the performance and functionality of "
 "LimeWire."
@@ -5283,9 +5427,8 @@ msgid "Use UPnP (Recommended)"
 msgstr "UPnP yi Kullan(Tavsiye Edilen)"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ForceIPPaneItem.java:51
-#, fuzzy
 msgid "Manual Port Forward:"
-msgstr "Elle Bağlantı Noktası:"
+msgstr "Elle Bağlantı Noktası Yönlendirme:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ForceIPPaneItem.java:53
 msgid "Do Nothing (Not Recommended)"
@@ -6213,7 +6356,7 @@ msgid ""
 "Six months of free updates"
 msgstr ""
 "Daha iyi arama sonuçları\n"
-"Turbo-Yüklü indirme hızları\n"
+"Turbo hızlı indirme\n"
 "Daha fazla kaynağa erişim\n"
 "Kişisel teknik destek\n"
 "Altı ay ücretsiz güncelleme"
@@ -6321,8 +6464,8 @@ msgid ""
 "user's shared files."
 msgstr ""
 "Bağlanmak istediğiniz arkadaşınızın IP adresini ve bağlantı noktası "
-"numarasını (i.e ip:port) giriniz, \"Doğrudan Bağlantı\"ya tıklayınız, "
-"ardından LimeWire bu kişinin paylaşılmış dosyalarını bulmaya çalışacak."
+"numarasını (ip:port) giriniz ve 'Doğrudan Bağlantı'ya tıklayınız. LimeWire "
+"bu kişinin paylaşılan dosyalarını bulmaya çalışacaktır."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:370
 msgid "When your friends want to connect to you, they should enter"
@@ -7140,7 +7283,7 @@ msgstr "Yıl:"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:42
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:56
 msgid "Type:"
-msgstr "Tür:"
+msgstr "Türü:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:43
 msgid "Track:"
@@ -7187,7 +7330,7 @@ msgstr "Lisans:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:58
 msgid "Rating:"
-msgstr "Derece:"
+msgstr "Değerlendirme:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:62
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:76
@@ -7253,7 +7396,6 @@ msgid "Ogg Vorbis"
 msgstr "Ogg Vorbis"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:111
-#, fuzzy
 msgid ""
 "Unknown file type. Please choose the type that best describes this file."
-msgstr "Bilinmeyen öğe türü. Lütfen bu öğeyi en iyi açıklayan türü seçin."
+msgstr "Bilinmeyen dosya tipi. Lütfen bu dosyaya en uygun tipi seçin."

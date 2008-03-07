@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2007-09-16 01:13+0000\n"
-"Last-Translator: lbyunsml <Unknown>\n"
+"PO-Revision-Date: 2008-03-06 12:31+0000\n"
+"Last-Translator: puer_caeli <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2008-03-04 04:49+0000\n"
+"X-Launchpad-Export-Date: 2008-03-07 16:25+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -1493,16 +1493,15 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"하드 디스크의 빈 용량이 부족하기 때문에, 필요한 파일을 다른 이름으로 저장할 수 없는 상태. LimeWire의 사용을 계속하려면 , "
-"하드 디스크의 빈 용량을 증 할 것."
+"하드 디스크의 여유 공간이 부족하여 필요한 파일을 저장하지 못했습니다. 라임와이어를 계속 사용하시려면 하드 디스크의 여유공간을 늘려 "
+"주십시오"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
-"필요한 파일을 다른 프로그램이 사용하고 있기때문에, LimeWire는 파일을 열지 않는 상태. LimeWire는, 이 파일이 열릴 때까지 "
-"조작을 조 돌려주는 것."
+"다른 프로그램 라임와이어에서 필요한 파일을 사용중입니다. 이 파일이 사용가능 할 때 까지 라임와이어가 비정상적으로 작동 할 수 있습니다."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:54
 msgid ""
@@ -1510,23 +1509,24 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
-"필요한 접속권한이 없기 때문에, 필요한 파일을 기입해 불가. 다음에 LimeWire 가 시작되었을 때, 선택한 환경 설정이 보관 유지되어 "
-"있지 않을 가능성 있어. 또, LimeWire가 예기치 않은 작동을 할 가능성도 생각할 수 있습니다."
+"필요한 접근권한이 없어서 필요한 파일을 저장하지 못 했습니다. 다음에 라임와이어 실행시 저장한 설정값이 사라지거나 라임와이어가 "
+"비정상적으로 작동 할 수 있습니다."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:56
 msgid ""
 "LimeWire cannot open a necessary file because the filename contains "
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
-msgstr "파일명에 사용의 시스템으로 대응하고 있지 않는 문자가 있기때문에, 필요한 파일을 열리지 않는 상황."
+msgstr ""
+"운영체제에서 비대응하는 문자가 파일에 포함되어 라임와이에서 필요한 파일을 열 수 없습니다. 라임와이어가 비정상적으로 작동 할 수 있습니다."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:60
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
-"하드 디스크의 빈 용량이 부족하기 때문에, 선택한 파일을 다운로드할 수 없는 상태. 더욱 파일을 다운로드하려면 , 하드 디스크의 빈 "
-"용량을 늘리는 것."
+"하드디스크의 공간이 가득차서 선택한 파일을 다운로드하지 못 했습니다. 더 많은 파일을 다운로드 하려면, 하드디스크 여유공간을 더 늘려 "
+"주십시오."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:62
 msgid ""
@@ -1573,6 +1573,8 @@ msgid ""
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
 "to 'Resume' your downloads."
 msgstr ""
+"죄송합니다, 라임와이어가 이미 다운로드 받은 일부 파일을 인식 할 수 없었습니다. 이 파일을 계속해서 받으려면, '받는중인 파일'으로 "
+"가서 해당파일의 '계속' 버튼을 눌러 주십시오."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:319
 #, fuzzy
@@ -1582,7 +1584,7 @@ msgstr "Loading HTML 엔진..."
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:331
 #, fuzzy
 msgid "Loading Safe Content Management..."
-msgstr "오래된 접속 관리를 불러오는 중..."
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:336
 msgid "Loading Message Router..."
@@ -1590,7 +1592,7 @@ msgstr "메시지 라우터를 불러오는 중..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:341
 msgid "Checking for Updates..."
-msgstr "업데이트를 확인 중 입니다."
+msgstr "업데이트를 확인중 입니다..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:346
 #, fuzzy
@@ -1603,7 +1605,7 @@ msgstr "접속 청취자를 불러오는 중..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:365
 msgid "Loading Connection Management..."
-msgstr "접속 관리를 불러오는 중..."
+msgstr "저"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
 #, fuzzy
@@ -1617,24 +1619,24 @@ msgstr "오래된 접속 관리를 불러오는 중..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:385
 msgid "Locating Peers..."
-msgstr "사용자들 자리 매김..."
+msgstr "사용자들 자리 매김중..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:401
 #, fuzzy
 msgid "Loading Shared Files..."
-msgstr "다른 이름으로 저장 파일을 불러오는 중..."
+msgstr "공유 파일을 불러오는 중..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:406
 msgid "Loading BitTorrent Management..."
-msgstr ""
+msgstr "BitTorrent관리자를 불러오는 중..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:412
 msgid "Loading Old Downloads..."
-msgstr "낡은 다운로드를 불러오는 중..."
+msgstr "예전에 받은 파일을 불러오는 중..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:417
 msgid "Attaching LimeWire Store Listeners..."
-msgstr ""
+msgstr "라임와이어 스토어 청취자를 연결 하는 중..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:422
 msgid "Loading Directed Querier..."

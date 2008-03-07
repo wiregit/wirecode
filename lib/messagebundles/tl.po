@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-02-22 15:40+0000\n"
-"Last-Translator: Arielle B Cruz <me@abcruz.com>\n"
+"PO-Revision-Date: 2008-03-06 10:34+0000\n"
+"Last-Translator: vialofscorn~ <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2008-03-04 04:49+0000\n"
+"X-Launchpad-Export-Date: 2008-03-07 16:25+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -660,12 +660,13 @@ msgstr ""
 #. show warning but proceed
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:189
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:129
+#, fuzzy
 msgid ""
 "One or more URLs in the MAGNET link were invalid. Your file may not download "
 "correctly."
 msgstr ""
-"Isa o marami pang mga URL sa link ng MAGNET ay hindi wasto o walang say-say. "
-"Ang download ay maaaring hindi tumpak."
+"Isa o marami pang mga URL sa link ng MAGNET ay hindi wasto. Maaaring di-tama "
+"and pag-download ng file"
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:200
 #, java-format
@@ -679,8 +680,9 @@ msgstr "Ang inyong download ay nasa {0}"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:71
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:42
+#, fuzzy
 msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "Para sa hinahanap na TURBO Charged kumuha ng LimeWire Pro."
+msgstr "Para sa paghahanap na Turbo-Charged kumuha ng Limewire PRO"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:75
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:46
