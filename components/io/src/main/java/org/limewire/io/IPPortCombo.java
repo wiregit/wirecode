@@ -121,14 +121,7 @@ public class IPPortCombo implements IpPort {
     //TODO if IPv6 kicks in, this may fail, don't worry so much now.
     
     public byte[] toBytes() {
-        byte[] retVal = new byte[6];
-        
-        for (int i=0; i < 4; i++)
-            retVal[i] = getInetAddress().getAddress()[i];
-
-        ByteOrder.short2leb((short)getPort(), retVal, 4);
-
-        return retVal;
+        return NetworkUtils.getBytes(this, java.nio.ByteOrder.LITTLE_ENDIAN);
     }
 
     public boolean equals(Object other) {

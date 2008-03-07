@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -752,5 +753,25 @@ public class NetworkUtilsTest extends BaseTestCase {
     private static void assertTLS(IpPort ipp) {
         assertInstanceof(Connectable.class, ipp);
         assertTrue(((Connectable)ipp).isTLSCapable());
+    }
+    
+    public void testGetBytes() throws Exception {
+        byte[] big = { 127, 0, 0, 1, 0, 1 };
+        assertEquals(big, NetworkUtils.getBytes(new IpPortImpl("127.0.0.1:1"), ByteOrder.BIG_ENDIAN));
+        
+        big = new byte[] { 127, 0, 0, 1, (byte)0xFF, (byte)0xFE };
+        assertEquals(big, NetworkUtils.getBytes(new IpPortImpl("127.0.0.1:65534"), ByteOrder.BIG_ENDIAN));
+        
+        big = new byte[] { 127, 0, 0, 1, (byte)0xFF, (byte)0xFF };
+        assertEquals(big, NetworkUtils.getBytes(new IpPortImpl("127.0.0.1:65535"), ByteOrder.BIG_ENDIAN));
+        
+        byte[] little = { 127, 0, 0, 1, 1, 0 };
+        assertEquals(little, NetworkUtils.getBytes(new IpPortImpl("127.0.0.1:1"), ByteOrder.LITTLE_ENDIAN));
+        
+        little = new byte[] { 127, 0, 0, 1, (byte)0xFE, (byte)0xFF };
+        assertEquals(little, NetworkUtils.getBytes(new IpPortImpl("127.0.0.1:65534"), ByteOrder.LITTLE_ENDIAN));
+        
+        little = new byte[] { 127, 0, 0, 1, (byte)0xFF, (byte)0xFF };
+        assertEquals(little, NetworkUtils.getBytes(new IpPortImpl("127.0.0.1:65535"), ByteOrder.LITTLE_ENDIAN));
     }
 }

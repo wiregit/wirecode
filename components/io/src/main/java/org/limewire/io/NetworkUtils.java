@@ -505,13 +505,13 @@ public final class NetworkUtils {
      * 
      * This method is IPv6 compliant
      */
-    public static byte[] getBytes(SocketAddress addr) throws UnknownHostException {
+    public static byte[] getBytes(SocketAddress addr, java.nio.ByteOrder order) throws UnknownHostException {
         InetSocketAddress iaddr = (InetSocketAddress)addr;
         if (iaddr.isUnresolved()) {
             throw new UnknownHostException(iaddr.toString());
         }
         
-        return getBytes(iaddr.getAddress(), iaddr.getPort());
+        return getBytes(iaddr.getAddress(), iaddr.getPort(), order);
     }
     
     /**
@@ -519,8 +519,8 @@ public final class NetworkUtils {
      * 
      * This method is IPv6 compliant
      */
-    public static byte[] getBytes(IpPort ipp) {
-        return getBytes(ipp.getInetAddress(), ipp.getPort());
+    public static byte[] getBytes(IpPort ipp, java.nio.ByteOrder order) {
+        return getBytes(ipp.getInetAddress(), ipp.getPort(), order);
     }
     
     /**
@@ -528,7 +528,7 @@ public final class NetworkUtils {
      * 
      * This method is IPv6 compliant
      */
-    public static byte[] getBytes(InetAddress addr, int port) {
+    public static byte[] getBytes(InetAddress addr, int port, java.nio.ByteOrder order) {
         if (!isValidPort(port)) {
             throw new IllegalArgumentException("Port out of range: " + port);
         }
@@ -537,8 +537,10 @@ public final class NetworkUtils {
 
         byte[] dst = new byte[address.length + 2];
         System.arraycopy(address, 0, dst, 0, address.length);
-        dst[dst.length-2] = (byte)((port >> 8) & 0xFF);
-        dst[dst.length-1] = (byte)((port     ) & 0xFF);
+        if(order == java.nio.ByteOrder.BIG_ENDIAN)
+            ByteOrder.short2beb((short)port, dst, dst.length-2);
+        else // if order == LITTLE_ENDIAN
+            ByteOrder.short2leb((short)port, dst, dst.length-2);
         return dst;
     }
     

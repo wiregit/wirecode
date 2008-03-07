@@ -142,7 +142,7 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
             Set<? extends IpPort> proxies = value.getPushProxies();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             for (IpPort proxy : proxies) {
-                byte[] ipp = NetworkUtils.getBytes(proxy);
+                byte[] ipp = NetworkUtils.getBytes(proxy, java.nio.ByteOrder.BIG_ENDIAN);
                 assert (ipp.length == 6 || ipp.length == 18);
                 baos.write(ipp.length);
                 baos.write(ipp);
