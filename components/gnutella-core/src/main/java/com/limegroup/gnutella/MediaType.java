@@ -146,7 +146,7 @@ public class MediaType implements Serializable {
                 "fli", "flc", "flx", "flv", 
                 "wml", "vrml", "swf", "dcr", "jve", "nsv", 
                 "mkv", "ogm", 
-                "cdg", "srt", "sub", "idx"
+                "cdg", "srt", "sub", "idx", "flv"
             });
         
     /**
