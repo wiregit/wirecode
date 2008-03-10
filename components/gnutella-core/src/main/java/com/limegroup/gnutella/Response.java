@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Set;
 
 import org.limewire.collection.IntervalSet;
@@ -135,7 +136,7 @@ public class Response {
 		else 
 			this.name = name;
 		
-		isMetaFile = this.name.toLowerCase().endsWith(".torrent");
+		isMetaFile = this.name.toLowerCase(Locale.US).endsWith(".torrent");
 
         byte[] temp = null;
         try {

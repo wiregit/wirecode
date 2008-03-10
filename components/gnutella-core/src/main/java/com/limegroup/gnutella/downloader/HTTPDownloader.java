@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -1010,7 +1011,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		token = tokenizer.nextToken();
 		
 		// the first token should contain HTTP
-		if (token.toUpperCase().indexOf("HTTP") < 0 )
+		if (token.toUpperCase(Locale.US).indexOf("HTTP") < 0 )
 			throw new NoHTTPOKException("got: " + str);
         // does the server support http 1.1?
         else 
@@ -1201,7 +1202,7 @@ public class HTTPDownloader implements BandwidthTracker {
                                                             throws IOException {
         IntervalSet availableRanges = new IntervalSet();
 
-        line = line.toLowerCase();
+        line = line.toLowerCase(Locale.US);
         // start parsing after the word "bytes"
         int start = line.indexOf("bytes") + 6;
         // if start == -1 the word bytes has not been found
@@ -1326,9 +1327,9 @@ public class HTTPDownloader implements BandwidthTracker {
             String protocol = "";
             int slash = feature.indexOf("/");
             if(slash == -1) {
-                protocol = feature.toLowerCase().trim();
+                protocol = feature.toLowerCase(Locale.US).trim();
             } else {
-                protocol = feature.substring(0, slash).toLowerCase().trim();
+                protocol = feature.substring(0, slash).toLowerCase(Locale.US).trim();
             }
             // ignore the version for now.
 

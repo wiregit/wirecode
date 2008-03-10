@@ -818,7 +818,7 @@ public abstract class FileManagerImpl implements FileManager {
             resetVariables();
 
             // Load the extensions. 
-            String[] extensions = StringArraySetting.decode(SharingSettings.EXTENSIONS_TO_SHARE.getValue().toLowerCase());
+            String[] extensions = StringArraySetting.decode(SharingSettings.EXTENSIONS_TO_SHARE.getValue().toLowerCase(Locale.US));
                         
             for( String ext : extensions ) {
                 _extensions.add(ext);
@@ -2150,14 +2150,15 @@ public abstract class FileManagerImpl implements FileManager {
 	
     /** Returns true if file has a shareable extension.  Case is ignored. */
     private static boolean hasShareableExtension(File file) {
-        if(file == null) return false;
-        String filename = file.getName();
-        int begin = filename.lastIndexOf(".");
-        if (begin == -1)
+        if(file == null)
             return false;
-
-        String ext = filename.substring(begin + 1).toLowerCase();
-        return _extensions.contains(ext);
+        
+        String extension = FileUtils.getFileExtension(file);
+        if (extension != null) {
+            return _extensions.contains(extension.toLowerCase(Locale.US));
+        } else {
+            return false;
+        }
     }
     
     /* (non-Javadoc)
@@ -2210,7 +2211,7 @@ public abstract class FileManagerImpl implements FileManager {
 		if (_data.FILES_NOT_TO_SHARE.contains(file))
 			return false;
 		if (isFileInCompletelySharedDirectory(file)) {
-	        if (file.getName().toUpperCase().startsWith("LIMEWIRE"))
+	        if (file.getName().toUpperCase(Locale.US).startsWith("LIMEWIRE"))
 				return true;
 			if (!hasShareableExtension(file))
 	        	return false;

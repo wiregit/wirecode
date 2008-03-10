@@ -1,5 +1,7 @@
 package org.limewire.collection;
 
+import java.util.Locale;
+
 
 /** 
  * Allows storage & retrieval of numbers based on the index of an
@@ -128,7 +130,7 @@ public class BitNumbers {
                 String hex = Integer.toHexString(data[i] & 0x00FF);
                 if(hex.length() == 1)
                     sb.append("0");
-                sb.append(hex.toUpperCase());
+                sb.append(hex.toUpperCase(Locale.US));
             }
             sb.setLength(lastNonZero * 2 + 2); // erase empty fields.
             if(sb.length() > 1 && sb.charAt(sb.length()-1) == '0')

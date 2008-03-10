@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -1013,6 +1014,15 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         // go through the data, make sure its in HUGE
         String s = StringUtils.getASCIIString(data);
         assertTrue(s.toLowerCase().contains("ttroot"));
+    }
+    
+    public void testIsMetaFileWithAllLocales() throws Exception {
+        for (Locale locale : Locale.getAvailableLocales()) {
+            Locale.setDefault(locale);
+            Response response = new Response(100, 100, "hello world.torrent", "hello world.torrent".getBytes("UTF-8").length,
+                    null, null, null, 5000, null, null, false);
+            assertTrue("Failed for locale: " + locale, response.isMetaFile());
+        }
     }
 
     private void assertResponseParsingFails(Response r) throws Exception {

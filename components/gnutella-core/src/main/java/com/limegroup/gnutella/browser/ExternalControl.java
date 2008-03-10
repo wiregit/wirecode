@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -109,7 +110,7 @@ public class ExternalControl {
 	private boolean isTorrentRequest(String arg) {
 		if (arg == null) 
 			return false;
-		arg = arg.trim().toLowerCase();
+		arg = arg.trim().toLowerCase(Locale.US);
 		// magnets pointing to .torrent files are just magnets for now
 		return arg.endsWith(".torrent") && !arg.startsWith("magnet:");
 	}

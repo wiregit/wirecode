@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -1115,5 +1116,19 @@ public final class HandshakeResponseTest extends LimeTestCase {
         headers.clear();
         isTrue = (Boolean)m.invoke(null, params);        
         assertTrue("should not contain correct value", !isTrue.booleanValue());        
+    }
+    
+    public void testIsLimeWireWithAllLocales() throws Exception {
+        for (Locale locale : Locale.getAvailableLocales()) {
+            Locale.setDefault(locale);
+            Properties headers = new LeafHeaders("129.0.0.1", new IpPortImpl("192.168.0.1:5555"));
+            HandshakeResponse handshakeResponse = new HandshakeResponse(200, "OK", headers);
+            assertTrue(handshakeResponse.isLimeWire());
+            
+            headers = new Properties();
+            headers.put(HeaderNames.USER_AGENT, "LIMEWIRE");
+            handshakeResponse = new HandshakeResponse(200, "OK", headers);
+            assertTrue("Failed for locale: " + Locale.getDefault(), handshakeResponse.isLimeWire());
+        }
     }
 }

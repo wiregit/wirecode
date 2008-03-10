@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -41,7 +42,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
         Handler[] hs = createHandlers();
         if (LOG.isDebugEnabled()) LOG.debug("creating " + hs.length + " handler(s)...");
         for (Handler h : hs) {
-            this.names2handlers.put(h.name().toLowerCase(), h);
+            this.names2handlers.put(h.name().toLowerCase(Locale.US), h);
             if (LOG.isDebugEnabled()) LOG.debug(" - " + h.name());
         }
     }
@@ -143,7 +144,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
             final NHttpResponseTrigger trigger, HttpContext c) throws HttpException, IOException {
         String request = httpReq.getRequestLine().getUri();
         final String command = getCommand(request); //getOnlytheFileRequestPortionOfURL(request);
-        final Handler h = names2handlers.get(command.toLowerCase());
+        final Handler h = names2handlers.get(command.toLowerCase(Locale.US));
         if (h == null) {
             if (LOG.isErrorEnabled())
                 LOG.error("Couldn't create a handler for " + command);
@@ -209,7 +210,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
      */
     public final void handle(String request, PrintStream out, StringCallback callback) {
         final String req = getCommand(request);
-        final Handler h = names2handlers.get(req.toLowerCase());
+        final Handler h = names2handlers.get(req.toLowerCase(Locale.US));
         if (h == null) {
             if (LOG.isErrorEnabled()) LOG.error("Couldn't create a handler for " + req);
             callback.process(report(LWSDispatcherSupport.ErrorCodes.UNKNOWN_COMMAND));

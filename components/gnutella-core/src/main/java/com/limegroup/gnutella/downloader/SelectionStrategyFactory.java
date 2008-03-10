@@ -19,16 +19,13 @@ public class SelectionStrategyFactory {
         
         // Check if the extension matches known previewable extennsions
         if (extension != null && extension.length() > 0) {
-            // Put the extension in canonical form
-            extension = extension.toLowerCase();
-        
             String[] previewableExtensions = DownloadSettings.PREVIEWABLE_EXTENSIONS.getValue();
         
             // Loop over all previewable extensions
             for (int i = previewableExtensions.length-1; i >= 0; i--) {
                 // If the extension is previewable, return a strategy
                 // favorable for previewing
-                if (previewableExtensions[i].toLowerCase().equals(extension)) {
+                if (previewableExtensions[i].equalsIgnoreCase(extension)) {
                     if (LOG.isDebugEnabled()) { 
                         LOG.debug("Extension ("+extension+") is previewable."); 
                     }

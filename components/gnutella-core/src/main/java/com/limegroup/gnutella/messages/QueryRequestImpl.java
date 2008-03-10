@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.limewire.security.AddressSecurityToken;
@@ -655,12 +656,12 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
     public boolean isQueryForLW() {
         for (String term : SearchSettings.LIME_SEARCH_TERMS.getValue()) {
             if (getQuery().length() > 0 &&
-                    getQuery().toLowerCase().contains(term))
+                    getQuery().toLowerCase(Locale.US).contains(term))
                 return true;
 
             if (getRichQuery() != null) {
                 for (String keyword : getRichQuery().getKeyWords())
-                    if (keyword.toLowerCase().contains(term))
+                    if (keyword.toLowerCase(Locale.US).contains(term))
                         return true;
             }
         }

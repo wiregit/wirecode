@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -1070,7 +1071,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
         String userAgent = hr.getUserAgent();
         if(userAgent == null)
             return false;
-        userAgent = userAgent.toLowerCase();
+        userAgent = userAgent.toLowerCase(Locale.US);
         String[] bad = ConnectionSettings.EVIL_HOSTS.getValue();
         for(int i = 0; i < bad.length; i++)
             if(userAgent.indexOf(bad[i]) != -1)
@@ -1096,7 +1097,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
         String userAgent = hr.getUserAgent();
         if(userAgent == null)
             return false;
-        userAgent = userAgent.toLowerCase();
+        userAgent = userAgent.toLowerCase(Locale.US);
         String[] bad = ConnectionSettings.EVIL_HOSTS.getValue();
         for(int i = 0; i < bad.length; i++)
             if(userAgent.indexOf(bad[i]) != -1)

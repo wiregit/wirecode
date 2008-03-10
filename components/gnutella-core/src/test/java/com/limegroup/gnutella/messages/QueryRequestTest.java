@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
 
@@ -1475,6 +1476,16 @@ public final class QueryRequestTest extends LimeTestCase {
         assertEquals(query.getMetaMask(), proxy.getMetaMask());
         assertEquals(query.desiresOutOfBandReplies(), proxy.desiresOutOfBandReplies());
         assertEquals(query.getNetwork(), proxy.getNetwork());
+    }
+    
+    public void testIsQueryForLWAllLocales() {
+        for (Locale locale : Locale.getAvailableLocales()) {
+            Locale.setDefault(locale);
+            QueryRequestImpl queryRequest = new QueryRequestImpl(GUID.makeGuid(), (byte)1, 1, "LIMEWIRE", null, null, null, false, Network.TCP, true, 0, true, 0, false, true, null);
+            assertTrue("Failed for locale: " + locale, queryRequest.isQueryForLW());
+            queryRequest = new QueryRequestImpl(GUID.makeGuid(), (byte)1, 1, "limewire", null, null, null, false, Network.TCP, true, 0, true, 0, false, true, null);
+            assertTrue("Failed for locale: " + locale, queryRequest.isQueryForLW());
+        }
     }
     
     private void assertDesiresOutOfBand(QueryRequest query) {

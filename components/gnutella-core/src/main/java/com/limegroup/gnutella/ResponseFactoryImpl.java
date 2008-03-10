@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -245,7 +246,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
     }
 
     /**
-     * Constructs an xml string from the given extension sting.
+     * Constructs an xml string from the given extension string.
      * 
      * @param name the name of the file to construct the string for
      * @param ext an individual between-the-nulls string (note that there can be
@@ -264,8 +265,8 @@ public class ResponseFactoryImpl implements ResponseFactory {
         String second = tok.nextToken();
         assert first != null;
         assert second != null;
-        first = first.toLowerCase();
-        second = second.toLowerCase();
+        first = first.toLowerCase(Locale.US);
+        second = second.toLowerCase(Locale.US);
         String length = "";
         String bitrate = "";
         boolean bearShare1 = false;

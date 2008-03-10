@@ -2,6 +2,7 @@ package com.limegroup.gnutella.uploader;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -187,7 +188,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         processor.addInterceptor(new AltLocHeaderInterceptor(uploader, altLocManager,
                 alternateLocationFactory));
         processor.addInterceptor(new FWNodeInfoInterceptor(uploader, pushEndpointFactory));
-        if (!uploader.getFileName().toUpperCase().startsWith("LIMEWIRE")) {
+        if (!uploader.getFileName().toUpperCase(Locale.US).startsWith("LIMEWIRE")) {
             processor.addInterceptor(new UserAgentHeaderInterceptor(uploader));
         }
         try {

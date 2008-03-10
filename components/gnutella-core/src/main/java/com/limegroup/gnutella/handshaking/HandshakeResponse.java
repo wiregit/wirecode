@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -271,7 +272,7 @@ public class HandshakeResponse {
 
         IS_LIMEWIRE =
             extractStringHeaderValue(headers, HeaderNames.USER_AGENT).
-                toLowerCase().startsWith("limewire");
+                toLowerCase(Locale.US).startsWith("limewire");
 
         
         GOOD_ULTRAPEER = isHighDegreeConnection() &&
