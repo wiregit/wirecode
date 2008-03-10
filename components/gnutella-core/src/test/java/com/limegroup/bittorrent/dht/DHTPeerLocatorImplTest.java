@@ -2,6 +2,7 @@ package com.limegroup.bittorrent.dht;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -16,7 +17,6 @@ import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.FixedDHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
-import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.FindValueResult;
 import org.limewire.mojito.routing.Contact;
@@ -29,6 +29,7 @@ import com.google.inject.Module;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
+import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
@@ -37,22 +38,18 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 
 public class DHTPeerLocatorImplTest extends BaseTestCase {
-    private static final String HASH = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
 
-    private static final DHTValueType BT_PEER_TRIPLE = DHTValueType.valueOf("LimeBT Peer Triple",
-            "PEER");
+    private static String HASH1 = "urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
-    final byte[] ip = (new String("124.0.0.1")).getBytes();
+    private static String HASH2 = "urn:sha1:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
 
-    final byte[] id = (new String("123")).getBytes();
+    private static final byte[] IP = (new String("124.0.0.1")).getBytes();
 
-    public DHTPeerLocatorImplTest(String name) {
-        super(name);
-    }
+    private static final byte[] ID = (new String("123")).getBytes();
 
-    public static Test suite() {
-        return buildTestSuite(DHTPeerLocatorImplTest.class);
-    }
+    private static final int PORT = 4444;
+
+    private TorrentLocation torLoc = null;
 
     private Mockery context;
 
@@ -68,22 +65,35 @@ public class DHTPeerLocatorImplTest extends BaseTestCase {
 
     private MojitoDHT dht;
 
-    private BTMetaInfo btMetaInfo;
+    private BTMetaInfo btMetaInfoOne;
+
+    private BTMetaInfo btMetaInfoTwo;
 
     private Contact contact;
-
-    private URN urn;
 
     private Module module;
 
     private DHTPeerLocator dhtPeerLocator;
 
-    private KUID kuid;
+    private KUID kuidOne;
 
-    private EntityKey eKey;    
+    private EntityKey eKey;
+
+    private URN urnOne;
+
+    private URN urnTwo;
+
+    private TorrentManager torrentManager;
+
+    public DHTPeerLocatorImplTest(String name) {
+        super(name);
+    }
+
+    public static Test suite() {
+        return buildTestSuite(DHTPeerLocatorImplTest.class);
+    }
 
     public void setUp() throws Exception {
-        context = new Mockery();
         context = new Mockery();
         managedTorrentOne = context.mock(ManagedTorrent.class);
         managedTorrentTwo = context.mock(ManagedTorrent.class);
@@ -91,12 +101,17 @@ public class DHTPeerLocatorImplTest extends BaseTestCase {
         applicationServices = context.mock(ApplicationServices.class);
         networkManager = context.mock(NetworkManager.class);
         dht = context.mock(MojitoDHT.class);
-        btMetaInfo = context.mock(BTMetaInfo.class);
+        btMetaInfoOne = context.mock(BTMetaInfo.class);
+        btMetaInfoTwo = context.mock(BTMetaInfo.class);
+        torrentManager = context.mock(TorrentManager.class);
+
         contact = context.mock(Contact.class);
+
         try {
-            urn = URN.createSHA1Urn(HASH);
-        } catch (IOException ioe) {
-            fail(ioe);
+            urnOne = URN.createSHA1Urn(HASH1);
+            urnTwo = URN.createSHA1Urn(HASH2);
+        } catch (IOException ie) {
+            fail(ie);
         }
 
         module = new AbstractModule() {
@@ -107,21 +122,23 @@ public class DHTPeerLocatorImplTest extends BaseTestCase {
                 bind(ApplicationServices.class).toInstance(applicationServices);
                 bind(NetworkManager.class).toInstance(networkManager);
                 bind(MojitoDHT.class).toInstance(dht);
-                bind(BTMetaInfo.class).toInstance(btMetaInfo);
+                bind(BTMetaInfo.class).toInstance(btMetaInfoOne);
+                bind(BTMetaInfo.class).toInstance(btMetaInfoTwo);
+                bind(TorrentManager.class).toInstance(torrentManager);
             }
         };
 
         Injector inj = LimeTestUtils.createInjector(module);
         dhtPeerLocator = inj.getInstance(DHTPeerLocator.class);
-        
-        kuid = KUIDUtils.toKUID(urn);
-        eKey = EntityKey.createEntityKey(kuid, BT_PEER_TRIPLE);
+
+        kuidOne = KUIDUtils.toKUID(urnOne);
+        eKey = EntityKey.createEntityKey(kuidOne, DHTPeerLocatorUtils.BT_PEER_TRIPLE);
     }
 
     // Tests if locatePeer properly stores the torrents in waiting list if a DHT
     // was not available or did not support bootstrapping. It also test to
     // ensure duplicate torrents do not get stored in the waiting list.
-    public void testLocatePeerWhichShouldPutTorrentsInWaitingList() throws Exception {
+    public void testLocatePeerWhichShouldPutTorrentsInWaitingList() {
 
         context.checking(new Expectations() {
             {
@@ -133,16 +150,19 @@ public class DHTPeerLocatorImplTest extends BaseTestCase {
 
                 exactly(2).of(managedTorrentOne).isActive();
                 will(returnValue(true));
-                one(managedTorrentOne).getMetaInfo();
-                will(returnValue(btMetaInfo));
+                exactly(2).of(managedTorrentOne).getMetaInfo();
+                will(returnValue(btMetaInfoOne));
 
                 one(managedTorrentTwo).isActive();
                 will(returnValue(true));
                 one(managedTorrentTwo).getMetaInfo();
-                will(returnValue(btMetaInfo));
+                will(returnValue(btMetaInfoTwo));
 
-                exactly(2).of(btMetaInfo).getURN();
-                will(returnValue(urn));
+                exactly(2).of(btMetaInfoOne).getURN();
+                will(returnValue(urnOne));
+
+                one(btMetaInfoTwo).getURN();
+                will(returnValue(urnTwo));
 
                 never(dht).get(with(any(EntityKey.class)));
             }
@@ -158,34 +178,41 @@ public class DHTPeerLocatorImplTest extends BaseTestCase {
     }
 
     // Tests if locatePeer properly locates a peer in DHT.
-    public void testLocatePeerWhichShouldLocateAPeerInDHT() throws Exception {          
+    public void testLocatePeerWhichShouldLocateAPeerInDHT() {
 
         context.checking(new Expectations() {
             {
-                atLeast(2).of(networkManager).getAddress();
-                will(returnValue(ip));
-                atLeast(1).of(applicationServices).getMyBTGUID();
-                will(returnValue(id));
+                one(networkManager).getAddress();
+                will(returnValue(IP));
+                one(networkManager).getPort();
+                will(returnValue(PORT));
+                one(applicationServices).getMyBTGUID();
+                will(returnValue(ID));
 
                 exactly(2).of(dht).getLocalNode();
                 will(returnValue(contact));
 
-                exactly(1).of(contact).getNodeID();
-                will(returnValue(kuid));
+                one(contact).getNodeID();
+                will(returnValue(kuidOne));
             }
         });
 
-        BTConnectionTriple btct = new BTConnectionTriple(networkManager.getAddress(), 4444,
-                applicationServices.getMyBTGUID());
+        byte[] msg = null;
 
-        final TorrentLocation torLoc = new TorrentLocation(InetAddress.getByName(new String(btct
-                .getIP())), btct.getPort(), btct.getPeerID());
+        try {
+            torLoc = new TorrentLocation(InetAddress.getByName(new String((networkManager
+                    .getAddress()))), networkManager.getPort(), applicationServices.getMyBTGUID());
+            msg = DHTPeerLocatorUtils.encode(torLoc);
+        } catch (UnknownHostException uhe) {
+            fail(uhe);
+        } catch (IllegalArgumentException iae) {
+            fail(iae);
+        }
 
-        byte[] msg = btct.getEncoded();
+        final DHTValue dhtValue = new DHTValueImpl(DHTPeerLocatorUtils.BT_PEER_TRIPLE,
+                Version.ZERO, msg);
 
-        final DHTValue dhtValue = new DHTValueImpl(BT_PEER_TRIPLE, Version.ZERO, msg);
-
-        DHTValueEntity entity = DHTValueEntity.createFromValue(dht, kuid, dhtValue);
+        DHTValueEntity entity = DHTValueEntity.createFromValue(dht, kuidOne, dhtValue);
 
         Collection<DHTValueEntity> entities = new ArrayList<DHTValueEntity>();
         entities.add(entity);
@@ -194,6 +221,8 @@ public class DHTPeerLocatorImplTest extends BaseTestCase {
         entityKeys.add(eKey);
 
         FindValueResult result = new FindValueResult(eKey, null, entities, entityKeys, 123123L, 10);
+        // a fake future with successful result to test if a successful search
+        // works
         final DHTFuture<FindValueResult> future = new FixedDHTFuture<FindValueResult>(result);
 
         context.checking(new Expectations() {
@@ -206,22 +235,25 @@ public class DHTPeerLocatorImplTest extends BaseTestCase {
 
                 one(managedTorrentOne).isActive();
                 will(returnValue(true));
-                one(managedTorrentOne).getMetaInfo();
-                will(returnValue(btMetaInfo));
 
-                exactly(1).of(btMetaInfo).getURN();
-                will(returnValue(urn));
+                one(managedTorrentOne).getMetaInfo();
+                will(returnValue(btMetaInfoOne));
+
+                one(btMetaInfoOne).getURN();
+                will(returnValue(urnOne));
 
                 atLeast(1).of(dht).get(with(equal(eKey)));
                 will(returnValue(future));
 
-                atLeast(1).of(managedTorrentOne).addEndpoint(with(equal(torLoc)));                
+                atLeast(1).of(managedTorrentOne).addEndpoint(with(equal(torLoc)));
 
+                exactly(2).of(torrentManager).getTorrentForURN(with(equal(urnOne)));
+                will(returnValue(managedTorrentOne));
             }
         });
 
-        // store in waiting list
-        dhtPeerLocator.locatePeer(managedTorrentOne);        
+        // Should perform search successfully
+        dhtPeerLocator.locatePeer(managedTorrentOne);
 
         context.assertIsSatisfied();
     }

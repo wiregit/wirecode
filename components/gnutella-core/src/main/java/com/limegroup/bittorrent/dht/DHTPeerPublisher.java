@@ -3,11 +3,14 @@ package com.limegroup.bittorrent.dht;
 import com.limegroup.bittorrent.ManagedTorrent;
 
 /**
- * DHTPeerPublisher Interface defines a method for publishing yourself as a host
- * of a torrent in DHT.
+ * <code>DHTPeerPublisher</code> defines an interface for storing network information in DHT
+ * for a torrent file.
  */
 public interface DHTPeerPublisher {
 
+    /**
+     * Register the listeners used.
+     */
     public void init();
 
     /**

@@ -32,6 +32,8 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.TorrentManager;
+import com.limegroup.bittorrent.dht.DHTPeerLocator;
+import com.limegroup.bittorrent.dht.DHTPeerPublisher;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
@@ -133,6 +135,11 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<LicenseFactory> licenseFactory;
 
     private final Provider<ConnectionDispatcher> localConnectionDispatcher;
+    
+    private final Provider<DHTPeerLocator> dhtPeerLocator;
+    
+    private final Provider<DHTPeerPublisher> dhtPeerPublisher;
+    
 
     @Inject
     public LifecycleManagerImpl(
@@ -180,7 +187,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<OutOfBandThroughputMeasurer> outOfBandThroughputMeasurer,
             Provider<BrowseHostHandlerManager> browseHostHandlerManager,
             Provider<DownloadUpgradeTask> downloadUpgradeTask,
-            Provider<StatisticAccumulator> statisticAccumulator) { 
+            Provider<StatisticAccumulator> statisticAccumulator,
+            Provider<DHTPeerLocator> dhtPeerLocator,
+            Provider<DHTPeerPublisher> dhtPeerPublisher) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -227,6 +236,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.browseHostHandlerManager = browseHostHandlerManager;
         this.downloadUpgradeTask = downloadUpgradeTask;
         this.statisticAccumulator = statisticAccumulator;
+        this.dhtPeerLocator = dhtPeerLocator;
+        this.dhtPeerPublisher = dhtPeerPublisher;
     }
     
     /* (non-Javadoc)
@@ -410,7 +421,13 @@ public class LifecycleManagerImpl implements LifecycleManager {
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading BitTorrent Management..."));
 		torrentManager.get().initialize(fileManager.get(), connectionDispatcher.get(), backgroundExecutor.get(), incomingConnectionHandler.get());
 		LOG.trace("STOP TorrentManager");
-        
+		
+        // initialize DHTPeerLocator and DHTPeerPublishers
+		LOG.trace("START DHTPeerLocator and DHTPeerPublisher");
+		dhtPeerLocator.get().init();     
+        dhtPeerPublisher.get().init();        
+        LOG.trace("STOP DHTPeerLocator and DHTPeerPublisher");       
+		
         // Restore any downloads in progress.
         LOG.trace("START DownloadManager.postGuiInit");
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Old Downloads..."));

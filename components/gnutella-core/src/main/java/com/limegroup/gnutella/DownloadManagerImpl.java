@@ -130,6 +130,7 @@ public class DownloadManagerImpl implements DownloadManager {
     private final RemoteFileDescFactory remoteFileDescFactory;
     private final BTMetaInfoFactory btMetaInfoFactory;
     
+    //TODO At the moment this class knows about BTMetaInfo, this should be decoupled.
     @Inject
     public DownloadManagerImpl(NetworkManager networkManager,
             @Named("inNetwork") DownloadCallback innetworkCallback,
@@ -711,7 +712,7 @@ public class DownloadManagerImpl implements DownloadManager {
         
         BTMetaInfo info;
         try {
-            info = btMetaInfoFactory.create(memento);
+            info = btMetaInfoFactory.createBTMetaInfoFromMemento(memento);
         } catch(InvalidDataException ide) {
             throw new CantResumeException(name);
         }

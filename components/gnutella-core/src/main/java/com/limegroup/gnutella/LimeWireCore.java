@@ -22,7 +22,6 @@ import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.BTMetaInfoFactory;
 import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
-import com.limegroup.bittorrent.TorrentDHTManager;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.bittorrent.dht.DHTPeerLocator;
 import com.limegroup.bittorrent.dht.DHTPeerPublisher;
@@ -698,9 +697,5 @@ public class LimeWireCore {
     
     public BTMetaInfoFactory getBTMetaInfoFactory() {
         return injector.getInstance(BTMetaInfoFactory.class);
-    }
-    
-    public TorrentDHTManager getTorrentDHTManager() {
-        return injector.getInstance(TorrentDHTManager.class);
-    }
+    }    
 }

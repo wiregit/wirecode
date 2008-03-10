@@ -31,8 +31,7 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
     private final Provider<IPFilter> ipFilter;
     private final Provider<TorrentManager> torrentManager;
     private final Provider<FileManager> fileManager;
-    private final NetworkInstanceUtils networkInstanceUtils;
-    private final TorrentDHTManager torrentDHTManager;
+    private final NetworkInstanceUtils networkInstanceUtils;    
 
     @Inject
     public ManagedTorrentFactoryImpl(
@@ -44,10 +43,9 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
             BTLinkManagerFactory linkManagerFactory,
             BTConnectionFetcherFactory connectionFetcherFactory,
             Provider<ContentManager> contentManager,
-             Provider<IPFilter> ipFilter,
+            Provider<IPFilter> ipFilter,
             Provider<TorrentManager> torrentManager,
             Provider<FileManager> fileManager,
-            TorrentDHTManager torrentDHTManager,
             NetworkInstanceUtils networkInstanceUtils) {
         this.eventDispatcher = eventDispatcher;
         this.scheduledExecutorService = scheduledExecutorService;
@@ -60,18 +58,17 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
         this.ipFilter = ipFilter;
         this.torrentManager = torrentManager;
         this.fileManager = fileManager;
-        this.torrentDHTManager = torrentDHTManager;
         this.networkInstanceUtils = networkInstanceUtils;
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.bittorrent.ManagedTorrentFactory#create(com.limegroup.bittorrent.TorrentContext)
      */
-    public ManagedTorrent create(TorrentContext context) {
+    public ManagedTorrent createFromContext(TorrentContext context) {        
         return new ManagedTorrentImpl(context, eventDispatcher, scheduledExecutorService,
                 networkManager, trackerManagerFactory, chokerFactory, linkManagerFactory,
                 connectionFetcherFactory, contentManager.get(), ipFilter.get(), torrentManager.get(),
-                fileManager.get(), torrentDHTManager, networkInstanceUtils);
+                fileManager.get(), networkInstanceUtils);
     }
 
 

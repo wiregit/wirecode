@@ -3,21 +3,22 @@ package com.limegroup.bittorrent.dht;
 import com.limegroup.bittorrent.ManagedTorrent;
 
 /**
- * DHTPeerLocator Interface defines a method for looking up a peer in DHT given
- * the managedTorrent instance of the torrent
+ * <code>DHTPeerLocator</code> defines an interface for looking up a peer in
+ * DHT given the <code>ManagedTorrent</code> instance of the torrent.
  */
-
 public interface DHTPeerLocator {
 
     /**
-     * Initialization method
+     * Registers the listeners used.
      */
     public void init();
 
     /**
-     * Searches for peers sharing the given torrent.
+     * Searches for peers sharing the given torrent. If no peers are found, then
+     * the search stop.
      * 
-     * @param managedTorrent a managedTorrent instance of the torrent.
+     * @param managedTorrent a <code>ManagedTorrent</code> instance of the
+     *        torrent.
      */
     public void locatePeer(ManagedTorrent managedTorrent);
 

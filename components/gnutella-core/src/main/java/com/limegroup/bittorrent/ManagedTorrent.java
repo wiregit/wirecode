@@ -4,6 +4,9 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcher;
 
+/**
+ * Defines an interface for keeping track of a single torrent.
+ */
 public interface ManagedTorrent extends Torrent, BTLinkListener {
 
     /**
@@ -112,7 +115,5 @@ public interface ManagedTorrent extends Torrent, BTLinkListener {
      *         considered suspended if there are connections interested in it
      *         but all are choked.
      */
-    boolean isSuspended();
-
-    public void chunkVerified(int in);
+    boolean isSuspended();    
 }

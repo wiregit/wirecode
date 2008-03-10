@@ -10,14 +10,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.limewire.io.InvalidDataException;
 
-import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
@@ -29,9 +25,7 @@ import com.limegroup.gnutella.security.SHA1;
 /**
  * Contains information usually parsed in a .torrent file
  */
-public class BTMetaInfoImpl implements BTMetaInfo {
-
-    private static final Log LOG = LogFactory.getLog(BTMetaInfo.class);
+public class BTMetaInfoImpl implements BTMetaInfo {    
     
 	/** a marker for a hash that has been verified */
 	private static final byte [] VERIFIED_HASH = new byte[0];
@@ -363,24 +357,5 @@ public class BTMetaInfoImpl implements BTMetaInfo {
 		public FakeFileDesc(File file, Set<? extends URN> s) {
 			super(file, s, Integer.MAX_VALUE);
 		}
-	}
-	
-	/**
-     * Reads a BTMetaInfo from byte []
-     * 
-     * @param torrent byte array with the contents of .torrent
-     * @return new instance of BTMetaInfo if all went well
-     * @throws IOException if parsing or reading failed.
-     */
-    public static BTMetaInfo readFromBytes(byte []torrent) throws IOException {
-        try {
-            Object metaInfo = Token.parse(torrent);
-            if(!(metaInfo instanceof Map))
-                throw new ValueException("metaInfo not a Map!");
-            return new BTMetaInfoImpl(new BTDataImpl((Map)metaInfo));
-        } catch (IOException bad) {
-            LOG.error("read failed", bad);
-            throw bad;
-        }
-    }
+	}	
 }

@@ -26,9 +26,7 @@ interface Torrent {
     TRACKER_FAILURE, // r, c, ss
     SCRAPING, //scraping == requesting from tracker // a, d, p
     INVALID // ss
-	};
-	
-	public void init();
+	};	
 	
 	/**
 	 * @return true if the torrent is complete.

@@ -17,24 +17,33 @@ public class BTMetaInfoFactoryImpl implements BTMetaInfoFactory {
     /* (non-Javadoc)
      * @see com.limegroup.bittorrent.BTMetaInfoFactory#create(com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento)
      */
-    public BTMetaInfo create (BTMetaInfoMemento memento) throws InvalidDataException{
+    public BTMetaInfo createBTMetaInfoFromMemento (BTMetaInfoMemento memento) throws InvalidDataException{
         return new BTMetaInfoImpl(memento);
     }
     
-    public BTMetaInfo create(BTData data) throws IOException {
-        return new BTMetaInfoImpl(data);
-    }
-    
-
+    /*
+     * (non-Javadoc)
+     * @see com.limegroup.bittorrent.BTMetaInfoFactory#createBTMetaInfoFromBytes(byte[])
+     */
     public BTMetaInfo createBTMetaInfoFromBytes(byte []torrent) throws IOException {
         try {
             Object metaInfo = Token.parse(torrent);
             if(!(metaInfo instanceof Map))
                 throw new ValueException("metaInfo not a Map!");
-            return new BTMetaInfoImpl(new BTDataImpl((Map)metaInfo));
+            return this.createBTMetaInfoFromData(new BTDataImpl((Map)metaInfo));
         } catch (IOException bad) {
             LOG.error("read failed", bad);
             throw bad;
         }
-    }    
+    }
+    
+    /**
+     * Creates an instance of BTMetaInfo from the bit torrent data passed in
+     * @param data a BTData object for the torrent file
+     * @return a new instance of BTMetaInfo
+     * @throws IOException if data passed is incorrect
+     */
+    private BTMetaInfo createBTMetaInfoFromData (BTData data) throws IOException {
+        return new BTMetaInfoImpl(data);
+    }
 }

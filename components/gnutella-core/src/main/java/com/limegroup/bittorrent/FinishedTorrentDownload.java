@@ -13,11 +13,7 @@ public class FinishedTorrentDownload implements Torrent {
 		this.lost = active.getAmountLost();
 		this.state = active.getState();
 	}
-	
-	public void init() {
-	    
-	}
-	
+		
 	public List<BTLink> getConnections() {
 		return Collections.emptyList();
 	}

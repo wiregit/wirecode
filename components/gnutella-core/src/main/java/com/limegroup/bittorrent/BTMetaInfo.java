@@ -8,6 +8,9 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 
+/**
+ * Defines an interface for a class parsing information in a .torrent file.
+ */
 public interface BTMetaInfo {
 
     /**
@@ -22,15 +25,16 @@ public interface BTMetaInfo {
     public abstract boolean isPrivate();
 
     public abstract void setContext(TorrentContext context);
-        
+
     public long getAmountUploaded();
-    
-    public void countUploaded(int uploaded); 
-    
+
+    public void countUploaded(int uploaded);
+
     public float getRatio();
-    
+
     /**
      * Verifies whether the given hash matches the expect hash of a piece
+     * 
      * @param sha1 the hash that was computed
      * @param pieceNum the piece for which the hash was computed
      * @return true if they match.

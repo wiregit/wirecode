@@ -55,7 +55,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
         
     private final DownloadManager downloadManager;
     private final IncompleteFileManager incompleteFileManager;
-    private final Provider<TorrentManager> torrentManager;
+    private final Provider<TorrentManager> torrentManager;    
     private final BTUploaderFactory btUploaderFactory;
     private final ManagedTorrentFactory managedTorrentFactory;
     private final BTContextFactory btContextFactory;
@@ -73,7 +73,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
         this.incompleteFileManager = downloadManager.getIncompleteFileManager();
         this.managedTorrentFactory = managedTorrentFactory;
         this.btContextFactory = btContextFactory;
-        this.btMetaInfoFactory = btMetaInfoFactory;
+        this.btMetaInfoFactory = btMetaInfoFactory;        
     }
     
     /* (non-Javadoc)
@@ -87,8 +87,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 		    setDefaultFileName(btMetaInfo.getName());
 		}
         this.torrentContext = btContextFactory.createBTContext(btMetaInfo);
-        this.torrent = managedTorrentFactory.create(torrentContext);
-        this.torrent.init();
+        this.torrent = managedTorrentFactory.createFromContext(torrentContext);
 	}
 	
 	/**
@@ -390,7 +389,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
         case STOP_APPROVED:
         case STOP_REQUESTED:
         // handled in TorrentDHTManagerImpl
-        case CHUNK_VERIFIED:
+        case FIRST_CHUNK_VERIFIED:
 		}
 	}
 	
@@ -421,7 +420,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 
 	public void initialize() {
         torrentManager.get().addEventListener(this);
-        incompleteFileManager.addTorrentEntry(urn);
+        incompleteFileManager.addTorrentEntry(urn);        
     }
 	
 	public void startDownload() {
@@ -446,7 +445,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 	}
 	
 	public boolean conflicts(URN urn, long fileSize, File... file) {
-		if (urn.equals(urn))
+		if (this.urn.equals(urn))
 			return true;
 		for (File f : file) {
 			if (conflictsSaveFile(f))
@@ -514,6 +513,6 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
     public synchronized void initFromMemento(DownloadMemento memento) throws InvalidDataException {
         super.initFromMemento(memento);
         BTDownloadMemento bmem = (BTDownloadMemento)memento;
-        initBtMetaInfo(btMetaInfoFactory.create(bmem.getBtMetaInfoMemento()));
+        initBtMetaInfo(btMetaInfoFactory.createBTMetaInfoFromMemento(bmem.getBtMetaInfoMemento()));
     }
 }

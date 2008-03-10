@@ -1,19 +1,19 @@
 package com.limegroup.bittorrent.dht;
 
-import java.sql.Time;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
-import org.limewire.mojito.concurrent.DHTFutureListener;
-import org.limewire.mojito.db.DHTValueType;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.impl.DHTValueImpl;
 import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Version;
@@ -21,6 +21,10 @@ import org.limewire.mojito.routing.Version;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.bittorrent.ManagedTorrent;
+import com.limegroup.bittorrent.TorrentEvent;
+import com.limegroup.bittorrent.TorrentEventListener;
+import com.limegroup.bittorrent.TorrentLocation;
+import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.URN;
@@ -29,14 +33,12 @@ import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 
+/**
+ * Given an instance of torrent, stores the peer in DHT as someone seeding that
+ * file. Also re-attempts to publish the peer if DHT was not available.
+ */
 @Singleton
 public class DHTPeerPublisherImpl implements DHTPeerPublisher {
-
-    /**
-     * Value type associated with DHT lookup for a peer seeding a torrent.
-     */
-    private static final DHTValueType BT_PEER_TRIPLE = DHTValueType.valueOf("LimeBT Peer Triple",
-            "PEER");
 
     private static final Log LOG = LogFactory.getLog(DHTPeerPublisher.class);
 
@@ -46,81 +48,153 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
 
     private final NetworkManager networkManager;
 
+    private final TorrentManager torrentManager;
+
     /**
      * List of published torrents mapped to the time it was published.
      */
-    private final Map<ManagedTorrent, Time> publishedTorrents = new HashMap<ManagedTorrent, Time>();
+    private final Map<URN, Long> publishedTorrents = new HashMap<URN, Long>();
 
     /**
      * List of torrents a peer is sharing but not published yet since DHT was
      * unavailable.
      */
-    private final ArrayList<ManagedTorrent> torrentsWaitingForDHTList = new ArrayList<ManagedTorrent>();
-    /**
-     * List of torrents waiting to see if it was published properly
-     */
-    private final ArrayList<ManagedTorrent> torrentsWaitingForPutResultList = new ArrayList<ManagedTorrent>();
+    private final List<URN> torrentsWaitingForDHTList = new ArrayList<URN>();
 
     @Inject
     DHTPeerPublisherImpl(DHTManager dhtManager, ApplicationServices applicationServices,
-            NetworkManager networkManager) {
+            NetworkManager networkManager, TorrentManager torrentManager) {
 
         this.dhtManager = dhtManager;
         this.applicationServices = applicationServices;
         this.networkManager = networkManager;
+        this.torrentManager = torrentManager;
     }
 
+    /**
+     * Adds a <code>TorrentEventListener</code> to <code>TorrentManager</code>
+     * and a DHTEventListener to DHTManager.This method should only be called
+     * once.
+     */
     public void init() {
-        dhtManager.addEventListener(new dhtEventListenerForPublisher());
+        // listens for the TorrentEvent FIRST_CHUNK_VERIFIED to start publishing
+        torrentManager.addEventListener(new TorrentEventListenerForPublisher());
+        // listens for the DHTEvent CONNECTED to re-attempt publishing
+        dhtManager.addEventListener(new DHTEventListenerForPublisher());
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Publishes the local host in DHT as a peer sharing the given torrent .
+     * Torrent's infoHash is used as the key.
      * 
-     * @see com.limegroup.bittorrent.DHTPeerLocator#publish(com.limegroup.bittorrent.TorrentLocation)
+     * @param managedTorrent a managedTorrent instance of the torrent.
      */
     public void publishYourself(ManagedTorrent managedTorrent) {
         LOG.debug("In publishYourself");
+
+        URN urn = managedTorrent.getMetaInfo().getURN();
+
+        // TODO change the condition on acceptedIncomingConnection so that only
+        // networks which accepts incoming connections are published.
         if (managedTorrent.isActive() && networkManager.acceptedIncomingConnection()
-                && !isPublished(managedTorrent) && !torrentsWaitingForDHTList.contains(managedTorrent)
-                && !torrentsWaitingForPutResultList.contains(managedTorrent)) {
+                && !isPublished(urn)) {
+            // holding a lock on torrentsWaitingForDHTList here so that we do
+            // publish for a same torrent twice.
+            synchronized (torrentsWaitingForDHTList) {
+                // initial check
+                if (!torrentsWaitingForDHTList.contains(urn)) {
 
-            LOG.debug("Passed Initial checks");
+                    LOG.debug("Passed Initial checks");
+                    // holding a lock on DHT to ensure dht does not change
+                    // status
+                    // after we acquired it
+                    synchronized (dhtManager) {
+                        MojitoDHT mojitoDHT = dhtManager.getMojitoDHT();
 
-            URN urn = managedTorrent.getMetaInfo().getURN();
+                        if (LOG.isDebugEnabled())
+                            LOG.debug("DHT: " + mojitoDHT);
 
-            if (urn == null) {
-                LOG.debug("urn not available");
-                return;
-            }
-
-            // holding a lock on DHT to ensure dht does not change status after
-            // we acquired it
-            synchronized (dhtManager) {
-                MojitoDHT mojitoDHT = dhtManager.getMojitoDHT();
-
-                if (LOG.isDebugEnabled())
-                    LOG.debug("DHT: " + mojitoDHT);
-
-                if (mojitoDHT == null || !mojitoDHT.isBootstrapped()) {
-                    LOG.debug("DHT is null or unable to bootstrap");
-                    torrentsWaitingForDHTList.add(managedTorrent);
-                    return;
+                        if (mojitoDHT == null || !mojitoDHT.isBootstrapped()) {
+                            LOG.debug("DHT is null or unable to bootstrap");
+                            torrentsWaitingForDHTList.add(urn);
+                            return;
+                        }
+                        proceedPublishing(urn, mojitoDHT);
+                    }
                 }
+            }
+        }
+    }
+
+    /**
+     * Publishes the local host's network information in the given DHT as a peer
+     * seeding the torrent file specified by infoHash.
+     * 
+     * @param infoHash hashed data of the torrent file.
+     * @param mojitoDHT an instance of the MojitoDHT.
+     */
+    private void proceedPublishing(URN urn, MojitoDHT mojitoDHT) {
+        // checking if the torrent is active, getTorrentForURN returns null if
+        // there is no active managedTorrent for the given urn.
+        if (torrentManager.getTorrentForURN(urn) != null) {
+            try {
+                TorrentLocation torLoc = new TorrentLocation(InetAddress.getByName(NetworkUtils
+                        .ip2string((networkManager.getAddress()))), networkManager.getPort(),
+                        applicationServices.getMyBTGUID());
 
                 // encodes ip, port and peerid into a array of bytes
-                byte[] msg = getBTHost().getEncoded();
+                byte[] msg = DHTPeerLocatorUtils.encode(torLoc);
                 // creates a KUID from torrent's metadata
                 KUID key = KUIDUtils.toKUID(urn);
 
-                if (msg != null) {
+                if (msg.length != 0) {
                     // publish the information in the DHT
                     DHTFuture<StoreResult> future = mojitoDHT.put(key, new DHTValueImpl(
-                            BT_PEER_TRIPLE, Version.ZERO, msg));                    
+                            DHTPeerLocatorUtils.BT_PEER_TRIPLE, Version.ZERO, msg));
                     // ensure publishing was successful
-                    future.addDHTFutureListener(new PutResultDHTFutureListener(managedTorrent));
-                    torrentsWaitingForPutResultList.add(managedTorrent);
+                    future.addDHTFutureListener(new PublishYourselfResultHandler(urn));
                 }
+            } catch (IllegalArgumentException iae) {
+                LOG.error("Invalid network information", iae);
+            } catch (UnknownHostException uhe) {
+                LOG.error("Invalid IP address");
+            }
+        }
+    }
+
+    /**
+     * Returns whether the peer has already published him/her self as someone
+     * sharing the given torrent file.
+     * 
+     * @param managedTorrent The torrent we are dealing with.
+     * @return whether the peer's information is already published or not.
+     */
+    private boolean isPublished(URN urn) {
+        return publishedTorrents.containsKey(urn);
+    }
+
+    /**
+     * Adds a torrent to the map to indicate the peer has published itself as
+     * someone sharing the file. Also records the time it was published.
+     * 
+     * @param managedTorrent The torrent we are dealing with.
+     */
+    private void addAsPublished(URN urn, Long time) {
+        publishedTorrents.put(urn, time);
+        LOG.debug("published");
+    }
+
+    /**
+     * Handles the <code>TorrentEvent FIRST_CHUNK_VERIFIED</code>. Upon this
+     * event generation, it will try to publish the local peer as someone
+     * seeding given torrent file.
+     * 
+     */
+    private class TorrentEventListenerForPublisher implements TorrentEventListener {
+        public void handleTorrentEvent(TorrentEvent evt) {
+            if (evt.getType() == TorrentEvent.Type.FIRST_CHUNK_VERIFIED) {
+                LOG.debug("FIRST_CHUNK_VERIFIED_EVENT");
+                publishYourself(evt.getTorrent());
             }
         }
     }
@@ -129,82 +203,47 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
      * Implements the DHTEventListener to perform future attempts at publishing
      * a peer based on DHTEvent.
      */
-    private class dhtEventListenerForPublisher implements DHTEventListener {
+    private class DHTEventListenerForPublisher implements DHTEventListener {
 
         /**
          * This method is invoked when a DHTEvent occurs and if DHT is connected
          * then it tries to publish the peer again.
          */
         public void handleDHTEvent(DHTEvent evt) {
+            LOG.debug("In handle event");
             if (evt.getType() == DHTEvent.Type.CONNECTED) {
-                while (!torrentsWaitingForDHTList.isEmpty()) {
-                    publishYourself(torrentsWaitingForDHTList.remove(0));
+                MojitoDHT dht;
+                synchronized (dhtManager) {
+                    dht = dhtManager.getMojitoDHT();
+                    if (dht == null || !dht.isBootstrapped()) {
+                        LOG.error("Incorrect DHTEvent generated");
+                        return;
+                    }
+                }
+                synchronized (torrentsWaitingForDHTList) {
+                    while (!torrentsWaitingForDHTList.isEmpty()) {
+                        proceedPublishing(torrentsWaitingForDHTList.remove(0), dht);
+                    }
                 }
             }
         }
     }
 
     /**
-     * creates a BTConnectionTriple object for the local node
-     * 
-     * @return returns a BTConnectionTriple object of the local node
+     * This class listens to see if the peer was published successfully. If
+     * publishing was unsuccessful, then ....
      */
-    private BTConnectionTriple getBTHost() {
-        return new BTConnectionTriple(networkManager.getAddress(), networkManager.getPort(),
-                applicationServices.getMyBTGUID());
-    }
+    private class PublishYourselfResultHandler extends DHTFutureAdapter<StoreResult> {
 
-    /**
-     * This class listens to see if the peer was published successfully
-     */
-    public class PutResultDHTFutureListener implements DHTFutureListener<StoreResult> {
+        private final URN urn;
 
-        private final ManagedTorrent managedTorrent;
-
-        public PutResultDHTFutureListener(ManagedTorrent managedTorrent) {
-            this.managedTorrent = managedTorrent;
+        public PublishYourselfResultHandler(URN urn) {
+            this.urn = urn;
         }
 
+        @Override
         public void handleFutureSuccess(StoreResult result) {
-            addAsPublished(managedTorrent, new Time(System.currentTimeMillis()));
-            torrentsWaitingForPutResultList.remove(managedTorrent);
+            addAsPublished(urn, new Long(System.currentTimeMillis()));
         }
-
-        public void handleCancellationException(CancellationException e) {
-            torrentsWaitingForPutResultList.remove(managedTorrent);
-            publishYourself(managedTorrent);
-        }
-
-        public void handleExecutionException(ExecutionException e) {
-            torrentsWaitingForPutResultList.remove(managedTorrent);
-            publishYourself(managedTorrent);
-        }
-
-        public void handleInterruptedException(InterruptedException e) {
-            torrentsWaitingForPutResultList.remove(managedTorrent);
-            publishYourself(managedTorrent);
-        }
-    }
-
-    /**
-     * Returns whether the peer has already published him/her self as someone
-     * sharing the given torrent file
-     * 
-     * @param managedTorrent The torrent we are dealing with
-     * @return whether the peer's information is already published or not
-     */
-    private boolean isPublished(ManagedTorrent managedTorrent) {
-        return publishedTorrents.containsKey(managedTorrent);
-    }
-
-    /**
-     * Adds a torrent to the map to indicate the peer has published themself as
-     * someone sharing the file. Also records the time it was published.
-     * 
-     * @param managedTorrent The torrent we are dealing with
-     */
-    private void addAsPublished(ManagedTorrent managedTorrent, Time time) {
-        publishedTorrents.put(managedTorrent, time);
-        LOG.debug("published");
     }
 }

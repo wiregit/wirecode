@@ -27,6 +27,11 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
+/**
+ * Keeps track of a torrent tracker's information.
+ * Also connects to the tracker to retrieve information.
+ *
+ */
 public class TrackerImpl implements Tracker {
 	private static final Log LOG = LogFactory.getLog(Tracker.class);
 
