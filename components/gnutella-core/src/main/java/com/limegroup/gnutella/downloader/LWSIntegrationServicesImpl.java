@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,6 +20,7 @@ import org.apache.http.HttpException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -37,10 +40,17 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
     
     private static final Log LOG = LogFactory.getLog(LWSIntegrationServicesImpl.class);
     
+    /** The period in milliseconds for checking that {@link #getDownloadProgress()} is called. */
+    private final static int CALL_GET_DOWNLOAD_PROGRESS_PERIOD_MILLIS =  5 * 60 * 1000;
+    
+    /** Maintain the last time we called {@link #getDownloadProgress()}, intialized to <code>-1</code>. */
+    private long lastTimeWeCalledGetDownloadProgress = -1;
+    
     private final LWSManager lwsManager;
     private final DownloadServices downloadServices;
     private final LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate;
     private final RemoteFileDescFactory remoteFileDescFactory;
+    private final ScheduledExecutorService scheduler;
     
     /**
      * Maintain a map from downloader IDs to progress bar IDs, because the client sometimes
@@ -48,15 +58,46 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
      */
     private final Map<String,String> downloaderIDs2progressBarIDs = new HashMap<String,String>();
     
+    /**
+     * We maintain a collection of ever-active downloaders, so that when
+     * we iterate over all the current downloaders, we know that if one
+     * appears in the ever-active collection, but not the current we
+     * need to inspect further.
+     * 
+     * More specifically, that downloader could have completed normally
+     * or it could have been completed by being cancelled. If the
+     * downloader completed: 
+     * 
+     * - Normally: Remove it from the ever-active
+     *   collection and pass back a progress of 1.0
+     *    
+     * - By being cancelled: Pass back the String 'X' denoting it 
+     *   was cancelled.
+     * 
+     * The reason we need to do this is because, when the Store is on
+     * the download page and connected to the Client, it will poll the
+     * Client for the progress of all active and waiting downloads. In
+     * the case that a downloader is either (1) finished normally or (2)
+     * cancelled, and the Client polls after this occurs, we don't know
+     * which occured. Basically this allows the Store to sync with the
+     * Client, so we know when a download actually completes.
+     * 
+     * Furthermore, if the download is at 99% and then completes, and
+     * the Store polls after this occurs the progress bars on the Store
+     * web site will remain at 99%, because we never passed back
+     * notification that the download completed.
+     */
+    private final Map<String, CoreDownloader> everActiveDownloaderIDs2Downloaders = new HashMap<String, CoreDownloader>();      
+    
     private String downloadPrefix;
     
     @Inject
     public LWSIntegrationServicesImpl(LWSManager lwsManager, 
             DownloadServices downloadServices,
             LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate,
-            RemoteFileDescFactory remoteFileDescFactory) {
-        this(lwsManager,downloadServices,lwsIntegrationServicesDelegate,remoteFileDescFactory,LWSSettings.LWS_DOWNLOAD_PREFIX.getValue());
-
+            RemoteFileDescFactory remoteFileDescFactory,
+            @Named("backgroundExecutor") ScheduledExecutorService scheduler) {
+        this(lwsManager,downloadServices,lwsIntegrationServicesDelegate,remoteFileDescFactory,scheduler,LWSSettings.LWS_DOWNLOAD_PREFIX.getValue());
     }    
     
     /** For testing. */
@@ -64,12 +105,27 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                                       DownloadServices downloadServices,
                                       LWSIntegrationServicesDelegate lwsIntegrationServicesDelegate,
                                       RemoteFileDescFactory remoteFileDescFactory,
+                                      ScheduledExecutorService scheduler,
                                       String downloadPrefix) {
         this.lwsManager = lwsManager;
         this.downloadServices = downloadServices;
         this.lwsIntegrationServicesDelegate = lwsIntegrationServicesDelegate;
         this.remoteFileDescFactory = remoteFileDescFactory;
+        this.scheduler = scheduler;
         this.downloadPrefix = downloadPrefix;
+        this.scheduler.schedule(new Runnable() {
+            public void run() {
+                //
+                // Call getDownloadProgress() if the difference between the last time we called
+                // it and now is not less than CALL_GET_DOWNLOAD_PROGRESS_PERIOD_MILLIS
+                //
+                long now = System.currentTimeMillis();
+                if (lastTimeWeCalledGetDownloadProgress != -1 && (now-lastTimeWeCalledGetDownloadProgress) < CALL_GET_DOWNLOAD_PROGRESS_PERIOD_MILLIS) {
+                    return;
+                }
+                getDownloadProgress();
+            }
+        }, CALL_GET_DOWNLOAD_PROGRESS_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
     }
     
     public void setDownloadPrefix(String downloadPrefix) {
@@ -131,8 +187,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         }
         return downloader;
     }
-    
-
+   
     public void init() {
         // ====================================================================================================================================
         // Add a handler for the LimeWire Store Server so that
@@ -146,101 +201,10 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         // <percentage-downloaded> ':' <download-status> ]
         // This ID is the identity hash code
         // ====================================================================================================================================
-        lwsManager.registerHandler("GetDownloadProgress", new LWSManagerCommandResponseHandlerWithCallback("GetDownloadProgress") {
-            
-            /**
-             * We maintain a collection of ever-active downloaders, so that when
-             * we iterate over all the current downloaders, we know that if one
-             * appears in the ever-active collection, but not the current we
-             * need to inspect further.
-             * 
-             * More specifically, that downloader could have completed normally
-             * or it could have been completed by being cancelled. If the
-             * downloader completed: - Normally: Remove it from the ever-active
-             * collection and pass back a progress of 1.0 - By being cancelled:
-             * Pass back the String 'X' denoting it was cancelled.
-             * 
-             * The reason we need to do this is because, when the Store is on
-             * the download page and connected to the Client, it will poll the
-             * Client for the progress of all active and waiting downloads. In
-             * the case that a downloader is either (1) finished normally or (2)
-             * cancelled, and the Client polls after this occurs, we don't know
-             * which occured. Basically this allows the Store to sync with the
-             * Client, so we know when a download actually completes.
-             * 
-             * Furthermore, if the download is at 99% and then completes, and
-             * the Store polls after this occurs the progress bars on the Store
-             * web site will remain at 99%, because we never passed back
-             * notification that the download completed.
-             */
-            private final Map<String, CoreDownloader> everActiveDownloaderIDs2Downloaders = new HashMap<String, CoreDownloader>();            
-
+        lwsManager.registerHandler("GetDownloadProgress", new LWSManagerCommandResponseHandlerWithCallback("GetDownloadProgress") {          
             protected String handleRest(Map<String, String> args) {
-                //
-                // Return a string mapping urns to download percentages
-                //
-                StringBuffer res = new StringBuffer();
-                //
-                // Remember the downloader that are actually active, so we see
-                // if there are any that once existed
-                // but are completed and take the correct action. See the
-                // comment for 'everActiveDownloaderIDs'
-                // for why we have to do this
-                //
-                final Set<String> activeDownloaderIDS = new HashSet<String>();
-                synchronized (lwsIntegrationServicesDelegate) {
-                    for (CoreDownloader d : lwsIntegrationServicesDelegate.getAllDownloaders()) {
-                        if (d == null) continue;
-                        String id = String.valueOf(System.identityHashCode(d));
-                        everActiveDownloaderIDs2Downloaders.put(id, d);
-                        activeDownloaderIDS.add(id);
-                        if (d instanceof StoreDownloader) {
-                            recordProgress(d, res, id);
-                        }
-                    }
-                }
-                //
-                // Now check whether the list of ever-active downloaders
-                // contains a downloader
-                // not in the current list
-                //
-                final Collection<String> idsToRemove = new ArrayList<String>();
-                for (String downloaderID : everActiveDownloaderIDs2Downloaders.keySet()) {
-                    CoreDownloader d = everActiveDownloaderIDs2Downloaders.get(downloaderID);
-                    if (!activeDownloaderIDS.contains(downloaderID)) {
-                        //
-                        // We must have removed one of the previous from the
-                        // list, so record it
-                        // once then remove it from this list so we don't put it
-                        // on again -- because
-                        // that isn't neeed
-                        //
-                        recordProgress(d, res, downloaderID);
-                        idsToRemove.add(downloaderID);
-                    }
-                }
-                for (String idToRemove: idsToRemove) {
-                    everActiveDownloaderIDs2Downloaders.remove(idToRemove);
-                    downloaderIDs2progressBarIDs.remove(idToRemove);
-                }
-                return res.toString(); 
+                return getDownloadProgress();
             }  
-            
-            private void recordProgress(final CoreDownloader d, final StringBuffer res, String id) {
-                long read = d.getAmountRead();
-                long total = d.getContentLength();
-                String ratio = String.valueOf((float)read / (float)total);
-                String status = downloadStatusToString(d.getState());
-                String progressBarID = downloaderIDs2progressBarIDs.get(id);
-                res.append(id);
-                res.append(" ");
-                res.append(progressBarID);
-                res.append(" ");
-                res.append(ratio);
-                res.append(":");
-                res.append(status);
-                res.append("|");                
-            }
         }); 
         // ====================================================================================================================================
         // Add a handler for the LimeWire Store Server so that
@@ -596,6 +560,77 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         }
         return urlString.substring(ilast+1);
     }      
+    
+    private synchronized String getDownloadProgress() {
+        //
+        // Record the last time this was called, so that we know when to not call this from the periodic checker
+        //
+        lastTimeWeCalledGetDownloadProgress = System.currentTimeMillis();
+        //
+        // Return a string mapping urns to download percentages
+        //
+        StringBuffer res = new StringBuffer();
+        //
+        // Remember the downloader that are actually active, so we see
+        // if there are any that once existed
+        // but are completed and take the correct action. See the
+        // comment for 'everActiveDownloaderIDs'
+        // for why we have to do this
+        //
+        final Set<String> activeDownloaderIDS = new HashSet<String>();
+        synchronized (lwsIntegrationServicesDelegate) {
+            for (CoreDownloader d : lwsIntegrationServicesDelegate.getAllDownloaders()) {
+                if (d == null) continue;
+                String id = String.valueOf(System.identityHashCode(d));
+                everActiveDownloaderIDs2Downloaders.put(id, d);
+                activeDownloaderIDS.add(id);
+                if (d instanceof StoreDownloader) {
+                    recordProgress(d, res, id);
+                }
+            }
+        }
+        //
+        // Now check whether the list of ever-active downloaders
+        // contains a downloader
+        // not in the current list
+        //
+        final Collection<String> idsToRemove = new ArrayList<String>();
+        for (String downloaderID : everActiveDownloaderIDs2Downloaders.keySet()) {
+            CoreDownloader d = everActiveDownloaderIDs2Downloaders.get(downloaderID);
+            if (!activeDownloaderIDS.contains(downloaderID)) {
+                //
+                // We must have removed one of the previous from the
+                // list, so record it
+                // once then remove it from this list so we don't put it
+                // on again -- because
+                // that isn't neeed
+                //
+                recordProgress(d, res, downloaderID);
+                idsToRemove.add(downloaderID);
+            }
+        }
+        for (String idToRemove: idsToRemove) {
+            everActiveDownloaderIDs2Downloaders.remove(idToRemove);
+            downloaderIDs2progressBarIDs.remove(idToRemove);
+        }
+        return res.toString();         
+    }
+    
+    private void recordProgress(final CoreDownloader d, final StringBuffer res, String id) {
+        long read = d.getAmountRead();
+        long total = d.getContentLength();
+        String ratio = String.valueOf((float)read / (float)total);
+        String status = downloadStatusToString(d.getState());
+        String progressBarID = downloaderIDs2progressBarIDs.get(id);
+        res.append(id);
+        res.append(" ");
+        res.append(progressBarID);
+        res.append(" ");
+        res.append(ratio);
+        res.append(":");
+        res.append(status);
+        res.append("|");                
+    }    
 
 
 }
