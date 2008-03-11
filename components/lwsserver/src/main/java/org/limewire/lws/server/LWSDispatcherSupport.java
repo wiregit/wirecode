@@ -143,8 +143,8 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     public final void handle(HttpRequest httpReq, final HttpResponse response,
             final NHttpResponseTrigger trigger, HttpContext c) throws HttpException, IOException {
         String request = httpReq.getRequestLine().getUri();
-        final String command = getCommand(request); //getOnlytheFileRequestPortionOfURL(request);
-        final Handler h = names2handlers.get(command.toLowerCase(Locale.US));
+        final String command = getCommand(request);
+        final Handler h = names2handlers.get(command.toLowerCase());
         if (h == null) {
             if (LOG.isErrorEnabled())
                 LOG.error("Couldn't create a handler for " + command);
@@ -515,6 +515,11 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
         String PUBLIC = "public";
     
         /**
+         * Shared key.
+         */
+        String SHARED = "shared";        
+    
+        /**
          * Name of the command to send to the {@link LWSReceivesCommandsFromDispatcher}.
          */
         String COMMAND = "command";
@@ -553,6 +558,11 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
         String INVALID_PRIVATE_KEY = "invalid.private.key";
     
         /**
+         * Indicating an invalid shared key.
+         */
+        String INVALID_SHARED_KEY = "invalid.shared.key";        
+    
+        /**
          * Indicating an invalid public key or IP address.
          */
         String INVALID_PUBLIC_KEY_OR_IP = "invalid.public.key.or.ip.address";
@@ -566,7 +576,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
          * A command was not understood or did not have valid handler or
          * listener.
          */
-        String UNKNOWN_COMMAND = "unkown.command";
+        String UNKNOWN_COMMAND = "unknown.command";
     
         /**
          * No private key has been generated yet.
@@ -577,6 +587,16 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
          * No private key parameter was supplied.
          */
         String MISSING_PRIVATE_KEY_PARAMETER = "missing.private.parameter";
+    
+        /**
+         * No shared key has been generated yet.
+         */
+        String UNITIALIZED_SHARED_KEY = "uninitialized.shared.key";
+                
+        /**
+         * No shared key parameter was supplied.
+         */
+        String MISSING_SHARED_KEY_PARAMETER = "missing.shared.parameter";        
     
         /**
          * No public key parameter was supplied.

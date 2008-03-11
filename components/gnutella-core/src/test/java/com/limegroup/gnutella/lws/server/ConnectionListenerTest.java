@@ -27,7 +27,7 @@ public class ConnectionListenerTest extends AbstractCommunicationSupportWithNoLo
     public void testAuthenticate() {
         final boolean[] connected = { false };
         LWSConnectionListener lis = new LWSConnectionListener() {
-            public void connectionChanged(boolean isConnected) {System.out.println("isConnected:"+isConnected);
+            public void connectionChanged(boolean isConnected) {
                 connected[0] = isConnected;
             }
         };

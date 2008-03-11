@@ -137,12 +137,7 @@ public final class LWSServerUtil {
     }
 
     private static boolean isValidKey(final String key) {
-        if (key == null)
-            return false;
-        //
-        // Check the length
-        //
-        if (key.length() != LWSDispatcherSupport.Constants.KEY_LENGTH) return false;
+        if (key == null || key.equals("")) return false;
         //
         // No periods, this is an indication of an error
         //
@@ -163,6 +158,18 @@ public final class LWSServerUtil {
     public static boolean isValidPublicKey(final String key) {
         return isValidKey(key);
     }
+
+    /**
+     * Returns <tt>true</tt> if <tt>key</tt> is a valid shared key,
+     * <tt>false</tt> otherwise.
+     * 
+     * @param key key in question
+     * @return <tt>true</tt> if <tt>key</tt> is a valid shared key,
+     *         <tt>false</tt> otherwise
+     */
+    public static boolean isValidSharedKey(final String key) {
+        return isValidKey(key);
+    }    
 
     /**
      * Returns <tt>true</tt> if <tt>key</tt> is a valid private key,

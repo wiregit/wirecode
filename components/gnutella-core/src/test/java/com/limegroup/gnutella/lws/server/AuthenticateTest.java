@@ -23,7 +23,6 @@ public class AuthenticateTest extends AbstractCommunicationSupportWithNoLocalSer
   public void testAuthenticate() {
     final String res = doAuthenticate();
     assertEquals("invalid private key '" + res + "'", Responses.OK, res);
-    
   }
 
 }

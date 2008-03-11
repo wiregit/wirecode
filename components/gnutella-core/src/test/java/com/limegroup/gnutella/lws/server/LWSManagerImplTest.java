@@ -3,6 +3,9 @@ package com.limegroup.gnutella.lws.server;
 import java.io.IOException;
 import java.util.HashMap;
 
+import junit.framework.Test;
+import junit.textui.TestRunner;
+
 import org.limewire.lws.server.LWSDispatcherFactoryImpl;
 import org.limewire.lws.server.StringCallback;
 
@@ -12,10 +15,21 @@ import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
+/**
+ * This checks that we handle an empty hostname setting OK.
+ */
 public class LWSManagerImplTest extends LimeTestCase {
 
     public LWSManagerImplTest(String name) {
         super(name);
+    }
+    
+    public static Test suite() {
+        return buildTestSuite(LWSManagerImplTest.class);
+    }
+
+    public static void main(String[] args) {
+        TestRunner.run(suite());
     }
 
     public void testSendingMessageToServerWithEmptyHost() throws IOException {
