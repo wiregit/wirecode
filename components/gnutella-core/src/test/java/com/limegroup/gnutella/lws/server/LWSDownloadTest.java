@@ -42,57 +42,6 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         doDownloadTest(null,null,true,"");
     }
     
-    public void ____testTwoDownloadsAtOnce() {
-        final boolean[] done = {false,false};
-        final MutableString id1 = new MutableString();
-        final MutableString id2 = new MutableString();     
-        Thread download1 = new Thread(new Runnable() {
-            public void run() {
-                doDownloadTest(id1,null,true,"");
-                done[0] = true;
-            }
-        });
-        download1.start();
-        Thread download2 = new Thread(new Runnable() {
-            public void run() {
-                doDownloadTest(id2,null,true,"");
-                done[1] = true;
-            }
-        });
-        download2.start();
-        
-        // IDs should be the same
-        assertEquals("IDs should be the same", id1.get(), id2.get());
-        
-        DownloadServices downloadServices = getInstance(DownloadServices.class);
-        boolean haveSeenOneDownloader = false;
-        boolean haveSeenOneActiveDownloader = false;
-        while (!done[0] && !done[1]) {
-            if (!haveSeenOneDownloader) {
-                haveSeenOneDownloader = downloadServices.getNumDownloads() == 1;
-                haveSeenOneActiveDownloader = downloadServices.getNumActiveDownloads() == 1;
-            }
-            assertTrue("getNumDownloads should be 0 or 1, not" + downloadServices.getNumDownloads(),
-                    downloadServices.getNumDownloads() == 0 || downloadServices.getNumDownloads() == 1);
-            assertTrue("getNumActiveDownloads should be 0 or 1, not" + downloadServices.getNumActiveDownloads(),
-                    downloadServices.getNumActiveDownloads() == 0 || downloadServices.getNumActiveDownloads() == 1);
-        }
-        
-        assertTrue("Should have seen one downloader", haveSeenOneDownloader);
-        assertTrue("Should have seen one active downloader", haveSeenOneActiveDownloader);
-        
-        try {
-            download1.join();
-        } catch (InterruptedException e) {
-            LOG.error(e);
-        }
-        try {
-            download2.join();
-        } catch (InterruptedException e) {
-            LOG.error(e);
-        }
-    } 
-    
     public void testPauseResumeStopAll() {
         final boolean[] done = {false,false,false};
         final MutableString[] mids = {new MutableString(),new MutableString(),new MutableString()};
