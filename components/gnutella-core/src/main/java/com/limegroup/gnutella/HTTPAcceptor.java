@@ -139,6 +139,7 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
             HttpIOSession session = HttpContextParams.getIOSession(conn.getContext());
             session.setSocketTimeout(SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT.getValue());
             session.setThrottle(null);
+            conn.requestInput();  // make sure the new socket timeout is used.
         }
 
     }
