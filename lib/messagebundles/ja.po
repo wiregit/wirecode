@@ -10,14 +10,14 @@ msgstr ""
 "Project-Id-Version: ja\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-02-22 17:11+0000\n"
-"Last-Translator: narumi03 <Unknown>\n"
+"PO-Revision-Date: 2008-03-07 22:45+0000\n"
+"Last-Translator: Matt Turkel <Unknown>\n"
 "Language-Team: <en@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2008-03-07 16:25+0000\n"
+"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Modem"
@@ -5214,7 +5214,7 @@ msgstr "スキンを適用 (&A)"
 msgid ""
 "You have downloaded a new skin titled {0}. Would you like to use this new "
 "skin?"
-msgstr "タイトル付きの新しいスキンをダウンロードした{0}\"この新しいスキンを使用したいか？"
+msgstr "タイトル付きの新しいスキンをダウンロードしました{0}\"この新しいスキンを使用しますか？"
 
 #. could not read torrent file or bad torrent file.
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:468
@@ -5422,7 +5422,7 @@ msgstr "同一ファイルが {0}に既存"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:226
 msgid "Do you want to continue downloading anyway?"
-msgstr "いずれにせよ、ダウンロードしたいか？"
+msgstr "ダウンロードを続けますか？"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:228
 msgid "Continue"
@@ -7804,7 +7804,7 @@ msgstr "ダウンロード．．．"
 
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:255
 msgid "Would you like to start downloads from the following magnets?"
-msgstr "続くマグネットからダウンロードを開始したいか？"
+msgstr "以下のマグネットからダウンロードを開始しますか？"
 
 #: gui/com/limegroup/gnutella/gui/search/MetadataModel.java:575
 msgid "All"
@@ -7885,7 +7885,7 @@ msgstr "さらに検索"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:677
 msgid "Do you want to block search results from the following list of hosts?"
-msgstr "＃でホストからの検索結果を、ブロックしたいか？"
+msgstr "以下のホストからの検索結果を、ブロックしますか？"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1023
 msgid "More Info..."

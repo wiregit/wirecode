@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-02-22 13:06+0000\n"
-"Last-Translator: Andreas Sjursen <Unknown>\n"
+"PO-Revision-Date: 2008-03-08 21:20+0000\n"
+"Last-Translator: Martin h <Unknown>\n"
 "Language-Team: Norwegian Bokmal <nb@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-03-07 16:25+0000\n"
+"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
@@ -1824,6 +1824,11 @@ msgid ""
 "download the file and automatically resume downloading if it finds any "
 "matches."
 msgstr ""
+"Når din nedlasting sier <font color=\"1E8E44\">Trenger flere kilder</font>, "
+"prøv å velg den nedlastingen og så trykk på <font color=\"1E8E44\">Trenger "
+"flere kilder</font>. LimeWire vil søke gjennom harddisken for mer plass til "
+"å laste ned filen og vil automatisk fortsette nedlasttingen hvis den finner "
+"noen som ligner."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:37
 msgid ""
@@ -2581,12 +2586,17 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:523
+#, fuzzy
 msgid ""
 "You can save different types of files, such as audio, video or images, in "
 "different folders on your computer automatically. Go to <font "
 "color=\"1E8E44\">Preferences</font> &gt; <font "
 "color=\"1E8E44\">Saving</font> to choose the location for each type of file. "
 msgstr ""
+"Du kan lagre forskjellige typer filer, sånn som lyd, video eller bilder i "
+"forskjellige mapper på din data automatisk. Gå til <font "
+"color=\"1E8E44\">Preference</font> &gt; <font color=\"1E8E44\">Saving</font> "
+"for å velge stede for hver type fil. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:529
 msgid ""
@@ -2718,10 +2728,13 @@ msgstr ""
 "bedere. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:649
+#, fuzzy
 msgid ""
 "The spinning lime in the top-right corner of LimeWire Basic indicates that a "
 "search is in progress. "
 msgstr ""
+"Den spinnende limen i høyre top hjørne i LimeWire Basis indikerer at et søk "
+"er i gang. "
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:36
 msgid "New Version Available!"
@@ -4755,7 +4768,7 @@ msgstr "Popups"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:381
 msgid "Autocomplete"
-msgstr ""
+msgstr "Autofullfør"
 
 #. search options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:384
@@ -7294,4 +7307,5 @@ msgstr "Ogg Vorbis"
 #, fuzzy
 msgid ""
 "Unknown file type. Please choose the type that best describes this file."
-msgstr "Ukjent fil type. Vennligst velg en annen fil type"
+msgstr ""
+"Ukjent fil type. Vennligst velg den typen som best beskriver til denne filen"

@@ -8,15 +8,15 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-01-02 23:29+0000\n"
-"Last-Translator: axy_david <axy_david@yahoo.com>\n"
+"PO-Revision-Date: 2008-03-08 16:41+0000\n"
+"Last-Translator: allen_hitman <allen_hitman@yahoo.com>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n == 1 ? 0: (((n % 100 > 19) || ((n % 100 "
 "== 0) && (n != 0))) ? 2: 1));\n"
-"X-Launchpad-Export-Date: 2008-03-07 16:25+0000\n"
+"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Sorry, but LimeWire was unable to restart your old downloads."
@@ -981,7 +981,7 @@ msgstr "Incarcare fisiere impartite..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:406
 msgid "Loading BitTorrent Management..."
-msgstr ""
+msgstr "Incarcare management Bit Torrent"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:412
 msgid "Loading Old Downloads..."
@@ -989,7 +989,7 @@ msgstr "Incarcare descarcari vechi..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:417
 msgid "Attaching LimeWire Store Listeners..."
-msgstr ""
+msgstr "Atasare ascultatori LimeWire Store"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:422
 msgid "Loading Directed Querier..."
@@ -1174,7 +1174,7 @@ msgstr "Tip"
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:294
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:57
 msgid "Length"
-msgstr "Lungime"
+msgstr "Durata"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:95
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:111
@@ -1232,11 +1232,11 @@ msgstr "Studio"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 msgid "Stars"
-msgstr "Staruri"
+msgstr "Stele"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
-msgstr "Subtitrari"
+msgstr "Subtitrări"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 msgid "Rating"
@@ -1254,7 +1254,7 @@ msgstr "Latime"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
 #, fuzzy
 msgid "Image"
-msgstr "Imagini"
+msgstr "Imagine"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
 msgid "Description"
@@ -1286,7 +1286,6 @@ msgstr "Autor"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
-#, fuzzy
 msgid "Application"
 msgstr "Aplicaţie"
 
@@ -1366,6 +1365,10 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"Puteti alege daca vreti ca LimeWire sa administreze setarile de protocol Bit "
+"Torrent.Este recomandat ca LimeWire sa administreze aceste setari. Valori "
+"invalide sau inadecvate pot cauza probleme severe de performanta si/sau "
+"memorie"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
 msgid ""
@@ -1432,14 +1435,16 @@ msgid ""
 "Please add any comments you may have (e.g what caused the error). \n"
 "Thank you and please use English."
 msgstr ""
+"Va rugam sa adaugati orice comentarii ati avea (ex. cauza erorii) \n"
+"Va multumim si va rugam sa folositi English."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:432
 msgid "Send"
-msgstr "Trimitere"
+msgstr "Trimite"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:441
 msgid "Review"
-msgstr "Revizionare"
+msgstr "Previzualizare"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:455
 msgid "Discard"

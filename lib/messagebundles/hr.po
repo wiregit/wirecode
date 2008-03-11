@@ -8,15 +8,15 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-02-09 15:24+0000\n"
-"Last-Translator: antun <Unknown>\n"
+"PO-Revision-Date: 2008-03-08 16:19+0000\n"
+"Last-Translator: Stevan <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2008-03-07 16:25+0000\n"
+"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -216,6 +216,9 @@ msgid ""
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
 "to 'Resume' your downloads."
 msgstr ""
+"Nazalost, LimeWire nije mogao ucitati neke od starih download-e. Mozete ih "
+"ponovno pokrenuti odabirom Fajlovi-->Incomplete Files i klikom na \"Resume\" "
+"download-a."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:319
 msgid "Loading TLS Encryption..."
@@ -723,6 +726,8 @@ msgid ""
 "Please add any comments you may have (e.g what caused the error). \n"
 "Thank you and please use English."
 msgstr ""
+"Molim unesite komentar  (npr. sta je uzrokovalo gresku).\n"
+"Hvala i molimo uporabu engleskog."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:432
 msgid "Send"
@@ -969,7 +974,7 @@ msgstr "Spremi"
 #. updates).
 #: gui/com/limegroup/gnutella/gui/Console.java:188
 msgid "Delay: "
-msgstr ""
+msgstr "Zastoj "
 
 #: gui/com/limegroup/gnutella/gui/Console.java:618
 msgid "Save As"
@@ -1124,16 +1129,16 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:106
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:107
 msgid "Do not display this message again."
-msgstr ""
+msgstr "Ne prikazuj vise ovu gresku"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:81
 msgid "Dial Up"
-msgstr ""
+msgstr "Modem"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:38
 msgid "Broadband"
-msgstr ""
+msgstr "Broadband"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:40
 msgid "T1"
@@ -1474,7 +1479,7 @@ msgstr "Creative Commons detalji"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:483
 msgid "LimeWire was unable to locate the details of this Weed file."
-msgstr ""
+msgstr "Limewire nije mogao locirati detalje Weed dokumenta"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:488
 #, fuzzy
@@ -1483,7 +1488,7 @@ msgstr "Možete ponovno pokušati potražiti detalje klikom na 'Provjeri'."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:493
 msgid "View Weedshare Usage Rights"
-msgstr ""
+msgstr "Pogrel Weedshare korisnicka prava"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:508
 msgid "View Usage Rights"
@@ -1669,6 +1674,9 @@ msgid ""
 "LimeWire was unable to create your settings folder and is using a temporary "
 "folder.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
+"Limewire nije uspio kreirati postavke radne mape, te stoga koristi "
+"privremenu radnu mapu. Vase postavke mogu se obrisati kada zatvorite "
+"LimeWire. "
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:35
 msgid ""
@@ -1874,11 +1882,11 @@ msgstr "Slanje datoteka"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:1007
 msgid "Total Downstream:"
-msgstr ""
+msgstr "Ukupan Downstream"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:1012
 msgid "Total Upstream:"
-msgstr ""
+msgstr "Ukupan Upstream"
 
 #. *
 #. * The title for the TOTD window.
@@ -1993,6 +2001,8 @@ msgid ""
 "It helps the network if you keep your LimeWire running; other users will "
 "connect to the network easier and searches will perform better."
 msgstr ""
+"Za mrezu je pomoc ako ostavite LimeWire upaljen; tako ce se ostali korisnici "
+"lakse spojiti na mrezu i pretraga ce biti bolja."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:73
 msgid ""
@@ -2039,6 +2049,8 @@ msgid ""
 "Post feature suggestions on LimeWire's <a href=\"{0}\">message boards</a> "
 "and it may be added to future versions."
 msgstr ""
+"Posaljite vase sugestije na LimeWire-<a href=\"{0}\">prijedloge</a> i mozda "
+"ce biti dodane u narednu inacicu."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:98
 #, java-format
@@ -2046,12 +2058,16 @@ msgid ""
 "Visit <a href=\"{0}\">LimeWire's website</a> for detailed information about "
 "how skins are created."
 msgstr ""
+"Posjetite <a href=\"{0}\">LimeWire sajt</a> za detaljne informacije kako su "
+"skinovi kreirani."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:100
 msgid ""
 "Do you want to be part of LimeWire's development? Visit <a "
 "href=\"{0}\">LimeWire's Open Source website</a>."
 msgstr ""
+"Zelite li biti dio LimeWire razvoja? Posjetite <a href=\"{0}\">LimeWire Open "
+"Source sajt</a>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:102
 msgid ""
@@ -2102,6 +2118,8 @@ msgid ""
 "Try a <font color=\"1E8E44\">What's New</font> search and see what's "
 "recently been added to the Gnutella network."
 msgstr ""
+"Probaj <font color=\"1E8E44\">sta je novo</font> provjerite sta je nedavno "
+"dodano na Gnutella mrezu."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:124
 msgid ""
@@ -2125,6 +2143,8 @@ msgid ""
 "LimeWire supports Gnutella and BitTorrent peer-to-peer file sharing "
 "protocols."
 msgstr ""
+"LimeWire podrzava Gnutella i BitTorrent peer-to-peer protokol razmjene "
+"dokumenata."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:136
 msgid ""
@@ -2235,6 +2255,8 @@ msgid ""
 "You can increase the text size via <font color=\"1E8E44\">View</font> &gt; "
 "<font color=\"1E8E44\">Increase Font Size</font>."
 msgstr ""
+"Velicina teksta moze se povecati preko <font color=\"1E8E44\">Prikazi</font> "
+"&gt; <font color=\"1E8E44\">Increase Font Size</font>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:204
 msgid ""
@@ -2290,7 +2312,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:241
 msgid "LimeWire supports file sizes up to 1 TB (terabyte)."
-msgstr ""
+msgstr "LimeWire podrzava velicinu dokunenta do 1 TB (terabyte)"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:242
 msgid ""
@@ -2446,6 +2468,9 @@ msgid ""
 "Java will improve LimeWire's speed and stability. You can find the most "
 "recent Java release at <a href=\"{0}\">www.java.com</a>."
 msgstr ""
+"LimeWire je pisan i Java-i, stro znaci da ce uporaba posljednje inacice Java-"
+"e poboljsati brzinu i stabilnost. Najnoviju inacicu Java-e mozete naci na <a "
+"href=\"{0}\">www.java.com</a>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:356
 msgid ""
@@ -2694,6 +2719,11 @@ msgid ""
 "color=\"1E8E44\">Preferences</font> &gt; <font "
 "color=\"1E8E44\">Saving</font> to choose the location for each type of file. "
 msgstr ""
+"Moguce je sacuvati razlicite vrste dokumenata, kao sto su audio, video ili "
+"slike u razlicite radne mape racunara automatski. Idite na <font "
+"color=\"1E8E44\">Podesavanje</font> &gt; <font "
+"color=\"1E8E44\">Cuvanje</font> da izaberete lokaciju za pojedinu vrstu "
+"dokumenata. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:529
 msgid ""
@@ -2803,6 +2833,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:633
 msgid "Thank you for supporting LimeWire! We hope you enjoy LimeWire PRO. "
 msgstr ""
+"Hvala sto podrzavate LimeWire! Nadamo se da cete uzivati u LimeWire PRO. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:635
 msgid ""
@@ -2826,20 +2857,20 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:36
 msgid "New Version Available!"
-msgstr ""
+msgstr "Nova verzija dostupna!"
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:103
 msgid "A new version of LimeWire is available."
-msgstr ""
+msgstr "Nova verzija LimeWire-a je dosstupna."
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:156
 msgid "Update Now"
-msgstr ""
+msgstr "Nadogradnja sada"
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:159
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:192
 msgid "Visit http://www.limewire.com to update!"
-msgstr ""
+msgstr "Posjetite http://www.limewire.com  za nadogradnju!"
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:169
 msgid ""
@@ -2850,20 +2881,20 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:170
 msgid "Update Ready"
-msgstr ""
+msgstr "Nadogradnja spremna"
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:189
 msgid "Update Later"
-msgstr ""
+msgstr "Nadogradite poslije"
 
 #: gui/com/limegroup/gnutella/gui/UpdatePanel.java:20
 #: gui/com/limegroup/gnutella/gui/UpdatePanel.java:38
 msgid "A newer version is available, update?"
-msgstr ""
+msgstr "Novij verzija dostupna, nadograditi?"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:64
 msgid "Upgrade to PRO"
-msgstr ""
+msgstr "Nadogradnja na PRO"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:66
 msgid ""
@@ -2879,7 +2910,7 @@ msgstr "LimeWire &PRO"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:74
 msgid "Upgrade Your Java"
-msgstr ""
+msgstr "Nadogradnja Java-e"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:76
 msgid ""
@@ -2891,7 +2922,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:77
 msgid "Would you like to get your free Java upgrade?"
-msgstr ""
+msgstr "Zelite li besplatno dobiti nadogradnju Java-u"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:167
 #, fuzzy
@@ -2900,16 +2931,16 @@ msgstr "LimeWire &PRO"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:169
 msgid "Why"
-msgstr ""
+msgstr "Zasto"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:171
 msgid "What does PRO give me?"
-msgstr ""
+msgstr "Sta mi pruza PRO"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:173
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:201
 msgid "Later"
-msgstr ""
+msgstr "Kasnije"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:175
 #, fuzzy
@@ -2922,6 +2953,7 @@ msgid ""
 "LimeWire has detected a corruption in the file {0}. Do you want to continue "
 "the download?"
 msgstr ""
+"LimeWire je otkrio ostecenje u dokumentu {0}. Zelite li nastaviti download?"
 
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:638
 msgid ""
@@ -2968,15 +3000,15 @@ msgstr "Isključi se sa mreže."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:109
 msgid "O&pen Magnet or Torrent"
-msgstr ""
+msgstr "Otvori Magnet ili Torrent"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:110
 msgid "Opens a magnet link or torrent file"
-msgstr ""
+msgstr "Otvaranje magnet link-a ili torrent dokumenta"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:134
 msgid "Open Magnet or Torrent"
-msgstr ""
+msgstr "Otvori Magnet ili Torrent"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:167
 msgid ""
@@ -2986,7 +3018,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:174
 msgid "Open:"
-msgstr ""
+msgstr "Otvori:"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:235
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:225
@@ -3000,6 +3032,8 @@ msgid ""
 "LimeWire cannot download this address. Make sure you typed it correctly, and "
 "then try again."
 msgstr ""
+"LimeWire ne mozei download-ovati ovu adresu. Provjerite  da li je dobro "
+"napisana i pokusajte opet."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:344
 msgid "&Close"
@@ -3029,7 +3063,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:46
 #, java-format
 msgid "Search for: {0}"
-msgstr ""
+msgstr "Trazi po: {0}"
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchWhatsNewMediaTypeAction.java:32
 msgid "Search \"What's New\" for: {0}"
@@ -3038,27 +3072,27 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/actions/SearchXMLFieldAction.java:49
 #, java-format
 msgid "Search for {0}: {1}"
-msgstr ""
+msgstr "Trazi po {0}: {1}"
 
 #: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:29
 #: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:35
 msgid "Share New File..."
-msgstr ""
+msgstr "Podijeli novi dokument..."
 
 #: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:36
 msgid "Share"
-msgstr ""
+msgstr "Dijeljenje"
 
 #: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:53
 #, java-format
 msgid "The file \"{0}\" is already shared."
-msgstr ""
+msgstr "Dokument \"{0}\" vec je djeljen"
 
 #. like FailedEvent, but potentially others too.
 #: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:55
 #, java-format
 msgid "LimeWire was unable to share the file \"{0}\"."
-msgstr ""
+msgstr "LimeWire ne moze dijeliti dokument \"{0}\"."
 
 #: gui/com/limegroup/gnutella/gui/actions/ShareNewFolderAction.java:14
 #, fuzzy
@@ -3083,7 +3117,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:59
 msgid "Send Message"
-msgstr ""
+msgstr "Pošalji poruku"
 
 #. *
 #. * Constant for the locale-specific resource key for the toolTip of the
@@ -3099,19 +3133,19 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:71
 msgid "Send a Message to a Host"
-msgstr ""
+msgstr "Posalji poruku na Host"
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:73
 msgid "Chatting with"
-msgstr ""
+msgstr "Chat sa"
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:75
 msgid "Host is unavailable"
-msgstr ""
+msgstr "Host nije dostupan"
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:77
 msgid "You"
-msgstr ""
+msgstr "Vi"
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:231
 msgid "A connection error has occurred"
@@ -3119,7 +3153,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:252
 msgid "Could not send chat message"
-msgstr ""
+msgstr "Nije moguce poslati chat poruku"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:45
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:231
@@ -3135,7 +3169,7 @@ msgstr "Pretražuj..."
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:48
 msgid "Create a New Outgoing Connection"
-msgstr ""
+msgstr "Kreirajte novu Outgoing vezu"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:49
 #, fuzzy
@@ -3150,7 +3184,7 @@ msgstr "Pogledaj sve file-ove na označenom kompjuteru."
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:52
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:227
 msgid "Host"
-msgstr ""
+msgstr "Poslužitelj"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:55
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:383
@@ -3161,15 +3195,15 @@ msgstr "Statistike"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:58
 msgid "Messages (I/O)"
-msgstr ""
+msgstr "Poruke (U/I)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:61
 msgid "Messages In"
-msgstr ""
+msgstr "Poruke ulazne"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:64
 msgid "Messages Out"
-msgstr ""
+msgstr "Poruke Izlazne"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:67
 msgid "Bandwidth (I/O)"
@@ -3197,32 +3231,32 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:85
 msgid "Protocol"
-msgstr ""
+msgstr "Protokol"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:88
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:423
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:283
 msgid "Vendor/Version"
-msgstr ""
+msgstr "Isporucitelj/Inacica"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:91
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:415
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:31
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:275
 msgid "Time"
-msgstr ""
+msgstr "Vrijeme"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:94
 msgid "Compressed (I/O)"
-msgstr ""
+msgstr "Kompresirano (U/I)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:97
 msgid "Compressed In"
-msgstr ""
+msgstr "Kompresirano ulazno"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:100
 msgid "Compressed Out"
-msgstr ""
+msgstr "Kompresirano izlazno"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:103
 msgid "SSL Overhead (I/O)"
@@ -3238,11 +3272,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:112
 msgid "QRP (%)"
-msgstr ""
+msgstr "QRP (%)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:115
 msgid "QRP Empty"
-msgstr ""
+msgstr "QRP Prazan"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:123
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:66
@@ -3252,7 +3286,7 @@ msgstr "Kvalitet:"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:129
 msgid "Outgoing"
-msgstr ""
+msgstr "Odlazeći"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:135
 #, fuzzy
@@ -3282,7 +3316,7 @@ msgstr "Kvalitet:"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:69
 msgid "Leaves"
-msgstr ""
+msgstr "Lišće"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:72
 msgid "Ultrapeers"
@@ -3290,11 +3324,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:75
 msgid "Peers"
-msgstr ""
+msgstr "Točke"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:78
 msgid "Standard"
-msgstr ""
+msgstr "Standardno"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:163
 msgid "Loading Connections Window..."
@@ -3312,7 +3346,7 @@ msgstr "Kvalitet:"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:366
 msgid "Host:"
-msgstr ""
+msgstr "Posluzitelj"
 
 #. *
 #. * Constant for the key of the locale-specific <tt>String</tt> for the
@@ -3326,7 +3360,7 @@ msgstr "Slab"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:390
 msgid "Use TLS:"
-msgstr ""
+msgstr "Upotreba TLS:"
 
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:26
 msgid "Peer"
@@ -3334,7 +3368,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:29
 msgid "0.6"
-msgstr ""
+msgstr "0.6"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:90
 msgid ""
@@ -3345,7 +3379,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:94
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:259
 msgid "All folders you select will also have their subfolders shared."
-msgstr ""
+msgstr "Svi poddirektoriji oznacenih direktorija biti ce djeljeni."
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:99
 msgid "Share Dropped Files?"
@@ -3353,7 +3387,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:115
 msgid "Yes, Try Again"
-msgstr ""
+msgstr "Da, pokusaj ponovno"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:116
 #, fuzzy
@@ -3362,13 +3396,15 @@ msgstr "Broj file-ova koje razmjenjujete."
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:119
 msgid "Do not show this message again."
-msgstr ""
+msgstr "Ne pokazuj ponovno ovu poruku."
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:122
 msgid ""
 "You clicked OK but did not select any files to be shared. Would you like to "
 "try again?"
 msgstr ""
+"Kliknuli ste OK, ali niste oznacili nti jedan dokument za djeljenje. Zelite "
+"li ponovno pokusati?"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadButtons.java:49
 #, fuzzy
@@ -3388,12 +3424,12 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:75
 msgid "Waiting On Busy Hosts"
-msgstr ""
+msgstr "Cekam na zauzeti racunar"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:81
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:72
 msgid "Complete"
-msgstr ""
+msgstr "Završeno"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:87
 #, fuzzy
@@ -3412,11 +3448,11 @@ msgstr "Download"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:106
 msgid "Disk Problem"
-msgstr ""
+msgstr "Problem sa diskom"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:112
 msgid "File Corrupted"
-msgstr ""
+msgstr "Dokument ostecen"
 
 #. *
 #. * Constant for the "Waiting for Results" download state.
@@ -3425,7 +3461,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:118
 #, java-format
 msgid "Waiting {0}s for Sources"
-msgstr ""
+msgstr "Cekam {0} na Izvore"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:124
 #, fuzzy
@@ -3438,15 +3474,15 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:136
 msgid "Waiting in Line, Position"
-msgstr ""
+msgstr "CEkam u redu, pozicija"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:142
 msgid "Verifying File Contents..."
-msgstr ""
+msgstr "Verifikacija sadrzaja dokumenta..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:148
 msgid "Saving File..."
-msgstr ""
+msgstr "Sacuvaj dokument..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:154
 msgid "Recovering Corrupted File"
@@ -3454,16 +3490,16 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:160
 msgid "Pausing..."
-msgstr ""
+msgstr "Pauzira..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:166
 #: gui/com/limegroup/gnutella/gui/download/PriorityHolder.java:39
 msgid "Paused"
-msgstr ""
+msgstr "Pauza"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:170
 msgid "Content Removed"
-msgstr ""
+msgstr "Sadrzaj otklonjen"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:174
 msgid "Resuming..."
@@ -3471,7 +3507,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:178
 msgid "Downloading .torrent file..."
-msgstr ""
+msgstr "Download .torrent dokumenta..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:184
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:126
@@ -3511,11 +3547,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:238
 msgid "hosts"
-msgstr ""
+msgstr "posluzitelji"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:241
 msgid "host"
-msgstr ""
+msgstr "posluzitelj"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:247
 msgid "A more specific search may be required..."
@@ -3529,11 +3565,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:257
 msgid "Possible Hosts"
-msgstr ""
+msgstr "Moguci posluzitelji"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:260
 msgid "Busy Hosts"
-msgstr ""
+msgstr "Zauzeti posluzitelji"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:263
 msgid "Remotely Queued"
@@ -3550,7 +3586,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:359
 msgid "Priority"
-msgstr ""
+msgstr "Prioritet:"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:375
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:146
@@ -3565,7 +3601,7 @@ msgstr "Velicina"
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:73
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:251
 msgid "Chat"
-msgstr ""
+msgstr "Razgovor"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:399
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:259
@@ -3589,7 +3625,7 @@ msgstr "Brzina"
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:962
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:345
 msgid "BitTorrent"
-msgstr ""
+msgstr "BitTorrent"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1023
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:808
@@ -3695,11 +3731,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:627
 msgid "Choose Save Location"
-msgstr ""
+msgstr "Odaberi lokaciju cuvanja"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:728
 msgid "Search..."
-msgstr ""
+msgstr "Pretraživanje..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:800
 #, fuzzy
@@ -3780,7 +3816,7 @@ msgstr "Prekini download"
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:970
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:95
 msgid "Pause"
-msgstr ""
+msgstr "Pauza"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:972
 msgid "Pause Selected Downloads"
@@ -3806,7 +3842,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1039
 msgid "Change File Location..."
-msgstr ""
+msgstr "Promjena lokacije dokumenta..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1042
 msgid "Edit the Final Filename of the Download"
@@ -3819,26 +3855,26 @@ msgstr "Snimi kao..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:130
 msgid "Always Append (#)"
-msgstr ""
+msgstr "Uvijek dodati (#)"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:132
 msgid "Always Ask"
-msgstr ""
+msgstr "Uvijek pitaj"
 
 #. default action settings panel
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:143
 msgid "Choose a Default Action:"
-msgstr ""
+msgstr "Odaberi podrazumjevanu akciju:"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:214
 #, java-format
 msgid "Warning: {0}"
-msgstr ""
+msgstr "Upozorenje: {0}"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:220
 #, java-format
 msgid "Error: {0}"
-msgstr ""
+msgstr "Greska: {0}"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:228
 #, java-format
@@ -3849,11 +3885,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:315
 msgid "Overwrite"
-msgstr ""
+msgstr "Prepisati"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:317
 msgid "Overwrite the Existing File"
-msgstr ""
+msgstr "Prepisivanje postojeceg dokumenta"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:335
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:48
@@ -3862,11 +3898,11 @@ msgstr "Snimi kao..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:337
 msgid "Choose a different location for the Download"
-msgstr ""
+msgstr "Odabir druge lokacije za download"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:363
 msgid "Append (#)"
-msgstr ""
+msgstr "Dodati (#)"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:365
 msgid "Appends (#) to filename"
@@ -3896,7 +3932,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:226
 msgid "Do you want to continue downloading anyway?"
-msgstr ""
+msgstr "Zelite li ipak nastaviti download"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:228
 #, fuzzy
@@ -3915,12 +3951,12 @@ msgstr "Download-i"
 #: gui/com/limegroup/gnutella/gui/download/MagnetDownloaderFactory.java:32
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:282
 msgid "No Filename"
-msgstr ""
+msgstr "Bez imena dokumenta"
 
 #: gui/com/limegroup/gnutella/gui/download/PriorityHolder.java:33
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:59
 msgid "Active"
-msgstr ""
+msgstr "Aktivan"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:34
 msgid "File & Protocol Associations"
@@ -3952,7 +3988,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/init/FirewallWindow.java:22
 msgid "Firewall Setup"
-msgstr ""
+msgstr "Postavke vatrozida"
 
 #: gui/com/limegroup/gnutella/gui/init/FirewallWindow.java:23
 msgid ""
@@ -3970,7 +4006,7 @@ msgstr "Jezik:"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:63
 msgid "Miscellaneous Settings"
-msgstr ""
+msgstr "Razne postavke"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:65
 msgid ""
@@ -3980,7 +4016,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:78
 msgid "Network Speed"
-msgstr ""
+msgstr "Brzina mreze"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:82
 msgid "Broadband (or unsure)"
@@ -4011,11 +4047,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:147
 msgid "Content Filtering"
-msgstr ""
+msgstr "Filtriranje sadrzaja"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:149
 msgid "Enable Content Filtering"
-msgstr ""
+msgstr "Omoguci filtriranje sadrzaja"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:153
 msgid ""
@@ -4029,11 +4065,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/init/SetupWindow.java:127
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractPaneItem.java:66
 msgid "Learn more about this option..."
-msgstr ""
+msgstr "Nauci vise o ovoj opciji"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:60
 msgid "Save Folder and Shared Folders"
-msgstr ""
+msgstr "Sacuvaj direktorij i djeljene direktorije"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:73
 msgid ""
@@ -4069,6 +4105,8 @@ msgid ""
 "LimeWire was unable to use the specified folder for saving files. Please try "
 "a different folder."
 msgstr ""
+"LimeWire nije mogao upotrijebiti navedeni direktorij za cuvanje. Molim "
+"pokusajte sa drugim direktorijem."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:193
 #, java-format
@@ -4097,7 +4135,7 @@ msgstr "Koristi osnovne postavke"
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:226
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:118
 msgid "Choose Another Folder"
-msgstr ""
+msgstr "Odaberi drugu radnu mapu"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:218
 msgid "LimeWire Setup Wizard"
@@ -4121,7 +4159,7 @@ msgstr "Završi"
 
 #: gui/com/limegroup/gnutella/gui/init/WelcomeWindow.java:20
 msgid "Welcome"
-msgstr ""
+msgstr "Dobrodosli"
 
 #: gui/com/limegroup/gnutella/gui/init/WelcomeWindow.java:22
 msgid ""
@@ -4162,7 +4200,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:382
 msgid "Configure..."
-msgstr ""
+msgstr "Postavke..."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:398
 msgid "Songs purchased from the LimeWire Store"
@@ -4199,7 +4237,7 @@ msgstr "Ikona"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:152
 #: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:124
 msgid "Path"
-msgstr ""
+msgstr "Putanja"
 
 #. upload options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:155
@@ -4210,7 +4248,7 @@ msgstr "Upload-i"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:158
 msgid "Hits"
-msgstr ""
+msgstr "Pogodci"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:161
 #, fuzzy
@@ -4219,27 +4257,27 @@ msgstr "Lokacija"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:168
 msgid "Last Modified"
-msgstr ""
+msgstr "Posljednja izmjena"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:171
 msgid "Shared"
-msgstr ""
+msgstr "Dijeljeno"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:475
 msgid "This file is shared."
-msgstr ""
+msgstr "Ovaj dokument je dijeljen"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:477
 msgid "This file is not shared."
-msgstr ""
+msgstr "Ovaj dokument nije dijeljen"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:479
 msgid "This folder is shared."
-msgstr ""
+msgstr "Ovaj direktorij je dijeljen"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:481
 msgid "This folder is not shared."
-msgstr ""
+msgstr "Ovaj direktorij nije dijeljen"
 
 #. for sharing gnutella
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:230
@@ -4258,7 +4296,7 @@ msgstr "Spajam"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:397
 #: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:201
 msgid "Advanced"
-msgstr ""
+msgstr "Napredno"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:674
 msgid ""
@@ -4268,17 +4306,19 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:779
 msgid "Move to Recycle Bin"
-msgstr ""
+msgstr "Prebaci u kos za otpatke"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:780
 msgid "Move to Trash"
-msgstr ""
+msgstr "Posalji u smece"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:828
 msgid ""
 "Are you sure you want to delete the selected file(s), thus removing it from "
 "your computer?"
 msgstr ""
+"Da li ste sigurni da zelitite brisati odabrani/e dokument/e, stoga ukloniti "
+"sa racunala"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:894
 msgid ""
@@ -4320,7 +4360,7 @@ msgstr "Opisi oznaceni file."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1297
 msgid "Publish..."
-msgstr ""
+msgstr "Objavi..."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1299
 msgid "Publish under Creative Commons License"
@@ -4341,7 +4381,7 @@ msgstr "Preimenuj"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1352
 msgid "Share File"
-msgstr ""
+msgstr "Djeljeni dokument"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1379
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:162
@@ -4378,11 +4418,11 @@ msgstr "file-ova"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:608
 msgid "LimeWire cannot stop sharing this folder."
-msgstr ""
+msgstr "LimeWire ne moze zaustaviti djeljenje direktorija"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:610
 msgid "Are you sure you want to stop sharing this folder?"
-msgstr ""
+msgstr "Da li ste sigurni da zelite prestati djeliti direktorij?"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:679
 msgid ""
@@ -4398,7 +4438,7 @@ msgstr "Nanovo ucitaj direktorije za razmjenu."
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:811
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:374
 msgid "Store"
-msgstr ""
+msgstr "Smjestiti"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:823
 #, fuzzy
@@ -4407,7 +4447,7 @@ msgstr "Dodaj oznacene file-ove listi koja svira."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:870
 msgid "Hide .torrent Files"
-msgstr ""
+msgstr "Sakrij .torrent dokument"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:873
 #, fuzzy
@@ -4432,7 +4472,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:68
 msgid "Folders to share"
-msgstr ""
+msgstr "Direktoriji za djeljenje"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:76
 msgid ""
@@ -4443,7 +4483,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:320
 msgid "Legend"
-msgstr ""
+msgstr "Legenda"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:329
 msgid "Folder is fully shared including all subfolders."
@@ -4467,24 +4507,24 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/TorrentMetaFileDirectoryHolder.java:15
 msgid "List of .torrent files"
-msgstr ""
+msgstr "Pregled .torrent dokumenata"
 
 #: gui/com/limegroup/gnutella/gui/library/TorrentMetaFileDirectoryHolder.java:17
 msgid ".torrent files"
-msgstr ""
+msgstr ".torrent dokumenti"
 
 #: gui/com/limegroup/gnutella/gui/logging/LoggingMediator.java:36
 #: gui/com/limegroup/gnutella/gui/tabs/LoggingTab.java:22
 msgid "Logging"
-msgstr ""
+msgstr "Prijava"
 
 #: gui/com/limegroup/gnutella/gui/logging/LoggingMediator.java:57
 msgid "Loading Logging Window..."
-msgstr ""
+msgstr "Ucitavanje prozora prijave..."
 
 #: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:27
 msgid "&Advanced"
-msgstr ""
+msgstr "&Napredno"
 
 #: gui/com/limegroup/gnutella/gui/menu/AdvancedMenu.java:76
 msgid "Mojito &DHT Arcs View"
@@ -4513,7 +4553,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/menu/FiltersMenu.java:21
 msgid "&Learn More..."
-msgstr ""
+msgstr "Saznaj vise..."
 
 #: gui/com/limegroup/gnutella/gui/menu/FiltersMenu.java:22
 msgid "Learn More about LimeWire's Content Filtering System"
@@ -4573,7 +4613,7 @@ msgstr "Informacije o LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/menu/MenuMediator.java:91
 msgid "Loading Menus..."
-msgstr ""
+msgstr "Ucitavanje menija..."
 
 #: gui/com/limegroup/gnutella/gui/menu/NavMenu.java:23
 msgid "&Navigation"
@@ -4608,7 +4648,7 @@ msgstr "Pr&ikaži/Sakrij"
 #: gui/com/limegroup/gnutella/gui/menu/ShowHideMenu.java:53
 #, java-format
 msgid "Show {0} Window"
-msgstr ""
+msgstr "Prikaz {0} prozora"
 
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:64
 msgid "&Get More Skins"
@@ -4660,19 +4700,19 @@ msgstr "Prikaži tekst ispod ikona"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:45
 msgid "&Increase Font Size"
-msgstr ""
+msgstr "Povecaj velicinu slova"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:46
 msgid "Increases the Font Size"
-msgstr ""
+msgstr "Povecanje velicine slova"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:49
 msgid "&Decrease Font Size"
-msgstr ""
+msgstr "Smanji velicinu slova"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:50
 msgid "Decreases the Font Size"
-msgstr ""
+msgstr "Smanjivanje velicine slova"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:60
 msgid "C&hange Language"
@@ -4680,7 +4720,7 @@ msgstr "Promi&jeni jezik"
 
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:61
 msgid "Select your Language Prefereces"
-msgstr ""
+msgstr "Odaberite jezicne postavke"
 
 #. *
 #. * Constant for the play button.
@@ -4762,7 +4802,7 @@ msgstr ""
 #. set text before adding the document listener
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:255
 msgid "Search here"
-msgstr ""
+msgstr "Trazi ovdje"
 
 #. for saving gnutella
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:315
@@ -4776,11 +4816,11 @@ msgstr "Spajam"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:346
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:385
 msgid "Basic"
-msgstr ""
+msgstr "Osnovno"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
 msgid "Types"
-msgstr ""
+msgstr "Tipovi"
 
 #. store options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:326
@@ -4789,7 +4829,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:337
 msgid "Slots"
-msgstr ""
+msgstr "Utori"
 
 #. uploadSlotsPane.add(new SoftMaximumUploadsPaneItem("UPLOAD_SOFT_MAX"));
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:340
@@ -4799,11 +4839,11 @@ msgstr "Spojevi"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:355
 msgid "System Tray"
-msgstr ""
+msgstr "Sistemska traka"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:357
 msgid "Updates"
-msgstr ""
+msgstr "Nadogradnje"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:361
 #, fuzzy
@@ -4812,16 +4852,16 @@ msgstr "Sviraj"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:363
 msgid "Status Bar"
-msgstr ""
+msgstr "Statusna traka"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:367
 msgid "iTunes"
-msgstr ""
+msgstr "iTunes"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:369
 #: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:15
 msgid "Importing"
-msgstr ""
+msgstr "Uvoz"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:374
 msgid "Helper Apps"
@@ -4830,7 +4870,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:377
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:76
 msgid "Bug Reports"
-msgstr ""
+msgstr "Izvjestaj bug-ova"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:379
 #, fuzzy
@@ -4843,7 +4883,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:381
 msgid "Autocomplete"
-msgstr ""
+msgstr "Automatsko dovršavanje"
 
 #. search options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:384
@@ -4874,15 +4914,15 @@ msgstr "&Spoji se"
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:593
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
 msgid "Junk"
-msgstr ""
+msgstr "Smeće"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:393
 msgid "Keywords"
-msgstr ""
+msgstr "Ključne riječi"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:394
 msgid "Hosts"
-msgstr ""
+msgstr "Računalo"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:398
 msgid "Preferencing"
@@ -4890,16 +4930,16 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:399
 msgid "Firewall"
-msgstr ""
+msgstr "Vatrozid"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:400
 msgid "Proxy"
-msgstr ""
+msgstr "Proxy"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:401
 #: gui/com/limegroup/gnutella/gui/options/panes/NetworkInterfacePaneItem.java:33
 msgid "Network Interface"
-msgstr ""
+msgstr "Mrežno sučelje"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:403
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:58
@@ -4908,7 +4948,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:405
 msgid "Performance"
-msgstr ""
+msgstr "Performance"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:407
 msgid "System Boot"
@@ -4933,7 +4973,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:34
 msgid "Folder:"
-msgstr ""
+msgstr "Direktorij:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:56
 msgid "You can choose the folder for saving files."
@@ -4961,7 +5001,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:29
 msgid "Links and File Types"
-msgstr ""
+msgstr "Veze i tipovi dokumenata"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:31
 msgid ""
@@ -4982,7 +5022,7 @@ msgstr "Još postavki"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:24
 msgid "You can choose which audio player to use."
-msgstr ""
+msgstr "Mozete odabrati koji audio player koristiti"
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
@@ -4991,7 +5031,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:31
 msgid "Audio Player"
-msgstr ""
+msgstr "Audio Player"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AutoClearDownloadsPaneItem.java:21
 #, fuzzy
@@ -5044,7 +5084,7 @@ msgstr "Još postavki"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:30
 msgid "You can choose which browser to use."
-msgstr ""
+msgstr "Mozete odabrati koji pretrazivac koristiti"
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
@@ -5058,7 +5098,7 @@ msgstr "Pretražuj..."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:42
 msgid "View Example"
-msgstr ""
+msgstr "Pogledaj primjer"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:78
 msgid ""
@@ -5084,7 +5124,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ChatActivePaneItem.java:29
 msgid "Enable Chat:"
-msgstr ""
+msgstr "Omoguci chat:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ConnectOnStartupPaneItem.java:20
 #, fuzzy
@@ -5123,7 +5163,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:48
 msgid "Rarely"
-msgstr ""
+msgstr "Rijetko"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:55
 #, fuzzy
@@ -5144,11 +5184,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ContentFilterPaneItem.java:28
 msgid "Enable Content Filters"
-msgstr ""
+msgstr "Omoguci filtere sadrzaja"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapBufferSizePaneItem.java:14
 msgid "Buffer Size"
-msgstr ""
+msgstr "Velicina medjumemorije"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapBufferSizePaneItem.java:16
 msgid ""
@@ -5167,12 +5207,12 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapPasswordPaneItem.java:32
 msgid "Require Password:"
-msgstr ""
+msgstr "Zahtjeva lozinku"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapPasswordPaneItem.java:38
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:48
 msgid "Password:"
-msgstr ""
+msgstr "Lozinka"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:21
 msgid ""
@@ -5200,7 +5240,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:49
 msgid "Always Show the 'Save As' Dialog"
-msgstr ""
+msgstr "Uvijek prikazi \"Sacuvaj kao\" dijalog"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:50
 msgid "Always Append (#) to the Filename"
@@ -5212,7 +5252,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:23
 msgid "Capabilities"
-msgstr ""
+msgstr "Mogućnosti"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:25
 msgid ""
@@ -5236,7 +5276,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableOOBSearchingPaneItem.java:20
 msgid "OOB Searching"
-msgstr ""
+msgstr "OOB Pretraga"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableOOBSearchingPaneItem.java:22
 msgid ""
@@ -5265,7 +5305,7 @@ msgstr "Download"
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:46
 #: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:46
 msgid "Unlimited"
-msgstr ""
+msgstr "Neograničeno"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:21
 #, fuzzy
@@ -5284,7 +5324,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:20
 msgid "Display"
-msgstr ""
+msgstr "Prikaz"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:22
 msgid ""
@@ -5319,7 +5359,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:35
 msgid "Extensions:"
-msgstr ""
+msgstr "Ekstenzije:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:61
 #, fuzzy
@@ -5346,7 +5386,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ForceIPPaneItem.java:49
 msgid "Use UPnP (Recommended)"
-msgstr ""
+msgstr "Koristi UOnP (Preporuceno)"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ForceIPPaneItem.java:51
 msgid "Manual Port Forward:"
@@ -5354,7 +5394,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ForceIPPaneItem.java:53
 msgid "Do Nothing (Not Recommended)"
-msgstr ""
+msgstr "Nista ne poduzimati (Nije preporuceno)"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ForceIPPaneItem.java:156
 msgid ""
@@ -5396,7 +5436,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:50
 msgid "Ignore Adult Content"
-msgstr ""
+msgstr "Ignoriraj sadrzaj za odrasle"
 
 #. *
 #. * Key for the locale-specifis string for the html file check box
@@ -5404,7 +5444,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:56
 msgid "Ignore .htm/.html Files"
-msgstr ""
+msgstr "Ignoriraj .htm/.html dokumente"
 
 #. *
 #. * Key for the locale-specifis string for the vbs file check box
@@ -5412,18 +5452,18 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:62
 msgid "Ignore .vbs Files"
-msgstr ""
+msgstr "Ignoriraj .vbs dokumente"
 
 #. *
 #. * Key for the locale-specific string for the wmv and asf file check box label.
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:67
 msgid "Ignore .wmv/.asf files"
-msgstr ""
+msgstr "Ignoriraj .wmv/.asf dokumente"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultsPaneItem.java:21
 msgid "Filter Results"
-msgstr ""
+msgstr "Rezultati filtera"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultsPaneItem.java:23
 msgid "You can filter out search results containing specific words."
@@ -5436,7 +5476,7 @@ msgstr "Još postavki"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ImageViewerPaneItem.java:30
 msgid "You can choose which image viewer to use."
-msgstr ""
+msgstr "Mozete odabrati koji preglednik slika koristiti"
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
@@ -5445,7 +5485,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ImageViewerPaneItem.java:37
 msgid "Image Viewer"
-msgstr ""
+msgstr "Preglednik slika"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/LocalePreferencingPaneItem.java:19
 msgid "Locale Preferencing"
@@ -5523,7 +5563,7 @@ msgstr "Mediji"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:202
 msgid "Open Dialog to Select a Folder"
-msgstr ""
+msgstr "Otvori dijalog za odabir direktorija"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:233
 #, fuzzy
@@ -5654,11 +5694,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:93
 msgid "Port not available. Please select a different port."
-msgstr ""
+msgstr "Port nije dostupan. Molim odaberite drugi port"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/PortPaneItem.java:98
 msgid "Please enter a port between 1 and 65535."
-msgstr ""
+msgstr "Molim odaberite port izmedju 1 i 65535"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:24
 msgid "Login Details"
@@ -5679,7 +5719,7 @@ msgstr "Preimenuj"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:28
 msgid "Proxy Options"
-msgstr ""
+msgstr "Opcije proxy poslužitelja"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:30
 msgid "Configure Proxy Options for LimeWire."
@@ -5687,19 +5727,19 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:37
 msgid "No Proxy"
-msgstr ""
+msgstr "Bez proxy poslužitelja"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:39
 msgid "Socks v4"
-msgstr ""
+msgstr "Socks v4"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:41
 msgid "Socks v5"
-msgstr ""
+msgstr "Socks v5"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:43
 msgid "HTTP"
-msgstr ""
+msgstr "HTTP"
 
 #. *
 #. * Constant for the key of the locale-specific <tt>String</tt> for the
@@ -5707,11 +5747,11 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:49
 msgid "Proxy:"
-msgstr ""
+msgstr "Proxy:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:23
 msgid "You can automatically delete old incomplete download files."
-msgstr ""
+msgstr "Mozete automatski brisati stare nedovrsene download dokumente."
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
@@ -5720,14 +5760,14 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/PurgeIncompletePaneItem.java:30
 msgid "Days to Keep Incomplete Files:"
-msgstr ""
+msgstr "Dana za cuvanje nekompletiranih dokumenata:"
 
 #. *
 #. *  The mediator's description label id.
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:46
 msgid "You can specify a download location for each media type."
-msgstr ""
+msgstr "Mozete podesiti download lokaciju za svaki tip medije."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:119
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:123
@@ -5763,11 +5803,11 @@ msgstr "Prikaži filtere rezultata pretrage."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:68
 msgid "Show Only Three and Four Star Results"
-msgstr ""
+msgstr "Prikazi samo rezultate sa tri ii cetiri zvijezde"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:70
 msgid "Show Only Two, Three, and Four Star Results"
-msgstr ""
+msgstr "Prikazi samo rezultate sa dvije, tri i cetiri zvijezde"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SearchQualityPaneItem.java:72
 msgid "Show All Qualities"
@@ -5796,7 +5836,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SearchSpeedPaneItem.java:62
 msgid "Show All Speeds"
-msgstr ""
+msgstr "Prikazi sve brzine"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:21
 #, fuzzy
@@ -5814,7 +5854,7 @@ msgstr "Traži i download-aj file-ove."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:64
 msgid "All downloads will be shared."
-msgstr ""
+msgstr "Svi download-i biti ce djeljeni"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:66
 msgid "Only downloads in shared folders will be shared."
@@ -5831,7 +5871,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:24
 msgid "Share .torrent files"
-msgstr ""
+msgstr "Dijeli .torrent dokumente"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:35
 msgid ""
@@ -5849,7 +5889,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShutdownPaneItem.java:58
 msgid "Shutdown Immediately"
-msgstr ""
+msgstr "Odmah ugasi"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShutdownPaneItem.java:59
 #, fuzzy
@@ -5858,7 +5898,7 @@ msgstr "Zatvori nakon prijenosa"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShutdownPaneItem.java:60
 msgid "Minimize to System Tray"
-msgstr ""
+msgstr "minimiziraj u System Tray"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:20
 msgid "Start Upload Slots"
@@ -5876,7 +5916,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:28
 msgid "Sensitivity"
-msgstr ""
+msgstr "Osjetljivost"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:30
 msgid "Adjust the sensitivity of LimeWire's junk filter"
@@ -5893,7 +5933,7 @@ msgstr "Preimenuj"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:50
 msgid "Strict"
-msgstr ""
+msgstr "Striktan"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:23
 #, fuzzy
@@ -6014,29 +6054,29 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:44
 msgid "Template"
-msgstr ""
+msgstr "Predložak"
 
 #. *
 #. * Label for a drop down with options that can be added to the template
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:49
 msgid "Variables"
-msgstr ""
+msgstr "Varijable"
 
 #. *
 #. * Label for predefined templates
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:54
 msgid "Templates"
-msgstr ""
+msgstr "Predlošci"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:125
 msgid "Insert a Variable"
-msgstr ""
+msgstr "Unos varijable"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:156
 msgid "Insert a template"
-msgstr ""
+msgstr "Unos predloska"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:160
 msgid "iTunes like"
@@ -6045,7 +6085,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:197
 #, java-format
 msgid "Invalid template {0}"
-msgstr ""
+msgstr "Krivi predlozak {0}"
 
 #. *
 #. * Title of the item in the pane, this name will be displayed in a line border
@@ -6061,7 +6101,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:20
 msgid "System Tray Icon"
-msgstr ""
+msgstr "Ikona u sistemskoj traci"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:22
 msgid "You can display the system tray icon while LimeWire is visible."
@@ -6069,7 +6109,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:29
 msgid "Show System Tray Icon:"
-msgstr ""
+msgstr "Prikazi System Tray ikonu"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/UpdatePaneItem.java:18
 #, fuzzy
@@ -6082,7 +6122,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/UpdatePaneItem.java:35
 msgid "Beta Releases"
-msgstr ""
+msgstr "Beta inacica"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/UpdatePaneItem.java:36
 msgid "Service Releases"
@@ -6144,7 +6184,7 @@ msgstr "Otvori postojecu."
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:54
 msgid "Save the Current Playlist to a File"
-msgstr ""
+msgstr "Sacuvaj trenutnu Playlist-u u dokument"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:55
 #, fuzzy
@@ -6153,20 +6193,20 @@ msgstr "Dodaj oznacene file-ove listi koja svira."
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:56
 msgid "Removes all Files from Playlist"
-msgstr ""
+msgstr "Ukloni sve dokumente iz Playliste"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:26
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:37
 msgid "#"
-msgstr ""
+msgstr "#"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:90
 msgid "Comment"
-msgstr ""
+msgstr "_Komentar"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:153
 msgid "Playlist"
-msgstr ""
+msgstr "Popis pjesama"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:175
 msgid "Loading Playlist Window..."
@@ -6179,7 +6219,7 @@ msgstr "&Postavke"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:538
 msgid "Shuffle"
-msgstr ""
+msgstr "Nasumično"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:543
 #, fuzzy
@@ -6188,11 +6228,11 @@ msgstr "Spojevi"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:613
 msgid "Open Playlist (.m3u)"
-msgstr ""
+msgstr "Otvori Playlist-u (.m3u)"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:690
 msgid "Save Playlist As"
-msgstr ""
+msgstr "Sacuvaj Playlist-u kao"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:702
 #, java-format
@@ -6208,7 +6248,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/EndpointHolder.java:25
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:315
 msgid "Multiple"
-msgstr ""
+msgstr "Višestruko"
 
 #: gui/com/limegroup/gnutella/gui/search/FilterBox.java:82
 msgid "Option"
@@ -6245,7 +6285,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:270
 msgid "Configure"
-msgstr ""
+msgstr "Podesi"
 
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:271
 #: gui/com/limegroup/gnutella/gui/tabs/LibraryPlayListTab.java:38
@@ -6293,7 +6333,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:590
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
 msgid "Not Junk"
-msgstr ""
+msgstr "Nije nepoželjno"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:316
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:470
@@ -6309,7 +6349,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:518
 msgid "Search More"
-msgstr ""
+msgstr "Trazi vise"
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:677
 msgid "Do you want to block search results from the following list of hosts?"
@@ -6317,11 +6357,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1023
 msgid "More Info..."
-msgstr ""
+msgstr "Dodatne informacije..."
 
 #: gui/com/limegroup/gnutella/gui/search/SchemaBox.java:44
 msgid "Select Search Type:"
-msgstr ""
+msgstr "Odabir tipa pretrage"
 
 #: gui/com/limegroup/gnutella/gui/search/SchemaBox.java:184
 msgid "Search For Audio Files, Including mp3, wav, ogg, and More"
@@ -6368,11 +6408,11 @@ msgstr "Prestani sakupljati rezultate pretrage za označeni tab."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInformation.java:51
 msgid "New"
-msgstr ""
+msgstr "Novi"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:172
 msgid "Keyword"
-msgstr ""
+msgstr "Ključna riječ"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:176
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:355
@@ -6403,11 +6443,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:389
 msgid "Don't Know"
-msgstr ""
+msgstr "Ne znam"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:393
 msgid "What To Look For?"
-msgstr ""
+msgstr "Sta traziti"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:397
 msgid ""
@@ -6422,7 +6462,7 @@ msgstr "Zatvori pretragu"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:428
 msgid "Hide Adult Content"
-msgstr ""
+msgstr "Sakrij sadrzaj za odrasle"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:538
 #, fuzzy
@@ -6461,7 +6501,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
 msgid "Mark As"
-msgstr ""
+msgstr "Oznaci kao"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
 #, fuzzy
@@ -6534,7 +6574,7 @@ msgstr "Lokacija"
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:83
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:82
 msgid "Vendor"
-msgstr ""
+msgstr "Proizvođač"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:88
 msgid "Created"
@@ -6555,7 +6595,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/ThirdPartySearchResult.java:183
 msgid "View in Browser..."
-msgstr ""
+msgstr "Vidi u pretrazivacu..."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:56
 msgid "Sharing Extensions"
@@ -6569,11 +6609,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:82
 msgid "My Extensions"
-msgstr ""
+msgstr "Moji dodatci"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:83
 msgid "Other"
-msgstr ""
+msgstr "Ostalo"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:292
 msgid "To allow selection enable sharing of sensitive types."
@@ -6585,11 +6625,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:486
 msgid "Add New Extension"
-msgstr ""
+msgstr "Dodaj novu ekstenziju"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:487
 msgid "Add a New Extension to My Extensions"
-msgstr ""
+msgstr "Dodaj novu ekstenziju u moje ekstenzije"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:491
 msgid "Enter the extension pattern:"
@@ -6619,11 +6659,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:747
 msgid "File types you added to share."
-msgstr ""
+msgstr "Tipovi dokumenata dodani u djeljenje..."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:751
 msgid "Other types of files."
-msgstr ""
+msgstr "Ostali tipovi dokumenata"
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:29
 #, java-format
@@ -6652,11 +6692,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:75
 msgid "\".torrent\" files"
-msgstr ""
+msgstr ".torrent dokumenti"
 
 #: gui/com/limegroup/gnutella/gui/shell/LimeAssociations.java:87
 msgid "\"magnet:\" links"
-msgstr ""
+msgstr "\"magnet\" veze"
 
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:48
 msgid ""
@@ -6666,29 +6706,29 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:50
 msgid "Details"
-msgstr ""
+msgstr "Detalji"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:122
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:236
 msgid "Idle"
-msgstr ""
+msgstr "Neiskorišteno"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:292
 msgid "Sorry, the browser could not be loaded."
-msgstr ""
+msgstr "Oprostite, pretrazivac nije moguce ucitaiti"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:320
 msgid "Go"
-msgstr ""
+msgstr "Kreni"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:366
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:134
 msgid "Back"
-msgstr ""
+msgstr "Nazad"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:378
 msgid "Forward"
-msgstr ""
+msgstr "Naprijed"
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:46
 msgid "Revert To Default"
@@ -6712,7 +6752,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:186
 msgid "You cannot turn off all columns."
-msgstr ""
+msgstr "Sve kolone se ne mogu iskljuciti"
 
 #: gui/com/limegroup/gnutella/gui/tabs/ConnectionsTab.java:27
 msgid "Show Connections to Other Clients"
@@ -6810,11 +6850,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:66
 msgid "Transfer Interrupted"
-msgstr ""
+msgstr "Prijenos ometen"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:78
 msgid "File Not Found"
-msgstr ""
+msgstr "Datoteka nije pronađena"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:84
 msgid "Queued at"
@@ -6822,7 +6862,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:90
 msgid "Range Unavailable"
-msgstr ""
+msgstr "Opseg nedostupan"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:96
 msgid "Malformed Request"
@@ -6871,15 +6911,15 @@ msgstr "Download-aj sve označene file-ove."
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:43
 msgid "No Write Permission"
-msgstr ""
+msgstr "Bez prava pisanja"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:46
 msgid "Folder Does Not Exist"
-msgstr ""
+msgstr "Direktorij ne postoji"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:49
 msgid "File Already Exists"
-msgstr ""
+msgstr "Datoteka već postoji"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:52
 msgid "Filename Taken"
@@ -6892,7 +6932,7 @@ msgstr "Nanovo ucitaj direktorije za razmjenu."
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:58
 msgid "Not a File"
-msgstr ""
+msgstr "Nije dokument"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:61
 msgid "Filesystem Error"
@@ -6929,7 +6969,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:102
 #, java-format
 msgid "A file already exists at {0}."
-msgstr ""
+msgstr "Dokument vec postoji na {0}."
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:106
 #, java-format
@@ -7057,7 +7097,7 @@ msgstr "Naslov:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:474
 msgid "Comment:"
-msgstr ""
+msgstr "Komentar:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:495
 msgid "Please enter the copyright holder, copright year and title."
@@ -7140,11 +7180,11 @@ msgstr "Ništa za spremiti."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:181
 msgid "File not found or corrupt file. Data could not be saved"
-msgstr ""
+msgstr "Dokument nije nadjen ili je ostecen. Podaci nisu sacuvani"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:184
 msgid "Read Write Error. Data could not be saved."
-msgstr ""
+msgstr "Read Write Error. Podaci nisu sacuvani."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:187
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:190
@@ -7158,7 +7198,7 @@ msgstr "Unesen neispravni format. Promjene neće biti spremljene."
 #. unable to remove or write to disk
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:227
 msgid "Unable to remove data."
-msgstr ""
+msgstr "Nemoguce ukloniti podatke"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:37
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:55
@@ -7193,7 +7233,7 @@ msgstr "Vrsta:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:43
 msgid "Track:"
-msgstr ""
+msgstr "Zapis:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:45
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:59
@@ -7252,7 +7292,7 @@ msgstr "Vrsta dozvole"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:64
 msgid "Director:"
-msgstr ""
+msgstr "Urednik:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:65
 #, fuzzy
@@ -7261,7 +7301,7 @@ msgstr "Studio"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:67
 msgid "Stars: (Please separate with comma)"
-msgstr ""
+msgstr "Zvijezde: (Molim razdvojite sa zarezom)"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:68
 msgid "Producer: (Please separate with comma)"
@@ -7290,7 +7330,7 @@ msgstr "Izdavač"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:81
 msgid "Platform:"
-msgstr ""
+msgstr "Platforma:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:87
 msgid "Description:"
@@ -7298,7 +7338,7 @@ msgstr "Opis:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:116
 msgid "MPEG-1 Audio Layer 3"
-msgstr ""
+msgstr "MPEG-1 Audio Sloj 3"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:118
 msgid "MPEG-4 Audio"
@@ -7306,9 +7346,11 @@ msgstr "MPEG-4 zvuk"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:120
 msgid "Ogg Vorbis"
-msgstr ""
+msgstr "Ogg Vorbis"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:111
 msgid ""
 "Unknown file type. Please choose the type that best describes this file."
 msgstr ""
+"Nepoznat tip dokumenta. Molim vas da obaberete tip koji najbolje opisuje "
+"ovaj dokument."

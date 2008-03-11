@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-01-08 19:03+0000\n"
-"Last-Translator: sunnevaomars <Unknown>\n"
+"PO-Revision-Date: 2008-03-10 21:05+0000\n"
+"Last-Translator: Einar Örn <einarkrist@gmail.com>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-03-07 16:25+0000\n"
+"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -417,14 +417,13 @@ msgstr ""
 "harða disknum."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
-#, fuzzy
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
 "LimeWire gat ekki opnað nauðsynlega skrá vegna þess að annað forrit hefur "
-"lokað skráinni. LimeWire mun kannski grípa í á óvæntan hátt þangað til þessi "
-"skrá er gefin út."
+"læst skránni. LimeWire kann að hegða sér ófyrirsjáanlega þangað til að þessi "
+"skrá er aflæst."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:54
 msgid ""
@@ -433,7 +432,8 @@ msgid ""
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
 "LimeWire gat ekki skrifað nauðsynlega skrá vegna þess að þú hefur ekki "
-"nauðsynlega leyfið.Beiðni þín"
+"tilskilin leyfi. Stillingar þínar gætu ófyrirsjáanlega ekki viðhaldist næst "
+"þegar þú ræsir LimeWire, eða LimeWire kann að hegða sér ófyrirsjáanlega."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:56
 msgid ""
@@ -441,29 +441,40 @@ msgid ""
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
 msgstr ""
+"LimeWire getur ekki opnað nauðsynlega skrá vegna þess að skráarheitið "
+"inniheldur bókstafi sem eru ekki studdir af stýrikerfinu. LimeWire kann að "
+"hegða sér ófyrirsjáanlega."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:60
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
+"LimeWire getur ekki niðurhalið þessari tilteknu skrá vegna þess að rýmið á "
+"harða disknum er ekki til staðar. Til að niðurhala fleiri skrám, verður þú "
+"að búa til rými á harða disknum."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:62
-#, fuzzy
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr ""
-"LimeWire gat ekki notað valið skráarsafn til að geyma vistaðar skrár. "
-"Vinsamlegast viljið annað skráarsafn."
+"LimeWire gat ekki niðurhalið þessari tilteknu skrá vegna þess að hún er í "
+"notkun af öðru forriti. Vinsamlegast lokaðu hinu forritinu og reyndu "
+"niðurhalið aftur."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:64
+#, fuzzy
 msgid ""
 "LimeWire was unable to create or continue writing an incomplete file for the "
 "selected download because you do not have permission to write files to the "
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
+"LimeWire gat ekki búið til eða haldið áfram að skrifa skrá sem var ekki "
+"fullkláruð fyrir þetta valda niðurhal af því að þú hefur ekki tiltekin leyfi "
+"til að skrifa skrár í incomplete möppuna.  Til að halda áfram að nota "
+"LimeWire, vinsamlegast veljið aðra möppu til að vista skrár í."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:66
 msgid ""
@@ -471,6 +482,8 @@ msgid ""
 "because the filename contains characters which are not supported by your "
 "operating system."
 msgstr ""
+"LimeWire gat ekki opnað ókláruðu skránna fyrir þetta valda niðurhal af því "
+"að skáarheitið inniheldur bókstafi sem eru ekki studdir af stýrikerfinu."
 
 #: core/com/limegroup/gnutella/AcceptorImpl.java:283
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:35
@@ -478,6 +491,8 @@ msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
+"LimeWire gat ekki opnað port  til að hlusta á komandi tengingar. Sumir "
+"eiginleikar LimeWire gætu mögulega ekki virkað eins og ætlast er til."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:219
 msgid ""
@@ -485,6 +500,9 @@ msgid ""
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
+"Því miður, LimeWire gat ekki lesið gömlu niðurhölin þín. Þú getur endurræst "
+"þau með því að fara í Skráarsafnið þitt, skoðað 'Ókláraðar Skrár' , og "
+"smellt til 'Halda Áfram' niðurhölunum þínum."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:221
 msgid ""
@@ -492,20 +510,23 @@ msgid ""
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
 "to 'Resume' your downloads."
 msgstr ""
+"Því miður gat LimeWire ekki lesið sum af gömlu niðurhölunum þínum. Þú getur "
+"endurræst þau með því að fara í Skráarsafnið þitt, skoðað 'Ókláraðar Skrár' "
+", og smellt til að 'Halda Áfram' niðurhölunum þínum."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:319
 #, fuzzy
 msgid "Loading TLS Encryption..."
-msgstr "Hleð HTML-engine..."
+msgstr "Ræsi TLS dulkóðun..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:331
 #, fuzzy
 msgid "Loading Safe Content Management..."
-msgstr "Ræsi stale-connection management..."
+msgstr "Ræsi 'Öruggt Efni' Stjórnun..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:336
 msgid "Loading Message Router..."
-msgstr "Ræsi message-router..."
+msgstr "Ræsi Skilaboða Router..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:341
 msgid "Checking for Updates..."
@@ -514,77 +535,77 @@ msgstr "Athuga hvort til er uppfærsla..."
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:346
 #, fuzzy
 msgid "Loading Upload Management..."
-msgstr "Ræsi connection-management..."
+msgstr "Ræsi Upphals Stjórnun..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:356
 msgid "Loading Connection Listener..."
-msgstr "Ræsi connection-listener..."
+msgstr "Ræsi Tenginga Hlustanda..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:365
 msgid "Loading Connection Management..."
-msgstr "Ræsi connection-management..."
+msgstr "Ræsi Tenginga Stjórnun..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
 #, fuzzy
 msgid "Loading Download Management..."
-msgstr "Ræsi connection-management..."
+msgstr "Ræsi Niðurhals Stjórnun..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:380
 #, fuzzy
 msgid "Loading Ultrapeer/DHT Management..."
-msgstr "Ræsi stale-connection management..."
+msgstr "Ræsi Ultrapeer/DHT Stjórnun..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:385
 #, fuzzy
 msgid "Locating Peers..."
-msgstr "Ræsi peer-listener..."
+msgstr "Staðset Jafnoka. . ."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:401
 #, fuzzy
 msgid "Loading Shared Files..."
-msgstr "Ræsi saved-files..."
+msgstr "Ræsi Deildum Skrám..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:406
 msgid "Loading BitTorrent Management..."
-msgstr ""
+msgstr "Ræsi BitTorrent Stjórnun..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:412
 msgid "Loading Old Downloads..."
-msgstr "Ræsi old-downloads..."
+msgstr "Ræsi Gömul Niðurhöl..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:417
 msgid "Attaching LimeWire Store Listeners..."
-msgstr ""
+msgstr "Tengi LimeWire Verslunar Hlustendur..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:422
 msgid "Loading Directed Querier..."
-msgstr "Ræsi directed-querier..."
+msgstr "Ræsi Stýrðum Fyrirspurnum..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:427
 msgid "Loading Magnet Listener..."
-msgstr "Ræsi MAGNET-listener..."
+msgstr "Ræsi Magnet Hlustun..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:438
 msgid "Loading Peer Listener..."
-msgstr "Ræsi peer-listener..."
+msgstr "Ræsi Jafnoka Hlustun..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:443
 msgid "Loading Stale Connection Management..."
-msgstr "Ræsi stale-connection management..."
+msgstr "Ræsi 'Stöðnuð Tenging' Stjórnun..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:448
 msgid "Loading Saved Files..."
-msgstr "Ræsi saved-files..."
+msgstr "Ræsi Vistaðar Skrár..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:453
 #, fuzzy
 msgid "Loading Spam Management..."
-msgstr "Ræsi connection-management..."
+msgstr "Ræsi Ruslniðurstöðu Stjórnun"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:458
 #, fuzzy
 msgid "Loading Network Listeners..."
-msgstr "hleð net hlustanda"
+msgstr "Hleð Netkerfis Hlustendur..."
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
@@ -603,14 +624,14 @@ msgstr "Forrit"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:87
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
 msgid "Audio"
-msgstr ""
+msgstr "Hljóðskár"
 
 #: core/com/limegroup/gnutella/MediaType.java:49
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
 msgid "Video"
-msgstr "Vídeó"
+msgstr "Myndskeið"
 
 #: core/com/limegroup/gnutella/MediaType.java:50
 msgid "Images"
@@ -621,7 +642,7 @@ msgstr "Myndir"
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:124
 #, java-format
 msgid "Could not process bad MAGNET link {0}"
-msgstr ""
+msgstr "Gat ekki unnið úr lélegum MAGNET hlekk {0}"
 
 #. show warning but proceed
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:189
@@ -631,63 +652,64 @@ msgid ""
 "One or more URLs in the MAGNET link were invalid. Your file may not download "
 "correctly."
 msgstr ""
-"Einn eða fleiri URL-ar í MEGNET hlekknum voru ógildir.Skjalið þitt mun ekki "
-"hlaðasti rétt."
+"Ein eða fleiri vefsíðuslóð í MAGNET hlekknum voru ógild. Skráin þín gæti átt "
+"á hættu á því að hlaðast rangt niður."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:200
 #, java-format
 msgid "You have already downloaded {0}"
-msgstr ""
+msgstr "Þú hefur nú þegar náð í {0}"
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:205
 #, fuzzy, java-format
 msgid "You are already downloading this file to {0}"
-msgstr "Þú hefur þegar nákvæmlega eins skrá í {0}"
+msgstr "Þú ert nú þegar að niðurhala þessari skrá í {0}"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:71
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:42
 msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "Fyrir Turbo-Charged niðurstöður fáðu LimeWire PRO"
+msgstr "Fyrir Turbo-Hlaðnar niðurstöður náðu í LimeWire PRO útgáfuna."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:75
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:46
 msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr "Styddu LimeWire's peer-to-peer þræounina.Fáðu þér PRO."
+msgstr "Styddu LimeWire jafnoka-til-jafnoka (p2p) þróunina. Fáðu þér PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:79
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:50
 msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr "Kauptu LimeWire PRO til að hjálpa okkur að gera niðurhalið fljótar."
+msgstr "Kauptu LimeWire PRO til að hjálpa okkur að gera niðurhöl fljótari."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:82
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:53
 msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr "Fyrir Turbo-Charged...."
+msgstr "Fyrir Turbo-Hlaðin niðurhöl náðu í LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:85
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:56
 msgid "Support open networks. Get LimeWire PRO."
-msgstr "Studdu opin net.Fáðu þér LimeWire PRO."
+msgstr "Studdu opin netkerfi. Náðu í LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:89
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:60
 msgid "Support open source and open protocols. Get LimeWire PRO."
-msgstr "Studdu opnar heimildir og opin frumskjöl. Fáðu þér LimeWire PRO."
+msgstr ""
+"Styddu opnar uppsprettur og opnar samskiptaaðferðir. Náðu í LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:92
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:63
 msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr "Fyrir Turbo-Charged frammistöðu fáðu LimeWire PRO."
+msgstr "Fyrir Turbo-Hlaðna frammistöðu náðu í LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:95
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:66
 msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr "Haltu internetinu opnu.Fáðu þér LimeWire PRO."
+msgstr "Haltu Internetinu opnu. Náðu í LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:98
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:69
 msgid "Developing LimeWire costs real money. Get PRO."
-msgstr "Að þróa LimeWire kostar mikið. Fáðu þér PRO."
+msgstr "Þróun LimeWire kostar peninga. Náðu í PRO."
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:88
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:104
@@ -695,7 +717,6 @@ msgstr "Að þróa LimeWire kostar mikið. Fáðu þér PRO."
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:131
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:282
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:49
-#, fuzzy
 msgid "Title"
 msgstr "Titill"
 
@@ -705,27 +726,26 @@ msgstr "Titill"
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:57
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:42
 msgid "Artist"
-msgstr "Höfundur"
+msgstr "Flytjandi"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:90
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:286
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:58
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:65
-#, fuzzy
 msgid "Album"
-msgstr "Um LimeWire..."
+msgstr "Albúm"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:91
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:288
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:98
 msgid "Genre"
-msgstr ""
+msgstr "Stíll"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:92
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:290
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:73
 msgid "Track"
-msgstr ""
+msgstr "Lag"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:93
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:109
@@ -735,7 +755,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:80
 #, fuzzy
 msgid "Type"
-msgstr "Tegund:"
+msgstr "Skráartegund"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:94
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:110
@@ -756,26 +776,24 @@ msgstr "Ár"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
 #, fuzzy
 msgid "Language"
-msgstr "Tungumál:"
+msgstr "Tungumál"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:97
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:121
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:296
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:82
 msgid "Bitrate"
-msgstr "Bitahraði"
+msgstr "Bitatíðni"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:98
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:115
-#, fuzzy
 msgid "Comments"
 msgstr "Athugasemdir"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:99
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
-#, fuzzy
 msgid "Action"
-msgstr "Staðsetning"
+msgstr "Aðgerð"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
@@ -793,11 +811,11 @@ msgstr "Tegund heimildar"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:105
 msgid "Director"
-msgstr "Forstjóri"
+msgstr "Leikstjóri"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:106
 msgid "Producer"
-msgstr ""
+msgstr "Framleiðandi"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:107
 #, fuzzy
@@ -807,35 +825,33 @@ msgstr "Hljóðver"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 #, fuzzy
 msgid "Stars"
-msgstr "Tengist"
+msgstr "Stjörnur"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
 msgstr "Textar"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
-#, fuzzy
 msgid "Rating"
-msgstr "Óska eftir skrá, bíð"
+msgstr "Stigagjöf"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:119
 #, fuzzy
 msgid "Height"
-msgstr "Svör"
+msgstr "Hæð"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:120
 msgid "Width"
-msgstr ""
+msgstr "Breidd"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
-#, fuzzy
 msgid "Image"
-msgstr "Myndir"
+msgstr "Mynd"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
 msgid "Description"
-msgstr ""
+msgstr "Lýsing"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:127
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:134
@@ -844,27 +860,25 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:263
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:42
 msgid "License"
-msgstr ""
+msgstr "Leyfi"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:71
-#, fuzzy
 msgid "Document"
-msgstr "Textaskrár"
+msgstr "Textaskrá"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
 msgid "Topic"
-msgstr ""
+msgstr "Viðfangsefni"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
 msgid "Author"
-msgstr ""
+msgstr "Höfundur"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
-#, fuzzy
 msgid "Application"
-msgstr "Staðsetning"
+msgstr "Notkun"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:367
@@ -872,26 +886,24 @@ msgstr "Staðsetning"
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:34
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:53
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:219
-#, fuzzy
 msgid "Name"
-msgstr "Endurnefna"
+msgstr "Heiti"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Publisher"
-msgstr ""
+msgstr "Útgefandi"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 msgid "Platform"
-msgstr ""
+msgstr "Stýrikerfi"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:105
 msgid "The selected .torrent file may contain a security hazard."
-msgstr ""
+msgstr "Valda .torrent skráin getur innihaldið öryggis áhættu."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:107
-#, fuzzy
 msgid "LimeWire could not download a .torrent file from the provided URL."
-msgstr "Niðurhala torrent skrá frá veraldarvefnum"
+msgstr "LimeWire gat ekki niðurhalið .torrent skrá frá gefinni vefslóð."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:35
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:539
@@ -899,6 +911,8 @@ msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
+"Ef að þú stoppar þetta upphal, mun torrent skráin stoppa. Ertu viss um að þú "
+"viljir gera þetta?"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:38
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:544
@@ -906,20 +920,20 @@ msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
+"Þetta upphal er torrent og hefur ekki deilt nóg. Þú ættir að leyfa því að "
+"deila lengur. Ertu viss um að þú viljir stöðva það?"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:16
-#, fuzzy
 msgid "Automatically start torrents"
-msgstr "Skruna sjálfkrafa"
+msgstr "Byrja sjálfkrafa torrent skrár"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:18
-#, fuzzy
 msgid ""
 "You can choose whether to automatically start torrents downloaded from "
 "Gnutella."
 msgstr ""
-"Þú getur valið hvort skrár sem hafa verið vistaðar hreinsist úr listanum "
-"sjálfkrafa."
+"Þú getur valið hvort eigi að byrja torrent skrár sjálfkrafa sem hefur verið "
+"niðurhalið frá Gnutella."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:26
 #, fuzzy
@@ -928,7 +942,7 @@ msgstr "Ræsa sjálfvirkt"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:36
 msgid "BitTorrent Settings"
-msgstr ""
+msgstr "BitTorrent Stillingar"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:38
 msgid ""
@@ -937,6 +951,10 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"Þú getur valið hvort að LimeWire eigi að sjá um BitTorrent "
+"samkskiptaaðferðir þínar sjálfkrafa. Það er ráðlagt að LimeWire sjái um "
+"þessar stillingar. Ógildar eða óviðeigandi gildi gætu valdið verulegum "
+"frammistöðu- og/eða minnisvandamálum."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
 msgid ""
@@ -944,30 +962,33 @@ msgid ""
 "memory problems. Unless you really know what you're doing, it is highly "
 "recommended that you let LimeWire manage these settings."
 msgstr ""
+"Ógild eða óviðeigandi sérsniðin gildi gætu valdið verulegum frammistöðu- "
+"og/eða minnisvandamálum. Ef að þú veist ekki hvað þú ert að gera, er mælt "
+"með því að þú látir LimeWire um þessar stillingar."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:77
 msgid "Let LimeWire manage my BitTorrent settings. (Recommended)"
-msgstr ""
+msgstr "Leyfa LimeWire að sjá um BitTorrent stillingarnar mínar. (Ráðlagt)"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:85
 msgid "Maximum uploads per torrent"
-msgstr ""
+msgstr "Hámarks upphal fyrir hvert torrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:91
 msgid "Minimum uploads per torrent"
-msgstr ""
+msgstr "Lágmarks upphal fyrir hvert torrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:97
 msgid "Safe chunk verification"
-msgstr ""
+msgstr "Staðfesting á öruggu broti"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:103
 msgid "Experimental disk access"
-msgstr ""
+msgstr "Tilrauna disk aðgangur"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:81
 msgid "Internal Error"
-msgstr ""
+msgstr "Innvortis villa"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:392
 msgid ""
@@ -976,62 +997,59 @@ msgid ""
 "'Send' to notify LimeWire about the problem. If desired, you can click "
 "'Review' to look at the information that will be sent. Thank you."
 msgstr ""
-"Upp hefur komið innbyggð villa við keyrslu á LimeWire. Samt sem áður getur "
-"LimeWire lagað þessa villu og ætti að starfa eðlilega. To aid with "
-"debugging, please click 'Send' to notify LimeWire about the problem. If "
-"desired, you can click 'Review' to look at the information that will be "
-"sent. Thank you."
+"Upp hefur komið innvortis villa í LimeWire. Það er mögulegt fyrir LimeWire "
+"að ná sér og halda áfram að keyra venjulega. Til að hjálpa til við að finna "
+"villur í hugbúnaðinum, vinsamlegast smelltu á 'Senda' til að tilkynna "
+"LimeWire um vandamálið. Ef þess óskast, er hægt að smella á 'Fara yfir' til "
+"að skoða upplýsingarnar sem verða sendar. Takk fyrir."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:394
-#, fuzzy
 msgid ""
 "LimeWire has encountered an internal error. It is possible for LimeWire to "
 "recover and continue running normally. To continue using LimeWire, click "
 "'Discard'. If desired, you can click 'Review' to look at the information "
 "about the error."
 msgstr ""
-"Upp hefur komið innbyggð villa við keyrslu á LimeWire. Samt sem áður getur "
-"LimeWire lagað þessa villu og ætti að starfa eðlilega. To aid with "
-"debugging, please click 'Send' to notify LimeWire about the problem. If "
-"desired, you can click 'Review' to look at the information that will be "
-"sent. Thank you."
+"Upp hefur komið innvortis villa í LimeWire. Það er mögulegt fyrir LimeWire "
+"að ná sér og halda áfram að keyra venjulega. Til að halda áfram að nota "
+"LimeWire, smelltu á 'Hafna'. Ef þess óskast, er hægt að smella á 'Fara yfir' "
+"til að skoða upplýsingar um villuna."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:412
 msgid ""
 "Please add any comments you may have (e.g what caused the error). \n"
 "Thank you and please use English."
 msgstr ""
+"Vinsamlegast bættu við þeim athugasemdum sem þú vilt koma á framfæri (t.d. "
+"hvað orsakaði villuna).\n"
+"Takk fyrir og vinsamlegast notið Ensku."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:432
-#, fuzzy
 msgid "Send"
-msgstr "Forrit"
+msgstr "Senda"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:441
-#, fuzzy
 msgid "Review"
-msgstr "Forsýna"
+msgstr "Fara yfir"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:455
 msgid "Discard"
-msgstr ""
+msgstr "Hafna"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:472
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
-#, fuzzy
 msgid "Always Send Immediately"
-msgstr "Loka forriti strax"
+msgstr "Ávallt Senda Samstundis"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:473
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
-#, fuzzy
 msgid "Always Ask For Review"
-msgstr "Spyrja alltaf"
+msgstr "Ávallt Spyrja Um Yfirferð"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:474
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Always Discard All Errors"
-msgstr ""
+msgstr "Ávallt Hafna Öllum Villum"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:573
 msgid ""
@@ -1039,10 +1057,14 @@ msgid ""
 "bug report. For further help and to aid with debugging, please visit "
 "www.limewire.com and click 'Support'. Thank you."
 msgstr ""
+"LimeWire gat ekki tengst villunetþjóninum til að senda villuskýrsluna hér "
+"fyrir neðan. Fyrir nánari hjálp og til að hjálpa til við villuleit í "
+"hugbúnaði, vinsamlegast heimsæktu www.limewire.com og smelltu á 'Support'. "
+"Takk fyrir."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:602
 msgid "Copy Report"
-msgstr ""
+msgstr "Afrita Skýrslu"
 
 #. Add an OK button out of the window.
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:610
@@ -1056,11 +1078,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:144
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:221
 msgid "OK"
-msgstr ""
+msgstr "Í Lagi"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
 msgid "Automatically Scroll"
-msgstr "Skruna sjálfkrafa"
+msgstr "Skruna Sjálfkrafa"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:64
 msgid "About LimeWire"
@@ -1069,9 +1091,8 @@ msgstr "Um LimeWire"
 #. set up limewire version label
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:80
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:35
-#, fuzzy
 msgid "LimeWire"
-msgstr "LimeWire &PRO"
+msgstr "LimeWire"
 
 #. set up close button
 #. *
@@ -1085,7 +1106,7 @@ msgstr "&Loka"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:106
 msgid "Close This Window"
-msgstr "Loka Um LimeWire glugganum."
+msgstr "Loka Þessum Glugga"
 
 #. introduction
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:177
@@ -1099,6 +1120,14 @@ msgid ""
 "collection of protocols that is constantly improving -- a testament to the "
 "power of open protocols and open standards."
 msgstr ""
+"Hvatt áfram af eiganda LimeWire, Mark Gorton, LimeWire verkefnið er samunnið "
+"<a href=\"http://www.limewire.org/\">Open source forritunar viðleitni</a> "
+"sem felur í sér tölvufræðinga og rannsóknarmenn allstaðar að úr heiminum. "
+"Samstarfs eiginleikar Gnutella er einnig endurspeglað í Gnutella Developers "
+"Forum spjallborðinu (GDF), sem LimeWire er þáttakandi í. Meðlimir í GDF "
+"vinna í skotgröfunum hvern einasta dag til að gera Gnutella að nýjungagjörnu "
+"safni af samskiptaaðferðum sem er í stöðugri þróun -- vitnisburður um mátt "
+"opinna samskiptaaðferða og opinna staðla."
 
 #. developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:181
@@ -1106,6 +1135,8 @@ msgid ""
 "LimeWire is also, of course, the result of the countless hours of work by "
 "LimeWire's developers:"
 msgstr ""
+"LimeWire er einnig, að sjálfsögðu, árangur ótalmargra tíma af vinnu "
+"framleiðenda LimeWire:"
 
 #. business developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:199
@@ -1113,6 +1144,8 @@ msgid ""
 "Behind the scenes business strategy and day-to-day affairs are handled by "
 "LimeWire's business developers:"
 msgstr ""
+"'Bak við tjöldin' viðskipta stefnumótun og dagleg atvik annast "
+"viðskiptahönnuðir LimeWire:"
 
 #. web developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:211
@@ -1120,12 +1153,15 @@ msgid ""
 "The LimeWire <a href=\"http://www.limewire.com/\">web site</a> and LimeWire "
 "graphic design are the hard work of LimeWire's web team:"
 msgstr ""
+"LimeWire <a href=\"http://www.limewire.com/\">vefsíðan</a> og grafísk hönnun "
+"LimeWire er dugnaður vefteymis LimeWire:"
 
 #. support staff
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:218
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
 msgstr ""
+"LimeWire PRO spurningum er samviskusamlega svarað af tækniaðstoð LimeWire:"
 
 #. previous developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:228
@@ -1133,6 +1169,8 @@ msgid ""
 "In addition, the following individuals have worked on the LimeWire team in "
 "the past but have since moved on to other projects:"
 msgstr ""
+"Til viðbótar, hafa eftirfarandi einstaklingar unnið í LimeWire teyminu á "
+"árum áður en hafa í dag farið í önnur verkefni:"
 
 #. open source contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:258
@@ -1142,6 +1180,11 @@ msgid ""
 "have either written code that is distributed with every version of LimeWire, "
 "have identified serious bugs in the code, or both:"
 msgstr ""
+"LimeWire Open Source stuðningsaðilar hafa einnig lagt verkefninu "
+"þýðingarmikinn kóða og lagfæringar á kóða, hugmyndir, rannsóknir, o.s.frv. "
+"Þeir einstaklingar sem taldir eru upp hér að neðan hafa annaðhvort skrifað "
+"kóða sem er dreift með hverri útgáfu af LimeWire, hafa bent á alvarlega "
+"galla, eða bæði:"
 
 #. internationalization contributors
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:295
@@ -1150,6 +1193,9 @@ msgid ""
 "internationalization project, both for the application itself and for the "
 "LimeWire web site."
 msgstr ""
+"LimeWire vill einnig þakka hinum mörgu stuðningsaðilum sem hafa hjálpað til "
+"við að gera verkefnið alþjóðlegt, bæði fyrir forritið sjálft og fyrir "
+"vefsíðu LimeWire."
 
 #. community VIPs
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:299
@@ -1157,6 +1203,8 @@ msgid ""
 "Several colleagues in the Gnutella community merit special thanks. These "
 "include:"
 msgstr ""
+"Nokkrir samstarfsmenn í Gnutella samfélaginu verðskulda sérstakar þakkir. "
+"Þeir eru:"
 
 #. conclusion
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:320
@@ -1165,25 +1213,28 @@ msgid ""
 "developers, users, and all others who have contributed their ideas to the "
 "project. Without LimeWire users, the LimeWire network would not exist."
 msgstr ""
+"Að lokum, vill LimeWire senda innilegar þakkir til þessara hönnuða, notenda, "
+"og allra annara sem hafa lagt hugmyndir sínar að mörkum til verkefnisins. Án "
+"LimeWire notenda, myndi LimeWire netið ekki vera til staðar."
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:325
 msgid ""
 "BitTorrent, the BitTorrent Logo, and Torrent are trademarks of BitTorrent, "
 "Inc."
 msgstr ""
+"BitTorrent, BitTorrent merkið, og Torrent eru vörumerki BitTorrent, Inc."
 
 #. *
 #. * The select all action.
 #. 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:606
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:74
-#, fuzzy
 msgid "Select All"
-msgstr "Afvelja allt"
+msgstr "Velja Allt"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:608
 msgid "Marks all Items as Selected"
-msgstr "Merkja allt valið"
+msgstr "Merkir alla Hluti sem Valið"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:626
 msgid "Deselect All"
@@ -1191,16 +1242,16 @@ msgstr "Afvelja allt"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:628
 msgid "Deselects all Items in the List"
-msgstr "Afvelja allar færslur"
+msgstr "Afvelur alla hluti í listanum"
 
 #: gui/com/limegroup/gnutella/gui/ClearableAutoCompleteTextField.java:316
 msgid "Clear History"
-msgstr ""
+msgstr "Hreinsa feril"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:165
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:40
 msgid "Apply"
-msgstr "Staðfesta"
+msgstr "Virkja"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:172
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:802
@@ -1211,27 +1262,27 @@ msgstr "Hreinsa"
 #: gui/com/limegroup/gnutella/gui/Console.java:179
 #, fuzzy
 msgid "Save"
-msgstr "Vista sem"
+msgstr "Vista"
 
 #. default the delay time to zero (ie, live
 #. updates).
 #: gui/com/limegroup/gnutella/gui/Console.java:188
 msgid "Delay: "
-msgstr ""
+msgstr "Töf: "
 
 #: gui/com/limegroup/gnutella/gui/Console.java:618
 msgid "Save As"
-msgstr "Vista sem"
+msgstr "Vista Sem"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:121
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:96
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:174
 msgid "What's New"
-msgstr ""
+msgstr "Hvað er nýtt"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:122
 msgid "Creative Commons"
-msgstr ""
+msgstr "Creative Commons"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:182
 msgid ""
@@ -1239,6 +1290,9 @@ msgid ""
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under iTunes -> Sharing."
 msgstr ""
+"LimeWire varð fyrir villu í Digital Audio Access Protocol (til að deila "
+"skrám í iTunes). Slökkt verður á þessum eiginleika. Þú getur kveikt á honum "
+"aftur í stillingum, undir ITunes -> Samnýting."
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:326
 msgid ""
@@ -1248,6 +1302,12 @@ msgid ""
 "information if you want to use this feature. Click 'Yes' to go to the patch, "
 "'No' to disable this feature, or 'Cancel' to decide later."
 msgstr ""
+"LimeWire gat ekki ræst Digital Audio Access Protocol (til að deila skrám í "
+"iTunes) vegna þess að Microsoft endurbót er nauðsynleg eða að eldveggur sé "
+"að hindra aðgang. LimeWire getur stýrt þér á síðu Microsofts með upplýsingum "
+"ef að þú vilt nota þennan eiginleika. Smelltu á 'Já' til að ná í "
+"endurbótina, 'Nei' til að gera þennan eiginleika óvirkan, eða 'Hætta við' "
+"til að ákveða seinna."
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:339
 msgid ""
@@ -1257,6 +1317,11 @@ msgid ""
 "full access to incoming and outgoing connections. To disable this feature, "
 "click 'No'."
 msgstr ""
+"LimeWire gat ekki ræst Digital Audio Access Protocol (til að deila skrám í "
+"iTunes) vegna þess að eldveggur er að hindra aðgang. Til að nota þennan "
+"eiginleika áfram, smelltu á 'Já' og breyttu eldveggnum svo að hann leyfi "
+"'LimeWire.exe' fullan aðgang að tengingum  til og frá. Til að gera þennan "
+"eiginleika óvirkan, smelltu á 'Nei' ."
 
 #. NOTE: The IDs are serialized to disk, and should never change.
 #. *
@@ -1301,7 +1366,7 @@ msgstr "Nei"
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:244
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:136
 msgid "Cancel"
-msgstr ""
+msgstr "Hætta við"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:80
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:98
@@ -1311,7 +1376,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:445
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:464
 msgid "Select Folder"
-msgstr "Velja skráarsafn"
+msgstr "Velja Möppu"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:99
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:121
@@ -1327,16 +1392,15 @@ msgstr "Velja skráarsafn"
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:508
 #, fuzzy
 msgid "Select"
-msgstr "Velja skráarsafn"
+msgstr "Velja"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:812
-#, fuzzy
 msgid "All Folders"
-msgstr "Leyfa 'Freeloadera':"
+msgstr "Allar Möppur"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:48
 msgid "View My Shared Files."
-msgstr ""
+msgstr "Skoða Deiliskrár"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:81
 #, java-format
@@ -1345,6 +1409,9 @@ msgid ""
 "indicates a potential security problem, so please review your \"My Shared "
 "Files\" to ensure you aren't sharing any sensitive files."
 msgstr ""
+"Þú ert að deila of mörgum undirmöppum í deilimöppu: {0}. Þetta gefur til "
+"kynna hugsanlegt öryggis vandamál, vinsamlegast endurskoðaðu \"Deiliskrárnar "
+"Mínar\" til að ganga úr skugga um að þú sért ekki að deila viðkvæmum skrám."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:94
 #, java-format
@@ -1353,20 +1420,24 @@ msgid ""
 "you mean to share all these files? Please review your sharing settings and "
 "which files are shared to ensure you aren't sharing any sensitive files."
 msgstr ""
+"Þú ert að deila mörgum skrám í gegnum LimeWire, {0} skrám og fer hækkandi. "
+"Er ætlunin að deila öllum þessum skrám? Vinsamlegast farðu yfir deili "
+"stillingar og hvaða skrár eru í deilingu til að ganga úr skugga um að þú "
+"sért ekki að deila viðkvæmum skrám."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:106
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:107
 msgid "Do not display this message again."
-msgstr ""
+msgstr "Ekki sýna þessi skilaboð aftur."
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:81
 msgid "Dial Up"
-msgstr ""
+msgstr "Innhringi Módem"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:38
 msgid "Broadband"
-msgstr ""
+msgstr "Breiðband"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:40
 msgid "T1"
@@ -1378,7 +1449,7 @@ msgstr "T3 eða betra"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:44
 msgid "Ethernet"
-msgstr "Ethernet"
+msgstr "Ljósvakanet"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:117
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1534
@@ -1388,42 +1459,45 @@ msgid ""
 "automatically keep trying to connect you to the network unless you select "
 "\"Disconnect\" from the File menu."
 msgstr ""
+"Svo virðist sem engin virk Internet tenging sé til staðar eða að eldveggur "
+"sé að hindra aðgang LimeWire að internetinu. LimeWire mun halda áfram að "
+"reyna að tengja þig við netkerfið nema að þú veljir \"Aftengja\" í Skrár "
+"valmyndinni."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:126
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:25
 #, fuzzy
 msgid "&Search"
-msgstr "leitirnar"
+msgstr "&Leita"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:127
-#, fuzzy
 msgid "&Monitor"
-msgstr "Eftirlit"
+msgstr "&Eftirlit"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:128
 #, fuzzy
 msgid "&Connections"
-msgstr "Líkur:"
+msgstr "&Tengingar"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:129
 #, fuzzy
 msgid "&Library"
-msgstr "Skráarsafnið"
+msgstr "&Skráarsafn"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:130
 #, fuzzy
 msgid "C&onsole"
-msgstr "&Tengjast"
+msgstr "Stjórn&borð"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:131
 msgid "Lo&gging"
-msgstr ""
+msgstr "&Atburðaskrá"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:148
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:172
 #, java-format
 msgid "Display the {0} Screen"
-msgstr ""
+msgstr "Sýna {0} skjáinn"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:263
 msgid "LimeWire: Enabling Open Information Sharing"
@@ -1439,7 +1513,7 @@ msgid ""
 "then click the 'Run this program in compatibility mode for' check box, and "
 "then select 'Windows 2000' in the box below the check box. Then click the "
 "'OK' button at the bottom and restart LimeWire."
-msgstr ""
+msgstr "LimeWire varð var"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:524
 msgid ""
@@ -1449,6 +1523,11 @@ msgid ""
 "Please note: LimeWire cannot monitor or control the content of the Gnutella "
 "network. Please respect your local copyright laws."
 msgstr ""
+"LimeWire fann ekki gilt leyfi fyrir þessa skrá. Niðurhala skrá engu að "
+"síður?\n"
+"\n"
+"Vinsamlegast athugið: LimeWire getur ekki vaktað eða stjórnað innihaldi á "
+"Gnutella netkerfinu. Vinsamlegast virtu höfundarréttarlögin í þínu umdæmi."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1441
 #, java-format
@@ -1456,6 +1535,7 @@ msgid ""
 "LimeWire could not locate your web browser to display the following webpage: "
 "{0}."
 msgstr ""
+"LimeWire gat ekki fundið vafra til að birta eftirfarandi heimasíðu: {0}."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1460
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1483
@@ -1470,6 +1550,9 @@ msgid ""
 "\n"
 "Executed command: {0}."
 msgstr ""
+"LimeWire gat ekki ræst eftirfarandi skrá.\n"
+"\n"
+"Framkvæmd aðgerð: {0}."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1465
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1488
@@ -1531,10 +1614,14 @@ msgid ""
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under iTunes -> Sharing."
 msgstr ""
+"LimeWire gat ekki ræst Digital Audio Access Protocol Service (til að deila "
+"skrám í iTunes). Slökkt verður á þessum eiginleika. Þú getur kveikt á honum "
+"aftur í stillingum, undir iTunes -> Samnýting."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:544
 msgid "This Alpha version has expired.  Press Ok to exit. "
 msgstr ""
+"Þessi Alpha útgáfa er fallinn úr gildi. Smelltu á Allt í lagi til að hætta. "
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:550
 msgid ""
@@ -1543,6 +1630,10 @@ msgid ""
 "connections on the local machine. Please allow LimeWire access to the "
 "internet and restart LimeWire."
 msgstr ""
+"LimeWire gat ekki frumstillt og ræst sig. Í flestum tilfellum er það vegna "
+"þess að eldveggur hindrar aðgang LimeWire að internetinu eða vegna slaufu "
+"tenginga á vélinni. Vinsamlegast leyfið LimeWire að tengjast internetinu og "
+"endurræsið LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:556
 msgid ""
@@ -1555,6 +1646,15 @@ msgid ""
 "\n"
 "LimeWire will now exit.  Thank You."
 msgstr ""
+"LimeWire gat ekki búið til tímabundna möppu fyrir stillingar.\n"
+"\n"
+"Algengasta ástæðan fyrir þessu er að þú hefur ekki tilskylin réttindi á "
+"vélinni sem að þú ert að nota. Vinsamlegast gangið úr skugga um að LimeWire "
+"(og þú) hafi aðgang til að búa til skrár/möppur á vélinni. Ef að vandamálið "
+"heldur áfram, vinsamlegast heimsæktu www.limewire.com og smelltu á 'Support' "
+"hlekkinn.\n"
+"\n"
+"LimeWire mun nú hætta. Takk Fyrir."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:566
 #: gui/com/limegroup/gnutella/gui/MessageService.java:76
@@ -1586,6 +1686,9 @@ msgid ""
 "version is known to have caused problems with LimeWire. Please upgrade to "
 "the final 1.6.0 release.\n"
 msgstr ""
+"Þú ert að nota beta útgáfu eða óútgefna útgáfu af Java 1.6.0. Þessi útgáfa "
+"er þekkt fyrir að hafa valdið vandamálum með LimeWire. Vinsamlegast uppfærðu "
+"í loka útgáfu af 1.6.0.\n"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:151
 #, fuzzy
@@ -1600,15 +1703,15 @@ msgstr "Fleyri möguleikar"
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:169
 #, java-format
 msgid "Visit {0}"
-msgstr ""
+msgstr "Heimsæktu {0}"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:177
 msgid "Remind Me Later"
-msgstr ""
+msgstr "Minna á seinna"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:184
 msgid "Do not Show Again"
-msgstr ""
+msgstr "Ekki sýna aftur"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:173
 msgid "LimeWire must be restarted for the new language to take effect."
@@ -1616,7 +1719,7 @@ msgstr "LimeWire verður að vera enduræst til að breytingarnar taki gildi."
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:186
 msgid "Change Language"
-msgstr ""
+msgstr "Skipta um tungumál"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:189
 msgid "Help Translate LimeWire"
@@ -1624,11 +1727,11 @@ msgstr "Hjálpa að þýða LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:190
 msgid "Show Language in status bar"
-msgstr ""
+msgstr "Sýna tungumál í stöðulínu"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:381
 msgid "Verify"
-msgstr ""
+msgstr "Sannreyna"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:425
 #, fuzzy
@@ -1638,34 +1741,34 @@ msgstr "LimeWire gat ekki deilt skránni \"{0}\"."
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:430
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:556
 msgid "You can try validating this license again by clicking 'Verify'."
-msgstr ""
+msgstr "Þú getur sannreynt þetta leyfi aftur með því að smella á 'Sannreyna'"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:435
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:561
 msgid "View Claimed License Deed"
-msgstr ""
+msgstr "Skoða Fullyrt Leyfisskjal"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:440
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:498
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:566
 msgid "View Verification Page"
-msgstr ""
+msgstr "Skoða Staðfestingar Síðu"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:445
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:503
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:571
 msgid "License Details:"
-msgstr ""
+msgstr "Leyfis Upplýsingar:"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:450
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:576
 msgid "View License Deed"
-msgstr ""
+msgstr "Skoða Leyfisskjal"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:455
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:581
 msgid "LimeWire is currently locating the details of this license."
-msgstr ""
+msgstr "LimeWire er eins og er að finna upplýsingar um þetta leyfi."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:460
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:586
@@ -1673,10 +1776,14 @@ msgid ""
 "LimeWire has not yet verified this license.\n"
 "Click 'verify' to locate the details of this Creative Commons license."
 msgstr ""
+"LimeWire hefur ekki sannreynt þetta leyfi.\n"
+"\n"
+"Smelltu á 'sannreyna' til að finna upplýsingarnar um þetta Creative Commons "
+"leyfi."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:465
 msgid "Creative Commons Details"
-msgstr ""
+msgstr "Creative Commons upplýsingar"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:483
 #, fuzzy
@@ -1686,25 +1793,31 @@ msgstr "LimeWire gat ekki deilt skránni \"{0}\"."
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:488
 msgid "You can try looking up the details again by clicking 'Verify'."
 msgstr ""
+"Þú getur reynt að fletta upp upplýsingunum aftur með því að smella á "
+"'staðfesta'"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:493
 msgid "View Weedshare Usage Rights"
-msgstr ""
+msgstr "Skoða Weedshare notkunarrétt"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:508
 msgid "View Usage Rights"
-msgstr ""
+msgstr "Skoða Notunarrétt"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:513
 msgid ""
 "LimeWire is contacting www.weedshare.com for the details of this file."
 msgstr ""
+"LimeWire er að hafa samband við www.weedshare.com í leit að upplýsingum um "
+"þessa skrá."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:518
 msgid ""
 "LimeWire has not yet verified this license.\n"
 "Click 'verify' to locate the details of this file."
 msgstr ""
+"LimeWire hefur ekki sannreynt þetta leyfi.\n"
+"Smelltu á 'sannreyna' til að finna upplýsingar um þessa skrá."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:523
 #, fuzzy
@@ -1713,11 +1826,11 @@ msgstr "Eyða þínum stillingum"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:551
 msgid "This file may require a license in order to open and view."
-msgstr ""
+msgstr "Þessi skrá kann að þurfa leyfi til þess að opna hana og skoða."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:591
 msgid "License Details"
-msgstr ""
+msgstr "Leyfis Upplýsingar"
 
 #. *
 #. * The undo action.
@@ -1756,7 +1869,7 @@ msgstr "Líma"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:789
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1267
 msgid "Delete"
-msgstr ""
+msgstr "Eyða"
 
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:229
 #: gui/com/limegroup/gnutella/gui/actions/SelectSharedDirectoryAction.java:26
@@ -1788,6 +1901,8 @@ msgstr "Hlusta á porti"
 #: gui/com/limegroup/gnutella/gui/MessageResourceHandler.java:18
 msgid "Magnet Links for Fast Downloads (if you have LimeWire installed)"
 msgstr ""
+"Magnet Hlekkir fyrir Hratt Niðurhal (ef að þú ert með LimeWire uppsett á "
+"vélinni)"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:63
 msgid "Loading Messages..."
@@ -1822,11 +1937,11 @@ msgstr "Skilaboð"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:623
 msgid "Do not display this message again"
-msgstr ""
+msgstr "Ekki sýna þessi skilaboð aftur"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:640
 msgid "Always use this answer"
-msgstr ""
+msgstr "Ávallt nota þetta svar"
 
 #: gui/com/limegroup/gnutella/gui/MonitorView.java:56
 msgid "Loading Monitor Window..."
@@ -1869,24 +1984,34 @@ msgid ""
 "are saved properly you should save them to a sub-folder of {1}.  Would you "
 "like to choose another location?"
 msgstr ""
+"Að vista niðurhöl í {0} gæti mögulega ekki virkað rétt. Til að vera viss um "
+"að niðurhal sé vistað á réttan hátt ættirðu að vista skrárnar í undir-möppu "
+"af {1}. Viltu velja  aðra staðsetningu?"
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:20
 msgid ""
 "LimeWire was unable to create your settings folder and is using a temporary "
 "folder.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
+"LimeWire gat ekki búið til stillingar möppuna þína og er því að nota "
+"tímabundna möppu. Stillingar þínar gæti verið eytt þegar þú lokar LimeWire. "
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:35
 msgid ""
 "LimeWire has encountered problems in managing your settings.  Your settings "
 "changes may not be saved on shutdown."
 msgstr ""
+"LimeWire lenti í vandræðum með að stýra stillingunum þínum. Breytingar á "
+"stillingum þínum gæti mögulega ekki vistast þegar þú slekkur á vélinni."
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:38
 msgid ""
 "LimeWire has encountered problems in loading your settings.  LimeWire will "
 "attempt to use the default values; however, may behave unexpectedly."
 msgstr ""
+"LimeWire lenti í vandræðum með að ræsa stillingarnar þínar. LimeWire mun "
+"gera tilraun til þess að nota sjálfgefin gildi; hinsvegar gæti LimeWire "
+"hegðað sér á óvæntan hátt."
 
 #: gui/com/limegroup/gnutella/gui/ShutdownWindow.java:18
 #, fuzzy
@@ -1933,11 +2058,11 @@ msgstr "LimeWire hefur fundið eldvegg"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:501
 msgid "You are not connected to the LimeWire Store"
-msgstr ""
+msgstr "Þú ert ekki tengdur við LimeWire Verslunina"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:504
 msgid "You are connected to the LimeWire Store"
-msgstr ""
+msgstr "Þú ert tengdur við LimeWire Verslunina"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:596
 msgid "Connection"
@@ -2012,6 +2137,7 @@ msgstr "Tengingin við netið er mjög sterk"
 msgid ""
 "You can experience Turbo-Charged connections all the time with LimeWire PRO!"
 msgstr ""
+"Þú getur upplifað Turbo-Hlaðnar tengingar öllum stundum með LimeWire PRO!"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:633
 #, fuzzy
@@ -2020,7 +2146,7 @@ msgstr "Óska eftir skrá, bíð"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:634
 msgid "LimeWire is waking up from sleep mode"
-msgstr ""
+msgstr "LimeWire er að vakna eftir svefnham"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:742
 msgid "Show Connection Quality"
@@ -2041,7 +2167,7 @@ msgstr "Sýna stöðu Eldveggs"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:811
 msgid "Show Store Indicator"
-msgstr ""
+msgstr "Sýna Verslunarvísi"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:827
 msgid "Show Bandwidth Consumption"
@@ -2057,16 +2183,16 @@ msgstr "LimeWire spilarinn"
 #, java-format
 msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Þú ert að deila {0} skrá"
+msgstr[1] "Þú ert að deila {0} skrám"
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:916
 #, java-format
 msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Þú ert að deila {0} skrá (Ræsi...)"
+msgstr[1] "Þú ert að deila {0} skrám (Ræsi...)"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:993
 #, fuzzy
@@ -2080,11 +2206,11 @@ msgstr "Uppflyt"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:1007
 msgid "Total Downstream:"
-msgstr ""
+msgstr "Samtals Niðurstreymi:"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:1012
 msgid "Total Upstream:"
-msgstr ""
+msgstr "Samtals Uppstreymi:"
 
 #. *
 #. * The title for the TOTD window.
@@ -2131,6 +2257,12 @@ msgid ""
 "lot of sources, use the <font color=\"1E8E44\">Junk</font> button to train "
 "LimeWire's junk filter."
 msgstr ""
+"Þreyttur á að niðurhalið stöðvist á miðri leið? Það hjálpar til að velja "
+"leitarniðurstöður með hærri tölu í '#'' dálknum. # Er fjöldi einstakra staða "
+"á netkerfinu sem hýsir skránna. Því fleiri uppsprettur, því meiri líkur er á "
+"ná í skránna. Í tilfellum þar sem ruslniðurstaða virðist vera með margar "
+"uppsprettur, notaðu <font color=\"1E8E44\">Rusl</font> takkann til að þjálfa "
+"ruslsíu LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:31
 msgid ""
@@ -2140,6 +2272,11 @@ msgid ""
 "download the file and automatically resume downloading if it finds any "
 "matches."
 msgstr ""
+"Þegar niðurhölin segja að þau <font color=\"1E8E44\">Þurfi Fleiri "
+"Uppsprettur</font>, reyndu þá að velja það niðurhal og smella á <font "
+"color=\"1E8E44\">Finna Fleiri Uppsprettur</font>. LimeWire mun leita á "
+"netkerfinu að fleiri stöðum til að hala niður skránni og hefur sjálfkrafa "
+"niðurhalið ef að samsvörun finnst."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:37
 msgid ""
@@ -2148,6 +2285,10 @@ msgid ""
 "green (or blue to indicate aLimeWire PRO or an Ultrapeer connection), "
 "LimeWire has completely connected."
 msgstr ""
+"Þegar LimeWire ræsir sig, þarf það að tengjast netkerfinu. Á meðan á því "
+"stendur, munu stikurnar í neðra vinstra horni breyta um lit. Þegar allar "
+"stikurnar eru orðnar grænar (eða bláar til að gefa tilkynna LimeWire PRO eða "
+"Ultrapeer tengingu), hefur LimeWire náð fullri tengingu."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
 msgid ""
@@ -2159,6 +2300,14 @@ msgid ""
 "link, LimeWire will automatically ask if you want to use the new skin when "
 "the download completes."
 msgstr ""
+"Þú getur breytt útliti og skynjun LimeWire með því fara í <font "
+"color=\"1E8E44\">Skoða</font> &gt; <font color=\"1E8E44\">Beita "
+"Skinnum</font> og velja nýtt skinn. Viðbótarskinn eru fáanleg á vefsíðu "
+"LimeWire, tiltæk með því að velja <font color=\"1E8E44\">Ná Í Fleiri "
+"Skinn</font>. Ef þú niðurhalar skinnum með því að nota <font "
+"color=\"1E8E44\">Download via LimeWire</font> hlekkinn, mun LimeWire "
+"sjálfkrafa spyrja hvort að þú viljir nota nýja skinnið þegar niðurhali er "
+"lokið."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:51
 msgid ""
@@ -2166,6 +2315,9 @@ msgid ""
 "column to sort by is the '#' column, which can put the results that have the "
 "highest chance of downloading at the top of the list."
 msgstr ""
+"Þú getur flokkað leitarniðurstöðum með því að smella á dálk. Mest gagnlegi "
+"dálkurinn til þess að flokka eftir er '#' dálkurinn, sem setur skrárnar sem "
+"mestar líkur eru á að ná í efst í listann."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:55
 msgid ""
@@ -2173,6 +2325,10 @@ msgid ""
 "completing successfully. Four blue stars signal 'Ethernet' speed and have "
 "the greatest chance of completing successfully."
 msgstr ""
+"Því fleiri stjörnur sem niðurstaða hefur, því meiri líkur eru á að ljúka "
+"niðurhali ljúki fullkomlega. Fjórar bláar stjörnur gefa til kynna "
+"'Ljósvakanet' hraða og hefur mestan möguleika á því að ljúka niðurhali "
+"fullkomlega."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:59
 msgid ""
@@ -2182,6 +2338,11 @@ msgid ""
 "Y', where 'Y' is the number of people who have attempted to upload that "
 "file, and 'X' is the number of people who have successfully uploaded it."
 msgstr ""
+"Til að finna út hversu oft einhver hefur niðurhalað skrá frá þér, veldu "
+"<font color=\"1E8E44\">Skráarsafn</font> flipann og kíktu á <font "
+"color=\"1E8E44\">Deilingar</font> dálkinn. Upplýsingarnar eru skráðar sem "
+"'X/Y', þar sem 'Y' er fjöldi fólks sem hefur reynt að niðurhala skránni, og "
+"'X' er fjöldi fólks sem hefur niðurhalað skránni fullkomlega."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:65
 msgid ""
@@ -2190,12 +2351,18 @@ msgid ""
 "color=\"1E8E44\">Library</font> tab counts how many times LimeWire has "
 "returned a result from someone searching for that file."
 msgstr ""
+"Forvitinn um það hversu margir eru að leyta af skránnum þínum? <font "
+"color=\"1E8E44\">Smellir</font> dálkurinn í <font "
+"color=\"1E8E44\">Skráarsafn</font> flipanum telur hversu oft LimeWire hefur "
+"skilað niðurstöðu frá einhverjum sem hefur leitað að þeirri skrá."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:70
 msgid ""
 "It helps the network if you keep your LimeWire running; other users will "
 "connect to the network easier and searches will perform better."
 msgstr ""
+"Það hjálpar netkerfinu að hafa LimeWire keyrandi; aðrir notendur munu eiga "
+"auðveldara með að  tengjast netkerfinu og leitir munu skila betri afköstum."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:73
 msgid ""
@@ -2204,6 +2371,11 @@ msgid ""
 "queued your download. In order to successfully complete your download, wait "
 "while your request advances in line and is eventually serviced."
 msgstr ""
+"Þegar LimeWire segir að niðurhalið sé <font color=\"1E8E44\">Í "
+"Biðröð</font>, er uppsprettan sem að þú ert að niðurhala frá upptekin "
+"tímabundin og hefur sett niðurhalið biðröð. Til þess að klára niðurhalið "
+"fullkomlega, bíddu meðan að fyrirspurnin þín fer hækkandi í listanum og er á "
+"endanum afgreitt."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:78
 #, java-format
@@ -2213,6 +2385,11 @@ msgid ""
 "href=\"{1}\">FAQ</a> for answers to commonly asked questions or the <a "
 "href=\"{2}\">User Guide</a> for more information."
 msgstr ""
+"Ef að þú þarft frekari hjálp, heimsæktu <a href=\"{0}\">spjallborðið "
+"okkar</a> til að komast að því hvort að einhverjir aðrir hafa nú þegar "
+"svarað spurningunni þinni. Þú getur líka yfirfarið <a href=\"{1}\">Algengar "
+"Spurningar (á ensku)</a> til að finna svör við algengum spurningum eða <a "
+"href=\"{2}\">Notenda Leiðbeiningarnar</a> fyrir fleiri upplýsingar."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:83
 msgid ""
@@ -2222,6 +2399,11 @@ msgid ""
 "click <font color=\"1E8E44\">Resume</font>. LimeWire automatically searches "
 "for that file and begins downloading it again."
 msgstr ""
+"Þú getur haldið áfram niðurhali sem að var hætt við fyrir slysni með því að "
+"smella á <font color=\"1E8E44\">Skráarsafn</font> flipann, og velja þarnæst "
+"<font color=\"1E8E44\">Ólokið</font> möppuna. Undirstrikaðu skráarnafnið og "
+"smelltu á <font color=\"1E8E44\">Halda Áfram</font>. LimeWire leitar "
+"sjálfkrafa að þeirri skrá og byrjar niðurhalið að nýju."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:89
 #, java-format
@@ -2229,6 +2411,9 @@ msgid ""
 "If you have any tips on using LimeWire, add it to <a href=\"{0}\">the "
 "wiki</a> and it may make it into a future tip of the day."
 msgstr ""
+"Ef að þú ert með einhverjar ábendingar um notkun LimeWire, bættu því við <a "
+"href=\"{0}\">orðabókina</a> og það gæti ratað inn í framtíðar ábendingu "
+"dagsins."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:92
 msgid ""
@@ -2236,12 +2421,17 @@ msgid ""
 "Sources</font> by searching for that file again. LimeWire will automatically "
 "restart the download if it finds any matching results."
 msgstr ""
+"Þú getur endurræst niðurhöl merkt <font color=\"1E8E44\">Bíð Eftir "
+"Uppsprettum</font> með því að leita að þeirri skrá aftur. LimeWire mun "
+"sjálfkrafa endursetja niðurhalið ef að það finnur samsvarandi niðurstöður."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:96
 msgid ""
 "Post feature suggestions on LimeWire's <a href=\"{0}\">message boards</a> "
 "and it may be added to future versions."
 msgstr ""
+"Tilkynntu ábendingar um betrumbætur á <a href=\"{0}\"spjallborð</a> LimeWire "
+"og þær gætu ratað í komandi útgáfum."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:98
 #, java-format
@@ -2249,18 +2439,25 @@ msgid ""
 "Visit <a href=\"{0}\">LimeWire's website</a> for detailed information about "
 "how skins are created."
 msgstr ""
+"Heimsæktu <a href=\"{0}\">heimasíðu LimeWire</a> fyrir nánari upplýsingar um "
+"það hvernig skinn eru búin til."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:100
 msgid ""
 "Do you want to be part of LimeWire's development? Visit <a "
 "href=\"{0}\">LimeWire's Open Source website</a>."
 msgstr ""
+"Viltu taka þátt í þróun LimeWire? Heimsæktu <a href=\"{0}\">Open Source "
+"heimasíðu LimeWire</a>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:102
 msgid ""
 "You can preview downloading files to make sure they are what you expect; "
 "select the download and click <font color=\"1E8E44\">Preview</font>."
 msgstr ""
+"Þú getur fengið sýnishorn af skrám í niðurhali til að vera viss um að það sé "
+"það sem að þú býst við; veldu niðurhalið og smelltu á <font "
+"color=\"1E8E44\">Sýnishorn</font>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:104
 msgid ""
@@ -2269,6 +2466,10 @@ msgid ""
 "<font color=\"1E8E44\">Connections</font> to take a look at LimeWire's "
 "connections."
 msgstr ""
+"Forvitinn um hvaða vefþjónar eru að tengjast , eða eru tengdir við þig? "
+"Veldu <font color=\"1E8E44\">Skoða</font> &gt; <font "
+"color=\"1E8E44\">Sýna/Fela</font>, <font color=\"1E8E44\">Tengingar</font> "
+"til að skoða tengingar LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:108
 #, java-format
@@ -2276,6 +2477,8 @@ msgid ""
 "Passionate about digital rights? Visit the <a href=\"{0}\">Electronic "
 "Frontier Foundation</a> to see what you can do to help."
 msgstr ""
+"Ástríðufullur um stafræn réttindi? Heimsæktu <a href=\"{0}\">Electronic "
+"Frontier Foundation</a> til að sjá hvað þú getur gert til að aðstoða."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:110
 msgid ""
@@ -3237,7 +3440,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:46
 #, java-format
 msgid "Search for: {0}"
-msgstr ""
+msgstr "Leita að: {0}"
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchWhatsNewMediaTypeAction.java:32
 msgid "Search \"What's New\" for: {0}"
@@ -3246,7 +3449,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/actions/SearchXMLFieldAction.java:49
 #, java-format
 msgid "Search for {0}: {1}"
-msgstr ""
+msgstr "Leita að {0}: {1}"
 
 #: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:29
 #: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:35
@@ -7126,9 +7329,9 @@ msgid "Awaiting Requests"
 msgstr "Gat ekki vistað niður"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:313
-#, fuzzy, java-format
+#, java-format
 msgid "Swarm for {0}"
-msgstr "{0}"
+msgstr "Sveimur fyrir {0}"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:130
 msgid "Loading Upload Window..."

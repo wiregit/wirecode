@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: 4.14.10\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-02-29 17:31+0000\n"
-"Last-Translator: ToonVanDijck <Unknown>\n"
+"PO-Revision-Date: 2008-03-08 15:56+0000\n"
+"Last-Translator: Apie <apieisme@gmail.com>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-03-07 16:25+0000\n"
+"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -1734,14 +1734,16 @@ msgstr ""
 "wordt vrijgegeven."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:54
+#, fuzzy
 msgid ""
 "LimeWire was unable to write a necessary file because you do not have the "
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
 "LimeWire kon een vereist bestand niet wegschrijven omdat u niet de benodigde "
-"rechten heeft. Uw voorkeursinstellingen worden misschien niet bewaard voor "
-"een volgende keer, of LimeWire kan onverwachte handelingen uitvoeren."
+"toestemming heeft. Uw voorkeursinstellingen worden misschien niet bewaard "
+"wanneer u de volgende keer Limewire opstart, of LimeWire kan onverwachte "
+"handelingen uitvoeren."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:56
 msgid ""
@@ -1758,9 +1760,9 @@ msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
-"LimeWire kan het geselecteerde bestand niet downloaden omdat uw schijf vol "
-"is. Om meer bestanden te downloaden moet u ruimte op uw harde schijf vrij "
-"maken."
+"LimeWire kan het geselecteerde bestand niet downloaden omdat uw harde schijf "
+"vol is. Om meer bestanden te downloaden moet u ruimte op uw harde schijf "
+"vrij maken."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:62
 msgid ""
@@ -1768,19 +1770,21 @@ msgid ""
 "using the file. Please close the other program and retry the download."
 msgstr ""
 "LimeWire kon het geselecteerde bestand niet downloaden omdat een ander "
-"programma het bestand gebruikt. Sluit a.u.b. het andere programma en probeer "
-"opnieuw te downloaden."
+"programma het bestand in gebruik heeft. Sluit alstublieft het andere "
+"programma en probeer opnieuw te downloaden."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:64
+#, fuzzy
 msgid ""
 "LimeWire was unable to create or continue writing an incomplete file for the "
 "selected download because you do not have permission to write files to the "
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
-"LimeWire kon een onvolledig bestand niet aanmaken of wegschrijven omdat u "
-"geen toestemming hebt om bestanden naar de onvolledige map te schrijven. Om "
-"LimeWire te gebruiken moet u een andere opslagmap kiezen."
+"Limewire kon niet een onvolledig bestand aanmaken of afmaken voor het "
+"geselecteerde download omdat u geen toestemming heeft om bestanden naar de "
+"onvolledige map over te schrijven.\n"
+"Om Limewire te blijven gebruiken, moet u een andere opslagmap kiezen"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:66
 msgid ""
@@ -1797,8 +1801,8 @@ msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
-"LimeWire kan geen poort openzetten om inkomende verbindingen te accepteren. "
-"Sommige functies van LimeWire zullen niet als verwacht werken."
+"LimeWire kon geen poort openzetten om inkomende verbindingen te zoeken. "
+"Sommige functies van LimeWire zullen niet conform verwachting werken."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:219
 msgid ""
@@ -1807,7 +1811,7 @@ msgid ""
 "'Resume' your downloads."
 msgstr ""
 "Sorry, LimeWire kon uw oude downloads niet lezen. U kunt ze herstarten door "
-"naar de Bibliotheek te gaan en bij 'Incomplete bestanden' op 'Hervatten' te "
+"naar uw Bibliotheek te gaan en bij 'Incomplete bestanden' op 'Hervatten' te "
 "klikken."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:221
@@ -1817,7 +1821,7 @@ msgid ""
 "to 'Resume' your downloads."
 msgstr ""
 "Sorry, LimeWire kon sommige van uw oude downloads niet lezen. U kunt ze "
-"herstarten door naar de Bibliotheek te gaan en bij 'Incomplete bestanden' op "
+"herstarten door naar uw Bibliotheek te gaan en bij 'Incomplete bestanden' op "
 "'Hervatten' te klikken."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:319
@@ -1834,7 +1838,7 @@ msgstr "Berichtenrouter wordt geladen..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:341
 msgid "Checking for Updates..."
-msgstr "Controleert op updates..."
+msgstr "Controle voor updates"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:346
 msgid "Loading Upload Management..."
@@ -1874,7 +1878,7 @@ msgstr "Oude downloads worden geladen..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:417
 msgid "Attaching LimeWire Store Listeners..."
-msgstr "LimeWire Store-luisteraards worden toegevoegd..."
+msgstr "Limewire Store-toebehoren worden bevestigd..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:422
 msgid "Loading Directed Querier..."
@@ -1882,15 +1886,15 @@ msgstr "Vragenlijst wordt geladen..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:427
 msgid "Loading Magnet Listener..."
-msgstr "Magnet-luisteraar wordt geladen..."
+msgstr "Magnet-toebehoren wordt geladen..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:438
 msgid "Loading Peer Listener..."
-msgstr "Peerluisteraar wordt geladen..."
+msgstr "Peer-toebehoren worden geladen..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:443
 msgid "Loading Stale Connection Management..."
-msgstr "Staal verbindingsbeheer wordt geladen..."
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:448
 msgid "Loading Saved Files..."
@@ -3523,6 +3527,7 @@ msgid "Loading tips..."
 msgstr "Tips worden geladen..."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:7
+#, fuzzy
 msgid ""
 "Tired of downloads stopping halfway through? It helps to pick search results "
 "with a higher number in the '#' column. The # is the amount of unique places "
@@ -3531,6 +3536,13 @@ msgid ""
 "lot of sources, use the <font color=\"1E8E44\">Junk</font> button to train "
 "LimeWire's junk filter."
 msgstr ""
+"Moe van downloads die halverwege stoppen? Het helpt om zoekresultaten te "
+"pakken die een hoog nummer in de '#' kolom hebben. het #-teken staat voor "
+"het aantal unieke plaatsen op het netwerk die het bestand hosten. Hoe meer "
+"bronnen, hoe meer kans op het verkrijgen van het bestand. In gevallen van "
+"veel bronnen bij een slecht resultaat, gebruik de <font "
+"color=\"1E8E44\">Junk</font> toets om Limewires junk filter op de hoogte te "
+"stellen."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:31
 msgid ""
@@ -3548,6 +3560,10 @@ msgid ""
 "green (or blue to indicate aLimeWire PRO or an Ultrapeer connection), "
 "LimeWire has completely connected."
 msgstr ""
+"Als LimeWire opstart, moet het een verbinding maken met het netwerk. "
+"Gedurende deze tijd zullen de balkjes in de hoek linksonder van kleur "
+"veranderen. Zodra alle balkjes groen (of blauw bij een LimeWire PRO of een "
+"Ultrapeer connectie) zijn, is LimeWire volledig verbonden."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
 msgid ""
@@ -3576,6 +3592,9 @@ msgid ""
 "completing successfully. Four blue stars signal 'Ethernet' speed and have "
 "the greatest chance of completing successfully."
 msgstr ""
+"Hoe meer sterren een zoekresultaat heeft, hoe groter de kans is dat de "
+"download succesvol wordt afgerond. Vier blauwe sterren betekenen 'Ethernet' "
+"snelheid en hebben de beste kans om succesvol te worden afgerond."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:59
 msgid ""

@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-07 14:20+0000\n"
-"Last-Translator: emrearin <Unknown>\n"
+"PO-Revision-Date: 2008-03-08 21:44+0000\n"
+"Last-Translator: kutay60 <Unknown>\n"
 "Language-Team: Turkish <tr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2008-03-07 16:25+0000\n"
+"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
@@ -30,10 +30,7 @@ msgstr ""
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
-msgstr ""
-"Başka bir program tarafından kullanıldığı için, LimeWire gerekli bir dosyayı "
-"açamadı. Bu dosya serbest bırakılana kadar LimeWire beklenmedik bir şekilde "
-"hareket edebilir."
+msgstr "asdasdads"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:54
 msgid ""
@@ -614,9 +611,8 @@ msgid ""
 "Please add any comments you may have (e.g what caused the error). \n"
 "Thank you and please use English."
 msgstr ""
-"Lütfen sahip olabileceğiniz yorumları ekleyiniz (örneğin; hataya neyin sebep "
-"olduğu). \n"
-"Teşekkürler ve lütfen İngilizce kullanınız."
+"lütfen yorumlarınızı ekleyiniz (örneğin; hataya neyin sebep olduğu), "
+"Teşekkürler ve lütfen ingilizce kullanınız."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:432
 msgid "Send"
@@ -856,7 +852,7 @@ msgstr "Kaydet"
 #. updates).
 #: gui/com/limegroup/gnutella/gui/Console.java:188
 msgid "Delay: "
-msgstr "Erteleme: "
+msgstr "Ertele "
 
 #: gui/com/limegroup/gnutella/gui/Console.java:618
 msgid "Save As"
@@ -2079,6 +2075,8 @@ msgid ""
 "Try a <font color=\"1E8E44\">What's New</font> search and see what's "
 "recently been added to the Gnutella network."
 msgstr ""
+"<font color=\"1E8E44\">Yeni Ne Var</font> aramasını deneyin ve Gnutella "
+"ağına yeni eklenenleri görün."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:124
 msgid ""
@@ -2103,12 +2101,16 @@ msgid ""
 "buddy is sharing 'Limers' but you searched for 'The Limers', your buddy's "
 "file will still be found."
 msgstr ""
+"Arama şartlarındaki küçük değişkenler hala çalışmaktadır. Örneğin, "
+"Arkadaşınız 'Limer' adlı dosyayı paylaşıyor. Siz 'The Limers'ı aradığınızda "
+"arkadaşınızın dosyası bulunacaktır."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:134
 msgid ""
 "LimeWire supports Gnutella and BitTorrent peer-to-peer file sharing "
 "protocols."
 msgstr ""
+"LimeWire, Gnutella ve Bittorent p2p dosya paylaşım protokolünü destekler."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:136
 msgid ""
@@ -2116,6 +2118,9 @@ msgid ""
 "file on the Internet, or dragging a .torrent file to anywhere on the <font "
 "color=\"1E8E44\">Search</font> tab."
 msgstr ""
+"İnternetteki .torent dosyalarına tıklayarak yada .torrent dosyasını "
+"sürükleyip <font color=\"1E8E44\">Arama</font> sekmesinde herhangi bir yere "
+"bırakarak dosyayı indirebilirsiniz."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:140
 msgid ""
@@ -2125,6 +2130,11 @@ msgid ""
 "color=\"1E8E44\">Individually Shared Files</font> to see your newly shared "
 "file."
 msgstr ""
+"Dosyayı yada klasörü sürükleyip <font color=\"1E8E44\">Kütüphane</font> "
+"sekmesine bırakarak bireysel paylaşım sağlayabilirsiniz. Bireysel "
+"paylaşımlarınızı görmek için <font color=\"1E8E44\">Kütüphane</font> "
+"sekmesinde <font color=\"1E8E44\">Bireysel Paylaşılan Dosyalar</font> "
+"bölümünü seçiniz."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:145
 msgid ""

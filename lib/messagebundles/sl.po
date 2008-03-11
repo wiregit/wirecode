@@ -8,15 +8,15 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-06 21:34+0000\n"
-"Last-Translator: pal <bcan99@gmail.com>\n"
+"PO-Revision-Date: 2008-03-10 15:37+0000\n"
+"Last-Translator: doc6si <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || "
 "n%100==4 ? 3 : 0);\n"
-"X-Launchpad-Export-Date: 2008-03-07 16:25+0000\n"
+"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Modem"
@@ -825,6 +825,8 @@ msgid ""
 "Please add any comments you may have (e.g what caused the error). \n"
 "Thank you and please use English."
 msgstr ""
+"Prosim dodajte kakršnekoli komentarje (npr.: kaj je povzročilo težavo)\n"
+"Hvala in prosim pišite v angleščini."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:432
 #, fuzzy
@@ -1280,6 +1282,7 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:524
+#, fuzzy
 msgid ""
 "LimeWire is unable to find a license for this file. Download the file "
 "anyway?\n"
@@ -1287,6 +1290,10 @@ msgid ""
 "Please note: LimeWire cannot monitor or control the content of the Gnutella "
 "network. Please respect your local copyright laws."
 msgstr ""
+"LimeWire ne najde licence za to datoteko. Vseeno nadaljuje s prenosom?\n"
+"\n"
+"Opomba: LimeWire ne more nadzorovati in kontrolirati vsebine v omrežju "
+"Gnutella. Spoštujte lokalne copyright zakone."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1441
 #, java-format
