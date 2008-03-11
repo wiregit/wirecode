@@ -40,8 +40,17 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
     
     private static final Log LOG = LogFactory.getLog(LWSIntegrationServicesImpl.class);
     
-    /** The period in milliseconds for checking that {@link #getDownloadProgress()} is called. */
+    /** 
+     * The period in milliseconds for checking that {@link #getDownloadProgress()} is called.
+     */
     private final static int CALL_GET_DOWNLOAD_PROGRESS_PERIOD_MILLIS =  5 * 60 * 1000;
+    
+    /**
+     * The period in milliseconds for checking that
+     * {@link #everActiveDownloaderIDs2Downloaders()} only contains active
+     * downloaders.
+     */
+    private final static int CHECK_EVER_ACTIVE_DOWNLOADER_IDS_2_DOWNLOADERS_PERIOD_MILLIS =  10 * 1000;
     
     /** Maintain the last time we called {@link #getDownloadProgress()}, intialized to <code>-1</code>. */
     private long lastTimeWeCalledGetDownloadProgress = -1;
@@ -57,6 +66,128 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
      * cannot keep this state.  Clear them whenever the downloader finishes.
      */
     private final Map<String,String> downloaderIDs2progressBarIDs = new HashMap<String,String>();
+    
+    /**
+     * Instances of this interface should appear like a downloader, but not
+     * actually contain one. There are two implementations:
+     * <ol>
+     * <li>{@link #HeavyWeightDownloaderInterface} contains a {@link CoreDownloader}</li>
+     * <li>{@link #LightWeightDownloaderInterface} contains only the state of a completed {@link CoreDownloader}</li>
+     * </ol>
+     */
+    private interface DownloaderInterface {
+
+        /**
+         * @see Downloader#getAmountRead()
+         */
+        long getAmountRead();
+
+        /**
+         * @see Downloader#getContentLength()
+         */        
+        long getContentLength();
+
+        /**
+         * @see Downloader#getState()
+         */        
+        DownloadStatus getState();
+
+        /**
+         * @see Downloader#isCompleted()
+         */        
+        boolean isCompleted();
+
+        /**
+         * Returns <code>true</code> if this instance actually contains a downloader.
+         * 
+         * @return <code>true</code> if this instance actually contains a downloader.
+         */        
+        boolean isHeavyWeight();
+        
+        /**
+         * Releases any resources.  This may not be totally necessary.
+         */
+        void release();
+    }
+    
+    /**
+     * Implementation of {@link DownloaderInterface} with an actual downloader.
+     * Package protected for testing.
+     */
+    final static class HeavyWeightDownloaderInterface implements DownloaderInterface {
+        
+        private Downloader d;
+        HeavyWeightDownloaderInterface(Downloader d) {
+            this.d = d;
+        }
+
+        public boolean isHeavyWeight() {
+            return true;
+        }
+
+        public long getAmountRead() {
+            return d.getAmountRead();
+        }
+
+        public long getContentLength() {
+            return d.getContentLength();
+        }
+
+        public DownloadStatus getState() {
+            return d.getState();
+        }
+
+        public boolean isCompleted() {
+            return d.isCompleted();
+        }
+
+        public void release() {
+            d = null;
+        }  
+    }
+    
+    /**
+     * Implementation of {@link DownloaderInterface} with just the values from
+     * another. Package protected for testing.
+     */
+    final static class LightWeightDownloaderInterface implements DownloaderInterface {
+        
+        private final long amountRead;
+        private final long contentLength;
+        private final DownloadStatus state;
+        
+        LightWeightDownloaderInterface(DownloaderInterface d) {
+            amountRead = d.getAmountRead();
+            contentLength = d.getContentLength();
+            state = d.getState();
+        }
+
+        public boolean isHeavyWeight() {
+            return false;
+        }
+
+        public long getAmountRead() {
+            return amountRead;
+        }
+
+        public long getContentLength() {
+            return contentLength;
+        }
+
+        public DownloadStatus getState() {
+            return state;
+        }
+
+        public boolean isCompleted() {
+            return true;
+        }
+
+        public void release() {
+            // Nothing
+        }  
+    }    
+    
+    
     
     /**
      * We maintain a collection of ever-active downloaders, so that when
@@ -87,7 +218,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
      * web site will remain at 99%, because we never passed back
      * notification that the download completed.
      */
-    private final Map<String, CoreDownloader> everActiveDownloaderIDs2Downloaders = new HashMap<String, CoreDownloader>();      
+    private final Map<String, DownloaderInterface> everActiveDownloaderIDs2Downloaders = new HashMap<String, DownloaderInterface>();
     
     private String downloadPrefix;
     
@@ -126,6 +257,11 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 getDownloadProgress();
             }
         }, CALL_GET_DOWNLOAD_PROGRESS_PERIOD_MILLIS, TimeUnit.MILLISECONDS);
+        this.scheduler.schedule(new Runnable() {
+            public void run() {
+                   checkEverActiveDownloaderIDs2Downloaders();
+            }
+        }, CHECK_EVER_ACTIVE_DOWNLOADER_IDS_2_DOWNLOADERS_PERIOD_MILLIS, TimeUnit.MILLISECONDS);        
     }
     
     public void setDownloadPrefix(String downloadPrefix) {
@@ -352,7 +488,6 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
                 d.resume();
             }           
         });        
-        
         // ====================================================================================================================================
         // Add a handler for the LimeWire Store Server so that we can find the
         // info of the client running
@@ -581,12 +716,13 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         synchronized (lwsIntegrationServicesDelegate) {
             for (CoreDownloader d : lwsIntegrationServicesDelegate.getAllDownloaders()) {
                 if (d == null) continue;
+                if (!(d instanceof StoreDownloader)) continue;
                 String id = String.valueOf(System.identityHashCode(d));
-                everActiveDownloaderIDs2Downloaders.put(id, d);
-                activeDownloaderIDS.add(id);
-                if (d instanceof StoreDownloader) {
-                    recordProgress(d, res, id);
+                if (!everActiveDownloaderIDs2Downloaders.containsKey(id)) {
+                    everActiveDownloaderIDs2Downloaders.put(id, new HeavyWeightDownloaderInterface(d));
                 }
+                activeDownloaderIDS.add(id);
+                recordProgress(d, res, id);
             }
         }
         //
@@ -596,7 +732,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         //
         final Collection<String> idsToRemove = new ArrayList<String>();
         for (String downloaderID : everActiveDownloaderIDs2Downloaders.keySet()) {
-            CoreDownloader d = everActiveDownloaderIDs2Downloaders.get(downloaderID);
+            DownloaderInterface d = everActiveDownloaderIDs2Downloaders.get(downloaderID);
             if (!activeDownloaderIDS.contains(downloaderID)) {
                 //
                 // We must have removed one of the previous from the
@@ -616,11 +752,17 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         return res.toString();         
     }
     
-    private void recordProgress(final CoreDownloader d, final StringBuffer res, String id) {
-        long read = d.getAmountRead();
-        long total = d.getContentLength();
+    private void recordProgress(DownloaderInterface d, StringBuffer res, String id) {
+        recordProgress(res, d.getAmountRead(), d.getContentLength(), d.getState(), id);
+    }
+    
+    private void recordProgress(CoreDownloader d, StringBuffer res, String id) {
+        recordProgress(res, d.getAmountRead(), d.getContentLength(), d.getState(), id);
+    }
+    
+    private void recordProgress(StringBuffer res, long read, long total, DownloadStatus state, String id) {
         String ratio = String.valueOf((float)read / (float)total);
-        String status = downloadStatusToString(d.getState());
+        String status = downloadStatusToString(state);
         String progressBarID = downloaderIDs2progressBarIDs.get(id);
         res.append(id);
         res.append(" ");
@@ -631,6 +773,26 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         res.append(status);
         res.append("|");                
     }    
+    
+    /**
+     * Checks that {@link #everActiveDownloaderIDs2Downloaders only contains downloaders
+     * that are still active.  If we encounter a downloader that has completed replace
+     * its instance with a stub.  Package protected for testing.
+     */
+    synchronized void checkEverActiveDownloaderIDs2Downloaders() {
+        final Collection<String> idsToChange = new ArrayList<String>();
+        for (String downloaderID : everActiveDownloaderIDs2Downloaders.keySet()) {
+            DownloaderInterface d = everActiveDownloaderIDs2Downloaders.get(downloaderID);
+            if (d.isCompleted() && d.isHeavyWeight()) {
+                idsToChange.add(downloaderID);
+            }
+        }
+        for (String id : idsToChange) {
+            DownloaderInterface d = everActiveDownloaderIDs2Downloaders.get(id);
+            everActiveDownloaderIDs2Downloaders.remove(id);
+            everActiveDownloaderIDs2Downloaders.put(id, new LightWeightDownloaderInterface(d));
+        }
+    }
 
 
 }

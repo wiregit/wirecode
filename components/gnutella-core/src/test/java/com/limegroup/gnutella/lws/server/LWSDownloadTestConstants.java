@@ -12,7 +12,7 @@ final class LWSDownloadTestConstants {
     final String URL = "/" + FILE;
     
     /** The length of the file */
-    final long LENGTH = 40000;
+    final long LENGTH = 400000;
     
     /** Dummy ID of the progress bar we're updating, passed to the <code>Download</code> message. */
     final String ID = "123456";
@@ -24,5 +24,5 @@ final class LWSDownloadTestConstants {
     final int PORT = 8011;
     
     /** The amount we wait for a download.  This should be much more than needed. */
-    final long DOWNLOAD_WAIT_TIME = 1000 * 30 * 1;
+    final long DOWNLOAD_WAIT_TIME = 1000 * 20 * 1;
 }

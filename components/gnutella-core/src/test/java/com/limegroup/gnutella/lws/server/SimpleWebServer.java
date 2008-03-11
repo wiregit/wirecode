@@ -28,13 +28,9 @@ final class SimpleWebServer {
     private final Log LOG = LogFactory.getLog(SimpleWebServer.class);
 
     private final int port;
-
     private final long length;
-
     private long bytesWritten;
-
     private Thread thread;
-
     private ServerSocket serverSocket;
 
     SimpleWebServer(LWSDownloadTestConstants constants) {
@@ -62,7 +58,7 @@ final class SimpleWebServer {
                     InputStream is = socket.getInputStream();
                     OutputStream os = socket.getOutputStream();
                     handle(new BufferedReader(new InputStreamReader(socket.getInputStream())),
-                            new PrintStream(os));
+                           new PrintStream(os));
                     socket.close();
                     is.close();
                     os.close();

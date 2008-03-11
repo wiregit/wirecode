@@ -76,7 +76,6 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         this.exe = exe;
         this.dispatcher = lwsDispatcherFactory.createDispatcher(this, new  AbstractReceivesCommandsFromDispatcher() {
             public String receiveCommand(String cmd, Map<String, String> args) {
-                System.out.println("cmd: " + cmd + ": " + args);
                 return LWSManagerImpl.this.dispatch(cmd, args);
             }            
         });
