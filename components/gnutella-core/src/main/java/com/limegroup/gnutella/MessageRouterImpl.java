@@ -33,6 +33,7 @@ import org.limewire.collection.NoMoreStorageException;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
@@ -307,6 +308,12 @@ public abstract class MessageRouterImpl implements MessageRouter {
     
     @InspectionPoint("duplicate queries")
     private final DuplicateQueryCounter duplicateQueryCounter = new DuplicateQueryCounter();
+    
+    @InspectablePrimitive("dropped last hop queries to ultrapeers")
+    private volatile long lastHopDropUltrapeer;
+    
+    @InspectablePrimitive("dropped queries to leaves")
+    private volatile long droppedLeafQueries;
     
     protected final NetworkManager networkManager;
     protected final QueryRequestFactory queryRequestFactory;
@@ -1693,6 +1700,9 @@ public abstract class MessageRouterImpl implements MessageRouter {
             // by filling up the 'hitsConnection' list.
             mc.send(query);
         }
+        
+        if (hitConnections.isEmpty())
+            droppedLeafQueries++;
 	}
 
 	/**
@@ -1764,10 +1774,13 @@ public abstract class MessageRouterImpl implements MessageRouter {
 		List<RoutedConnection> list = connectionManager.getInitializedConnections();
         int limit = list.size();
 
+        boolean forwarded = false;
 		for(int i=0; i<limit; i++) {
 			RoutedConnection mc = list.get(i);      
-            forwardQueryToUltrapeer(query, handler, mc);  
+            forwarded |= forwardQueryToUltrapeer(query, handler, mc);  
         }
+		if (!forwarded && query.getTTL() == 1)
+		    lastHopDropUltrapeer++;
     }
 
     /**
@@ -1826,20 +1839,20 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @param ultrapeer the Ultrapeer to send the query to
      */
     // default access for testing
-    void forwardQueryToUltrapeer(QueryRequest query, 
+    boolean forwardQueryToUltrapeer(QueryRequest query, 
                                          ReplyHandler handler,
                                          RoutedConnection ultrapeer) {    
         // don't send a query back to the guy who sent it
-        if(ultrapeer == handler) return;
+        if(ultrapeer == handler) return false;
 
         // make double-sure we don't send a query received
         // by a leaf to other Ultrapeers
-        if(ultrapeer.getConnectionCapabilities().isClientSupernodeConnection()) return;
+        if(ultrapeer.getConnectionCapabilities().isClientSupernodeConnection()) return false;
 
         // make sure that the ultrapeer understands feature queries.
         if(query.isFeatureQuery() && 
            !ultrapeer.getConnectionCapabilities().getRemoteHostSupportsFeatureQueries())
-             return;
+             return false;
 
         // is this the last hop for the query??
 		boolean lastHop = query.getTTL() == 1; 
@@ -1847,11 +1860,12 @@ public abstract class MessageRouterImpl implements MessageRouter {
         // if it's the last hop to an Ultrapeer that sends
         // query route tables, route it.
         if(lastHop && ultrapeer.isUltrapeerQueryRoutingConnection()) {
-            sendRoutedQueryToHost(query, ultrapeer, handler);
+            return sendRoutedQueryToHost(query, ultrapeer, handler);
         } else {
             // otherwise, just send it out
             ultrapeer.send(query);
         }
+        return true;
     }
 
 
