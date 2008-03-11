@@ -435,6 +435,7 @@ public class UDPService implements ReadWriteObserver {
                             _lastReportedPort = r.getMyPort();
                         }
                     }
+                    updateFWTState();
                 }
                 
             }
@@ -653,14 +654,22 @@ public class UDPService implements ReadWriteObserver {
 	    if (!canReceiveSolicited()) 
 	        return false;
 
+	    boolean ret = !ConnectionSettings.LAST_FWT_STATE.getValue();
 	    if (!connectionServices.isConnected())
-	        return !ConnectionSettings.LAST_FWT_STATE.getValue();
+	        return ret;
 	    
+	    synchronized(this) {
+	        if (_numReceivedIPPongs < 1) 
+	            return ret;
+	    }
+	    
+	    updateFWTState();
+	    return !ConnectionSettings.LAST_FWT_STATE.getValue();
+	}
+	
+	private void updateFWTState() {
 	    boolean ret = true;
 	    synchronized(this) {     	
-	        if (_numReceivedIPPongs < 1) 
-	            return !ConnectionSettings.LAST_FWT_STATE.getValue();
-	        
 	        if (LOG.isTraceEnabled()) {
 	            LOG.trace("stable "+_portStable+
 	                    " last reported port "+_lastReportedPort+
@@ -673,18 +682,15 @@ public class UDPService implements ReadWriteObserver {
 	        
 	        ret= 
 	            NetworkUtils.isValidAddress(networkManager.getExternalAddress()) && 
-	    		_portStable;
+	            _portStable;
 	        
 	        if (_numReceivedIPPongs == 1){
 	            ret = ret &&
-	            	(_lastReportedPort == acceptor.get().getPort(false) ||
+	            (_lastReportedPort == acceptor.get().getPort(false) ||
 	                    _lastReportedPort == networkManager.getPort());
 	        }
 	    }
-	    
 	    ConnectionSettings.LAST_FWT_STATE.setValue(!ret);
-	    
-	    return ret;
 	}
 	
 	// Some getters for bug reporting 

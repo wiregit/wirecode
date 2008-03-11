@@ -554,9 +554,9 @@ public class PushUploadTest extends LimeTestCase {
         public MyNetworkManager(Provider<UDPService> udpService, Provider<Acceptor> acceptor,
                 Provider<DHTManager> dhtManager, Provider<ConnectionManager> connectionManager,
                 Provider<ActivityCallback> activityCallback, OutOfBandStatistics outOfBandStatistics, 
-                NetworkInstanceUtils networkInstanceUtils) {
+                NetworkInstanceUtils networkInstanceUtils, Provider<CapabilitiesVMFactory> capabilitiesVMFactory) {
             super(udpService, acceptor, dhtManager, connectionManager, activityCallback,
-                    outOfBandStatistics, networkInstanceUtils);
+                    outOfBandStatistics, networkInstanceUtils, capabilitiesVMFactory);
         }
 
         @Override

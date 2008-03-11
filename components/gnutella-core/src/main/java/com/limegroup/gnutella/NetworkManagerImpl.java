@@ -6,6 +6,8 @@ import java.util.Properties;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.rudp.RUDPUtils;
+import org.limewire.setting.evt.SettingEvent;
+import org.limewire.setting.evt.SettingListener;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -13,7 +15,9 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 
@@ -27,6 +31,8 @@ public class NetworkManagerImpl implements NetworkManager {
     private final Provider<ActivityCallback> activityCallback;
     private final OutOfBandStatistics outOfBandStatistics;
     private final NetworkInstanceUtils networkInstanceUtils;
+    private final Provider<CapabilitiesVMFactory> capabilitiesVMFactory;
+    private final SettingListener fwtListener = new FWTChangeListener();
     
     @Inject
     public NetworkManagerImpl(Provider<UDPService> udpService,
@@ -35,7 +41,8 @@ public class NetworkManagerImpl implements NetworkManager {
             Provider<ConnectionManager> connectionManager,
             Provider<ActivityCallback> activityCallback,
             OutOfBandStatistics outOfBandStatistics,
-            NetworkInstanceUtils networkInstanceUtils) {
+            NetworkInstanceUtils networkInstanceUtils,
+            Provider<CapabilitiesVMFactory> capabilitiesVMFactory) {
         this.udpService = udpService;
         this.acceptor = acceptor;
         this.dhtManager = dhtManager;
@@ -43,8 +50,19 @@ public class NetworkManagerImpl implements NetworkManager {
         this.activityCallback = activityCallback;
         this.outOfBandStatistics = outOfBandStatistics;
         this.networkInstanceUtils = networkInstanceUtils;
+        this.capabilitiesVMFactory = capabilitiesVMFactory;
     }
     
+
+    public void start() {
+        ConnectionSettings.LAST_FWT_STATE.addSettingListener(fwtListener);
+    }
+
+
+    public void stop() {
+        ConnectionSettings.LAST_FWT_STATE.removeSettingListener(fwtListener);
+    }
+
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.NetworkManager#isIpPortValid()
@@ -117,6 +135,7 @@ public class NetworkManagerImpl implements NetworkManager {
      * @see com.limegroup.gnutella.NetworkManager#incomingStatusChanged()
      */
     public boolean incomingStatusChanged() {
+        updateCapabilities();
         activityCallback.get().handleAddressStateChanged();
         // Only continue if the current address/port is valid & not private.
         byte addr[] = getAddress();
@@ -131,6 +150,12 @@ public class NetworkManagerImpl implements NetworkManager {
         return true;
     }
 
+    private void updateCapabilities() {
+        capabilitiesVMFactory.get().updateCapabilities();
+        if (connectionManager.get().isShieldedLeaf()) 
+            connectionManager.get().sendUpdatedCapabilities();
+    }
+    
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.NetworkManager#addressChanged()
      */
@@ -222,5 +247,12 @@ public class NetworkManagerImpl implements NetworkManager {
     
     public boolean isPrivateAddress(byte[] addr) {
         return networkInstanceUtils.isPrivateAddress(addr);
+    }
+    
+    private class FWTChangeListener implements SettingListener {
+        public void settingChanged(SettingEvent evt) {
+            if (evt.getEventType() == SettingEvent.EventType.VALUE_CHANGED)
+                updateCapabilities();
+        }
     }
 }

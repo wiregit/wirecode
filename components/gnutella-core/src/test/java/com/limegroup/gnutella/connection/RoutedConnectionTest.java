@@ -10,6 +10,8 @@ import java.util.Properties;
 
 import junit.framework.Test;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.NIOServerSocket;
@@ -32,8 +34,10 @@ import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.MessageSettings;
 
 
 /**
@@ -82,6 +86,194 @@ public class RoutedConnectionTest extends ServerSideTestCase {
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         routedConnectionFactory = injector.getInstance(RoutedConnectionFactory.class);
         blockingConnectionFactory = injector.getInstance(BlockingConnectionFactory.class);
+    }
+    
+    private Expectations buildCapVMExpectations(final CapabilitiesVM cvm, final boolean tcp, final boolean fwt) {
+        return new Expectations(){{
+            atLeast(1).of(cvm).canAcceptIncomingTCP();
+            will(returnValue(tcp));
+            atLeast(1).of(cvm).canDoFWT();
+            will(returnValue(fwt));
+            
+            
+            // capabilities we don't care about
+            ignoring(cvm).isActiveDHTNode();
+            ignoring(cvm).isPassiveDHTNode();
+            ignoring(cvm).supportsTLS();
+            ignoring(cvm).supportsWhatIsNew();
+            allowing(cvm).supportsSIMPP();
+            will(returnValue(-1));
+            ignoring(cvm).isPassiveLeafNode();
+            ignoring(cvm).supportsFeatureQueries();
+            allowing(cvm).supportsUpdate();
+            will(returnValue(-1));
+        }};
+    }
+    
+    private Expectations buildQueryExpectations(final QueryRequest query, 
+            final boolean tcp, 
+            final boolean fwt) throws Exception {
+        return new Expectations(){{
+            allowing(query).canDoFirewalledTransfer();
+            will(returnValue(fwt));
+            allowing(query).isFirewalledSource();
+            will(returnValue(!tcp));
+            
+            // stubbed out stuff
+            allowing(query).getFunc();
+            will(returnValue(Message.F_QUERY));
+            ignoring(query).isOriginated();
+            ignoring(query).getHops();
+            ignoring(query).getCreationTime();
+            allowing(query).getNetwork();
+            will(returnValue(Message.Network.TCP));
+            ignoring(query).getLength();
+            ignoring(query).getTTL();
+        }};
+    }
+    
+    public void testFirewallFirewallDrop() throws Exception {
+        ConnectionManager cm = connectionManager;
+        BlockingConnection conn = createLeafConnection();
+        BlockingConnectionUtils.drain(conn);
+        assertEquals(1, cm.getNumConnections());
+        
+        
+        GnutellaConnection mc = (GnutellaConnection)cm.getConnections().get(0);
+        Mockery mockery = new Mockery();
+        final CapabilitiesVM cvm = mockery.mock(CapabilitiesVM.class);
+        mockery.checking(buildCapVMExpectations(cvm, false, false));
+        final QueryRequest query = mockery.mock(QueryRequest.class);
+        mockery.checking(buildQueryExpectations(query, false, false));
+        mc.handleVendorMessage(cvm);
+        assertFalse(mc.shouldSendQuery(query));
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testFirewallFirewallDropDisabled() throws Exception {
+        MessageSettings.ULTRAPEER_FIREWALL_FILTERING.setValue(false);
+        ConnectionManager cm = connectionManager;
+        BlockingConnection conn = createLeafConnection();
+        BlockingConnectionUtils.drain(conn);
+        assertEquals(1, cm.getNumConnections());
+        
+        
+        GnutellaConnection mc = (GnutellaConnection)cm.getConnections().get(0);
+        Mockery mockery = new Mockery();
+        final CapabilitiesVM cvm = mockery.mock(CapabilitiesVM.class);
+        mockery.checking(buildCapVMExpectations(cvm, false, false));
+        final QueryRequest query = mockery.mock(QueryRequest.class);
+        mockery.checking(buildQueryExpectations(query, false, false));
+        mc.handleVendorMessage(cvm);
+        assertTrue(mc.shouldSendQuery(query));
+    }
+    
+    public void testNonFirewallQuerySend() throws Exception {
+        ConnectionManager cm = connectionManager;
+        BlockingConnection conn = createLeafConnection();
+        BlockingConnectionUtils.drain(conn);
+        assertEquals(1, cm.getNumConnections());
+        
+        
+        GnutellaConnection mc = (GnutellaConnection)cm.getConnections().get(0);
+        Mockery mockery = new Mockery();
+        final CapabilitiesVM cvm = mockery.mock(CapabilitiesVM.class);
+        mockery.checking(buildCapVMExpectations(cvm, false, false));
+        final QueryRequest query = mockery.mock(QueryRequest.class);
+        mockery.checking(buildQueryExpectations(query, true, false));
+        mc.handleVendorMessage(cvm);
+        assertTrue(mc.shouldSendQuery(query));
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testNonFirewallLeafSend() throws Exception {
+        ConnectionManager cm = connectionManager;
+        BlockingConnection conn = createLeafConnection();
+        BlockingConnectionUtils.drain(conn);
+        assertEquals(1, cm.getNumConnections());
+        
+        
+        GnutellaConnection mc = (GnutellaConnection)cm.getConnections().get(0);
+        Mockery mockery = new Mockery();
+        final CapabilitiesVM cvm = mockery.mock(CapabilitiesVM.class);
+        mockery.checking(buildCapVMExpectations(cvm, true, false));
+        final QueryRequest query = mockery.mock(QueryRequest.class);
+        mockery.checking(buildQueryExpectations(query, false, false));
+        mc.handleVendorMessage(cvm);
+        assertTrue(mc.shouldSendQuery(query));
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testNonFirewallBothSend() throws Exception {
+        ConnectionManager cm = connectionManager;
+        BlockingConnection conn = createLeafConnection();
+        BlockingConnectionUtils.drain(conn);
+        assertEquals(1, cm.getNumConnections());
+        
+        
+        GnutellaConnection mc = (GnutellaConnection)cm.getConnections().get(0);
+        Mockery mockery = new Mockery();
+        final CapabilitiesVM cvm = mockery.mock(CapabilitiesVM.class);
+        mockery.checking(buildCapVMExpectations(cvm, true, false));
+        final QueryRequest query = mockery.mock(QueryRequest.class);
+        mockery.checking(buildQueryExpectations(query, true, false));
+        mc.handleVendorMessage(cvm);
+        assertTrue(mc.shouldSendQuery(query));
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testBothFWTSend() throws Exception {
+        ConnectionManager cm = connectionManager;
+        BlockingConnection conn = createLeafConnection();
+        BlockingConnectionUtils.drain(conn);
+        assertEquals(1, cm.getNumConnections());
+        
+        
+        GnutellaConnection mc = (GnutellaConnection)cm.getConnections().get(0);
+        Mockery mockery = new Mockery();
+        final CapabilitiesVM cvm = mockery.mock(CapabilitiesVM.class);
+        mockery.checking(buildCapVMExpectations(cvm, false, true));
+        final QueryRequest query = mockery.mock(QueryRequest.class);
+        mockery.checking(buildQueryExpectations(query, false, true));
+        mc.handleVendorMessage(cvm);
+        assertTrue(mc.shouldSendQuery(query));
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testNoFWTLeafDrop() throws Exception {
+        ConnectionManager cm = connectionManager;
+        BlockingConnection conn = createLeafConnection();
+        BlockingConnectionUtils.drain(conn);
+        assertEquals(1, cm.getNumConnections());
+        
+        
+        GnutellaConnection mc = (GnutellaConnection)cm.getConnections().get(0);
+        Mockery mockery = new Mockery();
+        final CapabilitiesVM cvm = mockery.mock(CapabilitiesVM.class);
+        mockery.checking(buildCapVMExpectations(cvm, false, true));
+        final QueryRequest query = mockery.mock(QueryRequest.class);
+        mockery.checking(buildQueryExpectations(query, false, false));
+        mc.handleVendorMessage(cvm);
+        assertFalse(mc.shouldSendQuery(query));
+        mockery.assertIsSatisfied();
+    }
+    
+    public void testNoFWTQueryDrop() throws Exception {
+        ConnectionManager cm = connectionManager;
+        BlockingConnection conn = createLeafConnection();
+        BlockingConnectionUtils.drain(conn);
+        assertEquals(1, cm.getNumConnections());
+        
+        
+        GnutellaConnection mc = (GnutellaConnection)cm.getConnections().get(0);
+        Mockery mockery = new Mockery();
+        final CapabilitiesVM cvm = mockery.mock(CapabilitiesVM.class);
+        mockery.checking(buildCapVMExpectations(cvm, false, false));
+        final QueryRequest query = mockery.mock(QueryRequest.class);
+        mockery.checking(buildQueryExpectations(query, false, true));
+        mc.handleVendorMessage(cvm);
+        assertFalse(mc.shouldSendQuery(query));
+        mockery.assertIsSatisfied();
     }
     
     /**

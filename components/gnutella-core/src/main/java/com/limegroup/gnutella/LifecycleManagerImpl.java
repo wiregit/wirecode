@@ -352,6 +352,10 @@ public class LifecycleManagerImpl implements LifecycleManager {
         connectionDispatcher.get().addConnectionAcceptor(httpUploadAcceptor.get(), false, httpUploadAcceptor.get().getHttpMethods());
         LOG.trace("STOP HTTPUploadAcceptor");
 
+        LOG.trace("START NetworkManager");
+        networkManager.get().start();
+        LOG.trace("STOP NetworkManager");
+        
         LOG.trace("START Acceptor");
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Connection Listener..."));
 		acceptor.get().start();

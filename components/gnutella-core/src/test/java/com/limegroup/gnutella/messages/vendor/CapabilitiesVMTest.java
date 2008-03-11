@@ -89,12 +89,12 @@ public class CapabilitiesVMTest extends BaseTestCase {
     }
 
     public void testNetworkConstructor() throws Exception {
-        CapabilitiesVM.SupportedMessageBlock smp1 = 
-            new CapabilitiesVM.SupportedMessageBlock("SUSH".getBytes(), 10);
-        CapabilitiesVM.SupportedMessageBlock smp2 = 
-            new CapabilitiesVM.SupportedMessageBlock("NEIL".getBytes(), 5);
-        CapabilitiesVM.SupportedMessageBlock smp3 = 
-            new CapabilitiesVM.SupportedMessageBlock("DAWG".getBytes(), 3);
+        CapabilitiesVMImpl.SupportedMessageBlock smp1 = 
+            new CapabilitiesVMImpl.SupportedMessageBlock("SUSH".getBytes(), 10);
+        CapabilitiesVMImpl.SupportedMessageBlock smp2 = 
+            new CapabilitiesVMImpl.SupportedMessageBlock("NEIL".getBytes(), 5);
+        CapabilitiesVMImpl.SupportedMessageBlock smp3 = 
+            new CapabilitiesVMImpl.SupportedMessageBlock("DAWG".getBytes(), 3);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         byte[] guid = GUID.makeGuid();
@@ -104,7 +104,7 @@ public class CapabilitiesVMTest extends BaseTestCase {
         smp2.encode(baos);
         smp3.encode(baos);
         smp3.encode(baos);
-        VendorMessage vm = new CapabilitiesVM(guid, ttl, hops, 0, 
+        VendorMessage vm = new CapabilitiesVMImpl(guid, ttl, hops, 0, 
                                               baos.toByteArray(), Network.UNKNOWN);
         baos = new ByteArrayOutputStream();
         vm.write(baos);
@@ -127,19 +127,19 @@ public class CapabilitiesVMTest extends BaseTestCase {
         smp1.encode(baos);
         
         CapabilitiesVM vmpOther = 
-            new CapabilitiesVM(guid, ttl, hops, 0, baos.toByteArray(), Network.UNKNOWN);
+            new CapabilitiesVMImpl(guid, ttl, hops, 0, baos.toByteArray(), Network.UNKNOWN);
 
         assertEquals(vmp, vmpOther);
 
     }
 
     public void testBadCases() throws Exception {
-        CapabilitiesVM.SupportedMessageBlock smp1 = 
-            new CapabilitiesVM.SupportedMessageBlock("SUSH".getBytes(), 10);
-        CapabilitiesVM.SupportedMessageBlock smp2 = 
-            new CapabilitiesVM.SupportedMessageBlock("NEIL".getBytes(), 5);
-        CapabilitiesVM.SupportedMessageBlock smp3 = 
-            new CapabilitiesVM.SupportedMessageBlock("DAWG".getBytes(), 3);
+        CapabilitiesVMImpl.SupportedMessageBlock smp1 = 
+            new CapabilitiesVMImpl.SupportedMessageBlock("SUSH".getBytes(), 10);
+        CapabilitiesVMImpl.SupportedMessageBlock smp2 = 
+            new CapabilitiesVMImpl.SupportedMessageBlock("NEIL".getBytes(), 5);
+        CapabilitiesVMImpl.SupportedMessageBlock smp3 = 
+            new CapabilitiesVMImpl.SupportedMessageBlock("DAWG".getBytes(), 3);
         ByteArrayOutputStream baos = null;
         byte[] guid = GUID.makeGuid();
         byte ttl = 1, hops = 0;
@@ -150,7 +150,7 @@ public class CapabilitiesVMTest extends BaseTestCase {
             smp2.encode(baos);
             smp3.encode(baos);
             smp1.encode(baos);
-            new CapabilitiesVM(guid, ttl, hops, 0, baos.toByteArray(), Network.UNKNOWN);
+            new CapabilitiesVMImpl(guid, ttl, hops, 0, baos.toByteArray(), Network.UNKNOWN);
             fail("bpe should have been thrown.");
         } catch (BadPacketException expected) {
         }
@@ -162,7 +162,7 @@ public class CapabilitiesVMTest extends BaseTestCase {
             smp3.encode(baos);
             smp1.encode(baos);
             baos.write("crap".getBytes());
-            new CapabilitiesVM(guid, ttl, hops, 0, 
+            new CapabilitiesVMImpl(guid, ttl, hops, 0, 
                                                    baos.toByteArray(), Network.UNKNOWN);
             fail("bpe should have been thrown.");
         } catch (BadPacketException expected) {
@@ -175,14 +175,14 @@ public class CapabilitiesVMTest extends BaseTestCase {
         smp3.encode(baos);
         smp1.encode(baos);
         CapabilitiesVM vmpOther = 
-            new CapabilitiesVM(guid, ttl, hops, 0, baos.toByteArray(), Network.UNKNOWN);
+            new CapabilitiesVMImpl(guid, ttl, hops, 0, baos.toByteArray(), Network.UNKNOWN);
         baos = new ByteArrayOutputStream();
         ByteOrder.short2leb((short)3, baos);
         smp2.encode(baos);
         smp3.encode(baos);
         smp1.encode(baos);
         CapabilitiesVM vmpOneOther = 
-            new CapabilitiesVM(guid, ttl, hops, 0, baos.toByteArray(), Network.UNKNOWN);
+            new CapabilitiesVMImpl(guid, ttl, hops, 0, baos.toByteArray(), Network.UNKNOWN);
         assertNotEquals(vmpOther,vmpOneOther);
 
     }

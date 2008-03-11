@@ -509,4 +509,15 @@ public class ConnectionCapabilitiesImpl implements ConnectionCapabilities {
         this.messagesSupportedVendorMessage = vm;
     }
 
+    public boolean canAcceptIncomingTCP() {
+        if (capabilitiesVendorMessage == null)
+            return true;
+        return capabilitiesVendorMessage.canAcceptIncomingTCP();
+    }
+    
+    public boolean canDoFWT() {
+        if (capabilitiesVendorMessage == null)
+            return true;
+        return capabilitiesVendorMessage.canDoFWT();
+    }
 }

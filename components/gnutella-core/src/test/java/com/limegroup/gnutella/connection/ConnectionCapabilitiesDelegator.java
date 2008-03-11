@@ -200,4 +200,12 @@ public class ConnectionCapabilitiesDelegator implements ConnectionCapabilities {
         return delegate.supportsVMRouting();
     }
 
+    public boolean canAcceptIncomingTCP() {
+        return delegate.canAcceptIncomingTCP();
+    }
+
+    public boolean canDoFWT() {
+        return delegate.canDoFWT();
+    }
+
 }

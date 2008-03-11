@@ -35,9 +35,10 @@ import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMImpl;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM.SupportedMessageBlock;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMImpl.SupportedMessageBlock;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -395,7 +396,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     private void addPassiveLeafCapability() {
         CapabilitiesVMFactoryImplStub factory = (CapabilitiesVMFactoryImplStub) injector.getInstance(CapabilitiesVMFactory.class);
-        SupportedMessageBlock messageBlock = new CapabilitiesVM.SupportedMessageBlock(DHTMode.PASSIVE_LEAF.getCapabilityName(), Integer.valueOf(0));
+        SupportedMessageBlock messageBlock = new CapabilitiesVMImpl.SupportedMessageBlock(DHTMode.PASSIVE_LEAF.getCapabilityName(), Integer.valueOf(0));
         factory.addMessageBlock(messageBlock);
     }
 

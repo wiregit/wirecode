@@ -272,5 +272,9 @@ public interface ConnectionCapabilities {
      * message or -1.
      */
     public int getSupportedOOBProxyControlVersion();
+    
+    public boolean canAcceptIncomingTCP();
+    
+    public boolean canDoFWT();
 
 }

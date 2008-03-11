@@ -739,15 +739,37 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      * @see com.limegroup.gnutella.RoutedConnection#send(com.limegroup.gnutella.messages.Message)
      */
     public void send(Message m) {
-        // if Hops Flow is in effect, and this is a QueryRequest, and the
-        // hoppage is too biggage, discardage time...
-        int smh = hopsFlowMax;
-        if (smh > -1 && (m instanceof QueryRequest) && m.getHops() >= smh)
-            return;
-
+        if (m instanceof QueryRequest && !shouldSendQuery((QueryRequest)m))
+                return;
+        
         _outputRunner.send(m);
     }
 
+    /**
+     * @return true if the query should be sent.
+     * default access for testing.
+     */
+    boolean shouldSendQuery(QueryRequest query) {
+        // if Hops Flow is in effect, and this is a QueryRequest, and the
+        // hoppage is too biggage, discardage time...
+        int smh = hopsFlowMax;
+        if (smh > -1 && query.getHops() >= smh)
+            return false;
+        
+        // if we are an ultrapeer sending a query to a leaf, check its firewall status
+        boolean send = true;
+        if (isSupernodeClientConnection() && MessageSettings.ULTRAPEER_FIREWALL_FILTERING.getValue()) {
+            boolean incomingTCP = getConnectionCapabilities().canAcceptIncomingTCP();
+            boolean fwt = getConnectionCapabilities().canDoFWT();
+            
+            // if either party can accept tcp, send.
+            // otherwise send if both sides can do fwt.
+            if (!incomingTCP && query.isFirewalledSource()) 
+                send = fwt && query.canDoFirewalledTransfer();
+        }
+        return send;
+    }
+    
     /*
      * (non-Javadoc)
      * 

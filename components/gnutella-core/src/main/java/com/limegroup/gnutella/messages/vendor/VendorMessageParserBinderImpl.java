@@ -153,7 +153,7 @@ public class VendorMessageParserBinderImpl implements VendorMessageParserBinder 
     private static class CapabilitiesVMParser implements VendorMessageParser {
         public VendorMessage parse(byte[] guid, byte ttl, byte hops, int version, 
                 byte[] restOf, Network network) throws BadPacketException {
-            return new CapabilitiesVM(guid, ttl, hops, version, restOf, network);
+            return new CapabilitiesVMImpl(guid, ttl, hops, version, restOf, network);
         }
     }
     

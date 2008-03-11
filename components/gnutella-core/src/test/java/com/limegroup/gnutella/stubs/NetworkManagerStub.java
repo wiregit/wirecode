@@ -177,4 +177,6 @@ public class NetworkManagerStub implements NetworkManager {
         return new SimpleNetworkInstanceUtils().isPrivateAddress(addr);
     }
 
+    public void start(){}
+    public void stop(){}
 }

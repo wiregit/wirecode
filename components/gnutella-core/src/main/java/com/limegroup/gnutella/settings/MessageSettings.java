@@ -69,4 +69,12 @@ public class MessageSettings extends LimeProps {
     public static final BooleanSetting GUID_ZERO_EXPERIMENT = 
         FACTORY.createRemoteBooleanSetting("GUID_ZERO_EXPERIMENT", false, 
                 "MessageSettings.guidZeroExperiment");
+    
+    /**
+     * Whether ultrapeers should filter queries to leaves based on firewall status.
+     * Described in LWC-1309
+     */
+    public static final BooleanSetting ULTRAPEER_FIREWALL_FILTERING =
+        FACTORY.createRemoteBooleanSetting("ULTRAPEER_FIREWALL_FILTERING",true,
+                "MessageSettings.ultrapeerFirewallFiltering");
 }
