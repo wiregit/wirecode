@@ -23,7 +23,6 @@ public interface ConnectionDispatcher {
      * 
      * @param acceptor The SocketAcceptor to call acceptConnection on
      * @param localOnly True if localhost connections are required, false if none allowed
-     * @param blocking True if the acceptor may block on I/O after acceptConnection is called
      * @param words The list of words to associate with this SocketAcceptor
      */
     public abstract void addConnectionAcceptor(ConnectionAcceptor acceptor,
@@ -39,8 +38,8 @@ public interface ConnectionDispatcher {
      * Dispatches this incoming connection to the appropriate manager, depending
      * on the word that was read.
      * 
-     * @param word
-     * @param client
+     * @param word The word associated with this Socket
+     * @param client Socket to use for dispatch
      * @param newThread whether or not a new thread is necessary when dispatching
      *                  to a blocking protocol.
      */

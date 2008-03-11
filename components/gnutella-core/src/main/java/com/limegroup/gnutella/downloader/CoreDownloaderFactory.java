@@ -35,13 +35,13 @@ public interface CoreDownloaderFactory {
             throws SaveLocationException;
 
     /**
-     * @param rfd - location to download from
-     * @param saveDirectory - location to save the file
-     * @param fileName - name of file once download is complete
-     * @param overwrite - true to overwrite a file with the same name in the
+     * @param rfd location to download from
+     * @param saveDirectory location to save the file
+     * @param fileName name of file once download is complete
+     * @param overwrite true to overwrite a file with the same name in the
      *        same directory
-     * @return - a StoreDownloader to begin downloading from
-     * @throws SaveLocationException
+     * @return StoreDownloader to begin downloading from
+     * @throws SaveLocationException when the new file location could not be set
      */
     public StoreDownloader createStoreDownloader(RemoteFileDesc rfd, File saveDirectory,
             String fileName, boolean overwrite) throws SaveLocationException;

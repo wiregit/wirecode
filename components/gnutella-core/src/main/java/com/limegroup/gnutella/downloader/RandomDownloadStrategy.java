@@ -10,27 +10,26 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 
 
-/** 
- * This SelectionStrategy selects random Intervals from the availableIntervals.
- * 
+/**
+ * This <code>SelectionStrategy</code> selects random Intervals from the availableIntervals.
+ * <p>
  * If the number of Intervals contained in neededBytes is less than MAX_FRAGMENTS,
  * then a random location between the first and last bytes (inclusive) of neededBytes
- * is chosen.  We find the last chunk before this location and the first chunk after.
- * We return one or the other chunk (as an Interval) with equal probability.  Of
+ * is chosen. We find the last chunk before this location and the first chunk after.
+ * We return one or the other chunk (as an Interval) with equal probability. Of
  * course, if there are only available bytes on one side of the location, then there
- * is only one choice for which chunk to return.  For network efficiency, the random 
+ * is only one choice for which chunk to return. For network efficiency, the random 
  * location is aligned to blockSize boundaries.
- * 
+ * <p>
  * If the number of Intervals in neededBytes is greater than or equal to MAX_FRAGMENTS,
  * then the same algorithm is used, except that the location is chosen randomly from
  * an endpoint of one of the existing fragments, in an attempt to coalesce fragments.
- * 
  */
 public class RandomDownloadStrategy implements SelectionStrategy {
     
     private static final Log LOG = LogFactory.getLog(RandomDownloadStrategy.class);
     
-    /** Maximum number of file framgents we're willing to intentionally create */
+    /** Maximum number of file fragments we're willing to intentionally create */
     private static final int MAX_FRAGMENTS = 16;
     
     /**
@@ -62,9 +61,8 @@ public class RandomDownloadStrategy implements SelectionStrategy {
      *      This guarantees candidateBytes is a subset of neededBytes.
      * @param neededBytes a representation of the set of bytes
      *      of the file that have not been leased, verified, etc.
-     * @param fileSize the total length of the file being downloaded
      * @param blockSize the maximum size of the returned Interval. Any values less than 1 will
-     *      be ignared.  An attempt will be made to make the high end of the interval one less
+     *      be ignored.  An attempt will be made to make the high end of the interval one less
      *      than a multiple of blockSize.  Any values less than 1 will generate IllegalArgumentExceptions.
      * @return the Interval that should be assigned next, with a size of at most blockSize bytes
      * @throws NoSuchElementException if passed an empty IntervalSet

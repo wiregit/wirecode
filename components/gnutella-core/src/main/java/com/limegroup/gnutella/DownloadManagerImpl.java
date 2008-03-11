@@ -87,7 +87,7 @@ public class DownloadManagerImpl implements DownloadManager {
     private volatile boolean downloadsReadFromDisk = false;
     
     /** The number if IN-NETWORK active downloaders.  We don't count these when
-     * determing how many downloaders are active.
+     * determining how many downloaders are active.
      */
     private int innetworkCount = 0;
 
@@ -173,7 +173,7 @@ public class DownloadManagerImpl implements DownloadManager {
     
     /**
      * Adds a new downloader to this manager.
-     * @param downloader
+     * @param downloader the core downloader
      */
     public void addNewDownloader(CoreDownloader downloader) {
         synchronized(this) {
@@ -309,10 +309,6 @@ public class DownloadManagerImpl implements DownloadManager {
      * 
      * Closes the socket if neither BrowseHostHandler nor any ManagedDownloaders wanted it.
      * 
-     * @param file
-     * @param index
-     * @param clientGUID
-     * @param socket
      */
     private synchronized boolean handleIncomingPush(String file, int index, byte [] clientGUID, Socket socket) {
          boolean handled = false;
@@ -364,7 +360,7 @@ public class DownloadManagerImpl implements DownloadManager {
                 i.remove();
                 cleanupCompletedDownload(md, false);
             }
-            // handle downloads from LWS seperately, only allow 1 at a time
+            // handle downloads from LWS separately, only allow 1 at a time
             else if( storeDownloadCount == 0 && md.getDownloadType() == DownloaderType.STORE ) {
                     i.remove();
                     storeDownloadCount++;
@@ -581,7 +577,7 @@ public class DownloadManagerImpl implements DownloadManager {
         //Note: If the filename exists, it would be nice to check that we are
         //not already downloading the file by calling conflicts with the
         //filename...the problem is we cannot do this effectively without the
-        //size of the file (atleast, not without being risky in assuming that
+        //size of the file (at least, not without being risky in assuming that
         //two files with the same name are the same file). So for now we will
         //just leave it and download the same file twice.
 
@@ -807,8 +803,6 @@ public class DownloadManagerImpl implements DownloadManager {
      * Returns true if there already exists a download for the same file.
      * <p>
      * Same file means: same urn, or as fallback same filename + same filesize
-     * @param rfds
-     * @return
      */
     private boolean conflicts(RemoteFileDesc[] rfds, File... fileName) {
         URN urn = null;

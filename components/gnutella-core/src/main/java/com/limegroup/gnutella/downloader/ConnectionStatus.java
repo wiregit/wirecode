@@ -7,12 +7,14 @@ import com.limegroup.gnutella.tigertree.HashTree;
  * requesting a file.
  *
  * Possible options are:
- *   NoFile (the server is not giving us the file)
- *   Queued (the server queued us)
- *   Connected (we are connected and should download)
- *   NoData (we have no data to request)
- *   PartialData (the server has other data to use)
- *   ThexResponse (the server just gave us a HashTree)
+ * <ul>
+ * <li>NoFile (the server is not giving us the file)</li>
+ * <li>Queued (the server queued us)</li>
+ * <li>Connected (we are connected and should download)</li>
+ * <li>NoData (we have no data to request)</li>
+ * <li>PartialData (the server has other data to use)</li>
+ * <li>ThexResponse (the server just gave us a HashTree)</li>
+ * </ul>
  */
 public class ConnectionStatus {
     

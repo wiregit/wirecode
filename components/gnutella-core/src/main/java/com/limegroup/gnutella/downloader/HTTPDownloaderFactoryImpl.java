@@ -40,13 +40,6 @@ public class HTTPDownloaderFactoryImpl implements HTTPDownloaderFactory {
     private final NetworkInstanceUtils networkInstanceUtils;
 
 
-    /**
-     * @param networkManager
-     * @param alternateLocationFactory
-     * @param downloadManager
-     * @param creationTimeCache
-     * @param bandwidthManager
-     */
     @Inject
     public HTTPDownloaderFactoryImpl(NetworkManager networkManager,
             AlternateLocationFactory alternateLocationFactory, DownloadManager downloadManager,

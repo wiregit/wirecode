@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
 /**
- * All kinds of downloads.
+ * Defines the various types of downloads.
  */
 public enum DownloaderType {
     BTDOWNLOADER, INNETWORK, MAGNET, MANAGED, STORE, TORRENTFETCHER, UNKNOWN

@@ -33,7 +33,7 @@ import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.MultiShutdownable;
 
 /**
- * Class that performs the logic of downloading a file from a single host.
+ * Performs the logic of downloading a file from a single host.
  */
 public class DownloadWorker {
     /*
@@ -63,7 +63,7 @@ public class DownloadWorker {
      * beginDownload, handleQueued, or finishHttpLoop
      * 
      * Each 'if needed' method can return true or false. True means that an
-     * operation is being performend and upon success or failure the state
+     * operation is being performed and upon success or failure the state
      * machine will continue. Success generally calls incrementState again to
      * move to the next state. Failure generally calls finishHttpLoop to stop
      * the download. False means the operation does not need to be performed and
@@ -119,7 +119,7 @@ public class DownloadWorker {
     private static final int MIN_SPLIT_SIZE = 16 * 1024; // 16 KB
 
     /**
-     * The lowest (cumulative) bandwith we will accept without stealing the
+     * The lowest (cumulative) bandwidth we will accept without stealing the
      * entire grey area from a downloader for a new one
      */
     private static final float MIN_ACCEPTABLE_SPEED = DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC
@@ -199,15 +199,17 @@ public class DownloadWorker {
     private final AtomicBoolean _interrupted = new AtomicBoolean(false);
 
     /**
-     * The downloader that will do the actual downloading TODO: un-volatilize
-     * after fixing the assertion failures
+     * The downloader that will do the actual downloading 
      */
+     //TODO: un-volatilize after fixing the assertion failures
+     
     private volatile HTTPDownloader _downloader;
 
     /**
-     * Whether I should release the ranges that I have leased for download TODO:
-     * un-volatilize after fixing the assertion failures
-     */
+     * Whether I should release the ranges that I have leased for download 
+     */ 
+     //TODO: un-volatilize after fixing the assertion failures
+     
     private volatile boolean _shouldRelease;
 
     /**
@@ -374,8 +376,6 @@ public class DownloadWorker {
 
     /**
      * Handles a failure of an RFD.
-     * 
-     * @param rfd
      */
     private void handleRFDFailure() {
         _rfd.incrementFailedCount();
@@ -443,7 +443,7 @@ public class DownloadWorker {
      * either finish the download (if an error occurred) or move to the next
      * state.
      * 
-     * A succesful download will reset the failed count on the RFD. A
+     * A successful download will reset the failed count on the RFD. A
      * DiskException while downloading will notify the manager of a problem.
      */
     private void beginDownload() {
@@ -609,7 +609,7 @@ public class DownloadWorker {
         // make sure that we're not in _downloaders if we're
         // sleeping/queued. this would ONLY be possible
         // if some uploader was misbehaved and queued
-        // us after we succesfully managed to download some
+        // us after we successfully managed to download some
         // information. despite the rarity of the situation,
         // we should be prepared.
         _manager.removeActiveWorker(this);
@@ -651,7 +651,7 @@ public class DownloadWorker {
      * 
      * This will return immediately, scheduling callbacks for the connection
      * events. The appropriate ConnectObserver (Push or Direct) will be notified
-     * via handleConnect if succesful or shutdown if not. From there, the rest
+     * via handleConnect if successful or shutdown if not. From there, the rest
      * of the download may start.
      */
     private void establishConnection() {
@@ -809,9 +809,6 @@ public class DownloadWorker {
      * Assigns a white area or a grey area to a downloader. Sets the state, and
      * checks if this downloader has been interrupted.
      * 
-     * @param _downloader The downloader to which this method assigns either a
-     *        grey area or white area.
-     * @return the ConnectionStatus.
      */
     private boolean assignAndRequest() {
         if (LOG.isTraceEnabled())
@@ -1046,8 +1043,6 @@ public class DownloadWorker {
     /**
      * picks an unclaimed interval from the verifying file
      * 
-     * @param http11 whether the downloader is http 11
-     * 
      * @throws NoSuchRangeException if the remote host is partial and doesn't
      *         have the ranges we need
      */
@@ -1162,10 +1157,6 @@ public class DownloadWorker {
     /**
      * Completes assigning a grey portion to a downloader. This accounts for
      * changes in the victim's downloaded range while we were requesting.
-     * 
-     * @param victim
-     * @param slowestRange
-     * @throws IOException
      */
     private void completeAssignGrey(DownloadWorker victim, Range slowestRange)
             throws IOException {
@@ -1326,7 +1317,6 @@ public class DownloadWorker {
     /**
      * Returns true if the victim is going below minimum speed.
      * 
-     * @return
      */
     boolean isSlow() {
         float ourSpeed = getOurSpeed();
@@ -1348,7 +1338,7 @@ public class DownloadWorker {
      * The file does not have such ranges
      */
     private ConnectionStatus handleNoRanges() {
-        // forget the ranges we are preteding uploader is busy.
+        // forget the ranges we are pretending uploader is busy.
         _rfd.setAvailableRanges(null);
 
         // if this RFD did not already give us a retry-after header
@@ -1484,8 +1474,6 @@ public class DownloadWorker {
 
     /**
      * Starts a new thread that will perform the download.
-     * 
-     * @param dl
      */
     private void startDownload(HTTPDownloader dl) {
         _downloader = dl;
@@ -1513,7 +1501,7 @@ public class DownloadWorker {
 
     /**
      * A simple IOStateObserver that will increment state upon completion and
-     * finish on close/shutdown, but offer the abillity for something to be done
+     * finish on close/shutdown, but offer the ability for something to be done
      * prior to moving on in each case.
      */
     private abstract class State implements IOStateObserver {
@@ -1558,9 +1546,6 @@ public class DownloadWorker {
          * call _manager.forgetRFD(_rfd) if the push fails. If
          * directConnectOnFailure is true, this will attempt a direct connection
          * if the push fails. Upon success, this will always start the download.
-         * 
-         * @param forgetOnFailure
-         * @param directConnectOnFailure
          */
         PushConnector(boolean forgetOnFailure, boolean directConnectOnFailure) {
             this.forgetOnFailure = forgetOnFailure;
@@ -1645,15 +1630,13 @@ public class DownloadWorker {
          * Creates a new DirectConnection. If pushConnectOnFailure is true, this
          * will attempt a push connection if the direct connect fails. Upon
          * success, this will always start a new download.
-         * 
-         * @param pushConnectOnFailure
          */
         DirectConnector(boolean pushConnectOnFailure) {
             this.pushConnectOnFailure = pushConnectOnFailure;
         }
 
         /**
-         * Upon succesful connect, create the HTTPDownloader with the right
+         * Upon successful connect, create the HTTPDownloader with the right
          * socket, and proceed to continue downloading.
          */
         public void handleConnect(Socket socket) {
@@ -1673,7 +1656,7 @@ public class DownloadWorker {
         }
 
         /**
-         * Upon unsuccesful connect, try using a push (if pushConnectOnFailure
+         * Upon unsuccessful connect, try using a push (if pushConnectOnFailure
          * is true).
          */
         public void shutdown() {

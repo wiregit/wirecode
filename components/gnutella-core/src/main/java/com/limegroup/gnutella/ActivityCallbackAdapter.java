@@ -12,6 +12,11 @@ import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.version.UpdateInformation;
 
+/**
+ * Provides a default implementation of <code>ActivityCallback</code> where
+ * all the methods are either empty or return <code>false</code>. You can extend 
+ * this class when you are only need specific methods.
+ */
 @Singleton
 public class ActivityCallbackAdapter implements ActivityCallback {
 

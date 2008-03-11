@@ -99,7 +99,7 @@ import com.limegroup.gnutella.tigertree.ThexReaderFactory;
  * dl.connectHTTP(startByte, stopByte);
  * dl.doDownload();
  * </pre> 
- * LOCKING: _writtenGoodLocs and _goodLocs are both synchronized on _goodLocs
+ * LOCKING: _writtenGoodLocs and _goodLocs are both synchronized on _goodLocs<p>
  * LOCKING: _writtenBadLocs and _badLocs are both synchronized on _badLocs
  */
 
@@ -402,11 +402,11 @@ public class HTTPDownloader implements BandwidthTracker {
     
     ///////////////////////////////// Connection /////////////////////////////
 
-    /** 
+    /**
      * Initializes the TCP connection by installing readers & writers
      * on the socket and setting the appropriate keepAlive & soTimeout
      * socket options.
-     * 
+     * <p>
      * If the TCP connection could not be initialized, this
      * throws an IOException.
      */
@@ -440,20 +440,23 @@ public class HTTPDownloader implements BandwidthTracker {
         connectHTTP(start, stop, supportQueueing, -1, observer);
     }
     
-    /** 
+    /**
      * Sends a GET request using an already open socket, and reads all 
      * headers.  The actual ranges downloaded MAY NOT be the same
      * as the 'start' and 'stop' parameters, as HTTP allows the server
      * to respond with any satisfiable subrange of the request.
-     *
+     * <p>
      * Users of this class should examine getInitialReadingPoint()
      * and getAmountToRead() to determine what the effective start & stop
-     * ranges are, and update external datastructures appropriately.
+     * ranges are, and update external datastructures appropriately.<p>
+     * <pre>
      *  int newStart = dloader.getInitialReadingPoint();
      *  int newStop = (dloader.getAmountToRead() - 1) + newStart; // INCLUSIVE
+     *  </pre>
      * or
+     * <pre>
      *  int newStop = dloader.getAmountToRead() + newStart; // EXCLUSIVE
-     *
+     *  </pre>
      * <p>
      * @param start The byte at which the HTTPDownloader should begin
      * @param stop the index just past the last byte to read;
@@ -876,12 +879,12 @@ public class HTTPDownloader implements BandwidthTracker {
                 // per the PFSP spec, a 503 should be returned. But if the
                 // uploader returns a "Avaliable-Ranges" header regardless of
                 // whether it is really busy or just does not have the requested
-                // range, we cannot really distingush between the two cases on
+                // range, we cannot really distinguish between the two cases on
                 // the client side.
                 
                 //For the most part clients send 416 when they have other ranges
                 //that may match the clients need. From LimeWire 4.0.6 onwards
-                //LimeWire will treate 503s to mean either busy or queued BUT
+                //LimeWire will treat 503s to mean either busy or queued BUT
                 //NOT partial range available.
 
                 //if( _rfd.isPartialSource() )
@@ -904,7 +907,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * Does nothing except for throwing an exception if the
      * X-Gnutella-Content-URN header does not match
      * 
-     * @param str
+     * @param value
      *            the header <tt>String</tt>
      * @param sha1
      *            the <tt>URN</tt> we expect

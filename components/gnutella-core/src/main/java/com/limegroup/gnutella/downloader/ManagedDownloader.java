@@ -7,6 +7,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 
+/**Defines an interface for controlled downloads. */
 public interface ManagedDownloader extends MeshHandler, CoreDownloader {
 
     /** Adds any default sources, and a default filename to use. */
@@ -34,7 +35,9 @@ public interface ManagedDownloader extends MeshHandler, CoreDownloader {
      * wish to override this protected method to control the behavior.
      * 
      * @param rfd a new download candidate.  Typically rfd will be similar or
-     *  same to some entry in this, but that is not required.  
+     *  same to some entry in this, but that is not required. 
+     * @param cache if true, add the <code>RemoteFileDesc</code> to a set of 
+     *  cached files  
      * @return true if rfd has been added.  In this case, the caller should
      *  not offer rfd to another ManagedDownloaders.
      */

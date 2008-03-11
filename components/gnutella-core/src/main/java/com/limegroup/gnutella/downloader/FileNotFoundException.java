@@ -3,7 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.IOException;
 
 /**
- * Thrown when a file is not found, ie an HTTP 404 
+ * Thrown when a file is not found, for example an HTTP 404. 
  */
 
 public class FileNotFoundException extends IOException {

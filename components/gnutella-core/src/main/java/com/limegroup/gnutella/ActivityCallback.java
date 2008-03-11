@@ -13,17 +13,17 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
- *  Callback to notify the GUI of asynchronous backend events.
- *  The methods in this fall into the following categories:
+ *  Defines the interface of a callback to notify about asynchronous backend 
+ *  events. The methods in this interface fall into the following categories:
  *
  *  <ul>
  *  <li>Query replies (for displaying results) and query strings 
- *     (for the monitor)
- *  <li>Update in shared file statistics
- *  <li>Change of connection state
- *  <li>New or dead uploads or downloads
- *  <li>New chat requests and chat messages
- *  <li>Error messages
+ *     (for the monitor)</li>
+ *  <li>Update in shared file statistics</li>
+ *  <li>Change of connection state</li>
+ *  <li>New or dead uploads or downloads</li>
+ *  <li>New chat requests and chat messages</li>
+ *  <li>Error messages</li>
  *  </ul>
  */
 public interface ActivityCallback extends DownloadCallback, FileEventListener, ConnectionLifecycleListener
@@ -68,7 +68,7 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, C
 	/** The given chatter is no longer available */
 	public void chatUnavailable(InstantMessenger chatter);
 
-	/** display an error message in the chat gui */
+	/** display an error message */
 	public void chatErrorMessage(InstantMessenger chatter, String str);
 
     /** display an error message since the browse host failed. 
@@ -77,37 +77,37 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, C
     public void browseHostFailed(GUID guid);
         
 	/**
-	 * Notification that the file manager is beginning loading.
+	 * Notification that the <code>FileManager</code> is beginning loading.
 	 */
 	public void fileManagerLoading();
 
     /**
-     * Notifies a user that the filemanager has completely loaded.
+     * Notifies a user that the file manager has completely loaded.
      */
     public void fileManagerLoaded();
     
     /**
-     * Notifies the GUI that the user is attempting to share a sensitive
+     * Notifies that the user is attempting to share a sensitive
      * directory.  Returns true if the sensitive directory should be shared. 
      */
     public boolean warnAboutSharingSensitiveDirectory(File dir);
     
     /**
-     * Notifies the GUI when a FileDesc was either added, removed, 
+     * Notifies when a FileDesc was either added, removed, 
      * changed or renamed. This event is triggered by FileManager
      * or MetaFileManager.
      */
     public void handleFileEvent(FileManagerEvent evt);
     
     /** 
-     * Notifies the GUI of connection lifecycle related events.
+     * Notifies about connection life cycle related events.
      * This event is triggered by the ConnectionManager
      * 
      */
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt);
     
     /**
-     * Notifies the GUI that the given shared file has new information.
+     * Notifies that the given shared file has new information.
      *
      * @param file The File that needs updating
      */    
@@ -124,18 +124,18 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, C
 	public void setAnnotateEnabled(boolean enabled);
     
     /** 
-     * Notifies the GUI that all active uploads have been completed.
+     * Notifies that all active uploads have been completed.
      */  
     public void uploadsComplete();
 
 	/**
-	 *  Tell the GUI to deiconify.
+	 *  Tell to deiconify.
 	 */
 	public void restoreApplication();
 
     /**
-     * @return true If the guid that maps to a query result screen is still
-     * available/viewable to the user.
+     * @return true If the <code>guid</code> that maps to a query result screen 
+     * is still available/viewable to the user.
      */
     public boolean isQueryAlive(GUID guid);
     
@@ -148,12 +148,12 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, C
     public void installationCorrupted();
 	
 	/**
-	 * The core passes parsed magnets to the GUI and asks it if it wants
+	 * The core passes parsed magnets to the callback and asks it if it wants
 	 * to handle them itself.
 	 * <p>
 	 * If this is the case the callback should return <code>true</code>, otherwise
 	 * the core starts the downloads itself.
-	 * @param magnets
+	 * @param magnets Array of magnet information to handle
 	 * @return true if the callback handles the magnet links
 	 */
 	public boolean handleMagnets(MagnetOptions[] magnets);

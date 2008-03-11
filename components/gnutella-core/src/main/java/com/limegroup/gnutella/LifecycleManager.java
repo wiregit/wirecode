@@ -1,5 +1,8 @@
 package com.limegroup.gnutella;
 
+/**
+ * Defines the interface for the start up and shutdown of a LimeWire instance.
+ */
 public interface LifecycleManager {
 
     public boolean isLoaded();
@@ -19,9 +22,9 @@ public interface LifecycleManager {
 
     /**
      * Shuts down anything that requires shutdown.
-     *
-     * TODO: Make all of these things Shutdown Items.
      */
+    // TODO: Make all of these things Shutdown Items.
+
     public void shutdown();
 
     /** Shuts down & executes something after shutdown completes. */
@@ -32,8 +35,8 @@ public interface LifecycleManager {
 
     /**
      * Adds something that requires shutting down.
-     *
-     * TODO: Make this take a 'Service' or somesuch that
+     */
+     /* TODO: Make this take a 'Service' or some such that
      *       has a shutdown method, and run the method in its
      *       own thread.
      */

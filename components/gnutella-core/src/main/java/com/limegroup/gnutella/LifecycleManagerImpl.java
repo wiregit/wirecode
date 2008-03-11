@@ -60,6 +60,10 @@ import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.version.UpdateHandler;
 
+/**
+ * Provides an implementation of the <code>LifecycleManager</code> to start and
+ * stop the LimeWire components.
+ */
 @Singleton
 public class LifecycleManagerImpl implements LifecycleManager {
     

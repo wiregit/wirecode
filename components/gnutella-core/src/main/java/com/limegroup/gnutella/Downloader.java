@@ -3,13 +3,14 @@ package com.limegroup.gnutella;
 import java.io.File;
 
 /**
- * The downloader interface.  The UI maintains a list of Downloader's and uses
- * its methods to stop and resume downloads.  Note that there is no start method;
+ * Defines an interface for downloading a file. The user interface maintains a 
+ * list of <code>Downloader</code>'s and uses its methods to stop and 
+ * resume downloads. Note that there is no start method;
  * it is assumed that the downloader will start as soon as it is instantiated.
  */
 public interface Downloader extends BandwidthTracker {
     
-    /** The states a download can be in. */
+    /** Enumerates the various states of a download. */
     public static enum DownloadStatus {
         INITIALIZING,
         QUEUED,
@@ -38,7 +39,7 @@ public interface Downloader extends BandwidthTracker {
     }
 
     /**
-     * Marker string for Bittorrent downloads.
+     * Marker string for BitTorrent downloads.
      */
     public static final String BITTORRENT_DOWNLOAD = "";
     
@@ -50,7 +51,7 @@ public interface Downloader extends BandwidthTracker {
     
     /**
      * Stops this.  If the download is already stopped, does nothing.
-     *     @modifies this
+     * @modifies this
      */
     public void stop();
     
@@ -91,11 +92,11 @@ public interface Downloader extends BandwidthTracker {
 
     /**
      * Resumes this.  If the download is GAVE_UP, tries all locations again and
-     * returns true.  If WAITING_FOR_RETRY, forces the retry immediately and
-     * returns true.  If some other downloader is currently downloading the
+     * @return true If WAITING_FOR_RETRY, forces the retry immediately and
+     * returns true if some other downloader is currently downloading the
      * file, throws AlreadyDowloadingException.  If WAITING_FOR_USER, then
      * launches another query.  Otherwise does nothing and returns false. 
-     *     @modifies this 
+     * @modifies this 
      */
     public boolean resume();
     
@@ -104,8 +105,8 @@ public interface Downloader extends BandwidthTracker {
      * This is useful for retrieving information from the file,
      * such as the icon.
      *
-     * This should NOT be used for playing the file.  Instead,
-     * use getDownloadFragment for the reasons described in that
+     * This should NOT be used for playing the file; instead,
+     * use {@link #getDownloadFragment()} for the reasons described in that
      * method.
      */
     public File getFile();
@@ -121,17 +122,20 @@ public interface Downloader extends BandwidthTracker {
     public File getDownloadFragment();
 
     /**
-     * Sets the directory where the file will be saved. If saveLocation is null, 
-     * the default save directory will be used.
+     * Sets the directory where the file will be saved. If <code>saveDirectory</code> 
+     * is null, the default save directory will be used.
      *
-     * @param saveDirectory the directory where the file should be saved. null indicates the default.
-     * @param fileName the name of the file to be saved in saveDirectory. null indicates the default.
+     * @param saveDirectory the directory where the file should be saved. null 
+     * indicates the default.
+     * @param fileName the name of the file to be saved in <code>saveDirectory</code>. 
+     * null indicates the default.
      * @param overwrite is true if saving should be allowed to overwrite existing files
      * @throws SaveLocationException when the new file location could not be set
      */
     public void setSaveFile(File saveDirectory, String fileName, boolean overwrite) throws SaveLocationException;
     
-    /** Returns the file under which the download will be saved when complete.  Counterpart to setSaveFile. */
+    /** Returns the file under which the download will be saved when complete.  
+     * Counterpart to setSaveFile. */
     public File getSaveFile();
     
     /**
@@ -140,8 +144,8 @@ public interface Downloader extends BandwidthTracker {
     public DownloadStatus getState();
 
     /**
-     * Returns an upper bound on the amount of time this will stay in the current
-     * state, in seconds.  Returns Integer.MAX_VALUE if unknown.
+     * Returns an upper bound on the amount of time (in seconds) this will stay 
+     * in the current state.  Returns <code>Integer.MAX_VALUE</code> if unknown.
      */
     public int getRemainingStateTime();
 
@@ -163,7 +167,8 @@ public interface Downloader extends BandwidthTracker {
     
     /**
      * @return the number locations from which this is currently downloading.
-     * Result meaningful only in the DOWNLOADING state.
+     * The number of hosts returned is only meaningful in the 
+     * {@link DownloadStatus#DOWNLOADING} state.
      */
     public int getNumHosts();
     
@@ -193,13 +198,13 @@ public interface Downloader extends BandwidthTracker {
 	public boolean isLaunchable();
 
     /**
-     * either treats a corrupt file as normal file and saves it, or 
+     * Either treats a corrupt file as normal file and saves it, or 
      * discards the corruptFile, depending on the value of delete.
      */
     public void discardCorruptDownload(boolean delete);
 
 	/**
-	 * Returns a browse-enabled <tt>Endpoint</tt> instance for this
+	 * Returns a browse-enabled <tt>RemoteFileDesc</tt> instance for this
 	 * <tt>Downloader</tt>.
 	 */
 	public RemoteFileDesc getBrowseEnabledHost();
@@ -214,18 +219,18 @@ public interface Downloader extends BandwidthTracker {
 	public boolean hasBrowseEnabledHost();
 
     /**
-     * Returns the position of the download on the uploader, relavent only if
-     * the downloader is queueud.
+     * Returns the position of the download on the uploader, relevant only if
+     * the downloader is queued.
      */
     public int getQueuePosition();
     
     /**
-     * Return the number of validated alternate locations for this download
+     * Return the number of validated alternate locations for this download.
      */
     public int getNumberOfAlternateLocations();
     
     /**
-     * Return the number of invalid alternate locations for this download
+     * Return the number of invalid alternate locations for this download.
      */
     public int getNumberOfInvalidAlternateLocations();
     
@@ -248,7 +253,7 @@ public interface Downloader extends BandwidthTracker {
     /**
      * Returns the number of hosts that were attempted to connect to. 
      * Should be reset whenever the downloader returns to the 
-     * {@link #CONNECTING} state.
+     * {@link DownloadStatus#CONNECTING} state.
      * 
      * @return -1 if downloader does not support it
      */
@@ -283,21 +288,21 @@ public interface Downloader extends BandwidthTracker {
     
     /**
      * Sets a new attribute associated with the download.
-     * The attributes are used eg. by GUI to store some extra
+     * The attributes are used, for example, by GUI to store some extra
      * information about the download.
      * @param key A key used to identify the attribute.
+     * @param value The value of the key.
      * @param serialize Whether the attribute should be serialized to disk.
-     * @patam value The value of the key.
-     * @return A prvious value of the attribute, or <code>null</code>
+     * @return A previous value of the attribute, or <code>null</code>
      *         if the attribute wasn't set.
      */
     public Object setAttribute( String key, Object value, boolean serialize );
 
     /**
      * Gets a value of attribute associated with the download.
-     * The attributes are used eg. by GUI to store some extra
+     * The attributes are used, for example, by GUI to store some extra
      * information about the download.
-     * @param key A key which identifies the attribue.
+     * @param key A key which identifies the attribute.
      * @return The value of the specified attribute,
      *         or <code>null</code> if value was not specified.
      */
