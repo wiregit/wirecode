@@ -829,6 +829,8 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 if (session.getQueueStatus() == QueueStatus.QUEUED) {
                     session.getIOSession().setSocketTimeout(
                             HTTPUploadSession.MAX_POLL_TIME);
+                    // make sure the new socket timeout is used.
+                    conn.requestInput();
                 }
             }
         }
