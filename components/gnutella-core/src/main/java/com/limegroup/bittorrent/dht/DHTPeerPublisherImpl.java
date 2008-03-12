@@ -19,6 +19,7 @@ import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Version;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentEvent;
@@ -42,13 +43,13 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
 
     private static final Log LOG = LogFactory.getLog(DHTPeerPublisher.class);
 
-    private final DHTManager dhtManager;
+    private final Provider<DHTManager> dhtManager;
 
-    private final ApplicationServices applicationServices;
+    private final Provider<ApplicationServices> applicationServices;
 
-    private final NetworkManager networkManager;
+    private final Provider<NetworkManager> networkManager;
 
-    private final TorrentManager torrentManager;
+    private final Provider<TorrentManager> torrentManager;
 
     /**
      * List of published torrents mapped to the time it was published.
@@ -62,8 +63,9 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
     private final List<URN> torrentsWaitingForDHTList = new ArrayList<URN>();
 
     @Inject
-    DHTPeerPublisherImpl(DHTManager dhtManager, ApplicationServices applicationServices,
-            NetworkManager networkManager, TorrentManager torrentManager) {
+    DHTPeerPublisherImpl(Provider<DHTManager> dhtManager,
+            Provider<ApplicationServices> applicationServices,
+            Provider<NetworkManager> networkManager, Provider<TorrentManager> torrentManager) {
 
         this.dhtManager = dhtManager;
         this.applicationServices = applicationServices;
@@ -78,9 +80,9 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
      */
     public void init() {
         // listens for the TorrentEvent FIRST_CHUNK_VERIFIED to start publishing
-        torrentManager.addEventListener(new TorrentEventListenerForPublisher());
+        torrentManager.get().addEventListener(new TorrentEventListenerForPublisher());
         // listens for the DHTEvent CONNECTED to re-attempt publishing
-        dhtManager.addEventListener(new DHTEventListenerForPublisher());
+        dhtManager.get().addEventListener(new DHTEventListenerForPublisher());
     }
 
     /**
@@ -94,9 +96,7 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
 
         URN urn = managedTorrent.getMetaInfo().getURN();
 
-        // TODO change the condition on acceptedIncomingConnection so that only
-        // networks which accepts incoming connections are published.
-        if (managedTorrent.isActive() && networkManager.acceptedIncomingConnection()
+        if (managedTorrent.isActive() && networkManager.get().acceptedIncomingConnection()
                 && !isPublished(urn)) {
             // holding a lock on torrentsWaitingForDHTList here so that we do
             // publish for a same torrent twice.
@@ -109,7 +109,7 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
                     // status
                     // after we acquired it
                     synchronized (dhtManager) {
-                        MojitoDHT mojitoDHT = dhtManager.getMojitoDHT();
+                        MojitoDHT mojitoDHT = dhtManager.get().getMojitoDHT();
 
                         if (LOG.isDebugEnabled())
                             LOG.debug("DHT: " + mojitoDHT);
@@ -136,11 +136,11 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
     private void proceedPublishing(URN urn, MojitoDHT mojitoDHT) {
         // checking if the torrent is active, getTorrentForURN returns null if
         // there is no active managedTorrent for the given urn.
-        if (torrentManager.getTorrentForURN(urn) != null) {
+        if (torrentManager.get().getTorrentForURN(urn) != null) {
             try {
                 TorrentLocation torLoc = new TorrentLocation(InetAddress.getByName(NetworkUtils
-                        .ip2string((networkManager.getAddress()))), networkManager.getPort(),
-                        applicationServices.getMyBTGUID());
+                        .ip2string((networkManager.get().getAddress()))), networkManager.get()
+                        .getPort(), applicationServices.get().getMyBTGUID());
 
                 // encodes ip, port and peerid into a array of bytes
                 byte[] msg = DHTPeerLocatorUtils.encode(torLoc);
@@ -153,6 +153,9 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
                             DHTPeerLocatorUtils.BT_PEER_TRIPLE, Version.ZERO, msg));
                     // ensure publishing was successful
                     future.addDHTFutureListener(new PublishYourselfResultHandler(urn));
+                    if (LOG.isDebugEnabled())
+                        LOG.debug("IP:PORT of peer published: " + torLoc.getAddress() + ":"
+                                + torLoc.getPort());
                 }
             } catch (IllegalArgumentException iae) {
                 LOG.error("Invalid network information", iae);
@@ -209,21 +212,25 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
          * This method is invoked when a DHTEvent occurs and if DHT is connected
          * then it tries to publish the peer again.
          */
-        public void handleDHTEvent(DHTEvent evt) {
-            LOG.debug("In handle event");
+        public void handleDHTEvent(DHTEvent evt) {            
+            List<URN> torrentsWaitingForDHTListCopy;
             if (evt.getType() == DHTEvent.Type.CONNECTED) {
                 MojitoDHT dht;
                 synchronized (dhtManager) {
-                    dht = dhtManager.getMojitoDHT();
+                    dht = dhtManager.get().getMojitoDHT();
                     if (dht == null || !dht.isBootstrapped()) {
                         LOG.error("Incorrect DHTEvent generated");
                         return;
                     }
                 }
                 synchronized (torrentsWaitingForDHTList) {
-                    while (!torrentsWaitingForDHTList.isEmpty()) {
-                        proceedPublishing(torrentsWaitingForDHTList.remove(0), dht);
-                    }
+                    torrentsWaitingForDHTListCopy = torrentsWaitingForDHTList;
+                    torrentsWaitingForDHTList.clear();
+                }
+                // copying the array then iterating since reading is cheaper
+                // than removing
+                for (int i = 0; i < torrentsWaitingForDHTListCopy.size(); i++) {                    
+                    proceedPublishing(torrentsWaitingForDHTListCopy.get(i), dht);
                 }
             }
         }

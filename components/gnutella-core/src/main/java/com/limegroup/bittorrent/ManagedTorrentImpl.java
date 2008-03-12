@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -135,7 +136,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
 
     private final NetworkInstanceUtils networkInstanceUtils;
 
-    private boolean peerIsPublishedForThisTorrent;
+    private AtomicBoolean firstChunkVerifiedEventDispatched;
 
     /**
      * Constructs new ManagedTorrent
@@ -172,7 +173,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         _peers = Collections.emptySet();
         linkManager = linkManagerFactory.getLinkManager();
         trackerManager = trackerManagerFactory.getTrackerManager(this);
-        this.peerIsPublishedForThisTorrent = false;
+        this.firstChunkVerifiedEventDispatched = new AtomicBoolean(false);
     }
 
     /*
@@ -251,7 +252,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         diskInvoker.execute(new Runnable() {
             public void run() {
                 if (state.get() != TorrentState.QUEUED) // something happened,
-                                                        // do not start.
+                    									// do not start.
                     return;
 
                 LOG.debug("executing torrent start");
@@ -536,10 +537,12 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
      * @see com.limegroup.bittorrent.ManagedTorrent#trackerRequestFailed()
      */
     public void trackerRequestFailed() {
-        dispatchEvent(TorrentEvent.Type.TRACKER_FAILED);
         synchronized (state.getLock()) {
             if (state.get() == TorrentState.SCRAPING)
                 state.set(TorrentState.WAITING_FOR_TRACKER);
+        }
+        if(BittorrentSettings.TORRENT_ALTLOC_SEARCH.getValue()) {
+            dispatchEvent(TorrentEvent.Type.TRACKER_FAILED);
         }
     }
 
@@ -613,10 +616,11 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
      * @see com.limegroup.bittorrent.ManagedTorrent#chunkVerified(int)
      */
     public void chunkVerified(int in) {
-        if (!peerIsPublishedForThisTorrent) {
+        if (firstChunkVerifiedEventDispatched.compareAndSet(false, true) && !_info.isPrivate()
+                && SharingSettings.SHARE_TORRENT_META_FILES.getValue()
+                && BittorrentSettings.TORRENT_AUTO_PUBLISH.getValue()) {
             // add yourself to the DHT as someone sharing this torrent
             dispatchEvent(TorrentEvent.Type.FIRST_CHUNK_VERIFIED);
-            peerIsPublishedForThisTorrent = true;
         }
 
         if (LOG.isDebugEnabled())
@@ -665,7 +669,8 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
             return;
         if (networkInstanceUtils.isMe(to.getAddress(), to.getPort())) {
             return;
-        }if (_peers.add(to)) {
+        }
+        if (_peers.add(to)) {
             LOG.debug("Peer Added: " + to);
             synchronized (state.getLock()) {
                 if (state.get() == TorrentState.SCRAPING)

@@ -17,6 +17,7 @@ import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.result.FindValueResult;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentEvent;
@@ -38,9 +39,9 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
 
     private static final Log LOG = LogFactory.getLog(DHTPeerLocator.class);
 
-    private final DHTManager dhtManager;
+    private final Provider<DHTManager> dhtManager;
 
-    private final TorrentManager torrentManager;
+    private final Provider<TorrentManager> torrentManager;
 
     /**
      * List of torrents for which a peer is trying to locate a seeder in DHT but
@@ -49,7 +50,7 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
     private final List<URN> torrentsWaitingForDHTList = new ArrayList<URN>();
 
     @Inject
-    DHTPeerLocatorImpl(DHTManager dhtManager, TorrentManager torrentManager) {
+    DHTPeerLocatorImpl(Provider<DHTManager> dhtManager, Provider<TorrentManager> torrentManager) {
         this.dhtManager = dhtManager;
         this.torrentManager = torrentManager;
     }
@@ -61,9 +62,9 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
     public void init() {
         // listens for the TorrentEvent TRACKER_FAILED to start locating a
         // peer
-        torrentManager.addEventListener(new LocatorTorrentEventListener());
+        torrentManager.get().addEventListener(new LocatorTorrentEventListener());
         // listens for the DHTEvent CONNECTED to re-attempt locating a peer
-        dhtManager.addEventListener(new DHTEventListenerForLocator());
+        dhtManager.get().addEventListener(new DHTEventListenerForLocator());
     }
 
     /**
@@ -82,11 +83,10 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
             synchronized (torrentsWaitingForDHTList) {
                 if (!torrentsWaitingForDHTList.contains(urn)) {
                     LOG.debug("Passed Initial checks");
-
                     // holding a lock on DHT to ensure dht does not change
                     // status after we acquired it
                     synchronized (dhtManager) {
-                        MojitoDHT mojitoDHT = dhtManager.getMojitoDHT();
+                        MojitoDHT mojitoDHT = dhtManager.get().getMojitoDHT();
                         if (LOG.isDebugEnabled())
                             LOG.debug("DHT:" + mojitoDHT);
                         if (mojitoDHT == null || !mojitoDHT.isBootstrapped()) {
@@ -111,7 +111,8 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
     private void proceedSearch(URN urn, MojitoDHT mojitoDHT) {
         // checking if the torrent is active, getTorrentForURN returns null if
         // there is no active managedTorrent for the given urn.
-        if (torrentManager.getTorrentForURN(urn) != null) {
+        if (torrentManager.get().getTorrentForURN(urn) != null) {
+            LOG.debug("in proceed search");
             // creates a KUID from torrent's metadata
             KUID key = KUIDUtils.toKUID(urn);
             // creates an entity key from the KUID and DHTValueType
@@ -136,6 +137,8 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
         try {
             final TorrentLocation torLoc = DHTPeerLocatorUtils.decode(value.getValue());
             managedTorrent.addEndpoint(torLoc);
+            if (LOG.isDebugEnabled())
+                LOG.debug("IP:PORT of found: " + torLoc.getAddress() + ":" + torLoc.getPort());
         } catch (IllegalArgumentException iae) {
             // if the payload passed in to decode was incorrect
             LOG.error("Invalid payload");
@@ -167,13 +170,12 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
          * This method is invoked when a DHTEvent occurs and if DHT is connected
          * then it tries to search for a peer.
          */
-        public void handleDHTEvent(DHTEvent evt) {
-            LOG.debug("In handle event");
+        public void handleDHTEvent(DHTEvent evt) {            
             List<URN> torrentsWaitingForDHTListCopy;
             if (evt.getType() == DHTEvent.Type.CONNECTED) {
                 MojitoDHT dht;
                 synchronized (dhtManager) {
-                    dht = dhtManager.getMojitoDHT();
+                    dht = dhtManager.get().getMojitoDHT();
                     if (dht == null || !dht.isBootstrapped()) {
                         LOG.error("Incorrect DHTEvent generated");
                         return;
@@ -183,6 +185,8 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
                     torrentsWaitingForDHTListCopy = torrentsWaitingForDHTList;
                     torrentsWaitingForDHTList.clear();
                 }
+                // copying the array then iterating since reading is cheaper
+                // than removing
                 for (int i = 0; i < torrentsWaitingForDHTListCopy.size(); i++) {
                     proceedSearch(torrentsWaitingForDHTListCopy.get(i), dht);
                 }
@@ -206,7 +210,7 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
         @Override
         public void handleFutureSuccess(FindValueResult result) {
             LOG.debug("handle result");
-            ManagedTorrent managedTorrent = torrentManager.getTorrentForURN(urn);
+            ManagedTorrent managedTorrent = torrentManager.get().getTorrentForURN(urn);            
             if (result.isSuccess() && managedTorrent != null) {
                 LOG.debug("successful result");
                 for (DHTValueEntity entity : result.getEntities()) {
