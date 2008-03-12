@@ -2,7 +2,7 @@ package com.limegroup.bittorrent.tracking;
 
 import java.net.URI;
 
-import org.limewire.http.LimeHttpClient;
+import org.limewire.http.httpclient.LimeHttpClient;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

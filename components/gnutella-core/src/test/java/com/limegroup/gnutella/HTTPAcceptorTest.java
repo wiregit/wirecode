@@ -19,7 +19,7 @@ import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
 import org.cybergarage.http.HTTPStatus;
 import org.limewire.http.HttpAcceptorListener;
-import org.limewire.http.HttpClientUtils;
+import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;

@@ -10,8 +10,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.params.HttpParams;
 import org.limewire.collection.Cancellable;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.http.HttpClientUtils;
-import org.limewire.http.LimeHttpClient;
+import org.limewire.http.httpclient.HttpClientUtils;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.nio.observer.Shutdownable;
 
 import com.google.inject.Inject;

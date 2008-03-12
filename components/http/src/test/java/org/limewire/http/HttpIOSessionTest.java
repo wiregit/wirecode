@@ -5,6 +5,8 @@ import junit.framework.TestCase;
 import org.apache.http.nio.reactor.EventMask;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.nio.reactor.SessionBufferStatus;
+import org.limewire.http.reactor.HttpChannel;
+import org.limewire.http.reactor.HttpIOSession;
 
 public class HttpIOSessionTest extends TestCase {
 

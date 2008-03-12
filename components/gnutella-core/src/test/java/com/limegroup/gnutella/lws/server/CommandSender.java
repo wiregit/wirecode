@@ -11,8 +11,8 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
-import org.limewire.http.LimeHttpClient;
-import org.limewire.http.SimpleLimeHttpClient;
+import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.lws.server.LWSDispatcher;
 import org.limewire.lws.server.LWSDispatcherSupport;
 

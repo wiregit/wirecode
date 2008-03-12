@@ -12,7 +12,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpHead;
-import org.limewire.http.LimeHttpClient;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.Connectable;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;

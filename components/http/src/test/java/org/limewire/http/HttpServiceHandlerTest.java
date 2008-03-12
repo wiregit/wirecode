@@ -32,6 +32,9 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpProcessor;
 import org.apache.http.protocol.HttpContext;
+import org.limewire.http.protocol.ExtendedAsyncNHttpServiceHandler;
+import org.limewire.http.reactor.HttpChannel;
+import org.limewire.http.reactor.HttpIOSession;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.BufferUtils;
 

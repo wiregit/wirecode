@@ -12,6 +12,7 @@ import junit.framework.Test;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.limewire.concurrent.SimpleTimer;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;

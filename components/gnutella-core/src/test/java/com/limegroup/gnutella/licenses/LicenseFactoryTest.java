@@ -2,8 +2,8 @@ package com.limegroup.gnutella.licenses;
 
 import java.net.URISyntaxException;
 
-import org.limewire.http.LimeHttpClient;
-import org.limewire.http.SimpleLimeHttpClient;
+import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.inject.Providers;
 import org.limewire.util.BaseTestCase;
 

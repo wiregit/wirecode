@@ -7,7 +7,7 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.http.LimeHttpClient;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.inject.Providers;
 import org.limewire.util.BaseTestCase;
 

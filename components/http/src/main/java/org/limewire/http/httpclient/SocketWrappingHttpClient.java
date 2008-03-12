@@ -1,6 +1,7 @@
-package org.limewire.http;
+package org.limewire.http.httpclient;
 
 import java.net.Socket;
+
 
 /**
  * An <code>HttpClient</code> that uses a <code>Socket</code> specified by the caller.

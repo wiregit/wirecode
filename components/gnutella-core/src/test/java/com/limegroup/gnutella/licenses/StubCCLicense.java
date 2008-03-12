@@ -2,7 +2,7 @@ package com.limegroup.gnutella.licenses;
 
 import java.net.URI;
 
-import org.limewire.http.LimeHttpClient;
+import org.limewire.http.httpclient.LimeHttpClient;
 
 class StubCCLicense extends CCLicense {
 

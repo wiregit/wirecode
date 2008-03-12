@@ -5,6 +5,7 @@ package org.limewire.http;
 
 import java.util.concurrent.Executor;
 
+import org.limewire.http.reactor.HttpIOSession;
 import org.limewire.nio.AbstractNBSocket;
 
 public class StubIOSession extends HttpIOSession {      

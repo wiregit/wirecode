@@ -9,11 +9,11 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.nio.ContentEncoder;
 import org.apache.http.nio.IOControl;
-import org.limewire.http.HttpIOSession;
 import org.limewire.http.entity.AbstractProducingNHttpEntity;
 import org.limewire.http.entity.FilePieceReader;
 import org.limewire.http.entity.Piece;
 import org.limewire.http.entity.PieceListener;
+import org.limewire.http.reactor.HttpIOSession;
 import org.limewire.nio.NIODispatcher;
 
 import com.google.inject.Provider;

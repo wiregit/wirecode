@@ -9,7 +9,7 @@ import org.apache.http.nio.NHttpConnection;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpProtocolParams;
-import org.limewire.http.HttpIOReactor;
+import org.limewire.http.reactor.DefaultDispatchedIOReactor;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.BaseTestCase;
 
@@ -75,12 +75,12 @@ public class HttpIOReactorTest extends BaseTestCase {
     public void testAcceptConnection() throws Exception {
         HttpTestServer server = new HttpTestServer(params);
         server.execute(null);
-        HttpIOReactor reactor = server.getReactor();
+        DefaultDispatchedIOReactor reactor = server.getReactor();
         
         Socket socket = socketsManager.connect(new InetSocketAddress("localhost", ACCEPTOR_PORT), 500);
         try {
             NHttpConnection conn = reactor.acceptConnection(null, socket);
-            assertNotNull(conn.getContext().getAttribute(HttpIOReactor.IO_SESSION_KEY));
+            assertNotNull(conn.getContext().getAttribute(DefaultDispatchedIOReactor.IO_SESSION_KEY));
             assertEquals(2222, socket.getSoTimeout());
         } finally {
             socket.close();

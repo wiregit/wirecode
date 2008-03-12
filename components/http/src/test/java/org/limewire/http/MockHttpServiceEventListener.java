@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.nio.NHttpConnection;
+import org.limewire.http.protocol.HttpServiceEventListener;
 
 public class MockHttpServiceEventListener implements HttpServiceEventListener {
 

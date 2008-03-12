@@ -32,6 +32,13 @@ import org.apache.http.protocol.HttpRequestHandlerRegistry;
 import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
+import org.limewire.http.protocol.ExtendedAsyncNHttpServiceHandler;
+import org.limewire.http.protocol.HttpServiceEventListener;
+import org.limewire.http.protocol.LimeResponseConnControl;
+import org.limewire.http.protocol.SynchronizedHttpProcessor;
+import org.limewire.http.protocol.SynchronizedNHttpRequestHandlerRegistry;
+import org.limewire.http.reactor.DispatchedIOReactor;
+import org.limewire.http.reactor.DefaultDispatchedIOReactor;
 import org.limewire.net.ConnectionAcceptor;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.NIODispatcher;
@@ -121,7 +128,7 @@ public class BasicHttpAcceptor implements ConnectionAcceptor {
         serviceHandler.setEventListener(connectionListener);
         serviceHandler.setHandlerResolver(this.registry);
 
-        this.reactor = new HttpIOReactor(params, NIODispatcher.instance().getScheduledExecutorService());
+        this.reactor = new DefaultDispatchedIOReactor(params, NIODispatcher.instance().getScheduledExecutorService());
         IOEventDispatch ioEventDispatch = new DefaultServerIOEventDispatch(
                 serviceHandler, params);
         try {

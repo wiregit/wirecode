@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.licenses;
 
-import org.limewire.http.LimeHttpClient;
+import org.limewire.http.httpclient.LimeHttpClient;
 
 class StubWeedLicense extends WeedLicense {
     

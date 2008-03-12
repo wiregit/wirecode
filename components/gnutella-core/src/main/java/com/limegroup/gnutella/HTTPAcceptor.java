@@ -20,7 +20,7 @@ import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.http.BasicHttpAcceptor;
 import org.limewire.http.HttpAcceptorListener;
-import org.limewire.http.HttpIOSession;
+import org.limewire.http.reactor.HttpIOSession;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.statistic.Statistic;
 

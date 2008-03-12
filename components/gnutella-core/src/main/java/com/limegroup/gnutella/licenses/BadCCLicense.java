@@ -3,7 +3,7 @@ package com.limegroup.gnutella.licenses;
 import java.net.URI;
 import java.net.URL;
 
-import org.limewire.http.LimeHttpClient;
+import org.limewire.http.httpclient.LimeHttpClient;
 
 import com.limegroup.gnutella.URN;
 

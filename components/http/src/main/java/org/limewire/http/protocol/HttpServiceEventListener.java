@@ -1,4 +1,4 @@
-package org.limewire.http;
+package org.limewire.http.protocol;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.nio.NHttpConnection;

@@ -14,7 +14,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.util.EntityUtils;
-import org.limewire.http.SimpleLimeHttpClient;
+import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 

@@ -35,7 +35,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.api.Action;
 import org.jmock.api.Invocation;
-import org.limewire.http.HttpClientUtils;
+import org.limewire.http.httpclient.HttpClientUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;

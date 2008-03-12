@@ -9,8 +9,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.params.ClientPNames;
-import org.limewire.http.LimeHttpClient;
-import org.limewire.http.SimpleLimeHttpClient;
+import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.nio.NIODispatcher;
 
 import com.google.inject.Injector;

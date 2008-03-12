@@ -18,7 +18,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpProtocolParams;
-import org.limewire.http.SocketWrappingHttpClient;
+import org.limewire.http.httpclient.SocketWrappingHttpClient;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;

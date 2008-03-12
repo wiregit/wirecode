@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/test/java/org/apache/http/nio/mockup/TestHttpServer.java $
- * $Revision: 1.5 $
- * $Date: 2008-03-03 22:04:47 $
+ * $Revision: 1.6 $
+ * $Date: 2008-03-12 21:16:45 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -50,14 +50,14 @@ import org.apache.http.protocol.ResponseConnControl;
 import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
-import org.limewire.http.HttpIOReactor;
+import org.limewire.http.reactor.DefaultDispatchedIOReactor;
 import org.limewire.nio.NIODispatcher;
 
 public class HttpTestServer {
 
     private final NHttpRequestHandlerRegistry registry;
 
-    private HttpIOReactor reactor;
+    private DefaultDispatchedIOReactor reactor;
 
     private HttpParams params = new BasicHttpParams();
 
@@ -81,13 +81,13 @@ public class HttpTestServer {
 
         serviceHandler.setHandlerResolver(this.registry);
 
-        reactor = new HttpIOReactor(params, NIODispatcher.instance().getScheduledExecutorService());
+        reactor = new DefaultDispatchedIOReactor(params, NIODispatcher.instance().getScheduledExecutorService());
         IOEventDispatch ioEventDispatch = new DefaultServerIOEventDispatch(
                 serviceHandler, params);
         reactor.execute(ioEventDispatch);
     }
 
-    public HttpIOReactor getReactor() {
+    public DefaultDispatchedIOReactor getReactor() {
         return reactor;
     }
 

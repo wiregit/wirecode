@@ -14,7 +14,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.http.LimeHttpClient;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.service.ErrorService;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;

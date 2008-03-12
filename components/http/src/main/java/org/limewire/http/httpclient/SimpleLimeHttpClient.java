@@ -1,4 +1,4 @@
-package org.limewire.http;
+package org.limewire.http.httpclient;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.impl.client.DefaultHttpClient;

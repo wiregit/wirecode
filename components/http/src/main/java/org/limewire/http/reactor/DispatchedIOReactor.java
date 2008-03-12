@@ -1,4 +1,4 @@
-package org.limewire.http;
+package org.limewire.http.reactor;
 
 import java.net.Socket;
 

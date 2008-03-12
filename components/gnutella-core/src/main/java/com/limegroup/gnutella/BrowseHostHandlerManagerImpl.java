@@ -16,7 +16,7 @@ import org.apache.http.HttpException;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
-import org.limewire.http.SocketWrappingHttpClient;
+import org.limewire.http.httpclient.SocketWrappingHttpClient;
 import org.limewire.io.NetworkInstanceUtils;
 
 import com.google.inject.Inject;

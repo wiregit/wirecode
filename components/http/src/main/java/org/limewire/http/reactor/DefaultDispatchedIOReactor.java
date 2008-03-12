@@ -1,4 +1,4 @@
-package org.limewire.http;
+package org.limewire.http.reactor;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -8,10 +8,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
 import org.apache.http.nio.NHttpConnection;
-import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.nio.reactor.IOReactorStatus;
 import org.apache.http.nio.reactor.IOSession;
+import org.apache.http.nio.reactor.ListeningIOReactor;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.io.IOUtils;
@@ -19,14 +19,16 @@ import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.channel.ThrottleWriter;
 
 /**
- * An implementation of the {@link ConnectingIOReactor} interface that
+ * An implementation of {@link DispatchedIOReactor} interface that
  * establishes connections through LimeWire's NIO layer.
+ * 
+ * This is analogous to {@link ListeningIOReactor}.
  */
-public class HttpIOReactor implements DispatchedIOReactor {
+public class DefaultDispatchedIOReactor implements DispatchedIOReactor {
 
     public static final String IO_SESSION_KEY = "org.limewire.iosession";
 
-    private static final Log LOG = LogFactory.getLog(HttpIOReactor.class);
+    private static final Log LOG = LogFactory.getLog(DefaultDispatchedIOReactor.class);
     
     private final HttpParams params;
     
@@ -37,7 +39,7 @@ public class HttpIOReactor implements DispatchedIOReactor {
     // copied from DefaultServerIOEventDispatch
     private static final String NHTTP_CONN = "NHTTP_CONN";
     
-    public HttpIOReactor(final HttpParams params, final Executor ioExecutor) {
+    public DefaultDispatchedIOReactor(final HttpParams params, final Executor ioExecutor) {
         if (params == null) {
             throw new IllegalArgumentException();
         }

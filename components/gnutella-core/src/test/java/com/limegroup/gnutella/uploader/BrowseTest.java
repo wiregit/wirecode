@@ -18,8 +18,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.params.HttpProtocolParams;
-import org.limewire.http.HttpClientUtils;
-import org.limewire.http.LimeHttpClient;
+import org.limewire.http.httpclient.HttpClientUtils;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;

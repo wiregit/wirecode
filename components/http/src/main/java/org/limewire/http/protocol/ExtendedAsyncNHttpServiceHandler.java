@@ -1,4 +1,4 @@
-package org.limewire.http;
+package org.limewire.http.protocol;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
@@ -17,6 +17,8 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpProcessor;
+import org.limewire.http.reactor.DefaultDispatchedIOReactor;
+import org.limewire.http.reactor.HttpIOSession;
 
 /**
  * An extension to {@link AsyncNHttpServiceHandler} to allow more fine-grained
@@ -59,7 +61,7 @@ public class ExtendedAsyncNHttpServiceHandler extends AsyncNHttpServiceHandler {
             final DefaultNHttpServerConnection c = (DefaultNHttpServerConnection)conn;
             // make sure any buffered requests are processed
             if (c.hasBufferedInput()) {
-                HttpIOSession session = (HttpIOSession)c.getContext().getAttribute(HttpIOReactor.IO_SESSION_KEY);
+                HttpIOSession session = (HttpIOSession)c.getContext().getAttribute(DefaultDispatchedIOReactor.IO_SESSION_KEY);
                 Executor executor = session.getIoExecutor();
                 Runnable runner = new Runnable() {
                     public void run() {

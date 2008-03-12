@@ -1,4 +1,4 @@
-package org.limewire.http;
+package org.limewire.http.httpclient;
 
 import java.net.Socket;
 import java.util.concurrent.ScheduledExecutorService;

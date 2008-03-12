@@ -12,7 +12,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpConnectionParams;
-import org.limewire.http.LimeHttpClient;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;

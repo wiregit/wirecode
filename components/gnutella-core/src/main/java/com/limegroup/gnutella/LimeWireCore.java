@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.limewire.http.LimeHttpClient;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;

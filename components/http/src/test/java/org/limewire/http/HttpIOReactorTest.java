@@ -4,12 +4,13 @@ import junit.framework.TestCase;
 
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
+import org.limewire.http.reactor.DefaultDispatchedIOReactor;
 
 public class HttpIOReactorTest extends TestCase {
 
     public void testHttpIOReactor() throws Exception {
         try {
-            new HttpIOReactor(null, null);
+            new DefaultDispatchedIOReactor(null, null);
             fail("Expected IllegalArgumentException");
         } catch (IllegalArgumentException expected) {
         }
@@ -17,7 +18,7 @@ public class HttpIOReactorTest extends TestCase {
 
     public void testExecute() throws Exception {
         HttpParams params = new BasicHttpParams();
-        HttpIOReactor reactor = new HttpIOReactor(params, null);
+        DefaultDispatchedIOReactor reactor = new DefaultDispatchedIOReactor(params, null);
         try {
             reactor.execute(null);
             fail("Expected IllegalArgumentException");
@@ -27,7 +28,7 @@ public class HttpIOReactorTest extends TestCase {
 
     public void testShutdown() throws Exception {
         HttpParams params = new BasicHttpParams();
-        HttpIOReactor reactor = new HttpIOReactor(params, null);
+        DefaultDispatchedIOReactor reactor = new DefaultDispatchedIOReactor(params, null);
         try {
             reactor.shutdown();
             fail("Expected UnsupportedOperationException");
