@@ -243,12 +243,12 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     /**
      * Variable for the <tt>QueryRouteTable</tt> received for this connection.
      */
-    private QueryRouteTable _lastQRPTableReceived;
+    private volatile QueryRouteTable _lastQRPTableReceived;
 
     /**
      * Variable for the <tt>QueryRouteTable</tt> sent for this connection.
      */
-    private QueryRouteTable _lastQRPTableSent;
+    private volatile QueryRouteTable _lastQRPTableSent;
 
     /**
      * Whether or not this was a supernode <-> client connection when message
