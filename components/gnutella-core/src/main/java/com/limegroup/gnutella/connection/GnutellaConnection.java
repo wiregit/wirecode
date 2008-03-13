@@ -1399,7 +1399,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         data.put("nrmd", getNumReceivedMessagesDropped());
         data.put("nsmd", getNumSentMessagesDropped());
         data.put("qrteu", getQueryRouteTableEmptyUnits());
-        data.put("qrtpf", getQueryRouteTablePercentFull());
+        data.put("qrtpf2", Double.doubleToLongBits(getQueryRouteTablePercentFull()));
         data.put("qrtue", getQueryRouteTableUnitsInUse());
         data.put("qrts", getQueryRouteTableSize());
         data.put("bl", isBusyLeaf());
