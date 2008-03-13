@@ -196,6 +196,13 @@ public class QueryRouteTable {
 	    return bitTable.getUnitsInUse();
 	}
 
+	/**
+     * @return the number of units with specified load.
+     */
+    public int getUnitsWithLoad(int load) {
+        return bitTable.numUnitsWithLoad(load);
+    }
+    
     /**
      * Returns true if a response could be generated for qr.  Note that a return
      * value of true does not necessarily mean that a response will be

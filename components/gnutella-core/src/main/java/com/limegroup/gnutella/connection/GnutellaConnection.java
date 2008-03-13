@@ -667,6 +667,9 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         return _lastQRPTableReceived == null ? -1 : _lastQRPTableReceived.getEmptyUnits();
     }
 
+    private int getQueryRouteTableUnitsWithLoad(int load) {
+        return _lastQRPTableReceived == null ? -1 : _lastQRPTableReceived.getUnitsWithLoad(load);
+    }
     /*
      * (non-Javadoc)
      * 
@@ -1399,6 +1402,9 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         data.put("nrmd", getNumReceivedMessagesDropped());
         data.put("nsmd", getNumSentMessagesDropped());
         data.put("qrteu", getQueryRouteTableEmptyUnits());
+        data.put("qrtul1", getQueryRouteTableUnitsWithLoad(1));
+        data.put("qrtul2", getQueryRouteTableUnitsWithLoad(2));
+        data.put("qrtul3", getQueryRouteTableUnitsWithLoad(3));
         data.put("qrtpf2", Double.doubleToLongBits(getQueryRouteTablePercentFull()));
         data.put("qrtue", getQueryRouteTableUnitsInUse());
         data.put("qrts", getQueryRouteTableSize());
