@@ -9,7 +9,6 @@ import java.util.zip.Inflater;
 
 import junit.framework.Test;
 
-import org.limewire.collection.BitSet;
 import org.limewire.io.IOUtils;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -38,10 +37,10 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCas
     
     /** May return null!
      */ 
-    private BitSet getBitTable(QueryRouteTable source) throws Exception {
-        BitSet retSet = null;
-            retSet = (BitSet) PrivilegedAccessor.getValue(source,
-                                                          "bitTable");
+    private QRTTableStorage getBitTable(QueryRouteTable source) throws Exception {
+        QRTTableStorage retSet = null;
+            retSet = (QRTTableStorage) PrivilegedAccessor.getValue(source,
+                                                          "storage");
         return retSet;
     }
 
@@ -71,8 +70,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCas
     }
     
     private int entries(QueryRouteTable tbl) throws Exception{
-        BitSet set = getBitTable(tbl);
-        return set.cardinality();
+        return getBitTable(tbl).cardinality();
     }
 
     public void testCompressionAndUncompress() throws Exception {
