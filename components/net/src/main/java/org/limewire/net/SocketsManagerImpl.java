@@ -2,12 +2,15 @@ package org.limewire.net;
 
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 import org.limewire.io.NetworkUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.nio.NBSocket;
+import org.limewire.nio.NBSocketFactory;
 import org.limewire.nio.observer.ConnectObserver;
 
 import com.google.inject.Inject;
@@ -53,16 +56,46 @@ public class SocketsManagerImpl implements SocketsManager {
         return connect(null, null, addr, timeout, observer, type);    
     }
 
-    public Socket connect(NBSocket socket, InetSocketAddress localAddr, InetSocketAddress addr, int timeout, ConnectObserver observer, ConnectType type) throws IOException {
+    public Socket connect(final NBSocket socket, InetSocketAddress localAddr, InetSocketAddress addr, int timeout, ConnectObserver observer, ConnectType type) throws IOException {
         if(!NetworkUtils.isValidPort(addr.getPort()))  
             throw new IllegalArgumentException("port out of range: "+addr.getPort());
         if(addr.isUnresolved())
             throw new IOException("address must be resolved!");
         
         if(socket == null) {
-            return socketController.connect(type.getFactory(), addr, timeout, observer);
+            return socketController.connect(type.getFactory(), addr, null, timeout, observer);
 	    } else {
-            return socketController.connect(socket, localAddr, addr, timeout, observer);
+	        NBSocketFactory factory = new NBSocketFactory() {
+                @Override
+                public NBSocket createSocket() throws IOException {
+                    return socket;
+                }
+
+                @Override
+                public NBSocket createSocket(String host, int port) throws IOException,
+                        UnknownHostException {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public NBSocket createSocket(InetAddress host, int port) throws IOException {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public NBSocket createSocket(String host, int port, InetAddress localHost,
+                        int localPort) throws IOException, UnknownHostException {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public NBSocket createSocket(InetAddress address, int port,
+                        InetAddress localAddress, int localPort) throws IOException {
+                    throw new UnsupportedOperationException();
+                }
+	            
+	        };
+            return socketController.connect(factory, addr, localAddr, timeout, observer);
         }
     }
 

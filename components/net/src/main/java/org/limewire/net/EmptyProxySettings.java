@@ -1,6 +1,6 @@
 package org.limewire.net;
 
-class EmptyProxySettings implements ProxySettings {
+public class EmptyProxySettings implements ProxySettings {
 
     public ProxyType getCurrentProxyType() {
         return ProxyType.NONE;
