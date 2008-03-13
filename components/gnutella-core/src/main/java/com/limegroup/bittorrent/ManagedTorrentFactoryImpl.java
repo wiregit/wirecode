@@ -43,7 +43,7 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
             BTLinkManagerFactory linkManagerFactory,
             BTConnectionFetcherFactory connectionFetcherFactory,
             Provider<ContentManager> contentManager,
-             Provider<IPFilter> ipFilter,
+            Provider<IPFilter> ipFilter,
             Provider<TorrentManager> torrentManager,
             Provider<FileManager> fileManager,
             NetworkInstanceUtils networkInstanceUtils) {
@@ -64,8 +64,8 @@ public class ManagedTorrentFactoryImpl implements ManagedTorrentFactory {
     /* (non-Javadoc)
      * @see com.limegroup.bittorrent.ManagedTorrentFactory#create(com.limegroup.bittorrent.TorrentContext)
      */
-    public ManagedTorrent create(TorrentContext context) {
-        return new ManagedTorrent(context, eventDispatcher, scheduledExecutorService,
+    public ManagedTorrent createFromContext(TorrentContext context) {        
+        return new ManagedTorrentImpl(context, eventDispatcher, scheduledExecutorService,
                 networkManager, trackerManagerFactory, chokerFactory, linkManagerFactory,
                 connectionFetcherFactory, contentManager.get(), ipFilter.get(), torrentManager.get(),
                 fileManager.get(), networkInstanceUtils);

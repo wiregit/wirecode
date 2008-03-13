@@ -29,6 +29,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTMetaInfo;
+import com.limegroup.bittorrent.BTMetaInfoFactory;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -127,6 +128,7 @@ public class DownloadManagerImpl implements DownloadManager {
     private final DownloadSerializer downloadSerializer;
     private final IncompleteFileManager incompleteFileManager;
     private final RemoteFileDescFactory remoteFileDescFactory;
+    private final BTMetaInfoFactory btMetaInfoFactory;
     
     @Inject
     public DownloadManagerImpl(NetworkManager networkManager,
@@ -139,7 +141,8 @@ public class DownloadManagerImpl implements DownloadManager {
             CoreDownloaderFactory coreDownloaderFactory,
             DownloadSerializer downloaderSerializer,
             IncompleteFileManager incompleteFileManager,
-            RemoteFileDescFactory remoteFileDescFactory) {
+            RemoteFileDescFactory remoteFileDescFactory,
+            BTMetaInfoFactory btMetaInfoFactory) {
         this.networkManager = networkManager;
         this.innetworkCallback = innetworkCallback;
         this.downloadCallback = downloadCallback;
@@ -151,6 +154,7 @@ public class DownloadManagerImpl implements DownloadManager {
         this.downloadSerializer = downloaderSerializer;
         this.incompleteFileManager = incompleteFileManager;
         this.remoteFileDescFactory = remoteFileDescFactory;
+        this.btMetaInfoFactory = btMetaInfoFactory;
     }
 
     /* (non-Javadoc)
@@ -703,7 +707,7 @@ public class DownloadManagerImpl implements DownloadManager {
         
         BTMetaInfo info;
         try {
-            info = new BTMetaInfo(memento);
+            info = btMetaInfoFactory.createBTMetaInfoFromMemento(memento);
         } catch(InvalidDataException ide) {
             throw new CantResumeException(name);
         }

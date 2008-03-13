@@ -19,9 +19,12 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.limegroup.bittorrent.BTContextFactory;
+import com.limegroup.bittorrent.BTMetaInfoFactory;
 import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
+import com.limegroup.bittorrent.dht.DHTPeerLocator;
+import com.limegroup.bittorrent.dht.DHTPeerPublisher;
 import com.limegroup.bittorrent.disk.DiskManagerFactory;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.bittorrent.tracking.TrackerFactory;
@@ -684,4 +687,15 @@ public class LimeWireCore {
         return injector.getInstance(NetworkInstanceUtils.class);
     }
     
+    public DHTPeerPublisher getDHTPeerPublisher() {
+        return injector.getInstance(DHTPeerPublisher.class);
+    }
+    
+    public DHTPeerLocator getDHTPeerLocator() {
+        return injector.getInstance(DHTPeerLocator.class);
+    }
+    
+    public BTMetaInfoFactory getBTMetaInfoFactory() {
+        return injector.getInstance(BTMetaInfoFactory.class);
+    }    
 }
