@@ -1,13 +1,18 @@
 package org.limewire.xmpp;
 
-import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Set;
 
-import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.packet.IQ;
+import org.xmpp.packet.JID;
 
 public class SearchCommand extends Command{
-    SearchCommand(XMPPConnection connection) {
+    private final Set<JID> limewireClients;
+
+    SearchCommand(XMPPConnection connection, Set<JID> limewireClients) {
         super(connection);
+        this.limewireClients = limewireClients;
     }
 
     public String getCommand() {
@@ -15,9 +20,11 @@ public class SearchCommand extends Command{
     }
 
     public void execute(String args) throws Exception {
-        Query query = new Query(args);
-        query.setType(IQ.Type.GET);
-        query.setTo(connection.getServiceName());  // TODO is service name the right thing to use?
-        connection.sendPacket(query);
+        for (JID limewireClient : limewireClients) {
+            Query query = new Query(args);
+            query.setType(IQ.Type.GET);
+            query.setTo(limewireClient.toString());
+            connection.sendPacket(query);
+        }
     }
 }
