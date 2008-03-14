@@ -332,7 +332,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
         
         Version v = null;
         try {
-            v = new Version("4.14.0");
+            v = new Version("4.16.6");
         } catch (VersionFormatException impossible){};
         lastGoodVersion = v;
     }
