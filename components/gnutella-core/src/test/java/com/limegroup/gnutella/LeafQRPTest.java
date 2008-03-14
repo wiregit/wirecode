@@ -4,9 +4,6 @@ import java.io.InterruptedIOException;
 
 import junit.framework.Test;
 
-import org.limewire.collection.BitSet;
-import org.limewire.util.PrivilegedAccessor;
-
 import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -52,8 +49,7 @@ public class LeafQRPTest extends ClientSideTestCase {
     public void testQRPExchange() throws Exception {
         // set up the connection
         QueryRouteTable qrt = new QueryRouteTable();
-        BitSet retSet = (BitSet) PrivilegedAccessor.getValue(qrt,"bitTable");
-        assertEquals(0, retSet.cardinality());
+        assertEquals(0.0,qrt.getPercentFull());
         Thread.sleep(15000);
         try {
             Message m = null;
