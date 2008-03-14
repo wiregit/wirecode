@@ -20,6 +20,10 @@ public class Search extends IQ {
         this(getList(args));
     }
 
+    public List<String> getKeywords() {
+        return keywords;
+    }
+
     private static List<String> getList(String args) {
         StringTokenizer st = new StringTokenizer(args);
         ArrayList<String> tokens = new ArrayList<String>();

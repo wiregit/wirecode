@@ -20,6 +20,7 @@ public class SearchCommand extends Command{
 
     public void execute(String args) throws Exception {
         for (String limewireClient : limewireClients) {
+            System.out.println("searching " + limewireClient + " for " + args);
             Search query = new Search(args);
             query.setType(IQ.Type.GET);
             query.setTo(limewireClient);

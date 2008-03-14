@@ -29,28 +29,29 @@ public class AuthenticatedClient {
         
         XMPPConnection conn = new XMPPConnection(getConnectionConfig(args[0]));
         conn.connect();
-        ServiceDiscoveryManager serviceDiscoveryManager = ServiceDiscoveryManager.getInstanceFor(conn);
-        serviceDiscoveryManager.addFeature("http://www.limewire.org/search");
-        
         conn.login(args[1], args[2], "limewire");
-        
-        Roster roster = conn.getRoster();
-
-        HashSet<String> limewireClients = new HashSet<String>();
-        for (RosterEntry rosterEntry : roster.getEntries()) {
-            Iterator<Presence> presences = roster.getPresences(rosterEntry.getUser());
-            while(presences.hasNext()) {
-                Presence presence = presences.next();
-                try {
-                    if (serviceDiscoveryManager.discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/search")) {
-                        limewireClients.add(presence.getFrom());
-                        System.out.println("found lw client: " + presence.getFrom());
-                    }
-                } catch (XMPPException exception) {
-                    //exception.printStackTrace();
-                }
-            }
-        }
+//        ServiceDiscoveryManager serviceDiscoveryManager = ServiceDiscoveryManager.getInstanceFor(conn);
+//        //serviceDiscoveryManager.addFeature("http://www.limewire.org/search");
+//        
+//        conn.login(args[1], args[2], "limewire");
+//        
+//        Roster roster = conn.getRoster();
+//
+//        HashSet<String> limewireClients = new HashSet<String>();
+//        for (RosterEntry rosterEntry : roster.getEntries()) {
+//            Iterator<Presence> presences = roster.getPresences(rosterEntry.getUser());
+//            while(presences.hasNext()) {
+//                Presence presence = presences.next();
+//                try {
+//                    if (serviceDiscoveryManager.discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/search")) {
+//                        limewireClients.add(presence.getFrom());
+//                        System.out.println("found lw client: " + presence.getFrom());
+//                    }
+//                } catch (XMPPException exception) {
+//                    //exception.printStackTrace();
+//                }
+//            }
+//        }
             
 
 //        HashSet<JID> limewireClients = new HashSet<JID>();
@@ -68,16 +69,16 @@ public class AuthenticatedClient {
 //        ping.setType(IQ.Type.GET);
 //        conn.sendPacket(ping);
 
-        CommandDispatcher dispatcher = new CommandDispatcher();
-        dispatcher.add(new DownloadCommand(conn));
-        //dispatcher.add(new InitiateChatCommand(conn));
-        //dispatcher.add(new RosterCommand(conn));
-        dispatcher.add(new SearchCommand(conn, limewireClients));
-        //dispatcher.add(new SendMessageCommand(conn));
-        dispatcher.add(new BrowseCommand(conn));
-        Thread t = new Thread(dispatcher);
-        t.setDaemon(false);
-        t.start();
+//        CommandDispatcher dispatcher = new CommandDispatcher();
+//        dispatcher.add(new DownloadCommand(conn));
+//        //dispatcher.add(new InitiateChatCommand(conn));
+//        //dispatcher.add(new RosterCommand(conn));
+//        dispatcher.add(new SearchCommand(conn, limewireClients));
+//        //dispatcher.add(new SendMessageCommand(conn));
+//        dispatcher.add(new BrowseCommand(conn));
+//        Thread t = new Thread(dispatcher);
+//        t.setDaemon(false);
+//        t.start();
     }
 
     private static ConnectionConfiguration getConnectionConfig(String serviceName) {

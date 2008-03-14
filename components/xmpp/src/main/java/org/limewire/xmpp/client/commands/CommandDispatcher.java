@@ -34,6 +34,7 @@ public class CommandDispatcher implements Runnable{
         StringTokenizer st = new StringTokenizer(cmd);
         Command command = cmds.get(st.nextToken());
         if(command != null) {
+            System.out.println("dispatching " + cmd + " command...");
             cmd = cmd.substring(command.getCommand().length());
             cmd = cmd.trim();
             try {

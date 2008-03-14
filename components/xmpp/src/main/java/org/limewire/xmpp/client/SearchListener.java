@@ -1,28 +1,32 @@
 package org.limewire.xmpp.client;
 
-import org.jivesoftware.smack.PacketListener;
-import org.jivesoftware.smack.filter.PacketFilter;
-import org.jivesoftware.smack.packet.IQ;
-import org.jivesoftware.smack.packet.Packet;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringTokenizer;
+
 import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.tree.DefaultElement;
-import org.dom4j.tree.DefaultAttribute;
-
-import java.io.File;
-import java.util.List;
-import java.util.StringTokenizer;
-import java.util.ArrayList;
+import org.dom4j.tree.DefaultText;
+import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.filter.PacketFilter;
+import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smack.packet.Packet;
 
 public class SearchListener implements PacketListener {
+    private final XMPPConnection connection;
     private final List<File> sharedResources;
 
-    public SearchListener(List<File> sharedResources) {
-        this.sharedResources = sharedResources;
+    public SearchListener(XMPPConnection connection, File... sharedResources) {
+        this.connection = connection;
+        this.sharedResources = Arrays.asList(sharedResources);
     }
 
     public void processPacket(Packet packet) {
-        IQ iq = (IQ)packet;
+        Search iq = (Search)packet;
         if(iq.getType().equals(IQ.Type.GET)) {
             handleGet(iq);
         } else if(iq.getType().equals(IQ.Type.RESULT)) {
@@ -36,6 +40,10 @@ public class SearchListener implements PacketListener {
         }
     }
 
+    private void handleResult(IQ iq) {
+        //To change body of created methods use File | Settings | File Templates.
+    }
+
     private void handleError(IQ packet) {
         System.out.println("ERROR:\n" + packet.toXML());
     }
@@ -44,55 +52,54 @@ public class SearchListener implements PacketListener {
         // sendError(packet);
     }
 
-    private void handleGet(IQ packet) {
-        IQ queryResult = new SearchResult();
+    private void handleGet(Search packet) {
+        IQ queryResult = new SearchResult(searchLocalResources(packet.getKeywords()));
         queryResult.setTo(packet.getFrom());
         queryResult.setFrom(packet.getTo());
-        queryResult.setPacketID(IQ.nextID());
-
+        queryResult.setPacketID(packet.getPacketID());
+        queryResult.setType(IQ.Type.RESULT);
+        connection.sendPacket(queryResult);
     }
 
-    private Element searchLocalResources(Element childElement) {
-        DefaultElement queryReply = new DefaultElement("query-reply", new Namespace("", "iq:jabber:lw-query-reply"));
-        Element keywords = childElement.element("keywords");
-        String[] keywordsList = parseKeywords(keywords.getText());
+    private Element [] searchLocalResources(List<String> keywordsList) {
+        ArrayList<Element> queryReplies = new ArrayList<Element>();
         if(keywordsList != null) {
             for(String keyword : keywordsList) {
                 for(File shared : sharedResources) {
                     if(shared.exists()) {
                         if(shared.isFile()) {
-                            searchFile(keyword, shared, queryReply);
+                            searchFile(keyword, shared, queryReplies);
                         } else if(shared.isDirectory()) {
-                            searchDir(keyword, shared, queryReply);
+                            searchDir(keyword, shared, queryReplies);
                         }
                     }
                 }
             }
         }
-        return queryReply;
+        return queryReplies.toArray(new Element[]{});
     }
 
-    private void searchDir(String keyword, File shared, DefaultElement queryReply) {
+    private void searchDir(String keyword, File shared, ArrayList<Element> queryReplies) {
         File [] files = shared.listFiles();
         if(files != null) {
             for(File f : files) {
                 if(f.isFile()) {
-                    searchFile(keyword, f, queryReply);
+                    searchFile(keyword, f, queryReplies);
                 } else if(f.isDirectory()){
                     // TODO eliminate infinite recursion from symbolic links
-                    searchDir(keyword, f, queryReply);
+                    searchDir(keyword, f, queryReplies);
                 }
             }
         }
     }
 
-    private void searchFile(String keyword, File shared, DefaultElement queryReply) {
+    private void searchFile(String keyword, File shared, ArrayList<Element> queryReplies) {
         keyword = keyword.toLowerCase();
         String fileName = shared.getName().toLowerCase();
         if(fileName.contains(keyword)) {
-            DefaultElement reply = new DefaultElement("reply", new Namespace("", "iq:jabber:lw-query-reply"));
-            reply.add(new DefaultAttribute("file", shared.getPath()));
-            queryReply.add(reply);
+            DefaultElement reply = new DefaultElement("search-result", new Namespace("", "jabber:iq:lw-search-results"));
+            reply.add(new DefaultText(shared.getPath()));
+            queryReplies.add(reply);
         }
 
     }
@@ -105,10 +112,13 @@ public class SearchListener implements PacketListener {
         }
         return wordList.toArray(new String[]{});
     }
-
-    public static class SearchFilter implements PacketFilter {
-        public boolean accept(Packet packet) {
-            return packet.getExtension("search", "jabber:iq:lw-search") != null;
-        }
+    
+    public PacketFilter getPacketFilter() {
+        return new PacketFilter(){
+            public boolean accept(Packet packet) {
+                return packet instanceof Search;
+                //return packet.getExtension("search", "jabber:iq:lw-search") != null;
+            }
+        };
     }
 }
