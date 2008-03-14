@@ -8,7 +8,11 @@ import org.apache.commons.httpclient.util.Base64;
  * The class handles encoding and decoding 'PEM' encoded data, essentially
  * taking byte arrays and base64 encoding them and then adding line breaks.
  */
-public class PemCodec {
+public final class PemCodec {
+    private PemCodec() {
+
+    }
+
     /**
      * Encodes the given byte array into a base-64 encoded string with line
      * breaks at 64 characters. Always ends with a line break, unless the

@@ -310,7 +310,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     }
 
     /** ONLY ADD TO THIS LIST, AND ADD AT THE END. ORDERING IS SUPER-IMPORTANT. */
-    private static final String[] PROPERTY_ENCODING_ARRAY = new String[] { "artist", "album",
+    private static final String[] PROPERTY_ENCODING_ARRAY = new String[] {"artist", "album",
             "url", "genre", "license", "size", "creation_time", "vendor", "name", "audio", "video",
             "document" };
 
@@ -532,14 +532,19 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
         return true;
     }
 
+    @Override
+    public int hashCode() {
+        return (int) getUniqueID();
+    }
+
     public static enum PromotionMediaType {
-        /** audio content */
+        /** audio content. */
         AUDIO(1),
-        /** video content */
+        /** video content. */
         VIDEO(2),
-        /** LimeWire Store content */
+        /** LimeWire Store content. */
         STORE(3),
-        /** LimeSpot content */
+        /** LimeSpot content. */
         SPOT(4),
         /** A browser link of no special type. */
         GENERIC_LINK(5),
@@ -641,7 +646,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
          *         {@link #getEncodedRadius()}.
          */
         static int decodeRadius(byte radiusByte) {
-            long radius = ByteUtil.toLongFromBytes(new byte[] { radiusByte }) + 1;
+            long radius = ByteUtil.toLongFromBytes(new byte[] {radiusByte }) + 1;
             return (int) Math.pow(13 * radius, 2);
         }
     }

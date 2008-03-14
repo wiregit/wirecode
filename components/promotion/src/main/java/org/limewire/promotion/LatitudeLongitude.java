@@ -3,11 +3,11 @@ package org.limewire.promotion;
 import org.limewire.util.ByteUtil;
 
 public class LatitudeLongitude {
-    private final double AVERAGE_EARTH_RADIUS_KM = 6371.0;
+    private final static double AVERAGE_EARTH_RADIUS_KM = 6371.0;
 
-    private byte[] latitude;
+    private final byte[] latitude;
 
-    private byte[] longitude;
+    private final byte[] longitude;
 
     /**
      * Construct an instance using the given byte-encoded integer values using

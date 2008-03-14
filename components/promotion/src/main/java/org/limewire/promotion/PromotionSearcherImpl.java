@@ -1,6 +1,7 @@
 package org.limewire.promotion;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -8,6 +9,7 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.promotion.SearcherDatabase.QueryResult;
 import org.limewire.promotion.containers.PromotionMessageContainer;
 import org.limewire.promotion.containers.PromotionMessageContainer.GeoRestriction;
+import org.limewire.promotion.impressions.ImpressionsCollector;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.geocode.GeocodeInformation;
@@ -17,10 +19,17 @@ public class PromotionSearcherImpl implements PromotionSearcher {
 
     private final SearcherDatabase searcherDatabase;
 
+    private final ImpressionsCollector impressionsCollector;
+
+    private final PromotionBinderFactory promotionBinderFactory;
+
     @Inject
-    public PromotionSearcherImpl(KeywordUtil keywordUtil, SearcherDatabase searcherDatabase) {
+    public PromotionSearcherImpl(KeywordUtil keywordUtil, SearcherDatabase searcherDatabase,
+            ImpressionsCollector impressionsCollector, PromotionBinderFactory promotionBinderFactory) {
         this.keywordUtil = keywordUtil;
         this.searcherDatabase = searcherDatabase;
+        this.impressionsCollector = impressionsCollector;
+        this.promotionBinderFactory = promotionBinderFactory;
     }
 
     /**
@@ -66,7 +75,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
             this.query = query;
             this.callback = callback;
             this.normalizedQuery = keywordUtil.normalizeQuery(query);
-            // Now calculate our lat/longitude from the Geocode, or null
+            // Now calculate our latitude/longitude from the Geocode, or null
             this.userLatLon = getLatitudeLongitude(userLocation);
             this.userTerritory = userLocation.getProperty(GeocodeInformation.Property.CountryCode);
         }
@@ -77,8 +86,9 @@ public class PromotionSearcherImpl implements PromotionSearcher {
          * problem parsing or missing data.
          */
         private LatitudeLongitude getLatitudeLongitude(GeocodeInformation geocodeInformation) {
-            String lat = geocodeInformation.getProperty(GeocodeInformation.Property.Latitude);
-            String lon = geocodeInformation.getProperty(GeocodeInformation.Property.Longitude);
+            final String lat = geocodeInformation.getProperty(GeocodeInformation.Property.Latitude);
+            final String lon = geocodeInformation
+                    .getProperty(GeocodeInformation.Property.Longitude);
             if (lat == null || lon == null)
                 return null;
             try {
@@ -91,14 +101,31 @@ public class PromotionSearcherImpl implements PromotionSearcher {
         @Override
         public void run() {
             // OK, start the meat of the query!
+            final Date timeQueried = new Date();
             searcherDatabase.expungeExpired();
             List<QueryResult> results = searcherDatabase.query(normalizedQuery);
             removeInvalidResults(results);
 
-            for (QueryResult result : results)
+            for (QueryResult result : results) {
                 callback.process(result.getPromotionMessageContainer());
+                // Tell the collector that we just showed this result.
+                impressionsCollector.recordImpression(query, timeQueried, new Date(), result
+                        .getPromotionMessageContainer(), result.getBinderUniqueId());
+            }
 
-            // TODO
+            // Get the binder...
+            PromotionBinder binder = promotionBinderFactory.getBinderForBucket(keywordUtil
+                    .getHashValue(normalizedQuery));
+            if (binder == null)
+                return;
+
+            List<PromotionMessageContainer> messages = binder.getPromoMessageList();
+            for (PromotionMessageContainer promoMessage : messages) {
+
+            }
+
+            // rerun the db search and callback any new results
+            // TODO I'm a todo.
         }
 
         /**

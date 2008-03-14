@@ -34,7 +34,7 @@ public class MultiMessageContainer extends MapMessageContainer {
      */
     private byte[] getWrappedBytes() {
         byte[] bytes = getBytes(KEY_WRAPPED_BYTES);
-        if(bytes == null)
+        if (bytes == null)
             return new byte[0];
         return bytes;
     }

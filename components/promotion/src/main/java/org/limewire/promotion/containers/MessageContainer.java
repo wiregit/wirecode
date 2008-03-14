@@ -1,7 +1,5 @@
 package org.limewire.promotion.containers;
 
-import java.io.InvalidObjectException;
-
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.GGEP;
 
@@ -11,7 +9,7 @@ import com.limegroup.gnutella.messages.GGEP;
  * determines how to further interpret the GGEP data after parsing.
  */
 public interface MessageContainer {
-    final String TYPE_KEY = "T";
+    String TYPE_KEY = "T";
 
     /**
      * @return the type code for this container.
@@ -28,7 +26,7 @@ public interface MessageContainer {
      * Take the given passed in GGEP-encoded bytes and parse out the data to
      * fill yourself in.
      * 
-     * @throws InvalidObjectException If the passed-in value doesn't represent
+     * @throws BadGGEPBlockException If the passed-in value doesn't represent
      *         an instance of this object type, or a wrapped MessageContainer
      *         throws this exception during its own parse method.
      */

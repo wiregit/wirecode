@@ -30,7 +30,7 @@ public class KeywordUtilImpl implements KeywordUtil {
     }
 
     private void initEnglishStopwords() {
-        for (String word : new String[] { "i", "a", "s", "about", "an", "are", "as", "at", "be",
+        for (String word : new String[] {"i", "a", "s", "about", "an", "are", "as", "at", "be",
                 "by", "com", "de", "en", "for", "from", "how", "in", "is", "it", "la", "of", "on",
                 "or", "that", "the", "this", "to", "was", "what", "when", "where", "who", "will",
                 "with", "und", "the", "www" })

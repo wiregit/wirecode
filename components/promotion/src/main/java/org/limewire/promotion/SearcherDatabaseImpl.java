@@ -6,7 +6,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -57,7 +56,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
      * Creates a statement and runs the given SQL, then returns the resulting
      * affected row count.
      * 
-     * @see {@link Statement#executeUpdate(String)}
+     * @see {@link java.sql.Statement#executeUpdate(String)}
      */
     private int executeUpdate(String sql, Object... values) {
         try {
@@ -155,7 +154,10 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
         PreparedStatement statement = null;
         try {
             statement = connection
-                    .prepareStatement("SELECT entry_id, binder_unique_id FROM keywords k WHERE EXISTS (SELECT 1 FROM entries e where e.entry_id = k.entry_id AND valid_start_dt < CURRENT_TIMESTAMP AND valid_end_dt > CURRENT_TIMESTAMP) AND phrase LIKE ?");
+                    .prepareStatement("SELECT entry_id, binder_unique_id FROM keywords k WHERE "
+                            + "EXISTS (SELECT 1 FROM entries e where e.entry_id = k.entry_id "
+                            + "AND valid_start_dt < CURRENT_TIMESTAMP AND valid_end_dt > CURRENT_TIMESTAMP) "
+                            + "AND phrase LIKE ?");
             statement.setString(1, normalizedQuery);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
@@ -170,6 +172,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
                 try {
                     statement.close();
                 } catch (SQLException ignored) {
+
                 }
             }
         }
