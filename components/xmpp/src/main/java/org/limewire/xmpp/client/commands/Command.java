@@ -1,4 +1,4 @@
-package org.limewire.xmpp;
+package org.limewire.xmpp.client.commands;
 
 import org.jivesoftware.smack.XMPPConnection;
 

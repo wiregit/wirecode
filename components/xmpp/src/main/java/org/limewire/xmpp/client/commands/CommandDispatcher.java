@@ -1,4 +1,4 @@
-package org.limewire.xmpp;
+package org.limewire.xmpp.client.commands;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -10,12 +10,12 @@ public class CommandDispatcher implements Runnable{
     final HashMap<String, Command> cmds;
     protected BufferedReader reader;
 
-    CommandDispatcher() {
+    public CommandDispatcher() {
         cmds = new HashMap<String, Command>();
         reader = new BufferedReader(new InputStreamReader(System.in));
     }
     
-    void add(Command cmd){
+    public void add(Command cmd){
         cmds.put(cmd.getCommand(), cmd);
     }
     

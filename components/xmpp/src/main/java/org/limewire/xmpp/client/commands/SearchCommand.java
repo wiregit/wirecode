@@ -1,16 +1,15 @@
-package org.limewire.xmpp;
+package org.limewire.xmpp.client.commands;
 
-import java.util.Iterator;
 import java.util.Set;
 
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.IQ;
-import org.xmpp.packet.JID;
+import org.limewire.xmpp.client.Search;
 
 public class SearchCommand extends Command{
-    private final Set<JID> limewireClients;
+    private final Set<String> limewireClients;
 
-    SearchCommand(XMPPConnection connection, Set<JID> limewireClients) {
+    public SearchCommand(XMPPConnection connection, Set<String> limewireClients) {
         super(connection);
         this.limewireClients = limewireClients;
     }
@@ -20,10 +19,10 @@ public class SearchCommand extends Command{
     }
 
     public void execute(String args) throws Exception {
-        for (JID limewireClient : limewireClients) {
-            Query query = new Query(args);
+        for (String limewireClient : limewireClients) {
+            Search query = new Search(args);
             query.setType(IQ.Type.GET);
-            query.setTo(limewireClient.toString());
+            query.setTo(limewireClient);
             connection.sendPacket(query);
         }
     }

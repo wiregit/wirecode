@@ -1,4 +1,4 @@
-package org.limewire.xmpp;
+package org.limewire.xmpp.client;
 
 import java.util.List;
 

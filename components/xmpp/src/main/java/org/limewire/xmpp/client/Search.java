@@ -1,4 +1,4 @@
-package org.limewire.xmpp;
+package org.limewire.xmpp.client;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,20 +6,17 @@ import java.util.StringTokenizer;
 
 import org.jivesoftware.smack.packet.IQ;
 
-public class Query extends IQ {
-    public static final int DEFAULT_TTL = 3;
+public class Search extends IQ {
     
-    private int ttl = DEFAULT_TTL;
-    private int hops = 0;
     private List<String> keywords;
     // TODO exact word / phrase match
     // TODO match case
     
-    public Query(List<String> keywords) {
+    public Search(List<String> keywords) {
         this.keywords = keywords;
     }
 
-    public Query(String args) {
+    public Search(String args) {
         this(getList(args));
     }
 
@@ -33,7 +30,7 @@ public class Query extends IQ {
     }
 
     public String getChildElementXML() {
-        return "<query xmlns=\"jabber:iq:lw-query\"><hops>" + hops + "</hops>" + "<ttl>" + ttl + "</ttl>" + getKeywordsElement(keywords) + "</query>";
+        return "<search xmlns=\"jabber:iq:lw-search\">" + getKeywordsElement(keywords) + "</search>";
     }
 
     private String getKeywordsElement(List<String> keywords) {

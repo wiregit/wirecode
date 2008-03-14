@@ -1,14 +1,14 @@
-package org.limewire.xmpp;
+package org.limewire.xmpp.client.commands;
 
 import org.jivesoftware.smack.XMPPConnection;
 
-public class InitiateChatCommand extends Command {
-    InitiateChatCommand(XMPPConnection connection) {
+public class BrowseCommand extends Command {
+    public BrowseCommand(XMPPConnection connection) {
         super(connection);
     }
 
     public String getCommand() {
-        return "chat";
+        return "browse";
     }
 
     public void execute(String args) throws Exception {

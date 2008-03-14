@@ -1,4 +1,4 @@
-package org.limewire.xmpp;
+package org.limewire.xmpp.client;
 
 import org.jivesoftware.smack.ConnectionCreationListener;
 import org.jivesoftware.smack.PacketListener;

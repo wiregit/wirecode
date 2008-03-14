@@ -1,4 +1,4 @@
-package org.limewire.xmpp;
+package org.limewire.xmpp.server;
 
 import org.jivesoftware.openfire.starter.ServerStarter;
 

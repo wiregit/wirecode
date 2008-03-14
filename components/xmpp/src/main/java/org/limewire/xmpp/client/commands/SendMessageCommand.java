@@ -1,14 +1,14 @@
-package org.limewire.xmpp;
+package org.limewire.xmpp.client.commands;
 
 import org.jivesoftware.smack.XMPPConnection;
 
-public class DownloadCommand extends Command {
-    DownloadCommand(XMPPConnection connection) {
+public class SendMessageCommand extends Command {
+    public SendMessageCommand(XMPPConnection connection) {
         super(connection);
     }
 
     public String getCommand() {
-        return "get";
+        return DEFAULT;
     }
 
     public void execute(String args) throws Exception {

@@ -1,4 +1,4 @@
-package org.limewire.xmpp;
+package org.limewire.xmpp.server;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -8,6 +8,7 @@ import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.handler.IQHandler;
+import org.limewire.xmpp.client.PingHandler;
 
 public class ServerPlugin implements Plugin {
     public void initializePlugin(PluginManager manager, File pluginDirectory) {

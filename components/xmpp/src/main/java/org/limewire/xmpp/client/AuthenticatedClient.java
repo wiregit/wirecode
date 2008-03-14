@@ -1,4 +1,4 @@
-package org.limewire.xmpp;
+package org.limewire.xmpp.client;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -17,7 +17,10 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
-import org.xmpp.packet.JID;
+import org.limewire.xmpp.client.commands.BrowseCommand;
+import org.limewire.xmpp.client.commands.CommandDispatcher;
+import org.limewire.xmpp.client.commands.DownloadCommand;
+import org.limewire.xmpp.client.commands.SearchCommand;
 
 public class AuthenticatedClient {
     public static void main(String [] args) throws XMPPException, ClassNotFoundException, UnsupportedLookAndFeelException, IllegalAccessException, InstantiationException {
@@ -33,14 +36,14 @@ public class AuthenticatedClient {
         
         Roster roster = conn.getRoster();
 
-        HashSet<JID> limewireClients = new HashSet<JID>();
+        HashSet<String> limewireClients = new HashSet<String>();
         for (RosterEntry rosterEntry : roster.getEntries()) {
             Iterator<Presence> presences = roster.getPresences(rosterEntry.getUser());
             while(presences.hasNext()) {
                 Presence presence = presences.next();
                 try {
                     if (serviceDiscoveryManager.discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/search")) {
-                        limewireClients.add(new JID(presence.getFrom()));
+                        limewireClients.add(presence.getFrom());
                         System.out.println("found lw client: " + presence.getFrom());
                     }
                 } catch (XMPPException exception) {
@@ -64,8 +67,6 @@ public class AuthenticatedClient {
 //        Ping ping = new Ping();
 //        ping.setType(IQ.Type.GET);
 //        conn.sendPacket(ping);
-        
-        // TODO listen for pongs
 
         CommandDispatcher dispatcher = new CommandDispatcher();
         dispatcher.add(new DownloadCommand(conn));
@@ -82,12 +83,12 @@ public class AuthenticatedClient {
     private static ConnectionConfiguration getConnectionConfig(String serviceName) {
         if(serviceName.equals("gtalk")) {
             return new ConnectionConfiguration("talk.google.com", 5222, "gmail.com");
-        } else if(serviceName.equals("yahoo")) {
+        } /*else if(serviceName.equals("yahoo")) {
             return new ConnectionConfiguration("chat.live.yahoo.com", 5222, "yahoo.com");
         } else if(serviceName.equals("aol")) {
             return new ConnectionConfiguration("xmpp.oscar.aol.com", 5222, "aol.com");
-        } else {
-            throw new IllegalArgumentException("unknown service: " + serviceName + ". Supported values are: gtalk, yahoo, aol");
+        } */else {
+            throw new IllegalArgumentException("unknown service: " + serviceName + ". Supported values are: gtalk");//, yahoo, aol");
         }
     }
     
@@ -99,13 +100,13 @@ public class AuthenticatedClient {
 
     static class DiscoInfoListener implements PacketListener {
         private boolean incoming;
-        private Set<JID> limewireClients;
+        private Set<String> limewireClients;
 
         DiscoInfoListener() {
             incoming = false;    
         }
         
-        DiscoInfoListener(Set<JID> limewireClients){
+        DiscoInfoListener(Set<String> limewireClients){
             incoming = true;
             this.limewireClients = limewireClients;
         }
@@ -114,7 +115,7 @@ public class AuthenticatedClient {
             DiscoverInfo discoInfo = (DiscoverInfo)packet;
             if(incoming) {
                 if(discoInfo.containsFeature("http://www.limewire.org/search")) {
-                    limewireClients.add(new JID(discoInfo.getFrom()));
+                    limewireClients.add(discoInfo.getFrom());
                 }
             } else {
                 discoInfo.addFeature("http://www.limewire.org/search");
