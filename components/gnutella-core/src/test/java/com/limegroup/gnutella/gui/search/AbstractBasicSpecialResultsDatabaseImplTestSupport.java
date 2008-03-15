@@ -52,7 +52,7 @@ abstract class AbstractBasicSpecialResultsDatabaseImplTestSupport extends LimeTe
      * @param attr attributes that should be <code>null</code>
      */
     protected final void runTestWithString(final Object expected, String buf, final Getter getter) {       
-        BasicSpecialResultsDatabaseImpl db = helper.newDatabase(buf);
+        BasicThirdPartyResultsDatabaseImpl db = helper.newDatabase(buf);
         db.find("cat", null /* this is ok */, new ThirdPartyResultsDatabase.SearchResultsCallback() {
             public void process(List<SearchResult> results, SearchInformation info) {
                 if(expected == NOTHING) {

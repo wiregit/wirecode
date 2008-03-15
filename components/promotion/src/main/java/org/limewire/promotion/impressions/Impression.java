@@ -11,9 +11,7 @@ import org.limewire.promotion.containers.PromotionMessageContainer;
  */
 public class Impression {
     private final long binderUniqueID;
-
     private final Date timeShown;
-
     private final PromotionMessageContainer promo;
 
     Impression(PromotionMessageContainer promo, long binderUniqueID, Date timeShown) {

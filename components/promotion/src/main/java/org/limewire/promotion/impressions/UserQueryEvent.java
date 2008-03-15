@@ -5,10 +5,9 @@ import java.util.List;
 import java.util.Vector;
 
 public class UserQueryEvent {
+    
     private List<Impression> impressions = new Vector<Impression>();
-
     private final String originalQuery;
-
     private final Date originalQueryTime;
 
     UserQueryEvent(String originalQuery, Date originalQueryTime) {
