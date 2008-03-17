@@ -1,6 +1,7 @@
 package org.limewire.xmpp.client;
 
 import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.IQ;
 
@@ -13,6 +14,15 @@ public class SearchResultListener implements PacketListener {
     }
 
     private void handleResult(SearchResult result) {
-        //To change body of created methods use File | Settings | File Templates.
+        //IQ queryResult = new SearchResult();
+    }
+
+    public PacketFilter getPacketFilter() {
+        return new PacketFilter(){
+            public boolean accept(Packet packet) {
+                return packet instanceof SearchResult;
+                //return packet.getExtension("search", "jabber:iq:lw-search") != null;
+            }
+        };
     }
 }

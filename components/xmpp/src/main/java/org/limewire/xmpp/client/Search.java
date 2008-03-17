@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smack.provider.IQProvider;
+import org.xmlpull.v1.XmlPullParser;
 
 public class Search extends IQ {
     
@@ -48,5 +50,16 @@ public class Search extends IQ {
         }
         elem += "</keywords>";
         return elem;
+    }
+
+    public static IQProvider getIQProvider() {
+        return new SearchIQProvider();
+    }
+
+    private static class SearchIQProvider implements IQProvider {
+        public IQ parseIQ(XmlPullParser parser) throws Exception {
+            parser.nextTag(); // keywords
+            return new Search(parser.nextText());
+        }
     }
 }

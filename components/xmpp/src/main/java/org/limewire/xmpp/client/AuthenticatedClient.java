@@ -1,26 +1,16 @@
 package org.limewire.xmpp.client;
 
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.PacketListener;
-import org.jivesoftware.smack.Roster;
-import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.Packet;
-import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
-import org.limewire.xmpp.client.commands.BrowseCommand;
-import org.limewire.xmpp.client.commands.CommandDispatcher;
-import org.limewire.xmpp.client.commands.DownloadCommand;
-import org.limewire.xmpp.client.commands.SearchCommand;
 
 public class AuthenticatedClient {
     public static void main(String [] args) throws XMPPException, ClassNotFoundException, UnsupportedLookAndFeelException, IllegalAccessException, InstantiationException {
@@ -78,7 +68,7 @@ public class AuthenticatedClient {
 //        dispatcher.add(new BrowseCommand(conn));
 //        Thread t = new Thread(dispatcher);
 //        t.setDaemon(false);
-//        t.start();
+//        t.create();
     }
 
     private static ConnectionConfiguration getConnectionConfig(String serviceName) {

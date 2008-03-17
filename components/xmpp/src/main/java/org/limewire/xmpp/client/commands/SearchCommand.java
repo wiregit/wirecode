@@ -19,11 +19,13 @@ public class SearchCommand extends Command{
     }
 
     public void execute(String args) throws Exception {
+        String id = IQ.nextID();
         for (String limewireClient : limewireClients) {
             System.out.println("searching " + limewireClient + " for " + args);
             Search query = new Search(args);
             query.setType(IQ.Type.GET);
             query.setTo(limewireClient);
+            query.setPacketID(id);
             connection.sendPacket(query);
         }
     }

@@ -8,7 +8,7 @@ import org.jivesoftware.openfire.XMPPServer;
 import org.jivesoftware.openfire.container.Plugin;
 import org.jivesoftware.openfire.container.PluginManager;
 import org.jivesoftware.openfire.handler.IQHandler;
-import org.limewire.xmpp.client.PingHandler;
+import org.limewire.xmpp.server.PingHandler;
 
 public class ServerPlugin implements Plugin {
     public void initializePlugin(PluginManager manager, File pluginDirectory) {
