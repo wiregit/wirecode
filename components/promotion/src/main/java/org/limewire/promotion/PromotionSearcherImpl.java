@@ -21,11 +21,11 @@ public class PromotionSearcherImpl implements PromotionSearcher {
 
     private final ImpressionsCollector impressionsCollector;
 
-    private final PromotionBinderFactory promotionBinderFactory;
+    private final PromotionBinderRepository promotionBinderFactory;
 
     @Inject
     public PromotionSearcherImpl(KeywordUtil keywordUtil, SearcherDatabase searcherDatabase,
-            ImpressionsCollector impressionsCollector, PromotionBinderFactory promotionBinderFactory) {
+            ImpressionsCollector impressionsCollector, PromotionBinderRepository promotionBinderFactory) {
         this.keywordUtil = keywordUtil;
         this.searcherDatabase = searcherDatabase;
         this.impressionsCollector = impressionsCollector;
@@ -42,10 +42,14 @@ public class PromotionSearcherImpl implements PromotionSearcher {
      * <li> check to see when the last time this bucket has been fetched, and
      * continue if has not been fetched or it has expired
      * <li> request the {@link PromotionBinder} for this query from the
-     * {@link PromotionBinderFactory}
+     * {@link PromotionBinderRepository}
      * <li> insert all valid {@link PromotionMessageContainer} entries into db
      * <li> rerun the db search and callback any new results
+     * </ol>
      * 
+     * @param query the searched terms
+     * @param callback the recipient of the results
+     * @param userLocation this can be <code>null</code>
      */
     public void search(String query, PromotionSearchResultsCallback callback,
             GeocodeInformation userLocation) {
@@ -76,14 +80,21 @@ public class PromotionSearcherImpl implements PromotionSearcher {
             this.callback = callback;
             this.normalizedQuery = keywordUtil.normalizeQuery(query);
             // Now calculate our latitude/longitude from the Geocode, or null
-            this.userLatLon = getLatitudeLongitude(userLocation);
-            this.userTerritory = userLocation.getProperty(GeocodeInformation.Property.CountryCode);
+            if (userLocation == null) {
+                this.userLatLon = null;
+                this.userTerritory = null;
+            } else {
+                this.userLatLon = getLatitudeLongitude(userLocation);
+                this.userTerritory = userLocation.getProperty(GeocodeInformation.Property.CountryCode);
+            }
         }
 
         /**
          * Pulls out the latitude and longitude properties and puts them into a
          * {@link LatitudeLongitude} instance, or returns null if there is a
          * problem parsing or missing data.
+         * 
+         * @param geocodeInformation this could be <code>null</code>
          */
         private LatitudeLongitude getLatitudeLongitude(GeocodeInformation geocodeInformation) {
             final String lat = geocodeInformation.getProperty(GeocodeInformation.Property.Latitude);
@@ -114,18 +125,21 @@ public class PromotionSearcherImpl implements PromotionSearcher {
             }
 
             // Get the binder...
-            PromotionBinder binder = promotionBinderFactory.getBinderForBucket(keywordUtil
-                    .getHashValue(normalizedQuery));
-            if (binder == null)
-                return;
+            promotionBinderFactory.getBinderForBucket(keywordUtil.getHashValue(normalizedQuery), new PromotionBinderCallback() {
 
-            List<PromotionMessageContainer> messages = binder.getPromoMessageList();
-            for (PromotionMessageContainer promoMessage : messages) {
+                public void process(PromotionBinder binder) {
+                    if (binder == null) {
+                        return;
+                    }
+    
+                    List<PromotionMessageContainer> messages = binder.getPromoMessageList();
+                    for (PromotionMessageContainer promoMessage : messages) {
+    
+                    }                    
+                }
+                
+            });
 
-            }
-
-            // rerun the db search and callback any new results
-            // TODO I'm a todo.
         }
 
         /**

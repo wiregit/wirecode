@@ -5,6 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.NIODispatcher;
+import org.limewire.promotion.PromotionSearcher;
 import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.rudp.UDPSelectorProvider;
@@ -727,5 +728,9 @@ public class LimeWireCore {
     
     public Geocoder getGeocoder() {
         return injector.getInstance(Geocoder.class);
+    }
+    
+    public PromotionSearcher getPromotionSearcher() {
+        return injector.getInstance(PromotionSearcher.class);
     }
 }

@@ -1,25 +1,30 @@
 package org.limewire.promotion.impressions;
 
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.limewire.promotion.PromotionBinder;
+import org.limewire.promotion.PromotionBinderCallback;
+import org.limewire.promotion.PromotionBinderFactory;
+
 import junit.framework.Test;
 
-public class ContainerRequesterTest extends AbstractEventQueryDataTest {
+public class PromotionContainerRequestorTest extends AbstractEventQueryDataTest {
 
-    public ContainerRequesterTest(String name) {
+    public PromotionContainerRequestorTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(ContainerRequesterTest.class);
+        return buildTestSuite(PromotionContainerRequestorTest.class);
     }
 
-    private ContainerRequester req;
+    private TestPromotionContainerRequestorImpl req;
 
     @Override
     protected void setUp() throws Exception {
-        req = new TestContainerRequester();
+        req = new TestPromotionContainerRequestorImpl();
     }
     
 
@@ -38,7 +43,12 @@ public class ContainerRequesterTest extends AbstractEventQueryDataTest {
     // ------------------------------------------------------------------------    
     
     private void runTest(int n) {
-        req.request(url(), id(), getEvents(n));
+        req.request(url(), id(), getEvents(n), new PromotionBinderCallback() {
+
+            public void process(PromotionBinder binder) {
+            }
+            
+        });
     }    
 
     private Set<UserQueryEvent> getEvents(int numEvents) {

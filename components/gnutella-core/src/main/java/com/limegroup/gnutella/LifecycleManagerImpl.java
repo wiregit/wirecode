@@ -20,6 +20,7 @@ import org.limewire.net.HttpClientManager;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.ssl.SSLEngineTest;
 import org.limewire.nio.ssl.SSLUtils;
+import org.limewire.promotion.PromotionBinderRepository;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsGroupManager;
@@ -53,6 +54,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.ThirdPartySearchResultsSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
@@ -116,6 +118,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<LimeCoreGlue> limeCoreGlue;
     private final Provider<LWSManager> lwsManager;
     private final Provider<LWSIntegrationServices> lwsItegrationServices;
+    private final Provider<PromotionBinderRepository> promotionBinderRepository;
     
     /** A list of items that require running prior to shutting down LW. */
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
@@ -171,7 +174,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<LicenseFactory> licenseFactory,
             Provider<LimeCoreGlue> limeCoreGlue,
             Provider<LWSManager> lwsManager,
-            Provider<LWSIntegrationServices> lwsItegrationServices) { 
+            Provider<LWSIntegrationServices> lwsItegrationServices,
+            Provider<PromotionBinderRepository> promotionBinderRepository) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -214,6 +218,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.limeCoreGlue = limeCoreGlue;
         this.lwsManager = lwsManager;
         this.lwsItegrationServices = lwsItegrationServices;
+        this.promotionBinderRepository = promotionBinderRepository;
     }
     
     /* (non-Javadoc)
@@ -453,6 +458,11 @@ public class LifecycleManagerImpl implements LifecycleManager {
         } else {
             LOG.trace("Disabling the StoreServer");
         }      
+        
+        LOG.trace("START loading promotion system");
+        activityCallback.get().componentLoading(I18nMarker.marktr("Loading Promotion System..."));
+        promotionBinderRepository.get().init(ThirdPartySearchResultsSettings.SEARCH_URL.getValue());
+        LOG.trace("START loading promotion system");         
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
             startManualGCThread();

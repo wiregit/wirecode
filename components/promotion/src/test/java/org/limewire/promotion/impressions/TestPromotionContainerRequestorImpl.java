@@ -1,13 +1,15 @@
 package org.limewire.promotion.impressions;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.limewire.promotion.PromotionBinder;
+import org.limewire.promotion.PromotionBinderFactory;
+import org.limewire.promotion.AbstractPromotionBinderRequestor;
 
 import com.limegroup.gnutella.util.LimeWireUtils;
 
@@ -15,10 +17,17 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * Instances of this will use the httpclient classes directly to execute HTTP
  * requests.
  */
-public class TestContainerRequester extends ContainerRequester {
+public class TestPromotionContainerRequestorImpl extends AbstractPromotionBinderRequestor {
 
-    @Override
-    protected void handle(PostMethod request) throws HttpException, IOException {
+    public TestPromotionContainerRequestorImpl() {
+        super(new PromotionBinderFactory() {
+            public PromotionBinder newBinder(byte[] bytes) {
+                return new PromotionBinder(null,null,null);
+            }
+        });
+    }
+
+    public void makeRequest(PostMethod request, ByteArrayCallback callback) throws HttpException, IOException {
         HttpClient client = new HttpClient();
         int ret = client.executeMethod(request);
 
@@ -27,21 +36,15 @@ public class TestContainerRequester extends ContainerRequester {
             // still consume the response body
             request.getResponseBodyAsString();
         } else {
-            BufferedReader in = new BufferedReader(new InputStreamReader(request.getResponseBodyAsStream()));
-            String line;
-            while (((line = in.readLine()) != null)) {
-                System.out.println(line);
-            }
+            callback.process(request.getResponseBody());
         }
     }
 
-    @Override
-    protected void error(Exception e) {
+    public void error(Exception e) {
         e.printStackTrace();
     }
 
-    @Override
-    protected String getUserAgent() {
+    public String getUserAgent() {
         return LimeWireUtils.getHttpServer(); // todo
     }
 

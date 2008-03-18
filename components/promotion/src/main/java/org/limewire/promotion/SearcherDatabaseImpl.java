@@ -70,7 +70,8 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
                 statement.close();
             }
         } catch (SQLException ex) {
-            throw new RuntimeException("SQLException during update", ex);
+            ex.printStackTrace();return 0;
+            //throw new RuntimeException("SQLException during update", ex);
         }
     }
 
@@ -101,7 +102,8 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
                 statement.close();
             }
         } catch (SQLException ex) {
-            throw new RuntimeException("SQLException during update", ex);
+            ex.printStackTrace();return 0;
+            //throw new RuntimeException("SQLException during update", ex);
         }
     }
 
@@ -166,7 +168,8 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             }
             rs.close();
         } catch (SQLException ex) {
-            throw new RuntimeException("SQLException during query.", ex);
+            ex.printStackTrace();
+            //throw new RuntimeException("SQLException during query.", ex);
         } finally {
             if (statement != null) {
                 try {
