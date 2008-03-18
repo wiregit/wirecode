@@ -25,7 +25,8 @@ public class PromotionSearcherImpl implements PromotionSearcher {
 
     @Inject
     public PromotionSearcherImpl(KeywordUtil keywordUtil, SearcherDatabase searcherDatabase,
-            ImpressionsCollector impressionsCollector, PromotionBinderRepository promotionBinderRepository) {
+            ImpressionsCollector impressionsCollector,
+            PromotionBinderRepository promotionBinderRepository) {
         this.keywordUtil = keywordUtil;
         this.searcherDatabase = searcherDatabase;
         this.impressionsCollector = impressionsCollector;
@@ -85,7 +86,8 @@ public class PromotionSearcherImpl implements PromotionSearcher {
                 this.userTerritory = null;
             } else {
                 this.userLatLon = getLatitudeLongitude(userLocation);
-                this.userTerritory = userLocation.getProperty(GeocodeInformation.Property.CountryCode);
+                this.userTerritory = userLocation
+                        .getProperty(GeocodeInformation.Property.CountryCode);
             }
         }
 
@@ -114,31 +116,41 @@ public class PromotionSearcherImpl implements PromotionSearcher {
             // OK, start the meat of the query!
             final Date timeQueried = new Date();
             searcherDatabase.expungeExpired();
-            List<QueryResult> results = searcherDatabase.query(normalizedQuery);
-            removeInvalidResults(results);
+            final List<QueryResult> results1 = searcherDatabase.query(normalizedQuery);
+            removeInvalidResults(results1);
 
-            for (QueryResult result : results) {
+            for (QueryResult result : results1) {
                 callback.process(result.getPromotionMessageContainer());
                 // Tell the collector that we just showed this result.
                 impressionsCollector.recordImpression(query, timeQueried, new Date(), result
                         .getPromotionMessageContainer(), result.getBinderUniqueId());
             }
 
-            // Get the binder...
-            promotionBinderRepository.getBinderForBucket(keywordUtil.getHashValue(normalizedQuery), new PromotionBinderCallback() {
+            // Get the binder, ingest it, and do it again...
+            promotionBinderRepository.getBinderForBucket(keywordUtil.getHashValue(normalizedQuery),
+                    new PromotionBinderCallback() {
+                        public void process(PromotionBinder binder) {
+                            if (binder == null)
+                                return;
+                            searcherDatabase.ingest(binder);
+                            searcherDatabase.expungeExpired();
+                            List<QueryResult> results2 = searcherDatabase.query(normalizedQuery);
+                            removeInvalidResults(results2);
 
-                public void process(PromotionBinder binder) {
-                    if (binder == null) {
-                        return;
-                    }
-    
-                    List<PromotionMessageContainer> messages = binder.getPromoMessageList();
-                    for (PromotionMessageContainer promoMessage : messages) {
-                        callback.process(promoMessage);
-                    }                    
-                }
-                
-            });
+                            for (QueryResult result : results2) {
+                                // Only return results we haven't returned
+                                // before.
+                                if (results1.contains(result))
+                                    continue;
+                                callback.process(result.getPromotionMessageContainer());
+                                // record we just showed this result.
+                                impressionsCollector.recordImpression(query, timeQueried,
+                                        new Date(), result.getPromotionMessageContainer(), result
+                                                .getBinderUniqueId());
+                            }
+                        }
+
+                    });
 
         }
 

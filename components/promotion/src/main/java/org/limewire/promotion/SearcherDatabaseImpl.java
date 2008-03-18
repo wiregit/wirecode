@@ -259,6 +259,18 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             return query;
         }
 
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof QueryResultImpl) {
+                QueryResultImpl other = (QueryResultImpl) obj;
+                return this.promotionMessageContainer.equals(other.promotionMessageContainer);
+            }
+            return false;
+        }
+        
+        @Override
+        public int hashCode() {
+            return promotionMessageContainer.hashCode();
+        }
     }
-
 }
