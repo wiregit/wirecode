@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.settings;
 
 import org.limewire.promotion.PromotionBinder;
+import org.limewire.setting.IntSetting;
 import org.limewire.setting.StringSetting;
 
 /**
@@ -21,6 +22,12 @@ public final class ThirdPartySearchResultsSettings extends LimeProps {
      * The url we use to search for {@link PromotionBinder}s.
      */    
     public static final StringSetting SEARCH_URL =
-        FACTORY.createRemoteStringSetting("SEARCH_URL", "http://jeffpalm.com/lwp/getBuckets.php", "ThirdPartySearchResultsSettings.searchUrl");    
+        FACTORY.createRemoteStringSetting("SEARCH_URL", "http://jeffpalm.com/lwp/getBuckets.php", "ThirdPartySearchResultsSettings.searchUrl");
+    
+    /**
+     * The mod we take with the bucket ID. 
+     */    
+    public static final IntSetting BUCKET_ID_MODULOUS =
+        FACTORY.createRemoteIntSetting("BUCKET_ID_MODULOUS", 200, "ThirdPartySearchResultsSettings.bucketIdModulous", 0, Integer.MAX_VALUE);     
  
 }

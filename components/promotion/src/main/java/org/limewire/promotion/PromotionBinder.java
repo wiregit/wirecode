@@ -126,7 +126,7 @@ public class PromotionBinder {
      *         whether it is a member of this group.
      */
     private boolean isExpired(PromotionMessageContainer message) {
-        return !(message.getValidStart().getTime() > System.currentTimeMillis() && message
+        return (message.getValidStart().getTime() > System.currentTimeMillis() || message
                 .getValidEnd().getTime() < System.currentTimeMillis());
 
     }

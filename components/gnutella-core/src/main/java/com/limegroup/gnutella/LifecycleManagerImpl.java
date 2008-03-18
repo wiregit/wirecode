@@ -461,7 +461,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         LOG.trace("START loading promotion system");
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Promotion System..."));
-        promotionBinderRepository.get().init(ThirdPartySearchResultsSettings.SEARCH_URL.getValue());
+        promotionBinderRepository.get().init(
+                    ThirdPartySearchResultsSettings.SEARCH_URL.getValue(),
+                    ThirdPartySearchResultsSettings.BUCKET_ID_MODULOUS.getValue());
         LOG.trace("START loading promotion system");         
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())

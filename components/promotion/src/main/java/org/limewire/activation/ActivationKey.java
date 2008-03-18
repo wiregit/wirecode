@@ -8,8 +8,6 @@ import com.limegroup.gnutella.messages.GGEP;
 public class ActivationKey {
     private static final String KEY_VALID_FROM = "d";
 
-    private static final String KEY_VALID_UNTIL = "D";
-
     private final GGEP ggep;
 
     public ActivationKey() {

@@ -11,7 +11,7 @@ import org.limewire.promotion.containers.PromotionMessageContainer;
 import com.google.inject.Singleton;
 
 @Singleton
-public class ImpressionsCollectorImpl implements ImpressionsCollector {
+public final class ImpressionsCollectorImpl implements ImpressionsCollector {
     private Map<String, UserQueryEvent> queries = new Hashtable<String, UserQueryEvent>();
 
     public Set<UserQueryEvent> getCollectedImpressions() {

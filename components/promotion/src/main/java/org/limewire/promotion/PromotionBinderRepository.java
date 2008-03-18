@@ -24,7 +24,8 @@ public interface PromotionBinderRepository {
      * Sets a remote URL to use for search.
      * 
      * @param url the new URL
+     * @param mod the modulous with which to send the bucket ID
      */
-    void init(String url);
+    void init(String url, int mod);
 
 }

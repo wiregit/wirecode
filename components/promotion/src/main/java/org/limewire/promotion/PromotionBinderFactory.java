@@ -1,6 +1,5 @@
 package org.limewire.promotion;
 
-import java.io.InputStream;
 
 /**
  * Defines an interface to create {@link PromotionBinder}s given an input

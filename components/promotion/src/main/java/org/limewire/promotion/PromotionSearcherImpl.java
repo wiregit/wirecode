@@ -21,15 +21,15 @@ public class PromotionSearcherImpl implements PromotionSearcher {
 
     private final ImpressionsCollector impressionsCollector;
 
-    private final PromotionBinderRepository promotionBinderFactory;
+    private final PromotionBinderRepository promotionBinderRepository;
 
     @Inject
     public PromotionSearcherImpl(KeywordUtil keywordUtil, SearcherDatabase searcherDatabase,
-            ImpressionsCollector impressionsCollector, PromotionBinderRepository promotionBinderFactory) {
+            ImpressionsCollector impressionsCollector, PromotionBinderRepository promotionBinderRepository) {
         this.keywordUtil = keywordUtil;
         this.searcherDatabase = searcherDatabase;
         this.impressionsCollector = impressionsCollector;
-        this.promotionBinderFactory = promotionBinderFactory;
+        this.promotionBinderRepository = promotionBinderRepository;
     }
 
     /**
@@ -125,7 +125,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
             }
 
             // Get the binder...
-            promotionBinderFactory.getBinderForBucket(keywordUtil.getHashValue(normalizedQuery), new PromotionBinderCallback() {
+            promotionBinderRepository.getBinderForBucket(keywordUtil.getHashValue(normalizedQuery), new PromotionBinderCallback() {
 
                 public void process(PromotionBinder binder) {
                     if (binder == null) {
@@ -134,7 +134,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
     
                     List<PromotionMessageContainer> messages = binder.getPromoMessageList();
                     for (PromotionMessageContainer promoMessage : messages) {
-    
+                        callback.process(promoMessage);
                     }                    
                 }
                 

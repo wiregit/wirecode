@@ -9,7 +9,7 @@ import org.limewire.promotion.containers.PromotionMessageContainer;
  * within a {@link UserQueryEvent} for full information about the event,
  * including ordering of results.
  */
-public class Impression {
+public final class Impression {
     private final long binderUniqueID;
     private final Date timeShown;
     private final PromotionMessageContainer promo;
