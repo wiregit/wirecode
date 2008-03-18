@@ -160,14 +160,14 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
     public List<QueryResult> query(String query) {
         List<QueryResult> results = new ArrayList<QueryResult>();
 
-        String normalizedQuery = keywordUtil.normalizeQuery(query);
+        String normalizedQuery = "%" + keywordUtil.normalizeQuery(query) + "%";
 
         PreparedStatement statement = null;
         try {
             statement = connection
                     .prepareStatement("SELECT entry_id, binder_unique_id FROM keywords k WHERE "
-                            + "EXISTS (SELECT 1 FROM entries e where e.entry_id = k.entry_id "
-                            + "AND valid_start_dt < CURRENT_TIMESTAMP AND valid_end_dt > CURRENT_TIMESTAMP) "
+                            + "EXISTS (SELECT 1 FROM entries e where e.entry_id = k.entry_id) "
+                           // + "AND valid_start_dt < CURRENT_TIMESTAMP AND valid_end_dt > CURRENT_TIMESTAMP) "
                             + "AND phrase LIKE ?");
             statement.setString(1, normalizedQuery);
             ResultSet rs = statement.executeQuery();
@@ -267,7 +267,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             }
             return false;
         }
-        
+
         @Override
         public int hashCode() {
             return promotionMessageContainer.hashCode();

@@ -19,6 +19,13 @@ public interface PromotionSearcher {
      */
     void search(String query, PromotionSearchResultsCallback callback,
             GeocodeInformation userLocation);
+    
+    /**
+     * Initializes with the maximum number of results to show in the client.
+     * 
+     * @param maxNumberOfResults the maximum number of results to show in the client.
+     */
+    void init(int maxNumberOfResults);
 
     /**
      * The recipient of promotion search results. Implementations should be able

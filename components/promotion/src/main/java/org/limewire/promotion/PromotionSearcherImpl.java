@@ -15,13 +15,13 @@ import com.google.inject.Inject;
 import com.limegroup.gnutella.geocode.GeocodeInformation;
 
 public class PromotionSearcherImpl implements PromotionSearcher {
+
     private final KeywordUtil keywordUtil;
-
     private final SearcherDatabase searcherDatabase;
-
     private final ImpressionsCollector impressionsCollector;
-
     private final PromotionBinderRepository promotionBinderRepository;
+    
+    private int maxNumberOfResults;
 
     @Inject
     public PromotionSearcherImpl(KeywordUtil keywordUtil, SearcherDatabase searcherDatabase,
@@ -55,6 +55,10 @@ public class PromotionSearcherImpl implements PromotionSearcher {
     public void search(String query, PromotionSearchResultsCallback callback,
             GeocodeInformation userLocation) {
         new SearcherThread(query, callback, userLocation).start();
+    }
+    
+    public void init(int maxNumberOfResults) {
+        this.maxNumberOfResults = maxNumberOfResults;
     }
 
     /**

@@ -17,7 +17,7 @@ public class PromotionBinderRepositoryImpl implements PromotionBinderRepository 
     /** The search URL. */
     private String searchUrl;
     
-    /** The modulous to take with teh bucket ID. */
+    /** The modulous to take with the bucket ID. */
     private int mod;
     
     @Inject

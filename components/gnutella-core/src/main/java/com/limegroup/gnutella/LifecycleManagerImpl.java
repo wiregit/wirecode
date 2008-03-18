@@ -21,6 +21,7 @@ import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.ssl.SSLEngineTest;
 import org.limewire.nio.ssl.SSLUtils;
 import org.limewire.promotion.PromotionBinderRepository;
+import org.limewire.promotion.PromotionSearcher;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsGroupManager;
@@ -119,6 +120,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<LWSManager> lwsManager;
     private final Provider<LWSIntegrationServices> lwsItegrationServices;
     private final Provider<PromotionBinderRepository> promotionBinderRepository;
+    private final Provider<PromotionSearcher> promotionSearcher;
     
     /** A list of items that require running prior to shutting down LW. */
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
@@ -175,7 +177,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<LimeCoreGlue> limeCoreGlue,
             Provider<LWSManager> lwsManager,
             Provider<LWSIntegrationServices> lwsItegrationServices,
-            Provider<PromotionBinderRepository> promotionBinderRepository) { 
+            Provider<PromotionBinderRepository> promotionBinderRepository,
+            Provider<PromotionSearcher> promotionSearcher) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -219,6 +222,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.lwsManager = lwsManager;
         this.lwsItegrationServices = lwsItegrationServices;
         this.promotionBinderRepository = promotionBinderRepository;
+        this.promotionSearcher = promotionSearcher;
     }
     
     /* (non-Javadoc)
@@ -463,7 +467,11 @@ public class LifecycleManagerImpl implements LifecycleManager {
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Promotion System..."));
         promotionBinderRepository.get().init(
                     ThirdPartySearchResultsSettings.SEARCH_URL.getValue(),
-                    ThirdPartySearchResultsSettings.BUCKET_ID_MODULOUS.getValue());
+                    ThirdPartySearchResultsSettings.BUCKET_ID_MODULOUS.getValue()
+                    );
+        promotionSearcher.get().init(
+                ThirdPartySearchResultsSettings.MAX_NUMBER_OF_SEARCH_RESULTS.getValue()
+                );        
         LOG.trace("START loading promotion system");         
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
