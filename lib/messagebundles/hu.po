@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-02-10 14:55+0000\n"
-"Last-Translator: Karoly Gossler <Unknown>\n"
+"PO-Revision-Date: 2008-03-13 20:36+0000\n"
+"Last-Translator: Punkboy <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
+"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -1327,13 +1327,12 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/AcceptorImpl.java:283
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:35
-#, fuzzy
 msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
-"A LimeWire nem tudott portot létrehozni a bejövő kapcsolatok figyel�s�re. A "
-"LimeWire pár lehetősége lehet, hogy nem fog teljesen működni."
+"A LimeWire nem tudott portot létrehozni a bejövő kapcsolatok figyelésére. "
+"Elképzelhető, hogy a LimeWire egyes funkciói nem fognak megfelelően működni."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:219
 msgid ""
@@ -1346,15 +1345,15 @@ msgstr ""
 "to 'Resume' your downloads."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:221
-#, fuzzy
 msgid ""
 "Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
 "to 'Resume' your downloads."
 msgstr ""
-"Bocsánat,LimeWire nem tudja olvasni a régi letöltéseidet.You can restart "
-"them by going to your Library, viewing your 'Incomplete Files', and clicking "
-"to 'Resume' your downloads."
+"Sajnáljuk, a LimeWire nem tudta olvasni egyes régi letöltéseidet. "
+"Újrakezdheted őket, ha a Könyvtáradba (Library) méssz, megnézed a "
+"Befejezetlen Fájlokat (Incomplete Files), és a folytatás (Resume) gombra "
+"kattintasz."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:319
 msgid "Loading TLS Encryption..."
@@ -1402,7 +1401,7 @@ msgstr "Megosztott fájlok betöltése..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:406
 msgid "Loading BitTorrent Management..."
-msgstr ""
+msgstr "BitTorrent Management betöltése..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:412
 msgid "Loading Old Downloads..."
@@ -1410,7 +1409,7 @@ msgstr "Régi letöltések betöltése..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:417
 msgid "Attaching LimeWire Store Listeners..."
-msgstr ""
+msgstr "LimeWire Store hallgatók csatolása..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:422
 msgid "Loading Directed Querier..."
@@ -1776,6 +1775,10 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"Kiválaszthatod, hogy a LimeWire kezelje-e a BitTorrent protokol "
+"beállításokat. Erősen ajánlott, hogy a LimeWire kezelje ezeket a "
+"beállításokat. Az érvénytelen vagy nem megfelelő értékek komoly teljesítmény "
+"és/vagy memória problémákat okozhatnak."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
 msgid ""
@@ -1840,6 +1843,8 @@ msgid ""
 "Please add any comments you may have (e.g what caused the error). \n"
 "Thank you and please use English."
 msgstr ""
+"Kérünk, ha bármilyen kommentárod van (pl. mi okozta a hibát). \n"
+"Köszönjük, és kérjük az angol nyelvet használd."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:432
 msgid "Send"
@@ -2078,7 +2083,7 @@ msgstr "Mentés"
 #. updates).
 #: gui/com/limegroup/gnutella/gui/Console.java:188
 msgid "Delay: "
-msgstr ""
+msgstr "Várakozás "
 
 #: gui/com/limegroup/gnutella/gui/Console.java:618
 msgid "Save As"
@@ -2209,9 +2214,8 @@ msgid "All Folders"
 msgstr "Minden mappa"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:48
-#, fuzzy
 msgid "View My Shared Files."
-msgstr "Meogsztott fájlaim megtekintése."
+msgstr "Megosztott fájlaim megtekintése."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:81
 #, java-format
@@ -2220,6 +2224,9 @@ msgid ""
 "indicates a potential security problem, so please review your \"My Shared "
 "Files\" to ensure you aren't sharing any sensitive files."
 msgstr ""
+"Sok almappád osztasz meg a megosztási mappádban: {0}. Ez potenciális védelmi "
+"problémát jelent, tehát nézd át a \"My Shared Files\" mappádat, hogy "
+"megbizonyosodj arról, hogy nem osztasz meg érzékeny fájlokat."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:94
 #, java-format
@@ -2228,6 +2235,10 @@ msgid ""
 "you mean to share all these files? Please review your sharing settings and "
 "which files are shared to ensure you aren't sharing any sensitive files."
 msgstr ""
+"Rengeteg fájlt osztasz meg a LimeWire-en keresztül, {0} a fájlok "
+"számolódnak. Meg akarod osztani az összes fájlt? Kérünk nézd át a megosztási "
+"beállításaidat és azt, hogy mely fájlok vannak megosztva, így "
+"megbizonyosadsz arról, hogy nem osztasz meg érzékeny fájlokat."
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:106
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:107
@@ -2237,11 +2248,11 @@ msgstr "Ne jelenjen meg ez az üzenet a jövőben."
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:81
 msgid "Dial Up"
-msgstr ""
+msgstr "Dial Up"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:38
 msgid "Broadband"
-msgstr ""
+msgstr "Szélessáv"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:40
 msgid "T1"
@@ -2451,6 +2462,14 @@ msgid ""
 "\n"
 "LimeWire will now exit.  Thank You."
 msgstr ""
+"A LimeWire nem tudott létrehozni egy átmeneti preferenciák mappát.\n"
+"\n"
+"Ezt általában a szükséges jogok hiánya okozza. Kérünk bizonyosodj meg arról, "
+"hogy a LimeWire (és te) rendelkezik hozzáféréssel a fájlok/mappák "
+"létrehozásához. Ha a probléma nem szünik meg, látogasd meg a "
+"www.limewire.com weboldalt és kattints a \"Support\" linkre.\n"
+"\n"
+"A LimeWire most leáll. Köszönjük."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:566
 #: gui/com/limegroup/gnutella/gui/MessageService.java:76
@@ -2767,24 +2786,35 @@ msgid ""
 "are saved properly you should save them to a sub-folder of {1}.  Would you "
 "like to choose another location?"
 msgstr ""
+"A fájlok mentése ide {0} nem működik megfelelően. Hogy megbizonyosodj arról, "
+"hogy a letöltések megfelelően mentődnek, mentened kell őket a {1} egyik "
+"almappájába. Szeretnél új helyet választani?"
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:20
 msgid ""
 "LimeWire was unable to create your settings folder and is using a temporary "
 "folder.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
+"A LimeWire nem tudta létrehozni a beállítások mappádat, és egy átmeneti "
+"mappát használ. A beállításaid elveszhetnek a LimeWire bezárásakor. "
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:35
 msgid ""
 "LimeWire has encountered problems in managing your settings.  Your settings "
 "changes may not be saved on shutdown."
 msgstr ""
+"A LimeWire problémákba ütközött a beállításaid kezelésében. A "
+"beállításaidban ejtett változtatások nem biztos, hogy mentésre kerülnek "
+"kikapcsoláskor."
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:38
 msgid ""
 "LimeWire has encountered problems in loading your settings.  LimeWire will "
 "attempt to use the default values; however, may behave unexpectedly."
 msgstr ""
+"A LimeWire problémákba ütközött a beállításaid betöltésében. A LimeWire "
+"megpróbálja az alapértelmezett értékeket használni; habár, furcsán "
+"viselkedhet."
 
 #: gui/com/limegroup/gnutella/gui/ShutdownWindow.java:18
 msgid "Shutting down LimeWire..."
@@ -2950,13 +2980,15 @@ msgstr "M�dialej�tsz�"
 msgid "You are sharing {0} file"
 msgid_plural "You are sharing {0} files"
 msgstr[0] "{0} fájl van megosztva"
+msgstr[1] "{0} fájl van megosztva"
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:916
 #, java-format
 msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
-msgstr[0] "{0} fájlok vannak megosztva"
+msgstr[0] "{0} fájl vannak megosztva (Betöltés...)"
+msgstr[1] "{0} fájl vannak megosztva (Betöltés...)"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:993
 msgid "Downloads:"
@@ -3036,6 +3068,10 @@ msgid ""
 "green (or blue to indicate aLimeWire PRO or an Ultrapeer connection), "
 "LimeWire has completely connected."
 msgstr ""
+"Amikor a LimeWire elindul, csatlakoznia kell a hálózathoz. Ez alatt, a bal-"
+"alsó sarokban levő sáv változtatni fogja a szineit. Amikor minden sáv zöld "
+"(vagy kék, amely egy LimeWire PRO vagy Ultrapeer kapcsolatot jelent), a Lime "
+"Wire teljesen csatlakozott."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
 msgid ""
@@ -3065,6 +3101,9 @@ msgid ""
 "completing successfully. Four blue stars signal 'Ethernet' speed and have "
 "the greatest chance of completing successfully."
 msgstr ""
+"Minél több csillaga van egy keresési eredménynek, annyál nagyobb az eséje, "
+"hogy a letöltés sikeres legyen. Négy kék csillag \"Ethernet\" sebességet "
+"jelent és ezeknek van a legnagyobb eséjük, hogy sikeresek legyenek"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:59
 msgid ""
@@ -3088,6 +3127,9 @@ msgid ""
 "It helps the network if you keep your LimeWire running; other users will "
 "connect to the network easier and searches will perform better."
 msgstr ""
+"Segítesz a hálózatnak, ha nem állítod le a LimeWire-t; a többi felhasználó "
+"könnyebben fog csatlakozni a hálózathoz és a keresések eredményesebbek "
+"lesznek."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:73
 msgid ""
@@ -3141,12 +3183,16 @@ msgid ""
 "Visit <a href=\"{0}\">LimeWire's website</a> for detailed information about "
 "how skins are created."
 msgstr ""
+"Látogasd meg a <a href=\"{0}\">LimeWire weboldalát</a> részletes "
+"információkért a témák készítésével kapcsolatban"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:100
 msgid ""
 "Do you want to be part of LimeWire's development? Visit <a "
 "href=\"{0}\">LimeWire's Open Source website</a>."
 msgstr ""
+"Szeretnél részt venni a LimeWire fejlesztésében? Látogasd meg a <a "
+"href=\"{0}\">LimeWire nyílt forrású weboldalát</a>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:102
 msgid ""
@@ -3176,6 +3222,10 @@ msgid ""
 "href=\"{0}\">internationalization page</a> for information on how you can "
 "help translation efforts."
 msgstr ""
+"A LimeWire sok, különböző nyelvre van leforditva, mint pédául franciára, "
+"németre, görögre, olaszra és még sok másra. Látogasd meg a Lime Wire <a "
+"href=\"{0}\">nemzetközi oldalát</a> további információkért a fordítással "
+"kapcsolatban."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:114
 #, java-format
@@ -3220,6 +3270,8 @@ msgid ""
 "LimeWire supports Gnutella and BitTorrent peer-to-peer file sharing "
 "protocols."
 msgstr ""
+"A LimeWire a Gnutella és a BitTorrent peer-to-peer fájl megosztó "
+"protokoljait kezeli."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:136
 msgid ""
@@ -3324,6 +3376,8 @@ msgid ""
 "The numbers next to the up and down arrows at the bottom of LimeWire show "
 "how fast all of your files are downloading or uploading."
 msgstr ""
+"A LimeWire ablak alján találhaztó le és fel nyilak melett levő számok "
+"megmutatják, hogy milyen sebességgel töltődnek le és fel a fájljaid."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:201
 msgid ""
@@ -3374,6 +3428,9 @@ msgid ""
 "even if both parties are behind a firewall. You don't have to do anything "
 "extra because it happens automatically."
 msgstr ""
+"Más peer-to-peer programokkal ellentétben, a LimeWire képes a fájlok "
+"átvitelére akkor is, ha mindkét fél tűzfal mögött van. Nem kell semmi extrát "
+"csinálnod, mert ez magától történik."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:236
 msgid ""
@@ -3386,6 +3443,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:241
 msgid "LimeWire supports file sizes up to 1 TB (terabyte)."
 msgstr ""
+"A LimeWire maximum 1 TB (terrabájt) nagyságú fájlokat tud megosztani."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:242
 msgid ""
@@ -3541,6 +3599,10 @@ msgid ""
 "Java will improve LimeWire's speed and stability. You can find the most "
 "recent Java release at <a href=\"{0}\">www.java.com</a>."
 msgstr ""
+"A LimeWire Java-ban íródott, ami azt jelenti, hogy ha a Java legfrisebb "
+"verziójával rendelkezel, a LimeWire sebessége és stabilitása nagyobb lesz. A "
+"Java legfrisebb verzióját beszerezheted a <a href=\"{0}\">www.java.com</a> "
+"weboldalról."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:356
 msgid ""
@@ -3898,6 +3960,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:633
 msgid "Thank you for supporting LimeWire! We hope you enjoy LimeWire PRO. "
 msgstr ""
+"Köszönjük, hogy segítetted a LimeWire-t! Reméljük élvezni fogod a LimeWire "
+"PRO-t. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:635
 msgid ""
@@ -4108,6 +4172,8 @@ msgid ""
 "LimeWire cannot download this address. Make sure you typed it correctly, and "
 "then try again."
 msgstr ""
+"A LimeWire nem tudja letölteni ezt a címet. Bizonyosodj meg arról, hogy jól "
+"gépelted be, és próbálkozz újra."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:344
 msgid "&Close"
@@ -4269,11 +4335,11 @@ msgstr "�zenetek (I/O)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:61
 msgid "Messages In"
-msgstr ""
+msgstr "Bejövő üzenetek"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:64
 msgid "Messages Out"
-msgstr ""
+msgstr "Kimenő üzenetek"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:67
 msgid "Bandwidth (I/O)"
@@ -4281,11 +4347,11 @@ msgstr "S�vsz�less�g (I/O)"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:70
 msgid "Bandwidth In"
-msgstr ""
+msgstr "Bejövő sávszélesség"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:73
 msgid "Bandwidth Out"
-msgstr ""
+msgstr "Kimenő sávszélesség"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:76
 msgid "Dropped (I/O)"
@@ -4355,11 +4421,11 @@ msgstr "Csatlakozás..."
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:129
 msgid "Outgoing"
-msgstr ""
+msgstr "Kimenő"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:135
 msgid "Incoming"
-msgstr ""
+msgstr "Bejövő"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:141
 msgid "Connected on"
@@ -4372,7 +4438,6 @@ msgstr "Ultrapeer"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:63
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:20
-#, fuzzy
 msgid "Leaf"
 msgstr "Lap"
 
@@ -4492,7 +4557,7 @@ msgstr "V�rakoz�s a foglalt kiszolg�l�kra"
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:81
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:72
 msgid "Complete"
-msgstr ""
+msgstr "Befejezett"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:87
 msgid "Aborted"
@@ -4788,6 +4853,8 @@ msgid ""
 "LimeWire was unable to load the torrent file \"{0}\", - it may be malformed "
 "or LimeWire does not have permission to access this file."
 msgstr ""
+"A LimeWire nem tudta betölteni a \"{0}\" torrent fájlt, lehet, hogy sérült "
+"vagy a LimeWire nem rendelkezik joggal a fájl megnyitásához."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:627
 msgid "Choose Save Location"
@@ -5067,17 +5134,19 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:78
 msgid "Network Speed"
-msgstr ""
+msgstr "Hálózat Sebessége"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:82
 msgid "Broadband (or unsure)"
-msgstr ""
+msgstr "Szélessáv (vagy bizonytalan)"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:88
 msgid ""
 "Please choose the speed of your internet connection. Setting this speed "
 "correctly is important for optimum network performance."
 msgstr ""
+"Kérünk válaszd ki az internet sebességedet. A sebesség pontos beállítása "
+"fontos az optimális hálózati sebesség eléréséhez."
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:118
 #: gui/com/limegroup/gnutella/gui/options/panes/StartupPaneItem.java:22
@@ -5120,11 +5189,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/init/SetupWindow.java:127
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractPaneItem.java:66
 msgid "Learn more about this option..."
-msgstr ""
+msgstr "Több információ erről az opcióról..."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:60
 msgid "Save Folder and Shared Folders"
-msgstr ""
+msgstr "Mentési Mappa és Megosztott Mappák"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:73
 msgid ""
@@ -5132,6 +5201,9 @@ msgid ""
 "can also choose folders you would like to share with other users running "
 "LimeWire."
 msgstr ""
+"Kérünk válassz egy mappát, ahova a letöltött fájlokat szeretnéd menteni. "
+"Továbbá kiválaszthatod azokat a mappákat, amelyeket meg szeretnél osztani a "
+"többi LimeWire felhasználóval."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:75
 msgid ""
@@ -5144,7 +5216,6 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:327
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirDataLine.java:48
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:30
-#, fuzzy
 msgid "Save Folder"
 msgstr "Mentési mappa"
 
@@ -5168,12 +5239,16 @@ msgid ""
 "LimeWire could not create default share folder {0}, a file with that name "
 "already exists."
 msgstr ""
+"A LimeWire nem tudta létrehozni az alapértelmezett letöltési mappát {0}, egy "
+"fájl ugyanezzel a névvel már létezik."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:197
 #, java-format
 msgid ""
 "LimeWire could not create default share folder {0}, it will not be shared."
 msgstr ""
+"A LimeWire nem tudta létrehozni az alapértelmezett letöltési mappát {0}, ez "
+"nem lesz megosztva."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:213
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:87
@@ -5188,11 +5263,11 @@ msgstr "Alapértelmezett mappa használata"
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:226
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:118
 msgid "Choose Another Folder"
-msgstr ""
+msgstr "Válassz egy másik mappát"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:218
 msgid "LimeWire Setup Wizard"
-msgstr ""
+msgstr "LimeWire telepítő varázsló"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:434
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:255
@@ -5243,7 +5318,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LWSSpecialFilesHolder.java:27
 msgid "List of All Individual Purchased Files"
-msgstr ""
+msgstr "A külön megvásárolt fájlok listája"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:109
 msgid "Loading Library Window..."
@@ -5261,7 +5336,7 @@ msgstr "Konfigur�l�s..."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:398
 msgid "Songs purchased from the LimeWire Store"
-msgstr ""
+msgstr "A LimeWire Boltból megvett dalok"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:55
 msgid "Search In Shared Files:"
@@ -5286,7 +5361,7 @@ msgstr "A legut�bbi keres�s eredm�nyeit tartalmazza"
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:18
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:47
 msgid "Icon"
-msgstr ""
+msgstr "Ikon"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:152
 #: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:124
@@ -5314,23 +5389,23 @@ msgstr "Utols� m�dos�t�"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:171
 msgid "Shared"
-msgstr ""
+msgstr "Megosztott"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:475
 msgid "This file is shared."
-msgstr ""
+msgstr "Ez a fájl megosztott."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:477
 msgid "This file is not shared."
-msgstr ""
+msgstr "Ez a fájl nem megosztott."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:479
 msgid "This folder is shared."
-msgstr ""
+msgstr "Ez a mappa megosztott."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:481
 msgid "This folder is not shared."
-msgstr ""
+msgstr "Ez a mappa nem megosztott."
 
 #. for sharing gnutella
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:230
@@ -5358,17 +5433,19 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:779
 msgid "Move to Recycle Bin"
-msgstr ""
+msgstr "Tedd át a Lomtárba."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:780
 msgid "Move to Trash"
-msgstr ""
+msgstr "Áthelyezés a Kukába"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:828
 msgid ""
 "Are you sure you want to delete the selected file(s), thus removing it from "
 "your computer?"
 msgstr ""
+"Biztosan törölni szeretnéd a kijelölt fájlt/fájlokat így törölve őket a "
+"számítógépről?"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:894
 msgid ""
@@ -5475,7 +5552,7 @@ msgstr "Val�ban le akarod �ll�tani a mappa megoszt�s�t?"
 msgid ""
 "LimeWire will not allow you delete to the folder reserved for incomplete "
 "files."
-msgstr ""
+msgstr "A LimeWire nem engedéjezi a befejezetlen fájlok mappájának törlését."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:784
 msgid "Shared Files"
@@ -5484,7 +5561,7 @@ msgstr "Megosztott f�jlok"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:811
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:374
 msgid "Store"
-msgstr ""
+msgstr "Bolt"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:823
 msgid "Add Folder Contents to Playlist"
@@ -5516,7 +5593,7 @@ msgstr "Megoszt�si opci�k konfigur�l�sa"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:68
 msgid "Folders to share"
-msgstr ""
+msgstr "Megosztásra szánt fájlok"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:76
 msgid ""
@@ -5524,15 +5601,17 @@ msgid ""
 "folders you do not want to share.  (You can change your shared folders at "
 "any time in LimeWire's options.)"
 msgstr ""
+"A következő mappák és almappák lesznek megosztva. Törölheted azokat a "
+"mappákat amelyeket nem szeretnél megosztani. (Bármikor megváltoztathatod a "
+"megosztott mappáidat a LimeWire beállításaiban."
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:320
-#, fuzzy
 msgid "Legend"
 msgstr "Jelmagyarázat"
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:329
 msgid "Folder is fully shared including all subfolders."
-msgstr ""
+msgstr "A mappa teljesen megoszott, az almappákat is beleértve."
 
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:343
 msgid "Folder is not shared and no subfolders are shared."
@@ -5857,16 +5936,16 @@ msgstr "Ment�"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:346
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:385
 msgid "Basic"
-msgstr ""
+msgstr "Alap"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
 msgid "Types"
-msgstr ""
+msgstr "Típusok"
 
 #. store options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:326
 msgid "LimeWire Store"
-msgstr ""
+msgstr "LimeWire Bolt"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:337
 msgid "Slots"
@@ -5901,7 +5980,7 @@ msgstr "iTunes"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:369
 #: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:15
 msgid "Importing"
-msgstr ""
+msgstr "Importálás"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:374
 msgid "Helper Apps"
@@ -5918,11 +5997,11 @@ msgstr "N�zet"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:380
 msgid "Popups"
-msgstr ""
+msgstr "Felugró ablakok"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:381
 msgid "Autocomplete"
-msgstr ""
+msgstr "Automatikus kiegészítés"
 
 #. search options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:384
@@ -5932,7 +6011,7 @@ msgstr "Keres�"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:386
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:32
 msgid "Quality"
-msgstr ""
+msgstr "Minőség"
 
 #. filter options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:390
@@ -5966,7 +6045,7 @@ msgstr "Rangsorol�"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:399
 msgid "Firewall"
-msgstr ""
+msgstr "Tűzfal"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:400
 msgid "Proxy"
@@ -5988,7 +6067,7 @@ msgstr "Teljes�tm�ny"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:407
 msgid "System Boot"
-msgstr ""
+msgstr "Rendszer Bootolás"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsMediator.java:70
 msgid "Loading Options Window..."
@@ -6326,7 +6405,6 @@ msgid "Disable Mojito DHT Capabilities:"
 msgstr "Mojito DHT k�pess�gek tilt�sa:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:45
-#, fuzzy
 msgid "Disable TLS Capabilities:"
 msgstr "TLS képességek letiltása"
 
@@ -6361,7 +6439,7 @@ msgstr "Let�lt�si sebess�g:"
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:46
 #: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:46
 msgid "Unlimited"
-msgstr ""
+msgstr "Korlátlan"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:21
 msgid "License Warning"
@@ -6381,7 +6459,7 @@ msgstr "Licenszfigyelmeztet�s haszn�lata:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:20
 msgid "Display"
-msgstr ""
+msgstr "Megjelenítés"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:22
 msgid ""
@@ -6486,7 +6564,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreMessagesPaneItem.java:56
 msgid "Use LimeWire's built-in blacklist"
-msgstr ""
+msgstr "A LimeWire beépített feketelistájának használata."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/IgnoreResultTypesPaneItem.java:22
 msgid "Filter Result Types"
@@ -6673,10 +6751,12 @@ msgid ""
 "LimeWire can display popups to notify you when certain things happen, such "
 "as a download completing. "
 msgstr ""
+"A LimeWire felugró ablakokkal figyelmeztethet, amikor bizonyos dolgok "
+"történnek, mint például egy letöltés befejezése. "
 
 #: gui/com/limegroup/gnutella/gui/options/panes/NotificationsPaneItem.java:25
 msgid "Show Notifications:"
-msgstr ""
+msgstr "Figyelmeztetések megjelenítése"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/PartialFileSharingPaneItem.java:19
 msgid "Partial Files"
@@ -6731,7 +6811,7 @@ msgstr "A LimeWire m�dialej�tsz� haszn�lata:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:20
 msgid "LimeWire Popups"
-msgstr ""
+msgstr "LimeWire felugró ablakok"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:22
 msgid ""
@@ -6796,7 +6876,7 @@ msgstr "Felhasználónév"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:28
 msgid "Proxy Options"
-msgstr ""
+msgstr "Proxy beállítások"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:30
 msgid "Configure Proxy Options for LimeWire."
@@ -6935,11 +7015,11 @@ msgstr "K�sz let�lt�sek megoszt�sa:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:64
 msgid "All downloads will be shared."
-msgstr ""
+msgstr "Az összes letöltés meg lesz osztva."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:66
 msgid "Only downloads in shared folders will be shared."
-msgstr ""
+msgstr "Csak a megosztott mappákban levő letöltések lesznek megosztva."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:15
 msgid "Torrent Sharing"
@@ -6983,7 +7063,7 @@ msgstr "Kis m�ret a t�lc�ra"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SoftMaximumUploadsPaneItem.java:20
 msgid "Start Upload Slots"
-msgstr ""
+msgstr "Feltöltési szálak indítása"
 
 #. *
 #. * Constant for the key of the locale-specific <code>String</code> for the
@@ -6997,7 +7077,7 @@ msgstr "Felt�lt�si helyek ind�t�sa:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:28
 msgid "Sensitivity"
-msgstr ""
+msgstr "Érzékenység"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:30
 msgid "Adjust the sensitivity of LimeWire's junk filter"
@@ -7087,15 +7167,15 @@ msgstr "T�zfalkijelz� mutat�sa:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarLWSPaneItem.java:21
 msgid "LimeWire Store Indicator"
-msgstr ""
+msgstr "LimeWire Bolt jelző"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarLWSPaneItem.java:23
 msgid "You can display your LimeWire Store status in the status bar."
-msgstr ""
+msgstr "Megjelenítheted a LimeWire Bolt státuszodat az állapotsorban."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarLWSPaneItem.java:30
 msgid "Show LimeWire Store Indicator:"
-msgstr ""
+msgstr "LimeWire Bolt jelző mutatása"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarSharedFilesPaneItem.java:21
 msgid "Shared Files Indicator"
@@ -7114,7 +7194,7 @@ msgstr "Megosztottf�jl-kijelz� megjelen�t�se:"
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:34
 msgid "LimeWire Store - Subfolder Template"
-msgstr ""
+msgstr "LimeWire Bolt - Almappa Sablon"
 
 #. *
 #. * General description of what this item is, and what its used for
@@ -7136,29 +7216,29 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:44
 msgid "Template"
-msgstr ""
+msgstr "Sablon"
 
 #. *
 #. * Label for a drop down with options that can be added to the template
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:49
 msgid "Variables"
-msgstr ""
+msgstr "Változók"
 
 #. *
 #. * Label for predefined templates
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:54
 msgid "Templates"
-msgstr ""
+msgstr "Sablonok"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:125
 msgid "Insert a Variable"
-msgstr ""
+msgstr "Illessz be egy változót"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:156
 msgid "Insert a template"
-msgstr ""
+msgstr "Illessz be egy sablont"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:160
 msgid "iTunes like"
@@ -7167,19 +7247,21 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:197
 #, java-format
 msgid "Invalid template {0}"
-msgstr ""
+msgstr "Érvénytelen sablon {0}"
 
 #. *
 #. * Title of the item in the pane, this name will be displayed in a line border
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreSaveDirPaneItem.java:21
 msgid "LimeWire Store - Save Folder"
-msgstr ""
+msgstr "LimeWire Bolt - Mentési Mappa"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreSaveDirPaneItem.java:23
 msgid ""
 "You can choose the folder for saving files purchased from the LimeWire Store."
 msgstr ""
+"Kiválaszthatod a mappát, ahová a LimeWire Boltból vásárolt fájlokat menteni "
+"szeretnéd."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/TrayIconDisplayPaneItem.java:20
 msgid "System Tray Icon"
@@ -7272,7 +7354,7 @@ msgstr "A kijel�lt f�jlok elt�vol�t�sa a lej�tsz�list�b�"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:56
 msgid "Removes all Files from Playlist"
-msgstr ""
+msgstr "Az összes fájl eltávolítása a lejátszási listából."
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:26
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:37
@@ -7281,11 +7363,11 @@ msgstr "#"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:90
 msgid "Comment"
-msgstr ""
+msgstr "Kommentár"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:153
 msgid "Playlist"
-msgstr ""
+msgstr "Lejátszási lista"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:175
 msgid "Loading Playlist Window..."
@@ -7317,6 +7399,8 @@ msgid ""
 "Warning: a file with the name {0} already exists in the folder. Overwrite "
 "this file?"
 msgstr ""
+"Figyelem: egy fájl ugyanezzel a névvel {0} már létezik ebben a mappában. "
+"Felülírod ezt a fájlt?"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:831
 msgid "Playlist Files (*.m3u)"
@@ -7325,7 +7409,7 @@ msgstr "Lej�tsz�list�k (*.m3u)"
 #: gui/com/limegroup/gnutella/gui/search/EndpointHolder.java:25
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:315
 msgid "Multiple"
-msgstr ""
+msgstr "Több"
 
 #: gui/com/limegroup/gnutella/gui/search/FilterBox.java:82
 msgid "Option"
@@ -7357,10 +7441,12 @@ msgstr "Mind"
 msgid ""
 "You are sharing {0} files. You can control which files LimeWire shares."
 msgstr ""
+"{0} fájlt osztassz meg. Kiválaszthatod, hogy mely fájlokat ossz meg a "
+"LimeWire-el."
 
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:270
 msgid "Configure"
-msgstr ""
+msgstr "Beállítás"
 
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:271
 #: gui/com/limegroup/gnutella/gui/tabs/LibraryPlayListTab.java:38
@@ -7502,6 +7588,9 @@ msgid ""
 "to connect to, click 'Direct Connect', and LimeWire will try to browse that "
 "user's shared files."
 msgstr ""
+"Ird be barátod IP címet és a port számát (így: ip:port), kattints a "
+"\"Közvetlen Kapcsolat\" gombra, és a LimeWire megpróbálja megkeresni a "
+"felhasználó megosztott fájljait."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:370
 msgid "When your friends want to connect to you, they should enter"
@@ -7549,7 +7638,7 @@ msgstr "Keres�s a h�l�zaton a megadott szavak alapj�"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:660
 msgid "The address format is incorrect, please use host:port."
-msgstr ""
+msgstr "A cím formátuma hibás, kérünk használd az ip:port formátumot."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:87
 msgid "Close Search"
@@ -7585,7 +7674,7 @@ msgstr "Keres�ablak bet�lt�se..."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:346
 msgid "Firewalled Host"
-msgstr ""
+msgstr "Tűzfall által védett gazda"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:438
 msgid ""
@@ -7611,6 +7700,8 @@ msgstr "A keres�s t�l szigor�. R�vid�tsd le, majd pr�b�lkozz �jr
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
+"Kérjük várj, a LimeWire be kell fejezze a betöltést mielőtt elkeszthetnéd a "
+"keresést."
 
 #. if not connected or connecting, show one message.
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:464
@@ -7673,41 +7764,44 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/ThirdPartySearchResult.java:183
 msgid "View in Browser..."
-msgstr ""
+msgstr "Megtekintés böngészőben..."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:56
 msgid "Sharing Extensions"
-msgstr ""
+msgstr "Kiterjesztések megosztása"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:59
 msgid ""
 "Select the types of files on your computer that you wish to share with "
 "LimeWire."
 msgstr ""
+"Válaszd ki a fájltípusokat, amelyeket meg szeretnél osztani a LimeWire "
+"segítségével."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:82
 msgid "My Extensions"
-msgstr ""
+msgstr "Saját kiterjesztések"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:83
 msgid "Other"
-msgstr ""
+msgstr "Egyéb"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:292
 msgid "To allow selection enable sharing of sensitive types."
 msgstr ""
+"A kijelölés engedélyezéséhez kapcsold be az érzékeny fájlok megosztását."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:430
 msgid "The extension name was not valid, could not add."
-msgstr ""
+msgstr "A kiterjesztés neve érvénytelen, a hozzáadás nem lehetésges."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:486
 msgid "Add New Extension"
-msgstr ""
+msgstr "Új kiterjesztés hozzáadása"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:487
 msgid "Add a New Extension to My Extensions"
-msgstr ""
+msgstr "Új kiterjesztés hozzáadása a saját kiterjesztéseimhez."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:491
 msgid "Enter the extension pattern:"
@@ -7716,7 +7810,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:492
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:518
 msgid "Extension Sharing Settings"
-msgstr ""
+msgstr "Kiterjesztés Megosztás Beállításai"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:517
 msgid ""
@@ -7727,7 +7821,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:530
 msgid "Do Not Share Sensitive File Types"
-msgstr ""
+msgstr "Ne ossz meg érzékeny fájltípusokat."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:531
 msgid ""
@@ -7737,11 +7831,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:747
 msgid "File types you added to share."
-msgstr ""
+msgstr "Fájltípusok amelyeket megosztassz."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:751
 msgid "Other types of files."
-msgstr ""
+msgstr "Más fájltípusok"
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:29
 #, java-format
@@ -7789,27 +7883,24 @@ msgstr "R�szletek"
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:122
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:236
 msgid "Idle"
-msgstr ""
+msgstr "Várakozás"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:292
 msgid "Sorry, the browser could not be loaded."
-msgstr ""
+msgstr "Sajnáljuk, a böngészőt nem sikerült elindítani."
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:320
-#, fuzzy
 msgid "Go"
 msgstr "Mehet"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:366
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:134
-#, fuzzy
 msgid "Back"
 msgstr "Vissza"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:378
-#, fuzzy
 msgid "Forward"
-msgstr "Következő"
+msgstr "Előre"
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:46
 msgid "Revert To Default"
@@ -8176,7 +8267,7 @@ msgstr "M� c�me:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:474
 msgid "Comment:"
-msgstr ""
+msgstr "Kommentár:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:495
 msgid "Please enter the copyright holder, copright year and title."
@@ -8420,3 +8511,5 @@ msgstr "Ogg Vorbis"
 msgid ""
 "Unknown file type. Please choose the type that best describes this file."
 msgstr ""
+"Ismeretlen fájltípus. Kérünk válaszd ki a fájltípust amely legjobban leírja "
+"a fájlt."

@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-02-22 21:03+0000\n"
+"PO-Revision-Date: 2008-03-16 23:15+0000\n"
 "Last-Translator: Marek Štubniak <marcofreez@centrum.sk>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 1 : (n>=2 && n<=4) ? 2 : 0;\n"
-"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
+"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -2583,6 +2583,12 @@ msgid ""
 "lot of sources, use the <font color=\"1E8E44\">Junk</font> button to train "
 "LimeWire's junk filter."
 msgstr ""
+"Už ste unavený zastavovať downloady v polovici? Určite pomôže si vybrať z "
+"výsledkov vyhľadávania vyššie číslo v stľpci \"#\". # je množstvo unikátnych "
+"miest na sieti, ktoré tento súbor hostujú. Čím viac zdrojov, tým väčšia "
+"šanca súbor získať . V prípade, že sa objaví výsleok ako odpad, ktorý má "
+"veľa zdrojov, použite tlačidlo <font color=\"1E8E44\">Odpad</font>, aby ste "
+"zdokonalili filter odpadu LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:31
 msgid ""
@@ -2592,6 +2598,10 @@ msgid ""
 "download the file and automatically resume downloading if it finds any "
 "matches."
 msgstr ""
+"Ak download oznámi <font color=\"1E8E44\">Potrebujem viac zdrojov</font>, "
+"ten download si zvoľte a kliknite <font color=\"1E8E44\">Nájsť viac "
+"zdrojov</font>. LimeWire prehľadá sieť, aby našiel nové miesta na stiahnutie "
+"a automaticky obnoví download, ak nájde zhodu."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:37
 msgid ""
@@ -2600,6 +2610,10 @@ msgid ""
 "green (or blue to indicate aLimeWire PRO or an Ultrapeer connection), "
 "LimeWire has completely connected."
 msgstr ""
+"Keď sa LimeWire spúšťa, musí sa pripojiť k sieti. Počas tohto času, pruhy "
+"vľavo dole budú meniť svoju farbu. Ak sa všetky rozsvietia na zeleno (alebo "
+"namodro v prípade LimeWire PRO alebo pripojenia Ultrapeer), LimeWire sa "
+"kompletne pripojil."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
 msgid ""
@@ -2611,6 +2625,13 @@ msgid ""
 "link, LimeWire will automatically ask if you want to use the new skin when "
 "the download completes."
 msgstr ""
+"Môžete zmeniť vzhľad a pocit z LimeWire prejdením na  <font "
+"color=\"1E8E44\">Zobraziť</font> &gt; <font color=\"1E8E44\">Zmeniť "
+"tému/skin</font> a vybrať si nový skin. Ďaľšie skiny sú na stránke LimeWire, "
+"dostupné pomocou  <font color=\"1E8E44\">Získať viac tém/skins</font>. Ak "
+"stiahnete skiny pomocou linku <font color=\"1E8E44\">Stiahnuť cez "
+"LimeWire</font>, LimeWire sa automaticky spýta, či chcete nový skin použiť, "
+"ak sa download ukončí."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:51
 msgid ""
@@ -2628,6 +2649,9 @@ msgid ""
 "completing successfully. Four blue stars signal 'Ethernet' speed and have "
 "the greatest chance of completing successfully."
 msgstr ""
+"Ak má výsledok vyhľadávania viac hviezdičiek, šance na dokončenie sťahovania "
+"sú vyššie. Štyri modré hviezdičky značia rýchlosť \"Ethernet\" a majú "
+"najvyššiu šancu na úspešné dokončenie."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:59
 msgid ""
@@ -2637,6 +2661,11 @@ msgid ""
 "Y', where 'Y' is the number of people who have attempted to upload that "
 "file, and 'X' is the number of people who have successfully uploaded it."
 msgstr ""
+"Aby ste zistili, koľko krát sa uploadol Váš súbor, zvoľte si záložku <font "
+"color=\"1E8E44\">Knižnica</font> a pozrite si stľpec <font "
+"color=\"1E8E44\">Uploady</font>Informácia je zobrazená ako \"X / Y\", kde "
+"\"Y\" je množstvo ľudí, ktorí sa pokúsili stiahnuť Váš súbor a \"X\" je "
+"množstvo ľudí, ktorí si ho aj kompletne stiahli."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:65
 msgid ""
@@ -2645,12 +2674,18 @@ msgid ""
 "color=\"1E8E44\">Library</font> tab counts how many times LimeWire has "
 "returned a result from someone searching for that file."
 msgstr ""
+"Ste zvedavý, koľko ľudí vyhľadáva Vaše súbory? Stľpec <font "
+"color=\"1E8E44\">Prístupy</font> v záložke <font "
+"color=\"1E8E44\">Knižnica</font> počíta, koľko krát LimeWire vrátil výsledky "
+"hľadajúc Váš súbor."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:70
 msgid ""
 "It helps the network if you keep your LimeWire running; other users will "
 "connect to the network easier and searches will perform better."
 msgstr ""
+"Sieti pomôžete, ak LimeWire nechátespustený; ostatní užívatelia sa do siete "
+"pripoja jednoduchšie a vyhľadávanie bude pracovať lepšie."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:73
 msgid ""
@@ -2659,6 +2694,10 @@ msgid ""
 "queued your download. In order to successfully complete your download, wait "
 "while your request advances in line and is eventually serviced."
 msgstr ""
+"Ak LimeWire oznámi, že downloady <font color=\"1E8E44\">Čakajú v "
+"rade</font>, zdoje z ktorých sťahujete sú dočasne zaneprázdnené a sťahovaný "
+"súbor je v poradí. Aby ste úspešne dokončili sťahovanie súboru, počkajte až "
+"Vaša požiadavka postúpi v rade a prípadne bude obslúžená."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:78
 #, java-format
@@ -2668,6 +2707,10 @@ msgid ""
 "href=\"{1}\">FAQ</a> for answers to commonly asked questions or the <a "
 "href=\"{2}\">User Guide</a> for more information."
 msgstr ""
+"Pre viac pomoci, navštívte <a href=\"{0}\">našu nástenku</a>, aby ste "
+"zistili, či ostatní už nezodpovedali na Vašu otázku. Takisto si môžete "
+"prezrieť<a href=\"{1}\">FAQ</a> na zodpovedanie najčastejšie kladených "
+"otázok alebo pre viac informácii <a href=\"{2}\">Návod pre užívateľa</a>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:83
 msgid ""
@@ -2677,6 +2720,11 @@ msgid ""
 "click <font color=\"1E8E44\">Resume</font>. LimeWire automatically searches "
 "for that file and begins downloading it again."
 msgstr ""
+"Náhodné zrušenie sťahovania môžete obnoviť kliknutím na záložku <font "
+"color=\"1E8E44\">Knižnica</font>, označením súboru <font "
+"color=\"1E8E44\">Nedokončené súbory</font>. Potom vyznačte názov súboru a "
+"kliknite <font color=\"1E8E44\">Obnoviť</font>. LimeWire automaticky vyhľadá "
+"súbor a začne ho opäť sťahovať."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:89
 #, java-format
@@ -2684,6 +2732,8 @@ msgid ""
 "If you have any tips on using LimeWire, add it to <a href=\"{0}\">the "
 "wiki</a> and it may make it into a future tip of the day."
 msgstr ""
+"Ak máte nejaké tipy ako používať LimeWire, pridajte ho do  <a "
+"href=\"{0}\">wiki</a>  a môže sa stať budúcim tipm dňa."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:92
 msgid ""
@@ -2691,12 +2741,17 @@ msgid ""
 "Sources</font> by searching for that file again. LimeWire will automatically "
 "restart the download if it finds any matching results."
 msgstr ""
+"Reštartovať môžete downloady, ktoré oznamujú <font "
+"color=\"1E8E44\">Očakávané zdroje</font> vyhľadaním si znovu tohto súboru. "
+"Ak LimeWire nájde zhodné výsledky, automaticky reštartuje download."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:96
 msgid ""
 "Post feature suggestions on LimeWire's <a href=\"{0}\">message boards</a> "
 "and it may be added to future versions."
 msgstr ""
+"Pošlite návrhy funkcii na <a href=\"{0}\">nástenku</a> LimeWire a neskôr "
+"môže byť pridaná do budúcich verzii."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:98
 #, java-format
@@ -2704,18 +2759,25 @@ msgid ""
 "Visit <a href=\"{0}\">LimeWire's website</a> for detailed information about "
 "how skins are created."
 msgstr ""
+"Navštívte <a href=\"{0}\">stránku LimeWire</a> pre detailnejšie informácie o "
+"tom ako sa vytvárajú skiny."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:100
 msgid ""
 "Do you want to be part of LimeWire's development? Visit <a "
 "href=\"{0}\">LimeWire's Open Source website</a>."
 msgstr ""
+"Chcete byť súčasťou vývoja LimeWire? Navštívte <a href=\"{0}\">web stránku "
+"otvoreného kódu LimeWire</a>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:102
 msgid ""
 "You can preview downloading files to make sure they are what you expect; "
 "select the download and click <font color=\"1E8E44\">Preview</font>."
 msgstr ""
+"Môžete zhliadnuť sťahované súbory, aby ste sa uistili, že to sú tie, ktoré "
+"očakávate; označte download a kliknite na <font "
+"color=\"1E8E44\">Náhľad</font>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:104
 msgid ""
@@ -2724,6 +2786,11 @@ msgid ""
 "<font color=\"1E8E44\">Connections</font> to take a look at LimeWire's "
 "connections."
 msgstr ""
+"Ste zvedavý, k akým hostom sa LimeWire pripája alebo aký sa pripájajú k Vám? "
+"Označte <font color=\"1E8E44\">Zobraziť</font> &gt; <font "
+"color=\"1E8E44\">Zobraziť/Skryť</font>, <font "
+"color=\"1E8E44\">Pripojenia</font>, aby ste sa pozreli na pripojenia "
+"LimeWire."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:108
 #, java-format
@@ -2731,6 +2798,8 @@ msgid ""
 "Passionate about digital rights? Visit the <a href=\"{0}\">Electronic "
 "Frontier Foundation</a> to see what you can do to help."
 msgstr ""
+"Zaujímajú Vás digitálne práva? Navštívte <a href=\"{0}\">Electronic Frontier "
+"Foundation</a>, aby ste videli, čo môžete spraviť, aby ste pomohli."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:110
 msgid ""
@@ -2739,6 +2808,10 @@ msgid ""
 "href=\"{0}\">internationalization page</a> for information on how you can "
 "help translation efforts."
 msgstr ""
+"LimeWire je preložený do mnoha rôznych jazykov vrátane francúzštiny, "
+"nemčiny, gréčtiny, taliančiny a mnohých ďaľších. Navštívte <a "
+"href=\"{0}\">medzinárodnú stránku</a> LimeWire, aby ste získali informácie, "
+"ako môžete pomôcť s prekladom."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:114
 #, java-format

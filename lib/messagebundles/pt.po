@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-09 18:22+0000\n"
-"Last-Translator: Tiago Silva <Unknown>\n"
+"PO-Revision-Date: 2008-03-13 20:47+0000\n"
+"Last-Translator: Frogy <jorgehcbatista@hotmail.com>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
+"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Sorry, but LimeWire was unable to restart your old downloads."
@@ -1643,6 +1643,9 @@ msgid ""
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
+"Desculpe, o LimeWire não conseguiu lêr os seus antigos downloads. Pode "
+"reinicia-los indo á Biblioteca, vendo os seus 'ficheiros incompletos' e "
+"clicando para 'continuar' os seus downloads."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:221
 msgid ""
@@ -1650,6 +1653,9 @@ msgid ""
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
 "to 'Resume' your downloads."
 msgstr ""
+"Desculpe, o LimeWire não conseguiu lêr alguns dos seus antigos downloads. "
+"Pode reinicia-los indo á Biblioteca, vendo os seus 'ficheiros incompletos' e "
+"clicando para 'continuar' os seus downloads."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:319
 msgid "Loading TLS Encryption..."
@@ -1689,7 +1695,7 @@ msgstr "A carregar gestão de Ultrapeers/DHT..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:385
 msgid "Locating Peers..."
-msgstr "A localizar unidades..."
+msgstr "A localizar pessoas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:401
 msgid "Loading Shared Files..."
@@ -1697,15 +1703,16 @@ msgstr "A carregar ficheiros partilhados..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:406
 msgid "Loading BitTorrent Management..."
-msgstr ""
+msgstr "A carregar configuração do BitTorrent"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:412
 msgid "Loading Old Downloads..."
 msgstr "A carregar downloads antigos..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:417
+#, fuzzy
 msgid "Attaching LimeWire Store Listeners..."
-msgstr ""
+msgstr "Adicionando LimeWire Store Listeners"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:422
 msgid "Loading Directed Querier..."
@@ -1716,8 +1723,9 @@ msgid "Loading Magnet Listener..."
 msgstr "A carregar MAGNET-listener..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:438
+#, fuzzy
 msgid "Loading Peer Listener..."
-msgstr "A carregar listener de unidades..."
+msgstr "A carregar procurador de pessoas..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:443
 msgid "Loading Stale Connection Management..."
@@ -1733,7 +1741,7 @@ msgstr "A carregar gestão de lixo informático..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:458
 msgid "Loading Network Listeners..."
-msgstr "Carregando Rede de Ouvintes..."
+msgstr "A carregar Rede..."
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
@@ -1775,12 +1783,13 @@ msgstr "Não foi possível processar ligação MAGNET errada {0}"
 #. show warning but proceed
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:189
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:129
+#, fuzzy
 msgid ""
 "One or more URLs in the MAGNET link were invalid. Your file may not download "
 "correctly."
 msgstr ""
-"Existem uma ou mais URLs não válidas na ligação do MAGNET. O download do seu "
-"ficheiro poderá não ser efectuado correctamente."
+"Uma ou mais URL's do MAGNET são inválidas. O download poderá nao ser "
+"efectuado correctamente."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:200
 #, java-format
@@ -1790,18 +1799,19 @@ msgstr "Já fez download de {0}"
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:205
 #, java-format
 msgid "You are already downloading this file to {0}"
-msgstr "Já está a efectar o download deste ficheiro para \"{0}\"."
+msgstr "Este ficheiro {0} já esta a ser descarregado."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:71
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:42
 msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "Para pesquisas à Velocidade Tubo, adquira o LimeWire PRO."
+msgstr "Pare pesquisas a Velocidades Ultra Rapidas, adquira o LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:75
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:46
 msgid "Support LimeWire's peer-to-peer development. Get PRO."
 msgstr ""
-"Apoie o desenvolvimento unidade a unidade do LimeWire. Adquira a versão PRO."
+"Apoie o desenvolvimento da rede do LimeWire pessoa-a-pesoa. Adquira a versão "
+"PRO"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:79
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:50
@@ -2137,6 +2147,9 @@ msgid ""
 "Please add any comments you may have (e.g what caused the error). \n"
 "Thank you and please use English."
 msgstr ""
+"Por Favor adicione quaisquer comentários que possa ter (ex. o que causou o "
+"erro). \n"
+"Obrigado e por favor use Inglês."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:432
 msgid "Send"

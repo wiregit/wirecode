@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2007-10-21 09:52+0000\n"
-"Last-Translator: mehrad <mehrad.boozchaloo@gmail.com>\n"
+"PO-Revision-Date: 2008-03-15 19:26+0000\n"
+"Last-Translator: Artin <Unknown>\n"
 "Language-Team: Persian <fa@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
+"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
@@ -197,28 +197,28 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/MediaType.java:46
 msgid "Documents"
-msgstr ""
+msgstr "مستندات"
 
 #: core/com/limegroup/gnutella/MediaType.java:47
 msgid "Programs"
-msgstr ""
+msgstr "برنامه‌ها"
 
 #: core/com/limegroup/gnutella/MediaType.java:48
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:87
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
 msgid "Audio"
-msgstr ""
+msgstr "صوتی‌"
 
 #: core/com/limegroup/gnutella/MediaType.java:49
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
 msgid "Video"
-msgstr ""
+msgstr "ویدئو"
 
 #: core/com/limegroup/gnutella/MediaType.java:50
 msgid "Images"
-msgstr ""
+msgstr "تصویرها"
 
 #. show warning and return
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:183
@@ -297,7 +297,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:282
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:49
 msgid "Title"
-msgstr ""
+msgstr "عنوان"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:89
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:126
@@ -305,26 +305,26 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:57
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:42
 msgid "Artist"
-msgstr ""
+msgstr "هنرمند"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:90
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:286
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:58
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:65
 msgid "Album"
-msgstr ""
+msgstr "آلبوم"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:91
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:288
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:98
 msgid "Genre"
-msgstr ""
+msgstr "نوع"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:92
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:290
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:73
 msgid "Track"
-msgstr ""
+msgstr "شیار"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:93
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:109
@@ -333,48 +333,48 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:58
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:80
 msgid "Type"
-msgstr ""
+msgstr "نوع‌"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:94
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:110
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:294
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:57
 msgid "Length"
-msgstr ""
+msgstr "طول‌"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:95
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:111
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:292
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:123
 msgid "Year"
-msgstr ""
+msgstr "سال"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:96
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
 msgid "Language"
-msgstr ""
+msgstr "زبان"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:97
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:121
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:296
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:82
 msgid "Bitrate"
-msgstr ""
+msgstr "میزان ارسال بیت"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:98
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:115
 msgid "Comments"
-msgstr ""
+msgstr "توضیحات"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:99
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
 msgid "Action"
-msgstr ""
+msgstr "کنش"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
 msgid "Copyright"
-msgstr ""
+msgstr "حق نسخه‌برداری"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:101
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:118
@@ -382,48 +382,48 @@ msgstr ""
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:135
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:141
 msgid "License Type"
-msgstr ""
+msgstr "نوع مجوز"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:105
 msgid "Director"
-msgstr ""
+msgstr "کارگردان"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:106
 msgid "Producer"
-msgstr ""
+msgstr "تولید‌کننده"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:107
 msgid "Studio"
-msgstr ""
+msgstr "هنرکده"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 msgid "Stars"
-msgstr ""
+msgstr "ستاره‌ها"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
-msgstr ""
+msgstr "زیرنویس‌ها"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 msgid "Rating"
-msgstr ""
+msgstr "ارزیابی"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:119
 msgid "Height"
-msgstr ""
+msgstr "ارتفاع"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:120
 msgid "Width"
-msgstr ""
+msgstr "عرض"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
 msgid "Image"
-msgstr ""
+msgstr "تصویر"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
 msgid "Description"
-msgstr ""
+msgstr "شرح"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:127
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:134
@@ -432,25 +432,25 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:263
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:42
 msgid "License"
-msgstr ""
+msgstr "مجوز"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:71
 msgid "Document"
-msgstr ""
+msgstr "نوشتار"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
 msgid "Topic"
-msgstr ""
+msgstr "سرفصل"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
 msgid "Author"
-msgstr ""
+msgstr "مؤلف"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
 msgid "Application"
-msgstr ""
+msgstr "برنامه"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:367
@@ -459,15 +459,15 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:53
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:219
 msgid "Name"
-msgstr ""
+msgstr "نام"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Publisher"
-msgstr ""
+msgstr "ناشر"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 msgid "Platform"
-msgstr ""
+msgstr "سکو"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:105
 msgid "The selected .torrent file may contain a security hazard."
@@ -507,7 +507,7 @@ msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:36
 msgid "BitTorrent Settings"
-msgstr ""
+msgstr "تنظیمات BitTorrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:38
 msgid ""
@@ -546,7 +546,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:81
 msgid "Internal Error"
-msgstr ""
+msgstr "خطای درونی"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:392
 msgid ""
@@ -572,20 +572,20 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:432
 msgid "Send"
-msgstr ""
+msgstr "ارسال‌"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:441
 msgid "Review"
-msgstr ""
+msgstr "مرور"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:455
 msgid "Discard"
-msgstr ""
+msgstr "دورانداختن"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:472
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 msgid "Always Send Immediately"
-msgstr ""
+msgstr "همیشه بیدرنگ ارسال کن"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:473
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
@@ -620,7 +620,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:144
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:221
 msgid "OK"
-msgstr ""
+msgstr "تأیید"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
 msgid "Automatically Scroll"
@@ -628,13 +628,13 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:64
 msgid "About LimeWire"
-msgstr ""
+msgstr "درباره LimeWire"
 
 #. set up limewire version label
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:80
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:35
 msgid "LimeWire"
-msgstr ""
+msgstr "LimeWire"
 
 #. set up close button
 #. *
@@ -643,11 +643,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:104
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:79
 msgid "Close"
-msgstr ""
+msgstr "بستن"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:106
 msgid "Close This Window"
-msgstr ""
+msgstr "بستن این پنجره"
 
 #. introduction
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:177
@@ -740,7 +740,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:606
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:74
 msgid "Select All"
-msgstr ""
+msgstr "گزینش همه"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:608
 msgid "Marks all Items as Selected"
@@ -756,22 +756,22 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/ClearableAutoCompleteTextField.java:316
 msgid "Clear History"
-msgstr ""
+msgstr "پاک کردن تاریخچه"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:165
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:40
 msgid "Apply"
-msgstr ""
+msgstr "اِعمال"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:172
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:802
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:50
 msgid "Clear"
-msgstr ""
+msgstr "پاک کردن"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:179
 msgid "Save"
-msgstr ""
+msgstr "ذخیره"
 
 #. default the delay time to zero (ie, live
 #. updates).
@@ -828,7 +828,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:356
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:366
 msgid "Yes"
-msgstr ""
+msgstr "بله"
 
 #. *
 #. * Constant for when the user selects the no button
@@ -838,7 +838,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:359
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:369
 msgid "No"
-msgstr ""
+msgstr "خیر"
 
 #. *
 #. * Constant for when the user selects the cancel button
@@ -861,7 +861,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:244
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:136
 msgid "Cancel"
-msgstr ""
+msgstr "انصراف"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:80
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:98
@@ -871,7 +871,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:445
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:464
 msgid "Select Folder"
-msgstr ""
+msgstr "انتخاب پوشه"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:99
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:121
@@ -886,11 +886,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:486
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:508
 msgid "Select"
-msgstr ""
+msgstr "انتخاب"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:812
 msgid "All Folders"
-msgstr ""
+msgstr "تمام پوشه ها"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:48
 msgid "View My Shared Files."
@@ -915,7 +915,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:106
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:107
 msgid "Do not display this message again."
-msgstr ""
+msgstr "این پیغام را دیگر نشان نده:"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:81
@@ -924,7 +924,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:38
 msgid "Broadband"
-msgstr ""
+msgstr "اینترنت پر سرعت"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:40
 msgid "T1"
@@ -950,7 +950,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:126
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:25
 msgid "&Search"
-msgstr ""
+msgstr "&جستجو"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:127
 msgid "&Monitor"
@@ -958,11 +958,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:128
 msgid "&Connections"
-msgstr ""
+msgstr "&اتصالات‌"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:129
 msgid "&Library"
-msgstr ""
+msgstr "&کتابخانه‌"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:130
 msgid "C&onsole"
@@ -1032,23 +1032,23 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:135
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:232
 msgid "KB"
-msgstr ""
+msgstr "کیلوبایت"
 
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:137
 msgid "MB"
-msgstr ""
+msgstr "مگابایت"
 
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:139
 msgid "GB"
-msgstr ""
+msgstr "گیگابایت"
 
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:141
 msgid "TB"
-msgstr ""
+msgstr "ترابایت"
 
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:143
 msgid "KB/s"
-msgstr ""
+msgstr "کیلوبایت در ثانیه"
 
 #. Load up the HTML engine.
 #: gui/com/limegroup/gnutella/gui/Initializer.java:335
@@ -1066,7 +1066,7 @@ msgstr ""
 #. Initialize IconManager.
 #: gui/com/limegroup/gnutella/gui/Initializer.java:455
 msgid "Loading Icons..."
-msgstr ""
+msgstr "در حال باز کردن نمادها..."
 
 #. Touch the I18N stuff to ensure it loads properly.
 #: gui/com/limegroup/gnutella/gui/Initializer.java:464
@@ -1114,11 +1114,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/MessageService.java:208
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:901
 msgid "Error"
-msgstr ""
+msgstr "خطا"
 
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:67
 msgid "Input"
-msgstr ""
+msgstr "ورودی"
 
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:93
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:44
@@ -1144,7 +1144,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:168
 msgid "More Information"
-msgstr ""
+msgstr "اطلاعات بیشتر"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:169
 #, java-format
@@ -1165,11 +1165,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:186
 msgid "Change Language"
-msgstr ""
+msgstr "تغییر زبان"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:189
 msgid "Help Translate LimeWire"
-msgstr ""
+msgstr "کمک کردن برای ترجمه LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:190
 msgid "Show Language in status bar"
@@ -1177,7 +1177,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:381
 msgid "Verify"
-msgstr ""
+msgstr "وارسی کردن"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:425
 msgid "LimeWire was unable to locate the details of this license."
@@ -1203,7 +1203,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:503
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:571
 msgid "License Details:"
-msgstr ""
+msgstr "جزئیات مجوز:"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:450
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:576
@@ -1270,21 +1270,21 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:29
 msgid "Undo"
-msgstr ""
+msgstr "برگردان"
 
 #. *
 #. * The cut action
 #. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:38
 msgid "Cut"
-msgstr ""
+msgstr "برش"
 
 #. *
 #. * The copy action.
 #. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:47
 msgid "Copy"
-msgstr ""
+msgstr "نسخه‌برداری"
 
 #. *
 #. * The paste action.
@@ -1302,12 +1302,12 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:789
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1267
 msgid "Delete"
-msgstr ""
+msgstr "حذف"
 
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:229
 #: gui/com/limegroup/gnutella/gui/actions/SelectSharedDirectoryAction.java:26
 msgid "Add"
-msgstr ""
+msgstr "افزودن"
 
 #. remove
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:282
@@ -1318,7 +1318,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:224
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:49
 msgid "Remove"
-msgstr ""
+msgstr "حذف"
 
 #: gui/com/limegroup/gnutella/gui/MessageResourceHandler.java:10
 msgid "Download Page"
@@ -1334,14 +1334,14 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:63
 msgid "Loading Messages..."
-msgstr ""
+msgstr "در حال باز کردن پیغام ها..."
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:109
 #: gui/com/limegroup/gnutella/gui/MessageService.java:124
 #: gui/com/limegroup/gnutella/gui/MessageService.java:211
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:128
 msgid "Warning"
-msgstr ""
+msgstr "اخطار"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:138
 #: gui/com/limegroup/gnutella/gui/MessageService.java:151
@@ -1360,7 +1360,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:25
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:264
 msgid "Message"
-msgstr ""
+msgstr "پیغام"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:623
 msgid "Do not display this message again"
@@ -1368,7 +1368,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:640
 msgid "Always use this answer"
-msgstr ""
+msgstr "همیشه این جواب را استفاده کن"
 
 #: gui/com/limegroup/gnutella/gui/MonitorView.java:56
 msgid "Loading Monitor Window..."
@@ -1391,7 +1391,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/MonitorView.java:108
 msgid "Searches"
-msgstr ""
+msgstr "جستجوها"
 
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:40
 msgid ""
@@ -1436,14 +1436,14 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/SplashWindow.java:108
 msgid "Loading LimeWire..."
-msgstr ""
+msgstr "در حال بازکردن LimeWire..."
 
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:94
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:104
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:43
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:218
 msgid "Add..."
-msgstr ""
+msgstr "اضافه کردن..."
 
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:331
 msgid "Add New List Item"
@@ -1475,11 +1475,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:596
 msgid "Connection"
-msgstr ""
+msgstr "اتصال"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:599
 msgid "Disconnected"
-msgstr ""
+msgstr "قطع ارتباط"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:600
 msgid ""
@@ -1489,15 +1489,15 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:603
 msgid "Starting"
-msgstr ""
+msgstr "در حال آغاز"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:604
 msgid "You are currently connecting to the network"
-msgstr ""
+msgstr "شما در حال ارتباط با شبکه هستید"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:607
 msgid "Poor"
-msgstr ""
+msgstr "ضعیف"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:608
 msgid ""
@@ -1506,7 +1506,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:611
 msgid "Fair"
-msgstr ""
+msgstr "مناسب"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:612
 msgid "Your connection to the network is getting stronger"
@@ -1514,7 +1514,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:615
 msgid "Good"
-msgstr ""
+msgstr "خوب"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:616
 msgid ""
@@ -1524,7 +1524,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:620
 msgid "Excellent"
-msgstr ""
+msgstr "عالی"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:621
 msgid "Your connection to the network is very strong"
@@ -1553,7 +1553,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:742
 msgid "Show Connection Quality"
-msgstr ""
+msgstr "نمایش کیفیت ارتباط"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:758
 msgid "Show Shared Files Count"
@@ -1561,11 +1561,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:774
 msgid "Show Language Status"
-msgstr ""
+msgstr "نمایش دادن وضعیت زبان"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:795
 msgid "Show Firewall Status"
-msgstr ""
+msgstr "نمایش دادن وضعیت دیوار آتشین"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:811
 msgid "Show Store Indicator"
@@ -1616,14 +1616,14 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:53
 msgid "Tip of the Day"
-msgstr ""
+msgstr "نکتۀ روز"
 
 #. *
 #. * The 'Did You Know' intro.
 #. 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:58
 msgid "Did You Know..."
-msgstr ""
+msgstr "آیا می دانید..."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:64
 msgid "Show Tips At Startup"
@@ -1634,7 +1634,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:69
 msgid "Next Tip"
-msgstr ""
+msgstr "نکته بعدی"
 
 #. *
 #. * 'Previous'.
@@ -1645,7 +1645,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:335
 msgid "Loading tips..."
-msgstr ""
+msgstr "در حال بازکردن نکته ها..."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:7
 msgid ""
@@ -2624,7 +2624,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:169
 msgid "Why"
-msgstr ""
+msgstr "چرا"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:171
 msgid "What does PRO give me?"
@@ -2633,7 +2633,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:173
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:201
 msgid "Later"
-msgstr ""
+msgstr "بعداً"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:175
 msgid "Get LimeWire PRO Later"
@@ -2716,7 +2716,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:117
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:200
 msgid "Browse..."
-msgstr ""
+msgstr "مرور..."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:256
 msgid ""
@@ -2726,11 +2726,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:344
 msgid "&Close"
-msgstr ""
+msgstr "&بستن‌"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:345
 msgid "Close the Program"
-msgstr ""
+msgstr "بستن برنامه"
 
 #: gui/com/limegroup/gnutella/gui/actions/MySharedFilesAction.java:52
 msgid "My Shared Files"
@@ -2770,7 +2770,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:36
 msgid "Share"
-msgstr ""
+msgstr "اشتراک"
 
 #: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:53
 #, java-format
@@ -2805,7 +2805,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:59
 msgid "Send Message"
-msgstr ""
+msgstr "فرستادن پیغام"
 
 #. *
 #. * Constant for the locale-specific resource key for the toolTip of the
@@ -2833,7 +2833,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:77
 msgid "You"
-msgstr ""
+msgstr "شما"
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:231
 msgid "A connection error has occurred"
@@ -2876,7 +2876,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:383
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:243
 msgid "Status"
-msgstr ""
+msgstr "وضعیت‌‌"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:58
 msgid "Messages (I/O)"
@@ -2916,7 +2916,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:85
 msgid "Protocol"
-msgstr ""
+msgstr "قرار داد‌"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:88
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:423
@@ -2929,7 +2929,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:31
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:275
 msgid "Time"
-msgstr ""
+msgstr "زمان"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:94
 msgid "Compressed (I/O)"
@@ -2966,7 +2966,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:123
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:66
 msgid "Connecting..."
-msgstr ""
+msgstr "در حال اتصال..."
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:129
 msgid "Outgoing"
@@ -2993,7 +2993,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:66
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:42
 msgid "Connecting"
-msgstr ""
+msgstr "در حال اتصال‌"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:69
 msgid "Leaves"
@@ -3034,7 +3034,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:378
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:55
 msgid "Port:"
-msgstr ""
+msgstr "درگاه:"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:390
 msgid "Use TLS:"
@@ -3046,7 +3046,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:29
 msgid "0.6"
-msgstr ""
+msgstr "۰/۶"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:90
 msgid ""
@@ -3073,7 +3073,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:119
 msgid "Do not show this message again."
-msgstr ""
+msgstr "این پیغام دیگر نشان داده نشود."
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:122
 msgid ""
@@ -3088,7 +3088,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:60
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:61
 msgid "Queued"
-msgstr ""
+msgstr "صف شده‌"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:69
 #, java-format
@@ -3102,11 +3102,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:81
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:72
 msgid "Complete"
-msgstr ""
+msgstr "کامل"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:87
 msgid "Aborted"
-msgstr ""
+msgstr "ساقط شده‌"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:93
 msgid "Awaiting Sources"
@@ -3122,7 +3122,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:112
 msgid "File Corrupted"
-msgstr ""
+msgstr "پرونده آسیب دیده است"
 
 #. *
 #. * Constant for the "Waiting for Results" download state.
@@ -3135,7 +3135,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:124
 msgid "Need More Sources"
-msgstr ""
+msgstr "احتیاج به منابع بیشتری است"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:130
 msgid "Waiting for Stable Connections"
@@ -3151,20 +3151,20 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:148
 msgid "Saving File..."
-msgstr ""
+msgstr "در حال ذخیره کردن پرونده..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:154
 msgid "Recovering Corrupted File"
-msgstr ""
+msgstr "در حال بازیافتن پرونده آسیب دیده"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:160
 msgid "Pausing..."
-msgstr ""
+msgstr "در حال مکث کردن..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:166
 #: gui/com/limegroup/gnutella/gui/download/PriorityHolder.java:39
 msgid "Paused"
-msgstr ""
+msgstr "مکث شده‌"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:170
 msgid "Content Removed"
@@ -3172,7 +3172,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:174
 msgid "Resuming..."
-msgstr ""
+msgstr "در حال ادامه کار..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:178
 msgid "Downloading .torrent file..."
@@ -3181,7 +3181,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:184
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:126
 msgid "Average Bandwidth"
-msgstr ""
+msgstr "میانگین پهنای باند"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:190
 msgid "Valid Alternate Locations"
@@ -3194,12 +3194,12 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:202
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:132
 msgid "Started On"
-msgstr ""
+msgstr "آغازه شده در"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:208
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:138
 msgid "Finished On"
-msgstr ""
+msgstr "پایان یافته در"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:214
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:144
@@ -3208,7 +3208,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:220
 msgid "Chunks"
-msgstr ""
+msgstr "توده‌ها"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:226
 msgid "Lost To Corruption"
@@ -3216,11 +3216,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:238
 msgid "hosts"
-msgstr ""
+msgstr "میزبان ها"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:241
 msgid "host"
-msgstr ""
+msgstr "میزبان"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:247
 msgid "A more specific search may be required..."
@@ -3246,7 +3246,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:266
 msgid "Locating Sources..."
-msgstr ""
+msgstr "در حال مکان یابی منابع..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:269
 msgid "LimeWire cannot download this torrent.  The tracker responded"
@@ -3254,7 +3254,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:359
 msgid "Priority"
-msgstr ""
+msgstr "اولویت"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:375
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:146
@@ -3262,19 +3262,19 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:63
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:235
 msgid "Size"
-msgstr ""
+msgstr "اندازه‌"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:391
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:359
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:73
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:251
 msgid "Chat"
-msgstr ""
+msgstr "گپ"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:399
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:259
 msgid "Progress"
-msgstr ""
+msgstr "پیشرفت"
 
 #. addOption(STORE_KEY, STORE_ADVANCED_KEY, GUIMediator.getStringResource("Template"), StoreDirectoryTemplatePaneItem.class);
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:407
@@ -3284,7 +3284,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:81
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:267
 msgid "Speed"
-msgstr ""
+msgstr "سرعت‌"
 
 #. connectionsPane.add(new AutoConnectPaneItem("AUTO_CONNECT"));
 #. connectionsPane.add(new AutoConnectActivePaneItem("AUTO_CONNECT_ACTIVE"));
@@ -3292,13 +3292,13 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:962
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:345
 msgid "BitTorrent"
-msgstr ""
+msgstr "BitTorrent"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1023
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:808
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1228
 msgid "Launch"
-msgstr ""
+msgstr "شروع"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1025
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1230
@@ -3307,7 +3307,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1042
 msgid "Show in Library"
-msgstr ""
+msgstr "نمایش در کتابخانه"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:1044
 msgid "Show Download in Library"
@@ -3316,7 +3316,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:192
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:332
 msgid "Downloads"
-msgstr ""
+msgstr "دانلودها"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:232
 msgid "Loading Download Window..."
@@ -3330,7 +3330,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:269
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:786
 msgid "Find Sources"
-msgstr ""
+msgstr "پیدا کردن منابع"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:271
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:788
@@ -3341,14 +3341,14 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:791
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:951
 msgid "Resume Download"
-msgstr ""
+msgstr "ادامه دادن بارگیری"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:277
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:793
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:953
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1323
 msgid "Resume"
-msgstr ""
+msgstr "از سرگرفتن"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:279
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:795
@@ -3372,7 +3372,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:408
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:27
 msgid "&View"
-msgstr ""
+msgstr "&نما‌"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:409
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:61
@@ -3400,7 +3400,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:728
 msgid "Search..."
-msgstr ""
+msgstr "جستجو..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:800
 msgid "Clear Download"
@@ -3436,7 +3436,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:822
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:935
 msgid "Preview"
-msgstr ""
+msgstr "پیش نمایش"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:824
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:937
@@ -3471,7 +3471,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:970
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:95
 msgid "Pause"
-msgstr ""
+msgstr "مکث"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:972
 msgid "Pause Selected Downloads"
@@ -3513,7 +3513,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:132
 msgid "Always Ask"
-msgstr ""
+msgstr "همیشه سؤال شود"
 
 #. default action settings panel
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:143
@@ -3539,7 +3539,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:315
 msgid "Overwrite"
-msgstr ""
+msgstr "رونویسی"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:317
 msgid "Overwrite the Existing File"
@@ -3548,7 +3548,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:335
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:48
 msgid "Save As..."
-msgstr ""
+msgstr "ذخیره به عنوان..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:337
 msgid "Choose a different location for the Download"
@@ -3589,7 +3589,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:228
 msgid "Continue"
-msgstr ""
+msgstr "ادامه"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:242
 msgid "Same File Already In Library"
@@ -3602,12 +3602,12 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/MagnetDownloaderFactory.java:32
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:282
 msgid "No Filename"
-msgstr ""
+msgstr "بدون نام پرونده"
 
 #: gui/com/limegroup/gnutella/gui/download/PriorityHolder.java:33
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:59
 msgid "Active"
-msgstr ""
+msgstr "فعال"
 
 #: gui/com/limegroup/gnutella/gui/init/AssociationsWindow.java:34
 msgid "File & Protocol Associations"
@@ -3652,11 +3652,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:44
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:66
 msgid "Language:"
-msgstr ""
+msgstr "زبان:"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:63
 msgid "Miscellaneous Settings"
-msgstr ""
+msgstr "تنظیمات متفرقه"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:65
 msgid ""
@@ -3666,7 +3666,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:78
 msgid "Network Speed"
-msgstr ""
+msgstr "سرعت شبکه"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:82
 msgid "Broadband (or unsure)"
@@ -3681,11 +3681,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:118
 #: gui/com/limegroup/gnutella/gui/options/panes/StartupPaneItem.java:22
 msgid "System Startup"
-msgstr ""
+msgstr "سیستم راه انداز"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:120
 msgid "Start Automatically"
-msgstr ""
+msgstr "آغاز به طور خودکار"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:124
 msgid ""
@@ -3744,7 +3744,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:146
 #: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:33
 msgid "Shared Folders"
-msgstr ""
+msgstr "پوشه‌های مشترک"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:186
 msgid ""
@@ -3787,22 +3787,22 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:434
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:255
 msgid "Next >>"
-msgstr ""
+msgstr "بعدی >>"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:445
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:266
 msgid "<< Back"
-msgstr ""
+msgstr "<< قبلی"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:456
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:277
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:164
 msgid "Finish"
-msgstr ""
+msgstr "پایان"
 
 #: gui/com/limegroup/gnutella/gui/init/WelcomeWindow.java:20
 msgid "Welcome"
-msgstr ""
+msgstr "خوش آمد گویی"
 
 #: gui/com/limegroup/gnutella/gui/init/WelcomeWindow.java:22
 msgid ""
@@ -3842,7 +3842,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:382
 msgid "Configure..."
-msgstr ""
+msgstr "پیکربندی..."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryMediator.java:398
 msgid "Songs purchased from the LimeWire Store"
@@ -3857,7 +3857,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:563
 #: gui/com/limegroup/gnutella/gui/tabs/SearchDownloadTab.java:41
 msgid "Search"
-msgstr ""
+msgstr "جستجو"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchResultsHolder.java:29
 msgid "Search Results"
@@ -3871,19 +3871,19 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:18
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:47
 msgid "Icon"
-msgstr ""
+msgstr "نمایه"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:152
 #: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:124
 msgid "Path"
-msgstr ""
+msgstr "مسیر:"
 
 #. upload options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:155
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:335
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:57
 msgid "Uploads"
-msgstr ""
+msgstr "بارگذاریها"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:158
 msgid "Hits"
@@ -3891,7 +3891,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:161
 msgid "Locations"
-msgstr ""
+msgstr "مکان‌ها"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:168
 msgid "Last Modified"
@@ -3899,7 +3899,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:171
 msgid "Shared"
-msgstr ""
+msgstr "مشترک‌"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:475
 msgid "This file is shared."
@@ -3923,7 +3923,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:371
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:19
 msgid "Sharing"
-msgstr ""
+msgstr "اشتراک"
 
 #. advanced options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:280
@@ -3933,7 +3933,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:397
 #: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:201
 msgid "Advanced"
-msgstr ""
+msgstr "پیشرفته"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:674
 msgid ""
@@ -3947,7 +3947,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:780
 msgid "Move to Trash"
-msgstr ""
+msgstr "انتقال به سطل آشغال"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:828
 msgid ""
@@ -3983,7 +3983,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1269
 msgid "Delete Selected Files"
-msgstr ""
+msgstr "حذف پرونده های انتخاب شده"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1282
 msgid "Describe..."
@@ -4003,7 +4003,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1312
 msgid "Edit License..."
-msgstr ""
+msgstr "ویرایش مجوز..."
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1325
 msgid "Continue Downloading Selected Incomplete File"
@@ -4011,11 +4011,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1338
 msgid "Rename"
-msgstr ""
+msgstr "تغییر نام‌"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1352
 msgid "Share File"
-msgstr ""
+msgstr "مشترک کردن پرونده"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1379
 #: gui/com/limegroup/gnutella/gui/search/MySharedFilesResultPanel.java:162
@@ -4025,7 +4025,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1406
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:859
 msgid "Share Folder"
-msgstr ""
+msgstr "مشترک کردن پوشه"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1436
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:800
@@ -4039,7 +4039,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1475
 #: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:170
 msgid "View License"
-msgstr ""
+msgstr "دیدن مجوز"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:87
 msgid "Saved Files"
@@ -4082,7 +4082,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:901
 msgid "Refresh"
-msgstr ""
+msgstr "بازآوری‌"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:903
 msgid "Reload Shared Folders"
@@ -4162,7 +4162,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/menu/FileMenu.java:26
 msgid "&File"
-msgstr ""
+msgstr "&پرونده‌"
 
 #: gui/com/limegroup/gnutella/gui/menu/FiltersMenu.java:15
 msgid "Filter&s"
@@ -4186,7 +4186,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/menu/HelpMenu.java:40
 msgid "&Help"
-msgstr ""
+msgstr "&کمک‌"
 
 #: gui/com/limegroup/gnutella/gui/menu/HelpMenu.java:42
 msgid "&Using LimeWire"
@@ -4246,7 +4246,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/menu/ResourcesMenu.java:21
 msgid "&Resources"
-msgstr ""
+msgstr "&منابع‌"
 
 #: gui/com/limegroup/gnutella/gui/menu/ResourcesMenu.java:23
 msgid "LimeWire &PRO"
@@ -4296,11 +4296,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:27
 msgid "&Tools"
-msgstr ""
+msgstr "&ابزارها‌"
 
 #: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:39
 msgid "&Options"
-msgstr ""
+msgstr "&گزینه‌ها‌"
 
 #: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:40
 msgid "Display the Options Screen"
@@ -4351,7 +4351,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:89
 msgid "Play"
-msgstr ""
+msgstr "پخش"
 
 #. *
 #. * Constant for the stop button.
@@ -4368,14 +4368,14 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:144
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:258
 msgid "Next"
-msgstr ""
+msgstr "بعدی"
 
 #. *
 #. * Constant for the rewind button.
 #. 
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:113
 msgid "Previous"
-msgstr ""
+msgstr "قبلی"
 
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:237
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:513
@@ -4385,12 +4385,12 @@ msgstr ""
 #. restore
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:57
 msgid "Restore"
-msgstr ""
+msgstr "بازگرداندن"
 
 #. about box
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:68
 msgid "About"
-msgstr ""
+msgstr "درباره"
 
 #. exit after transfers
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:79
@@ -4400,7 +4400,7 @@ msgstr ""
 #. exit
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:88
 msgid "Exit"
-msgstr ""
+msgstr "خروج"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:54
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:510
@@ -4414,7 +4414,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:207
 #: gui/com/limegroup/gnutella/gui/search/FilterBox.java:76
 msgid "Options"
-msgstr ""
+msgstr "گزینه‌ها"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:224
 msgid ""
@@ -4430,7 +4430,7 @@ msgstr ""
 #. for saving gnutella
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:315
 msgid "Saving"
-msgstr ""
+msgstr "در حال ذخیره"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:316
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:321
@@ -4438,11 +4438,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:346
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:385
 msgid "Basic"
-msgstr ""
+msgstr "ابتدایی"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
 msgid "Types"
-msgstr ""
+msgstr "انواع"
 
 #. store options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:326
@@ -4451,13 +4451,13 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:337
 msgid "Slots"
-msgstr ""
+msgstr "شکافها"
 
 #. uploadSlotsPane.add(new SoftMaximumUploadsPaneItem("UPLOAD_SOFT_MAX"));
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:340
 #: gui/com/limegroup/gnutella/gui/tabs/ConnectionsTab.java:26
 msgid "Connections"
-msgstr ""
+msgstr "اتصال‌ها"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:355
 msgid "System Tray"
@@ -4469,7 +4469,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:361
 msgid "Player"
-msgstr ""
+msgstr "پخش‌کننده"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:363
 msgid "Status Bar"
@@ -4482,7 +4482,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:369
 #: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:15
 msgid "Importing"
-msgstr ""
+msgstr "در حال وارد کردن"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:374
 msgid "Helper Apps"
@@ -4495,7 +4495,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:379
 msgid "View"
-msgstr ""
+msgstr "نما"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:380
 msgid "Popups"
@@ -4508,12 +4508,12 @@ msgstr ""
 #. search options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:384
 msgid "Searching"
-msgstr ""
+msgstr "در حال جستجو"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:386
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:32
 msgid "Quality"
-msgstr ""
+msgstr "کیفیت"
 
 #. filter options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:390
@@ -4531,7 +4531,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:593
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
 msgid "Junk"
-msgstr ""
+msgstr "آشغال"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:393
 msgid "Keywords"
@@ -4539,7 +4539,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:394
 msgid "Hosts"
-msgstr ""
+msgstr "میزبانها"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:398
 msgid "Preferencing"
@@ -4547,7 +4547,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:399
 msgid "Firewall"
-msgstr ""
+msgstr "دیوار آتشین"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:400
 msgid "Proxy"
@@ -4565,7 +4565,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:405
 msgid "Performance"
-msgstr ""
+msgstr "کارایی"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:407
 msgid "System Boot"
@@ -4588,7 +4588,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:34
 msgid "Folder:"
-msgstr ""
+msgstr "پوشه:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:56
 msgid "You can choose the folder for saving files."
@@ -4701,7 +4701,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/BrowserPaneItem.java:37
 msgid "Browser"
-msgstr ""
+msgstr "مرورگر"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:42
 msgid "View Example"
@@ -4745,7 +4745,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ConnectOnStartupPaneItem.java:29
 msgid "Connect on Startup:"
-msgstr ""
+msgstr "اتصال به راه انداز:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:25
 msgid "Connection Preferencing"
@@ -4767,11 +4767,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:48
 msgid "Rarely"
-msgstr ""
+msgstr "به ندرت"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ConnectionPreferencingPaneItem.java:55
 msgid "Always"
-msgstr ""
+msgstr "همیشه"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ContentFilterPaneItem.java:18
 msgid "Content Filters"
@@ -4814,7 +4814,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapPasswordPaneItem.java:38
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:48
 msgid "Password:"
-msgstr ""
+msgstr "رمز عبور:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:21
 msgid ""
@@ -4824,11 +4824,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:24
 msgid "Share My Music:"
-msgstr ""
+msgstr "آهنگ های من را مشترک کن:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:27
 msgid "Shared Name:"
-msgstr ""
+msgstr "اسم مشترک شده:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:23
 msgid "File Already Exists Behavior"
@@ -4854,7 +4854,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:23
 msgid "Capabilities"
-msgstr ""
+msgstr "تواناییها"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:25
 msgid ""
@@ -4905,7 +4905,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadBandwidthPaneItem.java:46
 #: gui/com/limegroup/gnutella/gui/options/panes/UploadBandwidthPaneItem.java:46
 msgid "Unlimited"
-msgstr ""
+msgstr "نامحدود"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:21
 msgid "License Warning"
@@ -4919,11 +4919,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DownloadLicenseWarningPaneItem.java:30
 msgid "Show License Warning:"
-msgstr ""
+msgstr "نمایش اخطار مجوز:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:20
 msgid "Display"
-msgstr ""
+msgstr "نمایش"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:22
 msgid ""
@@ -4962,7 +4962,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:61
 msgid "Use Defaults"
-msgstr ""
+msgstr "پیش فرض ها را استفاده کن"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:63
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:511
@@ -4984,7 +4984,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ForceIPPaneItem.java:49
 msgid "Use UPnP (Recommended)"
-msgstr ""
+msgstr "از UPnP استفاده کن ( توصیه شده )"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ForceIPPaneItem.java:51
 msgid "Manual Port Forward:"
@@ -5082,7 +5082,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/ImageViewerPaneItem.java:37
 msgid "Image Viewer"
-msgstr ""
+msgstr "نمایشگر نصویر"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/LocalePreferencingPaneItem.java:19
 msgid "Locale Preferencing"
@@ -5152,7 +5152,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirDataLine.java:47
 msgid "Media Type"
-msgstr ""
+msgstr "نوع رسانه"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:202
 msgid "Open Dialog to Select a Folder"
@@ -5160,7 +5160,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:233
 msgid "Reset"
-msgstr ""
+msgstr "بازنشانی‌"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:235
 msgid "Reset to Default Download Folder"
@@ -5187,7 +5187,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/NotificationsPaneItem.java:20
 msgid "Notifications"
-msgstr ""
+msgstr "اخطارها"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/NotificationsPaneItem.java:22
 msgid ""
@@ -5302,7 +5302,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:41
 msgid "Username:"
-msgstr ""
+msgstr "نام کاربر:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:28
 msgid "Proxy Options"
@@ -5326,7 +5326,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:43
 msgid "HTTP"
-msgstr ""
+msgstr "HTTP"
 
 #. *
 #. * Constant for the key of the locale-specific <tt>String</tt> for the
@@ -5496,7 +5496,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:28
 msgid "Sensitivity"
-msgstr ""
+msgstr "حساسیت"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpamFilterSensivityPaneItem.java:30
 msgid "Adjust the sensitivity of LimeWire's junk filter"
@@ -5531,7 +5531,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/SpeedPaneItem.java:37
 msgid "Speed:"
-msgstr ""
+msgstr "سرعت:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StartupPaneItem.java:24
 msgid ""
@@ -5631,21 +5631,21 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:44
 msgid "Template"
-msgstr ""
+msgstr "قالب"
 
 #. *
 #. * Label for a drop down with options that can be added to the template
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:49
 msgid "Variables"
-msgstr ""
+msgstr "متغیرها"
 
 #. *
 #. * Label for predefined templates
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:54
 msgid "Templates"
-msgstr ""
+msgstr "قالب ها"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:125
 msgid "Insert a Variable"
@@ -6628,7 +6628,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:474
 msgid "Comment:"
-msgstr ""
+msgstr "توضیح:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:495
 msgid "Please enter the copyright holder, copright year and title."
@@ -6652,7 +6652,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:539
 msgid "What is this?"
-msgstr ""
+msgstr "این چیست ؟"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:557
 msgid "The verification file is hosted at the following URL:"
@@ -6675,7 +6675,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:149
 msgid "Copy to Clipboard"
-msgstr ""
+msgstr "رونوشت در تخته یادداشت"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:53
 msgid "Kind:"
@@ -6683,7 +6683,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:79
 msgid "Size:"
-msgstr ""
+msgstr "اندازه:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:83
 msgid "Date Modified:"
@@ -6732,39 +6732,39 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:72
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:86
 msgid "Title:"
-msgstr ""
+msgstr "عنوان:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:38
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:88
 msgid "Artist:"
-msgstr ""
+msgstr "هنرمند:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:39
 msgid "Album:"
-msgstr ""
+msgstr "آلبوم:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:40
 msgid "Genre:"
-msgstr ""
+msgstr "نوع:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:41
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:57
 msgid "Year:"
-msgstr ""
+msgstr "سال:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:42
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:56
 msgid "Type:"
-msgstr ""
+msgstr "نوع:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:43
 msgid "Track:"
-msgstr ""
+msgstr "شیار:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:45
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:59
 msgid "Length:"
-msgstr ""
+msgstr "طول:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:46
 msgid "Bitrate:"
@@ -6773,15 +6773,15 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:47
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:60
 msgid "Comments:"
-msgstr ""
+msgstr "توضیحات:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:48
 msgid "SHA1:"
-msgstr ""
+msgstr "SHA1:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:49
 msgid "Price:"
-msgstr ""
+msgstr "قیمت:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:50
 msgid "Link:"
@@ -6790,7 +6790,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:51
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:63
 msgid "Action:"
-msgstr ""
+msgstr "کنش:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:52
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:61
@@ -6798,22 +6798,22 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:83
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:89
 msgid "License:"
-msgstr ""
+msgstr "مجوز:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:58
 msgid "Rating:"
-msgstr ""
+msgstr "ارزیابی:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:62
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:76
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:82
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:90
 msgid "License Type:"
-msgstr ""
+msgstr "نوع مجوز:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:64
 msgid "Director:"
-msgstr ""
+msgstr "کارگردان:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:65
 msgid "Studio:"
@@ -6833,27 +6833,27 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:73
 msgid "Topic:"
-msgstr ""
+msgstr "سرفصل:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:74
 msgid "Author:"
-msgstr ""
+msgstr "مؤلف:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:79
 msgid "Name:"
-msgstr ""
+msgstr "نام:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:80
 msgid "Publisher:"
-msgstr ""
+msgstr "ناشر:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:81
 msgid "Platform:"
-msgstr ""
+msgstr "سکو:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:87
 msgid "Description:"
-msgstr ""
+msgstr "شرح:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:116
 msgid "MPEG-1 Audio Layer 3"

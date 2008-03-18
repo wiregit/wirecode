@@ -8,15 +8,15 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-08 16:41+0000\n"
-"Last-Translator: allen_hitman <allen_hitman@yahoo.com>\n"
+"PO-Revision-Date: 2008-03-13 20:42+0000\n"
+"Last-Translator: Punkboy <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n == 1 ? 0: (((n % 100 > 19) || ((n % 100 "
 "== 0) && (n != 0))) ? 2: 1));\n"
-"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
+"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Sorry, but LimeWire was unable to restart your old downloads."
@@ -1252,7 +1252,6 @@ msgstr "Latime"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
-#, fuzzy
 msgid "Image"
 msgstr "Imagine"
 
@@ -1266,13 +1265,11 @@ msgstr "Descriere"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:164
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:263
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:42
-#, fuzzy
 msgid "License"
 msgstr "Licenţă"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:71
-#, fuzzy
 msgid "Document"
 msgstr "Document"
 
@@ -1295,9 +1292,8 @@ msgstr "Aplicaţie"
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:34
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:53
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:219
-#, fuzzy
 msgid "Name"
-msgstr "Nume:"
+msgstr "Nume"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Publisher"
@@ -1306,7 +1302,7 @@ msgstr "Editor"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 #, fuzzy
 msgid "Platform"
-msgstr "Platforma:"
+msgstr "Platformă"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:105
 msgid "The selected .torrent file may contain a security hazard."
@@ -1350,7 +1346,6 @@ msgstr ""
 "Puteti alege daca publicati automat fisiere descarcate partial sau nu."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:26
-#, fuzzy
 msgid "Start automatically"
 msgstr "Start automat"
 
@@ -1385,7 +1380,6 @@ msgid "Let LimeWire manage my BitTorrent settings. (Recommended)"
 msgstr "Las LimeWire sa regleze setarile mele BitTorrent (Recomandat)"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:85
-#, fuzzy
 msgid "Maximum uploads per torrent"
 msgstr "Transferuri maxime per torrent"
 

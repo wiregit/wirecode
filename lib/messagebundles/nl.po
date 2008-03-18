@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: 4.14.10\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-08 15:56+0000\n"
-"Last-Translator: Apie <apieisme@gmail.com>\n"
+"PO-Revision-Date: 2008-03-14 14:31+0000\n"
+"Last-Translator: thom <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
+"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -9072,11 +9072,11 @@ msgstr "Omschrijving:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:116
 msgid "MPEG-1 Audio Layer 3"
-msgstr "MPEG-1 audiolaag 3"
+msgstr "MPEG-1 Audio lijn 3"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:118
 msgid "MPEG-4 Audio"
-msgstr "MPEG-4 audio"
+msgstr "MPEG-4 geluid"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:120
 msgid "Ogg Vorbis"
@@ -9086,4 +9086,4 @@ msgstr "Ogg Vorbis"
 msgid ""
 "Unknown file type. Please choose the type that best describes this file."
 msgstr ""
-"Onbekend bestandstype. Kies een type dat het beste bij dit bestand past."
+"Onbekend bestandstype. Kies een type dat het beste bij dit bestand hoort."

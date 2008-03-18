@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-02 01:41+0000\n"
+"PO-Revision-Date: 2008-03-15 23:47+0000\n"
 "Last-Translator: Seanan <Unknown>\n"
 "Language-Team: Irish(Ireland) <ga_IE@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n==2 ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
+"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Country: IRELAND\n"
 "X-Poedit-Language: Irish\n"
@@ -1560,6 +1560,9 @@ msgid ""
 "LimeWire has encountered problems in loading your settings.  LimeWire will "
 "attempt to use the default values; however, may behave unexpectedly."
 msgstr ""
+"Bhí fadhbanna ag LimeWire ag luchtú do chuid socruithe. Déanfaidh LimeWire "
+"iarracht feidhm a bhaint as na luachanna réamhshocraithe; ach d'fhéadfadh sé "
+"feidhmiú i slite nach bhfuil tú ag súil le."
 
 #: gui/com/limegroup/gnutella/gui/ShutdownWindow.java:18
 msgid "Shutting down LimeWire..."
@@ -5797,7 +5800,7 @@ msgstr "Táscaire Cáilíocht an Nasc"
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarConnectionQualityPaneItem.java:23
 msgid ""
 "You can display a measurement of your connection quality in the status bar."
-msgstr ""
+msgstr "Is féidir tomhas do cháilíocht naisc a thaispeáint sa treosabh."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/StatusBarConnectionQualityPaneItem.java:30
 msgid "Show Connection Quality Indicator:"
@@ -6537,6 +6540,9 @@ msgid ""
 "this folder because it is either not a folder or cannot be "
 "read.<br><br>Please select another folder to share.</table></html>"
 msgstr ""
+"<html><table width=400>Roghnaigh tú: <i>{0}</i><br>Ní féidir le LimeWire an "
+"fillteán seo a chomhroinnt mar ní fillteán é nó ní féidir é a "
+"léamh.<br><br>Roghnaigh fillteán eile le comhroinnt.</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:35
 #, java-format
@@ -6545,6 +6551,9 @@ msgid ""
 "this folder for security reasons.<br><br>Please select another folder to "
 "share.</table></html>"
 msgstr ""
+"<html><table width=400>Roghnaigh tú: <i>{0}</i><br>Ní féidir le LimeWire an "
+"fillteán seo a chomhroinnt toisc fáthanna slándála.<br><br>Roghnaigh "
+"fillteán eile le comhroinnt le do thoil.</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/sharing/ShareManager.java:52
 #, java-format

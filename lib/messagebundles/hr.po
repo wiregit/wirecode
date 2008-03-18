@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-08 16:19+0000\n"
+"PO-Revision-Date: 2008-03-16 09:22+0000\n"
 "Last-Translator: Stevan <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2008-03-11 03:49+0000\n"
+"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -653,12 +653,17 @@ msgid "BitTorrent Settings"
 msgstr "BitTorent postavke"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:38
+#, fuzzy
 msgid ""
 "You can choose whether or not LimeWire should manage your BitTorrent "
 "protocol settings. It is highly recommended that LimeWire manage these "
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"Mogucnost izbora da li Limewire da uredjuje ili ne BitTorent protokol "
+"podesenja. Prporucljivo je da LimeWire uredjuje ova podesenja. Pogresne ili "
+"nedostatne vrijednosti mogu uzrokovati  ozbiljne probleme performansi ili "
+"memorije."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
 msgid ""
@@ -1848,7 +1853,7 @@ msgstr "Pokaži pokazatelj trgovine"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:827
 msgid "Show Bandwidth Consumption"
-msgstr ""
+msgstr "Pokazi Bandwidth potrosnju"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:843
 msgid "Show Media Player"
@@ -1978,6 +1983,9 @@ msgid ""
 "completing successfully. Four blue stars signal 'Ethernet' speed and have "
 "the greatest chance of completing successfully."
 msgstr ""
+"VIse zvijzdica u rezultatima pretrazivanja ukazuje na vecu vjerovatnocu "
+"uspjesnog download-a. Cetiri plave zvijezdice imaju najvecu mogucnost "
+"uspjesnog downloada-a"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:59
 msgid ""
