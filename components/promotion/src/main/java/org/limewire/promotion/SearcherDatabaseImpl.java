@@ -83,8 +83,12 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
             try {
-                for (int i = 0; i < values.length; i++)
-                    statement.setObject(i + 1, values[i]);
+                for (int i = 0; i < values.length; i++) {
+                    if (values[i] instanceof Date)
+                        statement.setDate(i + 1, new java.sql.Date(((Date) values[i]).getTime()));
+                    else
+                        statement.setObject(i + 1, values[i]);
+                }
                 statement.executeUpdate();
             } finally {
                 statement.close();
@@ -108,8 +112,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
 
     private void createDBIfNeeded() {
         try {
-            query("SELECT count(1) FROM keywords");
-            query("SELECT count(1) FROM entries");
+            query("foo");
         } catch (RuntimeException ignored) {
             // Looks like the db needs some work, try clearing it.
             clear();
@@ -122,7 +125,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
 
         executeUpdate("CREATE CACHED TABLE entries (" + "entry_id IDENTITY, "
                 + "unique_id BIGINT, " + "probability_num FLOAT, " + "type_byte TINYINT, "
-                + "valid_start_dt DATE, " + "valid_end_dt DATE, entry_ggep BINARY )");
+                + "valid_start_dt DATETIME, " + "valid_end_dt DATETIME, entry_ggep BINARY )");
         executeUpdate("CREATE CACHED TABLE keywords ("
                 + "keyword_id IDENTITY, "
                 + "binder_unique_id BIGINT,"
@@ -165,10 +168,10 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
         PreparedStatement statement = null;
         try {
             statement = connection
-                    .prepareStatement("SELECT entry_id, binder_unique_id FROM keywords k WHERE "
-                            + "EXISTS (SELECT 1 FROM entries e where e.entry_id = k.entry_id) "
-                           // + "AND valid_start_dt < CURRENT_TIMESTAMP AND valid_end_dt > CURRENT_TIMESTAMP) "
-                            + "AND phrase LIKE ?");
+                    .prepareStatement("SELECT DISTINCT e.entry_id, k.binder_unique_id, e.probability_num FROM "
+                            + "keywords k JOIN entries e ON e.entry_id = k.entry_id WHERE "
+                            + "e.valid_start_dt <= CURRENT_TIMESTAMP AND e.valid_end_dt >= CURRENT_TIMESTAMP "
+                            + "AND k.phrase LIKE ? ORDER BY e.probability_num DESC");
             statement.setString(1, normalizedQuery);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {

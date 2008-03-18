@@ -15,12 +15,13 @@ import com.google.inject.Inject;
 import com.limegroup.gnutella.geocode.GeocodeInformation;
 
 public class PromotionSearcherImpl implements PromotionSearcher {
-
     private final KeywordUtil keywordUtil;
+
     private final SearcherDatabase searcherDatabase;
+
     private final ImpressionsCollector impressionsCollector;
     private final PromotionBinderRepository promotionBinderRepository;
-    
+
     private int maxNumberOfResults;
 
     @Inject
@@ -119,18 +120,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
         public void run() {
             // OK, start the meat of the query!
             final Date timeQueried = new Date();
-            searcherDatabase.expungeExpired();
-            final List<QueryResult> results1 = searcherDatabase.query(normalizedQuery);
-            removeInvalidResults(results1);
-
-            for (QueryResult result : results1) {
-                callback.process(result.getPromotionMessageContainer());
-                // Tell the collector that we just showed this result.
-                impressionsCollector.recordImpression(query, timeQueried, new Date(), result
-                        .getPromotionMessageContainer(), result.getBinderUniqueId());
-            }
-
-            // Get the binder, ingest it, and do it again...
+            // Get the binder (maybe cached), ingest it, and search...
             promotionBinderRepository.getBinderForBucket(keywordUtil.getHashValue(normalizedQuery),
                     new PromotionBinderCallback() {
                         public void process(PromotionBinder binder) {
@@ -138,14 +128,10 @@ public class PromotionSearcherImpl implements PromotionSearcher {
                                 return;
                             searcherDatabase.ingest(binder);
                             searcherDatabase.expungeExpired();
-                            List<QueryResult> results2 = searcherDatabase.query(normalizedQuery);
-                            removeInvalidResults(results2);
+                            List<QueryResult> results = searcherDatabase.query(normalizedQuery);
+                            removeInvalidResults(results);
 
-                            for (QueryResult result : results2) {
-                                // Only return results we haven't returned
-                                // before.
-                                if (results1.contains(result))
-                                    continue;
+                            for (QueryResult result : results) {
                                 callback.process(result.getPromotionMessageContainer());
                                 // record we just showed this result.
                                 impressionsCollector.recordImpression(query, timeQueried,
