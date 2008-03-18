@@ -47,6 +47,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             connection = DriverManager.getConnection("jdbc:hsqldb:file:" + getDBLocation(), "sa",
                     "");
             Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+            createDBIfNeeded();
         } catch (SQLException ex) {
             throw new RuntimeException("Unable to get connection to in-memory db.", ex);
         }
@@ -70,8 +71,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
                 statement.close();
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();return 0;
-            //throw new RuntimeException("SQLException during update", ex);
+            throw new RuntimeException("SQLException during update", ex);
         }
     }
 
@@ -102,8 +102,17 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
                 statement.close();
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();return 0;
-            //throw new RuntimeException("SQLException during update", ex);
+            throw new RuntimeException("SQLException during update", ex);
+        }
+    }
+
+    private void createDBIfNeeded() {
+        try {
+            query("SELECT count(1) FROM keywords");
+            query("SELECT count(1) FROM entries");
+        } catch (RuntimeException ignored) {
+            // Looks like the db needs some work, try clearing it.
+            clear();
         }
     }
 
@@ -168,8 +177,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             }
             rs.close();
         } catch (SQLException ex) {
-            ex.printStackTrace();
-            //throw new RuntimeException("SQLException during query.", ex);
+            throw new RuntimeException("SQLException during query.", ex);
         } finally {
             if (statement != null) {
                 try {
