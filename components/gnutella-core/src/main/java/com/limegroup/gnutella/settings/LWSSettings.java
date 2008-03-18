@@ -8,8 +8,6 @@ import org.limewire.setting.StringSetting;
  * Settings for The LimeWire Store&#8482;. This is used by
  * {@link LWSManagerImpl} for the host name to which we connect for
  * authentication.
- * 
- * A message for bobby -- does this stupid thing commit???
  */
 public final class LWSSettings extends LimeProps {
     
@@ -20,7 +18,7 @@ public final class LWSSettings extends LimeProps {
      * The hostname to which we connect for authentication.
      */
     public static final StringSetting LWS_AUTHENTICATION_HOSTNAME = FACTORY.createRemoteStringSetting(
-            "LWS_AUTHENTICATION_HOSTNAME", "", "LWSSettings.lwsAuthenticationHostname");
+            "LWS_AUTHENTICATION_HOSTNAME", "localhost", "LWSSettings.lwsAuthenticationHostname");
 
     /**
      * The port on which we connect for authentication. This can be
@@ -42,7 +40,7 @@ public final class LWSSettings extends LimeProps {
      * so needs to be all together.  This also makes it clearer.  <b>This HAS to end in a <code>/</code></b>.
      */
     public static final StringSetting LWS_DOWNLOAD_PREFIX = FACTORY.createRemoteStringSetting(
-            "LWS_DOWNLOAD_PREFIX", "10.254.0.247:8080", "LWSSettings.lwsDownloadPrefix"); 
+            "LWS_DOWNLOAD_PREFIX", "", "LWSSettings.lwsDownloadPrefix"); 
     
     /**
      * The hostname to which we connect for adding to playlists.
@@ -63,24 +61,5 @@ public final class LWSSettings extends LimeProps {
      */
     public static final BooleanSetting LWS_IS_ENABLED = FACTORY.createRemoteBooleanSetting(
             "LWS_IS_ENABLED", true, "LWSSettings.lwsIsEnabled");
-
-    /*
-     * These are mainly for the demos when we are using HTTP authentication for accessing the store.
-     * Previously we could just send a normal HTTP request from the client to the Store web server,
-     * but since adding HTTP authentication to simply access the Store site, we need to use
-     * basic authentication to get thru.
-     */
-    
-    /**
-     * The username with which we use to connect the client to the Store web server.
-     */
-    public static final StringSetting LWS_AUTHENTICATION_USERNAME = FACTORY.createRemoteStringSetting(
-            "LWS_AUTHENTICATION_USERNAME", "browse", "LWSSettings.lwsAuthenticationUsername"); 
-    
-    /**
-     * The username with which we use to connect the client to the Store web server.
-     */
-    public static final StringSetting LWS_AUTHENTICATION_PASSWORD = FACTORY.createRemoteStringSetting(
-            "LWS_AUTHENTICATION_PASSWORD", "browse", "LWSSettings.lwsAuthenticationPassword");      
-
+   
 }

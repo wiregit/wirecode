@@ -82,10 +82,12 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         
         // Construct the hostname and port to which we connect for authentication
         // from remote settings
-        StringBuffer hostNameAndPortBuffer = new StringBuffer(host);
+        StringBuilder hostNameAndPortBuffer = new StringBuilder(host);
         if (port > 0) hostNameAndPortBuffer.append(":").append(port);
         this.hostNameAndPort = hostNameAndPortBuffer.toString();
-        LOG.debug("hostname and port: " + hostNameAndPort);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("hostname and port: " + hostNameAndPort);
+        }
         //
         // remember when we're connected
         //
@@ -175,7 +177,7 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         try {
             get = new HttpGet(url);
         } catch (URISyntaxException e) {
-            LOG.error(e);
+            LOG.error("Making HTTP Get", e);
             IOException ioe = new IOException();
             ioe.initCause(e);
             throw ioe;
@@ -207,7 +209,7 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
                 return false;
             }
             
-            public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {System.out.println("requestFailed:"+response);
+            public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("requestFailed");
                 }            
@@ -218,33 +220,13 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         });
         
     }
-    
-    public void describe(OutputStream os) {
-        PrintStream out = new PrintStream(os);
-        out.println(System.identityHashCode(this));
-        out.println("LISTENERS");
-        for (Map.Entry<String,List<Listener>> e : commands2listenerLists.entrySet()) {
-            String cmd = e.getKey();
-            List<Listener> ls = e.getValue();
-            out.println(" * " + cmd + " ->");
-            for (Listener l : ls) {
-                out.println("   " + l);
-            }
-        }
-        out.println("HANDLERS");
-        for (Map.Entry<String,LWSManagerCommandResponseHandler> e : commands2handlers.entrySet()) {
-            String cmd = e.getKey();
-            LWSManagerCommandResponseHandler h = e.getValue();
-            out.println(" " + cmd + " -> " + h);
-        }
-    }    
-    
+     
     // ---------------------------------------------------------------------------------
     // Private
     // ---------------------------------------------------------------------------------    
     
     private String constructURL(final String msg, final Map<String, String> args) {
-        StringBuffer url = new StringBuffer("http");
+        StringBuilder url = new StringBuilder("http");
         if (LWSSettings.LWS_USE_SSL.getValue()) {
             url.append("s");
         }

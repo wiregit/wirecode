@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
+import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
@@ -223,7 +224,7 @@ public class DownloadTestCase extends LimeTestCase {
     }
 
     protected void tearDown() throws Exception {
-        lifecycleManager.shutdown();
+        if (lifecycleManager != null) lifecycleManager.shutdown();
         
         for (int i = 0; i < testUploaders.length; i++) {
             if (testUploaders[i] != null) {
@@ -248,19 +249,12 @@ public class DownloadTestCase extends LimeTestCase {
         for (int i = 0; i < files.length; i++) {
             if (files[i].isDirectory()) {
                 if (files[i].getName().equalsIgnoreCase("incomplete"))
-                    deleteDirectory(files[i]);
+                    FileUtils.deleteRecursive(files[i]);
                 else if (files[i].getName().equals(saveDir.getName()))
-                    deleteDirectory(files[i]);
+                    FileUtils.deleteRecursive(files[i]);
             }
         }
         dataDir.delete();
-    }
-
-    private void deleteDirectory(File dir) {
-        File[] files = dir.listFiles();
-        for (int i = 0; i < files.length; i++)
-            files[i].delete();
-        dir.delete();
     }
 
     protected void tGeneric(RemoteFileDesc[] rfds) throws Exception {

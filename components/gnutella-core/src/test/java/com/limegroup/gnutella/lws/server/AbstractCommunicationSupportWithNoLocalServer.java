@@ -322,6 +322,13 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
         return new FakeJavascriptCodeInTheWebpage.Handler() {
             public void handle(final String res) {
                 final String have = LWSServerUtil.unwrapError(LWSServerUtil.removeCallback(res));
+                //
+                // All errors are of the form 
+                //
+                //   <String> [ '.' <String> ]+
+                //
+                // See LWSDispatcherSupport#ErrorCodes
+                //
                 assertTrue(have.indexOf('.') != -1);
             }
         };

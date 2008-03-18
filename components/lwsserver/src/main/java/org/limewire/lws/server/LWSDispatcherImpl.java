@@ -163,7 +163,7 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
          * with the passed along private key, too.
          * 
          * @param privateKey private key pulled from the args
-         * @param herSharedKey TODO
+         * @param herSharedKey the shared key sent from a Browser
          * @param args original, untouched arguments
          * @return result <b>IN PLAIN TEXT</b> using the private key,
          *         <tt>privateKey</tt>

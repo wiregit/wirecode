@@ -205,7 +205,7 @@ public final class LWSServerUtil {
      * @return a public or private key
      */
     public static String generateKey() {
-        final StringBuffer sb = new StringBuffer();
+        final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < LWSDispatcherSupport.Constants.KEY_LENGTH;) {
             final int r = 'A' + (int) (Math.random() * ('Z' - 'A'));
             final char c = (char) r;

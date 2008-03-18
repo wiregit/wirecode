@@ -45,6 +45,7 @@ import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.StoreDownloader;
+import com.limegroup.gnutella.downloader.Visitor;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
@@ -1087,14 +1088,20 @@ public class DownloadManagerImpl implements DownloadManager {
         return fileName;
     }
     
-    // ---------------------------------------------------------------
-    // Implementation of LWSIntegrationServicesDelegate
-
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadMI#getAllDownloaders()
      */
     public final Iterable<CoreDownloader> getAllDownloaders() {
         return activeAndWaiting;
+    }
+    
+    // ---------------------------------------------------------------
+    // Implementation of LWSIntegrationServicesDelegate    
+
+    public synchronized void visitDownloads(Visitor<CoreDownloader> visitor) {
+        for (CoreDownloader downloader : activeAndWaiting) {
+            visitor.visit(downloader);
+        }
     }    
 
 }

@@ -21,6 +21,33 @@ import com.limegroup.gnutella.downloader.StoreDownloader;
 public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServer {
     
     private final LWSDownloadTestConstants constants = new LWSDownloadTestConstants();
+    
+    /**
+     * Set up the little web server.
+     */
+    protected void afterSetup() {
+        super.afterSetup();
+
+        // Make sure we are downloading from the right spot
+        LWSIntegrationServices services = getInstance(LWSIntegrationServices.class);
+        services.setDownloadPrefix(constants.HOST + ":" + constants.PORT);
+
+        // Start up the server
+        server = new SimpleWebServer(constants);
+        server.start();
+
+        // Reset and authenticate
+        doAuthenticate();
+    }
+
+    /**
+     * Tear down the little web server.
+     */
+    protected void afterTearDown() {
+        super.afterTearDown();
+        server.stop();
+        sleep(2000);
+    }    
   
     public LWSDownloadTest(String s) {
         super(s);
@@ -128,9 +155,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         final Map<String, String> args = new HashMap<String, String>();
         
         // Now pause the download
-        eh();
-        sendCommandToClient("PauseAllDownloads", args);
-        eh();
+        sendCommandToClientAndWait("PauseAllDownloads", args);
         isPaused = false;
         for (StoreDownloader storeDownloader : getStoreDownloaders()) {
             if (storeDownloader.isPaused()) {
@@ -141,9 +166,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         assertTrue("One should be paused", isPaused);
         
         // Now resume the download
-        eh();
-        sendCommandToClient("ResumeAllDownloads", args);
-        eh();
+        sendCommandToClientAndWait("ResumeAllDownloads", args);
         isActive = false;
         for (StoreDownloader storeDownloader : getStoreDownloaders()) {
             if (storeDownloader.isActive()) {
@@ -154,9 +177,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         assertTrue("One should be active", isActive);
         
         // Now pause the download, again
-        eh();        
-        sendCommandToClient("PauseAllDownloads", args);
-        eh();
+        sendCommandToClientAndWait("PauseAllDownloads", args);
         isPaused = false;
         for (StoreDownloader storeDownloader : getStoreDownloaders()) {
             if (storeDownloader.isPaused()) {
@@ -166,9 +187,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         }
         
         // Now resume the download, again
-        eh();
-        sendCommandToClient("ResumeAllDownloads", args);
-        eh();
+        sendCommandToClientAndWait("ResumeAllDownloads", args);
         isActive = false;
         for (StoreDownloader storeDownloader : getStoreDownloaders()) {
             if (storeDownloader.isActive()) {
@@ -179,9 +198,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         assertTrue("One should be active", isActive);
         
         // Now stop the download
-        eh();
-        sendCommandToClient("StopAllDownloads", args);
-        eh();
+        sendCommandToClientAndWait("StopAllDownloads", args);
         assertTrue("Should be empty", getStoreDownloaders(false).isEmpty());
         
         try {
@@ -220,35 +237,25 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         args.put("id", id);
         
         // Now pause the download
-        eh();
-        sendCommandToClient("PauseDownload", args);
-        eh();
+        sendCommandToClientAndWait("PauseDownload", args);
         assertTrue("Should be paused", storeDownloader.isPaused());
         
         // Now resume the download
-        eh();
-        sendCommandToClient("ResumeDownload", args);
-        eh();
+        sendCommandToClientAndWait("ResumeDownload", args);
         assertTrue("Should be resumed", storeDownloader.isActive() || storeDownloader.isCompleted());
         assertFalse("Should not be paused", storeDownloader.isPaused() || storeDownloader.isCompleted());
         
         // Now pause the download, again
-        eh();        
-        sendCommandToClient("PauseDownload", args);
-        eh();
+        sendCommandToClientAndWait("PauseDownload", args);
         assertTrue("Should be paused", storeDownloader.isPaused() || storeDownloader.isCompleted());
         
         // Now resume the download, again
-        eh();
-        sendCommandToClient("ResumeDownload", args);
-        eh();
+        sendCommandToClientAndWait("ResumeDownload", args);
         assertTrue("Should be resumed", storeDownloader.isActive() || storeDownloader.isCompleted());
         assertFalse("Should not be paused", storeDownloader.isPaused() || storeDownloader.isCompleted());
         
         // Now stop the download
-        eh();
-        sendCommandToClient("StopDownload", args);
-        eh();
+        sendCommandToClientAndWait("StopDownload", args);
         assertTrue("Should be empty",getStoreDownloaders(false).isEmpty());
         
         try {
@@ -264,17 +271,17 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
 
     private SimpleWebServer server;
     
-    protected final StoreDownloader getStoreDownloader() {
+    private StoreDownloader getStoreDownloader() {
         StoreDownloader storeDownloader = getStoreDownloaders().get(0);
         assertNotNull(storeDownloader);
         return storeDownloader;
     }
     
-    protected final List<StoreDownloader> getStoreDownloaders() {
+    private List<StoreDownloader> getStoreDownloaders() {
         return getStoreDownloaders(true);
     }
     
-    protected final List<StoreDownloader> getStoreDownloaders(boolean checkForEmpty) {
+    private List<StoreDownloader> getStoreDownloaders(boolean checkForEmpty) {
         DownloadManager man = getInstance(DownloadManager.class);
         List<StoreDownloader> res = new ArrayList<StoreDownloader>();
         for (CoreDownloader coreDownloader : man.getAllDownloaders()) {
@@ -288,7 +295,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         return res;
     }    
     
-    protected final static class MutableString {
+    private final static class MutableString {
         String s;
         public void set(String s) {this.s = s;}
         public String get() {return s;}
@@ -301,7 +308,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
      * @param checkComplete whether we check that the download finished at the end
      * @param fudge fudge factor to add to the url, file, and ID, so we can have multiple downloaders;
      */
-    protected final void doDownloadTest(MutableString inId, Runnable r, boolean checkComplete, String fudge) {
+    private void doDownloadTest(MutableString inId, Runnable r, boolean checkComplete, String fudge) {
 
         long length = constants.LENGTH;
 
@@ -349,7 +356,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         }
     }
     
-    protected final void sleep(long millis) {
+    private void sleep(long millis) {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException ignore) {
@@ -357,45 +364,24 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         }        
     }
     
-    protected final void sleepForASecond() {
-        sleep(1000);
-    }
-    
     /**
      * This is used, because there is a slight race condition in sending
      * commands. But 1 second is plenty enough time, and if it takes longer,
      * that is a problem as well.
+     */    
+    private void sleepForASecond() {
+        sleep(1000);
+    }
+    
+    /**
+     * Sends a command to the client and then waits; returns the result.
      * 
-     * @see #sleepForASecond()
+     * @return the result of sending the command to the client.
      */
-    protected final void eh() {
+    private String sendCommandToClientAndWait(String cmd, Map<String,String> args) {
         sleepForASecond();
-    }
-
-    /**
-     * Set up the little web server.
-     */
-    protected void afterSetup() {
-        super.afterSetup();
-
-        // Make sure we are downloading from the right spot
-        LWSIntegrationServices services = getInstance(LWSIntegrationServices.class);
-        services.setDownloadPrefix(constants.HOST + ":" + constants.PORT);
-
-        // Start up the server
-        server = new SimpleWebServer(constants);
-        server.start();
-
-        // Reset and authenticate
-        doAuthenticate();
-    }
-
-    /**
-     * Tear down the little web server.
-     */
-    protected void afterTearDown() {
-        super.afterTearDown();
-        server.stop();
-        sleep(2000);
+        String res = sendCommandToClient(cmd, args);
+        sleepForASecond();
+        return res;
     }
 }

@@ -57,18 +57,18 @@ public interface LWSIntegrationServices {
          */
         Version("version");
 
-        private final String s;
+        private final String value;
 
         Info(String s) {
-            this.s = s;
+            this.value = s;
         }
 
         public String getValue() {
-            return s;
+            return value;
         }
 
         public String toString() {
-            return s;
+            return value;
         }
     }
 
@@ -87,34 +87,5 @@ public interface LWSIntegrationServices {
      * @param downloadPrefix new download prefix
      */
     void setDownloadPrefix(String downloadPrefix);
-    
-    /*
-     * The following two are mainly for testing.
-     */
-    
-    /**
-     * Returns a new {@link RemoveFileDesc} for the file name, relative path,
-     * and file length given.
-     * 
-     * @param fileName simple file name to which we save
-     * @param urlString relative path of the URL we use to perform the download
-     * @param length length of the file or <code>-1</code> to look up the
-     *        length remotely
-     * @return a new {@link RemoveFileDesc} for the file name, relative path,
-     *         and file length given.
-     */
-    RemoteFileDesc createRemoteFileDescriptor(String fileName, String urlString, long length)
-            throws IOException, URISyntaxException, HttpException, InterruptedException;
-
-    /**
-     * Returns a new Store {@link Downloader} for the given arguments.
-     * 
-     * @param rfd file descriptor used for the download. This should be created
-     *        from {@link #createRemoteFileDescriptor(String, String, long)}.
-     * @param saveDir directory to which we save the downloaded file
-     * @return a new Store {@link Downloader} for the given arguments.
-     * @throws SaveLocationException
-     */
-    Downloader createDownloader(RemoteFileDesc rfd, File saveDir) throws SaveLocationException;
     
 }

@@ -544,6 +544,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
 
     /**
      * Codes that are sent to the code (javascript) when an error occurs.
+     * NOTE: All errors have dots in them: https://www.limewire.org/fisheye/cru/LWCR-109/review#c3737
      */
     public interface ErrorCodes {
     

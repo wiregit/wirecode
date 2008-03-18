@@ -11,6 +11,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.DownloadTestCase;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.LWSIntegrationServices;
+import com.limegroup.gnutella.downloader.LWSIntegrationServicesImpl;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 
 public class LowLevelLWSDownloadTest extends DownloadTestCase {
@@ -44,13 +45,13 @@ public class LowLevelLWSDownloadTest extends DownloadTestCase {
     // -----------------------------------------------------------
 
     private final LWSDownloadTestConstants constants = new LWSDownloadTestConstants();
-    private LWSIntegrationServices services;
+    private LWSIntegrationServicesImpl services;
     private SimpleWebServer server;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        services = injector.getInstance(LWSIntegrationServices.class);
+        services = (LWSIntegrationServicesImpl)injector.getInstance(LWSIntegrationServices.class);
         services.setDownloadPrefix(constants.HOST + ":" + constants.PORT);
         
         server = new SimpleWebServer(constants);

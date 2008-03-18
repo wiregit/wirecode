@@ -23,6 +23,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.Mutable;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
@@ -268,6 +269,17 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         this.downloadPrefix = downloadPrefix;
     }
     
+   /**
+     * Returns a new {@link RemoveFileDesc} for the file name, relative path,
+     * and file length given.
+     * 
+     * @param fileName simple file name to which we save
+     * @param urlString relative path of the URL we use to perform the download
+     * @param length length of the file or <code>-1</code> to look up the
+     *        length remotely
+     * @return a new {@link RemoveFileDesc} for the file name, relative path,
+     *         and file length given.
+     */
     public RemoteFileDesc createRemoteFileDescriptor(String fileName, String urlString, long length) throws IOException, URISyntaxException, HttpException, InterruptedException {
         //
         // We don't want to pass in a full URL and download it, so have
@@ -295,7 +307,17 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         return rfd;
     }
     
-    public Downloader createDownloader(RemoteFileDesc rfd, File saveDir) throws SaveLocationException {
+   /**
+     * Returns a new Store {@link Downloader} for the given arguments.
+     * 
+     * @param rfd file descriptor used for the download. This should be created
+     *        from {@link #createRemoteFileDescriptor(String, String, long)}.
+     * @param saveDir directory to which we save the downloaded file
+     * @return a new Store {@link Downloader} for the given arguments.
+     * @throws SaveLocationException
+     */
+    public Downloader createDownloader(RemoteFileDesc rfd, File saveDir)
+            throws SaveLocationException {
         //
         // We'll associate the identity hash code of the downloader
         // with this file so that the web page can keep track
@@ -305,23 +327,26 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         // Make sure we aren't already downloading this
         //
         String fileName = rfd.getFileName();
-        Downloader downloader = null;
+        final Mutable<Downloader> downloader = new Mutable<Downloader>();
         synchronized (lwsIntegrationServicesDelegate) {
-            File saveFile = new File(saveDir, fileName);
-            for (CoreDownloader d : lwsIntegrationServicesDelegate.getAllDownloaders()) {
-                if (d.conflictsSaveFile(saveFile)) {
-                    downloader = d;
-                    break;
+            final File saveFile = new File(saveDir, fileName);
+            lwsIntegrationServicesDelegate.visitDownloads(new Visitor<CoreDownloader>() {
+                public boolean visit(CoreDownloader d) {
+                    if (d.conflictsSaveFile(saveFile)) {
+                        downloader.set(d);
+                        return false; // don't continue
+                    }
+                    return true; // continue
                 }
-            }
+            });
         }
-        if (downloader == null) {
-            downloader = downloadServices.downloadFromStore(rfd, true, saveDir, fileName);
+        if (downloader.get() == null) {
+            downloader.set(downloadServices.downloadFromStore(rfd, true, saveDir, fileName));
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug("Have downloader " + downloader.toString());
         }
-        return downloader;
+        return downloader.get();
     }
    
     public void init() {
@@ -548,17 +573,22 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
             //
             // Find the downloader, by System.identityHashCode()
             //
-            for (Downloader downloader : del.getAllDownloaders()) {
-                String hash = String.valueOf(System.identityHashCode(downloader));
-                if (hash.equals(id)) {
-                    takeAction(downloader);
-                    return hash;
+            final Mutable<String> res = new Mutable<String>("OK");
+            del.visitDownloads(new Visitor<CoreDownloader>() {
+                public boolean visit(CoreDownloader d) {  
+                    String hash = String.valueOf(System.identityHashCode(d));
+                    if (hash.equals(id)) {
+                        takeAction(d);
+                        res.set(hash);
+                        return false; // we're done
+                    }
+                    return true; // continue
                 }
-            }
+            });
             //
             // The response don't matter
             //
-            return "OK";
+            return res.get();
         }         
     }
     
@@ -581,24 +611,27 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
             //
             // Find the downloaders and compare by System.identityHashCode()
             //
-            StringBuffer res = new StringBuffer();
+            final StringBuffer res = new StringBuffer();
             //
             // Use another list to avoid concurrent modification errors
             //
-            List<Downloader> downloadersToAffect = new ArrayList<Downloader>();
-            for (Downloader downloader : del.getAllDownloaders()) {
-                String hash = String.valueOf(System.identityHashCode(downloader));
-                for (String id : downloaderIDs2progressBarIDs.keySet()) {
-                    if (hash.equals(id)) {
-                        downloadersToAffect.add(downloader);
-                        if (res.length() > 0) {
-                            res.append(" ");
+            final List<Downloader> downloadersToAffect = new ArrayList<Downloader>();
+            del.visitDownloads(new Visitor<CoreDownloader>() {
+                public boolean visit(CoreDownloader d) {
+                    String hash = String.valueOf(System.identityHashCode(d));
+                    for (String id : downloaderIDs2progressBarIDs.keySet()) {
+                        if (hash.equals(id)) {
+                            downloadersToAffect.add(d);
+                            if (res.length() > 0) {
+                                res.append(" ");
+                            }
+                            res.append(id);
+                            break;
                         }
-                        res.append(id);
-                        continue;
                     }
-                }
-            }
+                    return true; // continue
+                }          
+            });
             for (int i=0; i<downloadersToAffect.size(); i++) {
                 takeAction(downloadersToAffect.get(i));
             }
@@ -704,7 +737,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         //
         // Return a string mapping urns to download percentages
         //
-        StringBuffer res = new StringBuffer();
+        final StringBuffer res = new StringBuffer();
         //
         // Remember the downloader that are actually active, so we see
         // if there are any that once existed
@@ -713,18 +746,19 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         // for why we have to do this
         //
         final Set<String> activeDownloaderIDS = new HashSet<String>();
-        synchronized (lwsIntegrationServicesDelegate) {
-            for (CoreDownloader d : lwsIntegrationServicesDelegate.getAllDownloaders()) {
-                if (d == null) continue;
-                if (!(d instanceof StoreDownloader)) continue;
+        lwsIntegrationServicesDelegate.visitDownloads(new Visitor<CoreDownloader>() {
+            public boolean visit(CoreDownloader d) {
+                if (d == null) return true;
+                if (!(d instanceof StoreDownloader)) return true;
                 String id = String.valueOf(System.identityHashCode(d));
                 if (!everActiveDownloaderIDs2Downloaders.containsKey(id)) {
                     everActiveDownloaderIDs2Downloaders.put(id, new HeavyWeightDownloaderInterface(d));
                 }
                 activeDownloaderIDS.add(id);
                 recordProgress(d, res, id);
+                return true;
             }
-        }
+        });
         //
         // Now check whether the list of ever-active downloaders
         // contains a downloader
