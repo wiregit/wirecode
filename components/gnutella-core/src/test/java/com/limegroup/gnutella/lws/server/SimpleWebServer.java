@@ -51,7 +51,7 @@ final class SimpleWebServer {
             public void run() {
                 try {
                     LOG.info("Waiting on port " + port);
-                    ServerSocket serverSocket = new ServerSocket(port);
+                    serverSocket = new ServerSocket(port);
                     LOG.info("Have server socket " + serverSocket);
                     Socket socket = serverSocket.accept();
                     LOG.info("Have socket " + socket);
