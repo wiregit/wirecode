@@ -10,7 +10,7 @@ import java.nio.channels.ReadableByteChannel;
  */
 class BELong extends NumberToken<Long> {
     
-    private static final BigInteger MAX = BigInteger.valueOf(Integer.MAX_VALUE);
+    private static final BigInteger MAX = BigInteger.valueOf(Long.MAX_VALUE);
     
     public BELong(ReadableByteChannel chan, byte terminator, byte firstByte) {
         super(chan, terminator, firstByte);
