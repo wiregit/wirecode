@@ -15,9 +15,7 @@ public interface KeywordUtil {
      *         <li>drop stop words (currently just English), but only if the
      *         query would have at least two words remaining after dropping
      *         these words
-     *         <li>Take the first two longest words (by character count) and
-     *         put them first, longest word first, then alphabetical
-     *         <li>Take the rest of the words and sort them alphabetically
+     *         <li>sort words alphabetically
      */
     String normalizeQuery(String query);
 
@@ -30,8 +28,9 @@ public interface KeywordUtil {
 
     /**
      * Takes as an input the String returned from
-     * {@link org.limewire.promotion.containers.PromotionMessageContainer#getKeywords()} and splits it on the tab
-     * character, then normalizes each phrase and returns the normalized list.
+     * {@link org.limewire.promotion.containers.PromotionMessageContainer#getKeywords()}
+     * and splits it on the tab character, then normalizes each phrase and
+     * returns the normalized list.
      */
     List<String> splitKeywords(String keywords);
 }

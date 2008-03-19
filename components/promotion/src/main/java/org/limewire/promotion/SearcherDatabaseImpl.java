@@ -149,10 +149,10 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
                         + "values (?,?,?,?,?,?)", promo.getUniqueID(), promo.getProbability(),
                 promo.getMediaType().getValue(), promo.getValidStart(), promo.getValidEnd(), promo
                         .getEncoded());
-        for (String keywords : keywordUtil.splitKeywords(promo.getKeywords()))
+        for (String keyword : keywordUtil.splitKeywords(promo.getKeywords()))
             executeInsert(
                     "INSERT INTO keywords (phrase, binder_unique_id, entry_id) values (?,?,?)",
-                    keywords, binderID, entryID);
+                    keywordUtil.normalizeQuery(keyword), binderID, entryID);
     }
 
     public void ingest(PromotionBinder binder) {
@@ -163,7 +163,9 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
     public List<QueryResult> query(String query) {
         List<QueryResult> results = new ArrayList<QueryResult>();
 
-        String normalizedQuery = "%" + keywordUtil.normalizeQuery(query) + "%";
+        // We add '%' instead of spaces so we basically find all keyword sets
+        // that have all or more of the words we enter
+        String normalizedQuery = "%" + keywordUtil.normalizeQuery(query).replace(' ', '%') + "%";
 
         PreparedStatement statement = null;
         try {

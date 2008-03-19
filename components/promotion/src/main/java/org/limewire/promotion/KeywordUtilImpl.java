@@ -51,20 +51,8 @@ public class KeywordUtilImpl implements KeywordUtil {
             return null;
         query = stripPunctuation(query);
         query = I18NConvert.instance().getNorm(query);
-        String[] queryArray = sortByLength(query.split(" "));
+        String[] queryArray = sortAlphabetically(query.split(" "));
         queryArray = stripEnglishStopWords(queryArray);
-        // If the query is short, just return it in length-sorted order
-        if (queryArray.length <= 2)
-            return unsplitString(queryArray);
-
-        // OK, we have a query with 3 or more words, so we have to do the
-        // two-part sort, first two longest words, then the remaining words.
-
-        String[] remaining = new String[queryArray.length - 2];
-        System.arraycopy(queryArray, 2, remaining, 0, remaining.length);
-        remaining = sortAlphabetically(remaining);
-        System.arraycopy(remaining, 0, queryArray, 2, remaining.length);
-
         return unsplitString(queryArray);
     }
 
@@ -127,15 +115,15 @@ public class KeywordUtilImpl implements KeywordUtil {
 
     public long getHashValue(String query) {
         query = normalizeQuery(query);
-        String[] words = query.split(" ");
+        final String[] words = sortByLength(query.split(" "));
         query = "";
         if (words.length > 0)
             query = words[0];
         if (words.length > 1)
             query += " " + words[1];
 
-        byte[] sha1 = computeSHA1(query);
-        byte[] hashArray = new byte[8];
+        final byte[] sha1 = computeSHA1(query);
+        final byte[] hashArray = new byte[8];
         System.arraycopy(sha1, 0, hashArray, 0, 8);
         // Make sure it's not negative (no leading bit set)
         hashArray[0] &= 127;
