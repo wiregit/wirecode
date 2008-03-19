@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
+import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
@@ -173,7 +174,7 @@ public class DownloadTestCase extends LimeTestCase {
                 ScheduledExecutorService.class, Names.named("backgroundExecutor")));
         scheduledExecutorService.scheduleWithFixedDelay(click, 0, 1000, TimeUnit.MILLISECONDS);
 
-        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
+        lifecycleManager = injector.getInstance(LifecycleManager.class);
         lifecycleManager.start();
 
         acceptor = injector.getInstance(Acceptor.class);
@@ -223,6 +224,8 @@ public class DownloadTestCase extends LimeTestCase {
     }
 
     protected void tearDown() throws Exception {
+        if (lifecycleManager != null) lifecycleManager.shutdown();
+        
         for (int i = 0; i < testUploaders.length; i++) {
             if (testUploaders[i] != null) {
                 testUploaders[i].reset();
@@ -238,7 +241,7 @@ public class DownloadTestCase extends LimeTestCase {
                     .shutdownNow();
     }
 
-    protected void deleteAllFiles() {
+    private void deleteAllFiles() {
         if (!dataDir.exists())
             return;
 
@@ -246,19 +249,12 @@ public class DownloadTestCase extends LimeTestCase {
         for (int i = 0; i < files.length; i++) {
             if (files[i].isDirectory()) {
                 if (files[i].getName().equalsIgnoreCase("incomplete"))
-                    deleteDirectory(files[i]);
+                    FileUtils.deleteRecursive(files[i]);
                 else if (files[i].getName().equals(saveDir.getName()))
-                    deleteDirectory(files[i]);
+                    FileUtils.deleteRecursive(files[i]);
             }
         }
         dataDir.delete();
-    }
-
-    protected void deleteDirectory(File dir) {
-        File[] files = dir.listFiles();
-        for (int i = 0; i < files.length; i++)
-            files[i].delete();
-        dir.delete();
     }
 
     protected void tGeneric(RemoteFileDesc[] rfds) throws Exception {
@@ -392,18 +388,22 @@ public class DownloadTestCase extends LimeTestCase {
     }
 
     /** Returns true if the complete file exists and is complete */
-    protected boolean isComplete() {
-        LOG.debug("file is " + savedFile.getPath());
-        if (savedFile.length() < TestFile.length()) {
-            LOG.debug("File too small by: " + (TestFile.length() - savedFile.length()));
+    protected final boolean isComplete() {
+        return isComplete(savedFile, TestFile.length());
+    }
+    
+    protected final boolean isComplete(File f, long length) {
+        LOG.debug("file is " + f.getPath());
+        if (f.length() < length) {
+            LOG.debug("File too small by: " + (length - f.length()));
             return false;
         } else if (savedFile.length() > TestFile.length()) {
-            LOG.debug("File too large by: " + (savedFile.length() - TestFile.length()));
+            LOG.debug("File too large by: " + (length - f.length()));
             return false;
         }
         FileInputStream stream = null;
         try {
-            stream = new FileInputStream(savedFile);
+            stream = new FileInputStream(f);
             for (int i = 0;; i++) {
                 int c = stream.read();
                 if (c == -1)//eof
@@ -432,6 +432,8 @@ public class DownloadTestCase extends LimeTestCase {
     protected final int COMPLETE = 2;
 
     protected final int INVALID = 3;
+
+    private LifecycleManager lifecycleManager;
 
     protected void waitForComplete(boolean corrupt) {
         waitForCompleteImpl(corrupt ? CORRUPT : COMPLETE);

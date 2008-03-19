@@ -174,7 +174,7 @@ public abstract class AbstractServer implements Runnable  {
             }
             while (!isDone()) {
                 Socket s = serverSocket.accept();
-                Worker ws = new Worker("lws worked #" + (threadCounter++));
+                Worker ws = new Worker("lws worker #" + (threadCounter++));
                 ws.setSocket(s, tmpPort);
                 addNewThread(ws);
             }

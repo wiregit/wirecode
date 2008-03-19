@@ -40,6 +40,7 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
     private final LWSSenderOfMessagesToServer sender;
     private String publicKey;
     private String privateKey;
+    private String sharedKey;
     
     public LWSDispatcherImpl(LWSSenderOfMessagesToServer sender) {
         this.sender = sender;
@@ -95,11 +96,17 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
         return privateKey;
     }
 
+    final String getSharedKey() {
+        return sharedKey;
+    }
+
     private void regenerateKeys() {
         publicKey = LWSServerUtil.generateKey();
         privateKey = LWSServerUtil.generateKey();
+        sharedKey = LWSServerUtil.generateKey();
         note("public key  : {0}", publicKey);
         note("private key : {0}", privateKey);
+        note("shared key  : {0}", sharedKey);
     }
 
     // ------------------------------------------------------------
@@ -113,6 +120,9 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
     protected abstract class HandlerWithCallbackWithPrivateKey extends HandlerWithCallback {
 
         protected final void handleRest(final Map<String, String> args, StringCallback cb) {
+            //
+            // Check the private key
+            //
             String privateKey = getPrivateKey();
             if (privateKey == null) {
                 cb.process(report(LWSDispatcherSupport.ErrorCodes.UNITIALIZED_PRIVATE_KEY));
@@ -123,11 +133,28 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
                 cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_PRIVATE_KEY_PARAMETER));
                 return;
             }
-            if (!herPrivateKey.equals(getPrivateKey())) {
+            if (!herPrivateKey.equals(privateKey)) {
                 cb.process(report(LWSDispatcherSupport.ErrorCodes.INVALID_PRIVATE_KEY));
                 return;
             }
-            handleRest(herPrivateKey, args, cb);
+            //
+            // Check the shared key
+            //
+            String sharedKey = getSharedKey();
+            if (sharedKey == null) {
+                cb.process(report(LWSDispatcherSupport.ErrorCodes.UNITIALIZED_SHARED_KEY));
+                return;
+            }
+            String herSharedKey = args.get(LWSDispatcherSupport.Parameters.SHARED);
+            if (herSharedKey == null) {
+                cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_SHARED_KEY_PARAMETER));
+                return;
+            }
+            if (!herSharedKey.equals(sharedKey)) {
+                cb.process(report(LWSDispatcherSupport.ErrorCodes.INVALID_SHARED_KEY));
+                return;
+            }            
+            handleRest(herPrivateKey, herSharedKey, args, cb);
         }
 
         /**
@@ -136,11 +163,12 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
          * with the passed along private key, too.
          * 
          * @param privateKey private key pulled from the args
+         * @param herSharedKey the shared key sent from a Browser
          * @param args original, untouched arguments
          * @return result <b>IN PLAIN TEXT</b> using the private key,
          *         <tt>privateKey</tt>
          */
-        abstract void handleRest(String privateKey,Map<String, String> args, StringCallback cb);
+        abstract void handleRest(String privateKey,String herSharedKey, Map<String, String> args, StringCallback cb);
     }
 
     /**
@@ -161,7 +189,7 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
                         //
                         // This could have a trailing space, so be nice
                         //
-                        cb.process(response.indexOf(Responses.OK) != -1 ? publicKey : "0");
+                        cb.process(response.indexOf(Responses.OK) != -1 ? publicKey + " " + sharedKey : "0");
                     }
                 });
             } catch (IOException e) {
@@ -174,7 +202,7 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
      * Sent from code with private key to authenticate.
      */
     class Authenticate extends HandlerWithCallbackWithPrivateKey {
-        protected void handleRest(String privateKey, Map<String, String> args, StringCallback cb) {
+        protected void handleRest(String privateKey, String herSharedKey, Map<String, String> args, StringCallback cb) {
             getCommandReceiver().setConnected(true);
             cb.process(LWSDispatcherSupport.Responses.OK);
         }
@@ -197,8 +225,8 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
      */
     class Msg extends HandlerWithCallbackWithPrivateKey {
         protected void handleRest(String privateKey,
-                                    Map<String, String> args,
-                                    StringCallback cb) {
+                                    String herSharedKey,
+                                    Map<String, String> args, StringCallback cb) {
             String cmd = args.get(LWSDispatcherSupport.Parameters.COMMAND);
             if (cmd == null) {
                 cb.process(report(LWSDispatcherSupport.ErrorCodes.MISSING_COMMAND_PARAMETER));
