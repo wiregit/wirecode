@@ -1,13 +1,31 @@
 package org.limewire.xmpp.client;
 
-import org.jivesoftware.smack.*;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
+import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.ConnectionCreationListener;
+import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
-
-import javax.swing.*;
-import java.awt.event.*;
-import java.awt.*;
-import java.io.File;
+import org.jivesoftware.smackx.jingle.JingleManager;
 
 public class LoginDialog extends JDialog {
     private JPanel contentPane;
@@ -20,6 +38,11 @@ public class LoginDialog extends JDialog {
     private static final String LW_SERVICE_NAME = "limewire";
 
     static {
+        try {
+            Class.forName("org.jivesoftware.smackx.jingle.JingleManager");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
         XMPPConnection.addConnectionCreationListener(new ConnectionCreationListener() {
             public void connectionCreated(final XMPPConnection connection) {
                 ServiceDiscoveryManager.getInstanceFor(connection).addFeature(LW_SERVICE_NS);
@@ -29,7 +52,6 @@ public class LoginDialog extends JDialog {
                 connection.addPacketListener(searcheResultListener, searcheResultListener.getPacketFilter());
                 ProviderManager.getInstance().addIQProvider("search", "jabber:iq:lw-search", SearchResult.getIQProvider());
                 ProviderManager.getInstance().addIQProvider("search-results", "jabber:iq:lw-search-results", SearchResult.getIQProvider());
-
             }
         });
     }
