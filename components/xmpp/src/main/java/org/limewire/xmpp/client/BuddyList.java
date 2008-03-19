@@ -26,6 +26,7 @@ import org.jivesoftware.smackx.jingle.OutgoingJingleSession;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
 import org.jivesoftware.smackx.jingle.mediaimpl.jmf.JmfMediaManager;
 import org.jivesoftware.smackx.jingle.nat.BasicTransportManager;
+import org.jivesoftware.smackx.jingle.nat.ICETransportManager;
 
 public class BuddyList {
     private JPanel myPanel;
@@ -81,7 +82,7 @@ public class BuddyList {
             }
         }
         
-        jingleOUT("tim.julien@gmail.com/limewire919DEFD3");
+        jingleOUT("tim.julien@gmail.com/limewire08A3FA9A");
     }
 
     private void createUIComponents() {
@@ -184,7 +185,7 @@ public class BuddyList {
     }
     
     private void jingleOUT(String to) {
-        JingleManager manager = new JingleManager(connection, new BasicTransportManager());
+        JingleManager manager = new JingleManager(connection, new ICETransportManager(connection, "jstun.javawi.de", 3478));
         try {
             manager.setMediaManager(new JmfMediaManager());
             OutgoingJingleSession out = manager.createOutgoingJingleSession(to);
