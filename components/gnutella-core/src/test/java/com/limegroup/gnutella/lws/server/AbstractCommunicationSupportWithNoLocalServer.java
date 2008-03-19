@@ -7,7 +7,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.lws.server.LWSDispatcherSupport;
-import org.limewire.lws.server.FakeJavascriptCodeInTheWebpage;
 import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.net.SocketsManager;
 
