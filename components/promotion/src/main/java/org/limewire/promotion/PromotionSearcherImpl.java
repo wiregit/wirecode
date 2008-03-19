@@ -23,7 +23,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
 
     private final PromotionBinderRepository promotionBinderRepository;
 
-    private int maxNumberOfResults;
+    private int maxNumberOfResults = 5;
 
     @Inject
     public PromotionSearcherImpl(KeywordUtil keywordUtil, SearcherDatabase searcherDatabase,
