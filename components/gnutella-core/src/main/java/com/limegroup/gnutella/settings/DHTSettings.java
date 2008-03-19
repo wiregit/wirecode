@@ -314,6 +314,14 @@ public class DHTSettings extends LimeProps {
         = FACTORY.createRemoteLongSetting("TIME_BETWEEN_PUSH_PROXY_QUERIES",
                 5L * 60L * 1000L, "DHT.TimeBetweenPushProxyQueries",
                 10L * 1000L, Long.MAX_VALUE);
+
+    /**
+     * The time in milliseconds push proxies have to be stable before being published.
+     */
+    public static final LongSetting PUSH_PROXY_STABLE_PUBLISHING_INTERVAL
+    = FACTORY.createRemoteLongSetting("PUSH_PROXY_STABLE_PUBLISHING_INTERVAL",
+            60L * 1000L, "DHT.pushProxyStablePublishingInterval",
+            10L * 1000L, Long.MAX_VALUE);
     
     /**
      * This setting is storing the most recent DHT Node ID for debugging purposes.

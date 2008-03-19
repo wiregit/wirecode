@@ -92,7 +92,7 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
     
     @Override
     public final int hashCode() {
-        return getPort() + getFeatures() * 31 + + getFwtVersion() * 31 * 31 
+        return getPort() + getFeatures() * 31 + getFwtVersion() * 31 * 31 
         + computeHashCode(getPushProxies()) * 31 * 31 * 31
         + getTLSInfo().hashCode() * 31 * 31 * 31 * 31;
     }
@@ -106,10 +106,6 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
         return hashCode;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("GUID=").append(new GUID(getGUID())).append("\n");

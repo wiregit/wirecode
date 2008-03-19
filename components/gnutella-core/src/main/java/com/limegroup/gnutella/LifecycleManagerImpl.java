@@ -39,6 +39,7 @@ import com.limegroup.gnutella.browser.LocalAcceptor;
 import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.LWSIntegrationServices;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
@@ -135,6 +136,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
     private final Provider<MagnetDownloaderPushEndpointFinder> magnetDownloaderPushEndpointFinder;
 
+    private final Provider<PushProxiesPublisher> pushProxiesPublisher;
+
     @Inject
     public LifecycleManagerImpl(
              Provider<IPFilter> ipFilter,
@@ -181,7 +184,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<OutOfBandThroughputMeasurer> outOfBandThroughputMeasurer,
             Provider<BrowseHostHandlerManager> browseHostHandlerManager,
             Provider<DownloadUpgradeTask> downloadUpgradeTask,
-            Provider<MagnetDownloaderPushEndpointFinder> magnetDownloaderPushEndpointFinder) { 
+            Provider<MagnetDownloaderPushEndpointFinder> magnetDownloaderPushEndpointFinder,
+            Provider<PushProxiesPublisher> pushProxiesPublisher) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -228,6 +232,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.browseHostHandlerManager = browseHostHandlerManager;
         this.downloadUpgradeTask = downloadUpgradeTask;
         this.magnetDownloaderPushEndpointFinder = magnetDownloaderPushEndpointFinder;
+        this.pushProxiesPublisher = pushProxiesPublisher;
     }
     
     /* (non-Javadoc)
@@ -269,6 +274,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         connectionManager.get().addEventListener(activityCallback.get());
         connectionManager.get().addEventListener(dhtManager.get());
+        dhtManager.get().addEventListener(pushProxiesPublisher.get());
         
         preinitializeDone.set(true);
     }
