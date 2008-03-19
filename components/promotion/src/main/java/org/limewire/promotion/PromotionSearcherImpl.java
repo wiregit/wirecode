@@ -20,6 +20,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
     private final SearcherDatabase searcherDatabase;
 
     private final ImpressionsCollector impressionsCollector;
+
     private final PromotionBinderRepository promotionBinderRepository;
 
     private int maxNumberOfResults;
@@ -40,13 +41,12 @@ public class PromotionSearcherImpl implements PromotionSearcher {
      * <ol>
      * <li> normalize the query using {@link KeywordUtil}
      * <li> expire any db results that have passed
-     * <li> search the current search db and callback results
-     * <li> check to see when the last time this bucket has been fetched, and
-     * continue if has not been fetched or it has expired
      * <li> request the {@link PromotionBinder} for this query from the
-     * {@link PromotionBinderRepository}
+     * {@link PromotionBinderRepository} (may be cached)
      * <li> insert all valid {@link PromotionMessageContainer} entries into db
-     * <li> rerun the db search and callback any new results
+     * <li> run the db search and callback results, but using maxNumberOfResults
+     * as a limit, and using the probability field to decide if a return result
+     * should REALLY be shown.
      * </ol>
      * 
      * @param query the searched terms
@@ -57,7 +57,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
             GeocodeInformation userLocation) {
         new SearcherThread(query, callback, userLocation).start();
     }
-    
+
     public void init(int maxNumberOfResults) {
         this.maxNumberOfResults = maxNumberOfResults;
     }
@@ -131,12 +131,22 @@ public class PromotionSearcherImpl implements PromotionSearcher {
                             List<QueryResult> results = searcherDatabase.query(normalizedQuery);
                             removeInvalidResults(results);
 
+                            int shownResults = 0;
                             for (QueryResult result : results) {
-                                callback.process(result.getPromotionMessageContainer());
-                                // record we just showed this result.
-                                impressionsCollector.recordImpression(query, timeQueried,
-                                        new Date(), result.getPromotionMessageContainer(), result
-                                                .getBinderUniqueId());
+                                float probability = result.getPromotionMessageContainer()
+                                        .getProbability();
+                                // Introduce some randomness into results using
+                                // the probability field
+                                if (Math.random() <= probability) {
+                                    shownResults++;
+                                    callback.process(result.getPromotionMessageContainer());
+                                    // record we just showed this result.
+                                    impressionsCollector.recordImpression(query, timeQueried,
+                                            new Date(), result.getPromotionMessageContainer(),
+                                            result.getBinderUniqueId());
+                                }
+                                if (shownResults >= maxNumberOfResults)
+                                    break;
                             }
                         }
 
