@@ -1,19 +1,37 @@
 package org.limewire.xmpp.client;
 
-import org.jivesoftware.smack.*;
-import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smackx.ServiceDiscoveryManager;
-
-import javax.swing.*;
-import javax.swing.tree.DefaultMutableTreeNode;
-import java.awt.*;
+import java.awt.Insets;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Iterator;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.RosterEntry;
+import org.jivesoftware.smack.RosterListener;
+import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smackx.ServiceDiscoveryManager;
+import org.jivesoftware.smackx.jingle.IncomingJingleSession;
+import org.jivesoftware.smackx.jingle.JingleManager;
+import org.jivesoftware.smackx.jingle.JingleSessionRequest;
+import org.jivesoftware.smackx.jingle.OutgoingJingleSession;
+import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
+import org.jivesoftware.smackx.jingle.mediaimpl.jmf.JmfMediaManager;
+import org.jivesoftware.smackx.jingle.nat.BasicTransportManager;
 
 public class BuddyList {
     private JPanel myPanel;
     private JTree tree1;
     private DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+    private final XMPPConnection connection;
 
     public static void create(XMPPConnection connection) {
         JFrame frame = new JFrame("BuddyList");
@@ -24,6 +42,7 @@ public class BuddyList {
     }
 
     public BuddyList(final XMPPConnection connection) {
+        this.connection = connection;
         $$$setupUI$$$();
         new Thread(new Runnable() {
             public void run() {
@@ -37,25 +56,32 @@ public class BuddyList {
         ServiceDiscoveryManager serviceDiscoveryManager = ServiceDiscoveryManager.getInstanceFor(connection);
 
         Roster roster = connection.getRoster();
-        roster.addRosterListener(new RosterListenerImpl(connection));
+        //roster.addRosterListener(new RosterListenerImpl(connection));
 
-        /*HashSet<String> limewireClients = new HashSet<String>();
+        HashSet<String> limewireClients = new HashSet<String>();
         for (RosterEntry rosterEntry : roster.getEntries()) {
-            root.add(new DefaultMutableTreeNode(rosterEntry.getName()));
-            tree1.updateUI();
+//            root.add(new DefaultMutableTreeNode(rosterEntry.getName()));
+//            tree1.updateUI();
             Iterator<Presence> presences = roster.getPresences(rosterEntry.getUser());
             while (presences.hasNext()) {
                 Presence presence = presences.next();
-                try {
-                    if (serviceDiscoveryManager.discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/")) {
-                        limewireClients.add(presence.getFrom());
-                        System.out.println("found lw client: " + presence.getFrom());
+                if (presence.getType() == Presence.Type.available) {
+                    System.out.println("found: " + rosterEntry.getName());
+                    root.add(new DefaultMutableTreeNode(rosterEntry.getName()));
+                    tree1.updateUI();
+                    try {
+                        if (serviceDiscoveryManager.discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/")) {
+                            limewireClients.add(presence.getFrom());
+                            System.out.println("found lw client: " + presence.getFrom());
+                        }
+                    } catch (XMPPException exception) {
+                        //exception.printStackTrace();
                     }
-                } catch (XMPPException exception) {
-                    //exception.printStackTrace();
                 }
             }
-        }*/
+        }
+        
+        jingleOUT("tim.julien@gmail.com/limewire919DEFD3");
     }
 
     private void createUIComponents() {
@@ -139,4 +165,36 @@ public class BuddyList {
             }
         }
     }
+    
+    private void jingleIN() {
+        JingleManager manager = new JingleManager(connection, new BasicTransportManager());
+        manager.addJingleSessionRequestListener(new JingleSessionRequestListener() {
+            public void sessionRequested(JingleSessionRequest request) {
+
+                try {
+                    // Accept the call
+                    IncomingJingleSession session = request.accept();
+                    // Start the call
+                    session.start();
+                } catch (XMPPException e) {
+                    e.printStackTrace();
+               }
+          }
+      });
+    }
+    
+    private void jingleOUT(String to) {
+        JingleManager manager = new JingleManager(connection, new BasicTransportManager());
+        try {
+            manager.setMediaManager(new JmfMediaManager());
+            OutgoingJingleSession out = manager.createOutgoingJingleSession(to);
+            
+            out.start();
+        
+            out.terminate();
+        } catch (XMPPException e) {
+            e.printStackTrace();
+        }
+    }
+    
 }
