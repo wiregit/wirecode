@@ -1,6 +1,5 @@
 package org.limewire.promotion;
 
-
 /**
  * Provides a mechanism to retrieve {@link PromotionBinder} instances, which may
  * be retrieved from the network, cached on disk, or distributed in some other
@@ -9,8 +8,8 @@ package org.limewire.promotion;
 public interface PromotionBinderRepository {
 
     /**
-     * This is the preferred way to retrieve a bucket-based binder. This method
-     * may hit the network, or may pull the content from disk cache.
+     * This is the main way to retrieve a bucket-based binder. This method may
+     * hit the network, or may pull the content from cache.
      * 
      * @param bucketNumber a 63-bit number, that this factory will take a
      *        modulus of to determine the real bucket to retrieve.
@@ -19,7 +18,7 @@ public interface PromotionBinderRepository {
      *         null if there is no matching bucket (which should be rare).
      */
     void getBinderForBucket(long bucketNumber, PromotionBinderCallback callback);
-    
+
     /**
      * Sets a remote URL to use for search.
      * 

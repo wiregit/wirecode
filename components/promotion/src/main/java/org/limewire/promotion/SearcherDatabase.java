@@ -19,6 +19,18 @@ public interface SearcherDatabase {
     void ingest(PromotionBinder binder);
 
     /**
+     * @return a binder that was previously ingested by a call to
+     *         {@link #ingest(PromotionBinder)}, or null if no match.
+     */
+    PromotionBinder getBinder(String binderUniqueName);
+
+    /**
+     * @return a binder that was previously ingested by a call to
+     *         {@link #ingest(PromotionBinder)}, or null if no match.
+     */
+    PromotionBinder getBinder(int bucketNumber);
+
+    /**
      * Removes all expired entries from the database.
      */
     void expungeExpired();
@@ -47,7 +59,7 @@ public interface SearcherDatabase {
          * @return The unique id of the binder that this result originally came
          *         from.
          */
-        long getBinderUniqueId();
+        String getBinderUniqueName();
 
         /**
          * 

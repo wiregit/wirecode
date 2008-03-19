@@ -19,7 +19,8 @@ public class SearcherDatabaseImplTest extends BaseTestCase {
     }
 
     public void testQuery() throws SQLException {
-        SearcherDatabaseImpl searcherDatabase = new SearcherDatabaseImpl(new KeywordUtilImpl());
+        SearcherDatabaseImpl searcherDatabase = new SearcherDatabaseImpl(new KeywordUtilImpl(),
+                null, null, null);
         searcherDatabase.clear();
 
         PromotionMessageContainer promo = new PromotionMessageContainer();
@@ -30,7 +31,7 @@ public class SearcherDatabaseImplTest extends BaseTestCase {
         promo.setValidStart(new Date(0));
         promo.setValidEnd(new Date(Long.MAX_VALUE));
 
-        searcherDatabase.ingest(promo, 1);
+        searcherDatabase.ingest(promo, "foo" + System.currentTimeMillis());
 
         List<SearcherDatabase.QueryResult> results = searcherDatabase.query("jaSON");
         assertEquals(1, results.size());

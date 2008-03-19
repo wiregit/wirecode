@@ -48,7 +48,7 @@ public class UserQueryEventData {
         System.arraycopy(ByteUtil.convertToBytes(event.getOriginalQueryTime().getTime(), 8), 0, bytes, inc.inc(8), 8);
         for (int i=0; i<impressions.size(); i++) {
             Impression imp = impressions.get(i);
-            System.arraycopy(ByteUtil.convertToBytes(imp.getBinderUniqueID(), 8),      0, bytes, inc.inc(8), 8);
+            System.arraycopy(imp.getBinderUniqueName().getBytes(),      0, bytes, inc.inc(8), 8);
             System.arraycopy(ByteUtil.convertToBytes(imp.getPromo().getUniqueID(), 8), 0, bytes, inc.inc(8), 8);
             System.arraycopy(ByteUtil.convertToBytes(imp.getTimeShown().getTime(), 8), 0, bytes, inc.inc(8), 8);
         }

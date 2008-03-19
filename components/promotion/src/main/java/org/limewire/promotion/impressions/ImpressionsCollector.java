@@ -17,7 +17,7 @@ public interface ImpressionsCollector {
      * event.
      */
     void recordImpression(String originalQuery, Date timeQueried, Date timeShown,
-            PromotionMessageContainer promo, long binderUniqueID);
+            PromotionMessageContainer promo, String binderUniqueName);
 
     /**
      * @return a Set of {@link UserQueryEvent} entries that have been created

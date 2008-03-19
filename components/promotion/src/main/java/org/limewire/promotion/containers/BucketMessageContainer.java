@@ -18,6 +18,8 @@ public class BucketMessageContainer extends MultiMessageContainer {
 
     private static final String KEY_NAME = "vn";
 
+    private static final String KEY_BUCKET_NUMBER = "vu";
+
     @Override
     public byte[] getType() {
         return ByteUtil.toUTF8Bytes("BKIT");
@@ -113,5 +115,24 @@ public class BucketMessageContainer extends MultiMessageContainer {
                 list.add((PromotionMessageContainer) message);
         }
         return list;
+    }
+
+    /**
+     * @param bucket Records the bucket number that this collection of messages
+     *        represents
+     */
+    public void setBucketNumber(int bucket) {
+        put(KEY_BUCKET_NUMBER, bucket);
+    }
+
+    /**
+     * @return The bucket number as set, or -1 if the bucket wasn't set or there
+     *         was a problem parsing.
+     */
+    public int getBucketNumber() {
+        Long num = getLong(KEY_BUCKET_NUMBER);
+        if (num == null)
+            return -1;
+        return num.intValue();
     }
 }

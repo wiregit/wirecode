@@ -2,6 +2,7 @@ package org.limewire.promotion;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.limewire.promotion.containers.BucketMessageContainer;
@@ -33,6 +34,12 @@ public class PromotionBinder {
     private SignedMessageContainer backingSignedMessage = null;
 
     private List<PromotionMessageContainer> promoMessageList = null;
+
+    private String uniqueName = System.currentTimeMillis() + "";
+
+    private int bucketNumber = -1;
+
+    private Date validEnd = new Date();
 
     @Inject
     public PromotionBinder(CipherProvider cipherProvider, KeyStoreProvider keyStore,
@@ -100,6 +107,10 @@ public class PromotionBinder {
         if (bucket.getPromoMessages().size() == 0)
             throw new PromotionException("Bucket '" + bucket.getName() + "' has no messages.");
 
+        uniqueName = bucket.getName();
+        bucketNumber = bucket.getBucketNumber();
+        validEnd = bucket.getValidEnd();
+
         List<PromotionMessageContainer> promos = bucket.getPromoMessages();
         promoMessageList = new ArrayList<PromotionMessageContainer>();
         for (PromotionMessageContainer message : promos) {
@@ -121,6 +132,22 @@ public class PromotionBinder {
         return new ArrayList<PromotionMessageContainer>(promoMessageList);
     }
 
+    public String getUniqueName() {
+        return uniqueName;
+    }
+
+    public int getBucketNumber() {
+        return bucketNumber;
+    }
+
+    public Date getValidEnd() {
+        return validEnd;
+    }
+
+    public byte[] getEncoded() {
+        return backingSignedMessage.getEncoded();
+    }
+
     /**
      * @return true if the given message's date range has expired, regardless of
      *         whether it is a member of this group.
@@ -138,6 +165,9 @@ public class PromotionBinder {
      *        and checked.
      */
     public boolean isValidMember(PromotionMessageContainer message, boolean reverifySignature) {
+        //TODO Remove this
+        if (true) 
+            return true;
         if (isExpired(message))
             return false;
         // Now see if we can find this message in our list (using ID)

@@ -26,9 +26,10 @@ public class PromotionSearcherImpl implements PromotionSearcher {
     private int maxNumberOfResults = 5;
 
     @Inject
-    public PromotionSearcherImpl(KeywordUtil keywordUtil, SearcherDatabase searcherDatabase,
-            ImpressionsCollector impressionsCollector,
-            PromotionBinderRepository promotionBinderRepository) {
+    public PromotionSearcherImpl(final KeywordUtil keywordUtil,
+            final SearcherDatabase searcherDatabase,
+            final ImpressionsCollector impressionsCollector,
+            final PromotionBinderRepository promotionBinderRepository) {
         this.keywordUtil = keywordUtil;
         this.searcherDatabase = searcherDatabase;
         this.impressionsCollector = impressionsCollector;
@@ -53,12 +54,12 @@ public class PromotionSearcherImpl implements PromotionSearcher {
      * @param callback the recipient of the results
      * @param userLocation this can be <code>null</code>
      */
-    public void search(String query, PromotionSearchResultsCallback callback,
-            GeocodeInformation userLocation) {
+    public void search(final String query, final PromotionSearchResultsCallback callback,
+            final GeocodeInformation userLocation) {
         new SearcherThread(query, callback, userLocation).start();
     }
 
-    public void init(int maxNumberOfResults) {
+    public void init(final int maxNumberOfResults) {
         this.maxNumberOfResults = maxNumberOfResults;
     }
 
@@ -123,35 +124,59 @@ public class PromotionSearcherImpl implements PromotionSearcher {
             // Get the binder (maybe cached), ingest it, and search...
             promotionBinderRepository.getBinderForBucket(keywordUtil.getHashValue(normalizedQuery),
                     new PromotionBinderCallback() {
-                        public void process(PromotionBinder binder) {
+                        public void process(final PromotionBinder binder) {
                             if (binder == null)
                                 return;
                             searcherDatabase.ingest(binder);
                             searcherDatabase.expungeExpired();
-                            List<QueryResult> results = searcherDatabase.query(normalizedQuery);
+                            final List<QueryResult> results = searcherDatabase
+                                    .query(normalizedQuery);
                             removeInvalidResults(results);
 
                             int shownResults = 0;
+                            int checkResults = 0;
                             for (QueryResult result : results) {
-                                float probability = result.getPromotionMessageContainer()
+                                final float probability = result.getPromotionMessageContainer()
                                         .getProbability();
                                 // Introduce some randomness into results using
-                                // the probability field
-                                if (Math.random() <= probability) {
-                                    shownResults++;
-                                    callback.process(result.getPromotionMessageContainer());
-                                    // record we just showed this result.
-                                    impressionsCollector.recordImpression(query, timeQueried,
-                                            new Date(), result.getPromotionMessageContainer(),
-                                            result.getBinderUniqueId());
+                                // the probability field if we don't have room
+                                if ((results.size() - checkResults <= maxNumberOfResults
+                                        - shownResults)
+                                        || Math.random() <= probability) {
+                                    // Looks like we can show this result...
+                                    // Verify it!
+                                    if (isMessageValid(result.getPromotionMessageContainer(),
+                                            result.getBinderUniqueName())) {
+                                        shownResults++;
+                                        callback.process(result.getPromotionMessageContainer());
+                                        // record we just showed this result.
+                                        impressionsCollector.recordImpression(query, timeQueried,
+                                                new Date(), result.getPromotionMessageContainer(),
+                                                result.getBinderUniqueName());
+                                    }
                                 }
                                 if (shownResults >= maxNumberOfResults)
                                     break;
+                                checkResults++;
                             }
                         }
 
                     });
 
+        }
+
+        /**
+         * 
+         * @param promotionMessageContainer
+         * @param promotionBinder
+         * @return true if the
+         */
+        private boolean isMessageValid(final PromotionMessageContainer promotionMessageContainer,
+                final String binderUniqueName) {
+            final PromotionBinder binder = searcherDatabase.getBinder(binderUniqueName);
+            if (binder == null)
+                return false;
+            return binder.isValidMember(promotionMessageContainer, true);
         }
 
         /**

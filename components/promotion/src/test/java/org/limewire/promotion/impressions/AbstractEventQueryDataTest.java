@@ -42,8 +42,8 @@ abstract class AbstractEventQueryDataTest extends BaseTestCase {
 
         Impression[] imps = new Impression[n];
         for (int i = 0; i < n; i++) {
-            imps[i] = new Impression(new PromotionMessageContainer(),
-                    (long) (Math.random() * Long.MAX_VALUE), new Date(L + i));
+            imps[i] = new Impression(new PromotionMessageContainer(), ""
+                    + (Math.random() * Long.MAX_VALUE), new Date(L + i));
         }
 
         UserQueryEvent e = new UserQueryEvent(Q, D);
@@ -65,7 +65,7 @@ abstract class AbstractEventQueryDataTest extends BaseTestCase {
     }
 
     private int transfer(Impression i, byte[] in, int start) {
-        arraycopy(ByteUtil.convertToBytes(i.getBinderUniqueID(), 8), 0, in, start, 8);
+        arraycopy(i.getBinderUniqueName().getBytes(), 0, in, start, 8);
         arraycopy(ByteUtil.convertToBytes(i.getPromo().getUniqueID(), 8), 0, in, start + 8, 8);
         arraycopy(date2bytes(i.getTimeShown()), 0, in, start + 16, 8);
         return start + 24;

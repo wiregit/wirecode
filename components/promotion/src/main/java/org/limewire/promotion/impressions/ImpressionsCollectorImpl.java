@@ -22,22 +22,23 @@ public final class ImpressionsCollectorImpl implements ImpressionsCollector {
      * We store the impression into a query event, and store that event in our
      * queries map. If the event doesn't yet exist, create it.
      */
-    public void recordImpression(String originalQuery, Date timeQueried, Date timeShown,
-            PromotionMessageContainer promo, long binderUniqueID) {
+    public void recordImpression(final String originalQuery, final Date timeQueried,
+            final Date timeShown, final PromotionMessageContainer promo,
+            final String binderUniqueName) {
         UserQueryEvent event = queries.get(getMapKey(originalQuery, timeQueried));
         if (event == null) {
             event = new UserQueryEvent(originalQuery, timeQueried);
             queries.put(getMapKey(originalQuery, timeQueried), event);
         }
-        event.addImpression(new Impression(promo, binderUniqueID, timeShown));
+        event.addImpression(new Impression(promo, binderUniqueName, timeShown));
     }
 
-    /** The key we use to store/retrieve */
-    private String getMapKey(String originalQuery, Date timeQueried) {
+    /** The key we use to store/retrieve. */
+    private String getMapKey(final String originalQuery, final Date timeQueried) {
         return originalQuery + ":" + timeQueried.getTime();
     }
 
-    public void removeImpressions(Set<UserQueryEvent> events) {
+    public void removeImpressions(final Set<UserQueryEvent> events) {
         for (UserQueryEvent event : events)
             queries.remove(getMapKey(event.getOriginalQuery(), event.getOriginalQueryTime()));
     }
