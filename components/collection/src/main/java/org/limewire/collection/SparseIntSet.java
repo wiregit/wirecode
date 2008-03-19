@@ -49,6 +49,18 @@ public class SparseIntSet extends AbstractSet<Integer> {
         return list.length * 4;
     }
     
+    /**
+     * @return the next element that is larger than the provided element
+     */
+    public int nextSetBit(int fromIndex) {
+        int position = binarySearch(fromIndex);
+        if (position < 0)
+            position = -(position + 1);
+        if (position == size)
+            return -1;
+        return list[position];
+    }
+    
     @Override
     public boolean add(Integer i) {
         int point = binarySearch(i);

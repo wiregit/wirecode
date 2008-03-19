@@ -96,4 +96,18 @@ public class SparseIntSetTest extends BaseTestCase {
         sparseSet.compact();
         assertEquals(4000, sparseSet.getActualMemoryUsed());
     }
+    
+    public void testNextSetBit() throws Exception {
+        SparseIntSet sparseSet = new SparseIntSet();
+        for (int i = 0; i < 1000; i++)
+            sparseSet.add(i);
+        
+        sparseSet.add(2000);
+        
+        assertEquals(999, sparseSet.nextSetBit(999));
+        assertEquals(2000, sparseSet.nextSetBit(1000));
+        assertEquals(2000, sparseSet.nextSetBit(2000));
+        assertEquals(-1, sparseSet.nextSetBit(2001));
+        
+    }
 }
