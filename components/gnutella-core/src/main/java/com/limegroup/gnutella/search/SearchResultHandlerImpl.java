@@ -45,6 +45,12 @@ import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.util.ClassCNetworks;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
+/**
+ * Search result information is now tabulated on a per-URN basis with GuidCount
+ * pairing a URN with a ResourceLocationCounter. Whole and partial results are
+ * accounted for correctly.
+ *
+ */
 @Singleton
 public class SearchResultHandlerImpl implements SearchResultHandler {
 
@@ -56,18 +62,6 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
      * to pass before giving up on it as an 'old' query.
      */
     private static final int QUERY_EXPIRE_TIME = 30 * 1000; // 30 seconds.
-
-    /**
-     * The "delay" between responses to wait to send a QueryStatusResponse.
-     */
-    public static final int REPORT_INTERVAL = 15;
-
-    /** 
-     * The maximum number of results to send in a QueryStatusResponse -
-     * basically sent to say 'shut off query'.
-     */
-    public static final int MAX_RESULTS = 65535;
-
 
     /** Used to keep track of the number of non-filtered responses per GUID.
      *  I need synchronization for every call I make, so a Vector is fine.
@@ -110,30 +104,17 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
       PUBLIC INTERFACE METHODS
      ----------------------------------------------------*/
 
-    /**
-     * Adds the Query to the list of queries kept track of.  You should do this
-     * EVERY TIME you start a query so we can leaf guide it when possible.
-     * Also adds the query to the Spam Manager to adjust percentages.
-     *
-     * @param qr The query that has been started.  We really just access the guid.
-     */ 
     public SearchResultStats addQuery(QueryRequest qr) {
         LOG.trace("entered SearchResultHandler.addQuery(QueryRequest)");
         
         if (!qr.isBrowseHostQuery() && !qr.isWhatIsNewRequest())
             spamManager.get().startedQuery(qr);
-        GuidCount gc = new GuidCount(qr);
+        GuidCount gc = new GuidCount(qr, remoteFileDescFactory, spamManager, activityCallback, searchServices);
         GUID_COUNTS.add(gc);
         
         return gc;
     }
 
-    /**
-     * Removes the Query from the list of queries kept track of.  You should do
-     * this EVERY TIME you stop a query.
-     *
-     * @param guid the guid of the query that has been removed.
-     */ 
     public void removeQuery(GUID guid) {
         LOG.trace("entered SearchResultHandler.removeQuery(GUID)");
         cncCounter.remove(guid);
@@ -149,11 +130,6 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
         }
     }
 
-    /**
-     * Returns a <tt>List</tt> of queries that require replanting into
-     * the network, based on the number of results they've had and/or
-     * whether or not they're new enough.
-     */
     public List<QueryRequest> getQueriesToReSend() {
         LOG.trace("entered SearchResultHandler.getQueriesToSend()");
         List<QueryRequest> reSend = null;
@@ -176,65 +152,14 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             return reSend;
     }        
 
-    /**
-     * Returns the searchServices member value.
-     * 
-     * @return
-     */
-    public SearchServices getSearchServices() {
-        return searchServices;
-    }
-
-    /**
-     * Returns the activityCallback member value.
-     * 
-     * @return
-     */
-    public Provider<ActivityCallback> getActivityCallback() {
-        return activityCallback;
-    }
-    
-    /**
-     * Returns the spamManager member value.
-     * 
-     * @return
-     */
-    public Provider<SpamManager> getSpamManager() {
-        return spamManager;
-    }
-    
-    /**
-     * Returns the remoteFileDescFactory member value.
-     * 
-     * @return
-     */
-    public RemoteFileDescFactory getRemoteFileDescFactory() {
-        return remoteFileDescFactory;
-    }
-    
-    /**
-     * Use this to see how many results have been displayed to the user for the
-     * specified query.
-     *
-     * @param guid the guid of the query.
-     *
-     * @return the number of non-filtered results for query with guid guid. -1
-     * is returned if the guid was not found....
-     */    
     public int getNumResultsForQuery(GUID guid) {
-        GuidCount gc = retrieveGuidCount(guid);
+        GuidCount gc = retrieveResultStats(guid);
         if (gc != null)
             return gc.getNumResults();
         else
             return -1;
     }
     
-    /** 
-     * Handles the given query reply. Only one thread may call it at a time.
-     *      
-     * @return <tt>true</tt> if the GUI will (probably) display the results,
-     *  otherwise <tt>false</tt> 
-     */
     public void handleQueryReply(final QueryReply qr) {
         HostData data;
         try {
@@ -307,7 +232,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
         LOG.trace("SRH.accountAndUpdateDynamicQueriers(): entered.");
         
         // get the correct GuidCount
-        GuidCount gc = retrieveGuidCount(new GUID(qr.getGUID()));
+        GuidCount gc = retrieveResultStats(new GUID(qr.getGUID()));
         
         if (gc == null)
             // 0. probably just hit lag, or....
@@ -364,7 +289,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
     }
 
 
-    public GuidCount retrieveGuidCount(GUID guid) {
+    public GuidCount retrieveResultStats(GUID guid) {
         synchronized (GUID_COUNTS) {
             for(GuidCount currGC : GUID_COUNTS) {
                 if (currGC.getGUID().equals(guid))
@@ -376,7 +301,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
     }
     
     public boolean isWhatIsNew(QueryReply reply) {
-        GuidCount gc = retrieveGuidCount(new GUID(reply.getGUID()));
+        GuidCount gc = retrieveResultStats(new GUID(reply.getGUID()));
         return gc != null && gc.getQueryRequest().isWhatIsNewRequest();
     }
     
@@ -397,14 +322,24 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
       END OF PRIVATE INTERFACE METHODS
      ----------------------------------------------------*/
     
-    /** A container that simply pairs a GUID and an int.  The int should
-     *  represent the number of non-filtered results for the GUID.
+    /**
+     * One GuidCount instance exists for each active search (which is 
+     * represented by a QueryRequest). As responses are received from the 
+     * network that information is incorporated into the GuidCount via
+     * addQueryReply().
+     * 
+     * Result counts are tabulated on a per-URN basis.
+     * 
      */
     static class GuidCount implements SearchResultStats {
 
         private final long _time;
         private final GUID _guid;
         private final QueryRequest _qr;
+        private final RemoteFileDescFactory _remoteFileDescFactory;
+        private final Provider<SpamManager> _spamManager;
+        private final Provider<ActivityCallback> _activityCallback;
+        private final SearchServices _searchServices;
         private int _numGoodResults;
         private int _nextReportNum = REPORT_INTERVAL;
         private boolean markAsFinished = false;
@@ -416,29 +351,25 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
          */
         private final Map<URN, ResourceLocationCounter> _isets = new HashMap<URN, ResourceLocationCounter>();
         
-        public GuidCount(QueryRequest qr) {
+        public GuidCount(QueryRequest qr, 
+                         RemoteFileDescFactory remoteFileDescFactory, 
+                         Provider<SpamManager> spamManager,
+                         Provider<ActivityCallback> activityCallback,
+                         SearchServices searchServices) {
             _qr = qr;
             _guid = new GUID(qr.getGUID());
             _time = System.currentTimeMillis();
+            _remoteFileDescFactory = remoteFileDescFactory;
+            _spamManager = spamManager;
+            _activityCallback = activityCallback;
+            _searchServices = searchServices;
         }
 
         public GUID getGUID() { return _guid; }
         public int getNumResults() {
-            return _numGoodResults ;
+            return _numGoodResults;
         }
         
-        /**
-         * Returns the number of locations known for the URN. This
-         * includes combining partial results.
-         * 
-         * TODO
-         * 
-         * For the time being this simply adds one to the count if
-         * any partial search results exist.
-         * 
-         * @param urn
-         * @return
-         */
         public int getNumResultsForURN(URN urn) {
             ResourceLocationCounter rlc = _isets.get(urn);
             
@@ -456,17 +387,6 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             _nextReportNum = _numGoodResults + REPORT_INTERVAL; 
         }
 
-        /**
-         * Returns the percentage of the data for the given URN
-         * that is available.
-         * 
-         * TODO
-         * 
-         * Make this work.
-         * 
-         * @param urn
-         * @return
-         */
         public int getPercentAvailable (URN urn) {
             ResourceLocationCounter rlc = _isets.get(urn);
             
@@ -476,15 +396,6 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             return rlc.getPercentAvailable();
         }
         
-        /**
-         * Returns the number of locations that have the data for
-         * the given URN. This incorporates partial search results,
-         * where the partial results will be combined together to
-         * form complete results.
-         * 
-         * @param urn
-         * @return
-         */
         public int getNumberOfLocations (URN urn) {
             ResourceLocationCounter rlc = _isets.get(urn);
             
@@ -504,20 +415,6 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             return "" + _guid + ":" + _numGoodResults + ":" + _nextReportNum;
         }
         
-        
-        /**
-         * Absorbs the query reply into the collective, adding
-         * its distinctiveness to our own. Resistance is futile.
-         * 
-         * TODO
-         * 
-         * Determine the number of locations from which the relevant URN is
-         * available, incorporating the partial search results.
-         * 
-         * Moved into GuidCount from SearchResultHandler::handleQueryReply().
-         * 
-         * @param qr
-         */
         public int addQueryReply(SearchResultHandler srh, QueryReply qr, HostData data) {
             List<Response> results = null;
             double numBad = 0;
@@ -539,15 +436,15 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
 
             for (Response response : results) {
                 if (!qr.isBrowseHostReply() && secureStatus != SecureMessage.SECURE) {
-                    if (!srh.getSearchServices().matchesType(data.getMessageGUID(), response))
+                    if (!_searchServices.matchesType(data.getMessageGUID(), response))
                         continue;
 
-                    if (!srh.getSearchServices().matchesQuery(data.getMessageGUID(), response))
+                    if (!_searchServices.matchesQuery(data.getMessageGUID(), response))
                         continue;
                 }
 
                 // Throw away results from Mandragore Worm
-                if (srh.getSearchServices().isMandragoreWorm(data.getMessageGUID(), response))
+                if (_searchServices.isMandragoreWorm(data.getMessageGUID(), response))
                     continue;
                 
                 // If there was an action, only allow it if it's a secure message.
@@ -565,12 +462,12 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                 
                 // we'll be showing the result to the user, count it
                 srh.countClassC(qr,response);
-                RemoteFileDesc rfd = response.toRemoteFileDesc(data, srh.getRemoteFileDescFactory());
+                RemoteFileDesc rfd = response.toRemoteFileDesc(data, _remoteFileDescFactory);
                 rfd.setSecureStatus(secureStatus);
                 Set<? extends IpPort> alts = response.getLocations();
-                srh.getActivityCallback().get().handleQueryResult(rfd, data, alts);
+                _activityCallback.get().handleQueryResult(rfd, data, alts);
                 
-                if (skipSpam || !srh.getSpamManager().get().isSpam(rfd)) {
+                if (skipSpam || !_spamManager.get().isSpam(rfd)) {
                     if (is != null) {
                         numGood += addIntervalSet(response.getUrns(), is, response.getSize());
                     }
@@ -644,11 +541,6 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             return count_after - count_before;
         }
         
-        /**
-         * Returns a handler which can be used to easily access the
-         * location count information for the given URN.
-         * 
-         */
         public QueryResultHandler getResultHandler (final URN urn) {
             final GuidCount gc = this;
             

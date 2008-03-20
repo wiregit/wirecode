@@ -138,7 +138,6 @@ public class SearchServicesImpl implements SearchServices {
      * @see com.limegroup.gnutella.SearchServices#queryWhatIsNew(byte[], com.limegroup.gnutella.MediaType)
      */
     public SearchResultStats queryWhatIsNew(final byte[] guid, final MediaType type) {
-    	try {
             QueryRequest qr = null;
             if (GUID.addressesMatch(guid, networkManager.get().getAddress(), networkManager.get().getPort())) {
                 // if the guid is encoded with my address, mark it as needing out
@@ -157,11 +156,6 @@ public class SearchServicesImpl implements SearchServices {
                 mutableGUIDFilter.get().addGUID(guid);
     
             return recordAndSendQuery(qr, type);
-    	} catch(Throwable t) {
-    		ErrorService.error(t);
-    	}
-    	
-    	return null;
     }
 
     /* (non-Javadoc)
@@ -171,8 +165,6 @@ public class SearchServicesImpl implements SearchServices {
     						 final String query, 
     						 final String richQuery, 
     						 final MediaType type) {
-    
-    	try {
             QueryRequest qr = null;
             if (networkManager.get().isIpPortValid() && (new GUID(guid)).addressesMatch(networkManager.get().getAddress(), 
                     networkManager.get().getPort())) {
@@ -189,11 +181,6 @@ public class SearchServicesImpl implements SearchServices {
             else
                 qr = queryRequestFactory.get().createQuery(guid, query, richQuery, type);
             return recordAndSendQuery(qr, type);
-    	} catch(Throwable t) {
-    		ErrorService.error(t);
-    	}
-    	
-    	return null;
     }
 
     /* (non-Javadoc)

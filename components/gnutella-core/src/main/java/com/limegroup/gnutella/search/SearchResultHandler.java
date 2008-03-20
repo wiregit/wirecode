@@ -2,15 +2,10 @@ package com.limegroup.gnutella.search;
 
 import java.util.List;
 
-import com.google.inject.Provider;
-import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.SearchServices;
-import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.spam.SpamManager;
 
 /**
  * Handles incoming search results from the network.  This class parses the 
@@ -29,10 +24,6 @@ public interface SearchResultHandler {
      * basically sent to say 'shut off query'.
      */
     public static final int MAX_RESULTS = 65535;
-
-    /*---------------------------------------------------    
-      PUBLIC INTERFACE METHODS
-     ----------------------------------------------------*/
 
     /**
      * Adds the Query to the list of queries kept track of.  You should do this
@@ -59,34 +50,6 @@ public interface SearchResultHandler {
     public List<QueryRequest> getQueriesToReSend();
 
     /**
-     * Returns the searchServices member value.
-     * 
-     * @return
-     */
-    public SearchServices getSearchServices();
-
-    /**
-     * Returns the activityCallback member value.
-     * 
-     * @return
-     */
-    public Provider<ActivityCallback> getActivityCallback();
-    
-    /**
-     * Returns the spamManager member value.
-     * 
-     * @return
-     */
-    public Provider<SpamManager> getSpamManager();
-    
-    /**
-     * Returns the remoteFileDescFactory member value.
-     * 
-     * @return
-     */
-    public RemoteFileDescFactory getRemoteFileDescFactory();
-    
-    /**
      * Use this to see how many results have been displayed to the user for the
      * specified query.
      *
@@ -97,18 +60,6 @@ public interface SearchResultHandler {
      */    
     public int getNumResultsForQuery(GUID guid);
     
-    /**
-     * Determines whether or not the specified 
-    
-    /*---------------------------------------------------    
-      END OF PUBLIC INTERFACE METHODS
-     ----------------------------------------------------*/
-
-    /*---------------------------------------------------    
-      PRIVATE INTERFACE METHODS
-     ----------------------------------------------------*/
-
-
     /** 
 	 * Handles the given query reply. Only one thread may call it at a time.
      *      
@@ -119,26 +70,11 @@ public interface SearchResultHandler {
 
     void countClassC(QueryReply qr, Response r);
 
-    void accountAndUpdateDynamicQueriers(final QueryReply qr, HostData data /*,
-                                                 final int numGoodSentToFrontEnd */ );
+    void accountAndUpdateDynamicQueriers(final QueryReply qr, HostData data);
 
     SearchResultStats removeQueryInternal(GUID guid);
 
-    SearchResultStats retrieveGuidCount(GUID guid);
+    SearchResultStats retrieveResultStats(GUID guid);
     
     boolean isWhatIsNew(QueryReply reply);
-    
-    /**
-     * Determines whether or not the query contained in the
-     * specified GuidCount is still valid.
-     * This depends on values such as the time the query was
-     * created and the amount of results we've received so far
-     * for this query.
-     */
-    boolean isQueryStillValid(SearchResultStats srs, long now);
-
-    /*---------------------------------------------------    
-      END OF PRIVATE INTERFACE METHODS
-     ----------------------------------------------------*/
-    
 }

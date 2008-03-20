@@ -78,9 +78,8 @@ public interface SearchResultStats {
     public int addQueryReply(SearchResultHandler srh, QueryReply qr, HostData data);
     
     /**
-     * 
-     * @param urn
-     * @return
+     * Returns a handler which can be used to easily access the
+     * location count information for the given URN.
      */
     public QueryResultHandler getResultHandler (final URN urn);
     
