@@ -130,11 +130,12 @@ public class SparseIntSet extends AbstractSet<Integer> {
                 if (lastThem && them.hasNext())
                     b = them.next();
 
+                biggest = Math.max(a, b);
+                
                 // this is where we differ from merge sort since this is a Set
                 if (index > 0 && newList[index - 1] == Math.min(a,b))
                     continue;
                 
-                biggest = Math.max(a, b);
                 if (a < b) {
                     newList[index] = a;
                     lastUs = true;
