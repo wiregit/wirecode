@@ -20,12 +20,14 @@ public class RecursiveSharingPanelTest extends GUIBaseTestCase {
     }
     
     public void testRetainAncestorsEmptyInput() {
-        assertEquals(Collections.emptySet(), RecursiveSharingPanel.retainAncestors(new File[0]));
+        RecursiveSharingPanel panel = new RecursiveSharingPanel();
+        assertEquals(Collections.emptySet(), panel.retainAncestors(new File[0]));
     }
     
     public void testRetainAncestorsSingleFile() {
+        RecursiveSharingPanel panel = new RecursiveSharingPanel();
         File file = new File("/test/file");
-        assertEquals(Collections.singleton(file), RecursiveSharingPanel.retainAncestors(file));
+        assertEquals(Collections.singleton(file), panel.retainAncestors(file));
     }
     
     public void testRetainAncestorsNoAncestors() {
@@ -36,7 +38,8 @@ public class RecursiveSharingPanelTest extends GUIBaseTestCase {
                 new File("/test/tmp/dir"),
                 new File("/blah")
         };
-        assertEquals(new HashSet<File>(Arrays.asList(files)), RecursiveSharingPanel.retainAncestors(files));
+        RecursiveSharingPanel panel = new RecursiveSharingPanel();
+        assertEquals(new HashSet<File>(Arrays.asList(files)), panel.retainAncestors(files));
     }
     
     public void testRetainAncestorsWithSubfoldersToRemove() {
@@ -52,7 +55,8 @@ public class RecursiveSharingPanelTest extends GUIBaseTestCase {
                 new File("/test/dir"),
                 new File("/blah")
         };
-        assertEquals(new HashSet<File>(Arrays.asList(resulting)), RecursiveSharingPanel.retainAncestors(files));
+        RecursiveSharingPanel panel = new RecursiveSharingPanel();
+        assertEquals(new HashSet<File>(Arrays.asList(resulting)), panel.retainAncestors(files));
     }
 
 }
