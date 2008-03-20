@@ -2259,26 +2259,8 @@ public abstract class FileManagerImpl implements FileManager {
         if (includeExcludedDirectories && _data.DIRECTORIES_NOT_TO_SHARE.contains(folder))
             return false;
         
-        //  check for system roots
-        File[] faRoots = File.listRoots();
-        if (faRoots != null && faRoots.length > 0) {
-            for (int i = 0; i < faRoots.length; i++) {
-                if (folder.equals(faRoots[i]))
-                    return false;
-            }
-        }
-        
-        // Check for the folder name being 'Cookies', or 'Cookies\Low' [vista]
-        // TODO: Make sure this is i18n-safe
-        String name = folder.getName().toLowerCase(Locale.US);
-        if(name.equals("cookies"))
+        if(SharingUtils.isFolderBanned(folder))
             return false;
-        else if(name.equals("low")) {
-            String parent = folder.getParent();
-            if(parent != null && parent.toLowerCase(Locale.US).equals("cookies"))
-                return false;
-        }
-        
         
         return true;
     }

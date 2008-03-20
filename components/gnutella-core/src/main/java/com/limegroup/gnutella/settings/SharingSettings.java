@@ -551,4 +551,7 @@ public class SharingSettings extends LimeProps {
      */
     public static final BooleanSetting LOAD_PARTIAL_KEYWORDS = 
         FACTORY.createRemoteBooleanSetting("LOAD_PARTIAL_KEYWORDS", true, "SharingSettings.loadPartialKeywords");
+    
+    public static final StringSetting LAST_WARNED_SAVE_DIRECTORY =
+        FACTORY.createStringSetting("LAST_WARNED_SAVED_DIRECTORY", "");
 }
