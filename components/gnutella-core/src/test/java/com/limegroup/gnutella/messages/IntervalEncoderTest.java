@@ -4,6 +4,7 @@ import junit.framework.Test;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.io.GGEP;
 import org.limewire.util.Base32;
 import org.limewire.util.ByteOrder;
 

@@ -2,13 +2,13 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.nio.ByteOrder;
 
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
 
 /**

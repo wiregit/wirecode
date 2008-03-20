@@ -17,6 +17,7 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.collection.FixedsizePriorityQueue;
+import org.limewire.io.GGEP;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.NetworkInstanceUtils;
@@ -32,7 +33,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
-import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.GGEPKeys;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
@@ -600,7 +601,7 @@ public class HostCatcherTest extends LimeTestCase {
         
         // Test with UDPHC pongs.
         GGEP ggep = new GGEP();
-        ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
+        ggep.put(GGEPKeys.GGEP_HEADER_UDP_HOST_CACHE);
         PingReply pr = pingReplyFactory.create(GUID.makeGuid(), (byte)1, 1,
                     new byte[] { 1, 1, 1, 1 },
                     0, 0, false, ggep);
@@ -618,7 +619,7 @@ public class HostCatcherTest extends LimeTestCase {
         
         // Test with a name in the cache.
         ggep = new GGEP();
-        ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE, "www.limewire.org");
+        ggep.put(GGEPKeys.GGEP_HEADER_UDP_HOST_CACHE, "www.limewire.org");
         pr = pingReplyFactory.create(GUID.makeGuid(), (byte)1, 1,
                     new byte[] { 5, 4, 3, 2 },
                     0, 0, false, ggep);
@@ -646,7 +647,7 @@ public class HostCatcherTest extends LimeTestCase {
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
         out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
         out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
-        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        ggep.put(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
         PingReply pr = pingReplyFactory.create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
@@ -668,8 +669,8 @@ public class HostCatcherTest extends LimeTestCase {
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
         out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
         out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
-        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
-        ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
+        ggep.put(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        ggep.put(GGEPKeys.GGEP_HEADER_UDP_HOST_CACHE);
         PingReply pr = pingReplyFactory.create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
@@ -691,7 +692,7 @@ public class HostCatcherTest extends LimeTestCase {
         	"www.limewire.com:6379\n"+
         	"www.eff.org\n"+
             "www.test.org:1";
-        ggep.putCompressed(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, addrs.getBytes());
+        ggep.putCompressed(GGEPKeys.GGEP_HEADER_PACKED_HOSTCACHES, addrs.getBytes());
         PingReply pr = pingReplyFactory.create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
@@ -954,10 +955,10 @@ public class HostCatcherTest extends LimeTestCase {
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
         out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
         out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
-        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        ggep.put(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
         // mark the second & third items as TLS
-        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS, (0x40 | 0x20));
-        ggep.put(GGEP.GGEP_HEADER_TLS_CAPABLE); // mark this guy as TLS capable.
+        ggep.put(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS_TLS, (0x40 | 0x20));
+        ggep.put(GGEPKeys.GGEP_HEADER_TLS_CAPABLE); // mark this guy as TLS capable.
         PingReply pr = pingReplyFactory.create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 0, 1, 0 },
             0, 0, false, ggep);

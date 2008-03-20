@@ -19,7 +19,9 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GGEP;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
@@ -497,7 +499,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         SecureGGEPData sg = _data.getSecureGGEP();
         if(sg != null) {
             try {
-                return sg.getGGEP().getBytes(GGEP.GGEP_HEADER_SIGNATURE);
+                return sg.getGGEP().getBytes(GGEPKeys.GGEP_HEADER_SIGNATURE);
             } catch(BadGGEPPropertyException bgpe) {
                 return null;
             }
@@ -809,20 +811,20 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
                         _data.setGGEPStart(parser.getNormalStartIndex());
                         _data.setGGEPEnd(parser.getNormalEndIndex());
                         try {
-                            supportsBrowseHostT = ggep.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST);
-                            if (ggep.hasKey(GGEP.GGEP_HEADER_FW_TRANS)) {
-                                _data.setFwTransferVersion(ggep.getBytes(GGEP.GGEP_HEADER_FW_TRANS)[0]);
+                            supportsBrowseHostT = ggep.hasKey(GGEPKeys.GGEP_HEADER_BROWSE_HOST);
+                            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_FW_TRANS)) {
+                                _data.setFwTransferVersion(ggep.getBytes(GGEPKeys.GGEP_HEADER_FW_TRANS)[0]);
                                 _data.setSupportsFWTransfer(_data.getFwTransferVersion() > 0);
                             }
-                            replyToMulticastT = ggep.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+                            replyToMulticastT = ggep.hasKey(GGEPKeys.GGEP_HEADER_MULTICAST_RESPONSE);
                             proxies = _ggepUtil.getPushProxies(ggep);
-                            if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
-                                securityToken = ggep.getBytes(GGEP.GGEP_HEADER_SECURE_OOB);
+                            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_SECURE_OOB)) {
+                                securityToken = ggep.getBytes(GGEPKeys.GGEP_HEADER_SECURE_OOB);
                                 if (securityToken == null || securityToken.length == 0) {
                                     throw new BadPacketException("Message had empty OOB security token");
                                 }
                             }
-                            supportsTLST = ggep.hasKey(GGEP.GGEP_HEADER_TLS_CAPABLE);
+                            supportsTLST = ggep.hasKey(GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
                         } catch (BadGGEPPropertyException bgpe) {
                         }
                     }
@@ -1052,13 +1054,13 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         public GGEPUtil() {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             _standardGGEP = create(out);
-            _bhGGEP = create(out, GGEP.GGEP_HEADER_BROWSE_HOST);
-            _mcGGEP = create(out, GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
-            _mcTLSGGEP = create(out, GGEP.GGEP_HEADER_MULTICAST_RESPONSE, GGEP.GGEP_HEADER_TLS_CAPABLE);
-            _bhAndMC = create(out, GGEP.GGEP_HEADER_BROWSE_HOST, GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
-            _bhTLSGGEP = create(out, GGEP.GGEP_HEADER_BROWSE_HOST, GGEP.GGEP_HEADER_TLS_CAPABLE);
-            _bhMCAndTLS = create(out, GGEP.GGEP_HEADER_BROWSE_HOST, GGEP.GGEP_HEADER_MULTICAST_RESPONSE, GGEP.GGEP_HEADER_TLS_CAPABLE);
-            _tlsGGEP = create(out, GGEP.GGEP_HEADER_TLS_CAPABLE);
+            _bhGGEP = create(out, GGEPKeys.GGEP_HEADER_BROWSE_HOST);
+            _mcGGEP = create(out, GGEPKeys.GGEP_HEADER_MULTICAST_RESPONSE);
+            _mcTLSGGEP = create(out, GGEPKeys.GGEP_HEADER_MULTICAST_RESPONSE, GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
+            _bhAndMC = create(out, GGEPKeys.GGEP_HEADER_BROWSE_HOST, GGEPKeys.GGEP_HEADER_MULTICAST_RESPONSE);
+            _bhTLSGGEP = create(out, GGEPKeys.GGEP_HEADER_BROWSE_HOST, GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
+            _bhMCAndTLS = create(out, GGEPKeys.GGEP_HEADER_BROWSE_HOST, GGEPKeys.GGEP_HEADER_MULTICAST_RESPONSE, GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
+            _tlsGGEP = create(out, GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
         }
         
         private byte[] create(ByteArrayOutputStream out, String... headers) {
@@ -1095,16 +1097,16 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 
                 // write easy extensions if applicable
                 if (supportsBH)
-                    retGGEP.put(GGEP.GGEP_HEADER_BROWSE_HOST);
+                    retGGEP.put(GGEPKeys.GGEP_HEADER_BROWSE_HOST);
                 if (isMulticastResponse)
-                    retGGEP.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+                    retGGEP.put(GGEPKeys.GGEP_HEADER_MULTICAST_RESPONSE);
                 if (supportsTLS)
-                    retGGEP.put(GGEP.GGEP_HEADER_TLS_CAPABLE);
+                    retGGEP.put(GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
                 if (supportsFWTransfer)
-                    retGGEP.put(GGEP.GGEP_HEADER_FW_TRANS,
+                    retGGEP.put(GGEPKeys.GGEP_HEADER_FW_TRANS,
                                 new byte[] {RUDPUtils.VERSION});
                 if (securityToken != null) {
-                    retGGEP.put(GGEP.GGEP_HEADER_SECURE_OOB, securityToken.getBytes());
+                    retGGEP.put(GGEPKeys.GGEP_HEADER_SECURE_OOB, securityToken.getBytes());
                 }
 
                 // if a PushProxyInterface is valid, write up to MAX_PROXIES
@@ -1125,10 +1127,10 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
                 try {
                     // add the PushProxies
                     if (numWritten > 0) {
-                        retGGEP.put(GGEP.GGEP_HEADER_PUSH_PROXY, baos.toByteArray());
+                        retGGEP.put(GGEPKeys.GGEP_HEADER_PUSH_PROXY, baos.toByteArray());
                         // add the TLS push proxies info, if any.
                         if(!bn.isEmpty())
-                            retGGEP.put(GGEP.GGEP_HEADER_PUSH_PROXY_TLS, bn.toByteArray());
+                            retGGEP.put(GGEPKeys.GGEP_HEADER_PUSH_PROXY_TLS, bn.toByteArray());
                     }
                     // set up return value
                     baos.reset();
@@ -1170,15 +1172,15 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             BitNumbers bn = null;
             
             // First try and get the bits for which PPs support TLS.
-            if(ggep.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY_TLS)) {
+            if(ggep.hasKey(GGEPKeys.GGEP_HEADER_PUSH_PROXY_TLS)) {
                 try {
-                    bn = new BitNumbers(ggep.getBytes(GGEP.GGEP_HEADER_PUSH_PROXY_TLS));
+                    bn = new BitNumbers(ggep.getBytes(GGEPKeys.GGEP_HEADER_PUSH_PROXY_TLS));
                 } catch(BadGGEPPropertyException bad) {}
             }
             
-            if (ggep.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY)) {
+            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_PUSH_PROXY)) {
                 try {
-                    byte[] proxyBytes = ggep.getBytes(GGEP.GGEP_HEADER_PUSH_PROXY);
+                    byte[] proxyBytes = ggep.getBytes(GGEPKeys.GGEP_HEADER_PUSH_PROXY);
                     ByteArrayInputStream bais = new ByteArrayInputStream(proxyBytes);
                     int i = 0;
                     while (bais.available() > 0) {

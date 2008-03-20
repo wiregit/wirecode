@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.db.DHTValueType;
@@ -12,7 +13,6 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 /**

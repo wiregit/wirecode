@@ -4,15 +4,15 @@ import java.io.IOException;
 import java.nio.ByteOrder;
 import java.util.List;
 
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.db.DHTValueType;
 
 import com.limegroup.bittorrent.TorrentLocation;
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
-import com.limegroup.gnutella.messages.GGEP;
 
 /**
  * An utility class for encoding and decoding network information. Also contains

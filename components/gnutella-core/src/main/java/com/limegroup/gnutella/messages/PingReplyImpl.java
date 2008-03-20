@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.Connectable;
+import org.limewire.io.GGEP;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
@@ -208,18 +210,18 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
         
         // TODO: the exceptions thrown here are messy
         if(ggep != null) {
-            if(ggep.hasKey(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME)) {
+            if(ggep.hasKey(GGEPKeys.GGEP_HEADER_DAILY_AVERAGE_UPTIME)) {
                 try {
                     dailyUptime = 
-                        ggep.getInt(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME); 
+                        ggep.getInt(GGEPKeys.GGEP_HEADER_DAILY_AVERAGE_UPTIME); 
                 } catch(BadGGEPPropertyException e) {}
             }
 
-            supportsUnicast = ggep.hasKey(GGEP.GGEP_HEADER_UNICAST_SUPPORT);
+            supportsUnicast = ggep.hasKey(GGEPKeys.GGEP_HEADER_UNICAST_SUPPORT);
 
-            if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
                 try {
-                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                    byte[] bytes = ggep.getBytes(GGEPKeys.GGEP_HEADER_QUERY_KEY_SUPPORT);
                     key = new AddressSecurityToken(bytes, manager);
                 } catch (InvalidSecurityTokenException e) {
                     throw new BadPacketException("invalid query key");
@@ -228,9 +230,9 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
                 }
             }
             
-            if(ggep.hasKey((GGEP.GGEP_HEADER_UP_SUPPORT))) {
+            if(ggep.hasKey((GGEPKeys.GGEP_HEADER_UP_SUPPORT))) {
                 try {
-                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_UP_SUPPORT);
+                    byte[] bytes = ggep.getBytes(GGEPKeys.GGEP_HEADER_UP_SUPPORT);
                     if(bytes.length >= 3) {
                         freeLeafSlots = bytes[1];
                         freeUltrapeerSlots = bytes[2];
@@ -238,9 +240,9 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
                 } catch (BadGGEPPropertyException e) {}
             }
             
-            if(ggep.hasKey((GGEP.GGEP_HEADER_DHT_SUPPORT))) {
+            if(ggep.hasKey((GGEPKeys.GGEP_HEADER_DHT_SUPPORT))) {
                 try {
-                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_DHT_SUPPORT);
+                    byte[] bytes = ggep.getBytes(GGEPKeys.GGEP_HEADER_DHT_SUPPORT);
                     if(bytes.length >= 3) {
                         dhtVersion = ByteOrder.ushort2int(ByteOrder.beb2short(bytes, 0));
                         byte mode = (byte)(bytes[2] & DHTMode.DHT_MODE_MASK);
@@ -254,9 +256,9 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
                 } catch (BadGGEPPropertyException e) {}
             }
             
-            if(ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE)) {
+            if(ggep.hasKey(GGEPKeys.GGEP_HEADER_CLIENT_LOCALE)) {
                 try {
-                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_CLIENT_LOCALE);
+                    byte[] bytes = ggep.getBytes(GGEPKeys.GGEP_HEADER_CLIENT_LOCALE);
                     if(bytes.length >= 2)
                         locale = new String(bytes, 0, 2);
                     if(bytes.length >= 3)
@@ -264,9 +266,9 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
                 } catch(BadGGEPPropertyException e) {}
             }
             
-            if (ggep.hasKey(GGEP.GGEP_HEADER_IPPORT)) {
+            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_IPPORT)) {
                 try{
-                    byte[] data = ggep.getBytes(GGEP.GGEP_HEADER_IPPORT);
+                    byte[] data = ggep.getBytes(GGEPKeys.GGEP_HEADER_IPPORT);
 
                     byte [] myip = new byte[4];
                     // only copy the addr if the data is atleast 6
@@ -296,46 +298,46 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
                 }catch(BadGGEPPropertyException ignored) {}
             }
             
-            if(ggep.hasKey(GGEP.GGEP_HEADER_UDP_HOST_CACHE)) {
+            if(ggep.hasKey(GGEPKeys.GGEP_HEADER_UDP_HOST_CACHE)) {
                 cacheAddress = "";
                 try {
-                    cacheAddress = ggep.getString(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
+                    cacheAddress = ggep.getString(GGEPKeys.GGEP_HEADER_UDP_HOST_CACHE);
                 } catch(BadGGEPPropertyException bad) {}
             }
             
-            if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_IPPORTS)) {
+            if(ggep.hasKey(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS)) {
                 try {
-                    byte[] data = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS);
+                    byte[] data = ggep.getBytes(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS);
                     packedIPs = NetworkUtils.unpackIps(data);
                 } catch(BadGGEPPropertyException bad) {
                 } catch(InvalidDataException bpe) {}
                 
-                if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS)) {
+                if(ggep.hasKey(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS_TLS)) {
                     try {
-                        byte[] data = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS);
+                        byte[] data = ggep.getBytes(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS_TLS);
                         packedIPs = decoratePackedIPs(data, packedIPs);
                     } catch(BadGGEPPropertyException bad) {
                     }
                 }
             }
             
-            if(ggep.hasKey(GGEP.GGEP_HEADER_DHT_IPPORTS)) {
+            if(ggep.hasKey(GGEPKeys.GGEP_HEADER_DHT_IPPORTS)) {
                 try {
-                    byte[] data = ggep.getBytes(GGEP.GGEP_HEADER_DHT_IPPORTS);
+                    byte[] data = ggep.getBytes(GGEPKeys.GGEP_HEADER_DHT_IPPORTS);
                     packedDHTIPs = NetworkUtils.unpackIps(data);
                 } catch(BadGGEPPropertyException bad) {
                 } catch(InvalidDataException bpe) {
                 }
             }
             
-            if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_HOSTCACHES)) {
+            if(ggep.hasKey(GGEPKeys.GGEP_HEADER_PACKED_HOSTCACHES)) {
                 try {
-                    String data = ggep.getString(GGEP.GGEP_HEADER_PACKED_HOSTCACHES);
+                    String data = ggep.getString(GGEPKeys.GGEP_HEADER_PACKED_HOSTCACHES);
                     packedCaches = listCaches(data);
                 } catch(BadGGEPPropertyException bad) {}
             }
             
-            tlsCapable = ggep.hasKey(GGEP.GGEP_HEADER_TLS_CAPABLE);
+            tlsCapable = ggep.hasKey(GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
         }
         
         MY_IP = myIP;

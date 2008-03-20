@@ -5,13 +5,13 @@ import java.net.UnknownHostException;
 
 import junit.framework.Test;
 
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.io.InvalidDataException;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.bittorrent.TorrentLocation;
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
-import com.limegroup.gnutella.messages.GGEP;
 
 public class DHTPeerLocatorUtilsTest extends BaseTestCase {
 

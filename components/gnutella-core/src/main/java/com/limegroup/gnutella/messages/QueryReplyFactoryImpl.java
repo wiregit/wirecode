@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.ByteOrder;
@@ -383,14 +385,14 @@ public class QueryReplyFactoryImpl implements QueryReplyFactory {
             byte [] myAddr = new byte[6];
             System.arraycopy(me.getInetAddress().getAddress(),0,myAddr,0,4);
             ByteOrder.short2beb((short)me.getPort(), myAddr, 4);
-            ggep.put(GGEP.GGEP_HEADER_RETURN_PATH_ME+suffix,myAddr);
+            ggep.put(GGEPKeys.GGEP_HEADER_RETURN_PATH_ME+suffix,myAddr);
         }
         byte [] theirAddr = new byte[6];
         System.arraycopy(source.getInetAddress().getAddress(),0,theirAddr,0,4);
         ByteOrder.short2beb((short)source.getPort(), theirAddr, 4);
-        ggep.put(GGEP.GGEP_HEADER_RETURN_PATH_SOURCE+suffix,theirAddr);
-        ggep.put(GGEP.GGEP_HEADER_RETURN_PATH_HOPS+suffix,hops);
-        ggep.put(GGEP.GGEP_HEADER_RETURN_PATH_TTL+suffix,ttl);
+        ggep.put(GGEPKeys.GGEP_HEADER_RETURN_PATH_SOURCE+suffix,theirAddr);
+        ggep.put(GGEPKeys.GGEP_HEADER_RETURN_PATH_HOPS+suffix,hops);
+        ggep.put(GGEPKeys.GGEP_HEADER_RETURN_PATH_TTL+suffix,ttl);
     }
     
     /**
@@ -399,10 +401,10 @@ public class QueryReplyFactoryImpl implements QueryReplyFactory {
      */
     private String getReturnPathSuffix(GGEP ggep) {
         for (int i = 0; i < 100000; i++) { // large number to make it impractical to avoid
-            if (ggep.hasKey(GGEP.GGEP_HEADER_RETURN_PATH_ME+i) ||
-                    ggep.hasKey(GGEP.GGEP_HEADER_RETURN_PATH_SOURCE+i) ||
-                    ggep.hasKey(GGEP.GGEP_HEADER_RETURN_PATH_HOPS+i) ||
-                    ggep.hasKey(GGEP.GGEP_HEADER_RETURN_PATH_TTL+i))
+            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_RETURN_PATH_ME+i) ||
+                    ggep.hasKey(GGEPKeys.GGEP_HEADER_RETURN_PATH_SOURCE+i) ||
+                    ggep.hasKey(GGEPKeys.GGEP_HEADER_RETURN_PATH_HOPS+i) ||
+                    ggep.hasKey(GGEPKeys.GGEP_HEADER_RETURN_PATH_TTL+i))
                 continue;
             return String.valueOf(i);
         }

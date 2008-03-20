@@ -1,18 +1,20 @@
-package com.limegroup.gnutella.messages;
+package org.limewire.io;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.collection.NameValue;
+import org.limewire.io.GGEP;
 import org.limewire.io.IOUtils;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.ByteOrder;
+import org.limewire.util.NameValue;
 
 import junit.framework.Test;
 
 
-@SuppressWarnings( { "unchecked", "cast" } )
 public class GGEPTest extends BaseTestCase {
     
     public GGEPTest(String name) {
@@ -49,12 +51,12 @@ public class GGEPTest extends BaseTestCase {
     }
     
     public void testPutAll() throws Exception {
-        List putm = new LinkedList();
-        putm.add(new NameValue("int", new Integer(1)));
+        List<NameValue<?>> putm = new LinkedList<NameValue<?>>();
+        putm.add(new NameValue<Integer>("int", new Integer(1)));
         putm.add(new NameValue("header"));
-        putm.add(new NameValue("long", new Long(2)));
-        putm.add(new NameValue("string", "value"));
-        putm.add(new NameValue("byte[]", new byte[] { 1, 2 } ));
+        putm.add(new NameValue<Long>("long", new Long(2)));
+        putm.add(new NameValue<String>("string", "value"));
+        putm.add(new NameValue<byte[]>("byte[]", new byte[] { 1, 2 } ));
         
         GGEP temp = new GGEP();
         temp.putAll(putm);
@@ -74,12 +76,12 @@ public class GGEPTest extends BaseTestCase {
         GGEP temp = new GGEP();
         temp.put("A", "B");
         temp.put("C", (String)null);
-        temp.put(GGEP.GGEP_HEADER_BROWSE_HOST, "");
+        temp.put("STRING", "");
         assertTrue(temp.hasKey("A"));
         assertEquals("B", temp.getString("A"));
         assertTrue(temp.hasKey("C"));
-        assertTrue(temp.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
-        assertEquals("", temp.getString(GGEP.GGEP_HEADER_BROWSE_HOST));
+        assertTrue(temp.hasKey("STRING"));
+        assertEquals("", temp.getString("STRING"));
     }
 
     public void testByteKeys() throws Exception {
@@ -378,7 +380,7 @@ public class GGEPTest extends BaseTestCase {
         assertEquals("DASWANI", ggep.getString("SUSHEEL"));
 
         bytes = new byte[24];
-        bytes[0] = (byte)GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
         bytes[1] = (byte)0x15;
         bytes[2] = (byte)'B';
         bytes[3] = (byte)'H';
@@ -766,6 +768,157 @@ public class GGEPTest extends BaseTestCase {
         ggep.put("EM", (byte[])null);
         assertNull(ggep.get("EM"));
     }
+    
+    
+    public void testCobsBoundCase() throws IOException {
+        byte[] bytes = new byte[254];
+        for (int i = 0; i < bytes.length; i++) bytes[i] = (byte) 7;
+        byte[] after = GGEP.cobsEncode(bytes);
+        assertTrue("after[0] is " + after[0], after[0] == ((byte)0xFF));
+        assertEquals(256, after.length); // 2 bytes of overhead for 254 bytes
+        byte[] afterOptimized = new byte[255];
+        // some people leave off that last 0, we should react OK
+        System.arraycopy(after, 0, afterOptimized, 0, afterOptimized.length);
+        byte[] decoded = GGEP.cobsDecode(afterOptimized);
+        assertEquals(254, decoded.length);
+        for (int i = 0; i < bytes.length; i++)
+            assertTrue(bytes[i] == decoded[i]);
+    }
+
+    public void testCobsEncodeAndDecode() throws IOException {
+        for (int num = 1; num < 260; num++) 
+            cobsEncodeAndDecode(num);
+    }
+    
+
+    private void cobsEncodeAndDecode(int num) throws IOException {
+        byte[] bytes = new byte[num];
+        for (int i = 0; i < bytes.length; i++)
+            bytes[i] = 0;
+        byte[] after = GGEP.cobsEncode(bytes);
+        assertEquals(bytes.length , (after.length-1));
+        for (int i = 0; i < after.length; i++)
+            assertEquals(0x01, after[i]);
+        byte[] decoded = GGEP.cobsDecode(after);
+        for (int i = 0; i < bytes.length; i++)
+            assertEquals(bytes[i], decoded[i]);
+
+
+        // test all 1s....
+        for (int i = 0; i < bytes.length; i++)
+            bytes[i] = 1;
+        after = GGEP.cobsEncode(bytes);
+        assertTrue("bytes.length = " + bytes.length + ", after.length + " +
+                   after.length + ", num = " + num,
+                   bytes.length == (after.length-((num / 254) + 1)));
+        for (int i = 1; i < after.length; i++) 
+            if (i % 255 != 0)
+                assertTrue(after[i] == 0x01);
+        assertTrue("after[0] = " + after[0], 
+                   (ByteOrder.ubyte2int(after[0]) == (num+1)) || 
+                   (ByteOrder.ubyte2int(after[0]) == 255)
+                   );
+        decoded = GGEP.cobsDecode(after);
+        for (int i = 0; i < bytes.length; i++)
+            assertEquals("num = " + num + ", i = " + i, 
+                       bytes[i], decoded[i]);
+        
+        // ----------------------------------
+        // build up 'induction' case for 0(1..).  we can trust 'induction' due
+        // to nature of the COBS algorithm...
+
+        // test 0 and 1s, specifically 0(1)^(j-1)s....
+        for (int j = 2; (j < 255) && (num > 1); j++) { 
+            for (int i = 0; i < bytes.length; i++) 
+                if (i % j == 0)
+                    bytes[i] = 0;
+                else
+                    bytes[i] = 1;
+            after = GGEP.cobsEncode(bytes);
+            assertEquals(bytes.length,(after.length-1));
+            for (int i = 0; i < after.length; i++) {
+                if (i == 0)
+                    assertEquals(1,after[0]);
+                else if ((i == 1) ||
+                         ((((i-1) % j) == 0) && (num > i))
+                         )
+                    assertGreaterThan(1, ByteOrder.ubyte2int(after[i]));
+                else
+                    assertEquals(1, after[i]);
+            }
+            decoded = GGEP.cobsDecode(after);
+            for (int i = 0; i < bytes.length; i++)
+                assertEquals(bytes[i], decoded[i]);
+        }
+        // ----------------------------------
+
+        // ----------------------------------
+        // build up 'induction' case for (1..)0.  we can trust 'induction' due
+        // to nature of the COBS algorithm...
+
+        // test 1s and 0, specifically (1)^(j-1s)0....
+        for (int j = 2; j < 255; j++) {
+            for (int i = 0; i < bytes.length; i++) 
+                if (i % j == 0)
+                    bytes[i] = 1;
+                else
+                    bytes[i] = 0;
+            after = GGEP.cobsEncode(bytes);
+            assertEquals(bytes.length ,(after.length - 1));
+            for (int i = 0; i < bytes.length; i++)
+                if ((i == 0) ||
+                    (i % j == 0)
+                    )
+                    assertGreaterThan(1, ByteOrder.ubyte2int(after[i]));
+                else
+                    assertEquals(1, after[i]);
+            decoded = GGEP.cobsDecode(after);
+            for (int i = 0; i < bytes.length; i++)
+                assertEquals(bytes[i] , decoded[i]);
+        }
+        // ----------------------------------
+    }
+
+    public void testCobsSymmetry() throws IOException {
+        // a quick test for symmetry - but symmetry was actually tested above,
+        // so no need for much testing...
+        byte[] bytes = (new String("Sush Is Cool!")).getBytes();
+        byte[] after = GGEP.cobsDecode(GGEP.cobsEncode(bytes));
+        assertEquals(bytes.length , after.length);
+    }
+
+
+    public void testCobsBadCOBSBlock() throws Exception {
+        byte[] badBlock = new byte[10];
+        badBlock[0] = (byte) 11;
+        for (int i = 1; i < badBlock.length; i++)
+            badBlock[i] = (byte)1;
+        try {
+            GGEP.cobsDecode(badBlock);
+            assertTrue(false);
+        }
+        catch (IOException expected) {}
+
+        badBlock = new byte[10];
+        badBlock[0] = (byte) 10;
+        for (int i = 1; i < badBlock.length; i++)
+            badBlock[i] = (byte)1;
+        GGEP.cobsDecode(badBlock);
+
+        badBlock = new byte[4];
+        badBlock[0] = (byte) 2;
+        badBlock[1] = (byte) 1;
+        badBlock[2] = (byte) 1;
+        badBlock[3] = (byte) 2;
+        try {
+            GGEP.cobsDecode(badBlock);
+            assertTrue(false);
+        }
+        catch (IOException expected) {
+        }
+
+    }
+    
 
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());

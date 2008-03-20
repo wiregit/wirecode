@@ -3,7 +3,7 @@ package com.limegroup.gnutella.messages;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.limewire.collection.NameValue;
+import org.limewire.util.NameValue;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -60,7 +60,7 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
      */
     public PingRequest createQueryKeyRequest() {
         List<NameValue<?>> l = new LinkedList<NameValue<?>>();
-        l.add(new NameValue(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT));
+        l.add(new NameValue(GGEPKeys.GGEP_HEADER_QUERY_KEY_SUPPORT));
         return new PingRequestImpl(GUID.makeGuid(), (byte)1, l);
     }
     
@@ -78,7 +78,7 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
     public PingRequest createUDPingWithDHTIPPRequest() {
         List<NameValue<?>> l = new LinkedList<NameValue<?>>();
         GUID guid = new GUID();
-        l.add(new NameValue(GGEP.GGEP_HEADER_DHT_IPPORTS));
+        l.add(new NameValue(GGEPKeys.GGEP_HEADER_DHT_IPPORTS));
         return new PingRequestImpl(guid.bytes(), (byte)1, l);
     }
     
@@ -88,7 +88,7 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
     public PingRequest createUHCPing() {
         List<NameValue<?>> ggeps = new LinkedList<NameValue<?>>();
         GUID guid = populateUDPGGEPList(ggeps);
-        ggeps.add(new NameValue(GGEP.GGEP_HEADER_UDP_HOST_CACHE));
+        ggeps.add(new NameValue(GGEPKeys.GGEP_HEADER_UDP_HOST_CACHE));
         return new PingRequestImpl(guid.bytes(),(byte)1,ggeps);
     }
     
@@ -99,7 +99,7 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
     public PingRequest createMulticastPing() {
         GUID guid = new GUID();        
         List<NameValue<?>> l = new LinkedList<NameValue<?>>();
-        l.add(new NameValue<byte[]>(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, getSCPData()));
+        l.add(new NameValue<byte[]>(GGEPKeys.GGEP_HEADER_SUPPORT_CACHE_PONGS, getSCPData()));
         return new PingRequestImpl(guid.bytes(), (byte)1, l);
     }    
     
@@ -112,10 +112,10 @@ public class PingRequestFactoryImpl implements PingRequestFactory {
         if(ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue()) {
             guid = PingRequest.UDP_GUID;
         } else {
-            l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT));
+            l.add(new NameValue(GGEPKeys.GGEP_HEADER_IPPORT));
             guid = networkManager.getSolicitedGUID();
         }        
-        l.add(new NameValue<byte[]>(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, getSCPData()));
+        l.add(new NameValue<byte[]>(GGEPKeys.GGEP_HEADER_SUPPORT_CACHE_PONGS, getSCPData()));
         return guid;
     }
     

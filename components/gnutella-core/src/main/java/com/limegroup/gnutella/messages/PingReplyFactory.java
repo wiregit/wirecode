@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages;
 import java.net.UnknownHostException;
 import java.util.Collection;
 
+import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.security.AddressSecurityToken;
 

@@ -5,6 +5,7 @@ import java.io.File;
 
 import junit.framework.Test;
 
+import org.limewire.io.GGEP;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
@@ -16,7 +17,6 @@ import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.PeerTestCase;
 import com.limegroup.gnutella.connection.BlockingConnection;
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.AbstractVendorMessage;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;

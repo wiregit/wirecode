@@ -16,8 +16,9 @@ import java.util.StringTokenizer;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.IntervalSet;
-import org.limewire.collection.NameValue;
+import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GGEP;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
@@ -25,6 +26,7 @@ import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
+import org.limewire.util.NameValue;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -34,8 +36,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
-import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.GGEPKeys;
 import com.limegroup.gnutella.messages.HUGEExtension;
 import com.limegroup.gnutella.messages.IntervalEncoder;
 import com.limegroup.gnutella.settings.MessageSettings;
@@ -431,26 +432,26 @@ public class ResponseFactoryImpl implements ResponseFactory {
         GGEP info = new GGEP(true);
         if (ggep.locations.size() > 0) {
             byte[] output = NetworkUtils.packIpPorts(ggep.locations);
-            info.put(GGEP.GGEP_HEADER_ALTS, output);
+            info.put(GGEPKeys.GGEP_HEADER_ALTS, output);
             BitNumbers bn = HTTPHeaderUtils.getTLSIndices(ggep.locations);
             if (!bn.isEmpty())
-                info.put(GGEP.GGEP_HEADER_ALTS_TLS, bn.toByteArray());
+                info.put(GGEPKeys.GGEP_HEADER_ALTS_TLS, bn.toByteArray());
         }
 
         if (ggep.createTime > 0)
-            info.put(GGEP.GGEP_HEADER_CREATE_TIME, ggep.createTime / 1000);
+            info.put(GGEPKeys.GGEP_HEADER_CREATE_TIME, ggep.createTime / 1000);
 
         if (ggep.size64 > Integer.MAX_VALUE && ggep.size64 <= MAX_FILE_SIZE)
-            info.put(GGEP.GGEP_HEADER_LARGE_FILE, ggep.size64);
+            info.put(GGEPKeys.GGEP_HEADER_LARGE_FILE, ggep.size64);
         
         if (ggep.ranges != null) {
             IntervalEncoder.encode(size, info, ggep.ranges);
             if (!ggep.verified)
-                info.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED);
+                info.put(GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED);
         }
         
         if (ggep.ttroot != null && MessageSettings.TTROOT_IN_GGEP.getValue())
-            info.put(GGEP.GGEP_HEADER_TTROOT,ggep.ttroot.getBytes());
+            info.put(GGEPKeys.GGEP_HEADER_TTROOT,ggep.ttroot.getBytes());
 
         info.write(out);
     }
@@ -472,39 +473,39 @@ public class ResponseFactoryImpl implements ResponseFactory {
 
         // if the block has a ALTS value, get it, parse it,
         // and move to the next.
-        if (ggep.hasKey(GGEP.GGEP_HEADER_ALTS)) {
+        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_ALTS)) {
             byte[] tlsData = null;
-            if (ggep.hasKey(GGEP.GGEP_HEADER_ALTS_TLS)) {
+            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_ALTS_TLS)) {
                 try {
-                    tlsData = ggep.getBytes(GGEP.GGEP_HEADER_ALTS_TLS);
+                    tlsData = ggep.getBytes(GGEPKeys.GGEP_HEADER_ALTS_TLS);
                 } catch (BadGGEPPropertyException ignored) {
                 }
             }
             BitNumbers bn = tlsData == null ? null : new BitNumbers(tlsData);
             try {
                 locations = parseLocations(bn, ggep
-                        .getBytes(GGEP.GGEP_HEADER_ALTS));
+                        .getBytes(GGEPKeys.GGEP_HEADER_ALTS));
             } catch (BadGGEPPropertyException bad) {
             }
         }
 
-        if (ggep.hasKey(GGEP.GGEP_HEADER_CREATE_TIME)) {
+        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_CREATE_TIME)) {
             try {
-                createTime = ggep.getLong(GGEP.GGEP_HEADER_CREATE_TIME) * 1000;
+                createTime = ggep.getLong(GGEPKeys.GGEP_HEADER_CREATE_TIME) * 1000;
             } catch (BadGGEPPropertyException bad) {
             }
         }
 
-        if (ggep.hasKey(GGEP.GGEP_HEADER_LARGE_FILE)) {
+        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_LARGE_FILE)) {
             try {
-                size64 = ggep.getLong(GGEP.GGEP_HEADER_LARGE_FILE);
+                size64 = ggep.getLong(GGEPKeys.GGEP_HEADER_LARGE_FILE);
             } catch (BadGGEPPropertyException bad) {
             }
         }
         
-        if (ggep.hasKey(GGEP.GGEP_HEADER_TTROOT)) {
+        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_TTROOT)) {
             try {
-                byte []tt = ggep.get(GGEP.GGEP_HEADER_TTROOT);
+                byte []tt = ggep.get(GGEPKeys.GGEP_HEADER_TTROOT);
                 if (tt != null)
                     ttroot = URN.createTTRootFromBytes(tt);
             } catch (IOException bad){}
@@ -514,7 +515,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
         IntervalSet ranges = null;
         try {
             ranges = IntervalEncoder.decode(size64,ggep);
-            verified = !ggep.hasKey(GGEP.GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED);
+            verified = !ggep.hasKey(GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED);
         } catch (BadGGEPPropertyException ignore){}
         
         

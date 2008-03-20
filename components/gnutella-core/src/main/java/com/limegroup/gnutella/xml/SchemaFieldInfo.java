@@ -3,7 +3,7 @@ package com.limegroup.gnutella.xml;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.limewire.collection.NameValue;
+import org.limewire.util.NameValue;
 
 
 /**

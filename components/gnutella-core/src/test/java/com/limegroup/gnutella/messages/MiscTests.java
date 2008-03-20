@@ -7,6 +7,7 @@ import java.util.Random;
 
 import junit.framework.Test;
 
+import org.limewire.io.GGEP;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecureMessage;
@@ -72,13 +73,13 @@ public class MiscTests extends LimeTestCase {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             addressSecurityToken.write(baos);
             GGEP in = new GGEP(true);
-            in.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
+            in.put(GGEPKeys.GGEP_HEADER_QUERY_KEY_SUPPORT,
                    baos.toByteArray());
             baos = new ByteArrayOutputStream();
             in.write(baos);
             GGEP out = new GGEP(baos.toByteArray(), 0, null);
             AddressSecurityToken queryKey2 = 
-            new AddressSecurityToken(out.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT),macManager);
+            new AddressSecurityToken(out.getBytes(GGEPKeys.GGEP_HEADER_QUERY_KEY_SUPPORT),macManager);
             assertEquals("qks not equal, i = " + i,
                        addressSecurityToken, queryKey2);
         }

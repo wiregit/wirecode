@@ -9,6 +9,7 @@ import java.util.concurrent.Executor;
 
 import junit.framework.Test;
 
+import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.SimpleNetworkInstanceUtils;
@@ -29,7 +30,6 @@ import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPReplyHandlerCache;
 import com.limegroup.gnutella.UDPReplyHandlerFactory;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.vendor.RoutableGGEPMessage;

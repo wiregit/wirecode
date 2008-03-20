@@ -12,7 +12,7 @@ import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
 import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
-import org.limewire.collection.NameValue;
+import org.limewire.util.NameValue;
 
 import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.metadata.MetaReader;

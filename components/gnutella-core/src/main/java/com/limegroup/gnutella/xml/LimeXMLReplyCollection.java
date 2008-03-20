@@ -20,12 +20,12 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IdentityHashSet;
-import org.limewire.collection.NameValue;
 import org.limewire.collection.StringTrie;
 import org.limewire.io.IOUtils;
 import org.limewire.util.ConverterObjectInputStream;
 import org.limewire.util.GenericsUtils;
 import org.limewire.util.I18NConvert;
+import org.limewire.util.NameValue;
 import org.xml.sax.SAXException;
 
 import com.google.inject.Provider;

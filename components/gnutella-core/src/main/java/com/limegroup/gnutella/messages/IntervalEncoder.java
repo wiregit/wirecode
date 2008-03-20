@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.limewire.collection.IntervalSet;
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -61,7 +63,7 @@ public class IntervalEncoder {
         
         // special case - for an empty interval set we add an extention
         if (bytes.size() + shorts.size() + b24.size() + ints.size() == 0)
-            g.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX+"0");
+            g.put(GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_PREFIX+"0");
     }
     
     /**
@@ -81,7 +83,7 @@ public class IntervalEncoder {
             System.arraycopy(toAdd,0,tmp,0,tmp.length);
             toAdd = tmp;
         }
-        ggep.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX+dataSize,toAdd);
+        ggep.put(GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_PREFIX+dataSize,toAdd);
         return available - toAdd.length;
     }
     
@@ -89,11 +91,11 @@ public class IntervalEncoder {
      * @return an IntervalSet contained in this GGEP.  Null if none.
      */
     public static IntervalSet decode(long size, GGEP ggep) throws BadGGEPPropertyException{
-        if (ggep.hasKey(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX+"0"))
+        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_PREFIX+"0"))
             return new IntervalSet();
         IntervalSet ret = null;
         for (int i = 1; i <= 4; i++ ) {
-            String key = GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX+i;
+            String key = GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_PREFIX+i;
             if (ggep.hasKey(key)) {
                 byte [] b = ggep.get(key);
                 if (b == null)

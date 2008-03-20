@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.GGEP;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
@@ -115,7 +117,7 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
     public boolean isTLSCapable() {
         parseGGEP();
         if(ggep != null && ggep != NULL_GGEP) {
-            return ggep.hasKey(GGEP.GGEP_HEADER_TLS_CAPABLE);
+            return ggep.hasKey(GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
         } else {
             return false;
         }
@@ -193,7 +195,7 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
         private static final byte[] TLS_GGEP;
         static {
             GGEP tlsGGEP = new GGEP();
-            tlsGGEP.put(GGEP.GGEP_HEADER_TLS_CAPABLE);
+            tlsGGEP.put(GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             try {
                 tlsGGEP.write(out);

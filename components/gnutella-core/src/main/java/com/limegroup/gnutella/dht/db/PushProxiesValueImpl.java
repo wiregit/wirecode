@@ -13,7 +13,10 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
@@ -22,9 +25,6 @@ import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 import org.limewire.util.ByteOrder;
 
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
-import com.limegroup.gnutella.messages.GGEP;
 
 class PushProxiesValueImpl extends AbstractPushProxiesValue {
     

@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.limewire.collection.NameValue;
+import org.limewire.util.NameValue;
 
 import com.limegroup.gnutella.metadata.MetaData;
 import com.limegroup.gnutella.metadata.MetaReader;

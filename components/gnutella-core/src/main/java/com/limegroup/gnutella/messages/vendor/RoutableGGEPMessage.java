@@ -6,16 +6,17 @@ import java.nio.ByteOrder;
 import java.security.Signature;
 import java.security.SignatureException;
 
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.service.ErrorService;
 
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.GGEPParser;
+import com.limegroup.gnutella.messages.GGEPKeys;
 import com.limegroup.gnutella.messages.SecureGGEPData;
 
 
@@ -151,7 +152,7 @@ public class RoutableGGEPMessage extends AbstractVendorMessage implements Secure
         SecureGGEPData sg = secureData;
         if(sg != null) {
             try {
-                return sg.getGGEP().getBytes(GGEP.GGEP_HEADER_SIGNATURE);
+                return sg.getGGEP().getBytes(GGEPKeys.GGEP_HEADER_SIGNATURE);
             } catch(BadGGEPPropertyException bgpe) {
                 return null;
             }

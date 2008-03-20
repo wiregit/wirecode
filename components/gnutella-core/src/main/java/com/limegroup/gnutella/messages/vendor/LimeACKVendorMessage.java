@@ -5,15 +5,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.GGEPKeys;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "LIME/11".
  *  This message acknowledges (ACKS) the guid contained in the message (i.e. A 
@@ -107,9 +108,9 @@ public final class LimeACKVendorMessage extends AbstractVendorMessage {
         if (getVersion() > OLD_VERSION) {
             try {
                 GGEP ggep = new GGEP(getPayload(), 1);
-                if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
+                if (ggep.hasKey(GGEPKeys.GGEP_HEADER_SECURE_OOB)) {
                     // we return a oob query key, but cannot verify it when it is not from us
-                    return new UnknownSecurityToken(ggep.getBytes(GGEP.GGEP_HEADER_SECURE_OOB));
+                    return new UnknownSecurityToken(ggep.getBytes(GGEPKeys.GGEP_HEADER_SECURE_OOB));
                 }
             }
             catch (BadGGEPPropertyException corrupt) {} 
@@ -143,7 +144,7 @@ public final class LimeACKVendorMessage extends AbstractVendorMessage {
         out.write(bytes[0]); 
 
         GGEP ggep = new GGEP();
-        ggep.put(GGEP.GGEP_HEADER_SECURE_OOB, securityTokenBytes);
+        ggep.put(GGEPKeys.GGEP_HEADER_SECURE_OOB, securityTokenBytes);
         try {
             ggep.write(out);
         }

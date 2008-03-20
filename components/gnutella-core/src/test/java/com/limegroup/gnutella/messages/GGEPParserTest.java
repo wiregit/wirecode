@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.Test;
 
+import org.limewire.io.GGEP;
 import org.limewire.util.BaseTestCase;
 
 public class GGEPParserTest extends BaseTestCase {

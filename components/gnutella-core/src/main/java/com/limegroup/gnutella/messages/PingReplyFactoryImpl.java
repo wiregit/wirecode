@@ -7,6 +7,9 @@ import java.net.UnknownHostException;
 import java.util.Collection;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
@@ -270,19 +273,19 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         GGEP ggep = parseGGEP(payload);
 
         if (ggep != null) {
-            if (ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE)) {
+            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_CLIENT_LOCALE)) {
                 try {
-                    ggep.getBytes(GGEP.GGEP_HEADER_CLIENT_LOCALE);
+                    ggep.getBytes(GGEPKeys.GGEP_HEADER_CLIENT_LOCALE);
                 } catch (BadGGEPPropertyException e) {
                     throw new BadPacketException("GGEP error : creating from"
                             + " network : client locale");
                 }
             }
 
-            if (ggep.hasKey(GGEP.GGEP_HEADER_PACKED_IPPORTS)) {
+            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS)) {
                 byte[] data = null;
                 try {
-                    data = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS);
+                    data = ggep.getBytes(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS);
                 } catch (BadGGEPPropertyException bad) {
                     throw new BadPacketException(bad.getMessage());
                 }
@@ -290,18 +293,18 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
                     throw new BadPacketException("invalid data");
             }
 
-            if (ggep.hasKey(GGEP.GGEP_HEADER_PACKED_HOSTCACHES)) {
+            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_PACKED_HOSTCACHES)) {
                 try {
-                    ggep.getBytes(GGEP.GGEP_HEADER_PACKED_HOSTCACHES);
+                    ggep.getBytes(GGEPKeys.GGEP_HEADER_PACKED_HOSTCACHES);
                 } catch (BadGGEPPropertyException bad) {
                     throw new BadPacketException(bad.getMessage());
                 }
             }
 
-            if (ggep.hasKey(GGEP.GGEP_HEADER_UDP_HOST_CACHE)) {
+            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_UDP_HOST_CACHE)) {
                 try {
                     String dns = ggep
-                            .getString(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
+                            .getString(GGEPKeys.GGEP_HEADER_UDP_HOST_CACHE);
                     ip = InetAddress.getByName(dns);
                     ipString = ip.getHostAddress();
                 } catch (BadGGEPPropertyException ignored) {
@@ -348,10 +351,10 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         GGEP ggep = new GGEP();
 
         if (dailyUptime >= 0)
-            ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
+            ggep.put(GGEPKeys.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
 
         if (isGUESSCapable && isUltrapeer) {
-            ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT);
+            ggep.put(GGEPKeys.GGEP_HEADER_UNICAST_SUPPORT);
         }
 
         // indicate UP support
@@ -363,7 +366,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
 
         // add our support of TLS
         if (SSLSettings.isIncomingTLSEnabled())
-            ggep.put(GGEP.GGEP_HEADER_TLS_CAPABLE);
+            ggep.put(GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
 
         return ggep;
     }
@@ -377,7 +380,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             addressSecurityToken.write(baos);
             // populate GGEP....
-            ggep.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT, baos.toByteArray());
+            ggep.put(GGEPKeys.GGEP_HEADER_QUERY_KEY_SUPPORT, baos.toByteArray());
 
             return ggep;
         } catch (IOException e) {
@@ -396,7 +399,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         payload[0] = s[0];
         payload[1] = s[1];
         payload[2] = (byte) slots;
-        ggep.put(GGEP.GGEP_HEADER_CLIENT_LOCALE, payload);
+        ggep.put(GGEPKeys.GGEP_HEADER_CLIENT_LOCALE, payload);
         return ggep;
     }
 
@@ -408,7 +411,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         System.arraycopy(address.getInetAddress().getAddress(), 0, payload, 0,
                 4);
         ByteOrder.short2leb((short) address.getPort(), payload, 4);
-        ggep.put(GGEP.GGEP_HEADER_IPPORT, payload);
+        ggep.put(GGEPKeys.GGEP_HEADER_IPPORT, payload);
         return ggep;
     }
 
@@ -420,15 +423,15 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
             Collection<? extends IpPort> dhtHosts) {
 
         if (gnutHosts != null && !gnutHosts.isEmpty()) {
-            ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, NetworkUtils
+            ggep.put(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS, NetworkUtils
                     .packIpPorts(gnutHosts));
             byte[] data = getTLSData(gnutHosts);
             if (data.length != 0)
-                ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS, data);
+                ggep.put(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS_TLS, data);
         }
 
         if (dhtHosts != null && !dhtHosts.isEmpty()) {
-            ggep.put(GGEP.GGEP_HEADER_DHT_IPPORTS, NetworkUtils
+            ggep.put(GGEPKeys.GGEP_HEADER_DHT_IPPORTS, NetworkUtils
                     .packIpPorts(dhtHosts));
         }
 
@@ -479,7 +482,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         payload[0] = 0;
         payload[1] = localPongInfo.getNumFreeLimeWireLeafSlots();
         payload[2] = localPongInfo.getNumFreeLimeWireNonLeafSlots();
-        ggep.put(GGEP.GGEP_HEADER_UP_SUPPORT, payload);
+        ggep.put(GGEPKeys.GGEP_HEADER_UP_SUPPORT, payload);
     }
 
     /**
@@ -507,7 +510,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         }
 
         // add it
-        ggep.put(GGEP.GGEP_HEADER_DHT_SUPPORT, payload);
+        ggep.put(GGEPKeys.GGEP_HEADER_DHT_SUPPORT, payload);
     }
 
     // TODO : change this to look for multiple GGEP block in the payload....

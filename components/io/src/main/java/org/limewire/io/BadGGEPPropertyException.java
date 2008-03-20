@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.messages;
+package org.limewire.io;
 
 /**
  * Thrown when a GGEP extension cannot be found or parsed.

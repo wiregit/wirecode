@@ -2,6 +2,8 @@ package com.limegroup.gnutella.messages;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.GGEP;
 
 /**
  * Allows multiple GGEP blocks to be parsed, storing
@@ -52,7 +54,7 @@ public class GGEPParser {
                     break;
                 
                 GGEP ggep = new GGEP(data, idx, storage);
-                if(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_BLOCK)) {
+                if(ggep.hasKey(GGEPKeys.GGEP_HEADER_SECURE_BLOCK)) {
                     secure = ggep;
                     secureStart = idx;
                     secureEnd = storage[0];

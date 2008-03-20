@@ -15,6 +15,7 @@ import junit.framework.Test;
 
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.security.SecureMessageVerifier;
@@ -33,7 +34,7 @@ import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ServerSideTestCase;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.GGEPKeys;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -172,8 +173,8 @@ public class InspectionTest extends ServerSideTestCase {
                 new RoutableGGEPMessage.GGEPSigner() {
                     public GGEP getSecureGGEP(GGEP original) {
                         GGEP ret = new GGEP(true);
-                        ret.put(GGEP.GGEP_HEADER_SECURE_BLOCK);
-                        ret.put(GGEP.GGEP_HEADER_SIGNATURE," adsf adsf asdf ".getBytes());
+                        ret.put(GGEPKeys.GGEP_HEADER_SECURE_BLOCK);
+                        ret.put(GGEPKeys.GGEP_HEADER_SIGNATURE," adsf adsf asdf ".getBytes());
                         return ret;
                     }
                 }, "com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue");

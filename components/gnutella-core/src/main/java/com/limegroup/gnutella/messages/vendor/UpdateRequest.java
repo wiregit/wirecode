@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.GGEP;
+
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.util.DataUtils;
 
 public final class UpdateRequest extends AbstractVendorMessage implements VendorMessage.ControlMessage {

@@ -5,8 +5,8 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import org.limewire.collection.NameValue;
 import org.limewire.util.FileUtils;
+import org.limewire.util.NameValue;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;

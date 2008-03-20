@@ -4,7 +4,7 @@
  * Created on April 16, 2001, 12:22 PM
  */
 
-package org.limewire.collection;
+package org.limewire.util;
 
 import java.util.Map;
 
@@ -63,7 +63,7 @@ public class NameValue <V> implements Map.Entry<String, V> {
         return "name=" + _name + ", value=" + _value;
     }
     /**
-     * Gives a {@link #compareTo(org.limewire.collection.NameValue.ComparableByName)} 
+     * Gives a {@link #compareTo(org.limewire.util.NameValue.ComparableByName)} 
      * implementation for a {@link NameValue}. This class compares according to
      * the name.  
      * <pre>

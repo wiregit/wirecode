@@ -11,6 +11,7 @@ import java.util.zip.DeflaterOutputStream;
 
 import org.limewire.inspection.InspectionException;
 import org.limewire.inspection.Inspector;
+import org.limewire.io.GGEP;
 import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.BEncoder;
@@ -18,7 +19,6 @@ import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.FECUtils;
 

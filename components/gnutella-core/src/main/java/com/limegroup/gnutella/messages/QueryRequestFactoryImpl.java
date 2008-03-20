@@ -2,6 +2,7 @@ package com.limegroup.gnutella.messages;
 
 import java.util.Set;
 
+import org.limewire.io.GGEP;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.I18NConvert;
@@ -340,7 +341,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
             newPayload[0] |= QueryRequest.SPECIAL_OUTOFBAND_MASK;
         GGEP ggep = new GGEP(true);
         // signal oob capability
-        ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);
+        ggep.put(GGEPKeys.GGEP_HEADER_SECURE_OOB);
 
         try {
             newPayload = QueryRequestImpl.patchInGGEP(newPayload, ggep, MACCalculatorRepositoryManager);

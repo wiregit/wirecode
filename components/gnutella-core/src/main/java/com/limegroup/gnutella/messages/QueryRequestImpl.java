@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.service.ErrorService;
@@ -280,32 +282,32 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
                 // get query key in byte form....
                 ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
                 this.QUERY_KEY.write(qkBytes);
-                ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
+                ggepBlock.put(GGEPKeys.GGEP_HEADER_QUERY_KEY_SUPPORT,
                               qkBytes.toByteArray());
             }
 
             // add the What Is header
             if (_featureSelector > 0)
-                ggepBlock.put(GGEP.GGEP_HEADER_FEATURE_QUERY, _featureSelector);
+                ggepBlock.put(GGEPKeys.GGEP_HEADER_FEATURE_QUERY, _featureSelector);
 
             // add a GGEP-block if we shouldn't proxy
             if (_doNotProxy) {
-                ggepBlock.put(GGEP.GGEP_HEADER_NO_PROXY);
+                ggepBlock.put(GGEPKeys.GGEP_HEADER_NO_PROXY);
             }
 
             // add a meta flag
             if (_metaMask != null)
-                ggepBlock.put(GGEP.GGEP_HEADER_META, _metaMask.intValue());
+                ggepBlock.put(GGEPKeys.GGEP_HEADER_META, _metaMask.intValue());
 
             // mark oob query to require support of security tokens
             if (canReceiveOutOfBandReplies) {
                 _isSecurityTokenRequired = true;
-                ggepBlock.put(GGEP.GGEP_HEADER_SECURE_OOB);
+                ggepBlock.put(GGEPKeys.GGEP_HEADER_SECURE_OOB);
             }
             
             if (SearchSettings.desiresPartialResults()) {
                 _partialResultsDesired = true;
-                ggepBlock.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX);
+                ggepBlock.put(GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_PREFIX);
             }
             
             // if there are GGEP headers, write them out...
@@ -982,26 +984,26 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
 
                 if(ggep != null) {
                     try {
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
-                            byte[] qkBytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+                            byte[] qkBytes = ggep.getBytes(GGEPKeys.GGEP_HEADER_QUERY_KEY_SUPPORT);
                             addressSecurityToken = new AddressSecurityToken(qkBytes, manager);
                         }
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
-                            featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY)) {
+                        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_FEATURE_QUERY))
+                            featureSelector = ggep.getInt(GGEPKeys.GGEP_HEADER_FEATURE_QUERY);
+                        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_NO_PROXY)) {
                             doNotProxy = true;
                         }
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
-                            metaMask = new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
+                        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_META)) {
+                            metaMask = new Integer(ggep.getInt(GGEPKeys.GGEP_HEADER_META));
                             // if the value is something we can't handle, don't even set it
                             if ((metaMask.intValue() < 4) || (metaMask.intValue() > 248))
                                 metaMask = null;
                         }
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
+                        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_SECURE_OOB)) {
                             hasSecurityTokenRequest = true;
                         }
                         
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX))
+                        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_PREFIX))
                             partialResultsDesired = true;
                         
                     } catch (BadGGEPPropertyException ignored) {}

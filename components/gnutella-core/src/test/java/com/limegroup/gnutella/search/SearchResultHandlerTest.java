@@ -6,9 +6,9 @@ import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.collection.NameValue;
 import org.limewire.io.IpPort;
 import org.limewire.security.SecureMessage;
+import org.limewire.util.NameValue;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;

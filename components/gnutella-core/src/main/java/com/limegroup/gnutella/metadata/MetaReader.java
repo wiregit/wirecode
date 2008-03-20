@@ -2,7 +2,7 @@ package com.limegroup.gnutella.metadata;
 
 import java.util.List;
 
-import org.limewire.collection.NameValue;
+import org.limewire.util.NameValue;
 
 /**
  *  Reads meta-data from a file. Each type of media type reader

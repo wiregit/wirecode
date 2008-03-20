@@ -7,13 +7,14 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.GGEPKeys;
 
 /**
  * A response of content.
@@ -64,8 +65,8 @@ public class ContentResponse extends AbstractVendorMessage {
         
         GGEP ggep =  new GGEP();
         // TODO use bytes instead of String, or pack into GUID.
-        ggep.put(GGEP.GGEP_HEADER_SHA1, sha1.getBytes());
-        ggep.put(GGEP.GGEP_HEADER_SHA1_VALID, okay ? 1 : 0);
+        ggep.put(GGEPKeys.GGEP_HEADER_SHA1, sha1.getBytes());
+        ggep.put(GGEPKeys.GGEP_HEADER_SHA1_VALID, okay ? 1 : 0);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             ggep.write(out);
@@ -80,7 +81,7 @@ public class ContentResponse extends AbstractVendorMessage {
      */
     public URN getURN() {
         try {
-            return URN.createSHA1UrnFromBytes(ggep.getBytes(GGEP.GGEP_HEADER_SHA1));
+            return URN.createSHA1UrnFromBytes(ggep.getBytes(GGEPKeys.GGEP_HEADER_SHA1));
         } catch(IOException iox) {
             return null;
         } catch(BadGGEPPropertyException bgpe) {
@@ -94,7 +95,7 @@ public class ContentResponse extends AbstractVendorMessage {
     public boolean getOK() {
         try {
             // nonzero values are okay.
-            return ggep.getInt(GGEP.GGEP_HEADER_SHA1_VALID) != 0;
+            return ggep.getInt(GGEPKeys.GGEP_HEADER_SHA1_VALID) != 0;
         } catch(BadGGEPPropertyException bgpe) {
             return false;
         }

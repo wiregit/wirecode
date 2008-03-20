@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.messages;
+package org.limewire.io;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -10,12 +10,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.limewire.collection.NameValue;
-import org.limewire.io.IOUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
+import org.limewire.util.NameValue;
 
-import com.limegroup.gnutella.util.COBSUtil;
+
 
 /** 
  * A mutable GGEP extension block.  A GGEP block can be thought of as a
@@ -28,91 +27,6 @@ import com.limegroup.gnutella.util.COBSUtil;
  */
 public class GGEP {
 
-    /** The extension header (key) for Browse Host. */
-    public static final String GGEP_HEADER_BROWSE_HOST = "BH";
-    /** The extension header (key) for average daily uptime. */
-    public static final String GGEP_HEADER_DAILY_AVERAGE_UPTIME = "DU";
-    /** The extension header (key) for unicast protocol support. */
-    public static final String GGEP_HEADER_UNICAST_SUPPORT = "GUE";
-    /** The extension header (key) for Ultrapeer support. */
-    public static final String GGEP_HEADER_UP_SUPPORT = "UP";
-    /** The extension header (key) for AddressSecurityToken support. */
-    public static final String GGEP_HEADER_QUERY_KEY_SUPPORT = "QK";
-    /** 
-     * The extension header (key) for oob query requests to require the new
-     * protocol version of oob messages that supports security tokens for
-     * authentication.
-     */
-    public static final String GGEP_HEADER_SECURE_OOB = "SO";
-    /** The extension header (key) for AddressSecurityToken support. */
-    public static final String GGEP_HEADER_MULTICAST_RESPONSE = "MCAST";
-    /** The extension header (key) for PushProxy support. */
-    public static final String GGEP_HEADER_PUSH_PROXY = "PUSH";
-    /** The extension header (key) for PushProxy TLS indexes. */
-    public static final String GGEP_HEADER_PUSH_PROXY_TLS = "PUSH_TLS";
-    /** The extension header (key) for AlternateLocation support */
-    public static final String GGEP_HEADER_ALTS = "ALT";
-    /** The extension header (key) for AlternateLocations that support TLS */
-    public static final String GGEP_HEADER_ALTS_TLS = "ALT_TLS";
-    /** The extention header (key) for IpPort request */
-    public static final String GGEP_HEADER_IPPORT="IP";
-    /** The extension header (key) for UDP HostCache pongs. */
-    public static final String GGEP_HEADER_UDP_HOST_CACHE = "UDPHC";
-    /** The extension header (key) for indicating support for packed ip/ports & udp host caches. */
-    public static final String GGEP_HEADER_SUPPORT_CACHE_PONGS = "SCP";
-    /** The extension header (key) for packed IP/Ports */
-    public static final String GGEP_HEADER_PACKED_IPPORTS="IPP";
-    /** The extension header (key) for which packed IP/Ports support TLS. */
-    public static final String GGEP_HEADER_PACKED_IPPORTS_TLS="IPP_TLS";
-    /** The extension header (key) for understanding TLS. */
-    public static final String GGEP_HEADER_TLS_CAPABLE="TLS";
-    /** The extension header (key) for packed UDP Host Caches */
-    public static final String GGEP_HEADER_PACKED_HOSTCACHES="PHC";
-    /** The extension header (key) for SHA1 urns. */
-    public static final String GGEP_HEADER_SHA1 = "S1";
-    /** The extension header (key) for TTROOT urns. */
-    public static final String GGEP_HEADER_TTROOT = "TT";
-    /** The extension header (key) to determine if a SHA1 is valid. */
-    public static final String GGEP_HEADER_SHA1_VALID = "SV";
-
-    /** The extension header (key) for DHT support */
-    public static final String GGEP_HEADER_DHT_SUPPORT = "DHT";
-    
-    /** The extension header (key) for DHT IPP requests. */
-    public static final String GGEP_HEADER_DHT_IPPORTS = "DHTIPP";
-    
-    /**
-     * The extension header (key) for a feature query.
-     * This is 'WH' for legacy reasons, because 'What is New' was the first.
-     */
-    public static final String GGEP_HEADER_FEATURE_QUERY = "WH";
-    /** The extension header disabling OOB proxying. */
-    public static final String GGEP_HEADER_NO_PROXY = "NP";
-    /** The extension header (key) for MetaType query support */
-    public static final String GGEP_HEADER_META = "M";
-    /** The extension header (key) for client locale */
-    public static final String GGEP_HEADER_CLIENT_LOCALE = "LOC";
-    /** The extension header (key) for creation time */
-    public static final String GGEP_HEADER_CREATE_TIME = "CT";
-    /** The extension header (key) for Firewalled Transfer support in Hits. */
-    public static final String GGEP_HEADER_FW_TRANS = "FW";
-    /** The extension header (key) indicating the GGEP block is the 'secure' block. */
-    public static final String GGEP_HEADER_SECURE_BLOCK = "SB";
-    /** The extension header (key) indiciating the value has a signature in it. */
-    public static final String GGEP_HEADER_SIGNATURE = "SIG";
-    /** The extention header (key) indicating the size of the file is 64 bit */
-    public static final String GGEP_HEADER_LARGE_FILE = "LF";
-    /** The prefix of the extention header (key) indicating support for partial results */
-    public static final String GGEP_HEADER_PARTIAL_RESULT_PREFIX = "PR";
-    /** The extension header (key) to determine if the encoded ranges are unverified */
-    public static final String GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED = "PRU";
-    
-    /** Various information contained in a return path entry GGEP block */
-    public static final String GGEP_HEADER_RETURN_PATH_SOURCE = "RPS";
-    public static final String GGEP_HEADER_RETURN_PATH_HOPS = "RPH";
-    public static final String GGEP_HEADER_RETURN_PATH_ME = "RPI";
-    public static final String GGEP_HEADER_RETURN_PATH_TTL = "RPT";
-    
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
 
@@ -132,7 +46,7 @@ public class GGEP {
     private final Map<String, Object> _props = new TreeMap<String, Object>();
 
     /** True if COBS encoding is required. */
-    public final boolean useCOBS;
+    private final boolean useCOBS;
 
 	/**
 	 * Cached hash code value to avoid calculating the hash code from the
@@ -238,7 +152,7 @@ public class GGEP {
                 if (encoded) {
                     tUseCOBS = true;
                     try {
-                        data = COBSUtil.cobsDecode(data);
+                        data = GGEP.cobsDecode(data);
                     } catch (IOException badCobsEncoding) {
                         throw new BadGGEPBlockException("Bad COBS Encoding");
                     }
@@ -372,7 +286,7 @@ public class GGEP {
                             throw new IllegalArgumentException("value for ["
                               + currHeader + "] too large after compression");
                     } if (shouldEncode)
-                        currData = COBSUtil.cobsEncode(currData);
+                        currData = GGEP.cobsEncode(currData);
                     dataLen = currData.length;
                 }
                 writeHeader(currHeader, dataLen, 
@@ -739,7 +653,86 @@ public class GGEP {
 		return hashCode;
 	}
 	
-	/**
+    /* COBS implementation....
+	 * For implementation details, please see:
+	 *  http://www.acm.org/sigcomm/sigcomm97/papers/p062.pdf 
+	 */
+	
+	/** Decode a COBS-encoded byte array.  The non-allowable byte value is 0.
+     *  PRE: src is not null.
+     *  POST: the return array will be a cobs decoded version of src.  namely,
+     *  cobsDecode(cobsEncode(src)) ==  src.  
+     *  @return the original COBS decoded string
+     */
+    static byte[] cobsDecode(byte[] src) throws IOException {
+        final int srcLen = src.length;
+        int currIndex = 0;
+        int code = 0;
+        ByteArrayOutputStream sink = new ByteArrayOutputStream();        
+    
+        while (currIndex < srcLen) {
+            code = ByteOrder.ubyte2int(src[currIndex++]);
+            if ((currIndex+(code-2)) >= srcLen)
+                throw new IOException();
+            for (int i = 1; i < code; i++) {
+                sink.write(src[currIndex++]);
+            }
+            if (currIndex < srcLen) // don't write this last one, it isn't used
+                if (code < 0xFF) sink.write(0);
+        }
+    
+        return sink.toByteArray();
+    }
+
+    static int cobsFinishBlock(int code, ByteArrayOutputStream sink, 
+                                   byte[] src, int begin, int end) {
+        sink.write(code);
+        if (begin > -1)
+            sink.write(src, begin, (end-begin)+1);
+        return (byte) 0x01;
+    }
+
+    /** Encode a byte array with COBS.  The non-allowable byte value is 0.
+     *  PRE: src is not null.
+     *  POST: the return array will be a cobs encoded version of src.  namely,
+     *  cobsDecode(cobsEncode(src)) ==  src.
+     *  @return a COBS encoded version of src.
+     */
+    static byte[] cobsEncode(byte[] src) {
+        final int srcLen = src.length;
+        int code = 1;
+        int currIndex = 0;
+        // COBS encoding adds no more than one byte of overhead for every 254
+        // bytes of packet data
+        final int maxEncodingLen = src.length + ((src.length+1)/254) + 1;
+        ByteArrayOutputStream sink = new ByteArrayOutputStream(maxEncodingLen);
+        int writeStartIndex = -1;
+    
+        while (currIndex < srcLen) {
+            if (src[currIndex] == 0) {
+                // currIndex was incremented so take 1 less
+                code = GGEP.cobsFinishBlock(code, sink, src, writeStartIndex,
+                                   (currIndex-1));
+                writeStartIndex = -1;
+            }
+            else {
+                if (writeStartIndex < 0) writeStartIndex = currIndex;
+                code++;
+                if (code == 0xFF) {
+                    code = GGEP.cobsFinishBlock(code, sink, src, writeStartIndex,
+                                       currIndex);
+                    writeStartIndex = -1;
+                }
+            }
+            currIndex++;
+        }
+    
+        // currIndex was incremented so take 1 less
+        GGEP.cobsFinishBlock(code, sink, src, writeStartIndex, (currIndex-1));
+        return sink.toByteArray();
+    }
+
+    /**
 	 * Marker class that wraps a byte[] value, if that value
 	 * is going to require compression upon write.
 	 */

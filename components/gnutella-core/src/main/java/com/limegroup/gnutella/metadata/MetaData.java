@@ -2,7 +2,7 @@ package com.limegroup.gnutella.metadata;
 
 import java.util.List;
 
-import org.limewire.collection.NameValue;
+import org.limewire.util.NameValue;
 
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 

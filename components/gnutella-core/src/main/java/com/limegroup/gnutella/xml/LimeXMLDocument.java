@@ -14,7 +14,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.NameValue;
+import org.limewire.util.NameValue;
 import org.limewire.util.RPNParser.StringLookup;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
