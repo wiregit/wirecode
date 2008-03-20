@@ -3,12 +3,8 @@ package com.limegroup.gnutella.lws.server;
 import java.io.IOException;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpMessage;
-import org.apache.http.client.methods.HttpGet;
 import org.limewire.lws.server.LWSDispatcherSupport;
 
-import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.util.Tagged;
 import com.limegroup.gnutella.util.URLDecoder;
 

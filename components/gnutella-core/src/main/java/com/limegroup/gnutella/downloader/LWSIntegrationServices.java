@@ -1,16 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-
-import org.apache.http.HttpException;
-
-import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.LifecycleManager;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.lws.server.LWSManager;
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
  * A class that initializes listeners to the passed in instance of
