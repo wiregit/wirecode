@@ -15,5 +15,13 @@ public interface PromotionBinderRequestor {
      * <code>url</code> and include the proper information we want to store.
      */
     void request(String url, long id, Set<UserQueryEvent> queries, PromotionBinderCallback callback);
+    
+    /**
+     * This sets the millisecond timeout for waiting for a bucket when requesting over the
+     * network. If we don't use the network, implementations can ignore this.
+     * 
+     * @param timeoutMillis millisecond timeout for using the network, if need be
+     */
+    void setNetworkTimeout(int timeoutMillis);
 
 }

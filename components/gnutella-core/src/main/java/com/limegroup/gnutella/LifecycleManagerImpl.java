@@ -119,8 +119,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<LimeCoreGlue> limeCoreGlue;
     private final Provider<LWSManager> lwsManager;
     private final Provider<LWSIntegrationServices> lwsItegrationServices;
-    private final Provider<PromotionBinderRepository> promotionBinderRepository;
-    private final Provider<PromotionSearcher> promotionSearcher;
+    private final Provider<PromotionServices> promotionServices;
     
     /** A list of items that require running prior to shutting down LW. */
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
@@ -177,8 +176,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<LimeCoreGlue> limeCoreGlue,
             Provider<LWSManager> lwsManager,
             Provider<LWSIntegrationServices> lwsItegrationServices,
-            Provider<PromotionBinderRepository> promotionBinderRepository,
-            Provider<PromotionSearcher> promotionSearcher) { 
+            Provider<PromotionServices> promotionServices) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -221,8 +219,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.limeCoreGlue = limeCoreGlue;
         this.lwsManager = lwsManager;
         this.lwsItegrationServices = lwsItegrationServices;
-        this.promotionBinderRepository = promotionBinderRepository;
-        this.promotionSearcher = promotionSearcher;
+        this.promotionServices = promotionServices;
     }
     
     /* (non-Javadoc)
@@ -463,16 +460,15 @@ public class LifecycleManagerImpl implements LifecycleManager {
             LOG.trace("Disabling the StoreServer");
         }      
         
-        LOG.trace("START loading promotion system");
-        activityCallback.get().componentLoading(I18nMarker.marktr("Loading Promotion System..."));
-        promotionBinderRepository.get().init(
-                    ThirdPartySearchResultsSettings.SEARCH_URL.getValue(),
-                    ThirdPartySearchResultsSettings.BUCKET_ID_MODULOUS.getValue()
-                    );
-        promotionSearcher.get().init(
-                ThirdPartySearchResultsSettings.MAX_NUMBER_OF_SEARCH_RESULTS.getValue()
-                );        
-        LOG.trace("START loading promotion system");         
+        // Allow us to enable/disable this remotely
+        if (ThirdPartySearchResultsSettings.PROMOTION_SYSTEM_IS_ENABLED.getValue()) {
+            LOG.trace("START loading promotion system");
+            activityCallback.get().componentLoading(I18nMarker.marktr("Loading Promotion System..."));
+            promotionServices.get().init();
+            LOG.trace("START loading promotion system");
+        } else {
+            LOG.trace("Disabling the promotion system");
+        }
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
             startManualGCThread();

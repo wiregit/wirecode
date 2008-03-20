@@ -24,6 +24,12 @@ public class PromotionBinderFactoryImpl implements PromotionBinderFactory {
     }    
 
     public PromotionBinder newBinder(byte[] bytes) {
+        //
+        // These bytes can be null, so can this request. For null bytes, return null.
+        //
+        if (bytes == null) {
+            return null;
+        }
         PromotionBinder binder = new PromotionBinder(cipherProvider, keyStore, certificateVerifier);         
         try {
             binder.initialize(bytes);

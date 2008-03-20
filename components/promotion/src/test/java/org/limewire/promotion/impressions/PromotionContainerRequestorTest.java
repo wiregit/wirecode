@@ -1,14 +1,12 @@
 package org.limewire.promotion.impressions;
 
-import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.promotion.PromotionBinder;
 import org.limewire.promotion.PromotionBinderCallback;
-import org.limewire.promotion.PromotionBinderFactory;
-
-import junit.framework.Test;
 
 public class PromotionContainerRequestorTest extends AbstractEventQueryDataTest {
 
@@ -19,13 +17,6 @@ public class PromotionContainerRequestorTest extends AbstractEventQueryDataTest 
     public static Test suite() {
         return buildTestSuite(PromotionContainerRequestorTest.class);
     }
-
-    private TestPromotionContainerRequestorImpl req;
-
-    @Override
-    protected void setUp() throws Exception {
-        req = new TestPromotionContainerRequestorImpl();
-    }
     
 
     // ------------------------------------------------------------------------
@@ -33,19 +24,68 @@ public class PromotionContainerRequestorTest extends AbstractEventQueryDataTest 
     // ------------------------------------------------------------------------    
     
     
-    public void test1Impressions() {
-        runTest(2);
+    public void testValid0() {
+        runTest(0,true);
+    }    
+    
+    public void testValid1() {
+        runTest(1,true);
     }
+    
+    public void testValid2() {
+        runTest(2,true);
+    }    
+    
+    public void testValid3() {
+        runTest(3,true);
+    } 
+    
+    public void testValid4() {
+        runTest(4,true);
+    } 
+    
+    public void testValid5() {
+        runTest(5,true);
+    }  
+    
+    public void testInvalid0() {
+        runTest(0,false);
+    }    
+    
+    public void testInvalid1() {
+        runTest(1,false);
+    }
+    
+    public void testInvalid2() {
+        runTest(2,false);
+    }    
+    
+    public void testInvalid3() {
+        runTest(3,false);
+    } 
+    
+    public void testInvalid4() {
+        runTest(4,false);
+    } 
+    
+    public void testInvalid5() {
+        runTest(5,false);
+    }      
     
     
     // ------------------------------------------------------------------------
     // Misc
     // ------------------------------------------------------------------------    
     
-    private void runTest(int n) {
-        req.request(url(), id(), getEvents(n), new PromotionBinderCallback() {
+    private void runTest(int n, final boolean isValid) {
+        new TestPromotionContainerRequestorImpl(isValid).request(url(), id(), getEvents(n), new PromotionBinderCallback() {
 
             public void process(PromotionBinder binder) {
+                if (isValid) {
+                    assertNotNull(binder);
+                } else {
+                    assertNull(binder);
+                }
             }
             
         });
@@ -63,8 +103,12 @@ public class PromotionContainerRequestorTest extends AbstractEventQueryDataTest 
         return eventSets;
     }
 
+    /**
+     * We don't care about this url.
+     * @return
+     */
     private String url() {
-        return "http://jeffpalm.com/lwp/getBuckets.php";
+        return "http://doesn.matter.com";
     }
 
     private long id() {

@@ -25,12 +25,19 @@ public class PromotionBinderRequestorImpl extends AbstractPromotionBinderRequest
     private final HttpExecutor exe;
     private final ApplicationServices applicationServices;
     
+    /** The default timeout is 5000, though we can change that. */
+    private int timeoutMillis = 5000;
+    
     @Inject
     public PromotionBinderRequestorImpl(PromotionBinderFactory binderFactory, HttpExecutor exe, ApplicationServices applicationServices) {
         super(binderFactory);
         this.exe = exe;
         this.applicationServices = applicationServices;
     }
+    
+    public void setNetworkTimeout(int timeoutMillis) {
+        this.timeoutMillis = timeoutMillis;
+    }    
 
     @Override
     protected void error(Exception e) {
@@ -59,7 +66,7 @@ public class PromotionBinderRequestorImpl extends AbstractPromotionBinderRequest
                 return false;
             }
             
-        }, 3000);
+        }, timeoutMillis);
     }
 
     @Override

@@ -22,12 +22,28 @@ abstract class AbstractEventQueryDataTest extends BaseTestCase {
 
         UserQueryEvent e = getUserQueryEvent(n);
         UserQueryEventData data = new UserQueryEventData(e);
-
-        final byte[] expected = new byte[4 + 8 + 1 + n * 24];
+        /*
+         *   milliseconds since start of the day : 4 bytes 
+         *   original query time                 : 8 bytes 
+         *   number of impressions               : 1 byte 
+         *   List of n=length of
+         *     binder Name      : 1 byte 
+         *     binder Name      : n bytes 
+         *     promo ID         : 8 bytes
+         *     impression time  : 8 bytes
+         */
+        int length = 4 + 8 + 1;
+        for (Impression imp : e.getImpressions()) {
+            length += 1;
+            length += imp.getBinderUniqueName().length();
+            length += 8;
+            length += 8;
+        }        
+        final byte[] expected = new byte[length];System.out.println("length:"+length);
         int cur = 0;
+        expected[cur++] = (byte) e.getImpressions().size();
         cur = transfer(data.getMillisSinceToday(), expected, cur);
         cur = transfer(D, expected, cur);
-        expected[cur++] = (byte) e.getImpressions().size();
         for (Impression imp : e.getImpressions()) {
             cur = transfer(imp, expected, cur);
         }
@@ -63,12 +79,20 @@ abstract class AbstractEventQueryDataTest extends BaseTestCase {
         System.arraycopy(ByteUtil.convertToBytes(i, 4), 0, in, start, 4);
         return start + 4;
     }
+    
+    private int transfer(short i, byte[] in, int start) {
+        System.arraycopy(ByteUtil.convertToBytes(i, 2), 0, in, start, 2);
+        return start + 2;
+    }    
 
     private int transfer(Impression i, byte[] in, int start) {
-        arraycopy(i.getBinderUniqueName().getBytes(), 0, in, start, 8);
-        arraycopy(ByteUtil.convertToBytes(i.getPromo().getUniqueID(), 8), 0, in, start + 8, 8);
-        arraycopy(date2bytes(i.getTimeShown()), 0, in, start + 16, 8);
-        return start + 24;
+        int cur = start;
+        int len = i.getBinderUniqueName().getBytes().length;
+        arraycopy(ByteUtil.convertToBytes(i.getBinderUniqueName().length(), 1), 0, in, cur, 1);     cur += 1;
+        arraycopy(i.getBinderUniqueName().getBytes(), 0, in, cur, len);                             cur += len;
+        arraycopy(ByteUtil.convertToBytes(i.getPromo().getUniqueID(), 8), 0, in, cur, 8);           cur += 8;
+        arraycopy(date2bytes(i.getTimeShown()), 0, in, cur, 8);                                     cur += 8;
+        return cur;
     }
 
     private void arraycopy(byte[] src, int i, byte[] in, int start, int j) {

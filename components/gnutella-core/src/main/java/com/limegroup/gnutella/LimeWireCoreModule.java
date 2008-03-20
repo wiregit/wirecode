@@ -381,6 +381,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(CertificateVerifier.class).to(CertificateVerifierImpl.class);
         
         // Promotion
+        bind(PromotionServices.class).to(PromotionServicesImpl.class);
         bind(SearcherDatabase.class).to(SearcherDatabaseImpl.class);
         bind(PromotionSearcher.class).to(PromotionSearcherImpl.class);
         bind(PromotionBinderRepository.class).to(PromotionBinderRepositoryImpl.class);

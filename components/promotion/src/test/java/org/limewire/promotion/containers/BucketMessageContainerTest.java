@@ -53,19 +53,4 @@ public class BucketMessageContainerTest extends BaseTestCase {
         }
     }
 
-    // private PromotionMessageContainer getPromoMessage(String fillerString) {
-    // PromotionMessageContainer message = new PromotionMessageContainer();
-    // message.setUniqueID(System.currentTimeMillis());
-    //
-    // message.setOptions(new PromotionMessageContainer.PromotionOptions());
-    // message.setDescription(fillerString);
-    // message.setKeywords(fillerString);
-    // message.setURL(fillerString);
-    //
-    // try {
-    // TimeUnit.MILLISECONDS.sleep(1);
-    // } catch (InterruptedException ignored) {
-    // }
-    // return message;
-    // }
 }

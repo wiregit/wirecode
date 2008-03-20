@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.settings;
 
 import org.limewire.promotion.PromotionBinder;
+import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.StringSetting;
 
@@ -11,12 +12,12 @@ import org.limewire.setting.StringSetting;
  */
 public final class ThirdPartySearchResultsSettings extends LimeProps {
     private ThirdPartySearchResultsSettings() {}
-
+    
     /**
-     * The search database.
+     * Enables the promotion system when <code>true</code>.
      */    
-    public static final StringSetting SEARCH_DATABASE =
-        FACTORY.createRemoteStringSetting("SEARCH_DATABASE", "", "ThirdPartySearchResultsSettings.searchDatabase");
+    public static final BooleanSetting PROMOTION_SYSTEM_IS_ENABLED =
+        FACTORY.createRemoteBooleanSetting("PROMOTION_SYSTEM_IS_ENABLED", false, "ThirdPartySearchResultsSettings.promotionSystemIsEnabled");    
     
     /**
      * The url we use to search for {@link PromotionBinder}s.
@@ -40,6 +41,13 @@ public final class ThirdPartySearchResultsSettings extends LimeProps {
      * The max number of search results.
      */    
     public static final IntSetting MAX_NUMBER_OF_SEARCH_RESULTS =
-        FACTORY.createRemoteIntSetting("MAX_NUMBER_OF_SEARCH_RESULTS", 5, "ThirdPartySearchResultsSettings.maxNumberOfSearchResults", 0, Integer.MAX_VALUE);     
- 
+        FACTORY.createRemoteIntSetting("MAX_NUMBER_OF_SEARCH_RESULTS", 5, "ThirdPartySearchResultsSettings.maxNumberOfSearchResults", 0, Integer.MAX_VALUE);
+    
+    /**
+     * The timeout to use when contacting the network for binders.  If this is <code>-1</code> then we ignore it.
+     */
+    public static final IntSetting NETWORK_TIMEOUT_MILLIS_FOR_REQUESTING_BUCKETS = FACTORY
+            .createRemoteIntSetting("NETWORK_TIMEOUT_MILLIS_FOR_REQUESTING_BUCKETS", 5000,
+                    "ThirdPartySearchResultsSettings.networkTimeoutMillisForRequestingBuckets", -1,
+                    8000);
 }

@@ -33,17 +33,23 @@ public class UserQueryEventData {
     public byte[] getData() {
         List<Impression> impressions = event.getImpressions();
         /*
-         * Format: milliseconds since start of the day : 4 bytes original query
-         * time : 8 bytes number of impressions : 1 byte List of n=length of
-         * binder Name : 1 byte binder Name : n bytes promo ID : 8 bytes
-         * impression time : 8 bytes
+         * Format:
+         *  
+         *   number of impressions               : 1 byte
+         *   milliseconds since start of the day : 4 bytes 
+         *   original query time                 : 8 bytes  
+         *   List of n=length of
+         *     binder Name      : 1 byte 
+         *     binder Name      : n bytes 
+         *     promo ID         : 8 bytes
+         *     impression time  : 8 bytes
          */
-        int length = 4 + 8 + 1;
+        int length = 1 + 4 + 8;
         for (Impression imp : impressions) {
             length += 1;
-            length += 8;
-            length += 8;
             length += imp.getBinderUniqueName().length();
+            length += 8;
+            length += 8;
         }
         byte[] bytes = new byte[length];
         PostIncrement inc = new PostIncrement(0);
