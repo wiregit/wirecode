@@ -91,7 +91,7 @@ public class BasicSpecialResultsDatabaseImplTest extends LimeTestCase {
         ; 
     
     private void runTestWithString(String buf, String query, int numEntries) throws IOException {
-        BasicSpecialResultsDatabaseImpl db = helper.newDatabase(buf);     
+        BasicThirdPartyResultsDatabaseImpl db = helper.newDatabase(buf);     
         List<Map<String,String>> lst = db.getSearchResults(query);
         assertEquals(numEntries, lst.size());
     }

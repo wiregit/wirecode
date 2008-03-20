@@ -1,0 +1,11 @@
+<project name="replace" basedir="." default="replace">
+
+  <target name="replace">
+    <replace dir="." 
+	     token="org.limewire.io.GGEPKeys"
+	     value="com.limegroup.gnutella.messages.GGEPKeys"
+	     >
+      <include name="**/*.java"/>
+    </replace>    
+  </target>
+</project>

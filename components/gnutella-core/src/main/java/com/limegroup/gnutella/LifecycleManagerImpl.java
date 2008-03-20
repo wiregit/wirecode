@@ -54,6 +54,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.ThirdPartySearchResultsSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
@@ -124,6 +125,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<BrowseHostHandlerManager> browseHostHandlerManager;
     private final Provider<DownloadUpgradeTask> downloadUpgradeTask;
     private final Provider<StatisticAccumulator> statisticAccumulator;
+    private final Provider<PromotionServices> promotionServices;
     
     /** A list of items that require running prior to shutting down LW. */
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
@@ -182,7 +184,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<OutOfBandThroughputMeasurer> outOfBandThroughputMeasurer,
             Provider<BrowseHostHandlerManager> browseHostHandlerManager,
             Provider<DownloadUpgradeTask> downloadUpgradeTask,
-            Provider<StatisticAccumulator> statisticAccumulator) { 
+            Provider<StatisticAccumulator> statisticAccumulator,
+            Provider<PromotionServices> promotionServices) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -227,6 +230,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.browseHostHandlerManager = browseHostHandlerManager;
         this.downloadUpgradeTask = downloadUpgradeTask;
         this.statisticAccumulator = statisticAccumulator;
+        this.promotionServices = promotionServices;
     }
     
     /* (non-Javadoc)
@@ -479,7 +483,17 @@ public class LifecycleManagerImpl implements LifecycleManager {
             LOG.trace("END StoreServer");
         } else {
             LOG.trace("Disabling the StoreServer");
-        }      
+        }  
+        
+        // Allow us to enable/disable this remotely
+        if (ThirdPartySearchResultsSettings.PROMOTION_SYSTEM_IS_ENABLED.getValue()) {
+            LOG.trace("START loading promotion system");
+            activityCallback.get().componentLoading(I18nMarker.marktr("Loading Promotion System..."));
+            promotionServices.get().init();
+            LOG.trace("START loading promotion system");
+        } else {
+            LOG.trace("Disabling the promotion system");
+        }        
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
             startManualGCThread();

@@ -24,7 +24,7 @@ final class BasicSpecialResultsDatabaseImplTestHelper {
         });        
     }  
     
-    final BasicSpecialResultsDatabaseImpl newDatabase(String buf) {
-        return new BasicSpecialResultsDatabaseImpl(injector.getInstance(LimeXMLDocumentFactory.class), buf);        
+    final BasicThirdPartyResultsDatabaseImpl newDatabase(String buf) {
+        return new BasicThirdPartyResultsDatabaseImpl(injector.getInstance(LimeXMLDocumentFactory.class), buf);        
     }
 }
