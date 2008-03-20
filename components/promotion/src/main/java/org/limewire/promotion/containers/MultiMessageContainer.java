@@ -22,7 +22,7 @@ public class MultiMessageContainer extends MapMessageContainer {
     }
 
     @Override
-    public void parse(GGEP rawGGEP) throws BadGGEPBlockException {
+    public void parse(final GGEP rawGGEP) throws BadGGEPBlockException {
         if (!rawGGEP.hasKey(KEY_WRAPPED_BYTES))
             throw new BadGGEPBlockException("Missing wrappedBytes");
         super.parse(rawGGEP);
@@ -33,10 +33,10 @@ public class MultiMessageContainer extends MapMessageContainer {
      *         loading the array.
      */
     private byte[] getWrappedBytes() {
-        byte[] bytes = getBytes(KEY_WRAPPED_BYTES);
+        final byte[] bytes = getBytes(KEY_WRAPPED_BYTES);
         if (bytes == null)
             return new byte[0];
-        return bytes;
+        return ByteUtil.decompress(bytes);
     }
 
     /**
@@ -45,12 +45,12 @@ public class MultiMessageContainer extends MapMessageContainer {
      *         a new list with new instances of the wrapped messages.
      */
     public List<MessageContainer> getWrappedMessages() {
-        List<MessageContainer> list = new ArrayList<MessageContainer>();
-        byte[] bytes = getWrappedBytes();
+        final List<MessageContainer> list = new ArrayList<MessageContainer>();
+        final byte[] bytes = getWrappedBytes();
         if (bytes.length > 0) {
-            int[] nextOffset = new int[1];
+            final int[] nextOffset = new int[1];
             int offset = 0;
-            MessageContainerParser parser = new MessageContainerParser();
+            final MessageContainerParser parser = new MessageContainerParser();
             while (offset < bytes.length) {
                 try {
                     list.add(parser.parse(new GGEP(bytes, offset, nextOffset)));
@@ -68,8 +68,8 @@ public class MultiMessageContainer extends MapMessageContainer {
      * message, so later changes to the given list will NOT be reflected by this
      * container.
      */
-    public void setWrappedMessages(List<MessageContainer> messages) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+    public void setWrappedMessages(final List<MessageContainer> messages) {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
         for (MessageContainer message : messages) {
             try {
                 out.write(message.getEncoded());
@@ -77,6 +77,6 @@ public class MultiMessageContainer extends MapMessageContainer {
                 throw new RuntimeException("IOException? WTF?", ex);
             }
         }
-        put(KEY_WRAPPED_BYTES, out.toByteArray());
+        put(KEY_WRAPPED_BYTES, ByteUtil.compress(out.toByteArray()));
     }
 }

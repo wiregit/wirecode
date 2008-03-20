@@ -78,4 +78,14 @@ public class ByteUtilTest extends BaseTestCase {
         assertEquals(Long.MIN_VALUE, ByteUtil.toLongFromBytes(bytes));
     }
 
+    public void testCompress() {
+        byte[] bytes1 = ByteUtil.toUTF8Bytes("I'm a little teapot, short and stout!");
+        assertLessThan(ByteUtil.compress(bytes1).length, bytes1.length);
+    }
+
+    public void testCompressDecompress() {
+        byte[] bytes1 = ByteUtil.toUTF8Bytes("I'm a little teapot, short and stout!");
+        byte[] bytesC = ByteUtil.compress(bytes1);
+        assertEquals(bytes1, ByteUtil.decompress(bytesC));
+    }
 }

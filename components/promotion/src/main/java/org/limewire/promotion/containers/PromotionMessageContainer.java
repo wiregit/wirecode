@@ -525,10 +525,6 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
             return false;
         if (!getURL().equals(compare.getURL()))
             return false;
-        if (!getValidStart().equals(compare.getValidStart()))
-            return false;
-        if (!getValidEnd().equals(compare.getValidEnd()))
-            return false;
         return true;
     }
 

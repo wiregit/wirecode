@@ -125,9 +125,8 @@ public class PromotionSearcherImpl implements PromotionSearcher {
             promotionBinderRepository.getBinderForBucket(keywordUtil.getHashValue(normalizedQuery),
                     new PromotionBinderCallback() {
                         public void process(final PromotionBinder binder) {
-                            if (binder == null)
-                                return;
-                            searcherDatabase.ingest(binder);
+                            if (binder != null)
+                                searcherDatabase.ingest(binder);
                             searcherDatabase.expungeExpired();
                             final List<QueryResult> results = searcherDatabase
                                     .query(normalizedQuery);

@@ -1,6 +1,11 @@
 package org.limewire.util;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 public final class ByteUtil {
     private ByteUtil() {
@@ -98,5 +103,57 @@ public final class ByteUtil {
             if (array1[i] != array2[i])
                 return false;
         return true;
+    }
+
+    /**
+     * Compresses the given byte array using ZIP.
+     */
+    public static byte[] compress(final byte[] input) {
+        final Deflater compressor = new Deflater();
+        compressor.setLevel(Deflater.BEST_COMPRESSION);
+
+        compressor.setInput(input);
+        compressor.finish();
+
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream(input.length);
+
+        // Compress the data
+        final byte[] buf = new byte[1024];
+        while (!compressor.finished()) {
+            final int count = compressor.deflate(buf);
+            bos.write(buf, 0, count);
+        }
+        try {
+            bos.close();
+        } catch (IOException unlikely) {
+            throw new RuntimeException("IOException caught closing...", unlikely);
+        }
+
+        return bos.toByteArray();
+    }
+
+    /** Decompresses the given ZIP-compressed byte array */
+    public static byte[] decompress(final byte[] input) {
+        final Inflater decompressor = new Inflater();
+        decompressor.setInput(input);
+
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream(input.length);
+
+        // Decompress the data
+        final byte[] buf = new byte[1024];
+        while (!decompressor.finished()) {
+            try {
+                final int count = decompressor.inflate(buf);
+                bos.write(buf, 0, count);
+            } catch (DataFormatException e) {
+            }
+        }
+        try {
+            bos.close();
+        } catch (IOException unlikely) {
+            throw new RuntimeException("IOException caught closing...", unlikely);
+        }
+
+        return bos.toByteArray();
     }
 }

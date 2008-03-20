@@ -165,9 +165,6 @@ public class PromotionBinder {
      *        and checked.
      */
     public boolean isValidMember(PromotionMessageContainer message, boolean reverifySignature) {
-        //TODO Remove this
-        if (true) 
-            return true;
         if (isExpired(message))
             return false;
         // Now see if we can find this message in our list (using ID)
@@ -196,9 +193,18 @@ public class PromotionBinder {
      */
     private boolean isValidMember(PromotionMessageContainer message,
             List<? extends MessageContainer> list) {
-        for (MessageContainer promo : list) {
-            if (promo.equals(message) && !isExpired(message))
-                return true;
+        if (isExpired(message))
+            return false;
+        System.out.println("Testing message.id=" + message.getUniqueID());
+        for (MessageContainer container : list) {
+            if (container instanceof PromotionMessageContainer) {
+                PromotionMessageContainer promo = (PromotionMessageContainer) container;
+                System.out.println("-- " + promo.getUniqueID()
+                        + ((message.getUniqueID() == promo.getUniqueID()) ? "TRUE" : ""));
+                if (message.getUniqueID() == promo.getUniqueID())
+                    if (promo.equals(message))
+                        return true;
+            }
         }
         return false;
     }

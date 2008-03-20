@@ -50,8 +50,8 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
     }
 
     @Inject
-    public SearcherDatabaseImpl(KeywordUtil keywordUtil, CipherProvider cipherProvider,
-            KeyStoreProvider keyStoreProvider, CertificateVerifier certificateVerifier) {
+    public SearcherDatabaseImpl(final KeywordUtil keywordUtil, final CipherProvider cipherProvider,
+            final KeyStoreProvider keyStoreProvider, final CertificateVerifier certificateVerifier) {
         this.keywordUtil = keywordUtil;
         this.cipherProvider = cipherProvider;
         this.keyStoreProvider = keyStoreProvider;
@@ -73,9 +73,9 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
      * 
      * @see {@link java.sql.Statement#executeUpdate(String)}
      */
-    private int executeUpdate(String sql, Object... values) {
+    private int executeUpdate(final String sql, final Object... values) {
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
+            final PreparedStatement statement = connection.prepareStatement(sql);
             try {
                 for (int i = 0; i < values.length; i++) {
                     statement.setObject(i + 1, values[i]);
@@ -93,7 +93,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
      * Creates a statement and runs the given SQL, then returns the results of a
      * call to "CALL IDENTITY()"
      */
-    private long executeInsert(String sql, Object... values) {
+    private long executeInsert(final String sql, final Object... values) {
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
             try {
@@ -109,7 +109,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             }
             statement = connection.prepareStatement("CALL IDENTITY()");
             try {
-                ResultSet rs = statement.executeQuery();
+                final ResultSet rs = statement.executeQuery();
                 try {
                     rs.next();
                     return rs.getLong(1);
@@ -156,15 +156,15 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
         executeUpdate("DELETE FROM binders WHERE valid_end_dt < CURRENT_TIMESTAMP");
     }
 
-    private void saveBinder(PromotionBinder binder) {
+    private void saveBinder(final PromotionBinder binder) {
         executeUpdate("DELETE FROM binders where binder_unique_name = ?", binder.getUniqueName());
         executeInsert(
                 "INSERT INTO binders (binder_unique_name, binder_bucket_id, valid_end_dt, binder_blob) VALUES (?,?,?,?)",
-                new Object[] { binder.getUniqueName(), binder.getBucketNumber(),
+                new Object[] {binder.getUniqueName(), binder.getBucketNumber(),
                         binder.getValidEnd(), binder.getEncoded() });
     }
 
-    public PromotionBinder getBinder(String binderUniqueName) {
+    public PromotionBinder getBinder(final String binderUniqueName) {
         PreparedStatement statement = null;
         try {
             statement = connection.prepareStatement("SELECT binder_blob FROM "
@@ -172,8 +172,8 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             statement.setString(1, binderUniqueName);
             final ResultSet rs = statement.executeQuery();
             if (rs.next()) {
-                PromotionBinder binder = new PromotionBinder(cipherProvider, keyStoreProvider,
-                        certificateVerifier);
+                final PromotionBinder binder = new PromotionBinder(cipherProvider,
+                        keyStoreProvider, certificateVerifier);
                 binder.initialize(rs.getBytes("binder_blob"));
                 return binder;
             }
@@ -192,7 +192,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
         }
     }
 
-    public PromotionBinder getBinder(int bucketNumber) {
+    public PromotionBinder getBinder(final int bucketNumber) {
         PreparedStatement statement = null;
         try {
             statement = connection.prepareStatement("SELECT binder_blob FROM "
@@ -200,8 +200,8 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             statement.setInt(1, bucketNumber);
             final ResultSet rs = statement.executeQuery();
             if (rs.next()) {
-                PromotionBinder binder = new PromotionBinder(cipherProvider, keyStoreProvider,
-                        certificateVerifier);
+                final PromotionBinder binder = new PromotionBinder(cipherProvider,
+                        keyStoreProvider, certificateVerifier);
                 binder.initialize(rs.getBytes("binder_blob"));
                 return binder;
             }
@@ -288,16 +288,16 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
      * @param entryID
      * @return
      */
-    PromotionMessageContainer getPromotionMessageContainer(long entryID) {
+    PromotionMessageContainer getPromotionMessageContainer(final long entryID) {
         PreparedStatement statement = null;
         try {
             statement = connection
                     .prepareStatement("select entry_ggep from entries where entry_id = ?");
             statement.setLong(1, entryID);
-            ResultSet rs = statement.executeQuery();
+            final ResultSet rs = statement.executeQuery();
             if (rs.next()) {
-                byte[] ggep = rs.getBytes(1);
-                PromotionMessageContainer promo = new PromotionMessageContainer();
+                final byte[] ggep = rs.getBytes(1);
+                final PromotionMessageContainer promo = new PromotionMessageContainer();
                 promo.parse(new GGEP(ggep, 0));
                 return promo;
             }
@@ -327,7 +327,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
 
         private final String query;
 
-        QueryResultImpl(String binderUniqueName, PromotionMessageContainer promo, String query) {
+        QueryResultImpl(final String binderUniqueName, final PromotionMessageContainer promo, final String query) {
             this.binderUniqueName = binderUniqueName;
             this.promotionMessageContainer = promo;
             this.query = query;
@@ -350,9 +350,9 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(final Object obj) {
             if (obj instanceof QueryResultImpl) {
-                QueryResultImpl other = (QueryResultImpl) obj;
+                final QueryResultImpl other = (QueryResultImpl) obj;
                 return this.promotionMessageContainer.equals(other.promotionMessageContainer);
             }
             return false;

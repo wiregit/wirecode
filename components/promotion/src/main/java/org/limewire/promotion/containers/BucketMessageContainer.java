@@ -29,12 +29,12 @@ public class BucketMessageContainer extends MultiMessageContainer {
      * Set a unique name for this bucket, such as "[0103]20080201", for future
      * lookups. Defaults to currentTimeMillis/1000. Cannot be null.
      */
-    public void setName(String bucketName) {
+    public void setName(final String bucketName) {
         put(KEY_NAME, bucketName);
     }
 
     public String getName() {
-        String name = getString(KEY_NAME);
+        final String name = getString(KEY_NAME);
         if (name == null) {
             setName((System.currentTimeMillis() / 1000) + "");
             return getName();
@@ -94,7 +94,7 @@ public class BucketMessageContainer extends MultiMessageContainer {
      * @see MultiMessageContainer#setWrappedMessages(List)
      */
     @Override
-    public void setWrappedMessages(List<MessageContainer> messages) {
+    public void setWrappedMessages(final List<MessageContainer> messages) {
         for (MessageContainer message : messages) {
             if (!(message instanceof PromotionMessageContainer))
                 throw new RuntimeException("All wrapped messages must be of type "
@@ -109,7 +109,7 @@ public class BucketMessageContainer extends MultiMessageContainer {
      * filtered out of the list.
      */
     public List<PromotionMessageContainer> getPromoMessages() {
-        List<PromotionMessageContainer> list = new ArrayList<PromotionMessageContainer>();
+        final List<PromotionMessageContainer> list = new ArrayList<PromotionMessageContainer>();
         for (MessageContainer message : getWrappedMessages()) {
             if (message instanceof PromotionMessageContainer)
                 list.add((PromotionMessageContainer) message);
