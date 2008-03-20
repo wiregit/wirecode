@@ -86,7 +86,7 @@ public class QueryRouteTable {
      *  the easy optimization of only using BitSets.
      */
     
-    private QRTTableStorage storage;
+    private volatile QRTTableStorage storage;
     
     /** The 'logical' length of the BitSet.  Needed because the BitSet accessor
      *  methods don't seem to offer what is needed.
@@ -152,7 +152,7 @@ public class QueryRouteTable {
      */
     private void initialize(int size, byte infinity) {
         this.bitTableLength = size;
-        this.storage = new BitSetQRTTableStorage(bitTableLength);
+        this.storage = new DynamicQRTStorage(bitTableLength);
         this.sequenceNumber = -1;
         this.sequenceSize = -1;
         this.nextPatch = 0;
@@ -342,6 +342,7 @@ public class QueryRouteTable {
      */
     public void addAll(QueryRouteTable qrt) {
         this.storage.or( qrt.storage.resize(this.bitTableLength) );
+        this.storage.compact();
     }
     
 
@@ -541,9 +542,9 @@ public class QueryRouteTable {
             if(!this.storage.equals(prev.storage) ) {
                 QRTTableStorage xOr = this.storage.clone();
                 xOr.xor(prev.storage);
-                for (int i=xOr.nextSetBit(0); i >= 0; i=xOr.nextSetBit(i+1)) {
+                for (int i : xOr) {
                     data[i] = this.storage.get(i) ?
-                        keywordPresent : keywordAbsent;
+                            keywordPresent : keywordAbsent;
                     needsPatch = true;
                 }
             }
@@ -553,7 +554,7 @@ public class QueryRouteTable {
         //1b. If there was no previous table, scan through the table using
         //    nextSetBit, avoiding bitTableLength calls to BitSet.get(int).
         else {
-            for (int i=storage.nextSetBit(0);i>=0;i=storage.nextSetBit(i+1)){
+            for (int i : storage) {
                 data[i] = keywordPresent;
                 needsPatch = true;
             }
@@ -638,7 +639,7 @@ public class QueryRouteTable {
      */
     public byte [] getRawDump() {
         byte [] ret = new byte[bitTableLength / 8];
-        for(int i = storage.nextSetBit(0); i >= 0; i = storage.nextSetBit(i+1)) 
+        for(int i : storage) 
             ret[i / 8] = (byte) (ret[i / 8] | (1 << (7 - i % 8)));
         return ret;
     }

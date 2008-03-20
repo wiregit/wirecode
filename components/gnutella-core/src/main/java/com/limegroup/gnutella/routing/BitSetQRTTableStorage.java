@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.routing;
 
-import org.limewire.collection.BitField;
+import java.util.Iterator;
+
 import org.limewire.collection.BitSet;
+import org.limewire.collection.UnmodifiableIterator;
 
 /**
  * Implementation of QRTTableStorage which uses a BitSet.
@@ -57,12 +59,12 @@ class BitSetQRTTableStorage implements QRTTableStorage {
         return bitSet.numUnitsWithLoad(load);
     }
 
-    public void or(BitField other) {
+    public void or(QRTTableStorage other) {
         if (other instanceof BitSetQRTTableStorage) {
             BitSetQRTTableStorage optimized = (BitSetQRTTableStorage) other;
             bitSet.or(optimized.bitSet);
         } else {
-            for (int i=other.nextSetBit(0); i >= 0; i=other.nextSetBit(i+1)) 
+            for (int i : other) 
                 bitSet.set(i);
         }
     }
@@ -107,17 +109,21 @@ class BitSetQRTTableStorage implements QRTTableStorage {
         bitSet.set(hash);
     }
 
-    public void xor(BitField other) {
+    public void xor(QRTTableStorage other) {
         if (other instanceof BitSetQRTTableStorage) {
             BitSetQRTTableStorage optimized = (BitSetQRTTableStorage) other;
             bitSet.xor(optimized.bitSet);
         } else {
-            for (int i=other.nextSetBit(0); i >= 0; i=other.nextSetBit(i+1)) 
+            for (int i=0; i < bitTableLength; i++) 
                 bitSet.set(i,bitSet.get(i) != other.get(i));
         }
 
     }
 
+    public Iterator<Integer> iterator() {
+        return new BitSetIterator();
+    }
+    
     public int cardinality() {
         return bitSet.cardinality();
     }
@@ -139,12 +145,35 @@ class BitSetQRTTableStorage implements QRTTableStorage {
     }
     
     public boolean equals(Object o) {
-        if (! (o instanceof BitSetQRTTableStorage)) 
+        if (! (o instanceof QRTTableStorage)) 
             return false;
         
-            // this will be updated when other types are implemented
-        BitSetQRTTableStorage other = (BitSetQRTTableStorage)o;
-        return bitSet.equals(other.bitSet);
+        if (o instanceof BitSetQRTTableStorage) {
+            BitSetQRTTableStorage other = (BitSetQRTTableStorage)o;
+            return bitSet.equals(other.bitSet);
+        }
+        
+        QRTTableStorage other = (QRTTableStorage)o;
+        if (cardinality() != other.cardinality())
+            return false;
+        for (int i : other) {
+            if (!get(i))
+                return false;
+        }
+        return true;
     }
 
+    private class BitSetIterator extends UnmodifiableIterator<Integer> {
+        private int current = bitSet.nextSetBit(0);
+        
+        public boolean hasNext() {
+            return current >= 0;
+        }
+        
+        public Integer next() {
+            int ret = current;
+            current = bitSet.nextSetBit(ret + 1);
+            return ret;
+        }
+    }
 }

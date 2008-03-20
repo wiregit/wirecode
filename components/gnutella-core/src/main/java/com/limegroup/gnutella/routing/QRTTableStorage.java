@@ -5,13 +5,22 @@ import org.limewire.collection.BitField;
 /**
  * Something that stores the hash values contained in a routing table.
  */
-interface QRTTableStorage extends BitField {
+interface QRTTableStorage extends BitField, Iterable<Integer> {
 
-    //// these will be removed soon as they're not relevant to
-    //// all implementations.
+    /**
+     * @return number of unused units, -1 if N/A
+     */
     public int getUnusedUnits();
-    public int getUnitsInUse();
+    
+    /**
+     * @return number of units with specified load, -1 if N/A
+     */
     public int numUnitsWithLoad(int load);
+    
+    /**
+     * @return number of 8-byte memory blocks in use or equivalent
+     */
+    public int getUnitsInUse();
     
     /**
      * @return % of units that are set.
@@ -47,12 +56,12 @@ interface QRTTableStorage extends BitField {
     /**
      * sets all entries present in other to be present in this as well.
      */
-    public void or(BitField other);
+    public void or(QRTTableStorage other);
     
     /**
      * performs a xor with the other BitField.
      */
-    public void xor(BitField other);
+    public void xor(QRTTableStorage other);
     
     
 }
