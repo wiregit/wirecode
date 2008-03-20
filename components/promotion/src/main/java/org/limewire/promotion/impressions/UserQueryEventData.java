@@ -31,24 +31,34 @@ public class UserQueryEventData {
     // TODO: Improve to not include all the array creation
     public byte[] getData() {
         List<Impression> impressions = event.getImpressions();
-        byte[] bytes = new byte[4 + 8 + 1 + 24*impressions.size()];
         /*
          * Format:
          *  milliseconds since start of the day     : 4 bytes
          *  original query time                     : 8 bytes
          *  number of impressions                   : 1 byte
          *  List of
-         *      binder ID                           : 8 bytes
+         *      n=length of binder Name             : 1 byte
+         *      binder Name                         : n bytes
          *      promo ID                            : 8 bytes
          *      impression time                     : 8 bytes                     
          */
+        int length = 4 + 8 + 1;
+        for (Impression imp : impressions) {
+            length += 1;
+            length += 8;
+            length += 8;
+            length += imp.getBinderUniqueName().length();
+        }
+        byte[] bytes = new byte[length];        
         PostIncrement inc = new PostIncrement(0);
-        bytes[inc.inc(1)] = (byte)(0xff & impressions.size());
+        bytes[inc.inc()] = (byte)(0xff & impressions.size());
         System.arraycopy(ByteUtil.convertToBytes(millisSinceToday, 4), 0, bytes, inc.inc(4), 4);
         System.arraycopy(ByteUtil.convertToBytes(event.getOriginalQueryTime().getTime(), 8), 0, bytes, inc.inc(8), 8);
         for (int i=0; i<impressions.size(); i++) {
             Impression imp = impressions.get(i);
-            System.arraycopy(imp.getBinderUniqueName().getBytes(),      0, bytes, inc.inc(8), 8);
+            String binderName = imp.getBinderUniqueName();
+            bytes[inc.inc()] = (byte)(0xff & binderName.length());
+            System.arraycopy(binderName.getBytes(),      0, bytes, inc.inc(binderName.length()), binderName.length());
             System.arraycopy(ByteUtil.convertToBytes(imp.getPromo().getUniqueID(), 8), 0, bytes, inc.inc(8), 8);
             System.arraycopy(ByteUtil.convertToBytes(imp.getTimeShown().getTime(), 8), 0, bytes, inc.inc(8), 8);
         }

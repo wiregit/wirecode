@@ -23,11 +23,13 @@ public class PromotionBinderRequestorImpl extends AbstractPromotionBinderRequest
     private final static Log LOG = LogFactory.getLog(PromotionBinderRequestorImpl.class);
     
     private final HttpExecutor exe;
+    private final ApplicationServices applicationServices;
     
     @Inject
-    public PromotionBinderRequestorImpl(PromotionBinderFactory binderFactory, HttpExecutor exe) {
+    public PromotionBinderRequestorImpl(PromotionBinderFactory binderFactory, HttpExecutor exe, ApplicationServices applicationServices) {
         super(binderFactory);
         this.exe = exe;
+        this.applicationServices = applicationServices;
     }
 
     @Override
@@ -52,10 +54,16 @@ public class PromotionBinderRequestorImpl extends AbstractPromotionBinderRequest
             }
 
             public boolean requestFailed(HttpMethod method, IOException exc) {
+                callback.process(null);
                 exe.releaseResources(method);
                 return false;
             }
             
         }, 3000);
+    }
+
+    @Override
+    protected String alterUrl(String url) {
+        return LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyBTGUID());
     }
 }

@@ -48,4 +48,12 @@ public class TestPromotionContainerRequestorImpl extends AbstractPromotionBinder
         return LimeWireUtils.getHttpServer(); // todo
     }
 
+    @Override
+    protected String alterUrl(String url) {
+        //
+        // Don't alter it
+        //
+        return url;
+    }
+
 }

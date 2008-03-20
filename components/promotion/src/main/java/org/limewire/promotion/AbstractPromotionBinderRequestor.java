@@ -48,6 +48,12 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
      *         <code>POST</code> request.
      */
     protected abstract String getUserAgent();
+    
+    /**
+     * Subclasses should alter the final URL in this method, such as adding
+     * version information, etc.
+     */
+    protected abstract String alterUrl(String url);
 
     /**
      * Called once the {@link PostMethod} <code>request</code> is constructed.
@@ -79,7 +85,7 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
         //      query_<i>: query for the ith UserQueryEvent
         //      data_<i>: data for the ith UserQueryEvent
         //
-        final PostMethod request = new PostMethod(url);
+        final PostMethod request = new PostMethod(alterUrl(url));
         //
         //  This is the id of the bucket we want
         //

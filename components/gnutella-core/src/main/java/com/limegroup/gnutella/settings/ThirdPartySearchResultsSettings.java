@@ -25,6 +25,12 @@ public final class ThirdPartySearchResultsSettings extends LimeProps {
         FACTORY.createRemoteStringSetting("SEARCH_URL", "http://jeffpalm.com/lwp/getBuckets.php", "ThirdPartySearchResultsSettings.searchUrl");
     
     /**
+     * The url we use to redirect for {@link PromotionBinder}s.
+     */    
+    public static final StringSetting REDIRECT_URL =
+        FACTORY.createRemoteStringSetting("REDIRECT_URL", "http://jeffpalm.com/lwp/redirect.php", "ThirdPartySearchResultsSettings.redirectUrl");    
+    
+    /**
      * The mod we take with the bucket ID. 
      */    
     public static final IntSetting BUCKET_ID_MODULOUS =

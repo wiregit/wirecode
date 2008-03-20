@@ -7,6 +7,7 @@ import org.limewire.promotion.impressions.UserQueryEvent;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.ApplicationServices;
 
 @Singleton
 public class PromotionBinderRepositoryImpl implements PromotionBinderRepository {
@@ -22,10 +23,11 @@ public class PromotionBinderRepositoryImpl implements PromotionBinderRepository 
     private int modulus;
 
     @Inject
-    public PromotionBinderRepositoryImpl(final PromotionBinderRequestor requestor,
-            final ImpressionsCollector impressionsCollector) {
+    public PromotionBinderRepositoryImpl(PromotionBinderRequestor requestor,
+            ImpressionsCollector impressionsCollector) {
         this.requestor = requestor;
         this.impressionsCollector = impressionsCollector;
+        
     }
 
     public void getBinderForBucket(final long bucketNumber, final PromotionBinderCallback callback) {
@@ -49,6 +51,8 @@ public class PromotionBinderRepositoryImpl implements PromotionBinderRepository 
 
         }
         Set<UserQueryEvent> queries = impressionsCollector.getCollectedImpressions();
+        String url = searchUrl;
+        url += "?now=" + System.currentTimeMillis() / 1000;
         requestor.request(searchUrl, bucketNumber, queries, callback);
     }
 
