@@ -394,7 +394,7 @@ public final class SearchSettings extends LimeProps {
      * Whether client side is enabled at all
      */
     public static final BooleanSetting DESIRES_PARTIAL_RESULTS_REMOTE =
-        FACTORY.createRemoteBooleanSetting("DESIRES_PARTIAL_RESULTS_REMOTE", 
+        FACTORY.createRemoteBooleanSetting("DESIRES_PARTIAL_RESULTS_REMOTE_BETA", 
                 true,"SearchSettings.desiresPartialResultsBeta");
     
     public static boolean desiresPartialResults() {

@@ -108,21 +108,5 @@ public interface Response {
      * Returns this Response as a RemoteFileDesc.
      */
     public RemoteFileDesc toRemoteFileDesc(HostData data, RemoteFileDescFactory remoteFileDescFactory);
-
-	/**
-	 * Overrides equals to check that these two responses are equal.
-	 * Raw extension bytes are not checked, because they may be
-	 * extensions that do not change equality, such as
-	 * otherLocations.
-	 */
-    public boolean equals(Object o);
-
-    public int hashCode();
-
-	/**
-	 * Overrides Object.toString to print out a more informative message.
-	 */
-	public String toString();
-	
 }
 

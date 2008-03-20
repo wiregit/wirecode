@@ -156,7 +156,7 @@ public class ResourceLocationCounter {
         // zero, set it to 1%.
         //
         if (sum > 0) {
-            _percentAvailable = (int)Math.round(100.0 / ((float)_fileSize / (float)sum));
+            _percentAvailable = (int)Math.floor(100.0 / ((float)_fileSize / (float)sum));
             
             if (_percentAvailable == 0)
                 _percentAvailable = 1;

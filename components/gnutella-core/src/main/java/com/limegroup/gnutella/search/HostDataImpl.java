@@ -131,6 +131,7 @@ public class HostDataImpl implements HostData {
      * 
      * @param reply the <tt>QueryReply</tt> instance from which host data
      *        should be extracted.
+     * @param networkManager TODO
      */
     protected HostDataImpl(QueryReply reply, NetworkManager networkManager) {
         CLIENT_GUID = reply.getClientGUID();
@@ -194,158 +195,70 @@ public class HostDataImpl implements HostData {
             SPEED = ByteOrder.long2int(reply.getSpeed()); //safe cast
     }
 
-    /**
-     * Accessor for the client guid for the host.
-     * 
-     * @return the host's client guid
-     */
     public byte[] getClientGUID() {
         return CLIENT_GUID;
     }
 
-    /**
-     * Accessor for the vendor code of the host.
-     * 
-     * @return the host's vendor code
-     */
     public String getVendorCode() {
         return VENDOR_CODE;
     }
 
-    /**
-     * Accessor for the message guid.
-     * 
-     * @return the message guid
-     */
     public byte[] getMessageGUID() {
         return MESSAGE_GUID;
     }
 
-    /**
-     * Accessor for the speed (bandwidth) of the remote host.
-     * 
-     * @return the speed of the remote host
-     */
     public int getSpeed() {
         return SPEED;
     }
 
-    /**
-     * Accessor for the quality of results returned from this host, based on
-     * firewalled status, whether or not it has upload slots, etc.
-     * 
-     * @return the quality of results returned from the remote host
-     */
     public int getQuality() {
         return QUALITY;
     }
 
-    /**
-     * Accessor for the ip address of the host sending the reply.
-     * 
-     * @return the ip address for the replying host
-     */
     public String getIP() {
         return IP;
     }
 
-    /**
-     * Accessor for the port of the host sending the reply.
-     * 
-     * @return the port of the replying host
-     */
     public int getPort() {
         return PORT;
     }
 
-    /**
-     * Returns whether or not the remote host is firewalled.
-     *
-     * @return <tt>true</tt> if the remote host is firewalled,
-     *  otherwise <tt>false</tt>
-     */
     public boolean isFirewalled() {
         return FIREWALLED;
     }
 
-    /**
-     * Returns whether or not the remote host is busy.
-     *
-     * @return <tt>true</tt> if the remote host is busy,
-     *  otherwise <tt>false</tt>
-     */
     public boolean isBusy() {
         return BUSY;
     }
 
-    /**
-     * Returns whether or not the remote host has browse host enabled.
-     *
-     * @return <tt>true</tt> if the remote host has browse host enabled,
-     *  otherwise <tt>false</tt>
-     */
     public boolean isBrowseHostEnabled() {
         return BROWSE_HOST_ENABLED;
     }
 
-    /**
-     * Returns whether or not the remote host has chat enabled.
-     *
-     * @return <tt>true</tt> if the remote host has chat enabled,
-     *  otherwise <tt>false</tt>
-     */
     public boolean isChatEnabled() {
         return CHAT_ENABLED;
     }
 
-    /**
-     * Returns whether or not the remote host is reporting a speed that 
-     * has been measured by the application, as opposed to simply selected
-     * by the user..
-     *
-     * @return <tt>true</tt> if the remote host has as measured speed,
-     *  otherwise <tt>false</tt>
-     */
     public boolean isMeasuredSpeed() {
         return MEASURED_SPEED;
     }
     
-    /**
-     * Returns whether or not this was a response to a multicast query.
-     *
-     * @return <tt>true</tt> if this is a response to a multicast query,
-     *  otherwise <tt>false</tt>
-     */
     public boolean isReplyToMulticastQuery() {
         return MULTICAST;
     }
 
-    /**
-     * Returns the <tt>Set</tt> of push proxies, which can be empty.
-     *
-     * @return a <tt>Set</tt> of push proxies, which can be empty
-     */
     public Set<? extends IpPort> getPushProxies() {
         return PROXIES;
     }
 
-    /**
-     * Returns whether or not this Host can do Firewalled Transfer.
-     *
-     */
     public boolean supportsFWTransfer() {
         return CAN_DO_FWTRANSFER;
     }
     
-    /**
-     * 
-     * @return the version of FWT protocol this host supports. 0 if none
-     */
     public int getFWTVersionSupported() {
         return FWT_VERSION;
     }
     
-    /** Returns true if the host supports TLS connections. */
     public boolean isTLSCapable() {
         return TLS_CAPABLE;
     }

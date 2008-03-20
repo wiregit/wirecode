@@ -23,6 +23,7 @@ import org.limewire.util.ByteOrder;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
@@ -44,6 +45,7 @@ import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.util.ClassCNetworks;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
+@Singleton
 public class SearchResultHandlerImpl implements SearchResultHandler {
 
     private static final Log LOG =
@@ -227,18 +229,6 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             return -1;
     }
     
-    /**
-     * Determines whether or not the specified 
-    
-    /*---------------------------------------------------    
-      END OF PUBLIC INTERFACE METHODS
-     ----------------------------------------------------*/
-
-    /*---------------------------------------------------    
-      PRIVATE INTERFACE METHODS
-     ----------------------------------------------------*/
-
-
     /** 
      * Handles the given query reply. Only one thread may call it at a time.
      *      
@@ -605,6 +595,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
          * 
          * @param urns A Set of URNs, typically from a Response
          * @param is An IntervalSet, typically from a Response
+         * @param size Size of the file in bytes
          * @return Returns the number of new locations that exist for the
          *         given Set<URN> based on the IntervalSet.
          * 

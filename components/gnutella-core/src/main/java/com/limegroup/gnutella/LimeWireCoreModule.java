@@ -334,7 +334,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UpdateMessageVerifier.class).to(UpdateMessageVerifierImpl.class);
         bind(InspectionResponseFactory.class).to(InspectionResponseFactoryImpl.class);
         bind(FECUtils.class).to(FECUtilsImpl.class);
-        bind(SearchResultHandler.class).to(SearchResultHandlerImpl.class).in(Scopes.SINGLETON);
+        bind(SearchResultHandler.class).to(SearchResultHandlerImpl.class);
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);

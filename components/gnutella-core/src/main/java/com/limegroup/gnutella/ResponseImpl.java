@@ -100,8 +100,10 @@ public class ResponseImpl implements Response {
      * @param doc the <tt>LimeXMLDocument</tt> instance associated with
      *  the file
      * @param extensions The raw unparsed extension bytes.
-     * @param endpoints a collection of other locations on this network
-     *        that will have this file
+     * @param alternateLocations Other hosts with this file 
+     * @param creationTime TODO
+     * @param ranges Ranges of data to be represented by this response
+     * @param verified TODO
      */
     public ResponseImpl(long index, long size, String name,
                      int incomingNameByteArraySize, Set<? extends URN> urns, 
@@ -153,9 +155,6 @@ public class ResponseImpl implements Response {
         this.verified = verified;
     }
   
-    /**
-     * Like writeToArray(), but writes to an OutputStream.
-     */
     public void writeToStream(OutputStream os) throws IOException {
         ByteOrder.int2leb((int)index, os);
         if (size > Integer.MAX_VALUE) 
@@ -174,16 +173,10 @@ public class ResponseImpl implements Response {
         os.write(0);
     }
 
-    /**
-     * Sets this' metadata.
-     * @param meta the parsed XML metadata 
-     */ 
     public void setDocument(LimeXMLDocument doc) {
         document = doc;
     }
        
-    /**
-     */
     public int getIncomingLength() {
         // must match same number of bytes of Response when initially read from the network
         if(incomingNameByteArraySize != -1){
@@ -196,73 +189,30 @@ public class ResponseImpl implements Response {
         return 8 + nameBytes.length + 1 + extBytes.length + 1;
     }
    
-
-    /**
-     * Returns the index for the file stored in this <tt>Response</tt>
-     * instance.
-     *
-     * @return the index for the file stored in this <tt>Response</tt>
-     * instance
-     */
     public long getIndex() {
         return index;
     }
 
-    /**
-     * Returns the size of the file for this <tt>Response</tt> instance
-     * (in bytes).
-     *
-     * @return the size of the file for this <tt>Response</tt> instance
-     * (in bytes)
-     */
     public long getSize() {
         return size;
     }
 
-    /**
-     * Returns the name of the file for this response.  This is guaranteed
-     * to be non-null, but it could be the empty string.
-     *
-     * @return the name of the file for this response
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * Returns this' metadata.
-     */
     public LimeXMLDocument getDocument() {
         return document;
     }
 
-    /**
-     * Returns an immutable <tt>Set</tt> of <tt>URN</tt> instances for 
-     * this <tt>Response</tt>.
-     *
-     * @return an immutable <tt>Set</tt> of <tt>URN</tt> instances for 
-     * this <tt>Response</tt>, guaranteed to be non-null, although the
-     * set could be empty
-     */
     public Set<URN> getUrns() {
         return urns;
     }
     
-    /**
-     * Returns an immutabe <tt>Set</tt> of <tt>Endpoint</tt> that
-     * contain the same file described in this <tt>Response</tt>.
-     *
-     * @return an immutabe <tt>Set</tt> of <tt>Endpoint</tt> that
-     * contain the same file described in this <tt>Response</tt>,
-     * guaranteed to be non-null, although the set could be empty
-     */
     public Set<? extends IpPort> getLocations() {
         return alternateLocations;
     }
     
-    /**
-     * Returns the create time.
-     */
     public long getCreateTime() {
         return creationTime;
     }    
@@ -283,9 +233,6 @@ public class ResponseImpl implements Response {
         return verified;
     }
     
-    /**
-     * Returns this Response as a RemoteFileDesc.
-     */
     public RemoteFileDesc toRemoteFileDesc(HostData data, RemoteFileDescFactory remoteFileDescFactory){
         if(cachedRFD != null &&
            cachedRFD.getPort() == data.getPort() &&
