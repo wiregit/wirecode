@@ -6,6 +6,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.SortedSet;
 
 /**
  * Represents a set of distinct integers. 
@@ -29,6 +30,30 @@ public class SparseIntSet extends AbstractSet<Integer> {
     private int size;
     
     private int modCount;
+    
+    /**
+     * Creates an empty set with capacity = 8
+     * (similar to ArrayList)
+     */
+    public SparseIntSet() {
+        this(8);
+    }
+    
+    /**
+     * Creates an empty set with the provided initial capacity.
+     * @param initialCapacity the initial capacity desired.
+     */
+    public SparseIntSet(int initialCapacity) {
+        ensureCapacity(initialCapacity);
+    }
+    
+    /**
+     * Creates a set containing all the elements of the provided
+     * collection.
+     */
+    public SparseIntSet(Collection<? extends Integer> c) {
+        addAll(c);
+    }
     
     /**
      * compacts this set to occupy 4*size() bytes of memory.
@@ -73,6 +98,79 @@ public class SparseIntSet extends AbstractSet<Integer> {
         list[point] = i;
         modCount++;
         return true;
+    }
+    
+    @Override
+    public boolean addAll(Collection<? extends Integer> c) {
+        if (c.isEmpty())
+            return false;
+        
+        // if we know the other collection is sorted, we can save a lot of time
+        if (c instanceof SparseIntSet || c instanceof SortedSet) {
+            if (isEmpty()) { 
+                fillFromSorted(c);
+                return true;
+            }
+            
+            int [] newList = new int[size() + c.size()];
+            Iterator<Integer> us = iterator();
+            Iterator<? extends Integer> them = c.iterator();
+            int index = 0;
+            boolean modified = false;
+            
+            // slightly tweaked mergesort
+            int biggest = Integer.MIN_VALUE;
+            boolean lastUs = true;
+            boolean lastThem = true;
+            while (us.hasNext() || them.hasNext()) {
+                int a = biggest;
+                int b = biggest;
+                if (lastUs && us.hasNext())
+                    a = us.next();
+                if (lastThem && them.hasNext())
+                    b = them.next();
+
+                // this is where we differ from merge sort since this is a Set
+                if (index > 0 && newList[index - 1] == Math.min(a,b))
+                    continue;
+                
+                biggest = Math.max(a, b);
+                if (a < b) {
+                    newList[index] = a;
+                    lastUs = true;
+                    lastThem = false;
+                } else if ( a > b) {
+                    modified = true;
+                    newList[index] = b;
+                    lastUs = false;
+                    lastThem = true;
+                } else {
+                    newList[index] = a;
+                    lastUs = true;
+                    lastThem = true;
+                }
+                index++;
+            }
+            
+            if (newList[index - 1] != biggest)
+                newList[index++] = biggest;
+            
+            list = newList;
+            size = index;
+            compact();
+            return modified;
+        } else {
+            // use regular addAll
+            ensureCapacity(size() + c.size());
+            boolean ret = super.addAll(c);
+            compact();
+            return ret;
+        }
+    }
+    private void fillFromSorted(Collection<? extends Integer> c) {
+        list = new int[c.size()];
+        for (int i : c) 
+            list[++size - 1] = i;
     }
     
     private void ensureCapacity(int minCapacity) {
