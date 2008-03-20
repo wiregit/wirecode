@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.google.inject.Inject;
 
-public class CertificateVerifierImpl implements CertificateVerifier{
+public class CertificateVerifierImpl implements CertificateVerifier {
     private static final Log LOG = LogFactory.getLog(CertificateVerifierImpl.class);
 
     private KeyStoreProvider keyStoreProvider;
@@ -92,7 +92,7 @@ public class CertificateVerifierImpl implements CertificateVerifier{
             // chain
             if (x509.getIssuerDN().getName().equals(x509.getSubjectDN().getName()))
                 return;
-            System.out.println(cn);
+            //System.out.println(cn);
             try {
                 Certificate issuerCert = keyStore.getCertificate(cn);
                 certs.add(issuerCert);

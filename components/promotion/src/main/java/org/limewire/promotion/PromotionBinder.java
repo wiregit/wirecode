@@ -42,8 +42,8 @@ public class PromotionBinder {
     private Date validEnd = new Date();
 
     @Inject
-    public PromotionBinder(CipherProvider cipherProvider, KeyStoreProvider keyStore,
-            CertificateVerifier certificateVerifier) {
+    public PromotionBinder(final CipherProvider cipherProvider, final KeyStoreProvider keyStore,
+            final CertificateVerifier certificateVerifier) {
         this.cipherProvider = cipherProvider;
         this.keyStore = keyStore;
         this.certificateVerifier = certificateVerifier;
@@ -51,7 +51,7 @@ public class PromotionBinder {
 
     /**
      * Takes the given byte array, parses it, and does an initial verification
-     * that the data contained inside is valid:
+     * that the data contained inside is valid.
      * 
      * <ol>
      * <li>check that the bytes actually parse into a {@link MessageContainer}
@@ -71,9 +71,9 @@ public class PromotionBinder {
      * @throws PromotionException if any parsing, signature verification, or
      *         date validation issues occur.
      */
-    public void initialize(byte[] encodedBinder) throws PromotionException {
+    public void initialize(final byte[] encodedBinder) throws PromotionException {
         backingSignedMessage = null;
-        MessageContainerParser parser = new MessageContainerParser();
+        final MessageContainerParser parser = new MessageContainerParser();
         MessageContainer message;
         try {
             message = parser.parse(encodedBinder);
@@ -85,8 +85,8 @@ public class PromotionBinder {
         initialize((SignedMessageContainer) message);
     }
 
-    /** Skips the first 2 steps of {@link #initialize(byte[])} */
-    public void initialize(SignedMessageContainer signedMessage) throws PromotionException {
+    /** Skips the first 2 steps of {@link #initialize(byte[])}. */
+    public void initialize(final SignedMessageContainer signedMessage) throws PromotionException {
         backingSignedMessage = null;
         MessageContainer wrappedMessage;
         try {
@@ -99,7 +99,7 @@ public class PromotionBinder {
             throw new PromotionException(
                     "Message signature passed, but did not contain expected bucket.");
         }
-        BucketMessageContainer bucket = (BucketMessageContainer) wrappedMessage;
+        final BucketMessageContainer bucket = (BucketMessageContainer) wrappedMessage;
         if (bucket.getValidStart().getTime() > System.currentTimeMillis())
             throw new PromotionException("Bucket '" + bucket.getName() + "' is not yet valid.");
         if (bucket.getValidEnd().getTime() < System.currentTimeMillis())
@@ -111,7 +111,7 @@ public class PromotionBinder {
         bucketNumber = bucket.getBucketNumber();
         validEnd = bucket.getValidEnd();
 
-        List<PromotionMessageContainer> promos = bucket.getPromoMessages();
+        final List<PromotionMessageContainer> promos = bucket.getPromoMessages();
         promoMessageList = new ArrayList<PromotionMessageContainer>();
         for (PromotionMessageContainer message : promos) {
             // Sanitize the dates to be within the range of this bucket
@@ -152,7 +152,7 @@ public class PromotionBinder {
      * @return true if the given message's date range has expired, regardless of
      *         whether it is a member of this group.
      */
-    private boolean isExpired(PromotionMessageContainer message) {
+    private boolean isExpired(final PromotionMessageContainer message) {
         return (message.getValidStart().getTime() > System.currentTimeMillis() || message
                 .getValidEnd().getTime() < System.currentTimeMillis());
 
@@ -164,7 +164,7 @@ public class PromotionBinder {
      * @param reverifySignature If true, the signed container will be re-parsed
      *        and checked.
      */
-    public boolean isValidMember(PromotionMessageContainer message, boolean reverifySignature) {
+    public boolean isValidMember(final PromotionMessageContainer message, final boolean reverifySignature) {
         if (isExpired(message))
             return false;
         // Now see if we can find this message in our list (using ID)
@@ -182,7 +182,7 @@ public class PromotionBinder {
             if (!(wrappedMessage instanceof BucketMessageContainer)) {
                 return false;
             }
-            BucketMessageContainer bucket = (BucketMessageContainer) wrappedMessage;
+            final BucketMessageContainer bucket = (BucketMessageContainer) wrappedMessage;
             return isValidMember(message, bucket.getWrappedMessages());
         }
     }
@@ -191,16 +191,13 @@ public class PromotionBinder {
      * @return true if the given message is a member of the given list, and is
      *         within its valid date range.
      */
-    private boolean isValidMember(PromotionMessageContainer message,
-            List<? extends MessageContainer> list) {
+    private boolean isValidMember(final PromotionMessageContainer message,
+            final List<? extends MessageContainer> list) {
         if (isExpired(message))
             return false;
-        System.out.println("Testing message.id=" + message.getUniqueID());
         for (MessageContainer container : list) {
             if (container instanceof PromotionMessageContainer) {
-                PromotionMessageContainer promo = (PromotionMessageContainer) container;
-                System.out.println("-- " + promo.getUniqueID()
-                        + ((message.getUniqueID() == promo.getUniqueID()) ? "TRUE" : ""));
+                final PromotionMessageContainer promo = (PromotionMessageContainer) container;
                 if (message.getUniqueID() == promo.getUniqueID())
                     if (promo.equals(message))
                         return true;
