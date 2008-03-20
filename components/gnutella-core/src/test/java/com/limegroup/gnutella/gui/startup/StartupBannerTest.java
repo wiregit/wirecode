@@ -10,44 +10,27 @@ public class StartupBannerTest extends BaseTestCase {
     
     public void testNullInput(){
         try {
-            new StartupBanner(null);
-        } catch(IllegalArgumentException e) {
-            assertTrue(true);
-            return;
-        }
-        assertTrue(false);
+            new StartupBanner((String[])null);
+            fail("should not have accepted null input");
+        } catch(IllegalArgumentException expected) {}
     }
     
     public void testEmptyStringInput(){
         try {
             new StartupBanner("");
-        } catch(IllegalArgumentException e) {
-            assertTrue(true);
-            return;
-        }
-        assertTrue(false);
+            fail("should not have accepted empty input");
+        } catch(IllegalArgumentException expected) {}
     }
     
     public void testWrongLengthString() {
         try {
             new StartupBanner("1 \t 2 \t 3 \t 4 \t 5 \t 6 \t 7 \t");
-        } catch(IllegalArgumentException e) {
-            assertTrue(true);
-            return;
-        }
-        assertTrue(false);
+            fail("should not have accepted invalid length input");
+        } catch(IllegalArgumentException expected) {}
     }
     
     public void testSingleAd() {
-        StartupBanner banner;
-        try {
-            banner = new StartupBanner("1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14");
-        } catch(IllegalArgumentException e) {
-            assertTrue(false);
-            return;
-        }
-        
-        assertNotNull(banner);
+        StartupBanner banner = new StartupBanner("1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14");
         
         assertEquals(1, banner.getAllAds().size());
         
@@ -70,45 +53,21 @@ public class StartupBannerTest extends BaseTestCase {
     }
     
     public void testTwoAds() {
-        StartupBanner banner;
-        try {
-            banner = new StartupBanner( new String[]{"1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
+        StartupBanner banner = new StartupBanner( new String[]{"1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
                     "1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14"});
-        } catch(IllegalArgumentException e) {
-            assertTrue(false);
-            return;
-        }
-        
-        assertNotNull(banner);
         
         assertEquals(2, banner.getAllAds().size());
     }
     
     public void testOneGoodOneBad() {
-        StartupBanner banner;
-        try {
-            banner = new StartupBanner( new String[]{"1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
+        StartupBanner banner = new StartupBanner( new String[]{"1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14",
                     "invalid ad"});
-        } catch(IllegalArgumentException e) {
-            assertTrue(false);
-            return;
-        }
-        
-        assertNotNull(banner);
         
         assertEquals(1, banner.getAllAds().size());
     }
     
     public void testNullTabDelimited() {
-        StartupBanner banner;
-        try {
-            banner = new StartupBanner( new String[]{"\t\t\t\t\t\t\t\t\t\t\t\t\t14"});
-        } catch(IllegalArgumentException e) {
-            assertTrue(false);
-            return;
-        }
-        
-        assertNotNull(banner);
+        StartupBanner banner = new StartupBanner( new String[]{"\t\t\t\t\t\t\t\t\t\t\t\t\t14"});
         
         assertEquals(1, banner.getAllAds().size());
         
