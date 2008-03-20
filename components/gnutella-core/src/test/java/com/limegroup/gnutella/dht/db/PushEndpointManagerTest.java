@@ -7,6 +7,8 @@ import org.jmock.Mockery;
 import org.jmock.Sequence;
 import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
+import org.limewire.io.IpPortImpl;
+import org.limewire.io.IpPortSet;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.GUID;
@@ -43,12 +45,15 @@ public class PushEndpointManagerTest extends BaseTestCase {
     }
     
     @SuppressWarnings({ "cast", "unchecked" })
-    public void testNoSearchIfPushEndpointInCache() {
+    public void testNoSearchIfPushEndpointInCache() throws Exception {
         final GUID guid = new GUID();
+        final IpPortSet proxies = new IpPortSet(new IpPortImpl("192.168.1.1:4545"));
         
         context.checking(new Expectations() {{
             one(pushEndpointCache).getPushEndpoint(guid);
             will(returnValue(result));
+            one(result).getProxies();
+            will(returnValue(proxies));
             one(listener).handleResult(result);
             one(listener).handleSearchDone(true);
             never(pushEndpointFinder).findPushEndpoint(guid, listener);

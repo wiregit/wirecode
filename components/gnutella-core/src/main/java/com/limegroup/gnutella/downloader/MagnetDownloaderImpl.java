@@ -19,10 +19,8 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.DownloadCallback;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
@@ -31,11 +29,9 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.altlocs.AltLocManager;
-import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.dht.db.PushEndpointService;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.MagnetDownloadMemento;
 import com.limegroup.gnutella.downloader.serial.MagnetDownloadMementoImpl;
@@ -74,11 +70,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     
 	private MagnetOptions magnet;
 
-    private final PushEndpointService pushEndpointManager;
-
-    private final AlternateLocationFactory alternateLocationFactory;
-
-    /**
+	/**
      * Creates a new MAGNET downloader.  Immediately tries to download from
      * <tt>defaultURLs</tt>, if specified. If that fails, or if defaultURLs does
      * not provide alternate locations, issues a requery with <tt>textQuery</tt>
@@ -111,7 +103,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
             Provider<HashTreeCache> tigerTreeCache, ApplicationServices applicationServices, 
-            RemoteFileDescFactory remoteFileDescFactory, @Named ("pushEndpointManager") PushEndpointService pushEndpointManager)
+            RemoteFileDescFactory remoteFileDescFactory)
 	{
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
@@ -119,8 +111,6 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
                 contentManager, sourceRankerFactory, urnCache, savedFileManager,
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
                 tigerTreeCache, applicationServices, remoteFileDescFactory);
-        this.alternateLocationFactory = alternateLocationFactory;
-        this.pushEndpointManager = pushEndpointManager;
     }
     
     public void initialize() {
@@ -172,11 +162,6 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
                   catch (InterruptedException e) {}
             }
         
-			URN urn = magnet.getSHA1Urn();
-			if (urn != null) {
-			    foundSource |= addLocationsFromGUIDUrns(magnet, urn);
-			}
-			
 			// if all locations included in the magnet URI fail we can't do much
 			if (!foundSource)
 				return DownloadStatus.GAVE_UP;
@@ -184,41 +169,6 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
         return super.initializeDownload();
     }
     
-    /**
-     * Synchronously looks up alternate locations for the set of guid urns,
-     * creates remote file descriptions from them and adds them as possible sources.
-     * <p>
-     * {@link MagnetOptions#getFileSize()} must have a valid value for a source
-     * to be added.
-     * </p>
-     *
-     * @param urns set of guid urns
-     * @param sha1Urn the sha1 urn identifying the resource on the alternate locations
-     * 
-     * @return true if at least one alternate location was added successfully
-     */
-    private boolean addLocationsFromGUIDUrns(MagnetOptions magnet, URN sha1Urn) {
-        long size = magnet.getFileSize();
-        if (size == -1) {
-            return false;
-        }
-        boolean added = false;
-        // implementation note: alt locs are looked up one after the other, this could
-        // be parallelized, but normally there's only one location to look up
-        for (URN urn : magnet.getGUIDUrns()) {
-            GUID guid = new GUID(GUID.fromHexString(urn.getNamespaceSpecificString()));
-            PushEndpoint pushEndpoint = pushEndpointManager.getPushEndpoint(guid);
-            if (LOG.isDebugEnabled())
-                LOG.debug(pushEndpoint);
-            AlternateLocation alternateLocation;
-            alternateLocation = alternateLocationFactory.createPushAltLoc(pushEndpoint, sha1Urn);
-            RemoteFileDesc rfd = alternateLocation.createRemoteFileDesc(size, remoteFileDescFactory);
-            addDownloadForced(rfd, true);
-            added = true;
-        }
-        return added;
-    }
-
     /** 
      * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader.  If a URL
      * is provided, issues a HEAD request to get the file size.  If this fails,
@@ -232,7 +182,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      * </p>
      */
     @SuppressWarnings("deprecation")
-    protected RemoteFileDesc createRemoteFileDesc(String defaultURL,
+    private RemoteFileDesc createRemoteFileDesc(String defaultURL,
         String filename, URN urn) throws IOException, HttpException, InterruptedException, URISyntaxException {
 
         // Use the URL class to do a little parsing for us.
@@ -309,10 +259,10 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 
 	/**
 	 * Overridden to make sure it calls the super method only if 
-	 * the filesize or sha1 are known.
+	 * the filesize is known.
 	 */
 	protected void initializeIncompleteFile() throws IOException {
-		if (getSha1Urn() != null || getContentLength() != -1) {
+		if (getContentLength() != -1) {
 			super.initializeIncompleteFile();
 		}
 	}
