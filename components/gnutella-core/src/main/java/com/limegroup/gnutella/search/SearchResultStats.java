@@ -6,30 +6,63 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 
+/**
+ * One SearchResultStats instance exists for each active search (which is 
+ * represented by a QueryRequest). As responses are received from the network
+ * that information is incorporated into the SearchResultStats via 
+ * addQueryReply().
+ * 
+ * Result counts are tabulated on a per-URN basis.
+ */
 public interface SearchResultStats {
 
+    /**
+     * Returns the GUID with which this SearchResultStats was created.
+     */
     public GUID getGUID();
     
+    /**
+     * Count of all results, good plus weighted bad.
+     */
     public int getNumResults();
     
     /**
-     * Returns the number of locations known for the URN. This
-     * includes combining partial results.
+     * Returns the number of locations known for the URN. This includes 
+     * combining partial results.
      * 
-     * TODO
+     * @param urn The URN for which you want the result count.
      * 
-     * For the time being this simply adds one to the count if
-     * any partial search results exist.
-     * 
-     * @param urn
-     * @return
+     * @return The number of results associated with the given URN.
      */
     public int getNumResultsForURN(URN urn);
     
+    /**
+     * 
+     * @return
+     */
     public int getNextReportNum();
+    
+    /**
+     * 
+     * @return
+     */
     public long getTime();
+    
+    /**
+     * 
+     * @return
+     */
     public QueryRequest getQueryRequest();
+    
+    /**
+     * 
+     * @return
+     */
     public boolean isFinished();
+    
+    /**
+     * 
+     */
     public void tallyReport();
 
     /**
@@ -56,10 +89,21 @@ public interface SearchResultStats {
      */
     public int getNumberOfLocations (URN urn);
     
+    /**
+     * 
+     * @param good
+     */
     public void increment(int good);
     
+    /**
+     * 
+     */
     public void markAsFinished();
 
+    /**
+     * 
+     * @return
+     */
     public String toString();
     
     /**

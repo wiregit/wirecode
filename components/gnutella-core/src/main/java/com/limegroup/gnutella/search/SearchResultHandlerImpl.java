@@ -322,15 +322,6 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
       END OF PRIVATE INTERFACE METHODS
      ----------------------------------------------------*/
     
-    /**
-     * One GuidCount instance exists for each active search (which is 
-     * represented by a QueryRequest). As responses are received from the 
-     * network that information is incorporated into the GuidCount via
-     * addQueryReply().
-     * 
-     * Result counts are tabulated on a per-URN basis.
-     * 
-     */
     static class GuidCount implements SearchResultStats {
 
         private final long _time;

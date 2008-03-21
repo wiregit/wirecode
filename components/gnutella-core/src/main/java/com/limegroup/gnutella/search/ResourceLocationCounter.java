@@ -120,9 +120,6 @@ public class ResourceLocationCounter {
     private synchronized void calculateLocationCount () {
         long sum = 0;
         
-        if (_urn != null)
-            ;
-        
         // if there are no partial result interval sets,
         // then the partial count is zero and the percent
         // available is also zero, unless there is at least

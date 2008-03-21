@@ -68,13 +68,38 @@ public interface SearchResultHandler {
      */
     public void handleQueryReply(final QueryReply qr);
 
+    /**
+     * 
+     * @param qr
+     * @param r
+     */
     void countClassC(QueryReply qr, Response r);
 
+    /**
+     * 
+     * @param qr
+     * @param data
+     */
     void accountAndUpdateDynamicQueriers(final QueryReply qr, HostData data);
 
+    /**
+     * 
+     * @param guid
+     * @return
+     */
     SearchResultStats removeQueryInternal(GUID guid);
 
+    /**
+     * 
+     * @param guid
+     * @return
+     */
     SearchResultStats retrieveResultStats(GUID guid);
     
+    /**
+     * 
+     * @param reply
+     * @return
+     */
     boolean isWhatIsNew(QueryReply reply);
 }
