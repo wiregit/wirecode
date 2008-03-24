@@ -12,7 +12,7 @@ import org.limewire.promotion.geocode.SuccessOrFailureCallbackConsumer;
  * as the String to return as soon as it consumes the callback and never calls
  * {@link  SuccessOrFailureCallback#setInvalid(Throwable)}.
  */
-final class SimpleInputStreamSuccessOrFailureCallbackConsumer implements
+public final class SimpleInputStreamSuccessOrFailureCallbackConsumer implements
         SuccessOrFailureCallbackConsumer<InputStream> {
     
     private final InputStream s;
