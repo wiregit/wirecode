@@ -313,8 +313,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
     @InspectionPoint("last hop forwarded queries to ultrapeers")
     private final InspectionHistogram<Integer> lastHopForwardedQueries = new InspectionHistogram<Integer>();
     
-    @InspectablePrimitive("dropped queries to leaves")
-    private volatile long droppedLeafQueries;
+    @InspectablePrimitive("leaf connection qrp hits")
+    private final InspectionHistogram<Integer> leafQRPHits = new InspectionHistogram<Integer>();
     
     protected final NetworkManager networkManager;
     protected final QueryRequestFactory queryRequestFactory;
@@ -1702,8 +1702,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             mc.send(query);
         }
         
-        if (hitConnections.isEmpty())
-            droppedLeafQueries++;
+        leafQRPHits.count(hitConnections.size());
 	}
 
 	/**
