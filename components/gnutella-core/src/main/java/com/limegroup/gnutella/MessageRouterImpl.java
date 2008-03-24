@@ -34,6 +34,7 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
@@ -309,8 +310,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
     @InspectionPoint("duplicate queries")
     private final DuplicateQueryCounter duplicateQueryCounter = new DuplicateQueryCounter();
     
-    @InspectablePrimitive("dropped last hop queries to ultrapeers")
-    private volatile long lastHopDropUltrapeer;
+    @InspectionPoint("last hop forwarded queries to ultrapeers")
+    private final InspectionHistogram<Integer> lastHopForwardedQueries = new InspectionHistogram<Integer>();
     
     @InspectablePrimitive("dropped queries to leaves")
     private volatile long droppedLeafQueries;
@@ -1774,13 +1775,13 @@ public abstract class MessageRouterImpl implements MessageRouter {
 		List<RoutedConnection> list = connectionManager.getInitializedConnections();
         int limit = list.size();
 
-        boolean forwarded = false;
+        int forwarded = 0;
 		for(int i=0; i<limit; i++) {
 			RoutedConnection mc = list.get(i);      
-            forwarded |= forwardQueryToUltrapeer(query, handler, mc);  
+            forwarded += forwardQueryToUltrapeer(query, handler, mc) ? 1 : 0;  
         }
-		if (!forwarded && query.getTTL() == 1)
-		    lastHopDropUltrapeer++;
+		if (query.getTTL() == 1)
+		    lastHopForwardedQueries.count(forwarded);
     }
 
     /**
