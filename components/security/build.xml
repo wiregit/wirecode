@@ -14,10 +14,11 @@
     
     <target name="initialize" depends="lw-common.initialize" unless="initialized.security">
         <do.setup-properties component="security">
-			<src-classpath>
-				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
-			    <path refid="build.limewire.components.common.buildpath"/>
-			</src-classpath>
+			    <src-classpath>
+				    <pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
+				    <pathelement location="${limewire.lib.jars}/dnsjava.jar"/>
+			      <path refid="build.limewire.components.common.buildpath"/>
+			    </src-classpath>
         </do.setup-properties>
     </target>
 	

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package org.limewire.promotion.geocode;
 
 /**
  * Consumes a {@link SuccessOrFailureCallback} and calls either

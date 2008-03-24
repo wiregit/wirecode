@@ -1,11 +1,12 @@
-package com.limegroup.gnutella.geocode;
+package org.limewire.promotion.geocode;
 
 import junit.framework.Test;
 
+import org.limewire.promotion.geocode.GeocodeInformation;
 import org.limewire.util.BaseTestCase;
 
 public class GeocodeInformationTestCase extends BaseTestCase {
-
+   
     public GeocodeInformationTestCase(String name) {
         super(name);
     }
@@ -14,11 +15,11 @@ public class GeocodeInformationTestCase extends BaseTestCase {
         return buildTestSuite(GeocodeInformationTestCase.class);
     }
     
-    private GeocodeInformationImpl info;
+    private GeocodeInformation info;
     
     @Override
     protected void setUp() throws Exception {
-        info = new GeocodeInformationImpl();
+        info = new GeocodeInformation();
     }
     
     @Override

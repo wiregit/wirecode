@@ -9,20 +9,17 @@ import org.limewire.concurrent.ManagedThread;
 import org.limewire.promotion.SearcherDatabase.QueryResult;
 import org.limewire.promotion.containers.PromotionMessageContainer;
 import org.limewire.promotion.containers.PromotionMessageContainer.GeoRestriction;
+import org.limewire.promotion.geocode.GeocodeInformation;
 import org.limewire.promotion.impressions.ImpressionsCollector;
 
 import com.google.inject.Inject;
-import com.limegroup.gnutella.geocode.GeocodeInformation;
 
 public class PromotionSearcherImpl implements PromotionSearcher {
+    
     private final KeywordUtil keywordUtil;
-
     private final SearcherDatabase searcherDatabase;
-
     private final ImpressionsCollector impressionsCollector;
-
     private final PromotionBinderRepository promotionBinderRepository;
-
     private int maxNumberOfResults = 5;
 
     @Inject

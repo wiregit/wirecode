@@ -10,12 +10,10 @@ import org.limewire.promotion.AbstractPromotionBinderRequestor;
 import org.limewire.promotion.PromotionBinder;
 import org.limewire.promotion.PromotionBinderFactory;
 
-import com.limegroup.gnutella.util.LimeWireUtils;
-
 /**
  * Instances of this will use either return a valid or invalid
  * {@link PromotionBinder}. This flag {@link #isValid} represents a request
- * that has a Binder or one that doesnt. Hence if {@link #isValid} is
+ * that has a Binder or one that does not. Hence if {@link #isValid} is
  * <code>true</code> we will return a non-null binder; otherwise it will be
  * <code>null</code>.
  */
@@ -48,7 +46,7 @@ public class TestPromotionContainerRequestorImpl extends AbstractPromotionBinder
     }
 
     public String getUserAgent() {
-        return LimeWireUtils.getHttpServer(); // todo
+        return "Limewire/@version@";
     }
 
     @Override

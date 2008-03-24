@@ -1,6 +1,4 @@
-package com.limegroup.gnutella;
-
-import com.limegroup.gnutella.geocode.Geocoder;
+package org.limewire.promotion.geocode;
 
 /**
  * Instances of this interface can either consume or a {@link String} or has

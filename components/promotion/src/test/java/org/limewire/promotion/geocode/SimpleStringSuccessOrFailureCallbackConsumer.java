@@ -1,9 +1,10 @@
-package com.limegroup.gnutella.geocode;
+package org.limewire.promotion.geocode;
 
 import java.io.InputStream;
 
-import com.limegroup.gnutella.SuccessOrFailureCallback;
-import com.limegroup.gnutella.SuccessOrFailureCallbackConsumer;
+import org.limewire.promotion.geocode.SuccessOrFailureCallback;
+import org.limewire.promotion.geocode.SuccessOrFailureCallbackConsumer;
+
 
 /**
  * A very simple implementation of

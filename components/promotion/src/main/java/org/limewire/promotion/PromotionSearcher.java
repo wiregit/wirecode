@@ -1,8 +1,7 @@
 package org.limewire.promotion;
 
 import org.limewire.promotion.containers.PromotionMessageContainer;
-
-import com.limegroup.gnutella.geocode.GeocodeInformation;
+import org.limewire.promotion.geocode.GeocodeInformation;
 
 public interface PromotionSearcher {
     /**

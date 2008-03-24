@@ -13,7 +13,6 @@ import org.limewire.security.certificate.KeyStoreProvider;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.PromotionBinderRequestorImpl;
 
 @Singleton
 public class PromotionBinderFactoryImpl implements PromotionBinderFactory {

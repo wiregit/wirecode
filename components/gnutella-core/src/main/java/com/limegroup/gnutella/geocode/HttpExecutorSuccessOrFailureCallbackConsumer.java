@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.limegroup.gnutella.geocode;
 
 import java.io.IOException;
@@ -13,10 +10,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.params.BasicHttpParams;
+import org.limewire.promotion.geocode.SuccessOrFailureCallback;
+import org.limewire.promotion.geocode.SuccessOrFailureCallbackConsumer;
 
 import com.google.inject.Provider;
-import com.limegroup.gnutella.SuccessOrFailureCallback;
-import com.limegroup.gnutella.SuccessOrFailureCallbackConsumer;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.util.LimeWireUtils;
@@ -24,7 +21,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 /**
  * An instance of {@link SuccessOrFailureCallbackConsumer<String>} that will
  * make an HTTP request to a given URL using the injected {@link HttpExecutor}
- * and call {@link SuccessOrFailureCallback#setInvalid(Throwable)} on failure
+ * and call {@link SuccessOrFailureCallback#setInvalid(java.lang.Throwable)} on failure
  * and {@link SuccessOrFailureCallback#process(Object)} on success.
  */
 final class HttpExecutorSuccessOrFailureCallbackConsumer implements SuccessOrFailureCallbackConsumer<InputStream> {

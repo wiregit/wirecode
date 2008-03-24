@@ -55,7 +55,6 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
-import com.limegroup.gnutella.geocode.Geocoder;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
@@ -700,10 +699,6 @@ public class LimeWireCore {
     public BTMetaInfoFactory getBTMetaInfoFactory() {
         return injector.getInstance(BTMetaInfoFactory.class);
     }    
-    
-    public Geocoder getGeocoder() {
-        return injector.getInstance(Geocoder.class);
-    }
     
     public PromotionSearcher getPromotionSearcher() {
         return injector.getInstance(PromotionSearcher.class);

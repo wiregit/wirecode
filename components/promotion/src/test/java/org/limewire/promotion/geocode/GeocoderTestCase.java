@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.geocode;
+package org.limewire.promotion.geocode;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,6 +7,8 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.limewire.promotion.geocode.GeocodeInformation;
+import org.limewire.promotion.geocode.Geocoder;
 import org.limewire.util.BaseTestCase;
 
 public class GeocoderTestCase extends BaseTestCase {
@@ -46,7 +48,7 @@ public class GeocoderTestCase extends BaseTestCase {
         for (Map.Entry<String,String> en : props.entrySet()) {
             testString += en.getKey() + SEPARATOR + en.getValue() + NEWLINE;
         }
-        geo = new GeocoderImpl(new SimpleInputStreamSuccessOrFailureCallbackConsumer(new StringInputStream(testString)));
+        geo = new DefaultGeocoder(new SimpleInputStreamSuccessOrFailureCallbackConsumer(new StringInputStream(testString)));
     }
     
     public void testSimple() throws InterruptedException {
@@ -66,7 +68,7 @@ public class GeocoderTestCase extends BaseTestCase {
         
         // Make sure we have all the correct properties
         System.out.println(info);
-        for (GeocodeInformation.Property p : GeocodeInformation.STRINGS2PROPERTIES.values()) {
+        for (GeocodeInformation.Property p : GeocodeInformation.getStrings2Properties().values()) {
             assertEquals(p.getValue() + " should be in " + info, props.get(p.getValue()), info.getProperty(p));
         }
     }
