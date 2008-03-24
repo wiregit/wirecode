@@ -363,11 +363,10 @@ public final class ConnectionSettings extends LimeProps {
     /**
      * The size of our Querry Routing Tables, in multiples of 1024 entries. 
      * (In 1998, the IEC standardized "kibi" as the prefix denoting 1024, or "kilo binary".) 
-     * TODO: remove beta switch after completing LWC-1337
      */
     public static final PowerOfTwoSetting QRT_SIZE_IN_KIBI_ENTRIES =
-        FACTORY.createRemotePowerOfTwoSetting("QRT_SIZE_IN_KIBI_ENTRIES_BETA", 128,
-                "ConnectionSettings.QRTSizeBeta", 128, 256);
+        FACTORY.createRemotePowerOfTwoSetting("QRT_SIZE_IN_KIBI_ENTRIES", 128,
+                "ConnectionSettings.QRTSizeV2", 128, 256);
     
     /**
      * 
