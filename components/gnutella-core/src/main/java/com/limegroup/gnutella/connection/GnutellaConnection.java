@@ -325,7 +325,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     private static enum StatsWriters {TOP, DEFLATER, DELAYER, THROTTLE }
     private final Map<StatsWriters,StatisticGatheringWriter> statsWriters = new HashMap<StatsWriters,StatisticGatheringWriter>();
     private volatile MessageCounter incoming, outgoing;
-    private volatile long droppedBadHops, droppedBadAddress;
+    private volatile long droppedBadHops, droppedBadAddress,droppedFW;
 
     /**
      * Creates a new outgoing connection to the specified host on the specified
@@ -769,6 +769,8 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             // otherwise send if both sides can do fwt.
             if (!incomingTCP && query.isFirewalledSource()) 
                 send = fwt && query.canDoFirewalledTransfer();
+            if (send)
+                droppedFW++;
         }
         return send;
     }
@@ -1443,6 +1445,9 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         // dropped replies
         data.put("badHops",droppedBadHops);
         data.put("badAddr",droppedBadAddress);
+        
+        // dropped queries
+        data.put("fwdrop",droppedFW);
         
         return data;
     }
