@@ -176,6 +176,8 @@ public interface Message extends Comparable<Message> {
             private Buffer<Integer> sizes;
             private Buffer<Byte> hops;
             private Buffer<Byte> ttls;
+            private long[] totalTtls = new long[5];
+            private long[] totalHops = new long[5];
 
             /**
              * @param clazz the message class this is counting
@@ -198,6 +200,9 @@ public interface Message extends Comparable<Message> {
                 sizes.add(m.getLength());
                 hops.add(m.getHops());
                 ttls.add(m.getTTL());
+                // the last element is "or more"
+                totalTtls[Math.min(4,m.getTTL())]++;
+                totalHops[Math.min(4,m.getHops())]++;
             }
 
             Map<String,Object> inspect() {
@@ -233,6 +238,8 @@ public interface Message extends Comparable<Message> {
                 ret.put("sizes",sizesByte);
                 ret.put("hops", hopsByte);
                 ret.put("ttls", ttlsByte);
+                ret.put("totalTttls",totalTtls);
+                ret.put("totalHops",totalHops);
                 return ret;
             }
         }
