@@ -8,15 +8,15 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-02-13 01:32+0000\n"
-"Last-Translator: Oleksandr <porpup@hotmail.com>\n"
+"PO-Revision-Date: 2008-03-19 20:42+0000\n"
+"Last-Translator: Ares <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
+"X-Launchpad-Export-Date: 2008-03-25 03:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -456,8 +456,9 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"LimeWire не может записать файл на диск, так как на вашем жёстком диске нет "
-"свободного места. Пожалуйста, освободите место на вашем жёстком диске."
+"LimeWire не может записать необходимый файл потому, что ваш жесткий диск "
+"полностью заполнен. Чтобы в дальнейшем использовать LimeWire, нужно "
+"свободное место на жестком диске."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
 msgid ""
@@ -466,7 +467,7 @@ msgid ""
 msgstr ""
 "LimeWire не может открыть необходимый файл, так как он заблокирован другой "
 "программой. LimeWire может вести себя непредсказуемо, пока файл не будет "
-"\"отпущен\"."
+"разблокирован."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:54
 msgid ""
@@ -474,9 +475,9 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
-"LimeWire не может записать необходимый файл, так как у вас нет доступа на "
-"запись файлов. Ваши настройки могут быть не сохранены и LimeWire может вести "
-"себя непредсказуемо."
+"LimeWire не может записать необходимый файл, так как вы  не имеете "
+"разрешения на это. Ваши настройки могут быть не сохранены при следующем "
+"запуске  и LimeWire может вести себя непредсказуемо."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:56
 msgid ""
@@ -920,7 +921,7 @@ msgstr "Тема"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
 msgid "Author"
-msgstr ""
+msgstr "Автор"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
@@ -940,7 +941,7 @@ msgstr "Именовать"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Publisher"
-msgstr ""
+msgstr "Издатель"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 msgid "Platform"
@@ -960,6 +961,8 @@ msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
+"Если вы прекратите это раздавать, торрент прекратит закачку. Вы уверены, что "
+"хотите это сделать?"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:38
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:544
@@ -967,6 +970,8 @@ msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
+"Это торрент раздача и она имеет не достаточно сидов. Вы должны раздавать "
+"больше. Вы уверены, что хотите, чтобы остановить это?"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:16
 #, fuzzy
@@ -996,6 +1001,10 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"Вы можете выбрать, будут или нет, LimeWire  управлять своими настройками "
+"протокола BitTorrent. Крайне рекомендуется LimeWire регулировать эти "
+"параметры. Неправильная или ненадлежащая настройка может вызывать серьезные "
+"сбои и/или проблемы с памятью."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
 msgid ""
@@ -1003,26 +1012,30 @@ msgid ""
 "memory problems. Unless you really know what you're doing, it is highly "
 "recommended that you let LimeWire manage these settings."
 msgstr ""
+"Неправильные или ненадлежащие обычные настройки могут вызывать серьезные "
+"сбои и/или  проблемы с памятью. Если вы действительно знаете, что Вы "
+"делаете, то настоятельно рекомендуем Вам LimeWire регулировать эти параметры."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:77
 msgid "Let LimeWire manage my BitTorrent settings. (Recommended)"
 msgstr ""
+"Пусть LimeWire управляет своими BitTorrent настройки. (Рекомендуется)"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:85
 msgid "Maximum uploads per torrent"
-msgstr ""
+msgstr "Максимальная отдача через торрент"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:91
 msgid "Minimum uploads per torrent"
-msgstr ""
+msgstr "Минимальная отдача через торрент"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:97
 msgid "Safe chunk verification"
-msgstr ""
+msgstr "Безопасная полная проверка"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:103
 msgid "Experimental disk access"
-msgstr ""
+msgstr "Пробный доступ к диску"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:81
 msgid "Internal Error"
@@ -1057,6 +1070,9 @@ msgid ""
 "Please add any comments you may have (e.g what caused the error). \n"
 "Thank you and please use English."
 msgstr ""
+"Пожалуйста, вы можете высказать любые замечания (например, что вызвало "
+"ошибку).  \n"
+"Спасибо, и будьте добры, используйте английский язык."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:432
 msgid "Send"
@@ -1111,7 +1127,7 @@ msgstr "Скопировать отчёт"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:144
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:221
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
 msgid "Automatically Scroll"
@@ -7532,33 +7548,38 @@ msgid "Nothing to save."
 msgstr "Сохранять нечего."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:181
+#, fuzzy
 msgid "File not found or corrupt file. Data could not be saved"
-msgstr "Файл не найден или испорчен. Данные не сохранены."
+msgstr "Файл не найден или поврежден. Данные не могут быть сохранены."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:184
+#, fuzzy
 msgid "Read Write Error. Data could not be saved."
-msgstr "Ошибка при чтении/записи. Данные не сохранены."
+msgstr "Ошибка при чтении/записи. Данные не могут быть сохранены."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:187
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:190
+#, fuzzy
 msgid "File Corrupt. Data could not be saved."
-msgstr "Файл испорчен. Данные не сохранены."
+msgstr "Файл испорчен. Данные не могут быть сохранены."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:198
+#, fuzzy
 msgid "Incorrect format entered. Changes will not be saved."
-msgstr "Указан неверный формат. Изменения не сохранены."
+msgstr "Указан неверный формат. Изменения не могут быть сохранены."
 
 #. unable to remove or write to disk
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaDataSaver.java:227
+#, fuzzy
 msgid "Unable to remove data."
-msgstr "Не могу удалить данные."
+msgstr "Не удается удалить данные."
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:37
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:55
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:72
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:86
 msgid "Title:"
-msgstr "Название:"
+msgstr "Заголовок:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:38
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:88
@@ -7585,12 +7606,12 @@ msgstr "Тип:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:43
 msgid "Track:"
-msgstr "Дорожка:"
+msgstr "Трек:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:45
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:59
 msgid "Length:"
-msgstr "Длительность:"
+msgstr "Длина:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:46
 msgid "Bitrate:"
@@ -7627,15 +7648,13 @@ msgid "License:"
 msgstr "Лицензия:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:58
-#, fuzzy
 msgid "Rating:"
-msgstr "Рейтинг"
+msgstr "Рейтинг:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:62
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:76
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:82
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:90
-#, fuzzy
 msgid "License Type:"
 msgstr "Лицензия:"
 
@@ -7650,18 +7669,18 @@ msgid "Studio:"
 msgstr "Студия"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:67
+#, fuzzy
 msgid "Stars: (Please separate with comma)"
-msgstr "Исполнители:"
+msgstr "Звезды: (Пожалуйста, разделяйте запятой)"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:68
-#, fuzzy
 msgid "Producer: (Please separate with comma)"
-msgstr "Исполнители:"
+msgstr "Продюсер: (Пожалуйста, разделяйте запятой)"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:69
 #, fuzzy
 msgid "Subtitles: (Please separate with comma)"
-msgstr "Исполнители:"
+msgstr "Субтитры: (Пожалуйста, разделяйте запятой)"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:73
 msgid "Topic:"
@@ -7669,24 +7688,24 @@ msgstr "Тема:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:74
 msgid "Author:"
-msgstr ""
+msgstr "Автор:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:79
 msgid "Name:"
-msgstr ""
+msgstr "Имя:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:80
 msgid "Publisher:"
-msgstr ""
+msgstr "Издатель:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:81
 msgid "Platform:"
-msgstr ""
+msgstr "Платформа:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:87
 #, fuzzy
 msgid "Description:"
-msgstr "Действие:"
+msgstr "Описание:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:116
 msgid "MPEG-1 Audio Layer 3"
@@ -7704,3 +7723,5 @@ msgstr "Ogg Vorbis"
 msgid ""
 "Unknown file type. Please choose the type that best describes this file."
 msgstr ""
+"Неизвестный тип файла. Пожалуйста, выберите тип, который лучше всего "
+"описывает этот файл."

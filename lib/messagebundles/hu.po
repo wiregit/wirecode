@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-13 20:36+0000\n"
-"Last-Translator: Punkboy <Unknown>\n"
+"PO-Revision-Date: 2008-03-19 18:55+0000\n"
+"Last-Translator: GaborPapp <gabor.978@hotmail.com>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
+"X-Launchpad-Export-Date: 2008-03-25 03:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -1498,13 +1498,15 @@ msgstr "Már letöltöd ezt a fájlt a {0} -ba."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:71
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:42
+#, fuzzy
 msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "A turb�-sebess�g� kapcsolatok�rt, v�lts a LimeWire PRO-ra."
+msgstr "A turbósebességü kapcsolatokért, válts a LimeWire PRO-ra."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:75
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:46
+#, fuzzy
 msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr "T�mogasd a LimeWire P2P fejleszt�seit. V�lts a PRO-ra."
+msgstr "Támogasd a LimeWire P2P fejleszt�seit. Válts a PRO-ra."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:79
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:50
@@ -1513,8 +1515,9 @@ msgstr "V�s�rold meg a LimeWire PRO-t, hogy seg�tsd a gyorsabb let�lt�
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:82
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:53
+#, fuzzy
 msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr "A turb�-sebess�g� let�lt�sek�rt v�lts a LimeWire PRO-ra."
+msgstr "A turbósebességü kapcsolatokért, válts a LimeWire PRO-ra."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:85
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:56
@@ -1658,8 +1661,9 @@ msgid "Subtitles"
 msgstr "Feliratok"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
+#, fuzzy
 msgid "Rating"
-msgstr "Besorol�"
+msgstr "Besorolás"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:119
 msgid "Height"
@@ -1671,8 +1675,9 @@ msgstr "Sz�less�"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
+#, fuzzy
 msgid "Image"
-msgstr "Kép"
+msgstr "kép"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
 msgid "Description"
@@ -1693,12 +1698,14 @@ msgid "Document"
 msgstr "Dokumentumok"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
+#, fuzzy
 msgid "Topic"
-msgstr "T�ma"
+msgstr "Téma"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
+#, fuzzy
 msgid "Author"
-msgstr "Szerz�"
+msgstr "Szerző"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
@@ -1715,12 +1722,14 @@ msgid "Name"
 msgstr "Név"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
+#, fuzzy
 msgid "Publisher"
-msgstr "Kiad�"
+msgstr "Kiadó"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
+#, fuzzy
 msgid "Platform"
-msgstr "Platform"
+msgstr "Felület"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:105
 msgid "The selected .torrent file may contain a security hazard."
@@ -1847,21 +1856,25 @@ msgstr ""
 "Köszönjük, és kérjük az angol nyelvet használd."
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:432
+#, fuzzy
 msgid "Send"
-msgstr "K�"
+msgstr "Küldés"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:441
+#, fuzzy
 msgid "Review"
-msgstr "El�n�zet"
+msgstr "Előnézet"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:455
+#, fuzzy
 msgid "Discard"
-msgstr "Eldob�"
+msgstr "Eldobás"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:472
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
+#, fuzzy
 msgid "Always Send Immediately"
-msgstr "Mindig azonnal k�ldd el"
+msgstr "Mindig azonnal küldd el"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:473
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
@@ -1885,7 +1898,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:602
 msgid "Copy Report"
-msgstr "Jelent�s m�sol�sa"
+msgstr "Jelentés másolása"
 
 #. Add an OK button out of the window.
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:610
@@ -1902,8 +1915,9 @@ msgid "OK"
 msgstr "Oké"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
+#, fuzzy
 msgid "Automatically Scroll"
-msgstr "Automatikus g�rget�"
+msgstr "Automatikus görgetés"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:64
 msgid "About LimeWire"
@@ -1925,8 +1939,9 @@ msgid "Close"
 msgstr "Bezárás"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:106
+#, fuzzy
 msgid "Close This Window"
-msgstr "Ablak bez�r�sa"
+msgstr "Ablak bezárása"
 
 #. introduction
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:177
@@ -2061,8 +2076,9 @@ msgid "Deselects all Items in the List"
 msgstr "Az �sszes elem kijel�letlen lesz a list�ban"
 
 #: gui/com/limegroup/gnutella/gui/ClearableAutoCompleteTextField.java:316
+#, fuzzy
 msgid "Clear History"
-msgstr "El�zm�nyek t�rl�se"
+msgstr "Előzmények törlése"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:165
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:40
@@ -2086,18 +2102,20 @@ msgid "Delay: "
 msgstr "Várakozás "
 
 #: gui/com/limegroup/gnutella/gui/Console.java:618
+#, fuzzy
 msgid "Save As"
-msgstr "Ment�s m�sk�nt"
+msgstr "Mentés másként"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:121
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:96
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:174
 msgid "What's New"
-msgstr "Mi �js�g?"
+msgstr "Mi Újság?"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:122
+#, fuzzy
 msgid "Creative Commons"
-msgstr "Creative Commons"
+msgstr "Kreatív Közösség"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:182
 msgid ""
@@ -2110,6 +2128,7 @@ msgstr ""
 "k�z�tt (iTunes -> Megoszt�s) visszakapcsolhatod."
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:326
+#, fuzzy
 msgid ""
 "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
 "files in iTunes) because a Microsoft patch is required or a firewall is "
@@ -2117,12 +2136,12 @@ msgid ""
 "information if you want to use this feature. Click 'Yes' to go to the patch, "
 "'No' to disable this feature, or 'Cancel' to decide later."
 msgstr ""
-"A LimeWire nem tudta elind�tani a Digit�lis Audi�hozz�f�r�si protokollt (az "
-"iTunes-beli f�jlmegoszt�shoz), mert egy Microsoft friss�t�s sz�ks�ges, vagy "
-"egy t�zfal blokkolja a LimeWire-t. A LimeWire, ha haszn�lni szeretn�d ezt az "
-"opci�t, a Microsoft oldal�ra ir�ny�t �t. Kattints az 'Igen' gombra a "
-"friss�t�s�rt, a 'Nem'-re az opci� kikapcsol�s��rt, vagy a 'M�gs�'-re, ha "
-"majd k�s�bb d�ntesz."
+"A LimeWire nem tudta elindítani a Digitális Audióhozzáférési protokollt (az "
+"iTunes-beli fájlmegosztáshoz), mert egy Microsoft frissítés szükséges, vagy "
+"egy tűzfal blokkolja a LimeWire-t. A LimeWire, ha használni szeretnéd ezt az "
+"opciót, a Microsoft oldalára irányít ott. Kattints az 'Igen' gombra a "
+"frissítésért, a 'Nem'-re az opció kikapcsolásáért, vagy a 'Mégsé'-re, ha "
+"majd késöbb döntesz."
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:339
 msgid ""
@@ -2191,8 +2210,9 @@ msgstr "Mégse"
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:270
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:445
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:464
+#, fuzzy
 msgid "Select Folder"
-msgstr "Mappa v�laszt�sa"
+msgstr "Mappa kiválasztása"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:99
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:121
@@ -2358,7 +2378,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1460
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1483
 msgid "LimeWire will not launch the specified file for security reasons."
-msgstr "A LimeWire nem ind�tja el a megadott f�jlt biztons�gi okokb�"
+msgstr "A LimeWire nem indítja el a megadott fájlt biztonsági okokból"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1462
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1485
@@ -2400,30 +2420,36 @@ msgstr "KB/s"
 
 #. Load up the HTML engine.
 #: gui/com/limegroup/gnutella/gui/Initializer.java:335
+#, fuzzy
 msgid "Loading HTML Engine..."
-msgstr "HTML motor bet�lt�se..."
+msgstr "HTML motor betőltése..."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:383
+#, fuzzy
 msgid "Loading User Interface..."
-msgstr "Felhaszn�l�i fel�let bet�lt�se..."
+msgstr "Felhasználói felület betőltése..."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:402
+#, fuzzy
 msgid "Loading Core Components..."
-msgstr "Alap�sszetev�k bet�lt�se..."
+msgstr "Alapösszetevők betöltése..."
 
 #. Initialize IconManager.
 #: gui/com/limegroup/gnutella/gui/Initializer.java:455
+#, fuzzy
 msgid "Loading Icons..."
-msgstr "Ikonok bet�lt�se..."
+msgstr "Ikonok betöltése..."
 
 #. Touch the I18N stuff to ensure it loads properly.
 #: gui/com/limegroup/gnutella/gui/Initializer.java:464
+#, fuzzy
 msgid "Loading Internationalization Support..."
-msgstr "Nyelvi t�mogat�s bet�lt�se..."
+msgstr "Nyelvi támogatás betöltése..."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:503
+#, fuzzy
 msgid "Loading Digital Audio Access Protocol..."
-msgstr "Digit�lis hanghozz�f�r�si (DAAP) protokoll bet�lt�se..."
+msgstr "Digitális hanghozzáférési (DAAP) protokoll betöltése..."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:509
 msgid ""
@@ -2491,8 +2517,9 @@ msgstr "Művelet alkalmazása"
 
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:94
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:45
+#, fuzzy
 msgid "Cancel Operation"
-msgstr "M�velet t�rl�se"
+msgstr "Művelet megszakítása"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:70
 msgid ""
@@ -2534,16 +2561,18 @@ msgid "Change Language"
 msgstr "Nyelv váltása"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:189
+#, fuzzy
 msgid "Help Translate LimeWire"
-msgstr "A LimeWire leford�t�s�nak seg�t�se"
+msgstr "A LimeWire lefordításának segítése"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:190
 msgid "Show Language in status bar"
 msgstr "Nyelv mutatása a Státuszsoron"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:381
+#, fuzzy
 msgid "Verify"
-msgstr "Ellen�rz�"
+msgstr "Ellenőrzés"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:425
 msgid "LimeWire was unable to locate the details of this license."
@@ -8441,27 +8470,32 @@ msgid "License:"
 msgstr "Licensz:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:58
+#, fuzzy
 msgid "Rating:"
-msgstr "Besorol�s:"
+msgstr "Értékelés:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:62
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:76
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:82
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:90
+#, fuzzy
 msgid "License Type:"
-msgstr "Licensz t�pusa:"
+msgstr "Licensz típusa:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:64
+#, fuzzy
 msgid "Director:"
-msgstr "Rendez�"
+msgstr "Igazgató"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:65
+#, fuzzy
 msgid "Studio:"
-msgstr "St�"
+msgstr "Studió"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:67
+#, fuzzy
 msgid "Stars: (Please separate with comma)"
-msgstr "M�v�szek: (vessz�vel elv�lasztva)"
+msgstr "Művészek: (vesszővel elválasztva)"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:68
 msgid "Producer: (Please separate with comma)"
@@ -8480,8 +8514,9 @@ msgid "Author:"
 msgstr "Szerz�"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:79
+#, fuzzy
 msgid "Name:"
-msgstr "N�"
+msgstr "Név"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:80
 msgid "Publisher:"

@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-16 18:52+0000\n"
-"Last-Translator: pelda <Unknown>\n"
+"PO-Revision-Date: 2008-03-23 17:38+0000\n"
+"Last-Translator: Alessandro Chiti <st20@tele2.it>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
+"X-Launchpad-Export-Date: 2008-03-25 03:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Loading bittorrent Management..."
@@ -3423,12 +3423,15 @@ msgstr ""
 "Seleziona un'altra cartella."
 
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:163
-#, java-format
+#, fuzzy, java-format
 msgid ""
 "Saving downloads to {0} may not function correctly.  To be sure downloads "
 "are saved properly you should save them to a sub-folder of {1}.  Would you "
 "like to choose another location?"
 msgstr ""
+"Salvare downloads in {0} potrebbe non funzionare correttamente. Per maggior "
+"sicurezza si dovrebbero salvare in una sottocartella di {1}. Vuoi scegliere "
+"un'altra posizione?"
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:20
 msgid ""
@@ -3642,12 +3645,14 @@ msgid "Uploads:"
 msgstr "Trasferimenti:"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:1007
+#, fuzzy
 msgid "Total Downstream:"
-msgstr ""
+msgstr "Totale Flusso Entrante"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:1012
+#, fuzzy
 msgid "Total Upstream:"
-msgstr ""
+msgstr "Totale Flusso Uscente"
 
 #. *
 #. * The title for the TOTD window.
@@ -3686,6 +3691,7 @@ msgid "Loading tips..."
 msgstr "Caricamento suggerimenti..."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:7
+#, fuzzy
 msgid ""
 "Tired of downloads stopping halfway through? It helps to pick search results "
 "with a higher number in the '#' column. The # is the amount of unique places "
@@ -3694,8 +3700,15 @@ msgid ""
 "lot of sources, use the <font color=\"1E8E44\">Junk</font> button to train "
 "LimeWire's junk filter."
 msgstr ""
+"Stanco dei download che si bloccano a metà? Scegli i risultati di ricerca "
+"con un numero più alto nella colonna '#'. Il simbolo # indica il numero di "
+"luoghi sulla rete che ospitano il file. Più alto è il numero più facile sarà "
+"scaricare il file. Se un falso risultato (junk) risulti avere molte fonti, "
+"usa il bottone <font color=\"1E8E44\">Junk</font> per istruire il filtro "
+"\"junk\" di LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:31
+#, fuzzy
 msgid ""
 "When your downloads say <font color=\"1E8E44\">Needs More Sources</font>, "
 "try choosing that download and then clicking <font color=\"1E8E44\">Find "
@@ -3703,6 +3716,11 @@ msgid ""
 "download the file and automatically resume downloading if it finds any "
 "matches."
 msgstr ""
+"Nel caso durante lo scaricamento compaia il messaggio <font "
+"color=\"1E8E44\">Necessarie Più Sorgenti</font>, prova a selezionare lo "
+"scaricamento e cliccare su <font color=\"1E8E44\">Trova Più Sorgenti</font>. "
+"LimeWire cercherà in rete altre fonti e in caso positivo riprenderà lo "
+"scaricamento."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:37
 msgid ""
@@ -3711,6 +3729,10 @@ msgid ""
 "green (or blue to indicate aLimeWire PRO or an Ultrapeer connection), "
 "LimeWire has completely connected."
 msgstr ""
+"Quando LimeWire viene lanciato deve connettersi al network. In questa fase "
+"la barra nell'angolo in basso a sinistra cambia colore. Quando tutte le "
+"barrette sono verdi (o blu in caso di connessione con LimeWire PRO o "
+"Ultrapeer), LimeWire è completamente connesso."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
 msgid ""
@@ -3803,6 +3825,9 @@ msgid ""
 "Sources</font> by searching for that file again. LimeWire will automatically "
 "restart the download if it finds any matching results."
 msgstr ""
+"Puoi ricominciare gli scaricamenti indicanti <font color=\"1E8E44\">Attesa "
+"Sorgenti</font>, facendo una nuova ricerca. LimeWire ricomincerà "
+"automaticamente lo scaricamento in caso di risultati validi."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:96
 msgid ""
@@ -3868,10 +3893,13 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:122
+#, fuzzy
 msgid ""
 "Try a <font color=\"1E8E44\">What's New</font> search and see what's "
 "recently been added to the Gnutella network."
 msgstr ""
+"Prova a cliccare su <font color=\"1E8E44\">What's New</font> per vedere cosa "
+"è stato aggiunto di recente al network Gnutella."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:124
 msgid ""
@@ -3999,6 +4027,8 @@ msgid ""
 "The numbers next to the up and down arrows at the bottom of LimeWire show "
 "how fast all of your files are downloading or uploading."
 msgstr ""
+"I numeri vicini alle frecce su e giù nella parte bassa della finestra di "
+"LimeWire indicano la velocità di scaricamento e caricamento dei files."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:201
 msgid ""

@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-16 21:55+0000\n"
-"Last-Translator: Henrique Zózimo <ekprime@oi.com.br>\n"
+"PO-Revision-Date: 2008-03-22 06:30+0000\n"
+"Last-Translator: Cognato <launchpad.net@cognato.net>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
+"X-Launchpad-Export-Date: 2008-03-25 03:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -1849,7 +1849,7 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"O LimeWire não consegue escrever um arquivo necessário porque o seu disco "
+"O LimeWire não conseguiu escrever um arquivo necessário porque o seu disco "
 "rígido está cheio. Para continuar a usar o LimeWire você deve liberar espaço "
 "no seu disco rígido."
 
@@ -1859,8 +1859,8 @@ msgid ""
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
 "O LimeWire não conseguiu abrir um arquivo necessário pois um outro programa "
-"bloqueou o arquivo. O LimeWire poderá agir de forma inesperada até o arquivo "
-"ser liberado."
+"bloqueou o acesso ao arquivo. O LimeWire poderá agir de forma inesperada até "
+"que o arquivo seja liberado."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:54
 msgid ""
@@ -1879,7 +1879,7 @@ msgid ""
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
 msgstr ""
-"O LimeWire não pode abrir um arquivo necessário pois o nome do arquivo "
+"O LimeWire não consegue abrir um arquivo necessário pois o nome do arquivo "
 "contem caracteres não suportados pelo seu sistema operacional. O LimeWire "
 "pode comportar-se de forma inesperada."
 
@@ -1938,19 +1938,20 @@ msgid ""
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
-"Desculpe, o LimeWire não pôde ler seus downloads antigos. Você pode reiniciá-"
-"los indo à sua Biblioteca, vendo seus 'Arquivos Incompletos', e clicando em "
-"'Continuar' seus downlaods."
+"Desculpe, o LimeWire não conseguiu ler seus downloads antigos. Você pode "
+"reiniciá-los indo à sua Biblioteca, visualizando seus 'Arquivos "
+"Incompletos', e clicando para 'Continuar' seus downlaods."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:221
+#, fuzzy
 msgid ""
 "Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
 "to 'Resume' your downloads."
 msgstr ""
-"Desculpe, o LimeWire não pôde ler alguns de seus antigos downloads. Você "
-"pode reiniciá-los indo à sua Biblioteca, vendo seus 'Arquivos Incompletos', "
-"e clicando em 'Continuar' seus downlaods"
+"Desculpe, o LimeWire não conseguiu ler alguns de seus antigos downloads. "
+"Você pode reiniciá-los indo à sua Biblioteca, visualizando seus 'Arquivos "
+"Incompletos', e clicando para 'Continuar' seus downloads."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:319
 msgid "Loading TLS Encryption..."
@@ -1958,52 +1959,51 @@ msgstr "Carregando Criptografia TLS..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:331
 msgid "Loading Safe Content Management..."
-msgstr "Carregando Gerenciador de Conteúdo Seguro"
+msgstr "Carregando Gerenciador de Conteúdo Seguro..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:336
 msgid "Loading Message Router..."
-msgstr "Carregando roteador de mensagens..."
+msgstr "Carregando Roteador de Mensagens..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:341
 msgid "Checking for Updates..."
-msgstr "Checando atualizações..."
+msgstr "Checando Atualizações..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:346
 msgid "Loading Upload Management..."
-msgstr "Carregando gerenciador de upload..."
+msgstr "Carregando Gerenciamento de Upload..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:356
 msgid "Loading Connection Listener..."
-msgstr "Carregando Listadores de Conexão"
+msgstr "Carregando Listadores de Conexão..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:365
 msgid "Loading Connection Management..."
-msgstr "Carregando gerenciador de conexão..."
+msgstr "Carregando Gerenciador de Conexão..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:374
 msgid "Loading Download Management..."
-msgstr "Carregando gerenciador de download..."
+msgstr "Carregando Gerenciador de Downloads..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:380
-#, fuzzy
 msgid "Loading Ultrapeer/DHT Management..."
-msgstr "Carregando Gerenciador de Ultrapeer/DHT"
+msgstr "Carregando Gerenciador de Ultrapeer/DHT..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:385
 msgid "Locating Peers..."
-msgstr "Localizando peers..."
+msgstr "Localizando 'Peers'..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:401
 msgid "Loading Shared Files..."
-msgstr "Carregando arquivos compartilhados..."
+msgstr "Carregando Arquivos Compartilhados..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:406
 msgid "Loading BitTorrent Management..."
-msgstr "Carregando o Gerenciador de BitTorrent"
+msgstr "Carregando o Gerenciador de BitTorrent..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:412
 msgid "Loading Old Downloads..."
-msgstr "Carregando downloads antigos..."
+msgstr "Carregando Downloads Antigos..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:417
 msgid "Attaching LimeWire Store Listeners..."
@@ -2011,23 +2011,23 @@ msgstr "Anexando os Ouvidores da Loja LimeWire..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:422
 msgid "Loading Directed Querier..."
-msgstr "Carregando 'directed querier'..."
+msgstr "Carregando 'Directed Querier'..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:427
 msgid "Loading Magnet Listener..."
-msgstr "Carregando ouvinte Magnet..."
+msgstr "Carregando Ouvinte 'Magnet'..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:438
 msgid "Loading Peer Listener..."
-msgstr "Carregando ouvinte de peer..."
+msgstr "Carregando Ouvinte de 'Peers'..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:443
 msgid "Loading Stale Connection Management..."
-msgstr "Carregando gerenciador de conexão desatualizada..."
+msgstr "Carregando Gerenciador de Conexão Desatualizada..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:448
 msgid "Loading Saved Files..."
-msgstr "Carregando arquivos salvos..."
+msgstr "Carregando Arquivos Salvos..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:453
 msgid "Loading Spam Management..."

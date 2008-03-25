@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-16 09:22+0000\n"
+"PO-Revision-Date: 2008-03-23 10:01+0000\n"
 "Last-Translator: Stevan <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
+"X-Launchpad-Export-Date: 2008-03-25 03:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -279,8 +279,9 @@ msgid "Loading Old Downloads..."
 msgstr "Učitavanje starih preuzetih datoteka..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:417
+#, fuzzy
 msgid "Attaching LimeWire Store Listeners..."
-msgstr ""
+msgstr "Dodavanje  LimeWire Store Listeners..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:422
 #, fuzzy
@@ -1493,7 +1494,7 @@ msgstr "Možete ponovno pokušati potražiti detalje klikom na 'Provjeri'."
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:493
 msgid "View Weedshare Usage Rights"
-msgstr "Pogrel Weedshare korisnicka prava"
+msgstr "Pogledaj Weedshare korisnicka prava"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:508
 msgid "View Usage Rights"
@@ -1588,7 +1589,7 @@ msgstr "Stranica preuzimanja datoteka"
 
 #: gui/com/limegroup/gnutella/gui/MessageResourceHandler.java:14
 msgid "File Listing for"
-msgstr ""
+msgstr "Lista dokumenata za"
 
 #: gui/com/limegroup/gnutella/gui/MessageResourceHandler.java:18
 msgid "Magnet Links for Fast Downloads (if you have LimeWire installed)"
@@ -1688,12 +1689,16 @@ msgid ""
 "LimeWire has encountered problems in managing your settings.  Your settings "
 "changes may not be saved on shutdown."
 msgstr ""
+"LimeWire je naisao na problem kod podesavanja postavki. Promjene postavki "
+"nece biti pohranjene kod gasenja."
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:38
 msgid ""
 "LimeWire has encountered problems in loading your settings.  LimeWire will "
 "attempt to use the default values; however, may behave unexpectedly."
 msgstr ""
+"LimeWire je naisao na  probleme prilikom ucitavanja postavki. LimeWire ce "
+"pokusati koristiti default postavke."
 
 #: gui/com/limegroup/gnutella/gui/ShutdownWindow.java:18
 msgid "Shutting down LimeWire..."
@@ -1869,11 +1874,12 @@ msgstr[1] "Razmjenjujete {0} datoteka"
 
 #. {0}: number of shared files
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:916
-#, java-format
+#, fuzzy, java-format
 msgid "You are sharing {0} file (Loading...)"
 msgid_plural "You are sharing {0} files (Loading...)"
 msgstr[0] "Razmjenjujete {0} datoteka (Učitavanje...)"
 msgstr[1] "Razmjenjujete {0} datoteka (Učitavanje...)"
+msgstr[2] "{0}  broj djeljenih dokumenata"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:993
 #, fuzzy
@@ -2044,6 +2050,8 @@ msgid ""
 "If you have any tips on using LimeWire, add it to <a href=\"{0}\">the "
 "wiki</a> and it may make it into a future tip of the day."
 msgstr ""
+"Ako imate neki tips za koristenje LimeWire-a, dodajte to u<a "
+"href=\"{0}\">wiki</a> i moze postati tip of the day."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:92
 msgid ""
@@ -2257,6 +2265,8 @@ msgid ""
 "The numbers next to the up and down arrows at the bottom of LimeWire show "
 "how fast all of your files are downloading or uploading."
 msgstr ""
+"Brojevi pored strelica gore i dolje pokazuju brzinu download-a u upload-a "
+"dokumenata."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:201
 msgid ""
@@ -2383,6 +2393,8 @@ msgid ""
 "color=\"1E8E44\">Help</font> &gt; <font color=\"1E8E44\">About "
 "LimeWire</font>. "
 msgstr ""
+"Moguce je saznati koju verziju koristte odabirom <font "
+"color=\"1E8E44\">Pomoc</font> &gt; <font color=\"1E8E44\">O LimeWire</font>. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:289
 msgid ""

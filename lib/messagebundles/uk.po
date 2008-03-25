@@ -8,15 +8,15 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2007-08-23 15:49+0000\n"
-"Last-Translator: Lime Wire <Unknown>\n"
+"PO-Revision-Date: 2008-03-19 09:02+0000\n"
+"Last-Translator: yurij <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
+"X-Launchpad-Export-Date: 2008-03-25 03:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -1754,6 +1754,8 @@ msgid ""
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
+"Нажаль LimeWire не зміг прочитати старі завантаження. Спробуйте їх "
+"відновити: зайшовши в Бібліотеку->Незавершені файли->Відновити завантаження"
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:221
 msgid ""
@@ -1761,6 +1763,8 @@ msgid ""
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
 "to 'Resume' your downloads."
 msgstr ""
+"Нажаль LimeWire не зміг прочитати деякі старі завантаження. Спробуйте їх "
+"відновити: зайшовши в Бібліотеку->Незавершені файли->Відновити завантаження"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:319
 #, fuzzy
@@ -1809,13 +1813,12 @@ msgid "Locating Peers..."
 msgstr "Шукаю інших клієнтів..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:401
-#, fuzzy
 msgid "Loading Shared Files..."
 msgstr "Завантажую збережені файли"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:406
 msgid "Loading BitTorrent Management..."
-msgstr ""
+msgstr "Відкриваю менеджер BitTorrent"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:412
 msgid "Loading Old Downloads..."
@@ -1852,7 +1855,7 @@ msgstr "Завантажую менеджер підключень..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:458
 msgid "Loading Network Listeners..."
-msgstr ""
+msgstr "Зававнтажую мережеві агенти"
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
@@ -1891,7 +1894,7 @@ msgstr "Картинки"
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:124
 #, java-format
 msgid "Could not process bad MAGNET link {0}"
-msgstr ""
+msgstr "Неможу обробити хиба MAGNET link {0}"
 
 #. show warning but proceed
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:189
@@ -2013,7 +2016,7 @@ msgstr "Тип:"
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:294
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:57
 msgid "Length"
-msgstr ""
+msgstr "Розмір"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:95
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:111
@@ -2157,11 +2160,11 @@ msgstr "Платформа:"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:105
 msgid "The selected .torrent file may contain a security hazard."
-msgstr ""
+msgstr "Цей файл містьть ризик безпеки"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:107
 msgid "LimeWire could not download a .torrent file from the provided URL."
-msgstr ""
+msgstr "LimeWire неможе стягнути .torrent файл з вказаного лінку."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:35
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:539
@@ -2169,6 +2172,8 @@ msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
+"Якщо ви зупинете це вивантаження, потік зупиниться. Ви упевнені що хочете "
+"цього?"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:38
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:544
@@ -2197,7 +2202,7 @@ msgstr "Запускатись автоматично"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:36
 msgid "BitTorrent Settings"
-msgstr ""
+msgstr "Налаштування BitTorrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:38
 msgid ""
@@ -2220,19 +2225,19 @@ msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:85
 msgid "Maximum uploads per torrent"
-msgstr ""
+msgstr "Максимальне вивантаження на потік"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:91
 msgid "Minimum uploads per torrent"
-msgstr ""
+msgstr "Мінімальне вивантаження на потік"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:97
 msgid "Safe chunk verification"
-msgstr ""
+msgstr "Безпечна перевірка кусочків"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:103
 msgid "Experimental disk access"
-msgstr ""
+msgstr "Експерементальний доступ до диску"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:81
 msgid "Internal Error"
@@ -2322,7 +2327,7 @@ msgstr "Копіювати повідомлення"
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:144
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:221
 msgid "OK"
-msgstr ""
+msgstr "ТАК"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
 msgid "Automatically Scroll"
@@ -2635,16 +2640,16 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:106
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:107
 msgid "Do not display this message again."
-msgstr ""
+msgstr "Ну показувати це повідомлення знову"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:81
 msgid "Dial Up"
-msgstr ""
+msgstr "Модемне з'єднання"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:38
 msgid "Broadband"
-msgstr ""
+msgstr "Виділена лінія"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:40
 msgid "T1"
@@ -2698,7 +2703,7 @@ msgstr "Консоль"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:131
 msgid "Lo&gging"
-msgstr ""
+msgstr "Реєеструємось"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:148
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:172
@@ -2756,6 +2761,8 @@ msgid ""
 "\n"
 "Executed command: {0}."
 msgstr ""
+"LimeWire неможе запустити файл.\n"
+"Виконана команда {0}."
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1465
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1488
@@ -2897,7 +2904,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:177
 msgid "Remind Me Later"
-msgstr ""
+msgstr "Нагадати пізніше"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:184
 #, fuzzy
@@ -2910,7 +2917,7 @@ msgstr "LimeWire має бути перезапущено, щоб викорис
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:186
 msgid "Change Language"
-msgstr ""
+msgstr "Змінити мову"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:189
 msgid "Help Translate LimeWire"
@@ -2918,7 +2925,7 @@ msgstr "Допоможіть перекласти LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:190
 msgid "Show Language in status bar"
-msgstr ""
+msgstr "Вказівник мови в інформаційній панелі"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:381
 msgid "Verify"
@@ -3056,7 +3063,7 @@ msgstr "Вставити"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:789
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1267
 msgid "Delete"
-msgstr ""
+msgstr "Видалити"
 
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:229
 #: gui/com/limegroup/gnutella/gui/actions/SelectSharedDirectoryAction.java:26
@@ -3372,11 +3379,11 @@ msgstr "Вивантаження:"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:1007
 msgid "Total Downstream:"
-msgstr ""
+msgstr "Загальне завантаження"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:1012
 msgid "Total Upstream:"
-msgstr ""
+msgstr "загальне вивантаження"
 
 #. *
 #. * The title for the TOTD window.

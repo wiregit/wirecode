@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-13 22:22+0000\n"
-"Last-Translator: enebro <Unknown>\n"
+"PO-Revision-Date: 2008-03-24 04:12+0000\n"
+"Last-Translator: iTr4v3l3r <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
+"X-Launchpad-Export-Date: 2008-03-25 03:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Sorry, but LimeWire was unable to restart your old downloads."
@@ -3656,6 +3656,11 @@ msgid ""
 "href=\"{1}\">FAQ</a> for answers to commonly asked questions or the <a "
 "href=\"{2}\">User Guide</a> for more information."
 msgstr ""
+"Si necesita mas ayuda, visite <a href=\"{0}\">nuestra pizarra de "
+"mensajes</a> para ver si otros ya han contestado su pregunta. Tambien puede "
+"revisar el <a href=\"{1}\">FAQ</a> para respuestas a las preguntas mas "
+"comunmente hechas o la <a href=\"{2}\">Guia de Usuario</a> para mas "
+"informacion."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:83
 msgid ""
@@ -3672,6 +3677,8 @@ msgid ""
 "If you have any tips on using LimeWire, add it to <a href=\"{0}\">the "
 "wiki</a> and it may make it into a future tip of the day."
 msgstr ""
+"Si tiene algun tip para usar LimeWire, agreguelo al <a href=\"{0}\">wiki</a> "
+"y quiza sea agregado al tip del dia en un futuro."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:92
 msgid ""
@@ -3679,6 +3686,10 @@ msgid ""
 "Sources</font> by searching for that file again. LimeWire will automatically "
 "restart the download if it finds any matching results."
 msgstr ""
+"Es posible reiniciar las descargas que dicen <font "
+"color=\"1E8E44\">Esperando Fuentes</font> al buscar otra vez ese archivo. "
+"LimiWire reiniciará automaticamente la descarga si encuentra resultados que "
+"coincidan"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:96
 msgid ""
@@ -3692,6 +3703,8 @@ msgid ""
 "Visit <a href=\"{0}\">LimeWire's website</a> for detailed information about "
 "how skins are created."
 msgstr ""
+"Visite el <a href=\"{0}\">sitio web LimeWire</a> para información detallada "
+"acerca de como crear pieles."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:100
 msgid ""
@@ -9080,7 +9093,7 @@ msgstr "Nombre:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:80
 msgid "Publisher:"
-msgstr "Editorial:"
+msgstr "Editor:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:81
 msgid "Platform:"
@@ -9103,9 +9116,8 @@ msgid "Ogg Vorbis"
 msgstr "Ogg Vorbis"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:111
-#, fuzzy
 msgid ""
 "Unknown file type. Please choose the type that best describes this file."
 msgstr ""
-"Tipo de archivo desconocido. Por favor elija el tipo que mejor describa este "
-"archivo."
+"Tipo de archivo desconocido. Por favor escoja el tipo que mejor se adecue a "
+"este archivo"

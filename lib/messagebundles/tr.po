@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-11 21:06+0000\n"
-"Last-Translator: kurukkafa <odarikan@mynet.com>\n"
+"PO-Revision-Date: 2008-03-24 14:51+0000\n"
+"Last-Translator: Bobcats <odemirbobcats@hotmail.com>\n"
 "Language-Team: Turkish <tr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
+"X-Launchpad-Export-Date: 2008-03-25 03:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
@@ -41,8 +41,8 @@ msgid ""
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
 "LimeWire gerekli bir dosyayı gerekli izniniz bulunmadığından dolayı "
-"kaydedemedi.  Gelecek sefer LimeWire'ı calıştırdığınızda tercihleriniz devam "
-"ettirilemeyebilir ve ya LimeWire beklenmedik bir şekilde davranabilir."
+"kaydedemedi. Gelecek sefer LimeWire'ı çalıştırdığınızda tercihleriniz devam "
+"ettirilemeyebilir veya LimeWire beklenmedik bir şekilde davranabilir."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:56
 msgid ""
@@ -105,9 +105,9 @@ msgid ""
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
-"Üzgünüz, LimeWire önceden indirmekte olduğunuz dosyaları okuyamadı. "
-"Kütüphaneye gidip 'Tamamlanmayan Dosyalar'a girebilir ve 'Devam Et'e "
-"tıklayarak bu dosyaları indirmeye tekrar başlayabilirsiniz."
+"Üzgünüz, LimeWire önceki yüklemelerinizi okuyamadı. Önceki yüklemelerinizi "
+"kütüphaneye gidip 'Tamamlanmayan Dosyalar'ı görüntüleyerek 'Devam Et'e "
+"tıklayarak devam ettirebilirsiniz"
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:221
 msgid ""
@@ -115,7 +115,7 @@ msgid ""
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
 "to 'Resume' your downloads."
 msgstr ""
-"Üzgünüz, Limewire önceden indirdiğiniz dosyaları okuyamadı. Kütüphaneye "
+"Üzgünüz, LimeWire önceden indirdiğiniz dosyaları okuyamadı. Kütüphaneye "
 "gidip 'Tamamlanmayan Dosyalar'ı görebilir ve 'Devam Et'e tıklayarak bu "
 "dosyaları indirmeye tekrar başlayabilirsiniz."
 
@@ -153,7 +153,7 @@ msgstr "İndirme Yönetimi yükleniyor..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:380
 msgid "Loading Ultrapeer/DHT Management..."
-msgstr "Ultrapeer/DHT yöneticisi yükleniyor..."
+msgstr "Ultrapeer/DHT Yöneticisi yükleniyor..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:385
 #, fuzzy
@@ -162,11 +162,11 @@ msgstr "Paylaşımcılar bulunuyor..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:401
 msgid "Loading Shared Files..."
-msgstr "Paylaşılan Dosyaları yüklüyor..."
+msgstr "Paylaşılan Dosyalar yükleniyor..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:406
 msgid "Loading BitTorrent Management..."
-msgstr "BitTorrent yöneticisi yükleniyor..."
+msgstr "BitTorrent Yöneticisi yükleniyor..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:412
 msgid "Loading Old Downloads..."
@@ -2152,6 +2152,10 @@ msgid ""
 "Also, you can change what these boxes show. Click the circle in the upper "
 "left corner of a box and choose a new option from the menu."
 msgstr ""
+"Bir arama başlattıkdan sonra, soldaki  'medya, Artist ve Albüm' adlı 3 "
+"kutucuğu düzenleyebilirsiniz daha fazla düzenlenmiş arama sonuçları için. "
+"Hatta, bu kutucukların ne gösterdiklerinide değiştirebilirsiniz. Daha "
+"üstteki sol köşedeki daireye tıklayın ve menüdn yeni bir seçenek seçin"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:154
 msgid ""
@@ -2186,6 +2190,8 @@ msgid ""
 "color=\"1E8E44\">Search in Shared files</font> search at the top of the "
 "<font color=\"1E8E44\">Library</font> tab to find a file."
 msgstr ""
+"Kaydedilmiş veya Paylaşılan klasörünüzde  bir çok dosyamı var? Kütüphanenin "
+"üsütndeki arama etiketini deneyiniz."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:175
 #, java-format
@@ -2279,6 +2285,9 @@ msgid ""
 "even if both parties are behind a firewall. You don't have to do anything "
 "extra because it happens automatically."
 msgstr ""
+"Diğer P2P dosya paylaşım programlarınınaksine,LimeWire dosyaları tüm "
+"taraflar bir güvenlik duvarı arkasında dahi olsa transfer edebilir. Ekstra "
+"birşey yapmanıza gerk yokturçünkü bu otomatik olarak gerçekleşmektedir."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:236
 msgid ""
@@ -2415,6 +2424,10 @@ msgid ""
 "include 'Title', 'Genre', 'Track', 'Length', and many more). Right-click on "
 "the search result column header, and check the columns you want to see."
 msgstr ""
+"Aram sonuç bilgilerini gösteren sütunları değiştirebilirsiniz ( sütunlar "
+"'başlık', 'tarz' , 'Parça' , 'uzunluk' , ve daha fazlasını içerir. ) Arama "
+"sonucu sütununun başlığına sağ tıklayın ve görüntülemek istediğiniz "
+"sütunları gözden geçirin"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:332
 msgid ""
@@ -2595,6 +2608,8 @@ msgid ""
 "You can find out which version of LimeWire you are using at the <font "
 "color=\"1E8E44\">About LimeWire</font> menu. "
 msgstr ""
+"Hangi LimeWire sürümünü kullandığınızı menüdeki LimeWire Hakkında seçeneğine "
+"tıklıyarak öğrenebilirsiniz. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:426
 msgid ""
@@ -2734,6 +2749,9 @@ msgid ""
 "Library, you have the option to either permanently delete the file from your "
 "computer or move it to the Trash. "
 msgstr ""
+"Kütüphane bir dosya yönetimidir. Bu demektir ki eğer kütüphaneden bir dosya "
+"sildiyseniz, dosyanız ya çöğ kutusuna gönderilir yada geri dönüşü olmayan "
+"bir şekilde bilgisayarınızdan silinir. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:519
 msgid ""
@@ -6937,7 +6955,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:108
 msgid "Uploading Hash Tree"
-msgstr ""
+msgstr "Şifrelenmiş ağaç yükleniyor"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:116
 msgid "Suspended"
@@ -7070,6 +7088,8 @@ msgid ""
 "The path of the parent folder exceeds the maximum length of paths on the "
 "filesystem. {0} "
 msgstr ""
+"Ebeveyn dosyasının yolu, dosya sistemindeki yolların maksimum uzunluğunu "
+"aşar. {0} "
 
 #: gui/com/limegroup/gnutella/gui/util/GUILauncher.java:67
 #, java-format

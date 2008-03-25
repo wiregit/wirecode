@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2007-09-25 05:43+0000\n"
-"Last-Translator: Arielle B Cruz <me@abcruz.com>\n"
+"PO-Revision-Date: 2008-03-20 06:20+0000\n"
+"Last-Translator: patskydomingo <Unknown>\n"
 "Language-Team: Filipino <fil@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
+"X-Launchpad-Export-Date: 2008-03-25 03:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
@@ -113,6 +113,11 @@ msgid ""
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
+"Paumanhin, hindi mabasa ng Limewire ang inyong mga huling downloads.  Maaari "
+"mong ulitin ang pag-download sa pamamagitan ng pagpunta sa \"Library\" ng "
+"inyong Limewire.  Buksan ito at hanapin ang mga \"Di Kumpletong Files\" o "
+"\"Incomplete Files\", pagkatapos ay pindutin ang \"Ituloy\"  o \"Resume\" "
+"ang pagdodownload."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:221
 msgid ""
@@ -990,7 +995,7 @@ msgstr "Lahat ng Folder"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:48
 msgid "View My Shared Files."
-msgstr ""
+msgstr "Tingnan ang Aking Mga Ibinahaging Dokumento sa Kompyuter"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:81
 #, java-format
@@ -1011,7 +1016,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:106
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:107
 msgid "Do not display this message again."
-msgstr ""
+msgstr "Huwag na muling ipakita ang mensaheng ito."
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:81
@@ -1058,11 +1063,11 @@ msgstr "&Magmanman"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:128
 msgid "&Connections"
-msgstr ""
+msgstr "at mga konenksyon"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:129
 msgid "&Library"
-msgstr ""
+msgstr "at Aklatan"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:130
 msgid "C&onsole"

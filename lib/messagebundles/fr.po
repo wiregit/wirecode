@@ -10,14 +10,14 @@ msgstr ""
 "Project-Id-Version: fr\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-03-03 00:51-0500\n"
-"PO-Revision-Date: 2008-03-13 06:35+0000\n"
-"Last-Translator: Michael Miles <Unknown>\n"
+"PO-Revision-Date: 2008-03-24 22:05+0000\n"
+"Last-Translator: Pierre Slamich <pierre.slamich@gmail.com>\n"
 "Language-Team: <fr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2008-03-18 03:53+0000\n"
+"X-Launchpad-Export-Date: 2008-03-25 03:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Sorry, but LimeWire was unable to restart your old downloads."
@@ -3479,6 +3479,13 @@ msgid ""
 "lot of sources, use the <font color=\"1E8E44\">Junk</font> button to train "
 "LimeWire's junk filter."
 msgstr ""
+"Fatigué des téléchargements s'arretant à mi-parcours? Il vous aide à "
+"récuperer les résultats de recherche en plus grand nombre dans la \"#\" "
+"colonne. Le \"#\" est le montant des places unique sur le réseau hébérgent "
+"le fichier. Plus il y a des sources plus vous avez de chances d'obtenir "
+"votre fichier. Dans le cas ou vous avez un grand nombre de source utilisez "
+"<font color=\"1E8E44\">Junk</font> pour mettre en marche le filtre "
+"LimeWire's junk."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:31
 msgid ""
@@ -3496,6 +3503,10 @@ msgid ""
 "green (or blue to indicate aLimeWire PRO or an Ultrapeer connection), "
 "LimeWire has completely connected."
 msgstr ""
+"Lorsque LimeWire démarre, il doit se connecter au réseau. Pendant ce temps, "
+"la bar qui se situe en bas à gauche va changer de couleur. Une fois toutes "
+"les bars au vert (ou bleu pour aLimeWire PRO ou Ultrapeer connection), "
+"LimeWire sera complètement connecté."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:42
 msgid ""
@@ -3520,11 +3531,16 @@ msgstr ""
 "correctement."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:55
+#, fuzzy
 msgid ""
 "The more stars a search result has, the better the chances of the download "
 "completing successfully. Four blue stars signal 'Ethernet' speed and have "
 "the greatest chance of completing successfully."
 msgstr ""
+"Plus le résultat de votre recherche comporte d'étoiles, plus vous avez de "
+"chances pour que votre téléchargement soit terminé avec succès. Quatre "
+"étoiles bleues vous indiquent une vitesse \"Ethernet\" et ont une grande "
+"chance de se terminer avec succès."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:59
 msgid ""
@@ -3542,12 +3558,19 @@ msgid ""
 "color=\"1E8E44\">Library</font> tab counts how many times LimeWire has "
 "returned a result from someone searching for that file."
 msgstr ""
+"Curieux de savoir combien de personnes sont à la recherche de vos fichiers? "
+"Le <font color=\"1E8E44\">Hits</font> column in the <font "
+"color=\"1E8E44\">Library</font> compte combien de fois LimeWire a retourné "
+"un résultat de la recherche de quelqu'un pour ce fichier."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:70
 msgid ""
 "It helps the network if you keep your LimeWire running; other users will "
 "connect to the network easier and searches will perform better."
 msgstr ""
+"Si vous laissez fonctionner LimeWire, cela permettra d'aider le réseau ; les "
+"autres utilisateurs se connecteront au réseau plus facilement et les "
+"recherches se lançeront mieux."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:73
 msgid ""
@@ -3594,25 +3617,36 @@ msgid ""
 "Post feature suggestions on LimeWire's <a href=\"{0}\">message boards</a> "
 "and it may be added to future versions."
 msgstr ""
+"Postez vos suggestions de fonctionnalités sur les <a href=\"{0}\">forums</a> "
+"de LimeWire et elles pourraient être ajoutées à de futures versions."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:98
-#, java-format
+#, fuzzy, java-format
 msgid ""
 "Visit <a href=\"{0}\">LimeWire's website</a> for detailed information about "
 "how skins are created."
 msgstr ""
+"Visitez <a href=\"{0}\">le site internet de LimeWire</a> pour des "
+"informations détaillées sur la manière dont les habillages (ou skins) sont "
+"crées."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:100
+#, fuzzy
 msgid ""
 "Do you want to be part of LimeWire's development? Visit <a "
 "href=\"{0}\">LimeWire's Open Source website</a>."
 msgstr ""
+"Vous souhaitez participer au developpement de LimeWire ? Visitez <a "
+"href=\"{0}\">le site Open Source de LimeWire</a>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:102
 msgid ""
 "You can preview downloading files to make sure they are what you expect; "
 "select the download and click <font color=\"1E8E44\">Preview</font>."
 msgstr ""
+"Vous pouvez pré-visualiser le téléchargement des fichiers afin d'être sur "
+"qu'ils correspondent à votre demande; sélectionnez le fichier téléchargé et "
+"entrez <font color=\"1E8E44\">Preview</font>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:104
 msgid ""
@@ -3674,6 +3708,10 @@ msgid ""
 "buddy is sharing 'Limers' but you searched for 'The Limers', your buddy's "
 "file will still be found."
 msgstr ""
+"De petits changements dans les termes de votre recherche foncionneront "
+"tuojours. Par exemple, si l'un de vos amis est en train de partager le "
+"fichier \"Limers\" mais que vous tappez dans la recherche \"Les Limers\", "
+"vous ne trouverez pas le ficher de votre ami."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:134
 msgid ""
