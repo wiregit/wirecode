@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
@@ -36,6 +37,7 @@ import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
 import com.limegroup.gnutella.messages.FeatureSearchData;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -45,6 +47,7 @@ import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
+import com.limegroup.gnutella.messages.Message.MessageCounter;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
@@ -71,6 +74,9 @@ public class StandardMessageRouter extends MessageRouterImpl {
     private final Statistics statistics;
 
     private final ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory;
+    
+    @InspectionPoint("false positive queries")
+    private final MessageCounter falsePositives = new Message.MessageCounter(50);
     
     @Inject
     public StandardMessageRouter(NetworkManager networkManager,
@@ -315,6 +321,8 @@ public class StandardMessageRouter extends MessageRouterImpl {
                                                      
         // Run the local query
         Response[] responses = fileManager.query(queryRequest);
+        if (responses.length == 0)
+            falsePositives.countMessage(queryRequest);
         return sendResponses(responses, queryRequest, handler);
         
     }
