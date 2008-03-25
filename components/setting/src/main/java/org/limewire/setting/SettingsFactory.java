@@ -504,12 +504,7 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
      */
     public synchronized FileSetting createFileSetting(String key, 
                                                       File defaultValue) {
-        String parentString = defaultValue.getParent();
-        if( parentString != null ) {
-            File parent = new File(parentString);
-            if(!parent.isDirectory())
-                parent.mkdirs();
-        }
+        // Creation of parent dirs removed per LWC-1323.
 
         FileSetting result = 
             new FileSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
