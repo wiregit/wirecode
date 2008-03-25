@@ -97,5 +97,6 @@
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.0-beta2-20080303.182830-4.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-alpha4-20080319.202202-3.jar"/>
 	<classpathentry kind="lib" path="lib/jars/dnsjava.jar"/>
+	<classpathentry kind="lib" path="lib/jars/hsqldb.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

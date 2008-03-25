@@ -74,7 +74,7 @@ public class DefaultGeocoder implements Geocoder {
      * For example: <code>countryName   United States</code> would cause a call
      * to <code>g.setCountryName("United States").
      * 
-     * @param lines input lines of the form
+     * @param is input lines of the form
      * <blockquote>
      * T N ( String[<em>Name</em>] T String[<em>Value</em>] N )*
      * </blockquote>

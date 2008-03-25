@@ -15,13 +15,13 @@ public class GeocodeSettings extends LimeProps {
 	 * Whether geo coding is enabled.
 	 */
 	public static final BooleanSetting IS_ENABLED =
-		FACTORY.createRemoteBooleanSetting("IS_ENABLED", true, "GeocodeSettings.isEnabled");
+		FACTORY.createRemoteBooleanSetting("IS_ENABLED", false, "GeocodeSettings.isEnabled");
     
     /**
      * The URL used to geocode the client.
      */
     public static final StringSetting GEOCODE_URL =
-        FACTORY.createRemoteStringSetting("GEOCODE_URL", "http://jeffpalm.com/geotest/", "GeocodeSettings.geocodeUrl");    
+        FACTORY.createRemoteStringSetting("GEOCODE_URL", "", "GeocodeSettings.geocodeUrl");    
     
     /**
      * The last IP address from which we opened the client. Don't know if it's
@@ -29,10 +29,5 @@ public class GeocodeSettings extends LimeProps {
      */
     public static final StringSetting LAST_IP =
         FACTORY.createRemoteStringSetting("LAST_IP", "", "GeocodeSettings.lastIp");
-    
-    /**
-     * The time out to use when requesting the geolocation information.
-     */
-    public static final IntSetting TIMEOUT =
-        FACTORY.createRemoteIntSetting("TIMEOUT", 10000, "GeocodeSettings.timeout", 0, 20000);
+
 }

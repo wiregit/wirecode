@@ -77,7 +77,14 @@ public class SignedMessageContainer implements MessageContainer {
         payload.put(KEY_ALIAS, ByteUtil.toUTF8Bytes(keyAlias));
     }
 
-    /** Parses the */
+    /**
+     * Returns a {@link MessageContainer} parsed from the <code>payload</code>.
+     * 
+     * @param cipherProvider verifies the signature
+     * @param keyStore holds the certificate
+     * @param certificateVerifier verifies the certificate
+     * @return a {@link MessageContainer} parsed from the <code>payload</code>.
+     */
     public MessageContainer getAndVerifyWrappedMessage(CipherProvider cipherProvider,
             KeyStoreProvider keyStore, CertificateVerifier certificateVerifier) throws IOException {
         try {

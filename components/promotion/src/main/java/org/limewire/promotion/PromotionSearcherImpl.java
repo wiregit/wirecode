@@ -161,12 +161,6 @@ public class PromotionSearcherImpl implements PromotionSearcher {
 
         }
 
-        /**
-         * 
-         * @param promotionMessageContainer
-         * @param promotionBinder
-         * @return true if the
-         */
         private boolean isMessageValid(final PromotionMessageContainer promotionMessageContainer,
                 final String binderUniqueName) {
             final PromotionBinder binder = searcherDatabase.getBinder(binderUniqueName);

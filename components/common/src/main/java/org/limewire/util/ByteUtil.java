@@ -80,11 +80,7 @@ public final class ByteUtil {
      * from 0 to 8 bytes long.
      */
     public static long toLongFromBytes(byte[] bytes) {
-        long value = 0;
-        for (int i = 0; i < bytes.length; i++) {
-            value = (value << 8) | (bytes[i] & 0xff);
-        }
-        return value;
+        return ByteOrder.beb2long(bytes, 0, bytes.length);
     }
 
     /**

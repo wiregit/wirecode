@@ -160,7 +160,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
         executeUpdate("DELETE FROM binders where binder_unique_name = ?", binder.getUniqueName());
         executeInsert(
                 "INSERT INTO binders (binder_unique_name, binder_bucket_id, valid_end_dt, binder_blob) VALUES (?,?,?,?)",
-                new Object[] {binder.getUniqueName(), binder.getBucketNumber(),
+                new Object[] { binder.getUniqueName(), binder.getBucketNumber(),
                         binder.getValidEnd(), binder.getEncoded() });
     }
 
@@ -282,11 +282,12 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
     }
 
     /**
-     * Loads the given entry id from the database, ignoring all the fields
-     * except the entry_ggep, reparsing the ggep into a promotion entry.
+     * Loads and return the given entry id from the database, ignoring all the
+     * fields except the entry_ggep, reparsing the ggep into a promotion entry.
      * 
-     * @param entryID
-     * @return
+     * @param entryID entry ID to load
+     * @return the given entry id from the database, ignoring all the fields
+     *         except the entry_ggep, reparsing the ggep into a promotion entry.
      */
     PromotionMessageContainer getPromotionMessageContainer(final long entryID) {
         PreparedStatement statement = null;
@@ -327,7 +328,8 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
 
         private final String query;
 
-        QueryResultImpl(final String binderUniqueName, final PromotionMessageContainer promo, final String query) {
+        QueryResultImpl(final String binderUniqueName, final PromotionMessageContainer promo,
+                final String query) {
             this.binderUniqueName = binderUniqueName;
             this.promotionMessageContainer = promo;
             this.query = query;

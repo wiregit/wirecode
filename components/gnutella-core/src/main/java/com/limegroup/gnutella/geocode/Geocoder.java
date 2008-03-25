@@ -2,7 +2,7 @@ package com.limegroup.gnutella.geocode;
 
 import java.io.InputStream;
 
-import com.limegroup.gnutella.SuccessOrFailureCallback;
+import org.limewire.promotion.geocode.SuccessOrFailureCallback;
 
 /**
  * Defines the interface for the finder and retriever or
