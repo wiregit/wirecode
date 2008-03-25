@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-03-25 00:04-0400\n"
+"POT-Creation-Date: 2008-03-25 10:37-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -68,43 +68,6 @@ msgid ""
 "LimeWire was unable to open the incomplete file for the selected download "
 "because the filename contains characters which are not supported by your "
 "operating system."
-msgstr ""
-
-#: components/io/src/test/java/org/limewire/io/GGEPTest.java:45
-msgid "Daswani"
-msgstr ""
-
-#: components/io/src/test/java/org/limewire/io/GGEPTest.java:70
-msgid "string"
-msgstr ""
-
-#: components/io/src/test/java/org/limewire/io/GGEPTest.java:81
-msgid "A"
-msgstr ""
-
-#: components/io/src/test/java/org/limewire/io/GGEPTest.java:84
-msgid "STRING"
-msgstr ""
-
-#: components/io/src/test/java/org/limewire/io/GGEPTest.java:302
-msgid "1"
-msgstr ""
-
-#: components/io/src/test/java/org/limewire/io/GGEPTest.java:303
-msgid "2"
-msgstr ""
-
-#: components/io/src/test/java/org/limewire/io/GGEPTest.java:304
-msgid "3"
-msgstr ""
-
-#: components/io/src/test/java/org/limewire/io/GGEPTest.java:380
-#: components/io/src/test/java/org/limewire/io/GGEPTest.java:452
-msgid "SUSHEEL"
-msgstr ""
-
-#: components/io/src/test/java/org/limewire/io/GGEPTest.java:447
-msgid "BHOST"
 msgstr ""
 
 #: core/com/limegroup/gnutella/AcceptorImpl.java:283
