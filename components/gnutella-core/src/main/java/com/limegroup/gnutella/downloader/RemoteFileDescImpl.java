@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.downloader;
 
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -20,6 +18,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
 
 import com.google.inject.util.Objects;
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
@@ -145,7 +144,8 @@ class RemoteFileDescImpl implements RemoteFileDesc {
     private final long _size;
     
     private final NetworkInstanceUtils networkInstanceUtils;
-    
+    private static final DownloadStatsTracker STATS_TRACKER_STUB = new DownloadStatsTrackerStub();
+
     /**
      * Actual constructor.  If the firewalled flag is set and a PE object is passed it is used, if 
      * no PE object is passed a new one is created.
@@ -189,7 +189,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
         _http11 = http11;
         _urns = Collections.unmodifiableSet(urns);
         this.networkInstanceUtils = networkInstanceUtils;
-	}
+    }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#setSerializeProxies()
@@ -531,28 +531,44 @@ class RemoteFileDescImpl implements RemoteFileDesc {
         
         return ret;
     }
+
+    public boolean needsPush() {
+        return needsPush(STATS_TRACKER_STUB);
+    }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.RemoteFileDesc#needsPush()
      */
-    public boolean needsPush() {
+    public boolean needsPush(DownloadStatsTracker statsTracker) {
         
         //if replying to multicast, do a push.
-        if ( isReplyToMulticast() )
+        if ( isReplyToMulticast() ) {
+            statsTracker.increment(DownloadStatsTracker.PushReason.MULTICAST_REPLY);
             return true;
+        }
         //Return true if rfd is private or unreachable
         if (isPrivate()) {
             // Don't do a push for magnets in case you are in a private network.
             // Note to Sam: This doesn't mean that isPrivate should be true.
             if (this instanceof UrlRemoteFileDescImpl) 
                 return false;
-            else  // Otherwise obey push rule for private rfds.
+            else  {// Otherwise obey push rule for private rfds.
+                statsTracker.increment(DownloadStatsTracker.PushReason.PRIVATE_NETWORK);
                 return true;
+            }
         }
-        else if (!NetworkUtils.isValidPort(getPort()))
+        else if (!NetworkUtils.isValidPort(getPort())) {
+            statsTracker.increment(DownloadStatsTracker.PushReason.INVALID_PORT);
             return true;
+        }
         
-        else return isFirewalled();
+        else {
+            boolean isFirewalled = isFirewalled();
+            if(isFirewalled) {
+                statsTracker.increment(DownloadStatsTracker.PushReason.FIREWALL);
+            }
+            return isFirewalled;
+        }
     }
     
     /* (non-Javadoc)
@@ -720,5 +736,19 @@ class RemoteFileDescImpl implements RemoteFileDesc {
             return null;
     }
     
-    
+    private static class DownloadStatsTrackerStub implements DownloadStatsTracker {
+        public Object inspect() {
+                return "this is a stub";
+            }
+
+            public void successfulDirectConnect() {}
+
+            public void failedDirectConnect() {}
+
+            public void successfulPushConnect() {}
+
+            public void failedPushConnect() {}
+
+            public void increment(DownloadStatsTracker.PushReason reason) {}    
+    }
 }

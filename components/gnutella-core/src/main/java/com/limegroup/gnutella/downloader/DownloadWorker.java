@@ -192,6 +192,7 @@ public class DownloadWorker {
     private final RemoteFileDesc _rfd;
 
     private final VerifyingFile _commonOutFile;
+    private final DownloadStatsTracker statsTracker;
 
     /**
      * Whether I was interrupted before starting
@@ -240,7 +241,8 @@ public class DownloadWorker {
             ScheduledExecutorService backgroundExecutor,
             ScheduledExecutorService nioExecutor,
             Provider<PushDownloadManager> pushDownloadManager,
-            SocketsManager socketsManager) {
+            SocketsManager socketsManager,
+            DownloadStatsTracker statsTracker) {
         this.httpDownloaderFactory = httpDownloaderFactory;
         this.backgroundExecutor = backgroundExecutor;
         this.nioExecutor = nioExecutor;
@@ -249,6 +251,7 @@ public class DownloadWorker {
         _manager = manager;
         _rfd = rfd;
         _commonOutFile = vf;
+        this.statsTracker = statsTracker;
         _currentState = new DownloadState();
 
         // if we'll be debugging, we want to distinguish the different workers
@@ -665,7 +668,7 @@ public class DownloadWorker {
             return;
         }
 
-        final boolean needsPush = _rfd.needsPush();
+        final boolean needsPush = _rfd.needsPush(statsTracker);
 
         synchronized (_manager) {
             DownloadStatus state = _manager.getState();
@@ -690,6 +693,7 @@ public class DownloadWorker {
             LOG.debug("WORKER: attempting connect to " + _rfd.getHost() + ":"
                     + _rfd.getPort());
 
+        // TODO move to DownloadStatsTracker?
         _manager.incrementTriedHostsCount();
 
         if (_rfd.isReplyToMulticast()) {
@@ -1567,6 +1571,7 @@ public class DownloadWorker {
                     _manager instanceof InNetworkDownloader);
             try {
                 dl.initializeTCP();
+                statsTracker.successfulPushConnect();
             } catch (IOException iox) {
                 failed();
                 return;
@@ -1582,6 +1587,7 @@ public class DownloadWorker {
 
         /** Notification that the push failed. */
         public void shutdown() {
+            statsTracker.failedPushConnect();
             // if it was already shutdown, don't shutdown again.
             if (shutdown.getAndSet(true))
                 return;
@@ -1647,6 +1653,7 @@ public class DownloadWorker {
             try {
                 dl.initializeTCP(); // already connected, timeout doesn't
                                     // matter.
+                statsTracker.successfulDirectConnect();
             } catch (IOException iox) {
                 shutdown(); // if it immediately IOX's, try a push instead.
                 return;
@@ -1660,10 +1667,12 @@ public class DownloadWorker {
          * is true).
          */
         public void shutdown() {
+            statsTracker.failedDirectConnect();
             this.shutdown = true;
             this.connectingSocket = null;
 
             if (pushConnectOnFailure) {
+                statsTracker.increment(DownloadStatsTracker.PushReason.DIRECT_FAILED);
                 connectWithPush(new PushConnector(false, false));
             } else {
                 finishConnect();

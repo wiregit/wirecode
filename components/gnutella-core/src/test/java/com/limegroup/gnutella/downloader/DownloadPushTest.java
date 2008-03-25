@@ -12,7 +12,9 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.Test;
 
@@ -35,8 +37,8 @@ import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.Message.Network;
+import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -70,6 +72,7 @@ public class DownloadPushTest extends DownloadTestCase {
     }
 
     public void testSimplePushDownload() throws Exception {
+        int successfulPushes = ((AtomicInteger)((Map <String, Object>)statsTracker.inspect()).get("push connect success")).intValue();
         LOG.info("-Testing non-swarmed push download");
 
         AlternateLocation pushLoc = alternateLocationFactory.create(guid.toHexString()
@@ -86,6 +89,7 @@ public class DownloadPushTest extends DownloadTestCase {
         new UDPAcceptor(PPORT_1, networkManager.getPort(), savedFile.getName(), uploader, guid);
 
         tGeneric(rfds);
+        assertEquals(successfulPushes + 1, ((AtomicInteger)((Map <String, Object>)statsTracker.inspect()).get("push connect success")).intValue());        
     }
 
     public void testSimpleSwarmPush() throws Exception {
@@ -327,6 +331,7 @@ public class DownloadPushTest extends DownloadTestCase {
      * are updated with the value
      */
     public void testPushLocUpdatesStatus() throws Exception {
+        int successfulPushes = ((AtomicInteger)((Map <String, Object>)statsTracker.inspect()).get("push connect success")).intValue();
         LOG.info("testing that a push loc updates its status");
         final int RATE = 100;
         final int FWTPort = 7498;
@@ -395,6 +400,8 @@ public class DownloadPushTest extends DownloadTestCase {
         assertEquals(expectedProxies.size(), readRFD.getPushProxies().size());
 
         assertTrue(expectedProxies.containsAll(readRFD.getPushProxies()));
+        
+        assertEquals(successfulPushes + 1, ((AtomicInteger)((Map <String, Object>)statsTracker.inspect()).get("push connect success")).intValue());
     }
 
     /**

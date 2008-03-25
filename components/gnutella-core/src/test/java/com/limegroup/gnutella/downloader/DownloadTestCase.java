@@ -127,6 +127,7 @@ public class DownloadTestCase extends LimeTestCase {
     protected MessageFactory messageFactory;
     
     protected RemoteFileDescFactory remoteFileDescFactory;
+    protected DownloadStatsTracker statsTracker;
 
     protected DownloadTestCase(String name) {
         super(name);
@@ -221,6 +222,7 @@ public class DownloadTestCase extends LimeTestCase {
         headPongFactory = injector.getInstance(HeadPongFactory.class);
         socketsManager = injector.getInstance(SocketsManager.class);
         messageFactory = injector.getInstance(MessageFactory.class);
+        statsTracker = injector.getInstance(DownloadStatsTracker.class);
     }
 
     protected void tearDown() throws Exception {
