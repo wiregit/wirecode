@@ -7,6 +7,9 @@ import org.jmock.Mockery;
 import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
 import org.limewire.inject.Providers;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.io.IpPortSet;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.DownloadManager;
@@ -34,7 +37,7 @@ public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
     public void testHandleEventHandlesAddEvent() {
         final MagnetDownloader downloader = context.mock(MagnetDownloader.class);
         // use magnet without sha1 so we can just check if 
-        final MagnetOptions magnet = MagnetOptions.parseMagnet("magnet:?dn=file&kt=hello")[0];
+        final MagnetOptions magnet = MagnetOptions.parseMagnet("magnet:?dn=file&kt=hello&xt=urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")[0];
         final MagnetDownloaderPushEndpointFinder endpointFinder = new MagnetDownloaderPushEndpointFinder(null, null, null, null);
         
         context.checking(new Expectations() {{
@@ -55,12 +58,13 @@ public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
     }
 
     @SuppressWarnings("unchecked")
-    public void testSearchForPushEndpoints() throws Exception {
+    public void testSearchForPushEndpointsNonFirewalledResult() throws Exception {
         final AlternateLocationFactory alternateLocationFactory = context.mock(AlternateLocationFactory.class);
         final PushEndpointService pushEndpointManager = context.mock(PushEndpointService.class);
         final AltLocManager altLocManager = new AltLocManager();
         final PushEndpoint result = context.mock(PushEndpoint.class);
         final AlternateLocation alternateLocation = context.mock(AlternateLocation.class);
+        final IpPort ipPort = new IpPortImpl("129.155.4.5:6666");
         
         final MagnetDownloaderPushEndpointFinder endpointFinder = 
             new MagnetDownloaderPushEndpointFinder(null, pushEndpointManager, alternateLocationFactory, altLocManager);
@@ -77,6 +81,57 @@ public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
                     return null;
                 }
             });
+            
+            allowing(result).getValidExternalAddress();
+            will(returnValue(ipPort));
+            allowing(result).getProxies();
+            will(returnValue(new IpPortSet(ipPort)));
+            
+            one(alternateLocationFactory).createDirectAltLoc(ipPort, sha1Urn);
+            will(returnValue(alternateLocation));
+            allowing(alternateLocation).getSHA1Urn();
+            will(returnValue(sha1Urn));
+        }});
+        
+        try {
+            endpointFinder.searchForPushEndpoints(sha1Urn, Collections.singleton(guidUrn));
+            fail("AltLocManager was not called, which should have caused an IllegalState exception for an invalid AlternateLocation");
+        } catch (IllegalStateException ise) {
+        }
+        context.assertIsSatisfied();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public void testSearchForPushEndpointsFirewalledResult() throws Exception {
+        final AlternateLocationFactory alternateLocationFactory = context.mock(AlternateLocationFactory.class);
+        final PushEndpointService pushEndpointManager = context.mock(PushEndpointService.class);
+        final AltLocManager altLocManager = new AltLocManager();
+        final PushEndpoint result = context.mock(PushEndpoint.class);
+        final AlternateLocation alternateLocation = context.mock(AlternateLocation.class);
+        final IpPort ipPort = new IpPortImpl("129.155.4.5:6666");
+        final IpPort otherIpPort = new IpPortImpl("129.155.4.5:6667");
+        
+        final MagnetDownloaderPushEndpointFinder endpointFinder = 
+            new MagnetDownloaderPushEndpointFinder(null, pushEndpointManager, alternateLocationFactory, altLocManager);
+        
+        final URN sha1Urn = URN.createSHA1Urn("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
+        final GUID guid = new GUID();
+        final URN guidUrn = URN.createGUIDUrn(guid);
+        
+        context.checking(new Expectations() {{
+            one(pushEndpointManager).findPushEndpoint(with(equal(guid)), with(any(SearchListener.class)));
+            will(new CustomAction("call listener") {
+                public Object invoke(Invocation invocation) throws Throwable {
+                    ((SearchListener<PushEndpoint>)invocation.getParameter(1)).handleResult(result);
+                    return null;
+                }
+            });
+            
+            allowing(result).getValidExternalAddress();
+            will(returnValue(ipPort));
+            allowing(result).getProxies();
+            will(returnValue(new IpPortSet(otherIpPort)));
+            
             one(alternateLocationFactory).createPushAltLoc(result, sha1Urn);
             will(returnValue(alternateLocation));
             allowing(alternateLocation).getSHA1Urn();

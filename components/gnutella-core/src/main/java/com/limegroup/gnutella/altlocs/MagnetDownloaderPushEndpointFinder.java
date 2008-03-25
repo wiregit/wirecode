@@ -1,9 +1,11 @@
 package com.limegroup.gnutella.altlocs;
 
+import java.io.IOException;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IpPort;
 import org.limewire.listener.EventListener;
 
 import com.google.inject.Inject;
@@ -39,6 +41,9 @@ public class MagnetDownloaderPushEndpointFinder implements Service, EventListene
      */
     final EventListener<DownloadStatusEvent> downloadStatusListener = new EventListener<DownloadStatusEvent>() { 
         public void handleEvent(DownloadStatusEvent event) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("per download event received: " + event);
+            }
             handleStatusEvent(event);
         }
     };
@@ -55,16 +60,16 @@ public class MagnetDownloaderPushEndpointFinder implements Service, EventListene
     }
 
     public void handleEvent(DownloadManagerEvent event) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("event received: " + event);
+        }
         switch (event.getType()) {
         case ADDED:
             CoreDownloader downloader = event.getSource();
             if (downloader instanceof MagnetDownloader) {
                 MagnetDownloader magnetDownloader = (MagnetDownloader)downloader;
-                long size = getSize(magnetDownloader);
-                if (size != -1) {
-                    // subscribe for status events so we can search when waiting for user
-                    magnetDownloader.addListener(this, downloadStatusListener);
-                }
+                // subscribe for status events so we can search when waiting for user
+                magnetDownloader.addListener(this, downloadStatusListener);
                 searchForPushEndpoints(magnetDownloader);
             }
             break;
@@ -89,10 +94,12 @@ public class MagnetDownloaderPushEndpointFinder implements Service, EventListene
         MagnetOptions magnet = magnetDownloader.getMagnet();
         URN sha1Urn = magnet.getSHA1Urn();
         if (sha1Urn == null) {
+            LOG.debug("no sha1 urn");
             return;
         }
         long size = getSize(magnetDownloader);
         if (size == -1) {
+            LOG.debug("no file size");
             return;
         }
         searchForPushEndpoints(sha1Urn, magnet.getGUIDUrns());
@@ -138,12 +145,32 @@ public class MagnetDownloaderPushEndpointFinder implements Service, EventListene
         }
 
         public void handleResult(PushEndpoint result) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("endpoint found: " + result);
+            }
             // TODO instantly create alternate locations for all sha1s that have the same guid urn as a source
-            AlternateLocation alternateLocation = alternateLocationFactory.createPushAltLoc(result, sha1);
-            altLocManager.add(alternateLocation, null);
+            
+            IpPort ipPort = result.getValidExternalAddress();
+            // if the external address is the same as the push proxy, it's a non-firewalled source
+            if (ipPort != null && result.getProxies().size() == 1 && result.getProxies().contains(ipPort)) {
+                try {
+                    AlternateLocation alternateLocation = alternateLocationFactory.createDirectAltLoc(ipPort, sha1);
+                    altLocManager.add(alternateLocation, null);
+                } catch (IOException ie) {
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error("error creating direct alt loc from " + ipPort, ie);
+                    }
+                }
+            } else {
+                AlternateLocation  alternateLocation = alternateLocationFactory.createPushAltLoc(result, sha1);
+                altLocManager.add(alternateLocation, null);
+            }
         }
 
         public void handleSearchDone(boolean success) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("search done: " + success);
+            }
         }
         
     }
