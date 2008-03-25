@@ -48,7 +48,7 @@ public class GeocoderTestCase extends BaseTestCase {
         for (Map.Entry<String,String> en : props.entrySet()) {
             testString += en.getKey() + SEPARATOR + en.getValue() + NEWLINE;
         }
-        geo = new DefaultGeocoder(new SimpleInputStreamSuccessOrFailureCallbackConsumer(new StringInputStream(testString)));
+        geo = new DefaultGeocoder(new DefaultStreamSuccessOrFailureCallbackConsumer(new StringInputStream(testString)));
     }
     
     public void testSimple() throws InterruptedException {

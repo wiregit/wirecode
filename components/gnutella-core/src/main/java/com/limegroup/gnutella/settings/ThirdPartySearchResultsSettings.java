@@ -29,31 +29,23 @@ public final class ThirdPartySearchResultsSettings extends LimeProps {
      * The url we use to search for {@link PromotionBinder}s.
      */    
     public static final StringSetting SEARCH_URL =
-        FACTORY.createRemoteStringSetting("SEARCH_URL", "http://jeffpalm.com/lwp/getBuckets.php", "ThirdPartySearchResultsSettings.searchUrl");
+        FACTORY.createRemoteStringSetting("SEARCH_URL", "", "ThirdPartySearchResultsSettings.searchUrl");
     
     /**
      * The url we use to redirect for {@link PromotionBinder}s.
      */    
     public static final StringSetting REDIRECT_URL =
-        FACTORY.createRemoteStringSetting("REDIRECT_URL", "http://jeffpalm.com/lwp/redirect.php", "ThirdPartySearchResultsSettings.redirectUrl");    
+        FACTORY.createRemoteStringSetting("REDIRECT_URL", "", "ThirdPartySearchResultsSettings.redirectUrl");    
     
     /**
      * The mod we take with the bucket ID. 
      */    
-    public static final IntSetting BUCKET_ID_MODULOUS =
-        FACTORY.createRemoteIntSetting("BUCKET_ID_MODULOUS", 200, "ThirdPartySearchResultsSettings.bucketIdModulous", 0, Integer.MAX_VALUE); 
+    public static final IntSetting BUCKET_ID_MODULUS =
+        FACTORY.createRemoteIntSetting("BUCKET_ID_MODULUS", 200, "ThirdPartySearchResultsSettings.bucketIdModulous", 0, Integer.MAX_VALUE); 
     
     /**
      * The max number of search results.
      */    
     public static final IntSetting MAX_NUMBER_OF_SEARCH_RESULTS =
         FACTORY.createRemoteIntSetting("MAX_NUMBER_OF_SEARCH_RESULTS", 5, "ThirdPartySearchResultsSettings.maxNumberOfSearchResults", 0, Integer.MAX_VALUE);
-    
-    /**
-     * The timeout to use when contacting the network for binders.  If this is <code>-1</code> then we ignore it.
-     */
-    public static final IntSetting NETWORK_TIMEOUT_MILLIS_FOR_REQUESTING_BUCKETS = FACTORY
-            .createRemoteIntSetting("NETWORK_TIMEOUT_MILLIS_FOR_REQUESTING_BUCKETS", 5000,
-                    "ThirdPartySearchResultsSettings.networkTimeoutMillisForRequestingBuckets", -1,
-                    8000);
 }
