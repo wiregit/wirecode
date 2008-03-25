@@ -39,10 +39,10 @@ public class UserQueryEventData {
          *   milliseconds since start of the day : 4 bytes 
          *   original query time                 : 8 bytes  
          *   List of n=length of
-         *     binder Name      : 1 byte 
-         *     binder Name      : n bytes 
-         *     promo ID         : 8 bytes
-         *     impression time  : 8 bytes
+         *     n=binder name length     : 1 byte 
+         *     binder name              : n bytes 
+         *     promo ID                 : 8 bytes
+         *     impression time          : 8 bytes
          */
         int length = 1 + 4 + 8;
         for (Impression imp : impressions) {

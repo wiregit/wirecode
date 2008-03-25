@@ -91,10 +91,23 @@ public class PromotionContainerRequestorTest extends AbstractEventQueryDataTest 
         });
     }    
 
+    /**
+     * Returns a singleton set with <code>numEvents</code> events.
+     * 
+     * @param numEvents number of events
+     * @return a singleton set with <code>numEvents</code> events.
+     */
     private Set<UserQueryEvent> getEvents(int numEvents) {
         return getEvents(numEvents, 1);
     }
 
+    /**
+     * Returns <code>numSets</code> sets of <code>numEvents</code> each set.
+     * 
+     * @param numEvents number of events in each set
+     * @param numSets number of sets to return
+     * @return <code>numSets</code> sets of <code>numEvents</code> each set.
+     */
     private Set<UserQueryEvent> getEvents(int numEvents, int numSets) {
         Set<UserQueryEvent> eventSets = new HashSet<UserQueryEvent>();
         for (int i = 0; i < numSets; i++) {
@@ -108,7 +121,7 @@ public class PromotionContainerRequestorTest extends AbstractEventQueryDataTest 
      * @return
      */
     private String url() {
-        return "http://doesn.matter.com";
+        return "http://doesnt.matter.com";
     }
 
     private long id() {

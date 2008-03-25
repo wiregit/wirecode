@@ -12,11 +12,11 @@ abstract class AbstractEventQueryDataTest extends BaseTestCase {
         super(name);
     }
 
-    private final String Q = "the query";
+    private final String A_QUERY = "the query";
 
-    private final long L = 123123123123L;
+    private final long DATE_IN_MILLIS = 123123123123L;
 
-    private final Date D = new Date(L);
+    private final Date A_DATE = new Date(DATE_IN_MILLIS);
 
     protected final UserQueryEventData getImpressions(int n) {
 
@@ -27,10 +27,10 @@ abstract class AbstractEventQueryDataTest extends BaseTestCase {
          *   original query time                 : 8 bytes 
          *   number of impressions               : 1 byte 
          *   List of n=length of
-         *     binder Name      : 1 byte 
-         *     binder Name      : n bytes 
-         *     promo ID         : 8 bytes
-         *     impression time  : 8 bytes
+         *     n=binder name length    : 1 byte 
+         *     binder Name             : n bytes 
+         *     promo ID                : 8 bytes
+         *     impression time         : 8 bytes
          */
         int length = 4 + 8 + 1;
         for (Impression imp : e.getImpressions()) {
@@ -39,16 +39,16 @@ abstract class AbstractEventQueryDataTest extends BaseTestCase {
             length += 8;
             length += 8;
         }        
-        final byte[] expected = new byte[length];System.out.println("length:"+length);
+        final byte[] expected = new byte[length];
         int cur = 0;
         expected[cur++] = (byte) e.getImpressions().size();
         cur = transfer(data.getMillisSinceToday(), expected, cur);
-        cur = transfer(D, expected, cur);
+        cur = transfer(A_DATE, expected, cur);
         for (Impression imp : e.getImpressions()) {
             cur = transfer(imp, expected, cur);
         }
 
-        assertEquals(data.getQuery(), Q);
+        assertEquals(data.getQuery(), A_QUERY);
         assertEquals(expected, data.getData());
 
         return data;
@@ -59,10 +59,10 @@ abstract class AbstractEventQueryDataTest extends BaseTestCase {
         Impression[] imps = new Impression[n];
         for (int i = 0; i < n; i++) {
             imps[i] = new Impression(new PromotionMessageContainer(), ""
-                    + (Math.random() * Long.MAX_VALUE), new Date(L + i));
+                    + (Math.random() * Long.MAX_VALUE), new Date(DATE_IN_MILLIS + i));
         }
 
-        UserQueryEvent e = new UserQueryEvent(Q, D);
+        UserQueryEvent e = new UserQueryEvent(A_QUERY, A_DATE);
         for (Impression imp : imps) {
             e.addImpression(imp);
         }

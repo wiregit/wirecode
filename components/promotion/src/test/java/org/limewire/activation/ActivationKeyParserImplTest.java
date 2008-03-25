@@ -57,10 +57,8 @@ public class ActivationKeyParserImplTest extends BaseTestCase {
         ActivationKey activationKey = new ActivationKey();
         activationKey.setValidFrom(new Date());
 
-        String activation = akp.generate("person=Beano Smith", activationKey, keyPair.getPrivate());
-        System.out.println(activation);
+        akp.generate("person=Beano Smith", activationKey, keyPair.getPrivate());
         // We're encoded... See if it parses...
-        ///akp.parse(activation);
         
     }
 }

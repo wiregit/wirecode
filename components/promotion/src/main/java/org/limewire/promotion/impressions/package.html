@@ -5,7 +5,14 @@
 of impressions.</p>
 
 <pre>
-DESCRIPTION
+            number of impressions               : 1 byte
+            milliseconds since start of the day : 4 bytes 
+            original query time                 : 8 bytes  
+            List of n=length of
+              n=binder name length     : 1 byte 
+              binder name              : n bytes 
+              promo ID                 : 8 bytes
+              impression time          : 8 bytes
 </pre>
 
 </body>

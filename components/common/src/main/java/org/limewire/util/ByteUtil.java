@@ -3,6 +3,7 @@ package org.limewire.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -91,18 +92,7 @@ public final class ByteUtil {
      *         or are two arrays that have the same content.
      */
     public static boolean areEqual(byte[] array1, byte[] array2) {
-        if (array1 == null && array2 == null)
-            return true;
-        if (array1 == null || array2 == null)
-            return false;
-        if (array1 == array2)
-            return true;
-        if (array1.length != array2.length)
-            return false;
-        for (int i = 0; i < array1.length; i++)
-            if (array1[i] != array2[i])
-                return false;
-        return true;
+        return Arrays.equals(array1,array2);
     }
 
     /**
@@ -148,12 +138,7 @@ public final class ByteUtil {
             } catch (DataFormatException e) {
             }
         }
-        try {
-            bos.close();
-        } catch (IOException unlikely) {
-            throw new RuntimeException("IOException caught closing...", unlikely);
-        }
-
+        
         return bos.toByteArray();
     }
 }
