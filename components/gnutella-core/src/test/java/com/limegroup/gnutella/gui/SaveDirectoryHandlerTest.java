@@ -38,18 +38,21 @@ public class SaveDirectoryHandlerTest extends LimeTestCase {
         File testFile = 
             new File("this_should_not_exist_but_we'll_delete_it_anyway");
         
-        if(testFile.isFile() && !testFile.delete()) {
+        if(!testFile.delete()) {
             fail("could not delete test file");
         }
         Object[] params = new Object[1];
         
-        // make sure it doesn't accept files that don't exist
+        // make sure it creates the dir if it doesn't existt
+        assertFalse(testFile.exists());
         params[0] = testFile;
         boolean valid = 
             ((Boolean)validityCheck.invoke(SaveDirectoryHandler.class, 
                 params)).booleanValue();
         
-        assertFalse("should not be a valid directory", valid);
+
+        assertTrue("should be a valid directory", valid);
+        assertTrue(testFile.exists());
         
         // make sure it doesn't accept null files
         params[0] = null;
@@ -57,6 +60,7 @@ public class SaveDirectoryHandlerTest extends LimeTestCase {
             ((Boolean)validityCheck.invoke(SaveDirectoryHandler.class, 
                 params)).booleanValue();
         assertFalse("should not be a valid directory", valid);
+        assertTrue("could not delete test file", testFile.delete());
         
         // make sure it doesn't accept files that exist but are not directories.
         OutputStream os = new FileOutputStream(testFile);
