@@ -18,12 +18,14 @@ public abstract class MojitoTestCase extends BaseTestCase {
      */
     public static void beforeAllTestsSetUp() throws Throwable {
         MojitoProps.instance().revertToDefault();
+        MojitoProps.instance().getFactory().getRevertSetting().setValue(false);
     }
     
     public void preSetUp() throws Exception {
         super.preSetUp();
         
         MojitoProps.instance().revertToDefault();
+        MojitoProps.instance().getFactory().getRevertSetting().setValue(false);
         
         // DHT Settings
         ContextSettings.SHUTDOWN_MESSAGES_MULTIPLIER.setValue(0);

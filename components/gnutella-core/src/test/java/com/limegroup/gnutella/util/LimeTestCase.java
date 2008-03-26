@@ -4,6 +4,7 @@ import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
 
+import org.limewire.mojito.settings.MojitoProps;
 import org.limewire.service.ErrorCallback;
 import org.limewire.setting.SettingsGroupManager;
 import org.limewire.util.BaseTestCase;
@@ -17,6 +18,7 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.LimeProps;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -192,6 +194,8 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
     protected static void setupSettings() throws Exception{
         SettingsGroupManager.instance().setShouldSave(false);
         SettingsGroupManager.instance().revertToDefault();
+        LimeProps.instance().getFactory().getRevertSetting().setValue(false);
+        MojitoProps.instance().getFactory().getRevertSetting().setValue(false);
         ConnectionSettings.FILTER_CLASS_C.setValue(false);
         ConnectionSettings.DISABLE_UPNP.setValue(true);
         ConnectionSettings.ALLOW_DUPLICATE.setValue(true);
