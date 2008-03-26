@@ -106,7 +106,7 @@ public class ResourceLocationCounter {
      * 
      * @return The percentage of the file that is accessible on the network
      */
-    public int getPercentAvailable () {
+    public float getPercentAvailable () {
         return _percentAvailable;
     }
     

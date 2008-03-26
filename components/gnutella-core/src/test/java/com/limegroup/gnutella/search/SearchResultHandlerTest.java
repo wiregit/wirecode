@@ -17,6 +17,7 @@ import org.limewire.collection.KeyValue;
 import org.limewire.collection.NameValue;
 import org.limewire.collection.Range;
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortSet;
 import org.limewire.security.SecureMessage;
 
 import com.google.inject.AbstractModule;
@@ -98,6 +99,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
     public void testSecureActionSent() throws Exception {
         Mockery m = new Mockery();
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
+//      final byte[] guid = GUID.makeGuid();
         final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         
         m.checking(new Expectations() {{
@@ -139,7 +141,8 @@ public class SearchResultHandlerTest extends LimeTestCase {
     public void testInsecureResponseWithoutActionSent() throws Exception {
         Mockery m = new Mockery();
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
-        final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        final byte[] guid = GUID.makeGuid();
+//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         
         m.checking(new Expectations() {{
             atLeast(1).of(queryRequest).isBrowseHostQuery();
@@ -208,7 +211,8 @@ public class SearchResultHandlerTest extends LimeTestCase {
        List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
        map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
        final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
-       final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+       final byte[] guid = GUID.makeGuid();
+//     final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
        final IntervalSet intervalSet = new IntervalSet();
        
        intervalSet.add( Range.createRange(0,15) );
@@ -286,7 +290,8 @@ public class SearchResultHandlerTest extends LimeTestCase {
         List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
         map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
         final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
-        final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        final byte[] guid = GUID.makeGuid();
+//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         final IntervalSet intervalSet = new IntervalSet();
         
         intervalSet.add( Range.createRange( 0, 2) );
@@ -342,9 +347,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         
-        assertEquals(0, srs.getPercentAvailable(urns.iterator().next()));
+        assertEquals(0.0, srs.getPercentAvailable(urns.iterator().next()));
         srs.addQueryReply(searchResultHandler, queryReply, hostData);
-        assertEquals(80, srs.getPercentAvailable(urns.iterator().next()));
+        assertEquals(80.0, srs.getPercentAvailable(urns.iterator().next()));
         
         m.assertIsSatisfied();
      }
@@ -356,7 +361,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
      * 
      * @throws Exception
      */
-    public void testAddWholeSearchResult() throws Exception {
+    public void testAddWholeSearchResultGetNumberOfLocations() throws Exception {
         Mockery m = new Mockery();
         
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
@@ -374,7 +379,8 @@ public class SearchResultHandlerTest extends LimeTestCase {
         List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
         map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
         final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
-        final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        final byte[] guid = GUID.makeGuid();
+//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         
         m.checking(new Expectations() {{
             atLeast(1).of(queryRequest).isBrowseHostQuery();
@@ -449,7 +455,8 @@ public class SearchResultHandlerTest extends LimeTestCase {
         final Response response = m.mock(Response.class);
         final List<Response> responses = Collections.singletonList(response);
         final Set<URN> urns = new UrnSet();
-        final Set<IpPort> ipPorts = new HashSet<IpPort>();
+//      final Set<IpPort> ipPorts = new HashSet<IpPort>();
+        final Set<IpPort> ipPorts = new IpPortSet();
         final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
         
         urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
@@ -458,7 +465,8 @@ public class SearchResultHandlerTest extends LimeTestCase {
         List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
         map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
         final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
-        final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        final byte[] guid = GUID.makeGuid();
+//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         
         m.checking(new Expectations() {{
             atLeast(1).of(queryRequest).isBrowseHostQuery();
@@ -534,7 +542,8 @@ public class SearchResultHandlerTest extends LimeTestCase {
         final QueryReply queryReply = m.mock(QueryReply.class);
         final HostData hostData = m.mock(HostData.class);
         
-        final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        final byte[] guid = GUID.makeGuid();
+//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         
         m.checking(new Expectations() {{
             atLeast(1).of(queryReply).getGUID();
@@ -554,7 +563,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
      * 
      * @throws Exception
      */
-    public void testGetPercentAvailable() throws Exception {
+    public void testAddWholeSearchResultGetPercentAvailable() throws Exception {
         // add query request
         // add query reply
         //   get search result stats
@@ -578,7 +587,8 @@ public class SearchResultHandlerTest extends LimeTestCase {
         List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
         map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
         final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
-        final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        final byte[] guid = GUID.makeGuid();
+//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         
         m.checking(new Expectations() {{
             atLeast(1).of(queryRequest).isBrowseHostQuery();
@@ -624,14 +634,13 @@ public class SearchResultHandlerTest extends LimeTestCase {
             
             atLeast(1).of(hostData).getMessageGUID();
             will(returnValue(guid));
-            
         }});
         
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         
-        assertEquals(0, srs.getNumberOfLocations(urns.iterator().next()));
+        assertEquals(0.0, srs.getPercentAvailable(urns.iterator().next()));
         srs.addQueryReply(searchResultHandler, queryReply, hostData);
-        assertEquals(100, srs.getPercentAvailable(urns.iterator().next()));
+        assertEquals(100.0, srs.getPercentAvailable(urns.iterator().next()));
         
         m.assertIsSatisfied();
     }
@@ -736,7 +745,8 @@ public class SearchResultHandlerTest extends LimeTestCase {
         List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
         map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
         final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
-        final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        final byte[] guid = GUID.makeGuid();
+//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         
         m.checking(new Expectations() {{
             atLeast(1).of(queryRequest).isBrowseHostQuery();
@@ -823,7 +833,8 @@ public class SearchResultHandlerTest extends LimeTestCase {
         List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
         map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
         final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
-        final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        final byte[] guid = GUID.makeGuid();
+//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         
         m.checking(new Expectations() {{
             atLeast(1).of(queryRequest).isBrowseHostQuery();
@@ -900,7 +911,8 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
         map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
-        final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        final byte[] guid = GUID.makeGuid();
+//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         
         m.checking(new Expectations() {{
             atLeast(1).of(queryRequest).isBrowseHostQuery();
@@ -929,7 +941,8 @@ public class SearchResultHandlerTest extends LimeTestCase {
     
     
     private QueryReply newQueryReply(Response[] responses) throws Exception {
-        byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        final byte[] guid = GUID.makeGuid();
+//      byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         
         QueryReply reply = 
                queryReplyFactory.createQueryReply(guid, (byte)1, 6346,

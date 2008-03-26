@@ -12,7 +12,7 @@ public interface QueryResultHandler {
      * is available based on results from the query - both partial and whole.
      * 
      */
-    public int getPercentAvailable();
+    public float getPercentAvailable();
     
     /**
      * Returns the number of number of locations from which the entirety of

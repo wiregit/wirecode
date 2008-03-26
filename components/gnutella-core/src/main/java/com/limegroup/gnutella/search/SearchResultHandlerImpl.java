@@ -378,11 +378,11 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             _nextReportNum = _numGoodResults + REPORT_INTERVAL; 
         }
 
-        public int getPercentAvailable (URN urn) {
+        public float getPercentAvailable (URN urn) {
             ResourceLocationCounter rlc = _isets.get(urn);
             
             if (rlc == null)
-                return 0;
+                return (float)0.0;
             
             return rlc.getPercentAvailable();
         }
@@ -536,7 +536,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             final GuidCount gc = this;
             
             return new QueryResultHandler () {
-                public int getPercentAvailable() {
+                public float getPercentAvailable() {
                     return gc.getPercentAvailable(urn);
                 }
                 public int getNumberOfLocations() {

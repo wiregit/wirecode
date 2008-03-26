@@ -36,88 +36,49 @@ public interface SearchResultStats {
      */
     public int getNumResultsForURN(URN urn);
     
-    /**
-     * 
-     * @return
-     */
     public int getNextReportNum();
     
-    /**
-     * 
-     * @return
-     */
     public long getTime();
     
     /**
-     * 
-     * @return
+     * Returns the QueryRequest instance associated with this SearchResultStats.
      */
     public QueryRequest getQueryRequest();
     
     /**
-     * 
-     * @return
+     * Notes whether this query has been marked as being finished.
      */
     public boolean isFinished();
     
-    /**
-     * 
-     */
     public void tallyReport();
 
     /**
      * Returns the percentage of the data for the given URN
      * that is available.
-     * 
-     * TODO
-     * 
-     * Make this work.
-     * 
-     * @param urn
-     * @return
      */
-    public int getPercentAvailable (URN urn);
+    public float getPercentAvailable (URN urn);
     
     /**
      * Returns the number of locations that have the data for
      * the given URN. This incorporates partial search results,
      * where the partial results will be combined together to
      * form complete results.
-     * 
-     * @param urn
-     * @return
      */
     public int getNumberOfLocations (URN urn);
     
     /**
-     * 
-     * @param good
+     * Increases the "good" search result count by good.
      */
     public void increment(int good);
     
     /**
-     * 
+     * Marks this search as being finished.
      */
     public void markAsFinished();
 
     /**
-     * 
-     * @return
-     */
-    public String toString();
-    
-    /**
      * Absorbs the query reply into the collective, adding
      * its distinctiveness to our own. Resistance is futile.
-     * 
-     * TODO
-     * 
-     * Determine the number of locations from which the relevant URN is
-     * available, incorporating the partial search results.
-     * 
-     * Moved into GuidCount from SearchResultHandler::handleQueryReply().
-     * 
-     * @param qr
      */
     public int addQueryReply(SearchResultHandler srh, QueryReply qr, HostData data);
     
