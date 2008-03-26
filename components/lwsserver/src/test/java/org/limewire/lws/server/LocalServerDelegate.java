@@ -174,8 +174,6 @@ public final class LocalServerDelegate {
             fail(e);
         } catch (URISyntaxException e) {
             fail(e);
-        } catch (InterruptedException e) {
-            fail(e);
         }
     }
 

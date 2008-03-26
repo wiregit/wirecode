@@ -61,8 +61,6 @@ final class CommandSender {
             LOG.warn("exception when sending " + url, e);
         } catch (URISyntaxException e) {
             LOG.warn("exception when sending " + url, e);
-        } catch (InterruptedException e) {
-            LOG.warn("exception when sending " + url, e);
         } finally {
             client.releaseConnection(response);
         }

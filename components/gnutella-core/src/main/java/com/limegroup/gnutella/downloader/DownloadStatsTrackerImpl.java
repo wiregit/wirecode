@@ -1,8 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.inject.Singleton;

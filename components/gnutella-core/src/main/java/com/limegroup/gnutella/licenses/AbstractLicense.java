@@ -117,8 +117,6 @@ public abstract class AbstractLicense implements MutableLicense, Serializable, C
             LOG.warn("Can't contact license server: " + url, e);
         } catch (URISyntaxException e) {
             LOG.warn("Can't contact license server: " + url, e);
-        } catch (InterruptedException e) {
-            LOG.warn("Can't contact license server: " + url, e);
         } finally {
             httpClient.releaseConnection(response);
         }

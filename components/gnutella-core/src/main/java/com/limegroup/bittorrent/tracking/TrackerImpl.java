@@ -205,8 +205,6 @@ public class TrackerImpl implements Tracker {
             return null;
         } catch (URISyntaxException e) {
             return null;
-        } catch (InterruptedException e) {
-            return null;
         } finally {
             client.releaseConnection(response);
         }

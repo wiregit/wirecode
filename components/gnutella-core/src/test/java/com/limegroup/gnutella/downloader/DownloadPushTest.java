@@ -72,7 +72,7 @@ public class DownloadPushTest extends DownloadTestCase {
     }
 
     public void testSimplePushDownload() throws Exception {
-        int successfulPushes = ((AtomicInteger)((Map <String, Object>)statsTracker.inspect()).get("push connect success")).intValue();
+        int successfulPushes = ((AtomicInteger)((Map)statsTracker.inspect()).get("push connect success")).intValue();
         LOG.info("-Testing non-swarmed push download");
 
         AlternateLocation pushLoc = alternateLocationFactory.create(guid.toHexString()
@@ -89,7 +89,7 @@ public class DownloadPushTest extends DownloadTestCase {
         new UDPAcceptor(PPORT_1, networkManager.getPort(), savedFile.getName(), uploader, guid);
 
         tGeneric(rfds);
-        assertEquals(successfulPushes + 1, ((AtomicInteger)((Map <String, Object>)statsTracker.inspect()).get("push connect success")).intValue());        
+        assertEquals(successfulPushes + 1, ((AtomicInteger)((Map)statsTracker.inspect()).get("push connect success")).intValue());        
     }
 
     public void testSimpleSwarmPush() throws Exception {
@@ -331,7 +331,7 @@ public class DownloadPushTest extends DownloadTestCase {
      * are updated with the value
      */
     public void testPushLocUpdatesStatus() throws Exception {
-        int successfulPushes = ((AtomicInteger)((Map <String, Object>)statsTracker.inspect()).get("push connect success")).intValue();
+        int successfulPushes = ((AtomicInteger)((Map)statsTracker.inspect()).get("push connect success")).intValue();
         LOG.info("testing that a push loc updates its status");
         final int RATE = 100;
         final int FWTPort = 7498;
@@ -401,7 +401,7 @@ public class DownloadPushTest extends DownloadTestCase {
 
         assertTrue(expectedProxies.containsAll(readRFD.getPushProxies()));
         
-        assertEquals(successfulPushes + 1, ((AtomicInteger)((Map <String, Object>)statsTracker.inspect()).get("push connect success")).intValue());
+        assertEquals(successfulPushes + 1, ((AtomicInteger)((Map)statsTracker.inspect()).get("push connect success")).intValue());
     }
 
     /**

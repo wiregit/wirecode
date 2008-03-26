@@ -101,10 +101,6 @@ public class DefaultHttpExecutor implements HttpExecutor {
             IOException ioe = new IOException();
             ioe.initCause(e);
             return !listener.requestFailed(method, null, ioe);
-        } catch (InterruptedException e) {
-            IOException ioe = new IOException();
-            ioe.initCause(e);
-            return !listener.requestFailed(method, null, ioe);
         }
 
         return !listener.requestComplete(method, response);

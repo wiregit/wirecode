@@ -92,6 +92,6 @@
 	<classpathentry kind="lib" path="lib/jars/aopalliance.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-4.0-beta2-20080303.182830-4.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.0-beta2-20080303.182830-4.jar"/>
-	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-alpha4-20080319.202202-3.jar"/>
+	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-alpha4-20080321.114022-5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

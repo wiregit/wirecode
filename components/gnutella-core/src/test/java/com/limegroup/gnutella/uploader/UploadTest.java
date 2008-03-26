@@ -27,6 +27,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.conn.ManagedClientConnection;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.message.BasicHeader;
@@ -1560,10 +1561,10 @@ public class UploadTest extends LimeTestCase {
         
     }
 
-    private void assertConnectionIsOpen(boolean open, HttpUriRequest request) throws InterruptedException {
+    private void assertConnectionIsOpen(boolean open, HttpUriRequest request) throws InterruptedException, ConnectionPoolTimeoutException {
         URI uri = request.getURI();
         HttpRoute route = new HttpRoute(new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme()));
-        ManagedClientConnection connection = client.getConnectionManager().getConnection(route);
+        ManagedClientConnection connection = client.getConnectionManager().requestConnection(route).getConnection(0, null);
         assertEquals(open, connection.isOpen());
         client.getConnectionManager().releaseConnection(connection);
     }
