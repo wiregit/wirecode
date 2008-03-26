@@ -77,6 +77,10 @@ public class StandardMessageRouter extends MessageRouterImpl {
     
     @InspectionPoint("false positive queries")
     private final MessageCounter falsePositives = new Message.MessageCounter(50);
+    @InspectionPoint("not serviced queries")
+    private final MessageCounter notServiced = new Message.MessageCounter(500);
+    @InspectionPoint("ignored busy queries")
+    private final MessageCounter ignoredBusy = new Message.MessageCounter(500);
     
     @Inject
     public StandardMessageRouter(NetworkManager networkManager,
@@ -309,6 +313,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
         // is necessary because we're always returning more total hits than
         // we have slots available.
         if(!uploadManager.mayBeServiceable() )  {
+            ignoredBusy.countMessage(queryRequest);
             return false;
         }
                                                 
@@ -346,8 +351,10 @@ public class StandardMessageRouter extends MessageRouterImpl {
         			filtered.add(r);
         	}
         	
-        	if (filtered.isEmpty()) // nothing to send..
+        	if (filtered.isEmpty()) {// nothing to send..
+        	    notServiced.countMessage(query);
         		return false;
+        	}
         	
         	if (filtered.size() != responses.length)
         		responses = filtered.toArray(new Response[filtered.size()]);
