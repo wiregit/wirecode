@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.settings;
 import java.io.File;
 
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.FileSetting;
 import org.limewire.setting.FloatSetting;
@@ -24,13 +25,15 @@ public class ApplicationSettings extends LimeProps {
 
     /**
      * The average time this user leaves the application running.
-     */        
+     */
+    @InspectablePrimitive("average application uptime")
     public static final IntSetting AVERAGE_UPTIME =
         FACTORY.createExpirableIntSetting("AVERAGE_UPTIME", 0);
    
     /**
 	 * The total time this user has used the application.
 	 */    
+    @InspectablePrimitive("total application uptime")
     public static final IntSetting TOTAL_UPTIME =
         FACTORY.createIntSetting("TOTAL_UPTIME", 0);
     
@@ -57,13 +60,15 @@ public class ApplicationSettings extends LimeProps {
      * The total number of times the application  has been run --
 	 * used in calculating the average amount of time this user
 	 * leaves the application on.
-     */    
+     */
+    @InspectablePrimitive("number of sessions")
     public static final IntSetting SESSIONS =
         FACTORY.createIntSetting("SESSIONS", 1);
     
     /**
      * The time that this was last shutdown (system time in milliseconds).
      */
+    @InspectablePrimitive("last shutdown time")
     public static final LongSetting LAST_SHUTDOWN_TIME =
         FACTORY.createLongSetting("LAST_SHUTDOWN_TIME", 0);
     
@@ -87,12 +92,14 @@ public class ApplicationSettings extends LimeProps {
     /**
 	 * The width that the application should be.
 	 */
+    @InspectablePrimitive("application width")
     public static final IntSetting APP_WIDTH =
         FACTORY.createIntSetting("APP_WIDTH", 840);
 	
     /**
 	 * The height that the application should be.
-	 */    
+	 */
+    @InspectablePrimitive("application height")
     public static final IntSetting APP_HEIGHT =
         FACTORY.createIntSetting("APP_HEIGHT", 800);
     
@@ -118,6 +125,7 @@ public class ApplicationSettings extends LimeProps {
         (IntSetting)FACTORY.createIntSetting("WINDOW_Y", 0).setAlwaysSave(true);
     
     /** Setting for whether or not LW should start maximized. */
+    @InspectablePrimitive("is application maximized")
     public static final BooleanSetting MAXIMIZE_WINDOW =
         FACTORY.createBooleanSetting("MAXIMIZE_WINDOW", false);
     
