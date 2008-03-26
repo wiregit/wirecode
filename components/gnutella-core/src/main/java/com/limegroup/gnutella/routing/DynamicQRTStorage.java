@@ -123,4 +123,9 @@ class DynamicQRTStorage implements QRTTableStorage {
     public Iterator<Integer> iterator() {
         return storage.iterator();
     }
+    
+    @Override
+    public String toString() {
+        return "DynamicQRTStorage: " + storage.toString();
+    }
 }

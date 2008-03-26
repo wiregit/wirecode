@@ -359,7 +359,7 @@ public class QueryRouteTable {
         QueryRouteTable other=(QueryRouteTable)o;
         if (this.bitTableLength!=other.bitTableLength)
             return false;
-
+        
         if (!this.storage.equals(other.storage))
             return false;
 
@@ -372,7 +372,7 @@ public class QueryRouteTable {
 
 
     public String toString() {
-        return "QueryRouteTable : " + storage.toString();
+        return "QueryRouteTable: " + storage.toString();
     }
 
 

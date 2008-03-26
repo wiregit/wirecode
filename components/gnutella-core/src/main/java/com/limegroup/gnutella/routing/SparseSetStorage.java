@@ -147,4 +147,9 @@ class SparseSetStorage implements QRTTableStorage {
     public Iterator<Integer> iterator() {
         return set.iterator();
     }
+    
+    @Override
+    public String toString() {
+        return "SparseSetStorage: " + set;
+    }
 }
