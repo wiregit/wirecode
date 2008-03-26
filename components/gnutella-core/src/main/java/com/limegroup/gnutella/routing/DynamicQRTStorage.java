@@ -111,7 +111,7 @@ class DynamicQRTStorage implements QRTTableStorage {
     }
 
     public DynamicQRTStorage clone() {
-        return new DynamicQRTStorage(storage);
+        return new DynamicQRTStorage(storage.clone());
     }
     
     public boolean equals(Object o) {

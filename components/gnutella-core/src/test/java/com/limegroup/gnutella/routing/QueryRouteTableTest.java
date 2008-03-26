@@ -185,10 +185,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCas
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
             if(m instanceof PatchTableMessage) {
-                try { 
-                    qrt2.patch((PatchTableMessage)m); 
-                } catch (BadPacketException e) {
-                }
+                qrt2.patch((PatchTableMessage)m); 
             } else {
                 qrt2.reset((ResetTableMessage)m);
             }
@@ -204,10 +201,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.LimeTestCas
         for (Iterator iter=qrt.encode(qrt2).iterator(); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
             if(m instanceof PatchTableMessage) {
-                try { 
-                    qrt2.patch((PatchTableMessage)m); 
-                } catch (BadPacketException e) {
-                }
+                qrt2.patch((PatchTableMessage)m); 
             } else {
                 qrt2.reset((ResetTableMessage)m);
             }
