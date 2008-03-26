@@ -1,9 +1,9 @@
-package org.limewire.promotion.geocode;
+package org.limewire.geocode;
 
 import java.io.InputStream;
 
-import org.limewire.promotion.geocode.SuccessOrFailureCallback;
-import org.limewire.promotion.geocode.SuccessOrFailureCallbackConsumer;
+import org.limewire.geocode.SuccessOrFailureCallback;
+import org.limewire.geocode.SuccessOrFailureCallbackConsumer;
 
 
 /**

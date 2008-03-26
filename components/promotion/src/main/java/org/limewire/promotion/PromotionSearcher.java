@@ -1,7 +1,7 @@
 package org.limewire.promotion;
 
+import org.limewire.geocode.GeocodeInformation;
 import org.limewire.promotion.containers.PromotionMessageContainer;
-import org.limewire.promotion.geocode.GeocodeInformation;
 
 public interface PromotionSearcher {
     /**

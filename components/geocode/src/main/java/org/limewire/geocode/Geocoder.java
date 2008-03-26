@@ -1,4 +1,4 @@
-package org.limewire.promotion.geocode;
+package org.limewire.geocode;
 
 import java.io.InputStream;
 

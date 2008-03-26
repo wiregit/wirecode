@@ -1,4 +1,4 @@
-package org.limewire.promotion.geocode;
+package org.limewire.geocode;
 
 /**
  * Consumes a {@link SuccessOrFailureCallback} and calls either

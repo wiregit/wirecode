@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Locale;
 
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.geocode.GeocodeInformation;
 import org.limewire.promotion.SearcherDatabase.QueryResult;
 import org.limewire.promotion.containers.PromotionMessageContainer;
 import org.limewire.promotion.containers.PromotionMessageContainer.GeoRestriction;
-import org.limewire.promotion.geocode.GeocodeInformation;
 import org.limewire.promotion.impressions.ImpressionsCollector;
 
 import com.google.inject.Inject;

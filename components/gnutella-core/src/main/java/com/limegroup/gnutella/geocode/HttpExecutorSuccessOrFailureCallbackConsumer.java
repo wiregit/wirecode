@@ -10,8 +10,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.params.BasicHttpParams;
-import org.limewire.promotion.geocode.SuccessOrFailureCallback;
-import org.limewire.promotion.geocode.SuccessOrFailureCallbackConsumer;
+import org.limewire.geocode.SuccessOrFailureCallback;
+import org.limewire.geocode.SuccessOrFailureCallbackConsumer;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.http.HttpClientListener;

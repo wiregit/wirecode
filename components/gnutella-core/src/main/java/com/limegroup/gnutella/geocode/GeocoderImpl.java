@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.geocode;
 
-import org.limewire.promotion.geocode.DefaultGeocoder;
+import org.limewire.geocode.DefaultGeocoder;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

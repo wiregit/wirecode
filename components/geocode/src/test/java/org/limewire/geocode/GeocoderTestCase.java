@@ -1,4 +1,4 @@
-package org.limewire.promotion.geocode;
+package org.limewire.geocode;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,8 +7,9 @@ import java.util.Map;
 
 import junit.framework.Test;
 
-import org.limewire.promotion.geocode.GeocodeInformation;
-import org.limewire.promotion.geocode.Geocoder;
+import org.limewire.geocode.DefaultGeocoder;
+import org.limewire.geocode.GeocodeInformation;
+import org.limewire.geocode.Geocoder;
 import org.limewire.util.BaseTestCase;
 
 public class GeocoderTestCase extends BaseTestCase {

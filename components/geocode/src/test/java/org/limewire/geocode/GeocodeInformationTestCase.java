@@ -1,8 +1,8 @@
-package org.limewire.promotion.geocode;
+package org.limewire.geocode;
 
 import junit.framework.Test;
 
-import org.limewire.promotion.geocode.GeocodeInformation;
+import org.limewire.geocode.GeocodeInformation;
 import org.limewire.util.BaseTestCase;
 
 public class GeocodeInformationTestCase extends BaseTestCase {

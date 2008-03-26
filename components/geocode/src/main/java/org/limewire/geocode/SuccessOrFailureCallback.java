@@ -1,4 +1,4 @@
-package org.limewire.promotion.geocode;
+package org.limewire.geocode;
 
 /**
  * Instances of this interface can either consume or a {@link String} or has
