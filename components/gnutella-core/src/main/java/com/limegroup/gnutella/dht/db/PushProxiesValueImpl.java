@@ -25,7 +25,7 @@ import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
 
-class PushProxiesValueImpl extends AbstractPushProxiesValue {
+public class PushProxiesValueImpl extends AbstractPushProxiesValue {
     
     private static final long serialVersionUID = -2912251955825278890L;
 

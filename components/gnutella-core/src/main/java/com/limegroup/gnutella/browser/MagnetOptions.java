@@ -149,7 +149,12 @@ public class MagnetOptions implements Serializable {
 	 * @return
 	 */
 	public static MagnetOptions createMagnet(String keywordTopics, String fileName,
-											 URN urn, String[] defaultURLs) {
+            URN urn, String[] defaultURLs) {
+	    return createMagnet(keywordTopics, fileName, urn, defaultURLs, null); 
+	}
+	
+	public static MagnetOptions createMagnet(String keywordTopics, String fileName,
+											 URN urn, String[] defaultURLs, Set<? extends URN> guidUrns) {
 		Map<Option, List<String>> map = new HashMap<Option, List<String>>();
         List<String> kt = new ArrayList<String>(1);
         kt.add(keywordTopics);
@@ -165,6 +170,14 @@ public class MagnetOptions implements Serializable {
 				addAppend(map, Option.AS, defaultURLs[i]);
 			}
 		}
+		if (guidUrns != null) {
+		    for (URN guidUrn : guidUrns) {
+		        if (!guidUrn.isGUID()) {
+		            throw new IllegalArgumentException("Not a GUID urn: " + guidUrn);
+		        }
+		        addAppend(map, Option.XS, guidUrn.httpStringValue());
+		    }
+		}
 		MagnetOptions magnet = new MagnetOptions(map);
 		magnet.urn = urn;
 		if (defaultURLs != null) {
@@ -175,6 +188,9 @@ public class MagnetOptions implements Serializable {
 		}
 		else {
 			magnet.defaultURLs = new String[0];
+		}
+		if (guidUrns != null) {
+		    magnet.guidUrns = Collections.unmodifiableSet(new HashSet<URN>(guidUrns));
 		}
 		return magnet;
 	}

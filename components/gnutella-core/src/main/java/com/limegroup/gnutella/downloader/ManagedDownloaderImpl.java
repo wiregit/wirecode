@@ -1241,6 +1241,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     public synchronized void locationAdded(AlternateLocation loc) {
         assert(loc.getSHA1Urn().equals(getSha1Urn()));
         
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("alt loc added: " + loc);
+        }
+        
         long contentLength = -1L;
         if (loc instanceof DirectDHTAltLoc) {
             long fileSize = ((DirectDHTAltLoc)loc).getFileSize();
@@ -3141,4 +3145,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return listeners.removeListener(strongRef, listener);
     }
 
+    /**
+     * @return the source ranker being used or null if none is set.
+     */
+    protected SourceRanker getSourceRanker() {
+        return ranker;
+    }
 }

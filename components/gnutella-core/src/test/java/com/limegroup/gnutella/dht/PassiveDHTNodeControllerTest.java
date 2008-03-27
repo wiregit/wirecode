@@ -50,7 +50,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     }
     
     public void setUp() throws Exception {
-        setSettings();
+        DHTTestUtils.setSettings(PORT);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         assertEquals("unexpected port", PORT, 
                  ConnectionSettings.PORT.getValue());
@@ -108,7 +108,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     }
     
     public void testAddRemoveLeafDHTNode() throws Exception {
-        setLocalIsPrivate(false);
+        DHTTestUtils.setLocalIsPrivate(false);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
         // Initial State:

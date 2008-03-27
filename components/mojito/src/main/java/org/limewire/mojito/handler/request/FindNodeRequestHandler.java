@@ -89,9 +89,9 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
         
         if (LOG.isTraceEnabled()) {
             if (!nodes.isEmpty()) {
-                LOG.trace("Sending back: " + CollectionUtils.toString(nodes));
+                LOG.trace("Sending back: " + CollectionUtils.toString(nodes) + " to: " + node);
             } else {
-                LOG.trace("Sending back an empty List");
+                LOG.trace("Sending back an empty list to: " + node);
             }
         }
         

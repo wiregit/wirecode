@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.dht.db;
 
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -52,7 +53,6 @@ public class PushEndpointManager implements PushEndpointService {
         return timeBetweenSearches;
     }
     
-    // TODO this leaks atomic longs in the long run
     public void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
         listener = SearchListenerAdapter.nonNullListener(listener);
         PushEndpoint cachedPushEndpoint = pushEndpointCache.getPushEndpoint(guid);
@@ -72,10 +72,12 @@ public class PushEndpointManager implements PushEndpointService {
                     // only start a search if we succeed setting the current time and it was still the last time
                     if (lastSearchTime.compareAndSet(lastSearch, currentTime)) {
                         startSearch(guid, listener);
-                        return;
+                    } else {
+                        listener.handleSearchDone(false);
                     }
+                } else {
+                    listener.handleSearchDone(false);
                 }
-                listener.handleSearchDone(false);
             }
         }
     }
@@ -91,6 +93,7 @@ public class PushEndpointManager implements PushEndpointService {
                     listener.handleSearchDone(success);
                 }
         });
+        purge();
     }
 
     public PushEndpoint getPushEndpoint(GUID guid) {
@@ -98,5 +101,17 @@ public class PushEndpointManager implements PushEndpointService {
         findPushEndpoint(guid, listener);
         return listener.getResult();
     }
-        
+    
+    /**
+     * Purges entries older than 2 * {@link #getTimeBetweenSearches()}.
+     */
+    public void purge() {
+        long currentTime = System.currentTimeMillis();
+        for (Entry<GUID, AtomicLong> entry : lastSearchTimeByGUID.entrySet()) {
+            if (currentTime - entry.getValue().get() > 2 * timeBetweenSearches) {
+                lastSearchTimeByGUID.remove(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+    
 }

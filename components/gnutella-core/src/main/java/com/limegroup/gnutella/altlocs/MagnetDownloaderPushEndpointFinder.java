@@ -154,6 +154,7 @@ public class MagnetDownloaderPushEndpointFinder implements Service, EventListene
             // if the external address is the same as the push proxy, it's a non-firewalled source
             if (ipPort != null && result.getProxies().size() == 1 && result.getProxies().contains(ipPort)) {
                 try {
+                    LOG.debug("creating direct altloc");
                     AlternateLocation alternateLocation = alternateLocationFactory.createDirectAltLoc(ipPort, sha1);
                     altLocManager.add(alternateLocation, null);
                 } catch (IOException ie) {
@@ -162,15 +163,14 @@ public class MagnetDownloaderPushEndpointFinder implements Service, EventListene
                     }
                 }
             } else {
+                LOG.debug("creating push altloc");
                 AlternateLocation  alternateLocation = alternateLocationFactory.createPushAltLoc(result, sha1);
                 altLocManager.add(alternateLocation, null);
             }
         }
 
         public void handleSearchDone(boolean success) {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("search done: " + success);
-            }
+            
         }
         
     }

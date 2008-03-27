@@ -21,4 +21,13 @@ public class DefaultEvent<T, E> implements Event<T, E> {
         return event;
     }
 
+    @Override
+    public String toString() {
+        String className = getClass().getName();
+        StringBuilder builder = new StringBuilder(className.substring(className.lastIndexOf('.')));
+        builder.append(": ");
+        builder.append("source: ").append(source);
+        builder.append(", type: " + event);
+        return builder.toString();
+    }
 }

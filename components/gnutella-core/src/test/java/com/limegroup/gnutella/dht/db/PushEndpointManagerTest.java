@@ -137,4 +137,7 @@ public class PushEndpointManagerTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
 
+    public void testPurge() {
+        fail("implement me");
+    }
 }

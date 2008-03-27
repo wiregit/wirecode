@@ -1,28 +1,14 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.io.OutputStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.rudp.UDPConnection;
-import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
@@ -32,13 +18,6 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
-import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.messages.vendor.HeadPing;
-import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -46,14 +25,14 @@ import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 public class DownloadPushTest extends DownloadTestCase {
 
-    private static final Log LOG = LogFactory.getLog(DownloadPushTest.class);
-
     /* ports for the various push proxies */
     private final int PPORT_1 = 10001;
 
     private final int PPORT_2 = 10002;
 
     private final int PPORT_3 = 10003;
+
+    private TestUDPAcceptorFactoryImpl testUDPAcceptorFactoryImpl;
 
     public DownloadPushTest(String name) {
         super(name);
@@ -67,6 +46,7 @@ public class DownloadPushTest extends DownloadTestCase {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[]{"127.*.*.*",
                 "1.1.1.1","1.2.3.4","6.7.8.9"});
         super.setUp();
+        testUDPAcceptorFactoryImpl = injector.getInstance(TestUDPAcceptorFactoryImpl.class);
     }
 
     public void testSimplePushDownload() throws Exception {
@@ -83,7 +63,7 @@ public class DownloadPushTest extends DownloadTestCase {
         RemoteFileDesc[] rfds = { rfd };
         TestUploader uploader = injector.getInstance(TestUploader.class);
         uploader.start("push uploader");
-        new UDPAcceptor(PPORT_1, networkManager.getPort(), savedFile.getName(), uploader, guid);
+        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_1, networkManager.getPort(), savedFile.getName(), uploader, guid, _currentTestName);
 
         tGeneric(rfds);
     }
@@ -104,7 +84,7 @@ public class DownloadPushTest extends DownloadTestCase {
 
         RemoteFileDesc[] rfds = { rfd1, rfd2 };
 
-        new UDPAcceptor(PPORT_2, networkManager.getPort(), savedFile.getName(), uploader, guid);
+        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_2, networkManager.getPort(), savedFile.getName(), uploader, guid, _currentTestName);
 
         tGeneric(rfds);
 
@@ -140,9 +120,9 @@ public class DownloadPushTest extends DownloadTestCase {
         TestUploader third = injector.getInstance(TestUploader.class);
         third.start("third pusher");
 
-        new UDPAcceptor(PPORT_1, networkManager.getPort(), savedFile.getName(), first, guid);
-        new UDPAcceptor(PPORT_2, networkManager.getPort(), savedFile.getName(), second, guid);
-        new UDPAcceptor(PPORT_3, networkManager.getPort(), savedFile.getName(), third, guid);
+        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_1, networkManager.getPort(), savedFile.getName(), first, guid, _currentTestName);
+        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_2, networkManager.getPort(), savedFile.getName(), second, guid, _currentTestName);
+        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_3, networkManager.getPort(), savedFile.getName(), third, guid, _currentTestName);
 
         testUploaders[0].setRate(RATE);
         testUploaders[1].setRate(RATE);
@@ -193,7 +173,7 @@ public class DownloadPushTest extends DownloadTestCase {
 
         RemoteFileDesc[] rfds = { rfd };
 
-        new UDPAcceptor(PPORT_1, networkManager.getPort(), savedFile.getName(), pusher, guid);
+        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_1, networkManager.getPort(), savedFile.getName(), pusher, guid, _currentTestName);
 
         tGeneric(rfds);
 
@@ -236,8 +216,8 @@ public class DownloadPushTest extends DownloadTestCase {
 
         first.setGoodAlternateLocations(alCol);
 
-        new UDPAcceptor(PPORT_1, networkManager.getPort(), savedFile.getName(), first, guid);
-        new UDPAcceptor(PPORT_2, networkManager.getPort(), savedFile.getName(), second, guid2);
+        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_1, networkManager.getPort(), savedFile.getName(), first, guid, _currentTestName);
+        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_2, networkManager.getPort(), savedFile.getName(), second, guid2, _currentTestName);
 
         RemoteFileDesc[] rfd = { newRFDPush(PPORT_1, 1, 2) };
 
@@ -291,7 +271,7 @@ public class DownloadPushTest extends DownloadTestCase {
         later.add(openRFD1);
         later.add(openRFD2);
 
-        new UDPAcceptor(PPORT_1, networkManager.getPort(), savedFile.getName(), pusher, guid);
+        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_1, networkManager.getPort(), savedFile.getName(), pusher, guid, _currentTestName);
 
         ManagedDownloader download = (ManagedDownloader) downloadServices.download(now,
                 RemoteFileDesc.EMPTY_LIST, null, false);
@@ -367,7 +347,7 @@ public class DownloadPushTest extends DownloadTestCase {
         assertFalse(pushRFD2.supportsFWTransfer());
         assertTrue(pushRFD2.needsPush());
 
-        new UDPAcceptor(PPORT_2, networkManager.getPort(), savedFile.getName(), pusher2, guid);
+        testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PPORT_2, networkManager.getPort(), savedFile.getName(), pusher2, guid, _currentTestName);
 
         RemoteFileDesc[] now = { pushRFD2 };
 
@@ -420,7 +400,7 @@ public class DownloadPushTest extends DownloadTestCase {
         AlternateLocation toBeDemoted = alternateLocationFactory.create(noFile);
 
         // create a listener for the headping
-        UDPAcceptor l = new UDPAcceptor(PORTS[1]);
+        TestUDPAcceptor l =  testUDPAcceptorFactoryImpl.createTestUDPAcceptor(PORTS[1], _currentTestName);
 
         ManagedDownloaderImpl download = (ManagedDownloaderImpl) downloadServices.download(
                 new RemoteFileDesc[] { rfd }, RemoteFileDesc.EMPTY_LIST, null, false);
@@ -502,130 +482,5 @@ public class DownloadPushTest extends DownloadTestCase {
         assertTrue(pcurrent.getPushAddress().getProxies().isEmpty());
         assertTrue(pcurrent.isDemoted());
         
-    }
-
-    private class UDPAcceptor extends ManagedThread {
-        private int _portC;
-
-        private DatagramSocket sock;
-
-        private String _fileName;
-
-        private TestUploader _uploader;
-
-        private GUID _g;
-
-        public boolean sentGIV;
-
-        private boolean noFile;
-
-        public int pings;
-
-        private String startedInTest;
-        
-        private volatile boolean shutdown;
-
-        public UDPAcceptor(int port) {
-            startedInTest = "began in test: " + _currentTestName;
-            noFile = true;
-            try {
-                sock = new DatagramSocket(port);
-                // sock.connect(InetAddress.getLocalHost(),portC);
-                sock.setSoTimeout(15000);
-            } catch (IOException bad) {
-                ErrorService.error(bad, startedInTest);
-            }
-            start();
-        }
-
-        public UDPAcceptor(int portL, int portC, String filename, TestUploader uploader, GUID g) {
-            super("push acceptor " + portL + "->" + portC);
-
-            _portC = portC;
-            _fileName = filename;
-            _uploader = uploader;
-            _g = g;
-            try {
-                sock = new DatagramSocket(portL);
-                // sock.connect(InetAddress.getLocalHost(),portC);
-                sock.setSoTimeout(15000);
-            } catch (IOException bad) {
-                ErrorService.error(bad, startedInTest);
-            }
-            setPriority(Thread.MAX_PRIORITY);
-            start();
-        }
-
-        public void shutdown() {
-            shutdown = true;
-            interrupt();
-        }
-        
-        public void run() {
-            DatagramPacket p = new DatagramPacket(new byte[1024], 1024);
-            Message m = null;
-            try {
-                LOG.debug("listening for push request on " + sock.getLocalPort());
-                while (true) {
-                    sock.receive(p);
-                    ByteArrayInputStream bais = new ByteArrayInputStream(p.getData());
-                    m = messageFactory.read(bais, Network.TCP);
-                    LOG.debug("received " + m.getClass() + " no file? " + noFile);
-                    if (noFile) {
-                        if (m instanceof HeadPing)
-                            handleNoFile(p.getSocketAddress(), new GUID(m.getGUID()));
-                        continue;
-                    } else if (m instanceof HeadPing)
-                        continue;
-                    else
-                        break;
-                }
-
-                assertTrue(m instanceof PushRequest);
-
-                LOG.debug("received a push request");
-
-                Socket s = socketsManager.connect(new InetSocketAddress("127.0.0.1", _portC), 500);
-
-                OutputStream os = s.getOutputStream();
-
-                String GIV = "GIV 0:" + _g.toHexString() + "/" + _fileName + "\n\n";
-                os.write(GIV.getBytes());
-
-                os.flush();
-
-                LOG.debug("wrote GIV");
-                sentGIV = true;
-                _uploader.setSocket(s);
-
-            } catch (BadPacketException bad) {
-                ErrorService.error(bad, startedInTest);
-            } catch (InterruptedIOException stop){
-                if (!shutdown)
-                    ErrorService.error(stop, startedInTest);
-            } catch (IOException bad) {
-                ErrorService.error(bad, startedInTest);
-            } finally {
-                sock.close();
-            }
-        }
-
-        private void handleNoFile(SocketAddress from, GUID g) {
-            HeadPing ping = new HeadPing(g, UrnHelper.SHA1, 0);
-            HeadPong pong = headPongFactory.create(ping);
-            assertFalse(pong.hasFile());
-            try {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                pong.write(baos);
-                DatagramPacket pack = new DatagramPacket(baos.toByteArray(),
-                        baos.toByteArray().length, from);
-                sock.send(pack);
-                pings++;
-            } catch (IOException e) {
-                ErrorService.error(e, startedInTest);
-            }
-
-            LOG.debug("sent a NoFile headPong to " + from);
-        }
     }
 }

@@ -120,11 +120,15 @@ public class PushProxiesPublisher implements DHTEventListener {
             if (publishingFuture != null) {
                 throw new IllegalStateException("should not have happened");
             }
+            long interval = DHTSettings.PUSH_PROXY_STABLE_PUBLISHING_INTERVAL.getValue();
+            long initialDelay = (long)(Math.random() * interval);
             // TODO instead of a polling approach, an event when push proxies have changed and should be updated might be nice
-            publishingFuture = backgroundExecutor.scheduleAtFixedRate(new PublishingRunnable(event.getDHTController().getMojitoDHT()), 0, DHTSettings.PUSH_PROXY_STABLE_PUBLISHING_INTERVAL.getValue(), TimeUnit.MILLISECONDS);
+            publishingFuture = backgroundExecutor.scheduleAtFixedRate(new PublishingRunnable(event.getDHTController().getMojitoDHT()), initialDelay, interval, TimeUnit.MILLISECONDS);
         } else if (event.getType() == Type.STOPPED) {
-            publishingFuture.cancel(false);
-            publishingFuture = null;
+            if (publishingFuture != null) {
+                publishingFuture.cancel(false);
+                publishingFuture = null;
+            }
         }
     }
     

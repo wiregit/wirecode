@@ -56,7 +56,7 @@ import com.limegroup.gnutella.util.LimeTestCase;
 
 public abstract class DownloadTestCase extends LimeTestCase {
 
-    private static final Log LOG = LogFactory.getLog(DownloadTestCase.class);
+    protected final Log LOG = LogFactory.getLog(getClass());
 
     protected final GUID guid = new GUID(GUID.makeGuid());
 
@@ -176,7 +176,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
         scheduledExecutorService.scheduleWithFixedDelay(click, 0, NodeAssigner.TIMER_DELAY,
                 TimeUnit.MILLISECONDS);
 
-        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
+        lifecycleManager = injector.getInstance(LifecycleManager.class);
         lifecycleManager.start();
 
         acceptor = injector.getInstance(Acceptor.class);
@@ -239,6 +239,10 @@ public abstract class DownloadTestCase extends LimeTestCase {
             injector.getInstance(
                     Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor")))
                     .shutdownNow();
+        
+        if (lifecycleManager != null) {
+            lifecycleManager.shutdown();
+        }
     }
 
     protected void deleteAllFiles() {
@@ -294,6 +298,9 @@ public abstract class DownloadTestCase extends LimeTestCase {
     
     /**
      * Performs a generic download of the file specified in <tt>rfds</tt>.
+     * 
+     * @param later can be null
+     * @param rfds can be null
      */
     protected void tGeneric(Downloader download, RemoteFileDesc[] later,
             RemoteFileDesc[] rfds) throws Exception {
@@ -447,6 +454,8 @@ public abstract class DownloadTestCase extends LimeTestCase {
     protected final int COMPLETE = 2;
 
     protected final int INVALID = 3;
+
+    private LifecycleManager lifecycleManager;
 
     protected void waitForComplete(boolean corrupt) {
         waitForCompleteImpl(corrupt ? CORRUPT : COMPLETE);

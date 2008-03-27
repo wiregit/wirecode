@@ -250,6 +250,9 @@ public abstract class AbstractDHTController implements DHTController {
         try {
             InetAddress addr = InetAddress.getByAddress(dhtControllerFacade.getAddress());
             int port = dhtControllerFacade.getPort();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("binding dht to: " + new InetSocketAddress(addr, port));
+            }
             dht.bind(new InetSocketAddress(addr, port));
             dht.start();
             if (dhtControllerFacade.isActiveSupernode()) 

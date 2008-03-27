@@ -144,7 +144,11 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      */
     protected DownloadStatus initializeDownload() {
         
-		if (!hasRFD()) {
+        // ask ranker since the alt loc manager might have added extra alt locs
+        // which were added to the ranker then
+        SourceRanker ranker = getSourceRanker();
+        boolean hasMore = ranker != null && ranker.hasMore();
+		if (!hasRFD() && !hasMore) {
 			MagnetOptions magnet = getMagnet();
 			String[] defaultURLs = magnet.getDefaultURLs();
 			

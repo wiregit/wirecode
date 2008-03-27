@@ -53,7 +53,7 @@ public class PassiveLeafTest extends DHTTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        setSettings();
+        DHTTestUtils.setSettings(PORT);
         
         injector = LimeTestUtils.createInjector();
         
@@ -66,7 +66,7 @@ public class PassiveLeafTest extends DHTTestCase {
     }
     
     public void testLookup() throws Exception {
-        setLocalIsPrivate(false);
+        DHTTestUtils.setLocalIsPrivate(false);
         
         final int k = KademliaSettings.REPLICATION_PARAMETER.getValue();
         

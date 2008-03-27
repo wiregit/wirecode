@@ -16,6 +16,7 @@ import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTTestCase;
+import com.limegroup.gnutella.dht.DHTTestUtils;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.MockUtils;
 
@@ -39,8 +40,8 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        setSettings();
-        setLocalIsPrivate(false);
+        DHTTestUtils.setSettings(PORT);
+        DHTTestUtils.setLocalIsPrivate(false);
         
         context = new Mockery();
         dhtManager = context.mock(DHTManager.class);

@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -261,6 +262,17 @@ public class MagnetOptionsTest extends BaseTestCase {
         assertEquals(1, magnet.getDefaultURLs().length);
         assertTrue(magnet.toExternalForm().contains("xl=123456789"));
         assertEquals(123456789, magnet.getFileSize());
+    }
+    
+    public void testCreateMagnetOptionsWithGuidUrns() throws Exception {
+        GUID guid = new GUID();
+        URN guidUrn = URN.createGUIDUrn(guid);
+        URN sha1Urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        
+        MagnetOptions magnet = MagnetOptions.createMagnet("hello", "fileName", sha1Urn, null, Collections.singleton(guidUrn));
+        
+        assertEquals(Collections.singleton(guidUrn), magnet.getGUIDUrns());
+        assertTrue(magnet.toExternalForm().contains(guidUrn.httpStringValue()));
     }
      
     private String createMultiLineMagnetLinks(MagnetOptions[] opts) {
