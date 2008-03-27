@@ -82,10 +82,10 @@ public interface Response {
     public Set<URN> getUrns();
     
     /**
-     * Returns an immutabe <tt>Set</tt> of <tt>Endpoint</tt> that
+     * Returns an immutable <tt>Set</tt> of <tt>Endpoint</tt> that
      * contain the same file described in this <tt>Response</tt>.
      *
-     * @return an immutabe <tt>Set</tt> of <tt>Endpoint</tt> that
+     * @return an immutable <tt>Set</tt> of <tt>Endpoint</tt> that
      * contain the same file described in this <tt>Response</tt>,
      * guaranteed to be non-null, although the set could be empty
      */

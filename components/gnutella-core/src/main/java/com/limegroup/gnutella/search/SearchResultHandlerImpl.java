@@ -228,7 +228,6 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
 
     public void accountAndUpdateDynamicQueriers(final QueryReply qr, HostData data /*,
                                                  final int numGoodSentToFrontEnd */ ) {
-
         LOG.trace("SRH.accountAndUpdateDynamicQueriers(): entered.");
         
         // get the correct GuidCount

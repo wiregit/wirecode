@@ -99,12 +99,13 @@ public class SearchResultHandlerTest extends LimeTestCase {
     public void testSecureActionSent() throws Exception {
         Mockery m = new Mockery();
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
-//      final byte[] guid = GUID.makeGuid();
-        final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        final byte[] guid = GUID.makeGuid();
         
         m.checking(new Expectations() {{
             atLeast(1).of(queryRequest).isBrowseHostQuery();
+            will(returnValue(false));
             atLeast(1).of(queryRequest).isWhatIsNewRequest();
+            will(returnValue(false));
             atLeast(1).of(queryRequest).getGUID();
             will(returnValue(guid));
         }});
@@ -115,7 +116,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         list.add(new NameValue<String>("audios__audio__action__", "http://somewhere.com"));
         LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         Response actionResponse = responseFactory.createResponse(0, 1, "test", actionDoc);
-        QueryReply reply = newQueryReply(new Response[] { actionResponse } );
+        QueryReply reply = newQueryReply(new Response[] {actionResponse}, guid);
         reply.setSecureStatus(SecureMessage.SECURE);
         assertEquals(0, callback.results.size());
         searchResultHandler.handleQueryReply(reply);
@@ -124,6 +125,8 @@ public class SearchResultHandlerTest extends LimeTestCase {
         assertNotNull(rfd.getXMLDocument());
         assertEquals("http://somewhere.com", rfd.getXMLDocument().getAction());
         assertEquals(SecureMessage.SECURE, rfd.getSecureStatus());
+        
+        m.assertIsSatisfied();
     }
     
     public void testInsecureActionNotSent() throws Exception {
@@ -132,7 +135,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         list.add(new NameValue<String>("audios__audio__action__", "http://somewhere.com"));
         LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         actionResponse.setDocument(actionDoc);
-        QueryReply reply = newQueryReply(new Response[] { actionResponse } );
+        QueryReply reply = newQueryReply(new Response[] { actionResponse }, null );
         assertEquals(0, callback.results.size());
         searchResultHandler.handleQueryReply(reply);
         assertEquals(0, callback.results.size());        
@@ -142,7 +145,6 @@ public class SearchResultHandlerTest extends LimeTestCase {
         Mockery m = new Mockery();
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
         final byte[] guid = GUID.makeGuid();
-//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         
         m.checking(new Expectations() {{
             atLeast(1).of(queryRequest).isBrowseHostQuery();
@@ -160,7 +162,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         actionResponse.setDocument(actionDoc);
         
         Response noDoc = responseFactory.createResponse(1, 2, "other");
-        QueryReply reply = newQueryReply(new Response[] { actionResponse, noDoc } );
+        QueryReply reply = newQueryReply(new Response[] { actionResponse, noDoc }, guid );
         assertEquals(0, callback.results.size());
         searchResultHandler.handleQueryReply(reply);
         assertEquals(1, callback.results.size());
@@ -177,12 +179,81 @@ public class SearchResultHandlerTest extends LimeTestCase {
         actionResponse.setDocument(actionDoc);
         
         Response noDoc = responseFactory.createResponse(1, 2, "other");
-        QueryReply reply = newQueryReply(new Response[] { actionResponse, noDoc } );
+        QueryReply reply = newQueryReply(new Response[] { actionResponse, noDoc }, null );
         reply.setSecureStatus(SecureMessage.FAILED);
         
         assertEquals(0, callback.results.size());
         searchResultHandler.handleQueryReply(reply);
         assertEquals(0, callback.results.size());        
+    }
+    
+    private byte[] setTestParameters(Mockery m, 
+                                     final QueryRequest queryRequest, 
+                                     final QueryReply queryReply, 
+                                     final IntervalSet intervalSet,
+                                     final HostData hostData,
+                                     final Set<URN> urns) throws Exception {
+        final byte[] guid = GUID.makeGuid();
+        
+        final Response response = m.mock(Response.class);
+        final List<Response> responses = Collections.singletonList(response);
+        final Set<IpPort> ipPorts = new IpPortSet();
+        final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
+        
+        urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
+        urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
+        
+        List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
+        map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
+        final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
+        
+        m.checking(new Expectations() {{
+            allowing(queryRequest).isBrowseHostQuery();
+        
+            allowing(queryRequest).isWhatIsNewRequest();
+        
+            allowing(queryRequest).getGUID();
+            will(returnValue(guid));
+        
+            allowing(queryReply).getGUID();
+            will(returnValue(guid));
+            
+            allowing(queryReply).isBrowseHostReply();
+            will(returnValue(false));
+            
+            allowing(queryReply).getResultsAsList();
+            will(returnValue(responses));
+            
+            allowing(queryReply).getIPBytes();
+            will(returnValue(new byte[]{127,0,0,1}));
+            
+            atLeast(1).of(response).getRanges();
+            will(returnValue(intervalSet));
+            
+            atLeast(1).of(response).getDocument();
+            will(returnValue(limeXmlDocument));
+            
+            atLeast(1).of(response).getUrns();
+            will(returnValue(urns));
+            
+            atLeast(1).of(response).getLocations();
+            will(returnValue(ipPorts));
+            
+            atLeast(1).of(response).getSize();
+            will(returnValue((long)15));
+            
+            atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
+            will(returnValue(remoteFileDesc));
+            
+            allowing(remoteFileDesc).setSecureStatus(0);
+            
+            allowing(queryReply).getSecureStatus();
+            
+            atLeast(1).of(hostData).getMessageGUID();
+            will(returnValue(guid));
+        }});
+        
+        return guid;
     }
     
     /**
@@ -199,69 +270,12 @@ public class SearchResultHandlerTest extends LimeTestCase {
        final QueryRequest queryRequest = m.mock(QueryRequest.class);
        final QueryReply queryReply = m.mock(QueryReply.class);
        final HostData hostData = m.mock(HostData.class);
-       final Response response = m.mock(Response.class);
-       final List<Response> responses = Collections.singletonList(response);
        final Set<URN> urns = new UrnSet();
-       final Set<IpPort> ipPorts = new HashSet<IpPort>();
-       final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
-       
-       urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
-       urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
-       
-       List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
-       map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
-       final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
-       final byte[] guid = GUID.makeGuid();
-//     final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
        final IntervalSet intervalSet = new IntervalSet();
        
        intervalSet.add( Range.createRange(0,15) );
        
-       m.checking(new Expectations() {{
-           atLeast(1).of(queryRequest).isBrowseHostQuery();
-           
-           atLeast(1).of(queryRequest).isWhatIsNewRequest();
-           
-           atLeast(1).of(queryRequest).getGUID();
-           will(returnValue(guid));
-           
-           atLeast(1).of(queryReply).getGUID();
-           will(returnValue(guid));
-           
-           atLeast(1).of(queryReply).isBrowseHostReply();
-           will(returnValue(false));
-           
-           atLeast(1).of(queryReply).getResultsAsList();
-           will(returnValue(responses));
-           
-           atLeast(1).of(queryReply).getIPBytes();
-           will(returnValue(new byte[]{127,0,0,1}));
-           
-           atLeast(1).of(response).getRanges();
-           will(returnValue(intervalSet));
-           
-           atLeast(1).of(response).getDocument();
-           will(returnValue(limeXmlDocument));
-           
-           atLeast(1).of(response).getUrns();
-           will(returnValue(urns));
-           
-           atLeast(1).of(response).getLocations();
-           will(returnValue(ipPorts));
-           
-           atLeast(1).of(response).getSize();
-           will(returnValue((long)15));
-           
-           atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
-           will(returnValue(remoteFileDesc));
-           
-           atLeast(1).of(remoteFileDesc).setSecureStatus(0);
-           
-           atLeast(1).of(queryReply).getSecureStatus();
-           
-           atLeast(1).of(hostData).getMessageGUID();
-           will(returnValue(guid));
-       }});
+       setTestParameters(m, queryRequest, queryReply, intervalSet, hostData, urns);
        
        SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
        
@@ -278,20 +292,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
         final QueryReply queryReply = m.mock(QueryReply.class);
         final HostData hostData = m.mock(HostData.class);
-        final Response response = m.mock(Response.class);
-        final List<Response> responses = Collections.singletonList(response);
         final Set<URN> urns = new UrnSet();
-        final Set<IpPort> ipPorts = new HashSet<IpPort>();
-        final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
-        
-        urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
-        urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
-        
-        List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
-        map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
-        final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
-        final byte[] guid = GUID.makeGuid();
-//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         final IntervalSet intervalSet = new IntervalSet();
         
         intervalSet.add( Range.createRange( 0, 2) );
@@ -299,57 +300,13 @@ public class SearchResultHandlerTest extends LimeTestCase {
         intervalSet.add( Range.createRange( 8,10) );
         intervalSet.add( Range.createRange(12,14) );
         
-        m.checking(new Expectations() {{
-            atLeast(1).of(queryRequest).isBrowseHostQuery();
-            
-            atLeast(1).of(queryRequest).isWhatIsNewRequest();
-            
-            atLeast(1).of(queryRequest).getGUID();
-            will(returnValue(guid));
-            
-            atLeast(1).of(queryReply).getGUID();
-            will(returnValue(guid));
-            
-            atLeast(1).of(queryReply).isBrowseHostReply();
-            will(returnValue(false));
-            
-            atLeast(1).of(queryReply).getResultsAsList();
-            will(returnValue(responses));
-            
-            atLeast(1).of(queryReply).getIPBytes();
-            will(returnValue(new byte[]{127,0,0,1}));
-            
-            atLeast(1).of(response).getRanges();
-            will(returnValue(intervalSet));
-            
-            atLeast(1).of(response).getDocument();
-            will(returnValue(limeXmlDocument));
-            
-            atLeast(1).of(response).getUrns();
-            will(returnValue(urns));
-            
-            atLeast(1).of(response).getLocations();
-            will(returnValue(ipPorts));
-            
-            atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
-            will(returnValue(remoteFileDesc));
-            
-            atLeast(1).of(response).getSize();
-            will(returnValue((long)15));
-            
-            atLeast(1).of(remoteFileDesc).setSecureStatus(0);
-            
-            atLeast(1).of(queryReply).getSecureStatus();
-            
-            atLeast(1).of(hostData).getMessageGUID();
-            will(returnValue(guid));
-        }});
+        setTestParameters(m, queryRequest, queryReply, intervalSet, hostData, urns);
         
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         
-        assertEquals(0.0, srs.getPercentAvailable(urns.iterator().next()));
+        assertEquals(0.0, srs.getPercentAvailable(urns.iterator().next()), 0.0);
         srs.addQueryReply(searchResultHandler, queryReply, hostData);
-        assertEquals(80.0, srs.getPercentAvailable(urns.iterator().next()));
+        assertEquals(80.0, srs.getPercentAvailable(urns.iterator().next()), 0.0);
         
         m.assertIsSatisfied();
      }
@@ -367,66 +324,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
         final QueryReply queryReply = m.mock(QueryReply.class);
         final HostData hostData = m.mock(HostData.class);
-        final Response response = m.mock(Response.class);
-        final List<Response> responses = Collections.singletonList(response);
         final Set<URN> urns = new UrnSet();
-        final Set<IpPort> ipPorts = new HashSet<IpPort>();
-        final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
         
-        urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
-        urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
-        
-        List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
-        map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
-        final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
-        final byte[] guid = GUID.makeGuid();
-//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
-        
-        m.checking(new Expectations() {{
-            atLeast(1).of(queryRequest).isBrowseHostQuery();
-            
-            atLeast(1).of(queryRequest).isWhatIsNewRequest();
-            
-            atLeast(1).of(queryRequest).getGUID();
-            will(returnValue(new byte[16]));
-            
-            atLeast(1).of(queryReply).getGUID();
-            will(returnValue(guid));
-            
-            atLeast(1).of(queryReply).isBrowseHostReply();
-            will(returnValue(false));
-            
-            atLeast(1).of(queryReply).getResultsAsList();
-            will(returnValue(responses));
-            
-            atLeast(1).of(queryReply).getIPBytes();
-            will(returnValue(new byte[]{127,0,0,1}));
-            
-            atLeast(1).of(response).getRanges();
-            will(returnValue(null));
-            
-            atLeast(1).of(response).getDocument();
-            will(returnValue(limeXmlDocument));
-            
-            atLeast(1).of(response).getUrns();
-            will(returnValue(urns));
-            
-            atLeast(1).of(response).getLocations();
-            will(returnValue(ipPorts));
-            
-            atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
-            will(returnValue(remoteFileDesc));
-            
-            atLeast(1).of(response).getSize();
-            will(returnValue((long)15));
-            
-            atLeast(1).of(remoteFileDesc).setSecureStatus(0);
-            
-            atLeast(1).of(queryReply).getSecureStatus();
-            
-            atLeast(1).of(hostData).getMessageGUID();
-            will(returnValue(guid));
-        }});
+        setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
         
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         
@@ -441,9 +341,6 @@ public class SearchResultHandlerTest extends LimeTestCase {
      * Add a QueryRequest and a QueryReply then remove the associated
      * GUID and verify that the GUID was successfully removed.
      * 
-     * (cjones@moo.limewire.com:~/Projects/limewire-psr-2/tests <Mon Feb 11> <16:59:54>)
-     * $ [60|560] >> ant -Dclass=search/SearchResultHandlerTest test
-     * 
      * @throws Exception
      */
     public void testRemoveQuery() throws Exception {
@@ -452,68 +349,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
         final QueryReply queryReply = m.mock(QueryReply.class);
         final HostData hostData = m.mock(HostData.class);
-        final Response response = m.mock(Response.class);
-        final List<Response> responses = Collections.singletonList(response);
         final Set<URN> urns = new UrnSet();
-//      final Set<IpPort> ipPorts = new HashSet<IpPort>();
-        final Set<IpPort> ipPorts = new IpPortSet();
-        final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
         
-        urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
-        urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
-        
-        List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
-        map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
-        final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
-        final byte[] guid = GUID.makeGuid();
-//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
-        
-        m.checking(new Expectations() {{
-            atLeast(1).of(queryRequest).isBrowseHostQuery();
-            
-            atLeast(1).of(queryRequest).isWhatIsNewRequest();
-            
-            atLeast(1).of(queryRequest).getGUID();
-            will(returnValue(new byte[16]));
-            
-            atLeast(1).of(queryReply).getGUID();
-            will(returnValue(guid));
-            
-            atLeast(1).of(queryReply).isBrowseHostReply();
-            will(returnValue(false));
-            
-            atLeast(1).of(queryReply).getResultsAsList();
-            will(returnValue(responses));
-            
-            atLeast(1).of(queryReply).getIPBytes();
-            will(returnValue(new byte[]{127,0,0,1}));
-            
-            atLeast(1).of(response).getRanges();
-            will(returnValue(null));
-            
-            atLeast(1).of(response).getDocument();
-            will(returnValue(limeXmlDocument));
-            
-            atLeast(1).of(response).getUrns();
-            will(returnValue(urns));
-            
-            atLeast(1).of(response).getLocations();
-            will(returnValue(ipPorts));
-            
-            atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
-            will(returnValue(remoteFileDesc));
-            
-            atLeast(1).of(response).getSize();
-            will(returnValue((long)15));
-            
-            atLeast(1).of(remoteFileDesc).setSecureStatus(0);
-            
-            atLeast(1).of(queryReply).getSecureStatus();
-            
-            atLeast(1).of(hostData).getMessageGUID();
-            will(returnValue(guid));
-            
-        }});
+        byte[] guid = setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
         
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         
@@ -541,9 +379,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         final QueryReply queryReply = m.mock(QueryReply.class);
         final HostData hostData = m.mock(HostData.class);
-        
         final byte[] guid = GUID.makeGuid();
-//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         
         m.checking(new Expectations() {{
             atLeast(1).of(queryReply).getGUID();
@@ -575,72 +411,15 @@ public class SearchResultHandlerTest extends LimeTestCase {
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
         final QueryReply queryReply = m.mock(QueryReply.class);
         final HostData hostData = m.mock(HostData.class);
-        final Response response = m.mock(Response.class);
-        final List<Response> responses = Collections.singletonList(response);
         final Set<URN> urns = new UrnSet();
-        final Set<IpPort> ipPorts = new HashSet<IpPort>();
-        final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
         
-        urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
-        urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
-        
-        List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
-        map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
-        final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
-        final byte[] guid = GUID.makeGuid();
-//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
-        
-        m.checking(new Expectations() {{
-            atLeast(1).of(queryRequest).isBrowseHostQuery();
-            
-            atLeast(1).of(queryRequest).isWhatIsNewRequest();
-            
-            atLeast(1).of(queryRequest).getGUID();
-            will(returnValue(new byte[16]));
-            
-            atLeast(1).of(queryReply).getGUID();
-            will(returnValue(guid));
-            
-            atLeast(1).of(queryReply).isBrowseHostReply();
-            will(returnValue(false));
-            
-            atLeast(1).of(queryReply).getResultsAsList();
-            will(returnValue(responses));
-            
-            atLeast(1).of(queryReply).getIPBytes();
-            will(returnValue(new byte[]{127,0,0,1}));
-            
-            atLeast(1).of(response).getRanges();
-            will(returnValue(null));
-            
-            atLeast(1).of(response).getDocument();
-            will(returnValue(limeXmlDocument));
-            
-            atLeast(1).of(response).getUrns();
-            will(returnValue(urns));
-            
-            atLeast(1).of(response).getLocations();
-            will(returnValue(ipPorts));
-            
-            atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
-            will(returnValue(remoteFileDesc));
-            
-            atLeast(1).of(response).getSize();
-            will(returnValue((long)15));
-            
-            atLeast(1).of(remoteFileDesc).setSecureStatus(0);
-            
-            atLeast(1).of(queryReply).getSecureStatus();
-            
-            atLeast(1).of(hostData).getMessageGUID();
-            will(returnValue(guid));
-        }});
+        setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
         
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         
-        assertEquals(0.0, srs.getPercentAvailable(urns.iterator().next()));
+        assertEquals(0.0, srs.getPercentAvailable(urns.iterator().next()), 0.0);
         srs.addQueryReply(searchResultHandler, queryReply, hostData);
-        assertEquals(100.0, srs.getPercentAvailable(urns.iterator().next()));
+        assertEquals(100.0, srs.getPercentAvailable(urns.iterator().next()), 0.0);
         
         m.assertIsSatisfied();
     }
@@ -733,67 +512,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
         final QueryReply queryReply = m.mock(QueryReply.class);
         final HostData hostData = m.mock(HostData.class);
-        final Response response = m.mock(Response.class);
-        final List<Response> responses = Collections.singletonList(response);
         final Set<URN> urns = new UrnSet();
-        final Set<IpPort> ipPorts = new HashSet<IpPort>();
-        final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
         
-        urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
-        urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
-        
-        List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
-        map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
-        final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
-        final byte[] guid = GUID.makeGuid();
-//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
-        
-        m.checking(new Expectations() {{
-            atLeast(1).of(queryRequest).isBrowseHostQuery();
-            
-            atLeast(1).of(queryRequest).isWhatIsNewRequest();
-            
-            atLeast(1).of(queryRequest).getGUID();
-            will(returnValue(guid));
-            
-            atLeast(1).of(queryReply).getGUID();
-            will(returnValue(guid));
-            
-            atLeast(1).of(queryReply).isBrowseHostReply();
-            will(returnValue(false));
-            
-            atLeast(1).of(queryReply).getResultsAsList();
-            will(returnValue(responses));
-            
-            atLeast(1).of(queryReply).getIPBytes();
-            will(returnValue(new byte[]{127,0,0,1}));
-            
-            atLeast(1).of(response).getRanges();
-            will(returnValue(null));
-            
-            atLeast(1).of(response).getDocument();
-            will(returnValue(limeXmlDocument));
-            
-            atLeast(1).of(response).getUrns();
-            will(returnValue(urns));
-            
-            atLeast(1).of(response).getLocations();
-            will(returnValue(ipPorts));
-            
-            atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
-            will(returnValue(remoteFileDesc));
-            
-            atLeast(1).of(response).getSize();
-            will(returnValue((long)15));
-            
-            atLeast(1).of(remoteFileDesc).setSecureStatus(0);
-            
-            atLeast(1).of(queryReply).getSecureStatus();
-            
-            atLeast(1).of(hostData).getMessageGUID();
-            will(returnValue(guid));
-            
-        }});
+        setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
         
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         
@@ -821,67 +542,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
         final QueryReply queryReply = m.mock(QueryReply.class);
         final HostData hostData = m.mock(HostData.class);
-        final Response response = m.mock(Response.class);
-        final List<Response> responses = Collections.singletonList(response);
         final Set<URN> urns = new UrnSet();
-        final Set<IpPort> ipPorts = new HashSet<IpPort>();
-        final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
-        
-        urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
-        urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
-        
-        List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
-        map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
-        final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
-        final byte[] guid = GUID.makeGuid();
-//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
-        
-        m.checking(new Expectations() {{
-            atLeast(1).of(queryRequest).isBrowseHostQuery();
-            
-            atLeast(1).of(queryRequest).isWhatIsNewRequest();
-            
-            atLeast(1).of(queryRequest).getGUID();
-            will(returnValue(guid));
-            
-            atLeast(1).of(queryReply).getGUID();
-            will(returnValue(guid));
-            
-            atLeast(1).of(queryReply).isBrowseHostReply();
-            will(returnValue(false));
-            
-            atLeast(1).of(queryReply).getResultsAsList();
-            will(returnValue(responses));
-            
-            atLeast(1).of(queryReply).getIPBytes();
-            will(returnValue(new byte[]{127,0,0,1}));
-            
-            atLeast(1).of(response).getRanges();
-            will(returnValue(null));
-            
-            atLeast(1).of(response).getDocument();
-            will(returnValue(limeXmlDocument));
-            
-            atLeast(1).of(response).getUrns();
-            will(returnValue(urns));
-            
-            atLeast(1).of(response).getLocations();
-            will(returnValue(ipPorts));
-            
-            atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
-            will(returnValue(remoteFileDesc));
-            
-            atLeast(1).of(response).getSize();
-            will(returnValue((long)15));
-            
-            atLeast(1).of(remoteFileDesc).setSecureStatus(0);
-            
-            atLeast(1).of(queryReply).getSecureStatus();
-            
-            atLeast(1).of(hostData).getMessageGUID();
-            will(returnValue(guid));
-            
-        }});
+  
+        byte[] guid = setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
         
         assertEquals(-1, searchResultHandler.getNumResultsForQuery(new GUID(guid)));
         
@@ -912,7 +575,6 @@ public class SearchResultHandlerTest extends LimeTestCase {
         List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
         map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
         final byte[] guid = GUID.makeGuid();
-//      final byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
         
         m.checking(new Expectations() {{
             atLeast(1).of(queryRequest).isBrowseHostQuery();
@@ -940,9 +602,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
     
     
     
-    private QueryReply newQueryReply(Response[] responses) throws Exception {
-        final byte[] guid = GUID.makeGuid();
-//      byte[] guid = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+    private QueryReply newQueryReply(Response[] responses, byte[] guid) throws Exception {
+        if (guid == null)
+            guid = GUID.makeGuid();
         
         QueryReply reply = 
                queryReplyFactory.createQueryReply(guid, (byte)1, 6346,
