@@ -16,13 +16,15 @@ public final class LWSSettings extends LimeProps {
 
     /**
      * The hostname to which we connect for authentication.
+     * <br>e.g. <code>1.2.3.4</code>
      */
     public static final StringSetting LWS_AUTHENTICATION_HOSTNAME = FACTORY.createRemoteStringSetting(
-            "LWS_AUTHENTICATION_HOSTNAME", "", "LWSSettings.lwsAuthenticationHostname");
+            "LWS_AUTHENTICATION_HOSTNAME", "localhost", "LWSSettings.lwsAuthenticationHostname");
 
     /**
      * The port on which we connect for authentication. This can be
      * <code><= 0</code> for no port.
+     * <br>e.g. <code>80</code>
      */
     public static final IntSetting LWS_AUTHENTICATION_PORT = FACTORY.createRemoteIntSetting(
             "LWS_AUTHENTICATION_PORT", 8080, "LWSSettings.lwsAuthenticationPort", -Integer.MIN_VALUE,
@@ -38,9 +40,10 @@ public final class LWSSettings extends LimeProps {
     /**
      * The entire prefix to put before a url is downloaded.  This is encoded/decoded many times
      * so needs to be all together.  This also makes it clearer.  <b>This HAS to end in a <code>/</code></b>.
+     * <br>e.g. <code>1.2.3.4:80</code>
      */
     public static final StringSetting LWS_DOWNLOAD_PREFIX = FACTORY.createRemoteStringSetting(
-            "LWS_DOWNLOAD_PREFIX", "", "LWSSettings.lwsDownloadPrefix"); 
+            "LWS_DOWNLOAD_PREFIX", "localhost:8080", "LWSSettings.lwsDownloadPrefix"); 
     
     /**
      * The hostname to which we connect for adding to playlists.
