@@ -76,7 +76,7 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
@@ -145,7 +145,7 @@ public class RequeryDownloadTest extends LimeTestCase {
         hash = TestFile.hash();
         NetworkManagerStub networkManager = (NetworkManagerStub) injector
                 .getInstance(NetworkManager.class);
-        networkManager.setListeningPort(ConnectionSettings.PORT.getValue());
+        networkManager.setListeningPort(NetworkSettings.PORT.getValue());
         
         messageRouter = (TestMessageRouter)injector.getInstance(MessageRouter.class);
         routeTable = (RouteTable) PrivilegedAccessor.getValue(messageRouter, "_queryRouteTable");

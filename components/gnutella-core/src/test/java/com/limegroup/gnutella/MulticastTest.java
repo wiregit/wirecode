@@ -23,6 +23,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
@@ -78,7 +79,7 @@ public class MulticastTest extends LimeTestCase {
         // Set the local host to not be banned so pushes can go through
         String ip = InetAddress.getLocalHost().getHostAddress();
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] { ip });
-        ConnectionSettings.PORT.setValue(TEST_PORT);
+        NetworkSettings.PORT.setValue(TEST_PORT);
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
         File mp3 = TestUtils.getResourceFile(MP3_NAME);
         assertTrue(mp3.exists());

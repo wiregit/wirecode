@@ -26,8 +26,8 @@ import org.limewire.util.CommonUtils;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 public class PassiveDHTNodeControllerTest extends DHTTestCase {
@@ -53,7 +53,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         setSettings();
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         assertEquals("unexpected port", PORT, 
-                 ConnectionSettings.PORT.getValue());
+                 NetworkSettings.PORT.getValue());
         
         // fake a connection to the network
         Injector injector = LimeTestUtils.createInjector();

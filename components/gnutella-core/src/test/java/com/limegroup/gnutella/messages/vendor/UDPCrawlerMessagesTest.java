@@ -52,6 +52,7 @@ import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessage
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -145,7 +146,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
                 new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
                 new String[] {localIP,"127.*.*.*"});
-        ConnectionSettings.PORT.setValue(PORT);
+        NetworkSettings.PORT.setValue(PORT);
         
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
@@ -160,7 +161,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
 	public void setUp() throws Exception {
         PORT++;
         setSettings();
-        assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
+        assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
         
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
@@ -186,7 +187,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         connectionServices.connect();	
 		connect();
         assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
+					 NetworkSettings.PORT.getValue());
         
         Object handler = messageRouter.getUDPMessageHandler(UDPCrawlerPing.class);
         PrivilegedAccessor.setValue(handler,

@@ -41,10 +41,10 @@ public abstract class DHTTestCase extends LimeTestCase {
         bootstrapDHT.bind(new InetSocketAddress(BOOTSTRAP_DHT_PORT));
         bootstrapDHT.start();
         
-        ConnectionSettings.PORT.setValue(PORT);
+        com.limegroup.gnutella.settings.NetworkSettings.PORT.setValue(PORT);
         ConnectionSettings.FORCED_PORT.setValue(PORT);
         
-        assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
+        assertEquals("unexpected port", PORT, com.limegroup.gnutella.settings.NetworkSettings.PORT.getValue());
         
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         lifeCycleManager.start();
@@ -58,8 +58,8 @@ public abstract class DHTTestCase extends LimeTestCase {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
                 new String[] {"127.*.*.*", "18.239.0.*"});
                 
-        ConnectionSettings.PORT.setValue(PORT);
-        assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
+        com.limegroup.gnutella.settings.NetworkSettings.PORT.setValue(PORT);
+        assertEquals("unexpected port", PORT, com.limegroup.gnutella.settings.NetworkSettings.PORT.getValue());
                 
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);

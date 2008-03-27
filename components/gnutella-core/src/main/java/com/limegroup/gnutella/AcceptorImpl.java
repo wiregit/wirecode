@@ -39,6 +39,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 
 /**
  * Listens on ports, accepts incoming connections, and dispatches threads to
@@ -221,7 +222,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         // try a random port if we have not received an incoming connection  
         // and have been running on the default port (6346) 
         // and the user has not changed the settings
-        boolean tryingRandom = ConnectionSettings.PORT.isDefault() && 
+        boolean tryingRandom = NetworkSettings.PORT.isDefault() && 
                 !ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue() &&
                 !ConnectionSettings.FORCE_IP_ADDRESS.getValue();
         
@@ -231,7 +232,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             tempPort = gen.nextInt(50000)+2000;
         }
         else
-            tempPort = ConnectionSettings.PORT.getValue();
+            tempPort = NetworkSettings.PORT.getValue();
 
         //0. Get local address.  This must be done here because it can
         //   block under certain conditions.
@@ -285,7 +286,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         }
         
         if (_port != oldPort || tryingRandom) {
-            ConnectionSettings.PORT.setValue(_port);
+            NetworkSettings.PORT.setValue(_port);
             SettingsGroupManager.instance().save();
             networkManager.addressChanged();
         }

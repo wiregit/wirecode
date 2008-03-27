@@ -177,12 +177,6 @@ public final class ConnectionSettings extends LimeProps {
         FACTORY.createIntSetting("CONNECTION_SPEED", SpeedConstants.CABLE_SPEED_INT);
     
     /**
-	 * The port to connect on
-	 */
-    public static final IntSetting PORT =
-        FACTORY.createIntSetting("PORT", 6346);
-    
-    /**
 	 * Sets whether or not the users ip address should be forced to
 	 * the value they have entered.
 	 */

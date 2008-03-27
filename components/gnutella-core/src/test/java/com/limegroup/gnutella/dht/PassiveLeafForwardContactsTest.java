@@ -152,11 +152,11 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
                 new String[] {"127.*.*.*"});
         
-        ConnectionSettings.PORT.setValue(PORT);
+        com.limegroup.gnutella.settings.NetworkSettings.PORT.setValue(PORT);
         ConnectionSettings.FORCED_PORT.setValue(PORT);
         
         assertEquals("unexpected port", PORT, 
-                 ConnectionSettings.PORT.getValue());
+                 com.limegroup.gnutella.settings.NetworkSettings.PORT.getValue());
         
         DHTSettings.DISABLE_DHT_USER.setValue(false);
         DHTSettings.DISABLE_DHT_NETWORK.setValue(false);

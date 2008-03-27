@@ -25,6 +25,7 @@ import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
@@ -63,7 +64,7 @@ public abstract class PeerTestCase extends LimeTestCase {
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"127.*.*.*", "192.168.*.*", "10.254.*.*", localIP});        
-        ConnectionSettings.PORT.setValue(SERVER_PORT);
+        NetworkSettings.PORT.setValue(SERVER_PORT);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
@@ -101,7 +102,7 @@ public abstract class PeerTestCase extends LimeTestCase {
         
         //  rs=new RouterService(callback);
         assertEquals("unexpected port",
-                SERVER_PORT, ConnectionSettings.PORT.getValue());
+                SERVER_PORT, NetworkSettings.PORT.getValue());
         lifecycleManager = injector.getInstance(LifecycleManager.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
         blockingConnectionFactory = injector.getInstance(BlockingConnectionFactory.class);
@@ -112,7 +113,7 @@ public abstract class PeerTestCase extends LimeTestCase {
         connectionServices.connect();
         Thread.sleep(2000);
         assertEquals("unexpected port",
-                SERVER_PORT, ConnectionSettings.PORT.getValue());
+                SERVER_PORT, NetworkSettings.PORT.getValue());
     }
 
     protected BlockingConnection connect(boolean ultrapeer) throws Exception {

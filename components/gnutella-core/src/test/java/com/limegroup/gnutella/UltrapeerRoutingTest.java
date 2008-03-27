@@ -24,6 +24,7 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.EmptyResponder;
@@ -142,7 +143,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
             new String[] {"127.*.*.*", "18.239.0.*"});
         // TODO hack: incrementing port value so each test has its own port
         // PORT++;
-        ConnectionSettings.PORT.setValue(PORT);
+        NetworkSettings.PORT.setValue(PORT);
         LimeTestUtils.setSharedDirectories(new File[0]);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
@@ -156,7 +157,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
 
 
         assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
+					 NetworkSettings.PORT.getValue());
         
         Injector injector = LimeTestUtils.createInjector();
         connectionFactory = injector.getInstance(BlockingConnectionFactory.class);
@@ -174,7 +175,7 @@ public final class UltrapeerRoutingTest extends LimeTestCase {
         
 		connect();
         assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
+					 NetworkSettings.PORT.getValue());
 	}
 
 	public void tearDown() throws Exception {

@@ -28,6 +28,7 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 
 /**
  * A basic implementation of {@link Connection}. The only methods that
@@ -552,7 +553,7 @@ public abstract class AbstractConnection implements Connection {
         InetAddress localAddress = getSocket().getLocalAddress();
         if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue()
                 && getSocket().getInetAddress().equals(localAddress)
-                && getPort() == ConnectionSettings.PORT.getValue()) {
+                && getPort() == NetworkSettings.PORT.getValue()) {
             throw new IOException("Connection to self");
         }
 

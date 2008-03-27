@@ -13,6 +13,7 @@ import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.EmptyResponder;
@@ -88,7 +89,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"127.*.*.*", localIP});
-        ConnectionSettings.PORT.setValue(PORT);
+        NetworkSettings.PORT.setValue(PORT);
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         // get the resource file for com/limegroup/gnutella
         File berkeley = 
@@ -153,13 +154,13 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         headersFactory = injector.getInstance(HeadersFactory.class);
         blockingConnectionFactory = injector.getInstance(BlockingConnectionFactory.class);
 
-        assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
+        assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
 
         lifecycleManager.start();
 
         connectionServices.connect();
         
-        assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
+        assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
 
         // set up ultrapeer stuff
         int numUPs = getNumberOfUltrapeers();

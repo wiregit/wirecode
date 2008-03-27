@@ -22,6 +22,7 @@ import org.limewire.util.TestUtils;
 import com.google.inject.Guice;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
@@ -445,7 +446,7 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
 
-        ConnectionSettings.PORT.setValue(port);
+        NetworkSettings.PORT.setValue(port);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
