@@ -412,6 +412,8 @@ public class GGEP {
      */
     public void putCompressed(String key, byte[] value) throws IllegalArgumentException {
         validateKey(key);
+        if(value == null)
+            throw new IllegalArgumentException("null value for key: " + key);
         //validateValue(value); // done when writing.  TODO: do here?
         _props.put(key, new NeedsCompression(value));
     }
@@ -431,13 +433,12 @@ public class GGEP {
      * @param key the name of the GGEP extension, whose length should be between
      *  1 and 15, inclusive
      * @param value the GGEP extension data
-     * @exception IllegalArgumentException key is of an illegal length;
-     *  or value contains a null bytes, null bytes are disallowed, and if you
-     *  didn't allow nulls at construction but has nulls
+     * @exception IllegalArgumentException key is of an illegal length
+     *  or if value is null.
      */
     public void put(String key, byte[] value) throws IllegalArgumentException {
         validateKey(key);
-        validateValue(value);
+        validateValue(value, key);
         _props.put(key, value);
     }
 
@@ -446,9 +447,8 @@ public class GGEP {
      * @param key the name of the GGEP extension, whose length should be between
      *  1 and 15, inclusive
      * @param value the GGEP extension data
-     * @exception IllegalArgumentException key is of an illegal length;
-     *  or value contains a null bytes, null bytes are disallowed, if you
-     *  didn't allow nulls at construction but has nulls
+     * @exception IllegalArgumentException key is of an illegal length 
+     *  or if value is null
      */
     public void put(String key, String value) throws IllegalArgumentException {
         put(key, value==null ? null : value.getBytes());
@@ -459,13 +459,12 @@ public class GGEP {
      * @param key the name of the GGEP extension, whose length should be between
      *  1 and 15, inclusive
      * @param value the GGEP extension data, which should be an unsigned integer
-     * @exception IllegalArgumentException key is of an illegal length; or value
-     *  is negative; or value contains a null bytes, null bytes are disallowed,
-     *  and COBS encoding is not supported 
+     * @exception IllegalArgumentException key is of an illegal length
+     *     or if value is negative
      */
     public void put(String key, int value) throws IllegalArgumentException {
-        if (value<0)  //TODO: ?
-            throw new IllegalArgumentException("Negative value");
+        if (value < 0) // int2minLeb doesn't work on negative values
+            throw new IllegalArgumentException("Negative value: " + value + " for key: " + key);
         put(key, ByteOrder.int2minLeb(value));
     }
 
@@ -474,13 +473,12 @@ public class GGEP {
      * @param key the name of the GGEP extension, whose length should be between
      *  1 and 15, inclusive
      * @param value the GGEP extension data, which should be an unsigned long
-     * @exception IllegalArgumentException key is of an illegal length; or value
-     *  is negative; or value contains a null bytes, null bytes are disallowed,
-     *  and COBS encoding is not supported 
+     * @exception IllegalArgumentException key is of an illegal length
+     *          of ir value is negative
      */
     public void put(String key, long value) throws IllegalArgumentException {
-        if (value<0)  //TODO: ?
-            throw new IllegalArgumentException("Negative value");
+        if (value < 0) // long2minLeb doesn't work on negative values
+            throw new IllegalArgumentException("Negative value: " + value + " for key: " + key);
         put(key, ByteOrder.long2minLeb(value));
     }
 
@@ -491,7 +489,8 @@ public class GGEP {
      * @exception IllegalArgumentException key is of an illegal length.
      */
     public void put(String key) throws IllegalArgumentException {
-        put(key, (byte[])null);
+        validateKey(key);
+        _props.put(key, null);
     }
 
     /**
@@ -599,11 +598,11 @@ public class GGEP {
             throw new IllegalArgumentException();
     }
 
-    private void validateValue(byte[] value) throws IllegalArgumentException {
+    private void validateValue(byte[] value, String key) throws IllegalArgumentException {
         if (value==null)
-            return;
+            throw new IllegalArgumentException("null value for key: " + key);
         if (value.length>MAX_VALUE_SIZE_IN_BYTES)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("value (" + value + ") too large for key: " + key);
     }
 
     private boolean containsNull(byte[] bytes) {

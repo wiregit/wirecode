@@ -75,11 +75,14 @@ public class GGEPTest extends BaseTestCase {
     public void testStringKeys() throws Exception {
         GGEP temp = new GGEP();
         temp.put("A", "B");
-        temp.put("C", (String)null);
+        try {
+            temp.put("C", (String)null);
+            fail("should have caught IAX");
+        } catch(IllegalArgumentException expected) {}
         temp.put("STRING", "");
         assertTrue(temp.hasKey("A"));
         assertEquals("B", temp.getString("A"));
-        assertTrue(temp.hasKey("C"));
+        assertFalse(temp.hasKey("C"));
         assertTrue(temp.hasKey("STRING"));
         assertEquals("", temp.getString("STRING"));
     }
@@ -765,8 +768,13 @@ public class GGEPTest extends BaseTestCase {
     
     public void testNullGGEPValues() {
         GGEP ggep = new GGEP(true);
-        ggep.put("EM", (byte[])null);
+        try {
+            ggep.put("EM", (byte[])null);
+            fail("should have caught IAX");
+        } catch(IllegalArgumentException expected) {}
+        
         assertNull(ggep.get("EM"));
+        assertFalse(ggep.hasKey("EM"));
     }
     
     
