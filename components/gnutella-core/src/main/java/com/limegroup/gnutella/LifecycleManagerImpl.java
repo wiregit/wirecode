@@ -389,10 +389,6 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		downloadUpgradeTask.get().upgrade();
 		LOG.trace("Download upgrade task run!");
 
-		// has to be started before download manager reads saved downloads which is actually later
-		LOG.trace("START MagnetDownloaderPushEndpointFinder");
-		magnetDownloaderPushEndpointFinder.get().start();
-		
 		LOG.trace("START DownloadManager");
 		activityCallback.get().componentLoading(I18nMarker.marktr("Loading Download Management..."));
 		downloadManager.get().initialize();
@@ -430,6 +426,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		torrentManager.get().initialize(connectionDispatcher.get());
 		LOG.trace("STOP TorrentManager");
         
+		// add listener before downloads are read to get all add events
+		downloadManager.get().addListener(magnetDownloaderPushEndpointFinder.get(), magnetDownloaderPushEndpointFinder.get());
+		
         // Restore any downloads in progress.
         LOG.trace("START DownloadManager.postGuiInit");
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Old Downloads..."));
@@ -579,7 +578,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         downloadManager.get().writeSnapshot();
         
-        magnetDownloaderPushEndpointFinder.get().stop();
+        downloadManager.get().removeListener(magnetDownloaderPushEndpointFinder.get(), magnetDownloaderPushEndpointFinder.get());
         
        // torrentManager.writeSnapshot();
         

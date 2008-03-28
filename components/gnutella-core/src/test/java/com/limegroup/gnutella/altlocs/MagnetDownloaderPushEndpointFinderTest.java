@@ -6,13 +6,11 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
-import org.limewire.inject.Providers;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.util.BaseTestCase;
 
-import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerEvent;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
@@ -38,7 +36,7 @@ public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
         final MagnetDownloader downloader = context.mock(MagnetDownloader.class);
         // use magnet without sha1 so we can just check if 
         final MagnetOptions magnet = MagnetOptions.parseMagnet("magnet:?dn=file&kt=hello&xt=urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")[0];
-        final MagnetDownloaderPushEndpointFinder endpointFinder = new MagnetDownloaderPushEndpointFinder(null, null, null, null);
+        final MagnetDownloaderPushEndpointFinder endpointFinder = new MagnetDownloaderPushEndpointFinder(null, null, null);
         
         context.checking(new Expectations() {{
             atLeast(1).of(downloader).getMagnet();
@@ -67,7 +65,7 @@ public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
         final IpPort ipPort = new IpPortImpl("129.155.4.5:6666");
         
         final MagnetDownloaderPushEndpointFinder endpointFinder = 
-            new MagnetDownloaderPushEndpointFinder(null, pushEndpointManager, alternateLocationFactory, altLocManager);
+            new MagnetDownloaderPushEndpointFinder(pushEndpointManager, alternateLocationFactory, altLocManager);
         
         final URN sha1Urn = URN.createSHA1Urn("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
         final GUID guid = new GUID();
@@ -112,7 +110,7 @@ public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
         final IpPort otherIpPort = new IpPortImpl("129.155.4.5:6667");
         
         final MagnetDownloaderPushEndpointFinder endpointFinder = 
-            new MagnetDownloaderPushEndpointFinder(null, pushEndpointManager, alternateLocationFactory, altLocManager);
+            new MagnetDownloaderPushEndpointFinder(pushEndpointManager, alternateLocationFactory, altLocManager);
         
         final URN sha1Urn = URN.createSHA1Urn("urn:sha1:YNCKHTQCWBTRNJIV4WNAE52SJUQCZO5C");
         final GUID guid = new GUID();
@@ -143,34 +141,6 @@ public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
             fail("AltLocManager was not called, which should have caused an IllegalState exception for an invalid AlternateLocation");
         } catch (IllegalStateException ise) {
         }
-        context.assertIsSatisfied();
-    }
-
-    public void testAddsListener() {
-        final DownloadManager downloadManager = context.mock(DownloadManager.class);
-        final MagnetDownloaderPushEndpointFinder endpointFinder = 
-            new MagnetDownloaderPushEndpointFinder(Providers.of(downloadManager), null, null, null);
-        
-        context.checking(new Expectations() {{
-            one(downloadManager).addListener(endpointFinder, endpointFinder);
-        }});
-        
-        endpointFinder.start();
-        
-        context.assertIsSatisfied();
-    }
-
-    public void testRemoveListener() {
-        final DownloadManager downloadManager = context.mock(DownloadManager.class);
-        final MagnetDownloaderPushEndpointFinder endpointFinder = 
-            new MagnetDownloaderPushEndpointFinder(Providers.of(downloadManager), null, null, null);
-        
-        context.checking(new Expectations() {{
-            one(downloadManager).removeListener(endpointFinder, endpointFinder);
-        }});
-        
-        endpointFinder.stop();
-        
         context.assertIsSatisfied();
     }
 

@@ -7,13 +7,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IpPort;
 import org.limewire.listener.EventListener;
-import org.limewire.service.Service;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.DownloadManagerEvent;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
@@ -27,11 +24,10 @@ import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
 
 @Singleton
-public class MagnetDownloaderPushEndpointFinder implements Service, EventListener<DownloadManagerEvent> {
+public class MagnetDownloaderPushEndpointFinder implements EventListener<DownloadManagerEvent> {
 
     static final Log LOG = LogFactory.getLog(MagnetDownloaderPushEndpointFinder.class);
     
-    private final Provider<DownloadManager> downloadManager;
     private final PushEndpointService pushEndpointManager;
     private final AlternateLocationFactory alternateLocationFactory;
     private final AltLocManager altLocManager;
@@ -49,11 +45,9 @@ public class MagnetDownloaderPushEndpointFinder implements Service, EventListene
     };
     
     @Inject
-    public MagnetDownloaderPushEndpointFinder(Provider<DownloadManager> downloadManager, 
-            @Named("pushEndpointManager") PushEndpointService pushEndpointManager, 
+    public MagnetDownloaderPushEndpointFinder(@Named("pushEndpointManager") PushEndpointService pushEndpointManager, 
             AlternateLocationFactory alternateLocationFactory,
             AltLocManager altLocManager) {
-        this.downloadManager = downloadManager;
         this.pushEndpointManager = pushEndpointManager;
         this.alternateLocationFactory = alternateLocationFactory;
         this.altLocManager = altLocManager;
@@ -128,14 +122,6 @@ public class MagnetDownloaderPushEndpointFinder implements Service, EventListene
         }
     }
 
-    public void start() {
-        downloadManager.get().addListener(this, this);
-    }
-
-    public void stop() {
-        downloadManager.get().removeListener(this, this);
-    }
-    
     private class PushendpointHandler implements SearchListener<PushEndpoint> {
         
         private final URN sha1;
