@@ -113,4 +113,10 @@ public class BitNumbersTest extends BaseTestCase {
         }
         assertEquals(new byte[] { 0x10 }, bn.toByteArray() );
     }
+    
+    public void testEquals() {
+        BitNumbers bitNumbers1 = new BitNumbers("01");
+        BitNumbers bitNumbers2 = new BitNumbers(new byte[] { 0x1 });
+        assertTrue(bitNumbers1 + " should be equal to " + bitNumbers2, bitNumbers1.equals(bitNumbers2));
+    }
 }

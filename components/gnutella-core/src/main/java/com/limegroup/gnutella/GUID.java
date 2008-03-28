@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.Random;
@@ -90,6 +91,15 @@ public class GUID implements Comparable<GUID> {
     public GUID(byte[] bytes) {
         assert(bytes.length==SZ);
         this.bytes=bytes;
+    }
+    
+    /**
+     * Creates a GUID from a hex string.
+     * 
+     * @throws IllegalArgumentException if the string is invalid, see {@link #fromHexString(String)}.
+     */
+    public GUID(String hexString) {
+        this(GUID.fromHexString(hexString));
     }
 
     /** See the class header description for more details.
@@ -382,12 +392,7 @@ public class GUID implements Comparable<GUID> {
             return true;
         } else if(o instanceof GUID) {
             byte[] bytes2=((GUID)o).bytes();
-            assert bytes!=null : "Null bytes in GUID.equals";
-            assert bytes2!=null : "Null bytes2 in GUID.equals";
-            for (int i=0; i<SZ; i++)
-                if (bytes[i]!=bytes2[i])
-                    return false;
-            return true;
+            return Arrays.equals(bytes, bytes2);
         } else {
             return false;
         }
@@ -441,7 +446,8 @@ public class GUID implements Comparable<GUID> {
     
     /**
      *  Create a GUID bytes from a hex string version.
-     *  Throws IllegalArgumentException if sguid is
+     *  
+     *  @throws IllegalArgumentException if sguid is
      *  not of the proper format.
      */
     public static byte[] fromHexString(String sguid)
@@ -454,9 +460,9 @@ public class GUID implements Comparable<GUID> {
             }
             return bytes;
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(sguid);
         } catch (IndexOutOfBoundsException e) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(sguid);
         }
     }
 

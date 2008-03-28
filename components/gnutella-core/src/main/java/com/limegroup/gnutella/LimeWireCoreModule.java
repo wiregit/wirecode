@@ -89,6 +89,7 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.DHTNodeFetcherFactory;
 import com.limegroup.gnutella.dht.DHTNodeFetcherFactoryImpl;
+import com.limegroup.gnutella.dht.LimeWireDHTModule;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.AltLocValueFactoryImpl;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
@@ -202,6 +203,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireNetModule(SettingsBackedProxySettings.class, SettingsBackedSocketBindingSettings.class));
         binder().install(new LimeWireDownloadModule());
         binder().install(new LimeWireHashTreeModule());        
+        binder().install(new LimeWireDHTModule());
         binder().install(new LimeWireHttpModule());
         binder().install(new LimeWireStatisticsModule());
         binder().install(new LimeWireGnutellaStatisticsModule());

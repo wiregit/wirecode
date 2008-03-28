@@ -25,6 +25,8 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.DiskException;
 import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.WeakEventListenerList;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 
@@ -210,7 +212,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     
     /** The complete Set of files passed to the constructor.  Must be
      *  maintained in memory to support resume.  allFiles may only contain
-     *  elements of type RemoteFileDesc and URLRemoteFileDesc */
+     *  elements of type RemoteFileDesc and URLRemoteFileDesc
+     */
     private Set<RemoteFileDesc> cachedRFDs;
 
 	/**
@@ -404,6 +407,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     
     private long contentLength = -1;
     
+    private final WeakEventListenerList<DownloadStatusEvent> listeners = 
+        new WeakEventListenerList<DownloadStatusEvent>(); 
+    
     protected final DownloadManager downloadManager;
     protected final FileManager fileManager;
     protected final IncompleteFileManager incompleteFileManager;
@@ -508,6 +514,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#initialize()
      */
     public void initialize() {
+        setState(DownloadStatus.INITIALIZING);
         currentRFDs = new HashSet<RemoteFileDesc>();
         _activeWorkers=new LinkedList<DownloadWorker>();
         _workers=new ArrayList<DownloadWorker>();
@@ -953,12 +960,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             return;
         
         URN sha1 = getSha1Urn();
-        if (sha1 != null)
+        if (sha1 != null) {
             incompleteFile = incompleteFileManager.getFileForUrn(sha1);
-        
+        }
         if (incompleteFile == null) { 
             incompleteFile = getIncompleteFile(getSaveFile().getName(), sha1,
-                                               getContentLength());
+                    getContentLength());
         }
         
         if(LOG.isWarnEnabled())
@@ -968,6 +975,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * Retrieves an incomplete file from the given incompleteFileManager with the
      * given name, URN & content-length.
+     * <p>
+     * It can be overridden in subclasses.
+     * </p> 
      */
     protected File getIncompleteFile(String name, URN urn,
                                      long length) throws IOException {
@@ -1232,6 +1242,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     public synchronized void locationAdded(AlternateLocation loc) {
         assert(loc.getSHA1Urn().equals(getSha1Urn()));
         
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("alt loc added: " + loc);
+        }
+        
         long contentLength = -1L;
         if (loc instanceof DirectDHTAltLoc) {
             long fileSize = ((DirectDHTAltLoc)loc).getFileSize();
@@ -1289,19 +1303,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#addDownload(com.limegroup.gnutella.RemoteFileDesc, boolean)
      */
     public synchronized boolean addDownload(RemoteFileDesc rfd, boolean cache) {
-        // never add to a stopped download.
-        if(stopped || isCompleted())
-            return false;
-        
-        if (!allowAddition(rfd))
-            return false;
-        
-        rfd.setDownloading(true);
-        
-        if(!hostIsAllowed(rfd))
-            return false;
-        
-        return addDownloadForced(rfd, cache);
+        return addDownload(Collections.singleton(rfd), cache);
     }
     
     /* (non-Javadoc)
@@ -1313,8 +1315,15 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         
         List<RemoteFileDesc> l = new ArrayList<RemoteFileDesc>(c.size());
         for(RemoteFileDesc rfd : c) {
-            if (hostIsAllowed(rfd) && allowAddition(rfd))
-                l.add(rfd);
+            if (allowAddition(rfd)) {
+                // this is set here and not for all remote descs since only these
+                // could have possible come from the UI, this should be solved differently
+                // this is set even if the host is not allowed as a download source for UI's sake
+                rfd.setDownloading(true);
+                if (hostIsAllowed(rfd)) {
+                    l.add(rfd);
+                }
+            }
         }
         
         return addDownloadForced(l,cache);
@@ -1336,42 +1345,31 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     protected synchronized boolean addDownloadForced(RemoteFileDesc rfd,
                                                            boolean cache) {
-
-        // DO NOT DOWNLOAD FROM YOURSELF.
-        if( rfd.isMe(applicationServices.getMyGUID()) )
-            return true;
-        
-        // already downloading from the host
-        if (currentRFDs.contains(rfd))
-            return true;
-        
-        prepareRFD(rfd,cache);
-        
-        if (ranker.addToPool(rfd)){
-            //if(LOG.isTraceEnabled())
-                //LOG.trace("added rfd: " + rfd);
-            receivedNewSources = true;
-        }
-        
-        return true;
+        // the singleton impl calls the collection impl and not the other way round,
+        // so that the ping ranker gets a collection and only fires off one round of pinging
+        return addDownloadForced(Collections.singleton(rfd), cache);
     }
     
     protected synchronized final boolean addDownloadForced(Collection<? extends RemoteFileDesc> c, boolean cache) {
+        // create copy, argument might not be modifiable
+        Set<RemoteFileDesc> copy = new HashSet<RemoteFileDesc>(c);
         // remove any rfds we're currently downloading from 
-        c.removeAll(currentRFDs);
+        copy.removeAll(currentRFDs);
         
-        for (Iterator<? extends RemoteFileDesc> iter = c.iterator(); iter.hasNext();) {
+        byte[] myGUID = applicationServices.getMyGUID();
+        for (Iterator<RemoteFileDesc> iter = copy.iterator(); iter.hasNext();) {
             RemoteFileDesc rfd =  iter.next();
-            if (rfd.isMe(applicationServices.getMyGUID())) {
+            // do not download from ourselves
+            if (rfd.isMe(myGUID)) {
                 iter.remove();
-                continue;
+            } else { 
+                prepareRFD(rfd,cache);
             }
-            prepareRFD(rfd,cache);
          //   if(LOG.isTraceEnabled())
          //       LOG.trace("added rfd: " + rfd);
         }
         
-        if ( ranker.addToPool(c) ) {
+        if ( ranker.addToPool(copy) ) {
          //   if(LOG.isTraceEnabled())
         //        LOG.trace("added rfds: " + c);
             receivedNewSources = true;
@@ -2556,7 +2554,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
     /////////////////////////////Display Variables////////////////////////////
 
-    public synchronized void setState(DownloadStatus newState) {
+    public void setState(DownloadStatus newState) {
         setState(newState, Long.MAX_VALUE);
     }
 
@@ -2567,9 +2565,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @param time the time we expect to state in this state, in 
      *  milliseconds. 
      */
-    synchronized void setState(DownloadStatus newState, long time) {
+    void setState(DownloadStatus newState, long time) {
+        synchronized (this) {
             this.state=newState;
             this.stateTime=System.currentTimeMillis()+time;
+        }
+        listeners.broadcast(new DownloadStatusEvent(this, newState));
     }
     
     /**
@@ -3116,5 +3117,27 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             rfds.add(remoteFileDescFactory.createFromMemento(memento));
         }
         return rfds;
+    }
+
+    /**
+     * Only for testing. 
+     */
+    Set<RemoteFileDesc> getCachedRFDs() {
+        return cachedRFDs;
+    }
+
+    public void addListener(Object strongRef, EventListener<DownloadStatusEvent> listener) {
+        listeners.addListener(strongRef, listener);
+    }
+
+    public boolean removeListener(Object strongRef, EventListener<DownloadStatusEvent> listener) {
+        return listeners.removeListener(strongRef, listener);
+    }
+
+    /**
+     * @return the source ranker being used or null if none is set.
+     */
+    protected SourceRanker getSourceRanker() {
+        return ranker;
     }
 }

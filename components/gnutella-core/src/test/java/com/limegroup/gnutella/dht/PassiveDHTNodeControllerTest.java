@@ -36,6 +36,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         = new DHTEventDispatcherStub();
     private MojitoDHT bootstrapDHT;
     private DHTControllerFactory dhtControllerFactory;
+    private Injector injector;
     
     public PassiveDHTNodeControllerTest(String name) {
         super(name);
@@ -50,14 +51,12 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     }
     
     public void setUp() throws Exception {
-        setSettings();
+        DHTTestUtils.setSettings(PORT);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         assertEquals("unexpected port", PORT, 
                  ConnectionSettings.PORT.getValue());
         
-        // fake a connection to the network
-        Injector injector = LimeTestUtils.createInjector();
-
+        injector = LimeTestUtils.createInjector();
         dhtControllerFactory = injector.getInstance(DHTControllerFactory.class);
         
         bootstrapDHT = startBootstrapDHT(injector.getInstance(LifecycleManager.class));
@@ -108,6 +107,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
     }
     
     public void testAddRemoveLeafDHTNode() throws Exception {
+        DHTTestUtils.setLocalIsPrivate(injector, false);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
         // Initial State:

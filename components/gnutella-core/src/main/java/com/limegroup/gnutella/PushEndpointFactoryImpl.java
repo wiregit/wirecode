@@ -52,7 +52,7 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
     }
 
     public PushEndpoint createPushEndpoint(byte[] guid, Set<? extends IpPort> proxies, byte features, int version, IpPort addr) {
-        return new PushEndpoint(guid, proxies, features, version, addr, pushEndpointCache.get(), networkInstanceUtils);
+        return new PushEndpointImpl(guid, proxies, features, version, addr, pushEndpointCache.get(), networkInstanceUtils);
     }
 
     public PushEndpoint createPushEndpoint(String httpString) throws IOException {
@@ -188,7 +188,6 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
         
         /** this adds the read set to the existing proxies */
         PushEndpoint pe = createPushEndpoint(guid, proxies, features, version, addr);
-        pe.updateProxies(true);
         return pe;
     }    
     

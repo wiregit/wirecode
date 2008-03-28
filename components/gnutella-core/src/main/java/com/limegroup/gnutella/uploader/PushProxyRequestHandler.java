@@ -207,7 +207,7 @@ public class PushProxyRequestHandler extends SimpleNHttpRequestHandler {
         return true;
     }
 
-    private class PushProxyRequest {
+    private static class PushProxyRequest {
 
         private String clientGUID;
 

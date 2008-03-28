@@ -2,11 +2,20 @@ package com.limegroup.gnutella.stubs;
 
 import org.limewire.io.LocalSocketAddressProvider;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Module;
 import com.google.inject.Singleton;
 
 @Singleton
 public class LocalSocketAddressProviderStub implements LocalSocketAddressProvider {
 
+    public static final Module STUB_MODULE = new AbstractModule() {
+        @Override
+        protected void configure() {
+            bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
+        }
+    };
+    
     private byte[] localAddress;
     private int localPort;
     private boolean localAddressPrivate;
@@ -44,5 +53,5 @@ public class LocalSocketAddressProviderStub implements LocalSocketAddressProvide
         this.tlsCapable = tlsCapable;
         return this;
     }
-
+    
 }

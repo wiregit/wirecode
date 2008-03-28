@@ -25,6 +25,10 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * The listener interface for receiving DHTFuture notifications.
+ * <p>
+ * Note: There is no guarantee any of the methods is called if the
+ * task does not finish.
+ * </p>
  */
 public interface DHTFutureListener<T> {
     

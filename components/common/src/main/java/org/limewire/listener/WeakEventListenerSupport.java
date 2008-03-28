@@ -7,7 +7,7 @@ package org.limewire.listener;
  * reference is *not* the listener itself, which allows anonymous classes and
  * one-off instances to be used.
  */
-public interface WeakEventListenerSupport<E extends Event> {
+public interface WeakEventListenerSupport<E> {
 
     public void addListener(Object strongRef, EventListener<E> listener);
 

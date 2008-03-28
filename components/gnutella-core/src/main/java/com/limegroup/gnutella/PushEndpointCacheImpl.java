@@ -1,6 +1,9 @@
 package com.limegroup.gnutella;
 
+import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -11,17 +14,19 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkInstanceUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 @Singleton
 public class PushEndpointCacheImpl implements PushEndpointCache {
     
     /**
-     * A mapping from GUID to a GUIDSetWrapper.  This is used to ensure
+     * A mapping from GUID to a CachedPushEndpoint.  This is used to ensure
      * that all PE's will have access to the same PushProxies, even if
      * multiple PE's exist for a single GUID.  Because access to the proxies
      * is referenced from this GUID_PROXY_MAP, the PE will always receive the
@@ -36,21 +41,29 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
      * object that is stored in the map -- to ensure that the map will not GC
      * the GUID while it is still in use by a PE.
      *
-     * The value is a GUIDSetWrapper (containing a WeakReference to the
+     * The value is a CachedPushEndpoint SetWrapper (containing a WeakReference to the
      * GUID key as well as the Set of proxies) so that subsequent PEs can 
      * reference the true key object.  A WeakReference is used to allow
      * GC'ing to still work and the map to ultimately remove unused keys.
      */
-    private final Map<GUID, PushEndpointCache.CachedPushEndpoint> GUID_PROXY_MAP = 
+    private final Map<GUID, CachedPushEndpoint> GUID_PROXY_MAP = 
         Collections.synchronizedMap(new WeakHashMap<GUID, CachedPushEndpoint>());
     
+    /**
+     * Package access for testing.
+     */
+    final ReferenceQueue<GUID> referenceQueue = new ReferenceQueue<GUID>();
+    
     private final HTTPHeaderUtils httpHeaderUtils;
+
+    private final NetworkInstanceUtils networkInstanceUtils;
     
     @Inject
     PushEndpointCacheImpl(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-                          HTTPHeaderUtils httpHeaderUtils) {
-        backgroundExecutor.scheduleWithFixedDelay(new WeakCleaner(),30*1000,30*1000, TimeUnit.MILLISECONDS);
+                          HTTPHeaderUtils httpHeaderUtils, NetworkInstanceUtils networkInstanceUtils) {
         this.httpHeaderUtils = httpHeaderUtils;
+        this.networkInstanceUtils = networkInstanceUtils;
+        backgroundExecutor.scheduleWithFixedDelay(new WeakCleaner(),30*1000,30*1000, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -78,10 +91,11 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
         synchronized(GUID_PROXY_MAP) {
             wrapper = GUID_PROXY_MAP.get(g);
             if (wrapper==null) {
-                wrapper = new CachedPushEndpointImpl(g);
+                wrapper = new CachedPushEndpoint(g, newSet);
                 GUID_PROXY_MAP.put(g, wrapper);
+            } else {
+                wrapper.overwriteProxies(newSet);
             }
-            wrapper.overwriteProxies(newSet);
         }
     }
 
@@ -96,16 +110,6 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
     }
 
     /**
-     * updates the features of all PushEndpoints for the given guid 
-     */
-    public void setFeatures(byte [] guid,int features) {
-    	GUID g = new GUID(guid);
-    	CachedPushEndpoint current = getCached(g);
-    	if (current!=null)
-    		current.setFeatures(features);
-    }
-
-    /**
      * Sets the fwt version supported for all PEs pointing to the
      * given client guid.
      */
@@ -115,10 +119,23 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
     	if (current!=null)
     		current.setFWTVersion(version);
     }
-
+    
     public CachedPushEndpoint getCached(GUID guid) {
-        synchronized(GUID_PROXY_MAP) {
-            return GUID_PROXY_MAP.get(guid);
+        return GUID_PROXY_MAP.get(guid);
+    }
+
+    public PushEndpoint getPushEndpoint(GUID guid) {
+        CachedPushEndpoint cached = GUID_PROXY_MAP.get(guid);
+        return cached != null ? cached.createClone() : null;
+    }
+    
+    public void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
+        PushEndpoint pushEndpoint = getPushEndpoint(guid);
+        if (pushEndpoint != null) {
+            listener.handleResult(pushEndpoint);
+            listener.handleSearchDone(true);
+        } else {
+            listener.handleSearchDone(false);
         }
     }
 
@@ -137,12 +154,8 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
             // add a new one atomically
             // (we don't care about the proxies of the expired mapping)
             if (existing == null || guidRef==null) {                
-                existing = new CachedPushEndpointImpl(guid, pushEndpoint.getFeatures(), pushEndpoint.supportsFWTVersion());
-                if (valid)
-                    existing.updateProxies(pushEndpoint.getProxies(), true);
-                else
-                    existing.updateProxies(IpPort.EMPTY_SET, true);
-                
+                existing = new CachedPushEndpoint(guid, pushEndpoint.getFeatures(), pushEndpoint.getFWTVersion(), 
+                        valid ? pushEndpoint.getProxies() : IpPort.EMPTY_SET);
                 GUID_PROXY_MAP.put(guid, existing);
                 return guid;
             }
@@ -153,11 +166,13 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
         existing.updateProxies(pushEndpoint.getProxies(), valid);
         return guidRef;
     }
+    
 
+    public void removePushProxy(byte[] bytes, IpPort pushProxy) {
+    }
+    
     public void clear() {
-        synchronized (GUID_PROXY_MAP) {
-            GUID_PROXY_MAP.clear();
-        }
+        GUID_PROXY_MAP.clear();
     }
     
     private final class WeakCleaner implements Runnable {
@@ -166,48 +181,49 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
         }
     }
     
-    static class CachedPushEndpointImpl implements CachedPushEndpoint {
-        private final WeakReference<GUID> _guidRef;
-        private Set<IpPort> _proxies;
-        private int _features,_fwtVersion;
-        private IpPort _externalAddr;
+    class CachedPushEndpoint extends AbstractPushEndpoint {
         
-        CachedPushEndpointImpl(GUID guid) {
-            this(guid,0,0);
+        private final WeakReference<GUID> _guidRef;
+        /**
+         * Class invariant: never null
+         */
+        private Set<IpPort> _proxies;
+        private byte _features;
+        private int _fwtVersion;
+        private IpPort _externalAddr;
+        private final byte[] guid;
+        
+        CachedPushEndpoint(GUID guid, Set<? extends IpPort> proxies) {
+            this(guid, (byte)0, 0, proxies);
         }
         
-        CachedPushEndpointImpl(GUID guid,int features, int version) {
-            _guidRef = new WeakReference<GUID>(guid);
+        CachedPushEndpoint(GUID guid, byte features, int version, Set<? extends IpPort> proxies) {
+            this.guid = guid.bytes();
+            _guidRef = new WeakReference<GUID>(guid, referenceQueue);
             _features=features;
             _fwtVersion=version;
+            overwriteProxies(proxies);
         }
         
         public synchronized void updateProxies(Set<? extends IpPort> s, boolean add){
-            Set<IpPort> existing = new IpPortSet();
-            
-            if (s == null)
-                s = _proxies;
-            
-            if (_proxies!=null)
-                existing.addAll(_proxies);
-            
+            Set<IpPort> existing = new IpPortSet(_proxies);
             if (add)
                 existing.addAll(s);
             else
                 existing.removeAll(s);
             
-            overwriteProxies(existing);
+            _proxies = Collections.unmodifiableSet(existing);
         }
         
-        public synchronized void overwriteProxies(Set<? extends IpPort> s) {
-            _proxies = Collections.unmodifiableSet(s);
+        public synchronized void overwriteProxies(Set<? extends IpPort> proxies) {
+            _proxies = Collections.unmodifiableSet(new IpPortSet(proxies));
         }
         
         public synchronized Set<IpPort> getProxies() {
-            return _proxies != null ? _proxies : IpPort.EMPTY_SET;
+            return _proxies;
         }
         
-        public synchronized int getFeatures() {
+        public synchronized byte getFeatures() {
             return _features;
         }
         
@@ -215,7 +231,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
             return _fwtVersion;
         }
         
-        public synchronized void setFeatures(int features) {
+        public synchronized void setFeatures(byte features) {
             _features=features;
         }
         
@@ -233,6 +249,48 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
         
         public GUID getGuid() {
             return _guidRef.get();
+        }
+
+        public PushEndpoint createClone() {
+            return new PushEndpointImpl(guid, getProxies(), 
+                    getFeatures(), getFWTVersion(), 
+                    getValidExternalAddress(), PushEndpointCacheImpl.this, networkInstanceUtils);
+        }
+
+        public byte[] getClientGUID() {
+            return guid;
+        }
+
+        public int getPort() {
+            IpPort address = _externalAddr;
+            return address != null ? address.getPort() : 6346;
+        }
+
+        public IpPort getValidExternalAddress() {
+            return _externalAddr;
+        }
+
+        public boolean isLocal() {
+            return false;
+        }
+
+        public synchronized void updateProxies(boolean good) {
+            if (!good) {
+                _proxies = Collections.emptySet();
+            }
+        }
+
+        public String getAddress() {
+            IpPort address = _externalAddr;
+            return address != null ? _externalAddr.getAddress() : RemoteFileDesc.BOGUS_IP;
+        }
+
+        public InetAddress getInetAddress() {
+            return null;
+        }
+
+        public InetSocketAddress getInetSocketAddress() {
+            return null;
         }
     }
 

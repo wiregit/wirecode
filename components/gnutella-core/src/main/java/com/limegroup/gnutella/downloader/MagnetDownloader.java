@@ -6,4 +6,5 @@ public interface MagnetDownloader extends ManagedDownloader {
 
     public void setMagnet(MagnetOptions magnetOptions);
 
+    public MagnetOptions getMagnet();
 }

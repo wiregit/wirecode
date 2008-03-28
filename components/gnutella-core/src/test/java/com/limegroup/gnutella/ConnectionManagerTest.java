@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -20,6 +21,10 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import junit.framework.Test;
 
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -62,6 +67,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.version.UpdateHandler;
 
@@ -296,6 +302,28 @@ public class ConnectionManagerTest extends LimeTestCase {
         initializeDone(l1);
         assertTrue("should be supernode", mgr.isSupernode());
         assertTrue("should not be leaf", !mgr.isShieldedLeaf());
+    }
+    
+    /**
+     * Tests that the ConnectionManager returns itself as a push proxy if
+     * it is not firewalled.
+     */
+    public void testGetPushProxiesForNonShieldedLeaf() throws Exception {
+        final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
+        networkManagerStub.setAcceptedIncomingConnection(true);
+        doSetUp(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(NetworkManager.class).toInstance(networkManagerStub);
+            }
+        });
+        // precondition
+        assertFalse(connectionManager.isShieldedLeaf());
+        
+        Set<? extends Connectable> proxies = connectionManager.getPushProxies();
+        assertEquals(1, proxies.size());
+        Connectable expected = new ConnectableImpl(new IpPortImpl(networkManagerStub.getAddress(), networkManagerStub.getPort()), SSLSettings.isOutgoingTLSEnabled());
+        assertEquals(0, IpPort.IP_COMPARATOR.compare(expected, proxies.iterator().next()));
     }
     
     /**

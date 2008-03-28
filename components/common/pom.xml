@@ -48,6 +48,11 @@
       <version>1.0</version>
     </dependency>    
     <dependency>
+      <groupId>com.google.common</groupId>
+      <artifactId>google-collections</artifactId>
+      <version>snapshot-20071022</version>
+    </dependency>	
+    <dependency>
       <groupId>org.limewire</groupId>
       <artifactId>lw-test-util</artifactId>
       <version>${limewire.version}</version>

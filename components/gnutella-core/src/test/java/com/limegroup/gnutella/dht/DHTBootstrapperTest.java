@@ -44,7 +44,7 @@ public class DHTBootstrapperTest extends DHTTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        setSettings();
+        DHTTestUtils.setSettings(PORT);
         MojitoDHT dht = MojitoFactory.createDHT();
         
         Injector injector = LimeTestUtils.createInjector();

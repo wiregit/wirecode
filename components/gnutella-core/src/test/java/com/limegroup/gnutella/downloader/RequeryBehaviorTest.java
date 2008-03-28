@@ -16,7 +16,6 @@ import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
@@ -26,17 +25,15 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
-import com.limegroup.gnutella.altlocs.AltLocManager;
-import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
-import com.limegroup.gnutella.dht.db.AltLocSearchListener;
+import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -134,7 +131,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         assertSame("time spent querying dht"+dhtQueryTime,DownloadStatus.QUERYING_DHT, downloader.getState());
         
         LOG.debug("dht query fails");
-        myAltFinder.listener.handleAltLocSearchDone(false);
+        myAltFinder.listener.handleSearchDone(false);
         assertSame(DownloadStatus.GAVE_UP,downloader.getState());
         waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.QUEUED,downloader.getState());
@@ -217,7 +214,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         // now tell them the dht query failed
         LOG.debug("dht query fails");
         assertNotNull(myAltFinder.listener);
-        myAltFinder.listener.handleAltLocSearchDone(false);
+        myAltFinder.listener.handleSearchDone(false);
         assertSame(DownloadStatus.GAVE_UP,downloader.getState());
         waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.QUEUED,downloader.getState());
@@ -311,7 +308,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         // now tell them the dht query failed
         LOG.debug("dht query fails");
         assertNotNull(myAltFinder.listener);
-        myAltFinder.listener.handleAltLocSearchDone(false);
+        myAltFinder.listener.handleSearchDone(false);
         assertSame(DownloadStatus.GAVE_UP, downloader.getState());
         waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.QUEUED, downloader.getState());
@@ -401,18 +398,12 @@ public class RequeryBehaviorTest extends LimeTestCase {
     }
     
     @Singleton
-    private static class MyAltLocFinder extends AltLocFinder {
-        private volatile AltLocSearchListener listener;
+    private static class MyAltLocFinder implements AltLocFinder {
+        private volatile SearchListener<AlternateLocation> listener;
         
         volatile boolean cancelled;
-        @Inject
-        public MyAltLocFinder(DHTManager manager, AlternateLocationFactory alternateLocationFactory, AltLocManager altLocManager, PushEndpointFactory pushEndpointFactory) {
-            super(manager, alternateLocationFactory, altLocManager, pushEndpointFactory);
-        }
         
-        
-        @Override
-        public Shutdownable findAltLocs(URN urn, AltLocSearchListener listener) {
+        public Shutdownable findAltLocs(URN urn, SearchListener<AlternateLocation> listener) {
             this.listener = listener;
             return new Shutdownable() {
                 public void shutdown() {
@@ -421,8 +412,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
             };
         }
 
-        @Override
-        public boolean findPushAltLocs(GUID guid, URN urn) {
+        public boolean findPushAltLocs(GUID guid, URN urn, SearchListener<AlternateLocation> listener) {
             return true;
         }
     }

@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
@@ -224,6 +225,17 @@ public class IOUtils {
      */
     public static void close(Closeable closeable) {
         FileUtils.close(closeable);
+    }
+    
+    /**
+     * Closes a collection of closeables. Also handles a null argument gracefully. 
+     */
+    public static void close(Collection<? extends Closeable> closeables) {
+        if (closeables != null) {
+            for (Closeable closeable : closeables) {
+                close(closeable);
+            }
+        }
     }
     
     /**

@@ -6,28 +6,16 @@ import java.util.Set;
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.IpPort;
 import org.limewire.mojito.db.DHTValue;
-import org.limewire.mojito.db.DHTValueType;
-import org.limewire.mojito.routing.Version;
+import org.limewire.mojito.routing.Contact;
 
+/**
+ * Does not contain external address information since it can be retrieved
+ * from the {@link Contact} that created the value.
+ * <p>
+ * Implementations should provide a value based {@link #equals(Object)} method.
+ * </p>
+ */
 public interface PushProxiesValue extends DHTValue, Serializable  {
-
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#getValueType()
-     */
-    public DHTValueType getValueType();
-
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#getVersion()
-     */
-    public Version getVersion();
-
-    /*
-     * (non-Javadoc)
-     * @see org.limewire.mojito.db.DHTValue#size()
-     */
-    public int size();
 
     /**
      * The Client ID of the Gnutella Node
@@ -57,8 +45,8 @@ public interface PushProxiesValue extends DHTValue, Serializable  {
 
     /**
      * @return BitNumbers for tls status of push proxies,
-     * null if none are tls-capable.
+     * or empty Bitnumbers
      */
     public BitNumbers getTLSInfo();
-
+    
 }

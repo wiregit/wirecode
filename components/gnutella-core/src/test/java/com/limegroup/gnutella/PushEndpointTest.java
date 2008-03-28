@@ -88,8 +88,8 @@ public class PushEndpointTest extends BaseTestCase {
         GUID guid1 = new GUID(GUID.makeGuid());        
         PushEndpoint empty = factory.createPushEndpoint(guid1.bytes()); 
         assertEquals(guid1, new GUID(empty.getClientGUID()));
-        assertEquals(PushEndpoint.HEADER_SIZE,PushEndpoint.getSizeBytes(empty.getProxies(), false));
-        assertEquals(PushEndpoint.HEADER_SIZE,PushEndpoint.getSizeBytes(empty.getProxies(), true));
+        assertEquals(PushEndpoint.HEADER_SIZE,AbstractPushEndpoint.getSizeBytes(empty.getProxies(), false));
+        assertEquals(PushEndpoint.HEADER_SIZE,AbstractPushEndpoint.getSizeBytes(empty.getProxies(), true));
         assertEquals(0, empty.getProxies().size());
     }
     
@@ -104,16 +104,16 @@ public class PushEndpointTest extends BaseTestCase {
         set2.add(ppi2);
         
         PushEndpoint one = factory.createPushEndpoint(guid2.bytes(), set1);
-        assertEquals(PushEndpoint.HEADER_SIZE+PushEndpoint.PROXY_SIZE, PushEndpoint.getSizeBytes(one.getProxies(), false));
-        assertEquals(PushEndpoint.HEADER_SIZE+PushEndpoint.PROXY_SIZE, PushEndpoint.getSizeBytes(one.getProxies(), true));
+        assertEquals(PushEndpoint.HEADER_SIZE+PushEndpoint.PROXY_SIZE, AbstractPushEndpoint.getSizeBytes(one.getProxies(), false));
+        assertEquals(PushEndpoint.HEADER_SIZE+PushEndpoint.PROXY_SIZE, AbstractPushEndpoint.getSizeBytes(one.getProxies(), true));
         assertEquals(1,one.getProxies().size());
-        assertEquals(0,one.supportsFWTVersion());
+        assertEquals(0,one.getFWTVersion());
         
         PushEndpoint two = factory.createPushEndpoint(guid2.bytes(), set2);
-        assertEquals(PushEndpoint.HEADER_SIZE+2*PushEndpoint.PROXY_SIZE, PushEndpoint.getSizeBytes(two.getProxies(), false));
-        assertEquals(PushEndpoint.HEADER_SIZE+2*PushEndpoint.PROXY_SIZE, PushEndpoint.getSizeBytes(two.getProxies(), true));
+        assertEquals(PushEndpoint.HEADER_SIZE+2*PushEndpoint.PROXY_SIZE, AbstractPushEndpoint.getSizeBytes(two.getProxies(), false));
+        assertEquals(PushEndpoint.HEADER_SIZE+2*PushEndpoint.PROXY_SIZE, AbstractPushEndpoint.getSizeBytes(two.getProxies(), true));
         assertEquals(2,two.getProxies().size());
-        assertEquals(0,two.supportsFWTVersion());
+        assertEquals(0,two.getFWTVersion());
     }
     
     @SuppressWarnings("null")
@@ -131,10 +131,10 @@ public class PushEndpointTest extends BaseTestCase {
         set3.add(ppi3);
     	
         PushEndpoint tls = factory.createPushEndpoint(guid4.bytes(), set3);
-        assertEquals(PushEndpoint.HEADER_SIZE+3*PushEndpoint.PROXY_SIZE, PushEndpoint.getSizeBytes(tls.getProxies(), false));
-        assertEquals(PushEndpoint.HEADER_SIZE+3*PushEndpoint.PROXY_SIZE+1, PushEndpoint.getSizeBytes(tls.getProxies(), true));
+        assertEquals(PushEndpoint.HEADER_SIZE+3*PushEndpoint.PROXY_SIZE, AbstractPushEndpoint.getSizeBytes(tls.getProxies(), false));
+        assertEquals(PushEndpoint.HEADER_SIZE+3*PushEndpoint.PROXY_SIZE+1, AbstractPushEndpoint.getSizeBytes(tls.getProxies(), true));
         assertEquals(3,tls.getProxies().size());
-        assertEquals(0,tls.supportsFWTVersion());
+        assertEquals(0,tls.getFWTVersion());
         Set proxies = tls.getProxies();
         assertEquals(3, proxies.size());
         int notTLS = 0;
@@ -156,7 +156,7 @@ public class PushEndpointTest extends BaseTestCase {
     public void testConstructorFeatures() throws Exception {
         GUID guid3 = new GUID(GUID.makeGuid());
     	PushEndpoint three = factory.createPushEndpoint(guid3.bytes(), null, (byte)0, 1);
-    	assertGreaterThan(0, three.supportsFWTVersion());
+    	assertGreaterThan(0, three.getFWTVersion());
     	assertEquals("1.1.1.1", three.getAddress());
     	assertEquals(6346, three.getPort());
     }
@@ -179,7 +179,7 @@ public class PushEndpointTest extends BaseTestCase {
                 fail("TLS capable: " + ipp);
         }
         
-    	assertEquals(0,one.supportsFWTVersion());
+    	assertEquals(0,one.getFWTVersion());
         
         byte[] expected = new byte[23];
         expected[ 0] = 0x1; // 1 proxy, no f2f, no features
@@ -208,7 +208,7 @@ public class PushEndpointTest extends BaseTestCase {
         assertEquals(expected, network2, 2, expected.length);
     	
         // Test fromBytes
-    	assertEquals(PushEndpoint.getSizeBytes(one.getProxies(), false), expected.length);
+    	assertEquals(AbstractPushEndpoint.getSizeBytes(one.getProxies(), false), expected.length);
     	PushEndpoint one_prim = factory.createFromBytes(new DataInputStream(new ByteArrayInputStream(expected)));
     	assertEquals(one, one_prim);
     	// And make sure none of the proxies are TLS capable.
@@ -238,7 +238,7 @@ public class PushEndpointTest extends BaseTestCase {
         }
         
         PushEndpoint one = factory.createPushEndpoint(guid1.bytes(), tet1);
-        assertEquals(0,one.supportsFWTVersion());        
+        assertEquals(0,one.getFWTVersion());        
         // Make sure the proxies we read are TLS capable.
         Set proxies = one.getProxies();
         Set expectedProxies = new IpPortSet(tet1);
@@ -290,7 +290,7 @@ public class PushEndpointTest extends BaseTestCase {
         assertEquals(network, network2, 2, network.length);
         
         // Test fromBytes
-        assertEquals(PushEndpoint.getSizeBytes(one.getProxies(), true), expected.length);
+        assertEquals(AbstractPushEndpoint.getSizeBytes(one.getProxies(), true), expected.length);
         PushEndpoint one_prim = factory.createFromBytes(new DataInputStream(new ByteArrayInputStream(expected)));
         assertEquals(one, one_prim);
         
@@ -334,7 +334,7 @@ public class PushEndpointTest extends BaseTestCase {
         }
         
         PushEndpoint one = factory.createPushEndpoint(guid1.bytes(), set);
-        assertEquals(0,one.supportsFWTVersion());
+        assertEquals(0,one.getFWTVersion());
         
         // Test toBytes
         byte[] network = one.toBytes(true);
@@ -382,7 +382,7 @@ public class PushEndpointTest extends BaseTestCase {
     	String httpString = six.httpStringValue();
         assertEquals(g1.toHexString() + ";fwt/2;5:1.2.3.4;1.2.3.4:1235;1.2.3.5:1235;1.2.3.6:1235;1.2.3.7:1235", httpString);
     	PushEndpoint four = factory.createPushEndpoint(httpString);
-    	assertEquals(2,four.supportsFWTVersion());
+    	assertEquals(2,four.getFWTVersion());
     	assertEquals(4,four.getProxies().size());
     	assertEquals("1.2.3.4",four.getAddress());
     	assertEquals(5,four.getPort());
@@ -401,7 +401,7 @@ public class PushEndpointTest extends BaseTestCase {
         assertNull(pushEndpoint.getValidExternalAddress());
         assertNull(pushEndpoint.getInetAddress());
         assertNull(pushEndpoint.getInetSocketAddress());
-        assertEquals(0, pushEndpoint.supportsFWTVersion());
+        assertEquals(0, pushEndpoint.getFWTVersion());
     }
     
     public void testHttpStringWithTLS() throws Exception {
@@ -441,7 +441,7 @@ public class PushEndpointTest extends BaseTestCase {
         PushEndpoint pe = factory.createPushEndpoint(g1.bytes(), set, (byte)0, 2, myIp);
         String httpString = pe.httpStringValue();
         assertEquals(g1.toHexString() + ";fwt/2;7:1.3.2.5;pptls=A;1.2.3.4:1235;1.2.3.5:1235;1.2.3.6:1235;1.2.3.7:1235", httpString);
-        assertEquals(2, pe.supportsFWTVersion());
+        assertEquals(2, pe.getFWTVersion());
         PushEndpoint read = factory.createPushEndpoint(httpString);
         assertEquals("1.3.2.5", read.getAddress());
         Iterator<? extends IpPort> i = read.getProxies().iterator();
@@ -534,13 +534,13 @@ public class PushEndpointTest extends BaseTestCase {
         // test a PE that claims it supports FWT but doesn't have external address -
         // its FWT status gets cleared
         PushEndpoint six = factory.createPushEndpoint(guid2.bytes(), set6, (byte)0, 2);
-        assertEquals(2,six.supportsFWTVersion());
+        assertEquals(2,six.getFWTVersion());
         byte[] network = six.toBytes(false);
-        assertEquals(PushEndpoint.getSizeBytes(six.getProxies(), false),network.length);
+        assertEquals(AbstractPushEndpoint.getSizeBytes(six.getProxies(), false),network.length);
         
         pushEndpointCache.clear();
         PushEndpoint four = factory.createFromBytes(new DataInputStream(new ByteArrayInputStream(network)));
-        assertEquals(0,four.supportsFWTVersion());
+        assertEquals(0,four.getFWTVersion());
         assertEquals(4,four.getProxies().size());
         
         IpPortSet sent = new IpPortSet();
@@ -551,7 +551,7 @@ public class PushEndpointTest extends BaseTestCase {
         pushEndpointCache.clear();
         PushEndpoint ext = factory.createPushEndpoint(guid2.bytes(), set6, (byte)0, 2, new IpPortImpl("1.2.3.4",5));
         network = ext.toBytes(false);
-        assertEquals(PushEndpoint.getSizeBytes(set6, false)+6,network.length);
+        assertEquals(AbstractPushEndpoint.getSizeBytes(set6, false)+6,network.length);
         
         pushEndpointCache.clear();
         PushEndpoint ext2 = factory.createFromBytes(new DataInputStream(new ByteArrayInputStream(network)));
@@ -566,7 +566,7 @@ public class PushEndpointTest extends BaseTestCase {
         pushEndpointCache.clear();
         PushEndpoint noFWT = factory.createPushEndpoint(guid2.bytes(), set6, (byte)0, 0, new IpPortImpl("1.2.3.4",5));
         network = noFWT.toBytes(false);
-        assertEquals(PushEndpoint.getSizeBytes(set6, false),network.length);
+        assertEquals(AbstractPushEndpoint.getSizeBytes(set6, false),network.length);
         
         pushEndpointCache.clear();
         PushEndpoint noFWT2 = factory.createFromBytes(new DataInputStream(new ByteArrayInputStream(network)));
@@ -598,29 +598,29 @@ public class PushEndpointTest extends BaseTestCase {
     public void testUnknownFeatures() throws Exception {
         PushEndpoint unknown = factory.createPushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;someFeature/2.3;1.2.3.5:1235;1.2.3.6:1235");
     	assertEquals(2,unknown.getProxies().size());
-    	assertEquals(0,unknown.supportsFWTVersion());
+    	assertEquals(0,unknown.getFWTVersion());
     	
     	//now an endpoint with the fwt header moved elsewhere
     	unknown = factory.createPushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;1.2.3.5:1235;fwt/1.3;1.2.3.6:1235;555:129.1.2.3");
     	assertEquals(2,unknown.getProxies().size());
-    	assertEquals(1,unknown.supportsFWTVersion());
+    	assertEquals(1,unknown.getFWTVersion());
     	
     	//now an endpoint only with the guid
     	unknown = factory.createPushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500");
     	assertEquals(0,unknown.getProxies().size());
-    	assertEquals(0,unknown.supportsFWTVersion());
+    	assertEquals(0,unknown.getFWTVersion());
     	
     	//now an endpoint only guid and port:ip
     	unknown = factory.createPushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;5:1.2.3.4");
     	assertEquals(0,unknown.getProxies().size());
-    	assertEquals(0,unknown.supportsFWTVersion());
+    	assertEquals(0,unknown.getFWTVersion());
     	assertEquals("1.2.3.4",unknown.getAddress());
     	assertEquals(5,unknown.getPort());
     	
     	//now an endpoint only guid and two port:ips.. the second one should be ignored
     	unknown = factory.createPushEndpoint("2A8CA57F43E6E0B7FF823F0CC7880500;5:1.2.3.4;6:2.3.4.5");
     	assertEquals(0,unknown.getProxies().size());
-    	assertEquals(0,unknown.supportsFWTVersion());
+    	assertEquals(0,unknown.getFWTVersion());
     	assertEquals("1.2.3.4",unknown.getAddress());
     	assertEquals(5,unknown.getPort());
     }

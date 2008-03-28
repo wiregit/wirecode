@@ -33,12 +33,14 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
+import com.limegroup.gnutella.altlocs.MagnetDownloaderPushEndpointFinder;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
 import com.limegroup.gnutella.browser.LocalAcceptor;
 import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.LWSIntegrationServices;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
@@ -136,6 +138,10 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
     private final Provider<ConnectionDispatcher> localConnectionDispatcher;
 
+    private final Provider<MagnetDownloaderPushEndpointFinder> magnetDownloaderPushEndpointFinder;
+
+    private final Provider<PushProxiesPublisher> pushProxiesPublisher;
+
     @Inject
     public LifecycleManagerImpl(
              Provider<IPFilter> ipFilter,
@@ -182,7 +188,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<OutOfBandThroughputMeasurer> outOfBandThroughputMeasurer,
             Provider<BrowseHostHandlerManager> browseHostHandlerManager,
             Provider<DownloadUpgradeTask> downloadUpgradeTask,
-            Provider<StatisticAccumulator> statisticAccumulator) { 
+            Provider<StatisticAccumulator> statisticAccumulator,
+            Provider<MagnetDownloaderPushEndpointFinder> magnetDownloaderPushEndpointFinder,
+            Provider<PushProxiesPublisher> pushProxiesPublisher) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -227,6 +235,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.browseHostHandlerManager = browseHostHandlerManager;
         this.downloadUpgradeTask = downloadUpgradeTask;
         this.statisticAccumulator = statisticAccumulator;
+        this.magnetDownloaderPushEndpointFinder = magnetDownloaderPushEndpointFinder;
+        this.pushProxiesPublisher = pushProxiesPublisher;
     }
     
     /* (non-Javadoc)
@@ -268,6 +278,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         connectionManager.get().addEventListener(activityCallback.get());
         connectionManager.get().addEventListener(dhtManager.get());
+        dhtManager.get().addEventListener(pushProxiesPublisher.get());
         
         preinitializeDone.set(true);
     }
@@ -377,6 +388,10 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		LOG.trace("Running download upgrade task");
 		downloadUpgradeTask.get().upgrade();
 		LOG.trace("Download upgrade task run!");
+
+		// has to be started before download manager reads saved downloads which is actually later
+		LOG.trace("START MagnetDownloaderPushEndpointFinder");
+		magnetDownloaderPushEndpointFinder.get().start();
 		
 		LOG.trace("START DownloadManager");
 		activityCallback.get().componentLoading(I18nMarker.marktr("Loading Download Management..."));
@@ -563,6 +578,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         cleanupTorrentMetadataFiles();
         
         downloadManager.get().writeSnapshot();
+        
+        magnetDownloaderPushEndpointFinder.get().stop();
         
        // torrentManager.writeSnapshot();
         

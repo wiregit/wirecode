@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
@@ -17,6 +19,8 @@ import com.limegroup.gnutella.util.ClassCNetworks;
 @Singleton
 public class AltLocManager {
 
+    private static final Log LOG = LogFactory.getLog(AltLocManager.class);
+    
     /**
      * Map of the alternate location collections for each URN.
      * LOCKING: itself for all map operations as well as operations on the contained arrays
@@ -28,6 +32,10 @@ public class AltLocManager {
      * @return whether the manager already knew about this altloc
      */
     public boolean add(AlternateLocation al, Object source) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("alternate location added: " + al);
+        }
+        
         URN sha1 = al.getSHA1Urn();
         AlternateLocationCollection<DirectAltLoc> dCol = null;
         AlternateLocationCollection<PushAltLoc>   pCol = null;

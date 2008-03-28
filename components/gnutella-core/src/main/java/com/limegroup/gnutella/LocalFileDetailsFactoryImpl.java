@@ -13,10 +13,12 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 public class LocalFileDetailsFactoryImpl implements LocalFileDetailsFactory {
     
     private final NetworkManager networkManager;
+    private final ApplicationServices applicationServices;
     
     @Inject
-    public LocalFileDetailsFactoryImpl(NetworkManager networkManager) {
+    public LocalFileDetailsFactoryImpl(NetworkManager networkManager, ApplicationServices applicationServices) {
         this.networkManager = networkManager;
+        this.applicationServices = applicationServices;
     }
     
     /* (non-Javadoc)
@@ -55,7 +57,11 @@ public class LocalFileDetailsFactoryImpl implements LocalFileDetailsFactory {
 
             public LimeXMLDocument getXMLDocument() {
                 return fd.getXMLDocument();
-            }            
+            }
+            
+            public byte[] getClientGUID() {
+                return applicationServices.getMyGUID();
+            }
         };
     }
 
