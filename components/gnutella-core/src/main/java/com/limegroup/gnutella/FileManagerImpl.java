@@ -1417,8 +1417,10 @@ public abstract class FileManagerImpl implements FileManager {
                 // try loading the fd so we can check the LimeXML info
                 loadFile(fd, file, metadata, urns);
 
-                // check LimeXML to determine if is a store file
-                if (isStoreXML(fd.getXMLDocument())) {
+                // check LimeXML to determine if is a store file or the sha1 is mapped to a store file 
+                //  (the sha1 check is needed if duplicate store files are loaded since the second file 
+                //  will not have a unique LimeXMLDoc associated with it)
+                if (isStoreXML(fd.getXMLDocument()) || _urnStoreMap.containsKey(fd.getSHA1Urn()) ) { 
                     addStoreFile(fd, file, urns, addFileType, notify, callback);
                 } else if (addFileType == AddType.ADD_SHARE) {
                     addSharedFile(file, fd, urns, addFileType, notify, callback);
