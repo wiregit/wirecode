@@ -241,9 +241,8 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
         
         int numGoodSentToFrontEnd = gc.addQueryReply(this, qr, data);
             
-        // we should execute if results were consumed
-        // technically Ultrapeers don't use this info, but we are keeping it
-        // around for further use
+        // we should execute if results were consumed. technically Ultrapeers 
+        // don't use this info, but we are keeping it around for further use.
         if (numGoodSentToFrontEnd > 0) {
             // update the object
             LOG.trace("SRH.accountAndUpdateDynamicQueriers(): incrementing.");
@@ -266,7 +265,6 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                                                 numResultsToReport);
                     connectionManager.get().updateQueryStatus(stat);
                 }
-
             }
         }
         LOG.trace("SRH.accountAndUpdateDynamicQueriers(): returning.");

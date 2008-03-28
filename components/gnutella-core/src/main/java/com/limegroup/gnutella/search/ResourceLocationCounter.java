@@ -47,7 +47,7 @@ public class ResourceLocationCounter {
      * This value represent the percentage of the data that
      * is available, up to 100%.
      */
-    private int _percentAvailable = 0;
+    private float _percentAvailable = 0.0f;
     
     /**
      * Creates a new instance for the given URN.
@@ -128,7 +128,7 @@ public class ResourceLocationCounter {
         //
         if (_isets.size() == 0) {
             _partialCount = 0;
-            _percentAvailable = _wholeCount > 0 ? 100 : 0;
+            _percentAvailable = _wholeCount > 0 ? 100.0f : 0.0f;
             return;
         }
         
@@ -149,7 +149,7 @@ public class ResourceLocationCounter {
         //
         if (iset.contains(Range.createRange(0, _fileSize-1))) {
             _partialCount = 1;
-            _percentAvailable = 100;
+            _percentAvailable = 100.0f;
             return;
         }
         
@@ -171,14 +171,10 @@ public class ResourceLocationCounter {
         // rounding appropriately and if it rounds down to 
         // zero, set it to 1%.
         //
-        if (sum > 0) {
-            _percentAvailable = (int)Math.floor(100.0 / ((float)_fileSize / (float)sum));
-            
-            if (_percentAvailable == 0)
-                _percentAvailable = 1;
-        }
+        if (sum > 0)
+            _percentAvailable = 100.0f / ((float)_fileSize / (float)sum);
         else
-            _percentAvailable = 0;
+            _percentAvailable = 0.0f;
     }
     
 }
