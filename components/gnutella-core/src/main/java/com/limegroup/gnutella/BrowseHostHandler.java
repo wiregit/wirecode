@@ -340,7 +340,7 @@ public class BrowseHostHandler {
             try {
                 in = response.getEntity().getContent();
             } catch (IOException e) {
-                LOG.debug("Unable to read a message", e);
+                LOG.debug("Unable to read a single message", e);
                 return;
             }
             Message m = null;
@@ -356,7 +356,7 @@ public class BrowseHostHandler {
                 } // either timeout, or the remote closed.
                 
                 if(m == null)  {
-                    LOG.debug("Unable to read a message");
+                    LOG.debug("Unable to read create message");
                     return;
                 } else {
                     if(m instanceof QueryReply) {
