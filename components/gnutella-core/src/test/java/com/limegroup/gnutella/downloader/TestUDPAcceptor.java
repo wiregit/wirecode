@@ -158,7 +158,6 @@ class TestUDPAcceptor extends ManagedThread {
         HeadPing ping = new HeadPing(g, UrnHelper.SHA1, 0);
         HeadPong pong = headPongFactory.create(ping);
         Assert.assertFalse(pong.hasFile());
-        System.out.println(pong.getPushLocs());
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             pong.write(baos);

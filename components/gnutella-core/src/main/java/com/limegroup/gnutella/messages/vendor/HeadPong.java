@@ -120,7 +120,8 @@ public interface HeadPong extends VendorMessage {
     /**
      * 
      * @return set of <tt>PushEndpoint</tt>
-     * containing any firewalled locations this alternate location returned.
+     * containing any firewalled locations this alternate location returned or
+     * <code>null</code> if not available.
      */
     public Set<PushEndpoint> getPushLocs();
 
