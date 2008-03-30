@@ -3,6 +3,8 @@ package com.limegroup.gnutella.gui;
 import java.io.File;
 import java.util.Locale;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Module;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -12,6 +14,13 @@ import com.limegroup.gnutella.util.LimeTestCase;
  */
 public abstract class GUIBaseTestCase extends LimeTestCase {
 
+    public static Module GUI_CORE_MEDIATOR_INJECTION = new AbstractModule() {
+        @Override
+        protected void configure() {
+            requestStaticInjection(GuiCoreMediator.class);
+        }
+    };
+    
 	private static String savedWorkingDir;
 	
 	public GUIBaseTestCase(String name) {

@@ -5,6 +5,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.SwingUtilities;
 
+import junit.framework.Test;
+
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.jmock.Expectations;
@@ -35,6 +37,10 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     
     public FileManagerWarningManagerTest(String name) {
         super(name);
+    }
+    
+    public static Test suite() { 
+        return buildTestSuite(FileManagerWarningManagerTest.class); 
     }
     
     @Override

@@ -3,6 +3,8 @@ package com.limegroup.gnutella.gui.sharing;
 import java.util.HashSet;
 import java.util.Set;
 
+import junit.framework.Test;
+
 import org.limewire.setting.StringArraySetting;
 
 import com.google.inject.AbstractModule;
@@ -23,6 +25,9 @@ public class FileTypeSharingPanelManagerTest extends GUIBaseTestCase {
     private boolean migrate;
 
 
+    public static Test suite() { 
+        return buildTestSuite(FileTypeSharingPanelManagerTest.class); 
+    }
     
     @Override
     public void setUp() {
