@@ -114,4 +114,11 @@ public class PushEndpointManager implements PushEndpointService {
         }
     }
     
+    /**
+     * Access for testing only
+     */
+    ConcurrentMap<GUID, AtomicLong> getLastSearchTimeByGUID() {
+        return lastSearchTimeByGUID;
+    }
+    
 }
