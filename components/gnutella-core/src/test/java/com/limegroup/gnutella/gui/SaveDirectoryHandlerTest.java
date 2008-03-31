@@ -38,9 +38,10 @@ public class SaveDirectoryHandlerTest extends LimeTestCase {
         File testFile = 
             new File("this_should_not_exist_but_we'll_delete_it_anyway");
         
-        if(!testFile.delete()) {
+        testFile.delete();
+        if(testFile.exists())
             fail("could not delete test file");
-        }
+        
         Object[] params = new Object[1];
         
         // make sure it creates the dir if it doesn't existt
