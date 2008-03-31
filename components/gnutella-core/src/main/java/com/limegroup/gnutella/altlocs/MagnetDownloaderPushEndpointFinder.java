@@ -17,12 +17,19 @@ import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.dht.db.PushEndpointManager;
 import com.limegroup.gnutella.dht.db.PushEndpointService;
 import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.downloader.CoreDownloader;
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
 
+/**
+ * Listens for {@link DownloadManagerEvent} and registers itself as an event listener
+ * on {@link MagnetDownloader}. After registration and when a downloader goes into
+ * {@link DownloadStatus#QUEUED}, it will peform a search for alternate locations
+ * asking its {@link PushEndpointManager} for endpoints.
+ */
 @Singleton
 public class MagnetDownloaderPushEndpointFinder implements EventListener<DownloadManagerEvent> {
 
