@@ -4,16 +4,16 @@ import java.io.IOException;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
-
-import org.limewire.security.certificate.CertificateVerifier;
-import org.limewire.security.certificate.CipherProvider;
-import org.limewire.security.certificate.KeyStoreProvider;
-import org.limewire.security.certificate.CipherProvider.SignatureType;
-import org.limewire.util.ByteUtil;
+import java.util.Arrays;
 
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
+import org.limewire.security.certificate.CertificateVerifier;
+import org.limewire.security.certificate.CipherProvider;
+import org.limewire.security.certificate.KeyStoreProvider;
+import org.limewire.security.certificate.CipherProvider.SignatureType;
+import org.limewire.util.StringUtils;
 
 /**
  * Container to hold some other container along with a signature to validate the
@@ -38,7 +38,7 @@ public class SignedMessageContainer implements MessageContainer {
     private GGEP payload = new GGEP();
 
     public byte[] getType() {
-        return ByteUtil.toUTF8Bytes("SIGN");
+        return StringUtils.toUTF8Bytes("SIGN");
     }
 
     public byte[] getEncoded() {
@@ -47,7 +47,7 @@ public class SignedMessageContainer implements MessageContainer {
     }
 
     public void parse(GGEP rawGGEP) throws BadGGEPBlockException {
-        if (!ByteUtil.areEqual(getType(), rawGGEP.get(TYPE_KEY)))
+        if (!Arrays.equals(getType(), rawGGEP.get(TYPE_KEY)))
             throw new BadGGEPBlockException("Incorrect type.");
         if (!rawGGEP.hasKey(KEY_ALIAS))
             throw new BadGGEPBlockException("Missing alias");
@@ -74,7 +74,7 @@ public class SignedMessageContainer implements MessageContainer {
         payload = new GGEP();
         payload.put(KEY_WRAPPED_BYTES, messagePayload);
         payload.put(KEY_SIGNATURE, signature);
-        payload.put(KEY_ALIAS, ByteUtil.toUTF8Bytes(keyAlias));
+        payload.put(KEY_ALIAS, StringUtils.toUTF8Bytes(keyAlias));
     }
 
     /**
@@ -88,7 +88,7 @@ public class SignedMessageContainer implements MessageContainer {
     public MessageContainer getAndVerifyWrappedMessage(CipherProvider cipherProvider,
             KeyStoreProvider keyStore, CertificateVerifier certificateVerifier) throws IOException {
         try {
-            String keyAlias = ByteUtil.toStringFromUTF8Bytes(payload.getBytes(KEY_ALIAS));
+            String keyAlias = StringUtils.toStringFromUTF8Bytes(payload.getBytes(KEY_ALIAS));
             Certificate cert = keyStore.getKeyStore().getCertificate(keyAlias);
             if (!certificateVerifier.isValid(cert))
                 throw new IOException("Invalid certificate retrieved.");

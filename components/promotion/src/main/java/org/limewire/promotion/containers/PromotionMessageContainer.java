@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -11,13 +12,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.limewire.promotion.LatitudeLongitude;
-import org.limewire.promotion.exceptions.PromotionException;
-import org.limewire.util.ByteUtil;
-
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
+import org.limewire.promotion.LatitudeLongitude;
+import org.limewire.promotion.exceptions.PromotionException;
+import org.limewire.util.ByteOrder;
+import org.limewire.util.StringUtils;
 
 /**
  * The unit of work for the promotion system, this message contains the
@@ -50,7 +51,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     private GGEP payload = new GGEP();
 
     public byte[] getType() {
-        return ByteUtil.toUTF8Bytes("P");
+        return StringUtils.toUTF8Bytes("P");
     }
 
     /* Throws a RTE if we're missing any required fields. */
@@ -77,7 +78,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
      */
     public void setUniqueID(long id) {
         byte[] header = getHeader();
-        System.arraycopy(ByteUtil.convertToBytes(id, 8), 0, header, 0, 8);
+        System.arraycopy(ByteOrder.long2bytes(id, 8), 0, header, 0, 8);
         setHeader(header);
     }
 
@@ -85,7 +86,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
         byte[] header = getHeader();
         byte[] id = new byte[8];
         System.arraycopy(header, 0, id, 0, 8);
-        return ByteUtil.toLongFromBytes(id);
+        return ByteOrder.beb2long(id, 0, 8);
     }
 
     /**
@@ -192,7 +193,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
         StringBuilder countries = new StringBuilder();
         for (Locale locale : locales)
             countries.append(locale.getCountry());
-        payload.put(KEY_TERRITORIES, ByteUtil.toUTF8Bytes(countries.toString()));
+        payload.put(KEY_TERRITORIES, StringUtils.toUTF8Bytes(countries.toString()));
     }
 
     /**
@@ -203,7 +204,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
         List<Locale> territoryList = new ArrayList<Locale>();
         String territories;
         try {
-            territories = ByteUtil.toStringFromUTF8Bytes(payload.getBytes(KEY_TERRITORIES));
+            territories = StringUtils.toStringFromUTF8Bytes(payload.getBytes(KEY_TERRITORIES));
         } catch (BadGGEPPropertyException e) {
             throw new RuntimeException("GGEP exception parsing territories.");
         }
@@ -266,7 +267,8 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
         }
         // Put the string into the ggep, but strip the last character (which is
         // always a tab)
-        byte[] encodedProperties = ByteUtil.toUTF8Bytes(builder.substring(0, builder.length() - 1));
+        byte[] encodedProperties = StringUtils.toUTF8Bytes(builder.substring(0,
+                builder.length() - 1));
         payload.put(KEY_PROPERTIES, encodedProperties);
     }
 
@@ -310,7 +312,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     }
 
     /** ONLY ADD TO THIS LIST, AND ADD AT THE END. ORDERING IS SUPER-IMPORTANT. */
-    private static final String[] PROPERTY_ENCODING_ARRAY = new String[] {"artist", "album",
+    private static final String[] PROPERTY_ENCODING_ARRAY = new String[] { "artist", "album",
             "url", "genre", "license", "size", "creation_time", "vendor", "name", "audio", "video",
             "document" };
 
@@ -347,7 +349,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     public Map<String, String> getProperties() {
         Map<String, String> properties = new HashMap<String, String>();
         try {
-            String encoded = ByteUtil.toStringFromUTF8Bytes(payload.getBytes(KEY_PROPERTIES));
+            String encoded = StringUtils.toStringFromUTF8Bytes(payload.getBytes(KEY_PROPERTIES));
             StringTokenizer tokens = new StringTokenizer(encoded, "\t");
             while (tokens.hasMoreTokens()) {
                 String token = tokens.nextToken();
@@ -433,8 +435,8 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
         if (end == null)
             end = new Date(MAX_DATE_IN_SECONDS * 1000);
         byte[] range = new byte[8];
-        byte[] startBytes = ByteUtil.convertToBytes(start.getTime() / 1000, 4);
-        byte[] endBytes = ByteUtil.convertToBytes(end.getTime() / 1000, 4);
+        byte[] startBytes = ByteOrder.long2bytes(start.getTime() / 1000, 4);
+        byte[] endBytes = ByteOrder.long2bytes(end.getTime() / 1000, 4);
         System.arraycopy(startBytes, 0, range, 0, 4);
         System.arraycopy(endBytes, 0, range, 4, 4);
         payload.put(KEY_DATE_RANGE, range);
@@ -450,7 +452,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
             byte range[] = payload.getBytes(KEY_DATE_RANGE);
             byte start[] = new byte[4];
             System.arraycopy(range, 0, start, 0, 4);
-            long startLong = ByteUtil.toLongFromBytes(start);
+            long startLong = ByteOrder.beb2long(start, 0, 4);
             return new Date(startLong * 1000);
         } catch (BadGGEPPropertyException ex) {
             return new Date();
@@ -468,7 +470,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
             byte range[] = payload.getBytes(KEY_DATE_RANGE);
             byte end[] = new byte[4];
             System.arraycopy(range, 4, end, 0, 4);
-            long endLong = ByteUtil.toLongFromBytes(end);
+            long endLong = ByteOrder.beb2long(end, 0, 4);
             return new Date(endLong * 1000);
         } catch (BadGGEPPropertyException ex) {
             return new Date(MAX_DATE_IN_SECONDS * 1000);
@@ -480,7 +482,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
         try {
             if (!payload.hasKey(key))
                 return "";
-            return ByteUtil.toStringFromUTF8Bytes(payload.getBytes(key));
+            return StringUtils.toStringFromUTF8Bytes(payload.getBytes(key));
         } catch (BadGGEPPropertyException ex) {
             throw new RuntimeException("GGEP exception parsing value." + ex.getMessage());
         }
@@ -491,11 +493,11 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
      * sets the value to "".
      */
     private void set(String key, String value) {
-        payload.put(key, ByteUtil.toUTF8Bytes(value));
+        payload.put(key, StringUtils.toUTF8Bytes(value));
     }
 
     public void parse(GGEP rawGGEP) throws BadGGEPBlockException {
-        if (!ByteUtil.areEqual(getType(), rawGGEP.get(TYPE_KEY)))
+        if (!Arrays.equals(getType(), rawGGEP.get(TYPE_KEY)))
             throw new BadGGEPBlockException("Incorrect type.");
         if (!rawGGEP.hasKey(KEY_HEADER))
             throw new BadGGEPBlockException("Missing header");
@@ -634,7 +636,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
          */
         byte getEncodedRadius() {
             long value = (long) (Math.sqrt(radiusInMeters) / 13);
-            return ByteUtil.convertToBytes(value - 1, 1)[0];
+            return ByteOrder.long2bytes(value - 1, 1)[0];
         }
 
         /**
@@ -642,7 +644,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
          *         {@link #getEncodedRadius()}.
          */
         static int decodeRadius(byte radiusByte) {
-            long radius = ByteUtil.toLongFromBytes(new byte[] {radiusByte }) + 1;
+            long radius = ByteOrder.beb2long(new byte[] { radiusByte }, 0, 1) + 1;
             return (int) Math.pow(13 * radius, 2);
         }
     }

@@ -12,8 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.util.ByteUtil;
 import org.limewire.util.I18NConvert;
+import org.limewire.util.StringUtils;
 
 public class KeywordUtilImpl implements KeywordUtil {
     private Set<String> englishStopwords = new HashSet<String>();
@@ -30,7 +30,7 @@ public class KeywordUtilImpl implements KeywordUtil {
     }
 
     private void initEnglishStopwords() {
-        for (String word : new String[] {"i", "a", "s", "about", "an", "are", "as", "at", "be",
+        for (String word : new String[] { "i", "a", "s", "about", "an", "are", "as", "at", "be",
                 "by", "com", "de", "en", "for", "from", "how", "in", "is", "it", "la", "of", "on",
                 "or", "that", "the", "this", "to", "was", "what", "when", "where", "who", "will",
                 "with", "und", "the", "www" })
@@ -127,14 +127,14 @@ public class KeywordUtilImpl implements KeywordUtil {
         System.arraycopy(sha1, 0, hashArray, 0, 8);
         // Make sure it's not negative (no leading bit set)
         hashArray[0] &= 127;
-        return ByteUtil.toLongFromBytes(hashArray);
+        return org.limewire.util.ByteOrder.beb2long(hashArray, 0, 8);
     }
 
     private byte[] computeSHA1(String input) {
         try {
             final MessageDigest outputSHA1 = MessageDigest.getInstance("SHA-1");
             final byte[] data = new byte[64 * 1024]; // 64k Chunks
-            InputStream in = new ByteArrayInputStream(ByteUtil.toUTF8Bytes(normalizeQuery(input)));
+            InputStream in = new ByteArrayInputStream(StringUtils.toUTF8Bytes(normalizeQuery(input)));
 
             while (true) {
                 final int bytesRead = in.read(data);

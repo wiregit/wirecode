@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.limewire.util.ByteUtil;
+import org.limewire.util.StringUtils;
 
 /**
  * A container that extends the {@link MultiMessageContainer}, adding start and
@@ -22,7 +22,7 @@ public class BucketMessageContainer extends MultiMessageContainer {
 
     @Override
     public byte[] getType() {
-        return ByteUtil.toUTF8Bytes("BKIT");
+        return StringUtils.toUTF8Bytes("BKIT");
     }
 
     /**

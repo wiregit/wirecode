@@ -16,18 +16,14 @@ import java.security.cert.CertificateException;
 
 import junit.framework.Test;
 
-import org.limewire.promotion.containers.MessageContainer;
-import org.limewire.promotion.containers.MessageContainerParser;
-import org.limewire.promotion.containers.SignedMessageContainer;
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.security.certificate.CertificateVerifier;
 import org.limewire.security.certificate.CipherProviderImpl;
 import org.limewire.security.certificate.KeyStoreProvider;
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.ByteUtil;
-
-import org.limewire.io.BadGGEPBlockException;
-import org.limewire.io.BadGGEPPropertyException;
-import org.limewire.io.GGEP;
+import org.limewire.util.StringUtils;
 
 public class SignedMessageContainerTest extends BaseTestCase {
     public SignedMessageContainerTest(String name) {
@@ -152,7 +148,7 @@ public class SignedMessageContainerTest extends BaseTestCase {
         private GGEP payload = new GGEP();
 
         public byte[] getType() {
-            return ByteUtil.toUTF8Bytes("MOCK");
+            return StringUtils.toUTF8Bytes("MOCK");
         }
 
         public void setFoo(String foo) {

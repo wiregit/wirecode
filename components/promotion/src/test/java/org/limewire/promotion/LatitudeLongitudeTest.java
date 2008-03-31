@@ -3,7 +3,7 @@ package org.limewire.promotion;
 import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.ByteUtil;
+import org.limewire.util.ByteOrder;
 
 public class LatitudeLongitudeTest extends BaseTestCase {
     public LatitudeLongitudeTest(String name) {
@@ -31,7 +31,7 @@ public class LatitudeLongitudeTest extends BaseTestCase {
         assertEquals(3, Math
                 .round(LatitudeLongitude.longBytesToRadians(new byte[] { 127, -1, -1 })));
 
-        assertEquals(6, Math.round(LatitudeLongitude.longBytesToRadians(ByteUtil.convertToBytes(
+        assertEquals(6, Math.round(LatitudeLongitude.longBytesToRadians(ByteOrder.long2bytes(
                 16777215, 3))));
 
     }
@@ -40,7 +40,7 @@ public class LatitudeLongitudeTest extends BaseTestCase {
         assertEquals(new byte[] { 0, 0, 0 }, LatitudeLongitude.convertDegreesToBytes(0, 3));
         assertEquals(new byte[] { -1, -1, -1 }, LatitudeLongitude.convertDegreesToBytes(
                 359.9999999, 3));
-        assertEquals(ByteUtil.convertToBytes(8388608, 3), LatitudeLongitude.convertDegreesToBytes(
+        assertEquals(ByteOrder.long2bytes(8388608, 3), LatitudeLongitude.convertDegreesToBytes(
                 180, 3));
     }
 

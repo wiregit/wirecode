@@ -1,12 +1,12 @@
 package org.limewire.promotion.containers;
 
+import java.util.Arrays;
 import java.util.Date;
-
-import org.limewire.util.ByteUtil;
 
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
+import org.limewire.util.StringUtils;
 
 /**
  * Provides an abstract generic message container to store arbitrary key/value
@@ -22,7 +22,7 @@ public abstract class MapMessageContainer implements MessageContainer {
     protected void put(String key, String value) {
         if (value == null || key == null)
             throw new NullPointerException("key and value must not be null.");
-        payload.put(key, ByteUtil.toUTF8Bytes(value));
+        payload.put(key, StringUtils.toUTF8Bytes(value));
     }
 
     /**
@@ -64,7 +64,7 @@ public abstract class MapMessageContainer implements MessageContainer {
             throw new NullPointerException("key must not be null.");
         if (!payload.hasKey(key))
             return null;
-        return ByteUtil.toStringFromUTF8Bytes(payload.get(key));
+        return StringUtils.toStringFromUTF8Bytes(payload.get(key));
     }
 
     /**
@@ -121,7 +121,7 @@ public abstract class MapMessageContainer implements MessageContainer {
     }
 
     public void parse(GGEP rawGGEP) throws BadGGEPBlockException {
-        if (!ByteUtil.areEqual(getType(), rawGGEP.get(TYPE_KEY)))
+        if (!Arrays.equals(getType(), rawGGEP.get(TYPE_KEY)))
             throw new BadGGEPBlockException("Incorrect type.");
         this.payload = rawGGEP;
     }

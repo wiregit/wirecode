@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.limewire.promotion.containers.PromotionMessageContainer;
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.ByteUtil;
+import org.limewire.util.ByteOrder;
 
 abstract class AbstractEventQueryDataTest extends BaseTestCase {
 
@@ -76,21 +76,21 @@ abstract class AbstractEventQueryDataTest extends BaseTestCase {
     }
 
     private int transfer(long i, byte[] in, int start) {
-        System.arraycopy(ByteUtil.convertToBytes(i, 4), 0, in, start, 4);
+        System.arraycopy(ByteOrder.long2bytes(i, 4), 0, in, start, 4);
         return start + 4;
     }
     
     private int transfer(short i, byte[] in, int start) {
-        System.arraycopy(ByteUtil.convertToBytes(i, 2), 0, in, start, 2);
+        System.arraycopy(ByteOrder.long2bytes(i, 2), 0, in, start, 2);
         return start + 2;
     }    
 
     private int transfer(Impression i, byte[] in, int start) {
         int cur = start;
         int len = i.getBinderUniqueName().getBytes().length;
-        arraycopy(ByteUtil.convertToBytes(i.getBinderUniqueName().length(), 1), 0, in, cur, 1);     cur += 1;
+        arraycopy(ByteOrder.long2bytes(i.getBinderUniqueName().length(), 1), 0, in, cur, 1);     cur += 1;
         arraycopy(i.getBinderUniqueName().getBytes(), 0, in, cur, len);                             cur += len;
-        arraycopy(ByteUtil.convertToBytes(i.getPromo().getUniqueID(), 8), 0, in, cur, 8);           cur += 8;
+        arraycopy(ByteOrder.long2bytes(i.getPromo().getUniqueID(), 8), 0, in, cur, 8);           cur += 8;
         arraycopy(date2bytes(i.getTimeShown()), 0, in, cur, 8);                                     cur += 8;
         return cur;
     }
@@ -100,6 +100,6 @@ abstract class AbstractEventQueryDataTest extends BaseTestCase {
     }
 
     private byte[] date2bytes(Date d) {
-        return ByteUtil.convertToBytes(d.getTime(), 8);
+        return ByteOrder.long2bytes(d.getTime(), 8);
     }
 }

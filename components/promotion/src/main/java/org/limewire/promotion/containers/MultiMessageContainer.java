@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.limewire.util.ByteUtil;
-
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.GGEP;
+import org.limewire.io.IOUtils;
+import org.limewire.util.StringUtils;
 
 /**
  * Wraps multiple messages into one message, generally so you can stuff a bunch
@@ -18,7 +18,7 @@ public class MultiMessageContainer extends MapMessageContainer {
     private static final String KEY_WRAPPED_BYTES = "W";
 
     public byte[] getType() {
-        return ByteUtil.toUTF8Bytes("MULT");
+        return StringUtils.toUTF8Bytes("MULT");
     }
 
     @Override
@@ -34,9 +34,12 @@ public class MultiMessageContainer extends MapMessageContainer {
      */
     private byte[] getWrappedBytes() {
         final byte[] bytes = getBytes(KEY_WRAPPED_BYTES);
-        if (bytes == null)
-            return new byte[0];
-        return ByteUtil.decompress(bytes);
+        try {
+            if (bytes != null)
+                return IOUtils.inflate(bytes);
+        } catch (IOException ignored) {
+        }
+        return new byte[0];
     }
 
     /**
@@ -77,6 +80,6 @@ public class MultiMessageContainer extends MapMessageContainer {
                 throw new RuntimeException("IOException? WTF?", ex);
             }
         }
-        put(KEY_WRAPPED_BYTES, ByteUtil.compress(out.toByteArray()));
+        put(KEY_WRAPPED_BYTES, IOUtils.deflate(out.toByteArray()));
     }
 }

@@ -1,6 +1,5 @@
 package org.limewire.promotion;
 
-import org.limewire.util.ByteUtil;
 
 public class LatitudeLongitude {
     private final static double AVERAGE_EARTH_RADIUS_KM = 6371.0;
@@ -54,7 +53,7 @@ public class LatitudeLongitude {
     static byte[] convertDegreesToBytes(double degrees, int byteCount) {
         double scale = Math.pow(2, 8 * byteCount) / 360.0;
         long value = (long) (normalizeDegrees(degrees) * scale);
-        return ByteUtil.convertToBytes(value, byteCount);
+        return org.limewire.util.ByteOrder.long2bytes(value, byteCount);
     }
 
     /**
@@ -73,7 +72,7 @@ public class LatitudeLongitude {
      * converts to radians. Package-visible for unit testing.
      */
     static double longBytesToRadians(byte[] bytes) {
-        long value = ByteUtil.toLongFromBytes(bytes);
+        long value = org.limewire.util.ByteOrder.beb2long(bytes, 0, bytes.length);
         return Math.toRadians(value / (Math.pow(2, 8 * bytes.length) / 360.0));
     }
 

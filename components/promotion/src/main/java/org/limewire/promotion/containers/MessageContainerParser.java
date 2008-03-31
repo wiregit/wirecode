@@ -1,9 +1,8 @@
 package org.limewire.promotion.containers;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.limewire.util.ByteUtil;
 
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.GGEP;
@@ -36,7 +35,7 @@ public class MessageContainerParser {
     public MessageContainer parse(GGEP ggepMessage) throws BadGGEPBlockException {
         byte[] type = ggepMessage.get(MessageContainer.TYPE_KEY);
         for (MessageContainer container : parsers) {
-            if (ByteUtil.areEqual(container.getType(), type)) {
+            if (Arrays.equals(container.getType(), type)) {
                 // Found a parser type that should handle this GGEP!
                 try {
                     MessageContainer instance = container.getClass().newInstance();
