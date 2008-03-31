@@ -310,8 +310,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
     @InspectionPoint("duplicate queries")
     private final DuplicateQueryCounter duplicateQueryCounter = new DuplicateQueryCounter();
     
-    @InspectionPoint("last hop forwarded queries to ultrapeers")
-    private final InspectionHistogram<Integer> lastHopForwardedQueries = new InspectionHistogram<Integer>();
+    @InspectionPoint("last hop counter for ultrapeers")
+    private final LastHopCounter lastHopCounter = new LastHopCounter();
     
     @InspectablePrimitive("leaf connection qrp hits")
     private final InspectionHistogram<Integer> leafQRPHits = new InspectionHistogram<Integer>();
@@ -1780,7 +1780,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             forwarded += forwardQueryToUltrapeer(query, handler, mc) ? 1 : 0;  
         }
 		if (query.getTTL() == 1)
-		    lastHopForwardedQueries.count(forwarded);
+		    lastHopCounter.countMessage(query.getHops(), forwarded);
     }
 
     /**
@@ -3366,6 +3366,26 @@ public abstract class MessageRouterImpl implements MessageRouter {
         }
     }
     
+    private static class LastHopCounter implements Inspectable {
+        private final Map<Byte,InspectionHistogram<Integer>> lastHopRouted = 
+            new HashMap<Byte,InspectionHistogram<Integer>>();
+        
+        public synchronized Object inspect() {
+            Map<String,Object> ret = new HashMap<String,Object>();
+            for (byte b : lastHopRouted.keySet())
+                ret.put(String.valueOf(b),lastHopRouted.get(b).inspect());
+            return ret;
+        }
+        
+        public synchronized void countMessage(byte hops, int connections) {
+            InspectionHistogram<Integer> histogram = lastHopRouted.get(hops);
+            if (histogram == null) {
+                histogram = new InspectionHistogram<Integer>();
+                lastHopRouted.put(hops, histogram);
+            }
+            histogram.count(connections);
+        }
+    }
     private static class DuplicateQueryCounter implements Inspectable {
         private final Buffer<Long> duplicateTimes = new Buffer<Long>(100);
         private final Buffer<Byte> duplicateHops = new Buffer<Byte>(100);
