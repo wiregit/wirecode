@@ -1,16 +1,12 @@
 package org.limewire.io;
 
-
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 
 import com.google.inject.Inject;
-
-
-
+import com.google.inject.Singleton;
 
 /**
  * Returns the current port and address for the local system. A <a 
@@ -25,6 +21,7 @@ import com.google.inject.Inject;
  * It's not ok to use <code>IpPortForSelf</code> in objects whose hashCode or 
  * equals will depend on the values returned by any of the getters.  
  */
+@Singleton
 public class IpPortForSelf implements IpPort, Connectable {
 	
 	private final InetAddress localhost;
