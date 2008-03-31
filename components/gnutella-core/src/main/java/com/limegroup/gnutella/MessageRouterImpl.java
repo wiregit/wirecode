@@ -2935,6 +2935,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
 
         /* small optimization:
            send only HopsFlowVendorMessages if the busy state changed */
+    	@InspectablePrimitive("last upload slot busy state")
         private static boolean _oldBusyState = false;
            
         public void run() {
