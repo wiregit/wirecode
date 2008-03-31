@@ -61,18 +61,6 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
         return getValue().length;
     }
     
-    public abstract byte[] getGUID();
-    
-    public abstract int getPort();
-    
-    public abstract byte getFeatures();
-    
-    public abstract int getFwtVersion();
-    
-    public abstract Set<? extends IpPort> getPushProxies();
-    
-    public abstract BitNumbers getTLSInfo();
-    
     /**
      * Value based comparison with other object.
      */

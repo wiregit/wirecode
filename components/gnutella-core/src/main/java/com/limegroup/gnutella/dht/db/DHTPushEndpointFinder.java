@@ -24,6 +24,9 @@ import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 
+/**
+ * Searches for {@link PushEndpoint push endpoints} in the DHT.
+ */
 @Singleton
 public class DHTPushEndpointFinder implements PushEndpointService {
 
