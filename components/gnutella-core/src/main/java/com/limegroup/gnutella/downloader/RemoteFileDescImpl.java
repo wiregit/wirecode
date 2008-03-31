@@ -164,7 +164,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
             throw new IllegalArgumentException("invalid speed: " + speed);
         if (filename.equals(""))
             throw new IllegalArgumentException("cannot accept empty string file name");
-        if (size > MAX_FILE_SIZE)
+        if (size < 0 || size > MAX_FILE_SIZE)
             throw new IllegalArgumentException("invalid size: " + size);
         if ((index & 0xFFFFFFFF00000000L) != 0)
             throw new IllegalArgumentException("invalid index: " + index);
