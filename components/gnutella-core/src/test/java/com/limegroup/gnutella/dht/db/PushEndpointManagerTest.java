@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.dht.db;
 
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
+
 import junit.framework.Test;
 
 import org.jmock.Expectations;
@@ -137,7 +140,30 @@ public class PushEndpointManagerTest extends BaseTestCase {
         context.assertIsSatisfied();
     }
 
-    public void testPurge() {
-        fail("implement me");
+    public void testPurge() throws Exception {
+        PushEndpointManager pushEndpointManager = new PushEndpointManager(null, null);
+        pushEndpointManager.setTimeBetweenSearches(100);
+        ConcurrentMap<GUID, AtomicLong> lastSearchTimeByGUID = pushEndpointManager.getLastSearchTimeByGUID();
+        
+        // add an entry that should be purged, and one that shouldn't
+        GUID guid1 = new GUID();
+        GUID guid2 = new GUID();
+        long currentTime = System.currentTimeMillis();
+
+        lastSearchTimeByGUID.put(guid1, new AtomicLong(currentTime));
+        lastSearchTimeByGUID.put(guid2, new AtomicLong(currentTime + 200));
+        
+        Thread.sleep(250);
+        
+        pushEndpointManager.purge();
+        
+        assertEquals(1, lastSearchTimeByGUID.size());
+        
+        assertTrue(lastSearchTimeByGUID.containsKey(guid2));
+        assertFalse(lastSearchTimeByGUID.containsKey(guid1));
+        
+        Thread.sleep(250);
+        pushEndpointManager.purge();
+        assertTrue(lastSearchTimeByGUID.isEmpty());
     }
 }
