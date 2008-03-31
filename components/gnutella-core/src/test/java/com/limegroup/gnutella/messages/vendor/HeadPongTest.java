@@ -374,8 +374,8 @@ public class HeadPongTest extends LimeTestCase {
         
         assertNull(pong.getRanges());
         assertNull(pong.getVendor());
-        assertNull(pong.getAltLocs());
-        assertNull(pong.getPushLocs());
+        assertEmpty(pong.getAltLocs());
+        assertEmpty(pong.getPushLocs());
         assertFalse(pong.isBusy());
         assertFalse(pong.hasCompleteFile());
         assertFalse(pong.isDownloading());

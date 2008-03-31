@@ -82,9 +82,9 @@ public class HeadPongImpl extends AbstractVendorMessage implements HeadPong {
     /** available ranges */
     private IntervalSet _ranges;
     /** the altlocs that were sent, if any */
-    private Set<IpPort> _altLocs;
+    private Set<IpPort> _altLocs = Collections.emptySet();
     /** the firewalled altlocs that were sent, if any */
-    private Set<PushEndpoint> _pushLocs;
+    private Set<PushEndpoint> _pushLocs = Collections.emptySet();
     /** the queue status, can be negative */
     private int _queueStatus;
     /** whether the other host has the file at all */
@@ -356,15 +356,11 @@ public class HeadPongImpl extends AbstractVendorMessage implements HeadPong {
     public Set<RemoteFileDesc> getAllLocsRFD(RemoteFileDesc original, RemoteFileDescFactory remoteFileDescFactory){
         Set<RemoteFileDesc> ret = new HashSet<RemoteFileDesc>();
         
-        if (_altLocs!=null) {
-            for(IpPort current : _altLocs)
-                ret.add(remoteFileDescFactory.createRemoteFileDesc(original, current));
-        }
+        for(IpPort current : _altLocs)
+            ret.add(remoteFileDescFactory.createRemoteFileDesc(original, current));
         
-        if (_pushLocs!=null) {
-            for(PushEndpoint current : _pushLocs)
-                ret.add(remoteFileDescFactory.createRemoteFileDesc(original, current));
-        }
+        for(PushEndpoint current : _pushLocs)
+            ret.add(remoteFileDescFactory.createRemoteFileDesc(original, current));
         
         return ret;
     }

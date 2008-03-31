@@ -1010,7 +1010,7 @@ public class AltLocUploadTest extends LimeTestCase {
                 sock.receive(rcv);
                 ByteArrayInputStream bais = new ByteArrayInputStream(recv, 0, rcv.getLength());
                 HeadPong pong = (HeadPong) messageFactory.read(bais, Network.TCP);
-                if (pong.getAltLocs() == null || pong.getAltLocs().isEmpty())
+                if (pong.getAltLocs().isEmpty())
                     break;
             } catch (IOException iox) {
                 fail("didn't get response "+i,iox);

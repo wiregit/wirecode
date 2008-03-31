@@ -328,11 +328,8 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
             
             // update cache with push proxies of headpong since they are
             // brand new
-            Collection<PushEndpoint> pushEndpoints = pong.getPushLocs();
-            if (pushEndpoints != null) {
-                for (PushEndpoint pushEndpoint : pushEndpoints) {
-                    pushEndpoint.updateProxies(true);
-                }
+            for (PushEndpoint pushEndpoint : pong.getPushLocs()) {
+                pushEndpoint.updateProxies(true);
             }
             
             if (!pingedHosts.containsKey(handler)) 
