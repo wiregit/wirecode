@@ -28,6 +28,7 @@ import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 public class PassiveDHTNodeControllerTest extends DHTTestCase {
@@ -56,7 +57,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         assertEquals("unexpected port", PORT, 
                  ConnectionSettings.PORT.getValue());
         
-        injector = LimeTestUtils.createInjector();
+        injector = LimeTestUtils.createInjector(LocalSocketAddressProviderStub.STUB_MODULE);
         dhtControllerFactory = injector.getInstance(DHTControllerFactory.class);
         
         bootstrapDHT = startBootstrapDHT(injector.getInstance(LifecycleManager.class));

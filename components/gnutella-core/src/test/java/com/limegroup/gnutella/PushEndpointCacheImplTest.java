@@ -93,4 +93,7 @@ public class PushEndpointCacheImplTest extends BaseTestCase {
         
     }
 
+    public void testRemoveProxy() {
+        fail("implement test and impl");
+    }
 }
