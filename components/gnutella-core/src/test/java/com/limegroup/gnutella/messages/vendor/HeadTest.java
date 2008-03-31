@@ -631,6 +631,11 @@ public class HeadTest extends LimeTestCase {
 		HeadPong pong1 = headPongFactory.create(ping1);
         clearStoredProxies();
         pong1 = reparse(pong1);
+        // this used to be done in the factory and is now handled by PingRanker,
+        // so simulate ping ranker here
+        for (PushEndpoint pushEndpoint : pong1.getPushLocs()) {
+            pushEndpoint.updateProxies(true);
+        }
 
 		assertNull(pong1.getRanges());
 		assertNull(pong1.getAltLocs());
@@ -645,7 +650,7 @@ public class HeadTest extends LimeTestCase {
 		RemoteFileDesc rfd = (RemoteFileDesc)received.toArray()[0]; 
 		PushEndpoint point = rfd.getPushAddr();
 		assertEquals(pushCollectionPE,point);
-		assertEquals(pushCollectionPE.getProxies().size(),point.getProxies().size());
+		assertEquals(pushCollectionPE.getProxies() + " expected to have the same size as " + point.getProxies(), pushCollectionPE.getProxies().size(),point.getProxies().size());
         Set parsedProxies = new IpPortSet(point.getProxies());
 		parsedProxies.retainAll(pushCollectionPE.getProxies());
 		assertEquals(pushCollectionPE.getProxies().size(),parsedProxies.size());
