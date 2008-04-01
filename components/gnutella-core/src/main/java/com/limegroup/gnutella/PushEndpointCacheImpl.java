@@ -1,6 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -23,7 +22,7 @@ import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 @Singleton
-public class PushEndpointCacheImpl implements PushEndpointCache {
+class PushEndpointCacheImpl implements PushEndpointCache {
     
     /**
      * A mapping from GUID to a CachedPushEndpoint.  This is used to ensure
@@ -48,11 +47,6 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
      */
     private final Map<GUID, CachedPushEndpoint> GUID_PROXY_MAP = 
         Collections.synchronizedMap(new WeakHashMap<GUID, CachedPushEndpoint>());
-    
-    /**
-     * Package access for testing.
-     */
-    final ReferenceQueue<GUID> referenceQueue = new ReferenceQueue<GUID>();
     
     private final HTTPHeaderUtils httpHeaderUtils;
 
@@ -199,7 +193,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
         
         CachedPushEndpoint(GUID guid, byte features, int version, Set<? extends IpPort> proxies) {
             this.guid = guid.bytes();
-            _guidRef = new WeakReference<GUID>(guid, referenceQueue);
+            _guidRef = new WeakReference<GUID>(guid);
             _features=features;
             _fwtVersion=version;
             overwriteProxies(proxies);
@@ -251,7 +245,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
             return _guidRef.get();
         }
 
-        public PushEndpoint createClone() {
+        public synchronized PushEndpoint createClone() {
             return new PushEndpointImpl(guid, getProxies(), 
                     getFeatures(), getFWTVersion(), 
                     getValidExternalAddress(), PushEndpointCacheImpl.this, networkInstanceUtils);
@@ -261,12 +255,12 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
             return guid;
         }
 
-        public int getPort() {
+        public synchronized int getPort() {
             IpPort address = _externalAddr;
             return address != null ? address.getPort() : 6346;
         }
 
-        public IpPort getValidExternalAddress() {
+        public synchronized IpPort getValidExternalAddress() {
             return _externalAddr;
         }
 
@@ -280,7 +274,7 @@ public class PushEndpointCacheImpl implements PushEndpointCache {
             }
         }
 
-        public String getAddress() {
+        public synchronized String getAddress() {
             IpPort address = _externalAddr;
             return address != null ? _externalAddr.getAddress() : RemoteFileDesc.BOGUS_IP;
         }

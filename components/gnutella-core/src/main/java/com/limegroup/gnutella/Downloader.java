@@ -151,9 +151,7 @@ public interface Downloader extends BandwidthTracker {
 
     /**
      * Returns the size of this file in bytes, i.e., the total amount to
-     * download. 
-     * 
-     * @return -1 if content length is not known
+     * download or -1 if content length is unknown.
      */
     public long getContentLength();
 

@@ -22,16 +22,16 @@ import com.limegroup.gnutella.settings.DHTSettings;
  * the push endpoint.
  */
 @Singleton
-public class PushEndpointManager implements PushEndpointService {
+class PushEndpointManagerImpl implements PushEndpointService {
 
     private final PushEndpointCache pushEndpointCache;
     private final PushEndpointService pushEndpointFinder;
-    private ConcurrentMap<GUID, AtomicLong> lastSearchTimeByGUID = new ConcurrentHashMap<GUID, AtomicLong>(); 
+    private final ConcurrentMap<GUID, AtomicLong> lastSearchTimeByGUID = new ConcurrentHashMap<GUID, AtomicLong>(); 
     
-    private long timeBetweenSearches = DHTSettings.TIME_BETWEEN_PUSH_PROXY_QUERIES.getValue();
+    private volatile long timeBetweenSearches = DHTSettings.TIME_BETWEEN_PUSH_PROXY_QUERIES.getValue();
     
     @Inject
-    public PushEndpointManager(PushEndpointCache pushEndpointCache, 
+    public PushEndpointManagerImpl(PushEndpointCache pushEndpointCache, 
             @Named("dhtPushEndpointFinder") PushEndpointService pushEndpointFinder) {
         this.pushEndpointCache = pushEndpointCache;
         this.pushEndpointFinder = pushEndpointFinder;

@@ -48,7 +48,7 @@ public abstract class AbstractAlternateLocation implements AlternateLocation {
     private final Average legacy, ping, response;
 	
 	protected AbstractAlternateLocation(URN sha1) {
-		SHA1_URN= Objects.nonNull(sha1, "sha1 must not be null");
+		SHA1_URN= Objects.nonNull(sha1, "sha1");
         legacy = new Average();
         ping = new Average();
         response = new Average();
@@ -270,12 +270,3 @@ public abstract class AbstractAlternateLocation implements AlternateLocation {
         }
     }
 }
-
-
-
-
-
-
-
-
-

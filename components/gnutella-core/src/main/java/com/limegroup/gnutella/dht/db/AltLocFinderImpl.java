@@ -22,6 +22,7 @@ import org.limewire.nio.observer.Shutdownable;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
@@ -47,12 +48,12 @@ public class AltLocFinderImpl implements AltLocFinder {
 
     private final AltLocManager altLocManager;
 
-    private final PushEndpointManager pushEndpointManager;
+    private final PushEndpointService pushEndpointManager;
     
     @Inject
     public AltLocFinderImpl(DHTManager manager, AlternateLocationFactory alternateLocationFactory, 
             AltLocManager altLocManager, 
-            PushEndpointManager pushEndpointManager) {
+            @Named("pushEndpointManager") PushEndpointService pushEndpointManager) {
         this.manager = manager;
         this.alternateLocationFactory = alternateLocationFactory;
         this.altLocManager = altLocManager;

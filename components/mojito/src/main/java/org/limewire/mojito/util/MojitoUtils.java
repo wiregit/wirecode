@@ -89,7 +89,6 @@ public class MojitoUtils {
             dht.start();
             
             if (i > 0) {
-                Thread.sleep(100);
                 dht.bootstrap(new InetSocketAddress("localhost", port)).get();
             }
             dhts.add(dht);
@@ -134,14 +133,13 @@ public class MojitoUtils {
             dht.start();
             
             if (i > 0) {
-                Thread.sleep(100);
                 dht.bootstrap(new InetSocketAddress("localhost", port)).get();
             } else {
                 first = dht;
             }
             dhts.put(dht.getLocalNodeID(), dht);
         }
-        if (first != null) { // unnecessary null check to satisfy compiler
+        if (first != null) { // unnecessary null check to satisfy compiler, although if k was null it would be necessary
             first.bootstrap(new InetSocketAddress("localhost", 3000 + 1)).get();
         }
         return dhts;

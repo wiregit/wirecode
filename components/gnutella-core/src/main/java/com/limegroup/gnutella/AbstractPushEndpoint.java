@@ -50,17 +50,17 @@ public abstract class AbstractPushEndpoint implements PushEndpoint {
             throw new IllegalArgumentException ("target array too small");
         
         int featureIdx = offset;
-//      store the number of proxies
+        // store the number of proxies
         where[offset] = (byte)(Math.min(MAX_PROXIES,proxies.size()) 
                 | getFeatures() 
                 | FWTVersion << 3);
         
-//      store the guid
+        // store the guid
         System.arraycopy(getClientGUID(),0,where,++offset,16);
         offset+=16;
         
-//      if we know the external address, store that too
-//      if its valid and not private and port is valid
+        // if we know the external address, store that too
+        // if its valid and not private and port is valid
         if (address != null && FWTVersion > 0) {
             byte [] addr = address.getInetAddress().getAddress();
             int port = address.getPort();
@@ -71,12 +71,12 @@ public abstract class AbstractPushEndpoint implements PushEndpoint {
             offset+=2;
         }
         
-//      If we're including TLS, then add a byte for which proxies support it.
+        // If we're including TLS, then add a byte for which proxies support it.
         
         int pptlsIdx = offset;
         int i=0;
         if(includeTLS) {
-//          If any of the proxies are TLS-capable, increment the offset
+            // If any of the proxies are TLS-capable, increment the offset
             for(IpPort ppi : proxies) {
                 if(i >= MAX_PROXIES)
                     break;
@@ -90,7 +90,7 @@ public abstract class AbstractPushEndpoint implements PushEndpoint {
             }
         }
         
-//      store the push proxies
+        // store the push proxies
         i=0;
         for(IpPort ppi : proxies) {
             if(i >= MAX_PROXIES)
@@ -106,7 +106,7 @@ public abstract class AbstractPushEndpoint implements PushEndpoint {
             i++;
         }
         
-//      insert the tls indices & turn the feature on if TLS should be included
+        // insert the tls indices & turn the feature on if TLS should be included
         BitNumbers bn = includeTLS ? HTTPHeaderUtils.getTLSIndices(proxies, (Math.min(proxies.size(), MAX_PROXIES))) : BitNumbers.EMPTY_BN;
         if(!bn.isEmpty()) {
             byte[] tlsIndexes = bn.toByteArray();
@@ -183,7 +183,7 @@ public abstract class AbstractPushEndpoint implements PushEndpoint {
     }
     
     /**
-     * @param the set of proxies for this PE
+     * @param proxies the set of proxies for this PE
      * @return how many bytes a PE will use when serialized.
      */
     public static int getSizeBytes(Set<? extends IpPort> proxies, boolean includeTLS) {

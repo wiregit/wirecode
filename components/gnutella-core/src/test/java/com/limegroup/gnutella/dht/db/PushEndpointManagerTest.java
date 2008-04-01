@@ -25,7 +25,7 @@ public class PushEndpointManagerTest extends BaseTestCase {
     private PushEndpointService pushEndpointFinder;
     private SearchListener<PushEndpoint> listener;
     private PushEndpoint result;
-    private PushEndpointManager pushEndpointManager;
+    private PushEndpointManagerImpl pushEndpointManager;
 
     public PushEndpointManagerTest(String name) {
         super(name);
@@ -44,7 +44,7 @@ public class PushEndpointManagerTest extends BaseTestCase {
         pushEndpointFinder = context.mock(PushEndpointService.class);
         listener = (SearchListener<PushEndpoint>)context.mock(SearchListener.class);
         result = context.mock(PushEndpoint.class);
-        pushEndpointManager = new PushEndpointManager(pushEndpointCache, pushEndpointFinder);
+        pushEndpointManager = new PushEndpointManagerImpl(pushEndpointCache, pushEndpointFinder);
     }
     
     @SuppressWarnings({ "cast", "unchecked" })
@@ -114,7 +114,7 @@ public class PushEndpointManagerTest extends BaseTestCase {
     }
     
     /**
-     * Asserts that {@link PushEndpointManager#startSearch(com.limegroup.gnutella.GUID, SearchListener)}
+     * Asserts that {@link PushEndpointManagerImpl#startSearch(com.limegroup.gnutella.GUID, SearchListener)}
      * starts a search and notifies the cache of results.
      */
     @SuppressWarnings("unchecked")
@@ -141,7 +141,7 @@ public class PushEndpointManagerTest extends BaseTestCase {
     }
 
     public void testPurge() throws Exception {
-        PushEndpointManager pushEndpointManager = new PushEndpointManager(null, null);
+        PushEndpointManagerImpl pushEndpointManager = new PushEndpointManagerImpl(null, null);
         pushEndpointManager.setTimeBetweenSearches(100);
         ConcurrentMap<GUID, AtomicLong> lastSearchTimeByGUID = pushEndpointManager.getLastSearchTimeByGUID();
         

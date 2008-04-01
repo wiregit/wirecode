@@ -50,15 +50,12 @@ public interface PushEndpointCache extends PushEndpointService {
     public void setFWTVersionSupported(byte[] guid, int version);
 
     /**
-     * Updates the PushEndpoint to match what is in the cache.
-     * If there is nothing in the cache, the cache is set to match this endpoint.
-     * If the endpoint is valid, the proxies in it are added to those already cached.
-     * If it is invalid, the proxies are removed from the cached version.
-     */
-    /**
-     * Adds or removes the given set of ip ports depending on <code>add</code>.
+     * Adds or removes the given set of ip ports depending on <code>valid</code>.
      * 
-     * @param add if false removes <code>proxies</code> otherwise adds them
+     * @param valid if false removes <code>proxies</code> otherwise adds them
+     * 
+     * @return the guid of the push endpoint a client should hold onto to keep
+     * the values in the cache 
      */
     public GUID updateProxiesFor(GUID guid, PushEndpoint pushEndpoint, boolean valid);
 

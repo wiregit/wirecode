@@ -11,7 +11,6 @@ import com.google.common.collect.ReferenceMap;
  * Maintains event listeners and broadcasts events to all listeners.
  * Listeners are kept by weak references to a key value, allowing anonymous
  * listeners to be used while still allowing the list to time out.
- * @param <E>
  */
 public class WeakEventListenerList<E> implements WeakEventListenerSupport<E> {
     
