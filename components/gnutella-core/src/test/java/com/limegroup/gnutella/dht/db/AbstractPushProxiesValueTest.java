@@ -73,32 +73,26 @@ public class AbstractPushProxiesValueTest extends BaseTestCase {
             proxies = new IpPortSet(new IpPortImpl("129.0.0.1", 9595));
         }
         
-        @Override
         public byte getFeatures() {
             return 1;
         }
 
-        @Override
         public int getFwtVersion() {
             return 5;
         }
 
-        @Override
         public byte[] getGUID() {
             return guid.bytes();
         }
 
-        @Override
         public int getPort() {
             return 6667;
         }
 
-        @Override
         public Set<? extends IpPort> getPushProxies() {
             return proxies;
         }
 
-        @Override
         public BitNumbers getTLSInfo() {
             return BitNumbers.EMPTY_BN;
         }
