@@ -1,4 +1,5 @@
-package com.limegroup.gnutella;
+package org.limewire.promotion;
+
 
 /**
  * This defines an interface to the basic services needed by and provided for

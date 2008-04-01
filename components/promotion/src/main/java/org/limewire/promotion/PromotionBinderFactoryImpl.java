@@ -1,11 +1,11 @@
 package org.limewire.promotion;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
 import org.limewire.promotion.exceptions.PromotionException;
 import org.limewire.security.certificate.CertificateVerifier;
 import org.limewire.security.certificate.CipherProvider;
@@ -16,7 +16,7 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class PromotionBinderFactoryImpl implements PromotionBinderFactory {
-
+    
     private final static Log LOG = LogFactory.getLog(PromotionBinderFactoryImpl.class);
 
     private CipherProvider cipherProvider;
@@ -39,24 +39,13 @@ public class PromotionBinderFactoryImpl implements PromotionBinderFactory {
         }
         PromotionBinder binder = new PromotionBinder(cipherProvider, keyStore, certificateVerifier);
         try {
-            binder.initialize(toBytes(in));
+            binder.initialize(IOUtils.readFully(in));
         } catch (PromotionException e) {
-            throw new RuntimeException("PromotionException:", e);
-        } catch (IOException e) {
-            throw new RuntimeException("IOException:", e);
+            LOG.error(e);           // Don't be verbose
+        } catch (IOException e) {   // about this error
+            LOG.error(e);           // But note it
         }
         return binder;
-    }
+    }    
 
-    private byte[] toBytes(InputStream in) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = in.read(buf)) > 0) {
-            out.write(buf, 0, len);
-        }
-        in.close();
-        out.close();
-        return out.toByteArray();
-    }
 }

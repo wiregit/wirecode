@@ -15,6 +15,7 @@ import org.limewire.promotion.containers.PromotionMessageContainer.PromotionMedi
 import org.limewire.promotion.containers.PromotionMessageContainer.PromotionOptions;
 import org.limewire.promotion.exceptions.PromotionException;
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.ByteOrder;
 
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;

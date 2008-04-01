@@ -2,7 +2,9 @@ package org.limewire.promotion;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
@@ -12,6 +14,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.limewire.promotion.impressions.InputStreamCallback;
 import org.limewire.promotion.impressions.UserQueryEvent;
+
 import org.limewire.promotion.impressions.UserQueryEventData;
 
 /**
@@ -29,6 +32,62 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
         this.binderFactory = binderFactory;
     }
 
+    /**
+     * The main entry point. This will create a <code>POST</code> request to
+     * <code>url</code> and include the proper information we want to store.
+     */
+    public final void request(String url, long id, Set<? extends UserQueryEvent> queries,
+            final PromotionBinderCallback callback) {
+        //
+        // This request takes the following parameters
+        // - id: bucket ID for the bucket that will be returned
+        // - for i=1..n
+        // query_<i>: query for the ith UserQueryEvent
+        // data_<i>: data for the ith UserQueryEvent
+        //
+
+        //
+        // This is the id of the bucket we want
+        //
+        if (url.indexOf('?') == -1) {
+            url += "?";
+        } else {
+            url += "&";
+        }
+        url += "id=" + encode(String.valueOf(id));
+        int i = 0;
+        for (UserQueryEvent e : queries) {
+            //
+            // The query and data
+            //
+            UserQueryEventData data = new UserQueryEventData(e);
+            String dataStr = new String(new Base64().encode(data.getData()));
+            url += "query_" + i + "=" + encode(data.getQuery());
+            url += "data_" + i + "=" + encode(dataStr);
+            i++;
+        }
+        HttpPost tmp = null;
+        try {
+            tmp = new HttpPost(alterUrl(url));
+        } catch (URISyntaxException e) {
+            error(e);
+        }
+        final HttpPost request = tmp;
+        HttpParams params = new BasicHttpParams();
+        request.addHeader("User-Agent", getUserAgent());
+        try {
+            makeRequest(request, params, new InputStreamCallback() {
+                public void process(InputStream in) {
+                    callback.process(binderFactory.newBinder(in));
+                }
+            });
+        } catch (HttpException e) {
+            error(e);
+        } catch (IOException e) {
+            error(e);
+        }
+    }
+    
     /**
      * Called when an {@link Exception} occurs.
      * 
@@ -50,7 +109,7 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
      * version information, etc.
      */
     protected abstract String alterUrl(String url);
-
+    
     /**
      * Called once the {@link PostMethod} <code>request</code> is constructed.
      * The purpose of the callback is so we can pass a {@link PromotionBindder}
@@ -65,59 +124,14 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
      * @throws HttpException thrown when a protocol error occurs
      * @throws IOException thrown when a protocol I/O occurs
      */
-    protected abstract void makeRequest(HttpPost request, HttpParams params,
-            InputStreamCallback callback) throws HttpException, IOException;
-
-    /**
-     * The main entry point. This will create a <code>POST</code> request to
-     * <code>url</code> and include the proper information we want to store.
-     */
-    public void request(String url, long id, Set<? extends UserQueryEvent> queries,
-            final PromotionBinderCallback callback) {
-        //
-        // This request takes the following parameters
-        // - id: bucket ID for the bucket that will be returned
-        // - for i=1..n
-        // query_<i>: query for the ith UserQueryEvent
-        // data_<i>: data for the ith UserQueryEvent
-        //
-
-        HttpPost tmp = null;
+    protected abstract void makeRequest(HttpPost request, HttpParams params, InputStreamCallback callback) throws HttpException, IOException;
+    
+    public static String encode(String string) {
         try {
-            tmp = new HttpPost(alterUrl(url));
-        } catch (URISyntaxException e1) {
-            throw new RuntimeException("URI Syntax exception: Could not parse '" + alterUrl(url)
-                    + "'", e1);
-        }
-        final HttpPost request = tmp;
-        HttpParams params = new BasicHttpParams();
-        //
-        // This is the id of the bucket we want
-        //
-        params.setParameter("id", String.valueOf(id));
-        int i = 0;
-        for (UserQueryEvent e : queries) {
-            //
-            // The query and data
-            //
-            UserQueryEventData data = new UserQueryEventData(e);
-            String dataStr = new String(new Base64().encode(data.getData()));
-            params.setParameter("query_" + i, data.getQuery());
-            params.setParameter("data_" + i, dataStr);
-            i++;
-        }
-        request.addHeader("User-Agent", getUserAgent());
-        try {
-            makeRequest(request, params, new InputStreamCallback() {
-                public void process(InputStream in) {
-                    callback.process(binderFactory.newBinder(in));
-                }
-            });
-        } catch (HttpException e) {
-            error(e);
-        } catch (IOException e) {
-            error(e);
+            return URLEncoder.encode(string, "8859_1");
+        } catch(UnsupportedEncodingException uee) {
+            return string;
         }
     }
-
+  
 }

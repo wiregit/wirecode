@@ -8,6 +8,7 @@ import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SimpleTimer;
+import org.limewire.geocode.LimewireGeocodeModule;
 import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
 import org.limewire.inspection.Inspector;
@@ -21,35 +22,12 @@ import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.LimeWireNetModule;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
-import org.limewire.promotion.KeywordUtil;
-import org.limewire.promotion.KeywordUtilImpl;
-import org.limewire.promotion.PromotionBinderFactory;
-import org.limewire.promotion.PromotionBinderFactoryImpl;
-import org.limewire.promotion.PromotionBinderRepository;
-import org.limewire.promotion.PromotionBinderRepositoryImpl;
-import org.limewire.promotion.PromotionBinderRequestor;
-import org.limewire.promotion.PromotionSearcher;
-import org.limewire.promotion.PromotionSearcherImpl;
-import org.limewire.promotion.SearcherDatabase;
-import org.limewire.promotion.SearcherDatabaseImpl;
-import org.limewire.promotion.impressions.ImpressionsCollector;
-import org.limewire.promotion.impressions.ImpressionsCollectorImpl;
+import org.limewire.promotion.LimeWirePromotionModule;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SettingsProvider;
-import org.limewire.security.certificate.CertificateVerifier;
-import org.limewire.security.certificate.CertificateVerifierImpl;
-import org.limewire.security.certificate.CipherProvider;
-import org.limewire.security.certificate.CipherProviderImpl;
-import org.limewire.security.certificate.HashCalculator;
-import org.limewire.security.certificate.HashCalculatorSHA1Impl;
-import org.limewire.security.certificate.HashLookupProvider;
-import org.limewire.security.certificate.HashLookupProviderDNSTXTImpl;
-import org.limewire.security.certificate.KeyStoreProvider;
-import org.limewire.security.certificate.KeyStoreProviderImpl;
-import org.limewire.security.certificate.RootCAProvider;
-import org.limewire.security.certificate.RootCAProviderImpl;
+import org.limewire.security.certificate.LimeWireSecurityCertificateModule;
 import org.limewire.statistic.LimeWireStatisticsModule;
 
 import com.google.inject.Inject;
@@ -126,6 +104,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.LocalIPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.filters.SpamFilterFactoryImpl;
+import com.limegroup.gnutella.geocode.GeocoderImpl;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactoryImpl;
 import com.limegroup.gnutella.handshaking.HandshakeServices;
@@ -233,6 +212,10 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireGnutellaRudpModule());
         binder().install(new LimeWireIOModule());
         binder().install(new LimeWireMojitoModule());
+        binder().install(new LimeWireSecurityCertificateModule());
+        binder().install(new LimewireGeocodeModule(GeocoderImpl.class));
+        binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, 
+                                                     PromotionServicesImpl.class));
         
         bind(LimeWireCore.class);
         
@@ -354,24 +337,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(FECUtils.class).to(FECUtilsImpl.class);
         bind(NodeAssigner.class).to(NodeAssignerImpl.class);
         bind(BTMetaInfoFactory.class).to(BTMetaInfoFactoryImpl.class);
-        
-        bind(CipherProvider.class).to(CipherProviderImpl.class);
-        bind(KeyStoreProvider.class).to(KeyStoreProviderImpl.class);
-        bind(HashCalculator.class).to(HashCalculatorSHA1Impl.class);
-        bind(HashLookupProvider.class).to(HashLookupProviderDNSTXTImpl.class);
-        bind(RootCAProvider.class).to(RootCAProviderImpl.class);
-        bind(CertificateVerifier.class).to(CertificateVerifierImpl.class);
-        
-        // Promotion
-        bind(PromotionServices.class).to(PromotionServicesImpl.class);
-        bind(SearcherDatabase.class).to(SearcherDatabaseImpl.class);
-        bind(PromotionSearcher.class).to(PromotionSearcherImpl.class);
-        bind(PromotionBinderRepository.class).to(PromotionBinderRepositoryImpl.class);
-        bind(KeywordUtil.class).to(KeywordUtilImpl.class);
-        bind(ImpressionsCollector.class).to(ImpressionsCollectorImpl.class);
-        bind(PromotionBinderFactory.class).to(PromotionBinderFactoryImpl.class);
-        bind(PromotionBinderRequestor.class).to(PromotionBinderRequestorImpl.class);        
-        
+                
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
         bindAll(Names.named("dhtExecutor"), ExecutorService.class, DHTExecutorProvider.class, Executor.class);

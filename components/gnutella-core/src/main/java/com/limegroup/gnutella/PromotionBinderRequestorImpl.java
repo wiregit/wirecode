@@ -27,31 +27,21 @@ public class PromotionBinderRequestorImpl extends AbstractPromotionBinderRequest
     private final HttpExecutor exe;
     private final ApplicationServices applicationServices;
     
-    /** The default timeout is 5000, though we can change that. */
-    private int timeoutMillis = 5000;
-    
     @Inject
     public PromotionBinderRequestorImpl(PromotionBinderFactory binderFactory, HttpExecutor exe, ApplicationServices applicationServices) {
         super(binderFactory);
         this.exe = exe;
         this.applicationServices = applicationServices;
     }
-    
-    public void setNetworkTimeout(int timeoutMillis) {
-        this.timeoutMillis = timeoutMillis;
-    }    
-
-    @Override
+ 
     protected void error(Exception e) {
         LOG.error("Error processing promotion binder", e);
     }
 
-    @Override
     protected String getUserAgent() {
         return LimeWireUtils.getHttpServer();
     }
 
-    //@Override
     protected void makeRequest(final HttpPost post, HttpParams params, final InputStreamCallback callback)
             throws HttpException, IOException {
         exe.execute(post, params, new HttpClientListener() {
@@ -79,8 +69,7 @@ public class PromotionBinderRequestorImpl extends AbstractPromotionBinderRequest
         });
     }
 
-    @Override
-    protected String alterUrl(String url) {
+    public String alterUrl(String url) {
         return LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyBTGUID());
-    }   
+    } 
 }

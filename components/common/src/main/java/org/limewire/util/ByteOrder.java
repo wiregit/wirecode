@@ -653,7 +653,7 @@ public class ByteOrder {
 					| (( x[offset + 3] & 0xFFL) << 32)
 					| (( x[offset + 2] & 0xFFL) << 40)
 					| (( x[offset + 1] & 0xFFL) << 48)
-					|  ( x[offset    ]          << 56);
+					| (( x[offset    ] & 0xFFL) << 56);
 		default:
 			throw new IllegalArgumentException("No bytes specified");
 		}

@@ -76,15 +76,13 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
      */
     public void setUniqueID(long id) {
         byte[] header = getHeader();
-        System.arraycopy(ByteOrder.long2bytes(id, 8), 0, header, 0, 8);
+        ByteOrder.long2beb(id, header, 0);
         setHeader(header);
     }
-
+    
     public long getUniqueID() {
         byte[] header = getHeader();
-        byte[] id = new byte[8];
-        System.arraycopy(header, 0, id, 0, 8);
-        return ByteOrder.beb2long(id, 0, 8);
+        return ByteOrder.beb2long(header, 0, 8);
     }
 
     /**
@@ -173,8 +171,8 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
      */
     private byte[] getHeader() {
         byte[] header = null;
-        if (payload.hasKey(KEY_HEADER))
             try {
+                if (payload.hasKey(KEY_HEADER))
                 header = payload.getBytes(KEY_HEADER);
             } catch (BadGGEPPropertyException ignored) {
             }

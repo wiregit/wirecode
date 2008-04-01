@@ -18,8 +18,8 @@ public class LatitudeLongitude {
      * and pass that to the degree constructor
      * </ul>
      * 
-     * @param latitude24bit
-     * @param longitude24bit
+     * @param latitude the Latitude
+     * @param longitude the Longitude
      */
     public LatitudeLongitude(byte[] latitude, byte[] longitude) {
         this.latitude = latitude;

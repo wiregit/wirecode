@@ -8,10 +8,10 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>lw-http</artifactId>
+  <artifactId>lw-geocode</artifactId>
   <packaging>jar</packaging>
   <version>${limewire.version}</version>
-  <name>LimeWire HTTP Component</name>
+  <name>LimeWire Geocode Component</name>
 
   <repositories>
     <repository>
@@ -33,39 +33,9 @@
     </dependency>
     <dependency>
       <groupId>org.limewire</groupId>
-      <artifactId>lw-io</artifactId>
-      <version>${limewire.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.limewire</groupId>
-      <artifactId>lw-net</artifactId>
-      <version>${limewire.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.limewire</groupId>
-      <artifactId>lw-nio</artifactId>
-      <version>${limewire.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.limewire</groupId>
       <artifactId>lw-test-util</artifactId>
       <version>${limewire.version}</version>
 	  <scope>test</scope>
     </dependency>
-	<dependency>
-	  <groupId>org.apache.httpcomponents</groupId>
-	  <artifactId>httpcore</artifactId>
-      <version>4.0-beta2-20080303.182830-4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpcore-nio</artifactId>
-      <version>4.0-beta2-20080303.182830-4</version>
-    </dependency>
-    <dependency> 
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>4.0-alpha4-20080319.202202-3</version>
-    </dependency>    
   </dependencies>
 </project>

@@ -19,6 +19,7 @@ import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.ssl.SSLEngineTest;
 import org.limewire.nio.ssl.SSLUtils;
+import org.limewire.promotion.PromotionServices;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsGroupManager;

@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.settings;
 
-import org.limewire.promotion.PromotionBinder;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.StringSetting;

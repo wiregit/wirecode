@@ -27,7 +27,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
     private int maxNumberOfResults = 5;
 
     @Inject
-    public PromotionSearcherImpl(final KeywordUtil keywordUtil,
+    public PromotionSearcherImpl(final KeywordUtilImpl keywordUtil,
             final SearcherDatabase searcherDatabase,
             final ImpressionsCollector impressionsCollector,
             final PromotionBinderRepository promotionBinderRepository) {
@@ -41,7 +41,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
      * Order of operations:
      * 
      * <ol>
-     * <li> normalize the query using {@link KeywordUtil}
+     * <li> normalize the query using {@link KeywordUtilImpl}
      * <li> expire any db results that have passed
      * <li> request the {@link PromotionBinder} for this query from the
      * {@link PromotionBinderRepository} (may be cached)

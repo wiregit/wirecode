@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import org.limewire.promotion.PromotionBinderRepository;
 import org.limewire.promotion.PromotionSearcher;
+import org.limewire.promotion.PromotionServices;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;

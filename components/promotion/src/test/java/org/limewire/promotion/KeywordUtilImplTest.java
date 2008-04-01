@@ -26,6 +26,7 @@ public class KeywordUtilImplTest extends BaseTestCase {
         assertEquals(7771131797414839755L, keywordUtil.getHashValue("a big foo"));
         assertEquals(7771131797414839755L, keywordUtil.getHashValue("a foo big"));
 
+
         assertSameHash("a", "A");
         assertSameHash("big bird", "a big bird");
         assertSameHash("I shot the sherriff", "sherriff shot");
