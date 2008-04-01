@@ -23,7 +23,7 @@ import org.limewire.mojito.result.FindValueResult;
  */
 abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
     
-    static final Log LOG = LogFactory.getLog(AbstractResultHandler.class);
+    private static final Log LOG = LogFactory.getLog(AbstractResultHandler.class);
     
     /**
      * Result type to denote different results of {@link AbstractResultHandler#handleDHTValueEntity(DHTValueEntity)}.
@@ -109,6 +109,16 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
         }
     }
     
+    /**
+     * Updates the old value to the possible new value if the state
+     * transition makes sense and provides a better.
+     * 
+     * State transtions are.
+     *
+     * FOUND => goes nowhere, the value has been found
+     * NOT_YET_FOUND  => can go to FOUND
+     * NOT_FOUND => can go to NOT_YET_FOUND, or FOUND, or stay with FOUND
+     */
     private Result updateResult(Result oldValue, Result possibleValue) {
         if (oldValue == Result.FOUND || possibleValue == Result.FOUND) {
             return Result.FOUND;

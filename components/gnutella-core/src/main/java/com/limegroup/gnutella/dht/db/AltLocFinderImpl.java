@@ -38,9 +38,9 @@ import com.limegroup.gnutella.settings.DHTSettings;
  * alternate locations.
  */
 @Singleton
-public class AltLocFinderImpl implements AltLocFinder {
+class AltLocFinderImpl implements AltLocFinder {
 
-    static final Log LOG = LogFactory.getLog(AltLocFinderImpl.class);
+    private static final Log LOG = LogFactory.getLog(AltLocFinderImpl.class);
     
     private final DHTManager manager;
 
@@ -61,11 +61,7 @@ public class AltLocFinderImpl implements AltLocFinder {
     }
     
     public Shutdownable findAltLocs(URN urn, SearchListener<AlternateLocation> listener) {
-        if (urn == null) {
-            return null;
-        }
         listener = SearchListenerAdapter.nonNullListener(listener);
-        
         synchronized (manager) {
             MojitoDHT dht = manager.getMojitoDHT();
             if (dht == null || !dht.isBootstrapped()) {

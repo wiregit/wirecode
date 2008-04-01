@@ -8,7 +8,7 @@ import org.limewire.concurrent.OnewayExchanger;
  */
 public class BlockingSearchListener<Result> implements SearchListener<Result> {
 
-    final OnewayExchanger<Result, RuntimeException> exchanger = new OnewayExchanger<Result, RuntimeException>();
+    private final OnewayExchanger<Result, RuntimeException> exchanger = new OnewayExchanger<Result, RuntimeException>();
     
     public void handleResult(Result result) {
         exchanger.setValue(result);

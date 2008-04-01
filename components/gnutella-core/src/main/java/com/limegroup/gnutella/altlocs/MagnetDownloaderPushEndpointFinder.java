@@ -70,7 +70,6 @@ public class MagnetDownloaderPushEndpointFinder implements EventListener<Downloa
                 MagnetDownloader magnetDownloader = (MagnetDownloader)downloader;
                 // subscribe for status events so we can search when waiting for user
                 magnetDownloader.addListener(downloadStatusListener);
-                searchForPushEndpoints(magnetDownloader);
             }
             break;
         case REMOVED:

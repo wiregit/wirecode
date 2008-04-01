@@ -5,6 +5,8 @@ import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.EntityKey;
@@ -30,6 +32,8 @@ import com.limegroup.gnutella.dht.util.KUIDUtils;
 @Singleton
 public class DHTPushEndpointFinder implements PushEndpointService {
 
+    private static final Log LOG = LogFactory.getLog(DHTPushEndpointFinder.class);
+    
     private final PushEndpointFactory pushEndpointFactory;
     private final DHTManager dhtManager;
 

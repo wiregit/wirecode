@@ -17,9 +17,7 @@ public interface AltLocFinder {
     /**
      * Finds alternate locations for the given URN.
      * 
-     * @param urn for the alternate location
-     * 
-     * @return <code>null</code> if <code>urn</code> is null or the search failed immediately
+     * @param urn for the alternate location, must not be null
      */
     Shutdownable findAltLocs(URN urn, SearchListener<AlternateLocation> listener);
 

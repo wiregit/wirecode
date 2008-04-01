@@ -7,6 +7,7 @@ import org.limewire.nio.observer.Shutdownable;
 
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
@@ -206,7 +207,11 @@ class RequeryManager implements DHTEventListener {
         requeryListener.lookupStarted(QueryType.DHT, Math.max(TIME_BETWEEN_REQUERIES, 
                 LookupSettings.FIND_VALUE_LOOKUP_TIMEOUT.getValue()));
       
-        dhtQuery = altLocFinder.findAltLocs(requeryListener.getSHA1Urn(), searchHandler);
+        URN sha1Urn = requeryListener.getSHA1Urn();
+        if (sha1Urn != null) {
+            dhtQuery = altLocFinder.findAltLocs(sha1Urn, searchHandler);
+        }
+        // fail silently otherwise as before
     }
     
     /** Sends a Gnutella Query */
