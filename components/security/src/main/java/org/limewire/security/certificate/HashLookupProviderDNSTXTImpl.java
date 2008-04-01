@@ -8,11 +8,14 @@ import org.xbill.DNS.Lookup;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.Type;
 
+import com.google.inject.Singleton;
+
 /**
  * DNS lookup-backed provider, takes given keys and does a DNS lookup for a TXT
  * record matching the key. We'd expect the key to be something like
  * 'something.auth.limewire.com'.
  */
+@Singleton
 public class HashLookupProviderDNSTXTImpl implements HashLookupProvider {
     private static final Log LOG = LogFactory.getLog(HashLookupProviderDNSTXTImpl.class);
 

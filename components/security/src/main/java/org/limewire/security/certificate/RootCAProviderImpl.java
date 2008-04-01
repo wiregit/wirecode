@@ -7,7 +7,9 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class RootCAProviderImpl implements RootCAProvider {
     KeyStoreProvider keyStoreProvider;
 

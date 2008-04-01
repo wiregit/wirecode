@@ -65,11 +65,11 @@ public class KeyStoreProviderImpl implements KeyStoreProvider {
             keyStore.store(out, keyStorePassword);
             return keyStore;
         } catch (KeyStoreException ex) {
-            throw IOUtils.getIOException("KeyStoreException while saving keystore: " ,ex);
+            throw IOUtils.getIOException("KeyStoreException while saving keystore: ", ex);
         } catch (NoSuchAlgorithmException ex) {
-            throw IOUtils.getIOException("NoSuchAlgorithmException while saving keystore: ",ex);
+            throw IOUtils.getIOException("NoSuchAlgorithmException while saving keystore: ", ex);
         } catch (CertificateException ex) {
-            throw new IOException("CertificateException while saving keystore: " + ex.getMessage());
+            throw IOUtils.getIOException("CertificateException while saving keystore: ", ex);
         } finally {
             if (out != null)
                 out.close();
@@ -93,11 +93,11 @@ public class KeyStoreProviderImpl implements KeyStoreProvider {
                 try {
                     newKeyStore.load(connection.getInputStream(), keyStorePassword);
                 } catch (NoSuchAlgorithmException ex) {
-                    throw new IOException("NoSuchAlgorithmException while parsing keystore: "
-                            + ex.getMessage());
+                    throw IOUtils.getIOException(
+                            "NoSuchAlgorithmException while parsing keystore: ", ex);
                 } catch (CertificateException ex) {
-                    throw new IOException("CertificateException while parsing keystore: "
-                            + ex.getMessage());
+                    throw IOUtils.getIOException("CertificateException while parsing keystore: ",
+                            ex);
                 }
                 return newKeyStore;
             } else {
@@ -123,13 +123,12 @@ public class KeyStoreProviderImpl implements KeyStoreProvider {
             newKeyStore.load(in, keyStorePassword);
             return newKeyStore;
         } catch (KeyStoreException ex) {
-            throw new IOException("KeyStoreException while creating keystore in memory: "
-                    + ex.getMessage());
+            throw IOUtils.getIOException("KeyStoreException while creating keystore in memory: ",
+                    ex);
         } catch (NoSuchAlgorithmException ex) {
-            throw new IOException("NoSuchAlgorithmException while parsing keystore: "
-                    + ex.getMessage());
+            throw IOUtils.getIOException("NoSuchAlgorithmException while parsing keystore: ", ex);
         } catch (CertificateException ex) {
-            throw new IOException("CertificateException while parsing keystore: " + ex.getMessage());
+            throw IOUtils.getIOException("CertificateException while parsing keystore: ", ex);
         } finally {
             if (in != null)
                 in.close();
