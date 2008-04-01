@@ -10,6 +10,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.EnumMap;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
@@ -22,30 +25,29 @@ import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 
-
 /**
- * Provides utility input and output related methods. <code>IOUtils</code> 
+ * Provides utility input and output related methods. <code>IOUtils</code>
  * includes methods to read and skip over data, and handle exceptions. Furthermore,
  * this class lets you compress and uncompress data and to close {@link Closeable}
  * objects, {@link Socket Sockets} and {@link ServerSocket ServerSockets}.
  */
 public class IOUtils {
-    
+
     public static enum ErrorType {
         GENERIC, DOWNLOAD;
     }
-    
+
     private static enum DetailErrorType {
         DISK_FULL, FILE_LOCKED, NO_PRIVS, BAD_CHARS;
     }
-    
+
     private static final EnumMap<ErrorType, EnumMap<DetailErrorType, String>> errorDescs;
-    
+
     static {
-        errorDescs = new EnumMap<ErrorType, EnumMap<DetailErrorType,String>>(ErrorType.class);
-        for(ErrorType type : ErrorType.values())
+        errorDescs = new EnumMap<ErrorType, EnumMap<DetailErrorType, String>>(ErrorType.class);
+        for (ErrorType type : ErrorType.values())
             errorDescs.put(type, new EnumMap<DetailErrorType, String>(DetailErrorType.class));
-        
+
         errorDescs.get(ErrorType.GENERIC).put(DetailErrorType.DISK_FULL, 
             I18nMarker.marktr("LimeWire was unable to write a necessary file because your hard drive is full. To continue using LimeWire you must free up space on your hard drive."));
         errorDescs.get(ErrorType.GENERIC).put(DetailErrorType.FILE_LOCKED,
@@ -64,31 +66,30 @@ public class IOUtils {
             I18nMarker.marktr("LimeWire was unable to create or continue writing an incomplete file for the selected download because you do not have permission to write files to the incomplete folder. To continue using LimeWire, please choose a different Save Folder."));
         errorDescs.get(ErrorType.DOWNLOAD).put(DetailErrorType.BAD_CHARS,
             I18nMarker.marktr("LimeWire was unable to open the incomplete file for the selected download because the filename contains characters which are not supported by your operating system."));
-        
+
         // just verify it was all setup right.
-        for(ErrorType type : ErrorType.values()) {
+        for (ErrorType type : ErrorType.values()) {
             assert errorDescs.get(type) != null;
             assert errorDescs.get(type).size() == DetailErrorType.values().length;
         }
-     
+
     }
 
-    
     /**
      * Attempts to handle an IOException. If we know expect the problem,
      * we can either ignore it or display a friendly error (both returning
      * true, for handled) or expect the outer-world to handle it (and
      * return false).
-     *
+     * 
      * @return true if we could handle the error.
      */
     public static boolean handleException(IOException ioe, ErrorType errorType) {
         Throwable e = ioe;
-        
-        while(e != null) {
+
+        while (e != null) {
             String msg = e.getMessage();
-            
-            if(msg != null) {
+
+            if (msg != null) {
                 msg = msg.toLowerCase();
                 DetailErrorType detailType = null;
                 // If the user's disk is full, let them know.
@@ -107,24 +108,31 @@ public class IOUtils {
                     detailType = DetailErrorType.NO_PRIVS;
                 }
                 // If characterset is faulty...
-                else if(StringUtils.contains(msg, "invalid argument")) {
+                else if (StringUtils.contains(msg, "invalid argument")) {
                     detailType = DetailErrorType.BAD_CHARS;
                 }
-                
-                if(detailType != null) {
+
+                if (detailType != null) {
                     MessageService.showError(errorDescs.get(errorType).get(detailType));
                     return true;
                 }
             }
-            
+
             e = e.getCause();
         }
 
         // dunno what to do, let the outer world handle it.
         return false;
-    }       
+    }
 
-   /**
+    /** Convenience method to create a new IOException with initCause set. */
+    public static IOException getIOException(String message, Throwable cause) {
+        IOException ioException = new IOException(message);
+        ioException.initCause(cause);
+        return ioException;
+    }
+
+    /**
      * Returns the first word of specified maximum size up to the first space
      * and returns it. This does not read up to the first whitespace
      * character -- it only looks for a single space. This is particularly
@@ -132,30 +140,30 @@ public class IOUtils {
      * the HTTP version must all be separated by a single space.
      * Note that only one extra character is read from the stream in the case of
      * success (the white space character after the word).
-     *
+     * 
      * @param in The input stream from where to read the word
      * @param maxSize The maximum size of the word.
      * @return the first word (i.e., no whitespace) of specified maximum size
      * @exception IOException if the word of specified maxSize couldn't be read,
-     * either due to stream errors, or timeouts
+     *            either due to stream errors, or timeouts
      */
     public static String readWord(InputStream in, int maxSize)
       throws IOException {
         final char[] buf = new char[maxSize];
         int i = 0;
-        //iterate till maxSize + 1 (for white space)
+        // iterate till maxSize + 1 (for white space)
         while (true) {
             int got;
             try {
                 got = in.read();
                 if (got >= 0) { // not EOF
                     if ((char)got != ' ') { //didn't get word. Exclude space.
-                        if (i < maxSize) { //We don't store the last letter
-                            buf[i++] = (char)got;
+                        if (i < maxSize) { // We don't store the last letter
+                            buf[i++] = (char) got;
                             continue;
                         }
-                        //if word of size upto maxsize not found, throw an
-                        //IOException. (Fixes bug 26 in 'core' project)
+                        // if word of size upto maxsize not found, throw an
+                        // IOException. (Fixes bug 26 in 'core' project)
                         throw new IOException("could not read word");
                     }
                     return new String(buf, 0, i);
@@ -167,7 +175,7 @@ public class IOUtils {
             }
         }
     }
-    
+
     /**
      * Reads a word, but if the connection closes, returns the largest word read
      * instead of throwing an IOX.
@@ -176,24 +184,24 @@ public class IOUtils {
       throws IOException {
         final char[] buf = new char[maxSize];
         int i = 0;
-        //iterate till maxSize + 1 (for white space)
+        // iterate till maxSize + 1 (for white space)
         while (true) {
             int got;
             try {
                 got = in.read();
-                if(got == -1) {
-                    if(i == 0)
+                if (got == -1) {
+                    if (i == 0)
                         throw new IOException("could not read any word.");
                     else
                         return new String(buf, 0, i);
                 } else if (got >= 0) {
                     if ((char)got != ' ') { //didn't get word. Exclude space.
-                        if (i < maxSize) { //We don't store the last letter
-                            buf[i++] = (char)got;
+                        if (i < maxSize) { // We don't store the last letter
+                            buf[i++] = (char) got;
                             continue;
                         }
-                        //if word of size upto maxsize not found, throw an
-                        //IOException. (Fixes bug 26 in 'core' project)
+                        // if word of size upto maxsize not found, throw an
+                        // IOException. (Fixes bug 26 in 'core' project)
                         throw new IOException("could not read word");
                     }
                     return new String(buf, 0, i);
@@ -205,17 +213,17 @@ public class IOUtils {
             }
         }
     }
-    
+
     public static long ensureSkip(InputStream in, long length) throws IOException {
-    	long skipped = 0;
-    	while(skipped < length) {
-    		long current = in.skip(length - skipped);
-    	    if(current == -1 || current == 0)
-    	        throw new EOFException("eof");
-    	    else
-    	        skipped += current;
-    	}
-    	return skipped;
+        long skipped = 0;
+        while (skipped < length) {
+            long current = in.skip(length - skipped);
+            if (current == -1 || current == 0)
+                throw new EOFException("eof");
+            else
+                skipped += current;
+        }
+        return skipped;
     }
 
     /**
@@ -225,7 +233,44 @@ public class IOUtils {
     public static void close(Closeable closeable) {
         FileUtils.close(closeable);
     }
-    
+
+    /**
+     * A utility method to close a SQL {@link ResultSet} without bothering with
+     * the possibility that the set is null or wants to throw a SQLException.
+     * 
+     * @return true if the close() operation completed normally, false if the
+     *         result set was null or an exception was thrown.
+     */
+    public static boolean close(ResultSet resultSet) {
+        if (resultSet == null)
+            return false;
+        try {
+            resultSet.close();
+            return true;
+        } catch (SQLException absorbed) {
+            return false;
+        }
+    }
+
+    /**
+     * A utility method to close a SQL {@link Statement} without bothering with
+     * the possibility that the statement is null or wants to throw a
+     * SQLException.
+     * 
+     * @return true if the close() operation completed normally, false if the
+     *         statement was null or an exception was thrown.
+     */
+    public static boolean close(Statement statement) {
+        if (statement == null)
+            return false;
+        try {
+            statement.close();
+            return true;
+        } catch (SQLException absorbed) {
+            return false;
+        }
+    }
+
     /**
      * A utility method to flush Flushable objects (Readers, Writers, 
      * Input- and OutputStreams and RandomAccessFiles).
@@ -233,16 +278,16 @@ public class IOUtils {
     public static void flush(Flushable flushable) {
         FileUtils.flush(flushable);
     }
-    
+
     /**
      * A utility method to close Sockets
      */
     public static void close(Socket s) {
-        if(s != null) {
+        if (s != null) {
             try {
                 s.close();
             } catch(IOException ignored) {}
-            
+
             try {
                 close(s.getInputStream());
             } catch(IOException ignored) {}
@@ -252,30 +297,30 @@ public class IOUtils {
             } catch(IOException ignored) {}
         }
     }
-    
+
     /**
      * A utility method to close ServerSockets
      */
     public static void close(ServerSocket s) {
-        if(s != null) {
+        if (s != null) {
             try {
                 s.close();
             } catch(IOException ignored) {}
         }
     }
-    
+
     public static void close(Deflater deflater) {
-        if(deflater != null) {
+        if (deflater != null) {
             deflater.end();
         }
     }
-    
+
     public static void close(Inflater inflater) {
-        if(inflater != null) {
+        if (inflater != null) {
             inflater.end();
         }
     }
-    
+
     /**
      * Deflates (compresses) the data.
      */
@@ -284,12 +329,12 @@ public class IOUtils {
         Deflater def = null;
         try {
             def = new Deflater();
-            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             dos = new DeflaterOutputStream(baos, def);
             dos.write(data, 0, data.length);
-            dos.close();                      //flushes bytes
+            dos.close(); // flushes bytes
             return baos.toByteArray();
-        } catch(IOException impossible) {
+        } catch (IOException impossible) {
             ErrorService.error(impossible);
             return null;
         } finally {
@@ -297,7 +342,7 @@ public class IOUtils {
             close(def);
         }
     }
-    
+
     /**
      * Inflates (uncompresses) the data.
      */
@@ -309,29 +354,29 @@ public class IOUtils {
             in = new InflaterInputStream(new ByteArrayInputStream(data), inf);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             byte[] buf = new byte[64];
-            while(true) {
+            while (true) {
                 int read = in.read(buf, 0, buf.length);
-                if(read == -1)
+                if (read == -1)
                     break;
                 out.write(buf, 0, read);
             }
             return out.toByteArray();
-        } catch(OutOfMemoryError oome) {
+        } catch (OutOfMemoryError oome) {
             throw new IOException(oome.getMessage());
         } finally {
             close(in);
             close(inf);
         }
-    } 
-    
-    public static byte [] readFully(InputStream in) throws IOException {
+    }
+
+    public static byte[] readFully(InputStream in) throws IOException {
         ByteArrayOutputStream bos = null;
         try {
             bos = new ByteArrayOutputStream();
-            byte [] buffer = new byte[1024];
+            byte[] buffer = new byte[1024];
             int read;
-            while((read = in.read(buffer)) != -1) {
-                bos.write(buffer, 0, read);        
+            while ((read = in.read(buffer)) != -1) {
+                bos.write(buffer, 0, read);
             }
             return bos.toByteArray();
         } finally {
@@ -339,4 +384,5 @@ public class IOUtils {
             close(in);
         }
     }
+
 }

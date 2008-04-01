@@ -55,7 +55,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     }
 
     /* Throws a RTE if we're missing any required fields. */
-    public byte[] getEncoded() {
+    public byte[] encode() {
         payload.put(TYPE_KEY, getType());
         if (!payload.hasKey(KEY_HEADER))
             throw new RuntimeException("Missing header");
@@ -72,9 +72,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     }
 
     /**
-     * A long that specifies a globally unique ID for this promo. Most likely
-     * we'll just stick {@link System#currentTimeMillis()} in here and make sure
-     * we wait at least a milli between promo creations.
+     * A long that specifies a globally unique ID for this promo.
      */
     public void setUniqueID(long id) {
         byte[] header = getHeader();
@@ -165,7 +163,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     /** Sets the payload with the given header. Should be 11 bytes or bigger. */
     private void setHeader(byte[] header) {
         if (header == null || header.length < 11)
-            throw new RuntimeException("header must be at least 11 bytes long.");
+            throw new IllegalArgumentException("header must be at least 11 bytes long.");
         payload.put(KEY_HEADER, header);
     }
 
@@ -205,8 +203,8 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
         String territories;
         try {
             territories = StringUtils.toStringFromUTF8Bytes(payload.getBytes(KEY_TERRITORIES));
-        } catch (BadGGEPPropertyException e) {
-            throw new RuntimeException("GGEP exception parsing territories.");
+        } catch (BadGGEPPropertyException ex) {
+            throw new RuntimeException("GGEP exception parsing territories.", ex);
         }
         for (int i = 0; i < territories.length() - 1; i += 2)
             territoryList.add(new Locale("", territories.substring(i, i + 2)));
@@ -496,7 +494,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
         payload.put(key, StringUtils.toUTF8Bytes(value));
     }
 
-    public void parse(GGEP rawGGEP) throws BadGGEPBlockException {
+    public void decode(GGEP rawGGEP) throws BadGGEPBlockException {
         if (!Arrays.equals(getType(), rawGGEP.get(TYPE_KEY)))
             throw new BadGGEPBlockException("Incorrect type.");
         if (!rawGGEP.hasKey(KEY_HEADER))
@@ -613,7 +611,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
         /**
          * @return true if point is within this restriction.
          */
-        public boolean isWithin(LatitudeLongitude point) {
+        public boolean contains(LatitudeLongitude point) {
             return center.distanceFrom(point) <= (radiusInMeters / 1000.0);
         }
 

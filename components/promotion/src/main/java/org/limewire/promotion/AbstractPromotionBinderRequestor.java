@@ -14,9 +14,6 @@ import org.limewire.promotion.impressions.InputStreamCallback;
 import org.limewire.promotion.impressions.UserQueryEvent;
 import org.limewire.promotion.impressions.UserQueryEventData;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-
 /**
  * Instances of this class make <code>POST</code> requests to the URL given
  * for containers, and also add the data given in the {@link UserQueryEvent}.
@@ -24,12 +21,10 @@ import com.google.inject.Singleton;
  * The {@link PromotionBinder} that is passed in is created by the injected
  * {@link PromotionBinderFactory}.
  */
-@Singleton
 public abstract class AbstractPromotionBinderRequestor implements PromotionBinderRequestor {
 
     private final PromotionBinderFactory binderFactory;
 
-    @Inject
     public AbstractPromotionBinderRequestor(PromotionBinderFactory binderFactory) {
         this.binderFactory = binderFactory;
     }
@@ -49,7 +44,7 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
      *         <code>POST</code> request.
      */
     protected abstract String getUserAgent();
-    
+
     /**
      * Subclasses should alter the final URL in this method, such as adding
      * version information, etc.
@@ -66,37 +61,38 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
      * @param callback this callback will take the passed in bytes and construct
      *        a {@link PromotionBinder} to pass the
      *        {@link PromotionBinderCallback} in
-     *        {@ilnk #request(String, long, Set, PromotionBinderCallback)}
+     *        {@link #request(String, long, Set, PromotionBinderCallback)}
      * @throws HttpException thrown when a protocol error occurs
      * @throws IOException thrown when a protocol I/O occurs
      */
-    protected abstract void makeRequest(HttpPost request, HttpParams params, InputStreamCallback callback)
-            throws HttpException, IOException;
+    protected abstract void makeRequest(HttpPost request, HttpParams params,
+            InputStreamCallback callback) throws HttpException, IOException;
 
     /**
      * The main entry point. This will create a <code>POST</code> request to
      * <code>url</code> and include the proper information we want to store.
      */
-    public void request(String url, long id, Set<UserQueryEvent> queries,
+    public void request(String url, long id, Set<? extends UserQueryEvent> queries,
             final PromotionBinderCallback callback) {
         //
         // This request takes the following parameters
-        //  - id: bucket ID for the bucket that will be returned
-        //  - for i=1..n
-        //      query_<i>: query for the ith UserQueryEvent
-        //      data_<i>: data for the ith UserQueryEvent
+        // - id: bucket ID for the bucket that will be returned
+        // - for i=1..n
+        // query_<i>: query for the ith UserQueryEvent
+        // data_<i>: data for the ith UserQueryEvent
         //
-        
+
         HttpPost tmp = null;
         try {
             tmp = new HttpPost(alterUrl(url));
         } catch (URISyntaxException e1) {
-            //TODO: what here?
+            throw new RuntimeException("URI Syntax exception: Could not parse '" + alterUrl(url)
+                    + "'", e1);
         }
         final HttpPost request = tmp;
         HttpParams params = new BasicHttpParams();
         //
-        //  This is the id of the bucket we want
+        // This is the id of the bucket we want
         //
         params.setParameter("id", String.valueOf(id));
         int i = 0;

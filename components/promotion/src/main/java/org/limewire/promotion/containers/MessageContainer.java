@@ -20,7 +20,7 @@ public interface MessageContainer {
      * @return The full encoded version of this container (A raw GGEP,
      *         generally)
      */
-    byte[] getEncoded();
+    byte[] encode();
 
     /**
      * Take the given passed in GGEP-encoded bytes and parse out the data to
@@ -30,6 +30,6 @@ public interface MessageContainer {
      *         an instance of this object type, or a wrapped MessageContainer
      *         throws this exception during its own parse method.
      */
-    void parse(GGEP rawGGEP) throws BadGGEPBlockException;
+    void decode(GGEP rawGGEP) throws BadGGEPBlockException;
 
 }

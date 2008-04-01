@@ -18,6 +18,11 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 
+import org.limewire.io.IOUtils;
+
+import com.google.inject.Singleton;
+
+@Singleton
 public class CipherProviderImpl implements CipherProvider {
 
     public byte[] decrypt(byte[] ciphertext, Key key, CipherType cipherType) throws IOException {
@@ -27,7 +32,7 @@ public class CipherProviderImpl implements CipherProvider {
             AlgorithmParameters algParams = cipher.getParameters();
             cipher.init(Cipher.DECRYPT_MODE, key, algParams);
         } catch (GeneralSecurityException ex) {
-            throw new IOException("Security exception while initializing: " + ex.getMessage());
+            throw IOUtils.getIOException("Security exception while initializing: ", ex);
         }
         InputStream in = new ByteArrayInputStream(ciphertext);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -48,7 +53,7 @@ public class CipherProviderImpl implements CipherProvider {
             cp = Cipher.getInstance(cipherType.getDescription());
             cp.init(Cipher.ENCRYPT_MODE, key);
         } catch (GeneralSecurityException ex) {
-            throw new IOException("Security exception while initializing: " + ex.getMessage());
+            throw IOUtils.getIOException("Security exception while initializing: ", ex);
         }
 
         InputStream in = new ByteArrayInputStream(plaintext);
@@ -72,11 +77,11 @@ public class CipherProviderImpl implements CipherProvider {
             signer.update(plaintext);
             return signer.sign();
         } catch (NoSuchAlgorithmException ex) {
-            throw new IOException("NoSuchAlgorithmException during signing: " + ex.getMessage());
+            throw IOUtils.getIOException("NoSuchAlgorithmException during signing: ", ex);
         } catch (InvalidKeyException ex) {
-            throw new IOException("InvalidKeyException during signing: " + ex.getMessage());
+            throw IOUtils.getIOException("InvalidKeyException during signing: ", ex);
         } catch (SignatureException ex) {
-            throw new IOException("SignatureException during signing: " + ex.getMessage());
+            throw IOUtils.getIOException("SignatureException during signing: ", ex);
         }
     }
 
@@ -88,11 +93,11 @@ public class CipherProviderImpl implements CipherProvider {
             signer.update(plaintext);
             return signer.verify(signature);
         } catch (NoSuchAlgorithmException ex) {
-            throw new IOException("NoSuchAlgorithmException during signing: " + ex.getMessage());
+            throw IOUtils.getIOException("NoSuchAlgorithmException during signing: ", ex);
         } catch (InvalidKeyException ex) {
-            throw new IOException("InvalidKeyException during signing: " + ex.getMessage());
+            throw IOUtils.getIOException("InvalidKeyException during signing: ", ex);
         } catch (SignatureException ex) {
-            throw new IOException("SignatureException during signing: " + ex.getMessage());
+            throw IOUtils.getIOException("SignatureException during signing: ", ex);
         }
     }
 

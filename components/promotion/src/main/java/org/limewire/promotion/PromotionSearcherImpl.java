@@ -15,11 +15,15 @@ import org.limewire.promotion.impressions.ImpressionsCollector;
 import com.google.inject.Inject;
 
 public class PromotionSearcherImpl implements PromotionSearcher {
-    
+
     private final KeywordUtil keywordUtil;
+
     private final SearcherDatabase searcherDatabase;
+
     private final ImpressionsCollector impressionsCollector;
+
     private final PromotionBinderRepository promotionBinderRepository;
+
     private int maxNumberOfResults = 5;
 
     @Inject
@@ -53,7 +57,8 @@ public class PromotionSearcherImpl implements PromotionSearcher {
      */
     public void search(final String query, final PromotionSearchResultsCallback callback,
             final GeocodeInformation userLocation) {
-        new SearcherThread(query, callback, userLocation).start();
+        new ManagedThread(new SearcherThread(query, callback, userLocation), "SearcherThread["
+                + query + "]").start();
     }
 
     public void init(final int maxNumberOfResults) {
@@ -65,7 +70,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
      * conducting the search and invoking the callback passed to the search
      * method. When the search has completed, this thread dies.
      */
-    private class SearcherThread extends ManagedThread {
+    private class SearcherThread implements Runnable {
         private final String query;
 
         private final PromotionSearchResultsCallback callback;
@@ -114,7 +119,6 @@ public class PromotionSearcherImpl implements PromotionSearcher {
             }
         }
 
-        @Override
         public void run() {
             // OK, start the meat of the query!
             final Date timeQueried = new Date();
@@ -142,7 +146,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
                                     // Looks like we can show this result...
                                     // Verify it!
                                     if (isMessageValid(result.getPromotionMessageContainer(),
-                                            result.getBinderUniqueName())) {
+                                            result.getBinderUniqueName(), timeQueried.getTime())) {
                                         shownResults++;
                                         callback.process(result.getPromotionMessageContainer());
                                         // record we just showed this result.
@@ -162,11 +166,11 @@ public class PromotionSearcherImpl implements PromotionSearcher {
         }
 
         private boolean isMessageValid(final PromotionMessageContainer promotionMessageContainer,
-                final String binderUniqueName) {
+                final String binderUniqueName, long currentTimeMillis) {
             final PromotionBinder binder = searcherDatabase.getBinder(binderUniqueName);
             if (binder == null)
                 return false;
-            return binder.isValidMember(promotionMessageContainer, true);
+            return binder.isValidMember(promotionMessageContainer, true, currentTimeMillis);
         }
 
         /**
@@ -178,35 +182,50 @@ public class PromotionSearcherImpl implements PromotionSearcher {
                 PromotionMessageContainer promo = result.getPromotionMessageContainer();
                 List<GeoRestriction> restrictions = promo.getGeoRestrictions();
                 // Check that the user is within any geo restrictions
-                if (restrictions.size() > 0 && userLatLon != null) {
-                    boolean matchedAtLeastOneRestriction = false;
-                    for (GeoRestriction restriction : restrictions) {
-                        if (restriction.isWithin(userLatLon)) {
-                            matchedAtLeastOneRestriction = true;
-                            break;
-                        }
-                    }
-                    if (!matchedAtLeastOneRestriction) {
-                        // The user is not within any of the restrictions, so
-                        // remove the result
+                if (restrictions.size() > 0) {
+                    if (userLatLon == null) {
+                        // promo is restricted but we don't know the user's
+                        // location so don't show it.
                         results.remove(result);
                         continue;
+                    } else {
+                        boolean matchedAtLeastOneRestriction = false;
+                        for (GeoRestriction restriction : restrictions) {
+                            if (restriction.contains(userLatLon)) {
+                                matchedAtLeastOneRestriction = true;
+                                break;
+                            }
+                        }
+                        if (!matchedAtLeastOneRestriction) {
+                            // The user is not within any of the restrictions,
+                            // so
+                            // remove the result
+                            results.remove(result);
+                            continue;
+                        }
                     }
                 }
                 // Check that the user is within any territories
                 Locale[] territories = promo.getTerritories();
-                if (territories.length > 0 && userTerritory != null) {
-                    boolean matchAtLeastOneTerritory = false;
-                    for (Locale territory : territories) {
-                        if (userTerritory.equalsIgnoreCase(territory.getCountry())) {
-                            matchAtLeastOneTerritory = true;
-                            break;
-                        }
-                    }
-                    if (!matchAtLeastOneTerritory) {
-                        // User isn't in any valid territories
+                if (territories.length > 0) {
+                    if (userTerritory == null) {
+                        // promo is restricted but we don't know the user's
+                        // location so don't show it.
                         results.remove(result);
                         continue;
+                    } else {
+                        boolean matchAtLeastOneTerritory = false;
+                        for (Locale territory : territories) {
+                            if (userTerritory.equalsIgnoreCase(territory.getCountry())) {
+                                matchAtLeastOneTerritory = true;
+                                break;
+                            }
+                        }
+                        if (!matchAtLeastOneTerritory) {
+                            // User isn't in any valid territories
+                            results.remove(result);
+                            continue;
+                        }
                     }
                 }
             }

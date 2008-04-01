@@ -1,6 +1,5 @@
 package org.limewire.promotion;
 
-
 public class LatitudeLongitude {
     private final static double AVERAGE_EARTH_RADIUS_KM = 6371.0;
 
@@ -39,10 +38,10 @@ public class LatitudeLongitude {
     }
 
     /**
-     * Converts a degree value between 0 and 359 to a byte array with the given
-     * byte count (1-8 bytes). The array will represent a long between 0 and
-     * 2^(8 * byteCount), where the highest value scales to 360. Package visible
-     * for unit testing.
+     * Converts a degree value to a normal value between 0 and 359 to a byte
+     * array with the given byte count (1-8 bytes). The array will represent a
+     * long between 0 and 2^(8 * byteCount), where the highest value scales to
+     * 360. Package visible for unit testing.
      * <p>
      * Examples:
      * <ul>
@@ -67,21 +66,21 @@ public class LatitudeLongitude {
     }
 
     /**
-     * Converts a multibyte array into a long, then converts the long to a
+     * Converts a B.E. byte array into a long, then converts the long to a
      * double between 0 and 360 based on the maximum size of the long, then
      * converts to radians. Package-visible for unit testing.
      */
-    static double longBytesToRadians(byte[] bytes) {
+    static double toRadians(byte[] bytes) {
         long value = org.limewire.util.ByteOrder.beb2long(bytes, 0, bytes.length);
         return Math.toRadians(value / (Math.pow(2, 8 * bytes.length) / 360.0));
     }
 
     private double getLatitudeRadians() {
-        return longBytesToRadians(latitude);
+        return toRadians(latitude);
     }
 
     private double getLongitudeRadians() {
-        return longBytesToRadians(longitude);
+        return toRadians(longitude);
     }
 
     /** @return the distance from the other point, in kilometers. */
@@ -124,7 +123,7 @@ public class LatitudeLongitude {
     private byte[] to3Bytes(byte[] in) {
         if (in.length == 3)
             return in;
-        double value = longBytesToRadians(in);
+        double value = toRadians(in);
         return convertDegreesToBytes(Math.toDegrees(value), 3);
     }
 

@@ -20,7 +20,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class CertificateVerifierImpl implements CertificateVerifier {
     private static final Log LOG = LogFactory.getLog(CertificateVerifierImpl.class);
 
@@ -92,9 +94,13 @@ public class CertificateVerifierImpl implements CertificateVerifier {
             // chain
             if (x509.getIssuerDN().getName().equals(x509.getSubjectDN().getName()))
                 return;
-            //System.out.println(cn);
+            // System.out.println(cn);
             try {
                 Certificate issuerCert = keyStore.getCertificate(cn);
+                if (issuerCert == null) {
+                    LOG.error("Could not find certificate alias '" + cn + "'");
+                    return;
+                }
                 certs.add(issuerCert);
                 populateCertList(keyStore, issuerCert, certs);
             } catch (KeyStoreException ex) {
@@ -102,6 +108,5 @@ public class CertificateVerifierImpl implements CertificateVerifier {
                 return;
             }
         }
-        return;
     }
 }

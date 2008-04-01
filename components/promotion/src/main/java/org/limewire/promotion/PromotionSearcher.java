@@ -3,13 +3,18 @@ package org.limewire.promotion;
 import org.limewire.geocode.GeocodeInformation;
 import org.limewire.promotion.containers.PromotionMessageContainer;
 
+/**
+ * Provides methods and callbacks to perform a search of the promotion system.
+ * Implementations may pull from network or locally cached data, and customize
+ * results to the user.
+ */
 public interface PromotionSearcher {
     /**
      * Performs a search based on the given query and then invokes the
-     * {@link PromotionSearchResultsCallback#process(PromotionMessageContainer)} method on the
-     * passed-in callback passing in the results to display to the user in the
-     * order they are expected to be shown. May call the callback method more
-     * than once, but will not submit duplicate results.
+     * {@link PromotionSearchResultsCallback#process(PromotionMessageContainer)}
+     * method on the passed-in callback passing in the results to display to the
+     * user in the order they are expected to be shown. May call the callback
+     * method more than once, but will not submit duplicate results.
      * 
      * @param userLocation The current location of the user (best guess). If
      *        null, no location restrictions will be applied. If missing
@@ -18,11 +23,12 @@ public interface PromotionSearcher {
      */
     void search(String query, PromotionSearchResultsCallback callback,
             GeocodeInformation userLocation);
-    
+
     /**
      * Initializes with the maximum number of results to show in the client.
      * 
-     * @param maxNumberOfResults the maximum number of results to show in the client.
+     * @param maxNumberOfResults the maximum number of results to show in the
+     *        client.
      */
     void init(int maxNumberOfResults);
 

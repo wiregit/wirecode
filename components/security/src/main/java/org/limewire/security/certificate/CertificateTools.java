@@ -10,8 +10,8 @@ import org.limewire.util.CommonUtils;
 
 public class CertificateTools {
     /**
-     * Takes a byte array and returns a hex string encoded two chars per
-     * byte (00-FF), all uppercase.
+     * Takes a byte array and returns a hex string encoded two chars per byte
+     * (00-FF), all uppercase.
      */
     public static String encodeBytesToString(byte bytes[]) {
         StringBuilder string = new StringBuilder(bytes.length * 2);
@@ -24,10 +24,11 @@ public class CertificateTools {
         return string.toString();
     }
 
-    public static String getCertificateHash(Certificate certificate, HashCalculator hashCalculator) throws CertificateEncodingException{
+    public static String getCertificateHash(Certificate certificate, HashCalculator hashCalculator)
+            throws CertificateEncodingException {
         return encodeBytesToString(hashCalculator.calculate(certificate.getEncoded()));
     }
-    
+
     // table to convert a nibble to a hex char.
     private final static char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
             'A', 'B', 'C', 'D', 'E', 'F' };
@@ -49,20 +50,17 @@ public class CertificateTools {
     public static File getCertificateSettingsDirectory() {
         return new File(CommonUtils.getUserSettingsDir(), "certificate/");
     }
-    
-    public static URL getKeyStoreURL(){
+
+    public static URL getKeyStoreURL() {
         try {
             return new URL(CertificateProps.getKeyStoreURLString());
-        } catch (MalformedURLException ignored) {
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException("MalformedURL '" + CertificateProps.getKeyStoreURLString()
+                    + "'", ex);
         }
-        try {
-            return new URL("http://localhost/error.getting.keystore.url");
-        } catch (MalformedURLException ignored) {
-        }
-        return null;
     }
-    
-    public static char[] getKeyStorePassword(){
+
+    public static char[] getKeyStorePassword() {
         return "".toCharArray();
     }
 

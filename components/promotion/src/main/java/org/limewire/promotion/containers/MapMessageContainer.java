@@ -115,12 +115,12 @@ public abstract class MapMessageContainer implements MessageContainer {
         }
     }
 
-    public byte[] getEncoded() {
+    public byte[] encode() {
         payload.put(TYPE_KEY, getType());
         return payload.toByteArray();
     }
 
-    public void parse(GGEP rawGGEP) throws BadGGEPBlockException {
+    public void decode(GGEP rawGGEP) throws BadGGEPBlockException {
         if (!Arrays.equals(getType(), rawGGEP.get(TYPE_KEY)))
             throw new BadGGEPBlockException("Incorrect type.");
         this.payload = rawGGEP;

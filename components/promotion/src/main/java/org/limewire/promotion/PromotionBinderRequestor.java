@@ -14,7 +14,7 @@ public interface PromotionBinderRequestor {
      * The main entry point. This will create a <code>POST</code> request to
      * <code>url</code> and include the proper information we want to store.
      */
-    void request(String url, long id, Set<UserQueryEvent> queries, PromotionBinderCallback callback);
+    void request(String url, long id, Set<? extends UserQueryEvent> queries, PromotionBinderCallback callback);
     
     /**
      * This sets the millisecond timeout for waiting for a bucket when requesting over the

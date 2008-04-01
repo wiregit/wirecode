@@ -16,11 +16,13 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class PromotionBinderFactoryImpl implements PromotionBinderFactory {
-    
+
     private final static Log LOG = LogFactory.getLog(PromotionBinderFactoryImpl.class);
-    
+
     private CipherProvider cipherProvider;
+
     private KeyStoreProvider keyStore;
+
     private CertificateVerifier certificateVerifier;
 
     @Inject
@@ -29,35 +31,32 @@ public class PromotionBinderFactoryImpl implements PromotionBinderFactory {
         this.cipherProvider = cipherProvider;
         this.keyStore = keyStore;
         this.certificateVerifier = certificateVerifier;
-    }    
+    }
 
     public PromotionBinder newBinder(InputStream in) {
-        //
-        // These bytes can be null, so can this request. For null bytes, return null.
-        //
         if (in == null) {
             return null;
         }
-        PromotionBinder binder = new PromotionBinder(cipherProvider, keyStore, certificateVerifier);         
+        PromotionBinder binder = new PromotionBinder(cipherProvider, keyStore, certificateVerifier);
         try {
             binder.initialize(toBytes(in));
         } catch (PromotionException e) {
-            LOG.error(e);
+            throw new RuntimeException("PromotionException:", e);
         } catch (IOException e) {
-            LOG.error(e);
+            throw new RuntimeException("IOException:", e);
         }
         return binder;
     }
-    
+
     private byte[] toBytes(InputStream in) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
         byte[] buf = new byte[1024];
         int len;
         while ((len = in.read(buf)) > 0) {
-            out.write(buf,0,len);
+            out.write(buf, 0, len);
         }
         in.close();
         out.close();
         return out.toByteArray();
-    }     
+    }
 }

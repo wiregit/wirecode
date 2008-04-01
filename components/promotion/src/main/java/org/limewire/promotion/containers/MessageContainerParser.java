@@ -39,13 +39,13 @@ public class MessageContainerParser {
                 // Found a parser type that should handle this GGEP!
                 try {
                     MessageContainer instance = container.getClass().newInstance();
-                    instance.parse(ggepMessage);
+                    instance.decode(ggepMessage);
                     return instance;
                 } catch (InstantiationException ex) {
                     throw new BadGGEPBlockException("InstantiationException caught."
                             + ex.getMessage());
                 } catch (IllegalAccessException ex) {
-                    throw new BadGGEPBlockException("InstantiationException caught."
+                    throw new BadGGEPBlockException("IllegalAccessException caught."
                             + ex.getMessage());
                 }
             }

@@ -10,7 +10,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hsqldb.jdbcDriver;
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.GGEP;
 import org.limewire.promotion.containers.PromotionMessageContainer;
 import org.limewire.promotion.exceptions.PromotionException;
 import org.limewire.security.certificate.CertificateVerifier;
@@ -20,11 +24,11 @@ import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.limewire.io.BadGGEPBlockException;
-import org.limewire.io.GGEP;
 
 @Singleton
 public class SearcherDatabaseImpl implements SearcherDatabase {
+    private final static Log LOG = LogFactory.getLog(SearcherDatabaseImpl.class);
+
     private Connection connection;
 
     private final KeywordUtil keywordUtil;
@@ -63,7 +67,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             Runtime.getRuntime().addShutdownHook(new ShutdownHook());
             createDBIfNeeded();
         } catch (SQLException ex) {
-            throw new RuntimeException("Unable to get connection to in-memory db.", ex);
+            LOG.error("Unable to get connection to in-memory db.", ex);
         }
     }
 
@@ -78,7 +82,10 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             final PreparedStatement statement = connection.prepareStatement(sql);
             try {
                 for (int i = 0; i < values.length; i++) {
-                    statement.setObject(i + 1, values[i]);
+                    if (values[i] instanceof Date)
+                        statement.setDate(i + 1, new java.sql.Date(((Date) values[i]).getTime()));
+                    else
+                        statement.setObject(i + 1, values[i]);
                 }
                 return statement.executeUpdate();
             } finally {
@@ -95,19 +102,8 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
      */
     private long executeInsert(final String sql, final Object... values) {
         try {
-            PreparedStatement statement = connection.prepareStatement(sql);
-            try {
-                for (int i = 0; i < values.length; i++) {
-                    if (values[i] instanceof Date)
-                        statement.setDate(i + 1, new java.sql.Date(((Date) values[i]).getTime()));
-                    else
-                        statement.setObject(i + 1, values[i]);
-                }
-                statement.executeUpdate();
-            } finally {
-                statement.close();
-            }
-            statement = connection.prepareStatement("CALL IDENTITY()");
+            executeUpdate(sql, values);
+            PreparedStatement statement = connection.prepareStatement("CALL IDENTITY()");
             try {
                 final ResultSet rs = statement.executeQuery();
                 try {
@@ -231,7 +227,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
                         + "(unique_id, probability_num, type_byte, valid_start_dt, valid_end_dt, entry_ggep) "
                         + "values (?,?,?,?,?,?)", promo.getUniqueID(), promo.getProbability(),
                 promo.getMediaType().getValue(), promo.getValidStart(), promo.getValidEnd(), promo
-                        .getEncoded());
+                        .encode());
         for (String keyword : keywordUtil.splitKeywords(promo.getKeywords()))
             executeInsert(
                     "INSERT INTO keywords (phrase, binder_unique_name, entry_id) values (?,?,?)",
@@ -262,8 +258,11 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             statement.setString(1, normalizedQuery);
             final ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-                results.add(new QueryResultImpl(rs.getString("binder_unique_name"),
-                        getPromotionMessageContainer(rs.getLong("entry_id")), query));
+                String binderUniqueName = rs.getString("binder_unique_name");
+                PromotionMessageContainer promo = getPromotionMessageContainer(rs
+                        .getLong("entry_id"));
+                if (promo != null && binderUniqueName != null)
+                    results.add(new QueryResultImpl(binderUniqueName, promo, query));
             }
             rs.close();
         } catch (SQLException ex) {
@@ -299,7 +298,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             if (rs.next()) {
                 final byte[] ggep = rs.getBytes(1);
                 final PromotionMessageContainer promo = new PromotionMessageContainer();
-                promo.parse(new GGEP(ggep, 0));
+                promo.decode(new GGEP(ggep, 0));
                 return promo;
             }
             rs.close();

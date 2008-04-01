@@ -15,11 +15,15 @@ import java.security.cert.CertificateException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
+
+import com.google.inject.Singleton;
 
 /**
  * Initially loads the key store from the network, and then caches it to disk in
  * the preferences directory.
  */
+@Singleton
 public class KeyStoreProviderImpl implements KeyStoreProvider {
     private KeyStore keyStore = null;
 
@@ -61,10 +65,9 @@ public class KeyStoreProviderImpl implements KeyStoreProvider {
             keyStore.store(out, keyStorePassword);
             return keyStore;
         } catch (KeyStoreException ex) {
-            throw new IOException("KeyStoreException while saving keystore: " + ex.getMessage());
+            throw IOUtils.getIOException("KeyStoreException while saving keystore: " ,ex);
         } catch (NoSuchAlgorithmException ex) {
-            throw new IOException("NoSuchAlgorithmException while saving keystore: "
-                    + ex.getMessage());
+            throw IOUtils.getIOException("NoSuchAlgorithmException while saving keystore: ",ex);
         } catch (CertificateException ex) {
             throw new IOException("CertificateException while saving keystore: " + ex.getMessage());
         } finally {

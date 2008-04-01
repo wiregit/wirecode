@@ -6,12 +6,14 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.limewire.io.IOUtils;
+
 public class HashCalculatorSHA1Impl implements HashCalculator {
     public byte[] calculate(byte[] in) {
         try {
             return calculate(new ByteArrayInputStream(in));
         } catch (IOException ex) {
-            throw new RuntimeException("Impossible IOException caught: " + ex.getMessage());
+            throw new RuntimeException("Impossible IOException caught: ", ex);
         }
     }
 
@@ -29,7 +31,7 @@ public class HashCalculatorSHA1Impl implements HashCalculator {
             // Done, let's compute the hash
             return outputSHA1.digest();
         } catch (NoSuchAlgorithmException ex) {
-            throw new IOException("NoSuchAlgorithmException during computation: " + ex.getMessage());
+            throw IOUtils.getIOException("NoSuchAlgorithmException during computation: ", ex);
         }
     }
 }

@@ -311,7 +311,7 @@ public class PromotionMessageContainerTest extends BaseTestCase {
     public void testEncodeFailsIfMissingFields() throws BadGGEPBlockException {
         PromotionMessageContainer message = new PromotionMessageContainer();
         try {
-            message.getEncoded();
+            message.encode();
             fail("Shouldn't have been able to getEncoded since we're missing required fields.");
         } catch (RuntimeException expected) {
             message.setOptions(new PromotionMessageContainer.PromotionOptions());
@@ -321,14 +321,14 @@ public class PromotionMessageContainerTest extends BaseTestCase {
         }
 
         // This should work now, since we've set every field we think we need.
-        message.parse(new GGEP(message.getEncoded(), 0));
+        message.decode(new GGEP(message.encode(), 0));
     }
 
     public void testGeoRestrictionWithin() {
         LatitudeLongitude latlon = new LatitudeLongitude(45, 45);
         PromotionMessageContainer.GeoRestriction gr = new GeoRestriction(latlon, 1000);
-        assertTrue(gr.isWithin(latlon));
-        assertFalse(gr.isWithin(new LatitudeLongitude(1, 1)));
+        assertTrue(gr.contains(latlon));
+        assertFalse(gr.contains(new LatitudeLongitude(1, 1)));
     }
 
     public void testGeoRestrictionDecodeRadius() {
@@ -357,8 +357,8 @@ public class PromotionMessageContainerTest extends BaseTestCase {
     public void testGeoRestrictionByteConstruction() throws PromotionException {
         PromotionMessageContainer.GeoRestriction geo = new PromotionMessageContainer.GeoRestriction(
                 new byte[] { 0, 0, 0, -128, 0, 0, 1 });
-        assertTrue(geo.isWithin(new LatitudeLongitude(0, 180)));
-        assertFalse(geo.isWithin(new LatitudeLongitude(0, 181)));
+        assertTrue(geo.contains(new LatitudeLongitude(0, 180)));
+        assertFalse(geo.contains(new LatitudeLongitude(0, 181)));
     }
 
     public void testGeoRestrictionsCycle() {
@@ -372,16 +372,16 @@ public class PromotionMessageContainerTest extends BaseTestCase {
         List<GeoRestriction> list2 = message.getGeoRestrictions();
         assertEquals(3, list2.size());
         // Test the first entry
-        assertTrue(list2.get(0).isWithin(new LatitudeLongitude(180, 0)));
-        assertTrue(list2.get(0).isWithin(new LatitudeLongitude(180.013, 0)));
-        assertFalse(list2.get(0).isWithin(new LatitudeLongitude(180.014, 0)));
+        assertTrue(list2.get(0).contains(new LatitudeLongitude(180, 0)));
+        assertTrue(list2.get(0).contains(new LatitudeLongitude(180.013, 0)));
+        assertFalse(list2.get(0).contains(new LatitudeLongitude(180.014, 0)));
         // Test the second entry
-        assertTrue(list2.get(1).isWithin(new LatitudeLongitude(180, 180)));
-        assertTrue(list2.get(1).isWithin(new LatitudeLongitude(180.152, 180)));
-        assertFalse(list2.get(1).isWithin(new LatitudeLongitude(180.153, 180)));
+        assertTrue(list2.get(1).contains(new LatitudeLongitude(180, 180)));
+        assertTrue(list2.get(1).contains(new LatitudeLongitude(180.152, 180)));
+        assertFalse(list2.get(1).contains(new LatitudeLongitude(180.153, 180)));
         // Test the third entry
-        assertTrue(list2.get(2).isWithin(new LatitudeLongitude(0, 180)));
-        assertTrue(list2.get(2).isWithin(new LatitudeLongitude(0, 197.727)));
-        assertFalse(list2.get(2).isWithin(new LatitudeLongitude(0, 197.728)));
+        assertTrue(list2.get(2).contains(new LatitudeLongitude(0, 180)));
+        assertTrue(list2.get(2).contains(new LatitudeLongitude(0, 197.727)));
+        assertFalse(list2.get(2).contains(new LatitudeLongitude(0, 197.728)));
     }
 }

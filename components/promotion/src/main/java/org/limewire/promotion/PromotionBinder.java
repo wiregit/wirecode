@@ -89,6 +89,7 @@ public class PromotionBinder {
     public void initialize(final SignedMessageContainer signedMessage) throws PromotionException {
         backingSignedMessage = null;
         MessageContainer wrappedMessage;
+        long currentTimeMillis = System.currentTimeMillis();
         try {
             wrappedMessage = signedMessage.getAndVerifyWrappedMessage(cipherProvider, keyStore,
                     certificateVerifier);
@@ -100,9 +101,9 @@ public class PromotionBinder {
                     "Message signature passed, but did not contain expected bucket.");
         }
         final BucketMessageContainer bucket = (BucketMessageContainer) wrappedMessage;
-        if (bucket.getValidStart().getTime() > System.currentTimeMillis())
+        if (bucket.getValidStart().getTime() > currentTimeMillis)
             throw new PromotionException("Bucket '" + bucket.getName() + "' is not yet valid.");
-        if (bucket.getValidEnd().getTime() < System.currentTimeMillis())
+        if (bucket.getValidEnd().getTime() < currentTimeMillis)
             throw new PromotionException("Bucket '" + bucket.getName() + "' has expired.");
         if (bucket.getPromoMessages().size() == 0)
             throw new PromotionException("Bucket '" + bucket.getName() + "' has no messages.");
@@ -120,7 +121,7 @@ public class PromotionBinder {
             if (bucket.getValidEnd().getTime() < message.getValidEnd().getTime())
                 message.setValidEnd(bucket.getValidEnd());
             // Determine if the message is valid...
-            if (!isExpired(message))
+            if (!isExpired(message, currentTimeMillis))
                 promoMessageList.add(message);
         }
 
@@ -145,16 +146,16 @@ public class PromotionBinder {
     }
 
     public byte[] getEncoded() {
-        return backingSignedMessage.getEncoded();
+        return backingSignedMessage.encode();
     }
 
     /**
      * @return true if the given message's date range has expired, regardless of
      *         whether it is a member of this group.
      */
-    private boolean isExpired(final PromotionMessageContainer message) {
-        return (message.getValidStart().getTime() > System.currentTimeMillis() || message
-                .getValidEnd().getTime() < System.currentTimeMillis());
+    private boolean isExpired(final PromotionMessageContainer message, long currentTimeMillis) {
+        return (message.getValidStart().getTime() > currentTimeMillis || message.getValidEnd()
+                .getTime() < currentTimeMillis);
 
     }
 
@@ -164,13 +165,14 @@ public class PromotionBinder {
      * @param reverifySignature If true, the signed container will be re-parsed
      *        and checked.
      */
-    public boolean isValidMember(final PromotionMessageContainer message, final boolean reverifySignature) {
-        if (isExpired(message))
+    public boolean isValidMember(final PromotionMessageContainer message,
+            final boolean reverifySignature, long currentTimeMillis) {
+        if (isExpired(message, currentTimeMillis))
             return false;
         // Now see if we can find this message in our list (using ID)
         if (!reverifySignature) {
             // Just check to make sure it's in our list and hasn't expired
-            return isValidMember(message, promoMessageList);
+            return isValidMember(message, promoMessageList, currentTimeMillis);
         } else {
             MessageContainer wrappedMessage;
             try {
@@ -183,7 +185,7 @@ public class PromotionBinder {
                 return false;
             }
             final BucketMessageContainer bucket = (BucketMessageContainer) wrappedMessage;
-            return isValidMember(message, bucket.getWrappedMessages());
+            return isValidMember(message, bucket.getWrappedMessages(), currentTimeMillis);
         }
     }
 
@@ -192,16 +194,12 @@ public class PromotionBinder {
      *         within its valid date range.
      */
     private boolean isValidMember(final PromotionMessageContainer message,
-            final List<? extends MessageContainer> list) {
-        if (isExpired(message))
+            final List<? extends MessageContainer> list, long currentTimeMillis) {
+        if (isExpired(message, currentTimeMillis))
             return false;
         for (MessageContainer container : list) {
-            if (container instanceof PromotionMessageContainer) {
-                final PromotionMessageContainer promo = (PromotionMessageContainer) container;
-                if (message.getUniqueID() == promo.getUniqueID())
-                    if (promo.equals(message))
-                        return true;
-            }
+            if (container.equals(message))
+                return true;
         }
         return false;
     }

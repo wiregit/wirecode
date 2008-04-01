@@ -22,10 +22,10 @@ public class MultiMessageContainer extends MapMessageContainer {
     }
 
     @Override
-    public void parse(final GGEP rawGGEP) throws BadGGEPBlockException {
+    public void decode(final GGEP rawGGEP) throws BadGGEPBlockException {
         if (!rawGGEP.hasKey(KEY_WRAPPED_BYTES))
             throw new BadGGEPBlockException("Missing wrappedBytes");
-        super.parse(rawGGEP);
+        super.decode(rawGGEP);
     }
 
     /**
@@ -75,7 +75,7 @@ public class MultiMessageContainer extends MapMessageContainer {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         for (MessageContainer message : messages) {
             try {
-                out.write(message.getEncoded());
+                out.write(message.encode());
             } catch (IOException ex) {
                 throw new RuntimeException("IOException? WTF?", ex);
             }

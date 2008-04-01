@@ -26,12 +26,12 @@ public class LatitudeLongitudeTest extends BaseTestCase {
     }
 
     public void testLongBytesToDegrees() {
-        assertEquals(0.0, LatitudeLongitude.longBytesToRadians(new byte[] { 0 }));
-        assertEquals(6, Math.round(LatitudeLongitude.longBytesToRadians(new byte[] { -1, -1, -1 })));
+        assertEquals(0.0, LatitudeLongitude.toRadians(new byte[] { 0 }));
+        assertEquals(6, Math.round(LatitudeLongitude.toRadians(new byte[] { -1, -1, -1 })));
         assertEquals(3, Math
-                .round(LatitudeLongitude.longBytesToRadians(new byte[] { 127, -1, -1 })));
+                .round(LatitudeLongitude.toRadians(new byte[] { 127, -1, -1 })));
 
-        assertEquals(6, Math.round(LatitudeLongitude.longBytesToRadians(ByteOrder.long2bytes(
+        assertEquals(6, Math.round(LatitudeLongitude.toRadians(ByteOrder.long2bytes(
                 16777215, 3))));
 
     }

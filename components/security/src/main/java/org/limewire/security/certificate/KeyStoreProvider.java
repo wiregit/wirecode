@@ -3,8 +3,6 @@ package org.limewire.security.certificate;
 import java.io.IOException;
 import java.security.KeyStore;
 
-import com.google.inject.Singleton;
-
 /**
  * Provides a wrapper to access the base LimeWire key store, which should
  * contain the ca.limewire.com root certificate as well as any other important
@@ -13,7 +11,6 @@ import com.google.inject.Singleton;
  * classes to validate and call {@link #invalidateKeyStore()} if there is a
  * problem.
  */
-@Singleton
 public interface KeyStoreProvider {
     /**
      * @return the current instance of the LimeWire key store, which will be

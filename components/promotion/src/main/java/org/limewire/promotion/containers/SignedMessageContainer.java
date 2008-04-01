@@ -9,6 +9,7 @@ import java.util.Arrays;
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
+import org.limewire.io.IOUtils;
 import org.limewire.security.certificate.CertificateVerifier;
 import org.limewire.security.certificate.CipherProvider;
 import org.limewire.security.certificate.KeyStoreProvider;
@@ -41,12 +42,12 @@ public class SignedMessageContainer implements MessageContainer {
         return StringUtils.toUTF8Bytes("SIGN");
     }
 
-    public byte[] getEncoded() {
+    public byte[] encode() {
         payload.put(TYPE_KEY, getType());
         return payload.toByteArray();
     }
 
-    public void parse(GGEP rawGGEP) throws BadGGEPBlockException {
+    public void decode(GGEP rawGGEP) throws BadGGEPBlockException {
         if (!Arrays.equals(getType(), rawGGEP.get(TYPE_KEY)))
             throw new BadGGEPBlockException("Incorrect type.");
         if (!rawGGEP.hasKey(KEY_ALIAS))
@@ -60,15 +61,15 @@ public class SignedMessageContainer implements MessageContainer {
     }
 
     /**
-     * Calls the {@link #getEncoded()} method on the passed in message and
-     * stores the signed result into the payload.
+     * Calls the {@link #encode()} method on the passed in message and stores
+     * the signed result into the payload.
      * 
      * @throws IOException if there is a problem signing.
      */
     public void setAndSignWrappedMessage(MessageContainer wrappedMessage,
             CipherProvider cipherProvider, PrivateKey privateKey, String keyAlias)
             throws IOException {
-        byte[] messagePayload = wrappedMessage.getEncoded();
+        byte[] messagePayload = wrappedMessage.encode();
         byte[] signature = cipherProvider.sign(messagePayload, privateKey,
                 SignatureType.SHA1_WITH_RSA);
         payload = new GGEP();
@@ -98,11 +99,11 @@ public class SignedMessageContainer implements MessageContainer {
                 throw new IOException("Wrapped message did not match the signature.");
             return new MessageContainerParser().parse(wrappedBytes);
         } catch (BadGGEPBlockException ex) {
-            throw new IOException("BadGGEPBlockException parsing contents:" + ex.getMessage());
+            throw IOUtils.getIOException("BadGGEPBlockException parsing contents:", ex);
         } catch (KeyStoreException ex) {
-            throw new IOException("KeyStoreException parsing contents:" + ex.getMessage());
+            throw IOUtils.getIOException("KeyStoreException parsing contents:", ex);
         } catch (BadGGEPPropertyException ex) {
-            throw new IOException("BadGGEPPropertyException parsing contents:" + ex.getMessage());
+            throw IOUtils.getIOException("BadGGEPPropertyException parsing contents:", ex);
         }
     }
 
