@@ -518,10 +518,10 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
         initBtMetaInfo(btMetaInfoFactory.createBTMetaInfoFromMemento(bmem.getBtMetaInfoMemento()));
     }
     
-    public void addListener(Object strongRef, EventListener<DownloadStatusEvent> listener) {
+    public void addListener(EventListener<DownloadStatusEvent> listener) {
     }
     
-    public boolean removeListener(Object strongRef, EventListener<DownloadStatusEvent> listener) {
+    public boolean removeListener(EventListener<DownloadStatusEvent> listener) {
         return false;
     }
 

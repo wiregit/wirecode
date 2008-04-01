@@ -6,18 +6,18 @@ package org.limewire.listener;
  */
 public class EventMulticasterImpl<E> implements EventMulticaster<E> {
 
-    private final WeakEventListenerList<E> listeners = new WeakEventListenerList<E>();
+    private final EventListenerList<E> listeners = new EventListenerList<E>();
     
     public void handleEvent(E event) {
         listeners.broadcast(event);
     }
 
-    public void addListener(Object strongRef, EventListener<E> eventListener) {
-        listeners.addListener(strongRef, eventListener);
+    public void addListener(EventListener<E> eventListener) {
+        listeners.addListener(eventListener);
     }
 
-    public boolean removeListener(Object strongRef, EventListener<E> eventListener) {
-        return listeners.removeListener(strongRef, eventListener);        
+    public boolean removeListener(EventListener<E> eventListener) {
+        return listeners.removeListener(eventListener);        
     }
     
     

@@ -427,7 +427,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		LOG.trace("STOP TorrentManager");
         
 		// add listener before downloads are read to get all add events
-		downloadManager.get().addListener(magnetDownloaderPushEndpointFinder.get(), magnetDownloaderPushEndpointFinder.get());
+		downloadManager.get().addListener(magnetDownloaderPushEndpointFinder.get());
 		
         // Restore any downloads in progress.
         LOG.trace("START DownloadManager.postGuiInit");
@@ -578,7 +578,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         downloadManager.get().writeSnapshot();
         
-        downloadManager.get().removeListener(magnetDownloaderPushEndpointFinder.get(), magnetDownloaderPushEndpointFinder.get());
+        downloadManager.get().removeListener(magnetDownloaderPushEndpointFinder.get());
         
        // torrentManager.writeSnapshot();
         

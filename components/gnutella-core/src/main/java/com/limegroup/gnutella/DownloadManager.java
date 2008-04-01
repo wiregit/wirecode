@@ -5,7 +5,7 @@ import java.net.Socket;
 import java.util.Collection;
 import java.util.List;
 
-import org.limewire.listener.WeakEventListenerSupport;
+import org.limewire.listener.ListenerSupport;
 
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -36,7 +36,7 @@ import com.limegroup.gnutella.version.DownloadInformation;
  * serialized.  
  */
 public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
-LWSIntegrationServicesDelegate, PushedSocketHandler, WeakEventListenerSupport<DownloadManagerEvent> {
+LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadManagerEvent> {
     
     /**
      * Adds a new downloader that this will manager.

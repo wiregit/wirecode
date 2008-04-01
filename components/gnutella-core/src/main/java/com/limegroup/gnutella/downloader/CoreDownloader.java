@@ -3,7 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 
 import org.limewire.io.InvalidDataException;
-import org.limewire.listener.WeakEventListenerSupport;
+import org.limewire.listener.ListenerSupport;
 
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.GUID;
@@ -14,7 +14,7 @@ import com.limegroup.gnutella.downloader.serial.DownloadMemento;
  * Extends the {@link Downloader} interface to provide more functionality,
  * allowing the download to be more tightly managed.
  */
-public interface CoreDownloader extends Downloader, WeakEventListenerSupport<DownloadStatusEvent> {
+public interface CoreDownloader extends Downloader, ListenerSupport<DownloadStatusEvent> {
 
     /**
      * Sets the inactive priority of this download.

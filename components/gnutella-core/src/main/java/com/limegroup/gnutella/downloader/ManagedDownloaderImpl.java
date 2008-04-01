@@ -26,7 +26,7 @@ import org.limewire.io.DiskException;
 import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
 import org.limewire.listener.EventListener;
-import org.limewire.listener.WeakEventListenerList;
+import org.limewire.listener.EventListenerList;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 
@@ -407,8 +407,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     
     private long contentLength = -1;
     
-    private final WeakEventListenerList<DownloadStatusEvent> listeners = 
-        new WeakEventListenerList<DownloadStatusEvent>(); 
+    private final EventListenerList<DownloadStatusEvent> listeners = 
+        new EventListenerList<DownloadStatusEvent>(); 
     
     protected final DownloadManager downloadManager;
     protected final FileManager fileManager;
@@ -3126,12 +3126,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return cachedRFDs;
     }
 
-    public void addListener(Object strongRef, EventListener<DownloadStatusEvent> listener) {
-        listeners.addListener(strongRef, listener);
+    public void addListener(EventListener<DownloadStatusEvent> listener) {
+        listeners.addListener(listener);
     }
 
-    public boolean removeListener(Object strongRef, EventListener<DownloadStatusEvent> listener) {
-        return listeners.removeListener(strongRef, listener);
+    public boolean removeListener(EventListener<DownloadStatusEvent> listener) {
+        return listeners.removeListener(listener);
     }
 
     /**

@@ -43,8 +43,8 @@ public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
             will(returnValue(magnet));
             atLeast(1).of(downloader).getContentLength();
             will(returnValue(1l));
-            atLeast(1).of(downloader).addListener(endpointFinder, endpointFinder.downloadStatusListener);
-            atLeast(1).of(downloader).removeListener(endpointFinder, endpointFinder.downloadStatusListener);
+            atLeast(1).of(downloader).addListener(endpointFinder.downloadStatusListener);
+            atLeast(1).of(downloader).removeListener(endpointFinder.downloadStatusListener);
         }});
         
         // iterate through all events
