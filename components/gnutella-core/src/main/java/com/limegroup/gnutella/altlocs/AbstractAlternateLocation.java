@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.altlocs;
 
 
-import com.google.common.base.Objects;
+import org.limewire.util.Objects;
+
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;

@@ -18,7 +18,6 @@
 				<pathelement location="${limewire.lib.jars}/icu4j.jar"/>
 				<pathelement location="${limewire.lib.jars}/guice-1.0.jar"/>
 				<pathelement location="${limewire.lib.jars}/aopalliance.jar"/>
-				<pathelement location="${limewire.lib.jars}/google-collect-snapshot-20071022.jar"/>
 			</src-classpath>
         </do.setup-properties>
     </target>
