@@ -4,7 +4,6 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.QueryResultHandler;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
  * One SearchResultStats instance exists for each active search (which is 
@@ -36,46 +35,12 @@ public interface SearchResultStats {
      */
     public int getNumResultsForURN(URN urn);
     
-    public int getNextReportNum();
-    
-    public long getTime();
-    
-    /**
-     * Returns the QueryRequest instance associated with this SearchResultStats.
-     */
-    public QueryRequest getQueryRequest();
-    
-    /**
-     * Notes whether this query has been marked as being finished.
-     */
-    public boolean isFinished();
-    
-    public void tallyReport();
-
     /**
      * Returns the percentage of the data for the given URN
      * that is available.
      */
     public float getPercentAvailable (URN urn);
     
-    /**
-     * Returns the number of locations that have the data for
-     * the given URN. This incorporates partial search results,
-     * where the partial results will be combined together to
-     * form complete results.
-     */
-    public int getNumberOfLocations (URN urn);
-    
-    /**
-     * Increases the "good" search result count by good.
-     */
-    public void increment(int good);
-    
-    /**
-     * Marks this search as being finished.
-     */
-    public void markAsFinished();
-
     /**
      * Absorbs the query reply into the collective, adding
      * its distinctiveness to our own. Resistance is futile.

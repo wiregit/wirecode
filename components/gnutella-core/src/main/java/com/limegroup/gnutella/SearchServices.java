@@ -66,8 +66,7 @@ public interface SearchServices {
     /**
      * Sends a 'What Is New' query on the network.
      * 
-     * @return The SearchResultStats corresponding to the guid or null if an
-     *         error occurs.
+     * @return The SearchResultStats corresponding to the guid.
      */
     public SearchResultStats queryWhatIsNew(final byte[] guid, final MediaType type);
 
@@ -78,8 +77,7 @@ public interface SearchServices {
      *  typically in XML format
      * @see query(byte[], String, MediaType)
      * 
-     * @return The SearchResultStats corresponding to the guid or null if an
-     *         error occurs.
+     * @return The SearchResultStats corresponding to the guid.
      */
     public SearchResultStats query(final byte[] guid, final String query,
             final String richQuery, final MediaType type);

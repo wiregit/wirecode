@@ -1,9 +1,7 @@
 package com.limegroup.gnutella.search;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -23,7 +21,6 @@ import org.limewire.security.SecureMessage;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ForMeReplyHandler;
 import com.limegroup.gnutella.GUID;
@@ -51,7 +48,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
     private LimeXMLDocumentFactory factory;
     private MyActivityCallback callback;
     private LimeXMLDocumentHelper limeXMLDocumentHelper;
-    private SearchResultHandler searchResultHandler;
+    private SearchResultHandlerImpl searchResultHandler;
     private ResponseFactory responseFactory;
     private QueryReplyFactory queryReplyFactory;
     private LimeXMLDocumentFactory limeXmlDocumentFactory;
@@ -85,7 +82,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         factory = injector.getInstance(LimeXMLDocumentFactory.class);
         
-        searchResultHandler = injector.getInstance(SearchResultHandler.class);
+        searchResultHandler = (SearchResultHandlerImpl)injector.getInstance(SearchResultHandler.class);
         
         responseFactory = injector.getInstance(ResponseFactory.class);
         
@@ -278,10 +275,11 @@ public class SearchResultHandlerTest extends LimeTestCase {
        setTestParameters(m, queryRequest, queryReply, intervalSet, hostData, urns);
        
        SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
+       SearchResultHandlerImpl.GuidCount gc = (SearchResultHandlerImpl.GuidCount)srs;
        
-       assertEquals(0, srs.getNumberOfLocations(urns.iterator().next()));
+       assertEquals(0, gc.getNumResultsForURN(urns.iterator().next()));
        srs.addQueryReply(searchResultHandler, queryReply, hostData);
-       assertEquals(1, srs.getNumberOfLocations(urns.iterator().next()));
+       assertEquals(1, gc.getNumResultsForURN(urns.iterator().next()));
        
        m.assertIsSatisfied();
     }
@@ -329,10 +327,11 @@ public class SearchResultHandlerTest extends LimeTestCase {
         setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
         
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
+        SearchResultHandlerImpl.GuidCount gc = (SearchResultHandlerImpl.GuidCount)srs;
         
-        assertEquals(0, srs.getNumberOfLocations(urns.iterator().next()));
+        assertEquals(0, gc.getNumResultsForURN(urns.iterator().next()));
         srs.addQueryReply(searchResultHandler, queryReply, hostData);
-        assertEquals(1, srs.getNumberOfLocations(urns.iterator().next()));
+        assertEquals(1, gc.getNumResultsForURN(urns.iterator().next()));
         
         m.assertIsSatisfied();
     }
@@ -354,10 +353,11 @@ public class SearchResultHandlerTest extends LimeTestCase {
         byte[] guid = setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
         
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
+        SearchResultHandlerImpl.GuidCount gc = (SearchResultHandlerImpl.GuidCount)srs;
         
-        assertEquals(0, srs.getNumberOfLocations(urns.iterator().next()));
+        assertEquals(0, gc.getNumResultsForURN(urns.iterator().next()));
         srs.addQueryReply(searchResultHandler, queryReply, hostData);
-        assertEquals(1, srs.getNumberOfLocations(urns.iterator().next()));
+        assertEquals(1, gc.getNumResultsForURN(urns.iterator().next()));
         
         searchResultHandler.removeQuery(new GUID(guid));
         
@@ -454,10 +454,11 @@ public class SearchResultHandlerTest extends LimeTestCase {
         }});
         
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
+        SearchResultHandlerImpl.GuidCount gc = (SearchResultHandlerImpl.GuidCount)srs;
         
-        assertEquals(false, srs.isFinished());
-        srs.markAsFinished();
-        assertEquals(true, srs.isFinished());
+        assertEquals(false, gc.isFinished());
+        ((SearchResultHandlerImpl.GuidCount)srs).markAsFinished();
+        assertEquals(true, gc.isFinished());
         
         m.assertIsSatisfied();
     }
@@ -491,7 +492,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         
         assertEquals(0, srs.getNumResults());
-        srs.increment(1);
+        ((SearchResultHandlerImpl.GuidCount)srs).increment(1);
         assertEquals(1, srs.getNumResults());
         
         m.assertIsSatisfied();

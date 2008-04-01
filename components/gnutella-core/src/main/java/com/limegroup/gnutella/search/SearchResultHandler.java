@@ -3,7 +3,6 @@ package com.limegroup.gnutella.search;
 import java.util.List;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 
@@ -67,27 +66,6 @@ public interface SearchResultHandler {
 	 *  otherwise <tt>false</tt> 
      */
     public void handleQueryReply(final QueryReply qr);
-
-    /**
-     * 
-     * @param qr
-     * @param r
-     */
-    void countClassC(QueryReply qr, Response r);
-
-    /**
-     * 
-     * @param qr
-     * @param data
-     */
-    void accountAndUpdateDynamicQueriers(final QueryReply qr, HostData data);
-
-    /**
-     * 
-     * @param guid
-     * @return
-     */
-    SearchResultStats removeQueryInternal(GUID guid);
 
     /**
      * 

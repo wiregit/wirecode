@@ -17,7 +17,7 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
-public class ResponseImpl implements Response {
+class ResponseImpl implements Response {
 
     //private static final Log LOG = LogFactory.getLog(Response.class);
     

@@ -52,7 +52,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  *
  */
 @Singleton
-public class SearchResultHandlerImpl implements SearchResultHandler {
+class SearchResultHandlerImpl implements SearchResultHandler {
 
     private static final Log LOG =
         LogFactory.getLog(SearchResultHandler.class);
@@ -309,16 +309,12 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
      * created and the amount of results we've received so far
      * for this query.
      */
-    public boolean isQueryStillValid(SearchResultStats srs, long now) {
+    public boolean isQueryStillValid(GuidCount gc, long now) {
         LOG.trace("entered SearchResultHandler.isQueryStillValid(GuidCount)");
-        return (now < (srs.getTime() + QUERY_EXPIRE_TIME)) &&
-               (srs.getNumResults() < QueryHandler.ULTRAPEER_RESULTS);
+        return (now < (gc.getTime() + QUERY_EXPIRE_TIME)) &&
+               (gc.getNumResults() < QueryHandler.ULTRAPEER_RESULTS);
     }
 
-    /*---------------------------------------------------    
-      END OF PRIVATE INTERFACE METHODS
-     ----------------------------------------------------*/
-    
     static class GuidCount implements SearchResultStats {
 
         private final long _time;
@@ -362,15 +358,28 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             ResourceLocationCounter rlc = _isets.get(urn);
             
             if (rlc == null)
-                return getNumResults();
+                return 0;
             else
-                return getNumResults() + rlc.getLocationCount();
+                return rlc.getLocationCount();
         }
         
         public int getNextReportNum() { return _nextReportNum; }
+        
+        /**
+         * Time at which query was started.
+         */
         public long getTime() { return _time; }
+        
+        /**
+         * Returns the QueryRequest instance associated with this GuidCount.
+         */
         public QueryRequest getQueryRequest() { return _qr; }
+        
+        /**
+         * Notes whether this query has been marked as being finished.
+         */
         public boolean isFinished() { return markAsFinished; }
+        
         public void tallyReport() { 
             _nextReportNum = _numGoodResults + REPORT_INTERVAL; 
         }
@@ -384,6 +393,13 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             return rlc.getPercentAvailable();
         }
         
+        /**
+         * Returns the number of locations that have the data for
+         * the given URN. This incorporates partial search results,
+         * where the partial results will be combined together to
+         * form complete results.
+         */
+        /*
         public int getNumberOfLocations (URN urn) {
             ResourceLocationCounter rlc = _isets.get(urn);
             
@@ -392,11 +408,18 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
             
             return rlc.getLocationCount();
         }
+        */
         
+        /**
+         * Increases the "good" search result count by good.
+         */
         public void increment(int good) {
             _numGoodResults += good;
         }
         
+        /**
+         * Marks this search as being finished.
+         */
         public void markAsFinished() { markAsFinished = true; }
 
         public String toString() {
@@ -404,6 +427,10 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
         }
         
         public int addQueryReply(SearchResultHandler srh, QueryReply qr, HostData data) {
+            return addQueryReply( (SearchResultHandlerImpl)srh, qr, data);
+        }
+        
+        public int addQueryReply(SearchResultHandlerImpl srh, QueryReply qr, HostData data) {
             List<Response> results = null;
             double numBad = 0;
             int numGood = 0;
@@ -499,7 +526,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                     _isets.put(urn, (rlc = new ResourceLocationCounter(urn, size)));
                 
                 count_before = rlc.getLocationCount();
-                rlc.addIntervalSet( is );
+                rlc.addPartialSource( is );
                 count_after = rlc.getLocationCount();
                 
                 break;
@@ -521,7 +548,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                 if (null == (rlc = _isets.get(urn)))
                     _isets.put(urn, (rlc = new ResourceLocationCounter(urn, size)));
                 
-                rlc.incrementCount();
+                rlc.incrementWholeSources();
                 
                 break;
             }
@@ -537,7 +564,7 @@ public class SearchResultHandlerImpl implements SearchResultHandler {
                     return gc.getPercentAvailable(urn);
                 }
                 public int getNumberOfLocations() {
-                    return gc.getNumberOfLocations(urn);
+                    return gc.getNumResultsForURN(urn);
                 }
             };
         }
