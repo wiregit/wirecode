@@ -336,7 +336,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         assertEquals(st.nextToken(), "X-Node");
         InetAddress addr = InetAddress.getByName(st.nextToken().trim());
         assertEquals(networkManagerStub.getExternalAddress(), addr.getAddress());
-        assertEquals(PORT, Integer.parseInt(st.nextToken()));
+        assertEquals("expecting the stable udp port, since fwt transfer: " + networkManagerStub.getStableUDPPort(), Integer.parseInt(st.nextToken()));
 
         // send back a 202 and make sure no PushRequest is sent via the normal
         // way
