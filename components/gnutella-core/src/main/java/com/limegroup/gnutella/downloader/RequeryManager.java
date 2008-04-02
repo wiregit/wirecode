@@ -265,13 +265,14 @@ class RequeryManager implements DHTEventListener {
 
     private class AltLocSearchHandler implements SearchListener<AlternateLocation> {
 
-        public void handleSearchDone(boolean success) {
-            RequeryManager.this.handleAltLocSearchDone(success);
+        public void searchFailed() {
+            RequeryManager.this.handleAltLocSearchDone(false);
         }
 
         public void handleResult(AlternateLocation alternateLocation) {
             // ManagedDownloader installs its own AlternatelocationListener so it
             // is notified of all results
+            RequeryManager.this.handleAltLocSearchDone(true);
         }
     }
 }

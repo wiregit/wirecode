@@ -28,15 +28,15 @@ import com.limegroup.gnutella.settings.DHTSettings;
 @Singleton
 public class PushProxiesPublisher implements DHTEventListener {
     
-    private PushProxiesValue lastSeenValue;
+    private volatile PushProxiesValue lastSeenValue;
     
-    private PushProxiesValue lastPublishedValue;
+    private volatile PushProxiesValue lastPublishedValue;
     
     private final PushProxiesValueFactory pushProxiesValueFactory;
 
     private final ScheduledExecutorService backgroundExecutor;
 
-    private ScheduledFuture publishingFuture;
+    private volatile ScheduledFuture publishingFuture;
     
     @Inject
     public PushProxiesPublisher(PushProxiesValueFactory pushProxiesValueFactory,
@@ -61,7 +61,7 @@ public class PushProxiesPublisher implements DHTEventListener {
      * @param mojitoDHT 
      */
     void publish(MojitoDHT mojitoDHT) {
-        PushProxiesValue valueToPublish = getValuetoPublish();
+        PushProxiesValue valueToPublish = getValueToPublish();
         if (valueToPublish != null) {
             GUID guid = new GUID(lastPublishedValue.getGUID());
             KUID primaryKey = KUIDUtils.toKUID(guid);
@@ -75,7 +75,7 @@ public class PushProxiesPublisher implements DHTEventListener {
      * Has the side effect of storing the updating the last published value.
      * </p>
      */
-    PushProxiesValue getValuetoPublish() {
+    PushProxiesValue getValueToPublish() {
         // order is important to compare newest last seen value with last published value
         if (pushProxiesAreStable() && publishedValueChanged()) {
             lastPublishedValue = lastSeenValue;

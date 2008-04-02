@@ -8,9 +8,16 @@ import org.limewire.io.IpPort;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.routing.Contact;
 
+import com.limegroup.gnutella.PushEndpoint;
+
 /**
+ * The representation of a {@link PushEndpoint} in the DHT. This can also 
+ * represent non-firewalled clients. In that case the publisher's address
+ * will match the single push proxy value in {@link #getPushProxies()}.
+ * 
  * Does not contain external address information since it can be retrieved
- * from the {@link Contact} that created the value.
+ * from the {@link Contact} that created the value. This should be passed on
+ * to the external address info of a {@link PushEndpoint} created from it.
  * <p>
  * Implementations should provide a value based {@link #equals(Object)} method.
  * </p>

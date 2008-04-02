@@ -523,9 +523,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
     }
     
     public boolean removeListener(EventListener<DownloadStatusEvent> listener) {
-
-        
-
+        // TODO implement
         return false;
     }
 

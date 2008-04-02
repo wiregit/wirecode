@@ -14,10 +14,8 @@ public class BlockingSearchListener<Result> implements SearchListener<Result> {
         exchanger.setValue(result);
     }
 
-    public void handleSearchDone(boolean success) {
-        if (!success) {
-            exchanger.setValue(null);
-        }
+    public void searchFailed() {
+        exchanger.setValue(null);
     }
     
     public Result getResult() {

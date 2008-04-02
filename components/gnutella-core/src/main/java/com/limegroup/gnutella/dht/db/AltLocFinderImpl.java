@@ -62,14 +62,15 @@ class AltLocFinderImpl implements AltLocFinder {
     
     public Shutdownable findAltLocs(URN urn, SearchListener<AlternateLocation> listener) {
         listener = SearchListenerAdapter.nonNullListener(listener);
+        
+        KUID key = KUIDUtils.toKUID(urn);
+        EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractAltLocValue.ALT_LOC);
+        
         synchronized (manager) {
             MojitoDHT dht = manager.getMojitoDHT();
             if (dht == null || !dht.isBootstrapped()) {
                 return null;
             }
-            
-            KUID key = KUIDUtils.toKUID(urn);
-            EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractAltLocValue.ALT_LOC);
             final DHTFuture<FindValueResult> future = dht.get(lookupKey);
             future.addDHTFutureListener(new AltLocsHandler(dht, urn, key, listener));
             return new Shutdownable() {
@@ -81,36 +82,31 @@ class AltLocFinderImpl implements AltLocFinder {
     }
     
     /**
+     * Looks up the push endpoint for an alternate location based on the guid.
      */
     private void findPushAltLocs(final GUID guid, final URN urn, 
             final DHTValueEntity altLocEntity, final SearchListener<AlternateLocation> listener) {
         
         SearchListener<PushEndpoint> pushEndpointListener = new SearchListener<PushEndpoint>() {
             public void handleResult(PushEndpoint pushEndpoint) {
-                if (altLocEntity != null) {
-                    // So we made a lookup for AltLocs, the found AltLoc was 
-                    // firewalled and we made a lookup for its PushProxies.
-                    // In any case the creator of both values should be the 
-                    // same Node!
-                    InetAddress creatorAddress = ((InetSocketAddress)altLocEntity.getCreator().getContactAddress()).getAddress();
-                    if (!pushEndpoint.getInetAddress().equals(creatorAddress)) {
-                        if (LOG.isWarnEnabled()) {
-                            LOG.warn("Creator of " + altLocEntity 
-                                    + " and found " + pushEndpoint + " do not match!");
-                        }
-                        listener.handleSearchDone(false);
-                        return;
+                // So we made a lookup for AltLocs, the found AltLoc was 
+                // firewalled and we made a lookup for its PushProxies.
+                // In any case the creator of both values should be the 
+                // same Node!
+                InetAddress creatorAddress = ((InetSocketAddress)altLocEntity.getCreator().getContactAddress()).getAddress();
+                if (!pushEndpoint.getInetAddress().equals(creatorAddress)) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Creator of " + altLocEntity + " and found " + pushEndpoint + " do not match!");
                     }
+                    listener.searchFailed();
+                } else {
+                    AlternateLocation alternateLocation = alternateLocationFactory.createPushAltLoc(pushEndpoint, urn);
+                    listener.handleResult(alternateLocation);
                 }
-                AlternateLocation alternateLocation = alternateLocationFactory.createPushAltLoc(pushEndpoint, urn);
-                listener.handleResult(alternateLocation);
-                listener.handleSearchDone(true);
             }
-
-            public void handleSearchDone(boolean success) {
-                if (!success) {
-                    listener.handleSearchDone(success);
-                }
+            
+            public void searchFailed() {
+                listener.searchFailed();
             }  
             
         };

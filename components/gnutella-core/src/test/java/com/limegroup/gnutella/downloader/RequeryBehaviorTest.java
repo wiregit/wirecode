@@ -131,7 +131,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         assertSame("time spent querying dht"+dhtQueryTime,DownloadStatus.QUERYING_DHT, downloader.getState());
         
         LOG.debug("dht query fails");
-        myAltFinder.listener.handleSearchDone(false);
+        myAltFinder.listener.searchFailed();
         assertSame(DownloadStatus.GAVE_UP,downloader.getState());
         waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.QUEUED,downloader.getState());
@@ -214,7 +214,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         // now tell them the dht query failed
         LOG.debug("dht query fails");
         assertNotNull(myAltFinder.listener);
-        myAltFinder.listener.handleSearchDone(false);
+        myAltFinder.listener.searchFailed();
         assertSame(DownloadStatus.GAVE_UP,downloader.getState());
         waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.QUEUED,downloader.getState());
@@ -308,7 +308,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         // now tell them the dht query failed
         LOG.debug("dht query fails");
         assertNotNull(myAltFinder.listener);
-        myAltFinder.listener.handleSearchDone(false);
+        myAltFinder.listener.searchFailed();
         assertSame(DownloadStatus.GAVE_UP, downloader.getState());
         waitForStateToEnd(DownloadStatus.GAVE_UP, downloader);
         assertSame(DownloadStatus.QUEUED, downloader.getState());

@@ -133,7 +133,7 @@ public class AltLocFinderImplTest extends DHTFinderTestCase {
         volatile AlternateLocation altLoc;
         volatile boolean success;
         
-        public void handleSearchDone(boolean success) {
+        public void searchFailed() {
             this.success = success;
             doneLatch.countDown();
         }

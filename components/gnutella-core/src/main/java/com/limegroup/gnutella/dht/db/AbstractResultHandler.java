@@ -87,6 +87,7 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
                     
                 try {
                     DHTFuture<FindValueResult> future = dht.get(entityKey);
+                    // TODO make this a non-blocking call
                     FindValueResult resultFromKey = future.get();
                     
                     if (resultFromKey.isSuccess()) {
@@ -105,15 +106,13 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
         // only notify if there if we already found something or there is 
         // no chance of still finding a value
         if (outcome != Result.NOT_YET_FOUND) {
-            listener.handleSearchDone(outcome.isFound());
+            listener.searchFailed();
         }
     }
     
     /**
-     * Updates the old value to the possible new value if the state
-     * transition makes sense and provides a better.
-     * 
-     * State transtions are.
+     * Updates the result from the old value to the new value if the new value
+     * doesn't already say the value was found. 
      *
      * FOUND => goes nowhere, the value has been found
      * NOT_YET_FOUND  => can go to FOUND
@@ -138,19 +137,19 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
     @Override
     public void handleCancellationException(CancellationException e) {
         LOG.error("CancellationException", e);
-        listener.handleSearchDone(false);
+        listener.searchFailed();
     }
 
     @Override
     public void handleExecutionException(ExecutionException e) {
         LOG.error("ExecutionException", e);
-        listener.handleSearchDone(false);
+        listener.searchFailed();
     }
 
     @Override
     public void handleInterruptedException(InterruptedException e) {
         LOG.error("InterruptedException", e);
-        listener.handleSearchDone(false);
+        listener.searchFailed();
     }
     
     public int hashCode() {

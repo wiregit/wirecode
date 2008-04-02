@@ -45,16 +45,23 @@ public class DHTPushEndpointFinder implements PushEndpointService {
     
     public void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
         listener = SearchListenerAdapter.nonNullListener(listener);
+        
+        KUID key = KUIDUtils.toKUID(guid);
+        EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractPushProxiesValue.PUSH_PROXIES);
+        boolean querySent = false;
+        
         synchronized (dhtManager) {
             MojitoDHT dht = dhtManager.getMojitoDHT();
-            if (dht == null || !dht.isBootstrapped()) {
-                listener.handleSearchDone(false);
-                return;
+            if (dht != null && dht.isBootstrapped()) {
+                DHTFuture<FindValueResult> future = dht.get(lookupKey);
+                future.addDHTFutureListener(new PushEndpointHandler(dht, guid, key, listener));
+                querySent = true;
             }
-            KUID key = KUIDUtils.toKUID(guid);
-            EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractPushProxiesValue.PUSH_PROXIES);
-            DHTFuture<FindValueResult> future = dht.get(lookupKey);
-            future.addDHTFutureListener(new PushEndpointHandler(dht, guid, key, listener));
+        }
+        
+        // listener notification outside of lock
+        if (!querySent) {
+            listener.searchFailed();
         }
     }
 

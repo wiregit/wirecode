@@ -127,9 +127,8 @@ class PushEndpointCacheImpl implements PushEndpointCache {
         PushEndpoint pushEndpoint = getPushEndpoint(guid);
         if (pushEndpoint != null) {
             listener.handleResult(pushEndpoint);
-            listener.handleSearchDone(true);
         } else {
-            listener.handleSearchDone(false);
+            listener.searchFailed();
         }
     }
 

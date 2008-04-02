@@ -58,7 +58,6 @@ public class PushEndpointManagerTest extends BaseTestCase {
             one(result).getProxies();
             will(returnValue(proxies));
             one(listener).handleResult(result);
-            one(listener).handleSearchDone(true);
             never(pushEndpointFinder).findPushEndpoint(guid, listener);
         }});
         
@@ -86,7 +85,7 @@ public class PushEndpointManagerTest extends BaseTestCase {
             one(pushEndpointCache).getPushEndpoint(guid);
             will(returnValue(null));
             inSequence(sequence);
-            one(listener).handleSearchDone(false);
+            one(listener).searchFailed();
             inSequence(sequence);
             // zero calls to the finder here
             
@@ -126,12 +125,10 @@ public class PushEndpointManagerTest extends BaseTestCase {
             will(new CustomAction("call listener") {
                 public Object invoke(Invocation invocation) throws Throwable {
                     ((SearchListener<PushEndpoint>)invocation.getParameter(1)).handleResult(result);
-                    ((SearchListener<PushEndpoint>)invocation.getParameter(1)).handleSearchDone(true);
                     return null;
                 }
             });
             one(listener).handleResult(result);
-            one(listener).handleSearchDone(true);
             one(result).updateProxies(true);
         }});
         

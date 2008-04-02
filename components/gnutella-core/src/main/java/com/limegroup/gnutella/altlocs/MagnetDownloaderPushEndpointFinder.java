@@ -147,6 +147,7 @@ public class MagnetDownloaderPushEndpointFinder implements EventListener<Downloa
                 try {
                     LOG.debug("creating direct altloc");
                     AlternateLocation alternateLocation = alternateLocationFactory.createDirectAltLoc(ipPort, sha1);
+                    // adding to alt loc manager will notify the downloader of the new alternate location
                     altLocManager.add(alternateLocation, null);
                 } catch (IOException ie) {
                     if (LOG.isErrorEnabled()) {
@@ -156,12 +157,13 @@ public class MagnetDownloaderPushEndpointFinder implements EventListener<Downloa
             } else {
                 LOG.debug("creating push altloc");
                 AlternateLocation  alternateLocation = alternateLocationFactory.createPushAltLoc(result, sha1);
+                // adding to alt loc manager will notify the downloader of the new alternate location
                 altLocManager.add(alternateLocation, null);
             }
         }
 
-        public void handleSearchDone(boolean success) {
-            
+        public void searchFailed() {
+            // ignoring unsuccessful searches
         }
         
     }

@@ -68,10 +68,10 @@ public class PushProxiesPublisherTest extends LimeTestCase {
     public void testValueToPublishForNonFirewalledPeer() {
         networkManagerStub.setAcceptedIncomingConnection(true);
         
-        PushProxiesValue value = pushProxiesPublisher.getValuetoPublish();
+        PushProxiesValue value = pushProxiesPublisher.getValueToPublish();
         assertNull("First value should be null since not stable", value);
         
-        value = pushProxiesPublisher.getValuetoPublish();
+        value = pushProxiesPublisher.getValueToPublish();
         Connectable expected = new ConnectableImpl(new IpPortImpl(networkManagerStub.getAddress(), networkManagerStub.getPort()), SSLSettings.isOutgoingTLSEnabled());
         assertEquals(0, IpPort.IP_COMPARATOR.compare(expected, value.getPushProxies().iterator().next()));
     }
@@ -86,10 +86,10 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         networkManagerStub.setAcceptedIncomingConnection(true);
         networkManagerStub.setSupportsFWTVersion(1);
 
-        PushProxiesValue value = pushProxiesPublisher.getValuetoPublish();
+        PushProxiesValue value = pushProxiesPublisher.getValueToPublish();
         assertNull("First value should be null, since not considered stable", value);
         
-        value = pushProxiesPublisher.getValuetoPublish();
+        value = pushProxiesPublisher.getValueToPublish();
         
         Connectable expected = new ConnectableImpl(new IpPortImpl(networkManagerStub.getAddress(), networkManagerStub.getPort()), SSLSettings.isOutgoingTLSEnabled());
         assertEquals(0, IpPort.IP_COMPARATOR.compare(expected, value.getPushProxies().iterator().next()));
@@ -98,31 +98,31 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         // change fwt support status so we should get a different pushproxy value 
         // for ourselves that needs to be republished
         networkManagerStub.setSupportsFWTVersion(2);
-        value = pushProxiesPublisher.getValuetoPublish();
+        value = pushProxiesPublisher.getValueToPublish();
         assertNull("first value after change should be null, since not stable", value);
         
-        value = pushProxiesPublisher.getValuetoPublish();
+        value = pushProxiesPublisher.getValueToPublish();
         assertEquals(2, value.getFwtVersion());
     }
     
     public void testValueChangingInBetweenConsecutiveCallsToGetValueToPublish() {
         networkManagerStub.setAcceptedIncomingConnection(true);
         
-        PushProxiesValue value = pushProxiesPublisher.getValuetoPublish();
+        PushProxiesValue value = pushProxiesPublisher.getValueToPublish();
         assertNull("value should be null, since not stable as first value", value);
         
         networkManagerStub.setPort(54545);
         
-        value = pushProxiesPublisher.getValuetoPublish();
+        value = pushProxiesPublisher.getValueToPublish();
         assertNull("value should be null, since push proxies should have changed and not stable", value);
         
         networkManagerStub.setCanDoFWT(true);
         networkManagerStub.setSupportsFWTVersion(2);
         
-        value = pushProxiesPublisher.getValuetoPublish();
+        value = pushProxiesPublisher.getValueToPublish();
         assertNull("value should be null, since push proxies should have changed and not stable", value);
         
-        value = pushProxiesPublisher.getValuetoPublish();
+        value = pushProxiesPublisher.getValueToPublish();
         assertNotNull("value should not be null, since stable now", value);
     }
     

@@ -26,7 +26,7 @@ public class SearchListenerAdapter<Result> implements SearchListener<Result> {
     public void handleResult(Result result) {
     }
     
-    public void handleSearchDone(boolean success) {
+    public void searchFailed() {
     }
 
 }

@@ -24,14 +24,14 @@ import com.limegroup.gnutella.settings.DHTSettings;
 @Singleton
 class PushEndpointManagerImpl implements PushEndpointService {
 
-    private final PushEndpointCache pushEndpointCache;
+    private final PushEndpointService pushEndpointCache;
     private final PushEndpointService pushEndpointFinder;
     private final ConcurrentMap<GUID, AtomicLong> lastSearchTimeByGUID = new ConcurrentHashMap<GUID, AtomicLong>(); 
     
     private volatile long timeBetweenSearches = DHTSettings.TIME_BETWEEN_PUSH_PROXY_QUERIES.getValue();
     
     @Inject
-    public PushEndpointManagerImpl(PushEndpointCache pushEndpointCache, 
+    public PushEndpointManagerImpl(@Named("pushEndpointCache") PushEndpointService pushEndpointCache, 
             @Named("dhtPushEndpointFinder") PushEndpointService pushEndpointFinder) {
         this.pushEndpointCache = pushEndpointCache;
         this.pushEndpointFinder = pushEndpointFinder;
@@ -58,7 +58,6 @@ class PushEndpointManagerImpl implements PushEndpointService {
         PushEndpoint cachedPushEndpoint = pushEndpointCache.getPushEndpoint(guid);
         if (cachedPushEndpoint != null && !cachedPushEndpoint.getProxies().isEmpty()) {
             listener.handleResult(cachedPushEndpoint);
-            listener.handleSearchDone(true);
         } else {
             long currentTime = System.currentTimeMillis();
             AtomicLong lastSearchTime = lastSearchTimeByGUID.putIfAbsent(guid, new AtomicLong(currentTime));
@@ -73,10 +72,10 @@ class PushEndpointManagerImpl implements PushEndpointService {
                     if (lastSearchTime.compareAndSet(lastSearch, currentTime)) {
                         startSearch(guid, listener);
                     } else {
-                        listener.handleSearchDone(false);
+                        listener.searchFailed();
                     }
                 } else {
-                    listener.handleSearchDone(false);
+                    listener.searchFailed();
                 }
             }
         }
@@ -89,8 +88,8 @@ class PushEndpointManagerImpl implements PushEndpointService {
                     result.updateProxies(true);
                     listener.handleResult(result);
                 }
-                public void handleSearchDone(boolean success) {
-                    listener.handleSearchDone(success);
+                public void searchFailed() {
+                    listener.searchFailed();
                 }
         });
         purge();
@@ -105,7 +104,7 @@ class PushEndpointManagerImpl implements PushEndpointService {
     /**
      * Purges entries older than 2 * {@link #getTimeBetweenSearches()}.
      */
-    public void purge() {
+    void purge() {
         long currentTime = System.currentTimeMillis();
         for (Entry<GUID, AtomicLong> entry : lastSearchTimeByGUID.entrySet()) {
             if (currentTime - entry.getValue().get() > 2 * timeBetweenSearches) {

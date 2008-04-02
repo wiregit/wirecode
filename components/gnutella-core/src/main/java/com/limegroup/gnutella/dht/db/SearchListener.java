@@ -9,12 +9,9 @@ public interface SearchListener<Result> {
     void handleResult(Result result);
 
     /**
-     * Is called when a search has been performed, any result has been returned 
+     * Is called when a search has been performed, no result has been returned 
      * or an exception occurred during lookup. 
-     * It is also called when the search was not successful.
-     *
-     * @param success whether or not the search was successful
      */
-    void handleSearchDone(boolean success);
+    void searchFailed();
     
 }
