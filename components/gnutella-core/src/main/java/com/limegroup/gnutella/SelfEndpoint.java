@@ -18,7 +18,6 @@ import com.google.inject.Singleton;
 public class SelfEndpoint extends AbstractPushEndpoint {
     private final NetworkManager networkManager;
     private final Provider<ConnectionManager> connectionManager;
-    private final Provider<UDPService> udpService;
     private final ApplicationServices applicationServices;
     private final PushEndpointCache pushEndpointCache;
     private final NetworkInstanceUtils networkInstanceUtils;
@@ -27,13 +26,11 @@ public class SelfEndpoint extends AbstractPushEndpoint {
     SelfEndpoint(NetworkManager networkManager,
             ApplicationServices applicationServices,
             Provider<ConnectionManager> connectionManager,
-            Provider<UDPService> udpService,
             PushEndpointCache pushEndpointCache,
             NetworkInstanceUtils networkInstanceUtils) {
         this.networkManager = networkManager;
         this.applicationServices = applicationServices;
         this.connectionManager = connectionManager;
-        this.udpService = udpService;
         this.pushEndpointCache = pushEndpointCache;
         this.networkInstanceUtils = networkInstanceUtils;
     }
@@ -91,7 +88,7 @@ public class SelfEndpoint extends AbstractPushEndpoint {
     public int getPort() {
         if (networkManager.canDoFWT()
                 && !networkManager.acceptedIncomingConnection())
-            return udpService.get().getStableUDPPort();
+            return networkManager.getStableUDPPort();
         return networkManager.getPort();
     }
 

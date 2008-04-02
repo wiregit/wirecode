@@ -305,28 +305,6 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     /**
-     * Tests that the ConnectionManager returns itself as a push proxy if
-     * it is not firewalled.
-     */
-    public void testGetPushProxiesForNonShieldedLeaf() throws Exception {
-        final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
-        networkManagerStub.setAcceptedIncomingConnection(true);
-        doSetUp(new AbstractModule() {
-            @Override
-            protected void configure() {
-                bind(NetworkManager.class).toInstance(networkManagerStub);
-            }
-        });
-        // precondition
-        assertFalse(connectionManager.isShieldedLeaf());
-        
-        Set<? extends Connectable> proxies = connectionManager.getPushProxies();
-        assertEquals(1, proxies.size());
-        Connectable expected = new ConnectableImpl(new IpPortImpl(networkManagerStub.getAddress(), networkManagerStub.getPort()), SSLSettings.isOutgoingTLSEnabled());
-        assertEquals(0, IpPort.IP_COMPARATOR.compare(expected, proxies.iterator().next()));
-    }
-    
-    /**
      * Tests the various connection-counting methods
      */
     public void testGetNumberOfConnections() throws Exception {

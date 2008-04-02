@@ -5,7 +5,10 @@ import java.io.OutputStream;
 import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Version;
 
@@ -13,9 +16,13 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
+import com.limegroup.gnutella.settings.SSLSettings;
+import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
- * An implementation of PushProxiesDHTValue for the localhost
+ * An implementation of PushProxiesDHTValue for the localhost.
+ * 
+ * Returns itself as a push proxy if the client is not behind a firewall.
  */
 class PushProxiesValueForSelf extends AbstractPushProxiesValue {
     
@@ -66,12 +73,21 @@ class PushProxiesValueForSelf extends AbstractPushProxiesValue {
     }
     
     public int getPort() {
-        return networkManager.getPort();
+        return self.getPort();
     }
 
+    /**
+     * Returns a set of push proxies or the client's ip and port if it is not 
+     * firewalled. 
+     */
     public Set<? extends IpPort> getPushProxies() {
-        return self.getProxies();
-    }
+        if (networkManager.acceptedIncomingConnection() && networkManager.isIpPortValid()) {
+            // port should be the same as returned in #get
+            return new StrictIpPortSet<Connectable>(new ConnectableImpl(new IpPortImpl(networkManager.getAddress(), networkManager.getPort()), SSLSettings.isIncomingTLSEnabled()));
+        } else {
+            return self.getProxies();
+        }
+     }
     
     public BitNumbers getTLSInfo() {
         return AbstractPushProxiesValue.getNumbersFromProxies(getPushProxies());

@@ -27,9 +27,7 @@ import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.Connectable;
-import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
-import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.ConnectionDispatcher;
@@ -1223,8 +1221,6 @@ public class ConnectionManagerImpl implements ConnectionManager {
                     proxies.add(currMC);
             }
             return proxies;
-        } else if (networkManager.acceptedIncomingConnection() && networkManager.isIpPortValid()) {
-            return new StrictIpPortSet<Connectable>(new ConnectableImpl(new IpPortImpl(networkManager.getAddress(), networkManager.getPort()), SSLSettings.isIncomingTLSEnabled()));
         } else {
             return Collections.emptySet();
         }
