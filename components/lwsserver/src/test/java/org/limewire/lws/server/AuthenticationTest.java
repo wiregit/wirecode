@@ -58,7 +58,8 @@ public class AuthenticationTest extends AbstractCommunicationSupport {
                 //
                 // This will be encoded strangely, but just check the length
                 //
-                assertEquals("should be the PING bytes", LWSDispatcherSupport.PING_BYTES.length, res.length());
+                String s = new String(LWSDispatcherSupport.PING_BYTES);
+                assertTrue("'" + s + "' should contain PNG", s.indexOf("PNG") != -1);
                 assertTrue("should be authenticated", getLocalServer().getDispatcher().isAuthenticated());
             }
         });
