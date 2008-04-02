@@ -325,7 +325,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
             data.put("JVM version", VersionUtils.getJavaVersion());
             data.put("OS", OSUtils.getOS());
             data.put("OS version", OSUtils.getOSVersion());
-            data.put("graceful shutdown", ApplicationSettings.PREVIOUS_SHUTDOWN_WAS_GRACEFUL.getValueAsString());
+            data.put("graceful shutdown", ApplicationSettings.PREVIOUS_SHUTDOWN_WAS_GRACEFUL.getValue());
             return data;
         }
     };
