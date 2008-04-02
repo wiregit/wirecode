@@ -34,6 +34,7 @@ import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
+import com.limegroup.gnutella.messagehandlers.LimeACKHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
 import com.limegroup.gnutella.messages.FeatureSearchData;
@@ -114,7 +115,8 @@ public class StandardMessageRouter extends MessageRouterImpl {
             ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory,
             PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
             Provider<OOBHandler> oobHandlerFactory,
-            Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager) {
+            Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager,
+            Provider<LimeACKHandler> limeACKHandler) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
@@ -127,7 +129,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
                 guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, 
                 udpCrawlerPingHandlerFactory, 
                 pingRequestFactory, messageHandlerBinder, oobHandlerFactory, 
-                MACCalculatorRepositoryManager);
+                MACCalculatorRepositoryManager, limeACKHandler);
         this.statistics = statistics;
         this.replyNumberVendorMessageFactory = replyNumberVendorMessageFactory;
     }
@@ -373,7 +375,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
             // send the replies out-of-band - we need to
             // 1) buffer the responses
             // 2) send a ReplyNumberVM with the number of responses
-            if (bufferResponsesForLaterDelivery(query, responses)) {
+            if (limeAckHandler.get().bufferResponsesForLaterDelivery(query, responses)) {
                 // special out of band handling....
                 InetAddress addr = null;
                 try {

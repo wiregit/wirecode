@@ -11,7 +11,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Random;
 
 import junit.framework.Test;
@@ -87,8 +86,6 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
     private VendorMessageFactory vendorMessageFactory;
 
-    private MessageRouterImpl messageRouterImpl;
-
     private MACCalculatorRepositoryManager macManager;
     
     public ServerSideOutOfBandReplyTest(String name) {
@@ -143,7 +140,6 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         messageFactory = injector.getInstance(MessageFactory.class);
         vendorMessageFactory = injector.getInstance(VendorMessageFactory.class);
-        messageRouterImpl = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
         macManager = injector.getInstance(MACCalculatorRepositoryManager.class);
         
         networkManagerStub.setAcceptedIncomingConnection(true);
@@ -1072,11 +1068,11 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         final int MAX_BUFFERED_REPLIES = 10;
 
         // ok, we need to set MAX_BUFFERED_REPLIES in MessageRouter
-        messageRouterImpl.setMaxBufferedReplies(MAX_BUFFERED_REPLIES);
+        MessageSettings.MAX_BUFFERED_OOB_REPLIES.setValue(MAX_BUFFERED_REPLIES);
 
         // clear stored results from other tests
-        Map table = messageRouterImpl.getOutOfBandReplies();
-        table.clear();
+//        Map table = messageRouterImpl.getOutOfBandReplies();
+//        table.clear();
 
         try {
             // send 10 queries

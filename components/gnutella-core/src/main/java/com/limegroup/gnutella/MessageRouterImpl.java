@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +61,7 @@ import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messagehandlers.DualMessageHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
+import com.limegroup.gnutella.messagehandlers.LimeACKHandler;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
@@ -178,10 +177,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     private RouteTable _headPongRouteTable = 
     	new RouteTable(10, MAX_ROUTE_TABLE_SIZE);
 
-    /** How long to buffer up out-of-band replies.
-     */
-    private static final long CLEAR_TIME = 30 * 1000; // 30 seconds
-    
     /**
      * The amount of time after which to expire an OOBSession.
      */
@@ -191,22 +186,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
      */
     private static final long HOPS_FLOW_INTERVAL = 15 * 1000; // 15 seconds
 
-    /** The maximum number of UDP replies to buffer up.  Non-final for 
-     *  testing.
-     */
-    public static final int MAX_BUFFERED_REPLIES = 250;
-    
-    private int maxBufferedReplies = MAX_BUFFERED_REPLIES;
-
-    /**
-     * Keeps track of QueryReplies to be sent after recieving LimeAcks (sent
-     * if the sink wants them).  Cleared every CLEAR_TIME seconds.
-     * TimedGUID->QueryResponseBundle.
-     */
-    private final Map<GUID.TimedGUID, QueryResponseBundle> _outOfBandReplies =
-        new Hashtable<GUID.TimedGUID, QueryResponseBundle>();
-
-    
     private final BypassedResultsCache _bypassedResultsCache;
     
     /**
@@ -261,11 +240,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * a "high" number of hops.
      */
     private static final int HIGH_HOPS_RESPONSE_LIMIT = 10;
-
-    /**
-     * The lifetime of OOBs guids.
-     */
-    private static final long TIMED_GUID_LIFETIME = 25 * 1000; 
 
     /** Keeps track of Listeners of GUIDs. */
     private volatile Map<byte[], List<MessageListener>> _messageListeners =
@@ -351,7 +325,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
     private final Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory;
     private final Provider<OOBHandler> oobHandlerFactory;
     private final Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager;
-
+    protected final Provider<LimeACKHandler> limeAckHandler;
+    
     private final PingRequestFactory pingRequestFactory;
 
     private final MessageHandlerBinder messageHandlerBinder;
@@ -401,7 +376,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
             Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
             PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
             Provider<OOBHandler> oobHandlerFactory,
-            Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager) {
+            Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager,
+            Provider<LimeACKHandler> limeACKHandler) {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.queryHandlerFactory = queryHandlerFactory;
@@ -439,6 +415,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         this.inspectionRequestHandlerFactory = inspectionRequestHandlerFactory;
         this.oobHandlerFactory = oobHandlerFactory;
         this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
+        this.limeAckHandler = limeACKHandler;
 
         _clientGUID = applicationServices.getMyGUID();
         _bypassedResultsCache = new BypassedResultsCache(activityCallback, downloadManager);
@@ -559,8 +536,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
 		
 	    QRP_PROPAGATOR.start();
 
-        // schedule a runner to clear unused out-of-band replies
-        backgroundExecutor.scheduleWithFixedDelay(new Expirer(), CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
         // schedule a runner to clear guys we've connected back to
         backgroundExecutor.scheduleWithFixedDelay(new ConnectBackExpirer(), 10 * CLEAR_TIME, 
                                10 * CLEAR_TIME, TimeUnit.MILLISECONDS);
@@ -604,7 +579,9 @@ public abstract class MessageRouterImpl implements MessageRouter {
         setUDPMessageHandler(QueryReply.class, new UDPQueryReplyHandler(oobHandler));
         setUDPMessageHandler(PingRequest.class, new UDPPingRequestHandler());
         setUDPMessageHandler(PingReply.class, new UDPPingReplyHandler());
-        setUDPMessageHandler(LimeACKVendorMessage.class, new UDPLimeACKVendorMessageHandler());
+        LimeACKHandler ackHandler = limeAckHandler.get();
+        ackHandler.start();
+        setUDPMessageHandler(LimeACKVendorMessage.class, ackHandler);
         setUDPMessageHandler(ReplyNumberVendorMessage.class, oobHandler);
         setUDPMessageHandler(UDPCrawlerPing.class, udpCrawlerPingHandlerFactory.get());
         setUDPMessageHandler(HeadPing.class, new UDPHeadPingHandler());
@@ -1167,44 +1144,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         }
     }
 
-    /** Handles a ACK message - looks up the QueryReply and sends it out of
-     *  band.
-     */
-    protected void handleLimeACKMessage(LimeACKVendorMessage ack,
-                                        InetSocketAddress addr) {
-
-        GUID.TimedGUID refGUID = new GUID.TimedGUID(new GUID(ack.getGUID()),
-                                                    TIMED_GUID_LIFETIME);
-        QueryResponseBundle bundle = _outOfBandReplies.remove(refGUID);
-        
-        // token is null for old oob messages, it will just be ignored then
-        SecurityToken securityToken = ack.getSecurityToken();
-       
-        if ((bundle != null) && (ack.getNumResults() > 0)) {
-            InetAddress iaddr = addr.getAddress();
-            int port = addr.getPort();
-
-            //convert responses to QueryReplies, but only send as many as the
-            //node wants
-            Iterable<QueryReply> iterable;
-            if (ack.getNumResults() < bundle._responses.length) {
-                // TODO move selection to responseToQueryReplies methods for randomization
-                Response[] desired = new Response[ack.getNumResults()];
-                System.arraycopy(bundle._responses, 0, desired, 0, desired.length);
-                iterable = responsesToQueryReplies(desired, bundle._query, 1, securityToken);
-            } else { 
-                iterable = responsesToQueryReplies(bundle._responses, 
-                                                   bundle._query, 1, securityToken);
-            }
-            
-            //send the query replies
-            for(QueryReply queryReply : iterable)
-                udpService.send(queryReply, iaddr, port);
-        }
-        // else some sort of routing error or attack?
-        // TODO: tally some stat stuff here
-    }
-    
     /**
      * Adds the sender of the reply message to an internal cache under the guid of the message
      * if the sender can receive unsolicited UDP.
@@ -1264,26 +1203,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         return _queryRouteTable.getReplyHandler(guid.bytes()) != null;
     }
 
-    /** Stores (for a limited time) the resps for later out-of-band delivery -
-     *  interacts with handleLimeACKMessage
-     *  @return true if the operation failed, false if not (i.e. too busy)
-     */
-    protected boolean bufferResponsesForLaterDelivery(QueryRequest query,
-                                                      Response[] resps) {
-        // store responses by guid for later retrieval
-        synchronized (_outOfBandReplies) {
-            if (_outOfBandReplies.size() < maxBufferedReplies) {
-                GUID.TimedGUID tGUID = 
-                    new GUID.TimedGUID(new GUID(query.getGUID()),
-                                       TIMED_GUID_LIFETIME);
-                _outOfBandReplies.put(tGUID, new QueryResponseBundle(query, 
-                                                                     resps));
-                return true;
-            }
-            return false;
-        }
-    }
-    
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.MessageRouter#isHostUnicastQueried(com.limegroup.gnutella.GUID, org.limewire.io.IpPort)
      */
@@ -2310,8 +2229,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @param security token might be null
      * @return Iterable of QueryReply
      */
-    // default access for testing
-    Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
+    public Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
                                              QueryRequest queryRequest,
                                              final int REPLY_LIMIT, SecurityToken securityToken) {
 
@@ -2852,30 +2770,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         return _headPongRouteTable;
     }
     
-    /**
-     * Default access for testing only. 
-     */
-    Map<GUID.TimedGUID, QueryResponseBundle> getOutOfBandReplies() {
-        return _outOfBandReplies;
-    }
-    
-    /**
-     * Default access use for testing only. 
-     */
-    void setMaxBufferedReplies(int maxBufferedReplies) {
-        this.maxBufferedReplies = maxBufferedReplies;
-    }
-    
-    private static class QueryResponseBundle {
-        public final QueryRequest _query;
-        public final Response[] _responses;
-        
-        public QueryResponseBundle(QueryRequest query, Response[] responses) {
-            _query = query;
-            _responses = responses;
-        }
-    }
-
     /** Expires the UDP-Reply cache. */
     private class UDPReplyCleaner implements Runnable {
         public void run() {
@@ -2887,26 +2781,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         }
         
     }
-
-    /** Can be run to invalidate out-of-band ACKs that we are waiting for....
-     */
-    private class Expirer implements Runnable {
-        public void run() {
-            Set<GUID.TimedGUID> toRemove = new HashSet<GUID.TimedGUID>();
-            synchronized (_outOfBandReplies) {
-                long now = System.currentTimeMillis();
-                for(GUID.TimedGUID currQB : _outOfBandReplies.keySet()) {
-                    if ((currQB != null) && (currQB.shouldExpire(now)))
-                        toRemove.add(currQB);
-                }
-                // done iterating through _outOfBandReplies, remove the 
-                // keys now...
-                for(GUID.TimedGUID next : toRemove)
-                    _outOfBandReplies.remove(next);
-            }
-        }
-    }
-
 
     /** This is run to clear out the registry of connect back attempts...
      *  Made package access for easy test access.
@@ -3151,12 +3025,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     private class UDPPingReplyHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
             handleUDPPingReply((PingReply)msg, handler, addr.getAddress(), addr.getPort());
-        }
-    }
-    
-    private class UDPLimeACKVendorMessageHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            handleLimeACKMessage((LimeACKVendorMessage)msg, addr);
         }
     }
     

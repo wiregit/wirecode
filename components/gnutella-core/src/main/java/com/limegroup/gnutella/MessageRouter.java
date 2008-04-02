@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.util.Set;
 
 import org.limewire.io.IpPort;
+import org.limewire.security.SecurityToken;
 import org.limewire.service.Service;
 
 import com.limegroup.gnutella.connection.RoutedConnection;
@@ -21,6 +22,8 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 
 public interface MessageRouter extends Service {
 
+    public static final long CLEAR_TIME = 30 * 1000; // 30 seconds
+    
     /**
      * Installs a MessageHandler for "regular" Messages.
      * 
@@ -290,6 +293,9 @@ public interface MessageRouter extends Service {
      */
     public Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
             QueryRequest queryRequest);
+    
+    public Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
+            QueryRequest queryRequest, int replyLimit, SecurityToken token);
 
     /**
      * Accessor for the most recently calculated <tt>QueryRouteTable</tt>

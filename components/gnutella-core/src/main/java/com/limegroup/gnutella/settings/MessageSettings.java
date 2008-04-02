@@ -77,4 +77,10 @@ public class MessageSettings extends LimeProps {
     public static final BooleanSetting ULTRAPEER_FIREWALL_FILTERING =
         FACTORY.createRemoteBooleanSetting("ULTRAPEER_FIREWALL_FILTERING",true,
                 "MessageSettings.ultrapeerFirewallFiltering");
+    
+    /** 
+     * The maximum number of UDP replies to buffer up.  For testing.
+     */
+    public static final IntSetting MAX_BUFFERED_OOB_REPLIES =
+        FACTORY.createIntSetting("MAX_BUFFERED_OOB_REPLIES", 250);
 }

@@ -294,6 +294,12 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
             // TODO Auto-generated method stub
             return null;
         }
+        
+        public Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
+                QueryRequest queryRequest, int max, SecurityToken tok) {
+            // TODO Auto-generated method stub
+            return null;
+        }
 
         public void sendDynamicQuery(QueryRequest query) {
             // TODO Auto-generated method stub
