@@ -20,6 +20,7 @@ import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.nio.protocol.NHttpResponseTrigger;
@@ -38,6 +39,30 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     private LWSReceivesCommandsFromDispatcher commandReceiver;
     private final Executor handlerExecutor = ExecutorsHelper.newProcessingQueue("lws-handlers");
     
+    /** Package protected for testing. */
+    public final static byte[] PING_BYTES = new byte[]{
+        (byte)0x89, (byte)0x50, (byte)0x4E, (byte)0x47, (byte)0x0D, (byte)0x0A, (byte)0x1A, (byte)0x0A, (byte)0x00, 
+        (byte)0x00, (byte)0x00, (byte)0x0D, (byte)0x49, (byte)0x48, (byte)0x44, (byte)0x52, (byte)0x00, (byte)0x00, 
+        (byte)0x00, (byte)0x01, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x01, (byte)0x08, (byte)0x06, (byte)0x00, 
+        (byte)0x00, (byte)0x00, (byte)0x1F, (byte)0x15, (byte)0xC4, (byte)0x89, (byte)0x00, (byte)0x00, (byte)0x00, 
+        (byte)0x01, (byte)0x73, (byte)0x52, (byte)0x47, (byte)0x42, (byte)0x00, (byte)0xAE, (byte)0xCE, (byte)0x1C, 
+        (byte)0xE9, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x04, (byte)0x67, (byte)0x41, (byte)0x4D, (byte)0x41, 
+        (byte)0x00, (byte)0x00, (byte)0xB1, (byte)0x8F, (byte)0x0B, (byte)0xFC, (byte)0x61, (byte)0x05, (byte)0x00, 
+        (byte)0x00, (byte)0x00, (byte)0x20, (byte)0x63, (byte)0x48, (byte)0x52, (byte)0x4D, (byte)0x00, (byte)0x00, 
+        (byte)0x7A, (byte)0x26, (byte)0x00, (byte)0x00, (byte)0x80, (byte)0x84, (byte)0x00, (byte)0x00, (byte)0xFA, 
+        (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x80, (byte)0xE8, (byte)0x00, (byte)0x00, (byte)0x75, (byte)0x30, 
+        (byte)0x00, (byte)0x00, (byte)0xEA, (byte)0x60, (byte)0x00, (byte)0x00, (byte)0x3A, (byte)0x98, (byte)0x00, 
+        (byte)0x00, (byte)0x17, (byte)0x70, (byte)0x9C, (byte)0xBA, (byte)0x51, (byte)0x3C, (byte)0x00, (byte)0x00, 
+        (byte)0x00, (byte)0x18, (byte)0x74, (byte)0x45, (byte)0x58, (byte)0x74, (byte)0x53, (byte)0x6F, (byte)0x66, 
+        (byte)0x74, (byte)0x77, (byte)0x61, (byte)0x72, (byte)0x65, (byte)0x00, (byte)0x50, (byte)0x61, (byte)0x69, 
+        (byte)0x6E, (byte)0x74, (byte)0x2E, (byte)0x4E, (byte)0x45, (byte)0x54, (byte)0x20, (byte)0x76, (byte)0x33, 
+        (byte)0x2E, (byte)0x31, (byte)0x30, (byte)0x72, (byte)0xB2, (byte)0x25, (byte)0x92, (byte)0x00, (byte)0x00, 
+        (byte)0x00, (byte)0x0B, (byte)0x49, (byte)0x44, (byte)0x41, (byte)0x54, (byte)0x18, (byte)0x57, (byte)0x63, 
+        (byte)0xF8, (byte)0x0F, (byte)0x04, (byte)0x00, (byte)0x09, (byte)0xFB, (byte)0x03, (byte)0xFD, (byte)0x2B, 
+        (byte)0xD5, (byte)0x08, (byte)0x45, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00, (byte)0x49, (byte)0x45, 
+        (byte)0x4E, (byte)0x44, (byte)0xAE, (byte)0x42, (byte)0x60, (byte)0x82,
+    };    
+    
     public LWSDispatcherSupport() {
         Handler[] hs = createHandlers();
         if (LOG.isDebugEnabled()) LOG.debug("creating " + hs.length + " handler(s)...");
@@ -50,6 +75,13 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
     // ------------------------------------------------------
     // Abstract
     // ------------------------------------------------------
+    
+    /**
+     * Returns whether the web page has authenticated yet. This is used for
+     * determining whether to handle a PING request or not.
+     */
+    protected abstract boolean isAuthenticated();
+    
     
     /*
      * The abstraction is this.  There are two subclasses of this class:
@@ -144,10 +176,27 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
             final NHttpResponseTrigger trigger, HttpContext c) throws HttpException, IOException {
         String request = httpReq.getRequestLine().getUri();
         final String command = getCommand(request);
+        note("Have command {0} ", command);
+        //
+        // If the command is ping and we are authenticated, then send
+        // back the special PING response
+        //
+        if (isAuthenticated() && command.equals(Commands.PING)) {
+            note("Handling PING");
+            handlerExecutor.execute(new Runnable() {
+                public void run() {
+                        response.setEntity(new ByteArrayEntity(PING_BYTES));
+                        trigger.submitResponse(response);
+                }
+            });
+            notifyConnectionListeners(true);
+            return;
+        }
         final Handler h = names2handlers.get(command.toLowerCase());
         if (h == null) {
-            if (LOG.isErrorEnabled())
+            if (LOG.isErrorEnabled()) {
                 LOG.error("Couldn't create a handler for " + command);
+            }
             String str = report(LWSDispatcherSupport.ErrorCodes.UNKNOWN_COMMAND);
             response.setEntity(new NStringEntity(str));
             trigger.submitResponse(response);
@@ -156,11 +205,13 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
         if (LOG.isDebugEnabled())
             LOG.debug("have handler: " + h.name());
         final Map<String, String> args = getArgs(request);
+        note("Have args {0} ", args);
         handlerExecutor.execute(new Runnable() {
             public void run() {
                 h.handle(args, new StringCallback() {
                     public void process(String input) {
                         try {
+                            note("Have response {0}",input);
                             response.setEntity(new NStringEntity(input));
                             trigger.submitResponse(response);
                         } catch (UnsupportedEncodingException e) {
@@ -179,6 +230,10 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
 
     public final boolean removeConnectionListener(LWSConnectionListener lis) {
         return getCommandReceiver().removeConnectionListener(lis);
+    }
+    
+    public final void notifyConnectionListeners(boolean isConnected) {
+        getCommandReceiver().setConnected(isConnected);
     }
     
     /**
@@ -210,6 +265,12 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
      */
     public final void handle(String request, PrintStream out, StringCallback callback) {
         final String req = getCommand(request);
+        if (isAuthenticated() && req.equals(Commands.PING)) {
+            note("Handling PING");
+            callback.process(new String(PING_BYTES));
+            notifyConnectionListeners(true);
+            return;
+        }
         final Handler h = names2handlers.get(req.toLowerCase(Locale.US));
         if (h == null) {
             if (LOG.isErrorEnabled()) LOG.error("Couldn't create a handler for " + req);
@@ -485,6 +546,11 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
         String AUTHENTICATE = "Authenticate";
         
         /**
+         * Sent from Code to Local no parameters for sending back the special ping response.
+         */
+        String PING = "Ping";        
+        
+        /**
          * Sent from Code to Local with parameters.
          * <ul>
          * <li>{@link LocalServer.Parameters#COMMAND}</li>
@@ -685,4 +751,5 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
         String ARGUMENT_SEPARATOR = "%26";
     
     }
+
 }

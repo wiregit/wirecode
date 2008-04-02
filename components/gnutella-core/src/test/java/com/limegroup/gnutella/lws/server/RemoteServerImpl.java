@@ -196,6 +196,15 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
         protected String getCommand(String request) {
             return RemoteServerImpl.getCommand(request);
         }
+        
+        protected boolean isAuthenticated() {
+            // This doesn't matter
+            return false;
+        }
+
+        public void deauthenticate() {
+            // This isn't used
+        }
     }    
 
     // ---------------------------------------------------------------

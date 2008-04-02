@@ -152,7 +152,8 @@ public final class LocalServerDelegate {
             String request = ctor.constructURL(msg, newArgs);
 
             HttpClient client = new SimpleLimeHttpClient();
-            HttpGet get = new HttpGet("http://" + host + ":" + port + "/" + request);
+            String requestLine = "http://" + host + ":" + port + "/" + request;
+            HttpGet get = new HttpGet(requestLine);
             HttpProtocolParams.setVersion(client.getParams(), HttpVersion.HTTP_1_1);
 
             HttpResponse response = client.execute(get);

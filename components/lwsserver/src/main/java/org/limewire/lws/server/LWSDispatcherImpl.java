@@ -45,6 +45,12 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
     public LWSDispatcherImpl(LWSSenderOfMessagesToServer sender) {
         this.sender = sender;
     }
+    
+    public void deauthenticate() {
+        publicKey = null;
+        privateKey = null;
+        sharedKey = null;
+    }
 
     @Override
     protected final Handler[] createHandlers() {
@@ -54,6 +60,10 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
                 new Detatch(), 
                 new Msg() 
          };
+    }
+    
+    protected final boolean isAuthenticated() {
+        return publicKey != null && privateKey != null && sharedKey != null;
     }
     
       /**
@@ -202,8 +212,8 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
      * Sent from code with private key to authenticate.
      */
     class Authenticate extends HandlerWithCallbackWithPrivateKey {
-        protected void handleRest(String privateKey, String herSharedKey, Map<String, String> args, StringCallback cb) {
-            getCommandReceiver().setConnected(true);
+        protected void handleRest(String privateKey, String sharedKey, Map<String, String> args, StringCallback cb) {
+            notifyConnectionListeners(true);
             cb.process(LWSDispatcherSupport.Responses.OK);
         }
     }
@@ -215,7 +225,8 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
         protected void handleRest(Map<String, String> args, StringCallback cb) {
             privateKey = null;
             publicKey = null;
-            getCommandReceiver().setConnected(false);
+            sharedKey = null;
+            notifyConnectionListeners(false);
             cb.process(LWSDispatcherSupport.Responses.OK);
         }
     }

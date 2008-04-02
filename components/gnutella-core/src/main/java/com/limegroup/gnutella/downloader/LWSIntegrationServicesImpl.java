@@ -46,6 +46,8 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
      */
     private final static int CALL_GET_DOWNLOAD_PROGRESS_PERIOD_MILLIS =  5 * 60 * 1000;
     
+    /** The bytes on a 1x1 png image for respond to ping requests. */
+    
     /**
      * The period in milliseconds for checking that
      * {@link #everActiveDownloaderIDs2Downloaders()} only contains active

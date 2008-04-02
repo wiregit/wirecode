@@ -1,5 +1,6 @@
 package org.limewire.lws.server;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
@@ -47,6 +48,21 @@ public final class FakeJavascriptCodeInTheWebpage {
                 h.handle(removeHeaders(response));
             }
         }, LocalServerDelegate.WicketStyleURLConstructor.INSTANCE);
+	}
+	
+	/**
+	 * Sends a <code>ping</code> message, whose response will be an image.
+	 * 
+	 * @param privateKey the private key
+	 * @param publicKey the public key
+	 * @param h handles the response.
+	 */
+	protected final void sendPing(String privateKey, String sharedKey, Handler h) {
+	    Map<String,String> args = new HashMap<String,String>();
+        args.put(LWSDispatcherSupport.Parameters.PRIVATE, privateKey);
+        args.put(LWSDispatcherSupport.Parameters.SHARED, sharedKey);
+        args.put(LWSDispatcherSupport.Parameters.CALLBACK, "_dummy");
+	    sendLocalMsg(LWSDispatcherSupport.Commands.PING, args, h);
 	}
 	
 	private String removeHeaders(String response) {

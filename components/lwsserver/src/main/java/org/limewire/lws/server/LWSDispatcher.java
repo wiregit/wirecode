@@ -35,5 +35,15 @@ public interface LWSDispatcher extends NHttpRequestHandler {
      *         <code>false</code> otherwise.
      */
     boolean removeConnectionListener(LWSConnectionListener lis);
+    
+    /**
+     * Notifies all connection listeners of the new state of connectivity.
+     */
+    void notifyConnectionListeners(boolean isConnected);
+    
+    /**
+     * Reset all keys to <code>null</code> and deauthenticates.
+     */
+    void deauthenticate();
   
 }

@@ -192,6 +192,11 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
         note("Authenticating with private key '" + privateKey + "' and shared key '" + sharedKey + "'");
         return sendMessageFromWebpageToClient("Authenticate", args);        
     }
+    
+    protected final String sendPing() {
+        Map<String, String> args = new HashMap<String, String>();
+        return sendMessageFromWebpageToClient("Ping", args);          
+    }
 
     protected final String getPrivateKey() {
         if (privateKey == null) {
