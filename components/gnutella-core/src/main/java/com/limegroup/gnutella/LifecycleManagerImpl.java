@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -14,7 +16,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.ssl.SSLEngineTest;
@@ -26,6 +30,7 @@ import org.limewire.statistic.StatisticAccumulator;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
+import org.limewire.util.VersionUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -311,7 +316,33 @@ public class LifecycleManagerImpl implements LifecycleManager {
         }
     }
     
-    private void doStart() {
+    /** Details about the shutdown */
+    @SuppressWarnings("unused")
+    @InspectionPoint("ungraceful shutdown details")
+    private final Inspectable ungracefulShutdownDetails = new Inspectable() {
+        public Object inspect() {
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put("JVM version", VersionUtils.getJavaVersion());
+            data.put("OS", OSUtils.getOS());
+            data.put("OS version", OSUtils.getOSVersion());
+            data.put("graceful shutdown", ApplicationSettings.PREVIOUS_SHUTDOWN_WAS_GRACEFUL.getValueAsString());
+            return data;
+        }
+    };
+    
+    private void doStart() {                                
+        //if previous instance of LimeWire was shutdown properly
+        if(ApplicationSettings.CURRENTLY_RUNNING.getValue()) {
+            ApplicationSettings.PREVIOUS_SHUTDOWN_WAS_GRACEFUL.setValue(false);             
+        } else {
+            ApplicationSettings.PREVIOUS_SHUTDOWN_WAS_GRACEFUL.setValue(true); 
+        }
+        //sets that an instance of LimeWire is running.
+        ApplicationSettings.CURRENTLY_RUNNING.setValue(true);        
+        
+        // save limewire.props & other settings
+        SettingsGroupManager.instance().save();
+        
         loadBackgroundTasksBlocking();
         
 	    LOG.trace("START RouterService");
@@ -539,6 +570,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         //Update fractional uptime statistics (before writing limewire.props)
         statistics.get().shutdown();
+        
+        //records that LimeWire is shutting down properly
+        ApplicationSettings.CURRENTLY_RUNNING.setValue(false);
         
 		// start closing all active torrents
 		// torrentManager.shutdown();

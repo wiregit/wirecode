@@ -73,6 +73,21 @@ public class ApplicationSettings extends LimeProps {
         FACTORY.createLongSetting("LAST_SHUTDOWN_TIME", 0);
     
     /**
+     * Whether the last shutdown was graceful or not.
+     */
+    @InspectablePrimitive("previous shutdown was graceful")
+    public static final BooleanSetting PREVIOUS_SHUTDOWN_WAS_GRACEFUL =
+        FACTORY.createBooleanSetting("PREVIOUS_SHUTDOWN_WAS_GRACEFUL", true);
+    
+    /**
+     * Indicates whether an instance of LimeWire is running or not. 
+     * Should always be false at the start up if LimeWire was shutdown properly.
+     * It will get set to true once the core is started.
+     */
+    public static final BooleanSetting CURRENTLY_RUNNING =
+        FACTORY.createBooleanSetting("CURRENTLY_RUNNING", false);            
+    
+    /**
      * The fraction of time this is running, a unitless quality.  This is
      * used to identify highly available hosts with big pongs.  This value
      * should only be updated once per session.
