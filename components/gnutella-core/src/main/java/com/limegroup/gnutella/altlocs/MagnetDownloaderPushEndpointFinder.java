@@ -105,7 +105,9 @@ public class MagnetDownloaderPushEndpointFinder implements EventListener<Downloa
     }
     
     void handleStatusEvent(DownloadStatusEvent event) {
-        if (event.getType() == DownloadStatus.QUEUED) {
+        switch (event.getType()) {
+        case GAVE_UP:
+        case WAITING_FOR_USER:
             CoreDownloader downloader = event.getSource();
             if (downloader instanceof MagnetDownloader) {
                 MagnetDownloader magnetDownloader = (MagnetDownloader)downloader;

@@ -24,6 +24,7 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.dht.DHTControllerStub;
 import com.limegroup.gnutella.dht.DHTEvent;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.NullDHTController;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
@@ -133,6 +134,7 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         final MojitoDHT mojitoDHT = context.mock(MojitoDHT.class);
         final ScheduledExecutorService executorService = context.mock(ScheduledExecutorService.class);
         final ScheduledFuture future = context.mock(ScheduledFuture.class);
+        final DHTManager dhtManager = context.mock(DHTManager.class);
         
         
         context.checking(new Expectations() {{
@@ -146,6 +148,10 @@ public class PushProxiesPublisherTest extends LimeTestCase {
                     return future;
                 }
             });
+            allowing(dhtManager).getMojitoDHT();
+            will(returnValue(mojitoDHT));
+            allowing(mojitoDHT).isBootstrapped();
+            will(returnValue(true));
         }});
         
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
@@ -158,7 +164,7 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         
         DHTSettings.PUBLISH_PUSH_PROXIES.setValue(true);
         
-        pushProxiesPublisher = new PushProxiesPublisher(injector.getInstance(PushProxiesValueFactory.class), executorService);
+        pushProxiesPublisher = new PushProxiesPublisher(injector.getInstance(PushProxiesValueFactory.class), executorService, dhtManager);
 
         pushProxiesPublisher.handleDHTEvent(new DHTEvent(new DHTControllerStub(mojitoDHT, DHTMode.PASSIVE), Type.CONNECTED));
         

@@ -13,6 +13,7 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
+import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -37,12 +38,19 @@ public class PushProxiesPublisher implements DHTEventListener {
     private final ScheduledExecutorService backgroundExecutor;
 
     private volatile ScheduledFuture publishingFuture;
+
+    private final DHTManager dhtManager;
     
+    /**
+     * @param dhtManager just needed to hold a lock on it when sending queries
+     */
     @Inject
     public PushProxiesPublisher(PushProxiesValueFactory pushProxiesValueFactory,
-            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            DHTManager dhtManager) {
         this.pushProxiesValueFactory = pushProxiesValueFactory;
         this.backgroundExecutor = backgroundExecutor;
+        this.dhtManager = dhtManager;
     }
 
     private PushProxiesValue getCurrentPushproxiesValue() {
@@ -58,14 +66,18 @@ public class PushProxiesPublisher implements DHTEventListener {
     /**
      * Publishes push proxies if they are stable and have changed from the
      * last time they were published.
-     * @param mojitoDHT 
      */
-    void publish(MojitoDHT mojitoDHT) {
+    void publish() {
         PushProxiesValue valueToPublish = getValueToPublish();
         if (valueToPublish != null) {
             GUID guid = new GUID(lastPublishedValue.getGUID());
             KUID primaryKey = KUIDUtils.toKUID(guid);
-            mojitoDHT.put(primaryKey, lastPublishedValue);
+            synchronized (dhtManager) {
+                MojitoDHT dht = dhtManager.getMojitoDHT();
+                if (dht != null && dht.isBootstrapped()) {
+                    dht.put(primaryKey, lastPublishedValue);
+                }
+            }
         }
     }
     
@@ -123,7 +135,7 @@ public class PushProxiesPublisher implements DHTEventListener {
             long interval = DHTSettings.PUSH_PROXY_STABLE_PUBLISHING_INTERVAL.getValue();
             long initialDelay = (long)(Math.random() * interval);
             // TODO instead of a polling approach, an event when push proxies have changed and should be updated might be nice
-            publishingFuture = backgroundExecutor.scheduleAtFixedRate(new PublishingRunnable(event.getDHTController().getMojitoDHT()), initialDelay, interval, TimeUnit.MILLISECONDS);
+            publishingFuture = backgroundExecutor.scheduleAtFixedRate(new PublishingRunnable(), initialDelay, interval, TimeUnit.MILLISECONDS);
         } else if (event.getType() == Type.STOPPED) {
             if (publishingFuture != null) {
                 publishingFuture.cancel(false);
@@ -134,14 +146,8 @@ public class PushProxiesPublisher implements DHTEventListener {
     
     private class PublishingRunnable implements Runnable {
         
-        private final MojitoDHT mojitoDHT;
-
-        public PublishingRunnable(MojitoDHT mojitoDHT) {
-            this.mojitoDHT = mojitoDHT;
-        }
-
         public void run() {
-            publish(mojitoDHT);
+            publish();
         }
     }
 }

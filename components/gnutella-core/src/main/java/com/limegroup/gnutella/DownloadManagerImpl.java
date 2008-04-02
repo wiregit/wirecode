@@ -189,10 +189,10 @@ public class DownloadManagerImpl implements DownloadManager {
     public void addNewDownloader(CoreDownloader downloader) {
         synchronized(this) {
             waiting.add(downloader);
-            downloader.initialize();
-            callback(downloader).addDownload(downloader);
         }
         fireEvent(downloader, DownloadManagerEvent.Type.ADDED);
+        downloader.initialize();
+        callback(downloader).addDownload(downloader);
     }
 
     /* (non-Javadoc)
@@ -1115,6 +1115,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }    
 
     private void fireEvent(CoreDownloader downloader, DownloadManagerEvent.Type type) {
+        System.out.println("firing: " + type);
         listeners.broadcast(new DownloadManagerEvent(downloader, type));
     }
 

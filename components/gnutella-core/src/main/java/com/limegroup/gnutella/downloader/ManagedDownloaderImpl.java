@@ -2566,11 +2566,15 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      *  milliseconds. 
      */
     void setState(DownloadStatus newState, long time) {
+        DownloadStatus oldState = null;
         synchronized (this) {
+            oldState = this.state;
             this.state=newState;
             this.stateTime=System.currentTimeMillis()+time;
         }
-        listeners.broadcast(new DownloadStatusEvent(this, newState));
+        if (oldState != newState) {
+            fireEventLater(newState);
+        }
     }
     
     /**
@@ -3124,6 +3128,17 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     Set<RemoteFileDesc> getCachedRFDs() {
         return cachedRFDs;
+    }
+    
+    /**
+     * Fires status event in background executro thread. 
+     */
+    private void fireEventLater(final DownloadStatus status) {
+        backgroundExecutor.execute(new Runnable() {
+            public void run() {
+                listeners.broadcast(new DownloadStatusEvent(ManagedDownloaderImpl.this, status));
+            }
+        });
     }
 
     public void addListener(EventListener<DownloadStatusEvent> listener) {
