@@ -46,7 +46,16 @@ public class DHTPushEndpointFinder implements PushEndpointService {
     public void findPushEndpoint(GUID guid, SearchListener<PushEndpoint> listener) {
         listener = SearchListenerAdapter.nonNullListener(listener);
         
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("starting dht lookup for guid: " + guid);
+        }
+        
         KUID key = KUIDUtils.toKUID(guid);
+        
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("starting dht lookup for kuid: " + key);
+        }
+        
         EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractPushProxiesValue.PUSH_PROXIES);
         boolean querySent = false;
         

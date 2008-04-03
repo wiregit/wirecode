@@ -27,7 +27,11 @@ import com.limegroup.gnutella.settings.DHTSettings;
  * <p>
  * It implements {@link DHTEventListener} and starts publishing push proxies
  * once the DHT is bootstrapped. It only publishes stable configurations that 
- * have been stable for a minute
+ * have been stable for a certain amount of time specified by 
+ * {@link DHTSettings#PUSH_PROXY_STABLE_PUBLISHING_INTERVAL}.
+ * <p>
+ * Note: For this class to work it must be registered as a listener to
+ * {@link DHTManager} before it fires events.
  */
 @Singleton
 public class PushProxiesPublisher implements DHTEventListener {
@@ -153,6 +157,7 @@ public class PushProxiesPublisher implements DHTEventListener {
     
     public void handleDHTEvent(DHTEvent event) {
         if (event.getType() == Type.CONNECTED) {
+            LOG.debug("starting push proxy publishing");
             if (publishingFuture != null) {
                 throw new IllegalStateException("should not have happened");
             }
@@ -161,6 +166,7 @@ public class PushProxiesPublisher implements DHTEventListener {
             // TODO instead of a polling approach, an event when push proxies have changed and should be updated might be nice
             publishingFuture = backgroundExecutor.scheduleAtFixedRate(new PublishingRunnable(), initialDelay, interval, TimeUnit.MILLISECONDS);
         } else if (event.getType() == Type.STOPPED) {
+            LOG.debug("stopping push proxy publishing");
             if (publishingFuture != null) {
                 publishingFuture.cancel(false);
                 publishingFuture = null;

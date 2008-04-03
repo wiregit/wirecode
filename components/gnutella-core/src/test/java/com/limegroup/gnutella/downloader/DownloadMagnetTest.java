@@ -4,8 +4,6 @@ import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -23,11 +21,8 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.browser.MagnetOptions;
-import com.limegroup.gnutella.dht.DHTEvent;
-import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTTestUtils;
-import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.dht.db.PushProxiesValue;
 import com.limegroup.gnutella.dht.db.PushProxiesValueImpl;
@@ -99,7 +94,7 @@ public class DownloadMagnetTest extends DownloadTestCase {
 
              publishPushProxyForGuid(node, guid, PORTS[0], PORTS[0]);
              
-             waitForBootStrap(dhtManager);
+             DHTTestUtils.waitForBootStrap(dhtManager);
 
              Downloader downloader = downloadServices.download(magnet, true, saveDir, savedFileName);
              
@@ -129,7 +124,7 @@ public class DownloadMagnetTest extends DownloadTestCase {
 
              publishPushProxyForGuid(node, guid, 5555 /* just a random different port */, PUSH_PROXY_PORT);
              
-             waitForBootStrap(dhtManager);
+             DHTTestUtils.waitForBootStrap(dhtManager);
 
              TestUploader uploader = injector.getInstance(TestUploader.class);
              uploader.start("push uploader");
@@ -149,20 +144,6 @@ public class DownloadMagnetTest extends DownloadTestCase {
     private void publishPushProxyForGuid(MojitoDHT dht, GUID guid, int proxyPort, int clientPort) throws Exception {
         PushProxiesValue value = new PushProxiesValueImpl(dht.getVersion(), guid.bytes(), (byte) 0, RUDPUtils.VERSION, clientPort, Collections.singleton(new IpPortImpl("127.0.0.1", proxyPort)));
         dht.put(KUIDUtils.toKUID(guid), value).get();
-    }
-    
-    private void waitForBootStrap(DHTManager dhtManager) throws Exception {
-        final CountDownLatch bootStrapped = new CountDownLatch(1);
-        dhtManager.addEventListener(new DHTEventListener() {
-            public void handleDHTEvent(DHTEvent evt) {
-                if (evt.getType() == Type.CONNECTED) {
-                    bootStrapped.countDown();
-                }
-            }
-        });
-        if (!dhtManager.isBootstrapped()) {
-            assertTrue(bootStrapped.await(500, TimeUnit.SECONDS));
-        }
     }
     
     private FileDetails createFileDetails(final GUID guid) {

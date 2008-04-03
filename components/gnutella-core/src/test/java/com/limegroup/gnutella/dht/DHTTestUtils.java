@@ -1,11 +1,16 @@
 package com.limegroup.gnutella.dht;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.util.AssertComparisons;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.Injector;
+import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -53,4 +58,17 @@ public class DHTTestUtils {
         localSocketAddressProviderStub.setLocalAddressPrivate(localIsPrivate);
     }
 
+    public static void waitForBootStrap(DHTManager dhtManager) throws Exception {
+        final CountDownLatch bootStrapped = new CountDownLatch(1);
+        dhtManager.addEventListener(new DHTEventListener() {
+            public void handleDHTEvent(DHTEvent evt) {
+                if (evt.getType() == Type.CONNECTED) {
+                    bootStrapped.countDown();
+                }
+            }
+        });
+        if (!dhtManager.isBootstrapped()) {
+            AssertComparisons.assertTrue(bootStrapped.await(5, TimeUnit.SECONDS));
+        }
+    }
 }
