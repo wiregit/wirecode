@@ -38,9 +38,6 @@ public class LimeACKHandler implements MessageHandler, Service {
      */
     private static final long TIMED_GUID_LIFETIME = 25 * 1000;
     
-    /** How long to buffer up out-of-band replies.
-     */
-    
     private final ScheduledExecutorService backgroundExecutor;
     private final Provider<MessageRouter> messageRouter;
     private final Provider<UDPService> udpService;
@@ -78,8 +75,8 @@ public class LimeACKHandler implements MessageHandler, Service {
         SecurityToken securityToken = ack.getSecurityToken();
 
         if ((bundle != null) && (ack.getNumResults() > 0)) {
-            InetAddress iaddr = addr.getAddress();
-            int port = addr.getPort();
+            final InetAddress iaddr = addr.getAddress();
+            final int port = addr.getPort();
 
           // convert responses to QueryReplies, but only send as many as the
           // node wants
@@ -95,11 +92,15 @@ public class LimeACKHandler implements MessageHandler, Service {
             }
 
           // send the query replies
-            for(QueryReply queryReply : iterable)
-                udpService.get().send(queryReply, iaddr, port);
+            int i = 0;
+            for(final QueryReply queryReply : iterable) {
+                backgroundExecutor.schedule(new Runnable() {
+                    public void run () {
+                        udpService.get().send(queryReply, iaddr, port);
+                    }
+                }, (i++) * 200, TimeUnit.MILLISECONDS);
+            }
         }
-// else some sort of routing error or attack?
-// TODO: tally some stat stuff here
     }
 
     
