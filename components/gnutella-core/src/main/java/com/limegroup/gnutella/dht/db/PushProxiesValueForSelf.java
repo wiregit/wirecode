@@ -40,10 +40,6 @@ class PushProxiesValueForSelf extends AbstractPushProxiesValue {
         this.applicationServices = applicationServices;
     }
 
-    public boolean isEmpty() {
-        return false;
-    }
-
     public DHTValueType getValueType() {
         return AbstractPushProxiesValue.PUSH_PROXIES;
     }

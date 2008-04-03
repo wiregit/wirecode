@@ -4,6 +4,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IpPortSet;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 
@@ -28,6 +31,8 @@ import com.limegroup.gnutella.settings.DHTSettings;
  */
 @Singleton
 public class PushProxiesPublisher implements DHTEventListener {
+    
+    private static final Log LOG = LogFactory.getLog(PushProxiesPublisher.class);
     
     private volatile PushProxiesValue lastSeenValue;
     
@@ -70,6 +75,9 @@ public class PushProxiesPublisher implements DHTEventListener {
     void publish() {
         PushProxiesValue valueToPublish = getValueToPublish();
         if (valueToPublish != null) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("publishing: " + valueToPublish);
+            }
             GUID guid = new GUID(lastPublishedValue.getGUID());
             KUID primaryKey = KUIDUtils.toKUID(guid);
             synchronized (dhtManager) {
@@ -89,7 +97,7 @@ public class PushProxiesPublisher implements DHTEventListener {
      */
     PushProxiesValue getValueToPublish() {
         // order is important to compare newest last seen value with last published value
-        if (pushProxiesAreStable() && publishedValueChanged()) {
+        if (pushProxiesAreStable() && valueToPublishChangedSignificantly()) {
             lastPublishedValue = lastSeenValue;
             return lastPublishedValue;
         }
@@ -98,10 +106,26 @@ public class PushProxiesPublisher implements DHTEventListener {
     
     /**
      * Returns true if there is a valid last seen value and it differs from
-     * the last published value.
+     * the last published value significantly in the set of push proxies.
      */
-    boolean publishedValueChanged() {
-        return lastSeenValue != null && !lastSeenValue.equals(lastPublishedValue);
+    boolean valueToPublishChangedSignificantly() {
+        // no data or values the same
+        if (lastSeenValue == null || lastSeenValue.equals(lastPublishedValue)) {
+            return false;
+        }
+        // never published before
+        if (lastPublishedValue == null) {
+            return true;
+        }
+        // publish if fwt capabilities have changed
+        if (lastSeenValue.getFwtVersion() != lastPublishedValue.getFwtVersion()) {
+            return true;
+        }
+        // value has changed, if only one or less proxies are still the same
+        // we republish
+        IpPortSet old = new IpPortSet(lastPublishedValue.getPushProxies());
+        old.retainAll(lastSeenValue.getPushProxies());
+        return old.size() < 2;
     }
     
     /**

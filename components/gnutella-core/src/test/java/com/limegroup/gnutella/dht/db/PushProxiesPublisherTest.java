@@ -14,12 +14,15 @@ import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.db.DHTValue;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.dht.DHTControllerStub;
@@ -40,6 +43,7 @@ public class PushProxiesPublisherTest extends LimeTestCase {
     private Mockery context;
 
     private Runnable publishingRunnable;
+    private ConnectionManager connectionManager;
     
     public PushProxiesPublisherTest(String name) {
         super(name);
@@ -52,11 +56,13 @@ public class PushProxiesPublisherTest extends LimeTestCase {
     @Override
     protected void setUp() throws Exception {
         context = new Mockery();
+        connectionManager = context.mock(ConnectionManager.class);
         networkManagerStub = new NetworkManagerStub();
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(NetworkManager.class).toInstance(networkManagerStub);
+                bind(ConnectionManager.class).toInstance(connectionManager);
             }
         });
         pushProxiesPublisher = injector.getInstance(PushProxiesPublisher.class);
@@ -68,6 +74,7 @@ public class PushProxiesPublisherTest extends LimeTestCase {
      */
     public void testValueToPublishForNonFirewalledPeer() {
         networkManagerStub.setAcceptedIncomingConnection(true);
+        assertTrue(NetworkUtils.isValidIpPort(new IpPortImpl(networkManagerStub.getAddress(), networkManagerStub.getPort())));
         
         PushProxiesValue value = pushProxiesPublisher.getValueToPublish();
         assertNull("First value should be null since not stable", value);
@@ -106,6 +113,54 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         assertEquals(2, value.getFwtVersion());
     }
     
+    public void testValueToPublishDoesNotChangeWhenPushProxiesChange() throws Exception {
+
+        final IpPort proxy1 = new IpPortImpl("199.49.4.4", 4545);
+        final IpPort proxy2 = new IpPortImpl("205.2.1.1", 1000);
+        final IpPort proxy3 = new IpPortImpl("111.34.4.4", 1010);
+        final IpPort proxy4 = new IpPortImpl("111.34.4.4", 2020);
+        
+        final IpPortSet proxies = new IpPortSet(proxy1, proxy2, proxy3);
+        
+        context.checking(new Expectations() {{
+            allowing(connectionManager).getPushProxies();
+            will(returnValue(proxies));
+        }});
+        
+        assertFalse(networkManagerStub.acceptedIncomingConnection());
+        
+        PushProxiesValue value = pushProxiesPublisher.getValueToPublish();
+        assertNull("First value should be null, since not stable", value);
+        
+        value = pushProxiesPublisher.getValueToPublish();
+        assertEquals(new IpPortSet(proxy1, proxy2, proxy3), value.getPushProxies());
+        
+        // one new proxy, two old proxies
+        proxies.remove(proxy3);
+        proxies.add(proxy4);
+        
+        value = pushProxiesPublisher.getValueToPublish();
+        assertNull("value should be null, since changed and not stable", value);
+        
+        value = pushProxiesPublisher.getValueToPublish();
+        assertNull("value should still be null, since mostly the same proxies", value);
+        
+        value = pushProxiesPublisher.getValueToPublish();
+        assertNull("value should still be null, since mostly the same proxies", value);
+        
+        // only one old proxy
+        proxies.remove(proxy2);
+        
+        value = pushProxiesPublisher.getValueToPublish();
+        assertNull("value should be null, since changed and not stable", value);
+        
+        value = pushProxiesPublisher.getValueToPublish();
+        assertEquals("new proxies should be published", new IpPortSet(proxy1, proxy4), value.getPushProxies());
+        
+        value = pushProxiesPublisher.getValueToPublish();
+        assertNull("no changes, should be null", value);
+    }
+    
     public void testValueChangingInBetweenConsecutiveCallsToGetValueToPublish() {
         networkManagerStub.setAcceptedIncomingConnection(true);
         
@@ -126,7 +181,6 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         value = pushProxiesPublisher.getValueToPublish();
         assertNotNull("value should not be null, since stable now", value);
     }
-    
     public void testDHTEventHandlerIsInstalledAndTriggersRunnable() {
         networkManagerStub.setAcceptedIncomingConnection(true);
         networkManagerStub.setSupportsFWTVersion(1);
