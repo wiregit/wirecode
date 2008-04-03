@@ -15,7 +15,6 @@ import com.limegroup.gnutella.DownloadManagerEvent;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.dht.db.PushEndpointService;
 import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.downloader.MagnetDownloader;
@@ -34,15 +33,17 @@ public class MagnetDownloaderPushEndpointFinderTest extends BaseTestCase {
 
     public void testHandleEventHandlesAddEvent() {
         final MagnetDownloader downloader = context.mock(MagnetDownloader.class);
+        // commented out since magnet search is not performed on add right now
         // use magnet without sha1 so we can just check if 
-        final MagnetOptions magnet = MagnetOptions.parseMagnet("magnet:?dn=file&kt=hello&xt=urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")[0];
+//        final MagnetOptions magnet = MagnetOptions.parseMagnet("magnet:?dn=file&kt=hello&xt=urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")[0];
         final MagnetDownloaderPushEndpointFinder endpointFinder = new MagnetDownloaderPushEndpointFinder(null, null, null);
         
         context.checking(new Expectations() {{
-            atLeast(1).of(downloader).getMagnet();
-            will(returnValue(magnet));
-            atLeast(1).of(downloader).getContentLength();
-            will(returnValue(1l));
+            // commented out since magnet search is not performed on add right now
+//            atLeast(1).of(downloader).getMagnet();
+//            will(returnValue(magnet));
+//            atLeast(1).of(downloader).getContentLength();
+//            will(returnValue(1l));
             atLeast(1).of(downloader).addListener(endpointFinder.downloadStatusListener);
             atLeast(1).of(downloader).removeListener(endpointFinder.downloadStatusListener);
         }});
