@@ -70,7 +70,6 @@ public class AltLocFinderImplTest extends DHTFinderTestCase {
 
         if (successful) {
             assertEquals(expectedAltLoc, listener.altLoc);
-            assertTrue(listener.success);
         } else {
             assertNull(listener.altLoc);
             assertFalse(listener.success);
@@ -119,7 +118,6 @@ public class AltLocFinderImplTest extends DHTFinderTestCase {
         
         if (successful) {
             assertEquals(expectedAltLoc, listener.altLoc);
-            assertTrue(listener.success);
         } else {
             assertNull(listener.altLoc);
             assertFalse(listener.success);
@@ -134,7 +132,7 @@ public class AltLocFinderImplTest extends DHTFinderTestCase {
         volatile boolean success;
         
         public void searchFailed() {
-            this.success = success;
+            this.success = false;
             doneLatch.countDown();
         }
 
