@@ -48,6 +48,8 @@ public class RequeryManagerTest extends LimeTestCase {
     private Mockery mockery;
     private Sequence sequence;
     
+    private URN sha1Urn;
+    
     public void setUp() throws Exception {
         DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
         RequeryManager.NO_DELAY = true;
@@ -69,6 +71,8 @@ public class RequeryManagerTest extends LimeTestCase {
         dhtManager = (MyDHTManager)injector.getInstance(DHTManager.class);    
         altLocFinder = (MyAltLocFinder)injector.getInstance(AltLocFinder.class);
         requeryManagerFactory = injector.getInstance(RequeryManagerFactory.class);
+        
+        sha1Urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         
         setPro(false);
     }
@@ -94,9 +98,12 @@ public class RequeryManagerTest extends LimeTestCase {
     public void testCancelsQueries() throws Exception {
         dhtManager.on = true;
         RequeryManager requeryManager = requeryManagerFactory.createRequeryManager(requeryListener);
+        
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength()); inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         requeryManager.activate();
         requeryManager.sendQuery();
@@ -142,7 +149,9 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength()); inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         requeryManager.sendQuery();
         assertSame(requeryManager.searchHandler, altLocFinder.listener);
@@ -161,7 +170,9 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength()); inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         // and we should start a lookup
         requeryManager.sendQuery();
@@ -287,7 +298,9 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         // and we should start a lookup
         requeryManager.sendQuery();
@@ -310,7 +323,9 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         requeryManager.sendQuery();
         assertSame(requeryManager.searchHandler, altLocFinder.listener);
@@ -334,7 +349,9 @@ public class RequeryManagerTest extends LimeTestCase {
         // with dht on, start a requery
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         requeryManager.sendQuery();
         assertSame(requeryManager.searchHandler, altLocFinder.listener);
@@ -385,7 +402,9 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         requeryManager.sendQuery();
         assertSame(requeryManager.searchHandler, altLocFinder.listener); // sent a DHT query
@@ -428,7 +447,9 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         requeryManager.sendQuery();
         assertSame(requeryManager.searchHandler, altLocFinder.listener); // sent a DHT query
@@ -453,7 +474,9 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         requeryManager.sendQuery();
         assertSame(requeryManager.searchHandler, altLocFinder.listener); // sent a DHT query
