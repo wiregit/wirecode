@@ -21,7 +21,7 @@ import com.google.inject.Inject;
 /**
  * This class is a convenience wrapper around a signed {@link MessageContainer}
  * that contains a bunch of PromotionMessageContainer instances. Also enforces
- * some magic around validity dates, to ensure that contained promotion items
+ * validity dates, to ensure that contained promotion items
  * have sane values.
  */
 public class PromotionBinder {

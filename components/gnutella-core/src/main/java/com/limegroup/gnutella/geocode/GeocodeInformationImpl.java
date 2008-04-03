@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Simple implemenation of {@link GeocodeInformation}.
+ * Simple implementation of {@link GeocodeInformation}.
  */
 final class GeocodeInformationImpl implements GeocodeInformation {
 

@@ -13,7 +13,9 @@ public interface PromotionBinderRequestor {
     /**
      * The main entry point. This will create a <code>POST</code> request to
      * <code>url</code> and include the proper information we want to store.
+     * 
+     * @return the {@link PromotionBinder} created from the <code>url</code> or null if there is not one
      */
-    void request(String url, long id, Set<? extends UserQueryEvent> queries, PromotionBinderCallback callback);
+    PromotionBinder request(String url, long id, Set<? extends UserQueryEvent> queries);
 
 }

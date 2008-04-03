@@ -39,7 +39,8 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
 
     private final CertificateVerifier certificateVerifier;
 
-    private static String getDBLocation() {
+    /** Package for testing. */
+    static String getDBLocation() {
         return new File(CommonUtils.getUserSettingsDir(), "promotion/promodb").getAbsolutePath();
     }
 
@@ -48,19 +49,32 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
      */
     private class ShutdownHook extends Thread {
         @Override
-        public void run() {
-            executeUpdate("SHUTDOWN");
+        public void run() {System.out.println(connection);
+            if (connection != null) {
+                executeUpdate("SHUTDOWN");
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    // ignore
+                }
+            }
         }
     }
 
     @Inject
     public SearcherDatabaseImpl(final KeywordUtil keywordUtil, final CipherProvider cipherProvider,
-            final KeyStoreProvider keyStoreProvider, final CertificateVerifier certificateVerifier) {
+            final KeyStoreProvider keyStoreProvider, final CertificateVerifier certificateVerifier, PromotionServices services) {
         this.keywordUtil = keywordUtil;
         this.cipherProvider = cipherProvider;
         this.keyStoreProvider = keyStoreProvider;
         this.certificateVerifier = certificateVerifier;
         new jdbcDriver();
+        
+        // This will only throw an exception if the connection can't be made, so createDBIfNeeded won't
+        // be called if it fails, and the promotion services will be turned off, too, if it fails
+        // So, if the contract of not using the promotion services, as stated in the isRunning method
+        // of PromotionServices is honored, there is no need to check for null when doing any of
+        // the database operations, because they should never be called
         try {
             connection = DriverManager.getConnection("jdbc:hsqldb:file:" + getDBLocation(), "sa",
                     "");
@@ -68,7 +82,9 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             createDBIfNeeded();
         } catch (SQLException ex) {
             LOG.error("Unable to get connection to in-memory db.", ex);
+            services.shutDown();
         }
+        
     }
 
     /**

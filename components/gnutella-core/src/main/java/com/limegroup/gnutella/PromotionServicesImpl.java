@@ -14,6 +14,8 @@ final class PromotionServicesImpl implements PromotionServices {
     private final PromotionBinderRepository promotionBinderRepository;
 
     private final PromotionSearcher promotionSearcher;
+    
+    private boolean isRunning;
 
     @Inject
     public PromotionServicesImpl(PromotionBinderRepository promotionBinderRepository,
@@ -30,5 +32,14 @@ final class PromotionServicesImpl implements PromotionServices {
         promotionSearcher.init(
                     ThirdPartySearchResultsSettings.MAX_NUMBER_OF_SEARCH_RESULTS.getValue()
                 );
+        isRunning = true;
+    }
+
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    public void shutDown() {
+        isRunning = false;
     }
 }

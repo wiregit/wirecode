@@ -36,9 +36,8 @@ public class TestPromotionContainerRequestorImpl extends AbstractPromotionBinder
         this.isValid = isValid;
     }
 
-    public void makeRequest(HttpPost request, HttpParams params, InputStreamCallback callback)
-            throws HttpException, IOException {
-        callback.process(isValid ? new EmptyInputStream() : null);
+    protected InputStream makeRequest(HttpPost request, HttpParams params) throws HttpException, IOException {
+        return isValid ? new EmptyInputStream() : null;
     }
 
     public void error(Exception e) {

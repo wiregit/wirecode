@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 /**
  * Defines the interface for the finder and retriever or
- * {@link GeocodeInformation}.
+ * {@link GeocodeInformationImpl}.
  * <p>
  * The portion of instances of this interface that implements
  * {@link SuccessOrFailureCallback<String>} should process Strings of the form:
@@ -41,10 +41,10 @@ public interface Geocoder extends SuccessOrFailureCallback<InputStream> {
     void initialize();
 
     /**
-     * Returns the {@link GeocodeInformation} obtained from
+     * Returns the {@link GeocodeInformationImpl} obtained from
      * {@link #initialize()}.
      * 
-     * @return the {@link GeocodeInformation} obtained from
+     * @return the {@link GeocodeInformationImpl} obtained from
      *         {@link #initialize()}
      */
     GeocodeInformation getGeocodeInformation();

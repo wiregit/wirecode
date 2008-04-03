@@ -12,10 +12,13 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
+/**
+ * This class must be run from the root of the limewire repository.
+ */
 public class CertificateImporter {
     public static void main(String[] args) throws CertificateException, KeyStoreException,
             NoSuchAlgorithmException, IOException {
-        String base = "c:/workspace/limewire/components/security/src/main/java/org/limewire/security/certificate/v3certs/";
+        String base = "src/main/java/org/limewire/security/certificate/v3certs/";
         // The keystore to add the certificates to
         // FileInputStream ksis = new FileInputStream(base + "keystore");
 

@@ -31,15 +31,15 @@ public class PromotionBinderRepositoryImpl implements PromotionBinderRepository 
         this.searcherDatabase = searcherDatabase;
     }
 
-    public void getBinderForBucket(final long bucketNumber, final PromotionBinderCallback callback) {
+    public PromotionBinder getBinderForBucket(final long bucketNumber) {
         // See if we have a cached binder...
         final int bucket = (int) (bucketNumber % modulus);
         searcherDatabase.expungeExpired();
         final PromotionBinder binder = searcherDatabase.getBinder(bucket);
         if (binder != null)
-            callback.process(binder);
+            return binder;
         else
-            getBinderForBucketOnNetwork(bucket, callback);
+            return getBinderForBucketOnNetwork(bucket);
     }
 
     public void init(final String url, final int modulus) {
@@ -54,14 +54,19 @@ public class PromotionBinderRepositoryImpl implements PromotionBinderRepository 
      *        monster)
      * @param callback where to drop the binder after retrieval
      */
-    private void getBinderForBucketOnNetwork(final long bucketNumber, final PromotionBinderCallback callback) {
+    private PromotionBinder getBinderForBucketOnNetwork(final long bucketNumber) {
         if (searchUrl == null) {
 
         }
         final Set<UserQueryEvent> queries = impressionsCollector.getCollectedImpressions();
         String url = searchUrl;
         url += "?now=" + System.currentTimeMillis() / 1000;
-        requestor.request(searchUrl, bucketNumber, queries, callback);
+        PromotionBinder result = requestor.request(searchUrl, bucketNumber, queries);
+        
+        // Now remove the query events
+        impressionsCollector.removeImpressions(queries);
+        
+        return result;
     }
 
 }

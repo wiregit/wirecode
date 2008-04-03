@@ -78,19 +78,14 @@ abstract class AbstractEventQueryDataTest extends BaseTestCase {
     private int transfer(long i, byte[] in, int start) {
         System.arraycopy(ByteOrder.long2bytes(i, 4), 0, in, start, 4);
         return start + 4;
-    }
-    
-    private int transfer(short i, byte[] in, int start) {
-        System.arraycopy(ByteOrder.long2bytes(i, 2), 0, in, start, 2);
-        return start + 2;
-    }    
+    } 
 
     private int transfer(Impression i, byte[] in, int start) {
         int cur = start;
         int len = i.getBinderUniqueName().getBytes().length;
         arraycopy(ByteOrder.long2bytes(i.getBinderUniqueName().length(), 1), 0, in, cur, 1);     cur += 1;
         arraycopy(i.getBinderUniqueName().getBytes(), 0, in, cur, len);                             cur += len;
-        arraycopy(ByteOrder.long2bytes(i.getPromo().getUniqueID(), 8), 0, in, cur, 8);           cur += 8;
+        arraycopy(ByteOrder.long2bytes(i.getPromoUniqueID(), 8), 0, in, cur, 8);           cur += 8;
         arraycopy(date2bytes(i.getTimeShown()), 0, in, cur, 8);                                     cur += 8;
         return cur;
     }

@@ -12,12 +12,12 @@ import org.limewire.promotion.containers.PromotionMessageContainer;
 public final class Impression {
     private final String binderUniqueName;
     private final Date timeShown;
-    private final PromotionMessageContainer promo;
+    private final long promoUniqueID;
 
     Impression(PromotionMessageContainer promo, String binderUniqueName, Date timeShown) {
         this.binderUniqueName = binderUniqueName;
-        this.promo = promo;
         this.timeShown = timeShown;
+        this.promoUniqueID = promo.getUniqueID();
     }
 
     public Date getTimeShown() {
@@ -27,8 +27,8 @@ public final class Impression {
     public String getBinderUniqueName() {
         return binderUniqueName;
     }
-
-    public PromotionMessageContainer getPromo() {
-        return promo;
+    
+    public long getPromoUniqueID() {
+        return promoUniqueID;
     }
 }

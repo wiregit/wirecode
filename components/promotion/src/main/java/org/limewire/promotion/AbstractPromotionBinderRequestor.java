@@ -9,12 +9,13 @@ import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpException;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.UrlEncodedFormEntity;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
-import org.limewire.promotion.impressions.InputStreamCallback;
 import org.limewire.promotion.impressions.UserQueryEvent;
-
 import org.limewire.promotion.impressions.UserQueryEventData;
 
 /**
@@ -36,8 +37,7 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
      * The main entry point. This will create a <code>POST</code> request to
      * <code>url</code> and include the proper information we want to store.
      */
-    public final void request(String url, long id, Set<? extends UserQueryEvent> queries,
-            final PromotionBinderCallback callback) {
+    public final PromotionBinder request(String url, long id, Set<? extends UserQueryEvent> queries) {
         //
         // This request takes the following parameters
         // - id: bucket ID for the bucket that will be returned
@@ -46,15 +46,9 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
         // data_<i>: data for the ith UserQueryEvent
         //
 
-        //
-        // This is the id of the bucket we want
-        //
-        if (url.indexOf('?') == -1) {
-            url += "?";
-        } else {
-            url += "&";
-        }
-        url += "id=" + encode(String.valueOf(id));
+        int curParam = 0;
+        NameValuePair[] nameValuePairs = new NameValuePair[queries.size() + 1];
+        nameValuePairs[curParam++] = new BasicNameValuePair("id", String.valueOf(id));
         int i = 0;
         for (UserQueryEvent e : queries) {
             //
@@ -62,8 +56,8 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
             //
             UserQueryEventData data = new UserQueryEventData(e);
             String dataStr = new String(new Base64().encode(data.getData()));
-            url += "query_" + i + "=" + encode(data.getQuery());
-            url += "data_" + i + "=" + encode(dataStr);
+            nameValuePairs[curParam++] = new BasicNameValuePair("query_" + i, data.getQuery());
+            nameValuePairs[curParam++] = new BasicNameValuePair("data_" + i, dataStr);
             i++;
         }
         HttpPost tmp = null;
@@ -71,21 +65,25 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
             tmp = new HttpPost(alterUrl(url));
         } catch (URISyntaxException e) {
             error(e);
+            return null;
         }
         final HttpPost request = tmp;
+        try {
+            request.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+        } catch (UnsupportedEncodingException e) {
+            error(e);
+            return null;
+        }
         HttpParams params = new BasicHttpParams();
         request.addHeader("User-Agent", getUserAgent());
         try {
-            makeRequest(request, params, new InputStreamCallback() {
-                public void process(InputStream in) {
-                    callback.process(binderFactory.newBinder(in));
-                }
-            });
+            return binderFactory.newBinder(makeRequest(request, params));
         } catch (HttpException e) {
             error(e);
         } catch (IOException e) {
             error(e);
         }
+        return null;
     }
     
     /**
@@ -117,14 +115,12 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
      * we recieve from the request.
      * 
      * @param request <code>POST</code> to send to a server
-     * @param callback this callback will take the passed in bytes and construct
-     *        a {@link PromotionBinder} to pass the
-     *        {@link PromotionBinderCallback} in
-     *        {@link #request(String, long, Set, PromotionBinderCallback)}
      * @throws HttpException thrown when a protocol error occurs
      * @throws IOException thrown when a protocol I/O occurs
+     * 
+     * @return a stream for the HTTP request
      */
-    protected abstract void makeRequest(HttpPost request, HttpParams params, InputStreamCallback callback) throws HttpException, IOException;
+    protected abstract InputStream makeRequest(HttpPost request, HttpParams params) throws HttpException, IOException;
     
     public static String encode(String string) {
         try {

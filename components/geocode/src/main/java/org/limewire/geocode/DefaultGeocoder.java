@@ -69,7 +69,7 @@ public class DefaultGeocoder implements Geocoder {
     /**
      * Read the lines and set the fields appropriately. The fields will be
      * name/value pairs separated by tabs (i.e. <code>\t</code>). The name
-     * correspond to the set method on {@link GeocodeInformation}.
+     * correspond to the set method on {@link GeocodeInformationImpl}.
      * <p>
      * For example: <code>countryName   United States</code> would cause a call
      * to <code>g.setCountryName("United States").
@@ -81,17 +81,16 @@ public class DefaultGeocoder implements Geocoder {
      * Where <em>T</em> could be <code>'\t'</code> and <em>N</em> could be <code>'\n'</code>, for example.
      * @throws IOException 
      */
+    @SuppressWarnings("unused")
     final synchronized void setGeocodeInformation(InputStream is) throws IOException {
 
         GeocodeInformation res = new GeocodeInformation();
 
         // The first character is key-value separator
-        String separator;
-
-        separator = String.valueOf((char) is.read());
+        String separator = String.valueOf((char) is.read());
 
         // The second character is entry separator
-        // This won't matter now
+        // This won't matter now, but it's here to show that is going to be a newline
         String newline = String.valueOf((char) is.read());
 
         BufferedReader in = new BufferedReader(new InputStreamReader(is));

@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.limewire.concurrent.ManagedThread;
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.geocode.GeocodeInformation;
 import org.limewire.promotion.SearcherDatabase.QueryResult;
 import org.limewire.promotion.containers.PromotionMessageContainer;
@@ -57,8 +57,8 @@ public class PromotionSearcherImpl implements PromotionSearcher {
      */
     public void search(final String query, final PromotionSearchResultsCallback callback,
             final GeocodeInformation userLocation) {
-        new ManagedThread(new SearcherThread(query, callback, userLocation), "SearcherThread["
-                + query + "]").start();
+        ExecutorsHelper.newThreadPool("SearcherThread[" + query + "]")
+            .execute(new SearcherThread(query, callback, userLocation));
     }
 
     public void init(final int maxNumberOfResults) {
@@ -123,46 +123,38 @@ public class PromotionSearcherImpl implements PromotionSearcher {
             // OK, start the meat of the query!
             final Date timeQueried = new Date();
             // Get the binder (maybe cached), ingest it, and search...
-            promotionBinderRepository.getBinderForBucket(keywordUtil.getHashValue(normalizedQuery),
-                    new PromotionBinderCallback() {
-                        public void process(final PromotionBinder binder) {
-                            if (binder != null)
-                                searcherDatabase.ingest(binder);
-                            searcherDatabase.expungeExpired();
-                            final List<QueryResult> results = searcherDatabase
-                                    .query(normalizedQuery);
-                            removeInvalidResults(results);
+            PromotionBinder binder = promotionBinderRepository.getBinderForBucket(keywordUtil.getHashValue(normalizedQuery));
+            if (binder != null)
+                searcherDatabase.ingest(binder);
+            searcherDatabase.expungeExpired();
+            final List<QueryResult> results = searcherDatabase.query(normalizedQuery);
+            removeInvalidResults(results);
 
-                            int shownResults = 0;
-                            int checkResults = 0;
-                            for (QueryResult result : results) {
-                                final float probability = result.getPromotionMessageContainer()
-                                        .getProbability();
-                                // Introduce some randomness into results using
-                                // the probability field if we don't have room
-                                if ((results.size() - checkResults <= maxNumberOfResults
-                                        - shownResults)
-                                        || Math.random() <= probability) {
-                                    // Looks like we can show this result...
-                                    // Verify it!
-                                    if (isMessageValid(result.getPromotionMessageContainer(),
-                                            result.getBinderUniqueName(), timeQueried.getTime())) {
-                                        shownResults++;
-                                        callback.process(result.getPromotionMessageContainer());
-                                        // record we just showed this result.
-                                        impressionsCollector.recordImpression(query, timeQueried,
-                                                new Date(), result.getPromotionMessageContainer(),
-                                                result.getBinderUniqueName());
-                                    }
-                                }
-                                if (shownResults >= maxNumberOfResults)
-                                    break;
-                                checkResults++;
-                            }
-                        }
-
-                    });
-
+            int shownResults = 0;
+            int checkResults = 0;
+            for (QueryResult result : results) {
+                final float probability = result.getPromotionMessageContainer().getProbability();
+                // Introduce some randomness into results using
+                // the probability field if we don't have room
+                if ((results.size() - checkResults <= maxNumberOfResults
+                        - shownResults)
+                        || Math.random() <= probability) {
+                    // Looks like we can show this result...
+                    // Verify it!
+                    if (isMessageValid(result.getPromotionMessageContainer(),
+                            result.getBinderUniqueName(), timeQueried.getTime())) {
+                        shownResults++;
+                        callback.process(result.getPromotionMessageContainer());
+                        // record we just showed this result.
+                        impressionsCollector.recordImpression(query, timeQueried,
+                                new Date(), result.getPromotionMessageContainer(),
+                                result.getBinderUniqueName());
+                    }
+                }
+                if (shownResults >= maxNumberOfResults)
+                    break;
+                checkResults++;
+            }
         }
 
         private boolean isMessageValid(final PromotionMessageContainer promotionMessageContainer,

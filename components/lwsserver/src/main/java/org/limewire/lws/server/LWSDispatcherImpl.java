@@ -56,6 +56,10 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
          };
     }
     
+    protected final boolean isAuthenticated() {
+        return publicKey != null && privateKey != null && sharedKey != null;
+    }
+    
       /**
       * Returns the arguments to the right of the <code>?</code>. <br>
       * <code>static</code> for testing

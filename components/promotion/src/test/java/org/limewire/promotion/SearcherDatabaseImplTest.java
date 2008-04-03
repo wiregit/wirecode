@@ -20,7 +20,7 @@ public class SearcherDatabaseImplTest extends BaseTestCase {
 
     public void testQuery() throws SQLException {
         SearcherDatabaseImpl searcherDatabase = new SearcherDatabaseImpl(new KeywordUtilImpl(),
-                null, null, null);
+                null, null, null, new SimplePromotionServicesImpl());
         searcherDatabase.clear();
 
         PromotionMessageContainer promo = new PromotionMessageContainer();

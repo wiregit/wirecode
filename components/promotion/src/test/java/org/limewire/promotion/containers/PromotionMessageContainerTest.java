@@ -9,17 +9,15 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.promotion.LatitudeLongitude;
 import org.limewire.promotion.containers.PromotionMessageContainer.GeoRestriction;
 import org.limewire.promotion.containers.PromotionMessageContainer.PromotionMediaType;
 import org.limewire.promotion.containers.PromotionMessageContainer.PromotionOptions;
 import org.limewire.promotion.exceptions.PromotionException;
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.ByteOrder;
-
-import org.limewire.io.BadGGEPBlockException;
-import org.limewire.io.BadGGEPPropertyException;
-import org.limewire.io.GGEP;
 
 public class PromotionMessageContainerTest extends BaseTestCase {
     public PromotionMessageContainerTest(String name) {

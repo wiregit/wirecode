@@ -11,12 +11,6 @@ import org.limewire.setting.StringSetting;
  */
 public final class ThirdPartySearchResultsSettings extends LimeProps {
     private ThirdPartySearchResultsSettings() {}
-
-    /**
-     * The total time this user has been connected to the network (in seconds).
-     */    
-    public static final StringSetting SEARCH_DATABASE =
-        FACTORY.createRemoteStringSetting("SEARCH_DATABASE", "", "ThirdPartySearchResultsSettings.searchDatabase");
  
     /**
      * Enables the promotion system when <code>true</code>.

@@ -6,7 +6,6 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.promotion.PromotionBinder;
-import org.limewire.promotion.PromotionBinderCallback;
 
 public class PromotionContainerRequestorTest extends AbstractEventQueryDataTest {
 
@@ -78,17 +77,12 @@ public class PromotionContainerRequestorTest extends AbstractEventQueryDataTest 
     // ------------------------------------------------------------------------    
     
     private void runTest(int n, final boolean isValid) {
-        new TestPromotionContainerRequestorImpl(isValid).request(url(), id(), getEvents(n), new PromotionBinderCallback() {
-
-            public void process(PromotionBinder binder) {
-                if (isValid) {
-                    assertNotNull(binder);
-                } else {
-                    assertNull(binder);
-                }
-            }
-            
-        });
+        PromotionBinder binder = new TestPromotionContainerRequestorImpl(isValid).request(url(), id(), getEvents(n));
+        if (isValid) {
+            assertNotNull(binder);
+        } else {
+            assertNull(binder);
+        }
     }    
 
     /**

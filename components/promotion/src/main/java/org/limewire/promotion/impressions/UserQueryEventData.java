@@ -3,6 +3,7 @@ package org.limewire.promotion.impressions;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.limewire.util.ByteOrder;
 
@@ -52,21 +53,21 @@ public class UserQueryEventData {
             length += 8;
         }
         byte[] bytes = new byte[length];
-        PostIncrement inc = new PostIncrement(0);
-        bytes[inc.inc()] = (byte) (0xff & impressions.size());
-        System.arraycopy(ByteOrder.long2bytes(millisSinceToday, 4), 0, bytes, inc.inc(4), 4);
+        AtomicInteger inc = new AtomicInteger(0);
+        bytes[inc.getAndAdd(1)] = (byte) (0xff & impressions.size());
+        System.arraycopy(ByteOrder.long2bytes(millisSinceToday, 4), 0, bytes, inc.getAndAdd(4), 4);
         System.arraycopy(ByteOrder.long2bytes(event.getOriginalQueryTime().getTime(), 8), 0,
-                bytes, inc.inc(8), 8);
+                bytes, inc.getAndAdd(8), 8);
         for (int i = 0; i < impressions.size(); i++) {
             Impression imp = impressions.get(i);
             String binderName = imp.getBinderUniqueName();
-            bytes[inc.inc()] = (byte) (0xff & binderName.length());
-            System.arraycopy(binderName.getBytes(), 0, bytes, inc.inc(binderName.length()),
+            bytes[inc.getAndAdd(1)] = (byte) (0xff & binderName.length());
+            System.arraycopy(binderName.getBytes(), 0, bytes, inc.getAndAdd(binderName.length()),
                     binderName.length());
-            System.arraycopy(ByteOrder.long2bytes(imp.getPromo().getUniqueID(), 8), 0, bytes,
-                    inc.inc(8), 8);
+            System.arraycopy(ByteOrder.long2bytes(imp.getPromoUniqueID(), 8), 0, bytes,
+                    inc.getAndAdd(8), 8);
             System.arraycopy(ByteOrder.long2bytes(imp.getTimeShown().getTime(), 8), 0, bytes,
-                    inc.inc(8), 8);
+                    inc.getAndAdd(8), 8);
         }
         return bytes;
     }

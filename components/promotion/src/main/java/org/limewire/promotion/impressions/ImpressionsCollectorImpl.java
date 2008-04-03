@@ -15,7 +15,9 @@ public final class ImpressionsCollectorImpl implements ImpressionsCollector {
     private Map<String, UserQueryEvent> queries = new Hashtable<String, UserQueryEvent>();
 
     public Set<UserQueryEvent> getCollectedImpressions() {
-        return new HashSet<UserQueryEvent>(queries.values());
+        synchronized (queries) {
+            return new HashSet<UserQueryEvent>(queries.values());
+        }
     }
 
     /*
@@ -26,11 +28,13 @@ public final class ImpressionsCollectorImpl implements ImpressionsCollector {
             final Date timeShown, final PromotionMessageContainer promo,
             final String binderUniqueName) {
         UserQueryEvent event = queries.get(getMapKey(originalQuery, timeQueried));
-        if (event == null) {
-            event = new UserQueryEvent(originalQuery, timeQueried);
-            queries.put(getMapKey(originalQuery, timeQueried), event);
+        synchronized (queries) {
+            if (event == null) {
+                event = new UserQueryEvent(originalQuery, timeQueried);
+                queries.put(getMapKey(originalQuery, timeQueried), event);
+            }
+            event.addImpression(new Impression(promo, binderUniqueName, timeShown));
         }
-        event.addImpression(new Impression(promo, binderUniqueName, timeShown));
     }
 
     /** The key we use to store/retrieve. */
@@ -39,8 +43,10 @@ public final class ImpressionsCollectorImpl implements ImpressionsCollector {
     }
 
     public void removeImpressions(final Set<UserQueryEvent> events) {
-        for (UserQueryEvent event : events)
-            queries.remove(getMapKey(event.getOriginalQuery(), event.getOriginalQueryTime()));
+        synchronized (queries) { 
+            for (UserQueryEvent event : events)
+                queries.remove(getMapKey(event.getOriginalQuery(), event.getOriginalQueryTime()));
+        }
     }
 
 }

@@ -13,11 +13,10 @@ public interface PromotionBinderRepository {
      * 
      * @param bucketNumber a 63-bit number, that this factory will take a
      *        modulus of to determine the real bucket to retrieve.
-     * @param callback this receives the result
      * @return A promo binder that corresponds to the given bucket number, or
      *         null if there is no matching bucket (which should be rare).
      */
-    void getBinderForBucket(long bucketNumber, PromotionBinderCallback callback);
+    PromotionBinder getBinderForBucket(long bucketNumber);
 
     /**
      * Sets a remote URL to use for search.

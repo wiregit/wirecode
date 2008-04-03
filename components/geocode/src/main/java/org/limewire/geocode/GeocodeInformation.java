@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Defines an interface for geographic information created from a
+ * Defines a class for geographic information created from a
  * {@link org.limewire.geocode.Geocoder} about the client. This is
  * basically a map from property names to values. Access to these values is
  * through the method {@link #getProperty(GeocodeInformation.Property)}.
@@ -146,3 +146,5 @@ public final class GeocodeInformation {
         return STRINGS2PROPERTIES;
     }
 }
+
+

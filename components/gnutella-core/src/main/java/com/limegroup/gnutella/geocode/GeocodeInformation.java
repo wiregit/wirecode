@@ -26,8 +26,7 @@ public interface GeocodeInformation {
     Map<String,Property> STRINGS2PROPERTIES = new HashMap<String,Property>();   
 
     /**
-     * The various values
-     *
+     * The various values one can pass to {@link #getProperty(Property)}.
      */
     enum Property {
         
