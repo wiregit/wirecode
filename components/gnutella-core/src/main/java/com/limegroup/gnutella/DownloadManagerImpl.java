@@ -1115,7 +1115,6 @@ public class DownloadManagerImpl implements DownloadManager {
     }    
 
     private void fireEvent(CoreDownloader downloader, DownloadManagerEvent.Type type) {
-        System.out.println("firing: " + type);
         listeners.broadcast(new DownloadManagerEvent(downloader, type));
     }
 

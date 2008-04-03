@@ -2,7 +2,6 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -27,6 +26,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.DHTEventListener;
@@ -355,9 +355,9 @@ public class RequeryBehaviorTest extends LimeTestCase {
         
     }
     
-    private RemoteFileDesc fakeRFD() {
+    private RemoteFileDesc fakeRFD() throws Exception {
         return remoteFileDescFactory.createRemoteFileDesc("0.0.0.1", (int)(Math.random() * Short.MAX_VALUE +1000), 13l, "badger", 1024, new byte[16],
-                56, false, 4, true, null, new HashSet<URN>(), false, false, "", null, -1, false);
+                56, false, 4, true, null, new UrnSet(URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")), false, false, "", null, -1, false);
     }
     
     
