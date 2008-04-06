@@ -202,6 +202,8 @@ class PushEndpointCacheImpl implements PushEndpointCache {
         }
         
         public synchronized void removePushProxy(IpPort pushProxy) {
+            // It's imortant to use IPortSet instead of Collections.singleton for
+            // comparator correctness based on IpPort.COMPARATOR
             updateProxies(new IpPortSet(pushProxy), false);
         }
         
