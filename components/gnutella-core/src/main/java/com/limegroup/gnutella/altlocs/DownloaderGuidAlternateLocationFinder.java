@@ -36,7 +36,7 @@ import com.limegroup.gnutella.downloader.MagnetDownloader;
 @Singleton
 public class DownloaderGuidAlternateLocationFinder implements EventListener<DownloadManagerEvent> {
 
-    private static final Log LOG = LogFactory.getLog(DownloaderGuidAlternateLocationFinderTest.class);
+    private static final Log LOG = LogFactory.getLog(DownloaderGuidAlternateLocationFinder.class);
     
     private final PushEndpointService pushEndpointManager;
     private final AlternateLocationFactory alternateLocationFactory;
