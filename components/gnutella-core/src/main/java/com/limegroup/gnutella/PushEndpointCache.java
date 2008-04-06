@@ -59,6 +59,13 @@ public interface PushEndpointCache extends PushEndpointService {
      */
     public GUID updateProxiesFor(GUID guid, PushEndpoint pushEndpoint, boolean valid);
 
+    /**
+     * Removes the push proxies from the set of push proxies of the push endpoint
+     * in the cache.
+
+     * @param bytes the bytes of the guid of the push endpoint
+     * @param pushProxy the push proxy to remove
+     */
     void removePushProxy(byte[] bytes, IpPort pushProxy);
 
 }

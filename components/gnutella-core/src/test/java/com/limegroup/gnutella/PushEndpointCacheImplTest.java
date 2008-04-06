@@ -13,6 +13,7 @@ import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.util.BaseTestCase;
 
@@ -93,7 +94,28 @@ public class PushEndpointCacheImplTest extends BaseTestCase {
         
     }
 
-    public void testRemoveProxy() {
-        fail("implement test and impl");
+    public void testRemoveProxy() throws Exception {
+        Set<IpPort> proxies = new IpPortSet(new IpPortImpl("199.19.49.4", 55),
+                new IpPortImpl("119.1.49.4", 4545));
+        GUID guid = new GUID();
+        PushEndpoint pushEndpoint = new PushEndpointImpl(guid.bytes(), proxies, (byte)0, 1, new IpPortImpl("127.0.0.1:6666"), pushEndpointCacheImpl, networkInstanceUtils);
+        
+        assertNull(pushEndpointCacheImpl.getCached(guid));
+        assertNull(pushEndpointCacheImpl.getPushEndpoint(guid));
+        
+        pushEndpoint.updateProxies(true);
+        
+        assertNotNull(pushEndpointCacheImpl.getCached(guid));
+        assertNotNull(pushEndpointCacheImpl.getPushEndpoint(guid));
+        assertEquals(2, pushEndpointCacheImpl.getPushEndpoint(guid).getProxies().size());
+        
+        pushEndpointCacheImpl.removePushProxy(guid.bytes(), new IpPortImpl("199.19.49.4", 55));
+        assertEquals(1, pushEndpointCacheImpl.getPushEndpoint(guid).getProxies().size());
+        assertEquals(1, pushEndpoint.getProxies().size());
+        
+        pushEndpointCacheImpl.removePushProxy(guid.bytes(), new IpPortImpl("119.1.49.4", 4545));
+        assertEquals(0, pushEndpointCacheImpl.getPushEndpoint(guid).getProxies().size());
+        assertEquals(0, pushEndpoint.getProxies().size());
     }
+
 }

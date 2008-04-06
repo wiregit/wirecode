@@ -79,7 +79,6 @@ class PushEndpointCacheImpl implements PushEndpointCache {
      * @param newSet the proxies to overwrite with
      */
     public void overwriteProxies(byte[] guid, Set<? extends IpPort> newSet) {
-        
         GUID g = new GUID(guid);
         CachedPushEndpoint wrapper ;
         synchronized(GUID_PROXY_MAP) {
@@ -90,6 +89,14 @@ class PushEndpointCacheImpl implements PushEndpointCache {
             } else {
                 wrapper.overwriteProxies(newSet);
             }
+        }
+    }
+    
+    public void removePushProxy(byte[] bytes, IpPort pushProxy) {
+        GUID guid = new GUID(bytes);
+        CachedPushEndpoint cachedPushEndpoint = GUID_PROXY_MAP.get(guid);
+        if (cachedPushEndpoint != null) {
+            cachedPushEndpoint.removePushProxy(pushProxy);
         }
     }
 
@@ -160,10 +167,6 @@ class PushEndpointCacheImpl implements PushEndpointCache {
         return guidRef;
     }
     
-
-    public void removePushProxy(byte[] bytes, IpPort pushProxy) {
-    }
-    
     public void clear() {
         GUID_PROXY_MAP.clear();
     }
@@ -196,6 +199,10 @@ class PushEndpointCacheImpl implements PushEndpointCache {
             _features=features;
             _fwtVersion=version;
             overwriteProxies(proxies);
+        }
+        
+        public synchronized void removePushProxy(IpPort pushProxy) {
+            updateProxies(new IpPortSet(pushProxy), false);
         }
         
         public synchronized void updateProxies(Set<? extends IpPort> s, boolean add){
