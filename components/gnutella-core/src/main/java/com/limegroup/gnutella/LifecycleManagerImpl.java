@@ -33,7 +33,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
-import com.limegroup.gnutella.altlocs.MagnetDownloaderPushEndpointFinder;
+import com.limegroup.gnutella.altlocs.DownloaderGuidAlternateLocationFinder;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
 import com.limegroup.gnutella.browser.LocalAcceptor;
@@ -138,7 +138,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
     private final Provider<ConnectionDispatcher> localConnectionDispatcher;
 
-    private final Provider<MagnetDownloaderPushEndpointFinder> magnetDownloaderPushEndpointFinder;
+    private final Provider<DownloaderGuidAlternateLocationFinder> magnetDownloaderPushEndpointFinder;
 
     private final Provider<PushProxiesPublisher> pushProxiesPublisher;
 
@@ -189,7 +189,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<BrowseHostHandlerManager> browseHostHandlerManager,
             Provider<DownloadUpgradeTask> downloadUpgradeTask,
             Provider<StatisticAccumulator> statisticAccumulator,
-            Provider<MagnetDownloaderPushEndpointFinder> magnetDownloaderPushEndpointFinder,
+            Provider<DownloaderGuidAlternateLocationFinder> magnetDownloaderPushEndpointFinder,
             Provider<PushProxiesPublisher> pushProxiesPublisher) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;

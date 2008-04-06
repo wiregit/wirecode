@@ -28,11 +28,15 @@ import com.limegroup.gnutella.downloader.MagnetDownloader;
  * on {@link MagnetDownloader}. After registration and when a downloader goes into
  * {@link DownloadStatus#QUEUED}, it will peform a search for alternate locations
  * asking its {@link PushEndpointManagerImpl} for endpoints.
+ * <p>
+ * Push endpoints where the external address and port equal its only push proxy
+ * are assumed to be non-firewalled hosts and a {@link DirectAltLoc} is created
+ * for them. 
  */
 @Singleton
-public class MagnetDownloaderPushEndpointFinder implements EventListener<DownloadManagerEvent> {
+public class DownloaderGuidAlternateLocationFinder implements EventListener<DownloadManagerEvent> {
 
-    private static final Log LOG = LogFactory.getLog(MagnetDownloaderPushEndpointFinder.class);
+    private static final Log LOG = LogFactory.getLog(DownloaderGuidAlternateLocationFinderTest.class);
     
     private final PushEndpointService pushEndpointManager;
     private final AlternateLocationFactory alternateLocationFactory;
@@ -51,7 +55,7 @@ public class MagnetDownloaderPushEndpointFinder implements EventListener<Downloa
     };
     
     @Inject
-    public MagnetDownloaderPushEndpointFinder(@Named("pushEndpointManager") PushEndpointService pushEndpointManager, 
+    public DownloaderGuidAlternateLocationFinder(@Named("pushEndpointManager") PushEndpointService pushEndpointManager, 
             AlternateLocationFactory alternateLocationFactory,
             AltLocManager altLocManager) {
         this.pushEndpointManager = pushEndpointManager;
