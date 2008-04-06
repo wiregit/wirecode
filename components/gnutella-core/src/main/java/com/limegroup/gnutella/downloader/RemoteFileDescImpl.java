@@ -649,7 +649,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 
     public String toString() {
         return  ("<"+getHost()+":"+getPort()+", "
-				 +getFileName().toLowerCase()+">");
+				 +getFileName() + ">");
     }
 
     public String getAddress() {
