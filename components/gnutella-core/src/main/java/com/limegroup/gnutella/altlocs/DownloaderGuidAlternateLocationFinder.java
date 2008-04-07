@@ -121,6 +121,9 @@ public class DownloaderGuidAlternateLocationFinder implements EventListener<Down
     }
     
     void searchForPushEndpoints(URN sha1Urn, Set<URN> guidUrns) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Searching for guid urns: " + guidUrns);
+        }
         for (URN guidUrn : guidUrns) {
             try {
                 GUID guid = new GUID(guidUrn.getNamespaceSpecificString());

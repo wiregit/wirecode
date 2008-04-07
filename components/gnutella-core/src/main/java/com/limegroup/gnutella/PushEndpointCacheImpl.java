@@ -147,6 +147,10 @@ class PushEndpointCacheImpl implements PushEndpointCache {
     }
 
     public GUID updateProxiesFor(GUID guid, PushEndpoint pushEndpoint, boolean valid) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Updating proxies for: " + guid + " with: " + pushEndpoint + ", valid: " + valid);
+        }
+        
         CachedPushEndpoint existing;
         GUID guidRef = null;
         

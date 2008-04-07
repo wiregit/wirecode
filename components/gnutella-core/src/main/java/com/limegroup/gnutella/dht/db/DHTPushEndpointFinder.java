@@ -51,11 +51,6 @@ public class DHTPushEndpointFinder implements PushEndpointService {
         }
         
         KUID key = KUIDUtils.toKUID(guid);
-        
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("starting dht lookup for kuid: " + key);
-        }
-        
         EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractPushProxiesValue.PUSH_PROXIES);
         boolean querySent = false;
         
@@ -70,6 +65,7 @@ public class DHTPushEndpointFinder implements PushEndpointService {
         
         // listener notification outside of lock
         if (!querySent) {
+            LOG.debug("dht manager not bootstrapped or no dht");
             listener.searchFailed();
         }
     }
@@ -126,6 +122,9 @@ public class DHTPushEndpointFinder implements PushEndpointService {
             int fwtVersion = pushProxies.getFwtVersion();
             IpPort ipp = new IpPortImpl(addr, pushProxies.getPort());
             PushEndpoint pe = pushEndpointFactory.createPushEndpoint(guid, proxies, features, fwtVersion, ipp);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("push endpoint found: " + pe);
+            }
             listener.handleResult(pe);
             return Result.FOUND;
         }

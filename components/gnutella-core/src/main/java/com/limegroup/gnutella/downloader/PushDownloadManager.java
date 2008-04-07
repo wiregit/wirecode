@@ -431,6 +431,17 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         }
     }
     
+    private void removePushProxy(byte[] guid, URI uri) {
+        try {
+            IpPort pushProxy = new IpPortImpl(uri.getHost(), uri.getPort());
+            removePushProxy(guid, pushProxy);
+        } catch (UnknownHostException uhe) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("exception on host that should have worked", uhe);
+            }
+        }
+    }
+    
     private void removePushProxy(byte[] guid, IpPort pushProxy) {
         pushEndpointCache.removePushProxy(guid, pushProxy);
     }
@@ -452,22 +463,17 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     	}
     	
     	public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
-    		LOG.warn("PushProxy request exception", exc);
+    	    if (LOG.isWarnEnabled()) {
+    	        LOG.warn("PushProxy request exception: " + request.getURI(), exc);
+    	    }
     		httpExecutor.get().releaseResources(response);
     		methods.remove(request);
 
     		URI uri = request.getURI();
-    		try {
-                IpPort pushProxy = new IpPortImpl(uri.getHost(), uri.getPort());
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Removing push proxy: " + pushProxy + " for " + new GUID(data.file.getClientGUID()));
-                }
-                removePushProxy(data.file.getClientGUID(), pushProxy);
-            } catch (UnknownHostException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(e);
-                }
+    		if (LOG.isDebugEnabled()) {
+                LOG.debug("Removing push proxy: " + uri + " for " + new GUID(data.file.getClientGUID()));
             }
+    		removePushProxy(data.file.getClientGUID(), uri);
     		
     		if (methods.isEmpty()) // all failed
                 sendPushThroughNetwork(data);
@@ -489,11 +495,12 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                 }
                 
                 return false; // don't need to process any more methods.
-    		}
-            
+    		} 
             
     		if(LOG.isWarnEnabled())
-    		    LOG.warn("Invalid push proxy: " + request + ", response: " + response.getStatusLine().getStatusCode());
+    		    LOG.warn("Invalid push proxy: " + request.getURI() + ", response: " + response.getStatusLine().getStatusCode() + ", reason: " + response.getStatusLine().getReasonPhrase());
+    		
+    		removePushProxy(data.file.getClientGUID(), request.getURI());
 
     		if (methods.isEmpty()) // all failed 
     		    sendPushThroughNetwork(data);

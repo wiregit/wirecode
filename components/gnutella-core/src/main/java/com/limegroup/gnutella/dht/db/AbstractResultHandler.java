@@ -103,9 +103,9 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
             }
         }
         
-        // only notify if there if we already found something or there is 
-        // no chance of still finding a value
-        if (outcome != Result.NOT_YET_FOUND) {
+        // only notify if we haven't found anything
+        if (outcome == Result.NOT_FOUND) {
+            LOG.debug("Not found");
             listener.searchFailed();
         }
     }

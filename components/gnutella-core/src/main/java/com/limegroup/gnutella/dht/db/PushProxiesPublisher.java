@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.dht.db;
 
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -9,6 +11,9 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IpPortSet;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureListener;
+import org.limewire.mojito.result.StoreResult;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -87,7 +92,23 @@ public class PushProxiesPublisher implements DHTEventListener {
             synchronized (dhtManager) {
                 MojitoDHT dht = dhtManager.getMojitoDHT();
                 if (dht != null && dht.isBootstrapped()) {
-                    dht.put(primaryKey, lastPublishedValue);
+                    DHTFuture<StoreResult> future = dht.put(primaryKey, lastPublishedValue);
+                    if (LOG.isDebugEnabled()) {
+                        future.addDHTFutureListener(new DHTFutureListener<StoreResult>() {
+                            public void handleCancellationException(CancellationException e) {
+                                LOG.debug("cancelled", e);
+                            }
+                            public void handleExecutionException(ExecutionException e) {
+                                LOG.debug("execution", e);
+                            }
+                            public void handleFutureSuccess(StoreResult result) {
+                                LOG.debug("success: " + result);
+                            }
+                            public void handleInterruptedException(InterruptedException e) {
+                                LOG.debug("interrupted", e);
+                            }
+                        });
+                    }
                 }
             }
         }

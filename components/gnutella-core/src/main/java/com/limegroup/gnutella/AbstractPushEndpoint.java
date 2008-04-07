@@ -172,11 +172,11 @@ public abstract class AbstractPushEndpoint implements PushEndpoint {
     
     @Override
     public String toString() {
-        String ret = "PE [FEATURES:"+getFeatures()+", FWT Version:"+getFWTVersion()+
-        ", GUID:"+ new GUID(getClientGUID()) +", address: "+
-        getAddress()+":"+getPort()+", proxies:{ "; 
+        String ret = "PE [FEATURES:"+getFeatures()+",\nFWT Version:"+getFWTVersion()+
+        ",\nGUID:"+ new GUID(getClientGUID()) +", address: "+
+        getAddress()+":"+getPort()+",\nproxies:{ "; 
         for (IpPort ppi : getProxies()) {
-            ret = ret+ppi.getInetAddress()+":"+ppi.getPort()+" ";
+            ret = ret+ppi.getInetAddress()+":"+ppi.getPort()+"\n";
         }
         ret = ret+ "}]";
         return ret;

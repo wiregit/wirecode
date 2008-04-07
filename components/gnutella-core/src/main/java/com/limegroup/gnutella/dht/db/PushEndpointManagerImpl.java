@@ -5,6 +5,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
@@ -24,6 +27,8 @@ import com.limegroup.gnutella.settings.DHTSettings;
 @Singleton
 class PushEndpointManagerImpl implements PushEndpointService {
 
+    private static final Log LOG = LogFactory.getLog(PushEndpointManagerImpl.class);
+    
     private final PushEndpointService pushEndpointCache;
     private final PushEndpointService pushEndpointFinder;
     private final ConcurrentMap<GUID, AtomicLong> lastSearchTimeByGUID = new ConcurrentHashMap<GUID, AtomicLong>(); 
@@ -57,6 +62,9 @@ class PushEndpointManagerImpl implements PushEndpointService {
         listener = SearchListenerAdapter.nonNullListener(listener);
         PushEndpoint cachedPushEndpoint = pushEndpointCache.getPushEndpoint(guid);
         if (cachedPushEndpoint != null && !cachedPushEndpoint.getProxies().isEmpty()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Found cached endpoint: " + cachedPushEndpoint);
+            }
             listener.handleResult(cachedPushEndpoint);
         } else {
             long currentTime = System.currentTimeMillis();
@@ -82,6 +90,9 @@ class PushEndpointManagerImpl implements PushEndpointService {
     }
     
     void startSearch(GUID guid, final SearchListener<PushEndpoint> listener) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Starting dht search for: " + guid);
+        }
         pushEndpointFinder.findPushEndpoint(guid, new SearchListener<PushEndpoint>() {
                 public void handleResult(PushEndpoint result) {
                     // notify cache about it
@@ -89,6 +100,7 @@ class PushEndpointManagerImpl implements PushEndpointService {
                     listener.handleResult(result);
                 }
                 public void searchFailed() {
+                    LOG.debug("dht search failed");
                     listener.searchFailed();
                 }
         });
