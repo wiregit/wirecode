@@ -459,6 +459,9 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     		URI uri = request.getURI();
     		try {
                 IpPort pushProxy = new IpPortImpl(uri.getHost(), uri.getPort());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Removing push proxy: " + pushProxy + " for " + new GUID(data.file.getClientGUID()));
+                }
                 removePushProxy(data.file.getClientGUID(), pushProxy);
             } catch (UnknownHostException e) {
                 if (LOG.isErrorEnabled()) {
