@@ -18,7 +18,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointCache;
 
-public class PushEndpointManagerTest extends BaseTestCase {
+public class PushEndpointManagerImplTest extends BaseTestCase {
 
     private Mockery context;
     private PushEndpointCache pushEndpointCache;
@@ -27,12 +27,12 @@ public class PushEndpointManagerTest extends BaseTestCase {
     private PushEndpoint result;
     private PushEndpointManagerImpl pushEndpointManager;
 
-    public PushEndpointManagerTest(String name) {
+    public PushEndpointManagerImplTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(PushEndpointManagerTest.class);
+        return buildTestSuite(PushEndpointManagerImplTest.class);
     }
     
     @SuppressWarnings({ "cast", "unchecked" })
