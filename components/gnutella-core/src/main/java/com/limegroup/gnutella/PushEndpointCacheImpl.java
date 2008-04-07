@@ -10,6 +10,8 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
@@ -23,6 +25,8 @@ import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 @Singleton
 class PushEndpointCacheImpl implements PushEndpointCache {
+    
+    private static final Log LOG = LogFactory.getLog(PushEndpointCacheImpl.class);
     
     /**
      * A mapping from GUID to a CachedPushEndpoint.  This is used to ensure
@@ -93,6 +97,9 @@ class PushEndpointCacheImpl implements PushEndpointCache {
     }
     
     public void removePushProxy(byte[] bytes, IpPort pushProxy) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Removing push proxy: " + pushProxy + " for " + new GUID(bytes));
+        }
         GUID guid = new GUID(bytes);
         CachedPushEndpoint cachedPushEndpoint = GUID_PROXY_MAP.get(guid);
         if (cachedPushEndpoint != null) {

@@ -278,6 +278,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         connectionManager.get().addEventListener(activityCallback.get());
         connectionManager.get().addEventListener(dhtManager.get());
+        LOG.debug("Installing push proxies publisher");
         dhtManager.get().addEventListener(pushProxiesPublisher.get());
         
         preinitializeDone.set(true);
