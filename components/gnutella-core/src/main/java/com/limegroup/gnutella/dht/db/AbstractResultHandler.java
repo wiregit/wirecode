@@ -73,6 +73,10 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
     
     @Override
     public void handleFutureSuccess(FindValueResult result) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("result: " + result);
+        }
+        
         Result outcome = Result.NOT_FOUND;
         
         if (result.isSuccess()) {
@@ -89,7 +93,9 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
                     DHTFuture<FindValueResult> future = dht.get(entityKey);
                     // TODO make this a non-blocking call
                     FindValueResult resultFromKey = future.get();
-                    
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("result from second lookup: " + resultFromKey);
+                    }
                     if (resultFromKey.isSuccess()) {
                         for (DHTValueEntity entity : resultFromKey.getEntities()) {
                             outcome = updateResult(outcome, handleDHTValueEntity(entity));

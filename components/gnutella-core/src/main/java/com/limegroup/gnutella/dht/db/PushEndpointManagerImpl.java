@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IpPort;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -29,14 +30,14 @@ class PushEndpointManagerImpl implements PushEndpointService {
 
     private static final Log LOG = LogFactory.getLog(PushEndpointManagerImpl.class);
     
-    private final PushEndpointService pushEndpointCache;
+    private final PushEndpointCache pushEndpointCache;
     private final PushEndpointService pushEndpointFinder;
     private final ConcurrentMap<GUID, AtomicLong> lastSearchTimeByGUID = new ConcurrentHashMap<GUID, AtomicLong>(); 
     
     private volatile long timeBetweenSearches = DHTSettings.TIME_BETWEEN_PUSH_PROXY_QUERIES.getValue();
     
     @Inject
-    public PushEndpointManagerImpl(@Named("pushEndpointCache") PushEndpointService pushEndpointCache, 
+    public PushEndpointManagerImpl(PushEndpointCache pushEndpointCache, 
             @Named("dhtPushEndpointFinder") PushEndpointService pushEndpointFinder) {
         this.pushEndpointCache = pushEndpointCache;
         this.pushEndpointFinder = pushEndpointFinder;
@@ -97,6 +98,10 @@ class PushEndpointManagerImpl implements PushEndpointService {
                 public void handleResult(PushEndpoint result) {
                     // notify cache about it
                     result.updateProxies(true);
+                    IpPort externalAddress = result.getValidExternalAddress();
+                    if (externalAddress != null) {
+                        pushEndpointCache.setAddr(result.getClientGUID(), externalAddress);
+                    }
                     listener.handleResult(result);
                 }
                 public void searchFailed() {
