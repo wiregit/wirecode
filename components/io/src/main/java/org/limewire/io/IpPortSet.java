@@ -29,4 +29,16 @@ public class IpPortSet extends TreeSet<IpPort> {
         this(Arrays.asList(ipps));
     }
     
+    /**
+     * Overridden to ensure {@link IpPort#COMPARATOR} is used for element
+     * comparisons.
+     */
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        boolean modified = false;
+        for (Object o : c) {
+            modified |= remove(o);
+        }
+        return modified;
+    }
 }
