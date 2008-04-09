@@ -10,6 +10,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.util.DataUtils;
 
 /** A Gnutella push request, used to download files behind a firewall. */
@@ -186,8 +187,13 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
 	}
 	
     public String toString() {
-        return "PushRequest("+super.toString()+" "+
-            NetworkUtils.ip2string(getIP())+":"+getPort()+")";
+        StringBuilder builder = new StringBuilder("PushRequest(");
+        builder.append(super.toString()).append("\n");
+        builder.append(NetworkUtils.ip2string(getIP())+":"+getPort()).append("\n");
+        builder.append("FWT push: ").append(isFirewallTransferPush()).append("\n");
+        builder.append("TLS: ").append(isTLSCapable()).append("\n");
+        builder.append("Client GUID: ").append(GUID.toHexString(getClientGUID())).append("\n");
+        return builder.toString();
     }
     
     /** A simple GGEP helper that precaches commonly used GGEPs. */
