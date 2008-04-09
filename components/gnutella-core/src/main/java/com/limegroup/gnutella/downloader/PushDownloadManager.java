@@ -177,11 +177,17 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      *  <tt>false</tt>
      */
     public void sendPush(RemoteFileDesc file, MultiShutdownable observer) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Sending push: " + file);
+        }
+        
         //Make sure we know our correct address/port.
         // If we don't, we can't send pushes yet.
         byte[] addr = networkManager.getAddress();
+        // TODO check stable udp port if we're interested in fwts?
         int port = networkManager.getPort();
         if(!NetworkUtils.isValidAddress(addr) || !NetworkUtils.isValidPort(port)) {
+            LOG.debug("no valid address or port yet");
             if(observer != null)
                 observer.shutdown();
             return;
@@ -199,8 +205,10 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             // if we can do FWT, offload a TCP pusher.
             if (networkManager.canDoFWT())
                 sendPushTCP(file, guid, observer);
-            else if (observer != null)
+            else if (observer != null) {
+                LOG.debug("Firewalled and can't do FWT yet");
                 observer.shutdown();
+            }
 
             return;
         }
@@ -328,11 +336,13 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      * @param data
      */
     private void sendPushThroughNetwork(PushData data) {
+        LOG.debug("sending through network");
         // at this stage, there is no additional shutdownable to notify.
         data.getMultiShutdownable().addShutdownable(null);
 
         // if push proxies failed, but we need a fw-fw transfer, give up.
         if (data.isFWTransfer() && !networkManager.acceptedIncomingConnection()) {
+            LOG.debug("through network, FWT and not accepted incoming connection");
             data.getMultiShutdownable().shutdown();
             return;
         }
@@ -340,6 +350,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         byte[] addr = networkManager.getAddress();
         int port = networkManager.getPort();
         if (!NetworkUtils.isValidAddressAndPort(addr, port)) {
+            LOG.debug("through network, no valid address or port");
             data.getMultiShutdownable().shutdown();
             return;
         }
@@ -359,6 +370,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         try {
             messageRouter.get().sendPushRequest(pr);
         } catch (IOException e) {
+            LOG.debug("no route sending through network");
             // this will happen if we have no push route.
             data.getMultiShutdownable().shutdown();
         }
@@ -370,10 +382,14 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      * is told to send the push through the network.
      */
     private void sendPushThroughProxies(PushData data, Set<? extends IpPort> proxies) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("sending through proxies: " + proxies);
+        }
         byte[] externalAddr = networkManager.getExternalAddress();
         // if a fw transfer is necessary, but our external address is invalid,
         // then exit immediately 'cause nothing will work.
         if (data.isFWTransfer() && !NetworkUtils.isValidAddress(externalAddr)) {
+            LOG.debug("FWT, but no valid external address yet");
         	data.getMultiShutdownable().shutdown();
             return;
         }
@@ -414,7 +430,8 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                 head.addHeader("Cache-Control", "no-cache");
                 methods.add(head);
             } catch (URISyntaxException e) {
-                LOG.error(e);
+                LOG.error("invlaid URI", e);
+                removePushProxy(data.file.getClientGUID(), ppi);
             }            
         }        
         
@@ -485,10 +502,11 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     		int statusCode = response.getStatusLine().getStatusCode();
     		httpExecutor.get().releaseResources(response);
     		if (statusCode == 202) {
-    			if(LOG.isInfoEnabled())
-    				LOG.info("Succesful push proxy: " + request);
+    			if(LOG.isDebugEnabled())
+    				LOG.debug("Successful push proxy: " + request.getURI());
     			
     			if (data.isFWTransfer()) {
+    			    LOG.debug("Starting fwt communication");
     			    AbstractNBSocket socket = udpSelectorProvider.get().openSocketChannel().socket();
                     data.getMultiShutdownable().addShutdownable(socket);
     				socket.connect(data.getFile().getInetSocketAddress(), 20000, new FWTConnectObserver(socketProcessor.get()));
