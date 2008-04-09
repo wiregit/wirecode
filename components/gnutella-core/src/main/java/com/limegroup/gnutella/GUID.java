@@ -429,13 +429,20 @@ public class GUID implements Comparable<GUID> {
      *  Integer.parseByte(String s, int radix)  call like this in reverse
      */
     public String toHexString() {
+        return toHexString(bytes);
+    }
+    
+    /**
+     * Returns a hex string of the guid bytes. 
+     */
+    public static String toHexString(byte[] guid) {
         StringBuilder buf=new StringBuilder();
         String       str;
         int val;
         for (int i=0; i<SZ; i++) {
             //Treating each byte as an unsigned value ensures
             //that we don't str doesn't equal things like 0xFFFF...
-            val = ByteOrder.ubyte2int(bytes[i]);
+            val = ByteOrder.ubyte2int(guid[i]);
             str = Integer.toHexString(val);
             while ( str.length() < 2 )
             str = "0" + str;

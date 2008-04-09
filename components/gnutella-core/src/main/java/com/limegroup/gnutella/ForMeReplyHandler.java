@@ -236,17 +236,25 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
      * just to return a 404 or Busy or Malformed Request, etc..
      */
 	public void handlePushRequest(PushRequest pushRequest, ReplyHandler handler){
+	    if (LOG.isDebugEnabled()) {
+	        LOG.debug("push: " + pushRequest + "\nfrom: " + handler);
+	    }
+	    
         //Ignore push request from banned hosts.
-        if (handler.isPersonalSpam(pushRequest))
+        if (handler.isPersonalSpam(pushRequest)) {
+            LOG.debug("discarded as personal spam");
             return;
+        }
             
         byte[] ip = pushRequest.getIP();
         String h = NetworkUtils.ip2string(ip);
 
         // check whether we serviced this push request already
     	GUID guid = new GUID(pushRequest.getGUID());
-    	if (GUID_REQUESTS.put(guid, guid) != null)
+    	if (GUID_REQUESTS.put(guid, guid) != null) {
+    	    LOG.debug("already serviced");
     		return;
+    	}
 
        // make sure the guy isn't hammering us
         AtomicInteger i = PUSH_REQUESTS.get(h);
@@ -256,18 +264,24 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
         } else {
             i.addAndGet(1);
             // if we're over the max push requests for this host, exit.
-            if(i.get() > UploadSettings.MAX_PUSHES_PER_HOST.getValue())
+            if(i.get() > UploadSettings.MAX_PUSHES_PER_HOST.getValue()) {
+                LOG.debug("over max pushes per host");
                 return;
+            }
         }
         
         // if the IP is banned, don't accept it
-        if (!ipFilterProvider.get().allow(ip))
+        if (!ipFilterProvider.get().allow(ip)) {
+            LOG.debug("blocked by ip filter");
             return;
+        }
 
         int port = pushRequest.getPort();
         // if invalid port, exit
-        if (!NetworkUtils.isValidPort(port) )
+        if (!NetworkUtils.isValidPort(port) ) {
+            LOG.debug("invalid port");
             return;
+        }
         
         String req_guid_hexstring =
             (new GUID(pushRequest.getClientGUID())).toString();
