@@ -30,12 +30,12 @@ import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.Message.Network;
 
 /**
- * Handles push proxy requests by sending a push request to the requested
+ * Handles HTTP push requests by proxying them and sending them to the specified
  * client.
  */
-public class PushProxyRequestHandler extends SimpleNHttpRequestHandler {
+public class HttpPushRequestHandler extends SimpleNHttpRequestHandler {
 
-    private static final Log LOG = LogFactory.getLog(PushProxyRequestHandler.class);
+    private static final Log LOG = LogFactory.getLog(HttpPushRequestHandler.class);
 
     public static final String P_SERVER_ID = "ServerId";
 
@@ -50,7 +50,7 @@ public class PushProxyRequestHandler extends SimpleNHttpRequestHandler {
     private MessageRouter messageRouter;
 
     @Inject
-    PushProxyRequestHandler(HTTPUploadSessionManager sessionManager, MessageRouter messageRouter) {
+    HttpPushRequestHandler(HTTPUploadSessionManager sessionManager, MessageRouter messageRouter) {
         if (sessionManager == null) {
             throw new IllegalArgumentException();
         }
@@ -71,8 +71,8 @@ public class PushProxyRequestHandler extends SimpleNHttpRequestHandler {
             HttpContext context) throws HttpException, IOException {
         HTTPUploader uploader = null;
         
-        PushProxyRequest pushProxyRequest = parsePushProxyRequest(request);
-        if (pushProxyRequest == null) {
+        HttpPushRequest pushRequest = parsePushRequest(request);
+        if (pushRequest == null) {
             response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
             uploader = sessionManager.getOrCreateUploader(request,
                     context, UploadType.MALFORMED_REQUEST,
@@ -80,9 +80,9 @@ public class PushProxyRequestHandler extends SimpleNHttpRequestHandler {
             uploader.setState(UploadStatus.MALFORMED_REQUEST);
         } else {
             uploader = sessionManager.getOrCreateUploader(request,
-                    context, UploadType.PUSH_PROXY, pushProxyRequest.clientGUID);
+                    context, UploadType.PUSH_PROXY, pushRequest.clientGUID);
             uploader.setState(UploadStatus.PUSH_PROXY);
-            if (!sendRequest(pushProxyRequest)) {
+            if (!sendRequest(pushRequest)) {
                 response.setStatusCode(HttpStatus.SC_GONE);
                 response.setReasonPhrase("Servent not connected");
             } else {
@@ -95,11 +95,11 @@ public class PushProxyRequestHandler extends SimpleNHttpRequestHandler {
     }
 
     /**
-     * Returns the push proxy request from <code>request</code>.
+     * Returns the push request from <code>request</code>.
      *
      * @return null, if the request was not valid
      */
-    private PushProxyRequest parsePushProxyRequest(HttpRequest request) {
+    private HttpPushRequest parsePushRequest(HttpRequest request) {
         String uri = request.getRequestLine().getUri();
         // start after the '?'
         int i = uri.indexOf('?');
@@ -166,7 +166,7 @@ public class PushProxyRequestHandler extends SimpleNHttpRequestHandler {
             return null;
         }
 
-        return new PushProxyRequest(clientGUID, fileIndex, address, useTLS);
+        return new HttpPushRequest(clientGUID, fileIndex, address, useTLS);
     }
 
     private InetSocketAddress getNodeAddress(String value) {
@@ -192,7 +192,7 @@ public class PushProxyRequestHandler extends SimpleNHttpRequestHandler {
      * 
      * @return false, if sending failed
      */
-    private boolean sendRequest(PushProxyRequest request) {
+    private boolean sendRequest(HttpPushRequest request) {
         byte[] clientGUID = GUID.fromHexString(request.getClientGUID());
         PushRequest push = new PushRequestImpl(GUID.makeGuid(), (byte) 0,
                 clientGUID, request.getFileIndex(), request.getAddress()
@@ -207,7 +207,7 @@ public class PushProxyRequestHandler extends SimpleNHttpRequestHandler {
         return true;
     }
 
-    private static class PushProxyRequest {
+    private static class HttpPushRequest {
 
         private String clientGUID;
 
@@ -217,7 +217,7 @@ public class PushProxyRequestHandler extends SimpleNHttpRequestHandler {
         
         private boolean useTLS;
 
-        public PushProxyRequest(String clientGUID, int fileIndex,
+        public HttpPushRequest(String clientGUID, int fileIndex,
                 InetSocketAddress address, boolean useTLS) {
             this.clientGUID = clientGUID;
             this.fileIndex = fileIndex;

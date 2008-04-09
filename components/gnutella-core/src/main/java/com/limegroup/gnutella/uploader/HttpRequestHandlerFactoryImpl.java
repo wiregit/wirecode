@@ -11,7 +11,7 @@ public class HttpRequestHandlerFactoryImpl implements HttpRequestHandlerFactory 
     private final Provider<FileRequestHandler> fileRequestHandlerProvider;
     private final Provider<BrowseRequestHandler> browseRequestHandlerProvider;
     private final Provider<FreeLoaderRequestHandler> freeLoaderRequestHandlerProvider;
-    private final Provider<PushProxyRequestHandler> pushProxyRequestHandlerProvider;
+    private final Provider<HttpPushRequestHandler> pushProxyRequestHandlerProvider;
     
     private final HTTPHeaderUtils httpHeaderUtils;
     private final AltLocManager altLocManager;
@@ -21,7 +21,7 @@ public class HttpRequestHandlerFactoryImpl implements HttpRequestHandlerFactory 
             Provider<FileRequestHandler> fileRequestHandlerProvider,
             Provider<BrowseRequestHandler> browseRequestHandlerProvider,
             Provider<FreeLoaderRequestHandler> freeLoaderRequestHandlerProvider,
-            Provider<PushProxyRequestHandler> pushProxyRequestHandlerProvider,
+            Provider<HttpPushRequestHandler> pushProxyRequestHandlerProvider,
             HTTPHeaderUtils httpHeaderUtils,
             AltLocManager altLocManager) {
         this.fileRequestHandlerProvider = fileRequestHandlerProvider;
@@ -65,7 +65,7 @@ public class HttpRequestHandlerFactoryImpl implements HttpRequestHandlerFactory 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.uploader.HttpRequestHandlerFactory#createPushProxyRequestHandler()
      */
-    public PushProxyRequestHandler createPushProxyRequestHandler() {
+    public HttpPushRequestHandler createPushProxyRequestHandler() {
         return pushProxyRequestHandlerProvider.get();
     }
 
