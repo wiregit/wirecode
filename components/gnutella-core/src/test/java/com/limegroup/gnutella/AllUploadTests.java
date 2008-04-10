@@ -6,7 +6,7 @@ import junit.framework.TestSuite;
 import com.limegroup.gnutella.uploader.AltLocUploadTest;
 import com.limegroup.gnutella.uploader.FileRequestHandlerTest;
 import com.limegroup.gnutella.uploader.HTTPUploaderTest;
-import com.limegroup.gnutella.uploader.PushProxyRequestHandlerTest;
+import com.limegroup.gnutella.uploader.HttpPushRequestHandlerTest;
 import com.limegroup.gnutella.uploader.PushUploadTest;
 import com.limegroup.gnutella.uploader.UploadQueueingTest;
 import com.limegroup.gnutella.uploader.UploadSlotManagerTest;
@@ -18,7 +18,7 @@ public class AllUploadTests {
         TestSuite suite = new TestSuite();
         //$JUnit-BEGIN$
         suite.addTest(FileRequestHandlerTest.suite());
-        suite.addTest(PushProxyRequestHandlerTest.suite());
+        suite.addTest(HttpPushRequestHandlerTest.suite());
         suite.addTest(HTTPUploaderTest.suite());
         suite.addTest(UploadSlotManagerTest.suite());
         suite.addTest(UrnHttpRequestTest.suite());
