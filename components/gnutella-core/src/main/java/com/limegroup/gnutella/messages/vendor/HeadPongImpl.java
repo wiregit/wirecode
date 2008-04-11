@@ -148,8 +148,7 @@ public class HeadPongImpl extends AbstractVendorMessage implements HeadPong {
         pushEndpointFactory = null;
     }
     
-
-    
+    @Override
     public Class<HeadPong> getHandlerClass() {
         return HeadPong.class;
     }
