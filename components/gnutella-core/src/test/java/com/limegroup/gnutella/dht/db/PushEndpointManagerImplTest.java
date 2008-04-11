@@ -10,6 +10,7 @@ import org.jmock.Mockery;
 import org.jmock.Sequence;
 import org.jmock.api.Invocation;
 import org.jmock.lib.action.CustomAction;
+import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.util.BaseTestCase;
@@ -117,8 +118,9 @@ public class PushEndpointManagerImplTest extends BaseTestCase {
      * starts a search and notifies the cache of results.
      */
     @SuppressWarnings("unchecked")
-    public void testSearchIsStartedAndCacheIsNotified() {
+    public void testSearchIsStartedAndCacheIsNotified() throws Exception {
         final GUID guid = new GUID();
+        final IpPort validExternalAddress = new IpPortImpl("129.1.1.1", 4545);
         
         context.checking(new Expectations() {{
             one(pushEndpointFinder).findPushEndpoint(with(same(guid)), with(any(SearchListener.class)));
@@ -130,6 +132,11 @@ public class PushEndpointManagerImplTest extends BaseTestCase {
             });
             one(listener).handleResult(result);
             one(result).updateProxies(true);
+            one(result).getValidExternalAddress();
+            will(returnValue(validExternalAddress));
+            one(result).getClientGUID();
+            will(returnValue(guid.bytes()));
+            one(pushEndpointCache).setAddr(guid.bytes(), validExternalAddress);
         }});
         
         pushEndpointManager.startSearch(guid, listener);
