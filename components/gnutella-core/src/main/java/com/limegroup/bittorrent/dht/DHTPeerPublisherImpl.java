@@ -108,8 +108,9 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
                     // holding a lock on DHT to ensure dht does not change
                     // status
                     // after we acquired it
-                    synchronized (dhtManager) {
-                        MojitoDHT mojitoDHT = dhtManager.get().getMojitoDHT();
+                    DHTManager manager = dhtManager.get();
+                    synchronized (manager) {
+                        MojitoDHT mojitoDHT = manager.getMojitoDHT();
 
                         if (LOG.isDebugEnabled())
                             LOG.debug("DHT: " + mojitoDHT);
@@ -215,9 +216,10 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
         public void handleDHTEvent(DHTEvent evt) {            
             List<URN> torrentsWaitingForDHTListCopy;
             if (evt.getType() == DHTEvent.Type.CONNECTED) {
+                DHTManager manager = dhtManager.get();
                 MojitoDHT dht;
                 synchronized (dhtManager) {
-                    dht = dhtManager.get().getMojitoDHT();
+                    dht = manager.getMojitoDHT();
                     if (dht == null || !dht.isBootstrapped()) {
                         LOG.error("Incorrect DHTEvent generated");
                         return;
