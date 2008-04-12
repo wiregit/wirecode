@@ -111,6 +111,55 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             throw new RuntimeException("SQLException during update", ex);
         }
     }
+    
+    /**
+     * This represents a single SQL statement and values to fill in the holes.
+     */
+    private final static class Stmt {
+        private final static Object[] EMPTY_VALUES = new Object[0];
+        final String sql;
+        final Object[] values;
+        Stmt(String sql, Object[] values) {
+            this.sql = sql;
+            this.values = values;
+        }
+        Stmt(String sql) {
+            this(sql, EMPTY_VALUES);
+        }
+    }
+    
+    /**
+     * Shortcut for creating a {@link Stmt}.
+     * 
+     * @param sql sql statement
+     * @param values values to fill in
+     */
+    private static Stmt stmt(String sql, Object[] values) {
+        return new Stmt(sql,values);
+    }
+    
+    /**
+     * Shortcut for creating a {@link Stmt}.
+     * 
+     * @param sql sql statement
+     */
+    private static Stmt stmt(String sql) {
+        return new Stmt(sql);
+    }    
+    
+    /**
+     * Returns the total number of affected rows and executing multiple updates synchronously.
+     * 
+     * @param stmts statements to execute
+     * @return the total number of affected rows and executing multiple updates synchronously.
+     */
+    private synchronized int executeUpdates(Stmt... stmts) {
+        int numAffectedRows = 0;
+        for (Stmt stmt : stmts) {
+            numAffectedRows += executeUpdate(stmt.sql, stmt.values);
+        }
+        return numAffectedRows;
+    }
 
     /**
      * Creates a statement and runs the given SQL, then returns the results of a
@@ -146,29 +195,32 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
     }
 
     public void clear() {
-        executeUpdate("DROP TABLE keywords IF EXISTS");
-        executeUpdate("DROP TABLE entries IF EXISTS");
-        executeUpdate("DROP TABLE binders IF EXISTS");
-
-        executeUpdate("CREATE CACHED TABLE entries (" + "entry_id IDENTITY, "
-                + "unique_id BIGINT, " + "probability_num FLOAT, " + "type_byte TINYINT, "
-                + "valid_start_dt DATETIME, " + "valid_end_dt DATETIME, entry_ggep BINARY )");
-        executeUpdate("CREATE CACHED TABLE keywords ("
-                + "keyword_id IDENTITY, "
-                + "binder_unique_name VARCHAR(1000),"
-                + "phrase VARCHAR,"
-                + "entry_id INTEGER, FOREIGN KEY (entry_id) REFERENCES entries (entry_id) ON DELETE CASCADE )");
-        executeUpdate("CREATE CACHED TABLE binders (" + "binder_id IDENTITY, "
-                + "binder_unique_name VARCHAR(1000), " + "binder_bucket_id INTEGER, "
-                + "valid_end_dt DATETIME, " + "binder_blob BINARY)");
+        executeUpdates(
+                stmt("DROP TABLE keywords IF EXISTS"),
+                stmt("DROP TABLE entries IF EXISTS"),
+                stmt("DROP TABLE binders IF EXISTS"),
+                stmt("CREATE CACHED TABLE entries (" + "entry_id IDENTITY, "
+                        + "unique_id BIGINT, " + "probability_num FLOAT, " + "type_byte TINYINT, "
+                        + "valid_start_dt DATETIME, " + "valid_end_dt DATETIME, entry_ggep BINARY )"),
+                stmt("CREATE CACHED TABLE keywords ("
+                        + "keyword_id IDENTITY, "
+                        + "binder_unique_name VARCHAR(1000),"
+                        + "phrase VARCHAR,"
+                        + "entry_id INTEGER, FOREIGN KEY (entry_id) REFERENCES entries (entry_id) ON DELETE CASCADE )"),
+                stmt("CREATE CACHED TABLE binders (" + "binder_id IDENTITY, "
+                        + "binder_unique_name VARCHAR(1000), " + "binder_bucket_id INTEGER, "
+                        + "valid_end_dt DATETIME, " + "binder_blob BINARY)")
+             );
     }
 
     public void expungeExpired() {
-        executeUpdate("DELETE FROM entries WHERE valid_end_dt < CURRENT_TIMESTAMP");
-        executeUpdate("DELETE FROM binders WHERE valid_end_dt < CURRENT_TIMESTAMP");
+        executeUpdates(
+                stmt("DELETE FROM entries WHERE valid_end_dt < CURRENT_TIMESTAMP"),
+                stmt("DELETE FROM binders WHERE valid_end_dt < CURRENT_TIMESTAMP")
+        );
     }
 
-    private void saveBinder(final PromotionBinder binder) {
+    private synchronized void saveBinder(final PromotionBinder binder) {
         executeUpdate("DELETE FROM binders where binder_unique_name = ?", binder.getUniqueName());
         executeInsert(
                 "INSERT INTO binders (binder_unique_name, binder_bucket_id, valid_end_dt, binder_blob) VALUES (?,?,?,?)",
@@ -236,7 +288,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
      * Does the actual ingestion of the given promo entry, inserting it into the
      * db. Package-visible for testing.
      */
-    void ingest(final PromotionMessageContainer promo, final String binderUniqueName) {
+    synchronized void ingest(final PromotionMessageContainer promo, final String binderUniqueName) {
         executeUpdate("DELETE FROM entries WHERE unique_id = ?", promo.getUniqueID());
         final long entryID = executeInsert(
                 "INSERT INTO entries "
