@@ -107,16 +107,17 @@ public class PushProxyPublishingTest extends LimeTestCase {
         
         hostCatcher.add(endpoint, true);
         
-        DHTTestUtils.waitForBootStrap(dhtManager);
+        DHTTestUtils.waitForBootStrap(dhtManager, 5);
         
         // should have published after 3 secs with  a publishing interval of 1 sec
-        Thread.sleep(10 * 1000);
+        Thread.sleep(3 * 1000);
         
         DHTPushEndpointFinder finder = injector.getInstance(DHTPushEndpointFinder.class);
-        PushEndpoint pushEndpoint = finder.getPushEndpoint(new GUID(injector.getInstance(ApplicationServices.class).getMyGUID()));
+        GUID guid = new GUID(injector.getInstance(ApplicationServices.class).getMyGUID());
+        PushEndpoint pushEndpoint = finder.getPushEndpoint(guid);
         assertNotNull(pushEndpoint);
-        assertEquals(NetworkUtils.ip2string(networkManagerStub.getAddress()), pushEndpoint.getAddress());
         assertEquals(networkManagerStub.getPort(), pushEndpoint.getPort());
+        assertEquals(guid.bytes(), pushEndpoint.getClientGUID());
         
     }
 }

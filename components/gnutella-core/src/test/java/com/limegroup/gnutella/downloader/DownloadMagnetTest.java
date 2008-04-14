@@ -94,7 +94,7 @@ public class DownloadMagnetTest extends DownloadTestCase {
 
              publishPushProxyForGuid(node, guid, PORTS[0], PORTS[0]);
              
-             DHTTestUtils.waitForBootStrap(dhtManager);
+             DHTTestUtils.waitForBootStrap(dhtManager, 5);
 
              Downloader downloader = downloadServices.download(magnet, true, saveDir, savedFileName);
              
@@ -124,7 +124,7 @@ public class DownloadMagnetTest extends DownloadTestCase {
 
              publishPushProxyForGuid(node, guid, 5555 /* just a random different port */, PUSH_PROXY_PORT);
              
-             DHTTestUtils.waitForBootStrap(dhtManager);
+             DHTTestUtils.waitForBootStrap(dhtManager, 5);
 
              TestUploader uploader = injector.getInstance(TestUploader.class);
              uploader.start("push uploader");

@@ -3,6 +3,8 @@ package com.limegroup.gnutella.dht;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import junit.framework.AssertionFailedError;
+
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.mojito.settings.NetworkSettings;
@@ -58,7 +60,12 @@ public class DHTTestUtils {
         localSocketAddressProviderStub.setLocalAddressPrivate(localIsPrivate);
     }
 
-    public static void waitForBootStrap(DHTManager dhtManager) throws Exception {
+    /**
+     * Waits up to <code>seconds</code> fo the dht to be bootstrapped.
+     * 
+     * @throw {@link AssertionFailedError} if not bootstrapped.
+     */
+    public static void waitForBootStrap(DHTManager dhtManager, int seconds) throws Exception {
         final CountDownLatch bootStrapped = new CountDownLatch(1);
         dhtManager.addEventListener(new DHTEventListener() {
             public void handleDHTEvent(DHTEvent evt) {
@@ -68,7 +75,7 @@ public class DHTTestUtils {
             }
         });
         if (!dhtManager.isBootstrapped()) {
-            AssertComparisons.assertTrue(bootStrapped.await(5, TimeUnit.SECONDS));
+            AssertComparisons.assertTrue(bootStrapped.await(seconds, TimeUnit.SECONDS));
         }
     }
 }
