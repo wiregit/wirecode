@@ -111,7 +111,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     private final CopyOnWriteArrayList<PushedSocketHandler> pushHandlers = new CopyOnWriteArrayList<PushedSocketHandler>();
     private final Provider<UDPSelectorProvider> udpSelectorProvider;
     
-    private final PushEndpointCache pushEndpointCache;
+    private final Provider<PushEndpointCache> pushEndpointCache;
     
     @Inject
     public PushDownloadManager(
@@ -124,7 +124,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     		Provider<IPFilter> ipFilter,
     		Provider<UDPService> udpService,
     		Provider<UDPSelectorProvider> udpSelectorProvider,
-    		PushEndpointCache pushEndpointCache) {
+    		Provider<PushEndpointCache> pushEndpointCache) {
     	this.messageRouter = router;
     	this.httpExecutor = executor;
         this.defaultParams = defaultParams;
@@ -460,7 +460,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     }
     
     private void removePushProxy(byte[] guid, IpPort pushProxy) {
-        pushEndpointCache.removePushProxy(guid, pushProxy);
+        pushEndpointCache.get().removePushProxy(guid, pushProxy);
     }
     
     /**
