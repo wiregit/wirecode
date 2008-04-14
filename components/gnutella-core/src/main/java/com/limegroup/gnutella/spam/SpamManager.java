@@ -131,7 +131,15 @@ public class SpamManager {
 	 * @return true if we think that this is an incomplete file
 	 */
 	private boolean isIncompleteFile(String name) {
-		if (name.startsWith("__incomplete"))
+	    if (name.startsWith("incomplete_"))
+            return true;
+	    if (name.startsWith("incomplete~"))
+            return true;
+	    if (name.startsWith("inacheve_"))
+            return true;       
+	    if (name.startsWith("in_"))
+            return true;
+	    if (name.startsWith("__incomplete"))
 			return true;
 		if (name.startsWith("___incompleted"))
 			return true;
