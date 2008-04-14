@@ -20,6 +20,8 @@ import org.limewire.promotion.exceptions.PromotionException;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.StringUtils;
 
+import com.limegroup.gnutella.gui.search.PromotionSearchResultFactory;
+
 /**
  * Instances of this class are messages that contain the keywords, target URL
  * and restrictions that define a promotion.
