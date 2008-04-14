@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
+import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.service.ErrorService;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -26,6 +27,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.helpers.AlternateLocationHelper;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 public class DownloadAltLocTest extends DownloadTestCase {
     
@@ -243,6 +245,10 @@ public class DownloadAltLocTest extends DownloadTestCase {
     }
 
     public void testAddSelfToMeshWithTree() throws Exception {
+        LocalSocketAddressProviderStub localSocketAddressProvider = (LocalSocketAddressProviderStub) injector.getInstance(LocalSocketAddressProvider.class);
+        localSocketAddressProvider.setLocalAddress(new byte[] { (byte)129, 0, 0, 1 });
+        localSocketAddressProvider.setLocalPort(6996);
+        
         // change the minimum required bytes so it'll be added.
         HTTPDownloader.MIN_PARTIAL_FILE_BYTES = 1;
         networkManager.setAcceptedIncomingConnection(true);
