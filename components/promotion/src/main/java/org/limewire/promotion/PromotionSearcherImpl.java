@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
 
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.geocode.GeocodeInformation;
@@ -25,6 +26,8 @@ public class PromotionSearcherImpl implements PromotionSearcher {
     private final PromotionBinderRepository promotionBinderRepository;
 
     private int maxNumberOfResults = 5;
+    
+    private /* ssa */ ExecutorService exec;
 
     @Inject
     public PromotionSearcherImpl(final KeywordUtilImpl keywordUtil,
@@ -57,8 +60,10 @@ public class PromotionSearcherImpl implements PromotionSearcher {
      */
     public void search(final String query, final PromotionSearchResultsCallback callback,
             final GeocodeInformation userLocation) {
-        ExecutorsHelper.newThreadPool("SearcherThread[" + query + "]")
-            .execute(new SearcherThread(query, callback, userLocation));
+        if (exec == null) {
+            exec =  ExecutorsHelper.newThreadPool("SearcherThread(" + getClass().getName() + ")");
+        }
+       exec.execute(new SearcherThread(query, callback, userLocation));
     }
 
     public void init(final int maxNumberOfResults) {

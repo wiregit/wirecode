@@ -13,6 +13,7 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.gui.GUIBaseTestCase;
+import com.limegroup.gnutella.gui.search.PromotionSearchResultFactory.Attr;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 
@@ -30,6 +31,7 @@ public class PromotionMessageContainerToSearchResultConverterTest extends GUIBas
         return buildTestSuite(PromotionMessageContainerToSearchResultConverterTest.class);
     }
     
+    // We'll reuse these
     private PromotionMessageContainer con;
     private PromotionMessageContainerToSearchResultConverter converter;
     
@@ -40,11 +42,13 @@ public class PromotionMessageContainerToSearchResultConverterTest extends GUIBas
     private final int size = 1234;
     private final long creationTime = 123123L;
     private final String query = "the keyword";
-    private final String type = "audio";
     private final String artist = "Jesse Rubenfeld";
     private final String album = "uhh.... ???";
     private final String genre = "rap";  // gansta, that is
     private final String title = "where's my 40?";
+    private final String xmlSchemaAudio = "http://www.limewire.com/schemas/audio.xsd";
+    private final String xmlSchemaVideo = "http://www.limewire.com/schemas/video.xsd";
+    private final String fileType = "mp3";
     
     @Override
     protected void setUp() throws Exception {
@@ -55,48 +59,116 @@ public class PromotionMessageContainerToSearchResultConverterTest extends GUIBas
         ApplicationServices applicationServices = injector.getInstance(ApplicationServices.class);
         converter = new PromotionMessageContainerToSearchResultConverter(xmlDocFactory, applicationServices);
     }
+    
+    // --------------------------------------------------------------------------------------
+    // XML Properties
+    // --------------------------------------------------------------------------------------
 
+    /** Tests {@link PromotionSearchResultFactory#Attr#NAME */
     public void testName() {
         con.setDescription(name);
         PromotionSearchResult result = (PromotionSearchResult)converter.convert(con, query);
         assertEquals("name", name, result.getFilenameNoExtension());
     }
     
+    /** Tests {@link PromotionSearchResultFactory#Attr#NAME */
+    public void testNameByProperties() {
+        Map<String,String> props = new HashMap<String,String>();
+        props.put(PromotionSearchResultFactory.Attr.NAME.getValue(), name);
+        con.setProperties(props);
+        PromotionSearchResult result = (PromotionSearchResult)converter.convert(con, query);
+        assertEquals("name", name, result.getFilenameNoExtension());
+    } 
+    
+    /** Tests {@link PromotionSearchResultFactory#Attr#URL */
     public void testUrl() {
         con.setURL(url);
         PromotionSearchResult result = (PromotionSearchResult)converter.convert(con, query);
-        assertTrue("should start with '?url=" + url, result.getURL().startsWith("?url=" + url));
-    }
+        assertTrue(result.getURL() + " should start with '?url=" + url, result.getURL().startsWith("?url=" + url));
+    }   
     
+    /** Tests {@link PromotionSearchResultFactory#Attr#URL */
     public void testLinkUrl() {
         con.setURL(url);
         PromotionSearchResult result = (PromotionSearchResult)converter.convert(con, query);
-        assertTrue("should start with '?url=" + url, result.getLinkUrl().startsWith("?url=" + url));
+        assertTrue(result.getURL() + " should start with '?url=" + url, result.getLinkUrl().startsWith("?url=" + url));
     }
     
+    /** Tests {@link PromotionSearchResultFactory#Attr#SIZE */
+    public void testSize() {
+        Map<String,String> props = new HashMap<String,String>();
+        props.put(Attr.SIZE.getValue(), String.valueOf(size));
+        con.setProperties(props);
+        PromotionSearchResult result = (PromotionSearchResult)converter.convert(con, query);
+        assertEquals("size", size, result.getSize());
+    }   
+    
+    /** Tests {@link PromotionSearchResultFactory#Attr#CREATION_TIME */
+    public void testCreationTime() {
+        Map<String,String> props = new HashMap<String,String>();
+        props.put(Attr.CREATION_TIME.getValue(), String.valueOf(creationTime));
+        con.setProperties(props);
+        PromotionSearchResult result = (PromotionSearchResult)converter.convert(con, query);
+        assertEquals("creation time", creationTime, result.getCreationTime());
+    }    
+    
+    /** Tests {@link PromotionSearchResultFactory#Attr#VENDOR */
     public void testVendor() {
         Map<String,String> props = new HashMap<String,String>();
-        props.put("vendor", vendor);
+        props.put(Attr.VENDOR.getValue(), vendor);
         con.setProperties(props);
         PromotionSearchResult result = (PromotionSearchResult)converter.convert(con, query);
         assertEquals("vendor", vendor, result.getVendor());
     }
     
-    public void testSize() {
+    /** Tests {@link PromotionSearchResultFactory#Attr#XML_SCHEMA */
+    public void testXmlSchemaAudio() {
+        con.setDescription(name);
         Map<String,String> props = new HashMap<String,String>();
-        props.put("size", String.valueOf(size));
+        props.put("artist", artist);
         con.setProperties(props);
         PromotionSearchResult result = (PromotionSearchResult)converter.convert(con, query);
-        assertEquals("speed", SpeedConstants.THIRD_PARTY_SPEED_INT, result.getSpeed());
-    }   
-    
-    public void testCreationTime() {
-        Map<String,String> props = new HashMap<String,String>();
-        props.put("creation_time", String.valueOf(creationTime));
-        con.setProperties(props);
-        PromotionSearchResult result = (PromotionSearchResult)converter.convert(con, query);
-        assertEquals("creation time", creationTime, result.getCreationTime());
+        LimeXMLDocument doc = result.getXMLDocument(); 
+        assertTrue("should have an audio schema", doc.getXMLString().contains(xmlSchemaAudio));
     }
+    
+    /** Tests {@link PromotionSearchResultFactory#Attr#XML_SCHEMA */
+    public void testXmlSchemaAudioWhileSpecifying() {
+        con.setDescription(name);
+        Map<String,String> props = new HashMap<String,String>();
+        props.put(Attr.XML_SCHEMA.getValue(), "audio");
+        props.put("artist", artist);
+        con.setProperties(props);
+        PromotionSearchResult result = (PromotionSearchResult)converter.convert(con, query);
+        LimeXMLDocument doc = result.getXMLDocument();
+        assertTrue("should have an audio schema", doc.getXMLString().contains(xmlSchemaAudio));
+    }
+    
+    /** Tests {@link PromotionSearchResultFactory#Attr#XML_SCHEMA */
+    public void testXmlSchemaVideoWhileSpecifying() {
+        con.setDescription(name);
+        Map<String,String> props = new HashMap<String,String>();
+        props.put(Attr.XML_SCHEMA.getValue(), "video");
+        props.put("director", artist);
+        con.setProperties(props);
+        PromotionSearchResult result = (PromotionSearchResult)converter.convert(con, query);
+        LimeXMLDocument doc = result.getXMLDocument();
+        assertTrue("should have a video schema", doc.getXMLString().contains(xmlSchemaVideo));
+    }
+    
+    /** Tests {@link PromotionSearchResultFactory#Attr#FILE_TYPE */
+    public void testFileType() {
+        Map<String,String> props = new HashMap<String,String>();
+        props.put(Attr.FILE_TYPE.getValue(), fileType);
+        con.setProperties(props);
+        PromotionSearchResult result = (PromotionSearchResult)converter.convert(con, query);
+        assertEquals("file type", fileType, result.getExtension());
+    }     
+    
+    
+    // --------------------------------------------------------------------------------------
+    // Add-hoc Properties
+    // --------------------------------------------------------------------------------------    
     
     public void testArtist() {
         Map<String,String> props = new HashMap<String,String>();
