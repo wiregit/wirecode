@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-04 23:30-0400\n"
+"POT-Creation-Date: 2008-04-14 14:25-0400\n"
 "PO-Revision-Date: 2008-03-30 06:50+0000\n"
 "Last-Translator: Ruuttu <Unknown>\n"
 "Language-Team: <fi@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-04-08 07:32+0000\n"
+"X-Launchpad-Export-Date: 2008-04-15 04:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -1696,34 +1696,34 @@ msgstr ""
 "toimintaansa normaalisti. Napsauta 'ohita' jatkaaksesi LimeWiren "
 "käyttöä.Voit tarkistaa lähetettävät tiedot valitsemalla `Tarkista`. Kiitos."
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:442
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:443
 msgid "Send"
 msgstr "Lähetä"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:453
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:454
 msgid "Review"
 msgstr "Tarkista"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:469
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:470
 msgid "Discard"
 msgstr "Ohita"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:486
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 msgid "Always Send Immediately"
 msgstr "Lähetä aina automaattisesti"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
 msgid "Always Ask For Review"
 msgstr "Kysy aina tarkistusta"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:489
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Always Discard All Errors"
 msgstr "Ohita aina virheraportit"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:587
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:588
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
 "bug report. For further help and to aid with debugging, please visit "
@@ -1733,12 +1733,12 @@ msgstr ""
 "raportin. Auttaaksesi kehitystyötä ole hyvä ja kopioi ohessa oleva teksti ja "
 "lähetä se osoitteeseen bugs@limewire.com. Kiitos."
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:616
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:617
 msgid "Copy Report"
 msgstr "Kopioi raportti"
 
 #. Add an OK button out of the window.
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:624
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:625
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:88
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:187
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:343

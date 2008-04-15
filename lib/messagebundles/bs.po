@@ -7,16 +7,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-04 23:30-0400\n"
-"PO-Revision-Date: 2008-02-09 14:21+0000\n"
-"Last-Translator: Davor <Unknown>\n"
+"POT-Creation-Date: 2008-04-14 14:25-0400\n"
+"PO-Revision-Date: 2008-04-12 11:02+0000\n"
+"Last-Translator: Sanel <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2008-04-08 07:32+0000\n"
+"X-Launchpad-Export-Date: 2008-04-15 04:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -2230,34 +2230,34 @@ msgstr ""
 "'Odbaci'. Ukoliko želite možete pritisnuti 'Prikaz' da bi vidjeli koje "
 "informacije sa greškom."
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:442
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:443
 msgid "Send"
 msgstr "Pošalji"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:453
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:454
 msgid "Review"
 msgstr "Prikaz"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:469
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:470
 msgid "Discard"
 msgstr "Odbaci"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:486
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 msgid "Always Send Immediately"
 msgstr "Uvijek pošalji odmah"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
 msgid "Always Ask For Review"
 msgstr "Uvijek pitaj za prikaz"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:489
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Always Discard All Errors"
 msgstr "Uvijek odbaci prislušne uređaje"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:587
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:588
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
 "bug report. For further help and to aid with debugging, please visit "
@@ -2268,12 +2268,12 @@ msgstr ""
 "kopirajte sljedeći tekst i pošaljite e-mailom na: bugs@limewire.com. Hvala "
 "vam."
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:616
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:617
 msgid "Copy Report"
 msgstr "Kopiraj izvještaj"
 
 #. Add an OK button out of the window.
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:624
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:625
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:88
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:187
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:343
@@ -8751,3 +8751,4 @@ msgstr "Ogg Vorbis"
 msgid ""
 "Unknown file type. Please choose the type that best describes this file."
 msgstr ""
+"Nepoznat tip/vrsta datoteke. Molim odaberite tip koji opisuje ovu datoteku."

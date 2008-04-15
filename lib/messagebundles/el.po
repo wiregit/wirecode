@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-04 23:30-0400\n"
-"PO-Revision-Date: 2008-03-31 21:23+0000\n"
-"Last-Translator: Sonickydon <Unknown>\n"
+"POT-Creation-Date: 2008-04-14 14:25-0400\n"
+"PO-Revision-Date: 2008-04-12 08:14+0000\n"
+"Last-Translator: vagman2008 <vaggos333a@yahoo.gr>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-04-08 07:32+0000\n"
+"X-Launchpad-Export-Date: 2008-04-15 04:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Bookmarks: 545,366,72,79,138,-1,-1,-1,-1,-1\n"
 
@@ -1784,9 +1784,8 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"Το LimeWire αδυνατεί να γράψει σε/δημιουργήσει ένα απαραίτητο αρχείο, γιατί "
-"ο σκληρός σας δίσκος είναι γεμάτος. Για να συνεχίσετε τη χρήση του LimeWire "
-"πρέπει να ελευθερώσετε χώρο στο σκληρό σας δίσκο."
+"Το Limewire δεν μπόρεσε να δημιουργήσει ένα απαραίτητο αρχείο γιατί ο "
+"σκληρός δίσκος είναι γεμάτος"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
 msgid ""
@@ -1803,7 +1802,7 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
-"Το LimeWire αδυνατεί να γράψει σε/δημιουργήσει ένα απαραίτητο αρχείο, επειδή "
+"Το LimeWire αδυνατεί να εγγράψει/δημιουργήσει ένα απαραίτητο αρχείο, επειδή "
 "δεν έχετε τα απαραίτητα δικαιώματα. Οι προτιμήσεις σας μπορεί να μη "
 "διατηρηθούν για την επόμενη φορά που θα ανοίξετε το LimeWire, ή το LimeWire "
 "μπορεί να συμπεριφερθεί με απροσδόκητους τρόπους."
@@ -2413,34 +2412,34 @@ msgstr ""
 "κάντε κλικ στο κουμπί «Απόρριψη». Αν θέλετε, μπορείτε να κάνετε κλικ στο "
 "κουμπί «Επισκόπηση» για να δείτε πληροφορίες σχετικά με το σφάλμα."
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:442
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:443
 msgid "Send"
 msgstr "Αποστολή"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:453
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:454
 msgid "Review"
 msgstr "Επισκόπηση"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:469
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:470
 msgid "Discard"
 msgstr "Απόρριψη"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:486
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 msgid "Always Send Immediately"
 msgstr "Να γίνεται πάντα άμεση αποστολή"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
 msgid "Always Ask For Review"
 msgstr "Να γίνεται πάντα ερώτηση για επισκόπηση"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:489
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Always Discard All Errors"
 msgstr "Να γίνεται πάντα απόρριψη όλων των σφαλμάτων"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:587
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:588
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
 "bug report. For further help and to aid with debugging, please visit "
@@ -2451,12 +2450,12 @@ msgstr ""
 "και στην εξάλειψη του σφάλματος, επισκεφθείτε το www.limewire.com και κάντε "
 "κλικ στο «Support». Σας ευχαριστούμε."
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:616
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:617
 msgid "Copy Report"
 msgstr "Αντιγραφή έκθεσης"
 
 #. Add an OK button out of the window.
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:624
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:625
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:88
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:187
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:343

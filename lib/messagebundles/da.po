@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-04 23:30-0400\n"
-"PO-Revision-Date: 2008-04-05 14:55+0000\n"
-"Last-Translator: AGFAGF <Unknown>\n"
+"POT-Creation-Date: 2008-04-14 14:25-0400\n"
+"PO-Revision-Date: 2008-04-12 11:28+0000\n"
+"Last-Translator: carson <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-04-08 07:32+0000\n"
+"X-Launchpad-Export-Date: 2008-04-15 04:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -1770,34 +1770,34 @@ msgstr ""
 "problemet og at fortsætte normalt. For at fortsætte med at bruge LimeWire, "
 "klik \"Undlad\". Du kan klikke \"Gennemse\" for at se nærmere om fejlen."
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:442
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:443
 msgid "Send"
 msgstr "Send"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:453
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:454
 msgid "Review"
 msgstr "Gennemse"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:469
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:470
 msgid "Discard"
 msgstr "Undlad"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:486
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 msgid "Always Send Immediately"
 msgstr "Send altid straks"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
 msgid "Always Ask For Review"
 msgstr "Anmod altid om genemsyn"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:489
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Always Discard All Errors"
 msgstr "Slå fejl-rapportering fra"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:587
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:588
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
 "bug report. For further help and to aid with debugging, please visit "
@@ -1807,12 +1807,12 @@ msgstr ""
 "nedenstående fejl-rapport. For yderligere hjælp og for at hjælpe med "
 "fejlrettelsen besøg www.limewire.com og klik 'Support'. Tak for hjælpen."
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:616
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:617
 msgid "Copy Report"
 msgstr "Kopier rapport"
 
 #. Add an OK button out of the window.
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:624
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:625
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:88
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:187
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:343
@@ -3070,6 +3070,9 @@ msgid ""
 "It helps the network if you keep your LimeWire running; other users will "
 "connect to the network easier and searches will perform better."
 msgstr ""
+"Det hjælper netværket, hvis du lader din LimeWire køre; det bliver så "
+"lettere for andre brugere at få forbindelse til netværket og søgninger vil "
+"give bedre resultater."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:76
 msgid ""
@@ -3118,6 +3121,8 @@ msgid ""
 "Post feature suggestions on LimeWire's <a href=\"{0}\">message boards</a> "
 "and it may be added to future versions."
 msgstr ""
+"Send dine forslag til forbedringer på LimeWire's <a href=\"{0}\">message "
+"boards</a> og de vil måske indgå i fremtidige versioner."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:101
 #, java-format
@@ -3191,6 +3196,8 @@ msgid ""
 "Try a <font color=\"1E8E44\">What's New</font> search and see what's "
 "recently been added to the Gnutella network."
 msgstr ""
+"Prøv en <font color=\"1E8E44\">Nye filer</font> søgning og se hvad der "
+"senest er lagt ud Gnutelle netværket."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:127
 msgid ""
@@ -3306,6 +3313,9 @@ msgid ""
 "LimeWire in the status bar. If there is a brick wall in front of the globe, "
 "your Internet connection is firewalled."
 msgstr ""
+"For at tjekke om du er bag en firewall så kig efter globen nederst til "
+"venstre i statusbjælken. Hvis der er en mur foran globen, så er din "
+"internetforbindelse bag en firewall."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:197
 msgid ""
@@ -3319,6 +3329,8 @@ msgid ""
 "The numbers next to the up and down arrows at the bottom of LimeWire show "
 "how fast all of your files are downloading or uploading."
 msgstr ""
+"Tallene ved siden af pilene op og ned i bunden af LimeWire viser hvor "
+"hurtigt alle dine filer downloades eller uploades."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:204
 msgid ""
@@ -3380,7 +3392,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:244
 msgid "LimeWire supports file sizes up to 1 TB (terabyte)."
-msgstr ""
+msgstr "LimeWire understøtter filstørrelser op til 1 TB (terabyte)."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:245
 msgid ""
@@ -3572,6 +3584,7 @@ msgstr ""
 msgid ""
 "You can find out which version of LimeWire you are using by choosing {0}."
 msgstr ""
+"Du kan finde ud af hvilken LimeWire version du har, ved at vælge {0}."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:345
 msgid ""
@@ -3951,6 +3964,8 @@ msgid ""
 "LimeWire cannot open this file or address. Make sure you typed it correctly, "
 "and then try again."
 msgstr ""
+"LimeWire kan ikke åbne denne fil eller adresse. Vær sikker på at du tastede "
+"rigtigt og forsøg igen."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:341
 msgid "&Close"
@@ -6817,11 +6832,11 @@ msgstr "Download deling"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:23
 msgid "You can share downloads that are saved to unshared folders."
-msgstr ""
+msgstr "Du kan dele downloads, som er gemt i mapper, der ikke deles."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:30
 msgid "Share Downloads Saved To Unshared Folders:"
-msgstr ""
+msgstr "Del downloads gemt i mapper, der ikke deles:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:64
 msgid "All downloads will be shared."
@@ -6829,7 +6844,7 @@ msgstr "Alle downloads vil blive delt."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:66
 msgid "Only downloads saved in shared folders will be shared."
-msgstr ""
+msgstr "Kun downloads gemt i delte mapper vil blive delt."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:15
 msgid "Torrent Sharing"
@@ -7580,7 +7595,7 @@ msgstr "Medie"
 #: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:136
 #, java-format
 msgid "... {0} more."
-msgstr ""
+msgstr "... {0} mere."
 
 #: gui/com/limegroup/gnutella/gui/search/TableLine.java:723
 msgid ""
@@ -7603,6 +7618,9 @@ msgid ""
 "automatically share all files with these types.  Only files in your Shared "
 "Folders will be shared.)"
 msgstr ""
+"Vælg de filtyper, som du ønsker at dele ved brug af LimeWire. (Det medfører "
+"ikke automatisk deling af alle filer af disse typer. Kun filer i din \"Dele "
+"mapper\" vil blive delt)."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:82
 msgid "My Extensions"

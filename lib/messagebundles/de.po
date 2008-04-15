@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TG V1.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-04 23:30-0400\n"
-"PO-Revision-Date: 2008-04-01 19:33+0000\n"
-"Last-Translator: Jochen Herrmann <Unknown>\n"
+"POT-Creation-Date: 2008-04-14 14:25-0400\n"
+"PO-Revision-Date: 2008-04-11 16:26+0000\n"
+"Last-Translator: foxtrott01 <guenther.p_petelin@hotmail.com>\n"
 "Language-Team: home <homepage125@t-online.de>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-04-08 07:32+0000\n"
+"X-Launchpad-Export-Date: 2008-04-15 04:05+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Country: GERMANY\n"
 "X-Poedit-Language: German\n"
@@ -617,10 +617,11 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
-"Sie können auswählen ob LimeWire ihre BitTorrent Protokolleinstellungen "
-"übernehmen soll. Es wird empfohlen LimeWire diese Einstellungen machen zu "
-"lasse. Ungültige oder unpassende Einstellungen können zu massiven Leistungs,-"
-" bzw. Speicherproblemen führen."
+"Sie können auswählen ob LimeWire Ihre BitTorrent Protokolleinstellungen "
+"übernehmen soll. Es wird empfohlen LimeWire diese Einstellungen automatisch "
+"konfigurieren zu lassen.\n"
+"Ungültige oder unpassende Einstellungen können zu massiven Leistungs-, bzw. "
+"Speicherproblemen führen."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
 msgid ""
@@ -692,34 +693,34 @@ msgstr ""
 "das Programm kann fortgesetzt werden. Zum Fortsetzen klicken Sie auf "
 "'Ignorieren'. Um die Fehlermeldung anzuzeigen, klicken Sie auf 'Anzeigen'."
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:442
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:443
 msgid "Send"
 msgstr "Senden"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:453
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:454
 msgid "Review"
 msgstr "Bericht"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:469
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:470
 msgid "Discard"
 msgstr "Ignorieren"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:486
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 msgid "Always Send Immediately"
 msgstr "Immer direkt senden"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
 msgid "Always Ask For Review"
 msgstr "Immer ansehen"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:489
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Always Discard All Errors"
 msgstr "Immer ignorieren"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:587
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:588
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
 "bug report. For further help and to aid with debugging, please visit "
@@ -730,12 +731,12 @@ msgstr ""
 "gut, wenn Sie den folgenden Text als eMail an bugs@limewire.com verschicken "
 "könnten. Vielen Dank."
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:616
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:617
 msgid "Copy Report"
 msgstr "Bericht kopieren"
 
 #. Add an OK button out of the window.
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:624
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:625
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:88
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:187
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:343
@@ -1629,6 +1630,9 @@ msgid ""
 "as a save folder for security reasons.<br><br>Please select another save "
 "folder.</table></html>"
 msgstr ""
+"<html><table width=400>Ausgewählter Ordner: <i>{0}</i><br>LimeWire kann "
+"diesen Ordner aus Sicherheitsgründen nicht zum Speichern "
+"verwenden.<br><br>Bitte wählen Sie einen anderen Ordner aus.</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:82
 #, java-format
@@ -1638,6 +1642,10 @@ msgid ""
 "<b>choose another</b> folder for saving your downloads.<br><br>Are you sure "
 "you want to download to this folder?</table></html>"
 msgstr ""
+"<html><table width=400>Der Ordner <i>{0}</i><br>könnte persönliche Daten "
+"beinhalten.<br><br>LimeWire empfiehlt Ihnen <b>einen anderen</b> Ordner zum "
+"Speichern zu verwenden.<br><br>Sind Sie sicher, dass sie in diesem Ordner "
+"Ihre Downloads speichern wollen?</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:105
 msgid ""
@@ -1662,10 +1670,14 @@ msgstr ""
 "Downloads auswählen ?"
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:19
+#, fuzzy
 msgid ""
 "LimeWire was unable to create your settings folder and is using a temporary "
 "folder.  Your settings may be deleted when you close LimeWire. "
 msgstr ""
+"LimeWire konnte Ihren Einstellungsordner nicht erstellung und verwendet nun "
+"einen temporären Ordner. Ihre Einstellungen können gelöscht werden wenn sie "
+"LimeWire beenden. "
 
 #: gui/com/limegroup/gnutella/gui/SettingsWarningManager.java:34
 msgid ""

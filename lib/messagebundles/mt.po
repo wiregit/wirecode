@@ -7,48 +7,44 @@ msgid ""
 msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2008-04-04 23:30-0400\n"
-"PO-Revision-Date: 2008-02-01 16:06+0000\n"
-"Last-Translator: ghawdxi94 <Unknown>\n"
+"POT-Creation-Date: 2008-04-14 14:25-0400\n"
+"PO-Revision-Date: 2008-04-13 12:39+0000\n"
+"Last-Translator: splashdesign <splash@onvol.net>\n"
 "Language-Team: Maltese <mt@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=n == 1 ? 0 : (n == 0 || ((n % 100) >= 2 && "
 "(n % 100) <= 10) ) ? 1 : ((n % 100) >= 11 && (n % 100) <= 19 ) ? 2 : 3;\n"
-"X-Launchpad-Export-Date: 2008-04-08 07:33+0000\n"
+"X-Launchpad-Export-Date: 2008-04-15 04:04+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
-#, fuzzy
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"LimeWire ma jistax jikteb il-file neccesarju ghax il-hard drive tieghek hija "
-"mimlija. Biex tkompli tuza il-Limewire trid tizvojta ftit mill-hard drive "
-"tieghek."
+"LimeWire ma jistax jikteb fajl neċessarju għax il-hard drive tiegħek hija "
+"mimlija. Biex tkompli tuza 'l Limewire, trid iżżid l-ispazju vojt fil-hard "
+"drive tiegħek."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
-#, fuzzy
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
-"LimeWire ma jistax jiftah il-fajl neccesarju ghax qed jigi imblokkat minn "
-"programm iehor. Limewire jista jkun li ma jahdimx tajjeb sakemm dan il-fajl "
-"ma jigiex liberat."
+"LimeWire ma jistax jiftaħ fajl neċessarju għax qed jiġi miżmum minn programm "
+"ieħor. Limewire jista' ma jaħdimx tajjeb sakemm dan il-fajl ma jiġix meħlus."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:54
-#, fuzzy
 msgid ""
 "LimeWire was unable to write a necessary file because you do not have the "
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
-"LimeWire ma setax jikeb il-fajl neccesarju ghax int ma ghandekx il-permess "
-"neccesarju. Il-preferenzi tieghek jista jkun li ma jigux mizmuma meta terga "
-"tiftah LimeWire, jew LimeWire jista ma jahdimx kif suppost."
+"LimeWire ma jistax jitkeb fajl neċessarju għax int m'għandekx il-permess "
+"neċessarju. Il-preferenzi tiegħek jistgħu ma jiġux miżmuma meta terġa' "
+"tiftaħ LimeWire, jew LimeWire jista' ma jaħdimx tajjeb."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:56
 msgid ""
@@ -56,18 +52,27 @@ msgid ""
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
 msgstr ""
+"LimeWire ma jistax jiftaħ fajl neċessarju għax l-isem tal-fajl huwa kompost "
+"minn karattri li mhumiex rikonoxxuti mis-sistema operattiva tiegħek. "
+"LimeWire jista' ma jaħdimx tajjeb."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:60
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
+"LimeWire ma jistax iniżżel il-fajl magħżul għax il-hard drive tiegħek hija "
+"mimlija. Biex tniżżel aktar fajls, trid iżżid l-ispazju vojt fil-hard drive "
+"tiegħek."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:62
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr ""
+"LimeWire ma jistax iniżżel il-fajl magħżul għax l-istess fajl qiegħed "
+"jintuża minn programm ieħor. Jekk jogħġbok agħlaq il-programm l-ieħor u "
+"erġa' pprova."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:64
 msgid ""
@@ -76,6 +81,10 @@ msgid ""
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
+"LimeWire ma jistax joħloq jew ikompli jikteb fajl li mhux komplut għad-"
+"dawnlowd magħżul għax m'għandekx permess biex tikteb fajls fil-fowlder "
+"inkomplut. Biex tkompli tuża 'l Limewire, jekk jogħġbok agħzel \"Save "
+"Folder\" ieħor."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:66
 msgid ""
@@ -83,6 +92,9 @@ msgid ""
 "because the filename contains characters which are not supported by your "
 "operating system."
 msgstr ""
+"LimeWire ma jistax jiftaħ il-fajl li mhux komplut għad-dawnlowd magħżul għax "
+"l-isem tal-fajl huwa kompost minn karattri li mhumiex rikonoxxuti mis-"
+"sistema operattiva tiegħek."
 
 #: core/com/limegroup/gnutella/AcceptorImpl.java:284
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:35
@@ -90,6 +102,8 @@ msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
+"LimeWire ma jistax joħloq port biex jagħraf incoming connections. Xi "
+"partijiet minn Limewire jistgħu ma jaħdmux tajjeb."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:224
 msgid ""
@@ -97,6 +111,9 @@ msgid ""
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
+"Jiddiepeċina, LimeWire ma jistax jaqra d-dawnlowds l-antiki tiegħek. Tista' "
+"terġa' tibdiehom billi tmur fil-Librerija, tara l-\"Fajls Inkompluti\" u "
+"tiklikja fuq \"Kompli\"."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:226
 msgid ""
@@ -104,30 +121,33 @@ msgid ""
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
 "to 'Resume' your downloads."
 msgstr ""
+"Jiddiepeċina, LimeWire ma jistax jaqra uħud mid-dawnlowds l-antiki tiegħek. "
+"Tista' terġa' tibdiehom billi tmur fil-Librerija, tara l-\"Fajls "
+"Inkompluti\" u tiklikja fuq \"Kompli\"."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:354
 msgid "Loading TLS Encryption..."
-msgstr ""
+msgstr "TLS Encryption qiegħda tiġi llowdjata..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:366
 msgid "Loading Safe Content Management..."
-msgstr ""
+msgstr "Safe Content Management qed jiġi llowdjat..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:371
 msgid "Loading Message Router..."
-msgstr ""
+msgstr "Message Router qed jiġi llowdjat..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:376
 msgid "Checking for Updates..."
-msgstr ""
+msgstr "Qed jiġu ċċekjati Updates ġodda..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:381
 msgid "Loading Upload Management..."
-msgstr ""
+msgstr "Upload Management qed jiġi llowdjat..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:395
 msgid "Loading Connection Listener..."
-msgstr ""
+msgstr "Connection Listener qed jiġi llowdjat..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:404
 msgid "Loading Connection Management..."
@@ -135,59 +155,59 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:413
 msgid "Loading Download Management..."
-msgstr ""
+msgstr "Download Management qed jiġi llowdjat..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:419
 msgid "Loading Ultrapeer/DHT Management..."
-msgstr ""
+msgstr "Ultrapeer/DHT Management qed jiġi llowdjat..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:424
 msgid "Locating Peers..."
-msgstr ""
+msgstr "Peers qed jiġu llowdjati..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:440
 msgid "Loading Shared Files..."
-msgstr ""
+msgstr "Shared Files qed jiġu llowdjati..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:445
 msgid "Loading BitTorrent Management..."
-msgstr ""
+msgstr "BitTorrent Management qed jiġi llowdjat..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:451
 msgid "Loading Old Downloads..."
-msgstr ""
+msgstr "Dawnlowds Antiki qed jiġu llowdjati..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:456
 msgid "Attaching LimeWire Store Listeners..."
-msgstr ""
+msgstr "LimeWire Store Listeners qed jiġu mehmuża..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:461
 msgid "Loading Directed Querier..."
-msgstr ""
+msgstr "Directed Querier qed jiġi llowdjat..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:466
 msgid "Loading Magnet Listener..."
-msgstr ""
+msgstr "Magnet Listener qed jiġi llowdjat..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:477
 msgid "Loading Peer Listener..."
-msgstr ""
+msgstr "Peer Listener qed jiġi llowdjat..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:482
 msgid "Loading Stale Connection Management..."
-msgstr ""
+msgstr "Stale Connection Management qed jiġi llowdjat..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:487
 msgid "Loading Saved Files..."
-msgstr ""
+msgstr "Fajls issejvjati qed jiġu llowdjati..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:492
 msgid "Loading Spam Management..."
-msgstr ""
+msgstr "Spam Management qed jiġi llowdjat..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:497
 msgid "Loading Network Listeners..."
-msgstr ""
+msgstr "Network Listeners qed jiġu llowdjati..."
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
@@ -206,18 +226,18 @@ msgstr "Programmi"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:87
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
 msgid "Audio"
-msgstr "Diski"
+msgstr "Awdjo"
 
 #: core/com/limegroup/gnutella/MediaType.java:49
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
 msgid "Video"
-msgstr "Vidjow"
+msgstr "Vidjo"
 
 #: core/com/limegroup/gnutella/MediaType.java:50
 msgid "Images"
-msgstr "ritratti"
+msgstr "Stampi"
 
 #. show warning and return
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:150
@@ -233,22 +253,24 @@ msgid ""
 "One or more URLs in the MAGNET link were invalid. Your file may not download "
 "correctly."
 msgstr ""
+"URL jew aktar minn wieħed f'dan il-MAGNET link huma invalidi. Il-fajl "
+"tiegħek jista' ma jiddawnlowdjax sew."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:167
 #, java-format
 msgid "You have already downloaded {0}"
-msgstr ""
+msgstr "Diġa iddawnlowdjajt {0}"
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:172
 #, java-format
 msgid "You are already downloading this file to {0}"
-msgstr ""
+msgstr "Diġa qiegħed tiddawnlowja dan il-fajl għal {0}"
 
 #: core/com/limegroup/gnutella/settings/StartupAdSettings.java:41
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:88
 #: gui/com/limegroup/gnutella/gui/startup/StartupBanner.java:19
 msgid "Upgrade to PRO"
-msgstr ""
+msgstr "Agħmel Upgade għal PRO"
 
 #: core/com/limegroup/gnutella/settings/StartupAdSettings.java:42
 #: gui/com/limegroup/gnutella/gui/startup/StartupBanner.java:20
@@ -257,57 +279,59 @@ msgid ""
 "love the improved performance of PRO. Thank you for helping keep the "
 "Internet open by running LimeWire."
 msgstr ""
+"Għal Turo-Charged dawnlowds, ġib LimeWire Pro. Niggarantulek li togħġbok il-"
+"performance mitjuba ta' PRO. Grazzi talli qed iżżomm l-Internet miftuh billi "
+"tuża LimeWire."
 
 #: core/com/limegroup/gnutella/settings/StartupAdSettings.java:43
 #: gui/com/limegroup/gnutella/gui/startup/StartupBanner.java:21
 msgid "Upgrade to LimeWire PRO?"
-msgstr ""
+msgstr "Tagħmel Upgade għal LimeWire PRO?"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:71
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:41
 msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "ghal \"Turbo-Charged Searches\" ixtri Il-LimeWire PRO"
+msgstr "Ġib LimeWire PRO għal tfittxijiet \"Turbo-Charged\"."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:75
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:45
 msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr ""
-"Is-sapportja Il-Peer-to-peer development tal-limewire.Ixtri Il-Lime Wire PRO"
+msgstr "Għin il-Peer-to-Peer Development ta' LimeWire. Ġib il-PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:79
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:49
 msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr "Ixtri il-limewire PRO biex tighna naghmlu id downlowds iktar magglin"
+msgstr "Ixtri LimeWire PRO biex tgħinna nagħmlu dawnlowds aktar maġġla."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:82
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:52
 msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr ""
+msgstr "Ġib LimeWire PRO għal dawnlowds \"Turbo-Charged\"."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:85
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:55
 msgid "Support open networks. Get LimeWire PRO."
-msgstr ""
+msgstr "Għin netwerks miftuħa. Ġib LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:89
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:59
 msgid "Support open source and open protocols. Get LimeWire PRO."
-msgstr ""
+msgstr "Għin \"open sources\" u \"open protocols\". Ġib LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:92
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:62
 msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr ""
+msgstr "Ġib LimeWire PRO għal \"Turbo-Charged performance\""
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:95
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:65
 msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr ""
+msgstr "Żomm l-Internet miftuh. Ġib LimeWire PRO."
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:98
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:68
 msgid "Developing LimeWire costs real money. Get PRO."
-msgstr ""
+msgstr "L-iżvilupp ta' LimeWire jiswa l-flus. Ġib PRO."
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:88
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:104
@@ -337,13 +361,13 @@ msgstr "Album"
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:288
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:98
 msgid "Genre"
-msgstr "Tip"
+msgstr "Ġeneru"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:92
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:290
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:73
 msgid "Track"
-msgstr ""
+msgstr "Trekk"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:93
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:109
@@ -359,41 +383,41 @@ msgstr "Tip"
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:294
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:57
 msgid "Length"
-msgstr "hin"
+msgstr "Tul"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:95
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:111
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:292
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:123
 msgid "Year"
-msgstr "sena"
+msgstr "Sena"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:96
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
 msgid "Language"
-msgstr "lingwagg"
+msgstr "Lingwa"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:97
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:121
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:296
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:82
 msgid "Bitrate"
-msgstr ""
+msgstr "Bitrate"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:98
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:115
 msgid "Comments"
-msgstr "kummenti"
+msgstr "Kummenti"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:99
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
 msgid "Action"
-msgstr "azzjoni"
+msgstr "Azzjoni"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
 msgid "Copyright"
-msgstr ""
+msgstr "Copyright"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:101
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:118
@@ -401,48 +425,48 @@ msgstr ""
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:135
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:141
 msgid "License Type"
-msgstr "tip ta licenzja"
+msgstr "Tip ta' Liċenzja"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:105
 msgid "Director"
-msgstr "direttur"
+msgstr "Direttur"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:106
 msgid "Producer"
-msgstr "prodjuser"
+msgstr "Prodjuser"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:107
 msgid "Studio"
-msgstr "studjow"
+msgstr "Stuwdjow"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 msgid "Stars"
-msgstr "stilel"
+msgstr "Stilel"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
-msgstr ""
+msgstr "Subtitles"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 msgid "Rating"
-msgstr ""
+msgstr "Rating"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:119
 msgid "Height"
-msgstr "gholi"
+msgstr "Għoli"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:120
 msgid "Width"
-msgstr "tul"
+msgstr "Wisgħa"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
 msgid "Image"
-msgstr "ritratt"
+msgstr "Stampa"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
 msgid "Description"
-msgstr "diskrizzjoni"
+msgstr "Deskrizzjoni"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:127
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:134
@@ -451,25 +475,25 @@ msgstr "diskrizzjoni"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:263
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:42
 msgid "License"
-msgstr "licenzja"
+msgstr "Liċenzja"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:71
 msgid "Document"
-msgstr "dokument"
+msgstr "Dokument"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
 msgid "Topic"
-msgstr ""
+msgstr "Topik"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
 msgid "Author"
-msgstr "awtur"
+msgstr "Awtur"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
 msgid "Application"
-msgstr "aplikazzjoni"
+msgstr "Applikazzjoni"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:355
@@ -478,23 +502,23 @@ msgstr "aplikazzjoni"
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:53
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:219
 msgid "Name"
-msgstr "isem"
+msgstr "Isem"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Publisher"
-msgstr ""
+msgstr "Pubblikatur"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 msgid "Platform"
-msgstr ""
+msgstr "Platforn"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:105
 msgid "The selected .torrent file may contain a security hazard."
-msgstr ""
+msgstr "It-torrent li għażilt jista' jkollu security hazard."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:107
 msgid "LimeWire could not download a .torrent file from the provided URL."
-msgstr ""
+msgstr "LimeWire ma setax jiddawnlowdja torrent mill-URL provdut."
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:35
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:566
@@ -502,6 +526,8 @@ msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
+"Jekk twaqqaf din l-uplowd, it-torrent dawnlowd jieqaf. Ċert li trid tagħmel "
+"hekk?"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:38
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:571
@@ -509,24 +535,28 @@ msgid ""
 "This upload is a torrent and it hasn't seeded enough. You should let it "
 "upload some more. Are you sure you want to stop it?"
 msgstr ""
+"Dan l-uplowd huwa torrent u ma ġiex seeded biżżejjed. Għandek tħallih "
+"juplowdja daqsxejn aktar. Ċert li trid twaqqfu?"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:16
 msgid "Automatically start torrents"
-msgstr ""
+msgstr "Ibda torrents awtomatikament"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:18
 msgid ""
 "You can choose whether to automatically start torrents downloaded from "
 "Gnutella."
 msgstr ""
+"Tista' tagħżel jekk tridx awtomatikament tibda t-torrents iddawnlowdjati "
+"mill-Gnutella."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:26
 msgid "Start automatically"
-msgstr "ibda awtomatikament"
+msgstr "Ibda awtomatikament"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:36
 msgid "BitTorrent Settings"
-msgstr ""
+msgstr "Settings tal-BitTorrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:38
 msgid ""
@@ -535,6 +565,10 @@ msgid ""
 "settings. Invalid or inappropriate values may cause severe performance "
 "and/or memory problems."
 msgstr ""
+"Tista' tagħżel jekk tridx li LimeWire jieħu ħsieb il-BitTorrent protocol "
+"settings. Huwa wisq rekomandat li LimeWire jieħu ħsieb dawn is-settings. "
+"Valuri invalidi jew mhux addattati jistgħu jikkaġunaw problemi fil-"
+"performance u/jew fil-memorja."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:63
 msgid ""
@@ -542,22 +576,26 @@ msgid ""
 "memory problems. Unless you really know what you're doing, it is highly "
 "recommended that you let LimeWire manage these settings."
 msgstr ""
+"Valuri invalidi jew mhux xierqa jistgħu jikkaġunaw problemi fil-performance "
+"u/jew fil-memorja. Sakemm verament taf x'inti tagħmel, huwa wisq rekomandat "
+"li tħalli 'l LimeWire jieħu ħsieb dawn is-settings."
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:77
 msgid "Let LimeWire manage my BitTorrent settings. (Recommended)"
 msgstr ""
+"Ħalli lil LimeWire jieħu ħsieb il-BitTorrent settings tiegħi. (Rakomandat)"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:85
 msgid "Maximum uploads per torrent"
-msgstr ""
+msgstr "Uplowds massimi għal kull torrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:91
 msgid "Minimum uploads per torrent"
-msgstr ""
+msgstr "Uplowds minimi għal kull torrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:97
 msgid "Safe chunk verification"
-msgstr ""
+msgstr "Safe chunk Verification"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:103
 msgid "Experimental disk access"
@@ -592,46 +630,46 @@ msgid ""
 "about the error."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:442
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:443
 msgid "Send"
 msgstr "ibat"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:453
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:454
 msgid "Review"
 msgstr "ara"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:469
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:470
 msgid "Discard"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:486
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 msgid "Always Send Immediately"
 msgstr "dejjem ibat immedjatament"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
 msgid "Always Ask For Review"
 msgstr "sejjem staqsi ghal reviw"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:489
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Always Discard All Errors"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:587
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:588
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
 "bug report. For further help and to aid with debugging, please visit "
 "www.limewire.com and click 'Support'. Thank you."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:616
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:617
 msgid "Copy Report"
 msgstr "copy right"
 
 #. Add an OK button out of the window.
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:624
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:625
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:88
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:187
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:343

@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2008-04-04 23:30-0400\n"
-"PO-Revision-Date: 2008-02-12 14:20+0000\n"
-"Last-Translator: espada12 <Unknown>\n"
+"POT-Creation-Date: 2008-04-14 14:25-0400\n"
+"PO-Revision-Date: 2008-04-09 17:16+0000\n"
+"Last-Translator: Radius Greenhill <Unknown>\n"
 "Language-Team: Thai <th@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Launchpad-Export-Date: 2008-04-08 07:33+0000\n"
+"X-Launchpad-Export-Date: 2008-04-15 04:05+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
@@ -192,7 +192,7 @@ msgstr "กำลังโหลดไฟล์เก่า"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:456
 msgid "Attaching LimeWire Store Listeners..."
-msgstr ""
+msgstr "กำลังเพิ่ม  คลังผู้ใช้ LimeWire..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:461
 #, fuzzy
@@ -229,7 +229,6 @@ msgstr "กำลังเข้าสู่ตัวเครือข่าย
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
-#, fuzzy
 msgid "All Types"
 msgstr "ทุกประเภท"
 
@@ -238,14 +237,12 @@ msgid "Documents"
 msgstr "เอกสาร"
 
 #: core/com/limegroup/gnutella/MediaType.java:47
-#, fuzzy
 msgid "Programs"
 msgstr "โปรแกรม"
 
 #: core/com/limegroup/gnutella/MediaType.java:48
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:87
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
-#, fuzzy
 msgid "Audio"
 msgstr "เสียง"
 
@@ -253,7 +250,6 @@ msgstr "เสียง"
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
-#, fuzzy
 msgid "Video"
 msgstr "วิดีโอ"
 
@@ -266,7 +262,7 @@ msgstr "ภาพ"
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:124
 #, java-format
 msgid "Could not process bad MAGNET link {0}"
-msgstr ""
+msgstr "ไม่สามารถประมวลผลการเชื่อมโยงแม็กเน็ต {0}"
 
 #. show warning but proceed
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:156
@@ -280,18 +276,18 @@ msgstr "การเชื่อมโยงแมกเนตล้มเหล
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:167
 #, java-format
 msgid "You have already downloaded {0}"
-msgstr ""
+msgstr "ดาวน์โหลดเสร็จสิ้น {0}"
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:172
 #, java-format
 msgid "You are already downloading this file to {0}"
-msgstr ""
+msgstr "คุณได้โหลดไฟล์นี้ไปที่ {0} แล้ว"
 
 #: core/com/limegroup/gnutella/settings/StartupAdSettings.java:41
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:88
 #: gui/com/limegroup/gnutella/gui/startup/StartupBanner.java:19
 msgid "Upgrade to PRO"
-msgstr ""
+msgstr "อัพเกรดเป็น PRO"
 
 #: core/com/limegroup/gnutella/settings/StartupAdSettings.java:42
 #: gui/com/limegroup/gnutella/gui/startup/StartupBanner.java:20
@@ -300,11 +296,14 @@ msgid ""
 "love the improved performance of PRO. Thank you for helping keep the "
 "Internet open by running LimeWire."
 msgstr ""
+"เพื่อการดาวน์โหลดได้อย่างเต็มที่, ใช้  LimeWire PRO. "
+"เรารับประกันว่าคุณจะต้องชื่นชอบในประสิทธิภาพที่เพิ่มขึ้นใน PRO. "
+"ขอบคุณที่ช่วยเปิดอินเตอร์เน็ตด้วยการใช้ LimeWire."
 
 #: core/com/limegroup/gnutella/settings/StartupAdSettings.java:43
 #: gui/com/limegroup/gnutella/gui/startup/StartupBanner.java:21
 msgid "Upgrade to LimeWire PRO?"
-msgstr ""
+msgstr "อัพเกรดเป็น LimeWire Pro?"
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:71
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:41
@@ -366,9 +365,8 @@ msgstr "LimeWire ใช้เงินทุนในการพัฒนา �
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:131
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:282
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:49
-#, fuzzy
 msgid "Title"
-msgstr "ชื่อ"
+msgstr "หัวเรื่อง"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:89
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:126
@@ -382,16 +380,14 @@ msgstr "ศิลปิน"
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:286
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:58
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:65
-#, fuzzy
 msgid "Album"
 msgstr "อัลบั้ม"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:91
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:288
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:98
-#, fuzzy
 msgid "Genre"
-msgstr "กลุ่ม"
+msgstr "ชนิด"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:92
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:290
@@ -413,41 +409,41 @@ msgstr "ประเภท"
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:294
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:57
 msgid "Length"
-msgstr ""
+msgstr "ความยาว"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:95
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:111
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:292
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:123
 msgid "Year"
-msgstr ""
+msgstr "ปี"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:96
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
 msgid "Language"
-msgstr ""
+msgstr "ภาษา"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:97
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:121
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:296
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:82
 msgid "Bitrate"
-msgstr ""
+msgstr "บิทเรท"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:98
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:115
 msgid "Comments"
-msgstr ""
+msgstr "ข้อคิดเห็น"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:99
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:116
 msgid "Action"
-msgstr ""
+msgstr "การกระทำ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
 msgid "Copyright"
-msgstr ""
+msgstr "ลิขสิทธิ์"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:101
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:118
@@ -455,48 +451,48 @@ msgstr ""
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:135
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:141
 msgid "License Type"
-msgstr ""
+msgstr "ชนิดของใบอนุญาติ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:105
 msgid "Director"
-msgstr ""
+msgstr "ผู้กำกับ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:106
 msgid "Producer"
-msgstr ""
+msgstr "ผู้ผลิต"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:107
 msgid "Studio"
-msgstr ""
+msgstr "สตูดิโอ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
 msgid "Stars"
-msgstr ""
+msgstr "ดารา"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
-msgstr ""
+msgstr "หัวข้อย่อย"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:114
 msgid "Rating"
-msgstr ""
+msgstr "อันดับ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:119
 msgid "Height"
-msgstr ""
+msgstr "ความสูง"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:120
 msgid "Width"
-msgstr ""
+msgstr "ความกว้าง"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:85
 msgid "Image"
-msgstr ""
+msgstr "รูปภาพ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:125
 msgid "Description"
-msgstr ""
+msgstr "คำอธิบาย"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:127
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:134
@@ -505,25 +501,25 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:263
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:42
 msgid "License"
-msgstr ""
+msgstr "ใบอนุญาติ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:130
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:71
 msgid "Document"
-msgstr ""
+msgstr "เอกสาร"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:132
 msgid "Topic"
-msgstr ""
+msgstr "หัวข้อ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:133
 msgid "Author"
-msgstr ""
+msgstr "ผู้ประพันธ์"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:137
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:78
 msgid "Application"
-msgstr ""
+msgstr "แอพพลิเคชั่น"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:138
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:355
@@ -532,23 +528,23 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:53
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:219
 msgid "Name"
-msgstr ""
+msgstr "ชื่อ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:139
 msgid "Publisher"
-msgstr ""
+msgstr "ผู้จัดพิมพ์"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:140
 msgid "Platform"
-msgstr ""
+msgstr "ระบบปฏิบัติการ"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:105
 msgid "The selected .torrent file may contain a security hazard."
-msgstr ""
+msgstr "ไฟล์ .torrent ที่เลือกอาจมีความเสี่ยงในด้านความปลอดภัย"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:107
 msgid "LimeWire could not download a .torrent file from the provided URL."
-msgstr ""
+msgstr "LimeWire ไม่สามารถดาวน์โหลดไฟล์ .torrent จาก URL นี้"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:35
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:566
@@ -556,6 +552,8 @@ msgid ""
 "If you stop this upload, the torrent download will stop. Are you sure you "
 "want to do this?"
 msgstr ""
+"ถ้าคุณหยุดการดาวน์โหลด การดาวน์โหลดทอร์เรนต์จะถูกหยุด "
+"คุณแน่ใจหรือไม่ว่าจะกระทำสิ่งนี้"
 
 #: gui/com/limegroup/bittorrent/gui/TorrentUploadCanceller.java:38
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:571
@@ -576,11 +574,11 @@ msgstr ""
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/AutoStartTorrentsPaneItem.java:26
 msgid "Start automatically"
-msgstr ""
+msgstr "เริ่มโดยอัติโนมัติ"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:36
 msgid "BitTorrent Settings"
-msgstr ""
+msgstr "ตั้งค่า BitTorrent"
 
 #: gui/com/limegroup/bittorrent/gui/options/panes/BittorrentPaneItem.java:38
 msgid ""
@@ -619,7 +617,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:83
 msgid "Internal Error"
-msgstr ""
+msgstr "ข้อผิดพลาดภายใน"
 
 #. *
 #. * The initial text displayed in the user comments area.
@@ -646,46 +644,46 @@ msgid ""
 "about the error."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:442
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:443
 msgid "Send"
-msgstr ""
+msgstr "ส่ง"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:453
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:454
 msgid "Review"
-msgstr ""
+msgstr "บทวิจารณ์"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:469
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:470
 msgid "Discard"
-msgstr ""
+msgstr "ละทิ้ง"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:486
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 msgid "Always Send Immediately"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
 msgid "Always Ask For Review"
-msgstr ""
+msgstr "ร้องขอบทวิจารณ์เสมอ"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:489
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Always Discard All Errors"
-msgstr ""
+msgstr "ละทิ้งข้อผิดพลาดทุกอย่างเสมอ"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:587
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:588
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
 "bug report. For further help and to aid with debugging, please visit "
 "www.limewire.com and click 'Support'. Thank you."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:616
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:617
 msgid "Copy Report"
-msgstr ""
+msgstr "คัดลอกรายงาน"
 
 #. Add an OK button out of the window.
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:624
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:625
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:88
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:187
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:343
@@ -696,15 +694,15 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:144
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:221
 msgid "OK"
-msgstr ""
+msgstr "ตกลง"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:51
 msgid "Automatically Scroll"
-msgstr ""
+msgstr "เลื่อนสกรอลอัติโนมัติ"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:64
 msgid "About LimeWire"
-msgstr ""
+msgstr "เกี่ยวกับ LimeWire"
 
 #. set up limewire version label
 #. *
@@ -714,7 +712,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:262
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:35
 msgid "LimeWire"
-msgstr ""
+msgstr "LimeWire"
 
 #. set up close button
 #. *
@@ -723,11 +721,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:104
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:79
 msgid "Close"
-msgstr ""
+msgstr "ปิด"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:106
 msgid "Close This Window"
-msgstr ""
+msgstr "ปิดหน้าต่างนี้"
 
 #. introduction
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:177
@@ -820,7 +818,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:606
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:74
 msgid "Select All"
-msgstr ""
+msgstr "เลือกทั้งหมด"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:608
 msgid "Marks all Items as Selected"
@@ -828,7 +826,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:626
 msgid "Deselect All"
-msgstr ""
+msgstr "ไม่เลือกทั้งหมด"
 
 #: gui/com/limegroup/gnutella/gui/CheckBoxList.java:628
 msgid "Deselects all Items in the List"
@@ -836,38 +834,38 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/ClearableAutoCompleteTextField.java:316
 msgid "Clear History"
-msgstr ""
+msgstr "ล้างประวัติ"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:165
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:40
 msgid "Apply"
-msgstr ""
+msgstr "นำไปใช้"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:172
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:817
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:50
 msgid "Clear"
-msgstr ""
+msgstr "ล้าง"
 
 #: gui/com/limegroup/gnutella/gui/Console.java:179
 msgid "Save"
-msgstr ""
+msgstr "บันทึก"
 
 #. default the delay time to zero (ie, live
 #. updates).
 #: gui/com/limegroup/gnutella/gui/Console.java:188
 msgid "Delay: "
-msgstr ""
+msgstr "หน่วงเวลา "
 
 #: gui/com/limegroup/gnutella/gui/Console.java:618
 msgid "Save As"
-msgstr ""
+msgstr "บันทึกเป็น"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:121
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:96
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:174
 msgid "What's New"
-msgstr ""
+msgstr "มีอะไรใหม่บ้าง"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:122
 msgid "Creative Commons"
@@ -909,7 +907,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:356
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:366
 msgid "Yes"
-msgstr ""
+msgstr "ใช่"
 
 #. *
 #. * Constant for when the user selects the no button
@@ -919,7 +917,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:359
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:369
 msgid "No"
-msgstr ""
+msgstr "ไม่ใช่"
 
 #. *
 #. * Constant for when the user selects the cancel button
@@ -942,7 +940,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:244
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditor.java:136
 msgid "Cancel"
-msgstr ""
+msgstr "ยกเลิก"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:81
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:99
@@ -952,7 +950,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:446
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:465
 msgid "Select Folder"
-msgstr ""
+msgstr "เลือกแฟ้ม"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:100
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:122
@@ -967,15 +965,15 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:487
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:509
 msgid "Select"
-msgstr ""
+msgstr "เลือก"
 
 #: gui/com/limegroup/gnutella/gui/FileChooserHandler.java:824
 msgid "All Folders"
-msgstr ""
+msgstr "ทุกแฟ้ม"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:48
 msgid "View My Shared Files."
-msgstr ""
+msgstr "ดูไฟล์ที่แบ่งปันของฉัน"
 
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:81
 #, java-format
@@ -996,28 +994,28 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:106
 #: gui/com/limegroup/gnutella/gui/FileManagerWarningManager.java:107
 msgid "Do not display this message again."
-msgstr ""
+msgstr "ไม่ต้องแสดงข้อความนี้อีก"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:36
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:81
 msgid "Dial Up"
-msgstr ""
+msgstr "Dial Up"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:38
 msgid "Broadband"
-msgstr ""
+msgstr "บอร์ดแบรนด์"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:40
 msgid "T1"
-msgstr ""
+msgstr "T1"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:42
 msgid "T3 or Higher"
-msgstr ""
+msgstr "T3 หรือสูงกว่านั้น"
 
 #: gui/com/limegroup/gnutella/gui/GUIConstants.java:44
 msgid "Ethernet"
-msgstr ""
+msgstr "อีเทอร์เน็ต"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:117
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:1516
@@ -1031,23 +1029,23 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:126
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:25
 msgid "&Search"
-msgstr ""
+msgstr "ค้นหา"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:127
 msgid "&Monitor"
-msgstr ""
+msgstr "เฝ้าดู"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:128
 msgid "&Connections"
-msgstr ""
+msgstr "การเชื่อมต่อ"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:129
 msgid "&Library"
-msgstr ""
+msgstr "ไลบราลี"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:130
 msgid "C&onsole"
-msgstr ""
+msgstr "คอนโซล"
 
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:131
 msgid "Lo&gging"
@@ -1109,32 +1107,32 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:135
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:224
 msgid "KB"
-msgstr ""
+msgstr "กิโลไบต์"
 
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:137
 msgid "MB"
-msgstr ""
+msgstr "เมกะไบต์"
 
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:139
 msgid "GB"
-msgstr ""
+msgstr "กิกะไบต์"
 
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:141
 msgid "TB"
-msgstr ""
+msgstr "เทระไบต์"
 
 #: gui/com/limegroup/gnutella/gui/GUIUtils.java:143
 msgid "KB/s"
-msgstr ""
+msgstr "กิโลไบต์/วินาที"
 
 #. Load up the HTML engine.
 #: gui/com/limegroup/gnutella/gui/Initializer.java:339
 msgid "Loading HTML Engine..."
-msgstr ""
+msgstr "กำลังโหลด HTML เอนจิ้น..."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:387
 msgid "Loading User Interface..."
-msgstr ""
+msgstr "กำลังโหลดส่วนติดต่อผู้ใช้..."
 
 #: gui/com/limegroup/gnutella/gui/Initializer.java:406
 msgid "Loading Core Components..."
@@ -1143,7 +1141,7 @@ msgstr ""
 #. Initialize IconManager.
 #: gui/com/limegroup/gnutella/gui/Initializer.java:459
 msgid "Loading Icons..."
-msgstr ""
+msgstr "กำลังโหลดไอคอน..."
 
 #. Touch the I18N stuff to ensure it loads properly.
 #: gui/com/limegroup/gnutella/gui/Initializer.java:468
@@ -1191,22 +1189,22 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/MessageService.java:212
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:901
 msgid "Error"
-msgstr ""
+msgstr "มีข้อผิดพลาด"
 
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:67
 msgid "Input"
-msgstr ""
+msgstr "อินพุต"
 
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:93
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:44
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:46
 msgid "Apply Operation"
-msgstr ""
+msgstr "ใช้การดำเนินการนี้"
 
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:94
 #: gui/com/limegroup/gnutella/gui/options/OptionsButtonPanel.java:45
 msgid "Cancel Operation"
-msgstr ""
+msgstr "ยกเลิกการดำเนินการ"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:70
 msgid ""
@@ -1217,11 +1215,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:151
 msgid "Upgrade Java"
-msgstr ""
+msgstr "อัพเกรด Java"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:168
 msgid "More Information"
-msgstr ""
+msgstr "ข้อมูลเพิ่มเติม"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:169
 #, java-format
@@ -1230,11 +1228,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:177
 msgid "Remind Me Later"
-msgstr ""
+msgstr "เตือนฉันทีหลัง"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:184
 msgid "Do not Show Again"
-msgstr ""
+msgstr "อย่าแสดงอีก"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:173
 msgid "LimeWire must be restarted for the new language to take effect."
@@ -1242,19 +1240,19 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:186
 msgid "Change Language"
-msgstr ""
+msgstr "เปลี่ยนภาษา"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:189
 msgid "Help Translate LimeWire"
-msgstr ""
+msgstr "ช่วยแปลภาษา LimeWire"
 
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:190
 msgid "Show Language in status bar"
-msgstr ""
+msgstr "แสดงภาษาในแถบสถานะ"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:383
 msgid "Verify"
-msgstr ""
+msgstr "ยืนยันความถูกต้อง"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:427
 msgid "LimeWire was unable to locate the details of this license."
@@ -1280,7 +1278,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:505
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:573
 msgid "License Details:"
-msgstr ""
+msgstr "รายละเอียดใบอนุญาติ:"
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:452
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:578
@@ -1340,28 +1338,28 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:593
 msgid "License Details"
-msgstr ""
+msgstr "รายละเอียดใบอนุญาติ"
 
 #. *
 #. * The undo action.
 #. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:29
 msgid "Undo"
-msgstr ""
+msgstr "เลิกทำ"
 
 #. *
 #. * The cut action
 #. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:38
 msgid "Cut"
-msgstr ""
+msgstr "ตัด"
 
 #. *
 #. * The copy action.
 #. 
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:47
 msgid "Copy"
-msgstr ""
+msgstr "คัดลอก"
 
 #. *
 #. * The paste action.
@@ -1369,7 +1367,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/LimeTextField.java:56
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:224
 msgid "Paste"
-msgstr ""
+msgstr "วาง"
 
 #. *
 #. * The delete action.
@@ -1379,12 +1377,12 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:789
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1267
 msgid "Delete"
-msgstr ""
+msgstr "ลบ"
 
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:229
 #: gui/com/limegroup/gnutella/gui/actions/SelectSharedDirectoryAction.java:26
 msgid "Add"
-msgstr ""
+msgstr "เพิ่ม"
 
 #. remove
 #: gui/com/limegroup/gnutella/gui/ListEditor.java:282
@@ -1395,11 +1393,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:224
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:49
 msgid "Remove"
-msgstr ""
+msgstr "เอาออก"
 
 #: gui/com/limegroup/gnutella/gui/MessageResourceHandler.java:10
 msgid "Download Page"
-msgstr ""
+msgstr "ดาวน์โหลดหน้านี้"
 
 #: gui/com/limegroup/gnutella/gui/MessageResourceHandler.java:14
 msgid "File Listing for"
@@ -1418,7 +1416,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/MessageService.java:215
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:128
 msgid "Warning"
-msgstr ""
+msgstr "คำเตือน"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:142
 #: gui/com/limegroup/gnutella/gui/MessageService.java:155
@@ -1437,11 +1435,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:25
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:264
 msgid "Message"
-msgstr ""
+msgstr "ข้อความ"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:621
 msgid "Do not display this message again"
-msgstr ""
+msgstr "อย่าแสดงข้อความนี้อีก"
 
 #: gui/com/limegroup/gnutella/gui/MessageService.java:638
 msgid "Always use this answer"
@@ -1454,7 +1452,7 @@ msgstr ""
 #. Create the "Show" check box
 #: gui/com/limegroup/gnutella/gui/MonitorView.java:64
 msgid "Show Incoming Searches"
-msgstr ""
+msgstr "แสดงการค้นหาที่เข้ามา"
 
 #: gui/com/limegroup/gnutella/gui/MonitorView.java:77
 msgid ""
@@ -1464,11 +1462,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/MonitorView.java:85
 msgid "Show Last"
-msgstr ""
+msgstr "แสดงอันดับสุดท้าย"
 
 #: gui/com/limegroup/gnutella/gui/MonitorView.java:108
 msgid "Searches"
-msgstr ""
+msgstr "ค้นหา"
 
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:58
 #, java-format
@@ -1530,14 +1528,14 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/SplashWindow.java:108
 msgid "Loading LimeWire..."
-msgstr ""
+msgstr "กำลังโหลด LimeWire..."
 
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:94
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:104
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:43
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:218
 msgid "Add..."
-msgstr ""
+msgstr "เพิ่ม..."
 
 #: gui/com/limegroup/gnutella/gui/StandardListEditor.java:331
 msgid "Add New List Item"
@@ -1569,11 +1567,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:596
 msgid "Connection"
-msgstr ""
+msgstr "การเชื่อมต่อ"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:599
 msgid "Disconnected"
-msgstr ""
+msgstr "ยกเลิกการเชื่อมต่อ"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:600
 msgid ""
@@ -1583,7 +1581,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:603
 msgid "Starting"
-msgstr ""
+msgstr "กำลังเริ่มต้น"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:604
 msgid "You are currently connecting to the network"
@@ -1591,7 +1589,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:607
 msgid "Poor"
-msgstr ""
+msgstr "ด้อยคุณภาพ"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:608
 msgid ""
@@ -1600,7 +1598,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:611
 msgid "Fair"
-msgstr ""
+msgstr "ค่อนข้างดี"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:612
 msgid "Your connection to the network is getting stronger"
@@ -1608,7 +1606,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:615
 msgid "Good"
-msgstr ""
+msgstr "ดี"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:616
 msgid ""
@@ -1618,7 +1616,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:620
 msgid "Excellent"
-msgstr ""
+msgstr "ดีเยี่ยม"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:621
 msgid "Your connection to the network is very strong"
@@ -1639,7 +1637,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:633
 msgid "Waking Up"
-msgstr ""
+msgstr "ลุกขึ้น"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:634
 msgid "LimeWire is waking up from sleep mode"
@@ -1691,11 +1689,11 @@ msgstr[1] ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:993
 msgid "Downloads:"
-msgstr ""
+msgstr "ดาวน์โหลด:"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:1000
 msgid "Uploads:"
-msgstr ""
+msgstr "อัพโหลด:"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:1007
 msgid "Total Downstream:"
@@ -1710,36 +1708,36 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:53
 msgid "Tip of the Day"
-msgstr ""
+msgstr "คำแนะนำประจำวัน"
 
 #. *
 #. * The 'Did You Know' intro.
 #. 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:58
 msgid "Did You Know..."
-msgstr ""
+msgstr "คุณรู้หรือไม่..."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:64
 msgid "Show Tips At Startup"
-msgstr ""
+msgstr "แสดงเมื่อเริ่มโปรแกรม"
 
 #. *
 #. * 'Next'.
 #. 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:69
 msgid "Next Tip"
-msgstr ""
+msgstr "คำแนะนำต่อไป"
 
 #. *
 #. * 'Previous'.
 #. 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:74
 msgid "Previous Tip"
-msgstr ""
+msgstr "คำแนะนำก่อนหน้า"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:339
 msgid "Loading tips..."
-msgstr ""
+msgstr "กำลังโหลดคำแนะนำ..."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:10
 msgid ""
@@ -2506,15 +2504,15 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:52
 msgid "New Version Available!"
-msgstr ""
+msgstr "มีรุ่นใหม่แล้ว!"
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:115
 msgid "A new version of LimeWire is available."
-msgstr ""
+msgstr "รุ่นใหม่ของ LimeWire พร้อมให้ใช้แล้ว"
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:161
 msgid "Update Now"
-msgstr ""
+msgstr "ปรับปรุงเดี๋ยวนี้"
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:164
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:197
@@ -2530,11 +2528,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:175
 msgid "Update Ready"
-msgstr ""
+msgstr "พร้อมปรับปรุงแล้ว"
 
 #: gui/com/limegroup/gnutella/gui/UpdateDialog.java:194
 msgid "Update Later"
-msgstr ""
+msgstr "ปรับปรุงหลังจากนี้"
 
 #: gui/com/limegroup/gnutella/gui/UpdatePanel.java:20
 #: gui/com/limegroup/gnutella/gui/UpdatePanel.java:38
@@ -2544,34 +2542,34 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:199
 #: gui/com/limegroup/gnutella/gui/startup/StartupBanner.java:23
 msgid "Get LimeWire PRO Now"
-msgstr ""
+msgstr "รับ LimeWire PRO เดี่ยวนี้"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:217
 #: gui/com/limegroup/gnutella/gui/startup/StartupBanner.java:24
 msgid "Why"
-msgstr ""
+msgstr "ทำไม"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:219
 #: gui/com/limegroup/gnutella/gui/startup/StartupBanner.java:25
 msgid "What does PRO give me?"
-msgstr ""
+msgstr "PRO จะให้อะไรกับฉัน?"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:236
 #: gui/com/limegroup/gnutella/gui/startup/StartupBanner.java:26
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:201
 msgid "Later"
-msgstr ""
+msgstr "เอาไว้ทีหลัง"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:238
 #: gui/com/limegroup/gnutella/gui/startup/StartupBanner.java:27
 msgid "Get LimeWire PRO Later"
-msgstr ""
+msgstr "รับ LimeWire PRO คราวหลัง"
 
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:341
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:73
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:72
 msgid "Complete"
-msgstr ""
+msgstr "เสร็จสิ้น"
 
 #: gui/com/limegroup/gnutella/gui/VisualConnectionCallback.java:554
 #, java-format
@@ -2643,14 +2641,14 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:174
 msgid "Open:"
-msgstr ""
+msgstr "เปิด:"
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:235
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:239
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:118
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:200
 msgid "Browse..."
-msgstr ""
+msgstr "มองหา..."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:256
 msgid ""
@@ -2711,11 +2709,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:29
 #: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:35
 msgid "Share New File..."
-msgstr ""
+msgstr "แบ่งปันไฟล์ใหม่..."
 
 #: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:36
 msgid "Share"
-msgstr ""
+msgstr "แบ่งปัน"
 
 #: gui/com/limegroup/gnutella/gui/actions/ShareFileSpeciallyAction.java:53
 #, java-format
@@ -2730,7 +2728,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/ShareNewFolderAction.java:14
 msgid "Share New Folder..."
-msgstr ""
+msgstr "แบ่งปันแฟ้มใหม่..."
 
 #: gui/com/limegroup/gnutella/gui/actions/ShareNewFolderAction.java:15
 msgid "Opens a Window and Lets You Choose a New Folder to Share"
@@ -2738,7 +2736,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/ShowInLibraryAction.java:24
 msgid "Show in Library"
-msgstr ""
+msgstr "แสดงในไลบราลี"
 
 #: gui/com/limegroup/gnutella/gui/actions/ShowInLibraryAction.java:26
 msgid "Show Download in Library"
@@ -2750,7 +2748,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:53
 msgid "Block Host"
-msgstr ""
+msgstr "บลอคโฮสต์"
 
 #. *
 #. * Constant for the locale-specific resource key for the label of the
@@ -2758,7 +2756,7 @@ msgstr ""
 #. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:59
 msgid "Send Message"
-msgstr ""
+msgstr "ส่งข้อความ"
 
 #. *
 #. * Constant for the locale-specific resource key for the toolTip of the
@@ -2778,7 +2776,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:73
 msgid "Chatting with"
-msgstr ""
+msgstr "พูดคุยกับ"
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:75
 msgid "Host is unavailable"
@@ -2786,7 +2784,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:77
 msgid "You"
-msgstr ""
+msgstr "คุณ"
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:231
 msgid "A connection error has occurred"
@@ -2823,13 +2821,13 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:52
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:227
 msgid "Host"
-msgstr ""
+msgstr "โอสต์"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:55
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:371
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:243
 msgid "Status"
-msgstr ""
+msgstr "สถานะ"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:58
 msgid "Messages (I/O)"
@@ -2869,20 +2867,20 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:85
 msgid "Protocol"
-msgstr ""
+msgstr "โปรโตคอล"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:88
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:411
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:283
 msgid "Vendor/Version"
-msgstr ""
+msgstr "ผู้จำหน่าย/รุ่น"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:91
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:403
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:31
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:275
 msgid "Time"
-msgstr ""
+msgstr "เวลา"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:94
 msgid "Compressed (I/O)"
@@ -3107,20 +3105,20 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:152
 msgid "Pausing..."
-msgstr ""
+msgstr "กำลังหยุด..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:158
 #: gui/com/limegroup/gnutella/gui/download/PriorityHolder.java:39
 msgid "Paused"
-msgstr ""
+msgstr "หยุดชั่วคราว"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:162
 msgid "Content Removed"
-msgstr ""
+msgstr "เนื้อหาถูกเอาออกแล้ว"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:166
 msgid "Resuming..."
-msgstr ""
+msgstr "กำลังดำเนินการต่อ..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:170
 msgid "Downloading .torrent file..."
@@ -3210,19 +3208,19 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:63
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:235
 msgid "Size"
-msgstr ""
+msgstr "ขนาด"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:379
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:359
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:73
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:251
 msgid "Chat"
-msgstr ""
+msgstr "พูดคุย"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:387
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:259
 msgid "Progress"
-msgstr ""
+msgstr "ความคืบหน้า"
 
 #. addOption(STORE_KEY, STORE_ADVANCED_KEY, GUIMediator.getStringResource("Template"), StoreDirectoryTemplatePaneItem.class);
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:395
@@ -3232,7 +3230,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:81
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:267
 msgid "Speed"
-msgstr ""
+msgstr "ความเร็ว"
 
 #. connectionsPane.add(new AutoConnectPaneItem("AUTO_CONNECT"));
 #. connectionsPane.add(new AutoConnectActivePaneItem("AUTO_CONNECT_ACTIVE"));
@@ -3240,12 +3238,12 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:918
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:345
 msgid "BitTorrent"
-msgstr ""
+msgstr "บิททอร์เรนต์"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:201
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:332
 msgid "Downloads"
-msgstr ""
+msgstr "ดาวน์โหลด"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:241
 msgid "Loading Download Window..."
@@ -3259,25 +3257,25 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:278
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:801
 msgid "Find Sources"
-msgstr ""
+msgstr "ค้นหาแหล่งข้อมูล"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:280
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:803
 msgid "Try to Find Additional Sources for Downloads"
-msgstr ""
+msgstr "ลองหาแหล่งข้อมูลเพิ่มเติมสำหรับการดาวน์โหลด"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:284
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:806
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:966
 msgid "Resume Download"
-msgstr ""
+msgstr "ดำเนินการดาวน์โหลดต่อ"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:286
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:808
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:968
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1323
 msgid "Resume"
-msgstr ""
+msgstr "ดำเนินการต่อ"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:288
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:810
@@ -3518,7 +3516,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:229
 msgid "Continue"
-msgstr ""
+msgstr "ดำเนินต่อไป"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:243
 msgid "Same File Already In Library"
@@ -3531,7 +3529,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/download/MagnetDownloaderFactory.java:32
 #: gui/com/limegroup/gnutella/gui/search/MagnetClipboardListener.java:282
 msgid "No Filename"
-msgstr ""
+msgstr "ไม่มีชื่อไฟล์"
 
 #: gui/com/limegroup/gnutella/gui/download/PriorityHolder.java:33
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:60
@@ -3667,13 +3665,13 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirDataLine.java:49
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:30
 msgid "Save Folder"
-msgstr ""
+msgstr "บันทึกแฟ้ม"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:121
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:146
 #: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:33
 msgid "Shared Folders"
-msgstr ""
+msgstr "แบ่งปันแฟ้ม"
 
 #. These need another message.
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:189
@@ -3723,22 +3721,22 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:468
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:255
 msgid "Next >>"
-msgstr ""
+msgstr "ต่อไป >>"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:479
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:266
 msgid "<< Back"
-msgstr ""
+msgstr "<< กลับ"
 
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:490
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:277
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:164
 msgid "Finish"
-msgstr ""
+msgstr "เสร็จสิ้น"
 
 #: gui/com/limegroup/gnutella/gui/init/WelcomeWindow.java:20
 msgid "Welcome"
-msgstr ""
+msgstr "ยินดีต้อนรับ"
 
 #: gui/com/limegroup/gnutella/gui/init/WelcomeWindow.java:22
 msgid ""
@@ -3807,19 +3805,19 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/logging/LoggingDataLine.java:18
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:47
 msgid "Icon"
-msgstr ""
+msgstr "ไอคอน"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:152
 #: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:132
 msgid "Path"
-msgstr ""
+msgstr "พาธ"
 
 #. upload options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:155
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:335
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:58
 msgid "Uploads"
-msgstr ""
+msgstr "อัพโหลด"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:158
 msgid "Hits"
@@ -3835,7 +3833,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:171
 msgid "Shared"
-msgstr ""
+msgstr "แบ่งปัน"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:475
 msgid "This file is shared."
@@ -3859,7 +3857,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:371
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:19
 msgid "Sharing"
-msgstr ""
+msgstr "การแบ่งปัน"
 
 #. advanced options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:280
@@ -3869,7 +3867,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:397
 #: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:201
 msgid "Advanced"
-msgstr ""
+msgstr "ขั้นสูง"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:674
 msgid ""
@@ -3961,7 +3959,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1406
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:859
 msgid "Share Folder"
-msgstr ""
+msgstr "แบ่งปันแฟ้ม"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1436
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:800
@@ -3997,7 +3995,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:784
 msgid "Shared Files"
-msgstr ""
+msgstr "ไฟล์ที่แบ่งปัน"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:811
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:374
@@ -4018,7 +4016,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:901
 msgid "Refresh"
-msgstr ""
+msgstr "รีเฟรช"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:903
 msgid "Reload Shared Folders"
@@ -4232,7 +4230,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:27
 msgid "&Tools"
-msgstr ""
+msgstr "เครื่องมือ"
 
 #: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:39
 msgid "&Options"
@@ -4366,7 +4364,7 @@ msgstr ""
 #. for saving gnutella
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:315
 msgid "Saving"
-msgstr ""
+msgstr "กำลังเซฟ"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:316
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:321
@@ -4374,7 +4372,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:346
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:385
 msgid "Basic"
-msgstr ""
+msgstr "พื้นฐาน"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
 msgid "Types"
@@ -4401,19 +4399,19 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:357
 msgid "Updates"
-msgstr ""
+msgstr "ปรับปรุง"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:361
 msgid "Player"
-msgstr ""
+msgstr "เครื่องเล่น"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:363
 msgid "Status Bar"
-msgstr ""
+msgstr "แถบสถานะ"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:367
 msgid "iTunes"
-msgstr ""
+msgstr "iTunes"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:369
 #: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:15
@@ -4454,7 +4452,7 @@ msgstr ""
 #. filter options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:390
 msgid "Filters"
-msgstr ""
+msgstr "ตัวกรองข้อมูล"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:391
 msgid "Content"
@@ -4467,11 +4465,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:613
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
 msgid "Junk"
-msgstr ""
+msgstr "ขยะ"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:393
 msgid "Keywords"
-msgstr ""
+msgstr "คีย์เวิร์ด"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:394
 msgid "Hosts"
@@ -4483,11 +4481,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:399
 msgid "Firewall"
-msgstr ""
+msgstr "ไฟร์วอลล์"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:400
 msgid "Proxy"
-msgstr ""
+msgstr "พร็อกซี่"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:401
 #: gui/com/limegroup/gnutella/gui/options/panes/NetworkInterfacePaneItem.java:33
@@ -4501,7 +4499,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:405
 msgid "Performance"
-msgstr ""
+msgstr "ประสิทธิภาพ"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:407
 msgid "System Boot"
@@ -6056,24 +6054,24 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:78
 msgid "Location"
-msgstr ""
+msgstr "ตำแหน่งที่ตั้ง"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:83
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:82
 msgid "Vendor"
-msgstr ""
+msgstr "ผู้จำหน่าย"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:88
 msgid "Created"
-msgstr ""
+msgstr "สร้างแล้ว"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:93
 msgid "Junk Rating"
-msgstr ""
+msgstr "อันดับขยะ"
 
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:267
 msgid "Media"
-msgstr ""
+msgstr "สื่อ"
 
 #: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:136
 #, java-format
@@ -6102,11 +6100,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:82
 msgid "My Extensions"
-msgstr ""
+msgstr "ส่วนขยายไฟล์ของฉัน"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:83
 msgid "Other"
-msgstr ""
+msgstr "อื่นๆ"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:292
 msgid "To allow selection enable sharing of sensitive types."
@@ -6199,7 +6197,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:50
 msgid "Details"
-msgstr ""
+msgstr "รายละเอียด"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:122
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:236
@@ -6212,16 +6210,16 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:320
 msgid "Go"
-msgstr ""
+msgstr "ไป"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:366
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:134
 msgid "Back"
-msgstr ""
+msgstr "กลับ"
 
 #: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:378
 msgid "Forward"
-msgstr ""
+msgstr "ไปข้างหน้า"
 
 #: gui/com/limegroup/gnutella/gui/tables/ColumnSelectionMenu.java:46
 msgid "Revert To Default"
@@ -6253,7 +6251,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/tabs/ConsoleTab.java:28
 msgid "Console"
-msgstr ""
+msgstr "คอนโซล"
 
 #: gui/com/limegroup/gnutella/gui/tabs/ConsoleTab.java:29
 msgid "View Console Messages"
@@ -6292,7 +6290,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:183
 msgid "Invalid Skin"
-msgstr ""
+msgstr "ไม่พบสกินดังกล่าว"
 
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:190
 msgid ""
@@ -6399,23 +6397,23 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:46
 msgid "Folder Does Not Exist"
-msgstr ""
+msgstr "ไม่พบแฟ้มนี้"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:49
 msgid "File Already Exists"
-msgstr ""
+msgstr "มีไฟล์นี้อยู่แล้ว"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:52
 msgid "Filename Taken"
-msgstr ""
+msgstr "ชื่อไฟล์ถูกใช้แล้ว"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:55
 msgid "Not a Folder"
-msgstr ""
+msgstr "ไม่ใช่แฟ้ม"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:58
 msgid "Not a File"
-msgstr ""
+msgstr "ไม่ใช่ไฟล์"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:61
 msgid "Filesystem Error"
@@ -6497,7 +6495,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/AbstractMetaInfoPanel.java:74
 msgid "Info"
-msgstr ""
+msgstr "ข้อมูล"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:93
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:273
@@ -6542,11 +6540,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:277
 msgid "How does it work?"
-msgstr ""
+msgstr "มันทำงานอย่างไร"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:363
 msgid "ShareAlike"
-msgstr ""
+msgstr "แบ่งปันความชอบที่เหมือนกัน"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:380
 msgid "Allow commercial use of your work?"
@@ -6574,7 +6572,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:474
 msgid "Comment:"
-msgstr ""
+msgstr "ข้อคิดเห็น"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:495
 msgid "Please enter the copyright holder, copright year and title."
@@ -6629,7 +6627,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:79
 msgid "Size:"
-msgstr ""
+msgstr "ขนาด:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:83
 msgid "Date Modified:"
@@ -6678,16 +6676,16 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:72
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:86
 msgid "Title:"
-msgstr ""
+msgstr "ชื่อเรื่อง:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:38
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:88
 msgid "Artist:"
-msgstr ""
+msgstr "ศิลปิน:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:39
 msgid "Album:"
-msgstr ""
+msgstr "อัลบั้ม:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:40
 msgid "Genre:"
@@ -6727,16 +6725,16 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:49
 msgid "Price:"
-msgstr ""
+msgstr "ราคา:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:50
 msgid "Link:"
-msgstr ""
+msgstr "การเชื่อมโยง:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:51
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:63
 msgid "Action:"
-msgstr ""
+msgstr "การกระทำ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:52
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:61
@@ -6744,11 +6742,11 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:83
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:89
 msgid "License:"
-msgstr ""
+msgstr "ใบอนุญาติ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:58
 msgid "Rating:"
-msgstr ""
+msgstr "อันดับ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:62
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:76
@@ -6763,7 +6761,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:65
 msgid "Studio:"
-msgstr ""
+msgstr "สตูดิโอ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:67
 msgid "Stars: (Please separate with comma)"
@@ -6771,49 +6769,49 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:68
 msgid "Producer: (Please separate with comma)"
-msgstr ""
+msgstr "ผู้ผลิต: (กรุณาแบ่งแยกด้วยเครื่องหมายจุลภาค)"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:69
 msgid "Subtitles: (Please separate with comma)"
-msgstr ""
+msgstr "หัวข้อย่อย: (กรุณาแบ่งแยกด้วยเครื่องหมายจุลภาค)"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:73
 msgid "Topic:"
-msgstr ""
+msgstr "หัวข้อ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:74
 msgid "Author:"
-msgstr ""
+msgstr "ผู้ประพันธ์"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:79
 msgid "Name:"
-msgstr ""
+msgstr "ชื่อ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:80
 msgid "Publisher:"
-msgstr ""
+msgstr "ผู้สร้าง:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:81
 msgid "Platform:"
-msgstr ""
+msgstr "ระบบปฏิบัติการ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:87
 msgid "Description:"
-msgstr ""
+msgstr "คำอธิบาย:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:116
 msgid "MPEG-1 Audio Layer 3"
-msgstr ""
+msgstr "MPEG-1 Audio Layer 3"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:118
 msgid "MPEG-4 Audio"
-msgstr ""
+msgstr "MPEG-4 Audio"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:120
 msgid "Ogg Vorbis"
-msgstr ""
+msgstr "Ogg Vorbis"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:111
 msgid ""
 "Unknown file type. Please choose the type that best describes this file."
-msgstr ""
+msgstr "ไฟล์ที่ไม่รู้จัก กรุณาเลือกไฟล์ที่เหมาะสมที่สุดในการอธิบายไฟล์นี้"

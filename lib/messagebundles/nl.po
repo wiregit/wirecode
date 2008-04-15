@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 4.14.10\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-04 23:30-0400\n"
-"PO-Revision-Date: 2008-03-14 14:31+0000\n"
-"Last-Translator: thom <Unknown>\n"
+"POT-Creation-Date: 2008-04-14 14:25-0400\n"
+"PO-Revision-Date: 2008-04-14 19:46+0000\n"
+"Last-Translator: dvdmeer <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-04-08 07:32+0000\n"
+"X-Launchpad-Export-Date: 2008-04-15 04:05+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -2368,34 +2368,34 @@ msgstr ""
 "'Verwerpen'. Desgewenst kunt op 'Overzicht' klikken om de informatie te "
 "bekijken over de fout."
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:442
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:443
 msgid "Send"
 msgstr "Verzenden"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:453
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:454
 msgid "Review"
 msgstr "Overzicht"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:469
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:470
 msgid "Discard"
 msgstr "Verwerpen"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:486
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:96
 msgid "Always Send Immediately"
 msgstr "Altijd direct verzenden"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:487
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:97
 msgid "Always Ask For Review"
 msgstr "Altijd vragen om overzicht"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:488
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:489
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:98
 msgid "Always Discard All Errors"
 msgstr "Altijd alle fouten verwerpen"
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:587
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:588
 msgid ""
 "LimeWire was unable to connect to the bug server in order to send the below "
 "bug report. For further help and to aid with debugging, please visit "
@@ -2405,12 +2405,12 @@ msgstr ""
 "foutenrapport te verzenden. Voor verdere hulp kunt u naar www.limewire.com "
 "gaan en klikken op 'Ondersteuning'. Dank u."
 
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:616
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:617
 msgid "Copy Report"
 msgstr "Rapport kopiëren"
 
 #. Add an OK button out of the window.
-#: gui/com/limegroup/gnutella/bugs/BugManager.java:624
+#: gui/com/limegroup/gnutella/bugs/BugManager.java:625
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:88
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:187
 #: gui/com/limegroup/gnutella/gui/LicenseWindow.java:343
@@ -3311,6 +3311,9 @@ msgid ""
 "as a save folder for security reasons.<br><br>Please select another save "
 "folder.</table></html>"
 msgstr ""
+"<html><table width=400>U heeft geselecteerd: <i>{0}</i><br>LimeWire kan deze "
+"map niet gebruiken in verband met beveiligings redenen.<br><br>Selecteer "
+"alstublieft een andere map.</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:82
 #, java-format
@@ -3320,6 +3323,11 @@ msgid ""
 "<b>choose another</b> folder for saving your downloads.<br><br>Are you sure "
 "you want to download to this folder?</table></html>"
 msgstr ""
+"Copy text   \t\n"
+"<html><table width=400>De map <i>{0}</i><br>Bevat waarschijnlijk gevoelige "
+"of persononlijke informatie.<br><br>LimeWire raadt U aan <b>een andere</b> "
+"map te kiezen om uw downloads op de slaan.<br><br>Weet U zeker dat uw "
+"downloads in deze map opgeslagen moeten worden?</table></html>"
 
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:105
 msgid ""
@@ -3614,6 +3622,7 @@ msgstr ""
 "stellen."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:34
+#, fuzzy
 msgid ""
 "When your downloads say <font color=\"1E8E44\">Needs More Sources</font>, "
 "try choosing that download and then clicking <font color=\"1E8E44\">Find "
@@ -3621,6 +3630,11 @@ msgid ""
 "download the file and automatically resume downloading if it finds any "
 "matches."
 msgstr ""
+"Als uw downloads zeggen <font color=\"1E8E44\">Meer bronnen vereist</font>, "
+"probeer deze downoad aan de klikken en te kiezen voor<font "
+"color=\"1E8E44\">Zoek naar meer bronnen</font>. LimeWire zal het netwerk "
+"afzoeken voor meer plaatsen om het bestand te downloaden en automatisch "
+"verder gaan als deze gevonden zijn."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:40
 msgid ""
@@ -3704,6 +3718,10 @@ msgid ""
 "href=\"{1}\">FAQ</a> for answers to commonly asked questions or the <a "
 "href=\"{2}\">User Guide</a> for more information."
 msgstr ""
+"Als U meer help nodig heeft, bezoek <a href=\"{0}\">onze forums</a> om te "
+"zien of andere hun vraag al beantwoord hebben gekregen. U kunt ook de <a "
+"href=\"{1}\">FAQ</a> bekijen om antwoorden te krijgen op veel voorkomende "
+"vragen of de <a href=\"{2}\">Gebruikershandleiding</a> raadplegen."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:86
 msgid ""
@@ -3720,6 +3738,8 @@ msgid ""
 "If you have any tips on using LimeWire, add it to <a href=\"{0}\">the "
 "wiki</a> and it may make it into a future tip of the day."
 msgstr ""
+"Als U tips heeft om LimeWire te gebruiken, voeg deze dan toe aan de <a "
+"href=\"{0}\">wiki</a> en maak het een toekomstige tip van de dag."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:95
 msgid ""
@@ -3740,12 +3760,16 @@ msgid ""
 "Visit <a href=\"{0}\">LimeWire's website</a> for detailed information about "
 "how skins are created."
 msgstr ""
+"Bezoek <a href=\"{0}\">de website van LimeWire</a> voor meer gedetailleerde "
+"informatie over hoe skins gemaakt worden."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:103
 msgid ""
 "Do you want to be part of LimeWire's development? Visit <a "
 "href=\"{0}\">LimeWire's Open Source website</a>."
 msgstr ""
+"Wilt U deel uitmaken van LimeWire's ontwikkeling? Bezoek <a "
+"href=\"{0}\">LimeWire's Open Source website</a>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:105
 msgid ""
@@ -3819,6 +3843,8 @@ msgid ""
 "LimeWire supports Gnutella and BitTorrent peer-to-peer file sharing "
 "protocols."
 msgstr ""
+"LimeWire ondersteunt Gnutella en BitTorrent peer-to-peer protocollen voor "
+"bestandsuitwisseling."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:139
 msgid ""
@@ -3923,12 +3949,16 @@ msgid ""
 "The numbers next to the up and down arrows at the bottom of LimeWire show "
 "how fast all of your files are downloading or uploading."
 msgstr ""
+"De getallen naast de omhoog- en omlaag pijltjes aan de onderkant van "
+"LimeWire laten zien hoe snel al uw bestanden downloaden of uploaden."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:204
 msgid ""
 "You can increase the text size via <font color=\"1E8E44\">View</font> &gt; "
 "<font color=\"1E8E44\">Increase Font Size</font>."
 msgstr ""
+"Je kan de tekstgrootte vergroten via <font color=\"1E8E44\">Beeld</font> "
+"&gt; <font color=\"1E8E44\">Tekstgrootte vergroten</font>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:207
 msgid ""
@@ -3984,7 +4014,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:244
 msgid "LimeWire supports file sizes up to 1 TB (terabyte)."
-msgstr ""
+msgstr "LimeWire ondersteunt bestandsgrootte tot 1 TB (terabyte)."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:245
 msgid ""
@@ -4173,6 +4203,7 @@ msgstr ""
 msgid ""
 "You can find out which version of LimeWire you are using by choosing {0}."
 msgstr ""
+"Om te weten welke versie van LimeWire u gebruikt kunt u kiezen voor {0}."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:345
 msgid ""
@@ -4260,7 +4291,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:364
 msgid "<font color=\"1E8E44\">Preferences</font>"
-msgstr ""
+msgstr "<font color=\"1E8E44\">Voorkeuren</font>"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:365
 msgid ""
@@ -4273,12 +4304,16 @@ msgid ""
 "<font color=\"1E8E44\">LimeWire</font> &gt; <font color=\"1E8E44\">About "
 "LimeWire</font>"
 msgstr ""
+"<font color=\"1E8E44\">LimeWire</font> &gt; <font color=\"1E8E44\">Over "
+"LimeWire</font>"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:370
 msgid ""
 "<font color=\"1E8E44\">Help</font> &gt; <font color=\"1E8E44\">About "
 "LimeWire</font>"
 msgstr ""
+"<font color=\"1E8E44\">Help</font> &gt; <font color=\"1E8E44\">Over "
+"LimeWire</font>"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:383
 msgid ""
@@ -4317,6 +4352,10 @@ msgid ""
 "generally use to store sensitive data (such as My Documents, Desktop, "
 "Program Files, etc.)."
 msgstr ""
+"Wees zorgvuldig en deel geen gevoelige informatie zoals belastingdocumenten, "
+"wachtwoorden, enz. LimeWire zal je waarschuwen als je een map probeert te "
+"delen die mensen in het algemeen gebruiken voor gevoelige gegevens (zoals "
+"Mijn Documenten, Bureaublad, Program Files, enz.)."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:405
 msgid ""
@@ -4333,6 +4372,9 @@ msgid ""
 "the Library, you have the option to either permanently delete the file from "
 "your computer or move it to the Recycle Bin."
 msgstr ""
+"De Bibliotheek is een bestandenbeheerder. Dat betekent dat wanneer je een "
+"bestand verwijderd uit de Bibliotheek je de keuze hebt om het of permanent "
+"te verwijderen van je computer of te verplaatsen naar de Prullenbak."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:416
 msgid ""
@@ -4360,6 +4402,10 @@ msgid ""
 "you attempt to share a folder that people generally use to store sensitive "
 "data (such as bin, dev, home, etc.). "
 msgstr ""
+"Ben je er bewust van wat je deelt? Wees zorgvuldig en deel geen gevoelige "
+"informatie zoals belastingdocumenten, wachtwoorden, enz. LimeWire zal je "
+"waarschuwen als je een map probeert te delen die mensen in het algemeen "
+"gebruiken voor gevoelige gegevens (zoals bin, home, enz.). "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:446
 msgid ""
@@ -4554,6 +4600,8 @@ msgid ""
 "LimeWire cannot open this file or address. Make sure you typed it correctly, "
 "and then try again."
 msgstr ""
+"LimeWire kan het bestand of adres niet openen. Zorg ervoor dat je het "
+"correct hebt getypt, en probeer het dan opnieuw."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:341
 msgid "&Close"
@@ -5620,6 +5668,8 @@ msgid ""
 "The save folder is invalid. You may not have permissions to write to the "
 "selected folder.  Please choose another save folder."
 msgstr ""
+"De opslagfolder is ongeldig. Je hebt misschien geen rechten om in de "
+"geselecteerde folder te schrijven. Kies alstublieft een andere opslagfolder."
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:200
 msgid ""
@@ -6406,7 +6456,7 @@ msgstr "Popups"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:381
 msgid "Autocomplete"
-msgstr ""
+msgstr "Automatisch aanvullen"
 
 #. search options
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:384
@@ -6450,7 +6500,7 @@ msgstr "Voorkeuren"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:399
 msgid "Firewall"
-msgstr ""
+msgstr "Firewall"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:400
 msgid "Proxy"
@@ -7237,7 +7287,7 @@ msgstr "Gebruik de LimeWire Media Player:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:20
 msgid "LimeWire Popups"
-msgstr ""
+msgstr "LimeWire Popups"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/PopupsPaneItem.java:22
 msgid ""
@@ -7303,7 +7353,7 @@ msgstr "Gebruikersnaam:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:28
 msgid "Proxy Options"
-msgstr ""
+msgstr "Proxy-opties"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyPaneItem.java:30
 msgid "Configure Proxy Options for LimeWire."
@@ -7434,11 +7484,11 @@ msgstr "Downloads delen"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:23
 msgid "You can share downloads that are saved to unshared folders."
-msgstr ""
+msgstr "Je kan downloads delen die opgeslagen zijn in ongedeelde mappen."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:30
 msgid "Share Downloads Saved To Unshared Folders:"
-msgstr ""
+msgstr "Deel Downloads Opgeslagen In Ongedeelde Mappen:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:64
 msgid "All downloads will be shared."
@@ -7447,6 +7497,7 @@ msgstr "Alle downloads zullen gedeeld worden."
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareSpeciallyPaneItem.java:66
 msgid "Only downloads saved in shared folders will be shared."
 msgstr ""
+"Alleen downloads opgeslagen in gedeelde mappen zullen worden gedeeld."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ShareTorrentMetaPaneItem.java:15
 msgid "Torrent Sharing"
@@ -8205,7 +8256,7 @@ msgstr "Media"
 #: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:136
 #, java-format
 msgid "... {0} more."
-msgstr ""
+msgstr ".. {0} meer."
 
 #: gui/com/limegroup/gnutella/gui/search/TableLine.java:723
 msgid ""
@@ -8227,6 +8278,9 @@ msgid ""
 "automatically share all files with these types.  Only files in your Shared "
 "Folders will be shared.)"
 msgstr ""
+"Selecteer de bestandstypes die u wenst te delen met LimeWire. (Dit deelt "
+"niet automatisch alle bestanden met deze types. Alleen de bestanden in uw "
+"Gedeelde Mappen worden gedeeld"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:82
 msgid "My Extensions"
