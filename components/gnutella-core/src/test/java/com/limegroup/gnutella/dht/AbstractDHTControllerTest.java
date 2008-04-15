@@ -64,7 +64,7 @@ public class AbstractDHTControllerTest extends DHTTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        setSettings();
+        DHTTestUtils.setSettings(PORT);
 		Injector injector = LimeTestUtils.createInjector();
 		dhtControllerFactory = injector.getInstance(DHTControllerFactory.class);
     }

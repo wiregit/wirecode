@@ -38,12 +38,14 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
+import com.limegroup.gnutella.altlocs.DownloaderGuidAlternateLocationFinder;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
 import com.limegroup.gnutella.browser.LocalAcceptor;
 import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.LWSIntegrationServices;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
@@ -141,6 +143,10 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
     private final Provider<ConnectionDispatcher> localConnectionDispatcher;
 
+    private final Provider<DownloaderGuidAlternateLocationFinder> magnetDownloaderPushEndpointFinder;
+
+    private final Provider<PushProxiesPublisher> pushProxiesPublisher;
+
     @Inject
     public LifecycleManagerImpl(
              Provider<IPFilter> ipFilter,
@@ -187,7 +193,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<OutOfBandThroughputMeasurer> outOfBandThroughputMeasurer,
             Provider<BrowseHostHandlerManager> browseHostHandlerManager,
             Provider<DownloadUpgradeTask> downloadUpgradeTask,
-            Provider<StatisticAccumulator> statisticAccumulator) { 
+            Provider<StatisticAccumulator> statisticAccumulator,
+            Provider<DownloaderGuidAlternateLocationFinder> magnetDownloaderPushEndpointFinder,
+            Provider<PushProxiesPublisher> pushProxiesPublisher) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -232,6 +240,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.browseHostHandlerManager = browseHostHandlerManager;
         this.downloadUpgradeTask = downloadUpgradeTask;
         this.statisticAccumulator = statisticAccumulator;
+        this.magnetDownloaderPushEndpointFinder = magnetDownloaderPushEndpointFinder;
+        this.pushProxiesPublisher = pushProxiesPublisher;
     }
     
     /* (non-Javadoc)
@@ -273,6 +283,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         connectionManager.get().addEventListener(activityCallback.get());
         connectionManager.get().addEventListener(dhtManager.get());
+        LOG.debug("Installing push proxies publisher");
+        dhtManager.get().addEventListener(pushProxiesPublisher.get());
         
         preinitializeDone.set(true);
     }
@@ -408,7 +420,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		LOG.trace("Running download upgrade task");
 		downloadUpgradeTask.get().upgrade();
 		LOG.trace("Download upgrade task run!");
-		
+
 		LOG.trace("START DownloadManager");
 		activityCallback.get().componentLoading(I18nMarker.marktr("Loading Download Management..."));
 		downloadManager.get().initialize();
@@ -446,6 +458,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		torrentManager.get().initialize(connectionDispatcher.get());
 		LOG.trace("STOP TorrentManager");
         
+		// add listener before downloads are read to get all add events
+		downloadManager.get().addListener(magnetDownloaderPushEndpointFinder.get());
+		
         // Restore any downloads in progress.
         LOG.trace("START DownloadManager.postGuiInit");
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Old Downloads..."));
@@ -597,6 +612,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         cleanupTorrentMetadataFiles();
         
         downloadManager.get().writeSnapshot();
+        
+        downloadManager.get().removeListener(magnetDownloaderPushEndpointFinder.get());
         
        // torrentManager.writeSnapshot();
         

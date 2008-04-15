@@ -1221,9 +1221,9 @@ public class ConnectionManagerImpl implements ConnectionManager {
                     proxies.add(currMC);
             }
             return proxies;
+        } else {
+            return Collections.emptySet();
         }
-
-        return Collections.emptySet();
     }
 
     /**

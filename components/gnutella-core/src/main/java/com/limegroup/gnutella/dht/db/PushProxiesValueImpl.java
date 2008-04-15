@@ -10,7 +10,6 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.BadGGEPBlockException;
@@ -26,7 +25,7 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.util.ByteOrder;
 
 
-class PushProxiesValueImpl extends AbstractPushProxiesValue {
+public class PushProxiesValueImpl extends AbstractPushProxiesValue {
     
     private static final long serialVersionUID = -2912251955825278890L;
 
@@ -78,7 +77,7 @@ class PushProxiesValueImpl extends AbstractPushProxiesValue {
         this.features = features;
         this.fwtVersion = fwtVersion;
         this.port = port;
-        this.proxies = new CopyOnWriteArraySet<IpPort>(proxies);
+        this.proxies = new IpPortSet(proxies);
         this.tlsInfo = AbstractPushProxiesValue.getNumbersFromProxies(proxies);
         this.data = AbstractPushProxiesValue.serialize(this);
     }

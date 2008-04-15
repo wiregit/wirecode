@@ -9,16 +9,20 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.limewire.util.FileUtils;
 
 import com.limegroup.gnutella.FileDetails;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.URIUtils;
 import com.limegroup.gnutella.util.EncodingUtils;
@@ -40,7 +44,23 @@ public class MagnetOptions implements Serializable {
 	private final Map<Option, List<String>> optionsMap;
     
     private enum Option {
-        XS, XT, AS, DN, KT;
+        /** eXact Source of the magnet, can be a url or a urn. */
+        XS,
+        /** 
+         * eXact Topic of the magnet, should be urn that uniquely 
+         * identifies the resource, e.g. a sha1 urn. */
+        XT, 
+        /** Alternate Source of the magnet, a url or a urn. */
+        AS, 
+        /** Display Name of the file. */
+        DN, 
+        /** 
+         * Keyword Topic, a short description or name for the file, can be
+         * used for searching.
+         */
+        KT, 
+        /** Length of the file denoted by the magnet. */
+        XL;
         
         public static Option valueFor(String str) {
             for(Option option : values()) {
@@ -57,7 +77,18 @@ public class MagnetOptions implements Serializable {
 	private transient String localizedErrorMessage;
 	private transient URN urn;
 	private transient String extractedFileName;
-	private transient List<URN> guidUrns;
+	private transient Set<URN> guidUrns;
+	/**
+	 * Cached field of file size of magnet, values meant the following:
+	 * -1   - magnet doesn't have a size field
+	 * -2   - magnet has not been parsed for size field yet
+	 * >= 0 - size of magnet 
+	 * 
+	 * Volatile, to have threadsafe assignments:
+	 * 
+	 * http://java.sun.com/docs/books/jvms/second_edition/html/Threads.doc.html#22244
+	 */
+    private transient volatile long fileSize = -2;
 	
 	/**
 	 * Creates a MagnetOptions object from file details.
@@ -68,10 +99,8 @@ public class MagnetOptions implements Serializable {
 	 * @return
 	 */
 	public static MagnetOptions createMagnet(FileDetails fileDetails) {
-		Map<Option, List<String>> map = new HashMap<Option, List<String>>();
-        List<String> name = new ArrayList<String>(1);
-        name.add(fileDetails.getFileName());
-		map.put(Option.DN, name);
+		Map<Option, List<String>> map = new EnumMap<Option, List<String>>(Option.class);
+		map.put(Option.DN, Collections.singletonList(fileDetails.getFileName()));
 		URN urn = fileDetails.getSHA1Urn();
 		if (urn != null) {
 			addAppend(map, Option.XT, urn.httpStringValue());
@@ -86,12 +115,26 @@ public class MagnetOptions implements Serializable {
 			url = addr.toString();
 			addAppend(map, Option.XS, url);
 		}
+		byte[] clientGuid = fileDetails.getClientGUID();
+		URN guidUrn = null;
+		if (clientGuid != null) {
+		    guidUrn = URN.createGUIDUrn(new GUID(clientGuid));
+		    addAppend(map, Option.XS, guidUrn.httpStringValue());
+		}
+		long fileSize = fileDetails.getFileSize();
+		if (fileSize >= 0) {
+		    addAppend(map, Option.XL, Long.toString(fileSize));
+		}
 		MagnetOptions magnet = new MagnetOptions(map);
 		// set already known values
 		magnet.urn = urn;
 		if (url != null) {
 			magnet.defaultURLs = new String[] { url };
 		}
+		if (guidUrn != null) {
+		    magnet.guidUrns = Collections.singleton(guidUrn);
+		}
+		magnet.fileSize = fileSize >= 0 ? fileSize : -1;
 		return magnet;
 	}
 	
@@ -107,7 +150,12 @@ public class MagnetOptions implements Serializable {
 	 * @return
 	 */
 	public static MagnetOptions createMagnet(String keywordTopics, String fileName,
-											 URN urn, String[] defaultURLs) {
+            URN urn, String[] defaultURLs) {
+	    return createMagnet(keywordTopics, fileName, urn, defaultURLs, null); 
+	}
+	
+	public static MagnetOptions createMagnet(String keywordTopics, String fileName,
+											 URN urn, String[] defaultURLs, Set<? extends URN> guidUrns) {
 		Map<Option, List<String>> map = new HashMap<Option, List<String>>();
         List<String> kt = new ArrayList<String>(1);
         kt.add(keywordTopics);
@@ -123,6 +171,14 @@ public class MagnetOptions implements Serializable {
 				addAppend(map, Option.AS, defaultURLs[i]);
 			}
 		}
+		if (guidUrns != null) {
+		    for (URN guidUrn : guidUrns) {
+		        if (!guidUrn.isGUID()) {
+		            throw new IllegalArgumentException("Not a GUID urn: " + guidUrn);
+		        }
+		        addAppend(map, Option.XS, guidUrn.httpStringValue());
+		    }
+		}
 		MagnetOptions magnet = new MagnetOptions(map);
 		magnet.urn = urn;
 		if (defaultURLs != null) {
@@ -133,6 +189,9 @@ public class MagnetOptions implements Serializable {
 		}
 		else {
 			magnet.defaultURLs = new String[0];
+		}
+		if (guidUrns != null) {
+		    magnet.guidUrns = Collections.unmodifiableSet(new HashSet<URN>(guidUrns));
 		}
 		return magnet;
 	}
@@ -272,6 +331,9 @@ public class MagnetOptions implements Serializable {
         
         for(String as : getAS())
 			ret.append("&as=").append(as);
+        
+        for(String xl : getXL())
+            ret.append("&xl=").append(xl);
 
 		return ret.toString();	
 	}
@@ -453,22 +515,22 @@ public class MagnetOptions implements Serializable {
 	}
 	
 	/**
-	 * Returns immutable list of all valid GUID urns than can be tried for downloading.
+	 * Returns immutable set of all valid GUID urns than can be tried for downloading.
 	 * 
 	 * GUID urns denote possibly firewalled hosts in the network that can be looked up
 	 * as possible download sources for this magnet link.
 	 */
-    public List<URN> getGUIDUrns() {
+    public Set<URN> getGUIDUrns() {
         if (guidUrns != null) {
             return guidUrns;
         }
-        List<URN> urns = null;
+        Set<URN> urns = null;
         List<String> potentialUrns = getPotentialURNs();
         for (String candidate : potentialUrns) {
             try {
                 URN urn = URN.createGUIDUrn(candidate);
                 if (urns == null) {
-                    urns = new ArrayList<URN>(2);
+                    urns = new HashSet<URN>(2);
                 }
                 urns.add(urn);
             } catch (IOException ie) {
@@ -476,9 +538,9 @@ public class MagnetOptions implements Serializable {
             }
         }
         if (urns == null) {
-            urns = Collections.emptyList();
+            urns = Collections.emptySet();
         } else {
-            urns = Collections.unmodifiableList(urns);
+            urns = Collections.unmodifiableSet(urns);
         }
         // only set after list is full to avoid race condition where some other thread sees the partial list
         guidUrns = urns;
@@ -567,6 +629,26 @@ public class MagnetOptions implements Serializable {
     }
     
     /**
+     * Returns the file size of the file of this magnet.
+     * @return -1 if file size is not specified for this magnet
+     */
+    public long getFileSize() {
+        if (fileSize == -2) {
+            List<String> lengthValues = getList(Option.XL);
+            long size = -1; 
+            for (String value : lengthValues) {
+                try {
+                    size = Long.parseLong(value);
+                } catch (NumberFormatException nfe) {
+                    // ignore
+                }
+            }
+            fileSize = size >= 0 ? size : -1;
+        }
+        return fileSize;
+    }
+    
+    /**
      * Returns a list of exact topic strings, they can be url or urn string.
      * @return
      */
@@ -580,6 +662,13 @@ public class MagnetOptions implements Serializable {
      */
     public List<String> getXS() {
         return getList(Option.XS);
+    }
+    
+    /**
+     * Returns the list of exact source strings, they should be a singleton list.
+     */
+    public List<String> getXL() {
+        return getList(Option.XL);
     }
 	
     /**

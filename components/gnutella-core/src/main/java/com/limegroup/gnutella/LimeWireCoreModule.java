@@ -89,8 +89,10 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.DHTNodeFetcherFactory;
 import com.limegroup.gnutella.dht.DHTNodeFetcherFactoryImpl;
+import com.limegroup.gnutella.dht.LimeWireDHTModule;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.AltLocValueFactoryImpl;
+import com.limegroup.gnutella.dht.db.PushEndpointService;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactoryImpl;
 import com.limegroup.gnutella.dht.io.LimeMessageDispatcherFactoryImpl;
@@ -202,6 +204,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireNetModule(SettingsBackedProxySettings.class, SettingsBackedSocketBindingSettings.class));
         binder().install(new LimeWireDownloadModule());
         binder().install(new LimeWireHashTreeModule());        
+        binder().install(new LimeWireDHTModule());
         binder().install(new LimeWireHttpModule());
         binder().install(new LimeWireStatisticsModule());
         binder().install(new LimeWireGnutellaStatisticsModule());
@@ -270,6 +273,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(GuidMapManager.class).to(GuidMapManagerImpl.class);
         bind(BrowseHostHandlerManager.class).to(BrowseHostHandlerManagerImpl.class);
         bind(PushEndpointCache.class).to(PushEndpointCacheImpl.class);
+        bind(PushEndpointService.class).annotatedWith(Names.named("pushEndpointCache")).to(PushEndpointCacheImpl.class);
         bind(FileResponseEntityFactory.class).to(FileResponseEntityFactoryImpl.class);
         bind(MessageFactory.class).to(MessageFactoryImpl.class);
         bind(MessageReaderFactory.class).to(MessageReaderFactoryImpl.class);

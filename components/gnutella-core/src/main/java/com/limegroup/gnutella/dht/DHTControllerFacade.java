@@ -24,8 +24,6 @@ public interface DHTControllerFacade {
 
     StorableModel getAltLocModel();
 
-    StorableModel getPushProxyModel();
-
     boolean isActiveSupernode();
 
     List<RoutedConnection> getInitializedClientConnections();

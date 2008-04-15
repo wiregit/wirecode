@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.FixedsizeForgetfulHashMap;
-import org.limewire.collection.IntWrapper;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
@@ -53,8 +53,8 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
     /**
      * Keeps track of what hosts have sent us PushRequests lately.
      */
-    private final Map<String, IntWrapper> PUSH_REQUESTS = 
-        Collections.synchronizedMap(new FixedsizeForgetfulHashMap<String, IntWrapper>(200));
+    private final Map<String, AtomicInteger> PUSH_REQUESTS = 
+        Collections.synchronizedMap(new FixedsizeForgetfulHashMap<String, AtomicInteger>(200));
 
     private final Map<GUID, GUID> GUID_REQUESTS = 
         Collections.synchronizedMap(new FixedsizeForgetfulHashMap<GUID, GUID>(200));
@@ -236,38 +236,52 @@ public final class ForMeReplyHandler implements ReplyHandler, SecureMessageCallb
      * just to return a 404 or Busy or Malformed Request, etc..
      */
 	public void handlePushRequest(PushRequest pushRequest, ReplyHandler handler){
+	    if (LOG.isDebugEnabled()) {
+	        LOG.debug("push: " + pushRequest + "\nfrom: " + handler);
+	    }
+	    
         //Ignore push request from banned hosts.
-        if (handler.isPersonalSpam(pushRequest))
+        if (handler.isPersonalSpam(pushRequest)) {
+            LOG.debug("discarded as personal spam");
             return;
+        }
             
         byte[] ip = pushRequest.getIP();
         String h = NetworkUtils.ip2string(ip);
 
         // check whether we serviced this push request already
     	GUID guid = new GUID(pushRequest.getGUID());
-    	if (GUID_REQUESTS.put(guid, guid) != null)
+    	if (GUID_REQUESTS.put(guid, guid) != null) {
+    	    LOG.debug("already serviced");
     		return;
+    	}
 
        // make sure the guy isn't hammering us
-        IntWrapper i = PUSH_REQUESTS.get(h);
+        AtomicInteger i = PUSH_REQUESTS.get(h);
         if(i == null) {
-            i = new IntWrapper(1);
+            i = new AtomicInteger(1);
             PUSH_REQUESTS.put(h, i);
         } else {
-            i.addInt(1);
+            i.addAndGet(1);
             // if we're over the max push requests for this host, exit.
-            if(i.getInt() > UploadSettings.MAX_PUSHES_PER_HOST.getValue())
+            if(i.get() > UploadSettings.MAX_PUSHES_PER_HOST.getValue()) {
+                LOG.debug("over max pushes per host");
                 return;
+            }
         }
         
         // if the IP is banned, don't accept it
-        if (!ipFilterProvider.get().allow(ip))
+        if (!ipFilterProvider.get().allow(ip)) {
+            LOG.debug("blocked by ip filter");
             return;
+        }
 
         int port = pushRequest.getPort();
         // if invalid port, exit
-        if (!NetworkUtils.isValidPort(port) )
+        if (!NetworkUtils.isValidPort(port) ) {
+            LOG.debug("invalid port");
             return;
+        }
         
         String req_guid_hexstring =
             (new GUID(pushRequest.getClientGUID())).toString();

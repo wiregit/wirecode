@@ -4,11 +4,19 @@ import java.util.Set;
 
 import org.limewire.io.IpPort;
 
-public interface PushEndpointCache {
+import com.limegroup.gnutella.dht.db.PushEndpointService;
+
+public interface PushEndpointCache extends PushEndpointService {
 
     void clear();
     
-    CachedPushEndpoint getCached(GUID guid);    
+    /**
+     * Should only be used internally by {@link PushEndpoint} implementations.
+     * <p>
+     * For retrieving a value from the cache use {@link #getPushEndpoint()}.
+     * </p>
+     */
+    PushEndpoint getCached(GUID guid);    
     
     /**
      * Overwrites the current known push proxies for the host specified
@@ -25,6 +33,9 @@ public interface PushEndpointCache {
      * @param guid the guid whose proxies to overwrite
      * @param newSet the proxies to overwrite with
      */
+    /**
+     * Sets a new set of proxies overwriting the exiting one. 
+     */
     public void overwriteProxies(byte[] guid, Set<? extends IpPort> newSet);
 
     /**
@@ -33,36 +44,28 @@ public interface PushEndpointCache {
     public void setAddr(byte [] guid, IpPort addr);
 
     /**
-     * updates the features of all PushEndpoints for the given guid 
-     */
-    public void setFeatures(byte [] guid, int features);
-
-    /**
      * Sets the fwt version supported for all PEs pointing to the
      * given client guid.
      */
     public void setFWTVersionSupported(byte[] guid, int version);
 
     /**
-     * Updates the PushEndpoint to match what is in the cache.
-     * If there is nothing in the cache, the cache is set to match this endpoint.
-     * If the endpoint is valid, the proxies in it are added to those already cached.
-     * If it is invalid, the proxies are removed from the cached version.
+     * Adds or removes the given set of ip ports depending on <code>valid</code>.
+     * 
+     * @param valid if false removes <code>proxies</code> otherwise adds them
+     * 
+     * @return the guid of the push endpoint a client should hold onto to keep
+     * the values in the cache 
      */
     public GUID updateProxiesFor(GUID guid, PushEndpoint pushEndpoint, boolean valid);
 
-    public interface CachedPushEndpoint {
-        void updateProxies(Set<? extends IpPort> s, boolean add);        
-        void overwriteProxies(Set<? extends IpPort> s) ;        
-        Set<IpPort> getProxies();        
-        int getFeatures();        
-        int getFWTVersion();        
-        void setFeatures(int features);        
-        void setFWTVersion(int version);        
-        void setIpPort(IpPort addr);        
-        IpPort getIpPort();        
-        GUID getGuid();
-    }
+    /**
+     * Removes the push proxies from the set of push proxies of the push endpoint
+     * in the cache.
 
+     * @param bytes the bytes of the guid of the push endpoint
+     * @param pushProxy the push proxy to remove
+     */
+    void removePushProxy(byte[] bytes, IpPort pushProxy);
 
 }

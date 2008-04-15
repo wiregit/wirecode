@@ -37,9 +37,9 @@ import com.limegroup.gnutella.messages.vendor.InspectionRequest;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 
-public class PushProxyRequestHandlerTest extends BaseTestCase {
+public class HttpPushRequestHandlerTest extends BaseTestCase {
 
-    private PushProxyRequestHandler requestHandler;
+    private HttpPushRequestHandler requestHandler;
 
     private HttpContext context;
 
@@ -47,12 +47,12 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
 
     private StubMessageRouter messageRouter;
 
-    public PushProxyRequestHandlerTest(String name) {
+    public HttpPushRequestHandlerTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(PushProxyRequestHandlerTest.class);
+        return buildTestSuite(HttpPushRequestHandlerTest.class);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
             }
         };
         sessionManager.uploader = uploader;
-        requestHandler = new PushProxyRequestHandler(sessionManager, messageRouter);
+        requestHandler = new HttpPushRequestHandler(sessionManager, messageRouter);
         context = new BasicHttpContext(null);
     }
 
@@ -294,12 +294,6 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
             // TODO Auto-generated method stub
             return null;
         }
-        
-        public Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
-                QueryRequest queryRequest, int max, SecurityToken tok) {
-            // TODO Auto-generated method stub
-            return null;
-        }
 
         public void sendDynamicQuery(QueryRequest query) {
             // TODO Auto-generated method stub
@@ -347,6 +341,11 @@ public class PushProxyRequestHandlerTest extends BaseTestCase {
         }
 
         public void stop() {
+        }
+
+        public Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
+                QueryRequest queryRequest, int replyLimit, SecurityToken token) {
+            return null;
         }
 
     }

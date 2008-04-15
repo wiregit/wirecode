@@ -21,6 +21,8 @@ import org.limewire.collection.MultiIterable;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.EventListenerList;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
 
@@ -118,6 +120,9 @@ public class DownloadManagerImpl implements DownloadManager {
      */
     private Runnable _waitingPump;
     
+    private final EventListenerList<DownloadManagerEvent> listeners =
+        new EventListenerList<DownloadManagerEvent>();
+    
     private final NetworkManager networkManager;
     private final DownloadCallback innetworkCallback;
     private final Provider<DownloadCallback> downloadCallback;
@@ -180,12 +185,14 @@ public class DownloadManagerImpl implements DownloadManager {
      * Adds a new downloader to this manager.
      * @param downloader the core downloader
      */
+    // TODO merge this with initializeDownload
     public void addNewDownloader(CoreDownloader downloader) {
         synchronized(this) {
             waiting.add(downloader);
-            downloader.initialize();
-            callback(downloader).addDownload(downloader);
         }
+        fireEvent(downloader, DownloadManagerEvent.Type.ADDED);
+        downloader.initialize();
+        callback(downloader).addDownload(downloader);
     }
 
     /* (non-Javadoc)
@@ -506,16 +513,18 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     void clearAllDownloads() {
-        List<Downloader> buf;
+        List<CoreDownloader> buf;
         synchronized(this) {
-            buf = new ArrayList<Downloader>(active.size() + waiting.size());
+            buf = new ArrayList<CoreDownloader>(active.size() + waiting.size());
             buf.addAll(active);
             buf.addAll(waiting);
             active.clear();
             waiting.clear();
         }
-        for(Downloader md : buf ) 
+        for(CoreDownloader md : buf ) { 
             md.stop();
+            fireEvent(md, DownloadManagerEvent.Type.REMOVED);
+        }
     }
            
     /* (non-Javadoc)
@@ -795,6 +804,7 @@ public class DownloadManagerImpl implements DownloadManager {
                 writeSnapshot(); // Save state for crash recovery.
             }
         });
+        fireEvent(md, DownloadManagerEvent.Type.ADDED);
     }
     
     /**
@@ -1001,6 +1011,8 @@ public class DownloadManagerImpl implements DownloadManager {
         // Enable auto shutdown
         if(active.isEmpty() && waiting.isEmpty())
             callback(dl).downloadsComplete();
+        
+        fireEvent(dl, DownloadManagerEvent.Type.REMOVED);
     }           
     
     /* (non-Javadoc)
@@ -1102,4 +1114,15 @@ public class DownloadManagerImpl implements DownloadManager {
         }
     }    
 
+    private void fireEvent(CoreDownloader downloader, DownloadManagerEvent.Type type) {
+        listeners.broadcast(new DownloadManagerEvent(downloader, type));
+    }
+
+    public void addListener(EventListener<DownloadManagerEvent> listener) {
+        listeners.addListener(listener);
+    }
+
+    public boolean removeListener(EventListener<DownloadManagerEvent> listener) {
+        return listeners.removeListener(listener);
+    }
 }

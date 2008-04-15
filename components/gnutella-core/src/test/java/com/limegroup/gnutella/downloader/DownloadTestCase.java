@@ -41,6 +41,7 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -49,13 +50,14 @@ import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.util.LimeTestCase;
 
-public class DownloadTestCase extends LimeTestCase {
+public abstract class DownloadTestCase extends LimeTestCase {
 
-    private static final Log LOG = LogFactory.getLog(DownloadTestCase.class);
+    protected final Log LOG = LogFactory.getLog(getClass());
 
     protected final GUID guid = new GUID(GUID.makeGuid());
 
@@ -137,13 +139,14 @@ public class DownloadTestCase extends LimeTestCase {
         DOWNLOAD_WAIT_TIME = time;
     }
     
+    @Override
     protected void setUp() throws Exception {
         setDownloadWaitTime(DEFAULT_WAIT_TIME);
         // raise the download-bytes-per-sec so stealing is easier
         DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(10);
 
         activityCallback = new MyCallback();
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
+        injector = LimeTestUtils.createInjector(LocalSocketAddressProviderStub.STUB_MODULE, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ActivityCallback.class).toInstance(activityCallback);
@@ -241,6 +244,10 @@ public class DownloadTestCase extends LimeTestCase {
             injector.getInstance(
                     Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor")))
                     .shutdownNow();
+        
+        if (lifecycleManager != null) {
+            lifecycleManager.shutdown();
+        }
     }
 
     private void deleteAllFiles() {
@@ -278,8 +285,23 @@ public class DownloadTestCase extends LimeTestCase {
     protected void tGeneric(RemoteFileDesc[] rfds, RemoteFileDesc[] later,
             List<? extends RemoteFileDesc> alts) throws Exception {
         Downloader download = null;
-
         download = downloadServices.download(rfds, alts, null, false);
+        tGeneric(download, later, rfds);
+    }
+    
+    protected void tGeneric(MagnetOptions magnet) throws Exception {
+        Downloader download = downloadServices.download(magnet, false);
+        tGeneric(download, null, null);
+    }
+    
+    /**
+     * Performs a generic download of the file specified in <tt>rfds</tt>.
+     * 
+     * @param later can be null
+     * @param rfds can be null
+     */
+    protected void tGeneric(Downloader download, RemoteFileDesc[] later,
+            RemoteFileDesc[] rfds) throws Exception {
         if (later != null) {
             Thread.sleep(100);
             for (int i = 0; i < later.length; i++)
@@ -293,7 +315,7 @@ public class DownloadTestCase extends LimeTestCase {
             fail("FAILED: complete corrupt");
 
         IncompleteFileManager ifm = downloadManager.getIncompleteFileManager();
-        for (int i = 0; i < rfds.length; i++) {
+        for (int i = 0; rfds != null && i < rfds.length; i++) {
             File incomplete = ifm.getFile(rfds[i]);
             VerifyingFile vf = ifm.getEntry(incomplete);
             assertNull("verifying file should be null", vf);

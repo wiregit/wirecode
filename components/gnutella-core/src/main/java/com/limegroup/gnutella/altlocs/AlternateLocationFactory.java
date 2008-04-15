@@ -39,8 +39,8 @@ public interface AlternateLocationFactory {
     /**
      * Creates a new push AlternateLocation
      */
-    public AlternateLocation createPushAltLoc(PushEndpoint pe, URN urn)
-            throws IOException;
+    public AlternateLocation createPushAltLoc(PushEndpoint pe, URN urn);
+            
 
     /**
      * Creates a new direct AlternateLocation from information that was

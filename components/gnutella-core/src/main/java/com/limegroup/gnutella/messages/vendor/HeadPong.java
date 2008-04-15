@@ -111,16 +111,16 @@ public interface HeadPong extends VendorMessage {
     public IntervalSet getRanges();
 
     /**
-     * 
      * @return set of <tt>Endpoint</tt> 
-     * containing any alternate locations this alternate location returned.
+     * containing any alternate locations this alternate location returned or
+     * and empty set if not available
      */
     public Set<IpPort> getAltLocs();
 
     /**
-     * 
      * @return set of <tt>PushEndpoint</tt>
-     * containing any firewalled locations this alternate location returned.
+     * containing any firewalled locations this alternate location returned or
+     * an empty set if not available.
      */
     public Set<PushEndpoint> getPushLocs();
 

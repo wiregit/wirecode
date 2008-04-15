@@ -12,7 +12,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +19,6 @@ import java.util.StringTokenizer;
 
 import junit.framework.Test;
 
-import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Function;
@@ -28,7 +26,6 @@ import org.limewire.collection.MultiIterable;
 import org.limewire.collection.Range;
 import org.limewire.inject.Providers;
 import org.limewire.io.Connectable;
-import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
@@ -62,6 +59,7 @@ import com.limegroup.gnutella.stubs.IOStateObserverStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
 import com.limegroup.gnutella.tigertree.ThexReaderFactory;
+import com.limegroup.gnutella.util.MockUtils;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase {
@@ -137,7 +135,7 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
     public void testFWNodeInfoHeaderIsWritten() throws Exception {
         final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
         networkManagerStub.setCanDoFWT(true);
-        final ConnectionManager connectionManager = context.mock(ConnectionManager.class);
+        final ConnectionManager connectionManager = MockUtils.createConnectionManagerWithPushProxies(context);
         Injector injector = setupInjector(new AbstractModule() {
             @Override
             protected void configure() {
@@ -150,16 +148,6 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.LimeTestCase
         // precondition
         assertFalse(networkManager.acceptedIncomingConnection());
         assertTrue(networkManager.canDoFWT());
-
-        final Set<Connectable> proxies = new LinkedHashSet<Connectable>();
-        proxies.add(new ConnectableImpl("192.168.0.1", 5555, false));
-        proxies.add(new ConnectableImpl("192.168.0.2", 6666, true));
-        context.checking(new Expectations() {
-            {
-                allowing(connectionManager).getPushProxies();
-                will(returnValue(proxies));
-            }
-        });
 
         Map<String, String> headers = getWrittenHeaders(new Function<HTTPDownloader, Void>() {
             public Void apply(HTTPDownloader dl) {

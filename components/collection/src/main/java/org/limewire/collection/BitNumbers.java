@@ -1,6 +1,8 @@
 package org.limewire.collection;
 
 import java.util.Locale;
+import java.util.Arrays;
+
 
 
 /** 
@@ -115,6 +117,20 @@ public class BitNumbers {
             if(data[i] != 0)
                 return false;
         return true;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof BitNumbers) {
+            BitNumbers other = (BitNumbers)obj;
+            return Arrays.equals(toByteArray(), other.toByteArray());
+        }
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(toByteArray());
     }
     
     /** A hexadecimal representation of the byte[] */

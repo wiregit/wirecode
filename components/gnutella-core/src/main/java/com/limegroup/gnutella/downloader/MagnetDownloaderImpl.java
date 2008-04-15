@@ -39,7 +39,7 @@ import com.limegroup.gnutella.util.QueryUtils;
 
 /**
  * A ManagedDownloader for MAGNET URIs.  Unlike a ManagedDownloader, a
- * MagnetDownloader need not have an initial RemoteFileDesc.  Instead it can be
+ * MagnetDownloader needs not have an initial RemoteFileDesc.  Instead it can be
  * started with various combinations of the following:
  * <ul>
  * <li>initial URL (exact source)
@@ -63,7 +63,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
         
 	private MagnetOptions magnet;
 
-    /**
+	/**
      * Creates a new MAGNET downloader.  Immediately tries to download from
      * <tt>defaultURLs</tt>, if specified. If that fails, or if defaultURLs does
      * not provide alternate locations, issues a requery with <tt>textQuery</tt>
@@ -106,14 +106,21 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     }
     
     public void initialize() {
-        assert (getMagnet() != null);
-        URN sha1 = getMagnet().getSHA1Urn();
+        MagnetOptions magnet = getMagnet();
+        assert (magnet != null);
+        URN sha1 = magnet.getSHA1Urn();
         if(sha1 != null)
             setSha1Urn(sha1);
+        long size = magnet.getFileSize();
+        if (size != -1) {
+            setContentLength(size);
+        }
         super.initialize();
+        // activate requery manager to get urn lookups for magnet downloads
+        requeryManager.activate();
     }
 
-	protected synchronized MagnetOptions getMagnet() {
+	public synchronized MagnetOptions getMagnet() {
 	    return magnet;
 	}
 	
@@ -129,22 +136,22 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      */
     protected DownloadStatus initializeDownload() {
         
-		if (!hasRFD()) {
+        // ask ranker since the alt loc manager might have added extra alt locs
+        // which were added to the ranker then
+        SourceRanker ranker = getSourceRanker();
+        boolean hasMore = ranker != null && ranker.hasMore();
+		if (!hasRFD() && !hasMore) {
 			MagnetOptions magnet = getMagnet();
 			String[] defaultURLs = magnet.getDefaultURLs();
-			if (defaultURLs.length == 0 )
-				return DownloadStatus.GAVE_UP;
-
-
-			RemoteFileDesc firstDesc = null;
 			
-			for (int i = 0; i < defaultURLs.length && firstDesc == null; i++) {
+			boolean foundSource = false;
+			for (int i = 0; i < defaultURLs.length; i++) {
 				try {
-					firstDesc = createRemoteFileDesc(defaultURLs[i],
+				    RemoteFileDesc rfd = createRemoteFileDesc(defaultURLs[i],
 													 getSaveFile().getName(), magnet.getSHA1Urn());
 							
-					initPropertiesMap(firstDesc);
-					addDownloadForced(firstDesc, true);
+					initPropertiesMap(rfd);
+					addDownloadForced(rfd, true);
 				} catch (IOException badRFD) {} 
                   catch (HttpException e) {} 
                   catch (URISyntaxException e) {} 
@@ -152,7 +159,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
             }
         
 			// if all locations included in the magnet URI fail we can't do much
-			if (firstDesc == null)
+			if (!foundSource)
 				return DownloadStatus.GAVE_UP;
 		}
         return super.initializeDownload();
@@ -161,10 +168,14 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     /** 
      * Creates a faked-up RemoteFileDesc to pass to ManagedDownloader.  If a URL
      * is provided, issues a HEAD request to get the file size.  If this fails,
-     * returns null.  Package-access and static for easy testing.
-     * 
+     * returns null.
+     * <p>
+     * Protected and non-static so it can be overridden in tests.
+     * </p>
+     * <p>
      * NOTE: this calls HTTPUtils.contentLength which opens a URL and calls Head on the
      * link to determine the file length. This is a blocking call!
+     * </p>
      */
     @SuppressWarnings("deprecation")
     private RemoteFileDesc createRemoteFileDesc(String defaultURL,

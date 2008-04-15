@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Set;
 
-import org.limewire.service.ErrorService;
-
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
@@ -19,7 +17,7 @@ import com.limegroup.gnutella.http.HTTPConstants;
 /**
  * A firewalled altloc.
  */
-public class PushAltLoc extends AlternateLocation {
+public class PushAltLoc extends AbstractAlternateLocation {
 
 	
 	/**
@@ -34,12 +32,11 @@ public class PushAltLoc extends AlternateLocation {
 	 * @param sha1
 	 * @throws IOException
 	 */
-	protected PushAltLoc(final PushEndpoint address, final URN sha1, ApplicationServices applicationServices) 
-		throws IOException {
+	protected PushAltLoc(final PushEndpoint address, final URN sha1, ApplicationServices applicationServices) { 
 		super(sha1);
 		
 		if (address == null)
-			throw new IOException("null address");
+			throw new NullPointerException("null address");
 		
 		_pushAddress = address;
         this.applicationServices = applicationServices;
@@ -61,14 +58,7 @@ public class PushAltLoc extends AlternateLocation {
 	}
 	
 	public synchronized AlternateLocation createClone() {
-        AlternateLocation ret = null;
-        try {
-
-        		ret = new PushAltLoc(_pushAddress.createClone(),SHA1_URN, applicationServices);
-        } catch(IOException ioe) {
-            ErrorService.error(ioe);
-            return null;
-        }
+        PushAltLoc ret = new PushAltLoc(_pushAddress.createClone(),SHA1_URN, applicationServices);
         ret._count = this._count;
         return ret;
     }
@@ -105,7 +95,7 @@ public class PushAltLoc extends AlternateLocation {
      * 0 if its not supported.
      */
     public int supportsFWTVersion() {
-    	return _pushAddress.supportsFWTVersion();
+    	return _pushAddress.getFWTVersion();
     }
     
     // stubbed out -- no demotion or promotion for push locs.

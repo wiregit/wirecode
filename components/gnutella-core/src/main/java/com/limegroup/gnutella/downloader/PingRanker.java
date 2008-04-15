@@ -23,6 +23,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageListener;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPPinger;
@@ -324,6 +325,12 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
                 return;
             
             HeadPong pong = (HeadPong)m;
+            
+            // update cache with push proxies of headpong since they are
+            // brand new
+            for (PushEndpoint pushEndpoint : pong.getPushLocs()) {
+                pushEndpoint.updateProxies(true);
+            }
             
             if (!pingedHosts.containsKey(handler)) 
                 return;

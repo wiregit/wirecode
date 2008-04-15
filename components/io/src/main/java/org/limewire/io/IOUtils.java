@@ -227,6 +227,17 @@ public class IOUtils {
     }
     
     /**
+     * Closes a collection of closeables. Also handles a null argument gracefully. 
+     */
+    public static void close(Iterable<? extends Closeable> closeables) {
+        if (closeables != null) {
+            for (Closeable closeable : closeables) {
+                close(closeable);
+            }
+        }
+    }
+    
+    /**
      * A utility method to flush Flushable objects (Readers, Writers, 
      * Input- and OutputStreams and RandomAccessFiles).
      */

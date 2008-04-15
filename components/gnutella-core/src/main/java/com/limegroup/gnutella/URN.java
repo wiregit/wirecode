@@ -17,16 +17,16 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import org.limewire.collection.IntWrapper;
 import org.limewire.io.IOUtils;
 import org.limewire.util.Base32;
 import org.limewire.util.SystemUtils;
 
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
-import com.limegroup.gnutella.security.SHA1;
 import com.limegroup.gnutella.security.MerkleTree;
+import com.limegroup.gnutella.security.SHA1;
 import com.limegroup.gnutella.security.Tiger;
 import com.limegroup.gnutella.settings.SharingSettings;
 
@@ -215,8 +215,8 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * and removed when hashing finishes.
 	 * IntWrapper stores the amount of bytes read.
 	 */
-	private static final Map<File, IntWrapper> progressMap =
-	    Collections.synchronizedMap(new HashMap<File, IntWrapper>());
+	private static final Map<File, AtomicInteger> progressMap =
+	    Collections.synchronizedMap(new HashMap<File, AtomicInteger>());
     
     /** Cache for byte[] used while creating the hash */
     private static final ThreadLocal<byte[]> threadLocal = new ThreadLocal<byte[]>() {
@@ -232,11 +232,11 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * Returns -1 if the file is not being hashed at all.
 	 */
 	public static int getHashingProgress(File file) {
-	    IntWrapper progress = progressMap.get(file);
+	    AtomicInteger progress = progressMap.get(file);
 	    if ( progress == null )
 	        return -1;
 	    else
-	        return progress.getInt();
+	        return progress.get();
 	}
 
 	/**
@@ -792,7 +792,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
         MessageDigest tt = new MerkleTree(new Tiger());
         byte[] buffer = threadLocal.get();
         int read;
-        IntWrapper progress = new IntWrapper(0);
+        AtomicInteger progress = new AtomicInteger(0);
         progressMap.put( file, progress );
         InputStream fis = null;        
         
@@ -804,7 +804,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
                 long start = System.nanoTime();
                 md.update(buffer,0,read);
                 tt.update(buffer,0,read);
-                progress.addInt( read );
+                progress.addAndGet( read );
                 if(SystemUtils.getIdleTime() < MIN_IDLE_TIME && SharingSettings.FRIENDLY_HASHING.getValue()) {
                     long interval = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
                     if (interval > 0) 

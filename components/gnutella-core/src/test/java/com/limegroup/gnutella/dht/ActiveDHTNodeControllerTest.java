@@ -50,7 +50,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        setSettings();
+        DHTTestUtils.setSettings(PORT);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
         injector = LimeTestUtils.createInjector();

@@ -135,7 +135,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
         Thread.sleep(250);
         // we should now be guess capable and tcp incoming capable....
         // test directly on UPD service and acceptor, since networkmanager is stubbed
-        assertTrue(acceptor.acceptedIncoming());
+        assertTrue("acceptor should have received a connection", acceptor.acceptedIncoming());
         
         // get rid of any messages that are stored up.
         drainAll();
