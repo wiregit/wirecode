@@ -47,7 +47,7 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
         //
 
         int curParam = 0;
-        NameValuePair[] nameValuePairs = new NameValuePair[queries.size() + 1];
+        NameValuePair[] nameValuePairs = new NameValuePair[2*queries.size() + 1];
         nameValuePairs[curParam++] = new BasicNameValuePair("id", String.valueOf(id));
         int i = 0;
         for (UserQueryEvent e : queries) {
