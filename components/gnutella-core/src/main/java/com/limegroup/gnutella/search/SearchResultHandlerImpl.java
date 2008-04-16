@@ -315,7 +315,7 @@ class SearchResultHandlerImpl implements SearchResultHandler {
                (gc.getNumResults() < QueryHandler.ULTRAPEER_RESULTS);
     }
 
-    static class GuidCount implements SearchResultStats {
+    class GuidCount implements SearchResultStats {
 
         private final long _time;
         private final GUID _guid;
@@ -484,7 +484,7 @@ class SearchResultHandlerImpl implements SearchResultHandler {
                 
                 if (skipSpam || !_spamManager.get().isSpam(rfd)) {
                     if (is != null) {
-                        numGood += addIntervalSet(response.getUrns(), is, response.getSize());
+                        numGood += addPartialSource(response.getUrns(), is, response.getSize());
                     }
                     else {
                         numGood += addLocation(response.getUrns(), response.getSize());
@@ -501,6 +501,19 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         }
         
         /**
+         * Returns the first SHA1 URN from the urns set, if there is one.
+         * Null, otherwise.
+         */
+        private URN getFirstSha1Urn(Set<URN> urns) {
+            for (URN urn : urns) {
+                if (urn.isSHA1())
+                    return urn;
+            }
+            
+            return null;
+        }
+        
+        /**
          * Adds the given IntervalSet to our internal map,
          * keyed on the appropriate URN, where the appropriate
          * URN is presently the first sha1 URN that we find. 
@@ -512,24 +525,19 @@ class SearchResultHandlerImpl implements SearchResultHandler {
          *         given Set<URN> based on the IntervalSet.
          * 
          */
-        private int addIntervalSet(Set<URN> urns, IntervalSet is, long size) {
+        private int addPartialSource(Set<URN> urns, IntervalSet is, long size) {
             ResourceLocationCounter rlc = null;
-            
+            URN urn = getFirstSha1Urn(urns);
             int count_before = 0;
             int count_after = 0;
             
-            for (URN urn : urns) {
-                if (!urn.isSHA1())
-                    continue;
-                
+            if (urn != null) {
                 if (null == (rlc = _isets.get(urn)))
                     _isets.put(urn, (rlc = new ResourceLocationCounter(urn, size)));
                 
                 count_before = rlc.getLocationCount();
                 rlc.addPartialSource( is );
                 count_after = rlc.getLocationCount();
-                
-                break;
             }
             
             return count_after - count_before;
@@ -537,23 +545,16 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         
         private int addLocation(Set<URN> urns, long size) {
             ResourceLocationCounter rlc = null;
+            URN urn = getFirstSha1Urn(urns);
             
-            int count_before = 0;
-            int count_after = 1;
-            
-            for (URN urn : urns) {
-                if (!urn.isSHA1())
-                    continue;
-                
+            if (urn != null) {
                 if (null == (rlc = _isets.get(urn)))
                     _isets.put(urn, (rlc = new ResourceLocationCounter(urn, size)));
                 
                 rlc.incrementWholeSources();
-                
-                break;
             }
             
-            return count_after - count_before;
+            return 1;
         }
         
         public QueryResultHandler getResultHandler (final URN urn) {

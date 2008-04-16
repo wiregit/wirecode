@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Set;
 
 import org.limewire.collection.IntervalSet;
@@ -94,7 +95,9 @@ class ResponseImpl implements Response {
      * @param index the index of the file referenced in the response
      * @param size the size of the file (in bytes)
      * @param name the name of the file
-     * @param incomingNameByteArraySize TODO
+     * @param incomingNameByteArraySize the number of bytes that were 
+     *  used to encode the file name in the message, used to compute 
+     *  the correct message length when reading from the network
      * @param urns the <tt>Set</tt> of <tt>URN</tt> instances associated
      *  with the file
      * @param doc the <tt>LimeXMLDocument</tt> instance associated with
@@ -127,7 +130,7 @@ class ResponseImpl implements Response {
         else 
             this.name = name;
         
-        isMetaFile = this.name.toLowerCase().endsWith(".torrent");
+        isMetaFile = this.name.toLowerCase(Locale.US).endsWith(".torrent");
 
         byte[] temp = null;
         try {

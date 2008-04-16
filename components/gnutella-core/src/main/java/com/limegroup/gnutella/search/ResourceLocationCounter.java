@@ -29,7 +29,7 @@ public class ResourceLocationCounter {
      * The list of ranges of available data for the URN. Synchronized 
      * internally (on itself) in this class as necessary.
      */
-    //private final ArrayList<IntervalSet> _isets = new ArrayList<IntervalSet>();
+    //private final ArrayList<IntervalSet> availableIntervals = new ArrayList<IntervalSet>();
     
     /**
      * Temporary solution for our simplistic implementation of counting
@@ -82,7 +82,7 @@ public class ResourceLocationCounter {
      */
     public void addPartialSource (IntervalSet is) {
         synchronized (this) {
-        //  _isets.add( is );
+        //  availableIntervals.add( is );
             _psets.add( is );
         }
         
@@ -149,8 +149,8 @@ public class ResourceLocationCounter {
             // the various URNs and "flatten" them into a single
             // interval set.
             //
-            synchronized (_isets) {
-                for (IntervalSet is : _isets)
+            synchronized (availableIntervals) {
+                for (IntervalSet is : availableIntervals)
                     iset.add( is );
             }
             */

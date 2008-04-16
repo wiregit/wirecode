@@ -1,8 +1,8 @@
 package com.limegroup.gnutella;
 
 /**
- * Provides simple statistics regarding a specific query. Typically obtained
- * via SearchResultStats.getResultHandler(URN).
+ * Provides simple statistics regarding a specific query result. Typically 
+ * obtained via SearchResultStats.getResultHandler(URN).
  *
  */
 public interface QueryResultHandler {
