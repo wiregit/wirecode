@@ -7,8 +7,8 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.util.DataUtils;
 
 public final class UpdateRequest extends AbstractVendorMessage implements VendorMessage.ControlMessage {
-    
-    public static final int VERSION = 1;
+    private static final int OLD_KEY_VERSION = 1;    
+    public static final int VERSION = 2;
     
     static final String COMPRESSED_UPDATE_KEY = "C";
     static final String UNCOMPRESSED_UPDATE_KEY = "U";
@@ -16,10 +16,6 @@ public final class UpdateRequest extends AbstractVendorMessage implements Vendor
     private GGEP _ggep;
     private boolean parsed;
 
-    /**
-     * Constructs a new SimppRequest from network data.
-     * @param network TODO
-     */
     UpdateRequest(byte[] guid, byte ttl, byte hops, int version, 
                                   byte[] payload, Network network) throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UPDATE_REQ, version, payload, network);
@@ -28,13 +24,13 @@ public final class UpdateRequest extends AbstractVendorMessage implements Vendor
     public UpdateRequest() {
         super(F_LIME_VENDOR_ID, F_UPDATE_REQ, VERSION, DataUtils.EMPTY_BYTE_ARRAY);
     }
-    
-    public int getVersion() {
-        return super.getVersion();
-    }
-    
+        
     public String toString() {
         return "{UpdateRequest:"+super.toString()+"}";
+    }
+    
+    public boolean isOldRequest() {
+        return getVersion() == OLD_KEY_VERSION;
     }
     
     /**

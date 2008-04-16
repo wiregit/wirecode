@@ -111,4 +111,7 @@ public class UpdateSettings extends LimeProps {
      */
     public static final LongSetting LAST_HTTP_FAILOVER = 
         FACTORY.createLongSetting("LAST_HTTP_FAILOVER", -1L);
+    
+    public static final LongSetting LAST_SIMPP_FAILOVER =
+        FACTORY.createLongSetting("LAST_SIMPP_FAILOVER", -1);
 }

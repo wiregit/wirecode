@@ -13,10 +13,10 @@ public class CapabilitiesVMStubHelper {
         return new CapabilitiesVMImpl.SupportedMessageBlock(capability, version);
     }
 
-    public static CapabilitiesVM makeCapVM(int simppNumber) throws Exception {
+    public static CapabilitiesVM makeCapibilitesWithSimp(int simppNumber) throws Exception {
         //1. prepare the SMB
         CapabilitiesVMImpl.SupportedMessageBlock simppSMB =
-            makeSMB(new byte[] { 'I', 'M', 'P', 'P' }, simppNumber);
+            makeSMB(new byte[] { 'S', 'I', 'P', 'M' }, simppNumber);
         //2. make the payload
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ByteOrder.short2leb((short)1, baos);
@@ -26,10 +26,10 @@ public class CapabilitiesVMStubHelper {
         return new CapabilitiesVMImpl(guid, (byte)1, (byte)0, 1, payload, Network.UNKNOWN);
     }
     
-    public static CapabilitiesVM makeUpdateVM(int id) throws Exception {
+    public static CapabilitiesVM makeCapabilitiesWithUpdate(int id) throws Exception {
         //1. prepare the SMB
         CapabilitiesVMImpl.SupportedMessageBlock smb =
-            makeSMB(new byte[] { 'L', 'M', 'U', 'P' }, id);
+            makeSMB(new byte[] { 'U', 'P', 'L', 'M' }, id);
             
         //2. make the payload
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

@@ -5,20 +5,12 @@ import com.limegroup.gnutella.util.DataUtils;
 
 public final class SimppRequestVM extends AbstractVendorMessage {
     
-    public static final int VERSION = 1;
+    private static final int OLD_KEY_VERSION = 1;
+    public static final int VERSION = 2;
 
-    /**
-     * Constructs a new SimppRequest from network data.
-     * @param network TODO
-     */
     SimppRequestVM(byte[] guid, byte ttl, byte hops, int version, 
                                   byte[] payload, Network network) throws BadPacketException {
-        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_SIMPP_REQ, version, payload, network);
-        
-        if(getVersion() > VERSION) //we don't support it
-            throw new BadPacketException("UNSUPPORTED VERSION");
-
-        //there is no payload 
+        super(guid, ttl, hops, F_LIME_VENDOR_ID, F_SIMPP_REQ, version, payload, network); 
     }
     
     public SimppRequestVM() {
@@ -26,8 +18,8 @@ public final class SimppRequestVM extends AbstractVendorMessage {
                                                 DataUtils.EMPTY_BYTE_ARRAY);
     }
     
-    public int getVersion() {
-        return super.getVersion();
+    public boolean isOldRequest() {
+        return getVersion() == OLD_KEY_VERSION;
     }
     
     public String toString() {

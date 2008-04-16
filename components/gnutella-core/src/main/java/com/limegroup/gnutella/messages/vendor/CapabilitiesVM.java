@@ -14,16 +14,18 @@ public interface CapabilitiesVM extends VendorMessage.ControlMessage {
      */
     static final byte[] FEATURE_SEARCH_BYTES = {(byte)87, (byte)72,
                                                       (byte)65, (byte)84};
-    /**
-     * The bytes for supporting SIMPP.  This used to be 'SIMP', but that
-     * implementation was broken.  We now use 'IMPP' to advertise support.
-     */
-    static final byte[] SIMPP_CAPABILITY_BYTES = {'I', 'M', 'P', 'P' };
     
-    /**
-     * The bytes for the LMUP message.
-     */
-    static final byte[] LIME_UPDATE_BYTES = { 'L', 'M', 'U', 'P' };
+    /** The old SIMPP capabilities, before key redo. */
+    static final byte[] OLD_SIMPP_CAPABILITY_BYTES = {'I', 'M', 'P', 'P' };
+    /** The old update capabilities, before key redo. */
+    static final byte[] OLD_LIME_UPDATE_BYTES = { 'L', 'M', 'U', 'P' };
+    
+    /** The new SIMPP capability bytes. */
+    static final byte[] SIMPP_BYTES = {'S', 'I', 'P', 'M' };
+    
+    /** The new lime update capaibility bytes. */
+    static final byte[] UPDATE_BYTES = { 'U', 'P', 'L', 'M' };
+    
     
     /** Bytes for supporting incoming TLS. */
     static final byte[] TLS_SUPPORT_BYTES = { 'T', 'L', 'S', '!' };
@@ -65,12 +67,12 @@ public interface CapabilitiesVM extends VendorMessage.ControlMessage {
     public boolean supportsWhatIsNew();
     
     /**
-     * Returns the current SIMPP version.
+     * Returns the SIMPP version.
      */
     public int supportsSIMPP();
     
     /**
-     * Returns the current Update version.
+     * Returns the Lime Update version.
      */
     public int supportsUpdate();
     

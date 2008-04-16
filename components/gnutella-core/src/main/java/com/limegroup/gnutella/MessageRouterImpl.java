@@ -2062,19 +2062,18 @@ public abstract class MessageRouterImpl implements MessageRouter {
      */
     private void handleSimppRequest(final SimppRequestVM simppReq, 
                                                   final ReplyHandler handler ) {
-        if(simppReq.getVersion() > SimppRequestVM.VERSION)
-            return; //we are not going to deal with these types of requests. 
-        byte[] simppBytes = simppManager.get().getSimppBytes();
-        if(simppBytes != null && simppBytes.length > 0 ) {
-            SimppVM simppVM = new SimppVM(simppBytes);
+        byte[] data = simppReq.isOldRequest() ? simppManager.get().getOldUpdateResponse() :
+                                                simppManager.get().getSimppBytes();
+        
+        if(data != null && data.length > 0 ) {
+            SimppVM simppVM = SimppVM.createSimppResponse(simppReq, data);
             try {
                 handler.handleSimppVM(simppVM);
-            } catch(IOException iox) {//uanble to send the SimppVM. Nothing I can do
+            } catch(IOException iox) {
                 return;
             }
         }
     }
-    
 
     /**
      * Passes on the SimppVM to the SimppManager which will verify it and
@@ -2083,31 +2082,35 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * all connections.
      */
     private void handleSimppVM(SimppVM simppVM, ReplyHandler handler) {
-        simppManager.get().checkAndUpdate(handler, simppVM.getPayload());
+        if(simppVM.isNewVersion()) {
+            simppManager.get().checkAndUpdate(handler, simppVM.getData());
+        }
     }
 
     /**
      *  Handles an update request by sending a response.
      */
     private void handleUpdateRequest(UpdateRequest req, ReplyHandler handler ) {
-
-        byte[] data = updateHandler.get().getLatestBytes();
+        byte[] data = req.isOldRequest() ? updateHandler.get().getOldUpdateResponse() :
+                                           updateHandler.get().getLatestBytes();
         if(data != null) {
             UpdateResponse msg = UpdateResponse.createUpdateResponse(data,req);
             handler.reply(msg);
         }
-    }
-    
-    /** Handles a ContentResponse msg -- passing it to the ContentManager. */
-    private void handleContentResponse(ContentResponse msg, ReplyHandler handler) {
-        contentManager.handleContentResponse(msg);
     }
 
     /**
      * Passes the request onto the update manager.
      */
     private void handleUpdateResponse(UpdateResponse resp, ReplyHandler handler) {
-        updateHandler.get().handleNewData(resp.getUpdate(), handler);
+        if(resp.isNewVersion()) {
+            updateHandler.get().handleNewData(resp.getUpdate(), handler);
+        }
+    }
+    
+    /** Handles a ContentResponse msg -- passing it to the ContentManager. */
+    private void handleContentResponse(ContentResponse msg, ReplyHandler handler) {
+        contentManager.handleContentResponse(msg);
     }
 
     /**

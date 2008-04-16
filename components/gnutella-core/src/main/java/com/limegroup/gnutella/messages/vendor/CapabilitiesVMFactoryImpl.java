@@ -65,28 +65,31 @@ public class CapabilitiesVMFactoryImpl implements CapabilitiesVMFactory {
         supported.add(smb);
 
         smb = new CapabilitiesVMImpl.SupportedMessageBlock(
-                CapabilitiesVM.SIMPP_CAPABILITY_BYTES, simppManager.get()
-                        .getVersion());
+                CapabilitiesVM.OLD_SIMPP_CAPABILITY_BYTES, 2147483647);
+        supported.add(smb);
+        
+        smb = new CapabilitiesVMImpl.SupportedMessageBlock(
+                CapabilitiesVM.SIMPP_BYTES, simppManager.get().getVersion());
         supported.add(smb);
 
         smb = new CapabilitiesVMImpl.SupportedMessageBlock(
-                CapabilitiesVM.LIME_UPDATE_BYTES, updateHandler.get()
-                        .getLatestId());
+                CapabilitiesVM.OLD_LIME_UPDATE_BYTES, 2147483647);
+        supported.add(smb);
+        
+        smb = new CapabilitiesVMImpl.SupportedMessageBlock(
+                CapabilitiesVM.UPDATE_BYTES, updateHandler.get().getLatestId());
         supported.add(smb);
         
         smb = new CapabilitiesVMImpl.SupportedMessageBlock(
                 CapabilitiesVM.INCOMING_TCP_BYTES,
-                networkManager.get().acceptedIncomingConnection() ? 1 : 0);
-        
+                networkManager.get().acceptedIncomingConnection() ? 1 : 0);        
         supported.add(smb);
         
         smb = new CapabilitiesVMImpl.SupportedMessageBlock(
                 CapabilitiesVM.FWT_SUPPORT_BYTES,
-                networkManager.get().supportsFWTVersion());
-        
+                networkManager.get().supportsFWTVersion());        
         supported.add(smb);
         
-
         if (dhtManager.get().isMemberOfDHT()) {
             DHTMode mode = dhtManager.get().getDHTMode();
             assert (mode != null);

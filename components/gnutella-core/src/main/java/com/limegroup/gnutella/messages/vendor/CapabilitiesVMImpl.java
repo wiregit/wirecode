@@ -117,14 +117,14 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
      * Returns the current SIMPP version.
      */
     public int supportsSIMPP() {
-        return supportsCapability(SIMPP_CAPABILITY_BYTES);
+        return supportsCapability(SIMPP_BYTES);
     }
     
     /**
      * Returns the current Update version.
      */
     public int supportsUpdate() {
-        return supportsCapability(LIME_UPDATE_BYTES);
+        return supportsCapability(UPDATE_BYTES);
     }
     
     /**

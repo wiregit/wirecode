@@ -133,13 +133,6 @@ public class InspectionRequestImpl extends RoutableGGEPMessage implements Inspec
         return g;
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.messages.vendor.InspectionRequest#getVersion()
-     */
-    public int getVersion() {
-        return super.getVersion();
-    }
-    
     @Override
     public Class<? extends Message> getHandlerClass() {
         return InspectionRequest.class;

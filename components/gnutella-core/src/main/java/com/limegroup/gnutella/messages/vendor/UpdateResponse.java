@@ -13,8 +13,9 @@ import com.limegroup.gnutella.messages.BadPacketException;
 public final class UpdateResponse extends AbstractVendorMessage implements VendorMessage.ControlMessage {
     
     private static final int NON_GGEP_VERSION = 1;
-    
-    public static final int VERSION = 2;
+    private static final int OLD_KEY_VERSION = 2;
+    private static final int NEW_KEY_VERSION = 3;
+    public static final int VERSION = 3;
 
     private byte [] update;
     
@@ -53,15 +54,32 @@ public final class UpdateResponse extends AbstractVendorMessage implements Vendo
     }
 
     public static UpdateResponse createUpdateResponse(byte [] update, UpdateRequest request) {
-        if (!request.hasGGEP()) 
+        if(!request.isOldRequest()) {
+            // If it's not an old request, just always toss it in a GGEP.
+            byte[] ggep = createGGEP(request, update);
+            return new UpdateResponse(ggep, VERSION);
+        } else if (!request.hasGGEP()) {
+            // If it's an old request w/o ggep, don't put in GGEP
             return new UpdateResponse(update, NON_GGEP_VERSION);
-        
+        } else {
+            // Old request w/ ggep, toss in the old GGEP.
+            byte[] ggep = createGGEP(request, update);
+            return new UpdateResponse(ggep, OLD_KEY_VERSION);
+        }
+    }
+    
+    public boolean isNewVersion() {
+        return getVersion() >= NEW_KEY_VERSION;
+    }
+    
+    private static byte[] createGGEP(UpdateRequest request, byte[] update) {
         GGEP ggep = new GGEP();
         if (request.requestsCompressed()) {
-            ggep.putCompressed(UpdateRequest.COMPRESSED_UPDATE_KEY,update);
-        } else
-            ggep.put(UpdateRequest.UNCOMPRESSED_UPDATE_KEY,update);
-        
+            ggep.putCompressed(UpdateRequest.COMPRESSED_UPDATE_KEY, update);
+        } else {
+            ggep.put(UpdateRequest.UNCOMPRESSED_UPDATE_KEY, update);
+        }
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             ggep.write(baos);
@@ -69,7 +87,7 @@ public final class UpdateResponse extends AbstractVendorMessage implements Vendo
             ErrorService.error(bad);
         }
         
-        return new UpdateResponse(baos.toByteArray(),VERSION);
+        return baos.toByteArray();
     }
     
     public byte[] getUpdate() {

@@ -24,35 +24,40 @@ public class SecureMessageVerifierImpl implements SecureMessageVerifier {
     private final String keyBase32;
     
     public SecureMessageVerifierImpl() {
-        this(null, null, null);
+        this(null, null, null, null);
     }
     
     public SecureMessageVerifierImpl(String name) {
-        this(null, null, name);
+        this(null, null, null, name);
     }
 
     public SecureMessageVerifierImpl(File keyFile) {
-        this(keyFile, null, null);
+        this(keyFile, null, null, null);
     }
     
     public SecureMessageVerifierImpl(String keyBase32, String name) {
-        this(null, keyBase32, name);
+        this(null, keyBase32, null, name);
     }
 
     public SecureMessageVerifierImpl(File keyFile, String name) {
-        this(keyFile, null, name);
+        this(keyFile, null, null, name);
     }
     
-    private SecureMessageVerifierImpl(File keyFile, String keyBase32, String name) {
+    public SecureMessageVerifierImpl(PublicKey pubKey, String name) {
+        this(null, null, pubKey, name);
+    }
+    
+    private SecureMessageVerifierImpl(File keyFile, String keyBase32, PublicKey pubKey, String name) {
         if (name == null) {
             QUEUE = ExecutorsHelper.newProcessingQueue("SecureMessageVerifier");
         } else {
             QUEUE = ExecutorsHelper.newProcessingQueue(name + "-SecureMessageVerifier");
         }
         
-        if ((keyFile == null) == (keyBase32 == null))
+        if (pubKey == null && (keyFile == null) == (keyBase32 == null))
             throw new IllegalArgumentException("must have only one source of key");
         
+        this.pubKey = pubKey;
         this.keyFile = keyFile;
         this.keyBase32 = keyBase32;
     }
