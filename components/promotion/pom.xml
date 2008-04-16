@@ -44,6 +44,11 @@
     </dependency>
     <dependency>
       <groupId>org.limewire</groupId>
+      <artifactId>lw-geocode</artifactId>
+      <version>${limewire.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.limewire</groupId>
       <artifactId>lw-http</artifactId>
       <version>${limewire.version}</version>
     </dependency>

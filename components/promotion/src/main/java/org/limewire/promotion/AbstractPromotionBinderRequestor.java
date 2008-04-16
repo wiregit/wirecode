@@ -56,13 +56,14 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
             //
             UserQueryEventData data = new UserQueryEventData(e);
             String dataStr = new String(new Base64().encode(data.getData()));
-            nameValuePairs[curParam++] = new BasicNameValuePair("query_" + i, data.getQuery());
+            nameValuePairs[curParam++] = new BasicNameValuePair("query_" + i, data.getQuery()); 
             nameValuePairs[curParam++] = new BasicNameValuePair("data_" + i, dataStr);
             i++;
         }
         HttpPost tmp = null;
         try {
-            tmp = new HttpPost(alterUrl(url));
+            String alteredUrl = alterUrl(url);
+            tmp = new HttpPost(alteredUrl);
         } catch (URISyntaxException e) {
             error(e);
             return null;

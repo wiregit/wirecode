@@ -32,7 +32,7 @@ public class PromotionBinderRequestorImpl extends AbstractPromotionBinderRequest
         this.applicationServices = applicationServices;
     }
  
-    protected void error(Exception e) {
+    protected void error(Exception e) {e.printStackTrace();
         LOG.error("Error processing promotion binder", e);
     }
 

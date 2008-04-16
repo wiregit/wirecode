@@ -6,13 +6,13 @@ package org.limewire.security.certificate;
  */
 public class CertificateProps {
     public static String getKeyStoreURLString() {
-        return "http://www.pelzer.com/lwpromo/limewire.keystore";
+        return "http://keystore.keys.limewire.com/lwpromo/limewire.keystore";
     }
     public static String getCACertAlias(){
         return "ca.limewire.com";
     }
     public static String getCAHashLookupKey(){
-        return "cahash.store.limewire.com";
+        return "cahash.keys.limewire.com";
     }
     
 }

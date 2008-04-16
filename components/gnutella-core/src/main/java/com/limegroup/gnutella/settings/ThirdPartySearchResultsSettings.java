@@ -22,13 +22,13 @@ public final class ThirdPartySearchResultsSettings extends LimeProps {
      * The url we use to search for {@link PromotionBinder}s.
      */    
     public static final StringSetting SEARCH_URL =
-        FACTORY.createRemoteStringSetting("SEARCH_URL", "", "ThirdPartySearchResultsSettings.searchUrl");
+        FACTORY.createRemoteStringSetting("SEARCH_URL", "http://binders.links.limewire.com/lwp/getBuckets.php", "ThirdPartySearchResultsSettings.searchUrl");
     
     /**
      * The url we use to redirect for {@link PromotionBinder}s.
      */    
     public static final StringSetting REDIRECT_URL =
-        FACTORY.createRemoteStringSetting("REDIRECT_URL", "", "ThirdPartySearchResultsSettings.redirectUrl");    
+        FACTORY.createRemoteStringSetting("REDIRECT_URL", "http://binders.links.limewire.com/lwp/redirect.php", "ThirdPartySearchResultsSettings.redirectUrl");    
     
     /**
      * The mod we take with the bucket ID. 

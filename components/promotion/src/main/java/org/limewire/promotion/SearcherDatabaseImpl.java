@@ -132,16 +132,6 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
      * Shortcut for creating a {@link Stmt}.
      * 
      * @param sql sql statement
-     * @param values values to fill in
-     */
-    private static Stmt stmt(String sql, Object[] values) {
-        return new Stmt(sql,values);
-    }
-    
-    /**
-     * Shortcut for creating a {@link Stmt}.
-     * 
-     * @param sql sql statement
      */
     private static Stmt stmt(String sql) {
         return new Stmt(sql);
@@ -321,8 +311,8 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             statement = connection
                     .prepareStatement("SELECT DISTINCT e.entry_id, k.binder_unique_name, e.probability_num FROM "
                             + "keywords k JOIN entries e ON e.entry_id = k.entry_id WHERE "
-                            + "e.valid_start_dt <= CURRENT_TIMESTAMP AND e.valid_end_dt >= CURRENT_TIMESTAMP "
-                            + "AND k.phrase LIKE ? ORDER BY e.probability_num DESC, RAND()");
+                            + "e.valid_start_dt <= CURRENT_TIMESTAMP AND e.valid_end_dt >= CURRENT_TIMESTAMP AND "
+                            + "k.phrase LIKE ? ORDER BY e.probability_num DESC, RAND()");
             statement.setString(1, normalizedQuery);
             final ResultSet rs = statement.executeQuery();
             while (rs.next()) {

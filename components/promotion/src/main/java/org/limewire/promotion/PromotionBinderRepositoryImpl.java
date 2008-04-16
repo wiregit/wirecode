@@ -61,7 +61,7 @@ public class PromotionBinderRepositoryImpl implements PromotionBinderRepository 
         final Set<UserQueryEvent> queries = impressionsCollector.getCollectedImpressions();
         String url = searchUrl;
         url += "?now=" + System.currentTimeMillis() / 1000;
-        PromotionBinder result = requestor.request(searchUrl, bucketNumber, queries);
+        PromotionBinder result = requestor.request(url, bucketNumber, queries);
         
         // Now remove the query events
         impressionsCollector.removeImpressions(queries);

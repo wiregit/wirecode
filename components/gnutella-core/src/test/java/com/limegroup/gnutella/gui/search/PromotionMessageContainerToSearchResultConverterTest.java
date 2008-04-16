@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.gui.search;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,7 +10,6 @@ import org.limewire.promotion.containers.PromotionMessageContainer;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.SpeedConstants;
 import com.limegroup.gnutella.gui.GUIBaseTestCase;
 import com.limegroup.gnutella.gui.search.PromotionSearchResultFactory.Attr;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
