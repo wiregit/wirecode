@@ -37,8 +37,8 @@
 	<classpathentry kind="src" output="components/promotion/build/classes" path="components/promotion/src/main/java"/>
 	<classpathentry kind="src" output="components/promotion/build/tests" path="components/promotion/src/test/java"/>
 	<classpathentry kind="src" path="core/examples/mojito"/>
-	<classpathentry kind="src" path="components/geocode/src/main/java"/>
-	<classpathentry kind="src" path="components/geocode/src/test/java"/>
+	<classpathentry kind="src" output="components/geocode/build/classes" path="components/geocode/src/main/java"/>
+	<classpathentry kind="src" output="components/geocode/build/tests" path="components/geocode/src/test/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-net.jar"/>
