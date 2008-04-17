@@ -15,11 +15,6 @@ public interface CapabilitiesVM extends VendorMessage.ControlMessage {
     static final byte[] FEATURE_SEARCH_BYTES = {(byte)87, (byte)72,
                                                       (byte)65, (byte)84};
     
-    /** The old SIMPP capabilities, before key redo. */
-    static final byte[] OLD_SIMPP_CAPABILITY_BYTES = {'I', 'M', 'P', 'P' };
-    /** The old update capabilities, before key redo. */
-    static final byte[] OLD_LIME_UPDATE_BYTES = { 'L', 'M', 'U', 'P' };
-    
     /** The new SIMPP capability bytes. */
     static final byte[] SIMPP_BYTES = {'S', 'I', 'P', 'M' };
     

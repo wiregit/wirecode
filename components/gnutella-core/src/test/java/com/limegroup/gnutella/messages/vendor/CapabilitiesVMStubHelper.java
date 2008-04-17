@@ -13,7 +13,7 @@ public class CapabilitiesVMStubHelper {
         return new CapabilitiesVMImpl.SupportedMessageBlock(capability, version);
     }
 
-    public static CapabilitiesVM makeCapibilitesWithSimp(int simppNumber) throws Exception {
+    public static CapabilitiesVM makeCapibilitesWithSimpp(int simppNumber) throws Exception {
         //1. prepare the SMB
         CapabilitiesVMImpl.SupportedMessageBlock simppSMB =
             makeSMB(new byte[] { 'S', 'I', 'P', 'M' }, simppNumber);

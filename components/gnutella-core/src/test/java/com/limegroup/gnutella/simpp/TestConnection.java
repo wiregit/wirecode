@@ -185,7 +185,7 @@ public class TestConnection extends AssertComparisons {
 
     private CapabilitiesVM makeCapabilitiesVM() {
         try {
-            return  CapabilitiesVMStubHelper.makeCapibilitesWithSimp(_capabilitySimppNo);
+            return  CapabilitiesVMStubHelper.makeCapibilitesWithSimpp(_capabilitySimppNo);
         } catch (Exception e) {
             fail("couldn't set up test -- failed to manipulate CapabilitiesVM");
         }
