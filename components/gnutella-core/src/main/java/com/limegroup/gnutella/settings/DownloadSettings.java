@@ -41,7 +41,7 @@ public class DownloadSettings extends LimeProps {
      * various parameters of the formulas for skipping acks.
      */
     public static final IntSetting MAX_SKIP_ACKS =
-        FACTORY.createRemoteIntSetting("MAX_SKIP_ACKS",5,"max_skip_ack",2,15);
+        FACTORY.createRemoteIntSetting("MAX_SKIP_ACKS",2,"max_skip_ack",2,15);
     
     public static final FloatSetting DEVIATION =
         FACTORY.createRemoteFloatSetting("SKIP_DEVIATION",1.3f,"skip_deviation",1.0f,2.0f);

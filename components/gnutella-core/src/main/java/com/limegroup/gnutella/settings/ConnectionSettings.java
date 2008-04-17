@@ -343,7 +343,7 @@ public final class ConnectionSettings extends LimeProps {
      * How many connections to maintain as a leaf when idle
      */
     public static final IntSetting IDLE_CONNECTIONS =
-        FACTORY.createRemoteIntSetting("IDLE_CONNECTIONS",1,"ConnectionSettings.IdleConnections",1,3);
+        FACTORY.createRemoteIntSetting("IDLE_CONNECTIONS",2,"ConnectionSettings.IdleConnections",1,3);
     
     /**
      * The maximum line length we'll try to parse while reading a header.

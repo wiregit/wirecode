@@ -146,15 +146,15 @@ public final class UISettings extends LimeProps {
         ImageInfoImpl(boolean intro) {
             this.intro = intro;
             imageUrl = FACTORY.createRemoteStringSetting(key("URL"), 
-                "http://clientpix.limewire.com/pix/" + (intro ? "intro" : "afterSearch"), remoteKey("Url"));
+                "http://clientpix.limewire.com/pix2/" + (intro ? "intro" : "afterSearch"), remoteKey("Url"));
             proShowPic = FACTORY.createRemoteBooleanSetting(key("PRO_SHOW"), 
-                false, remoteKey("ProShow"));
+                true, remoteKey("ProShow"));
             canLink = FACTORY.createRemoteBooleanSetting(key("HAS_LINK"), 
-                !intro, remoteKey("CanLink"));
+                true, remoteKey("CanLink"));
             localLink = FACTORY.createRemoteStringSetting(key("LOCAL_LINK"), 
-                "http://www.limewire.com/clientpro?", remoteKey("ClickLinkLocal"));
+                "http://www.limewire.com/client2pro?", remoteKey("ClickLinkLocal"));
             networkLink = FACTORY.createRemoteStringSetting(key("NETWORK_LINK"), 
-                "http://www.limewire.com/clientpro?", remoteKey("ClickLink"));
+                "http://www.limewire.com/client2pro?", remoteKey("ClickLink"));
         }
         
         private String key(String key) {
@@ -162,7 +162,7 @@ public final class UISettings extends LimeProps {
         }
         
         private String remoteKey(String key) {
-            return intro ? "UI.intro" + key : " + UI.afterSearch" + key;
+            return intro ? "UI.intro" + key : "UI.afterSearch" + key;
         }
 
         public boolean canLink() {

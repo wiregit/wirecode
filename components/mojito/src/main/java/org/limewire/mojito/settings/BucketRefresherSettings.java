@@ -49,6 +49,6 @@ public class BucketRefresherSettings extends MojitoProps {
      * it shouldn't be set to anything lower than say 5 minutes.
      */
     public static final LongSetting BUCKET_REFRESHER_PING_NEAREST
-        = FACTORY.createRemoteLongSetting("BUCKET_REFRESHER_PING_NEAREST", 0L, 
+        = FACTORY.createRemoteLongSetting("BUCKET_REFRESHER_PING_NEAREST", 600000, 
                 "Mojito.BucketRefresherPingNearest", 0L, 24L*60L*60L*1000L);
 }

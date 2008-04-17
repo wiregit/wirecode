@@ -23,7 +23,7 @@ public class DHTSettings extends LimeProps {
     // Was DHTSettings.DisableDHT // 4.13.1 & 4.13.2
     public static final BooleanSetting DISABLE_DHT_NETWORK 
         = FACTORY.createRemoteBooleanSetting("DISABLE_DHT_NETWORK", 
-                true, "DHT.DisableNetwork");
+                false, "DHT.DisableNetwork");
     
     /**
      * Setting for whether or not the DHT should be active at all.
@@ -54,7 +54,7 @@ public class DHTSettings extends LimeProps {
      */
     public static final IntSetting ACTIVE_DHT_ROUTETABLE_VERSION
         = FACTORY.createRemoteIntSetting("ACTIVE_DHT_ROUTETABLE_VERSION", 
-                0, "DHT.ActiveRouteTableVersion", 0, Integer.MAX_VALUE);
+                1, "DHT.ActiveRouteTableVersion", 0, Integer.MAX_VALUE);
 
     /**
      * Version of serialized RouteTable
@@ -72,7 +72,7 @@ public class DHTSettings extends LimeProps {
      */
     // Was DHT.MinDHTAvgUptime
     public static final LongSetting MIN_ACTIVE_DHT_AVERAGE_UPTIME 
-        = FACTORY.createRemoteLongSetting("MIN_ACTIVE_DHT_AVERAGE_UPTIME", 2L*60L*60L*1000L,
+        = FACTORY.createRemoteLongSetting("MIN_ACTIVE_DHT_AVERAGE_UPTIME", 1800000,
                 "DHT.MinActiveAverageUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
     
     /**
@@ -82,7 +82,7 @@ public class DHTSettings extends LimeProps {
      */
     // Was DHT.MinDHTInitialUptime
     public static final LongSetting MIN_ACTIVE_DHT_INITIAL_UPTIME 
-        = FACTORY.createRemoteLongSetting("MIN_ACTIVE_DHT_INITIAL_UPTIME", 2L*60L*60L*1000L,
+        = FACTORY.createRemoteLongSetting("MIN_ACTIVE_DHT_INITIAL_UPTIME", 3600000,
                 "DHT.MinActiveInitialUptime", 5L*60L*1000L, 48L*60L*60L*1000L);
     
     /**
@@ -109,7 +109,7 @@ public class DHTSettings extends LimeProps {
      * WARNING: DO NOT MANUALLY CHANGE THIS 
      */
     public static final LongSetting MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME 
-        = FACTORY.createRemoteLongSetting("MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME", 2L*60L*60L*1000L,
+        = FACTORY.createRemoteLongSetting("MIN_PASSIVE_LEAF_DHT_AVERAGE_UPTIME", 60000,
                 "DHT.MinPassiveLeafAverageUptime", 1L, 48L*60L*60L*1000L);
     
     /**
@@ -118,7 +118,7 @@ public class DHTSettings extends LimeProps {
      * WARNING: DO NOT MANUALLY CHANGE THIS
      */
     public static final LongSetting MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME 
-        = FACTORY.createRemoteLongSetting("MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME", 2L*60L*60L*1000L,
+        = FACTORY.createRemoteLongSetting("MIN_PASSIVE_LEAF_DHT_INITIAL_UPTIME", 300000,
                 "DHT.MinPassiveLeafInitialUptime", 1L, 48L*60L*60L*1000L);
     
     /**
@@ -251,21 +251,21 @@ public class DHTSettings extends LimeProps {
      */
     public static final BooleanSetting PUBLISH_ALT_LOCS
         = FACTORY.createRemoteBooleanSetting("PUBLISH_ALT_LOCS", 
-                false, "DHT.PublishAltLocs");
+                true, "DHT.PublishAltLocs");
     
     /**
      * Whether or not DHT querying is enabled 
      */
     public static final BooleanSetting ENABLE_DHT_ALT_LOC_QUERIES
         = FACTORY.createRemoteBooleanSetting("ENABLE_DHT_ALT_LOC_QUERIES", 
-                false, "DHT.EnableAltLocQueriesV2");
+                true, "DHT.EnableAltLocQueriesV2");
     
     /**
      * The maximum number of DHT requery attempts
      */
     public static final IntSetting MAX_DHT_ALT_LOC_QUERY_ATTEMPTS
         = FACTORY.createRemoteIntSetting("MAX_DHT_ALT_LOC_QUERY_ATTEMPTS", 
-                1, "DHT.MaxAltLocQueryAttempts", 1, Integer.MAX_VALUE);
+                500, "DHT.MaxAltLocQueryAttempts", 1, Integer.MAX_VALUE);
     
     /**
      * The minimum time between two DHT requeries
@@ -282,7 +282,7 @@ public class DHTSettings extends LimeProps {
     // Deadlock! Do not turn on! See MOJITO-119!
     public static final BooleanSetting ENABLE_PASSIVE_DHT_MODE
         = FACTORY.createRemoteBooleanSetting("ENABLE_PASSIVE_DHT_MODE", 
-                false, "DHT.EnablePassiveModeV2");
+                true, "DHT.EnablePassiveModeV2");
     
     /**
      * Setting for whether or not the passive leaf DHT mode should be active at all.
@@ -290,7 +290,7 @@ public class DHTSettings extends LimeProps {
      */
     public static final BooleanSetting ENABLE_PASSIVE_LEAF_DHT_MODE
         = FACTORY.createRemoteBooleanSetting("ENABLE_PASSIVE_LEAF_DHT_MODE", 
-                false, "DHT.EnablePassiveLeafMode");
+                true, "DHT.EnablePassiveLeafMode");
     
     /**
      * Whether or not PushProxies should be published.
@@ -298,14 +298,14 @@ public class DHTSettings extends LimeProps {
      */
     public static final BooleanSetting PUBLISH_PUSH_PROXIES
         = FACTORY.createRemoteBooleanSetting("PUBLISH_PUSH_PROXIES", 
-                false, "DHT.PublishPushProxies");
+                true, "DHT.PublishPushProxies");
     
     /**
      * Whether or not we query for PushProxies
      */
     public static final BooleanSetting ENABLE_PUSH_PROXY_QUERIES
         = FACTORY.createRemoteBooleanSetting("ENABLE_PUSH_PROXY_QUERIES", 
-                false, "DHT.EnablePushProxyQueriesV2");
+                true, "DHT.EnablePushProxyQueriesV2");
     
     /**
      * This setting is storing the most recent DHT Node ID for debugging purposes.

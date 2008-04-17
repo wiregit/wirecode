@@ -111,7 +111,7 @@ public final class RouteTableSettings extends MojitoProps {
      */
     public static final FloatSetting MAX_CONTACTS_PER_NETWORK_CLASS_RATIO
         = FACTORY.createRemoteFloatSetting("MAX_CONTACTS_PER_NETWORK_CLASS_RATIO", 
-                1.0f, "Mojito.MaxContactsPerNetworkClassRatio", 0.0f, 1.0f);
+                0.1f, "Mojito.MaxContactsPerNetworkClassRatio", 0.0f, 1.0f);
     
     /**
      * True if contacts created from incoming requests should be considered UNKNOWN

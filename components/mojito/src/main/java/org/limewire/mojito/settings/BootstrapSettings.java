@@ -44,7 +44,7 @@ public class BootstrapSettings extends MojitoProps {
      */
     public static final LongSetting BOOTSTRAP_TIMEOUT
         = FACTORY.createRemoteLongSetting("BOOTSTRAP_TIMEOUT", 
-                8L*60L*1000L, "Mojito.BootstrapTimeout", 60L*1000L, 30L*60L*1000L);
+                240000, "Mojito.BootstrapTimeout", 60L*1000L, 30L*60L*1000L);
     
     /**
      * The IS_BOOTSTRAPPED_RATIO is used to determinate if a Node's RouteTable
@@ -52,7 +52,7 @@ public class BootstrapSettings extends MojitoProps {
      */
     public static final FloatSetting IS_BOOTSTRAPPED_RATIO
         = FACTORY.createRemoteFloatSetting("IS_BOOTSTRAPPED_RATIO", 
-                0.5f, "Mojito.IsBootstrappedRatio", 0f, 1.0f);
+                0.3f, "Mojito.IsBootstrappedRatio", 0f, 1.0f);
     
     /**
      * Number of bootstrap workers to spawn.

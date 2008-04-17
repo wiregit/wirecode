@@ -101,7 +101,7 @@ public final class DatabaseSettings extends MojitoProps {
      * The period of the StorablePublisher
      */
     public static final LongSetting STORABLE_PUBLISHER_PERIOD
-        = FACTORY.createRemoteLongSetting("STORABLE_PUBLISHER_PERIOD", 5L*60L*1000L, 
+        = FACTORY.createRemoteLongSetting("STORABLE_PUBLISHER_PERIOD", 1860000, 
                 "Mojito.StorablePublisherPeriod", 5L*60L*1000L, 60L*60L*1000L);
     
     /**

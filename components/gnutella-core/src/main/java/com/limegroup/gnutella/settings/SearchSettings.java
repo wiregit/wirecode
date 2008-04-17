@@ -257,7 +257,7 @@ public final class SearchSettings extends LimeProps {
 
     public static final ProbabilisticBooleanSetting DISABLE_OOB_V2
         = FACTORY.createRemoteProbabilisticBooleanSetting("DISABLE_OOB_V2",
-                0f, "SearchSettings.DisableOOBV2",0f,1f);
+                0.999f, "SearchSettings.DisableOOBV2",0f,1f);
 
     /**
      * The TTL for probe queries.

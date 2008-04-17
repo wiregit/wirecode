@@ -26,7 +26,7 @@ public final class SWTBrowserSettings extends LimeProps {
      */ 
     public static final StringSetting BROWSER_HOME_URL =
         FACTORY.createRemoteStringSetting("SWT_BROWSER_HOME_URL", 
-                                          "http://www.limewire.com/features?inclient", 
+                                          "http://www.limewire.com/client/index.php?p=b2", 
                                           "SWTBrowserSettings.remoteLimeWireStoreUrl");
     
     public static StringSetting getTitleSetting() {
@@ -44,7 +44,7 @@ public final class SWTBrowserSettings extends LimeProps {
      */
    private static final StringSetting SWT_BROWSER_TITLE_WITH_AMPS =
        FACTORY.createRemoteStringSetting("SWT_BROWSER_TITLE_WITH_AMPS", 
-                                         "&Browser", 
+                                         "New @ &Lime", 
                                          "SWTBrowserSettings.swtBrowserTitleWithAmps");
    
    /**
@@ -52,18 +52,18 @@ public final class SWTBrowserSettings extends LimeProps {
     */
    private static final StringSetting SWT_BROWSER_TITLE_WITH_AMPS_PRO =
       FACTORY.createRemoteStringSetting("SWT_BROWSER_TITLE_WITH_AMPS_PRO", 
-                                        "&Browser", 
+                                        "New @ &Lime", 
                                         "SWTBrowserSettings.swtBrowserTitleWithAmpsPro");
   
    private static final StringSetting SWT_BROWSER_TOOLTIP_PRO =
       FACTORY.createRemoteStringSetting("SWT_BROWSER_TOOLTIP_PRO", 
-                                        "Browse The Web", 
+                                        "Learn More...", 
                                         "SWTBrowserSettings.swtBrowserTooltipPro");
   
     
    private static final StringSetting SWT_BROWSER_TOOLTIP =
         FACTORY.createRemoteStringSetting("SWT_BROWSER_TOOLTIP", 
-                                          "Browse The Web", 
+                                          "Learn More...", 
                                           "SWTBrowserSettings.swtBrowserTooltip");
     
     /** Whether or not the address bar is visible. */
