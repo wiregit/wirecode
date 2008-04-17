@@ -34,7 +34,11 @@
 	<classpathentry kind="src" output="components/mojito-ui/build/misc" path="components/mojito-ui/misc/java"/>
 	<classpathentry kind="src" output="components/lwsserver/build/classes" path="components/lwsserver/src/main/java"/>
 	<classpathentry kind="src" output="components/lwsserver/build/tests" path="components/lwsserver/src/test/java"/>
+	<classpathentry kind="src" output="components/promotion/build/classes" path="components/promotion/src/main/java"/>
+	<classpathentry kind="src" output="components/promotion/build/tests" path="components/promotion/src/test/java"/>
 	<classpathentry kind="src" path="core/examples/mojito"/>
+	<classpathentry kind="src" path="components/geocode/src/main/java"/>
+	<classpathentry kind="src" path="components/geocode/src/test/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-net.jar"/>
@@ -93,5 +97,7 @@
 	<classpathentry kind="lib" path="lib/jars/httpcore-4.0-beta2-20080303.182830-4.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.0-beta2-20080303.182830-4.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-alpha4-20080321.114022-5.jar"/>
+	<classpathentry kind="lib" path="lib/jars/dnsjava.jar"/>
+	<classpathentry kind="lib" path="lib/jars/hsqldb.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

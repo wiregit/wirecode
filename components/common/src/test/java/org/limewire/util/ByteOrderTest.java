@@ -14,16 +14,24 @@ import junit.framework.Test;
 public class ByteOrderTest extends BaseTestCase {
     
     short result1, result4;
-    int result2, result3;
-    byte in;
-    int out;
-    short in2;
-    int out2;
-    int in3;
-    long out4;
-    ByteArrayInputStream sin;
-    ByteArrayOutputStream sout;
 
+    int result2, result3;
+
+    byte in;
+
+    int out;
+
+    short in2;
+
+    int out2;
+
+    int in3;
+
+    long out4;
+
+    ByteArrayInputStream sin;
+
+    ByteArrayOutputStream sout;
     
 	public ByteOrderTest(String name) {
 		super(name);
@@ -84,8 +92,8 @@ public class ByteOrderTest extends BaseTestCase {
     
         byte[] x3={(byte)0x00, (byte)0xF3, (byte)0, (byte)0xFF};
         result3=ByteOrder.leb2int(x3,0);
-        assertEquals("unexpected result3 ("+Integer.toHexString(result3)+")",
-            0xFF00F300, result3);
+        assertEquals("unexpected result3 (" + Integer.toHexString(result3) + ")", 0xFF00F300,
+                result3);
             
         // stream version.
         sin = new ByteArrayInputStream(x2);
@@ -104,8 +112,7 @@ public class ByteOrderTest extends BaseTestCase {
 
         byte[] x3={(byte)0x0F, (byte)0xA3 };
         result4=ByteOrder.beb2short(x3,0);
-        assertEquals("unexpected result3 ("+Integer.toHexString(result4)+")",
-            0x0FA3, result4);
+        assertEquals("unexpected result3 (" + Integer.toHexString(result4) + ")", 0x0FA3, result4);
             
         short a = 515;
         byte[] x4 = new byte[2];
@@ -130,8 +137,8 @@ public class ByteOrderTest extends BaseTestCase {
 
         byte[] x3={(byte)0xFF, (byte)0x01, (byte)0xF3, (byte)0x00};
         result3=ByteOrder.beb2int(x3,0);
-        assertEquals("unexpected result3 ("+Integer.toHexString(result3)+")",
-            0xFF01F300, result3);
+        assertEquals("unexpected result3 (" + Integer.toHexString(result3) + ")", 0xFF01F300,
+                result3);
         
         byte[] buf = new byte[4];
         ByteOrder.int2beb(result3, buf, 0);
@@ -161,7 +168,8 @@ public class ByteOrderTest extends BaseTestCase {
         try {
             ByteOrder.beb2int(x4, 3, 5);
             fail("expected exception");
-        } catch(IllegalArgumentException expected) {}
+        } catch (IllegalArgumentException expected) {
+        }
         
         // limited version of stream int2beb.
         sout = new ByteArrayOutputStream();
@@ -172,21 +180,18 @@ public class ByteOrderTest extends BaseTestCase {
         assertEquals(new byte[] { (byte)0x01, (byte)0x02 }, sout.toByteArray());
         sout = new ByteArrayOutputStream();
         ByteOrder.int2beb(259, sout, 3);
-        assertEquals(new byte[] { 0, (byte)0x01, (byte)0x03 },
-                     sout.toByteArray());
+        assertEquals(new byte[] { 0, (byte) 0x01, (byte) 0x03 }, sout.toByteArray());
         sout = new ByteArrayOutputStream();
         ByteOrder.int2beb(Integer.MAX_VALUE, sout, 4);
-        assertEquals(
-            new byte[] {(byte)0x7F, (byte)0xFF, (byte)0xFF, (byte)0xFF },
-            sout.toByteArray()
-        );
+        assertEquals(new byte[] { (byte) 0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF }, sout
+                .toByteArray());
     }
     
     public void testLeb2Short() {
         byte[] x4={(byte)0xFF, (byte)0xF3};
         result4=ByteOrder.leb2short(x4,0);
-        assertEquals("unexpected result4 ("+Integer.toHexString(result4)+")",
-            (short)0xF3FF, result4);
+        assertEquals("unexpected result4 (" + Integer.toHexString(result4) + ")", (short) 0xF3FF,
+                result4);
     }
     
     public void testUByte2Int() {
@@ -243,66 +248,63 @@ public class ByteOrderTest extends BaseTestCase {
         try {
             ByteOrder.long2minLeb(-1);
             fail("exception should have been thrown");
-        } catch(IllegalArgumentException e) {}
+        } catch (IllegalArgumentException e) {
+        }
         
         assertEquals(ByteOrder.long2minLeb(0), new byte[] {0});
         assertEquals(ByteOrder.long2minLeb(1), new byte[] {(byte)1});
         assertEquals(ByteOrder.long2minLeb(7), new byte[] {(byte)7});
         assertEquals(ByteOrder.long2minLeb(255), new byte[] {(byte)0xFF});
-        assertEquals(ByteOrder.long2minLeb(256),
-            new byte[] {(byte)0, (byte)0x1});
-        assertEquals(ByteOrder.long2minLeb(0x012345L),
-            new byte[] {(byte)0x45, (byte)0x23, (byte)0x01});
-        assertEquals(ByteOrder.long2minLeb(0x015432FDL),
-            new byte[] {(byte)0xFD, (byte)0x32, (byte)0x54, (byte)0x01});
-        assertEquals(ByteOrder.long2minLeb(0x5324FCAB01L),
-            new byte[] {(byte)0x01, (byte)0xAB, (byte)0xFC, (byte)0x24, 
-                        (byte)0x53});
-        assertEquals(ByteOrder.long2minLeb(0x123456789ABCL),
-            new byte[] {(byte)0xBC, (byte)0x9A, (byte)0x78, (byte)0x56,
-                        (byte)0x34, (byte)0x12});
-        assertEquals(ByteOrder.long2minLeb(0xFDECBA12345678L),
-            new byte[] {(byte)0x78, (byte)0x56, (byte)0x34, (byte)0x12, 
-                        (byte)0xBA, (byte)0xEC, (byte)0xFD});
-        assertEquals(ByteOrder.long2minLeb(0x0123456789ABCDEFL),
-            new byte[] {(byte)0xEF, (byte)0xCD, (byte)0xAB, (byte)0x89, 
-                        (byte)0x67, (byte)0x45, (byte)0x23, (byte)0x01});
+        assertEquals(ByteOrder.long2minLeb(256), new byte[] { (byte) 0, (byte) 0x1 });
+        assertEquals(ByteOrder.long2minLeb(0x012345L), new byte[] { (byte) 0x45, (byte) 0x23,
+                (byte) 0x01 });
+        assertEquals(ByteOrder.long2minLeb(0x015432FDL), new byte[] { (byte) 0xFD, (byte) 0x32,
+                (byte) 0x54, (byte) 0x01 });
+        assertEquals(ByteOrder.long2minLeb(0x5324FCAB01L), new byte[] { (byte) 0x01, (byte) 0xAB,
+                (byte) 0xFC, (byte) 0x24, (byte) 0x53 });
+        assertEquals(ByteOrder.long2minLeb(0x123456789ABCL), new byte[] { (byte) 0xBC, (byte) 0x9A,
+                (byte) 0x78, (byte) 0x56, (byte) 0x34, (byte) 0x12 });
+        assertEquals(ByteOrder.long2minLeb(0xFDECBA12345678L), new byte[] { (byte) 0x78,
+                (byte) 0x56, (byte) 0x34, (byte) 0x12, (byte) 0xBA, (byte) 0xEC, (byte) 0xFD });
+        assertEquals(ByteOrder.long2minLeb(0x0123456789ABCDEFL), new byte[] { (byte) 0xEF,
+                (byte) 0xCD, (byte) 0xAB, (byte) 0x89, (byte) 0x67, (byte) 0x45, (byte) 0x23,
+                (byte) 0x01 });
     }
 
     public void testInt2MinLeb() {
         try {
             ByteOrder.int2minLeb(-1);
             fail("exception should have been thrown");
-        } catch (IllegalArgumentException e) { }
+        } catch (IllegalArgumentException e) {
+        }
 
         assertEquals(ByteOrder.int2minLeb(0), new byte[] {(byte)0});
         assertEquals(ByteOrder.int2minLeb(1), new byte[] {(byte)1});
         assertEquals(ByteOrder.int2minLeb(7), new byte[] {(byte)7});
         assertEquals(ByteOrder.int2minLeb(255), new byte[] {(byte)0xFF});
-        assertEquals(ByteOrder.int2minLeb(256),
-            new byte[] {(byte)0, (byte)0x1});
+        assertEquals(ByteOrder.int2minLeb(256), new byte[] { (byte) 0, (byte) 0x1 });
         assertEquals(ByteOrder.int2minLeb(72831), 
             new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1});
-        assertEquals(ByteOrder.int2minLeb(731328764), 
-            new byte[] {(byte)0xFC, (byte)0x30, (byte)0x97, (byte)0x2B});
+        assertEquals(ByteOrder.int2minLeb(731328764), new byte[] { (byte) 0xFC, (byte) 0x30,
+                (byte) 0x97, (byte) 0x2B });
     }
     
     public void testInt2MinBeb() {
         try {
             ByteOrder.int2minBeb(-1);
             fail("expected exception");
-        } catch(IllegalArgumentException expected) {}
+        } catch (IllegalArgumentException expected) {
+        }
         
         assertEquals(ByteOrder.int2minBeb(0), new byte[] {(byte)0});
         assertEquals(ByteOrder.int2minBeb(1), new byte[] {(byte)1});
         assertEquals(ByteOrder.int2minBeb(7), new byte[] {(byte)7});
         assertEquals(ByteOrder.int2minBeb(255), new byte[] {(byte)0xFF});
-        assertEquals(ByteOrder.int2minBeb(256),
-            new byte[] {(byte)0x1, (byte)0});
+        assertEquals(ByteOrder.int2minBeb(256), new byte[] { (byte) 0x1, (byte) 0 });
         assertEquals(ByteOrder.int2minBeb(72831), 
             new byte[] { (byte)0x1, (byte)0x1c, (byte)0x7f});
-        assertEquals(ByteOrder.int2minBeb(731328764), 
-            new byte[] {(byte)0x2B, (byte)0x97, (byte)0x30, (byte)0xFC});
+        assertEquals(ByteOrder.int2minBeb(731328764), new byte[] { (byte) 0x2B, (byte) 0x97,
+                (byte) 0x30, (byte) 0xFC });
         
     }   
     
@@ -310,31 +312,29 @@ public class ByteOrderTest extends BaseTestCase {
         assertEquals(0, ByteOrder.leb2long(new byte[] {(byte)0}, 0, 1));
         assertEquals(1, ByteOrder.leb2long(new byte[] {(byte)1}, 0, 1));
         assertEquals(7, ByteOrder.leb2long(new byte[] {(byte)7}, 0, 1));
-        assertEquals(0x1c,
-            ByteOrder.leb2long(new byte[] {(byte)0x7f, (byte)0x1c,
-                                           (byte)0x1}, 1, 1));
+        assertEquals(0x1c, ByteOrder.leb2long(new byte[] { (byte) 0x7f, (byte) 0x1c, (byte) 0x1 },
+                1, 1));
 
-        assertEquals(0x11c,
-            ByteOrder.leb2long(new byte[] {(byte)0x7f, (byte)0x1c,
-                                           (byte)0x1}, 1, 2));
+        assertEquals(0x11c, ByteOrder.leb2long(new byte[] { (byte) 0x7f, (byte) 0x1c, (byte) 0x1 },
+                1, 2));
 
-        assertEquals(0x11c7f,
-            ByteOrder.leb2long(new byte[] {(byte)0x7f, (byte)0x1c,
-                                           (byte)0x1}, 0, 3));
+        assertEquals(0x11c7f, ByteOrder.leb2long(
+                new byte[] { (byte) 0x7f, (byte) 0x1c, (byte) 0x1 }, 0, 3));
 
-        assertEquals(0x1011c7f,
-            ByteOrder.leb2long(new byte[] {(byte)0xac, (byte)0x7f, (byte)0x1c,
-                                           (byte)0x1, (byte)0x1}, 1, 4));
+        assertEquals(0x1011c7f, ByteOrder.leb2long(new byte[] { (byte) 0xac, (byte) 0x7f,
+                (byte) 0x1c, (byte) 0x1, (byte) 0x1 }, 1, 4));
 
         try {
             ByteOrder.leb2long(new byte[] {}, 0, 0);
             fail("illegalargument expected.");
-        } catch(IllegalArgumentException ignored) {}
+        } catch (IllegalArgumentException ignored) {
+        }
 
         try {
             ByteOrder.leb2long(new byte[] {}, 0, 9);
             fail("illegalargument expected.");
-        } catch(IllegalArgumentException ignored) {}            
+        } catch (IllegalArgumentException ignored) {
+        }
     }
     
     public void testLong2leb() {
@@ -353,25 +353,26 @@ public class ByteOrderTest extends BaseTestCase {
         assertEquals(0, ByteOrder.leb2int(new byte[] {(byte)0}, 0, 1));
         assertEquals(1, ByteOrder.leb2int(new byte[] {(byte)1}, 0, 1));
         assertEquals(7, ByteOrder.leb2int(new byte[] {(byte)7}, 0, 1));
-        assertEquals(0x1c,
-        ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 1, 1));
-        assertEquals(0x11c,
-        ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 1, 2));
-        assertEquals(0x11c7f,
-        ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 0, 3));
-        assertEquals(0x1011c7f,
-        ByteOrder.leb2int(new byte[] {(byte)0xac, (byte)0x7f, (byte)0x1c,
-                                      (byte)0x1, (byte)0x1}, 1, 4));
+        assertEquals(0x1c, ByteOrder.leb2int(new byte[] { (byte) 0x7f, (byte) 0x1c, (byte) 0x1 },
+                1, 1));
+        assertEquals(0x11c, ByteOrder.leb2int(new byte[] { (byte) 0x7f, (byte) 0x1c, (byte) 0x1 },
+                1, 2));
+        assertEquals(0x11c7f, ByteOrder.leb2int(
+                new byte[] { (byte) 0x7f, (byte) 0x1c, (byte) 0x1 }, 0, 3));
+        assertEquals(0x1011c7f, ByteOrder.leb2int(new byte[] { (byte) 0xac, (byte) 0x7f,
+                (byte) 0x1c, (byte) 0x1, (byte) 0x1 }, 1, 4));
         
         try {
             ByteOrder.leb2int(new byte[] {}, 0, 0);
             fail("illegalargument expected.");
-        } catch(IllegalArgumentException ignored) {}
+        } catch (IllegalArgumentException ignored) {
+        }
         
         try {
             ByteOrder.leb2int(new byte[] {}, 0, 5);
             fail("illegalargument expected.");
-        } catch(IllegalArgumentException ignored) {}            
+        } catch (IllegalArgumentException ignored) {
+        }
     }    
     
     public void testEOF() throws Exception {
@@ -380,26 +381,81 @@ public class ByteOrderTest extends BaseTestCase {
         try {
             ByteOrder.leb2short(bais);
             fail("should've thrown");
-        } catch (EOFException expected){};
+        } catch (EOFException expected) {
+        }
+        ;
         try {
             ByteOrder.beb2short(bais);
             fail("should've thrown");
-        } catch (EOFException expected){};
+        } catch (EOFException expected) {
+        }
+        ;
         byte[] three = new byte[3];
         bais = new ByteArrayInputStream(three);
         try {
             ByteOrder.leb2int(bais);
             fail("should've thrown");
-        } catch (EOFException expected){};
+        } catch (EOFException expected) {
+        }
+        ;
         try {
             ByteOrder.beb2int(bais);
             fail("should've thrown");
-        } catch (EOFException expected){};
+        } catch (EOFException expected) {
+        }
+        ;
         byte []seven = new byte[7];
         bais = new ByteArrayInputStream(seven);
         try {
             ByteOrder.leb2long(bais);
             fail("should've thrown");
-        } catch (EOFException expected){};
+        } catch (EOFException expected) {
+        }
+        ;
     }
+
+    public void testLong2Bytes() {
+        byte[] bytes = ByteOrder.long2bytes(1L, 4);
+        assertEquals(new byte[] { 0, 0, 0, 1 }, bytes);
+
+        bytes = ByteOrder.long2bytes(256L, 4);
+        assertEquals(new byte[] { 0, 0, 1, 0 }, bytes);
+
+        bytes = ByteOrder.long2bytes(65536L, 4);
+        assertEquals(new byte[] { 0, 1, 0, 0 }, bytes);
+
+        bytes = ByteOrder.long2bytes(65537L, 4);
+        assertEquals(new byte[] { 0, 1, 0, 1 }, bytes);
+
+        bytes = ByteOrder.long2bytes(16777216L, 4);
+        assertEquals(new byte[] { 1, 0, 0, 0 }, bytes);
+    }
+
+    public void testLong2Bytes2() {
+        byte[] bytes = ByteOrder.long2bytes(1L, 2);
+        assertEquals(new byte[] { 0, 1 }, bytes);
+    }
+
+    public void testLong2BytesMinus1() {
+        byte[] bytes = ByteOrder.long2bytes(-1L, 2);
+        assertEquals(new byte[] { -1, -1 }, bytes);
+
+        bytes = ByteOrder.long2bytes(-1L, 8);
+        assertEquals(new byte[] { -1, -1, -1, -1, -1, -1, -1, -1 }, bytes);
+
+    }
+
+    public void testConvertToBytesExtents() {
+        try {
+            ByteOrder.long2bytes(1, 9);
+            fail("Expected an exception for byteCount > 8");
+        } catch (ArrayIndexOutOfBoundsException expected) {
+        }
+        try {
+            ByteOrder.long2bytes(1, -1);
+            fail("Expected an exception for byteCount < 0");
+        } catch (NegativeArraySizeException expected) {
+        }
+    }
+
 }        

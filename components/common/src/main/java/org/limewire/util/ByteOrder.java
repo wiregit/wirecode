@@ -360,6 +360,39 @@ public class ByteOrder {
     }
     
     /**
+     * @return a big-endian array of byteCount bytes matching the passed-in
+     *         number: ie: 1L,4 becomes -> [0,0,0,1]
+     * @param byteCount a number between 0 and 8, the size of the resulting
+     *        array
+     * @throws NegativeArraySizeException if byteCount < 0
+     * @throws ArrayIndexOutOfBoundsException if byteCount > 8
+     */
+    public static byte[] long2bytes(long i, int byteCount) {
+        byte[] b = new byte[8];
+        b[7] = (byte) (i);
+        i >>>= 8;
+        b[6] = (byte) (i);
+        i >>>= 8;
+        b[5] = (byte) (i);
+        i >>>= 8;
+        b[4] = (byte) (i);
+        i >>>= 8;
+        b[3] = (byte) (i);
+        i >>>= 8;
+        b[2] = (byte) (i);
+        i >>>= 8;
+        b[1] = (byte) (i);
+        i >>>= 8;
+        b[0] = (byte) (i);
+
+        // We have an 8 byte array. Copy the interesting bytes into our new
+        // array of size 'byteCount'
+        byte[] bytes = new byte[byteCount];
+        System.arraycopy(b, 8 - byteCount, bytes, 0, byteCount);
+        return bytes;
+    }
+    
+    /**
      * Int to big-endian bytes: writes x to buf[offset ..].
      */
     public static void int2beb(final int x,
@@ -620,7 +653,7 @@ public class ByteOrder {
 					| (( x[offset + 3] & 0xFFL) << 32)
 					| (( x[offset + 2] & 0xFFL) << 40)
 					| (( x[offset + 1] & 0xFFL) << 48)
-					|  ( x[offset    ]          << 56);
+					| (( x[offset    ] & 0xFFL) << 56);
 		default:
 			throw new IllegalArgumentException("No bytes specified");
 		}

@@ -15,8 +15,8 @@ import org.limewire.security.SecureMessage;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEPParser;
 import com.limegroup.gnutella.messages.GGEPKeys;
+import com.limegroup.gnutella.messages.GGEPParser;
 import com.limegroup.gnutella.messages.SecureGGEPData;
 
 

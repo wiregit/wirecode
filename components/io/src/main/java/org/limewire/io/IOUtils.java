@@ -73,7 +73,6 @@ public class IOUtils {
      
     }
 
-    
     /**
      * Attempts to handle an IOException. If we know expect the problem,
      * we can either ignore it or display a friendly error (both returning
@@ -123,6 +122,13 @@ public class IOUtils {
         // dunno what to do, let the outer world handle it.
         return false;
     }       
+
+    /** Convenience method to create a new IOException with initCause set. */
+    public static IOException getIOException(String message, Throwable cause) {
+        IOException ioException = new IOException(message);
+        ioException.initCause(cause);
+        return ioException;
+    }
 
    /**
      * Returns the first word of specified maximum size up to the first space
