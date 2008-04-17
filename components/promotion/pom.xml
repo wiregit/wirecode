@@ -73,7 +73,7 @@
       <version>4.0-alpha4-20080319.202202-3</version>
     </dependency>
     <dependency>
-      <groupId>hsqldb</groupId>
+      <groupId>org.hsqldb</groupId>
       <artifactId>hsqldb</artifactId>
       <version>1.8.0.8</version>
     </dependency>

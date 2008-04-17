@@ -67,6 +67,21 @@
         <enabled>true</enabled>
       </snapshots>
     </repository>
+    <repository>
+  		<id>java-dev</id>
+  		<name>Java.net Repository</name>
+  		<layout>default</layout>
+  		<url>http://download.java.net/maven/2</url>
+  		<snapshots>
+  			<enabled>false</enabled>
+  		</snapshots>
+	</repository>
+	<repository>
+		<id>laughingpanda</id>
+		<name>Laughing Panda Repository</name>
+		<layout>default</layout>
+		<url>http://www.laughingpanda.org/maven2/</url>
+	</repository>
   </repositories>
 
   <distributionManagement>
