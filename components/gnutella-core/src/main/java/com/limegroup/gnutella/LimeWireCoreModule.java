@@ -21,6 +21,7 @@ import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.LimeWireNetModule;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
+import org.limewire.promotion.LimeWirePromotionModule;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
 import org.limewire.security.SecurityToken;
@@ -211,6 +212,8 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireGnutellaRudpModule());
         binder().install(new LimeWireIOModule());
         binder().install(new LimeWireMojitoModule());
+        binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, 
+                PromotionServicesImpl.class));
         
         bind(LimeWireCore.class);
         
