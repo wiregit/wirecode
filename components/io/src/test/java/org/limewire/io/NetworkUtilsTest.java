@@ -774,4 +774,22 @@ public class NetworkUtilsTest extends BaseTestCase {
         little = new byte[] { 127, 0, 0, 1, (byte)0xFF, (byte)0xFF };
         assertEquals(little, NetworkUtils.getBytes(new IpPortImpl("127.0.0.1:65535"), ByteOrder.LITTLE_ENDIAN));
     }
+    
+    public void testHexMask() throws Exception {
+        assertEquals(0,NetworkUtils.getHexMask(0));
+        assertEquals(0xFFFFFFFF, NetworkUtils.getHexMask(32));
+        try {
+            NetworkUtils.getHexMask(-1);
+            fail(" negative mask");
+        } catch (IllegalArgumentException expected){}
+        try {
+            NetworkUtils.getHexMask(33);
+            fail(" too big mask");
+        } catch (IllegalArgumentException expected){}
+        assertEquals(0xFF000000, NetworkUtils.getHexMask(8));
+        assertEquals(0xFFF00000, NetworkUtils.getHexMask(12));
+        assertEquals(0xFFFF0000, NetworkUtils.getHexMask(16));
+        assertEquals(0xFFFFF000, NetworkUtils.getHexMask(20));
+        assertEquals(0xFFFFFF00, NetworkUtils.getHexMask(24));
+    }
 }

@@ -131,7 +131,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         //repOk();
     }
 
-    QueryReplyImpl(byte[] guid, byte ttl, int port, byte[] ip, long speed,
+    protected QueryReplyImpl(byte[] guid, byte ttl, int port, byte[] ip, long speed,
             Response[] responses, byte[] clientGUID, byte[] xmlBytes,
             boolean includeQHD, boolean needsPush, boolean isBusy,
             boolean finishedUpload, boolean measuredSpeed,

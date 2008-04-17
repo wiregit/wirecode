@@ -420,7 +420,7 @@ public class QueryReplyFactoryImpl implements QueryReplyFactory {
                 hostDataFactory, responseFactory);
     }
 
-    private QueryReply createInternal(byte[] guid, byte ttl, int port,
+    protected QueryReply createInternal(byte[] guid, byte ttl, int port,
             byte[] ip, long speed, Response[] responses, byte[] clientGUID,
             byte[] xmlBytes, boolean includeQHD, boolean needsPush,
             boolean isBusy, boolean finishedUpload, boolean measuredSpeed,

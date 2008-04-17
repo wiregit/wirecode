@@ -290,7 +290,7 @@ public class StatsUtils {
      */
     public static class DoubleStats extends Stats {
         DoubleStats() {}
-        double min, max, med, q1, q3, avg, m2, m3, m4, mode, st, swilkW, swilkPW;
+        public double min, max, med, q1, q3, avg, m2, m3, m4, mode, st, swilkW, swilkPW;
         protected void addAnySpecifics(Map<String, Object> m) {
             m.put("swilkW", doubleToBytes(swilkW));
             m.put("swilkPW", doubleToBytes(swilkPW));

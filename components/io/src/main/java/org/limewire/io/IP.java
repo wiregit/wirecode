@@ -35,6 +35,12 @@ public class IP {
         this.mask = -1; /* 255.255.255.255 == 0xFFFFFFFF */
     }
     
+
+    public IP(int address, int mask) {
+        this.addr = address;
+        this.mask = mask;
+    }
+    
     /**
      * Creates an IP object out of a four byte array of the IP in
      * BIG ENDIAN format (most significant byte first).
