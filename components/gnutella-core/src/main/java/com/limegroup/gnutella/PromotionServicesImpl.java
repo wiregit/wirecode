@@ -40,6 +40,7 @@ final class PromotionServicesImpl implements PromotionServices {
     }
 
     public void shutDown() {
+        promotionSearcher.shutDown();
         isRunning = false;
     }
 }

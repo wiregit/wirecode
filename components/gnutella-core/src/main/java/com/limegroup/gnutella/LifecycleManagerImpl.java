@@ -595,6 +595,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         statisticAccumulator.get().stop();
         
+        promotionServices.get().shutDown();
+        
         runShutdownItems();
         
         shutdownDone.set(true);

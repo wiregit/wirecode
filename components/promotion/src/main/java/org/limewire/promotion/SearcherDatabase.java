@@ -79,4 +79,9 @@ public interface SearcherDatabase {
          */
         Date getDate();
     }
+    
+    /**
+     * Shuts down and releases any resources.
+     */
+    void shutDown();
 }

@@ -228,4 +228,8 @@ public class PromotionSearcherImpl implements PromotionSearcher {
             }
         }
     }
+
+    public void shutDown() {
+        searcherDatabase.shutDown();
+    }
 }

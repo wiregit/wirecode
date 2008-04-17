@@ -47,5 +47,9 @@ public interface PromotionSearcher {
          */
         void process(PromotionMessageContainer result);
     }
-
+    
+    /**
+     * Shuts down and releases any resources.
+     */
+    void shutDown();
 }

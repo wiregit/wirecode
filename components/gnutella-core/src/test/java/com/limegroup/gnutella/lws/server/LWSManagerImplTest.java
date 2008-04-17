@@ -48,6 +48,6 @@ public class LWSManagerImplTest extends LimeTestCase {
         } catch(IOException iox) {
             assertEquals("null host!", iox.getMessage());
         }
-    }
+    }   
 
 }

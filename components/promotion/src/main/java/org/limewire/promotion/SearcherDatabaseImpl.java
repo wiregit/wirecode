@@ -44,23 +44,6 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
         return new File(CommonUtils.getUserSettingsDir(), "promotion/promodb").getAbsolutePath();
     }
 
-    /**
-     * Called during shutdown process to ensure the db has been closed.
-     */
-    private class ShutdownHook extends Thread {
-        @Override
-        public void run() {System.out.println(connection);
-            if (connection != null) {
-                executeUpdate("SHUTDOWN");
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    // ignore
-                }
-            }
-        }
-    }
-
     @Inject
     public SearcherDatabaseImpl(final KeywordUtil keywordUtil, final CipherProvider cipherProvider,
             final KeyStoreProvider keyStoreProvider, final CertificateVerifier certificateVerifier, PromotionServices services) {
@@ -78,13 +61,27 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
         try {
             connection = DriverManager.getConnection("jdbc:hsqldb:file:" + getDBLocation(), "sa",
                     "");
-            Runtime.getRuntime().addShutdownHook(new ShutdownHook());
             createDBIfNeeded();
         } catch (SQLException ex) {
             LOG.error("Unable to get connection to in-memory db.", ex);
             services.shutDown();
         }
         
+    }
+    
+    public void shutDown() {
+        if (connection != null) {
+            try {
+                executeUpdate("SHUTDOWN");
+                connection.close();
+            } catch (SQLException ignore) {
+                // ignore
+            } catch (RuntimeException e) {
+                // If the underlying exception is an SQL exception this is OK
+                Throwable t = e.getCause();
+                if (!(t instanceof SQLException)) throw e;
+            }
+        }        
     }
 
     /**
