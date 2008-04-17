@@ -20,9 +20,8 @@ public class SimppDataVerifier {
     
     private static final byte SEP = (byte)124;
 
-    //We use DSA keys since they are fast, secure and the standard for
-    //signatures
-    public final String DSA_ALGORITHM = "DSA";
+    private final String ALGORITHM = "DSA";
+    private final String DIG_ALG = "SHA1";
 
     private byte[] simppPayload;    
     
@@ -58,9 +57,8 @@ public class SimppDataVerifier {
         if(pk == null)
             return false;
 
-        String algo = DSA_ALGORITHM;
         SignatureVerifier verifier = 
-                         new SignatureVerifier(propsData, signature, pk, algo);
+                         new SignatureVerifier(propsData, signature, pk, ALGORITHM, DIG_ALG);
         boolean ret = verifier.verifySignature();
         if(ret)
            verifiedData = propsData;
@@ -79,24 +77,14 @@ public class SimppDataVerifier {
     ////////////////////////////helpers/////////////////////
 
     private PublicKey getPublicKey() {
-        String base32Enc = "GCBADOBQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7" +
-                "VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6" +
-                "F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277" +
-                "LPRQ37A5VPZ6GVCTBKDYE7OB7" +
-                "NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7" +
-                "AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25" +
-                "NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7" +
-                "IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQUAAFAMBADZ2" +
-                "DEAUI6Y6O4SJOM6M77DVWGUD7SDOJZK7QACMEUF6BZLNEWUZ26IYVH53F4IPJBUGY4I7" +
-                "QVN5V7POFP7TLL2M6PCU4B66DO5DD7USVJABNT5PGI27G7BQD7OMRPRMOWYQHZUC6" +
-                "GXIW2X7HVSL5FBA5HMKZ6OTOXSAXJH2AUTSHXIM22DPNZVBOSK7UDJFBNMKCKHSRYHNUCY";
+        String base32Enc = "GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAO23AF7C247RPE4RGGMCU3XQTRVG3ZIKKQUVAS2BKNDBDB3W7L375GYP7ZWZL2RP3WAIBOHZ52G7KT46EAGBUG7DWQNZS4IWC2GDVU4PQ74Q64BJWMK2DZ6G7GYESYHUPBNDOB5PLI2WPF33NIAOXNYQXSEJLTSPUXBMY3RHAQY3TRG6EKQ6CNNZJ2NRVY3RZXLAV3QMVENJIQ";
         
         //3. convert the base32 encoded String into the original bytes
         byte[] pubKeyBytes = Base32.decode(base32Enc);
         //4. Make a public key out of it
         PublicKey ret = null;
         try {
-            KeyFactory factory = KeyFactory.getInstance(DSA_ALGORITHM);
+            KeyFactory factory = KeyFactory.getInstance(ALGORITHM);
             EncodedKeySpec keySpec = new X509EncodedKeySpec(pubKeyBytes);
             ret = factory.generatePublic(keySpec);
         } catch(NoSuchAlgorithmException nsax) {

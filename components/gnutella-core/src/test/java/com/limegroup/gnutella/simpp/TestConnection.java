@@ -155,7 +155,7 @@ public class TestConnection extends AssertComparisons {
         capVM.write(os);
         os.flush();
         //Read the first message of type SimppRequest
-        Message message = null;
+        SimppRequestVM message = null;
         try {
             message = BlockingConnectionUtils.getFirstInstanceOfMessage(
                                            _socket, SimppRequestVM.class, 2000, messageFactory);
@@ -171,7 +171,9 @@ public class TestConnection extends AssertComparisons {
         if( _sendSimppData) {//we dont want 
             if(_causeError)
                 throw new IOException();
-            Message simppVM = new SimppVM(_simppData);
+            if(message == null)
+                message = new SimppRequestVM();
+            Message simppVM = SimppVM.createSimppResponse(message, _simppData);
             simppVM.write(os);
             os.flush();
         }
@@ -183,7 +185,7 @@ public class TestConnection extends AssertComparisons {
 
     private CapabilitiesVM makeCapabilitiesVM() {
         try {
-            return  CapabilitiesVMStubHelper.makeCapVM(_capabilitySimppNo);
+            return  CapabilitiesVMStubHelper.makeCapibilitesWithSimpp(_capabilitySimppNo);
         } catch (Exception e) {
             fail("couldn't set up test -- failed to manipulate CapabilitiesVM");
         }

@@ -77,7 +77,7 @@ public class SimppManagerTest extends LimeTestCase {
         return buildTestSuite(SimppManagerTest.class);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         junit.textui.TestRunner.run(suite());
     }
 

@@ -53,20 +53,28 @@ public class CapabilitiesVMFactoryImpl implements CapabilitiesVMFactory {
     // protected for testing
     protected Set<CapabilitiesVM.SupportedMessageBlock> getSupportedMessages() {
         Set<CapabilitiesVM.SupportedMessageBlock> supported = new HashSet<CapabilitiesVM.SupportedMessageBlock>();
-
         CapabilitiesVM.SupportedMessageBlock smb = null;
+        
+        // old shutoff capabilities -- the maxid for each.
+        smb = new CapabilitiesVM.SupportedMessageBlock(
+                new byte[] {'I', 'M', 'P', 'P' }, 2147483647);
+        supported.add(smb);
+        smb = new CapabilitiesVM.SupportedMessageBlock(
+                new byte[] { 'L', 'M', 'U', 'P' }, 2147483647);
+        supported.add(smb);
+        
         smb = new CapabilitiesVM.SupportedMessageBlock(
                 CapabilitiesVM.FEATURE_SEARCH_BYTES,
                 FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR);
         supported.add(smb);
 
         smb = new CapabilitiesVM.SupportedMessageBlock(
-                CapabilitiesVM.SIMPP_CAPABILITY_BYTES, simppManager.get()
+                CapabilitiesVM.SIMPP_BYTES, simppManager.get()
                         .getVersion());
         supported.add(smb);
 
         smb = new CapabilitiesVM.SupportedMessageBlock(
-                CapabilitiesVM.LIME_UPDATE_BYTES, updateHandler.get()
+                CapabilitiesVM.UPDATE_BYTES, updateHandler.get()
                         .getLatestId());
         supported.add(smb);
 

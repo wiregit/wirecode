@@ -31,16 +31,13 @@ public final class CapabilitiesVM extends AbstractVendorMessage implements Vendo
      */
     static final byte[] FEATURE_SEARCH_BYTES = {(byte)87, (byte)72,
                                                       (byte)65, (byte)84};
-    /**
-     * The bytes for supporting SIMPP.  This used to be 'SIMP', but that
-     * implementation was broken.  We now use 'IMPP' to advertise support.
-     */
-    static final byte[] SIMPP_CAPABILITY_BYTES = {'I', 'M', 'P', 'P' };
     
-    /**
-     * The bytes for the LMUP message.
-     */
-    static final byte[] LIME_UPDATE_BYTES = { 'L', 'M', 'U', 'P' };
+    /** The new SIMPP capability bytes. */
+    static final byte[] SIMPP_BYTES = {'S', 'I', 'P', 'M' };
+    
+    /** The new lime update capaibility bytes. */
+    static final byte[] UPDATE_BYTES = { 'U', 'P', 'L', 'M' };
+    
     
     /** Bytes for supporting incoming TLS. */
     static final byte[] TLS_SUPPORT_BYTES = { 'T', 'L', 'S', '!' };
@@ -150,14 +147,14 @@ public final class CapabilitiesVM extends AbstractVendorMessage implements Vendo
      * Returns the current SIMPP version.
      */
     public int supportsSIMPP() {
-        return supportsCapability(SIMPP_CAPABILITY_BYTES);
+        return supportsCapability(SIMPP_BYTES);
     }
     
     /**
      * Returns the current Update version.
      */
     public int supportsUpdate() {
-        return supportsCapability(LIME_UPDATE_BYTES);
+        return supportsCapability(UPDATE_BYTES);
     }
     
     /**
