@@ -8,6 +8,7 @@ import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SimpleTimer;
+import org.limewire.geocode.LimewireGeocodeModule;
 import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
 import org.limewire.inspection.Inspector;
@@ -26,6 +27,7 @@ import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SettingsProvider;
+import org.limewire.security.certificate.LimeWireSecurityCertificateModule;
 import org.limewire.statistic.LimeWireStatisticsModule;
 
 import com.google.inject.Inject;
@@ -104,6 +106,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.LocalIPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.filters.SpamFilterFactoryImpl;
+import com.limegroup.gnutella.geocode.GeocoderImpl;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactoryImpl;
 import com.limegroup.gnutella.handshaking.HandshakeServices;
@@ -212,6 +215,8 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireGnutellaRudpModule());
         binder().install(new LimeWireIOModule());
         binder().install(new LimeWireMojitoModule());
+        binder().install(new LimeWireSecurityCertificateModule());
+        binder().install(new LimewireGeocodeModule(GeocoderImpl.class));        
         binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, 
                 PromotionServicesImpl.class));
         
