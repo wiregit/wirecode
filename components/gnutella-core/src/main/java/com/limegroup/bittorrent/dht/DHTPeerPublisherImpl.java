@@ -131,7 +131,7 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
      * Publishes the local host's network information in the given DHT as a peer
      * seeding the torrent file specified by infoHash.
      * 
-     * @param infoHash hashed data of the torrent file.
+     * @param urn SHA1 hash of the torrent file.
      * @param mojitoDHT an instance of the MojitoDHT.
      */
     private void proceedPublishing(URN urn, MojitoDHT mojitoDHT) {
@@ -170,7 +170,7 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
      * Returns whether the peer has already published him/her self as someone
      * sharing the given torrent file.
      * 
-     * @param managedTorrent The torrent we are dealing with.
+     * @param urn SHA1 hash of the torrent file.
      * @return whether the peer's information is already published or not.
      */
     private boolean isPublished(URN urn) {
@@ -181,7 +181,8 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
      * Adds a torrent to the map to indicate the peer has published itself as
      * someone sharing the file. Also records the time it was published.
      * 
-     * @param managedTorrent The torrent we are dealing with.
+     * @param urn SHA1 hash of the torrent file.
+     * @param time the time torrent was published.
      */
     private void addAsPublished(URN urn, Long time) {
         publishedTorrents.put(urn, time);

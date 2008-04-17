@@ -106,7 +106,7 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
      * Looks in the given DHT for a peer seeding the torrent file specified by
      * infoHash.
      * 
-     * @param infoHash hashed data of the torrent file.
+     * @param urn SHA1 hash of the torrent file.
      * @param mojitoDHT an instance of the MojitoDHT.
      */
     private void proceedSearch(URN urn, MojitoDHT mojitoDHT) {
