@@ -157,17 +157,17 @@ public class UpdateHandlerImpl implements UpdateHandler {
     private final UpdateMessageVerifier updateMessageVerifier;
     private final RemoteFileDescFactory remoteFileDescFactory;
     
-    private volatile String timeoutUpdateLocation = "http://update0.limewire.com/update.def";
-    private volatile List<String> maxedUpdateList = Arrays.asList("http://update1.limewire.com/update.def",
-            "http://update2.limewire.com/update.def",
-            "http://update3.limewire.com/update.def",
-            "http://update4.limewire.com/update.def",
-            "http://update5.limewire.com/update.def",
-            "http://update6.limewire.com/update.def",
-            "http://update7.limewire.com/update.def",
-            "http://update8.limewire.com/update.def",
-            "http://update9.limewire.com/update.def",
-            "http://update10.limewire.com/update.def");
+    private volatile String timeoutUpdateLocation = "http://update0.limewire.com/v2/update.def";
+    private volatile List<String> maxedUpdateList = Arrays.asList("http://update1.limewire.com/v2/update.def",
+            "http://update2.limewire.com/v2/update.def",
+            "http://update3.limewire.com/v2/update.def",
+            "http://update4.limewire.com/v2/update.def",
+            "http://update5.limewire.com/v2/update.def",
+            "http://update6.limewire.com/v2/update.def",
+            "http://update7.limewire.com/v2/update.def",
+            "http://update8.limewire.com/v2/update.def",
+            "http://update9.limewire.com/v2/update.def",
+            "http://update10.limewire.com/v2/update.def");
     private volatile int minMaxHttpRequestDelay = 1000 * 60;
     private volatile int maxMaxHttpRequestDelay = 1000 * 60 * 30;
     private volatile int silentPeriodForMaxHttpRequest = 1000 * 60 * 5;
