@@ -268,12 +268,7 @@ public final class NetworkUtils {
      * @param addr1 the second address to compare
      */
     public static boolean isVeryCloseIP(byte[] addr0, byte[] addr1) {
-        // if 0 is not a private address but 1 is, then the next
-        // check will fail anyway, so this is okay.
-        if ( isPrivateAddress(addr0) ) {
-            return false;
-            
-        } else if ((isIPv4Address(addr0) && isIPv4Address(addr1)) 
+        if ((isIPv4Address(addr0) && isIPv4Address(addr1)) 
                 || (isIPv4MappedAddress(addr0) && isIPv4MappedAddress(addr1))) {
             
             return addr0[/* 0 */ addr0.length - 4] == addr1[/* 0 */ addr1.length - 4]
@@ -314,7 +309,7 @@ public final class NetworkUtils {
      * 
      * @param address the address to check
      */
-    public static boolean isPrivateAddress(byte[] address) {
+    static boolean isPrivateAddress(byte[] address) {
         if (isAnyLocalAddress(address) 
                 || isInvalidAddress(address)
                 || isLoopbackAddress(address) 
