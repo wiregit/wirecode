@@ -8,6 +8,9 @@ import java.io.InputStreamReader;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -15,6 +18,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class InspectorImpl implements Inspector {
 
+    private static Log LOG = LogFactory.getLog(InspectorImpl.class);
+    
     private volatile Properties props;
     private final Injector injector;
     
@@ -58,8 +63,12 @@ public class InspectorImpl implements Inspector {
             }
             this.props = p;
         } catch(IllegalArgumentException ignored) {
+            LOG.trace("illegal argument", ignored);
         } catch(StringIndexOutOfBoundsException sioobe) {
-        } catch(IOException iox) {}
+            LOG.trace("index out of bounds", sioobe);
+        } catch(IOException iox) {
+            LOG.trace("IO", iox);
+        }
         finally {
             if (in != null)
                 try {in.close();} catch (IOException ignore){}

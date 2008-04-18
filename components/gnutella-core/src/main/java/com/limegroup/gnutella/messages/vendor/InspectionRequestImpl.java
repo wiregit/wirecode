@@ -141,4 +141,13 @@ public class InspectionRequestImpl extends RoutableGGEPMessage implements Inspec
     public int getSendInterval() {
         return sendInterval;
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("Requests:\n");
+        for (String request : requested) {
+            builder.append(request).append("\n");
+        }
+        return builder.toString();
+    }
 }

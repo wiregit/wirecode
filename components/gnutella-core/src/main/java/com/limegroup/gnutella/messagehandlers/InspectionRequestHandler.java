@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Periodic;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.security.SecureMessageVerifier;
@@ -32,6 +34,8 @@ import com.limegroup.gnutella.simpp.SimppManager;
  * return address.
  */
 public class InspectionRequestHandler extends RestrictedResponder {
+    
+    private static final Log LOG = LogFactory.getLog(InspectionRequestHandler.class);
     
     private final Provider<MessageRouter> router;
     private final InspectionResponseFactory factory;
@@ -80,10 +84,17 @@ public class InspectionRequestHandler extends RestrictedResponder {
         assert msg instanceof InspectionRequest;
         InspectionRequest ir = (InspectionRequest)msg;
         
+        if (LOG.isDebugEnabled())
+            LOG.debug("processing allowed message" + msg);
+        
         // send first response back right away
         InspectionResponse []r = factory.createResponses(ir);
-        if (r.length > 0 && r[0].shouldBeSent())
+        if (r.length > 0 && r[0].shouldBeSent()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("sending response: " + r + " to: " + handler); 
+            }
             handler.reply(r[0]);
+        }
         router.get().forwardInspectionRequestToLeaves(ir);
         
         synchronized(this) {
@@ -119,8 +130,12 @@ public class InspectionRequestHandler extends RestrictedResponder {
             return;
         }
         
-        if (resp.shouldBeSent())
+        if (resp.shouldBeSent()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("resending response: " + resp + " to: " + handler); 
+            }
             handler.reply(resp);
+        }
         sender.rescheduleIfLater(interval);
     }
 }

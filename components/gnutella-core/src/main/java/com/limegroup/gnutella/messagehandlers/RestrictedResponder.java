@@ -4,6 +4,8 @@ import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IP;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.security.SecureMessage;
@@ -27,6 +29,9 @@ import com.limegroup.gnutella.simpp.SimppManager;
  * contained in a simppable whitelist.
  */
 abstract class RestrictedResponder implements SimppListener, MessageHandler {
+    
+    private static final Log LOG = LogFactory.getLog(RestrictedResponder.class);
+    
     /** list of hosts that we can send responses to */
     private volatile IPList allowed;
     /** setting to check for updates to the host list */
@@ -101,8 +106,13 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
                 processRoutableMessage((RoutableGGEPMessage)msg, addr, handler);
         } else {
             // just check the return address.
-            if (!allowed.contains(new IP(handler.getAddress())))
+            IP ip = new IP(handler.getAddress());
+            if (!allowed.contains(ip)) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("restricted message not allowed from ip: " + ip);
+                }
                 return;
+            }
             processAllowedMessage(msg, addr, handler);
         }
     }
@@ -130,9 +140,13 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
         } else if (msg.getRoutableVersion() < 0) // no routable version either? drop.
             return;
 
-        
-        if (!allowed.contains(new IP(handler.getAddress())))
+        IP ip = new IP(handler.getAddress()); 
+        if (!allowed.contains(ip)) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("restricted message not allowed from ip: " + ip);
+            }
             return;
+        }
         
         // check if its a newer version than the last we routed.
         long routableVersion = msg.getRoutableVersion();
@@ -160,8 +174,12 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
         }
         
         public void handleSecureMessage(final SecureMessage sm, boolean passed) {
-            if (!passed)
+            if (!passed) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Message: " + sm + "didn't verify");
+                }
                 return;
+            }
             messageExecutorService.execute(new Runnable() {
                 public void run() {
                     processRoutableMessage((RoutableGGEPMessage)sm, addr, handler);
