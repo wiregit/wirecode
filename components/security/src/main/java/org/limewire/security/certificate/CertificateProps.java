@@ -6,7 +6,7 @@ package org.limewire.security.certificate;
  */
 public class CertificateProps {
     public static String getKeyStoreURLString() {
-        return "http://keystore.keys.limewire.com/lwpromo/limewire.keystore";
+        return "http://keystore.keys.limewire.com/lwp/limewire.keystore";
     }
     public static String getCACertAlias(){
         return "ca.limewire.com";
