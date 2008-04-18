@@ -130,8 +130,8 @@ public class ResourceLocationCounter {
      * @return 
      */
     public int getDisplayLocationCount () {
-//      return _displayCount;
-        return getLocationCount();
+        return _displayCount;
+//      return getLocationCount();
     }
     
     /**

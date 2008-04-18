@@ -40,6 +40,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.util.ClassCNetworks;
@@ -491,12 +492,17 @@ class SearchResultHandlerImpl implements SearchResultHandler {
                 Set<? extends IpPort> alts = response.getLocations();
                 _activityCallback.get().handleQueryResult(rfd, data, alts);
                 
+                // TODO
+                //
+                // alts.size() isn't quite the same as what the EndpointHolder will indicate, because
+                // alts.size() does not reflect the filtering out of duplicates.
+                
                 if (skipSpam || !_spamManager.get().isSpam(rfd)) {
 //                  if (is != null) {
 //                      numGood += addPartialSource(response.getUrns(), is, response.getSize());
 //                  }
 //                  else {
-                        numGood += addLocation(response.getUrns(), response.getSize());
+                        numGood += addLocation(response.getUrns(), response.getSize(), alts.size());
 //                  }
 //                  System.out.println("SearchResultHandlerImpl::addQueryReply().. numGood = " + numGood + ";");
                 }
@@ -560,15 +566,17 @@ class SearchResultHandlerImpl implements SearchResultHandler {
             return count_after - count_before;
         }
         
-        private int addLocation(Set<URN> urns, long size) {
+        private int addLocation(Set<URN> urns, long size, int altCnt) {
             ResourceLocationCounter rlc = null;
             URN urn = getFirstSha1Urn(urns);
+            int maxAlts = FilterSettings.MAX_ALTS_TO_DISPLAY.getValue();
             
             if (urn != null) {
                 if (null == (rlc = _isets.get(urn)))
                     _isets.put(urn, (rlc = new ResourceLocationCounter(urn, size)));
                 
                 rlc.incrementWholeSources();
+                rlc.updateDisplayLocationCount(altCnt > maxAlts ? maxAlts+1 : altCnt+1);
                 
                 System.out.println("SearchResultHandlerImpl::GuidCount::addLocation().. count = " + rlc.getLocationCount() + ";");
             }
