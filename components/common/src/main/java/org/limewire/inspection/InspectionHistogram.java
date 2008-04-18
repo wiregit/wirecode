@@ -14,14 +14,30 @@ public class InspectionHistogram<K> implements Inspectable {
 
     private final Map<K, Long> counts = new HashMap<K, Long>();
     
+    /**
+     * Counts single occurrence of K. 
+     */
     public synchronized void count(K occurence) {
-        Long already = counts.get(occurence);
-        if (already == null)
-            counts.put(occurence, Long.valueOf(0));
-        counts.put(occurence, counts.get(occurence)+1);
+        count(occurence, 1);
+    }
+    
+    /**
+     * Adds <code>value</code> to values under K.
+     */
+    public synchronized void count(K key, long value) {
+        Long already = counts.get(key);
+        if (already == null) {
+            already = 0L;
+        }
+        counts.put(key, already + value);
     }
     
     public synchronized Object inspect() {
         return new HashMap<Object,Long>(counts);
+    }
+    
+    @Override
+    public String toString() {
+        return inspect().toString();
     }
 }
