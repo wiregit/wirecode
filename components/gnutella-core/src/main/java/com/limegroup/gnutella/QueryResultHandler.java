@@ -21,4 +21,12 @@ public interface QueryResultHandler {
      */
     public int getNumberOfLocations();
     
+    /**
+     * Returns the number of locations to display in the GUI. This number is
+     * distinct from getNumberOfLocations() in that it limits the number of
+     * locations-per-reply - a spam-fighting characteristic.
+     * 
+     */
+    public int getNumberOfDisplayLocations();
+    
 }

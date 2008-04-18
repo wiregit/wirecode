@@ -363,6 +363,15 @@ class SearchResultHandlerImpl implements SearchResultHandler {
                 return rlc.getLocationCount();
         }
         
+        public int getNumDisplayResultsForURN(URN urn) {
+            ResourceLocationCounter rlc = _isets.get(urn);
+            
+            if (rlc == null)
+                return 0;
+            else
+                return rlc.getDisplayLocationCount();
+        }
+        
         public int getNextReportNum() { return _nextReportNum; }
         
         /**
@@ -483,19 +492,27 @@ class SearchResultHandlerImpl implements SearchResultHandler {
                 _activityCallback.get().handleQueryResult(rfd, data, alts);
                 
                 if (skipSpam || !_spamManager.get().isSpam(rfd)) {
-                    if (is != null) {
-                        numGood += addPartialSource(response.getUrns(), is, response.getSize());
-                    }
-                    else {
+//                  if (is != null) {
+//                      numGood += addPartialSource(response.getUrns(), is, response.getSize());
+//                  }
+//                  else {
                         numGood += addLocation(response.getUrns(), response.getSize());
-                    }
+//                  }
+//                  System.out.println("SearchResultHandlerImpl::addQueryReply().. numGood = " + numGood + ";");
                 }
                 else
                     numBad++;
+                
+//              for (int i = 0; i < numGood; ++i)
+                    
             } //end of response loop
+            
+            // 
             
             numGood += Math.ceil(numBad * SearchSettings.SPAM_RESULT_RATIO.getValue());
             _numGoodResults += numGood;
+            
+//          System.out.println("SearchResultHandlerImpl::addQueryReply().. numGood = " + numGood + "; numGoodResults = " + _numGoodResults + ";");
             
             return numGood;
         }
@@ -552,6 +569,8 @@ class SearchResultHandlerImpl implements SearchResultHandler {
                     _isets.put(urn, (rlc = new ResourceLocationCounter(urn, size)));
                 
                 rlc.incrementWholeSources();
+                
+                System.out.println("SearchResultHandlerImpl::GuidCount::addLocation().. count = " + rlc.getLocationCount() + ";");
             }
             
             return 1;
@@ -566,6 +585,9 @@ class SearchResultHandlerImpl implements SearchResultHandler {
                 }
                 public int getNumberOfLocations() {
                     return gc.getNumResultsForURN(urn);
+                }
+                public int getNumberOfDisplayLocations() {
+                    return gc.getNumDisplayResultsForURN(urn);
                 }
             };
         }

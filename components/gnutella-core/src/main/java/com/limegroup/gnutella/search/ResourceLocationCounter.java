@@ -46,6 +46,11 @@ public class ResourceLocationCounter {
     private int _wholeCount = 0;
     
     /**
+     * 
+     */
+    private int _displayCount = 0;
+    
+    /**
      * The number of complete locations available based on
      * all of the partial results that we know of.
      */
@@ -101,6 +106,14 @@ public class ResourceLocationCounter {
     }
     
     /**
+     * 
+     * @param num
+     */
+    public void updateDisplayLocationCount (int num) {
+       _displayCount += num; 
+    }
+    
+    /**
      * Combines the whole and partial result counts and returns the total
      * number of locations from which this URN can be accessed.
      * 
@@ -110,6 +123,15 @@ public class ResourceLocationCounter {
         synchronized (this) {
             return _wholeCount + _partialCount;
         }
+    }
+    
+    /**
+     * 
+     * @return 
+     */
+    public int getDisplayLocationCount () {
+//      return _displayCount;
+        return getLocationCount();
     }
     
     /**
