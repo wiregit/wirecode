@@ -25,8 +25,11 @@ import org.jivesoftware.smackx.jingle.JingleSessionRequest;
 import org.jivesoftware.smackx.jingle.OutgoingJingleSession;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
 import org.jivesoftware.smackx.jingle.mediaimpl.jmf.JmfMediaManager;
-import org.jivesoftware.smackx.jingle.nat.BasicTransportManager;
+import org.jivesoftware.smackx.jingle.mediaimpl.jspeex.SpeexMediaManager;
+import org.jivesoftware.smackx.jingle.mediaimpl.multi.MultiMediaManager;
+import org.jivesoftware.smackx.jingle.mediaimpl.sshare.ScreenShareMediaManager;
 import org.jivesoftware.smackx.jingle.nat.ICETransportManager;
+import org.limewire.xmpp.client.commands.LibraryCommand;
 
 public class BuddyList {
     private JPanel myPanel;
@@ -47,12 +50,17 @@ public class BuddyList {
         $$$setupUI$$$();
         new Thread(new Runnable() {
             public void run() {
-                getRoster(connection);
+                try {
+                    getRoster(connection);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }).start();
     }
 
-    private void getRoster(XMPPConnection connection) {
+    private void getRoster(XMPPConnection connection) throws Exception {
+        Thread.sleep(5 * 1000);
 
         ServiceDiscoveryManager serviceDiscoveryManager = ServiceDiscoveryManager.getInstanceFor(connection);
 
@@ -81,8 +89,12 @@ public class BuddyList {
                 }
             }
         }
-        
-        jingleOUT("tim.julien@gmail.com/limewire08A3FA9A");
+
+        LibraryCommand libraryCommand = new LibraryCommand(connection, limewireClients);
+        libraryCommand.execute(null);
+
+        //jingleIN();
+        //jingleOUT("tim.julien@gmail.com/limewire9F4264FA");
     }
 
     private void createUIComponents() {
@@ -166,9 +178,10 @@ public class BuddyList {
             }
         }
     }
-    
+
     private void jingleIN() {
-        JingleManager manager = new JingleManager(connection, new BasicTransportManager());
+        JingleManager manager = new JingleManager(connection, new ICETransportManager(connection, "jstun.javawi.de", 3478));
+        manager.setMediaManager(new JmfMediaManager());
         manager.addJingleSessionRequestListener(new JingleSessionRequestListener() {
             public void sessionRequested(JingleSessionRequest request) {
 
@@ -179,23 +192,33 @@ public class BuddyList {
                     session.start();
                 } catch (XMPPException e) {
                     e.printStackTrace();
-               }
-          }
-      });
+                }
+            }
+        });
     }
-    
-    private void jingleOUT(String to) {
+
+    private void jingleOUT(String to) throws InterruptedException {
         JingleManager manager = new JingleManager(connection, new ICETransportManager(connection, "jstun.javawi.de", 3478));
+
         try {
-            manager.setMediaManager(new JmfMediaManager());
+            MultiMediaManager mediaManager = new MultiMediaManager();
+            mediaManager.addMediaManager(new JmfMediaManager());
+            mediaManager.addMediaManager(new ScreenShareMediaManager());
+            mediaManager.addMediaManager(new SpeexMediaManager());
+
+            manager.setMediaManager(mediaManager);
             OutgoingJingleSession out = manager.createOutgoingJingleSession(to);
-            
+
             out.start();
-        
-            out.terminate();
+
+            while (out.getJingleMediaSession() == null) {
+                Thread.sleep(500);
+            }
+
+            //out.terminate();
         } catch (XMPPException e) {
             e.printStackTrace();
         }
     }
-    
+
 }

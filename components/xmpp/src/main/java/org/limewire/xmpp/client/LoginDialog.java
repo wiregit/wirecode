@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -25,7 +26,9 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
-import org.jivesoftware.smackx.jingle.JingleManager;
+
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
 
 public class LoginDialog extends JDialog {
     private JPanel contentPane;
@@ -36,6 +39,8 @@ public class LoginDialog extends JDialog {
 
     private static final String LW_SERVICE_NS = "http://www.limewire.org/";
     private static final String LW_SERVICE_NAME = "limewire";
+
+    private static LibraryListener libraryListener = new LibraryListener(null, null);
 
     static {
         try {
@@ -48,10 +53,20 @@ public class LoginDialog extends JDialog {
                 ServiceDiscoveryManager.getInstanceFor(connection).addFeature(LW_SERVICE_NS);
                 SearchListener searchListener = new SearchListener(connection, new File("C:\\data\\"));
                 SearchResultListener searcheResultListener = new SearchResultListener();
+                libraryListener.setConnection(connection);
                 connection.addPacketListener(searchListener, searchListener.getPacketFilter());
                 connection.addPacketListener(searcheResultListener, searcheResultListener.getPacketFilter());
+                connection.addPacketListener(libraryListener, libraryListener.getPacketFilter());
                 ProviderManager.getInstance().addIQProvider("search", "jabber:iq:lw-search", SearchResult.getIQProvider());
                 ProviderManager.getInstance().addIQProvider("search-results", "jabber:iq:lw-search-results", SearchResult.getIQProvider());
+                ProviderManager.getInstance().addIQProvider("library", "jabber:iq:lw-library", Library.getIQProvider());
+            }
+
+            private RemoteFile[] getMockLibrary() {
+                return new RemoteFile[]{new RemoteFile("12345", "foo"),
+                        new RemoteFile("678910", "bar"),
+                        new RemoteFile("1112131415", "baz")};
+
             }
         });
     }
@@ -135,11 +150,31 @@ public class LoginDialog extends JDialog {
     }
 
     public static void main(String[] args) throws ClassNotFoundException, UnsupportedLookAndFeelException, IllegalAccessException, InstantiationException {
+        run(null);
+        //System.exit(0);
+    }
+
+    public static void run(FileManager fileManager) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
+        RemoteFile[] files = toRemoteFiles(fileManager);
+        if (files != null) {
+            libraryListener.setFiles(files);
+        }
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         LoginDialog dialog = new LoginDialog();
         dialog.pack();
         dialog.setVisible(true);
-        //System.exit(0);
+    }
+
+    private static RemoteFile[] toRemoteFiles(FileManager fileManager) {
+        if (fileManager != null) {
+            ArrayList<RemoteFile> array = new ArrayList<RemoteFile>();
+            for (FileDesc desc : fileManager.getAllSharedFileDescriptors()) {
+                array.add(new RemoteFile(desc.getSHA1Urn().toString(), desc.getFileName()));
+            }
+            return array.toArray(new RemoteFile[]{});
+        } else {
+            return null;
+        }
     }
 
     {

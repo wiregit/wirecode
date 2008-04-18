@@ -10,9 +10,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.swing.UnsupportedLookAndFeelException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jivesoftware.launcher.Startup;
+//import org.jivesoftware.launcher.Startup;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.InspectablePrimitive;
@@ -27,7 +29,7 @@ import org.limewire.statistic.StatisticAccumulator;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
-import org.limewire.xmpp.LimeWirePlugin;
+import org.limewire.xmpp.client.LoginDialog;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -479,7 +481,21 @@ public class LifecycleManagerImpl implements LifecycleManager {
             LOG.trace("Disabling the StoreServer");
         }
 
-        Startup.main(new String[]{});
+        //Startup.main(new String[]{});
+
+        //ServerStarter.main(new String[]{});
+
+        try {
+            LoginDialog.run(fileManager.get());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
             startManualGCThread();

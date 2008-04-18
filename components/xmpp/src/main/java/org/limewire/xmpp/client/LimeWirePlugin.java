@@ -8,7 +8,6 @@ import org.jivesoftware.smack.provider.IQProvider;
 import org.jivesoftware.smack.provider.PacketExtensionProvider;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
-import org.jivesoftware.spark.plugin.Plugin;
 import org.limewire.xmpp.client.commands.BrowseCommand;
 import org.limewire.xmpp.client.commands.CommandDispatcher;
 import org.limewire.xmpp.client.commands.DownloadCommand;
