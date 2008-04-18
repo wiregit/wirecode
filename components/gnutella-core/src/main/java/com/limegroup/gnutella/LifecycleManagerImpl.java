@@ -37,6 +37,8 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.TorrentManager;
+import com.limegroup.bittorrent.dht.DHTPeerLocator;
+import com.limegroup.bittorrent.dht.DHTPeerPublisher;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.gnutella.altlocs.DownloaderGuidAlternateLocationFinder;
 import com.limegroup.gnutella.auth.ContentManager;
@@ -146,6 +148,10 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<DownloaderGuidAlternateLocationFinder> magnetDownloaderPushEndpointFinder;
 
     private final Provider<PushProxiesPublisher> pushProxiesPublisher;
+    
+    private final Provider<DHTPeerLocator> dhtPeerLocator;
+    
+    private final Provider<DHTPeerPublisher> dhtPeerPublisher;
 
     @Inject
     public LifecycleManagerImpl(
@@ -195,7 +201,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<DownloadUpgradeTask> downloadUpgradeTask,
             Provider<StatisticAccumulator> statisticAccumulator,
             Provider<DownloaderGuidAlternateLocationFinder> magnetDownloaderPushEndpointFinder,
-            Provider<PushProxiesPublisher> pushProxiesPublisher) { 
+            Provider<PushProxiesPublisher> pushProxiesPublisher,
+            Provider<DHTPeerLocator> dhtPeerLocator,
+            Provider<DHTPeerPublisher> dhtPeerPublisher) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -242,6 +250,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.statisticAccumulator = statisticAccumulator;
         this.magnetDownloaderPushEndpointFinder = magnetDownloaderPushEndpointFinder;
         this.pushProxiesPublisher = pushProxiesPublisher;
+        this.dhtPeerLocator = dhtPeerLocator;
+        this.dhtPeerPublisher = dhtPeerPublisher;
     }
     
     /* (non-Javadoc)
@@ -460,6 +470,12 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
 		// add listener before downloads are read to get all add events
 		downloadManager.get().addListener(magnetDownloaderPushEndpointFinder.get());
+		
+		// initialize DHTPeerLocator and DHTPeerPublishers
+	    LOG.trace("START DHTPeerLocator and DHTPeerPublisher");
+	    dhtPeerLocator.get().init();    
+	    dhtPeerPublisher.get().init();       
+	    LOG.trace("STOP DHTPeerLocator and DHTPeerPublisher");
 		
         // Restore any downloads in progress.
         LOG.trace("START DownloadManager.postGuiInit");
