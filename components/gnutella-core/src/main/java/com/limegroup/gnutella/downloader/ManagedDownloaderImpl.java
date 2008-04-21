@@ -2018,7 +2018,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         //because IFM.purge() is called frequently in DownloadManager.
         
         try {
-            saveFile = getSuggestedSaveLocation(saveFile);
+            saveFile = getSuggestedSaveLocation(saveFile, incompleteFile);
         } catch (IOException e) {
             return DownloadStatus.DISK_PROBLEM;
         }
@@ -2054,12 +2054,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * For example, could create a folder substructure and use a template based on ID3 information
      * for music. 
      * 
-     * @param saveFile the current file location to save the incomplete download to
+     * @param defaultSaveFile the current file location to save the incomplete download to
      * @return the location to save the actual download to
      * @throws IOException
      */
-    protected File getSuggestedSaveLocation(File saveFile) throws IOException{
-        return saveFile;
+    protected File getSuggestedSaveLocation(File defaultSaveFile, File newDownloadFile) throws IOException{
+        return defaultSaveFile;
     }
     
     /**

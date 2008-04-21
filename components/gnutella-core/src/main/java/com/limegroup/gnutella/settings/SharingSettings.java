@@ -46,6 +46,9 @@ public class SharingSettings extends LimeProps {
     public static final File DEFAULT_SAVE_LWS_DIR = 
         new File(LimeWireUtils.getLimeWireRootFolder(), "Store Purchased");
     
+    public static final String DEFAULT_LWS_FILENAME_TEMPLATE = 
+        "<artist> - <album> - <track> - <title>";
+    
     /**
      * Whether or not we're going to add an alternate for ourselves
      * to our shared files.  Primarily set to false for testing.
@@ -72,8 +75,17 @@ public class SharingSettings extends LimeProps {
      * The template allows purchased songs to be saved in a unique fashion, 
      * ie. LWS_dir/artist/album/songX.mp3
      */
-    public static final StringSetting TEMPLATE_FOR_SAVING_LWS_FILES = 
-        (StringSetting)FACTORY.createStringSetting("TEMPLATE_FOR_SAVING_LWS_FILES","").setAlwaysSave(true);
+    public static final StringSetting TEMPLATE_SUBDIRECTORY_LWS_FILES = 
+        FACTORY.createStringSetting("TEMPLATE_FOR_SAVING_LWS_FILES","");
+    
+    /**
+     * Template for file name structure when saving songs purchased from the LimeWire Store (LWS)
+     * The template allows purchased songs to be named in a unique fashion based on the 
+     * songs meta data
+     * ie. artist - track # - title.mp3
+     */
+    public static final StringSetting TEMPLATE_FOR_NAMING_LWS_FILES = 
+        FACTORY.createStringSetting("TEMPLATE_FOR_NAMING_LWS_FILES",DEFAULT_LWS_FILENAME_TEMPLATE);
     
     /**
      * The directory where incomplete files are stored (downloads in progress).
@@ -241,7 +253,7 @@ public class SharingSettings extends LimeProps {
             throw new NullPointerException();
         if (!storeDir.isDirectory()) {
             if (!storeDir.mkdirs())
-                throw new IOException("could not create save dir at: " + storeDir);
+                throw new IOException("could not create store save dir at: " + storeDir);
         }
         
         FileUtils.setWriteable(storeDir);
@@ -257,49 +269,7 @@ public class SharingSettings extends LimeProps {
         
         DIRECTORY_FOR_SAVING_LWS_FILES.setValue(storeDir);
     }
-    
-    
-    /**
-     * @return directory of where to save songs purchased from LimeWire Store
-     */
-    public static final File getSaveLWSDirectory(File incompleteFile) {
-//        final String template = getSaveLWSTemplate();
-        
-//        // if mp3, try to get meta-data to use template pattern when saving
-//        if( incompleteFile.getName().toLowerCase().endsWith("mp3")) {
-//            try {
-//                final MP3MetaData data = (MP3MetaData) MetaData.parse(incompleteFile);
-//                final Map<String, String> subs = new HashMap<String, String>();
-//                String artist = data.getArtist();
-//                if (artist == null) {
-//                    artist = GUIMediator.getStringResource("Unknown Artist");
-//                }
-//                String album = data.getAlbum();
-//                if (album == null) {
-//                    album = GUIMediator.getStringResource("Unknown Album");
-//                }
-//                subs.put(StoreSaveTemplateProcessor.ARTIST_LABEL, artist);
-//                subs.put(StoreSaveTemplateProcessor.ALBUM_LABEL, album);
-//                subs.put(StoreSaveTemplateProcessor.HOME_LABEL, System.getProperty("user.dir"));
-//                File outDir = null;
-//                try {
-//                    outDir = new StoreSaveTemplateProcessor().getOutputDirectory(template, subs, f);
-//                } catch (IllegalTemplateException e) {
-//                    GUIMediator.showError("Invalid Template", System.getProperty("line.separator") + e.getMessage());
-//                }
-//                if (outDir != null && new File(outDir.getCanonicalPath()).mkdirs()) {
-//                	FileUtils.setWriteable(outDir);
-//                	f = outDir; 
-//                }
-//            } catch (IOException e) { 
-////                LOG.error("getSaveLWSDirectory", e);
-//            }
-//            if( !f.isDirectory() || !f.canRead() || !f.canWrite())
-//                f = DIRECTORY_FOR_SAVING_LWS_FILES.getValue();
-//        }
-        return DIRECTORY_FOR_SAVING_LWS_FILES.getValue();
-    }
-    
+            
     /**
      * @return directory of where to save songs purchased from LimeWire Store
      */
@@ -309,16 +279,42 @@ public class SharingSettings extends LimeProps {
         return f;
     }
     
-    public static final void setSaveLWSTemplate(String template) throws IOException { 
-        if(template == null) template = "";
-        TEMPLATE_FOR_SAVING_LWS_FILES.setValue(template);
+    /**
+     * Sets the template for creating sub directories of store files using metadata
+     * @param template the template that describes the sub directory structure
+     * @throws NullPointerException if template is null
+     */
+    public static final void setSubdirectoryLWSTemplate(String template) { 
+        if(template == null) 
+            throw new NullPointerException();
+        TEMPLATE_SUBDIRECTORY_LWS_FILES.setValue(template);
     }
 
     /**
-     * @return template of how to store LWS files
+     * @return template of how to create subdirectories of store files
+     * If no subdirectory template is used, will return ""
      */
-    public static final String getSaveLWSTemplate() {
-        return TEMPLATE_FOR_SAVING_LWS_FILES.getValue();
+    public static final String getSubDirectoryLWSTemplate() {
+        return TEMPLATE_SUBDIRECTORY_LWS_FILES.getValue();
+    }
+    
+    /**
+     * Sets the template for naming files purchased from the LWS
+     * @param template the template that describes how id3 information should
+     *      be used to name a Store file
+     * @throws NullPointerException if template is null
+     */
+    public static final void setFileNameLWSTemplate(String template) {
+        if( template == null)
+            throw new NullPointerException();
+        TEMPLATE_FOR_NAMING_LWS_FILES.setValue(template);
+    }
+    
+    /**
+     * @return template of how to name LWS files
+     */
+    public static final String getFileNameLWSTemplate() {
+        return TEMPLATE_FOR_NAMING_LWS_FILES.getValue();
     }
     
     /*********************************************************************/

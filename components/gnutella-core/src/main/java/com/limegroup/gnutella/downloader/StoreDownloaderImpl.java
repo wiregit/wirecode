@@ -2,8 +2,12 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
@@ -28,7 +32,14 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.metadata.MetaDataFactory;
+import com.limegroup.gnutella.metadata.MetaReader;
+import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.templates.StoreFileNameTemplateProcessor;
+import com.limegroup.gnutella.templates.StoreSubDirectoryTemplateProcessor;
+import com.limegroup.gnutella.templates.StoreTemplateProcessor;
+import com.limegroup.gnutella.templates.StoreTemplateProcessor.IllegalTemplateException;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 /**
@@ -36,6 +47,12 @@ import com.limegroup.gnutella.tigertree.HashTreeCache;
  *  an item purchased off of the LimeWire Store (LWS) website
  */
 class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownloader {
+    
+    /**
+     * To succesfully use the download templates when saving Store Files. The MetaData
+     * must be parsed after downloading has been completed.
+     */
+    private final MetaDataFactory metaDataFactory;
     
     @Inject
     public StoreDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
@@ -49,13 +66,15 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
             VerifyingFileFactory verifyingFileFactory, DiskController diskController,
              IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<MessageRouter> messageRouter, Provider<HashTreeCache> tigerTreeCache,
-            ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider) {
+            ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory, 
+            Provider<PushList> pushListProvider, MetaDataFactory metaDataFactory) {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
                 contentManager, sourceRankerFactory, urnCache, savedFileManager,
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
                 tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider);
+        this.metaDataFactory = metaDataFactory;
     } 
            
     
@@ -153,20 +172,146 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
     /**
      * Use the file ID3 info to perform a lookup with the template to determine the
      * folder substructure for saving the file
+     * 
+     * WARNING: this reads the id3 tags of the file. This can potentially be a blocking 
+     * method and should only be called from within its own thread
      */
     @Override
-    protected File getSuggestedSaveLocation(File saveFile) throws IOException{
-        // First attempt to get new save location
-        final File realOutputDir = SharingSettings.getSaveLWSDirectory(getIncompleteFile());
+    protected File getSuggestedSaveLocation(File defaultSaveFile, File newDownloadFile) throws IOException{ 
+        // if its not an mp3 its currently not from the store
+        if( !newDownloadFile.getName().toLowerCase(Locale.US).endsWith("mp3"))
+            return defaultSaveFile;
+        
+        // parse the meta data of this file
+        AudioMetaData metaData = null; 
+        try { 
+            MetaReader reader = metaDataFactory.parse(newDownloadFile); 
+            metaData = (AudioMetaData) reader.getMetaData();
+        }
+        catch(IOException e) { 
+            // don't catch this exception, problem reading the ID3 tags, just
+            // use default locations instead
+            return defaultSaveFile;
+        }
+        // if there's no meta data, just return the current name and location
+        if( metaData == null )
+            return defaultSaveFile;
+
+        // set up a mapping of template variables to real values
+        // if the substitutions are null for some reason, return default file
+        final Map<String, String> subs = new HashMap<String, String>();
+        if( !createSubstitutes(subs, metaData) )
+            return defaultSaveFile;
+        
+        // First attempt to get new directory
+        final File realOutputDir = getLWSDirectory(SharingSettings.getSaveLWSDirectory(), subs);
 
         // make sure it is writable
         if (!FileUtils.setWriteable(realOutputDir)) {
-            reportDiskProblem("could not set file writeable " + 
-                    getSaveFile().getParentFile());
-            throw new IOException("Disk Error");
+            return defaultSaveFile;
         } 
-        // move file to new folder
-        return new File(realOutputDir, saveFile.getName());
+        return new File(realOutputDir, getLWSFileName(defaultSaveFile, subs));
+    }
+    
+    /**
+     * Attempts to use the meta data associated with this audio file and a template
+     * to create sub directories based on the meta data. If the meta data is missing or
+     * no template has been selected, reverts to the default LWS save directory
+     * 
+     * @return directory of where to save songs purchased from LimeWire Store
+     */
+    private File getLWSDirectory(File directory, Map<String, String> subs) {     
+            
+        final String template = SharingSettings.getSubDirectoryLWSTemplate();
+        
+        // fail quickly if no template has been chosen for subdirectories
+        if( template == null ||  template.length() == 0)
+            return directory;               
+        
+        File outDir = null;
+        try {
+            outDir = new StoreSubDirectoryTemplateProcessor().getOutputDirectory(template, subs, directory);
+        } catch (IllegalTemplateException e) {
+            return directory;
+        } 
+        
+        // if directory couldn't be made, return default location
+        if( outDir == null )
+            return directory;
+
+        outDir.mkdirs();
+        FileUtils.setWriteable(outDir);
+
+        if( !outDir.isDirectory() || !outDir.canRead() || !outDir.canWrite())
+            return directory;
+
+        return outDir;
+    }
+    
+    /**
+     * Using a template and meta data, it creates a new file name by replacing the
+     * template using the meta data associated with the file
+     * 
+     * @param defaultSaveFile current file name
+     * @param subs mapping of template variables to meta data values
+     * @return new file name based on template, if something went wrong, return 
+     *          current file name
+     */
+    private String getLWSFileName(File defaultSaveFile, Map<String, String> subs) {
+        String currentFileName = defaultSaveFile.getName();
+        
+        final String template = SharingSettings.getFileNameLWSTemplate();
+
+        try {
+            currentFileName  = new StoreFileNameTemplateProcessor().getFileName(template, subs);
+            if( currentFileName == null || currentFileName.length() == 0 )
+                return defaultSaveFile.getName();
+        } catch (IllegalTemplateException e) {
+            return defaultSaveFile.getName();
+        }
+        
+        String ext = FileUtils.getFileExtension(defaultSaveFile);
+        if ( ext != null) 
+            return currentFileName + "." + ext;
+        else  // no extension, shouldn't happen
+            return defaultSaveFile.getName();
+    }
+    
+    /**
+     * Fills a map, mapping template variables to values retrieved from the meta data.
+     * If values in the meta data don't exist, this returns false, otherwise returns
+     * true and sanitizes all meta data to remove illegal characters that may exist
+     * and filling the map
+     * 
+     * @param subs map to hold the substitutions
+     * @param metaData id3 information about the file
+     * @return false if meta data is missing, otherwise return true
+     */
+    private boolean createSubstitutes( Map<String, String> subs, AudioMetaData metaData ) {
+        String artist = metaData.getArtist();
+        String album = metaData.getAlbum();
+        String track = metaData.getTrack();
+        String title = metaData.getTitle();
+        
+        // fail if we can't read artist or album or track or title data is corrupt or not available
+        // this should never happen since the store writes all this data themselves.
+        // if something is missing chances are something went wrong so just revert to 
+        // defaults
+        if (artist == null || album == null || title == null || track == null) 
+            return false;
+        
+        //sanitize data to remove any illegal chars for file names/directories
+        artist = CommonUtils.santizeString(artist);
+        album = CommonUtils.santizeString(album);
+        track = CommonUtils.santizeString(track);
+        title = CommonUtils.santizeString(title);
+
+        subs.put(StoreTemplateProcessor.ARTIST_LABEL, artist);
+        subs.put(StoreTemplateProcessor.ALBUM_LABEL, album);
+        subs.put(StoreTemplateProcessor.TITLE_LABEL, title);
+        subs.put(StoreTemplateProcessor.TRACK_LABEL, track);
+        
+        return true;
     }
     
    
