@@ -32,7 +32,7 @@ public class PromotionBinderRequestorImpl extends AbstractPromotionBinderRequest
         this.applicationServices = applicationServices;
     }
  
-    protected void error(Exception e) {e.printStackTrace();
+    protected void error(Exception e) {
         LOG.error("Error processing promotion binder", e);
     }
 
@@ -46,6 +46,6 @@ public class PromotionBinderRequestorImpl extends AbstractPromotionBinderRequest
     }
     
     public String alterUrl(String url) {
-        return LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyBTGUID());
+        return LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID());
     } 
 }

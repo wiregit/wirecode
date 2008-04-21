@@ -23,6 +23,7 @@ import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.ssl.SSLEngineTest;
 import org.limewire.nio.ssl.SSLUtils;
+import org.limewire.promotion.PromotionServices;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsGroupManager;
@@ -63,6 +64,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.ThirdPartySearchResultsSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
@@ -142,16 +144,12 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
 
     private final Provider<LicenseFactory> licenseFactory;
-
     private final Provider<ConnectionDispatcher> localConnectionDispatcher;
-
     private final Provider<DownloaderGuidAlternateLocationFinder> magnetDownloaderPushEndpointFinder;
-
-    private final Provider<PushProxiesPublisher> pushProxiesPublisher;
-    
-    private final Provider<DHTPeerLocator> dhtPeerLocator;
-    
+    private final Provider<PushProxiesPublisher> pushProxiesPublisher;    
+    private final Provider<DHTPeerLocator> dhtPeerLocator;    
     private final Provider<DHTPeerPublisher> dhtPeerPublisher;
+    private final Provider<PromotionServices> promotionServices;
 
     @Inject
     public LifecycleManagerImpl(
@@ -203,7 +201,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<DownloaderGuidAlternateLocationFinder> magnetDownloaderPushEndpointFinder,
             Provider<PushProxiesPublisher> pushProxiesPublisher,
             Provider<DHTPeerLocator> dhtPeerLocator,
-            Provider<DHTPeerPublisher> dhtPeerPublisher) { 
+            Provider<DHTPeerPublisher> dhtPeerPublisher,
+            Provider<PromotionServices> promotionServices) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -252,6 +251,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.pushProxiesPublisher = pushProxiesPublisher;
         this.dhtPeerLocator = dhtPeerLocator;
         this.dhtPeerPublisher = dhtPeerPublisher;
+        this.promotionServices = promotionServices;
     }
     
     /* (non-Javadoc)
@@ -541,6 +541,16 @@ public class LifecycleManagerImpl implements LifecycleManager {
             LOG.trace("END StoreServer");
         } else {
             LOG.trace("Disabling the StoreServer");
+        }
+        
+        // Allow us to enable/disable this remotely
+        if (ThirdPartySearchResultsSettings.PROMOTION_SYSTEM_IS_ENABLED.getValue()) {
+            LOG.trace("START loading promotion system");
+            activityCallback.get().componentLoading(I18nMarker.marktr("Loading Promotion System..."));
+            promotionServices.get().init();
+            LOG.trace("START loading promotion system");
+        } else {
+            LOG.trace("Disabling the promotion system");
         }      
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
@@ -646,6 +656,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         localAcceptor.get().stop();
         
         statisticAccumulator.get().stop();
+        
+        promotionServices.get().shutDown();
         
         runShutdownItems();
         

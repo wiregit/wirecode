@@ -40,5 +40,5 @@ public final class ThirdPartySearchResultsSettings extends LimeProps {
      * The max number of search results.
      */    
     public static final IntSetting MAX_NUMBER_OF_SEARCH_RESULTS =
-        FACTORY.createRemoteIntSetting("MAX_NUMBER_OF_SEARCH_RESULTS", 5, "ThirdPartySearchResultsSettings.maxNumberOfSearchResults", 0, Integer.MAX_VALUE);
+        FACTORY.createRemoteIntSetting("MAX_NUMBER_OF_SEARCH_RESULTS", 3, "ThirdPartySearchResultsSettings.maxNumberOfSearchResults", 0, 15);
 }

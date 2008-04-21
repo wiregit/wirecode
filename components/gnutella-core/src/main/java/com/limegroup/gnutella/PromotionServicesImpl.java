@@ -15,7 +15,7 @@ final class PromotionServicesImpl implements PromotionServices {
 
     private final PromotionSearcher promotionSearcher;
     
-    private boolean isRunning;
+    private volatile boolean isRunning;
 
     @Inject
     public PromotionServicesImpl(PromotionBinderRepository promotionBinderRepository,
