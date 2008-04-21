@@ -2,7 +2,7 @@ package org.limewire.promotion.impressions;
 
 import junit.framework.Test;
 
-public class EventQueryDataTest extends AbstractEventQueryDataTest {
+public class EventQueryDataTest extends AbstractEventQueryDataBaseTestCase {
 
     public EventQueryDataTest(String name) {
         super(name);

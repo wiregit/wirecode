@@ -6,9 +6,9 @@ import org.limewire.promotion.containers.PromotionMessageContainer;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.ByteOrder;
 
-abstract class AbstractEventQueryDataTest extends BaseTestCase {
+abstract class AbstractEventQueryDataBaseTestCase extends BaseTestCase {
 
-    public AbstractEventQueryDataTest(String name) {
+    public AbstractEventQueryDataBaseTestCase(String name) {
         super(name);
     }
 

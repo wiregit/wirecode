@@ -7,7 +7,7 @@ import junit.framework.Test;
 
 import org.limewire.promotion.PromotionBinder;
 
-public class PromotionContainerRequestorTest extends AbstractEventQueryDataTest {
+public class PromotionContainerRequestorTest extends AbstractEventQueryDataBaseTestCase {
 
     public PromotionContainerRequestorTest(String name) {
         super(name);
