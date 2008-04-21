@@ -47,6 +47,8 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     private static final String KEY_DATE_RANGE = "d";
 
     private static final String KEY_PROPERTIES = "P";
+    
+    private static final String KEY_IMPRESS_ONLY = "I";
 
     private GGEP payload = new GGEP();
 
@@ -117,6 +119,17 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
         byte[] header = getHeader();
         header[8] = type.getValue();
         setHeader(header);
+    }
+    
+    public boolean isImpressionOnly() {
+        return payload.hasKey(KEY_IMPRESS_ONLY);
+    }
+    
+    public void setImpressionOnly(boolean impressOnly) {
+        if(impressOnly)
+            payload.put(KEY_IMPRESS_ONLY);
+        else
+            payload.getHeaders().remove(KEY_IMPRESS_ONLY);
     }
 
     public void setOptions(PromotionOptions options) {

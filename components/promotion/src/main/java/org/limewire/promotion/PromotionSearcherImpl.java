@@ -148,8 +148,10 @@ public class PromotionSearcherImpl implements PromotionSearcher {
                     // Verify it!
                     if (isMessageValid(result.getPromotionMessageContainer(),
                             result.getBinderUniqueName(), timeQueried.getTime())) {
-                        shownResults++;
-                        callback.process(result.getPromotionMessageContainer());
+                        if(!result.getPromotionMessageContainer().isImpressionOnly()) {
+                            shownResults++;
+                            callback.process(result.getPromotionMessageContainer());
+                        }
                         // record we just showed this result.
                         impressionsCollector.recordImpression(query, timeQueried,
                                 new Date(), result.getPromotionMessageContainer(),
