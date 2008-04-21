@@ -490,7 +490,6 @@ class SearchResultHandlerImpl implements SearchResultHandler {
                 RemoteFileDesc rfd = response.toRemoteFileDesc(data, _remoteFileDescFactory);
                 rfd.setSecureStatus(secureStatus);
                 Set<? extends IpPort> alts = response.getLocations();
-                _activityCallback.get().handleQueryResult(rfd, data, alts);
                 
                 // TODO
                 //
@@ -498,27 +497,20 @@ class SearchResultHandlerImpl implements SearchResultHandler {
                 // alts.size() does not reflect the filtering out of duplicates.
                 
                 if (skipSpam || !_spamManager.get().isSpam(rfd)) {
-//                  if (is != null) {
-//                      numGood += addPartialSource(response.getUrns(), is, response.getSize());
-//                  }
-//                  else {
+                    if (is != null)
+                        numGood += addPartialSource(response.getUrns(), is, response.getSize());
+                    else
                         numGood += addLocation(response.getUrns(), response.getSize(), alts.size());
-//                  }
-//                  System.out.println("SearchResultHandlerImpl::addQueryReply().. numGood = " + numGood + ";");
                 }
                 else
                     numBad++;
                 
-//              for (int i = 0; i < numGood; ++i)
+                _activityCallback.get().handleQueryResult(rfd, data, alts);
                     
             } //end of response loop
             
-            // 
-            
             numGood += Math.ceil(numBad * SearchSettings.SPAM_RESULT_RATIO.getValue());
             _numGoodResults += numGood;
-            
-//          System.out.println("SearchResultHandlerImpl::addQueryReply().. numGood = " + numGood + "; numGoodResults = " + _numGoodResults + ";");
             
             return numGood;
         }
@@ -551,19 +543,24 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         private int addPartialSource(Set<URN> urns, IntervalSet is, long size) {
             ResourceLocationCounter rlc = null;
             URN urn = getFirstSha1Urn(urns);
-            int count_before = 0;
-            int count_after = 0;
+            int count_dif = 0;
             
             if (urn != null) {
                 if (null == (rlc = _isets.get(urn)))
                     _isets.put(urn, (rlc = new ResourceLocationCounter(urn, size)));
                 
-                count_before = rlc.getLocationCount();
+                int count_before = rlc.getLocationCount();
                 rlc.addPartialSource( is );
-                count_after = rlc.getLocationCount();
+                int count_after = rlc.getLocationCount();
+                
+                count_dif = count_after - count_before;
+                
+                if (count_dif > 0)
+                    rlc.updateDisplayLocationCount(count_dif);
+                
             }
             
-            return count_after - count_before;
+            return count_dif;
         }
         
         private int addLocation(Set<URN> urns, long size, int altCnt) {
@@ -577,8 +574,6 @@ class SearchResultHandlerImpl implements SearchResultHandler {
                 
                 rlc.incrementWholeSources();
                 rlc.updateDisplayLocationCount(altCnt > maxAlts ? maxAlts+1 : altCnt+1);
-                
-                System.out.println("SearchResultHandlerImpl::GuidCount::addLocation().. count = " + rlc.getLocationCount() + ";");
             }
             
             return 1;
