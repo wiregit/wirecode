@@ -14,7 +14,9 @@ import org.limewire.promotion.containers.PromotionMessageContainer.GeoRestrictio
 import org.limewire.promotion.impressions.ImpressionsCollector;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class PromotionSearcherImpl implements PromotionSearcher {
 
     private final KeywordUtil keywordUtil;
@@ -24,10 +26,10 @@ public class PromotionSearcherImpl implements PromotionSearcher {
     private final ImpressionsCollector impressionsCollector;
 
     private final PromotionBinderRepository promotionBinderRepository;
-
-    private int maxNumberOfResults = 5;
     
-    private /* ssa */ ExecutorService exec;
+    private final ExecutorService exec;
+    
+    private volatile int maxNumberOfResults = 5;
 
     @Inject
     public PromotionSearcherImpl(final KeywordUtilImpl keywordUtil,
@@ -38,6 +40,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
         this.searcherDatabase = searcherDatabase;
         this.impressionsCollector = impressionsCollector;
         this.promotionBinderRepository = promotionBinderRepository;
+        this.exec = ExecutorsHelper.newThreadPool("SearcherThread");
     }
 
     /**
@@ -60,10 +63,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
      */
     public void search(final String query, final PromotionSearchResultsCallback callback,
             final GeocodeInformation userLocation) {
-        if (exec == null) {
-            exec =  ExecutorsHelper.newThreadPool("SearcherThread(" + getClass().getName() + ")");
-        }
-       exec.execute(new SearcherThread(query, callback, userLocation));
+       exec.execute(new Searcher(query, callback, userLocation));
     }
 
     public void init(final int maxNumberOfResults) {
@@ -75,7 +75,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
      * conducting the search and invoking the callback passed to the search
      * method. When the search has completed, this thread dies.
      */
-    private class SearcherThread implements Runnable {
+    private class Searcher implements Runnable {
         private final String query;
 
         private final PromotionSearchResultsCallback callback;
@@ -88,7 +88,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
         /** Two character territory of user ('US') or null if not known. */
         private final String userTerritory;
 
-        SearcherThread(String query, PromotionSearchResultsCallback callback,
+        Searcher(String query, PromotionSearchResultsCallback callback,
                 GeocodeInformation userLocation) {
             this.query = query;
             this.callback = callback;
@@ -136,19 +136,16 @@ public class PromotionSearcherImpl implements PromotionSearcher {
             removeInvalidResults(results);
 
             int shownResults = 0;
-            int checkResults = 0;
             for (QueryResult result : results) {
                 final float probability = result.getPromotionMessageContainer().getProbability();
                 // Introduce some randomness into results using
                 // the probability field if we don't have room
-                if ((results.size() - checkResults <= maxNumberOfResults
-                        - shownResults)
-                        || Math.random() <= probability) {
+                if (Math.random() <= probability) {
                     // Looks like we can show this result...
                     // Verify it!
                     if (isMessageValid(result.getPromotionMessageContainer(),
                             result.getBinderUniqueName(), timeQueried.getTime())) {
-                        if(!result.getPromotionMessageContainer().isImpressionOnly()) {
+                        if (!result.getPromotionMessageContainer().isImpressionOnly()) {
                             shownResults++;
                             callback.process(result.getPromotionMessageContainer());
                         }
@@ -158,9 +155,10 @@ public class PromotionSearcherImpl implements PromotionSearcher {
                                 result.getBinderUniqueName());
                     }
                 }
-                if (shownResults >= maxNumberOfResults)
+                
+                // Exit early if we're done.  Assumes impression-only are sorted at top.
+                if(shownResults >= maxNumberOfResults)
                     break;
-                checkResults++;
             }
         }
 
