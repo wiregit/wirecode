@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.io.InvalidDataException;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.DHTValue;
@@ -71,58 +70,34 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
      * Searches in the MojitoDHT for peers sharing the given torrent. Torrent's
      * infoHash is used as the key.
      * 
-     * @param managedTorrent a <code>ManagedTorrent</code> instance of the
-     *        torrent.
+     * @param urn SHA1 hash of the torrent file.
      */
-    public void locatePeer(ManagedTorrent managedTorrent) {
+    public void locatePeer(URN urn) {
         LOG.debug("In locatePeer");
-        if (managedTorrent.isActive()) {
-            URN urn = managedTorrent.getMetaInfo().getURN();
+        // checking if the torrent is active, getTorrentForURN returns null if
+        // there is no active managedTorrent for the given urn.
+        if (torrentManager.get().getTorrentForURN(urn) != null) {
             // holding a lock on torrentsWaitingForDHTList here so that we do
             // not perform search for a same torrent twice.
             synchronized (torrentsWaitingForDHTList) {
                 if (!torrentsWaitingForDHTList.contains(urn)) {
                     LOG.debug("Passed Initial checks");
-                    // holding a lock on DHT to ensure dht does not change
-                    // status after we acquired it
-                    DHTManager manager = dhtManager.get();
-                    synchronized (manager) {
-                        MojitoDHT mojitoDHT = manager.getMojitoDHT();
-                        if (LOG.isDebugEnabled())
-                            LOG.debug("DHT:" + mojitoDHT);
-                        if (mojitoDHT == null || !mojitoDHT.isBootstrapped()) {
-                            LOG.debug("DHT is null or unable to bootstrap");
-                            torrentsWaitingForDHTList.add(urn);
-                            return;
-                        }
-                        proceedSearch(urn, mojitoDHT);
+                    // creates a KUID from torrent's metadata
+                    KUID key = KUIDUtils.toKUID(urn);
+                    // creates an entity key from the KUID and DHTValueType
+                    EntityKey eKey = EntityKey.createEntityKey(key,
+                            DHTPeerLocatorUtils.BT_PEER_TRIPLE);
+                    // retrieves the future
+                    final DHTFuture<FindValueResult> future = dhtManager.get().get(eKey);
+                    if (future == null) {
+                        torrentsWaitingForDHTList.add(urn);
+                    } else {
+                        // handle the result retrieved in the future
+                        future.addDHTFutureListener(new LocatePeerResultHandler(urn));
+                        LOG.debug("Future Listener added");
                     }
                 }
             }
-        }
-    }
-
-    /**
-     * Looks in the given DHT for a peer seeding the torrent file specified by
-     * infoHash.
-     * 
-     * @param urn SHA1 hash of the torrent file.
-     * @param mojitoDHT an instance of the MojitoDHT.
-     */
-    private void proceedSearch(URN urn, MojitoDHT mojitoDHT) {
-        // checking if the torrent is active, getTorrentForURN returns null if
-        // there is no active managedTorrent for the given urn.
-        if (torrentManager.get().getTorrentForURN(urn) != null) {
-            LOG.debug("in proceed search");
-            // creates a KUID from torrent's metadata
-            KUID key = KUIDUtils.toKUID(urn);
-            // creates an entity key from the KUID and DHTValueType
-            EntityKey eKey = EntityKey.createEntityKey(key, DHTPeerLocatorUtils.BT_PEER_TRIPLE);
-            // retrieves the future
-            final DHTFuture<FindValueResult> future = mojitoDHT.get(eKey);
-            // handle the result retrieved in the future
-            future.addDHTFutureListener(new LocatePeerResultHandler(urn, mojitoDHT));
-
         }
     }
 
@@ -150,14 +125,14 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
     }
 
     /**
-     * Listens for a TRACKER_FAILED event and launched search for alternate
+     * Listens for a TRACKER_FAILED event and launches search for alternate
      * location.
      */
     private class LocatorTorrentEventListener implements TorrentEventListener {
         public void handleTorrentEvent(TorrentEvent evt) {
             if (evt.getType() == TorrentEvent.Type.TRACKER_FAILED) {
                 LOG.debug("TRACKER_FAILED_EVENT");
-                locatePeer(evt.getTorrent());
+                locatePeer(evt.getTorrent().getMetaInfo().getURN());
             }
         }
     }
@@ -171,26 +146,18 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
          * This method is invoked when a DHTEvent occurs and if DHT is connected
          * then it tries to search for a peer.
          */
-        public void handleDHTEvent(DHTEvent evt) {            
+        public void handleDHTEvent(DHTEvent evt) {
             List<URN> torrentsWaitingForDHTListCopy;
             if (evt.getType() == DHTEvent.Type.CONNECTED) {
-                DHTManager manager = dhtManager.get();
-                MojitoDHT dht;
-                synchronized (manager) {
-                    dht = manager.getMojitoDHT();
-                    if (dht == null || !dht.isBootstrapped()) {
-                        LOG.error("Incorrect DHTEvent generated");
-                        return;
-                    }
-                }
+                LOG.debug("DHT available");
+                // copying the array then iterating since reading is cheaper
+                // than removing.
                 synchronized (torrentsWaitingForDHTList) {
                     torrentsWaitingForDHTListCopy = torrentsWaitingForDHTList;
                     torrentsWaitingForDHTList.clear();
                 }
-                // copying the array then iterating since reading is cheaper
-                // than removing
                 for (int i = 0; i < torrentsWaitingForDHTListCopy.size(); i++) {
-                    proceedSearch(torrentsWaitingForDHTListCopy.get(i), dht);
+                    locatePeer(torrentsWaitingForDHTListCopy.get(i));
                 }
             }
         }
@@ -202,17 +169,14 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
     private class LocatePeerResultHandler extends DHTFutureAdapter<FindValueResult> {
         private final URN urn;
 
-        private final MojitoDHT dht;
-
-        public LocatePeerResultHandler(URN urn, MojitoDHT dht) {
+        public LocatePeerResultHandler(URN urn) {
             this.urn = urn;
-            this.dht = dht;
         }
 
         @Override
         public void handleFutureSuccess(FindValueResult result) {
             LOG.debug("handle result");
-            ManagedTorrent managedTorrent = torrentManager.get().getTorrentForURN(urn);            
+            ManagedTorrent managedTorrent = torrentManager.get().getTorrentForURN(urn);
             if (result.isSuccess() && managedTorrent != null) {
                 LOG.debug("successful result");
                 for (DHTValueEntity entity : result.getEntities()) {
@@ -223,20 +187,20 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
                     if (!entityKey.getDHTValueType().equals(DHTPeerLocatorUtils.BT_PEER_TRIPLE)) {
                         continue;
                     }
-
-                    try {
-                        DHTFuture<FindValueResult> future = dht.get(entityKey);
-                        FindValueResult resultFromKey = future.get();
-
-                        if (resultFromKey.isSuccess()) {
-                            for (DHTValueEntity entity : resultFromKey.getEntities()) {
-                                dispatch(managedTorrent, entity);
+                    DHTFuture<FindValueResult> future = dhtManager.get().get(entityKey);
+                    if (future != null) {
+                        try {
+                            FindValueResult resultFromKey = future.get();
+                            if (resultFromKey.isSuccess()) {
+                                for (DHTValueEntity entity : resultFromKey.getEntities()) {
+                                    dispatch(managedTorrent, entity);
+                                }
                             }
+                        } catch (ExecutionException e) {
+                            LOG.error("ExecutionException", e);
+                        } catch (InterruptedException e) {
+                            LOG.error("InterruptedException", e);
                         }
-                    } catch (ExecutionException e) {
-                        LOG.error("ExecutionException", e);
-                    } catch (InterruptedException e) {
-                        LOG.error("InterruptedException", e);
                     }
                 }
             }

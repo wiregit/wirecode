@@ -39,15 +39,15 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 
 public class DHTPeerPublisherImplTest extends BaseTestCase {
-    private static String HASH1 = "urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    private String HASH1 = "urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
-    private static String HASH2 = "urn:sha1:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+    private String HASH2 = "urn:sha1:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
 
-    private static final byte[] IP = (new String("124.0.0.1")).getBytes();
+    private byte[] IP;
 
-    private static final byte[] ID = (new String("123")).getBytes();
+    private byte[] ID;
 
-    private static final int PORT = 4444;
+    private int PORT = 4444;
 
     private TorrentLocation torLoc = null;
 
@@ -77,7 +77,9 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
 
     private KUID kuidOne;
 
-    private EntityKey eKey;
+    private KUID kuidTwo;
+    
+    private EntityKey eKeyOne;       
 
     private URN urnOne;
 
@@ -94,6 +96,9 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
     }
 
     public void setUp() throws Exception {
+        IP = "124.0.0.1".getBytes("US-ASCII");
+        ID = "123".getBytes("US-ASCII");
+        
         context = new Mockery();
         managedTorrentOne = context.mock(ManagedTorrent.class);
         managedTorrentTwo = context.mock(ManagedTorrent.class);
@@ -131,7 +136,8 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
 
         dhtPeerPublisher = inj.getInstance(DHTPeerPublisher.class);
         kuidOne = KUIDUtils.toKUID(urnOne);
-        eKey = EntityKey.createEntityKey(kuidOne, DHTPeerLocatorUtils.BT_PEER_TRIPLE);
+        kuidTwo = KUIDUtils.toKUID(urnTwo);
+        eKeyOne = EntityKey.createEntityKey(kuidOne, DHTPeerLocatorUtils.BT_PEER_TRIPLE);               
     }
 
     // Tests if publishYourself properly stores the torrents in waiting list if
@@ -141,41 +147,33 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
 
         context.checking(new Expectations() {
             {
-                exactly(2).of(dhtManager).getMojitoDHT();
-                will(returnValue(dht));
-
-                exactly(2).of(dht).isBootstrapped();
-                will(returnValue(false));
-
-                exactly(2).of(managedTorrentOne).isActive();
-                will(returnValue(true));
-                exactly(2).of(managedTorrentOne).getMetaInfo();
-                will(returnValue(btMetaInfoOne));
-
-                one(managedTorrentTwo).isActive();
-                will(returnValue(true));
-                one(managedTorrentTwo).getMetaInfo();
-                will(returnValue(btMetaInfoTwo));
-
-                exactly(2).of(btMetaInfoOne).getURN();
-                will(returnValue(urnOne));
-
-                one(btMetaInfoTwo).getURN();
-                will(returnValue(urnTwo));
-
                 exactly(3).of(networkManager).acceptedIncomingConnection();
-                will(returnValue(true));
-
-                never(dht).get(with(any(EntityKey.class)));
+                will(returnValue(true));                
+                exactly(2).of(torrentManager).getTorrentForURN(with(equal(urnOne)));
+                will(returnValue(managedTorrentOne));                
+                one(torrentManager).getTorrentForURN(with(equal(urnTwo)));
+                will(returnValue(managedTorrentTwo));                
+                
+                exactly(2).of(networkManager).getAddress();
+                will(returnValue(IP));
+                exactly(2).of(networkManager).getPort();
+                will(returnValue(PORT));
+                exactly(2).of(applicationServices).getMyBTGUID();
+                will(returnValue(ID));
+                
+                one(dhtManager).put(with(equal(kuidOne)), with(any(DHTValue.class)));
+                will(returnValue(null));                
+                one(dhtManager).put(with(equal(kuidTwo)), with(any(DHTValue.class)));
+                will(returnValue(null));
             }
         });
 
         // should store these torrents in the waiting list
-        dhtPeerPublisher.publishYourself(managedTorrentOne);
-        dhtPeerPublisher.publishYourself(managedTorrentTwo);
+        dhtPeerPublisher.publishYourself(urnOne);
+        dhtPeerPublisher.publishYourself(urnTwo);
         // should not pass the initial checks as it is already in the waiting
         // list
-        dhtPeerPublisher.publishYourself(managedTorrentOne);
+        dhtPeerPublisher.publishYourself(urnOne);
         context.assertIsSatisfied();
 
     }
@@ -222,44 +220,29 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
         entities.add(entity);
 
         Collection<EntityKey> entityKeys = new ArrayList<EntityKey>();
-        entityKeys.add(eKey);
+        entityKeys.add(eKeyOne);
 
         StoreResult result = new StoreResult(null, entities);
         final DHTFuture<StoreResult> future = new FixedDHTFuture<StoreResult>(result);
 
         context.checking(new Expectations() {
             {
-                one(dhtManager).getMojitoDHT();
-                will(returnValue(dht));
-
-                one(dht).isBootstrapped();
-                will(returnValue(true));
-
-                exactly(2).of(managedTorrentOne).isActive();
-                will(returnValue(true));
-
-                exactly(2).of(managedTorrentOne).getMetaInfo();
-                will(returnValue(btMetaInfoOne));
-
-                exactly(2).of(btMetaInfoOne).getURN();
-                will(returnValue(urnOne));
-
-                one(dht).put(with(any(KUID.class)), with(any(DHTValue.class)));
-                will(returnValue(future));
-
                 exactly(2).of(networkManager).acceptedIncomingConnection();
                 will(returnValue(true));
-
-                one(torrentManager).getTorrentForURN(with(equal(urnOne)));
+                
+                exactly(2).of(torrentManager).getTorrentForURN(with(equal(urnOne)));
                 will(returnValue(managedTorrentOne));
+                
+                one(dhtManager).put(with(equal(kuidOne)), with(any(DHTValue.class)));
+                will(returnValue(future));                
             }
         });
 
         // store in waiting list
-        dhtPeerPublisher.publishYourself(managedTorrentOne);
+        dhtPeerPublisher.publishYourself(urnOne);
 
         // call made to ensure the torrent got stored as published
-        dhtPeerPublisher.publishYourself(managedTorrentOne);
+        dhtPeerPublisher.publishYourself(urnOne);
 
         context.assertIsSatisfied();
     }

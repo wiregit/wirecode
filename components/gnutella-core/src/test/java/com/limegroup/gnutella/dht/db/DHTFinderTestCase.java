@@ -4,6 +4,9 @@ import java.util.List;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.jmock.api.Invocation;
+import org.jmock.lib.action.CustomAction;
+import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.util.MojitoUtils;
 
@@ -71,10 +74,14 @@ public abstract class DHTFinderTestCase extends DHTTestCase {
         
         mojitoDHT = dhts.get(0);
         context.checking(new Expectations() {{
-            allowing(dhtManager).getMojitoDHT();
-            will(returnValue(mojitoDHT));
+            allowing(dhtManager).get(with(any(EntityKey.class)));
+            will(new CustomAction("Mojito Get") {
+                public Object invoke(Invocation invocation) throws Throwable {
+                    return mojitoDHT.get((EntityKey)invocation.getParameter(0));
+                }                
+            });
         }});
-        assertTrue(dhtManager.getMojitoDHT().isBootstrapped());
+        assertTrue(mojitoDHT.isBootstrapped());
 
         // register necessary factories
         mojitoDHT.getDHTValueFactoryManager().addValueFactory(AbstractAltLocValue.ALT_LOC, altLocValueFactory);

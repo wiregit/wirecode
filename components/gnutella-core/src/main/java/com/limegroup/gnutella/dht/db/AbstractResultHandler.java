@@ -7,12 +7,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.DHTValueEntity;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.result.FindValueResult;
+import com.limegroup.gnutella.dht.DHTManager;
 
 /**
  * An abstract implementation of DHTFutureAdapter to handle AltLocValues
@@ -52,7 +52,7 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
         }
     };
     
-    protected final MojitoDHT dht;
+    protected final DHTManager dhtManager;
     
     protected final KUID key;
     
@@ -60,9 +60,9 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
     
     protected final DHTValueType valueType;
     
-    AbstractResultHandler(MojitoDHT dht, KUID key, SearchListener listener, 
+    AbstractResultHandler(DHTManager dhtManager, KUID key, SearchListener listener, 
             DHTValueType valueType) {
-        this.dht = dht;
+        this.dhtManager = dhtManager;
         this.key = key;
         this.listener = listener;
         this.valueType = valueType;
@@ -88,24 +88,25 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
                 if (!entityKey.getDHTValueType().equals(valueType)) {
                     continue;
                 }
-                    
-                try {
-                    DHTFuture<FindValueResult> future = dht.get(entityKey);
-                    // TODO make this a non-blocking call
-                    FindValueResult resultFromKey = future.get();
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("result from second lookup: " + resultFromKey);
-                    }
-                    if (resultFromKey.isSuccess()) {
-                        for (DHTValueEntity entity : resultFromKey.getEntities()) {
-                            outcome = updateResult(outcome, handleDHTValueEntity(entity));
+                DHTFuture<FindValueResult> future = dhtManager.get(entityKey);
+                if(future != null) {
+                    try {                        
+                        // TODO make this a non-blocking call
+                        FindValueResult resultFromKey = future.get();
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("result from second lookup: " + resultFromKey);
                         }
-                    }
-                } catch (ExecutionException e) {
-                    LOG.error("ExecutionException", e);
-                } catch (InterruptedException e) {
-                    LOG.error("InterruptedException", e);
-                } 
+                        if (resultFromKey.isSuccess()) {
+                            for (DHTValueEntity entity : resultFromKey.getEntities()) {
+                                outcome = updateResult(outcome, handleDHTValueEntity(entity));
+                            }
+                        }
+                    } catch (ExecutionException e) {
+                        LOG.error("ExecutionException", e);
+                    } catch (InterruptedException e) {
+                        LOG.error("InterruptedException", e);
+                    } 
+                }
             }
         }
         

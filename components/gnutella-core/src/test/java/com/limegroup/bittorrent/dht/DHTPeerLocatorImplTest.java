@@ -39,15 +39,15 @@ import com.limegroup.gnutella.dht.util.KUIDUtils;
 
 public class DHTPeerLocatorImplTest extends BaseTestCase {
 
-    private static String HASH1 = "urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+    private String HASH1 = "urn:sha1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
-    private static String HASH2 = "urn:sha1:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+    private String HASH2 = "urn:sha1:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
 
-    private static final byte[] IP = (new String("124.0.0.1")).getBytes();
+    private byte[] IP;
 
-    private static final byte[] ID = (new String("123")).getBytes();
+    private byte[] ID;
 
-    private static final int PORT = 4444;
+    private int PORT = 4444;
 
     private TorrentLocation torLoc = null;
 
@@ -77,7 +77,11 @@ public class DHTPeerLocatorImplTest extends BaseTestCase {
 
     private KUID kuidOne;
 
-    private EntityKey eKey;
+    private EntityKey eKeyOne;
+    
+    private KUID kuidTwo;
+
+    private EntityKey eKeyTwo;
 
     private URN urnOne;
 
@@ -94,6 +98,9 @@ public class DHTPeerLocatorImplTest extends BaseTestCase {
     }
 
     public void setUp() throws Exception {
+        IP = "124.0.0.1".getBytes("US-ASCII");
+        ID = "123".getBytes("US-ASCII");
+        
         context = new Mockery();
         managedTorrentOne = context.mock(ManagedTorrent.class);
         managedTorrentTwo = context.mock(ManagedTorrent.class);
@@ -132,7 +139,9 @@ public class DHTPeerLocatorImplTest extends BaseTestCase {
         dhtPeerLocator = inj.getInstance(DHTPeerLocator.class);
 
         kuidOne = KUIDUtils.toKUID(urnOne);
-        eKey = EntityKey.createEntityKey(kuidOne, DHTPeerLocatorUtils.BT_PEER_TRIPLE);
+        eKeyOne = EntityKey.createEntityKey(kuidOne, DHTPeerLocatorUtils.BT_PEER_TRIPLE);
+        kuidTwo = KUIDUtils.toKUID(urnTwo);
+        eKeyTwo = EntityKey.createEntityKey(kuidTwo, DHTPeerLocatorUtils.BT_PEER_TRIPLE);
     }
 
     // Tests if locatePeer properly stores the torrents in waiting list if a DHT
@@ -141,38 +150,26 @@ public class DHTPeerLocatorImplTest extends BaseTestCase {
     public void testLocatePeerWhichShouldPutTorrentsInWaitingList() {
 
         context.checking(new Expectations() {
-            {
-                exactly(2).of(dhtManager).getMojitoDHT();
-                will(returnValue(dht));
-
-                exactly(2).of(dht).isBootstrapped();
-                will(returnValue(false));
-
-                exactly(2).of(managedTorrentOne).isActive();
-                will(returnValue(true));
-                exactly(2).of(managedTorrentOne).getMetaInfo();
-                will(returnValue(btMetaInfoOne));
-
-                one(managedTorrentTwo).isActive();
-                will(returnValue(true));
-                one(managedTorrentTwo).getMetaInfo();
-                will(returnValue(btMetaInfoTwo));
-
-                exactly(2).of(btMetaInfoOne).getURN();
-                will(returnValue(urnOne));
-
-                one(btMetaInfoTwo).getURN();
-                will(returnValue(urnTwo));
-
-                never(dht).get(with(any(EntityKey.class)));
+            {                
+                exactly(2).of(torrentManager).getTorrentForURN(with(equal(urnOne)));
+                will(returnValue(managedTorrentOne));
+                
+                one(torrentManager).getTorrentForURN(with(equal(urnTwo)));
+                will(returnValue(managedTorrentTwo));
+                
+                one(dhtManager).get(eKeyOne);
+                will(returnValue(null));
+                
+                one(dhtManager).get(eKeyTwo);
+                will(returnValue(null));
             }
         });
 
         // should store these torrents in the waiting list
-        dhtPeerLocator.locatePeer(managedTorrentOne);
-        dhtPeerLocator.locatePeer(managedTorrentTwo);
+        dhtPeerLocator.locatePeer(urnOne);
+        dhtPeerLocator.locatePeer(urnTwo);
         // should not store this in waiting list as it should already be stored
-        dhtPeerLocator.locatePeer(managedTorrentOne);
+        dhtPeerLocator.locatePeer(urnOne);
 
         context.assertIsSatisfied();
     }
@@ -218,42 +215,27 @@ public class DHTPeerLocatorImplTest extends BaseTestCase {
         entities.add(entity);
 
         Collection<EntityKey> entityKeys = new ArrayList<EntityKey>();
-        entityKeys.add(eKey);
+        entityKeys.add(eKeyOne);
 
-        FindValueResult result = new FindValueResult(eKey, null, entities, entityKeys, 123123L, 10);
+        FindValueResult result = new FindValueResult(eKeyOne, null, entities, entityKeys, 123123L, 10);
         // a fake future with successful result to test if a successful search
         // works
         final DHTFuture<FindValueResult> future = new FixedDHTFuture<FindValueResult>(result);
 
         context.checking(new Expectations() {
             {
-                one(dhtManager).getMojitoDHT();
-                will(returnValue(dht));
-
-                one(dht).isBootstrapped();
-                will(returnValue(true));
-
-                one(managedTorrentOne).isActive();
-                will(returnValue(true));
-
-                one(managedTorrentOne).getMetaInfo();
-                will(returnValue(btMetaInfoOne));
-
-                one(btMetaInfoOne).getURN();
-                will(returnValue(urnOne));
-
-                atLeast(1).of(dht).get(with(equal(eKey)));
-                will(returnValue(future));
-
-                atLeast(1).of(managedTorrentOne).addEndpoint(with(equal(torLoc)));
-
                 exactly(2).of(torrentManager).getTorrentForURN(with(equal(urnOne)));
-                will(returnValue(managedTorrentOne));
+                will(returnValue(managedTorrentOne));                
+                
+                exactly(2).of(dhtManager).get(eKeyOne);
+                will(returnValue(future));
+                
+                atLeast(1).of(managedTorrentOne).addEndpoint(with(equal(torLoc)));
             }
         });
 
         // Should perform search successfully
-        dhtPeerLocator.locatePeer(managedTorrentOne);
+        dhtPeerLocator.locatePeer(urnOne);
 
         context.assertIsSatisfied();
     }

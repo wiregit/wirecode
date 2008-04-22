@@ -24,7 +24,13 @@ import org.jmock.Mockery;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.db.DHTValue;
+import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.net.SocketsManager;
@@ -1275,6 +1281,14 @@ public final class MessageRouterImplTest extends LimeTestCase {
         }
 
         public void setEnabled(boolean enabled) {
+        }
+        
+        public DHTFuture<FindValueResult> get(EntityKey eKey) {
+            return null;
+        }
+        
+        public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
+            return null;
         }
     }
 

@@ -1,6 +1,6 @@
 package com.limegroup.bittorrent.dht;
 
-import com.limegroup.bittorrent.ManagedTorrent;
+import com.limegroup.gnutella.URN;
 
 /**
  * <code>DHTPeerPublisher</code> defines an interface for storing network information in DHT
@@ -17,8 +17,8 @@ public interface DHTPeerPublisher {
      * Stores the network information of the local host as a seeder in DHT for
      * the given torrent.
      * 
-     * @param managedTorrent the torrent the peer is sharing.
+     * @param urn SHA1 hash of the torrent file.
      */
-    public void publishYourself(ManagedTorrent managedTorrent);
+    public void publishYourself(URN urn);
 
 }

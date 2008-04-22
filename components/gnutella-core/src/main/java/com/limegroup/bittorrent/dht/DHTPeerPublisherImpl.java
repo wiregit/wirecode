@@ -11,7 +11,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.impl.DHTValueImpl;
@@ -21,7 +20,6 @@ import org.limewire.mojito.routing.Version;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentEvent;
 import com.limegroup.bittorrent.TorrentEventListener;
 import com.limegroup.bittorrent.TorrentLocation;
@@ -89,79 +87,55 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
      * Publishes the local host in DHT as a peer sharing the given torrent .
      * Torrent's infoHash is used as the key.
      * 
-     * @param managedTorrent a managedTorrent instance of the torrent.
+     * @param urn SHA1 hash of the torrent file.
      */
-    public void publishYourself(ManagedTorrent managedTorrent) {
+    public void publishYourself(URN urn) {
         LOG.debug("In publishYourself");
 
-        URN urn = managedTorrent.getMetaInfo().getURN();
-
-        if (managedTorrent.isActive() && networkManager.get().acceptedIncomingConnection()
-                && !isPublished(urn)) {
+        // checking if the torrent is active, getTorrentForURN returns null if
+        // there is no active managedTorrent for the given urn.
+        if (networkManager.get().acceptedIncomingConnection()
+                && torrentManager.get().getTorrentForURN(urn) != null && !isPublished(urn)) {
             // holding a lock on torrentsWaitingForDHTList here so that we do
             // publish for a same torrent twice.
             synchronized (torrentsWaitingForDHTList) {
                 // initial check
                 if (!torrentsWaitingForDHTList.contains(urn)) {
-
                     LOG.debug("Passed Initial checks");
-                    // holding a lock on DHT to ensure dht does not change
-                    // status
-                    // after we acquired it
-                    DHTManager manager = dhtManager.get();
-                    synchronized (manager) {
-                        MojitoDHT mojitoDHT = manager.getMojitoDHT();
+                    try {
+                        TorrentLocation torLoc = new TorrentLocation(InetAddress
+                                .getByName(NetworkUtils.ip2string((networkManager.get()
+                                        .getAddress()))), networkManager.get().getPort(),
+                                applicationServices.get().getMyBTGUID());
 
-                        if (LOG.isDebugEnabled())
-                            LOG.debug("DHT: " + mojitoDHT);
+                        // encodes ip, port and peerid into a array of bytes
+                        byte[] msg = DHTPeerLocatorUtils.encode(torLoc);
+                        // creates a KUID from torrent's metadata
+                        KUID key = KUIDUtils.toKUID(urn);
 
-                        if (mojitoDHT == null || !mojitoDHT.isBootstrapped()) {
-                            LOG.debug("DHT is null or unable to bootstrap");
-                            torrentsWaitingForDHTList.add(urn);
-                            return;
+                        if (msg.length != 0) {
+                            // publish the information in the DHT
+                            DHTFuture<StoreResult> future = dhtManager.get().put(
+                                    key,
+                                    new DHTValueImpl(DHTPeerLocatorUtils.BT_PEER_TRIPLE,
+                                            Version.ZERO, msg));
+
+                            if (future == null) {
+                                torrentsWaitingForDHTList.add(urn);
+                            } else {
+                                // ensure publishing was successful
+                                future.addDHTFutureListener(new PublishYourselfResultHandler(urn));
+                                if (LOG.isDebugEnabled())
+                                    LOG.debug("IP:PORT of peer published: " + torLoc.getAddress()
+                                            + ":" + torLoc.getPort());
+                            }
                         }
-                        proceedPublishing(urn, mojitoDHT);
+                    } catch (IllegalArgumentException iae) {
+                        LOG.error("Invalid network information", iae);
+                    } catch (UnknownHostException uhe) {
+                        LOG.error("Invalid IP address");
                     }
                 }
-            }
-        }
-    }
-
-    /**
-     * Publishes the local host's network information in the given DHT as a peer
-     * seeding the torrent file specified by infoHash.
-     * 
-     * @param urn SHA1 hash of the torrent file.
-     * @param mojitoDHT an instance of the MojitoDHT.
-     */
-    private void proceedPublishing(URN urn, MojitoDHT mojitoDHT) {
-        // checking if the torrent is active, getTorrentForURN returns null if
-        // there is no active managedTorrent for the given urn.
-        if (torrentManager.get().getTorrentForURN(urn) != null) {
-            try {
-                TorrentLocation torLoc = new TorrentLocation(InetAddress.getByName(NetworkUtils
-                        .ip2string((networkManager.get().getAddress()))), networkManager.get()
-                        .getPort(), applicationServices.get().getMyBTGUID());
-
-                // encodes ip, port and peerid into a array of bytes
-                byte[] msg = DHTPeerLocatorUtils.encode(torLoc);
-                // creates a KUID from torrent's metadata
-                KUID key = KUIDUtils.toKUID(urn);
-
-                if (msg.length != 0) {
-                    // publish the information in the DHT
-                    DHTFuture<StoreResult> future = mojitoDHT.put(key, new DHTValueImpl(
-                            DHTPeerLocatorUtils.BT_PEER_TRIPLE, Version.ZERO, msg));
-                    // ensure publishing was successful
-                    future.addDHTFutureListener(new PublishYourselfResultHandler(urn));
-                    if (LOG.isDebugEnabled())
-                        LOG.debug("IP:PORT of peer published: " + torLoc.getAddress() + ":"
-                                + torLoc.getPort());
-                }
-            } catch (IllegalArgumentException iae) {
-                LOG.error("Invalid network information", iae);
-            } catch (UnknownHostException uhe) {
-                LOG.error("Invalid IP address");
             }
         }
     }
@@ -199,7 +173,7 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
         public void handleTorrentEvent(TorrentEvent evt) {
             if (evt.getType() == TorrentEvent.Type.FIRST_CHUNK_VERIFIED) {
                 LOG.debug("FIRST_CHUNK_VERIFIED_EVENT");
-                publishYourself(evt.getTorrent());
+                publishYourself(evt.getTorrent().getMetaInfo().getURN());
             }
         }
     }
@@ -214,26 +188,18 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher {
          * This method is invoked when a DHTEvent occurs and if DHT is connected
          * then it tries to publish the peer again.
          */
-        public void handleDHTEvent(DHTEvent evt) {            
+        public void handleDHTEvent(DHTEvent evt) {
             List<URN> torrentsWaitingForDHTListCopy;
             if (evt.getType() == DHTEvent.Type.CONNECTED) {
-                DHTManager manager = dhtManager.get();
-                MojitoDHT dht;
-                synchronized (dhtManager) {
-                    dht = manager.getMojitoDHT();
-                    if (dht == null || !dht.isBootstrapped()) {
-                        LOG.error("Incorrect DHTEvent generated");
-                        return;
-                    }
-                }
+                // copying the array then iterating since reading is cheaper
+                // than removing
                 synchronized (torrentsWaitingForDHTList) {
                     torrentsWaitingForDHTListCopy = torrentsWaitingForDHTList;
                     torrentsWaitingForDHTList.clear();
                 }
-                // copying the array then iterating since reading is cheaper
-                // than removing
-                for (int i = 0; i < torrentsWaitingForDHTListCopy.size(); i++) {                    
-                    proceedPublishing(torrentsWaitingForDHTListCopy.get(i), dht);
+
+                for (int i = 0; i < torrentsWaitingForDHTListCopy.size(); i++) {
+                    publishYourself(torrentsWaitingForDHTListCopy.get(i));
                 }
             }
         }

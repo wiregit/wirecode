@@ -11,7 +11,6 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
@@ -51,23 +50,15 @@ public class DHTPushEndpointFinder implements PushEndpointService {
         }
         
         KUID key = KUIDUtils.toKUID(guid);
-        EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractPushProxiesValue.PUSH_PROXIES);
-        boolean querySent = false;
-        
-        synchronized (dhtManager) {
-            MojitoDHT dht = dhtManager.getMojitoDHT();
-            if (dht != null && dht.isBootstrapped()) {
-                DHTFuture<FindValueResult> future = dht.get(lookupKey);
-                future.addDHTFutureListener(new PushEndpointHandler(dht, guid, key, listener));
-                querySent = true;
-            }
-        }
-        
-        // listener notification outside of lock
-        if (!querySent) {
+        EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractPushProxiesValue.PUSH_PROXIES);        
+      
+        DHTFuture<FindValueResult> future = dhtManager.get(lookupKey);
+        if(future != null) {                        
+            future.addDHTFutureListener(new PushEndpointHandler(dhtManager, guid, key, listener));            
+        } else {
             LOG.debug("dht manager not bootstrapped or no dht");
             listener.searchFailed();
-        }
+        }               
     }
 
     public PushEndpoint getPushEndpoint(GUID guid) {
@@ -87,9 +78,9 @@ public class DHTPushEndpointFinder implements PushEndpointService {
         
         private final SearchListener<PushEndpoint> listener;
 
-        private PushEndpointHandler(MojitoDHT dht, GUID guid, 
+        private PushEndpointHandler(DHTManager dhtManager, GUID guid, 
                 KUID key, SearchListener<PushEndpoint> listener) {
-            super(dht, key, listener, AbstractPushProxiesValue.PUSH_PROXIES);
+            super(dhtManager, key, listener, AbstractPushProxiesValue.PUSH_PROXIES);
             this.guid = guid;
             this.listener = listener;
         }

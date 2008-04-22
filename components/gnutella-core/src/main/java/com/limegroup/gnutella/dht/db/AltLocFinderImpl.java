@@ -12,7 +12,6 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
-import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueEntity;
@@ -42,7 +41,7 @@ class AltLocFinderImpl implements AltLocFinder {
 
     private static final Log LOG = LogFactory.getLog(AltLocFinderImpl.class);
     
-    private final DHTManager manager;
+    private final DHTManager dhtManager;
 
     private final AlternateLocationFactory alternateLocationFactory;
 
@@ -51,10 +50,10 @@ class AltLocFinderImpl implements AltLocFinder {
     private final PushEndpointService pushEndpointManager;
     
     @Inject
-    public AltLocFinderImpl(DHTManager manager, AlternateLocationFactory alternateLocationFactory, 
+    public AltLocFinderImpl(DHTManager dhtManager, AlternateLocationFactory alternateLocationFactory, 
             AltLocManager altLocManager, 
             @Named("pushEndpointManager") PushEndpointService pushEndpointManager) {
-        this.manager = manager;
+        this.dhtManager = dhtManager;
         this.alternateLocationFactory = alternateLocationFactory;
         this.altLocManager = altLocManager;
         this.pushEndpointManager = pushEndpointManager;
@@ -65,20 +64,19 @@ class AltLocFinderImpl implements AltLocFinder {
         
         KUID key = KUIDUtils.toKUID(urn);
         EntityKey lookupKey = EntityKey.createEntityKey(key, AbstractAltLocValue.ALT_LOC);
-        
-        synchronized (manager) {
-            MojitoDHT dht = manager.getMojitoDHT();
-            if (dht == null || !dht.isBootstrapped()) {
-                return null;
-            }
-            final DHTFuture<FindValueResult> future = dht.get(lookupKey);
-            future.addDHTFutureListener(new AltLocsHandler(dht, urn, key, listener));
-            return new Shutdownable() {
-                public void shutdown() {
-                    future.cancel(true);
-                }
-            };
-        }
+      
+          
+          final DHTFuture<FindValueResult> future = dhtManager.get(lookupKey);
+          if(future == null) {
+              return null;
+          } else {
+              future.addDHTFutureListener(new AltLocsHandler(dhtManager, urn, key, listener));
+              return new Shutdownable() {
+                  public void shutdown() {
+                      future.cancel(true);
+                  }
+              };
+          }              
     }
     
     /**
@@ -123,9 +121,9 @@ class AltLocFinderImpl implements AltLocFinder {
         private final SearchListener<AlternateLocation> listener;
         private final URN urn;
 
-        private AltLocsHandler(MojitoDHT dht, URN urn, KUID key, 
+        private AltLocsHandler(DHTManager dhtManager, URN urn, KUID key, 
                 SearchListener<AlternateLocation> listener) {
-            super(dht, key, listener, AbstractAltLocValue.ALT_LOC);
+            super(dhtManager, key, listener, AbstractAltLocValue.ALT_LOC);
             this.urn = urn;
             this.listener = listener;
         }

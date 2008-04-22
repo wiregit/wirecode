@@ -1,6 +1,6 @@
 package com.limegroup.bittorrent.dht;
 
-import com.limegroup.bittorrent.ManagedTorrent;
+import com.limegroup.gnutella.URN;
 
 /**
  * <code>DHTPeerLocator</code> defines an interface for looking up a peer in
@@ -17,9 +17,8 @@ public interface DHTPeerLocator {
      * Searches for peers sharing the given torrent. If no peers are found, then
      * the search stop.
      * 
-     * @param managedTorrent a <code>ManagedTorrent</code> instance of the
-     *        torrent.
+     * @param urn SHA1 hash of the torrent file.
      */
-    public void locatePeer(ManagedTorrent managedTorrent);
+    public void locatePeer(URN urn);
 
 }
