@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-14 14:25-0400\n"
+"POT-Creation-Date: 2008-04-21 11:30-0400\n"
 "PO-Revision-Date: 2008-03-29 11:19+0000\n"
 "Last-Translator: bakkersystem <bakkersystem@msn.com>\n"
 "Language-Team: none\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-04-15 04:05+0000\n"
+"X-Launchpad-Export-Date: 2008-04-22 03:56+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -124,6 +124,13 @@ msgstr ""
 #~ "{0}\n"
 #~ "\n"
 #~ "Val�ban megosztod a mapp�t?"
+
+#~ msgid ""
+#~ "One or more of the created magnet links may not be accessible since their "
+#~ "hosts are firewalled."
+#~ msgstr ""
+#~ "Egy vagy t�bb l�trehozott magnet hivatkoz�s lehet, hogy nem el�rhet�, mert a "
+#~ "kiszolg�l�ik t�zfallal v�dettek."
 
 #~ msgid "Open .&torrent"
 #~ msgstr ".&torrent f�jl megnyit�sa"
@@ -1361,7 +1368,7 @@ msgstr ""
 "A LimeWire nem tudott portot létrehozni a bejövő kapcsolatok figyelésére. "
 "Elképzelhető, hogy a LimeWire egyes funkciói nem fognak megfelelően működni."
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:224
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:231
 #, fuzzy
 msgid ""
 "Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
@@ -1372,7 +1379,7 @@ msgstr ""
 "létező Könyvtáradat,megnézheted a befejezetlen fájlokat, és kattints a "
 "letöltés ujrakezdésére."
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:226
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:233
 msgid ""
 "Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
@@ -1383,87 +1390,87 @@ msgstr ""
 "Befejezetlen Fájlokat (Incomplete Files), és a folytatás (Resume) gombra "
 "kattintasz."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:354
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:376
 msgid "Loading TLS Encryption..."
 msgstr "TLS bekódolás betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:366
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:388
 msgid "Loading Safe Content Management..."
 msgstr "Biztonságos tartalomkezelés betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:371
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:393
 msgid "Loading Message Router..."
 msgstr "Üzenetszűrő betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:376
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:398
 msgid "Checking for Updates..."
 msgstr "Frissítések keresése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:381
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:403
 msgid "Loading Upload Management..."
 msgstr "Feltöltéskezelés betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:395
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:417
 msgid "Loading Connection Listener..."
 msgstr "Kapcsolatfigyelő betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:404
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:426
 msgid "Loading Connection Management..."
 msgstr "Kapcsolatkezelő betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:413
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:435
 msgid "Loading Download Management..."
 msgstr "Letöltéskezelés betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:419
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:441
 msgid "Loading Ultrapeer/DHT Management..."
 msgstr "Ultrapeer/DHT-kezelés betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:424
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:446
 msgid "Locating Peers..."
 msgstr "Partnerek körülhatárolása..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:440
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:462
 msgid "Loading Shared Files..."
 msgstr "Megosztott fájlok betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:445
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:467
 msgid "Loading BitTorrent Management..."
 msgstr "BitTorrent Management betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:451
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:482
 msgid "Loading Old Downloads..."
 msgstr "Régi letöltések betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:456
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:487
 msgid "Attaching LimeWire Store Listeners..."
 msgstr "LimeWire Store hallgatók csatolása..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:461
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:492
 msgid "Loading Directed Querier..."
 msgstr "Irányított lekérdezés betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:466
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:497
 msgid "Loading Magnet Listener..."
 msgstr "Magnet-figyelö betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:477
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:508
 msgid "Loading Peer Listener..."
 msgstr "Partnerfigyelö betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:482
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:513
 msgid "Loading Stale Connection Management..."
 msgstr "Elévültkapcsolat-kezelő betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:487
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:518
 msgid "Loading Saved Files..."
 msgstr "Mentett fájlok betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:492
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:523
 msgid "Loading Spam Management..."
 msgstr "Spam-kezelés betöltése..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:497
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:528
 msgid "Loading Network Listeners..."
 msgstr "Hálózati hallgatók betöltése..."
 
@@ -1801,12 +1808,12 @@ msgstr "Kiadó"
 msgid "Platform"
 msgstr "Felület"
 
-#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:105
+#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:108
 #, fuzzy
 msgid "The selected .torrent file may contain a security hazard."
 msgstr "A kijelölt .torrent fájl biztonsági kockázatokat vethet fel."
 
-#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:107
+#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:110
 #, fuzzy
 msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr "A LimeWire nem tudott letölteni .torrent fájlt a megadott URL-ről."
@@ -2219,8 +2226,8 @@ msgid "Save As"
 msgstr "Mentés másként"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:121
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:96
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:174
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:98
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:186
 msgid "What's New"
 msgstr "Mi Újság?"
 
@@ -4092,25 +4099,17 @@ msgstr ""
 "t�ltsd le a leg�jabb hivatalos LimeWire-verzi�t.</html>"
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:34
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:104
 msgid "Lookup File with Bitzi"
 msgstr "A f�jl keres�se a Bitzi-vel"
 
-#: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:34
+#: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:32
 msgid "Copy Magnet Links to Clipboard"
 msgstr "Magneet linkek m�sol�sa a v�g�lapra"
 
-#: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:36
+#: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:34
 msgid "Copy the Magnet Links of the Selected Files to the Clipboard"
 msgstr "A kijel�lt f�jlok Magnet hivatkoz�s�nak m�sol�sa a v�g�lapra"
-
-#: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:73
-msgid ""
-"One or more of the created magnet links may not be accessible since their "
-"hosts are firewalled."
-msgstr ""
-"Egy vagy t�bb l�trehozott magnet hivatkoz�s lehet, hogy nem el�rhet�, mert a "
-"kiszolg�l�ik t�zfallal v�dettek."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:48
 msgid "C&onnect"
@@ -4171,13 +4170,13 @@ msgstr "&Bez�r�"
 msgid "Close the Program"
 msgstr "Program bez�r�sa"
 
-#: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:23
+#: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:27
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:823
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1228
 msgid "Launch"
 msgstr "Indítás"
 
-#: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:25
+#: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:29
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1230
 msgid "Launch Selected Files"
 msgstr "A kijel�lt f�jlok ind�t�sa."
@@ -4194,7 +4193,7 @@ msgstr "Megosztott {0} fájljaim megtekintése."
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:774
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:554
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:559
 #, java-format
 msgid "Search for Keywords: {0}"
 msgstr "Keres�s a kulcsszavakra: {0}"
@@ -4305,8 +4304,8 @@ msgstr "Az �zenetk�ld�s sikertelen volt"
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:231
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:936
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:43
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:96
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:102
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:44
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:53
 msgid "Browse Host"
@@ -5334,7 +5333,7 @@ msgstr "Keres�s a megosztott f�jlok k�z�tt:"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:73
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:297
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:563
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:575
 #: gui/com/limegroup/gnutella/gui/tabs/SearchDownloadTab.java:41
 msgid "Search"
 msgstr "Keresés"
@@ -5782,15 +5781,15 @@ msgstr "&Alap�rtelmezett"
 msgid "Use your default skin"
 msgstr "Az alap�rtelmezett kin�zet haszn�lata"
 
-#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:27
+#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:31
 msgid "&Tools"
 msgstr "&Eszk�z�"
 
-#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:39
+#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:43
 msgid "&Options"
 msgstr "&Be�ll�t�sok"
 
-#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:40
+#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:44
 msgid "Display the Options Screen"
 msgstr "A be�ll�t�sok megv�ltoztat�sa"
 
@@ -6013,11 +6012,11 @@ msgid "Content"
 msgstr "Tartalom"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:392
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:315
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:489
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:591
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:613
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:320
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:494
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:596
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:618
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:110
 msgid "Junk"
 msgstr "Szemét"
 
@@ -7480,35 +7479,39 @@ msgstr ""
 "Szem�lyre szabott technikai t�mogat�s\n"
 "Hat h�napig ingyen friss�t�"
 
+#: gui/com/limegroup/gnutella/gui/search/PromotionSearchResult.java:183
+msgid "View in Browser..."
+msgstr "Megtekintés böngészőben..."
+
 #. mark 'em red
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:313
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:475
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:610
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:318
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:480
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:615
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:112
 msgid "Not Junk"
 msgstr "Nem szem�"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:316
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:490
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:592
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:614
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:321
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:495
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:597
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:619
 msgid "Mark selected search results as Junk"
 msgstr "A kijel�lt eredm�nyek jel�l�se 'Szem�t'-k�nt"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:476
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:611
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:481
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:616
 msgid "Mark selected search results as Not Junk"
 msgstr "A kijel�lt eredm�nyek jel�l�se mint nem 'Szem�t'"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:538
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:543
 msgid "Search More"
 msgstr "Keress t�bbet"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:697
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:702
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr "Szeretn�d le�ll�tani a keres�st a k�vetkez� kiszolg�l�kr�"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1043
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1048
 msgid "More Info..."
 msgstr "T�bb inf�..."
 
@@ -7537,12 +7540,12 @@ msgid "Search for Program Files, Including exe, zip, gz, and More"
 msgstr "Programf�jlok (exe, zip, gz, �s EGYEBEK) keres�se"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:42
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:85
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:88
 msgid "Download"
 msgstr "Let�lt�"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:44
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:89
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:92
 msgid "Stop Search"
 msgstr "Keresés leállítása"
 
@@ -7562,20 +7565,20 @@ msgstr "A kijel�lt f�lh�z tartoz� keres�s le�ll�t�sa"
 msgid "New"
 msgstr "�j"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:172
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:184
 msgid "Keyword"
 msgstr "Kulcssz�"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:176
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:355
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:188
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:367
 msgid "Direct Connect"
 msgstr "Közvetlen Kapcsolat"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:329
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:341
 msgid "Got Friends?"
 msgstr "K�zvetlen m�"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:333
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:345
 msgid ""
 "Enter the IP address and port number (i.e. ip:port) of a friend you'd like "
 "to connect to, click 'Direct Connect', and LimeWire will try to browse that "
@@ -7585,11 +7588,11 @@ msgstr ""
 "\"Közvetlen Kapcsolat\" gombra, és a LimeWire megpróbálja megkeresni a "
 "felhasználó megosztott fájljait."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:370
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:382
 msgid "When your friends want to connect to you, they should enter"
 msgstr "Ha hozz�d szeretn�nek kapcsol�dni m�sok, be kell �rniuk a k�vetkez�"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:375
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:387
 msgid ""
 "Your computer is behind a firewall or router and cannot receive direct "
 "connections."
@@ -7597,15 +7600,15 @@ msgstr ""
 "A sz�m�t�g�ped t�zfal vagy router m�g�tt van, �s nem fogadhat k�zvetlen "
 "kapcsolatot."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:389
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:401
 msgid "Don't Know"
 msgstr "Nem tudom"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:393
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:405
 msgid "What To Look For?"
 msgstr "Mire keressek?"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:397
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:409
 msgid ""
 "A \"What's New\" search will search for files that have been recently added "
 "to the network."
@@ -7613,63 +7616,63 @@ msgstr ""
 "A \"Mi �js�g?\" szolg�ltat�s a h�l�zathoz nemr�g hozz�adott f�jlokra fog "
 "r�keresni."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:408
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:420
 msgid "Current Search:"
 msgstr "Jelenlegi keres�s:"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:428
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:440
 msgid "Hide Adult Content"
 msgstr "Feln�tt tartalom kisz�r�se"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:538
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:550
 msgid "Filename"
 msgstr "F�jln�"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:565
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:577
 msgid "Search the Network for the Given Words"
 msgstr "Keres�s a h�l�zaton a megadott szavak alapj�"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:660
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:679
 msgid "The address format is incorrect, please use host:port."
 msgstr "A cím formátuma hibás, kérünk használd az ip:port formátumot."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:87
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:90
 msgid "Close Search"
 msgstr "Keres�s bez�r�sa"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:94
 msgid "Launch Action"
 msgstr "M�velet ind�t�sa"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:98
 msgid "Chat With Host"
 msgstr "Cseveg�s a kiszolg�l�val"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:100
 msgid "Repeat Search"
 msgstr "Keres�s megism�tl�se"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:106
 msgid "Block Hosts"
 msgstr "Kiszolg�l�k blokkol�sa"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:108
 msgid "Mark As"
 msgstr "Jel�l�s mint"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:114
 msgid "Get More Results"
 msgstr "T�bb eredm�ny"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:145
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:142
 msgid "Loading Search Window..."
 msgstr "Keres�ablak bet�lt�se..."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:343
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:340
 msgid "Firewalled Host"
 msgstr "Tűzfall által védett gazda"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:435
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:453
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
 "network."
@@ -7677,19 +7680,19 @@ msgstr ""
 "Keres�sn�l legal�bb h�rom karaktert kell megadnod, hogy ne terheld t�l a "
 "h�l�zatot."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:440
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:458
 msgid ""
 "Your search is too long. Please make your search smaller and try again."
 msgstr ""
 "Az �ltalad megadott keres�s t�l hossz�. R�vid�tsd le, majd pr�b�lkozz �jra."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:443
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:447
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:461
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:465
 msgid ""
 "Your search is too specific. Please make your search smaller and try again."
 msgstr "A keres�s t�l szigor�. R�vid�tsd le, majd pr�b�lkozz �jra."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:452
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:470
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
@@ -7697,7 +7700,7 @@ msgstr ""
 "keresést."
 
 #. if not connected or connecting, show one message.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:461
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:479
 msgid ""
 "You are not connected to the network. To connect, select \"Connect\" from "
 "the \"File\" menu. Your search may not return any results until you connect."
@@ -7707,7 +7710,7 @@ msgstr ""
 "visszaadni eredm�nyeket, am�g nem kapcsol�dsz."
 
 #. if attempting to connect, show another.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:464
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:482
 msgid ""
 "LimeWire is currently connecting to the network. Your search may not return "
 "many results until you are fully connected to the network."
@@ -7715,7 +7718,7 @@ msgstr ""
 "A LimeWire most kapcsol�dik a h�l�zathoz. A keres�s val�sz�n�leg nem ad "
 "vissza eredm�nyeket, am�g teljesen nem kapcsol�dt�l a h�l�zathoz."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:766
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:784
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
@@ -7723,7 +7726,7 @@ msgstr ""
 "A kiv�lasztott f�jlok egyike v�grehajthat� program �s v�rust tartalmazhat. "
 "Biztos  vagy benne, hogy le akarod t�lteni?"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:470
+#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:475
 #, java-format
 msgid "Could not browse host {0}."
 msgstr "Nem siker� {0} kiszolg�l� b�ng�sz�se."
@@ -7749,7 +7752,7 @@ msgstr "'Szem�t'-besorol�"
 msgid "Media"
 msgstr "M�dia"
 
-#: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:136
+#: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:137
 #, java-format
 msgid "... {0} more."
 msgstr ""
@@ -7759,10 +7762,6 @@ msgid ""
 "This is a secure result. No information in this result has been tampered."
 msgstr ""
 "Ez egy biztons�gos eredm�ny. Az ehhez tartoz� inform�ci�k manipul�latlanok."
-
-#: gui/com/limegroup/gnutella/gui/search/ThirdPartySearchResult.java:183
-msgid "View in Browser..."
-msgstr "Megtekintés böngészőben..."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:56
 msgid "Sharing Extensions"

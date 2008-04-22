@@ -9,15 +9,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fr\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-14 14:25-0400\n"
-"PO-Revision-Date: 2008-04-12 22:06+0000\n"
-"Last-Translator: Listo <poiriphil@hotmail.com>\n"
+"POT-Creation-Date: 2008-04-21 11:30-0400\n"
+"PO-Revision-Date: 2008-04-15 15:02+0000\n"
+"Last-Translator: Yves MATHIEU <ymathieu@moulins-vichy.cci.fr>\n"
 "Language-Team: <fr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Launchpad-Export-Date: 2008-04-15 04:05+0000\n"
+"X-Launchpad-Export-Date: 2008-04-22 03:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "Sorry, but LimeWire was unable to restart your old downloads."
@@ -59,6 +59,13 @@ msgstr ""
 #~ "{0}\n"
 #~ "\n"
 #~ "Voulez-vous vraiment partager ce dossier ?"
+
+#~ msgid ""
+#~ "One or more of the created magnet links may not be accessible since their "
+#~ "hosts are firewalled."
+#~ msgstr ""
+#~ "Un ou plusieurs des liens Magnet peuvent être inaccessibles car leurs hôtes "
+#~ "sont situés derrière un système pare-feu."
 
 #~ msgid "URL"
 #~ msgstr "URL"
@@ -1729,7 +1736,7 @@ msgstr ""
 "connexions entrantes. Certaines fonctions de LimeWire ne fonctionneront pas "
 "de la façon attendue."
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:224
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:231
 msgid ""
 "Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
@@ -1739,7 +1746,7 @@ msgstr ""
 "pouvez les redémarrer en allant dans votre Médiathèque, au niveau de vos "
 "'Fichiers incomplets', et en cliquant sur 'Reprendre'."
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:226
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:233
 msgid ""
 "Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
@@ -1750,87 +1757,87 @@ msgstr ""
 "Médiathèque, au niveau de vos 'Fichiers incomplets', et en cliquant sur "
 "'Reprendre'."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:354
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:376
 msgid "Loading TLS Encryption..."
 msgstr "Chargement de l’encryptage TLS..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:366
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:388
 msgid "Loading Safe Content Management..."
 msgstr "Chargement du gestionnaire de contenu sûr..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:371
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:393
 msgid "Loading Message Router..."
 msgstr "Chargement du routeur de messages..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:376
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:398
 msgid "Checking for Updates..."
 msgstr "Vérification des mises à jour..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:381
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:403
 msgid "Loading Upload Management..."
 msgstr "Chargement du gestionnaire de transfert..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:395
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:417
 msgid "Loading Connection Listener..."
 msgstr "Chargement de l’auditeur de connexions..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:404
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:426
 msgid "Loading Connection Management..."
 msgstr "Chargement du gestionnaire de connexions..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:413
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:435
 msgid "Loading Download Management..."
 msgstr "Chargement du gestionnaire de chargement..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:419
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:441
 msgid "Loading Ultrapeer/DHT Management..."
 msgstr "Chargement du gestionnaire Ultrapair/DHT..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:424
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:446
 msgid "Locating Peers..."
 msgstr "Découverte d’autres pairs..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:440
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:462
 msgid "Loading Shared Files..."
 msgstr "Chargement des fichiers partagés..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:445
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:467
 msgid "Loading BitTorrent Management..."
 msgstr "Chargement du gestionnaire BitTorrent..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:451
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:482
 msgid "Loading Old Downloads..."
 msgstr "Chargement des anciens chargements incomplets..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:456
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:487
 msgid "Attaching LimeWire Store Listeners..."
 msgstr "Attachement des auditeurs du Dépot LimeWire..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:461
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:492
 msgid "Loading Directed Querier..."
 msgstr "Chargement du requêteur dirigé..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:466
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:497
 msgid "Loading Magnet Listener..."
 msgstr "Chargement de l’auditeur MAGNET..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:477
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:508
 msgid "Loading Peer Listener..."
 msgstr "Chargement de l’auditeur d’agents pairs..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:482
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:513
 msgid "Loading Stale Connection Management..."
 msgstr "Chargement du gestionnaire de connexions bloquées..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:487
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:518
 msgid "Loading Saved Files..."
 msgstr "Chargement des fichiers sauvegardés..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:492
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:523
 msgid "Loading Spam Management..."
 msgstr "Chargement du gestionnaire de contenus abusifs..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:497
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:528
 msgid "Loading Network Listeners..."
 msgstr "Chargement des auditeurs réseau..."
 
@@ -2142,12 +2149,12 @@ msgstr "Éditeur de la publication"
 msgid "Platform"
 msgstr "Plate-forme"
 
-#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:105
+#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:108
 msgid "The selected .torrent file may contain a security hazard."
 msgstr ""
 "Le fichier .torrent sélectionné peut comporter des risques de sécurité."
 
-#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:107
+#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:110
 msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr ""
 "LimeWire n’a pas pu télécharger un fichier .torrent depuis l’URL indiquée."
@@ -2534,8 +2541,8 @@ msgid "Save As"
 msgstr "Enregistrer sous..."
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:121
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:96
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:174
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:98
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:186
 msgid "What's New"
 msgstr "Quoi de neuf ?"
 
@@ -3604,7 +3611,6 @@ msgstr ""
 "correctement."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:58
-#, fuzzy
 msgid ""
 "The more stars a search result has, the better the chances of the download "
 "completing successfully. Four blue stars signal 'Ethernet' speed and have "
@@ -3612,8 +3618,8 @@ msgid ""
 msgstr ""
 "Plus le résultat de votre recherche comporte d'étoiles, plus vous avez de "
 "chances pour que votre téléchargement soit terminé avec succès. Quatre "
-"étoiles bleues vous indiquent une vitesse \"Ethernet\" et ont une grande "
-"chance de se terminer avec succès."
+"étoiles bleues vous indiquent une vitesse \"Ethernet\" et une plus grande "
+"chance de terminer avec succès."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:62
 msgid ""
@@ -3749,6 +3755,8 @@ msgid ""
 "Do you want to sport the LimeWire look? Visit our <a href=\"{0}\">LimeWire "
 "gear</a> page and purchase a T-shirt or hat."
 msgstr ""
+"Voulez vous faire du sport avec un look LimeWire ? Visitez notre page <a "
+"href=\"{0}\">LimeWire gear</a> et achetez un T-shirt ou une casquette."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:120
 msgid ""
@@ -3763,6 +3771,8 @@ msgid ""
 "Try a <font color=\"1E8E44\">What's New</font> search and see what's "
 "recently been added to the Gnutella network."
 msgstr ""
+"Essayez la recherche<font color=\"1E8E44\">Quoi de neuf</font> et regardez "
+"ce qui a été récemment ajouté au réseau Gnutella."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:127
 msgid ""
@@ -4107,11 +4117,16 @@ msgstr ""
 "href=\"{0}\">www.java.com</a>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:305
+#, fuzzy
 msgid ""
 "LimeWire is written in Java, which means that having the latest version of "
 "Java will improve LimeWire's speed and stability. You can upgrade to the "
 "latest Java release by using 'Software Update'. "
 msgstr ""
+"LimeWire est écrit en Java, ce qui veux dire que si vous aviez la dernière "
+"version de Java ceci améliorerai la vitesse et la stabilité de LimeWire. "
+"Vous pouvez mettre à jour en dernière version Java en utilisant 'Mise à jour "
+"logiciel'. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:309
 msgid ""
@@ -4256,24 +4271,33 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:364
 msgid "<font color=\"1E8E44\">Preferences</font>"
 msgstr ""
+"Copy text   \t\n"
+"<font color=\"1E8E44\">Préférences</font>"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:365
 msgid ""
 "<font color=\"1E8E44\">Tools</font> &gt; <font "
 "color=\"1E8E44\">Options</font>"
 msgstr ""
+"<font color=\"1E8E44\">Outils</font> &gt; <font "
+"color=\"1E8E44\">Options</font>"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:369
 msgid ""
 "<font color=\"1E8E44\">LimeWire</font> &gt; <font color=\"1E8E44\">About "
 "LimeWire</font>"
 msgstr ""
+"Copy text   \t\n"
+"<font color=\"1E8E44\">LimeWire</font> &gt; <font color=\"1E8E44\">A propos "
+"de LimeWire</font>"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:370
 msgid ""
 "<font color=\"1E8E44\">Help</font> &gt; <font color=\"1E8E44\">About "
 "LimeWire</font>"
 msgstr ""
+"<font color=\"1E8E44\">Aide</font> &gt; <font color=\"1E8E44\">A propos de "
+"LimeWire</font>"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:383
 msgid ""
@@ -4479,26 +4503,18 @@ msgstr ""
 "la dernière version officielle de LimeWire.</html>"
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:34
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:104
 msgid "Lookup File with Bitzi"
 msgstr "Identifier le fichier avec Bitzi"
 
-#: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:34
+#: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:32
 msgid "Copy Magnet Links to Clipboard"
 msgstr "Copier les liens Magnet"
 
-#: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:36
+#: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:34
 msgid "Copy the Magnet Links of the Selected Files to the Clipboard"
 msgstr ""
 "Copie les liens Magnet des fichiers sélectionnés vers le presse-papiers."
-
-#: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:73
-msgid ""
-"One or more of the created magnet links may not be accessible since their "
-"hosts are firewalled."
-msgstr ""
-"Un ou plusieurs des liens Magnet peuvent être inaccessibles car leurs hôtes "
-"sont situés derrière un système pare-feu."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:48
 msgid "C&onnect"
@@ -4561,13 +4577,13 @@ msgstr "&Fermer"
 msgid "Close the Program"
 msgstr "Ferme la fenêtre du programme."
 
-#: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:23
+#: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:27
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:823
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1228
 msgid "Launch"
 msgstr "Lancer"
 
-#: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:25
+#: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:29
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1230
 msgid "Launch Selected Files"
 msgstr "Ouvre ou exécute les fichiers sélectionnés."
@@ -4584,7 +4600,7 @@ msgstr "Voir mes {0} fichiers partagés"
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:774
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:554
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:559
 #, java-format
 msgid "Search for Keywords: {0}"
 msgstr "Recherche des mots-clés : {0}"
@@ -4696,8 +4712,8 @@ msgstr "Le message de discussion n’a pas pu être envoyé."
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:231
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:936
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:43
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:96
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:102
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:44
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:53
 msgid "Browse Host"
@@ -5751,7 +5767,7 @@ msgstr "Rechercher dans les fichiers partagés :"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:73
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:297
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:563
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:575
 #: gui/com/limegroup/gnutella/gui/tabs/SearchDownloadTab.java:41
 msgid "Search"
 msgstr "Chercher"
@@ -6208,15 +6224,15 @@ msgstr "Thème par &défaut"
 msgid "Use your default skin"
 msgstr "Utilise votre thème par défaut."
 
-#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:27
+#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:31
 msgid "&Tools"
 msgstr "&Outils"
 
-#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:39
+#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:43
 msgid "&Options"
 msgstr "&Options"
 
-#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:40
+#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:44
 msgid "Display the Options Screen"
 msgstr "Affiche l’écran de configuration."
 
@@ -6441,11 +6457,11 @@ msgid "Content"
 msgstr "Contenu"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:392
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:315
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:489
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:591
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:613
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:320
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:494
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:596
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:618
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:110
 msgid "Junk"
 msgstr "Pollution"
 
@@ -6463,7 +6479,7 @@ msgstr "Profiteurs"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:399
 msgid "Firewall"
-msgstr ""
+msgstr "Pare-feu"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:400
 msgid "Proxy"
@@ -6908,8 +6924,9 @@ msgid "Show License Warning:"
 msgstr "Afficher les avertissements de licence :"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:20
+#, fuzzy
 msgid "Display"
-msgstr ""
+msgstr "Afficher"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:22
 msgid ""
@@ -8024,37 +8041,41 @@ msgstr ""
 "Un support technique personnalisé.\n"
 "Six mois de mises à jour gratuites."
 
+#: gui/com/limegroup/gnutella/gui/search/PromotionSearchResult.java:183
+msgid "View in Browser..."
+msgstr "Voir dans le navigateur..."
+
 #. mark 'em red
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:313
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:475
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:610
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:318
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:480
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:615
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:112
 msgid "Not Junk"
 msgstr "Contenu utile"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:316
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:490
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:592
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:614
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:321
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:495
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:597
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:619
 msgid "Mark selected search results as Junk"
 msgstr "Marque les résultats sélectionnés comme de la pollution."
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:476
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:611
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:481
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:616
 msgid "Mark selected search results as Not Junk"
 msgstr "Marque les résultats sélectionnés comme des contenus utiles."
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:538
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:543
 msgid "Search More"
 msgstr "Chercher davantage"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:697
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:702
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr ""
 "Voulez-vous bloquer tous les résultats de recherche en provenance des hôtes "
 "suivants ?"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1043
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1048
 msgid "More Info..."
 msgstr "Plus d'informations..."
 
@@ -8086,12 +8107,12 @@ msgstr ""
 "Zip, Gzip, Tar, etc."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:42
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:85
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:88
 msgid "Download"
 msgstr "Charger"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:44
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:89
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:92
 msgid "Stop Search"
 msgstr "Stoppe la recherche"
 
@@ -8112,20 +8133,20 @@ msgstr ""
 msgid "New"
 msgstr "Nouveau"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:172
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:184
 msgid "Keyword"
 msgstr "Mots-clés"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:176
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:355
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:188
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:367
 msgid "Direct Connect"
 msgstr "Connexion directe"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:329
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:341
 msgid "Got Friends?"
 msgstr "Vous avez des amis ?"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:333
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:345
 msgid ""
 "Enter the IP address and port number (i.e. ip:port) of a friend you'd like "
 "to connect to, click 'Direct Connect', and LimeWire will try to browse that "
@@ -8136,11 +8157,11 @@ msgstr ""
 "directe », LimeWire tentera alors de parcourir et afficher les fichiers "
 "partagés de cet utilisateur."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:370
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:382
 msgid "When your friends want to connect to you, they should enter"
 msgstr "Si vos amis souhaitent se connecter à vous, ils peuvent entrer"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:375
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:387
 msgid ""
 "Your computer is behind a firewall or router and cannot receive direct "
 "connections."
@@ -8148,15 +8169,15 @@ msgstr ""
 "Votre ordinateur est placé derrière un routeur ou un pare-feu bloquant (ou "
 "non configuré) et ne peut actuellement recevoir aucune connexion directe."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:389
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:401
 msgid "Don't Know"
 msgstr "Vous ne savez pas"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:393
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:405
 msgid "What To Look For?"
 msgstr "quoi rechercher ?"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:397
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:409
 msgid ""
 "A \"What's New\" search will search for files that have been recently added "
 "to the network."
@@ -8164,64 +8185,64 @@ msgstr ""
 "Une recherche “Quoi de neuf ?” permettra de découvrir des fichiers ajoutés "
 "récemment au réseau."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:408
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:420
 msgid "Current Search:"
 msgstr "Recherche actuelle :"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:428
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:440
 msgid "Hide Adult Content"
 msgstr "Filtrer le contenu adulte"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:538
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:550
 msgid "Filename"
 msgstr "Nom de fichier"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:565
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:577
 msgid "Search the Network for the Given Words"
 msgstr "Recherche sur le réseau les mots indiqués."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:660
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:679
 msgid "The address format is incorrect, please use host:port."
 msgstr ""
 "Le format d’adresse indiqué est incorrect, veuillez utiliser “h.ô.t.e:port”"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:87
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:90
 msgid "Close Search"
 msgstr "Ferme la recherche"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:94
 msgid "Launch Action"
 msgstr "Lancer le fichier"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:98
 msgid "Chat With Host"
 msgstr "Discuter avec l’hôte"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:100
 msgid "Repeat Search"
 msgstr "Répéter la recherche"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:106
 msgid "Block Hosts"
 msgstr "Bannir les hôtes"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:108
 msgid "Mark As"
 msgstr "Marquer comme"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:114
 msgid "Get More Results"
 msgstr "Obtenir plus de résultats"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:145
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:142
 msgid "Loading Search Window..."
 msgstr "Chargement du panneau de recherche..."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:343
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:340
 msgid "Firewalled Host"
 msgstr "Hôte derrière pare-feu"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:435
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:453
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
 "network."
@@ -8229,21 +8250,21 @@ msgstr ""
 "Votre recherche doit comporter au moins 3 caractères pour éviter la "
 "congestion du réseau."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:440
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:458
 msgid ""
 "Your search is too long. Please make your search smaller and try again."
 msgstr ""
 "Votre recherche est trop longue. Veuillez la raccourcir et réessayer."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:443
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:447
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:461
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:465
 msgid ""
 "Your search is too specific. Please make your search smaller and try again."
 msgstr ""
 "Votre recherche est trop spécifique. Veuillez raccourcir ou supprimer "
 "certains critères et réessayer."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:452
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:470
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
@@ -8251,7 +8272,7 @@ msgstr ""
 "puissiez lancer une recherche."
 
 #. if not connected or connecting, show one message.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:461
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:479
 msgid ""
 "You are not connected to the network. To connect, select \"Connect\" from "
 "the \"File\" menu. Your search may not return any results until you connect."
@@ -8261,7 +8282,7 @@ msgstr ""
 "retourner aucun résultat tant que vous n’êtes pas connecté au réseau."
 
 #. if attempting to connect, show another.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:464
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:482
 msgid ""
 "LimeWire is currently connecting to the network. Your search may not return "
 "many results until you are fully connected to the network."
@@ -8270,7 +8291,7 @@ msgstr ""
 "pourrait ne pas retourner beaucoup de résultats tant que vous n’êtes pas "
 "pleinement connecté au réseau."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:766
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:784
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
@@ -8278,7 +8299,7 @@ msgstr ""
 "Un des fichiers sélectionnés est un programme exécutable et pourrait "
 "contenir un virus. Êtes-vous sûr de vouloir le télécharger ?"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:470
+#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:475
 #, java-format
 msgid "Could not browse host {0}."
 msgstr "Impossible de parcourir les fichiers sur l’hôte “{0}”."
@@ -8304,7 +8325,7 @@ msgstr "Évaluation de pollution"
 msgid "Media"
 msgstr "Média"
 
-#: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:136
+#: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:137
 #, java-format
 msgid "... {0} more."
 msgstr ""
@@ -8315,10 +8336,6 @@ msgid ""
 msgstr ""
 "Ceci est un résultat sécurisé. Aucune information de ce résultat n’a été "
 "altérée durant son transfert d’un hôte à l’autre."
-
-#: gui/com/limegroup/gnutella/gui/search/ThirdPartySearchResult.java:183
-msgid "View in Browser..."
-msgstr "Voir dans le navigateur..."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:56
 msgid "Sharing Extensions"

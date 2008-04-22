@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-14 14:25-0400\n"
-"PO-Revision-Date: 2008-03-31 23:20+0000\n"
-"Last-Translator: Marek Štubniak <marcofreez@centrum.sk>\n"
+"POT-Creation-Date: 2008-04-21 11:30-0400\n"
+"PO-Revision-Date: 2008-04-19 14:15+0000\n"
+"Last-Translator: Lenka <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 1 : (n>=2 && n<=4) ? 2 : 0;\n"
-"X-Launchpad-Export-Date: 2008-04-15 04:05+0000\n"
+"X-Launchpad-Export-Date: 2008-04-22 03:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -897,7 +897,7 @@ msgstr ""
 "LimeWire nemohol nastaviť port pre prichádzajúce pripojenia. Niektore "
 "funkcie LimeWire nemusia pracovať korektne."
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:224
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:231
 msgid ""
 "Sorry, LimeWire couldn't read your old downloads.  You can restart them by "
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
@@ -907,7 +907,7 @@ msgstr ""
 "prejdením do Knižnice, kliknutím na \"Nedokončené súbory\" a kliknutím na "
 "\"Obnoviť\" downolady."
 
-#: core/com/limegroup/gnutella/DownloadManagerImpl.java:226
+#: core/com/limegroup/gnutella/DownloadManagerImpl.java:233
 msgid ""
 "Sorry, LimeWire couldn't read some of your old downloads.  You can restart "
 "them by going to your Library, viewing your 'Incomplete Files', and clicking "
@@ -917,87 +917,87 @@ msgstr ""
 "obnoviť prejdením do Knižnice, kliknutím na \"Nedokončené súbory\" a "
 "kliknutím na \"Obnoviť\" downolady."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:354
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:376
 msgid "Loading TLS Encryption..."
 msgstr "Načítavam kódovanie TLS..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:366
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:388
 msgid "Loading Safe Content Management..."
 msgstr "Načítavam správcu zabezpečovacieho obsahu..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:371
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:393
 msgid "Loading Message Router..."
 msgstr "Načítavam router správ..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:376
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:398
 msgid "Checking for Updates..."
 msgstr "Kontrola aktualizácii..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:381
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:403
 msgid "Loading Upload Management..."
 msgstr "Načítavam správcu uploadov..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:395
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:417
 msgid "Loading Connection Listener..."
 msgstr "Načítavam naslúchač pripojení..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:404
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:426
 msgid "Loading Connection Management..."
 msgstr "Načítavam správcu pripojení"
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:413
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:435
 msgid "Loading Download Management..."
 msgstr "Načítavam správcu sťahovania..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:419
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:441
 msgid "Loading Ultrapeer/DHT Management..."
 msgstr "Načítavam správcu Ultrapeer/DHT..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:424
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:446
 msgid "Locating Peers..."
 msgstr "Lokalizujem Peer..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:440
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:462
 msgid "Loading Shared Files..."
 msgstr "Načítavam zdieľané súbory..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:445
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:467
 msgid "Loading BitTorrent Management..."
 msgstr "Načítavam správcu BitTorrent..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:451
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:482
 msgid "Loading Old Downloads..."
 msgstr "Načítavam už stiahnuté súbory..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:456
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:487
 msgid "Attaching LimeWire Store Listeners..."
 msgstr "Pripájam poslucháčov LimeWire Store..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:461
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:492
 msgid "Loading Directed Querier..."
 msgstr "Načítavam priame požiadavky..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:466
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:497
 msgid "Loading Magnet Listener..."
 msgstr "Načítavam Magnet naslúchač..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:477
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:508
 msgid "Loading Peer Listener..."
 msgstr "Načítavam Peer naslúchač..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:482
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:513
 msgid "Loading Stale Connection Management..."
 msgstr "Načítavam predošlého správcu pripojení..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:487
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:518
 msgid "Loading Saved Files..."
 msgstr "Načítavam uložené súbory..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:492
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:523
 msgid "Loading Spam Management..."
 msgstr "Načítavam správcu spamu..."
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:497
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:528
 msgid "Loading Network Listeners..."
 msgstr "Načítavam sieťových užívateľov..."
 
@@ -1305,11 +1305,11 @@ msgstr "Vydavateľ"
 msgid "Platform"
 msgstr "Platforma"
 
-#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:105
+#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:108
 msgid "The selected .torrent file may contain a security hazard."
 msgstr "Označený súbor .torrent môže spôsobiť bezpečnostné riziko."
 
-#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:107
+#: gui/com/limegroup/bittorrent/gui/TorrentFileFetcher.java:110
 msgid "LimeWire could not download a .torrent file from the provided URL."
 msgstr "LimeWire nemohol stiahnuť z tejto URL adresy súbor .torrent."
 
@@ -1682,8 +1682,8 @@ msgid "Save As"
 msgstr "Uložiť ako"
 
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:121
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:96
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:174
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:98
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:186
 msgid "What's New"
 msgstr "Čo je nové"
 
@@ -3454,12 +3454,15 @@ msgid ""
 "preferences such as your saved folder, shared folder, upload bandwidth, etc. "
 "These preferences (and more) are available at {0}."
 msgstr ""
+"Môžete si prispôsobiť LimeWire tak aby Vám čo najlepšie vyhovoval tým, že "
+"zmeníte rôzne nastavenia ako Vaše uložené priečinky, zdieľané priačinky, "
+"pásma odosielania dát atď. Tieto nastavenia (a ďalšie) sú prístupné v {0}."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:344
 #, java-format
 msgid ""
 "You can find out which version of LimeWire you are using by choosing {0}."
-msgstr ""
+msgstr "Ak chcete zistiť, ktorú veriziu LimeWire používate, vyberte {0}."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:345
 msgid ""
@@ -3468,6 +3471,10 @@ msgid ""
 "and uploads (transfers) are complete via {0} and looking at the <font "
 "color=\"1E8E44\">System Tray</font> options."
 msgstr ""
+"Buďte férovým užívateľom siete, nezatvárajte LimeWire ak niekto od Vás "
+"sťahuje. Môžete prikázať LimeWire aby sa automaticky ukončil po dokončení "
+"všetkých odchádzajúcich i prichádzajúcich sťahovaní (transferov) cez {0} a "
+"pozretím sa na nastavenia cez <font color=\"1E8E44\">Systémovú ikonu</font>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:346
 msgid ""
@@ -3477,6 +3484,11 @@ msgid ""
 "color=\"1E8E44\">Sharing</font>, <font color=\"1E8E44\">Types</font> to "
 "modify the file extensions to share."
 msgstr ""
+"LimeWire nezdieľa všetky typy súborov automaticky. Preto, ak máte špecifický "
+"súbor, ktorý chcete zdieľať , buď ho zdieľajte individuálne, alebo sa "
+"uistite, že sa súbory s touto príponou zdieľajú. Zvoľte {0} &gt; <font "
+"color=\"1E8E44\">Sharing</font>, <font color=\"1E8E44\">Typy súborov</font> "
+"ak chcete zmeniť typy súborov ktoré sa majú zdieľať."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:347
 #, java-format
@@ -3485,6 +3497,10 @@ msgid ""
 "color=\"1E8E44\">View</font>, <font color=\"1E8E44\">Autocomplete</font> and "
 "change the <font color=\"1E8E44\">Text Autocomplete</font> option."
 msgstr ""
+"Môžete zapnúť automatické dokončovanie textu pri vyhľadávaní cez {0} &gt; "
+"<font color=\"1E8E44\">Zobrazenie</font>, <font "
+"color=\"1E8E44\">Autocomplete</font> a zmenením nastavení <font "
+"color=\"1E8E44\">Automatické dokončovanie textu</font>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:348
 #, java-format
@@ -3495,6 +3511,11 @@ msgid ""
 "under <font color=\"1E8E44\">Revert To Default</font> under <font "
 "color=\"1E8E44\">View</font> &gt; <font color=\"1E8E44\">Popups</font>."
 msgstr ""
+"Môžete vidieť dialógy otázok ktoré ste predtým označili ako <font "
+"color=\"1E8E44\">Na budúce už nezobrazovať túto správu</font> alebo <font "
+"color=\"1E8E44\">Vždy použiť túto odpoveď</font> cez {0} a zaškrtnutím <font "
+"color=\"1E8E44\">Vrátiť pôvodné hodnoty</font> pod <font "
+"color=\"1E8E44\">Zobrazenie</font> &gt; <font color=\"1E8E44\">Popups</font>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:349
 #, java-format
@@ -3503,6 +3524,9 @@ msgid ""
 "{0} &gt; <font color=\"1E8E44\">Filters</font> &gt; <font "
 "color=\"1E8E44\">Keywords</font>, and adding new words."
 msgstr ""
+"Môžete zakázať niektoré slová vo Vašich výsledkoch vyhľadávania cez {0} &gt; "
+"<font color=\"1E8E44\">Filtre</font> &gt; <font color=\"1E8E44\">Kľúčové "
+"slová</font>, a pridaním nových slov."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:350
 #, java-format
@@ -3513,6 +3537,12 @@ msgid ""
 "to filter searches. Search results that contain a word from the keyword "
 "filter will not reach your computer. "
 msgstr ""
+"Dosiahli ste Váš limit vyhľadávania a všetky výsledky sú spam alebo sa "
+"nevzťahujú k Vášmu vyhľadávaniu? Použite filtrovanie kľúčových slov cez {0} "
+"&gt; <font color=\"1E8E44\">Filtre</font> &gt; <font "
+"color=\"1E8E44\">Kľúčové slová</font> aby ste vyfiltrovali výsledky "
+"vyhľadávania. Výsledky vyhľadávania ktoré obsahujú slovo z filtra kľúčových "
+"slov sa nedostanú do Vášho počítača. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:351
 msgid ""
@@ -3521,6 +3551,10 @@ msgid ""
 "TCP). Go to {0} &gt; <font color=\"1E8E44\">Advanced</font> &gt; <font "
 "color=\"1E8E44\">Firewall Config</font> to find the port number. "
 msgstr ""
+"Nemôžete sa pripojiť do siete Gnutella? Ak používate firewall, uistite sa, "
+"že máte otvorený port pre LimeWire (oba odchádzajúci aj prichádzajúci, UPD a "
+"TCP). Choďte cez {0} &gt; <font color=\"1E8E44\">Pokročilé</font> &gt; <font "
+"color=\"1E8E44\">Nastavenie firewalul</font> aby ste našli číslo portu. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:352
 #, java-format
@@ -3529,6 +3563,10 @@ msgid ""
 "different folders on your computer automatically. Go to {0} &gt; <font "
 "color=\"1E8E44\">Saving</font> to choose the location for each type of file. "
 msgstr ""
+"Môžete uložiť rôzne typy súborov, ako zvukové súbory, videá alebo obrázky, v "
+"rôznych priečinkoch vo Vašom počítači automaticky. Choďte do {0} &gt; <font "
+"color=\"1E8E44\">Ukladanie</font> a môžete zmeniť cestu pre uloženie každého "
+"typu súboru. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:353
 msgid ""
@@ -3536,6 +3574,9 @@ msgid ""
 "via {0} &gt; <font color=\"1E8E44\">Filters</font> &gt; <font "
 "color=\"1E8E44\">Junk</font>. "
 msgstr ""
+"Môžete nastaviť Spamový filter LimeWire tak aby blokoval viac výsledkov; "
+"toto a ďalšie nastavenia môžete uskutočniť cez {0} &gt; <font "
+"color=\"1E8E44\">Filtre</font> &gt; <font color=\"1E8E44\">Spam</font>. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:354
 #, java-format
@@ -3544,28 +3585,37 @@ msgid ""
 "to {0} &gt; <font color=\"1E8E44\">Updates</font> to get notified of beta "
 "releases. "
 msgstr ""
+"Chcete vyskúšať možnosti novej verzie programu hneď ako vyjde? Choďte do {0} "
+"&gt; <font color=\"1E8E44\">Aktualizácie</font> aby ste boli informovaní o "
+"beta vydaniach. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:364
 msgid "<font color=\"1E8E44\">Preferences</font>"
-msgstr ""
+msgstr "<font color=\"1E8E44\">Nastavenia</font>"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:365
 msgid ""
 "<font color=\"1E8E44\">Tools</font> &gt; <font "
 "color=\"1E8E44\">Options</font>"
 msgstr ""
+"<font color=\"1E8E44\">Nástroje</font> &gt; <font "
+"color=\"1E8E44\">Možnosti</font>"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:369
 msgid ""
 "<font color=\"1E8E44\">LimeWire</font> &gt; <font color=\"1E8E44\">About "
 "LimeWire</font>"
 msgstr ""
+"<font color=\"1E8E44\">LimeWire</font> &gt; <font color=\"1E8E44\">O "
+"LimeWire</font>"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:370
 msgid ""
 "<font color=\"1E8E44\">Help</font> &gt; <font color=\"1E8E44\">About "
 "LimeWire</font>"
 msgstr ""
+"<font color=\"1E8E44\">Pomoc</font> &gt; <font color=\"1E8E44\">O "
+"LimeWire</font>"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:383
 msgid ""
@@ -3814,25 +3864,17 @@ msgstr ""
 "si najnovšiu oficiálnu veziu programu LimeWire.</html>"
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:34
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:104
 msgid "Lookup File with Bitzi"
 msgstr "Vyhľadať súbor pomocou Bitzi"
 
-#: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:34
+#: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:32
 msgid "Copy Magnet Links to Clipboard"
 msgstr "Kopírovať magnet linky do schránky"
 
-#: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:36
+#: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:34
 msgid "Copy the Magnet Links of the Selected Files to the Clipboard"
 msgstr "Skopíruj Magnet linky označených súborov do schránky"
-
-#: gui/com/limegroup/gnutella/gui/actions/CopyMagnetLinkToClipboardAction.java:73
-msgid ""
-"One or more of the created magnet links may not be accessible since their "
-"hosts are firewalled."
-msgstr ""
-"Jeden alebo viac vytvorených magnet linkov nemusia byť prístupné, pretože "
-"hosty sú za firewallom."
 
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:48
 msgid "C&onnect"
@@ -3897,13 +3939,13 @@ msgstr "&Koniec"
 msgid "Close the Program"
 msgstr "Ukončiť program"
 
-#: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:23
+#: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:27
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:823
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1228
 msgid "Launch"
 msgstr "Spustiť"
 
-#: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:25
+#: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:29
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1230
 msgid "Launch Selected Files"
 msgstr "Spustiť vybrané súbory"
@@ -3920,7 +3962,7 @@ msgstr "Ukáž mojich {0} zdieľaných súborov"
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:774
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:554
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:559
 #, java-format
 msgid "Search for Keywords: {0}"
 msgstr "Hľadať podľa kľúčových slov: {0}"
@@ -4031,8 +4073,8 @@ msgstr "Chat správa sa nemôže odoslať {0} ."
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:231
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:936
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:43
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:96
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:102
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:44
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:53
 msgid "Browse Host"
@@ -5067,7 +5109,7 @@ msgstr "Vyhľadávanie v zdieľaných súboroch:"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchPanel.java:73
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:297
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:563
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:575
 #: gui/com/limegroup/gnutella/gui/tabs/SearchDownloadTab.java:41
 msgid "Search"
 msgstr "Hľadať"
@@ -5518,15 +5560,15 @@ msgstr "P&oužiť pôvodné"
 msgid "Use your default skin"
 msgstr "Použiť vasu predvolenú tému"
 
-#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:27
+#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:31
 msgid "&Tools"
 msgstr "&Nástroje"
 
-#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:39
+#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:43
 msgid "&Options"
 msgstr "&Voľby"
 
-#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:40
+#: gui/com/limegroup/gnutella/gui/menu/ToolsMenu.java:44
 msgid "Display the Options Screen"
 msgstr "Zobraziť okno Voľby"
 
@@ -5751,11 +5793,11 @@ msgid "Content"
 msgstr "Obsah"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:392
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:315
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:489
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:591
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:613
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:320
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:494
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:596
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:618
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:110
 msgid "Junk"
 msgstr "Odpad"
 
@@ -7242,35 +7284,39 @@ msgstr ""
 "Personalizovaná technická podpora\n"
 "Aktualizácie na šesť mesiacov zdarma"
 
+#: gui/com/limegroup/gnutella/gui/search/PromotionSearchResult.java:183
+msgid "View in Browser..."
+msgstr "Zobraziť v prehliadači..."
+
 #. mark 'em red
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:313
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:475
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:610
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:318
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:480
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:615
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:112
 msgid "Not Junk"
 msgstr "Nie je Odpad"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:316
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:490
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:592
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:614
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:321
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:495
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:597
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:619
 msgid "Mark selected search results as Junk"
 msgstr "Označiť vybrané výsledky hľadania ako Odpad"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:476
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:611
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:481
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:616
 msgid "Mark selected search results as Not Junk"
 msgstr "Označiť vybrané výsledky hľadanie ako Nie je Odpad"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:538
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:543
 msgid "Search More"
 msgstr "Hľadať ďalej"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:697
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:702
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr "Chcete zakázať vyhľadávanie zo servera"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1043
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1048
 msgid "More Info..."
 msgstr "Viac informácií..."
 
@@ -7299,12 +7345,12 @@ msgid "Search for Program Files, Including exe, zip, gz, and More"
 msgstr "Hľadať programy, vrátane exe, zip, gz a ďalšie"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:42
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:85
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:88
 msgid "Download"
 msgstr "Stiahnuť"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:44
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:89
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:92
 msgid "Stop Search"
 msgstr "Ukončiť vyhľadávanie"
 
@@ -7324,20 +7370,20 @@ msgstr "Zastaviť hľadanie na vybranej karte"
 msgid "New"
 msgstr "Nové"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:172
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:184
 msgid "Keyword"
 msgstr "Kľúčové slovo"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:176
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:355
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:188
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:367
 msgid "Direct Connect"
 msgstr "Priame pripojenie"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:329
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:341
 msgid "Got Friends?"
 msgstr "Máte serverových priateľov?"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:333
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:345
 msgid ""
 "Enter the IP address and port number (i.e. ip:port) of a friend you'd like "
 "to connect to, click 'Direct Connect', and LimeWire will try to browse that "
@@ -7347,11 +7393,11 @@ msgstr ""
 "spojiť, kliknite na \"Priame pripojenie\" a LimeWire sa pokúsi prehliadať "
 "užívateľové zdieľané súbory."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:370
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:382
 msgid "When your friends want to connect to you, they should enter"
 msgstr "Ak sa chcú pripojiť priatelia k vášmu počítaču, mali by zadať"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:375
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:387
 msgid ""
 "Your computer is behind a firewall or router and cannot receive direct "
 "connections."
@@ -7359,15 +7405,15 @@ msgstr ""
 "Váš počítač je chránený firewallom alebo routerom a nemôže získať priame "
 "pripojenie."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:389
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:401
 msgid "Don't Know"
 msgstr "Nie je známe"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:393
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:405
 msgid "What To Look For?"
 msgstr "Čo chcete hľadať?"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:397
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:409
 msgid ""
 "A \"What's New\" search will search for files that have been recently added "
 "to the network."
@@ -7375,63 +7421,63 @@ msgstr ""
 "Vyhľadávanie \"Čo je nové\" bude hľadať súbory, ktoré sú ako najnovšie "
 "pridané do siete"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:408
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:420
 msgid "Current Search:"
 msgstr "Prebiehajúce hľadanie"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:428
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:440
 msgid "Hide Adult Content"
 msgstr "Skryť erotický obsah"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:538
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:550
 msgid "Filename"
 msgstr "Názov súboru"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:565
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:577
 msgid "Search the Network for the Given Words"
 msgstr "Prehľadať sieť na zvolené slová"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:660
+#: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:679
 msgid "The address format is incorrect, please use host:port."
 msgstr "Formát adresy je nesprávny, použite prosím host:port."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:87
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:90
 msgid "Close Search"
 msgstr "Ukončiť hľadanie"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:94
 msgid "Launch Action"
 msgstr "Akcia spustiť"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:98
 msgid "Chat With Host"
 msgstr "Chat s hostiteľom servera"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:100
 msgid "Repeat Search"
 msgstr "Zopakovať hľadanie"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:106
 msgid "Block Hosts"
 msgstr "Blokovať server"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:108
 msgid "Mark As"
 msgstr "Označiť ako"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:114
 msgid "Get More Results"
 msgstr "Získať viac výsledkov"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:145
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:142
 msgid "Loading Search Window..."
 msgstr "Načítavam okno vyhľadávania..."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:343
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:340
 msgid "Firewalled Host"
 msgstr "Host je za firewallom"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:435
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:453
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
 "network."
@@ -7439,22 +7485,22 @@ msgstr ""
 "Vaše vyhľadávanie musí mať aspoň tri znaky, aby sa zbytočne prehľadávaním "
 "nezahltila sieť."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:440
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:458
 msgid ""
 "Your search is too long. Please make your search smaller and try again."
 msgstr ""
 "Vaše vyhľadávanie je príliš dlhé. Skráťte prosím vaše hľadanie a skúste "
 "znova."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:443
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:447
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:461
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:465
 msgid ""
 "Your search is too specific. Please make your search smaller and try again."
 msgstr ""
 "Vaše vyhľadávanie je príliš špecifické. Znížte prosím podmienky vyhľadávania "
 "s skúste znova."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:452
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:470
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
@@ -7462,7 +7508,7 @@ msgstr ""
 "vyhľadávania."
 
 #. if not connected or connecting, show one message.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:461
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:479
 msgid ""
 "You are not connected to the network. To connect, select \"Connect\" from "
 "the \"File\" menu. Your search may not return any results until you connect."
@@ -7472,7 +7518,7 @@ msgstr ""
 "nie ste pripojený."
 
 #. if attempting to connect, show another.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:464
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:482
 msgid ""
 "LimeWire is currently connecting to the network. Your search may not return "
 "many results until you are fully connected to the network."
@@ -7480,7 +7526,7 @@ msgstr ""
 "limeWire sa práve pripája k sieti. Vaše vyhľadávanie nemusí zobraziť veľa "
 "výsledkov, pokiaľ nie ste úplne pripojený k sieti."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:766
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:784
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
@@ -7488,7 +7534,7 @@ msgstr ""
 "Jeden z vybraných súborov je spustiteľný program a môže obsahovať výrusy. "
 "Ste si istý, že ho chcete stiahnuť?"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:470
+#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:475
 #, java-format
 msgid "Could not browse host {0}."
 msgstr "Nedá sa prehliadať server {0} ."
@@ -7514,7 +7560,7 @@ msgstr "Hodnotedie Odpad"
 msgid "Media"
 msgstr "Média"
 
-#: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:136
+#: gui/com/limegroup/gnutella/gui/search/SharedSearchResult.java:137
 #, java-format
 msgid "... {0} more."
 msgstr "... {0} viac."
@@ -7525,10 +7571,6 @@ msgid ""
 msgstr ""
 "Toto je bezpečný výsledok. Žiadne informácie v tomto výsledku neboli "
 "falšované."
-
-#: gui/com/limegroup/gnutella/gui/search/ThirdPartySearchResult.java:183
-msgid "View in Browser..."
-msgstr "Zobraziť v prehliadači..."
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:56
 msgid "Sharing Extensions"
