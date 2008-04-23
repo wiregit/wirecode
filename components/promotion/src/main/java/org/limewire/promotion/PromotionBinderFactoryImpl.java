@@ -40,12 +40,13 @@ public class PromotionBinderFactoryImpl implements PromotionBinderFactory {
         PromotionBinder binder = new PromotionBinder(cipherProvider, keyStore, certificateVerifier);
         try {
             binder.initialize(IOUtils.readFully(in));
+            return binder;
         } catch (PromotionException e) {
             LOG.error(e);           // Don't be verbose
         } catch (IOException e) {   // about this error
             LOG.error(e);           // But note it
         }
-        return binder;
+        return null;
     }    
 
 }

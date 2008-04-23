@@ -55,13 +55,13 @@ public class PromotionBinderRepositoryImpl implements PromotionBinderRepository 
      * @param callback where to drop the binder after retrieval
      */
     private PromotionBinder getBinderForBucketOnNetwork(final long bucketNumber) {
-        if (searchUrl == null) {
-
-        }
         final Set<UserQueryEvent> queries = impressionsCollector.getCollectedImpressions();
         String url = searchUrl;
         url += "?now=" + System.currentTimeMillis() / 1000;
         PromotionBinder result = requestor.request(url, bucketNumber, queries);
+        
+        //TODO: if there was an exception contacting the server, the impressions
+        //      aren't really recorded, but this still erases them.
         
         // Now remove the query events
         impressionsCollector.removeImpressions(queries);
