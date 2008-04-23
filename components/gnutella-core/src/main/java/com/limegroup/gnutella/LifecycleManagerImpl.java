@@ -352,7 +352,11 @@ public class LifecycleManagerImpl implements LifecycleManager {
         }
     };
     
-    private void doStart() {                                
+    /*
+     * Package private only for testing purposes, no methods outside this 
+     * class should try to access this method.
+     */
+    void doStart() {                                
         //if previous instance of LimeWire was shutdown properly
         if(ApplicationSettings.CURRENTLY_RUNNING.getValue()) {
             ApplicationSettings.PREVIOUS_SHUTDOWN_WAS_GRACEFUL.setValue(false);             
@@ -472,10 +476,10 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		downloadManager.get().addListener(magnetDownloaderPushEndpointFinder.get());
 		
 		// initialize DHTPeerLocator and DHTPeerPublishers
-	    LOG.trace("START DHTPeerLocator and DHTPeerPublisher");
-	    dhtPeerLocator.get().init();    
-	    dhtPeerPublisher.get().init();       
-	    LOG.trace("STOP DHTPeerLocator and DHTPeerPublisher");
+		LOG.trace("START DHTPeerLocator and DHTPeerPublisher");
+        dhtPeerLocator.get().init();
+        dhtPeerPublisher.get().init();
+        LOG.trace("STOP DHTPeerLocator and DHTPeerPublisher");
 		
         // Restore any downloads in progress.
         LOG.trace("START DownloadManager.postGuiInit");
