@@ -120,7 +120,7 @@ public class SearchServicesImpl implements SearchServices {
     /**
      * Just aggregates some common code in query() and queryWhatIsNew().
      * 
-     * @param qr 
+     * @param qr the search request 
      * @param type
      * @return The new stats object for this query.
      */

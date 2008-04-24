@@ -67,17 +67,4 @@ public interface SearchResultHandler {
      */
     public void handleQueryReply(final QueryReply qr);
 
-    /**
-     * 
-     * @param guid
-     * @return
-     */
-    SearchResultStats retrieveResultStats(GUID guid);
-    
-    /**
-     * 
-     * @param reply
-     * @return
-     */
-    boolean isWhatIsNew(QueryReply reply);
 }

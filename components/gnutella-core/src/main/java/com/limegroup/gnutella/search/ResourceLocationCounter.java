@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.search;
 
-import java.util.ArrayList;
-
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 
@@ -16,20 +14,9 @@ import com.limegroup.gnutella.URN;
 public class ResourceLocationCounter {
 
     /**
-     * The URN we are tracking.
-     */
-    private final URN _urn;
-    
-    /**
      * Size of the file.
      */
     private final long _fileSize;
-    
-    /**
-     * The list of ranges of available data for the URN. Synchronized 
-     * internally (on itself) in this class as necessary.
-     */
-    //private final ArrayList<IntervalSet> availableIntervals = new ArrayList<IntervalSet>();
     
     /**
      * Temporary solution for our simplistic implementation of counting
@@ -69,13 +56,9 @@ public class ResourceLocationCounter {
      * @param fileSize The size of the file represented by the URN
      */
     public ResourceLocationCounter (URN urn, long fileSize) {
-        if (urn == null)
-            throw new IllegalArgumentException("URN may not be null.");
-        
         if (fileSize < 0)
             throw new IllegalArgumentException("fileSize may not be negative: " + fileSize);
         
-       _urn = urn;
        _fileSize = fileSize;
     }
     
@@ -83,11 +66,10 @@ public class ResourceLocationCounter {
      * When a search result is received the interval set data can be added to
      * the results via addIntervalSet.
      * 
-     * @param The ranges this source has.
+     * @param is The ranges this source has.
      */
     public void addPartialSource (IntervalSet is) {
         synchronized (this) {
-        //  availableIntervals.add( is );
             _psets.add( is );
         }
         
@@ -107,10 +89,12 @@ public class ResourceLocationCounter {
     
     /**
      * 
-     * @param num
+     * @param num the amount by which to increase the display count
      */
     public void updateDisplayLocationCount (int num) {
-       _displayCount += num; 
+        synchronized (this) {
+            _displayCount += num; 
+        }
     }
     
     /**
@@ -127,11 +111,10 @@ public class ResourceLocationCounter {
     
     /**
      * 
-     * @return 
+     * @return the number of locations to display.
      */
     public int getDisplayLocationCount () {
         return _displayCount;
-//      return getLocationCount();
     }
     
     /**
@@ -163,19 +146,6 @@ public class ResourceLocationCounter {
                 _percentAvailable = _wholeCount > 0 ? 100.0f : 0.0f;
                 return;
             }
-            
-            /*
-            IntervalSet iset = new IntervalSet();
-            
-            // take all of the interval sets that we have for
-            // the various URNs and "flatten" them into a single
-            // interval set.
-            //
-            synchronized (availableIntervals) {
-                for (IntervalSet is : availableIntervals)
-                    iset.add( is );
-            }
-            */
             
             // if the flattened interval set contains the entire
             // range for the file, then we have enough sources

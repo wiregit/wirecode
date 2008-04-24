@@ -32,7 +32,7 @@ public interface Response {
 
     /**
      * Sets this' metadata.
-     * @param meta the parsed XML metadata 
+     * @param doc the parsed XML metadata 
      */	
     public void setDocument(LimeXMLDocument doc);
 	   

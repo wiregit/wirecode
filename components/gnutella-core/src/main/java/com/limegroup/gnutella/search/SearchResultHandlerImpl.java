@@ -207,7 +207,7 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         accountAndUpdateDynamicQueriers(qr, data);
     }
 
-    public void countClassC(QueryReply qr, Response r) {
+    void countClassC(QueryReply qr, Response r) {
         synchronized(cncCounter) {
             GUID searchGuid = new GUID(qr.getGUID());
             Map<URN, ClassCNetworks[]> m = cncCounter.get(searchGuid);
@@ -227,7 +227,7 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         }
     }
 
-    public void accountAndUpdateDynamicQueriers(final QueryReply qr, HostData data /*,
+    void accountAndUpdateDynamicQueriers(final QueryReply qr, HostData data /*,
                                                  final int numGoodSentToFrontEnd */ ) {
         LOG.trace("SRH.accountAndUpdateDynamicQueriers(): entered.");
         
@@ -272,7 +272,7 @@ class SearchResultHandlerImpl implements SearchResultHandler {
     }
 
 
-    public GuidCount removeQueryInternal(GUID guid) {
+    GuidCount removeQueryInternal(GUID guid) {
         synchronized (GUID_COUNTS) {
             Iterator<GuidCount> iter = GUID_COUNTS.iterator();
             while (iter.hasNext()) {
@@ -287,7 +287,13 @@ class SearchResultHandlerImpl implements SearchResultHandler {
     }
 
 
-    public GuidCount retrieveResultStats(GUID guid) {
+    /**
+     * 
+     * @param guid
+     * @return the object by which the stats for the specified GUID can be 
+     *         retrieved.
+     */
+    GuidCount retrieveResultStats(GUID guid) {
         synchronized (GUID_COUNTS) {
             for(GuidCount currGC : GUID_COUNTS) {
                 if (currGC.getGUID().equals(guid))
@@ -298,7 +304,7 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         return null;
     }
     
-    public boolean isWhatIsNew(QueryReply reply) {
+    boolean isWhatIsNew(QueryReply reply) {
         GuidCount gc = retrieveResultStats(new GUID(reply.getGUID()));
         return gc != null && gc.getQueryRequest().isWhatIsNewRequest();
     }
@@ -310,7 +316,7 @@ class SearchResultHandlerImpl implements SearchResultHandler {
      * created and the amount of results we've received so far
      * for this query.
      */
-    public boolean isQueryStillValid(GuidCount gc, long now) {
+    boolean isQueryStillValid(GuidCount gc, long now) {
         LOG.trace("entered SearchResultHandler.isQueryStillValid(GuidCount)");
         return (now < (gc.getTime() + QUERY_EXPIRE_TIME)) &&
                (gc.getNumResults() < QueryHandler.ULTRAPEER_RESULTS);
@@ -404,23 +410,6 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         }
         
         /**
-         * Returns the number of locations that have the data for
-         * the given URN. This incorporates partial search results,
-         * where the partial results will be combined together to
-         * form complete results.
-         */
-        /*
-        public int getNumberOfLocations (URN urn) {
-            ResourceLocationCounter rlc = _isets.get(urn);
-            
-            if (rlc == null)
-                return 0;
-            
-            return rlc.getLocationCount();
-        }
-        */
-        
-        /**
          * Increases the "good" search result count by good.
          */
         public void increment(int good) {
@@ -490,11 +479,6 @@ class SearchResultHandlerImpl implements SearchResultHandler {
                 RemoteFileDesc rfd = response.toRemoteFileDesc(data, _remoteFileDescFactory);
                 rfd.setSecureStatus(secureStatus);
                 Set<? extends IpPort> alts = response.getLocations();
-                
-                // TODO
-                //
-                // alts.size() isn't quite the same as what the EndpointHolder will indicate, because
-                // alts.size() does not reflect the filtering out of duplicates.
                 
                 if (skipSpam || !_spamManager.get().isSpam(rfd)) {
                     if (is != null)
