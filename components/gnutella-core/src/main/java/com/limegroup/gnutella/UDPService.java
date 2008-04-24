@@ -256,7 +256,7 @@ public class UDPService implements ReadWriteObserver {
      * @exception IOException Thrown if the DatagramSocket could not be
      * created.
      */
-    DatagramSocket newListeningSocket(int port) throws IOException {
+    public DatagramSocket newListeningSocket(int port) throws IOException {
         try {
             DatagramChannel channel = DatagramChannel.open();
             channel.configureBlocking(false);
@@ -278,7 +278,7 @@ public class UDPService implements ReadWriteObserver {
      *  return value of newListeningSocket(int).  A value of null disables 
      *  UDP sending and receiving.
 	 */
-	void setListeningSocket(DatagramSocket datagramSocket) {
+	public void setListeningSocket(DatagramSocket datagramSocket) {
 	    if(_channel != null) {
 	        try {
 	            _channel.close();
