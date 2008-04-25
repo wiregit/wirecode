@@ -110,7 +110,7 @@ public final class UISettings extends LimeProps {
     
     /** Whether or not to use network-based images, or just always use built-in ones. */
     private static final BooleanSetting USE_NETWORK_IMAGES = FACTORY.createRemoteBooleanSetting("USE_NETWORK_IMAGES",
-            true, "UI.useNetworkImages");
+           true, "UI.useNetworkImages");
     
     /** Collection of info for the 'Getting Started' image. */
     public static final ImageInfo INTRO_IMAGE_INFO = new ImageInfoImpl(true);
@@ -150,11 +150,13 @@ public final class UISettings extends LimeProps {
             proShowPic = FACTORY.createRemoteBooleanSetting(key("PRO_SHOW"), 
                 false, remoteKey("ProShow"));
             canLink = FACTORY.createRemoteBooleanSetting(key("HAS_LINK"), 
-                !intro, remoteKey("CanLink"));
+                true, remoteKey("CanLink"));
             localLink = FACTORY.createRemoteStringSetting(key("LOCAL_LINK"), 
-                "http://www.limewire.com/clientpro?", remoteKey("ClickLinkLocal"));
+                intro ? "" 
+                      : "http://www.limewire.com/inclient/?stage=after&resource=local", remoteKey("ClickLinkLocal"));
             networkLink = FACTORY.createRemoteStringSetting(key("NETWORK_LINK"), 
-                "http://www.limewire.com/clientpro?", remoteKey("ClickLink"));
+                intro ? "http://www.limewire.com/inclient/?stage=intro&resource=network"
+                      : "http://www.limewire.com/inclient/?stage=after&resource=network", remoteKey("ClickLink"));
         }
         
         private String key(String key) {
@@ -162,8 +164,7 @@ public final class UISettings extends LimeProps {
         }
         
         private String remoteKey(String key) {
-                                        // DO NOT CHANGE THIS -- A BUG THAT MUST STAY.
-            return intro ? "UI.intro" + key : " + UI.afterSearch" + key;
+            return intro ? "UI.intro" + key : "UI.afterSearch" + key;
         }
 
         public boolean canLink() {
