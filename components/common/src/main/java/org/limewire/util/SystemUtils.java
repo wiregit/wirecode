@@ -111,8 +111,9 @@ public class SystemUtils {
     	return null;
     }
     
-    /** A list of places that getSpecialPath uses. */
+    /** Identifies a special folder in the platform's shell. */
     public static enum SpecialLocations {
+        HOME("Home"),
         DOCUMENTS("Documents"),
         APPLICATION_DATA("ApplicationData"),
         DESKTOP("Desktop"),
@@ -128,43 +129,83 @@ public class SystemUtils {
         public String getName() {
             return name;
         }
+
+        /**
+         * Parse the text of a SpecialLocations identifier into that identifier.
+         * 
+         * @param name A String name, like "Documents".
+         * @return     The matching SpecialLocations identifier, like SpecialLocations.DOCUMENTS.
+         *             null if no match.
+         */
+        public static SpecialLocations parse(String name) {
+            for (SpecialLocations location : SpecialLocations.values())
+                if (location.getName().equals(name))
+                    return location;
+            return null;
+        }        
     }
 
     /**
-	 * Gets the complete path to a special folder in the platform operating system shell.
-	 * 
-	 * The returned path is specific to the current user, and current to how the user has customized it.
-	 * Here are the given special folder names and example return paths this method currently supports on Windows:
-	 * 
-	 * <pre>
-	 * Documents         C:\Documents and Settings\UserName\My Documents
-	 * ApplicationData   C:\Documents and Settings\UserName\Application Data
-	 * Desktop           C:\Documents and Settings\UserName\Desktop
-	 * StartMenu         C:\Documents and Settings\UserName\Start Menu
-	 * StartMenuPrograms C:\Documents and Settings\UserName\Start Menu\Programs
-	 * StartMenuStartup  C:\Documents and Settings\UserName\Start Menu\Programs\Startup
-	 * </pre>
-	 * 
-	 * @param name The name of a special folder
-	 * @return     The path to that folder, or null on error
-	 */
+     * Gets the absolute path to a special folder in the platform's shell.
+     * 
+     * The returned path is specific to the current user, and current to how the user has customized it.
+     * Here are the given special folder names and example return paths on Windows XP:
+     * 
+     * <pre>
+     * Home              C:\Documents and Settings\UserName
+     * Documents         C:\Documents and Settings\UserName\My Documents
+     * Desktop           C:\Documents and Settings\UserName\Desktop
+     * ApplicationData   C:\Documents and Settings\UserName\Application Data
+     * StartMenu         C:\Documents and Settings\UserName\Start Menu
+     * StartMenuPrograms C:\Documents and Settings\UserName\Start Menu\Programs
+     * StartMenuStartup  C:\Documents and Settings\UserName\Start Menu\Programs\Startup
+     * </pre>
+     * 
+     * Home, Documents, and Desktop work on Windows, Mac, and Linux, the others are Windows-only.
+     * 
+     * On Linux, this method sticks "Documents" and "Desktop" on the end of the user's home directory.
+     * This will always produce a usable folder.
+     * In most distributions, the window manager uses these folders as well.
+     * This method does not guarantee Linux has a window manager configured to those folders, however.
+     * 
+     * @param location A special folder identifier
+     * @return         The path to that folder, or null on not supported
+     */
     public static final String getSpecialPath(SpecialLocations location) {
-    	if (OSUtils.isWindows() && isLoaded) {
-            try {
-        		String path = getSpecialPathNative(location.getName());
-        		if(!path.equals(""))
-                    return path;
-            } catch(UnsatisfiedLinkError error) {
-                // Must catch the error because earlier versions of the dll didn't
-                // include this method, and installs that happen to have not
-                // updated this dll for whatever reason will receive the error
-                // otherwise.
-                LOG.error("Unable to use getSpecialPath!", error);
+        if (OSUtils.isWindows()) {
+            if (location == SpecialLocations.HOME) {
+                return CommonUtils.getUserHomeDir().getPath();
+            } else {
+                if (isLoaded) {
+                    try {
+                        String path = getSpecialPathNative(location.getName());
+                        if (!path.equals(""))
+                            return path;
+                        else
+                            return null;
+                    } catch (UnsatisfiedLinkError error) {
+                        LOG.error("Unable to use getSpecialPath!", error); // Old DLL version doesn't have this method
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
             }
-    	}
-    	return null;
-    }    
-
+        } else if (OSUtils.isPOSIX()) { // Stick "Documents" and "Desktop" on the user's Mac or Linux home directory
+            if (location == SpecialLocations.HOME) {
+                return CommonUtils.getUserHomeDir().getPath();
+            } else if (location == SpecialLocations.DOCUMENTS) {
+                return (new File(CommonUtils.getUserHomeDir(), location.getName())).getPath();
+            } else if (location == SpecialLocations.DESKTOP) {
+                return (new File(CommonUtils.getUserHomeDir(), location.getName())).getPath();
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+    
     /**
      * Changes the icon of a window.
      * Puts the given icon in the title bar, task bar, and Alt+Tab box.

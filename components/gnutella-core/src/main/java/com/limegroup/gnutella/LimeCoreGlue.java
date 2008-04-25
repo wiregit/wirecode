@@ -38,7 +38,7 @@ public class LimeCoreGlue {
      * @param userSettingsDir the preferred directory for user settings
      */
     public static void preinstall() throws InstallFailedException {
-        preinstall(LimeWireUtils.getRequestedUserSettingsLocation());
+        preinstall(null);
     }
     
     /**
@@ -50,6 +50,9 @@ public class LimeCoreGlue {
         // Only preinstall once
         if(!preinstalled.compareAndSet(false, true))
             return;
+        // Only get the settings location once
+        if (userSettingsDir == null)
+            userSettingsDir = LimeWireUtils.getRequestedUserSettingsLocation();
         
         // This looks a lot more complicated than it really is.
         // The excess try/catch blocks are just to make debugging easier,

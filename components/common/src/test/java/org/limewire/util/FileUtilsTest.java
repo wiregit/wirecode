@@ -2,6 +2,7 @@ package org.limewire.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 
 import junit.framework.Test;
 
@@ -301,4 +302,187 @@ public final class FileUtilsTest extends BaseTestCase {
         }
     }
 
+    public void testReadAndWriteProperties() throws Exception {
+        File path = null;
+        try {
+            
+            // clean up beforehand
+            path = new File("test.props");
+            if (path.exists())
+                path.delete();
+            
+            // make some properties
+            Properties p = new Properties();
+            p.setProperty("name1", "value1");
+            p.setProperty("name2", "value2");
+            p.setProperty("name3", "value3");
+            
+            // write them to disk
+            FileUtils.writeProperties(path, p);
+            
+            // read them from disk
+            Properties p2 = FileUtils.readProperties(path);
+            
+            // confirm that didn't change them
+            assertTrue(p.equals(p2));
+
+        } finally {
+            
+            // clean it up
+            if (path != null)
+                path.delete();
+        }
+    }
+    
+    public void testResolveSpecialPath() throws Exception {
+        File expected, actual;
+
+        // current working directory
+        expected = (new File("")).getCanonicalFile();
+        actual = FileUtils.resolveSpecialPath("");
+        assertEquals(expected, actual);
+
+        // current working directory, with subfolders
+        expected = (new File("folder")).getCanonicalFile();
+        actual = FileUtils.resolveSpecialPath("folder");
+        assertEquals(expected, actual);
+        expected = (new File("folder/subfolder")).getCanonicalFile();
+        actual = FileUtils.resolveSpecialPath("folder/subfolder");
+        assertEquals(expected, actual);
+        
+        // moving up
+        expected = (new File("..")).getCanonicalFile();
+        actual = FileUtils.resolveSpecialPath("..");
+        assertEquals(expected, actual);
+        expected = (new File("../folder")).getCanonicalFile();
+        actual = FileUtils.resolveSpecialPath("../folder");
+        assertEquals(expected, actual);
+        expected = (new File("../folder/subfolder")).getCanonicalFile();
+        actual = FileUtils.resolveSpecialPath("../folder/subfolder");
+        assertEquals(expected, actual);
+        
+        // user's home directory
+        expected = (new File(System.getProperty("user.home")));
+        actual = FileUtils.resolveSpecialPath("HOME>");
+        assertEquals(expected, actual);
+        expected = (new File(System.getProperty("user.home"), "folder"));
+        actual = FileUtils.resolveSpecialPath("HOME>folder");
+        assertEquals(expected, actual);
+        expected = (new File(System.getProperty("user.home"), "folder/subfolder"));
+        actual = FileUtils.resolveSpecialPath("HOME>folder/subfolder");
+        assertEquals(expected, actual);
+        
+        // platform shell documents directory
+        expected = (new File(System.getProperty("user.home"), "Documents"));
+        actual = FileUtils.resolveSpecialPath("DOCUMENTS>");
+        assertEquals(expected, actual);
+        expected = (new File(System.getProperty("user.home"), "Documents/folder"));
+        actual = FileUtils.resolveSpecialPath("DOCUMENTS>folder");
+        assertEquals(expected, actual);
+        expected = (new File(System.getProperty("user.home"), "Documents/folder/subfolder"));
+        actual = FileUtils.resolveSpecialPath("DOCUMENTS>folder/subfolder");
+        assertEquals(expected, actual);
+        
+        // platform shell desktop directory
+        expected = (new File(System.getProperty("user.home"), "Desktop"));
+        actual = FileUtils.resolveSpecialPath("DESKTOP>");
+        assertEquals(expected, actual);
+        expected = (new File(System.getProperty("user.home"), "Desktop/folder"));
+        actual = FileUtils.resolveSpecialPath("DESKTOP>folder");
+        assertEquals(expected, actual);
+        expected = (new File(System.getProperty("user.home"), "Desktop/folder/subfolder"));
+        actual = FileUtils.resolveSpecialPath("DESKTOP>folder/subfolder");
+        assertEquals(expected, actual);
+    }
+    
+    public void testMakeFolder() throws Exception {
+        File path = null;
+        try {
+            
+            // clean up beforehand
+            path = new File("testfolder");
+            if (path.isDirectory())
+                path.delete();
+            
+            // make a folder that isn't there
+            FileUtils.makeFolder(path);
+            
+            // confirm it's there now
+            assertTrue(path.isDirectory());
+            
+            // use the same method to check that it's there
+            FileUtils.makeFolder(path);
+            
+        } finally {
+            
+            // clean it up
+            if (path != null)
+                path.delete();
+        }
+    }
+    
+    public void testCantMakeFolder() throws Exception {
+        File path = null;
+        try {
+            
+            // write a little properties file
+            path = new File("testfile.props");
+            Properties p = new Properties();
+            p.put("hello", "you");
+            FileUtils.writeProperties(path, p);
+            
+            // we shouldn't be able to make a folder there
+            try {
+                FileUtils.makeFolder(path);
+                fail("expected exception");
+            } catch (IOException e) {}
+
+        } finally {
+            
+            // clean it up
+            if (path != null)
+                path.delete();
+        }
+    }
+    
+    public void testCopyDirectory() throws Exception {
+        File folder = new File("testfolder");
+        File file = new File("testfolder/test.props");
+        File subfolder = new File("testfolder/subfolder");
+        File destinationFolder = new File("testdestination");
+        File destinationFile = new File("testdestination/test.props");
+        File destinationSubfolder = new File("testdestination/subfolder");
+        try {
+            
+            // clean up beforehand
+            copyDirectoryClean();
+            
+            // make a folder of files
+            folder.mkdir();
+            file.createNewFile();
+            subfolder.mkdir();
+            
+            // copy it to a new location
+            FileUtils.copyDirectory(folder, destinationFolder);
+            
+            // confirm its there
+            assertTrue(destinationFolder.isDirectory());
+            assertTrue(destinationFile.exists());
+            assertTrue(destinationSubfolder.isDirectory());
+            
+        } finally {
+            
+            // clean it up
+            copyDirectoryClean();
+        }
+    }
+    
+    private void copyDirectoryClean() throws Exception {
+        (new File("testfolder/test.props")).delete();
+        (new File("testfolder/subfolder")).delete();
+        (new File("testfolder")).delete();
+        (new File("testdestination/test.props")).delete();
+        (new File("testdestination/subfolder")).delete();
+        (new File("testdestination")).delete();
+    }
 }

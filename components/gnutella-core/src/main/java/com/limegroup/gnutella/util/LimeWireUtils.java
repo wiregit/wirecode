@@ -338,6 +338,21 @@ public final class LimeWireUtils {
      * Returns the location where the user settings directory should be placed.
      */
     public static File getRequestedUserSettingsLocation() {
+
+        // Look for runtime settings for Portable LimeWire
+        Portable portable = new PortableImpl(); // This only gets called once as the program starts
+        File portableLocation = null;
+        try {
+            if (!portable.isPortable())                      // No settings
+                portableLocation = null;
+            else if (portable.getSettingsLocation() != null) // Good settings
+                portableLocation = portable.getSettingsLocation();
+            else                                             // Bad settings
+                portableLocation = PortableImpl.getDefaultSettingsLocation();
+        } catch (IOException e) {} // Error trying to get default settings
+        if (portableLocation != null)
+            return portableLocation;
+
         // LOGIC:
         
         // On all platforms other than Windows or OSX,

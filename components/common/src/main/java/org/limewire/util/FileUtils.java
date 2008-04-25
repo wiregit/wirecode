@@ -18,11 +18,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.IOUtils;
+import org.limewire.util.SystemUtils.SpecialLocations;
 
 
 /**
@@ -777,4 +780,118 @@ public class FileUtils {
         return null;
     }
 
+    /**
+     * Opens the file and path and parses its contents into a Properties object.
+     * @throws IOException path not found or any error
+     */
+    public static Properties readProperties(File path) throws IOException {
+        InputStream stream = null;
+        Properties properties = new Properties();
+        try {
+            stream = new BufferedInputStream(new FileInputStream(path));
+            properties.load(stream);
+        } finally {
+            IOUtils.close(stream);
+        }
+        return properties;
+    }
+
+    /** Writes properties to a file at path. */
+    public static void writeProperties(File path, Properties properties) throws IOException {
+        OutputStream stream = null;
+        try {
+            stream = new BufferedOutputStream(new FileOutputStream(path));
+            properties.store(stream, "");
+        } finally {
+            IOUtils.close(stream);
+        }
+    }
+
+    /**
+     * Confirms path is to a folder on the disk, making folders as needed.
+     * @throw IOException it's not
+     */
+    public static void makeFolder(File path) throws IOException {
+        if (path.isDirectory())
+            return; // It's already a folder
+        if (!path.mkdirs())
+            throw new IOException("error from File.mkdirs()"); // Turn returning false into an exception
+    }
+
+    /**
+     * Resolves the text of a special path into an absolute path specific to where
+     * the program is running now. Special paths can be complete or relative,
+     * step upwards, and start with a special folder tag. Here are some examples
+     * on Windows XP:
+     * 
+     * <pre>
+     * Running at:                C:\Program Files\LimeWire\LimeWire.jar
+     * 
+     * Special Path               Return File
+     * -------------------------  --------------------------
+     * C:\Folder\Subfolder        C:\Folder\Subfolder
+     * Folder Here                C:\Program Files\LimeWire\Folder Here
+     * ..\One Up                  C:\Program Files\One Up
+     * Desktop&gt;                   C:\Documents and Settings\User Name\Desktop
+     * Documents&gt;In My Documents  C:\Documents and Settings\User Name\My Documents\In My Documents
+     * </pre>
+     * 
+     * @throws IOException on error
+     */
+    public static File resolveSpecialPath(String path) throws IOException {
+        if (path == null)
+            throw new IOException("no path");
+
+        // the given path contains a ">", parse for the special folder tag before it
+        int i = path.indexOf(">");
+        if (i != -1) {
+            String tag = path.substring(0, i);
+            SpecialLocations location = SpecialLocations.parse(tag);
+            if (location == null)
+                throw new IOException("unknown tag");
+            String special = SystemUtils.getSpecialPath(location);
+            if (special == null)
+                throw new IOException("unable to get path");
+            path = path.substring(i + 1);
+            return (new File(special, path)).getAbsoluteFile();
+        }
+
+        // no special tag, just turn a relative path absolute
+        return getCanonicalFile(new File(path));
+    }
+
+    /**
+     * Copies all the files and folders in sourceDirectory to
+     * destinationDirectory.
+     * 
+     * @param  sourceDirectory      The source directory to copy, must exist
+     * @param  destinationDirectory The destination path, must not exist
+     * @throws IOException          An error prevented copying the whole directory
+     */
+    public static void copyDirectory(File sourceDirectory, File destinationDirectory) throws IOException {
+        if (!sourceDirectory.isDirectory())
+            throw new IOException("source directory not found");
+        if (destinationDirectory.exists())
+            throw new IOException("destination directory already exists");
+        makeFolder(destinationDirectory);
+
+        // Loop for each name in the source directory, like "file.ext" and "subfolder name"
+        String[] contents = sourceDirectory.list();
+        File source, destination;
+        for (String name : contents) {
+            
+            // Make File objects with complete paths for this file or subfolder
+            source = new File(sourceDirectory, name);
+            destination = new File(destinationDirectory, name);
+
+            // Copy it across
+            if (source.isDirectory()) {
+                // Call this same method to copy the subfolder and its contents
+                copyDirectory(source, destination);
+            } else {
+                if (!copy(source, destination))
+                    throw new IOException("unable to copy file");
+            }
+        }
+    }
 }
