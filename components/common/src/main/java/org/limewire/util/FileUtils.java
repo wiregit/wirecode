@@ -24,7 +24,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.IOUtils;
 import org.limewire.util.SystemUtils.SpecialLocations;
 
 
@@ -791,7 +790,7 @@ public class FileUtils {
             stream = new BufferedInputStream(new FileInputStream(path));
             properties.load(stream);
         } finally {
-            IOUtils.close(stream);
+            FileUtils.close(stream);
         }
         return properties;
     }
@@ -803,7 +802,7 @@ public class FileUtils {
             stream = new BufferedOutputStream(new FileOutputStream(path));
             properties.store(stream, "");
         } finally {
-            IOUtils.close(stream);
+            FileUtils.close(stream);
         }
     }
 
