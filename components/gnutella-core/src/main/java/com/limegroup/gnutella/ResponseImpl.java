@@ -103,10 +103,8 @@ class ResponseImpl implements Response {
      * @param doc the <tt>LimeXMLDocument</tt> instance associated with
      *  the file
      * @param alternateLocations Other hosts with this file 
-     * @param creationTime TODO
      * @param extensions The raw unparsed extension bytes.
      * @param ranges Ranges of data to be represented by this response
-     * @param verified TODO
      */
     public ResponseImpl(long index, long size, String name,
                      int incomingNameByteArraySize, Set<? extends URN> urns, 

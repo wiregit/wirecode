@@ -131,7 +131,6 @@ public class HostDataImpl implements HostData {
      * 
      * @param reply the <tt>QueryReply</tt> instance from which host data
      *        should be extracted.
-     * @param networkManager TODO
      */
     protected HostDataImpl(QueryReply reply, NetworkManager networkManager) {
         CLIENT_GUID = reply.getClientGUID();
