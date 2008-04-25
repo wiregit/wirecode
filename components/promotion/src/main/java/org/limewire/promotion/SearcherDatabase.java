@@ -80,6 +80,9 @@ public interface SearcherDatabase {
         Date getDate();
     }
     
+    /** Initializes this class and any required resources. */
+    void init() throws InitializeException;
+    
     /**
      * Shuts down and releases any resources.
      */

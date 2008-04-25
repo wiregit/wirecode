@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import org.limewire.promotion.InitializeException;
 import org.limewire.promotion.PromotionBinderRepository;
 import org.limewire.promotion.PromotionSearcher;
 import org.limewire.promotion.PromotionServices;
@@ -25,14 +26,20 @@ final class PromotionServicesImpl implements PromotionServices {
     }
 
     public void init() {
-        promotionBinderRepository.init(
-                    ThirdPartySearchResultsSettings.SEARCH_URL.getValue(),
-                    ThirdPartySearchResultsSettings.BUCKET_ID_MODULUS.getValue()
-                );
-        promotionSearcher.init(
-                    ThirdPartySearchResultsSettings.MAX_NUMBER_OF_SEARCH_RESULTS.getValue()
-                );
-        isRunning = true;
+        try {
+            promotionBinderRepository.init(
+                        ThirdPartySearchResultsSettings.SEARCH_URL.getValue(),
+                        ThirdPartySearchResultsSettings.BUCKET_ID_MODULUS.getValue()
+                    );
+            
+            promotionSearcher.init(
+                        ThirdPartySearchResultsSettings.MAX_NUMBER_OF_SEARCH_RESULTS.getValue()
+                    );
+
+            isRunning = true;
+        } catch(InitializeException initializeException) {
+            shutDown();
+        }
     }
 
     public boolean isRunning() {

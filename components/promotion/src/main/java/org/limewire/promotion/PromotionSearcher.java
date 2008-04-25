@@ -30,7 +30,7 @@ public interface PromotionSearcher {
      * @param maxNumberOfResults the maximum number of results to show in the
      *        client.
      */
-    void init(int maxNumberOfResults);
+    void init(int maxNumberOfResults) throws InitializeException;
 
     /**
      * The recipient of promotion search results. Implementations should be able

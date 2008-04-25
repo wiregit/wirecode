@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hsqldb.jdbcDriver;
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.GGEP;
@@ -27,7 +25,6 @@ import com.google.inject.Singleton;
 
 @Singleton
 public class SearcherDatabaseImpl implements SearcherDatabase {
-    private final static Log LOG = LogFactory.getLog(SearcherDatabaseImpl.class);
 
     private Connection connection;
 
@@ -46,27 +43,21 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
 
     @Inject
     public SearcherDatabaseImpl(final KeywordUtil keywordUtil, final CipherProvider cipherProvider,
-            final KeyStoreProvider keyStoreProvider, final CertificateVerifier certificateVerifier, PromotionServices services) {
+            final KeyStoreProvider keyStoreProvider, final CertificateVerifier certificateVerifier) {
         this.keywordUtil = keywordUtil;
         this.cipherProvider = cipherProvider;
         this.keyStoreProvider = keyStoreProvider;
         this.certificateVerifier = certificateVerifier;
-        new jdbcDriver();
-        
-        // This will only throw an exception if the connection can't be made, so createDBIfNeeded won't
-        // be called if it fails, and the promotion services will be turned off, too, if it fails
-        // So, if the contract of not using the promotion services, as stated in the isRunning method
-        // of PromotionServices is honored, there is no need to check for null when doing any of
-        // the database operations, because they should never be called
+    }
+    
+    public void init() throws InitializeException {
         try {
-            connection = DriverManager.getConnection("jdbc:hsqldb:file:" + getDBLocation(), "sa",
-                    "");
+            new jdbcDriver();        
+            connection = DriverManager.getConnection("jdbc:hsqldb:file:" + getDBLocation(), "sa", "");
             createDBIfNeeded();
-        } catch (SQLException ex) {
-            LOG.error("Unable to get connection to in-memory db.", ex);
-            services.shutDown();
+        } catch(SQLException sqlException) {
+            throw new InitializeException(sqlException);
         }
-        
     }
     
     public void shutDown() {
