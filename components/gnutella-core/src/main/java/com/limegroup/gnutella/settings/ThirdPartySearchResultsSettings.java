@@ -34,7 +34,7 @@ public final class ThirdPartySearchResultsSettings extends LimeProps {
      * The mod we take with the bucket ID. 
      */    
     public static final IntSetting BUCKET_ID_MODULUS =
-        FACTORY.createRemoteIntSetting("BUCKET_ID_MODULUS", 200, "ThirdPartySearchResultsSettings.bucketIdModulous", 0, Integer.MAX_VALUE); 
+        FACTORY.createRemoteIntSetting("BUCKET_ID_MODULUS", 4000, "ThirdPartySearchResultsSettings.bucketIdModulous", 0, Integer.MAX_VALUE); 
     
     /**
      * The max number of search results.
