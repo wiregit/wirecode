@@ -10,7 +10,7 @@ import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -98,7 +98,7 @@ public final class LimeACKVendorMessage extends AbstractVendorMessage {
      *  wants for a given query (as specified by the guid of this message).
      */
     public int getNumResults() {
-        return ByteOrder.ubyte2int(getPayload()[0]);
+        return ByteUtils.ubyte2int(getPayload()[0]);
     }
     
     /**
@@ -129,7 +129,7 @@ public final class LimeACKVendorMessage extends AbstractVendorMessage {
                                                numResults);
         byte[] payload = new byte[1];
         byte[] bytes = new byte[2];
-        ByteOrder.short2leb((short) numResults, bytes, 0);
+        ByteUtils.short2leb((short) numResults, bytes, 0);
         payload[0] = bytes[0];
         return payload;
     }
@@ -140,7 +140,7 @@ public final class LimeACKVendorMessage extends AbstractVendorMessage {
                                                numResults);
         byte[] bytes = new byte[2];
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        ByteOrder.short2leb((short) numResults, bytes, 0);
+        ByteUtils.short2leb((short) numResults, bytes, 0);
         out.write(bytes[0]); 
 
         GGEP ggep = new GGEP();

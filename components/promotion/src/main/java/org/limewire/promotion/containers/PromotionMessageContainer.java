@@ -17,7 +17,7 @@ import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
 import org.limewire.promotion.LatitudeLongitude;
 import org.limewire.promotion.exceptions.PromotionException;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.StringUtils;
 
 /**
@@ -78,13 +78,13 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
      */
     public void setUniqueID(long id) {
         byte[] header = getHeader();
-        ByteOrder.long2beb(id, header, 0);
+        ByteUtils.long2beb(id, header, 0);
         setHeader(header);
     }
     
     public long getUniqueID() {
         byte[] header = getHeader();
-        return ByteOrder.beb2long(header, 0, 8);
+        return ByteUtils.beb2long(header, 0, 8);
     }
 
     /**
@@ -444,8 +444,8 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
         if (end == null)
             end = new Date(MAX_DATE_IN_SECONDS * 1000);
         byte[] range = new byte[8];
-        byte[] startBytes = ByteOrder.long2bytes(start.getTime() / 1000, 4);
-        byte[] endBytes = ByteOrder.long2bytes(end.getTime() / 1000, 4);
+        byte[] startBytes = ByteUtils.long2bytes(start.getTime() / 1000, 4);
+        byte[] endBytes = ByteUtils.long2bytes(end.getTime() / 1000, 4);
         System.arraycopy(startBytes, 0, range, 0, 4);
         System.arraycopy(endBytes, 0, range, 4, 4);
         payload.put(KEY_DATE_RANGE, range);
@@ -461,7 +461,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
             byte range[] = payload.getBytes(KEY_DATE_RANGE);
             byte start[] = new byte[4];
             System.arraycopy(range, 0, start, 0, 4);
-            long startLong = ByteOrder.beb2long(start, 0, 4);
+            long startLong = ByteUtils.beb2long(start, 0, 4);
             return new Date(startLong * 1000);
         } catch (BadGGEPPropertyException ex) {
             return new Date();
@@ -479,7 +479,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
             byte range[] = payload.getBytes(KEY_DATE_RANGE);
             byte end[] = new byte[4];
             System.arraycopy(range, 4, end, 0, 4);
-            long endLong = ByteOrder.beb2long(end, 0, 4);
+            long endLong = ByteUtils.beb2long(end, 0, 4);
             return new Date(endLong * 1000);
         } catch (BadGGEPPropertyException ex) {
             return new Date(MAX_DATE_IN_SECONDS * 1000);
@@ -645,7 +645,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
          */
         byte getEncodedRadius() {
             long value = (long) (Math.sqrt(radiusInMeters) / 13);
-            return ByteOrder.long2bytes(value - 1, 1)[0];
+            return ByteUtils.long2bytes(value - 1, 1)[0];
         }
 
         /**
@@ -653,7 +653,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
          *         {@link #getEncodedRadius()}.
          */
         static int decodeRadius(byte radiusByte) {
-            long radius = ByteOrder.beb2long(new byte[] { radiusByte }, 0, 1) + 1;
+            long radius = ByteUtils.beb2long(new byte[] { radiusByte }, 0, 1) + 1;
             return (int) Math.pow(13 * radius, 2);
         }
     }

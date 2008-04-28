@@ -8,7 +8,7 @@ import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.GGEP;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.util.DataUtils;
@@ -101,12 +101,12 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
         int payloadSize = STANDARD_PAYLOAD_SIZE + extra.length;
         payload=new byte[payloadSize];
         System.arraycopy(clientGUID, 0, payload, 0, 16);
-        ByteOrder.int2leb((int)index,payload,16); //downcast ok
+        ByteUtils.int2leb((int)index,payload,16); //downcast ok
         payload[20]=ip[0]; //big endian
         payload[21]=ip[1];
         payload[22]=ip[2];
         payload[23]=ip[3];
-        ByteOrder.short2leb((short)port,payload,24); //downcast ok
+        ByteUtils.short2leb((short)port,payload,24); //downcast ok
         System.arraycopy(extra, 0, payload, STANDARD_PAYLOAD_SIZE, extra.length);
         
         updateLength(payloadSize);
@@ -152,7 +152,7 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
      * @see com.limegroup.gnutella.messages.PushRequest#getIndex()
      */
     public long getIndex() {
-        return ByteOrder.uint2long(ByteOrder.leb2int(payload, 16));
+        return ByteUtils.uint2long(ByteUtils.leb2int(payload, 16));
     }
 
     /* (non-Javadoc)
@@ -178,7 +178,7 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
      * @see com.limegroup.gnutella.messages.PushRequest#getPort()
      */
     public int getPort() {
-        return ByteOrder.ushort2int(ByteOrder.leb2short(payload, 24));
+        return ByteUtils.ushort2int(ByteUtils.leb2short(payload, 24));
     }
 
 	@Override

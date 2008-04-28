@@ -6,7 +6,7 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.io.GGEP;
 import org.limewire.util.Base32;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -52,17 +52,17 @@ public class IntervalEncoderTest extends LimeTestCase {
         assertEquals(3,l3.length);
         byte [] tmp = new byte[4];
         System.arraycopy(l3,0,tmp,1,3);
-        int carried = ByteOrder.beb2int(tmp, 0);
+        int carried = ByteUtils.beb2int(tmp, 0);
         assertEquals(15728640,carried);
         
         byte [] l2 = g.get("PR2");
         assertEquals(12, l2.length);
-        assertEquals(257, ByteOrder.beb2short(l2, 0));
-        assertEquals(513, ByteOrder.beb2short(l2, 2));
-        assertEquals(1025, ByteOrder.beb2short(l2, 4));
-        assertEquals(2049, ByteOrder.beb2short(l2, 6));
-        assertEquals(8192, ByteOrder.beb2short(l2, 8));
-        assertEquals(8195, ByteOrder.beb2short(l2, 10));
+        assertEquals(257, ByteUtils.beb2short(l2, 0));
+        assertEquals(513, ByteUtils.beb2short(l2, 2));
+        assertEquals(1025, ByteUtils.beb2short(l2, 4));
+        assertEquals(2049, ByteUtils.beb2short(l2, 6));
+        assertEquals(8192, ByteUtils.beb2short(l2, 8));
+        assertEquals(8195, ByteUtils.beb2short(l2, 10));
         
         byte [] l1 = g.get("PR1");
         assertEquals(7, l1.length);
@@ -92,12 +92,12 @@ public class IntervalEncoderTest extends LimeTestCase {
         
         byte [] l2 = g.get("PR2");
         assertEquals(12, l2.length);
-        assertEquals(257, ByteOrder.beb2short(l2, 0));
-        assertEquals(513, ByteOrder.beb2short(l2, 2));
-        assertEquals(1025, ByteOrder.beb2short(l2, 4));
-        assertEquals(2049, ByteOrder.beb2short(l2, 6));
-        assertEquals(8192, ByteOrder.beb2short(l2, 8));
-        assertEquals(8195, ByteOrder.beb2short(l2, 10));
+        assertEquals(257, ByteUtils.beb2short(l2, 0));
+        assertEquals(513, ByteUtils.beb2short(l2, 2));
+        assertEquals(1025, ByteUtils.beb2short(l2, 4));
+        assertEquals(2049, ByteUtils.beb2short(l2, 6));
+        assertEquals(8192, ByteUtils.beb2short(l2, 8));
+        assertEquals(8195, ByteUtils.beb2short(l2, 10));
         
         byte [] l1 = g.get("PR1");
         assertEquals(7, l1.length);
@@ -124,7 +124,7 @@ public class IntervalEncoderTest extends LimeTestCase {
         
         l2 = g.get("PR2");
         assertEquals(2, l2.length);
-        assertEquals(257, ByteOrder.beb2short(l2, 0));
+        assertEquals(257, ByteUtils.beb2short(l2, 0));
         
         l1 = g.get("PR1");
         assertEquals(7, l1.length);
@@ -140,17 +140,17 @@ public class IntervalEncoderTest extends LimeTestCase {
     public void testDecode() throws Exception {
         // same examples as above test
         byte [] tmp = new byte[4];
-        ByteOrder.int2beb(15728640, tmp, 0);
+        ByteUtils.int2beb(15728640, tmp, 0);
         byte [] l3 = new byte[3];
         System.arraycopy(tmp,1,l3,0,3);
         
         byte [] l2 = new byte[12];
-        ByteOrder.short2beb((short)257, l2, 0);
-        ByteOrder.short2beb((short)513, l2, 2);
-        ByteOrder.short2beb((short)1025, l2, 4);
-        ByteOrder.short2beb((short)2049, l2, 6);
-        ByteOrder.short2beb((short)8192, l2, 8);
-        ByteOrder.short2beb((short)8195, l2, 10);
+        ByteUtils.short2beb((short)257, l2, 0);
+        ByteUtils.short2beb((short)513, l2, 2);
+        ByteUtils.short2beb((short)1025, l2, 4);
+        ByteUtils.short2beb((short)2049, l2, 6);
+        ByteUtils.short2beb((short)8192, l2, 8);
+        ByteUtils.short2beb((short)8195, l2, 10);
         
         byte [] l1 = new byte[7];
         l1[0] = 5;
@@ -190,7 +190,7 @@ public class IntervalEncoderTest extends LimeTestCase {
         
         byte [] b = g.get("PR4");
         assertEquals(4, b.length);
-        assertEquals( (Integer.MAX_VALUE / 2 + Integer.MAX_VALUE / 4 + 1), ByteOrder.beb2int(b, 0));
+        assertEquals( (Integer.MAX_VALUE / 2 + Integer.MAX_VALUE / 4 + 1), ByteUtils.beb2int(b, 0));
         
         IntervalSet decoded = IntervalEncoder.decode(halfTB * 2, g);
         assertEquals(1, decoded.getNumberOfIntervals());

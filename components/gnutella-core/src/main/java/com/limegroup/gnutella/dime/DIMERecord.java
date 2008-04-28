@@ -10,7 +10,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.util.DataUtils;
 
@@ -209,10 +209,10 @@ public class DIMERecord {
             throw new IOException(iae.getMessage());
         }
 
-        int optionsLength = ByteOrder.beb2int(header, 2, 2);
-        int idLength = ByteOrder.beb2int(header, 4, 2);
-        int typeLength = ByteOrder.beb2int(header, 6, 2);
-        int dataLength = ByteOrder.beb2int(header, 8, 4);
+        int optionsLength = ByteUtils.beb2int(header, 2, 2);
+        int idLength = ByteUtils.beb2int(header, 4, 2);
+        int typeLength = ByteUtils.beb2int(header, 6, 2);
+        int dataLength = ByteUtils.beb2int(header, 8, 4);
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("creating dime record." + 
@@ -260,10 +260,10 @@ public class DIMERecord {
         // Write the header.
         out.write(_byte1);
         out.write(_byte2);
-        ByteOrder.int2beb(getOptionsLength(), out, 2);
-        ByteOrder.int2beb(getIdLength(), out, 2);
-        ByteOrder.int2beb(getTypeLength(), out, 2);
-        ByteOrder.int2beb(getDataLength(), out, 4);
+        ByteUtils.int2beb(getOptionsLength(), out, 2);
+        ByteUtils.int2beb(getIdLength(), out, 2);
+        ByteUtils.int2beb(getTypeLength(), out, 2);
+        ByteUtils.int2beb(getDataLength(), out, 4);
         
         // Write out the data.
         writeOptions(out);
@@ -593,7 +593,7 @@ public class DIMERecord {
             }
             offset += 2;
 
-            int valueLength = ByteOrder.beb2int(options, offset, 2);
+            int valueLength = ByteUtils.beb2int(options, offset, 2);
             offset += 2;
 
             if (options.length - offset < valueLength)

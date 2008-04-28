@@ -4,7 +4,7 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Hashtable;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 
 import junit.framework.Test;
@@ -114,8 +114,8 @@ public class GUIDTest extends com.limegroup.gnutella.util.LimeTestCase {
         bytes[9]=(byte)0x17;
         bytes[10]=(byte)0x05;
         g1=new GUID(bytes);
-        short s1=ByteOrder.leb2short(bytes, 4);
-        short s2=ByteOrder.leb2short(bytes, 6);
+        short s1=ByteUtils.leb2short(bytes, 4);
+        short s2=ByteUtils.leb2short(bytes, 6);
         short tag=GUID.tag(s1, s2);
         assertEquals("unexpected s1: " + Integer.toHexString(s1),
             (short)0x0102, s1);
@@ -138,8 +138,8 @@ public class GUIDTest extends com.limegroup.gnutella.util.LimeTestCase {
         bytes[10]=(byte)0x05;
         bytes[13]=(byte)0x2E;
         bytes[14]=(byte)0x05;
-        s1=ByteOrder.leb2short(bytes, 0);
-        s2=ByteOrder.leb2short(bytes, 9);
+        s1=ByteUtils.leb2short(bytes, 0);
+        s2=ByteUtils.leb2short(bytes, 9);
         tag=GUID.tag(s1,s2);
         assertEquals("unexpected s1: " + Integer.toHexString(s1),
             (short)0x0102, s1);
@@ -165,8 +165,8 @@ public class GUIDTest extends com.limegroup.gnutella.util.LimeTestCase {
         bytes[3]=(byte)0x05;
         bytes[13]=(byte)0x2E;
         bytes[14]=(byte)0x05;
-        s1=ByteOrder.leb2short(bytes, 0);
-        s2=ByteOrder.leb2short(bytes, 2);
+        s1=ByteUtils.leb2short(bytes, 0);
+        s2=ByteUtils.leb2short(bytes, 2);
         tag=GUID.tag(s1,s2);
         assertEquals("unexpected s1: " + Integer.toHexString(s1),
             (short)0x0102, s1);
@@ -192,8 +192,8 @@ public class GUIDTest extends com.limegroup.gnutella.util.LimeTestCase {
         bytes[12]=(byte)0x05;
         bytes[13]=(byte)0x2E;
         bytes[14]=(byte)0x05;
-        s1=ByteOrder.leb2short(bytes, 0);
-        s2=ByteOrder.leb2short(bytes, 11);
+        s1=ByteUtils.leb2short(bytes, 0);
+        s2=ByteUtils.leb2short(bytes, 11);
         tag=GUID.tag(s1,s2);
         assertEquals("unexpected s1: " + Integer.toHexString(s1),
             (short)0x0102, s1);
@@ -260,7 +260,7 @@ public class GUIDTest extends com.limegroup.gnutella.util.LimeTestCase {
         byte[] nyuBytes = nyu.getAddress();
         final int port = 17834;
         byte[] portBytes = new byte[2];
-        ByteOrder.short2leb((short) port, portBytes, 0);
+        ByteUtils.short2leb((short) port, portBytes, 0);
 
         // test construction
         byte[] guidBytes = GUID.makeAddressEncodedGuid(nyuBytes, port);

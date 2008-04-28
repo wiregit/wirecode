@@ -9,7 +9,7 @@ import java.util.Set;
 import org.limewire.io.GGEP;
 import org.limewire.io.IOUtils;
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.NameValue;
 
 import junit.framework.Test;
@@ -823,8 +823,8 @@ public class GGEPTest extends BaseTestCase {
             if (i % 255 != 0)
                 assertTrue(after[i] == 0x01);
         assertTrue("after[0] = " + after[0], 
-                   (ByteOrder.ubyte2int(after[0]) == (num+1)) || 
-                   (ByteOrder.ubyte2int(after[0]) == 255)
+                   (ByteUtils.ubyte2int(after[0]) == (num+1)) || 
+                   (ByteUtils.ubyte2int(after[0]) == 255)
                    );
         decoded = GGEP.cobsDecode(after);
         for (int i = 0; i < bytes.length; i++)
@@ -850,7 +850,7 @@ public class GGEPTest extends BaseTestCase {
                 else if ((i == 1) ||
                          ((((i-1) % j) == 0) && (num > i))
                          )
-                    assertGreaterThan(1, ByteOrder.ubyte2int(after[i]));
+                    assertGreaterThan(1, ByteUtils.ubyte2int(after[i]));
                 else
                     assertEquals(1, after[i]);
             }
@@ -877,7 +877,7 @@ public class GGEPTest extends BaseTestCase {
                 if ((i == 0) ||
                     (i % j == 0)
                     )
-                    assertGreaterThan(1, ByteOrder.ubyte2int(after[i]));
+                    assertGreaterThan(1, ByteUtils.ubyte2int(after[i]));
                 else
                     assertEquals(1, after[i]);
             decoded = GGEP.cobsDecode(after);

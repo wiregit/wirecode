@@ -40,7 +40,7 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.statistic.StatsUtils;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.RPNParser;
@@ -489,7 +489,7 @@ public abstract class FileManagerImpl implements FileManager {
      * @see com.limegroup.gnutella.FileManager#getSize()
      */
     public int getSize() {
-		return ByteOrder.long2int(_filesSize); 
+		return ByteUtils.long2int(_filesSize); 
 	}
 
     /* (non-Javadoc)

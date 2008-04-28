@@ -3,7 +3,7 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -83,7 +83,7 @@ public final class ReplyNumberVendorMessage extends AbstractVendorMessage {
             throw new IllegalArgumentException("Number of results too big: " +
                                                numResults);
         byte[] bytes = new byte[2];
-        ByteOrder.short2leb((short) numResults, bytes, 0);
+        ByteUtils.short2leb((short) numResults, bytes, 0);
         bytes[1] = canReceiveUnsolicited ? ReplyNumberVendorMessage.UNSOLICITED : 0x0;
         
         return bytes;
@@ -94,7 +94,7 @@ public final class ReplyNumberVendorMessage extends AbstractVendorMessage {
      *  for a given query (as specified by the guid of this message).
      */
     public int getNumResults() {
-        return ByteOrder.ubyte2int(getPayload()[0]);
+        return ByteUtils.ubyte2int(getPayload()[0]);
     }
     
     public boolean canReceiveUnsolicited() {

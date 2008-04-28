@@ -38,7 +38,7 @@ import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecurityToken;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 import org.limewire.util.TestUtils;
@@ -1007,7 +1007,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
                 InetAddress addr2 = InetAddress.getByAddress(tempAddr);
                 String address = addr2.getHostAddress();
                 
-                int curPort = ByteOrder.leb2int(bytes, inIndex+4, 2);
+                int curPort = ByteUtils.leb2int(bytes, inIndex+4, 2);
                 IpPort ppi2 = 
                     new IpPortImpl(address, curPort);
 
@@ -1391,16 +1391,16 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(1); // # of results
-        ByteOrder.short2leb((short)6346, out); // port
+        ByteUtils.short2leb((short)6346, out); // port
         out.write(IP); // ip
-        ByteOrder.int2leb(1, out);
+        ByteUtils.int2leb(1, out);
         Response r = responseFactory.createResponse(0, 1, "test");
         r.writeToStream(out);
         out.write(new byte[] { 'L', 'I', 'M', 'E' });
         out.write(4); // common payload length
         out.write(0x3C); // flags (control no push) 
         out.write(0x21); // control (yes ggep, flag busy)
-        ByteOrder.short2leb((short)1, out); // xml size
+        ByteUtils.short2leb((short)1, out); // xml size
         out.write(0); // no chat
         
         GGEP ggep = new GGEP(true);
@@ -1539,9 +1539,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         // try a reply with max number of responses
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(limit); // # of results
-        ByteOrder.short2leb((short)6346, out); // port
+        ByteUtils.short2leb((short)6346, out); // port
         out.write(IP); // ip
-        ByteOrder.int2leb(1, out);
+        ByteUtils.int2leb(1, out);
         for (int i = 0; i < limit; i++) 
             responseFactory.createResponse(i, 1, "test"+i).writeToStream(out);
         
@@ -1549,7 +1549,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         out.write(4); // common payload length
         out.write(0x3C); // flags (control no push) 
         out.write(0x21); // control (yes ggep, flag busy)
-        ByteOrder.short2leb((short)1, out); // xml size
+        ByteUtils.short2leb((short)1, out); // xml size
         out.write(0); // no chat
         out.write(0); // null after XML
         out.write(new byte[16]); // clientGUID
@@ -1795,7 +1795,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(1,meParsed[1]);
         assertEquals(1,meParsed[2]);
         assertEquals(1,meParsed[3]);
-        assertEquals(1,ByteOrder.beb2short(meParsed, 4));
+        assertEquals(1,ByteUtils.beb2short(meParsed, 4));
         
         byte[] sourceParsed = parsedGGEP.get("RPS0");
         assertEquals(6, sourceParsed.length);
@@ -1803,7 +1803,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(2,sourceParsed[1]);
         assertEquals(2,sourceParsed[2]);
         assertEquals(2,sourceParsed[3]);
-        assertEquals(2,ByteOrder.beb2short(sourceParsed, 4));
+        assertEquals(2,ByteUtils.beb2short(sourceParsed, 4));
         
         // tll
         assertEquals(unknownGGEP.getTTL(),parsedGGEP.getInt("RPT0"));
@@ -1887,10 +1887,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             assertEquals((byte )3,parsedHop3[i]);
         }
         
-        assertEquals((short)0,ByteOrder.beb2short(parsedHop0,4));
-        assertEquals((short)1,ByteOrder.beb2short(parsedHop1,4));
-        assertEquals((short)2,ByteOrder.beb2short(parsedHop2,4));
-        assertEquals((short)3,ByteOrder.beb2short(parsedHop3,4));
+        assertEquals((short)0,ByteUtils.beb2short(parsedHop0,4));
+        assertEquals((short)1,ByteUtils.beb2short(parsedHop1,4));
+        assertEquals((short)2,ByteUtils.beb2short(parsedHop2,4));
+        assertEquals((short)3,ByteUtils.beb2short(parsedHop3,4));
     }
     
     

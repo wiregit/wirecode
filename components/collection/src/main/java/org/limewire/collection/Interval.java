@@ -2,7 +2,7 @@ package org.limewire.collection;
 
 import java.io.Serializable;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 
 /** 
@@ -69,8 +69,8 @@ class Interval extends Range implements Serializable {
      * @see org.limewire.collection.Range#toBytes(byte[], int)
      */
     public void toBytes(byte [] dest, int offset) {
-        ByteOrder.int2beb(low,dest,offset);
-        ByteOrder.int2beb(high,dest,offset+4);
+        ByteUtils.int2beb(low,dest,offset);
+        ByteUtils.int2beb(high,dest,offset+4);
     }
    
 

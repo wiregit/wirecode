@@ -23,7 +23,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -806,7 +806,7 @@ public class HeadTest extends LimeTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ping.write(baos);
         byte[] out = baos.toByteArray();
-        ByteOrder.short2leb(version, out, 29); // location of the version of a VM
+        ByteUtils.short2leb(version, out, 29); // location of the version of a VM
         HeadPing p2 = (HeadPing)messageFactory.read(new ByteArrayInputStream(out), Network.TCP);
         assertEquals(version, p2.getVersion());
         return p2;

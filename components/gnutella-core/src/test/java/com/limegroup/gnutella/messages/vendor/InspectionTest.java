@@ -24,7 +24,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -318,9 +318,9 @@ public class InspectionTest extends ServerSideTestCase {
         byte [] selectorVersion = new byte[4];
         System.arraycopy(data,27,selectorVersion,0,4);
         //get the selector....
-        int selector = ByteOrder.ushort2int(ByteOrder.leb2short(selectorVersion, 0));
+        int selector = ByteUtils.ushort2int(ByteUtils.leb2short(selectorVersion, 0));
         // get the version....
-        int version = ByteOrder.ushort2int(ByteOrder.leb2short(selectorVersion, 2));
+        int version = ByteUtils.ushort2int(ByteUtils.leb2short(selectorVersion, 2));
         assertEquals(VendorMessage.F_INSPECTION_RESP, selector);
         assertEquals(1, version);
         

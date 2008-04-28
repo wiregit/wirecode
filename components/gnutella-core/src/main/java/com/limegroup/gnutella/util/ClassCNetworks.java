@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 /**
  * Utility class keeps track of masked ip ranges and an associated count.
@@ -74,8 +74,8 @@ public class ClassCNetworks {
         for (Map.Entry<Integer, Integer> entry : top) {
             if (i == number)
                 break;
-            ByteOrder.int2beb(entry.getKey(), ret, i * 8);
-            ByteOrder.int2beb(entry.getValue(), ret, i * 8 + 4);
+            ByteUtils.int2beb(entry.getKey(), ret, i * 8);
+            ByteUtils.int2beb(entry.getValue(), ret, i * 8 + 4);
             i++;
         }
         return ret;

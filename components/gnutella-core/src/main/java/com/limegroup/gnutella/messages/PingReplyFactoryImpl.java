@@ -16,7 +16,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -219,14 +219,14 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
 
         byte[] payload = new byte[length];
         //It's ok if casting port, files, or kbytes turns negative.
-        ByteOrder.short2leb((short) port, payload, 0);
+        ByteUtils.short2leb((short) port, payload, 0);
         //payload stores IP in BIG-ENDIAN
         payload[2] = ipBytes[0];
         payload[3] = ipBytes[1];
         payload[4] = ipBytes[2];
         payload[5] = ipBytes[3];
-        ByteOrder.int2leb((int) files, payload, 6);
-        ByteOrder.int2leb((int) (isUltrapeer ? mark(kbytes) : kbytes), payload,
+        ByteUtils.int2leb((int) files, payload, 6);
+        ByteUtils.int2leb((int) (isUltrapeer ? mark(kbytes) : kbytes), payload,
                 10);
 
         //Encode GGEP block if included.
@@ -259,7 +259,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         if (payload.length < PingReply.STANDARD_PAYLOAD_SIZE) {
             throw new BadPacketException("invalid payload length");
         }
-        int port = ByteOrder.ushort2int(ByteOrder.leb2short(payload, 0));
+        int port = ByteUtils.ushort2int(ByteUtils.leb2short(payload, 0));
         if (!NetworkUtils.isValidPort(port)) {
             throw new BadPacketException("invalid port: " + port);
         }
@@ -410,7 +410,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         byte[] payload = new byte[6];
         System.arraycopy(address.getInetAddress().getAddress(), 0, payload, 0,
                 4);
-        ByteOrder.short2leb((short) address.getPort(), payload, 4);
+        ByteUtils.short2leb((short) address.getPort(), payload, 4);
         ggep.put(GGEPKeys.GGEP_HEADER_IPPORT, payload);
         return ggep;
     }
@@ -499,7 +499,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
         // put version
         int version = dhtManager.get().getVersion().shortValue();
 
-        ByteOrder.short2beb((short) version, payload, 0);
+        ByteUtils.short2beb((short) version, payload, 0);
 
         if (dhtManager.get().isMemberOfDHT()) {
             DHTMode mode = dhtManager.get().getDHTMode();
@@ -533,7 +533,7 @@ public class PingReplyFactoryImpl implements PingReplyFactory {
 
     /** Marks the given kbytes field */
     private long mark(long kbytes) {
-        int x = ByteOrder.long2int(kbytes);
+        int x = ByteUtils.long2int(kbytes);
         //Returns the power of two nearest to x.  TODO3: faster algorithms are
         //possible.  At the least, you can do binary search.  I imagine some bit
         //operations can be done as well.  This brute-force approach was

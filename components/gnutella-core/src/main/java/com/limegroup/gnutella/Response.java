@@ -13,7 +13,7 @@ import java.util.Set;
 import org.limewire.collection.IntervalSet;
 import org.limewire.io.IpPort;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.search.HostData;
@@ -168,11 +168,11 @@ public class Response {
      * Like writeToArray(), but writes to an OutputStream.
      */
     public void writeToStream(OutputStream os) throws IOException {
-        ByteOrder.int2leb((int)index, os);
+        ByteUtils.int2leb((int)index, os);
         if (size > Integer.MAX_VALUE) 
-            ByteOrder.int2leb(0xFFFFFFFF, os);
+            ByteUtils.int2leb(0xFFFFFFFF, os);
         else
-            ByteOrder.int2leb((int)size, os);
+            ByteUtils.int2leb((int)size, os);
         for (int i = 0; i < nameBytes.length; i++)
             os.write(nameBytes[i]);
         //Write first null terminator.

@@ -25,7 +25,7 @@ import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.NameValue;
 
 import com.google.inject.Inject;
@@ -123,8 +123,8 @@ public class ResponseFactoryImpl implements ResponseFactory {
      */
     public Response createFromStream(InputStream is) throws IOException {
         // extract file index & size
-        long index = ByteOrder.uint2long(ByteOrder.leb2int(is));
-        long size = ByteOrder.uint2long(ByteOrder.leb2int(is));
+        long index = ByteUtils.uint2long(ByteUtils.leb2int(is));
+        long size = ByteUtils.uint2long(ByteUtils.leb2int(is));
 
         int incomingNameByteArraySize;
         

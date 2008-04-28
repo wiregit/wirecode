@@ -10,7 +10,7 @@ import java.util.Random;
 import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 
@@ -121,7 +121,7 @@ public class TEAMACCalculatorTest extends BaseTestCase {
             byte[] concat = new byte[16];
             System.arraycopy(msg1, 0, concat, 0, msg1.length);
             byte[] tag1Inbytes = new byte[8];
-            ByteOrder.long2leb(tag1, tag1Inbytes, 0);
+            ByteUtils.long2leb(tag1, tag1Inbytes, 0);
             System.arraycopy(xor(tag1Inbytes, msg2), 0, concat, msg1.length, msg1.length);
             
             assertEquals(tag2, generator.encryptCBCCMAC(concat));
@@ -155,7 +155,7 @@ public class TEAMACCalculatorTest extends BaseTestCase {
         for (int i = 1; i <= 8; i++) {
             byte[] data = new byte[i];
             random.nextBytes(data);
-            long asLong = ByteOrder.leb2long(data, 0, data.length);
+            long asLong = ByteUtils.leb2long(data, 0, data.length);
             assertEquals(generator.encrypt(asLong), generator.encryptCBCCMAC(data));
         }
         
@@ -163,7 +163,7 @@ public class TEAMACCalculatorTest extends BaseTestCase {
         for (int i = 9; i <= 16; i++) {
             byte[] data = new byte[i];
             random.nextBytes(data);
-            long asLong = ByteOrder.leb2long(data, 0, 8);
+            long asLong = ByteUtils.leb2long(data, 0, 8);
             assertNotSame(generator.encrypt(asLong), generator.encryptCBCCMAC(data));
         }
         
@@ -171,8 +171,8 @@ public class TEAMACCalculatorTest extends BaseTestCase {
         for (int i = 9; i <= 16; i++) {
             byte[] data = new byte[i];
             random.nextBytes(data);
-            long asLong = ByteOrder.leb2long(data, 0, 8);
-            long asLong2 = ByteOrder.leb2long(data, 8, data.length - 8);
+            long asLong = ByteUtils.leb2long(data, 0, 8);
+            long asLong2 = ByteUtils.leb2long(data, 8, data.length - 8);
             assertEquals(generator.encrypt(generator.encrypt(asLong) ^ asLong2), generator.encryptCBCCMAC(data));
         }
     }

@@ -6,7 +6,7 @@ import java.util.Map;
 import org.limewire.collection.NumericBuffer;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -52,7 +52,7 @@ public class QueryStats {
                 byte[] b = new byte[times.getSize() * 4];
                 for (int i = 0; i < times.getSize(); i++) {
                     int time = Float.floatToIntBits((times.get(i)-lifecycleManager.getStartFinishedTime()) / 1000f);
-                    ByteOrder.int2beb(time, b, i*4);
+                    ByteUtils.int2beb(time, b, i*4);
                 }
 
                 ret.put("buf",b);

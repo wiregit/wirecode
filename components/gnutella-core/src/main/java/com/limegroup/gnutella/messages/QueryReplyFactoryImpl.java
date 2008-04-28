@@ -9,7 +9,7 @@ import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.security.SecurityToken;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -322,7 +322,7 @@ public class QueryReplyFactoryImpl implements QueryReplyFactory {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.write(original.getPayload(),0,qhdOffset);
 
-        int length = ByteOrder.ubyte2int(payload[qhdOffset]);
+        int length = ByteUtils.ubyte2int(payload[qhdOffset]);
 
         // some special cases:
         // length == 1 requires adding the second flag byte manually
@@ -384,12 +384,12 @@ public class QueryReplyFactoryImpl implements QueryReplyFactory {
         if (me != null) {
             byte [] myAddr = new byte[6];
             System.arraycopy(me.getInetAddress().getAddress(),0,myAddr,0,4);
-            ByteOrder.short2beb((short)me.getPort(), myAddr, 4);
+            ByteUtils.short2beb((short)me.getPort(), myAddr, 4);
             ggep.put(GGEPKeys.GGEP_HEADER_RETURN_PATH_ME+suffix,myAddr);
         }
         byte [] theirAddr = new byte[6];
         System.arraycopy(source.getInetAddress().getAddress(),0,theirAddr,0,4);
-        ByteOrder.short2beb((short)source.getPort(), theirAddr, 4);
+        ByteUtils.short2beb((short)source.getPort(), theirAddr, 4);
         ggep.put(GGEPKeys.GGEP_HEADER_RETURN_PATH_SOURCE+suffix,theirAddr);
         ggep.put(GGEPKeys.GGEP_HEADER_RETURN_PATH_HOPS+suffix,hops);
         ggep.put(GGEPKeys.GGEP_HEADER_RETURN_PATH_TTL+suffix,ttl);

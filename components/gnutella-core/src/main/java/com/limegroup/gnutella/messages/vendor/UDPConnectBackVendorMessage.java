@@ -7,7 +7,7 @@ import java.io.OutputStream;
 
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -54,7 +54,7 @@ public final class UDPConnectBackVendorMessage extends AbstractVendorMessage {
                 if( payload.length != 18 )
                     throw new BadPacketException("invalid version1 payload");
                 bais = new ByteArrayInputStream(payload);
-                _port = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
+                _port = ByteUtils.ushort2int(ByteUtils.leb2short(bais));
                 byte[] guidBytes = new byte[16];
                 bais.read(guidBytes, 0, guidBytes.length);
                 _guid = new GUID(guidBytes);
@@ -63,7 +63,7 @@ public final class UDPConnectBackVendorMessage extends AbstractVendorMessage {
                 if( payload.length != 2 )
                     throw new BadPacketException("invalid version2 payload");
                 bais = new ByteArrayInputStream(payload);
-                _port = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
+                _port = ByteUtils.ushort2int(ByteUtils.leb2short(bais));
                 _guid = new GUID(super.getGUID());
                 break;
             default:
@@ -108,7 +108,7 @@ public final class UDPConnectBackVendorMessage extends AbstractVendorMessage {
         try {
             // do it during construction....
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)port,baos); // write port
+            ByteUtils.short2leb((short)port,baos); // write port
             baos.write(guid.bytes());
             return baos.toByteArray();
         } catch (IOException ioe) {

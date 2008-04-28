@@ -3,7 +3,7 @@ package com.limegroup.gnutella.messages;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.GUID;
 
@@ -109,7 +109,7 @@ public abstract class AbstractMessage implements Message {
         out.write(func);
         out.write(ttl);
         out.write(hops);
-        ByteOrder.int2leb(length, out);
+        ByteUtils.int2leb(length, out);
         writePayload(out);
     }
     
@@ -121,7 +121,7 @@ public abstract class AbstractMessage implements Message {
         buf[16]=func;
         buf[17]=ttl;
         buf[18]=hops;
-        ByteOrder.int2leb(length, buf, 19);
+        ByteUtils.int2leb(length, buf, 19);
         out.write(buf);
         writePayload(out);
     }

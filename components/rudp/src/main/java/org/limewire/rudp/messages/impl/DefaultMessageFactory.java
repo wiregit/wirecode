@@ -14,7 +14,7 @@ import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.rudp.messages.SynMessage;
 import org.limewire.rudp.messages.RUDPMessage.OpCode;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Singleton;
 
@@ -67,7 +67,7 @@ public class DefaultMessageFactory implements RUDPMessageFactory {
         // Assert that the int in F is the number of bytes remaining.
         int remaining = -1;
         try {
-            remaining = ByteOrder.leb2int(in);
+            remaining = ByteUtils.leb2int(in);
         } catch(IOException impossible) {
             ErrorService.error(impossible);
         }

@@ -24,7 +24,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.MACCalculatorRepositoryManager;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
@@ -176,9 +176,9 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
             NetworkInstanceUtils networkInstanceUtils) throws BadPacketException {
         super(guid, Message.F_PING_REPLY, ttl, hops, payload.length, network);
         PAYLOAD = payload;
-        PORT = ByteOrder.ushort2int(ByteOrder.leb2short(PAYLOAD, 0));
-        FILES = ByteOrder.uint2long(ByteOrder.leb2int(PAYLOAD, 6));
-        KILOBYTES = ByteOrder.uint2long(ByteOrder.leb2int(PAYLOAD, 10));
+        PORT = ByteUtils.ushort2int(ByteUtils.leb2short(PAYLOAD, 0));
+        FILES = ByteUtils.uint2long(ByteUtils.leb2int(PAYLOAD, 6));
+        KILOBYTES = ByteUtils.uint2long(ByteUtils.leb2int(PAYLOAD, 10));
 
         IP = ip;
 
@@ -244,7 +244,7 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
                 try {
                     byte[] bytes = ggep.getBytes(GGEPKeys.GGEP_HEADER_DHT_SUPPORT);
                     if(bytes.length >= 3) {
-                        dhtVersion = ByteOrder.ushort2int(ByteOrder.beb2short(bytes, 0));
+                        dhtVersion = ByteUtils.ushort2int(ByteUtils.beb2short(bytes, 0));
                         byte mode = (byte)(bytes[2] & DHTMode.DHT_MODE_MASK);
                         dhtMode = DHTMode.valueOf(mode);
                         if (dhtMode == null) {
@@ -262,7 +262,7 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
                     if(bytes.length >= 2)
                         locale = new String(bytes, 0, 2);
                     if(bytes.length >= 3)
-                        slots = ByteOrder.ubyte2int(bytes[2]);
+                        slots = ByteUtils.ubyte2int(bytes[2]);
                 } catch(BadGGEPPropertyException e) {}
             }
             
@@ -281,7 +281,7 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
                     if (NetworkUtils.isValidAddress(myip)) {
                         try{
                             myIP = InetAddress.getByAddress(myip);
-                            myPort = ByteOrder.ushort2int(ByteOrder.leb2short(data,4));
+                            myPort = ByteUtils.ushort2int(ByteUtils.leb2short(data,4));
                             
                             if (networkInstanceUtils.isPrivateAddress(myIP) ||
                                     !NetworkUtils.isValidPort(myPort) ) {
@@ -640,7 +640,7 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
         long kb = getKbytes();
         if (kb < 8)
             return false;
-        return isPowerOf2(ByteOrder.long2int(kb));
+        return isPowerOf2(ByteUtils.long2int(kb));
     }
 
     // TODO: Perhaps move to a generic math utils collection!!??

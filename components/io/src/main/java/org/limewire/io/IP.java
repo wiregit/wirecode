@@ -1,6 +1,6 @@
 package org.limewire.io;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 /**
  * Represents an Internet Protocol (IP) address with operations to parse, convert 
@@ -105,7 +105,7 @@ public class IP {
      * Converts a four byte array into a 32-bit int.
      */
     private static int bytesToInt(byte[] ip_bytes, int offset) {
-        return ByteOrder.beb2int(ip_bytes, offset);
+        return ByteUtils.beb2int(ip_bytes, offset);
     }
 
     /**

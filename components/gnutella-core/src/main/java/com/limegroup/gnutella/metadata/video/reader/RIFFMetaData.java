@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.limewire.io.IOUtils;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 /**
  *  Reads RIFF files meta data 
@@ -52,14 +52,14 @@ public class RIFFMetaData extends VideoDataReader {
 
 		// read microseconds per frame
 		dis.readFully(dword);
-		int microsPerFrame = ByteOrder.leb2int(dword, 0, 4);
+		int microsPerFrame = ByteUtils.leb2int(dword, 0, 4);
 
 		// boring data
 		IOUtils.ensureSkip(dis, 12);
 
 		// read total number of frames
 		dis.readFully(dword);
-		int totalFrames = ByteOrder.leb2int(dword, 0, 4);
+		int totalFrames = ByteUtils.leb2int(dword, 0, 4);
 		videoData.setLength((short) (1L * microsPerFrame * totalFrames / 1000 ));
 
 		// boring data
@@ -73,11 +73,11 @@ public class RIFFMetaData extends VideoDataReader {
 
 		// width in pixel
 		dis.readFully(dword);
-		videoData.setWidth(ByteOrder.leb2int(dword, 0, 4));
+		videoData.setWidth(ByteUtils.leb2int(dword, 0, 4));
 
 		// height in pixel
 		dis.readFully(dword);
-		videoData.setHeight(ByteOrder.leb2int(dword, 0, 4));
+		videoData.setHeight(ByteUtils.leb2int(dword, 0, 4));
 		
 		// reserved stuff
 		IOUtils.ensureSkip(dis, 16);

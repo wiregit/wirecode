@@ -33,7 +33,7 @@ import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.Shutdownable;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Provider;
 import com.limegroup.gnutella.Acceptor;
@@ -1236,9 +1236,9 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     }
 
     public void measureBandwidth() {
-        _upBandwidthTracker.measureBandwidth(ByteOrder.long2int(getConnectionBandwidthStatistics()
+        _upBandwidthTracker.measureBandwidth(ByteUtils.long2int(getConnectionBandwidthStatistics()
                 .getBytesSent()));
-        _downBandwidthTracker.measureBandwidth(ByteOrder
+        _downBandwidthTracker.measureBandwidth(ByteUtils
                 .long2int(getConnectionBandwidthStatistics().getBytesReceived()));
     }
 

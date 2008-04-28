@@ -3,7 +3,7 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 
@@ -46,7 +46,7 @@ public final class HopsFlowVendorMessage extends AbstractVendorMessage {
      *  connection you received this on wants to see from you.
      */
     public int getHopValue() {
-        return ByteOrder.ubyte2int(getPayload()[0]);
+        return ByteUtils.ubyte2int(getPayload()[0]);
     }
 
     /**

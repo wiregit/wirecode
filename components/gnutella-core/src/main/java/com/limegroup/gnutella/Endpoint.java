@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.StringUtils;
 
 
@@ -367,7 +367,7 @@ public class Endpoint implements Cloneable, Connectable, IpPort, java.io.Seriali
         int first;
         try {
             a=getHostBytes();
-            first=ByteOrder.ubyte2int(a[0]);
+            first=ByteUtils.ubyte2int(a[0]);
             b=other.getHostBytes();
         } catch (UnknownHostException e) {
             return false;

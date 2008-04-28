@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
 
@@ -99,10 +99,10 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(0x08);
         out.write(DIMERecord.TYPE_MEDIA_TYPE);
-        ByteOrder.int2beb(5, out, 2); // options length: 5
-        ByteOrder.int2beb(6, out, 2); // id length: 6
-        ByteOrder.int2beb(7, out, 2); // type length: 7
-        ByteOrder.int2beb(8, out, 4); // data length: 8
+        ByteUtils.int2beb(5, out, 2); // options length: 5
+        ByteUtils.int2beb(6, out, 2); // id length: 6
+        ByteUtils.int2beb(7, out, 2); // type length: 7
+        ByteUtils.int2beb(8, out, 4); // data length: 8
         out.write(new byte[] { 's', 'a', 'm', 'm', 'y',  0 ,  0 ,  0  } );
         out.write(new byte[] { 'b', 'e', 'r', 'l', 'i', 'n',  0 ,  0  } );
         out.write(new byte[] { 'h', 'a', 'c', 'k', 'e', 'r', 's',  0  } );
@@ -128,10 +128,10 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(0x08);
         out.write(DIMERecord.TYPE_MEDIA_TYPE);
-        ByteOrder.int2beb(5, out, 2); // options length: 5
-        ByteOrder.int2beb(6, out, 2); // id length: 6
-        ByteOrder.int2beb(7, out, 2); // type length: 7
-        ByteOrder.int2beb(8, out, 4); // data length: 8
+        ByteUtils.int2beb(5, out, 2); // options length: 5
+        ByteUtils.int2beb(6, out, 2); // id length: 6
+        ByteUtils.int2beb(7, out, 2); // type length: 7
+        ByteUtils.int2beb(8, out, 4); // data length: 8
         out.write(new byte[] { 's', 'a', 'm', 'm', 'y',  0 ,  0 ,  0  } );
         out.write(new byte[] { 'b', 'e', 'r', 'l', 'i', 'n',  0 ,  0  } );
         out.write(new byte[] { 'h', 'a', 'c', 'k', 'e', 'r', 's',  0  } );
@@ -187,10 +187,10 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         out.write(0x08);
         out.write(DIMERecord.TYPE_MEDIA_TYPE);
-        ByteOrder.int2beb(5, out, 2); // options length: 5
-        ByteOrder.int2beb(6, out, 2); // id length: 6
-        ByteOrder.int2beb(7, out, 2); // type length: 7
-        ByteOrder.int2beb(8, out, 4); // data length: 8
+        ByteUtils.int2beb(5, out, 2); // options length: 5
+        ByteUtils.int2beb(6, out, 2); // id length: 6
+        ByteUtils.int2beb(7, out, 2); // type length: 7
+        ByteUtils.int2beb(8, out, 4); // data length: 8
         out.write(new byte[] { 's', 'a', 'm', 'm', 'y',  0 ,  0 ,  0  } );
         out.write(new byte[] { 'b', 'e', 'r', 'l', 'i', 'n',  0 ,  0  } );
         out.write(new byte[] { 'h', 'a', 'c', 'k', 'e', 'r', 's',  0  } );
@@ -210,7 +210,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         out.write( 0x00 ); // no type + reserved
         out.write( new byte[] { 0, 0 } ); // option length: 0
         out.write( new byte[] { 0, 0 } ); // id length: 0
-        ByteOrder.int2beb(3, out, 2); // type length: 3
+        ByteUtils.int2beb(3, out, 2); // type length: 3
         out.write( new byte[] { 0, 0, 0, 0 } ); // data length: 0
         out.write( new byte[] { 's', 'a', 'm', 0 } ); // type + padding
         buffer = ByteBuffer.wrap(out.toByteArray());
@@ -234,7 +234,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         out.write( 0x03 << 4); // no type + reserved
         out.write( new byte[] { 0, 0 } ); // option length: 0
         out.write( new byte[] { 0, 0 } ); // id length: 0
-        ByteOrder.int2beb(3, out, 2); // type length: 3
+        ByteUtils.int2beb(3, out, 2); // type length: 3
         out.write( new byte[] { 0, 0, 0, 0 } ); // data length: 0
         out.write( new byte[] { 's', 'a', 'm', 0 } ); // type + padding
         buffer = ByteBuffer.wrap(out.toByteArray());
@@ -256,7 +256,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         out.write( 0x04 << 4 ); // no type + reserved
         out.write( new byte[] { 0, 0 } ); // option length: 0
         out.write( new byte[] { 0, 0 } ); // id length: 0
-        ByteOrder.int2beb(3, out, 2); // type length: 3
+        ByteUtils.int2beb(3, out, 2); // type length: 3
         out.write( new byte[] { 0, 0, 0, 0 } ); // data length: 0
         out.write( new byte[] { 's', 'a', 'm', 0 } ); // type + padding
         buffer = ByteBuffer.wrap(out.toByteArray());
@@ -280,7 +280,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         out.write( new byte[] { 0, 0 } ); // option length: 0
         out.write( new byte[] { 0, 0 } ); // id length: 0
         out.write( new byte[] { 0, 0 } ); // type length: 0
-        ByteOrder.int2beb(6, out, 4); // data length: 6
+        ByteUtils.int2beb(6, out, 4); // data length: 6
         out.write( new byte[] { 's', 'a', 'm', 'u', 'e', 'l', 0, 0 } ); //data + padding
         buffer = ByteBuffer.wrap(out.toByteArray());
         reader = new AsyncDimeRecordReader();
@@ -333,7 +333,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
             out.write( 0x00 ); // no type + reserved
             out.write( new byte[] { 0, 0 } ); // option length: 0
             out.write( new byte[] { 0, 0 } ); // id length: 0
-            ByteOrder.int2beb(2, out, 2); // type length: 2
+            ByteUtils.int2beb(2, out, 2); // type length: 2
             out.write( new byte[] { 0, 0, 0, 0 } ); // data length: 0
             out.write( new byte[] { 0x1, 0x2 } ); // type data
             ByteBuffer buffer = ByteBuffer.wrap(out.toByteArray());
@@ -361,7 +361,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
             out.write( (byte)i ); // no type + [invalid] reserved
             out.write( new byte[] { 0, 0 } ); // option length: 0
             out.write( new byte[] { 0, 0 } ); // id length: 0
-            ByteOrder.int2beb(2, out, 2); // type length: 2
+            ByteUtils.int2beb(2, out, 2); // type length: 2
             out.write( new byte[] { 0, 0, 0, 0 } ); // data length: 0
             out.write( new byte[] { 0x1, 0x2 } ); // type data
             ByteBuffer buffer = ByteBuffer.wrap(out.toByteArray());

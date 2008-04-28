@@ -24,7 +24,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -112,13 +112,13 @@ public class HeadPongTest extends LimeTestCase {
         out.write(new byte[] { 'S', 'A', 'M', 'B' });  // vendor
         out.write(-1);                                 // queue status
         
-        ByteOrder.short2beb((short)24, out);           // length of forthcoming ranges.
-        ByteOrder.int2beb(1, out);                     // ranges....
-        ByteOrder.int2beb(1000, out);
-        ByteOrder.int2beb(1050, out);
-        ByteOrder.int2beb(2001, out);
-        ByteOrder.int2beb(2500, out);
-        ByteOrder.int2beb(2525, out);                  //...ranges (1-1000, 1050-2001, 2500-2525)
+        ByteUtils.short2beb((short)24, out);           // length of forthcoming ranges.
+        ByteUtils.int2beb(1, out);                     // ranges....
+        ByteUtils.int2beb(1000, out);
+        ByteUtils.int2beb(1050, out);
+        ByteUtils.int2beb(2001, out);
+        ByteUtils.int2beb(2500, out);
+        ByteUtils.int2beb(2525, out);                  //...ranges (1-1000, 1050-2001, 2500-2525)
         
         Random random = new Random();
         byte[] g1 = new byte[16];
@@ -129,11 +129,11 @@ public class HeadPongTest extends LimeTestCase {
         random.nextBytes(g2);
         PushEndpoint p2 = pushEndpointFactory.createPushEndpoint(g2, new IpPortSet(new IpPortImpl("2.3.4.5:6"), new IpPortImpl("3.4.5.6:7")), PushEndpoint.PLAIN, 0);
         byte[] p2b = p2.toBytes(false);
-        ByteOrder.short2beb((short)(p1b.length + p2b.length), out); // length of forthcoming push locations.
+        ByteUtils.short2beb((short)(p1b.length + p2b.length), out); // length of forthcoming push locations.
         out.write(p1b);                                // push locations...
         out.write(p2b);                                // ...push locations
         
-        ByteOrder.short2beb((short)18, out);           // length of forthcoming alternate locations.
+        ByteUtils.short2beb((short)18, out);           // length of forthcoming alternate locations.
         out.write(new byte[] { 4, 5, 6, 7, 8, 0, 5, 6, 7, 8, 9, 0, 6, 7, 8, 9, 10, 0 } ); // alternate locations
         
         HeadPong pong = headPongFactory.createFromNetwork(new byte[16], (byte)0,
@@ -196,12 +196,12 @@ public class HeadPongTest extends LimeTestCase {
         ggep.put("Q", (byte)-1);                                // queue status.
         
         byte[] ranges = new byte[24];        
-        ByteOrder.int2beb(1,    ranges, 0);
-        ByteOrder.int2beb(1000, ranges, 4);
-        ByteOrder.int2beb(1050, ranges, 8);
-        ByteOrder.int2beb(2001, ranges, 12);
-        ByteOrder.int2beb(2500, ranges, 16);
-        ByteOrder.int2beb(2525, ranges, 20);  
+        ByteUtils.int2beb(1,    ranges, 0);
+        ByteUtils.int2beb(1000, ranges, 4);
+        ByteUtils.int2beb(1050, ranges, 8);
+        ByteUtils.int2beb(2001, ranges, 12);
+        ByteUtils.int2beb(2500, ranges, 16);
+        ByteUtils.int2beb(2525, ranges, 20);  
         ggep.put("R", ranges);                                  // ranges
         
         Random random = new Random();
@@ -288,12 +288,12 @@ public class HeadPongTest extends LimeTestCase {
         ggep.put("Q", (byte)-1);                                // queue status.
         
         byte[] ranges = new byte[24];        
-        ByteOrder.int2beb(1,    ranges, 0);
-        ByteOrder.int2beb(1000, ranges, 4);
-        ByteOrder.int2beb(1050, ranges, 8);
-        ByteOrder.int2beb(2001, ranges, 12);
-        ByteOrder.int2beb(2500, ranges, 16);
-        ByteOrder.int2beb(2525, ranges, 20);  
+        ByteUtils.int2beb(1,    ranges, 0);
+        ByteUtils.int2beb(1000, ranges, 4);
+        ByteUtils.int2beb(1050, ranges, 8);
+        ByteUtils.int2beb(2001, ranges, 12);
+        ByteUtils.int2beb(2500, ranges, 16);
+        ByteUtils.int2beb(2525, ranges, 20);  
         ggep.put("R", ranges);                                  // ranges
         
         Random random = new Random();
@@ -539,8 +539,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -577,8 +577,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -616,8 +616,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -647,8 +647,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -684,8 +684,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -723,8 +723,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -759,8 +759,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -795,8 +795,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -831,8 +831,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -872,8 +872,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -884,12 +884,12 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(new byte[] { (byte)expectedUploads }, writtenGGEP.getBytes("Q"));
         assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
         byte[] ranges = writtenGGEP.getBytes("R");
-        assertEquals(0,     ByteOrder.beb2int(ranges, 0));
-        assertEquals(500,   ByteOrder.beb2int(ranges, 4));
-        assertEquals(705,   ByteOrder.beb2int(ranges, 8));
-        assertEquals(1000,  ByteOrder.beb2int(ranges, 12));
-        assertEquals(20000, ByteOrder.beb2int(ranges, 16));
-        assertEquals(25000, ByteOrder.beb2int(ranges, 20));
+        assertEquals(0,     ByteUtils.beb2int(ranges, 0));
+        assertEquals(500,   ByteUtils.beb2int(ranges, 4));
+        assertEquals(705,   ByteUtils.beb2int(ranges, 8));
+        assertEquals(1000,  ByteUtils.beb2int(ranges, 12));
+        assertEquals(20000, ByteUtils.beb2int(ranges, 16));
+        assertEquals(25000, ByteUtils.beb2int(ranges, 20));
         assertEquals(24, ranges.length);
     }
     
@@ -921,8 +921,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -934,12 +934,12 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals("LIME".getBytes(), writtenGGEP.getBytes("V"));
         byte[] ranges = writtenGGEP.getBytes("R");
         assertEquals(8, ranges.length);
-        assertEquals(0,     ByteOrder.beb2int(ranges, 0));
-        assertEquals(500,   ByteOrder.beb2int(ranges, 4));
+        assertEquals(0,     ByteUtils.beb2int(ranges, 0));
+        assertEquals(500,   ByteUtils.beb2int(ranges, 4));
         byte[] ranges5 = writtenGGEP.getBytes("R5");
         assertEquals(10, ranges5.length);
-        assertEquals(0xFFFFFFFF00l, ByteOrder.beb2long(ranges5, 0, 5));
-        assertEquals(0xFFFFFFFFFFl, ByteOrder.beb2long(ranges5, 5, 5));
+        assertEquals(0xFFFFFFFF00l, ByteUtils.beb2long(ranges5, 0, 5));
+        assertEquals(0xFFFFFFFFFFl, ByteUtils.beb2long(ranges5, 5, 5));
         
         // try only long ranges now
         fd.setRangesAsIntervals(Range.createRange(0xFFFFFFFF00l, 0xFFFFFFFFFFl));
@@ -958,8 +958,8 @@ public class HeadPongTest extends LimeTestCase {
         } catch (BadGGEPPropertyException expected){}
         ranges5 = writtenGGEP.getBytes("R5");
         assertEquals(10, ranges5.length);
-        assertEquals(0xFFFFFFFF00l, ByteOrder.beb2long(ranges5, 0, 5));
-        assertEquals(0xFFFFFFFFFFl, ByteOrder.beb2long(ranges5, 5, 5));
+        assertEquals(0xFFFFFFFF00l, ByteUtils.beb2long(ranges5, 0, 5));
+        assertEquals(0xFFFFFFFFFFl, ByteUtils.beb2long(ranges5, 5, 5));
     }
     
     public void testWriteRangesOnlyIfRequested() throws Exception {
@@ -990,8 +990,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -1030,8 +1030,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -1071,8 +1071,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -1132,8 +1132,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -1277,8 +1277,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -1360,8 +1360,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -1412,8 +1412,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -1463,8 +1463,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -1536,8 +1536,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);
@@ -1587,8 +1587,8 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(guid, written, 0, 16);
         // 16...23, rest of Gnutella header, ignore.
         assertEquals("LIME", new String(written, 23, 4));   // headpong vendor ID
-        assertEquals(24, ByteOrder.leb2short(written, 27)); // headpong selector
-        assertEquals(2, ByteOrder.leb2short(written, 29));  // current headpong version
+        assertEquals(24, ByteUtils.leb2short(written, 27)); // headpong selector
+        assertEquals(2, ByteUtils.leb2short(written, 29));  // current headpong version
         
         int[] endOffset = new int[1];
         GGEP writtenGGEP = new GGEP(written, 31, endOffset);

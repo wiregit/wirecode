@@ -13,7 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.StringUtils;
 
 import com.limegroup.bittorrent.TorrentLocation;
@@ -175,7 +175,7 @@ class TrackerResponse {
 		for (int i = 0; i < bytes.length - 5; i += 6) {
 			byte[] address = new byte[4];
 			System.arraycopy(bytes, i, address, 0, 4);
-			int port = ByteOrder.beb2int(bytes, i + 4, 2);
+			int port = ByteUtils.beb2int(bytes, i + 4, 2);
             
             if (!NetworkUtils.isValidPort(port)) {
                 containedInvalid = true;

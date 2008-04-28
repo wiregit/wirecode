@@ -13,7 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.CountingInputStream;
 import org.limewire.io.IOUtils;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 
 /**
@@ -120,8 +120,8 @@ public class ASFParser {
         if(!Arrays.equals(marker, IDs.HEADER_ID))
             throw new IOException("not an ASF file");
        
-        long dataOffset = ByteOrder.leb2long(ds);
-        int objectCount = ByteOrder.leb2int(ds);
+        long dataOffset = ByteUtils.leb2long(ds);
+        int objectCount = ByteUtils.leb2int(ds);
         IOUtils.ensureSkip(ds, 2);
         
         if(LOG.isDebugEnabled())
@@ -132,7 +132,7 @@ public class ASFParser {
                     +dataOffset);
         if (objectCount < 0)
             throw new IOException("ASF file is corrupt. Object count unreasonable:"
-                    + ByteOrder.uint2long(objectCount));
+                    + ByteUtils.uint2long(objectCount));
         if(objectCount > 100)
             throw new IOException("object count very high: " + objectCount);
             
@@ -142,7 +142,7 @@ public class ASFParser {
                 LOG.debug("Parsing object[" + i + "]");
                 
             ds.readFully(object);
-            long size = ByteOrder.leb2long(ds) - 24;
+            long size = ByteUtils.leb2long(ds) - 24;
             if (size < 0)
                 throw new IOException("ASF file is corrupt.  Object size < 0 :"+size);
             counter.clearAmountRead();
@@ -193,15 +193,15 @@ public class ASFParser {
         LOG.debug("Parsing file properties");
         IOUtils.ensureSkip(ds, 48);
         
-        int duration = (int)(ByteOrder.leb2long(ds) / 10000000);
+        int duration = (int)(ByteUtils.leb2long(ds) / 10000000);
         if (duration < 0)
             throw new IOException("ASF file corrupt.  Duration < 0:"+duration);
         _length = duration;
         IOUtils.ensureSkip(ds, 20);
-        int maxBR = ByteOrder.leb2int(ds);
+        int maxBR = ByteUtils.leb2int(ds);
         if (maxBR < 0)
             throw new IOException("ASF file corrupt.  Max bitrate > 2 Gb/s:"+
-                    ByteOrder.uint2long(maxBR));
+                    ByteUtils.uint2long(maxBR));
         if(LOG.isDebugEnabled())
             LOG.debug("maxBitrate: " + maxBR);
         _bitrate = maxBR / 1000;
@@ -218,14 +218,14 @@ public class ASFParser {
         } else if(Arrays.equals(streamID, IDs.VIDEO_STREAM_ID)) {
             _hasVideo = true;
             IOUtils.ensureSkip(ds, 38);
-            _width = ByteOrder.leb2int(ds);
+            _width = ByteUtils.leb2int(ds);
             if (_width < 0)
                 throw new IOException("ASF file corrupt.  Video width excessive:"+
-                        ByteOrder.uint2long(_width));
-            _height = ByteOrder.leb2int(ds);
+                        ByteUtils.uint2long(_width));
+            _height = ByteUtils.leb2int(ds);
             if (_height < 0)
                 throw new IOException("ASF file corrupt.  Video height excessive:"+
-                        ByteOrder.uint2long(_height));
+                        ByteUtils.uint2long(_height));
         }
         
         // we aren't reading everything, but we'll skip over just fine.
@@ -236,15 +236,15 @@ public class ASFParser {
         LOG.debug("Parsing extended stream properties");
         
         IOUtils.ensureSkip(ds, 56);
-        int channels = ByteOrder.ushort2int(ByteOrder.leb2short(ds));
-        int sampleRate = ByteOrder.leb2int(ds);
+        int channels = ByteUtils.ushort2int(ByteUtils.leb2short(ds));
+        int sampleRate = ByteUtils.leb2int(ds);
         if (sampleRate < 0)
             throw new IOException("ASF file corrupt.  Sample rate excessive:"+
-                    ByteOrder.uint2long(sampleRate));
-        int byteRate = ByteOrder.leb2int(ds);
+                    ByteUtils.uint2long(sampleRate));
+        int byteRate = ByteUtils.leb2int(ds);
         if (byteRate < 0)
             throw new IOException("ASF file corrupt.  Byte rate excessive:"+
-                    ByteOrder.uint2long(byteRate));
+                    ByteUtils.uint2long(byteRate));
         if(_bitrate == -1)
             _bitrate = byteRate * 8 / 1000;
         if(LOG.isDebugEnabled())
@@ -258,20 +258,20 @@ public class ASFParser {
      */
     private void parseContentEncryption(DataInputStream ds) throws IOException {
         LOG.debug("Parsing content encryption");
-        long skipSize = ByteOrder.uint2long(ByteOrder.leb2int(ds)); // data
+        long skipSize = ByteUtils.uint2long(ByteUtils.leb2int(ds)); // data
         IOUtils.ensureSkip(ds, skipSize);
         
-        int typeSize = ByteOrder.leb2int(ds); // type
+        int typeSize = ByteUtils.leb2int(ds); // type
         if (typeSize < 0)
             throw new IOException("ASF file is corrupt.  Type size < 0: "+typeSize);
         byte[] b = new byte[typeSize];
         ds.readFully(b);
         _drmType = new String(b).trim();
         
-        skipSize = ByteOrder.uint2long(ByteOrder.leb2int(ds)); // data
+        skipSize = ByteUtils.uint2long(ByteUtils.leb2int(ds)); // data
         IOUtils.ensureSkip(ds, skipSize);
         
-        skipSize = ByteOrder.uint2long(ByteOrder.leb2int(ds)); // url
+        skipSize = ByteUtils.uint2long(ByteUtils.leb2int(ds)); // url
         IOUtils.ensureSkip(ds, skipSize);
     }   
     
@@ -282,10 +282,10 @@ public class ASFParser {
      */
     private void parseExtendedContentEncryption(DataInputStream ds) throws IOException {
         LOG.debug("Parsing extended content encryption");
-        int size = ByteOrder.leb2int(ds);
+        int size = ByteUtils.leb2int(ds);
         if (size < 0)
             throw new IOException("ASF file reports excessive length of encryption data:"
-                    +ByteOrder.uint2long(size));
+                    +ByteUtils.uint2long(size));
         byte[] b = new byte[size];
         ds.readFully(b);
         String xml = new String(b, "UTF-16").trim();
@@ -328,7 +328,7 @@ public class ASFParser {
         int[] sizes = { -1, -1, -1, -1, -1 };
         
         for(int i = 0; i < sizes.length; i++)
-            sizes[i] = ByteOrder.ushort2int(ByteOrder.leb2short(ds));
+            sizes[i] = ByteUtils.ushort2int(ByteUtils.leb2short(ds));
         
         byte[][] info = new byte[5][];
         for(int i = 0; i < sizes.length; i++)
@@ -363,18 +363,18 @@ public class ASFParser {
      */
     private void parseExtendedContentDescription(DataInputStream ds) throws IOException {
         LOG.debug("Parsing extended content description");
-        int fieldCount = ByteOrder.ushort2int(ByteOrder.leb2short(ds));
+        int fieldCount = ByteUtils.ushort2int(ByteUtils.leb2short(ds));
         
         if(LOG.isDebugEnabled())
             LOG.debug("Extended fieldCount: " + fieldCount);
         
         for(int i = 0; i < fieldCount; i++) {
-            int fieldSize = ByteOrder.ushort2int(ByteOrder.leb2short(ds));
+            int fieldSize = ByteUtils.ushort2int(ByteUtils.leb2short(ds));
             byte[] field = new byte[fieldSize];
             ds.readFully(field);
             String fieldName = string(field);
-            int dataType = ByteOrder.ushort2int(ByteOrder.leb2short(ds));
-            int dataSize = ByteOrder.ushort2int(ByteOrder.leb2short(ds));
+            int dataType = ByteUtils.ushort2int(ByteUtils.leb2short(ds));
+            int dataSize = ByteUtils.ushort2int(ByteUtils.leb2short(ds));
             
             switch(dataType) {
             case TYPE_STRING:
@@ -458,7 +458,7 @@ public class ASFParser {
             return;
         }
         
-        int value = ByteOrder.leb2int(ds);
+        int value = ByteUtils.leb2int(ds);
         if(LOG.isDebugEnabled())
             LOG.debug("Parsing extended int, field: " + field + ", size: " + size + ", value: " + value);
             
@@ -494,7 +494,7 @@ public class ASFParser {
             return;
         }
         
-        long value = ByteOrder.leb2long(ds);
+        long value = ByteUtils.leb2long(ds);
         if(LOG.isDebugEnabled())
             LOG.debug("Ignoring long field: " + field + ", size: " + size + ", value: " + value);
     }

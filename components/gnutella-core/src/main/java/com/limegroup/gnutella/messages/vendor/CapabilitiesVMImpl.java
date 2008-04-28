@@ -10,7 +10,7 @@ import java.util.TreeMap;
 
 import org.limewire.collection.Comparators;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -33,7 +33,7 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
         // populate the Set of supported messages....
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(payload);
-            int vectorSize = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
+            int vectorSize = ByteUtils.ushort2int(ByteUtils.leb2short(bais));
             // constructing the SMB will cause a BadPacketException if the
             // network data is invalid
             for (int i = 0; i < vectorSize; i++) {
@@ -41,7 +41,7 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
             }
             
             if(bais.available() > 0) {
-                vectorSize = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
+                vectorSize = ByteUtils.ushort2int(ByteUtils.leb2short(bais));
                 for(int i = 0; i < vectorSize; i++) {
                     readCapability(bais, true);
                 }
@@ -69,14 +69,14 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
             Map<byte[], Integer> capsNeedingInt = new TreeMap<byte[], Integer>(new Comparators.ByteArrayComparator());
             
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)allCapabilities.size(), out);
+            ByteUtils.short2leb((short)allCapabilities.size(), out);
             for(Map.Entry<byte[], Integer> entry : allCapabilities.entrySet()) {
                 writeCapability(out, entry.getKey(), entry.getValue(), false);
                 if(entry.getValue() > 65535)
                     capsNeedingInt.put(entry.getKey(), entry.getValue());
             }
             if(capsNeedingInt.size() > 0) {
-                ByteOrder.short2leb((short)capsNeedingInt.size(), out);
+                ByteUtils.short2leb((short)capsNeedingInt.size(), out);
                 for(Map.Entry<byte[], Integer> entry : capsNeedingInt.entrySet()) {
                     writeCapability(out, entry.getKey(), entry.getValue(), true);
                 }   
@@ -207,8 +207,8 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
         input.read(name, 0, name.length);
         
         int version = allow4ByteVersion ?
-                ByteOrder.leb2int(input) : 
-                ByteOrder.ushort2int(ByteOrder.leb2short(input));
+                ByteUtils.leb2int(input) : 
+                ByteUtils.ushort2int(ByteUtils.leb2short(input));
                 
         capabilities.put(name, version);
     }
@@ -216,9 +216,9 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
     static void writeCapability(OutputStream out, byte[] name, int version, boolean allow4ByteVersion) throws IOException {
         out.write(name);
         if(allow4ByteVersion)
-            ByteOrder.int2leb(version, out);
+            ByteUtils.int2leb(version, out);
         else
-            ByteOrder.short2leb((short)version, out);
+            ByteUtils.short2leb((short)version, out);
     }
 
     /** Overridden purely for stats handling.

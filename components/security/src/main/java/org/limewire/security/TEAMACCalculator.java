@@ -3,7 +3,7 @@ package org.limewire.security;
 import java.security.SecureRandom;
 
 import org.limewire.security.SecurityToken.TokenData;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 
 /* package */ class TEAMACCalculator implements MACCalculator {
@@ -105,7 +105,7 @@ import org.limewire.util.ByteOrder;
     final long encryptCBCCMAC(byte[] data) {
         long tag = 0;
         for (int i = 0; i < data.length; i += 8) {
-            tag = encrypt(tag ^ ByteOrder.leb2long(data, i, Math.min(8, data.length - i)));
+            tag = encrypt(tag ^ ByteUtils.leb2long(data, i, Math.min(8, data.length - i)));
         }
         return tag;
     }

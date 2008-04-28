@@ -3,7 +3,7 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -49,7 +49,7 @@ public final class QueryStatusResponse extends AbstractVendorMessage {
      *  for a given query (as specified by the guid of this message).
      */
     public int getNumResults() {
-        return ByteOrder.ushort2int(ByteOrder.leb2short(getPayload(), 0));
+        return ByteUtils.ushort2int(ByteUtils.leb2short(getPayload(), 0));
     }
 
     /**
@@ -67,7 +67,7 @@ public final class QueryStatusResponse extends AbstractVendorMessage {
             throw new IllegalArgumentException("Number of results too big: " +
                                                numResults);
         byte[] payload = new byte[2];
-        ByteOrder.short2leb((short) numResults, payload, 0);
+        ByteUtils.short2leb((short) numResults, payload, 0);
         return payload;
     }
 

@@ -4,7 +4,7 @@ import java.util.Set;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -81,7 +81,7 @@ public class HostDataFactoryImpl implements HostDataFactory {
         if ( multicast )
             speed = Integer.MAX_VALUE;
         else
-            speed = ByteOrder.long2int(reply.getSpeed()); //safe cast
+            speed = ByteUtils.long2int(reply.getSpeed()); //safe cast
         
         return new HostData(clientGuid, messageGuid, speed, firewalled, busy, multicast,
                 chatEnabled, browseHostEnabled, measuredSpeed, ip, port, quality, vendor, proxies,

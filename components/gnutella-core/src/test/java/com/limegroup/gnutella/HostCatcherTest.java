@@ -21,7 +21,7 @@ import org.limewire.io.GGEP;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -895,7 +895,7 @@ public class HostCatcherTest extends LimeTestCase {
         
         // if a pong is sent from the same host, it will be processed
         byte [] payload = new byte[14];
-        ByteOrder.short2leb((short)6000, payload, 0);
+        ByteUtils.short2leb((short)6000, payload, 0);
         System.arraycopy(InetAddress.getByName("127.0.0.1").getAddress(),0,payload,2,4);
         PingReply pong = 
             pingReplyFactory.createFromNetwork(ping.getGUID().clone(), (byte)1, (byte)1, payload, Message.Network.UDP);

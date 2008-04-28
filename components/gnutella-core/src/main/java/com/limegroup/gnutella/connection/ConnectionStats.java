@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.limewire.collection.Buffer;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -166,7 +166,7 @@ public class ConnectionStats {
             for (int i = 0; i < altsPerResponse.size(); i++)
                 alts[i] = altsPerResponse.get(i);
             for (int i = 0; i < altsPerReply.size(); i++)
-                ByteOrder.short2leb(altsPerReply.get(i), altsReply, i * 2);
+                ByteUtils.short2leb(altsPerReply.get(i), altsReply, i * 2);
             
             m.put("respreply", resps); // 50 bytes
             m.put("altresp", alts); // 50 bytes

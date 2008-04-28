@@ -30,7 +30,7 @@ import org.limewire.rudp.RUDPUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
@@ -175,9 +175,9 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             //Write beginning of payload.
             //Downcasts are ok, even if they go negative
             baos.write(n);
-            ByteOrder.short2leb((short)port, baos);
+            ByteUtils.short2leb((short)port, baos);
             baos.write(ip, 0, ip.length);
-            ByteOrder.int2leb((int)speed, baos);
+            ByteUtils.int2leb((int)speed, baos);
             
             //Write each response
             for (int left=n; left>0; left--) {
@@ -228,7 +228,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
                 int xmlSize = xmlBytes.length + 1;
                 if (xmlSize > XML_MAX_SIZE)
                     xmlSize = XML_MAX_SIZE;  // yes, truncate!
-                ByteOrder.short2leb(((short) xmlSize), baos);
+                ByteUtils.short2leb(((short) xmlSize), baos);
                 
                 //e) private area: one byte with flags 
                 //for chat support
@@ -284,7 +284,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 	
 	public void setOOBAddress(InetAddress addr, int port) {
 		_address =addr.getAddress();
-		ByteOrder.short2leb((short)port,_payload,1);
+		ByteUtils.short2leb((short)port,_payload,1);
 		
 	}
 
@@ -331,7 +331,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     /** Return the number of results N in this query. */
     public short getResultCount() {
         //The result of ubyte2int always fits in a short, so downcast is ok.
-        return (short)ByteOrder.ubyte2int(_payload[0]);
+        return (short)ByteUtils.ubyte2int(_payload[0]);
     }
     
     public short getPartialResultCount() {
@@ -348,7 +348,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     }
 
     public int getPort() {
-        return ByteOrder.ushort2int(ByteOrder.leb2short(_payload,1));
+        return ByteUtils.ushort2int(ByteUtils.leb2short(_payload,1));
     }
 
     /** Returns the IP address of the responding host in standard
@@ -367,7 +367,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     }
 
     public long getSpeed() {
-        return ByteOrder.uint2long(ByteOrder.leb2int(_payload,7));
+        return ByteUtils.uint2long(ByteUtils.leb2int(_payload,7));
     }
     
     /**
@@ -780,7 +780,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             i+=4;
 
             //b) extract payload length
-            int length=ByteOrder.ubyte2int(_payload[i]);
+            int length=ByteUtils.ubyte2int(_payload[i]);
             if (length<=0)
                 throw new BadPacketException("Common payload length zero.");
             
@@ -841,9 +841,9 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
                 //first we should get its size, then we have to look 
                 //backwards and get the actual xml...
                 int a, b, temp;
-                temp = ByteOrder.ubyte2int(_payload[i++]);
+                temp = ByteUtils.ubyte2int(_payload[i++]);
                 a = temp;
-                temp = ByteOrder.ubyte2int(_payload[i++]);
+                temp = ByteUtils.ubyte2int(_payload[i++]);
                 b = temp << 8;
                 int xmlSize = a | b;
                 if (xmlSize > 1) {

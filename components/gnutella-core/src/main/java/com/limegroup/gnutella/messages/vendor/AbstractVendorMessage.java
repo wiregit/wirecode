@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.messages.AbstractMessage;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -207,8 +207,8 @@ public abstract class AbstractVendorMessage extends AbstractMessage implements V
     // INHERIT COMMENT
     protected void writePayload(OutputStream out) throws IOException {
         out.write(_vendorID);
-        ByteOrder.short2leb((short)_selector, out);
-        ByteOrder.short2leb((short)_version, out);
+        ByteUtils.short2leb((short)_selector, out);
+        ByteUtils.short2leb((short)_version, out);
         writeVendorPayload(out);
     }
     

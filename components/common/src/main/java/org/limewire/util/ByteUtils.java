@@ -11,7 +11,7 @@ import java.io.OutputStream;
  * See <a href = "http://en.wikipedia.org/wiki/Endianness">Endianness</a> 
  * for more information.
  */
-public class ByteOrder {
+public class ByteUtils {
     /**
      * Returns the reverse of x.
      */

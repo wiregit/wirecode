@@ -3,7 +3,7 @@ package com.limegroup.gnutella.routing;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 
@@ -41,7 +41,7 @@ public class ResetTableMessage extends RouteTableMessage {
 
     protected void writePayloadData(OutputStream out) throws IOException {
         byte[] buf=new byte[5];
-        ByteOrder.int2leb(tableSize, buf, 0);
+        ByteUtils.int2leb(tableSize, buf, 0);
         buf[4]=infinity;
         out.write(buf);
     }
@@ -64,7 +64,7 @@ public class ResetTableMessage extends RouteTableMessage {
         //TODO: maybe we shouldn't enforce this
         //if (payload.length!=(2+4))
         //    throw new BadPacketException("Extra arguments in reset message.");
-        tableSize=ByteOrder.leb2int(payload, 1);
+        tableSize=ByteUtils.leb2int(payload, 1);
         infinity=payload[5];
     }
 

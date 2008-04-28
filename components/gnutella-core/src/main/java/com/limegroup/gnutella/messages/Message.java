@@ -10,7 +10,7 @@ import java.util.Map;
 
 import org.limewire.collection.Buffer;
 import org.limewire.inspection.Inspectable;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 public interface Message extends Comparable<Message> {
 
@@ -220,12 +220,12 @@ public interface Message extends Comparable<Message> {
                     long timestamp = timestamps.get(i);
                     timesByte[i * 6] = (byte)((timestamp >> 40) & 0xFF);
                     timesByte[i * 6 + 1] = (byte)((timestamp >> 32) & 0xFF);
-                    ByteOrder.int2beb((int)timestamp, timesByte, i * 6 + 2);
+                    ByteUtils.int2beb((int)timestamp, timesByte, i * 6 + 2);
                 }
 
                 for (int i = 0; i < sizes.getSize(); i++) {
                     short size = (short) Math.min(0xFFFF,sizes.get(i));
-                    ByteOrder.short2beb(size, sizesByte, i * 2);
+                    ByteUtils.short2beb(size, sizesByte, i * 2);
                 }
 
                 for (int i = 0; i < hops.getSize(); i++) 

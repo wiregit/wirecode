@@ -7,7 +7,7 @@ import java.net.SocketAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -109,7 +109,7 @@ public class MessageFactoryImpl implements MessageFactory {
         }
 
         // 2. Unpack.
-        int length = ByteOrder.leb2int(buf, 19);
+        int length = ByteUtils.leb2int(buf, 19);
         // 2.5 If the length is hopelessly off (this includes lengths >
         // than 2^31 bytes, throw an irrecoverable exception to
         // cause this connection to be closed.

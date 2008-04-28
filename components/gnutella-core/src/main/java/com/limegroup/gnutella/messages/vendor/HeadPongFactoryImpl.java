@@ -17,7 +17,7 @@ import org.limewire.io.CountingOutputStream;
 import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -418,7 +418,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
             if (loc.canBeSent(AlternateLocation.MESH_PING)) {
                 loc.send(now,AlternateLocation.MESH_PING);
                 baos.write(loc.getHost().getInetAddress().getAddress());
-                ByteOrder.short2leb((short)loc.getHost().getPort(),baos);
+                ByteUtils.short2leb((short)loc.getHost().getPort(),baos);
                 IpPort host = loc.getHost();
                 if(bn != null && host instanceof Connectable && ((Connectable)host).isTLSCapable())
                     bn.set(sent);
@@ -429,7 +429,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     	
     	LOG.debug("adding altlocs");
         if(includeSize) {
-    		ByteOrder.short2beb((short)baos.size(),out);
+    		ByteUtils.short2beb((short)baos.size(),out);
     		baos.writeTo(out);
         }
     	return true;
@@ -493,7 +493,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     	} else { 
     		LOG.debug("adding push altlocs");
             if(includeSize) {
-                ByteOrder.short2beb((short)baos.size(),out);
+                ByteUtils.short2beb((short)baos.size(),out);
     			baos.writeTo(out);
             } // else it's already written to out
     		return true;

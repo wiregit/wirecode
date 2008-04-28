@@ -11,7 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
 import org.limewire.collection.IntHashMap;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -120,9 +120,9 @@ public class VendorMessageFactoryImpl implements VendorMessageFactory {
             vendorID = new byte[4];
             bais.read(vendorID, 0, vendorID.length);
             // get the selector....
-            selector = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
+            selector = ByteUtils.ushort2int(ByteUtils.leb2short(bais));
             // get the version....
-            version = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
+            version = ByteUtils.ushort2int(ByteUtils.leb2short(bais));
             // get the rest....
             restOf = new byte[bais.available()];
             bais.read(restOf, 0, restOf.length);

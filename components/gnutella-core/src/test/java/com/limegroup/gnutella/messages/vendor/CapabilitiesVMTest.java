@@ -6,7 +6,7 @@ import java.io.ByteArrayOutputStream;
 import junit.framework.Test;
 
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -93,7 +93,7 @@ public class CapabilitiesVMTest extends BaseTestCase {
 
         byte[] guid = GUID.makeGuid();
         byte ttl = 1, hops = 0;
-        ByteOrder.short2leb((short)4, baos);
+        ByteUtils.short2leb((short)4, baos);
         CapabilitiesVMImpl.writeCapability(baos, "SUSH".getBytes(), 10, false);
         CapabilitiesVMImpl.writeCapability(baos, "NEIL".getBytes(), 5, false);
         CapabilitiesVMImpl.writeCapability(baos, "DAWG".getBytes(), 3, false);
@@ -115,7 +115,7 @@ public class CapabilitiesVMTest extends BaseTestCase {
         // now creat another one, mix up the blocks that are supported, and
         // make sure they are equal....
         baos = new ByteArrayOutputStream();
-        ByteOrder.short2leb((short)3, baos);
+        ByteUtils.short2leb((short)3, baos);
         CapabilitiesVMImpl.writeCapability(baos, "NEIL".getBytes(), 5, false);
         CapabilitiesVMImpl.writeCapability(baos, "DAWG".getBytes(), 3, false);
         CapabilitiesVMImpl.writeCapability(baos, "SUSH".getBytes(), 10, false);
@@ -134,7 +134,7 @@ public class CapabilitiesVMTest extends BaseTestCase {
         try {
             // test missing info....
             baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)4, baos);
+            ByteUtils.short2leb((short)4, baos);
             CapabilitiesVMImpl.writeCapability(baos, "NEIL".getBytes(), 5, false);
             CapabilitiesVMImpl.writeCapability(baos, "DAWG".getBytes(), 3, false);
             CapabilitiesVMImpl.writeCapability(baos, "SUSH".getBytes(), 10, false);
@@ -145,7 +145,7 @@ public class CapabilitiesVMTest extends BaseTestCase {
         try {
             // test corrupt info....
             baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)4, baos);
+            ByteUtils.short2leb((short)4, baos);
             CapabilitiesVMImpl.writeCapability(baos, "SUSH".getBytes(), 10, false);
             CapabilitiesVMImpl.writeCapability(baos, "NEIL".getBytes(), 5, false);
             CapabilitiesVMImpl.writeCapability(baos, "DAWG".getBytes(), 3, false);
@@ -162,9 +162,9 @@ public class CapabilitiesVMTest extends BaseTestCase {
         byte[] guid = GUID.makeGuid();
         byte ttl = 1, hops = 0;
         
-        ByteOrder.short2leb((short)1, baos);
+        ByteUtils.short2leb((short)1, baos);
         CapabilitiesVMImpl.writeCapability(baos, "DAWG".getBytes(), 3, false);
-        ByteOrder.short2leb((short)3, baos);        
+        ByteUtils.short2leb((short)3, baos);        
         CapabilitiesVMImpl.writeCapability(baos, "DAWG".getBytes(), 3, true);
         CapabilitiesVMImpl.writeCapability(baos, "SUSH".getBytes(), 10, true);
         CapabilitiesVMImpl.writeCapability(baos, "NEIL".getBytes(), 5, true);
@@ -172,7 +172,7 @@ public class CapabilitiesVMTest extends BaseTestCase {
             new CapabilitiesVMImpl(guid, ttl, hops, 0, baos.toByteArray(), Network.UNKNOWN);
         baos = new ByteArrayOutputStream();
         
-        ByteOrder.short2leb((short)3, baos);
+        ByteUtils.short2leb((short)3, baos);
         CapabilitiesVMImpl.writeCapability(baos, "NEIL".getBytes(), 5, false);
         CapabilitiesVMImpl.writeCapability(baos, "DAWG".getBytes(), 3, false);
         CapabilitiesVMImpl.writeCapability(baos, "SUSH".getBytes(), 10, false);

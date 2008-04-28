@@ -18,7 +18,7 @@ import org.limewire.io.GGEP;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;
 import org.xml.sax.SAXException;
@@ -243,7 +243,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            ByteOrder.short2leb((short)MIN_SPEED,baos); // write minspeed
+            ByteUtils.short2leb((short)MIN_SPEED,baos); // write minspeed
             baos.write(QUERY.getBytes("UTF-8"));              // write query
             baos.write(0);                             // null
 
@@ -971,8 +971,8 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
         public QueryRequestPayloadParser(byte[] payload, MACCalculatorRepositoryManager manager) throws BadPacketException {
             try {
                 PositionByteArrayInputStream bais = new PositionByteArrayInputStream(payload);
-                short sp = ByteOrder.leb2short(bais);
-                minSpeed = ByteOrder.ushort2int(sp);
+                short sp = ByteUtils.leb2short(bais);
+                minSpeed = ByteUtils.ushort2int(sp);
                 query = new String(readNullTerminatedBytes(bais), "UTF-8");
                  
                 // handle extensions, which include rich query and URN stuff

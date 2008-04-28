@@ -8,7 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.nio.statemachine.ReadState;
 import org.limewire.util.BufferUtils;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 
 public class AsyncDimeRecordReader extends ReadState {
@@ -112,10 +112,10 @@ public class AsyncDimeRecordReader extends ReadState {
         }
 
         byte[] headerArr = header.array();
-        int optionsLength = ByteOrder.beb2int(headerArr, 2, 2);
-        int idLength = ByteOrder.beb2int(headerArr, 4, 2);
-        int typeLength = ByteOrder.beb2int(headerArr, 6, 2);
-        int dataLength = ByteOrder.beb2int(headerArr, 8, 4);
+        int optionsLength = ByteUtils.beb2int(headerArr, 2, 2);
+        int idLength = ByteUtils.beb2int(headerArr, 4, 2);
+        int typeLength = ByteUtils.beb2int(headerArr, 6, 2);
+        int dataLength = ByteUtils.beb2int(headerArr, 8, 4);
 
         if(LOG.isDebugEnabled()) {
             LOG.debug("creating dime record." + 

@@ -19,7 +19,7 @@ import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -189,7 +189,7 @@ public class PushEndpointTest extends BaseTestCase {
         expected[18] = 2;
         expected[19] = 3;
         expected[20] = 4;
-        ByteOrder.short2leb((short)1235, expected, 21);
+        ByteUtils.short2leb((short)1235, expected, 21);
         
         // Test toBytes
     	byte [] network = one.toBytes(false);
@@ -234,7 +234,7 @@ public class PushEndpointTest extends BaseTestCase {
             expected[19 + (i * 6)] = 2;
             expected[20 + (i * 6)] = 3;
             expected[21 + (i * 6)] = (byte)(i+4);
-            ByteOrder.short2leb((short)1235, expected, 22 + (i*6));
+            ByteUtils.short2leb((short)1235, expected, 22 + (i*6));
         }
         
         PushEndpoint one = factory.createPushEndpoint(guid1.bytes(), tet1);
@@ -330,7 +330,7 @@ public class PushEndpointTest extends BaseTestCase {
             expected[18 + (i * 6)] = 2;
             expected[19 + (i * 6)] = 3;
             expected[20 + (i * 6)] = (byte)(i+4);
-            ByteOrder.short2leb((short)1235, expected, 21 + (i*6));
+            ByteUtils.short2leb((short)1235, expected, 21 + (i*6));
         }
         
         PushEndpoint one = factory.createPushEndpoint(guid1.bytes(), set);
@@ -586,7 +586,7 @@ public class PushEndpointTest extends BaseTestCase {
         out.write(1 | 1 << 3);
         out.write(new GUID().bytes());
         out.write(new byte[] { (byte)129, 12, 1, 1 });
-        ByteOrder.short2leb((short)5555, out);
+        ByteUtils.short2leb((short)5555, out);
         
         try {
             factory.createFromBytes(new DataInputStream(new ByteArrayInputStream(out.toByteArray())));

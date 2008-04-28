@@ -12,7 +12,7 @@ import junit.framework.Test;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 /**
  * Unit tests for IntervalSet
@@ -1011,8 +1011,8 @@ public class IntervalSetTest extends BaseTestCase {
         asByte = set.toBytes();
         assertEquals(10,asByte.longs.length);
         // check manually
-        assertEquals(0xFFFFFFFFF0l, ByteOrder.beb2long(asByte.longs, 0, 5));
-        assertEquals(0xFFFFFFFFFFl, ByteOrder.beb2long(asByte.longs, 5, 5));
+        assertEquals(0xFFFFFFFFF0l, ByteUtils.beb2long(asByte.longs, 0, 5));
+        assertEquals(0xFFFFFFFFFFl, ByteUtils.beb2long(asByte.longs, 5, 5));
         // and check parsing
         set2 = IntervalSet.parseBytes(asByte.ints,asByte.longs);
         assertEquals(set.getSize(),set2.getSize());

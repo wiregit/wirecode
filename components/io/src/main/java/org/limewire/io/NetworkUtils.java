@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.Decorator;
 
 /**
@@ -347,13 +347,13 @@ public final class NetworkUtils {
     public static final String ip2string(byte[] ip, int offset) {
         // xxx.xxx.xxx.xxx => 15 chars
         StringBuilder sbuf = new StringBuilder(16);   
-        sbuf.append(ByteOrder.ubyte2int(ip[offset]));
+        sbuf.append(ByteUtils.ubyte2int(ip[offset]));
         sbuf.append('.');
-        sbuf.append(ByteOrder.ubyte2int(ip[offset+1]));
+        sbuf.append(ByteUtils.ubyte2int(ip[offset+1]));
         sbuf.append('.');
-        sbuf.append(ByteOrder.ubyte2int(ip[offset+2]));
+        sbuf.append(ByteUtils.ubyte2int(ip[offset+2]));
         sbuf.append('.');
-        sbuf.append(ByteOrder.ubyte2int(ip[offset+3]));
+        sbuf.append(ByteUtils.ubyte2int(ip[offset+3]));
         return sbuf.toString();
     }
     
@@ -377,7 +377,7 @@ public final class NetworkUtils {
             int port = next.getPort();
             System.arraycopy(addr, 0, data, offset, 4);
             offset += 4;
-            ByteOrder.short2leb((short)port, data, offset);
+            ByteUtils.short2leb((short)port, data, offset);
             offset += 2;
         }
         return data;
@@ -465,7 +465,7 @@ public final class NetworkUtils {
      */
     public static int getMaskedIP(InetAddress addr, int netmask) {
         byte[] address = addr.getAddress();
-        return ByteOrder.beb2int(address, /* 0 */ address.length - 4) & netmask;
+        return ByteUtils.beb2int(address, /* 0 */ address.length - 4) & netmask;
     }
     
     /**
@@ -551,9 +551,9 @@ public final class NetworkUtils {
         byte[] dst = new byte[address.length + 2];
         System.arraycopy(address, 0, dst, 0, address.length);
         if(order == java.nio.ByteOrder.BIG_ENDIAN)
-            ByteOrder.short2beb((short)port, dst, dst.length-2);
+            ByteUtils.short2beb((short)port, dst, dst.length-2);
         else // if order == LITTLE_ENDIAN
-            ByteOrder.short2leb((short)port, dst, dst.length-2);
+            ByteUtils.short2leb((short)port, dst, dst.length-2);
         return dst;
     }
 
@@ -571,10 +571,10 @@ public final class NetworkUtils {
         
         short shortport;
         if(order == java.nio.ByteOrder.BIG_ENDIAN)
-            shortport = ByteOrder.beb2short(ipport, ipport.length - 2);
+            shortport = ByteUtils.beb2short(ipport, ipport.length - 2);
         else // if order == LITTLE_ENDIAN
-            shortport = ByteOrder.leb2short(ipport, ipport.length - 2);
-        int port = ByteOrder.ushort2int(shortport);
+            shortport = ByteUtils.leb2short(ipport, ipport.length - 2);
+        int port = ByteUtils.ushort2int(shortport);
         
         if (!NetworkUtils.isValidPort(port))
             throw new InvalidDataException("Bad Port: " + port);

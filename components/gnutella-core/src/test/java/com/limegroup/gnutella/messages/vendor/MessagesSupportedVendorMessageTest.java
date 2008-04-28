@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream;
 
 import junit.framework.Test;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.GUID;
@@ -99,7 +99,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
 
         byte[] guid = GUID.makeGuid();
         byte ttl = 1, hops = 0;
-        ByteOrder.short2leb((short)4, baos);
+        ByteUtils.short2leb((short)4, baos);
         smp1.encode(baos);
         smp2.encode(baos);
         smp3.encode(baos);
@@ -124,7 +124,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         // now creat another one, mix up the blocks that are supported, and
         // make sure they are equal....
         baos = new ByteArrayOutputStream();
-        ByteOrder.short2leb((short)3, baos);
+        ByteUtils.short2leb((short)3, baos);
         smp2.encode(baos);
         smp3.encode(baos);
         smp1.encode(baos);
@@ -154,7 +154,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         try {
             // test missing info....
             baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)4, baos);
+            ByteUtils.short2leb((short)4, baos);
             smp2.encode(baos);
             smp3.encode(baos);
             smp1.encode(baos);
@@ -166,7 +166,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         try {
             // test corrupt info....
             baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)4, baos);
+            ByteUtils.short2leb((short)4, baos);
             smp2.encode(baos);
             smp3.encode(baos);
             smp1.encode(baos);
@@ -179,7 +179,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
 
         // test semantics....
         baos = new ByteArrayOutputStream();
-        ByteOrder.short2leb((short)0, baos);
+        ByteUtils.short2leb((short)0, baos);
         smp2.encode(baos);
         smp3.encode(baos);
         smp1.encode(baos);
@@ -187,7 +187,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
             new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
                                                baos.toByteArray(), Network.UNKNOWN);
         baos = new ByteArrayOutputStream();
-        ByteOrder.short2leb((short)3, baos);
+        ByteUtils.short2leb((short)3, baos);
         smp2.encode(baos);
         smp3.encode(baos);
         smp1.encode(baos);

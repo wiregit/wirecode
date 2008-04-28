@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 
 /**
@@ -97,7 +97,7 @@ public final class DataUtils {
         for (int i=0; i<bytes.length; i++) {
             //Treating each byte as an unsigned value ensures
             //that we don't str doesn't equal things like 0xFFFF...
-            val = ByteOrder.ubyte2int(bytes[i]);
+            val = ByteUtils.ubyte2int(bytes[i]);
             str = Integer.toHexString(val);
             while ( str.length() < 2 )
             str = "0" + str;

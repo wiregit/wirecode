@@ -8,7 +8,7 @@ import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
@@ -67,7 +67,7 @@ public abstract class AbstractPushEndpoint implements PushEndpoint {
             
             System.arraycopy(addr,0,where,offset,4);
             offset+=4;
-            ByteOrder.short2leb((short)port,where,offset);
+            ByteUtils.short2leb((short)port,where,offset);
             offset+=2;
         }
         
@@ -101,7 +101,7 @@ public abstract class AbstractPushEndpoint implements PushEndpoint {
             
             System.arraycopy(addr,0,where,offset,4);
             offset+=4;
-            ByteOrder.short2leb(port,where,offset);
+            ByteUtils.short2leb(port,where,offset);
             offset+=2;
             i++;
         }

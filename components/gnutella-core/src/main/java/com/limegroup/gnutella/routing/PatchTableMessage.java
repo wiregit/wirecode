@@ -3,7 +3,7 @@ package com.limegroup.gnutella.routing;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 
@@ -96,8 +96,8 @@ public class PatchTableMessage extends RouteTableMessage {
         //if (payload.length<5)
         //    throw new BadPacketException("Extra arguments in reset message.");
         assert(payload[0]==PATCH_VARIANT);
-        this.sequenceNumber=(short)ByteOrder.ubyte2int(payload[1]);
-        this.sequenceSize=(short)ByteOrder.ubyte2int(payload[2]);
+        this.sequenceNumber=(short)ByteUtils.ubyte2int(payload[1]);
+        this.sequenceSize=(short)ByteUtils.ubyte2int(payload[2]);
         if (sequenceNumber<1 || sequenceSize<1 || sequenceNumber>sequenceSize) 
             throw new BadPacketException(
                 "Bad sequence/size: "+sequenceNumber+"/"+sequenceSize);

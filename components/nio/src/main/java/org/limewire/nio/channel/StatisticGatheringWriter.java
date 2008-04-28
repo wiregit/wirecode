@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.limewire.collection.Buffer;
 import org.limewire.nio.observer.WriteObserver;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 /** A simple writer that maintains statistics about how much was written. */
 public class StatisticGatheringWriter extends AbstractChannelInterestWriter {
@@ -69,7 +69,7 @@ public class StatisticGatheringWriter extends AbstractChannelInterestWriter {
     private byte [] getPacked(Buffer<Long> b) {
         byte [] ret = new byte[b.getSize() * 8];
         for (int i = 0; i < b.getSize(); i++)
-            ByteOrder.long2beb(b.get(i), ret, i*8);
+            ByteUtils.long2beb(b.get(i), ret, i*8);
         return ret;
     }
     

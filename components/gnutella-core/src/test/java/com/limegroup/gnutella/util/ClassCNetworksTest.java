@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import junit.framework.Test;
 
@@ -82,10 +82,10 @@ public class ClassCNetworksTest extends LimeTestCase {
         
         byte [] b = cnc.getTopInspectable(2);
         assertEquals(16,b.length);
-        assertEquals(0x01020500,ByteOrder.beb2int(b, 0));
-        assertEquals(4,ByteOrder.beb2int(b, 4));
-        assertEquals(0x01020300,ByteOrder.beb2int(b, 8));
-        assertEquals(3,ByteOrder.beb2int(b, 12));
+        assertEquals(0x01020500,ByteUtils.beb2int(b, 0));
+        assertEquals(4,ByteUtils.beb2int(b, 4));
+        assertEquals(0x01020300,ByteUtils.beb2int(b, 8));
+        assertEquals(3,ByteUtils.beb2int(b, 12));
     }
     
     public void testMask() throws Exception {

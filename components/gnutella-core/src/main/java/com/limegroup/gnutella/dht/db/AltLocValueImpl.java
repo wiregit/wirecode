@@ -9,7 +9,7 @@ import org.limewire.io.GGEP;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.security.MerkleTree;
 
@@ -90,7 +90,7 @@ class AltLocValueImpl extends AbstractAltLocValue {
             }
             
             byte[] portBytes = ggep.getBytes(AbstractAltLocValue.PORT);
-            this.port = ByteOrder.beb2short(portBytes, 0) & 0xFFFF;
+            this.port = ByteUtils.beb2short(portBytes, 0) & 0xFFFF;
             if (!NetworkUtils.isValidPort(port)) {
                 throw new DHTValueException("Illegal port: " + port);
             }

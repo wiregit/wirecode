@@ -20,7 +20,7 @@ import junit.framework.Test;
 import org.limewire.collection.FixedSizeExpiringSet;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -418,7 +418,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
                 == UDPCrawlerPing.LOCALE_INFO);
  		
  		//see if the result we got had any uptime (it should!)
- 		short uptime = ByteOrder.leb2short(payload,9);
+ 		short uptime = ByteUtils.leb2short(payload,9);
  		assertGreaterThan(0,uptime);
  	}
  	
@@ -439,7 +439,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
                 == UDPCrawlerPing.DHT_STATUS);
         
         //see if the result we got had any uptime (it should!)
-        short uptime = ByteOrder.leb2short(payload,14);
+        short uptime = ByteUtils.leb2short(payload,14);
         assertGreaterThan(0,uptime);
  	}
  	
@@ -522,7 +522,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
  		UDPCrawlerPong pong = crawlerPongFactory.createUDPCrawlerPong(msgAgents);
         byte[] payload = pong.getPayload();
         int agentsOffset=(payload[0]+payload[1])*6+3;
-        int agentsSize = ByteOrder.leb2short(payload,agentsOffset);
+        int agentsSize = ByteUtils.leb2short(payload,agentsOffset);
  		assertGreaterThan(0, agentsSize);
  		
         ByteArrayInputStream bais = 
@@ -533,7 +533,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         DataInputStream dais = new DataInputStream(gais);
         byte [] length = new byte[2];
         dais.readFully(length);
-        int len = ByteOrder.leb2short(length,0);
+        int len = ByteUtils.leb2short(length,0);
         byte []agents = new byte[len];
         dais.readFully(agents);
             
@@ -562,7 +562,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
                 == UDPCrawlerPing.NODE_UPTIME);
         
         //we should have an uptime > 5
-        assertGreaterThan(5,ByteOrder.leb2int(payload,3));
+        assertGreaterThan(5,ByteUtils.leb2int(payload,3));
         //the offset should be correctly set
         byte[] current = new byte[6];
         System.arraycopy(payload,7,current,0,6);
@@ -585,7 +585,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
     	assertTrue((format & UDPCrawlerPing.REPLIES) == UDPCrawlerPing.REPLIES);
     	assertEquals((3 + 6 * (6  + 4)), payload.length);
     	for (int i = 9; i < payload.length; i += 6) {
-    		assertEquals(0, ByteOrder.leb2int(payload, i));
+    		assertEquals(0, ByteUtils.leb2int(payload, i));
     		i += 4;
     	}
     	
@@ -618,7 +618,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         
         int current = 0;
         for (int i = 9; i < payload.length; i += 6) {
-    		assertEquals(sent[current++], ByteOrder.leb2int(payload, i));
+    		assertEquals(sent[current++], ByteUtils.leb2int(payload, i));
     		i += 4;
     	}
     }
@@ -679,9 +679,9 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         byte rest[] = new byte[in.available()];
         in.read(rest, 0, rest.length);
         //get the selector....
-        int selector = ByteOrder.ushort2int(ByteOrder.leb2short(rest, 0));
+        int selector = ByteUtils.ushort2int(ByteUtils.leb2short(rest, 0));
         // get the version....
-        int version = ByteOrder.ushort2int(ByteOrder.leb2short(rest, 2));
+        int version = ByteUtils.ushort2int(ByteUtils.leb2short(rest, 2));
         assertEquals(VendorMessage.F_CRAWLER_PONG, selector);
         assertEquals(UDPCrawlerPong.VERSION, version);
  	}

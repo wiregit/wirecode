@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 
 /**
@@ -636,16 +636,16 @@ public class IntervalSet implements Iterable<Range>, Serializable{
         
     	IntervalSet ret = new IntervalSet();
     	for (int i =0; i< ranges.length/8;i++) {
-    		int low = (int)ByteOrder.uint2long(ByteOrder.beb2int(ranges,i*8));
-    		int high = (int)ByteOrder.uint2long(ByteOrder.beb2int(ranges,i*8+4));
+    		int low = (int)ByteUtils.uint2long(ByteUtils.beb2int(ranges,i*8));
+    		int high = (int)ByteUtils.uint2long(ByteUtils.beb2int(ranges,i*8+4));
             if (high < low || low < 0)
                 throw new IOException();
     		ret.add(Range.createRange(low,high));
     	}
         
         for (int i = 0; i < ranges5.length / 10; i++) {
-            long low = ByteOrder.beb2long(ranges5, i * 10, 5);
-            long high = ByteOrder.beb2long(ranges5, i * 10 + 5, 5);
+            long low = ByteUtils.beb2long(ranges5, i * 10, 5);
+            long high = ByteUtils.beb2long(ranges5, i * 10 + 5, 5);
             if (high < low || low < 0)
                 throw new IOException();
             ret.add(Range.createRange(low, high));

@@ -6,7 +6,7 @@ import java.util.List;
 import org.limewire.collection.IntervalSet;
 import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.GGEP;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.settings.SharingSettings;
 
@@ -41,7 +41,7 @@ public class IntervalEncoder {
         
         byte [] shortsB = new byte[shorts.size() * 2];
         for (int i = 0; i < shorts.size(); i++)
-            ByteOrder.short2beb(shorts.get(i).shortValue(), shortsB, i * 2);
+            ByteUtils.short2beb(shorts.get(i).shortValue(), shortsB, i * 2);
         
         byte [] b24B = new byte[b24.size() * 3];
         for (int i = 0; i < b24.size(); i++) {
@@ -53,7 +53,7 @@ public class IntervalEncoder {
         
         byte [] intsB = new byte[ints.size() * 4];
         for (int i = 0; i < ints.size(); i++) 
-            ByteOrder.int2beb(ints.get(i).intValue(), intsB, i * 4);
+            ByteUtils.int2beb(ints.get(i).intValue(), intsB, i * 4);
         
         int availableSpace = SharingSettings.MAX_PARTIAL_ENCODING_SIZE.getValue();
         availableSpace = addIfSpace(bytesB,g,1,availableSpace);

@@ -8,7 +8,7 @@ import java.net.UnknownHostException;
 
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -56,7 +56,7 @@ public final class UDPConnectBackRedirect extends AbstractVendorMessage {
         }
 
         // get the port from the payload....
-        _port = ByteOrder.ushort2int(ByteOrder.leb2short(getPayload(), 
+        _port = ByteUtils.ushort2int(ByteUtils.leb2short(getPayload(), 
                                                          ip.length));
         if (!NetworkUtils.isValidPort(_port))
             throw new BadPacketException("invalid port");
@@ -98,7 +98,7 @@ public final class UDPConnectBackRedirect extends AbstractVendorMessage {
             if(!NetworkUtils.isValidAddress(ip))
                 throw new IllegalArgumentException("invalid addr: " + addr);
             baos.write(ip); // write _addr
-            ByteOrder.short2leb((short)port,baos); // write _port
+            ByteUtils.short2leb((short)port,baos); // write _port
             return baos.toByteArray();
         } catch (IOException ioe) {
             ErrorService.error(ioe); // impossible.

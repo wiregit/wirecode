@@ -6,7 +6,7 @@ import java.util.Locale;
 import java.util.Random;
 
 import org.limewire.io.NetworkUtils;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 
 /**
@@ -115,10 +115,10 @@ public class GUID implements Comparable<GUID> {
                                 int second,
                                 int markPoint) {
         // You could probably avoid calls to ByteOrder as an optimization.
-        short a=ByteOrder.leb2short(guid, first);
-        short b=ByteOrder.leb2short(guid, second);
+        short a=ByteUtils.leb2short(guid, first);
+        short b=ByteUtils.leb2short(guid, second);
         short tag=tag(a, b);
-        ByteOrder.short2leb(tag, guid, markPoint);        
+        ByteUtils.short2leb(tag, guid, markPoint);        
     }
 
     /** Returns the bytes for a new GUID. */
@@ -202,7 +202,7 @@ public class GUID implements Comparable<GUID> {
             ret[i] = ip[i];
 
         // put the port in there....
-        ByteOrder.short2leb((short) port, ret, 13);
+        ByteUtils.short2leb((short) port, ret, 13);
         
         return ret;
     }
@@ -261,9 +261,9 @@ public class GUID implements Comparable<GUID> {
                                          int first,
                                          int second,
                                          int found) {
-        short a = ByteOrder.leb2short(bytes, first);
-        short b = ByteOrder.leb2short(bytes, second);
-        short foundTag = ByteOrder.leb2short(bytes, found);
+        short a = ByteUtils.leb2short(bytes, first);
+        short b = ByteUtils.leb2short(bytes, second);
+        short foundTag = ByteUtils.leb2short(bytes, found);
         short expectedTag = tag(a, b); 
         return foundTag == expectedTag;
     }
@@ -317,7 +317,7 @@ public class GUID implements Comparable<GUID> {
             return false;
 
         byte[] portBytes = new byte[2];
-        ByteOrder.short2leb((short) port, portBytes, 0);
+        ByteUtils.short2leb((short) port, portBytes, 0);
 
         return ((guidBytes[0] == ip[0]) &&
                 (guidBytes[1] == ip[1]) &&
@@ -347,7 +347,7 @@ public class GUID implements Comparable<GUID> {
     /** Gets bytes 13-14 as a port.
      */
     public static int getPort(byte[] guidBytes) {
-        return ByteOrder.ushort2int(ByteOrder.leb2short(guidBytes, 13));
+        return ByteUtils.ushort2int(ByteUtils.leb2short(guidBytes, 13));
     }
 
     /** 
@@ -442,7 +442,7 @@ public class GUID implements Comparable<GUID> {
         for (int i=0; i<SZ; i++) {
             //Treating each byte as an unsigned value ensures
             //that we don't str doesn't equal things like 0xFFFF...
-            val = ByteOrder.ubyte2int(guid[i]);
+            val = ByteUtils.ubyte2int(guid[i]);
             str = Integer.toHexString(val);
             while ( str.length() < 2 )
             str = "0" + str;

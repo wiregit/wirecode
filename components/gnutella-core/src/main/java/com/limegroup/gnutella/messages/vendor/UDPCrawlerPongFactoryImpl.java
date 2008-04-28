@@ -9,7 +9,7 @@ import java.util.zip.GZIPOutputStream;
 
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
@@ -145,7 +145,7 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
             long currentAverage = connectionManager.get().getCurrentAverageUptime()/1000L;//in sec
             if(currentAverage > Integer.MAX_VALUE)
                 currentAverage = Integer.MAX_VALUE;
-            ByteOrder.int2leb((int)currentAverage, result, 3);
+            ByteUtils.int2leb((int)currentAverage, result, 3);
         }
         
         if(request.hasDHTStatus()) {
@@ -191,7 +191,7 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
             if (request.hasConnectionTime()) {
                 long uptime = now - c.getConnectionTime();
                 short packed = (short) ( uptime / Constants.MINUTE);
-                ByteOrder.short2leb(packed, result, index);
+                ByteUtils.short2leb(packed, result, index);
                 index+=2;
             }
                 
@@ -203,7 +203,7 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
             
             if (request.hasReplies()) {
                 // pack the # of replies as reported up to Integer.MAX_VALUE
-                ByteOrder.int2leb(ByteOrder.long2int(c.getConnectionMessageStatistics().getNumQueryReplies()),
+                ByteUtils.int2leb(ByteUtils.long2int(c.getConnectionMessageStatistics().getNumQueryReplies()),
                         result,index);
                 index += 4;
             }           
@@ -227,7 +227,7 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
             try {
                 GZIPOutputStream zout = new GZIPOutputStream(baos);
                 byte [] length = new byte[2];
-                ByteOrder.short2leb((short)agents.length(),length,0);
+                ByteUtils.short2leb((short)agents.length(),length,0);
                 zout.write(length);
                 zout.write(agents.toString().getBytes());
                 zout.flush();
@@ -242,7 +242,7 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
             result = new byte[result.length+agentsB.length+2];
             
             System.arraycopy(resTemp,0,result,0,resTemp.length);
-            ByteOrder.short2leb((short)agentsB.length,result,resTemp.length);
+            ByteUtils.short2leb((short)agentsB.length,result,resTemp.length);
             System.arraycopy(agentsB,0,result,resTemp.length+2,agentsB.length);
         }
         return result;

@@ -52,7 +52,7 @@ public class LatitudeLongitude {
     static byte[] convertDegreesToBytes(double degrees, int byteCount) {
         double scale = Math.pow(2, 8 * byteCount) / 360.0;
         long value = (long) (normalizeDegrees(degrees) * scale);
-        return org.limewire.util.ByteOrder.long2bytes(value, byteCount);
+        return org.limewire.util.ByteUtils.long2bytes(value, byteCount);
     }
 
     /**
@@ -71,7 +71,7 @@ public class LatitudeLongitude {
      * converts to radians. Package-visible for unit testing.
      */
     static double toRadians(byte[] bytes) {
-        long value = org.limewire.util.ByteOrder.beb2long(bytes, 0, bytes.length);
+        long value = org.limewire.util.ByteUtils.beb2long(bytes, 0, bytes.length);
         return Math.toRadians(value / (Math.pow(2, 8 * bytes.length) / 360.0));
     }
 

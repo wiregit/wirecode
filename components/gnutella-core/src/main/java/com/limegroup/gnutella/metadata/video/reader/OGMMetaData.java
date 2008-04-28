@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.limewire.io.IOUtils;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 /**
  * Reads MetaData from Ogg Media Formats
@@ -125,7 +125,7 @@ public class OGMMetaData extends VideoDataReader {
 		// read size of vendor string
 		byte[] dword = new byte[4];
 		dis.readFully(dword);
-		int vendorStringSize = ByteOrder.leb2int(dword, 0);
+		int vendorStringSize = ByteUtils.leb2int(dword, 0);
 
 		// read vendor string
 		byte[] vendorString = new byte[vendorStringSize];
@@ -133,12 +133,12 @@ public class OGMMetaData extends VideoDataReader {
 
 		// read number of comments
 		dis.readFully(dword);
-		int numComments = ByteOrder.leb2int(dword, 0);
+		int numComments = ByteUtils.leb2int(dword, 0);
 
 		// read comments
 		for (int i = 0; i < numComments; i++) {
 			dis.readFully(dword);
-			int commentSize = ByteOrder.leb2int(dword, 0);
+			int commentSize = ByteUtils.leb2int(dword, 0);
 			byte[] comment = new byte[commentSize];
 			dis.readFully(comment);
 			comments.add(new String(comment, "UTF-8"));

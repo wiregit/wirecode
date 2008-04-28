@@ -18,7 +18,7 @@ import junit.framework.Test;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
@@ -569,7 +569,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
             
             // encode this host's address into message payload
             System.arraycopy(InetAddress.getLocalHost().getAddress(), 0, rawMessage, 0, 4);
-            ByteOrder.short2leb((short)UDP_ACCESS.getLocalPort(), rawMessage, 13);
+            ByteUtils.short2leb((short)UDP_ACCESS.getLocalPort(), rawMessage, 13);
             
             QueryRequest query = (QueryRequest)messageFactory.read(new ByteArrayInputStream(rawMessage), Network.TCP);
             assertTrue(query.desiresOutOfBandReplies());
@@ -651,7 +651,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         byte[] rawMessage = FileUtils.readFileFully(_fileWithSOFlag);
         // encode this host's address into message payload
         System.arraycopy(InetAddress.getLocalHost().getAddress(), 0, rawMessage, 0, 4);
-        ByteOrder.short2leb((short)UDP_ACCESS.getLocalPort(), rawMessage, 13);
+        ByteUtils.short2leb((short)UDP_ACCESS.getLocalPort(), rawMessage, 13);
         
         DatagramPacket pack = null;
 
@@ -733,7 +733,7 @@ public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
         byte[] rawMessage = FileUtils.readFileFully(_fileWithSO);
         // enocode
         System.arraycopy(InetAddress.getLocalHost().getAddress(), 0, rawMessage, 0, 4);
-        ByteOrder.short2leb((short)UDP_ACCESS.getLocalPort(), rawMessage, 13);
+        ByteUtils.short2leb((short)UDP_ACCESS.getLocalPort(), rawMessage, 13);
         
         
         DatagramPacket pack = null;

@@ -20,7 +20,7 @@ import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.StringUtils;
 
@@ -159,8 +159,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	public void testSimpleCreateFromStream() throws Exception {
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    
-	    ByteOrder.int2leb(257, baos);
-	    ByteOrder.int2leb(1029, baos);
+	    ByteUtils.int2leb(257, baos);
+	    ByteUtils.int2leb(1029, baos);
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
@@ -188,16 +188,16 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    
 	    // RESPONSE 1.
-	    ByteOrder.int2leb(257, baos);
-	    ByteOrder.int2leb(1029, baos);
+	    ByteUtils.int2leb(257, baos);
+	    ByteUtils.int2leb(1029, baos);
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);	    
 	    // write out closing null.
 	    baos.write((byte)0);
 	    
 	    // RESPONSE 2.
-	    ByteOrder.int2leb(2181, baos);
-	    ByteOrder.int2leb(1981, baos);
+	    ByteUtils.int2leb(2181, baos);
+	    ByteUtils.int2leb(1981, baos);
 	    name = new byte[] { 's', '.', 'a', '.', 'b', 0 };
 	    baos.write(name);	    
 	    // write out closing null.
@@ -230,8 +230,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     public void testGarbageExtension() throws Exception {
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    
-	    ByteOrder.int2leb(257, baos);
-	    ByteOrder.int2leb(1029, baos);
+	    ByteUtils.int2leb(257, baos);
+	    ByteUtils.int2leb(1029, baos);
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
@@ -257,8 +257,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	public void testMultipleGarbageExtensions() throws Exception {
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    
-	    ByteOrder.int2leb(257, baos);
-	    ByteOrder.int2leb(1029, baos);
+	    ByteUtils.int2leb(257, baos);
+	    ByteUtils.int2leb(1029, baos);
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
@@ -288,8 +288,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         final String sha1 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    
-	    ByteOrder.int2leb(257, baos);
-	    ByteOrder.int2leb(1029, baos);
+	    ByteUtils.int2leb(257, baos);
+	    ByteUtils.int2leb(1029, baos);
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
@@ -320,8 +320,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         final String sha1 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    
-	    ByteOrder.int2leb(257, baos);
-	    ByteOrder.int2leb(1029, baos);
+	    ByteUtils.int2leb(257, baos);
+	    ByteUtils.int2leb(1029, baos);
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
@@ -357,8 +357,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     public void testBearShare1Extensions() throws Exception {
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    
-	    ByteOrder.int2leb(257, baos);
-	    ByteOrder.int2leb(1029, baos);
+	    ByteUtils.int2leb(257, baos);
+	    ByteUtils.int2leb(1029, baos);
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
@@ -394,8 +394,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     public void testBearShare2Extensions() throws Exception {
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    
-	    ByteOrder.int2leb(257, baos);
-	    ByteOrder.int2leb(1029, baos);
+	    ByteUtils.int2leb(257, baos);
+	    ByteUtils.int2leb(1029, baos);
 	    byte[] name = new byte[] { 's', 'a', 'm', 'm', 'y', 0 };
 	    baos.write(name);
 	    
@@ -431,8 +431,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     public void testGGEPAltExtension() throws Exception {
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    
-	    ByteOrder.int2leb(257, baos);
-	    ByteOrder.int2leb(1029, baos);
+	    ByteUtils.int2leb(257, baos);
+	    ByteUtils.int2leb(1029, baos);
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
@@ -466,8 +466,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     public void testReadGGEPAltWithTLSExtension() throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         
-        ByteOrder.int2leb(257, baos);
-        ByteOrder.int2leb(1029, baos);
+        ByteUtils.int2leb(257, baos);
+        ByteUtils.int2leb(1029, baos);
         byte[] name = new byte[] { 's', 'a', 'm', 0 };
         baos.write(name);
         
@@ -523,8 +523,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     public void testGGEPCreateTimeExtension() throws Exception {
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    
-	    ByteOrder.int2leb(257, baos);
-	    ByteOrder.int2leb(1029, baos);
+	    ByteUtils.int2leb(257, baos);
+	    ByteUtils.int2leb(1029, baos);
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
@@ -556,8 +556,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     public void testGGEPMultipleExtensions() throws Exception {
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    
-	    ByteOrder.int2leb(257, baos);
-	    ByteOrder.int2leb(1029, baos);
+	    ByteUtils.int2leb(257, baos);
+	    ByteUtils.int2leb(1029, baos);
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    
@@ -599,8 +599,8 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         final String sha1 = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";        
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    
-	    ByteOrder.int2leb(257, baos);
-	    ByteOrder.int2leb(1029, baos);
+	    ByteUtils.int2leb(257, baos);
+	    ByteUtils.int2leb(1029, baos);
 	    byte[] name = new byte[] { 's', 'a', 'm', 0 };
 	    baos.write(name);
 	    

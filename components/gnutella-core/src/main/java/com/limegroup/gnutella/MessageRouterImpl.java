@@ -46,7 +46,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
 import org.limewire.util.Base32;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -1945,7 +1945,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
                                              queryReply.getTotalLength(),
 											 queryReply.getUniqueResultCount(),
 											 queryReply.getPartialResultCount(),
-                                             ByteOrder.beb2int(queryReply.getIPBytes(), 0));
+                                             ByteUtils.beb2int(queryReply.getIPBytes(), 0));
 
         if(rrp != null) {
             queryReply.setPriority(rrp.getBytesRouted());
@@ -3197,7 +3197,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         public synchronized Object inspect() {
             byte [] tooManyResultsByte = new byte[tooManyResults.getSize() * 2];
             for (int i = 0; i < tooManyResults.getSize(); i++)
-                ByteOrder.short2beb(tooManyResults.get(i), tooManyResultsByte, i * 2);
+                ByteUtils.short2beb(tooManyResults.get(i), tooManyResultsByte, i * 2);
             
             byte [] ttlsByte = new byte[ttls.getSize()];
             for (int i = 0; i < ttls.getSize(); i++)
@@ -3205,7 +3205,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             
             byte [] bytesRoutedByte = new byte[bytesRouted.getSize() * 4];
             for (int i = 0; i < bytesRouted.getSize(); i++)
-                ByteOrder.int2beb(bytesRouted.get(i), bytesRoutedByte, i * 4);
+                ByteUtils.int2beb(bytesRouted.get(i), bytesRoutedByte, i * 4);
             
             Map<String,Object> ret = new HashMap<String,Object>();
             ret.put("tooMany",tooManyResultsByte);
@@ -3308,7 +3308,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             
             byte [] timesByte = new byte[duplicateTimes.getSize() * 8];
             for (int i = 0; i < duplicateTimes.getSize(); i++)
-                ByteOrder.long2beb(duplicateTimes.get(i), timesByte, i * 8);
+                ByteUtils.long2beb(duplicateTimes.get(i), timesByte, i * 8);
             
             ret.put("ttls",ttlsByte);
             ret.put("hops",hopsByte);

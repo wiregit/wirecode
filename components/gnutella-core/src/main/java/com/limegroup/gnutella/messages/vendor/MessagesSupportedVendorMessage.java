@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -42,7 +42,7 @@ public final class MessagesSupportedVendorMessage extends AbstractVendorMessage 
         // populate the Set of supported messages....
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(getPayload());
-            int vectorSize = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
+            int vectorSize = ByteUtils.ushort2int(ByteUtils.leb2short(bais));
             for (int i = 0; i < vectorSize; i++)
                 _messagesSupported.add(new SupportedMessageBlock(bais));
         } catch (IOException ioe) {
@@ -73,7 +73,7 @@ public final class MessagesSupportedVendorMessage extends AbstractVendorMessage 
     private static byte[] derivePayload(Set<SupportedMessageBlock> hashSet) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)hashSet.size(), baos);
+            ByteUtils.short2leb((short)hashSet.size(), baos);
             for(SupportedMessageBlock currSMP : hashSet)
                 currSMP.encode(baos);
             return baos.toByteArray();
@@ -316,8 +316,8 @@ public final class MessagesSupportedVendorMessage extends AbstractVendorMessage 
             _vendorID = new byte[4];
             encodedBlock.read(_vendorID, 0, _vendorID.length);
 
-            _selector =ByteOrder.ushort2int(ByteOrder.leb2short(encodedBlock));
-            _version = ByteOrder.ushort2int(ByteOrder.leb2short(encodedBlock));
+            _selector =ByteUtils.ushort2int(ByteUtils.leb2short(encodedBlock));
+            _version = ByteUtils.ushort2int(ByteUtils.leb2short(encodedBlock));
             _hashCode = computeHashCode(_vendorID, _selector, _version);
         }
 
@@ -326,8 +326,8 @@ public final class MessagesSupportedVendorMessage extends AbstractVendorMessage 
          */
         public void encode(OutputStream out) throws IOException {
             out.write(_vendorID);
-            ByteOrder.short2leb((short)_selector, out);
-            ByteOrder.short2leb((short)_version, out);
+            ByteUtils.short2leb((short)_selector, out);
+            ByteUtils.short2leb((short)_version, out);
         }
 
         /** @return 0 or more if this matches the message you are looking for.

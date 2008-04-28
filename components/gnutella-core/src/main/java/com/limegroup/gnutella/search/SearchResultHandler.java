@@ -18,7 +18,7 @@ import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.security.SecureMessage;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -325,7 +325,7 @@ public final class SearchResultHandler {
                     cnc = new ClassCNetworks[]{new ClassCNetworks(), new ClassCNetworks()};
                     m.put(u, cnc);
                 }
-                cnc[0].add(ByteOrder.beb2int(qr.getIPBytes(), 0), 1);
+                cnc[0].add(ByteUtils.beb2int(qr.getIPBytes(), 0), 1);
                 cnc[1].addAll(r.getLocations());
             }
         }

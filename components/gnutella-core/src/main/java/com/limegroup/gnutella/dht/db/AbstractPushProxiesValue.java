@@ -11,7 +11,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Version;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
@@ -114,7 +114,7 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
         ggep.put(FWT_VERSION, value.getFwtVersion());
         
         byte[] port = new byte[2];
-        ByteOrder.short2beb((short)value.getPort(), port, 0);
+        ByteUtils.short2beb((short)value.getPort(), port, 0);
         ggep.put(PORT, port);
         
         try {

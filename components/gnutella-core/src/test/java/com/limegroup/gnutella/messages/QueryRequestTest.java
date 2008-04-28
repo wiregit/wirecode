@@ -17,7 +17,7 @@ import org.limewire.io.GGEP;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.MACCalculatorRepositoryManager;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Injector;
@@ -1179,7 +1179,7 @@ public final class QueryRequestTest extends LimeTestCase {
         PositionByteArrayOutputStream out = new PositionByteArrayOutputStream();
         int minspeed = new Random().nextInt();
         minspeed &= QueryRequest.SPECIAL_OUTOFBAND_MASK;
-        ByteOrder.short2leb((short)minspeed, out); // write minspeed
+        ByteUtils.short2leb((short)minspeed, out); // write minspeed
         out.write("query".getBytes("UTF-8"));              // write query
         out.write(0);                             // null
         int startGem = out.getPos();

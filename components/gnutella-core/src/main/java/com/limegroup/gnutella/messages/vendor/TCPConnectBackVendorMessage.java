@@ -6,7 +6,7 @@ import java.io.OutputStream;
 
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.messages.BadPacketException;
 
@@ -39,7 +39,7 @@ public final class TCPConnectBackVendorMessage extends AbstractVendorMessage {
             throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: " +
                                          payload.length);
         // get the port from the payload....
-        _port = ByteOrder.ushort2int(ByteOrder.leb2short(getPayload(), 0));
+        _port = ByteUtils.ushort2int(ByteUtils.leb2short(getPayload(), 0));
         if( !NetworkUtils.isValidPort(_port) )
             throw new BadPacketException("invalid port");
     }
@@ -67,7 +67,7 @@ public final class TCPConnectBackVendorMessage extends AbstractVendorMessage {
         try {
             // i do it during construction....
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)port,baos); // write _port
+            ByteUtils.short2leb((short)port,baos); // write _port
             return baos.toByteArray();
         } catch (IOException ioe) {
             ErrorService.error(ioe); // impossible.

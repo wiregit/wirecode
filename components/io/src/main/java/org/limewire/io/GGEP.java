@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.limewire.service.ErrorService;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.NameValue;
 
 
@@ -465,7 +465,7 @@ public class GGEP {
     public void put(String key, int value) throws IllegalArgumentException {
         if (value < 0) // int2minLeb doesn't work on negative values
             throw new IllegalArgumentException("Negative value: " + value + " for key: " + key);
-        put(key, ByteOrder.int2minLeb(value));
+        put(key, ByteUtils.int2minLeb(value));
     }
 
     /** 
@@ -479,7 +479,7 @@ public class GGEP {
     public void put(String key, long value) throws IllegalArgumentException {
         if (value < 0) // long2minLeb doesn't work on negative values
             throw new IllegalArgumentException("Negative value: " + value + " for key: " + key);
-        put(key, ByteOrder.long2minLeb(value));
+        put(key, ByteUtils.long2minLeb(value));
     }
 
     /** 
@@ -534,7 +534,7 @@ public class GGEP {
             throw new BadGGEPPropertyException("No bytes");
         if (bytes.length>4)
             throw new BadGGEPPropertyException("Integer too big");
-        return ByteOrder.leb2int(bytes, 0, bytes.length);
+        return ByteUtils.leb2int(bytes, 0, bytes.length);
     }
     
     /**
@@ -551,7 +551,7 @@ public class GGEP {
             throw new BadGGEPPropertyException("No bytes");
         if (bytes.length>8)
             throw new BadGGEPPropertyException("Integer too big");
-        return ByteOrder.leb2long(bytes, 0, bytes.length);
+        return ByteUtils.leb2long(bytes, 0, bytes.length);
     }
 
     /**
@@ -670,7 +670,7 @@ public class GGEP {
         ByteArrayOutputStream sink = new ByteArrayOutputStream();        
     
         while (currIndex < srcLen) {
-            code = ByteOrder.ubyte2int(src[currIndex++]);
+            code = ByteUtils.ubyte2int(src[currIndex++]);
             if ((currIndex+(code-2)) >= srcLen)
                 throw new IOException();
             for (int i = 1; i < code; i++) {

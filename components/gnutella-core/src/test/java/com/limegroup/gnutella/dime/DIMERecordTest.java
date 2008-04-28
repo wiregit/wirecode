@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import junit.framework.Test;
 
@@ -219,10 +219,10 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.LimeTestCa
         assertEquals(12, in.read(header, 0, 12)); // must read 12 bytes of the header.
         assertEquals(0x08, header[0]); // version + flags
         assertEquals(DIMERecord.TYPE_MEDIA_TYPE, header[1]); // type + reserve
-        int optionsLength = ByteOrder.beb2int(header, 2, 2);
-        int idLength = ByteOrder.beb2int(header, 4, 2);
-        int typeLength = ByteOrder.beb2int(header, 6, 2);
-        int dataLength = ByteOrder.beb2int(header, 8, 4);
+        int optionsLength = ByteUtils.beb2int(header, 2, 2);
+        int idLength = ByteUtils.beb2int(header, 4, 2);
+        int typeLength = ByteUtils.beb2int(header, 6, 2);
+        int dataLength = ByteUtils.beb2int(header, 8, 4);
         assertEquals(4, optionsLength);
         assertEquals(1, idLength);
         assertEquals(2, typeLength);
@@ -244,10 +244,10 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.LimeTestCa
         out = new ByteArrayOutputStream();
         out.write(0x08);
         out.write(DIMERecord.TYPE_MEDIA_TYPE);
-        ByteOrder.int2beb(5, out, 2); // options length: 5
-        ByteOrder.int2beb(6, out, 2); // id length: 6
-        ByteOrder.int2beb(7, out, 2); // type length: 7
-        ByteOrder.int2beb(8, out, 4); // data length: 8
+        ByteUtils.int2beb(5, out, 2); // options length: 5
+        ByteUtils.int2beb(6, out, 2); // id length: 6
+        ByteUtils.int2beb(7, out, 2); // type length: 7
+        ByteUtils.int2beb(8, out, 4); // data length: 8
         out.write(new byte[] { 's', 'a', 'm', 'm', 'y',  0 ,  0 ,  0  } );
         out.write(new byte[] { 'b', 'e', 'r', 'l', 'i', 'n',  0 ,  0  } );
         out.write(new byte[] { 'h', 'a', 'c', 'k', 'e', 'r', 's',  0  } );
@@ -266,10 +266,10 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.LimeTestCa
         out = new ByteArrayOutputStream();
         out.write(0x08);
         out.write(DIMERecord.TYPE_MEDIA_TYPE);
-        ByteOrder.int2beb(5, out, 2); // options length: 5
-        ByteOrder.int2beb(6, out, 2); // id length: 6
-        ByteOrder.int2beb(7, out, 2); // type length: 7
-        ByteOrder.int2beb(8, out, 4); // data length: 8
+        ByteUtils.int2beb(5, out, 2); // options length: 5
+        ByteUtils.int2beb(6, out, 2); // id length: 6
+        ByteUtils.int2beb(7, out, 2); // type length: 7
+        ByteUtils.int2beb(8, out, 4); // data length: 8
         out.write(new byte[] { 's', 'a', 'm', 'm', 'y',  0 ,  0  } );
         out.write(new byte[] { 'b', 'e', 'r', 'l', 'i', 'n',  0 ,  0  } );
         out.write(new byte[] { 'h', 'a', 'c', 'k', 'e', 'r', 's',  0  } );
@@ -317,7 +317,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.LimeTestCa
     	    out.write( 0x00 ); // no type + reserved
     	    out.write( new byte[] { 0, 0 } ); // option length: 0
     	    out.write( new byte[] { 0, 0 } ); // id length: 0
-    	    ByteOrder.int2beb(3, out, 2); // type length: 3
+    	    ByteUtils.int2beb(3, out, 2); // type length: 3
     	    out.write( new byte[] { 0, 0, 0, 0 } ); // data length: 0
     	    out.write( new byte[] { 's', 'a', 'm', 0 } ); // type + padding
     	    in = new ByteArrayInputStream(out.toByteArray());
@@ -377,7 +377,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.LimeTestCa
 	    out.write( 0x01 << 4 ); // type
 	    out.write( new byte[] { 0, 0 } ); // option length: 0
 	    out.write( new byte[] { 0, 0 } ); // id length: 0
-	    ByteOrder.int2beb(3, out, 2);
+	    ByteUtils.int2beb(3, out, 2);
 	    out.write( new byte[] { 0, 0, 0, 0 } ); // data length: 0
 	    out.write( new byte[] { 's', 'a', 'm', 0 } ); // type data + padding.
 	    in = new ByteArrayInputStream(out.toByteArray());
@@ -438,7 +438,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.LimeTestCa
 	    out.write( 0x02 << 4 ); // type
 	    out.write( new byte[] { 0, 0 } ); // option length: 0
 	    out.write( new byte[] { 0, 0 } ); // id length: 0
-	    ByteOrder.int2beb(3, out, 2);
+	    ByteUtils.int2beb(3, out, 2);
 	    out.write( new byte[] { 0, 0, 0, 0 } ); // data length: 0
 	    out.write( new byte[] { 's', 'a', 'm', 0 } ); // type data + padding.
 	    in = new ByteArrayInputStream(out.toByteArray());
@@ -500,7 +500,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.LimeTestCa
     	    out.write( 0x03 << 4); // no type + reserved
     	    out.write( new byte[] { 0, 0 } ); // option length: 0
     	    out.write( new byte[] { 0, 0 } ); // id length: 0
-    	    ByteOrder.int2beb(3, out, 2); // type length: 3
+    	    ByteUtils.int2beb(3, out, 2); // type length: 3
     	    out.write( new byte[] { 0, 0, 0, 0 } ); // data length: 0
     	    out.write( new byte[] { 's', 'a', 'm', 0 } ); // type + padding
     	    in = new ByteArrayInputStream(out.toByteArray());
@@ -560,7 +560,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.LimeTestCa
     	    out.write( 0x04 << 4 ); // no type + reserved
     	    out.write( new byte[] { 0, 0 } ); // option length: 0
     	    out.write( new byte[] { 0, 0 } ); // id length: 0
-    	    ByteOrder.int2beb(3, out, 2); // type length: 3
+    	    ByteUtils.int2beb(3, out, 2); // type length: 3
     	    out.write( new byte[] { 0, 0, 0, 0 } ); // data length: 0
     	    out.write( new byte[] { 's', 'a', 'm', 0 } ); // type + padding
     	    in = new ByteArrayInputStream(out.toByteArray());
@@ -588,7 +588,7 @@ public final class DIMERecordTest extends com.limegroup.gnutella.util.LimeTestCa
     	    out.write( new byte[] { 0, 0 } ); // option length: 0
     	    out.write( new byte[] { 0, 0 } ); // id length: 0
     	    out.write( new byte[] { 0, 0 } ); // type length: 0
-    	    ByteOrder.int2beb(6, out, 4); // data length: 6
+    	    ByteUtils.int2beb(6, out, 4); // data length: 6
     	    //data + padding
     	    out.write( new byte[] { 's', 'a', 'm', 'u', 'e', 'l', 0, 0 } );
     	    in = new ByteArrayInputStream(out.toByteArray());

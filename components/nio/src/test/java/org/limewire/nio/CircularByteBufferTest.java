@@ -11,7 +11,7 @@ import junit.framework.Test;
 import org.limewire.nio.channel.ReadBufferChannel;
 import org.limewire.nio.channel.WriteBufferChannel;
 import org.limewire.util.BaseTestCase;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 
 
@@ -141,7 +141,7 @@ public class CircularByteBufferTest extends BaseTestCase {
     	CircularByteBuffer buf = new CircularByteBuffer(4, cache);
     	
     	byte [] data = new byte[4];
-    	ByteOrder.int2leb(50, data, 0);
+    	ByteUtils.int2leb(50, data, 0);
     	ReadableByteChannel source = new ReadBufferChannel(data);
     	buf.read(source);
     	
@@ -152,7 +152,7 @@ public class CircularByteBufferTest extends BaseTestCase {
     	buf.read(source);
     	assertEquals(50, buf.getInt());
     	
-    	ByteOrder.int2beb(50, data, 0);
+    	ByteUtils.int2beb(50, data, 0);
     	buf.order(java.nio.ByteOrder.BIG_ENDIAN);
     	source = new ReadBufferChannel(data);
     	buf.read(source);
@@ -167,7 +167,7 @@ public class CircularByteBufferTest extends BaseTestCase {
     	assertNull(cache.checkedOut);
     	CircularByteBuffer buf = new CircularByteBuffer(4, cache);
     	byte [] data = new byte[4];
-    	ByteOrder.int2leb(50, data, 0);
+    	ByteUtils.int2leb(50, data, 0);
     	ReadableByteChannel source = new ReadBufferChannel(data);
     	buf.read(source);
     	
@@ -192,7 +192,7 @@ public class CircularByteBufferTest extends BaseTestCase {
     public static void testDiscard() throws Exception {
     	CircularByteBuffer buf = new CircularByteBuffer(4, cache);
     	byte [] data = new byte[4];
-    	ByteOrder.int2leb(50, data, 0);
+    	ByteUtils.int2leb(50, data, 0);
     	ReadableByteChannel source = new ReadBufferChannel(data);
     	buf.read(source);
     	

@@ -1,7 +1,7 @@
 
 package com.limegroup.gnutella.messages.vendor;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -93,9 +93,9 @@ public class UDPCrawlerPing extends AbstractVendorMessage {
 		byte [] temp = new byte [2];
 		byte [] payload = new byte[3];
 		
-		ByteOrder.short2leb((short)numberUP,temp,0);
+		ByteUtils.short2leb((short)numberUP,temp,0);
 		payload[0]=temp[0];
-		ByteOrder.short2leb((short)numberLeaves,temp,0);
+		ByteUtils.short2leb((short)numberLeaves,temp,0);
 		payload[1] = temp[0];
 		
 		//the third byte is the requested format
@@ -121,8 +121,8 @@ public class UDPCrawlerPing extends AbstractVendorMessage {
 			throw new BadPacketException();
 		
 		//a new version would ideally keep the first 3 bytes the same.
-		_numberUP = ByteOrder.ubyte2int(payload[0]);
-		_numberLeaves = ByteOrder.ubyte2int(payload[1]);
+		_numberUP = ByteUtils.ubyte2int(payload[0]);
+		_numberLeaves = ByteUtils.ubyte2int(payload[1]);
 		_format = payload[2];
 		
 		//trim the features

@@ -166,7 +166,7 @@ public abstract class RUDPMessageImpl implements RUDPMessage {
         out.write((byte)1);
         out.write((byte)0);
         // write out the length of the payload.
-        org.limewire.util.ByteOrder.int2leb(_data2.remaining(), out);
+        org.limewire.util.ByteUtils.int2leb(_data2.remaining(), out);
         // write the payload.
         if ( _data2.hasRemaining() )
             out.write(_data2.array(), _data2.arrayOffset() + _data2.position(), _data2.remaining());

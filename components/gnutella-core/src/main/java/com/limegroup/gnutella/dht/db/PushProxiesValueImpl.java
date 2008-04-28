@@ -22,7 +22,7 @@ import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 
 public class PushProxiesValueImpl extends AbstractPushProxiesValue {
@@ -110,7 +110,7 @@ public class PushProxiesValueImpl extends AbstractPushProxiesValue {
             this.fwtVersion = ggep.getInt(AbstractPushProxiesValue.FWT_VERSION);
             
             byte[] portBytes = ggep.getBytes(AbstractPushProxiesValue.PORT);
-            this.port = ByteOrder.beb2short(portBytes, 0) & 0xFFFF;
+            this.port = ByteUtils.beb2short(portBytes, 0) & 0xFFFF;
             if (!NetworkUtils.isValidPort(port)) {
                 throw new DHTValueException("Illegal port: " + port);
             }

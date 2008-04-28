@@ -5,7 +5,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 /**
  * This is the data sent to the server. It includes a String query, and binary
@@ -55,8 +55,8 @@ public class UserQueryEventData {
         byte[] bytes = new byte[length];
         AtomicInteger inc = new AtomicInteger(0);
         bytes[inc.getAndAdd(1)] = (byte) (0xff & impressions.size());
-        System.arraycopy(ByteOrder.long2bytes(millisSinceToday, 4), 0, bytes, inc.getAndAdd(4), 4);
-        System.arraycopy(ByteOrder.long2bytes(event.getOriginalQueryTime().getTime(), 8), 0,
+        System.arraycopy(ByteUtils.long2bytes(millisSinceToday, 4), 0, bytes, inc.getAndAdd(4), 4);
+        System.arraycopy(ByteUtils.long2bytes(event.getOriginalQueryTime().getTime(), 8), 0,
                 bytes, inc.getAndAdd(8), 8);
         for (int i = 0; i < impressions.size(); i++) {
             Impression imp = impressions.get(i);
@@ -64,9 +64,9 @@ public class UserQueryEventData {
             bytes[inc.getAndAdd(1)] = (byte) (0xff & binderName.length());
             System.arraycopy(binderName.getBytes(), 0, bytes, inc.getAndAdd(binderName.length()),
                     binderName.length());
-            System.arraycopy(ByteOrder.long2bytes(imp.getPromoUniqueID(), 8), 0, bytes,
+            System.arraycopy(ByteUtils.long2bytes(imp.getPromoUniqueID(), 8), 0, bytes,
                     inc.getAndAdd(8), 8);
-            System.arraycopy(ByteOrder.long2bytes(imp.getTimeShown().getTime(), 8), 0, bytes,
+            System.arraycopy(ByteUtils.long2bytes(imp.getTimeShown().getTime(), 8), 0, bytes,
                     inc.getAndAdd(8), 8);
         }
         return bytes;

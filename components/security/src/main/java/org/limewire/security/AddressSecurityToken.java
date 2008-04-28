@@ -5,7 +5,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 /**
  * A token that embeds an IP address and port, allowing one side to 
@@ -147,8 +147,8 @@ public final class AddressSecurityToken extends AbstractSecurityToken {
             // Start out with 64 bits |0x00|0x00|port(2bytes)|ip(4bytes)|
             // and encrypt it with our secret key material.
             data = new byte[8];
-            ByteOrder.int2beb(port, data, 0);
-            ByteOrder.int2beb(ipInt, data, 4);
+            ByteUtils.int2beb(port, data, 0);
+            ByteUtils.int2beb(ipInt, data, 4);
             
         }
         

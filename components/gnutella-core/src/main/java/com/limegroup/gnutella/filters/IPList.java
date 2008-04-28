@@ -13,7 +13,7 @@ import org.limewire.collection.Trie.Cursor;
 import org.limewire.io.IP;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 
 /**
@@ -213,7 +213,7 @@ public class IPList {
         public SelectStatus select(Entry<? extends IP, ? extends IP> entry) {
             IP key = entry.getKey();
             byte[] buf = new byte[4];
-            ByteOrder.int2beb(key.addr,buf,0);
+            ByteUtils.int2beb(key.addr,buf,0);
             
             if(!allowPrivateIPs && networkInstanceUtils.isPrivateAddress(buf)) {
                 isInvalid = true;

@@ -2,7 +2,7 @@ package org.limewire.collection;
 
 import java.io.Serializable;
 
-import org.limewire.util.ByteOrder;
+import org.limewire.util.ByteUtils;
 
 /**
  * An implementation of range that stores data in longs
@@ -75,8 +75,8 @@ public class LongInterval extends Range implements Serializable {
     }
     
     private void toBytes8(byte [] dest, int offset) {
-        ByteOrder.int2beb((int)low,dest,offset);
-        ByteOrder.int2beb((int)high,dest,offset+4);
+        ByteUtils.int2beb((int)low,dest,offset);
+        ByteUtils.int2beb((int)high,dest,offset+4);
     }
     
     public final boolean isLong() {
