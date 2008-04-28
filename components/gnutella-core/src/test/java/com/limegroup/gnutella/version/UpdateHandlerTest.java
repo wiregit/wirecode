@@ -145,10 +145,10 @@ public class UpdateHandlerTest extends LimeTestCase {
         });
         UpdateHandlerImpl updateHandler = (UpdateHandlerImpl) injector
                 .getInstance(UpdateHandler.class);
-        assertEquals("http://update0.limewire.com/update.def", updateHandler.getTimeoutUrl());
+        assertEquals("http://update0.limewire.com/v2/update.def", updateHandler.getTimeoutUrl());
         List<String> maxUrls = updateHandler.getMaxUrls();
         for (int i = 0; i < 10; i++)
-            assertEquals("http://update" + (i + 1) + ".limewire.com/update.def", maxUrls.get(i));
+            assertEquals("http://update" + (i + 1) + ".limewire.com/v2/update.def", maxUrls.get(i));
         assertEquals(10, maxUrls.size());
     }
 

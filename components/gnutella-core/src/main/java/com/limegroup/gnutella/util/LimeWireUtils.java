@@ -340,8 +340,8 @@ public final class LimeWireUtils {
     public static File getRequestedUserSettingsLocation() {
 
         // Look for runtime settings for Portable LimeWire
-        Portable portable = new PortableImpl(); // This only gets called once as the program starts
-        File portableLocation = null;
+        Portable portable = new PortableImpl();
+        File portableLocation;
         try {
             if (!portable.isPortable())                      // No settings
                 portableLocation = null;
@@ -349,7 +349,10 @@ public final class LimeWireUtils {
                 portableLocation = portable.getSettingsLocation();
             else                                             // Bad settings
                 portableLocation = PortableImpl.getDefaultSettingsLocation();
-        } catch (IOException e) {} // Error trying to get default settings
+        } catch (IOException e) {
+            portableLocation = null;
+        }
+        
         if (portableLocation != null)
             return portableLocation;
 
