@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-21 11:30-0400\n"
+"POT-Creation-Date: 2008-04-28 11:30-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -91,88 +91,92 @@ msgid ""
 "to 'Resume' your downloads."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:376
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:380
 msgid "Loading TLS Encryption..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:388
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:392
 msgid "Loading Safe Content Management..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:393
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:397
 msgid "Loading Message Router..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:398
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:402
 msgid "Checking for Updates..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:403
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:407
 msgid "Loading Upload Management..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:417
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:421
 msgid "Loading Connection Listener..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:426
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:430
 msgid "Loading Connection Management..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:435
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:439
 msgid "Loading Download Management..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:441
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:445
 msgid "Loading Ultrapeer/DHT Management..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:446
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:450
 msgid "Locating Peers..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:462
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:466
 msgid "Loading Shared Files..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:467
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:471
 msgid "Loading BitTorrent Management..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:482
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:486
 msgid "Loading Old Downloads..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:487
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:491
 msgid "Attaching LimeWire Store Listeners..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:492
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:496
 msgid "Loading Directed Querier..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:497
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:501
 msgid "Loading Magnet Listener..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:508
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:512
 msgid "Loading Peer Listener..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:513
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:517
 msgid "Loading Stale Connection Management..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:518
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:522
 msgid "Loading Saved Files..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:523
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:527
 msgid "Loading Spam Management..."
 msgstr ""
 
-#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:528
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:532
 msgid "Loading Network Listeners..."
+msgstr ""
+
+#: core/com/limegroup/gnutella/LifecycleManagerImpl.java:553
+msgid "Loading Promotion System..."
 msgstr ""
 
 #. These are used as resource keys to retreive descriptions in the GUI
@@ -299,21 +303,26 @@ msgstr ""
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:124
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:131
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:282
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreFileNamePaneItem.java:46
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:49
 msgid "Title"
 msgstr ""
 
+#. *
+#. * Variables for displaying substitutable values, visual form
+#. * is converted to the selected language
+#.
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:89
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:126
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:284
-#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:57
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreFileNamePaneItem.java:43
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:42
 msgid "Artist"
 msgstr ""
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:90
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:286
-#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:58
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreFileNamePaneItem.java:44
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:65
 msgid "Album"
 msgstr ""
@@ -326,6 +335,7 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:92
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:290
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreFileNamePaneItem.java:45
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:73
 msgid "Track"
 msgstr ""
@@ -3132,7 +3142,7 @@ msgid "Size"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:379
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:359
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:358
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:73
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:251
 msgid "Chat"
@@ -3143,10 +3153,9 @@ msgstr ""
 msgid "Progress"
 msgstr ""
 
-#. addOption(STORE_KEY, STORE_ADVANCED_KEY, GUIMediator.getStringResource("Template"), StoreDirectoryTemplatePaneItem.class);
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:395
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:330
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:387
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:329
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:386
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:68
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:81
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:267
@@ -3157,12 +3166,12 @@ msgstr ""
 #. connectionsPane.add(new AutoConnectActivePaneItem("AUTO_CONNECT_ACTIVE"));
 #. bittorrent
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:918
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:345
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:344
 msgid "BitTorrent"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:201
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:332
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:331
 msgid "Downloads"
 msgstr ""
 
@@ -3582,7 +3591,6 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:99
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:327
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirDataLine.java:49
 #: gui/com/limegroup/gnutella/gui/options/panes/SaveDirPaneItem.java:30
 msgid "Save Folder"
@@ -3735,7 +3743,7 @@ msgstr ""
 
 #. upload options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:155
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:335
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:334
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:58
 msgid "Uploads"
 msgstr ""
@@ -3774,18 +3782,18 @@ msgstr ""
 
 #. for sharing gnutella
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:230
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:320
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:371
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:321
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:370
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:19
 msgid "Sharing"
 msgstr ""
 
 #. advanced options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:280
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:317
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:322
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:347
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:397
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:318
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:346
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:396
 #: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:201
 msgid "Advanced"
 msgstr ""
@@ -4267,163 +4275,163 @@ msgstr ""
 msgid "Revert All Settings to the Factory Defaults"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:207
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:208
 #: gui/com/limegroup/gnutella/gui/search/FilterBox.java:76
 msgid "Options"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:224
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:225
 msgid ""
 "You have made changes to some of LimeWire's settings. Would you like to save "
 "these changes?"
 msgstr ""
 
 #. set text before adding the document listener
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:255
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:256
 msgid "Search here"
 msgstr ""
 
 #. for saving gnutella
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:315
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:316
 msgid "Saving"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:316
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:321
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:336
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:346
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:385
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:317
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:322
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:335
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:345
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:384
 msgid "Basic"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:324
 msgid "Types"
 msgstr ""
 
 #. store options
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:326
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:327
 msgid "LimeWire Store"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:337
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:336
 msgid "Slots"
 msgstr ""
 
 #. uploadSlotsPane.add(new SoftMaximumUploadsPaneItem("UPLOAD_SOFT_MAX"));
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:340
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:339
 #: gui/com/limegroup/gnutella/gui/tabs/ConnectionsTab.java:26
 msgid "Connections"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:355
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:354
 msgid "System Tray"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:357
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:356
 msgid "Updates"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:361
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:360
 msgid "Player"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:363
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:362
 msgid "Status Bar"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:367
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:366
 msgid "iTunes"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:369
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:368
 #: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:15
 msgid "Importing"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:374
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:373
 msgid "Helper Apps"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:377
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:376
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:76
 msgid "Bug Reports"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:379
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:378
 msgid "View"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:380
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:379
 msgid "Popups"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:381
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:380
 msgid "Autocomplete"
 msgstr ""
 
 #. search options
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:384
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:383
 msgid "Searching"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:386
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:385
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:32
 msgid "Quality"
 msgstr ""
 
 #. filter options
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:390
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:389
 msgid "Filters"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:391
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:390
 msgid "Content"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:392
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:391
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:320
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:494
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:596
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:618
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:621
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:110
 msgid "Junk"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:393
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:392
 msgid "Keywords"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:394
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:393
 msgid "Hosts"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:398
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:397
 msgid "Preferencing"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:399
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:398
 msgid "Firewall"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:400
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:399
 msgid "Proxy"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:401
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:400
 #: gui/com/limegroup/gnutella/gui/options/panes/NetworkInterfacePaneItem.java:33
 msgid "Network Interface"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:403
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:402
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:58
 msgid "File Associations"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:405
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:404
 msgid "Performance"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:407
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:406
 msgid "System Boot"
 msgstr ""
 
@@ -5467,61 +5475,32 @@ msgstr ""
 #. *
 #. * Title of the item in the pane, this name will be displayed in a line border
 #.
-#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:34
-msgid "LimeWire Store - Subfolder Template"
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreFileNamePaneItem.java:32
+msgid "LimeWire Store - File Name"
 msgstr ""
 
 #. *
 #. * General description of what this item is, and what its used for
 #.
-#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:39
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreFileNamePaneItem.java:37
 msgid ""
-"You can customize where store files are saved. By creating a template Lime "
-"Wire can automatically save purchased files into folders using the artists "
-"name and album title. \n"
-"\n"
-"e.g:\n"
-"Purchased song: Artist Name - Track 1\n"
-" Template: ${artist} \n"
-" How its saved: LimeWireStore/Artist Name/Artist Name - Track 1"
+"You can choose how to name the files purchased from the LimeWire Store and "
+"where to save them."
 msgstr ""
 
 #. *
-#. * Label for the finished template
+#. * Labels for templates
 #.
-#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:44
-msgid "Template"
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreFileNamePaneItem.java:61
+msgid "File Name"
 msgstr ""
 
-#. *
-#. * Label for a drop down with options that can be added to the template
-#.
-#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:49
-msgid "Variables"
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreFileNamePaneItem.java:63
+msgid "SubFolder"
 msgstr ""
 
-#. *
-#. * Label for predefined templates
-#.
-#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:54
-msgid "Templates"
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:125
-msgid "Insert a Variable"
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:156
-msgid "Insert a template"
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:160
-msgid "iTunes like"
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/options/panes/StoreDirectoryTemplatePaneItem.java:197
-#, java-format
-msgid "Invalid template {0}"
+#: gui/com/limegroup/gnutella/gui/options/panes/StoreFileNamePaneItem.java:236
+msgid "No Subfolder"
 msgstr ""
 
 #. *
@@ -5751,7 +5730,7 @@ msgstr ""
 #. mark 'em red
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:318
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:480
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:615
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:618
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:112
 msgid "Not Junk"
 msgstr ""
@@ -5759,12 +5738,12 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:321
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:495
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:597
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:619
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:622
 msgid "Mark selected search results as Junk"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:481
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:616
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:619
 msgid "Mark selected search results as Not Junk"
 msgstr ""
 
@@ -5772,11 +5751,11 @@ msgstr ""
 msgid "Search More"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:702
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:705
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1048
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1051
 msgid "More Info..."
 msgstr ""
 
@@ -5930,42 +5909,42 @@ msgstr ""
 msgid "Firewalled Host"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:453
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:456
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
 "network."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:458
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:461
 msgid "Your search is too long. Please make your search smaller and try again."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:461
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:465
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:464
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:468
 msgid ""
 "Your search is too specific. Please make your search smaller and try again."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:470
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:473
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
 
 #. if not connected or connecting, show one message.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:479
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:482
 msgid ""
 "You are not connected to the network. To connect, select \"Connect\" from "
 "the \"File\" menu. Your search may not return any results until you connect."
 msgstr ""
 
 #. if attempting to connect, show another.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:482
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:485
 msgid ""
 "LimeWire is currently connecting to the network. Your search may not return "
 "many results until you are fully connected to the network."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:784
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:787
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
