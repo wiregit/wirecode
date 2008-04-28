@@ -48,7 +48,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 @Singleton
 public class SimppManagerImpl implements SimppManager {
     
-    private static final Log LOG = LogFactory.getLog(CopyOfSimppManager.class);
+    private static final Log LOG = LogFactory.getLog(SimppManagerImpl.class);
     
     private static int MIN_VERSION = 3;
    
