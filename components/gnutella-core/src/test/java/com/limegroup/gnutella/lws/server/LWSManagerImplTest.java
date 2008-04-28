@@ -34,7 +34,10 @@ public class LWSManagerImplTest extends LimeTestCase {
 
     public void testSendingMessageToServerWithEmptyHost() throws IOException {
         Injector injector = LimeTestUtils.createInjector();
-        // precondition: host should be empty
+        // precondition: host should NOT be empty when we're not setting remotely
+        //               but set to empty now for tseting if it were empty
+        LWSSettings.LWS_AUTHENTICATION_HOSTNAME.setValue("");
+        LWSSettings.LWS_DOWNLOAD_PREFIX.setValue("");
         assertEquals("", LWSSettings.LWS_AUTHENTICATION_HOSTNAME.getValue());
         
         LWSManagerImpl lwsManagerImpl = new LWSManagerImpl(injector.getInstance(HttpExecutor.class), new LWSDispatcherFactoryImpl());
@@ -52,7 +55,10 @@ public class LWSManagerImplTest extends LimeTestCase {
     
     public void testSendingMessageToServerWithEmptyDownloadPrefix() throws IOException {
         Injector injector = LimeTestUtils.createInjector();
-        // precondition: download prefix should be empty
+        // precondition: download prefix should NOT be empty when we're not setting remotely
+        //               but set to empty now for tseting if it were empty
+        LWSSettings.LWS_DOWNLOAD_PREFIX.setValue("");
+        LWSSettings.LWS_AUTHENTICATION_HOSTNAME.setValue("");
         assertEquals("", LWSSettings.LWS_DOWNLOAD_PREFIX.getValue());
         
         LWSManagerImpl lwsManagerImpl = new LWSManagerImpl(injector.getInstance(HttpExecutor.class), new LWSDispatcherFactoryImpl());

@@ -19,7 +19,7 @@ public final class LWSSettings extends LimeProps {
      * <br>e.g. <code>1.2.3.4</code>
      */
     public static final StringSetting LWS_AUTHENTICATION_HOSTNAME = FACTORY.createRemoteStringSetting(
-            "LWS_AUTHENTICATION_HOSTNAME", "", "LWSSettings.lwsAuthenticationHostname");
+            "LWS_AUTHENTICATION_HOSTNAME", "www.store.limewire.com", "LWSSettings.lwsAuthenticationHostname");
 
     /**
      * The port on which we connect for authentication. This can be
@@ -27,7 +27,7 @@ public final class LWSSettings extends LimeProps {
      * <br>e.g. <code>80</code>
      */
     public static final IntSetting LWS_AUTHENTICATION_PORT = FACTORY.createRemoteIntSetting(
-            "LWS_AUTHENTICATION_PORT", 8080, "LWSSettings.lwsAuthenticationPort", -Integer.MIN_VALUE,
+            "LWS_AUTHENTICATION_PORT", 80, "LWSSettings.lwsAuthenticationPort", -Integer.MIN_VALUE,
             10000);
     
     /**
@@ -43,7 +43,7 @@ public final class LWSSettings extends LimeProps {
      * <br>e.g. <code>1.2.3.4:80</code>
      */
     public static final StringSetting LWS_DOWNLOAD_PREFIX = FACTORY.createRemoteStringSetting(
-            "LWS_DOWNLOAD_PREFIX", "", "LWSSettings.lwsDownloadPrefix"); 
+            "LWS_DOWNLOAD_PREFIX", "www.store.limewire.com:80", "LWSSettings.lwsDownloadPrefix"); 
     
     /**
      * The hostname to which we connect for adding to playlists.
