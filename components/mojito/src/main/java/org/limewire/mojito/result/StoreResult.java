@@ -59,6 +59,7 @@ public class StoreResult implements Result {
         return values;
     }
     
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         

@@ -207,6 +207,7 @@ public class Endpoint implements Cloneable, Connectable, IpPort, java.io.Seriali
         this.port = ep.port;
     }
 
+    @Override
     public String toString()
     {
         return hostname+":"+port;
@@ -322,6 +323,7 @@ public class Endpoint implements Cloneable, Connectable, IpPort, java.io.Seriali
      * Endpoints are equal if their hostnames and ports are.  The number
      * and size of files does not matter.
      */
+    @Override
     public boolean equals(Object o) {
         if(!(o instanceof Endpoint))
             return false;
@@ -331,6 +333,7 @@ public class Endpoint implements Cloneable, Connectable, IpPort, java.io.Seriali
         return hostname.equals(e.hostname) && port==e.port;
     }
 
+    @Override
     public int hashCode()
     {
         //This is good enough, since one host rarely has multiple ports.
@@ -338,6 +341,7 @@ public class Endpoint implements Cloneable, Connectable, IpPort, java.io.Seriali
     }
 
 
+    @Override
     protected Object clone()
     {
         return new Endpoint(new String(hostname), port, files, kbytes);

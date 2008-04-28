@@ -26,7 +26,8 @@ class OutgoingBTHandshaker extends BTHandshaker {
 		this.observer = torrent.getFetcher();
 	}
 
-	public void startHandshaking() {
+	@Override
+    public void startHandshaking() {
 		if (shutdown)
 			return;
 		initOutgoingHandshake();
@@ -35,7 +36,8 @@ class OutgoingBTHandshaker extends BTHandshaker {
 		setReadInterest();
 	}
 	
-	protected void initIncomingHandshake() {
+	@Override
+    protected void initIncomingHandshake() {
 		incomingHandshake = new ByteBuffer[5];
 		incomingHandshake[0] = ByteBuffer.allocate(1); // 19
 		incomingHandshake[1] = ByteBuffer.allocate(19); // protocol identifier
@@ -44,7 +46,8 @@ class OutgoingBTHandshaker extends BTHandshaker {
 		incomingHandshake[4] = ByteBuffer.wrap(loc.getPeerID()); 
 	}
 	
-	protected boolean verifyIncoming() {
+	@Override
+    protected boolean verifyIncoming() {
 		for(; 
 		currentBufIndex < incomingHandshake.length &&
 		!incomingHandshake[currentBufIndex].hasRemaining();
@@ -75,7 +78,8 @@ class OutgoingBTHandshaker extends BTHandshaker {
 		return true;
 	}
 	
-	public void handleIOException(IOException iox) {
+	@Override
+    public void handleIOException(IOException iox) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("Connection failed: " + loc);
 		loc.strike();

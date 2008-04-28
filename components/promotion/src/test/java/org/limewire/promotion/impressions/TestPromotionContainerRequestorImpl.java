@@ -36,14 +36,17 @@ public class TestPromotionContainerRequestorImpl extends AbstractPromotionBinder
         this.isValid = isValid;
     }
 
+    @Override
     protected InputStream makeRequest(HttpPost request, HttpParams params) throws HttpException, IOException {
         return isValid ? new EmptyInputStream() : null;
     }
 
+    @Override
     public void error(Exception e) {
         e.printStackTrace();
     }
 
+    @Override
     public String getUserAgent() {
         return "Limewire/@version@";
     }

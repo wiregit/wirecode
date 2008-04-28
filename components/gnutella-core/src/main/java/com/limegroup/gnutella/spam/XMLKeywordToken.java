@@ -89,10 +89,12 @@ public class XMLKeywordToken extends AbstractToken {
 		return TokenType.XML_KEYWORD;
 	}
 
+    @Override
     public final int hashCode() {
         return _hashCode;
     }
     
+    @Override
     public final boolean equals(Object o) {
         if (o == null)
             return false;
@@ -110,7 +112,8 @@ public class XMLKeywordToken extends AbstractToken {
 	/**
 	 * overrides method from <tt>Object</tt>
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		return new String(_xmlField) + "::" + new String(_keyword) + " : "
 				+ _good + " : " + _bad;
 	}

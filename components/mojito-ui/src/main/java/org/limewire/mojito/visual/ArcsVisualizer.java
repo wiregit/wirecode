@@ -130,6 +130,7 @@ public class ArcsVisualizer extends JPanel implements MessageDispatcherListener 
         }
     }
     
+    @Override
     public void paint(Graphics g) {
         float width = getWidth();
         float height = getHeight();

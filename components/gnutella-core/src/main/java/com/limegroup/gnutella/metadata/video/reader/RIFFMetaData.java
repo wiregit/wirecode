@@ -18,7 +18,8 @@ public class RIFFMetaData extends VideoDataReader {
 		super(f);
 	}
 
-	protected void parseFile(File f) throws IOException {
+	@Override
+    protected void parseFile(File f) throws IOException {
 		InputStream is = null;
 		try {
 			is = new FileInputStream(f);

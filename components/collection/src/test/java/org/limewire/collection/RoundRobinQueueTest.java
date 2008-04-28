@@ -31,7 +31,8 @@ public class RoundRobinQueueTest extends BaseTestCase {
 			objects[i]= new Integer(i);
 	}
 	
-	public void setUp() {
+	@Override
+    public void setUp() {
 		queue = new RoundRobinQueue();
 		setQueue = new RoundRobinSetQueue();
 	}

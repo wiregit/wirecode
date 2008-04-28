@@ -38,6 +38,7 @@ public class RandomOrderHashSet<T> extends FixedSizeArrayHashSet<T> {
         super(initialCapacity);
     }
 
+    @Override
     public Iterator<T> iterator() {
         return new RandomIterator();
     }

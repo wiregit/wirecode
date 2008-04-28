@@ -17,6 +17,7 @@ public class NetworkInstanceUtilsTest extends BaseTestCase {
         return buildTestSuite(NetworkInstanceUtilsTest.class);
     }
     
+    @Override
     public void setUp() {
         stubProvider = new LocalSocketAddressProviderStub();
         networkInstanceUtils = new NetworkInstanceUtilsImpl(stubProvider, null);

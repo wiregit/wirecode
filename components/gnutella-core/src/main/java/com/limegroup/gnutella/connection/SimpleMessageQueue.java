@@ -31,10 +31,12 @@ public class SimpleMessageQueue extends AbstractMessageQueue {
         this._lifo=lifo;
     }
 
+    @Override
     protected Message addInternal(Message m) {
         return _buf.addLast(m);
     }
 
+    @Override
     protected Message removeNextInternal() {
         if (_buf.isEmpty())
             return null;
@@ -45,6 +47,7 @@ public class SimpleMessageQueue extends AbstractMessageQueue {
             return _buf.removeFirst();
     }
     
+    @Override
     public int size() {
         return _buf.size();
     }

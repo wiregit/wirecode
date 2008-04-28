@@ -70,6 +70,7 @@ public class TestConnection extends AssertComparisons {
 
     public void start() {
         Thread t = new ManagedThread() {
+            @Override
             public void run() {
                 //Make an out going connection to the machine
                 try {

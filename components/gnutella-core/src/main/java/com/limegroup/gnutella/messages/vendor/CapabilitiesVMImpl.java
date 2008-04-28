@@ -179,6 +179,7 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
     }
     
     // override super
+    @Override
     public boolean equals(Object other) {
         if(other == this)
             return true;
@@ -193,6 +194,7 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
     }
     
     // override super
+    @Override
     public int hashCode() {
         return capabilities.hashCode();
     }
@@ -223,10 +225,12 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
 
     /** Overridden purely for stats handling.
      */
+    @Override
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
     }
 
+    @Override
     public String toString() {
         return "{CapabilitiesVM:"+super.toString()+"; supporting: " + capabilities + "}";
     }

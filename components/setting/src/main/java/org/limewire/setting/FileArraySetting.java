@@ -126,6 +126,7 @@ public class FileArraySetting extends AbstractSetting {
      * @param sValue property string value
      *
      */
+    @Override
     protected synchronized void loadValue(String sValue) {
 		value = encode(sValue);
     }

@@ -240,6 +240,7 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
             return isValid;
         }
         
+        @Override
         public final String toString() {
             return "<publicKey=" + getPublicKey() + ",sharedKey=" + getSharedKey() + ",isValid=" + isValid() + ">";
         }

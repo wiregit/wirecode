@@ -79,6 +79,7 @@ public class BootstrapResult implements Result {
         return time;
     }
     
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("ResultType: ").append(resultType).append("\n");

@@ -25,18 +25,22 @@ class UDPSelectionKey extends SelectionKey {
         attach(attachment);
     }
 
+    @Override
     public void cancel() {
         valid = false;
     }
 
+    @Override
     public SelectableChannel channel() {
         return channel;
     }
 
+    @Override
     public int interestOps() {
         return interestOps;
     }
 
+    @Override
     public SelectionKey interestOps(int ops) {
         if(!isValid())
             throw new CancelledKeyException();
@@ -45,10 +49,12 @@ class UDPSelectionKey extends SelectionKey {
         return this;
     }
 
+    @Override
     public boolean isValid() {
         return valid;
     }
 
+    @Override
     public int readyOps() {
         if(!isValid())
             throw new CancelledKeyException();
@@ -59,6 +65,7 @@ class UDPSelectionKey extends SelectionKey {
         this.readyOps = readyOps;
     }
 
+    @Override
     public Selector selector() {
         return selector;
     }

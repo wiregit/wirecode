@@ -57,6 +57,7 @@ public class StringArraySetting extends AbstractSetting {
      * @param sValue property string value
      *
      */
+    @Override
     protected void loadValue(String sValue) {
 		value = decode(sValue);
     }
@@ -93,6 +94,7 @@ public class StringArraySetting extends AbstractSetting {
         return buffer.toString();
     }
 
+    @Override
     public String toString() {
         return encode(getValue());
     }

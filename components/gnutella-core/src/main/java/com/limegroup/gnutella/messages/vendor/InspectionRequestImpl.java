@@ -92,6 +92,7 @@ public class InspectionRequestImpl extends RoutableGGEPMessage implements Inspec
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.messages.vendor.InspectionRequest#setGUID(com.limegroup.gnutella.GUID)
      */
+    @Override
     public void setGUID(GUID g) {
         super.setGUID(g);
     }

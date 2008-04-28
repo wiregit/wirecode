@@ -79,6 +79,7 @@ public class PingRankerTest extends LimeTestCase {
         return buildTestSuite(PingRankerTest.class);
     }
 
+    @Override
     public void setUp() throws Exception {
         networkManager = new NetworkManagerStub();
         networkManager.setAcceptedIncomingConnection(false);

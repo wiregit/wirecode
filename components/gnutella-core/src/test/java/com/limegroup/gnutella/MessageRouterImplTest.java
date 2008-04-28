@@ -1051,6 +1051,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         }
 
         //added due to changes in FileManager
+        @Override
         protected void buildQRT() {
             super.buildQRT();
             Iterator iter = getKeyWords().iterator();
@@ -1062,7 +1063,8 @@ public final class MessageRouterImplTest extends LimeTestCase {
     
     private static class HeadListener extends ReplyHandlerStub {
     	Message _lastSent;
-    	public void reply(Message m) {
+    	@Override
+        public void reply(Message m) {
     		_lastSent = m;
     	}
     }

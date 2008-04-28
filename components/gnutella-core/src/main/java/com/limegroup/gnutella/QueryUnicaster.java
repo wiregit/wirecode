@@ -562,7 +562,8 @@ public final class QueryUnicaster {
         }
 		
 		// overrides toString to provide more information
-		public String toString() {
+		@Override
+        public String toString() {
 			return "QueryBundle: "+_qr;
 		}
     }
@@ -589,6 +590,7 @@ public final class QueryUnicaster {
             return false;
         }
 
+        @Override
         public String toString() {
             return "{QueryKeyBundle: " + _queryKey + " BirthTime = " +
             _birthTime;

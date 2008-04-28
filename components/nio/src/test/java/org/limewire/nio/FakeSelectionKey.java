@@ -17,11 +17,18 @@ public class FakeSelectionKey extends SelectionKey {
         ops |= SelectionKey.OP_WRITE;
     }
     
+    @Override
     public void cancel() {}
+    @Override
     public SelectableChannel channel() { return null; }
+    @Override
     public int interestOps() { return ops; }
+    @Override
     public SelectionKey interestOps(int ops) { this.ops = ops; return this; }
+    @Override
     public boolean isValid() { return true; }
+    @Override
     public int readyOps() { return ops; }
+    @Override
     public Selector selector() { return null; }
 }

@@ -636,6 +636,7 @@ public abstract class AbstractConnection implements Connection {
     }
 
     // overrides Object.toString
+    @Override
     public String toString() {
         return "CONNECTION: host=" + host + " port=" + port;
     }

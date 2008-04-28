@@ -55,6 +55,7 @@ public final class ByteSetting extends AbstractNumberSetting<Byte> {
      * Load value from property string value
      * @param sValue property string value
      */
+    @Override
     protected void loadValue(String sValue) {
         try {
             value = Byte.parseByte(sValue.trim());
@@ -62,6 +63,7 @@ public final class ByteSetting extends AbstractNumberSetting<Byte> {
             revertToDefault();
         }
     }
+    @Override
     protected Comparable<Byte> convertToComparable(String value) {
         return new Byte(value);
     }

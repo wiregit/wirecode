@@ -53,18 +53,24 @@ public class BTContext implements TorrentContext {
 	 */
 	private class FullBitSet extends BitSet {
 		private static final long serialVersionUID = -2621319856548383315L;
-		public void set(int i) {}
-		public void clear(int i){}
-		public boolean get(int i) {
+		@Override
+        public void set(int i) {}
+		@Override
+        public void clear(int i){}
+		@Override
+        public boolean get(int i) {
 			return true;
 		}
-		public int cardinality() {
+		@Override
+        public int cardinality() {
 			return info.getNumBlocks();
 		}
-		public int length() {
+		@Override
+        public int length() {
 			return info.getNumBlocks();
 		}
-		public int nextSetBit(int i) {
+		@Override
+        public int nextSetBit(int i) {
 			if (i >= cardinality())
 				return -1;
 			return i;

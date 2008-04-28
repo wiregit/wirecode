@@ -39,6 +39,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
         return buildTestSuite(IncompleteFileManagerTest.class);
     }
     
+    @Override
     public void setUp() {
         injector = LimeTestUtils.createInjector();
         fm = injector.getInstance(FileManager.class);
@@ -351,6 +352,7 @@ public class IncompleteFileManagerTest extends LimeTestCase {
             this.days=days;
         }
 
+        @Override
         public long lastModified() {
             //30 days ago
             return System.currentTimeMillis()-days*24l*60l*60l*1000l;

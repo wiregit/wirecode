@@ -60,14 +60,16 @@ public class DirectAltLoc extends AbstractAlternateLocation {
 			hashCode = ipPortForSelf.hashCode();
 	}
 	
-	protected String generateHTTPString() {
+	@Override
+    protected String generateHTTPString() {
 		String ret = _node.getInetAddress().getHostAddress();
 		if (_node.getPort()!=6346)
 			ret = ret+":"+_node.getPort();
 		return ret;
 	}
 	
-	public RemoteFileDesc createRemoteFileDesc(long size, RemoteFileDescFactory remoteFileDescFactory) {
+	@Override
+    public RemoteFileDesc createRemoteFileDesc(long size, RemoteFileDescFactory remoteFileDescFactory) {
 		Set<URN> urnSet = new UrnSet(getSHA1Urn());
         int quality = 3;
 		RemoteFileDesc ret = remoteFileDescFactory.createRemoteFileDesc(_node.getAddress(), _node
@@ -79,7 +81,8 @@ public class DirectAltLoc extends AbstractAlternateLocation {
         return ret;
 	}
 	
-	public synchronized AlternateLocation createClone() {
+	@Override
+    public synchronized AlternateLocation createClone() {
         DirectAltLoc ret = null;
         try {
         	ret = new DirectAltLoc(_node, this.SHA1_URN, networkInstanceUtils, ipPortForSelf);
@@ -93,7 +96,8 @@ public class DirectAltLoc extends AbstractAlternateLocation {
         return ret;
     }
 	
-	public boolean isMe(){
+	@Override
+    public boolean isMe(){
 	    return networkInstanceUtils.isMe(_node);
 	}
 	
@@ -105,7 +109,8 @@ public class DirectAltLoc extends AbstractAlternateLocation {
 	}
 
 	
-	public boolean equals(Object o){
+	@Override
+    public boolean equals(Object o){
 		if (o==null || !(o instanceof DirectAltLoc))
 			return false;
 		
@@ -123,13 +128,17 @@ public class DirectAltLoc extends AbstractAlternateLocation {
 		
 	}
 	
-	synchronized void demote() { _demoted = true;}
+	@Override
+    synchronized void demote() { _demoted = true;}
 	
-	synchronized void promote() { _demoted = false; }
+	@Override
+    synchronized void promote() { _demoted = false; }
 	
-	public synchronized boolean isDemoted() { return _demoted; }
+	@Override
+    public synchronized boolean isDemoted() { return _demoted; }
 
-	public int compareTo(AlternateLocation o) {
+	@Override
+    public int compareTo(AlternateLocation o) {
 	    
         if (this==o) //equal
             return 0;
@@ -174,7 +183,8 @@ public class DirectAltLoc extends AbstractAlternateLocation {
 
 	}
 	
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		if (hashCode ==0) {
 			int result = super.hashCode();
 			result = (37* result)+_node.getAddress().hashCode();
@@ -190,7 +200,8 @@ public class DirectAltLoc extends AbstractAlternateLocation {
 	 *
 	 * @return the string representation of this alternate location
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		return _node+","+_count+","+_demoted;
 	}
 }

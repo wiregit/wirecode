@@ -60,6 +60,7 @@ public void set(K key, V value)
 	@param o Another instance of the KeyValue class to which it
 	has to be compared.
 */
+@Override
 public boolean equals(Object o)
 {
 	KeyValue keyValue = (KeyValue)o;
@@ -70,6 +71,7 @@ public boolean equals(Object o)
 /**	
 * Converts the key Value pair into a string representation 
 */
+@Override
 public String toString()
 {
 	return key + " = " + value;
@@ -127,6 +129,7 @@ public V setValue(V value)
  * @see Object#equals(Object)
  * @see #equals(Object)
  */
+@Override
 public int hashCode()
 {
     return ((key == null   ? 0 : key.hashCode()) ^ 

@@ -38,6 +38,7 @@ public class OOBSecurityToken extends AbstractSecurityToken {
         super(network, manager);
     }
     
+    @Override
     protected byte [] getFromMAC(byte[] b, TokenData data) {
         byte [] ret = new byte[b.length+1];
         ret[0] = (byte)((OOBTokenData)data).getNumRequests();

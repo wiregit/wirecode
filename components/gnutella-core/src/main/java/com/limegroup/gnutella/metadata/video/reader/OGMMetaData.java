@@ -30,7 +30,8 @@ public class OGMMetaData extends VideoDataReader {
 		super(f);
 	}
 
-	protected void parseFile(File file) throws IOException {
+	@Override
+    protected void parseFile(File file) throws IOException {
 		InputStream is = null;
 		try {
 			is = new FileInputStream(file);

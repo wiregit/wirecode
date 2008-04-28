@@ -76,6 +76,7 @@ public class StatsResponseImpl extends AbstractResponseMessage
         return statistics;
     }
 
+    @Override
     protected void writeBody(MessageOutputStream out) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         GZIPOutputStream gz = new GZIPOutputStream(baos);
@@ -86,6 +87,7 @@ public class StatsResponseImpl extends AbstractResponseMessage
         out.writeStatistics(s);
     }
     
+    @Override
     public String toString() {
         try {
             return "StatsResponse: " + new String(statistics, "ISO-8859-1");

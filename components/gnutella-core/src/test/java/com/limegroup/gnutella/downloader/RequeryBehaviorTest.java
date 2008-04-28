@@ -57,6 +57,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
     private MyDHTManager myDHTManager;
     private Runnable pump;
     
+    @Override
     public void setUp() throws Exception {
       DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
       DHTSettings.MAX_DHT_ALT_LOC_QUERY_ATTEMPTS.setValue(2);
@@ -381,6 +382,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         private volatile DHTEventListener listener;
         private volatile boolean on;
         
+        @Override
         public void addEventListener(DHTEventListener listener) {
             this.listener = listener;
         }

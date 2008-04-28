@@ -128,6 +128,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
      * but connect has not been called yet.  This observer will be
      * notified when the socket is shutdown.
      */
+    @Override
     public final void setShutdownObserver(Shutdownable observer) {
         shutdownObserver = observer;
     }
@@ -275,16 +276,19 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
     }
     
     /** Closes the socket & all streams, waking up any waiting locks.  */
+    @Override
     public final void close() {
         shutdown();
     }
     
     /** Connects to <code>addr</code> with no timeout */
+    @Override
     public final void connect(SocketAddress addr) throws IOException {
         connect(addr, 0);
     }
     
     /** Connects to <code>addr</code> with the given timeout (in milliseconds) */
+    @Override
     public final void connect(SocketAddress addr, int timeout) throws IOException {
         if (timeout < 0) {
             throw new IllegalArgumentException("timeout must not be < 0");
@@ -333,6 +337,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
      * Returns true if this was able to connect immediately. The observer is still
      * notified about the success even it it was immediate.
      */
+    @Override
     public boolean connect(SocketAddress addr, int timeout, final ConnectObserver observer) {
         synchronized(LOCK) {
             if(shutdown) {
@@ -393,6 +398,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
      *
      * Internally, this is a blocking Pipe from the non-blocking <code>SocketChannel</code>.
      */
+    @Override
     public final InputStream getInputStream() throws IOException {
         // Unlocked check real quickly.
         if(isClosed() || isShutdown())
@@ -436,6 +442,7 @@ public abstract class AbstractNBSocket extends NBSocket implements ConnectObserv
      *
      * Internally, this is a blocking Pipe from the non-blocking SocketChannel.
      */
+    @Override
     public final OutputStream getOutputStream() throws IOException {
         // Unlocked check real quickly.
         if(isClosed() || isShutdown())

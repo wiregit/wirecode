@@ -234,6 +234,7 @@ public final class InflaterReaderTest extends BaseTestCase {
           super(out, flate);
         }
         
+        @Override
         public void flush() throws IOException {
             if( def.finished() ) return;
             def.setInput(new byte[0], 0, 0);
@@ -244,6 +245,7 @@ public final class InflaterReaderTest extends BaseTestCase {
             super.flush();
         }
         
+        @Override
         protected void deflate() throws IOException {
             try {
                 int deflated;

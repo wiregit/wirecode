@@ -181,6 +181,7 @@ public class ClassfulNetworkCounter implements Serializable {
         return (ratio < maxRatio);
     }
     
+    @Override
     public synchronized String toString() {
         return nodesPerNetwork.toString();// + ", " + bucket;
     }

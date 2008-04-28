@@ -1395,6 +1395,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         public void setGUID(GUID guid) { aliveGUID = guid; }
         public void clearGUID() { aliveGUID = null; }
 
+        @Override
         public boolean isQueryAlive(GUID guid) {
             if (aliveGUID != null)
                 return (aliveGUID.equals(guid));

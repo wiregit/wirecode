@@ -269,6 +269,7 @@ public abstract class AbstractMessage implements Message {
         return m.getPriority() - this.getPriority();
     }
 
+    @Override
     public String toString() {
         return "{guid="+(new GUID(guid)).toString()
              +", ttl="+ttl

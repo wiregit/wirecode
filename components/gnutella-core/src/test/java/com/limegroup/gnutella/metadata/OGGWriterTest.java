@@ -38,6 +38,7 @@ public class OGGWriterTest extends AudioTestBase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
     public void setUp(){
         Injector injector = LimeTestUtils.createInjector();
         limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);

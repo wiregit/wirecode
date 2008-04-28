@@ -85,6 +85,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
 
     private QueryRequestFactory queryRequestFactory;
     
+    @Override
     public void setUp() throws Exception {
         networkManagerStub = new NetworkManagerStub();
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {

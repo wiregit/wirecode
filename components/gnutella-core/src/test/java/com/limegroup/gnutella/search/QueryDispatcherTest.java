@@ -142,6 +142,7 @@ public class QueryDispatcherTest extends LimeTestCase {
 
     private static final class TestReplyHandler extends ReplyHandlerStub {
         
+        @Override
         public boolean isSupernodeClientConnection() {
             return true;
         }

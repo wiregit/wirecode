@@ -28,12 +28,14 @@ class IncomingBTHandshaker extends BTHandshaker {
 		this.manager = manager;
 	}
 	
-	public void startHandshaking() {
+	@Override
+    public void startHandshaking() {
 		initIncomingHandshake();
 		setReadInterest();
 	}
 	
-	protected boolean verifyIncoming() {
+	@Override
+    protected boolean verifyIncoming() {
 		for(; 
 		currentBufIndex < incomingHandshake.length &&
 		!incomingHandshake[currentBufIndex].hasRemaining();
@@ -71,7 +73,8 @@ class IncomingBTHandshaker extends BTHandshaker {
 		return true;
 	}
 
-	protected void initIncomingHandshake() {
+	@Override
+    protected void initIncomingHandshake() {
 		incomingHandshake = new ByteBuffer[4];
 		incomingHandshake[0] = ByteBuffer.allocate(8); // protocol bytes
 		incomingHandshake[1] = ByteBuffer.wrap(loc.getExtBytes());

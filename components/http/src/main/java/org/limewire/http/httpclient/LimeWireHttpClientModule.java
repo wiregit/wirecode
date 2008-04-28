@@ -81,6 +81,7 @@ public class LimeWireHttpClientModule extends AbstractModule {
             this.socketsManager = socketsManager;
         }
 
+        @Override
         protected SchemeRegistry createObject() {
             SchemeRegistry registry = new SchemeRegistry();
             registry.register(new Scheme("http", new LimeSocketFactory(socketsManager, SocketsManager.ConnectType.PLAIN), 80));
@@ -93,6 +94,7 @@ public class LimeWireHttpClientModule extends AbstractModule {
     @Singleton
     private static class SocketWrappingSchemeRegistryProvider extends AbstractLazySingletonProvider<SchemeRegistry> {
 
+        @Override
         protected SchemeRegistry createObject() {
             SchemeRegistry registry = new SchemeRegistry();
             registry.register(new Scheme("http", new SocketWrapperProtocolSocketFactory(), 80));
@@ -113,6 +115,7 @@ public class LimeWireHttpClientModule extends AbstractModule {
             this.defaultParams = defaultParams;
         }
 
+        @Override
         public ReapingClientConnectionManager createObject() {
             return new ReapingClientConnectionManager(registry, scheduler, defaultParams);
         }

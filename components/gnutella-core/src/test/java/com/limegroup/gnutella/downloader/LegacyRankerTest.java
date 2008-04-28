@@ -30,6 +30,7 @@ public class LegacyRankerTest extends LimeTestCase {
     private static SourceRanker ranker;
     private RemoteFileDescFactory remoteFileDescFactory;
     
+    @Override
     public void setUp() throws Exception {
         ranker = new LegacyRanker();
         

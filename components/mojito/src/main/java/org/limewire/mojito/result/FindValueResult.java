@@ -129,6 +129,7 @@ public class FindValueResult extends LookupResult {
         return !entities.isEmpty() || !entityKeys.isEmpty();
     }
     
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(getLookupID()).append(" (time=").append(time)

@@ -52,11 +52,13 @@ public class FileSetting extends AbstractSetting {
      * Load value from property string value
      * @param sValue property string value
      */
+    @Override
     protected void loadValue(String sValue) {
         value = new File(sValue);
         absolutePath = value.getAbsolutePath();
     }
 
+    @Override
     public FileSetting setAlwaysSave(boolean on) {
         super.setAlwaysSave(on);
         return this;

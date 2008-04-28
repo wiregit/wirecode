@@ -91,6 +91,7 @@ public final class PowerOfTwoSetting extends LongSetting {
      * 
      * Strings that can't be parsed as longs will result in DEFALT_VALUE.
      */
+    @Override
     protected String normalizeValue(String value) {
         long longValue;
         

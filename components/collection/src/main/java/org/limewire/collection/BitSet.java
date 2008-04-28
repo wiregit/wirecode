@@ -955,6 +955,7 @@ public class BitSet implements Cloneable, java.io.Serializable {
      *
      * @return  a hash code value for this bit set.
      */
+    @Override
     public int hashCode() {
 	long h = 1234;
 	for (int i = bits.length; --i >= 0; )
@@ -989,6 +990,7 @@ public class BitSet implements Cloneable, java.io.Serializable {
      *          <code>false</code> otherwise.
      * @see     java.util.BitSet#size()
      */
+    @Override
     public boolean equals(Object obj) {
 	if (!(obj instanceof BitSet))
 	    return false;
@@ -1028,6 +1030,7 @@ public class BitSet implements Cloneable, java.io.Serializable {
      * @return  a clone of this bit set.
      * @see     java.util.BitSet#size()
      */
+    @Override
     public Object clone() {
 	BitSet result = null;
 	try {
@@ -1079,6 +1082,7 @@ public class BitSet implements Cloneable, java.io.Serializable {
      *
      * @return  a string representation of this bit set.
      */
+    @Override
     public String toString() {
 	int numBits = unitsInUse << ADDRESS_BITS_PER_UNIT;
     StringBuilder buffer = new StringBuilder(8*numBits + 2);

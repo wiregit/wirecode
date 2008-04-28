@@ -64,6 +64,7 @@ public interface DHTMessage {
             return opcode;
         }
         
+        @Override
         public String toString() {
             return name() + " (" + toByte() + ")";
         }

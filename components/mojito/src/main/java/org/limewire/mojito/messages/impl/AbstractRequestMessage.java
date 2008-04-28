@@ -51,6 +51,7 @@ abstract class AbstractRequestMessage extends AbstractDHTMessage
         super(context, opcode, src, messageId, msgVersion, in);
     }
     
+    @Override
     protected final Contact createContact(SocketAddress src, Vendor vendor, Version version,
             KUID nodeId, SocketAddress contactAddress, int instanceId, int flags) {
         if (RouteTableSettings.INCOMING_REQUESTS_UNKNOWN.getValue())

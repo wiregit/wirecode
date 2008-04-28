@@ -31,12 +31,14 @@ public class BTBitField extends BTMessage {
 		return new BTBitField(ByteBuffer.wrap(bitfield));
 	}
 
-	public ByteBuffer getPayload() {
+	@Override
+    public ByteBuffer getPayload() {
 		_bitfield.clear();
 		return _bitfield;
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		return "BTBitfield";
 	}
 }

@@ -231,6 +231,7 @@ final class GUIDPair {
         this.hops=hops;
     }
 
+    @Override
     public String toString() {
         return "["+(new GUID(guid)).toString()+", "+time+"]";
     }
@@ -268,6 +269,7 @@ final class QueryPair {
             return ret;
     } */
 
+    @Override
     public boolean equals(Object o) {
         if ( o == this ) return true;
         
@@ -283,6 +285,7 @@ final class QueryPair {
                (xml == null ? other.xml == null : xml.equals(other.xml));
     }                
 
+    @Override
     public int hashCode() {
         if ( cachedHash == 0 ) {
             cachedHash = 17;
@@ -296,6 +299,7 @@ final class QueryPair {
 		return cachedHash;
     }
     
+    @Override
     public String toString() {
         return "QP: [hops: " + hops + ", metaMask: " + metaMask + ", URNs: " + URNs + ", query: " + query + ", xml: " + xml + "]";
     }

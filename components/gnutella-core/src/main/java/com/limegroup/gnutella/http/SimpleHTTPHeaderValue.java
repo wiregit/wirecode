@@ -12,6 +12,7 @@ public class SimpleHTTPHeaderValue implements HTTPHeaderValue {
         return value;
     }
     
+    @Override
     public String toString() {
         return httpStringValue();
     }

@@ -113,6 +113,7 @@ class UDPSocketChannel extends AbstractNBSocketChannel implements InterestReadab
      * sending a keep alive if more space became available.
      */
     long last = 0;
+    @Override
     public int read(ByteBuffer to) throws IOException {
         // It is possible that the channel is open but the processor
         // is closed.  In that case, this will return -1.
@@ -200,6 +201,7 @@ class UDPSocketChannel extends AbstractNBSocketChannel implements InterestReadab
      * could be written so far.
      * If all data is emptied from src, this will return that amount of data.
      */
+    @Override
     public int write(ByteBuffer src) throws IOException {
         // We cannot write if either the channel or the processor is closed.
         if(!isOpen() || processor.isClosed())
@@ -292,6 +294,7 @@ class UDPSocketChannel extends AbstractNBSocketChannel implements InterestReadab
     /// ********** SelectableChannel methods. ***************
 
     /** Closes the processor. */
+    @Override
     protected void implCloseSelectableChannel() throws IOException {        
         processor.close();
     }
@@ -341,35 +344,43 @@ class UDPSocketChannel extends AbstractNBSocketChannel implements InterestReadab
         return processor.getSocketAddress();
     }
 
+    @Override
     public boolean connect(SocketAddress remote) throws IOException {
         processor.connect((InetSocketAddress)remote);
         return false;
     }
 
+    @Override
     public boolean finishConnect() throws IOException {
         return processor.prepareOpenConnection();
     }
 
+    @Override
     public boolean isConnected() {
         return processor.isConnected();
     }
 
+    @Override
     public boolean isConnectionPending() {
         return processor.isConnecting();
     }
 
+    @Override
     public AbstractNBSocket socket() {
         return socket;
     }
 
+    @Override
     public long read(ByteBuffer[] dsts, int offset, int length) throws IOException {
         throw new IOException("unsupported");
     }
 
+    @Override
     public long write(ByteBuffer[] srcs, int offset, int length) throws IOException {
         throw new IOException("unsupported");
     }
 
+    @Override
     protected void implConfigureBlocking(boolean block) throws IOException {
         // does nothing.
     }    

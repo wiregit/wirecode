@@ -26,6 +26,7 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.LimeTestCa
         return buildTestSuite(ExtendedEndpointTest.class);
     }
 
+    @Override
     public void setUp() {
         TestExtendedEndpoint.now=1;
         e=new TestExtendedEndpoint("127.0.0.1", 6346, 3492);
@@ -339,6 +340,7 @@ class TestExtendedEndpoint extends ExtendedEndpoint {
         super(host, port, dailyUptime);
     }
 
+    @Override
     protected long now() {
         return now;
     }

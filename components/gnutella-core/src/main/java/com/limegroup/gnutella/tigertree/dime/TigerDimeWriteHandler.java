@@ -171,6 +171,7 @@ class TigerDimeWriteHandler implements HashTreeWriteHandler {
         /**
          * Writes the tree's data to the specified output stream.
          */
+        @Override
         public void writeData(OutputStream out) throws IOException {
             for(List<byte[]> list : hashTreeNodeManager.getAllNodes(tigerTree)) {
                 for(byte[] b : list)
@@ -182,6 +183,7 @@ class TigerDimeWriteHandler implements HashTreeWriteHandler {
         /**
          * Determines the length of the data.
          */
+        @Override
         public int getDataLength() {
             return length;
         }

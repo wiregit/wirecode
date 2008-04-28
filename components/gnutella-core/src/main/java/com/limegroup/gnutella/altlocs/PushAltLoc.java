@@ -42,11 +42,13 @@ public class PushAltLoc extends AbstractAlternateLocation {
         this.applicationServices = applicationServices;
 	}	
 		
-	protected String generateHTTPString() {
+	@Override
+    protected String generateHTTPString() {
 		return _pushAddress.httpStringValue();
 	}
 	
-	public RemoteFileDesc createRemoteFileDesc(long size, RemoteFileDescFactory remoteFileDescFactory) {
+	@Override
+    public RemoteFileDesc createRemoteFileDesc(long size, RemoteFileDescFactory remoteFileDescFactory) {
 		Set<URN> urnSet = new UrnSet(getSHA1Urn());
         int quality = 3;
  
@@ -57,13 +59,15 @@ public class PushAltLoc extends AbstractAlternateLocation {
 		return ret;
 	}
 	
-	public synchronized AlternateLocation createClone() {
+	@Override
+    public synchronized AlternateLocation createClone() {
         PushAltLoc ret = new PushAltLoc(_pushAddress.createClone(),SHA1_URN, applicationServices);
         ret._count = this._count;
         return ret;
     }
 	
-	public boolean isMe() {
+	@Override
+    public boolean isMe() {
 	    return Arrays.equals(_pushAddress.getClientGUID(),
 	            applicationServices.getMyGUID());
 	}
@@ -99,8 +103,10 @@ public class PushAltLoc extends AbstractAlternateLocation {
     }
     
     // stubbed out -- no demotion or promotion for push locs.
+    @Override
     void promote() {}
     // stutbed out -- no demotion or promotion for push locs.
+    @Override
     void demote() {}
     
     /**
@@ -108,11 +114,13 @@ public class PushAltLoc extends AbstractAlternateLocation {
      * This ensures that the PE will stay alive until it has exhausted
      * all possible proxies.
      */
+    @Override
     public boolean isDemoted() {
         return _pushAddress.getProxies().isEmpty();
     }
 
-	public boolean equals(Object o) {
+	@Override
+    public boolean equals(Object o) {
 		if (o==null || !(o instanceof PushAltLoc))
 			return false;
 		
@@ -124,7 +132,8 @@ public class PushAltLoc extends AbstractAlternateLocation {
 	}
 
 
-	public int compareTo(AlternateLocation obj) {
+	@Override
+    public int compareTo(AlternateLocation obj) {
 	    
         if (this==obj) //equal
             return 0;
@@ -144,7 +153,8 @@ public class PushAltLoc extends AbstractAlternateLocation {
 		        
 	}
 	
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		if (hashCode==0) {
 			int result = super.hashCode();
 			result = (37* result)+this._pushAddress.hashCode();
@@ -159,7 +169,8 @@ public class PushAltLoc extends AbstractAlternateLocation {
 	 *
 	 * @return the string representation of this alternate location
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		return _pushAddress+","+_count;
 	}
 }

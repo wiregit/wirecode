@@ -64,12 +64,14 @@ public class FindValueLookupStatisticContainer extends SingleLookupStatisticCont
         super(context, lookupKey);
     }
 
+    @Override
     public void setHops(int hops, boolean findValue) {
         super.setHops(hops, true);
         FIND_VALUE_LOOKUP_HOPS.addData(hops);
         FIND_VALUE_LOOKUP_HOPS.storeCurrentStat();
     }
     
+    @Override
     public void setTime(int time, boolean findValue) {
         super.setTime(time, true);
         FIND_VALUE_LOOKUP_TIME.addData(time);
@@ -77,18 +79,21 @@ public class FindValueLookupStatisticContainer extends SingleLookupStatisticCont
     }
 
 
+    @Override
     public void addReply() {
         super.addReply();
         FIND_VALUE_LOOKUP_REPLIES.incrementStat();
     }
 
 
+    @Override
     public void addRequest() {
         super.addRequest();
         FIND_VALUE_LOOKUP_REQUESTS.incrementStat();
     }
 
 
+    @Override
     public void addTimeout() {
         super.addTimeout();
         FIND_VALUE_LOOKUP_TIMEOUTS.incrementStat();

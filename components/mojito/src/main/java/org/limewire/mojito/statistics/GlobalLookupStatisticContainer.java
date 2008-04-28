@@ -90,7 +90,8 @@ public class GlobalLookupStatisticContainer extends StatisticContainer {
        }
    }
    
-   public void writeStats(Writer writer) throws IOException {
+   @Override
+public void writeStats(Writer writer) throws IOException {
        writer.write("Global lookups: \n");
        super.writeStats(writer);
        synchronized (singleLookups) {

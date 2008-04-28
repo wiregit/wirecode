@@ -99,6 +99,7 @@ class LimitedSocketController extends SimpleSocketController {
      * Otherwise, this will return true and the observer will never be notified,
      * because the connection will never be attempted.
      */
+    @Override
     public synchronized boolean removeConnectObserver(ConnectObserver observer) {
         for(Iterator<Requestor> i = WAITING_REQUESTS.iterator(); i.hasNext(); ) {
             Requestor next = i.next();
@@ -117,11 +118,13 @@ class LimitedSocketController extends SimpleSocketController {
     }
 
     /** Returns the maximum number of concurrent attempts this will allow. */
+    @Override
     public int getNumAllowedSockets() {
         return MAX_CONNECTING_SOCKETS;
     }
     
     /** Returns the number of sockets waiting. */
+    @Override
     public synchronized int getNumWaitingSockets() {
         return WAITING_REQUESTS.size();
     }

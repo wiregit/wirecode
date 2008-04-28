@@ -34,6 +34,7 @@ public class CountingConnection extends BlockingConnection {
         countEnabled = true;
     }
 
+    @Override
     public Message receive() throws IOException, BadPacketException {
         Message m = null;
         try {
@@ -55,6 +56,7 @@ public class CountingConnection extends BlockingConnection {
         return m;
     }
     
+    @Override
     public Message receive(int timeout) throws IOException, BadPacketException {
         Message m = null;
         try {
@@ -76,6 +78,7 @@ public class CountingConnection extends BlockingConnection {
         return m;
     }
 
+    @Override
     public void send(Message m) throws IOException {
         super.send(m);
         if(countEnabled)

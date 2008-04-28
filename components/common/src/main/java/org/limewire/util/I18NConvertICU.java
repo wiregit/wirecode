@@ -64,6 +64,7 @@ final class I18NConvertICU extends AbstractI18NConverter {
      * @param s String to be converted
      * @return the converted string
      */
+    @Override
     public String getNorm(String s) {
         return convert(s);
     } 
@@ -71,6 +72,7 @@ final class I18NConvertICU extends AbstractI18NConverter {
     /**
      * Simple composition of a String.
      */
+    @Override
     public String compose(String s) {
         return Normalizer.compose(s, false);
     }

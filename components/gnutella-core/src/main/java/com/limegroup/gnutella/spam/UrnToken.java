@@ -64,10 +64,12 @@ public class UrnToken extends AbstractToken {
 		return TokenType.URN;
 	}
     
+    @Override
     public final int hashCode() {
         return _urn.hashCode();
     }
     
+    @Override
     public final boolean equals(Object o) {
         if (o == null)
             return false;
@@ -84,7 +86,8 @@ public class UrnToken extends AbstractToken {
 	/**
 	 * overrides method from <tt>Object</tt>
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		return _urn.toString() + " " + _bad;
 	}
 }

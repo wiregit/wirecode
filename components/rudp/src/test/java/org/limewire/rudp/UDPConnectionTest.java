@@ -52,6 +52,7 @@ public final class UDPConnectionTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 
+    @Override
     public void setUp() throws Exception {
         RUDPMessageFactory factory = new DefaultMessageFactory();
         stubService = new UDPServiceStub(factory);
@@ -68,6 +69,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         stubService.addReceiver(6348, 6346, 10, 0);
     }
     
+    @Override
     public void tearDown() throws Exception {
         if (uconn1 != null) {
             uconn1.shutdown();
@@ -94,6 +96,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         // Start the second connection in another thread
         // and run it to completion.
         class Inner extends ManagedThread {
+            @Override
             public void run() {
                 try {
                     uconn2 = udpSelectorProvider.openSocketChannel().socket();
@@ -132,6 +135,7 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         final CountDownLatch threadEnder = new CountDownLatch(1);
         class Inner extends ManagedThread {
+            @Override
             public void run() {
                 try {
                     uconn2 = udpSelectorProvider.openSocketChannel().socket();
@@ -178,6 +182,7 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         // start the first connection in another thread
         class Inner extends ManagedThread {
+            @Override
             public void run() {
                 try {
                     uconn1 = udpSelectorProvider.openSocketChannel().socket();
@@ -344,6 +349,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         // Close the writer while the reader is blocked
         class Inner extends ManagedThread {
 
+            @Override
             public void run() {
                 try {
                     // Let reader lock up on block read
@@ -412,6 +418,7 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         // start the first connection in another thread
         class Inner extends ManagedThread {
+            @Override
             public void run() {
                 try {
                     uconn1 = udpSelectorProvider.openSocketChannel().socket();
@@ -463,6 +470,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         // Start the second connection in another thread
         // and run it to completion.
         class Inner extends ManagedThread {
+            @Override
             public void run() {
                 try {
                     uconn1 = udpSelectorProvider.openSocketChannel().socket();
@@ -515,6 +523,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         // Start the second connection in another thread
         // and run it to completion.
         class Inner extends ManagedThread {
+            @Override
             public void run() {
                 try {
                     uconn2 = udpSelectorProvider.openSocketChannel().socket();
@@ -567,6 +576,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         // Start the second connection in another thread
         // and run it to completion.
         class Inner extends ManagedThread {
+            @Override
             public void run() {
                 try {
                     uconn2 = udpSelectorProvider.openSocketChannel().socket();

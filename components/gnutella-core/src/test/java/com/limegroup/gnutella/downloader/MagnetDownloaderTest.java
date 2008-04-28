@@ -51,6 +51,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
     }
     
     
+    @Override
     public void setUp() throws Exception {
         final LocalSocketAddressProviderStub localSocketAddressProviderStub = new LocalSocketAddressProviderStub();
         localSocketAddressProviderStub.setLocalAddressPrivate(false);

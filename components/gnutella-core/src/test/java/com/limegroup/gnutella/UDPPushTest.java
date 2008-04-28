@@ -69,6 +69,7 @@ public class UDPPushTest extends LimeTestCase {
         return buildTestSuite(UDPPushTest.class);
     }
 
+    @Override
     public void setUp() throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.SOLICITED_GRACE_PERIOD.setValue(5000l);

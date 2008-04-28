@@ -31,11 +31,13 @@ public abstract class BEAbstractCollection<T> extends Token<T> {
     protected abstract Token<?> getNewElement() throws IOException;
     
     /** Determines if all parsing is finished for this token. */
+    @Override
     protected boolean isDone() {
         return done;
     }
     
     /** Reads a single item from the stream. */
+    @Override
     public void handleRead() throws IOException {
         if (isDone())
             throw new IllegalStateException("token is done, don't read to it");

@@ -304,7 +304,8 @@ public class MagnetOptions implements Serializable {
 		optionsMap = Collections.unmodifiableMap(options);
     }
     
-	public String toString() {
+	@Override
+    public String toString() {
 		return toExternalForm();
 	}
 	

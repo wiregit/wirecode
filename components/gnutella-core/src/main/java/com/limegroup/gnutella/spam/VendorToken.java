@@ -57,10 +57,12 @@ public class VendorToken extends AbstractToken {
         hashCode = vendor.hashCode();
     }
     
+    @Override
     public final int hashCode() {
         return hashCode;
     }
     
+    @Override
     public final boolean equals(Object o) {
         if (! (o instanceof VendorToken))
             return false;
@@ -120,10 +122,12 @@ public class VendorToken extends AbstractToken {
             super("ALT");
         }
         
+        @Override
         public float getRating() {
             return 0;
         }
 
+        @Override
         public void rate(Rating rating) {}
         
     }

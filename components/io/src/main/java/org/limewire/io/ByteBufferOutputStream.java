@@ -80,6 +80,7 @@ public class ByteBufferOutputStream extends OutputStream {
     }
     
     /** Does nothing. */
+    @Override
     public void close() throws IOException {}
     
     /** Resets the data so that the backing buffer can be reused. */
@@ -156,6 +157,7 @@ public class ByteBufferOutputStream extends OutputStream {
      * Converts the buffer's contents into a string, translating bytes into
      * characters according to the platform's default character encoding.
      */
+    @Override
     public String toString() {
         return new String(buffer.array(), buffer.arrayOffset(), buffer.position());
     }
@@ -184,6 +186,7 @@ public class ByteBufferOutputStream extends OutputStream {
      * <code>BufferOverflowException</code> is thrown and no data is written. 
      * If the buffer can grow, a new buffer is created & data is written.
      */
+    @Override
     public void write(byte[] b, int off, int len) {
         if(grow && len > buffer.remaining())
             grow(len);
@@ -211,6 +214,7 @@ public class ByteBufferOutputStream extends OutputStream {
      * and no data is written. If the buffer can grow, a new buffer is created
      * and data is written.
      */
+    @Override
     public void write(int b) {
         if(grow && !buffer.hasRemaining())
             grow(1);

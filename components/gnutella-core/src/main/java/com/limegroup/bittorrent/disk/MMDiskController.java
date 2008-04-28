@@ -87,7 +87,8 @@ public class MMDiskController<F extends File> extends RAFDiskController<F> {
 		return bufMap.get(f);
 	}
 	
-	public synchronized void close() {
+	@Override
+    public synchronized void close() {
 	    LOG.debug("closing...");
 	    boolean allCleaned = false;
 	    try {
@@ -108,7 +109,8 @@ public class MMDiskController<F extends File> extends RAFDiskController<F> {
 	    }
 	}
 	
-	public synchronized void flush() throws IOException {
+	@Override
+    public synchronized void flush() throws IOException {
 	    if (bufMap == null)
 	        return;
 	    for (MappedByteBuffer buf : bufMap.values())

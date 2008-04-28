@@ -27,7 +27,8 @@ public class ASFParsingTest extends LimeTestCase {
 		return buildTestSuite(ASFParsingTest.class);
 	}
 	
-	public void setUp(){
+	@Override
+    public void setUp(){
 	    Injector injector = LimeTestUtils.createInjector();
 	    metaDataFactory = injector.getInstance(MetaDataFactory.class);
 	}

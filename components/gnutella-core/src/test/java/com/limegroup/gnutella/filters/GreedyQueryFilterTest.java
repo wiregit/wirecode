@@ -27,7 +27,8 @@ public class GreedyQueryFilterTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 
-	public void setUp()
+	@Override
+    public void setUp()
     {   context = new Mockery();
         filter = new GreedyQueryFilter();
     }

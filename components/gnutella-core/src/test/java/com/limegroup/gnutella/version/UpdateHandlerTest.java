@@ -83,6 +83,7 @@ public class UpdateHandlerTest extends LimeTestCase {
 
     private File saveFile;
 
+    @Override
     public void setUp() {
         mockery = new Mockery();
         activityCallback = mockery.mock(ActivityCallback.class);
@@ -107,6 +108,7 @@ public class UpdateHandlerTest extends LimeTestCase {
         };
 
         injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
             public void configure() {
                 bind(ScheduledExecutorService.class).annotatedWith(
                         Names.named("backgroundExecutor")).toInstance(backgroundExecutor);
@@ -199,6 +201,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                         description.appendText("httpMethod");
                     }
 
+                    @Override
                     public boolean matchesSafely(HttpGet item) {
                         assertEquals("GET", item.getMethod());
                         assertTrue(item.getURI().toString(), item.getURI().toString()
@@ -209,6 +212,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                     public void describeTo(org.hamcrest.Description description) {
                     }
 
+                    @Override
                     public boolean matchesSafely(HttpParams item) {
                         assertEquals(10000, HttpConnectionParams.getConnectionTimeout(item));
                         assertEquals(10000, HttpConnectionParams.getSoTimeout(item));
@@ -219,6 +223,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                     public void describeTo(Description description) {
                     }
 
+                    @Override
                     public boolean matchesSafely(HttpClientListener item) {
                         httpClientListenerRef.set(item);
                         return true;
@@ -332,6 +337,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                         description.appendText("httpMethod");
                     }
 
+                    @Override
                     public boolean matchesSafely(HttpGet item) {
                         assertEquals("GET", item.getMethod());
                         assertTrue(item.getURI().toString(), item.getURI().toString()
@@ -342,6 +348,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                     public void describeTo(org.hamcrest.Description description) {
                     }
 
+                    @Override
                     public boolean matchesSafely(HttpParams item) {
                         assertEquals(10000, HttpConnectionParams.getConnectionTimeout(item));
                         assertEquals(10000, HttpConnectionParams.getSoTimeout(item));
@@ -351,6 +358,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                     public void describeTo(Description description) {
                     }
 
+                    @Override
                     public boolean matchesSafely(HttpClientListener item) {
                         httpClientListenerRef.set(item);
                         return true;
@@ -470,6 +478,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                         description.appendText("httpMethod");
                     }
 
+                    @Override
                     public boolean matchesSafely(HttpGet item) {
                         assertEquals("GET", item.getMethod());
                         assertTrue(item.getURI().toString(), item.getURI().toString()
@@ -480,6 +489,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                     public void describeTo(org.hamcrest.Description description) {
                     }
 
+                    @Override
                     public boolean matchesSafely(HttpParams item) {
                         assertEquals(10000, HttpConnectionParams.getConnectionTimeout(item));
                         assertEquals(10000, HttpConnectionParams.getSoTimeout(item));
@@ -489,6 +499,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                     public void describeTo(Description description) {
                     }
 
+                    @Override
                     public boolean matchesSafely(HttpClientListener item) {
                         httpClientListenerRef.set(item);
                         return true;
@@ -607,6 +618,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                         description.appendText("httpMethod");
                     }
 
+                    @Override
                     public boolean matchesSafely(HttpGet item) {
                         assertEquals("GET", item.getMethod());
                         assertTrue(item.getURI().toString(), item.getURI().toString()
@@ -617,6 +629,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                     public void describeTo(org.hamcrest.Description description) {
                     }
 
+                    @Override
                     public boolean matchesSafely(HttpParams item) {
                         assertEquals(10000, HttpConnectionParams.getConnectionTimeout(item));
                         assertEquals(10000, HttpConnectionParams.getSoTimeout(item));
@@ -626,6 +639,7 @@ public class UpdateHandlerTest extends LimeTestCase {
                     public void describeTo(Description description) {
                     }
 
+                    @Override
                     public boolean matchesSafely(HttpClientListener item) {
                         httpClientListenerRef.set(item);
                         return true;

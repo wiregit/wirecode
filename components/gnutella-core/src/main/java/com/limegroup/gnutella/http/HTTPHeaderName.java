@@ -207,7 +207,8 @@ public enum HTTPHeaderName {
 	 *
 	 * @return the string description of this instance
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		return NAME;
 	}
 

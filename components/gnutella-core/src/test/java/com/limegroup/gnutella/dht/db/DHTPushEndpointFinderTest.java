@@ -18,6 +18,7 @@ public class DHTPushEndpointFinderTest extends DHTFinderTestCase {
         return buildTestSuite(DHTPushEndpointFinderTest.class);
     }
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
         pushEndpointFinder = injector.getInstance(DHTPushEndpointFinder.class);

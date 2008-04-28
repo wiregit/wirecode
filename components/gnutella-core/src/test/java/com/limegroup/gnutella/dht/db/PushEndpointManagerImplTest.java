@@ -36,6 +36,7 @@ public class PushEndpointManagerImplTest extends BaseTestCase {
         return buildTestSuite(PushEndpointManagerImplTest.class);
     }
     
+    @Override
     @SuppressWarnings({ "cast", "unchecked" })
     protected void setUp() throws Exception {
         context = new Mockery();

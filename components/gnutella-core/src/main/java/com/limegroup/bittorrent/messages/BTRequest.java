@@ -65,7 +65,8 @@ public class BTRequest extends BTMessage {
 		return in;
 	}
 
-	public ByteBuffer getPayload() {
+	@Override
+    public ByteBuffer getPayload() {
 		if (_payload == null) {
 			ByteBuffer buf = ByteBuffer.allocate(12);
 			buf.order(ByteOrder.BIG_ENDIAN);
@@ -78,11 +79,13 @@ public class BTRequest extends BTMessage {
 		return _payload;
 	}
 	
-	public boolean isUrgent() {
+	@Override
+    public boolean isUrgent() {
 		return true;
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		return "BTRequest (" + in + ")" ;
 	}
 }

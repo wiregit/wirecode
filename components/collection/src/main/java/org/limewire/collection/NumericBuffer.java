@@ -31,7 +31,8 @@ public class NumericBuffer<T extends Number> extends Buffer<T> {
 		super(other);
 	}
 	
-	@SuppressWarnings("unchecked")
+	@Override
+    @SuppressWarnings("unchecked")
 	protected T[] createArray(int size) {
 		return (T[])new Number[size + 1];
 	}

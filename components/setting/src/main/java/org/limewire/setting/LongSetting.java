@@ -52,6 +52,7 @@ public class LongSetting extends AbstractNumberSetting<Long> {
      * @param sValue property string value
      *
      */
+    @Override
     protected void loadValue(String sValue) {
         try {
             value = Long.parseLong(sValue.trim());
@@ -60,6 +61,7 @@ public class LongSetting extends AbstractNumberSetting<Long> {
         }
     }
     
+    @Override
     protected Comparable<Long> convertToComparable(String value) {
         return new Long(value);
     }

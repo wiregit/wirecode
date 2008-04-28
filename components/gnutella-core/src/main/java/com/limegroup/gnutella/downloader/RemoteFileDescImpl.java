@@ -596,6 +596,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 	 * therefore it is necessary that we distinguish those by their 
 	 * client GUIDs
 	 */
+    @Override
     public boolean equals(Object o) {
 		if(o == this) return true;
         if (! (o instanceof RemoteFileDesc))
@@ -633,7 +634,8 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 	 *
 	 * @return a hash code value for this object
 	 */
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 	   if(_hashCode == 0) {
             int result = 17;
             result = (37* result)+_host.hashCode();
@@ -647,6 +649,7 @@ class RemoteFileDescImpl implements RemoteFileDesc {
 		return _hashCode;
 	}
 
+    @Override
     public String toString() {
         return  ("<"+getHost()+":"+getPort()+", "
 				 +getFileName() + ">");

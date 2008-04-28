@@ -52,6 +52,7 @@ public class AsyncDimeRecordReader extends ReadState {
         }
     }
 
+    @Override
     protected boolean processRead(ReadableByteChannel rc, ByteBuffer buffer) throws IOException {
         // Header must be completely read before continuing...
         if(fill(header, rc, buffer)) {

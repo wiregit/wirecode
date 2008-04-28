@@ -33,6 +33,7 @@ public class StatsResult implements Result {
         return statistics;
     }
     
+    @Override
     public String toString() {
         try {
             return new String(statistics, "ISO-8859-1");

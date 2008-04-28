@@ -27,11 +27,13 @@ public class BTChoke extends BTMessage {
 	/**
 	 * @return ByteBuffer for this message
 	 */
-	public ByteBuffer getPayload() {
+	@Override
+    public ByteBuffer getPayload() {
 		return EMPTY_PAYLOAD;
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		return "BTChoke" ;
 	}
 }

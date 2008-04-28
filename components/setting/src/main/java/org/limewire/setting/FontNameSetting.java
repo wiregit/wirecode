@@ -44,6 +44,7 @@ public final class FontNameSetting extends AbstractSetting {
      * then do not set _fontName.  The variable _fontName
      * is set to the default (dialog) in the constructor.
      */
+    @Override
     protected void loadValue(String sValue) {
         _fontName = sValue;
     }

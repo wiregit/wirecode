@@ -176,6 +176,7 @@ public abstract class AbstractVendorMessage extends AbstractMessage implements V
      * less.  Does not take version into account, but if different versions
      * have different payloads, they'll differ.
      */
+    @Override
     public boolean equals(Object other) {
         if (other instanceof AbstractVendorMessage) {
             AbstractVendorMessage vmp = (AbstractVendorMessage) other;
@@ -187,6 +188,7 @@ public abstract class AbstractVendorMessage extends AbstractMessage implements V
         return false;
     }
    
+    @Override
     public int hashCode() {
         return _hashCode;
     }
@@ -205,6 +207,7 @@ public abstract class AbstractVendorMessage extends AbstractMessage implements V
     //----------------------------------
 
     // INHERIT COMMENT
+    @Override
     protected void writePayload(OutputStream out) throws IOException {
         out.write(_vendorID);
         ByteUtils.short2leb((short)_selector, out);

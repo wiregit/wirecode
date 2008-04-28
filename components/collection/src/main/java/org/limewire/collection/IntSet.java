@@ -84,6 +84,7 @@ public class IntSet {
             this.high=singleton;
         }
 
+        @Override
         public String toString() {
             if (low==high)
                 return String.valueOf(low);
@@ -376,6 +377,7 @@ public class IntSet {
     }
 
 
+    @Override
     public String toString() {
         return list.toString();
     }

@@ -9,15 +9,18 @@ public class DebugOutputStream extends OutputStream {
     public DebugOutputStream(OutputStream delegate) {
         this._delegate=delegate;
     }
+    @Override
     public void write(int b) throws IOException { 
         System.out.print((char)b);
         _delegate.write(b);
     }
 
+    @Override
     public void flush() throws IOException {
         _delegate.flush();
     }
 
+    @Override
     public void close() throws IOException {
         _delegate.close();
     }

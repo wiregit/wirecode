@@ -3065,6 +3065,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         return incompleteFile;
     }
     
+    @Override
     protected DownloadMemento createMemento() {
         return new GnutellaDownloadMementoImpl();
     }

@@ -32,7 +32,8 @@ class FinMessageImpl extends RUDPMessageImpl implements FinMessage {
         data1.rewind(); 
     }
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return "FinMessage DestID:"+getConnectionID()+" reasonCode:"+_reasonCode;
 	}
 }

@@ -243,6 +243,7 @@ public class IntSetTest extends BaseTestCase {
      * Checks invariants.
      */
     private static class TestingIntSet extends IntSet {
+        @Override
         public boolean add(int x) {
             try {
                 repOk();
@@ -252,6 +253,7 @@ public class IntSetTest extends BaseTestCase {
             }
         }
         
+        @Override
         public boolean remove(int x) {
             try {
                 repOk();

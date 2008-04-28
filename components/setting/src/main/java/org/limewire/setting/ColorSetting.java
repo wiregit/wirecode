@@ -65,7 +65,8 @@ public final class ColorSetting extends AbstractSetting {
         this.value = value;
 	}
 	/** Returns the value of this setting. */
-	protected void loadValue(String sValue) {
+	@Override
+    protected void loadValue(String sValue) {
 	    sValue = sValue.trim();
 	    try {
             int r = Integer.parseInt(sValue.substring(1, 3), 16);

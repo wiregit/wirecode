@@ -29,6 +29,7 @@ public class FirewalledStatusTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
     public void setUp() throws Exception {
         injector = LimeTestUtils.createInjector();
         super.setUp(injector);

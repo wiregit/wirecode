@@ -28,6 +28,7 @@ public class UrnType implements Serializable {
         return _urnType;
     }
     
+    @Override
     public String toString() {
         return "urn type: " + _urnType;
     }

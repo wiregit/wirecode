@@ -318,6 +318,7 @@ public class Response {
 	 * extensions that do not change equality, such as
 	 * otherLocations.
 	 */
+    @Override
     public boolean equals(Object o) {
 		if(o == this) return true;
         if (! (o instanceof Response))
@@ -332,6 +333,7 @@ public class Response {
     }
 
 
+    @Override
     public int hashCode() {
         return  (int)((31 * 31 * getName().hashCode() + 31 * getSize()+getIndex()));
     }
@@ -339,7 +341,8 @@ public class Response {
 	/**
 	 * Overrides Object.toString to print out a more informative message.
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		return ("index:        "+index+"\r\n"+
 				"size:         "+size+"\r\n"+
 				"name:         "+name+"\r\n"+

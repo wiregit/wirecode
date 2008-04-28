@@ -14,6 +14,7 @@ public class FixedSizeSortedSetTest extends BaseTestCase {
     
     private FixedSizeSortedSet _set;
 
+    @Override
     public void setUp() {
         Comparator intComp = new Comparator() {
             public int compare(Object oa, Object ob) {
@@ -21,6 +22,7 @@ public class FixedSizeSortedSetTest extends BaseTestCase {
                 Integer b = (Integer) ob;
                 return a.compareTo(b);
             }
+            @Override
             public boolean equals(Object o) {
                 return o.equals(this);
                 }
@@ -28,6 +30,7 @@ public class FixedSizeSortedSetTest extends BaseTestCase {
         _set = new FixedSizeSortedSet(intComp, 9);        
     }
 
+    @Override
     public void tearDown() {
         _set = null;
     }

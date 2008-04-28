@@ -33,6 +33,7 @@ public class AsyncDimeParser extends ReadState {
     /** The AsyncDimeRecordReader we're using to read the current record. */
     private AsyncDimeRecordReader reader;
 
+    @Override
     protected boolean processRead(ReadableByteChannel channel, ByteBuffer buffer) throws IOException {
         while(true) {
             if(lastRead) 

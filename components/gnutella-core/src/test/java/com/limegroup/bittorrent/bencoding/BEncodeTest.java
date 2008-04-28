@@ -554,7 +554,8 @@ public class BEncodeTest extends LimeTestCase {
     	StringByte(String s) {
     		this.s = s;
     	}
-    	public boolean equals(Object o) {
+    	@Override
+        public boolean equals(Object o) {
     		if (!(o instanceof byte[]))
     			return false;
     		return s.equals(StringUtils.getASCIIString((byte[])o));

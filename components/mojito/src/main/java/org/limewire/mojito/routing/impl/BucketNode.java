@@ -395,10 +395,12 @@ class BucketNode implements Bucket {
         cache = Collections.emptyMap();
     }
     
+    @Override
     public int hashCode() {
         return bucketId.hashCode();
     }
     
+    @Override
     public boolean equals(Object o) {
         if (!(o instanceof BucketNode)) {
             return false;
@@ -409,6 +411,7 @@ class BucketNode implements Bucket {
                 && depth == other.depth;
     }
     
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(bucketId).append(" (depth=").append(getDepth())

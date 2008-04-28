@@ -479,6 +479,7 @@ public abstract class LWSDispatcherSupport implements LWSDispatcher {
          * the error with the error prefix as defined in {@link LWSServerUtil#wrapError(String)}
          * so that we don't wrap it in a callback.
          */
+        @Override
         protected final String report(String error) {
             return LWSServerUtil.wrapError(error);
         }

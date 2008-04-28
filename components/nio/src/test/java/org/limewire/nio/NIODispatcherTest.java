@@ -42,6 +42,7 @@ public class NIODispatcherTest extends BaseTestCase {
         return buildTestSuite(NIODispatcherTest.class);
     }
     
+    @Override
     public void setUp() throws Exception {
         LISTEN_SOCKET = new ServerSocket();
         LISTEN_SOCKET.setReuseAddress(true);
@@ -49,6 +50,7 @@ public class NIODispatcherTest extends BaseTestCase {
         LISTEN_SOCKET.bind(LISTEN_ADDR, 0);
     }
     
+    @Override
     public void tearDown() throws Exception {
         try {
             LISTEN_SOCKET.close();

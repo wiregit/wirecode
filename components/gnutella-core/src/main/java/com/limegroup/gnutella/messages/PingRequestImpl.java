@@ -80,12 +80,14 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
 
     /////////////////////////////methods///////////////////////////
 
+    @Override
     protected void writePayload(OutputStream out) throws IOException {
         if(payload != null && payload.length > 0 ) {
             out.write(payload);
         }
     }
 
+    @Override
     public String toString() {
         return "PingRequest("+super.toString()+")";
     }

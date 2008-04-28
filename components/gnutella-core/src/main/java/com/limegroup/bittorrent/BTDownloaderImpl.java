@@ -477,7 +477,8 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
 		return "downloader facade for "+torrentFileSystem.getCompleteFile().getName();
 	}
 	
-	public boolean equals(Object o) {
+	@Override
+    public boolean equals(Object o) {
 		if (! (o instanceof Downloader))
 			return false;
 		Downloader other = (Downloader)o;
@@ -498,6 +499,7 @@ public class BTDownloaderImpl extends AbstractCoreDownloader
         return DownloaderType.BTDOWNLOADER;
     }
     
+    @Override
     protected DownloadMemento createMemento() {
         if(finished)
             throw new IllegalStateException("creating memento for finished torrent!");

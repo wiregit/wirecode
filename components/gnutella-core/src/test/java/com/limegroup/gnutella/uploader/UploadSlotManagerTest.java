@@ -17,7 +17,8 @@ public class UploadSlotManagerTest extends LimeTestCase {
 	
 	private UploadSlotManager manager;
 	
-	public void setUp() {
+	@Override
+    public void setUp() {
 		UploadSettings.SOFT_MAX_UPLOADS.revertToDefault();
 		UploadSettings.HARD_MAX_UPLOADS.revertToDefault();
 		UploadSettings.UPLOAD_QUEUE_SIZE.revertToDefault();

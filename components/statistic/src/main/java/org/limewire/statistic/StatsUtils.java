@@ -291,42 +291,54 @@ public class StatsUtils {
     public static class DoubleStats extends Stats {
         DoubleStats() {}
         public double min, max, med, q1, q3, avg, m2, m3, m4, mode, st, swilkW, swilkPW;
+        @Override
         protected void addAnySpecifics(Map<String, Object> m) {
             m.put("swilkW", doubleToBytes(swilkW));
             m.put("swilkPW", doubleToBytes(swilkPW));
         }
         
+        @Override
         public Object getMin() {
             return doubleToBytes(min);
         }
+        @Override
         public Object getMax() {
             return doubleToBytes(max);
         }
+        @Override
         public Object getMed() {
             return doubleToBytes(med);
         }
+        @Override
         public Object getQ1() {
             return doubleToBytes(q1);
         }
+        @Override
         public Object getQ3() {
             return doubleToBytes(q3);
         }
+        @Override
         public Object getAvg() {
             return doubleToBytes(avg);
         }
+        @Override
         public Object getM2() {
             return doubleToBytes(m2);
         }
+        @Override
         public Object getM3() {
             return doubleToBytes(m3);
         }
+        @Override
         public Object getM4() {
             return doubleToBytes(m4);
         }
+        @Override
         public Object getMode() {
             return doubleToBytes(mode);
         }
         
+        @Override
         public Object getST() {
             return doubleToBytes(st);
         }

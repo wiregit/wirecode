@@ -136,6 +136,7 @@ public final class LocalIPFilter extends AbstractIPFilter {
         return minDistance;
     }
     
+    @Override
     protected boolean allowImpl(IP ip) {
         if (goodHosts.contains(ip)) {
             whitelistings++;

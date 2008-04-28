@@ -83,7 +83,8 @@ class OOBSession implements Inspectable {
         return requestedResponseCount - urnHashCodes.size() - (responseHashCodes != null ? responseHashCodes.size() : 0); 
     }
     
-	public boolean equals(Object o) {
+	@Override
+    public boolean equals(Object o) {
 		if (! (o instanceof OOBSession))
 			return false;
 		OOBSession other = (OOBSession) o;

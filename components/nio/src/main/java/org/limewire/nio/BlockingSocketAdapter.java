@@ -47,6 +47,7 @@ public class BlockingSocketAdapter extends NBSocket {
      * This will spawn a new thread and perform the blocking connect on that thread.
      * The observer will be notified of the changes.
      */
+    @Override
     public boolean connect(final SocketAddress addr, final int timeout, 
                            final ConnectObserver observer) {
         ThreadExecutor.startThread(new Runnable() {
@@ -65,6 +66,7 @@ public class BlockingSocketAdapter extends NBSocket {
     /**
      * Sets an observer for being shutdown.
      */
+    @Override
     public void setShutdownObserver(Shutdownable observer) {
         this.shutdownObserver = observer;
     }
@@ -72,6 +74,7 @@ public class BlockingSocketAdapter extends NBSocket {
     /**
      * Closes the socket and notifies the shutdown observer.
      */
+    @Override
     public void close() throws IOException {
         shutdownObserver.shutdown();
         super.close();

@@ -10,6 +10,7 @@ import javax.net.SocketFactory;
 public abstract class ExtendedSocketFactory extends SocketFactory {
     
     /** Returns a new unconnected socket. */
+    @Override
     public abstract Socket createSocket() throws IOException;
     
 }

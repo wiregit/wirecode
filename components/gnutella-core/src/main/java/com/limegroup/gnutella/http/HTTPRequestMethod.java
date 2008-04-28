@@ -52,7 +52,8 @@ public abstract class HTTPRequestMethod {
 	 */
 	public static final HTTPRequestMethod GET = 
 		new HTTPRequestMethod("GET") {
-			public void writeHttpResponse(HTTPMessage response, 
+			@Override
+            public void writeHttpResponse(HTTPMessage response, 
 										  OutputStream os) 
 			throws IOException {
 				if(response == null) {
@@ -73,7 +74,8 @@ public abstract class HTTPRequestMethod {
 	 */
 	public static final HTTPRequestMethod HEAD = 
 		new HTTPRequestMethod("HEAD") {
-			public void writeHttpResponse(HTTPMessage response, 
+			@Override
+            public void writeHttpResponse(HTTPMessage response, 
 										  OutputStream os) 
 			    throws IOException {
 				if(response == null) {
@@ -89,6 +91,7 @@ public abstract class HTTPRequestMethod {
 		};
     
     // overrides Object.toString to report more information
+    @Override
     public String toString() {
         return "HTTPRequestMethod: "+METHOD_NAME;
     }

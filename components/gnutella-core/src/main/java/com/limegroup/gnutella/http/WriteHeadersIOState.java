@@ -31,6 +31,7 @@ public abstract class WriteHeadersIOState extends WriteState {
      * This will return true if it needs to be called again to continue writing.
      * If it returns false, all data has been written and you can proceed to the next state.
      */
+    @Override
     protected boolean processWrite(WritableByteChannel channel, ByteBuffer buffer) throws IOException {
         if(outgoing == null) {
             outgoing = createOutgoingData();

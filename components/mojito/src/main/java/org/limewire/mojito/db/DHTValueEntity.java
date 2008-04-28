@@ -177,6 +177,7 @@ public class DHTValueEntity implements Serializable {
      * (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
+    @Override
     public int hashCode() {
         return hashCode;
     }
@@ -185,6 +186,7 @@ public class DHTValueEntity implements Serializable {
      * (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    @Override
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -201,6 +203,7 @@ public class DHTValueEntity implements Serializable {
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("Creator: ").append(getCreator()).append("\n");

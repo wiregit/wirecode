@@ -247,7 +247,8 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * Overrides toString to print out more detailed information about
 	 * this <tt>UDPReplyHandler</tt>
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		return addr.toString();
 	}
 	

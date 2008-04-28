@@ -387,6 +387,7 @@ public class GUID implements Comparable<GUID> {
         return 0;
     }
 
+    @Override
     public boolean equals(Object o) {
         if(o == this) {
             return true;
@@ -398,6 +399,7 @@ public class GUID implements Comparable<GUID> {
         }
     }
 
+    @Override
     public int hashCode() {
         //Glum bytes 0..3, 4..7, etc. together into 32-bit numbers.
         byte[] ba=bytes;
@@ -419,6 +421,7 @@ public class GUID implements Comparable<GUID> {
         return bytes;
     }
 
+    @Override
     public String toString() {
         return toHexString();
     }
@@ -509,6 +512,7 @@ public class GUID implements Comparable<GUID> {
         /** @return true if other is a GUID that is the same as the GUID
          *  in this bundle.
          */
+        @Override
         public boolean equals(Object other) {
             if (other == this) return true;
             if (other instanceof TimedGUID) 
@@ -519,6 +523,7 @@ public class GUID implements Comparable<GUID> {
         /** Since guids will be all we have when we do a lookup in a hashtable,
          *  we want the hash code to be the same as the GUID. 
          */
+        @Override
         public int hashCode() {
             return _guid.hashCode();
         }

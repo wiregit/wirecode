@@ -56,6 +56,7 @@ public class BiasedRandomDownloadStrategy extends RandomDownloadStrategy {
         super(fileSize);
     }
     
+    @Override
     public synchronized Range pickAssignment(IntervalSet candidateBytes,
             IntervalSet neededBytes,
             long blockSize) throws java.util.NoSuchElementException {

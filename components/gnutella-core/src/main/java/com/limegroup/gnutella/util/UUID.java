@@ -91,6 +91,7 @@ public final class UUID {
     /**
      * Generates the string of this UUID.
      */
+    @Override
     public String toString() {
         return uuid;
     }
@@ -98,6 +99,7 @@ public final class UUID {
     /**
      * Determines if this UUID is the same as another.
      */
+    @Override
     public boolean equals(Object o) {
         if(o == this)
             return true;
@@ -111,6 +113,7 @@ public final class UUID {
     /**
      * The hashCode of this UUID.
      */
+    @Override
     public int hashCode() {
         return uuid.hashCode();
     }

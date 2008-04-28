@@ -34,6 +34,7 @@ class AsyncTigerTreeReader extends ReadState implements ThexReader {
         this.tigerTreeFactory = tigerTreeFactory;
     }
 
+    @Override
     protected boolean processRead(ReadableByteChannel channel, ByteBuffer buffer)
             throws IOException {
         return parser.process(channel, buffer);

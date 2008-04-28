@@ -127,6 +127,7 @@ public abstract class AbstractAltLocValue implements AltLocValue {
      * (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("AltLoc: guid=").append(new GUID(getGUID()))

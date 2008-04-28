@@ -28,6 +28,7 @@ class PushDetails {
         return uniqueID;
     }
     
+    @Override
     public boolean equals(Object o) {
         if(o instanceof PushDetails) {
             PushDetails other = (PushDetails)o;
@@ -39,6 +40,7 @@ class PushDetails {
         }
     }
     
+    @Override
     public String toString() {
         return "clientGUID: " + new GUID(clientGUID) + ", address: " + address + ", uniqueID: " + uniqueID;
     }

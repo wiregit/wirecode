@@ -39,6 +39,7 @@ public class ResetTableMessage extends RouteTableMessage {
         this.infinity=infinity;
     }
 
+    @Override
     protected void writePayloadData(OutputStream out) throws IOException {
         byte[] buf=new byte[5];
         ByteUtils.int2leb(tableSize, buf, 0);
@@ -82,6 +83,7 @@ public class ResetTableMessage extends RouteTableMessage {
         return tableSize;
     }
 
+    @Override
     public String toString() {
         return "{RESET, tableSize: "+getTableSize()
               +", Infinity: "+getInfinity()+"}";

@@ -15,6 +15,7 @@ public final class CountingInputStream extends FilterInputStream {
         super(in);
     }
     
+    @Override
     public int read() throws IOException {
         int read = super.read();
         if (read != -1) {
@@ -23,6 +24,7 @@ public final class CountingInputStream extends FilterInputStream {
         return read;
     }
     
+    @Override
     public int read(byte[] b, int off, int len) throws IOException {
         int read;
         try {
@@ -37,12 +39,14 @@ public final class CountingInputStream extends FilterInputStream {
         return read;
     }
     
+    @Override
     public long skip(long n) throws IOException {
         long skipped = super.skip(n);
         _count += (int)skipped;
         return skipped;
     }
     
+    @Override
     public void close() throws IOException {
         in.close();
     }

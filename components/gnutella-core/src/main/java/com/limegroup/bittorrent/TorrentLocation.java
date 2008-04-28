@@ -142,7 +142,8 @@ public class TorrentLocation extends IpPortImpl {
 		PEER_ID[3] == (byte)'E';
 	}
 
-	public boolean equals(Object o) {
+	@Override
+    public boolean equals(Object o) {
 		if (!(o instanceof TorrentLocation))
 			return false;
 		TorrentLocation other = (TorrentLocation)o;
@@ -151,7 +152,8 @@ public class TorrentLocation extends IpPortImpl {
 		return Arrays.equals(other.PEER_ID,this.PEER_ID);
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return getAddress() + ":" + getPort() + ":" + new String(PEER_ID) + ":"
 				+ Base32.encode(EXTENSION_BYTES);
 	}

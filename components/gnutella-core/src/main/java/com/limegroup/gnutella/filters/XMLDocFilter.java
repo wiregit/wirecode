@@ -63,6 +63,7 @@ public class XMLDocFilter extends KeywordFilter {
      * Also activates the keyword filtering of adult content in the super class
      * {@link KeywordFilter#disallowAdult()}.
      */
+    @Override
     public void disallowAdult() {
         addDisallowedEntries(LimeXMLNames.VIDEO_TYPE, Arrays.asList("adult"));
         addDisallowedEntries(LimeXMLNames.VIDEO_RATING, Arrays.asList("adult"));

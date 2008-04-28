@@ -47,14 +47,17 @@ public final class UltrapeerQueryRouteTableTest extends ServerSideTestCase {
     }    
    
 
+    @Override
     protected int getNumberOfUltrapeers() {
         return 1;
     }
     
+    @Override
     protected int getNumberOfLeafpeers() {
         return 0;
     }
     
+    @Override
     protected void setSettings() throws Exception {
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
@@ -78,6 +81,7 @@ public final class UltrapeerQueryRouteTableTest extends ServerSideTestCase {
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
     }
     
+    @Override
     protected void setUpQRPTables() throws Exception {
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add(match);
@@ -86,6 +90,7 @@ public final class UltrapeerQueryRouteTableTest extends ServerSideTestCase {
         ULTRAPEER[0].flush();
     }
     
+    @Override
     public void setUp() throws Exception {
 
         final ResponseVerifier testVerifier = new TestResponseVerifier();

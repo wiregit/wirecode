@@ -363,10 +363,12 @@ public class Buffer<E> implements Cloneable, Iterable<E> {
     }
 
     /** Returns a shallow copy of this, of type Buffer */
+    @Override
     public Buffer<E> clone() {
         return new Buffer<E>(this);        
     }
 
+    @Override
     public String toString() {
         StringBuilder buf=new StringBuilder();
         buf.append("[");

@@ -530,6 +530,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         }
     }
 
+    @Override
     public int getNumberOfPeers() {
         return 1;
     }
@@ -559,6 +560,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
             return rfd;
         }
 
+        @Override
         public void handleQueryResult(RemoteFileDesc rfd, HostData data,
                 Set locs) {
             rfdLock.lock();

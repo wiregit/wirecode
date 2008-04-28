@@ -320,6 +320,7 @@ public class BlockingConnection extends AbstractConnection {
      * 
      * @see com.limegroup.gnutella.Connection#close()
      */
+    @Override
     protected void closeImpl() {
         IOUtils.close(_deflater);
         IOUtils.close(_inflater);

@@ -53,6 +53,7 @@ public class ConstantHTTPHeaderValue {
                 return LimeWireUtils.getHttpServer();
             }
             
+            @Override
             public String toString() {
                 return httpStringValue();
             }
@@ -65,6 +66,7 @@ public class ConstantHTTPHeaderValue {
                 return LimeWireUtils.getHttpServer();
             }
             
+            @Override
             public String toString() {
                 return httpStringValue();
             }

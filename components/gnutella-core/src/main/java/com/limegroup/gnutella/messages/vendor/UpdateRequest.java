@@ -25,6 +25,7 @@ public final class UpdateRequest extends AbstractVendorMessage implements Vendor
         super(F_LIME_VENDOR_ID, F_UPDATE_REQ, VERSION, DataUtils.EMPTY_BYTE_ARRAY);
     }
         
+    @Override
     public String toString() {
         return "{UpdateRequest:"+super.toString()+"}";
     }

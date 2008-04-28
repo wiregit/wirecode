@@ -34,6 +34,7 @@ public class FixedSizeExpiringSetTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    @Override
     protected void setUp() {
     	//    	test all constructors
         empty1 = new FixedSizeExpiringSet();

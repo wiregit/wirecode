@@ -11,6 +11,7 @@ public abstract class AbstractNBSocketChannel extends SocketChannel {
         super(provider);
     }
 
+    @Override
     public abstract AbstractNBSocket socket(); 
 
 }

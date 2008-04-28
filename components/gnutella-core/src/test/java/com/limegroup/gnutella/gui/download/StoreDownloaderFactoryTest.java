@@ -34,6 +34,7 @@ public class StoreDownloaderFactoryTest extends LimeTestCase{
         junit.textui.TestRunner.run(suite());
     }
 
+    @Override
     protected void setUp() {
         Injector injector = LimeTestUtils.createInjector();
         remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);

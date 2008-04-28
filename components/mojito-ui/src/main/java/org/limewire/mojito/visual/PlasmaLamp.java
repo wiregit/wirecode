@@ -48,6 +48,7 @@ class PlasmaLamp extends Painter {
         this.nodeId = nodeId;
     }
     
+    @Override
     public void paint(Component c, Graphics2D g2) {
         double width = c.getWidth();
         double height = c.getHeight();
@@ -88,6 +89,7 @@ class PlasmaLamp extends Painter {
         g2.fill(dot);
     }
     
+    @Override
     public void handle(EventType type, KUID nodeId, SocketAddress dst, OpCode opcode, boolean request) {
         if (nodeId == null) {
             return;
@@ -98,6 +100,7 @@ class PlasmaLamp extends Painter {
         }
     }
     
+    @Override
     public void clear() {
         synchronized (nodes) {
             nodes.clear();

@@ -80,6 +80,7 @@ public class FWTDetectionTest extends LimeTestCase {
      * the node sends an initial ping to them, and they return various
      * pongs.
      */
+    @Override
     public void setUp() throws Exception {
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         
@@ -119,6 +120,7 @@ public class FWTDetectionTest extends LimeTestCase {
         injector.getInstance(LifecycleManager.class).start();
     }
     
+    @Override
     public void tearDown() throws Exception {
         if(ponger1 != null)
             ponger1.drainAndClose();
@@ -556,21 +558,26 @@ public class FWTDetectionTest extends LimeTestCase {
         }
 
         private boolean connected;
+        @Override
         public boolean isConnected() {
             return connected;
         }
+        @Override
         public void setConnected(boolean yes) {
             connected=yes;
         }
         
+        @Override
         public boolean isFullyConnected() {
             return false;
         }
         
+        @Override
         public int getPreferredConnectionCount() {
             return 1;
         }
         
+        @Override
         public List<RoutedConnection> getInitializedConnections() {
             return Collections.emptyList();
         }

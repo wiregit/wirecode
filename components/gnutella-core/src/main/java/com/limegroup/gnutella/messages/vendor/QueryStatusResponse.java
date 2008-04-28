@@ -73,6 +73,7 @@ public final class QueryStatusResponse extends AbstractVendorMessage {
 
     /** Overridden purely for stats handling.
      */
+    @Override
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
     }

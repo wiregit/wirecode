@@ -61,6 +61,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
     public void setUp() throws Exception {
         Injector injector = LimeTestUtils.createInjector();
         acceptor = (AcceptorImpl)injector.getInstance(Acceptor.class);
@@ -371,6 +372,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
         }
     }
 
+    @Override
     public int getNumberOfPeers() {
         return 2;
     }

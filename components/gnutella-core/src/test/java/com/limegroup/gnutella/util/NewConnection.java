@@ -73,6 +73,7 @@ public class NewConnection extends TestConnection {
         return QRT.contains(query);
     }
 
+    @Override
     public String toString() {
         return "NEW TEST CONNECTION";
     }

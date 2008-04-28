@@ -121,6 +121,7 @@ public class FixedsizeForgetfulHashMap<K, V> extends LinkedHashMap<K, V> {
      *
      * @return a shallow copy of this map.
      */
+    @Override
     @SuppressWarnings("unchecked")
     public FixedsizeForgetfulHashMap<K, V> clone() {
         return (FixedsizeForgetfulHashMap<K, V>)super.clone();

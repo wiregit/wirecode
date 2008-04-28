@@ -41,12 +41,14 @@ public class InspectionRequestHandlerTest extends BaseTestCase {
     private SecureMessageVerifier verifier;
     private InspectionResponseFactory factory;
     
+    @Override
     public void setUp() throws Exception {
         mockery = new Mockery();
         messageRouter = mockery.mock(MessageRouter.class);
         verifier = mockery.mock(SecureMessageVerifier.class);
         factory = mockery.mock(InspectionResponseFactory.class);
         Module m = new AbstractModule() {
+            @Override
             public void configure() {
                 bind(MessageRouter.class).toInstance(messageRouter);
                 bind(InspectionResponseFactory.class).toInstance(factory);

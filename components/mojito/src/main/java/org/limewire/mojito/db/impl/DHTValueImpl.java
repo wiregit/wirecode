@@ -114,10 +114,12 @@ public class DHTValueImpl implements DHTValue {
         return value.length;
     }
     
+    @Override
     public int hashCode() {
         return hashCode;
     }
     
+    @Override
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -131,6 +133,7 @@ public class DHTValueImpl implements DHTValue {
                     && Arrays.equals(value, other.getValue());
     }
     
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("DHTValueType: ").append(getValueType()).append("\n");

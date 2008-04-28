@@ -62,6 +62,7 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
          };
     }
     
+    @Override
     protected final boolean isAuthenticated() {
         return publicKey != null && privateKey != null && sharedKey != null;
     }
@@ -73,6 +74,7 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
       * @param request may be <code>null</code>
       * @return the arguments to the right of the <code>?</code>
       */
+    @Override
     protected Map<String, String> getArgs(String request) {
          if (request == null || request.length() == 0) {
              return Collections.emptyMap();
@@ -129,6 +131,7 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
      */
     protected abstract class HandlerWithCallbackWithPrivateKey extends HandlerWithCallback {
 
+        @Override
         protected final void handleRest(final Map<String, String> args, StringCallback cb) {
             //
             // Check the private key
@@ -185,6 +188,7 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
      * Issues a command to start authentication.
      */
     class StartCom extends HandlerWithCallback {
+        @Override
         protected void handleRest(final Map<String, String> args, final StringCallback cb) {
             regenerateKeys();
             //
@@ -212,6 +216,7 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
      * Sent from code with private key to authenticate.
      */
     class Authenticate extends HandlerWithCallbackWithPrivateKey {
+        @Override
         protected void handleRest(String privateKey, String sharedKey, Map<String, String> args, StringCallback cb) {
             notifyConnectionListeners(true);
             cb.process(LWSDispatcherSupport.Responses.OK);
@@ -222,6 +227,7 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
      * Send from code to end session.
      */
     class Detatch extends HandlerWithCallback {
+        @Override
         protected void handleRest(Map<String, String> args, StringCallback cb) {
             privateKey = null;
             publicKey = null;
@@ -235,6 +241,7 @@ public final class LWSDispatcherImpl extends LWSDispatcherSupport {
      * Sent from code with parameter {@link Parameters#COMMAND}.
      */
     class Msg extends HandlerWithCallbackWithPrivateKey {
+        @Override
         protected void handleRest(String privateKey,
                                     String herSharedKey,
                                     Map<String, String> args, StringCallback cb) {

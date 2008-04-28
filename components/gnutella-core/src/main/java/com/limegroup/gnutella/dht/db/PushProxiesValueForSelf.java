@@ -40,10 +40,12 @@ class PushProxiesValueForSelf extends AbstractPushProxiesValue {
         this.applicationServices = applicationServices;
     }
 
+    @Override
     public DHTValueType getValueType() {
         return AbstractPushProxiesValue.PUSH_PROXIES;
     }
 
+    @Override
     public Version getVersion() {
         return AbstractPushProxiesValue.VERSION;
     }

@@ -105,6 +105,7 @@ class TestUDPAcceptor extends ManagedThread {
         interrupt();
     }
     
+    @Override
     public void run() {
         DatagramPacket p = new DatagramPacket(new byte[1024], 1024);
         Message m = null;

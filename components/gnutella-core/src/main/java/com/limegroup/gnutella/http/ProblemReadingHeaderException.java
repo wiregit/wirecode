@@ -27,7 +27,8 @@ public class ProblemReadingHeaderException extends IOException {
 	    this.cause = cause;
 	}
 	
-	public void printStackTrace() {
+	@Override
+    public void printStackTrace() {
 	    super.printStackTrace();
 	    if(cause != null) {
             System.err.println("Parent Cause:");

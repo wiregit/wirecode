@@ -50,6 +50,7 @@ public abstract class GUIBaseTestCase extends LimeTestCase {
 		System.setProperty("user.dir", savedWorkingDir);
 	}
     
+    @Override
     protected void setUp() throws Exception {
         setLocaleSettings(Locale.US);
     }

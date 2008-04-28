@@ -113,6 +113,7 @@ public final class PasswordSetting extends AbstractSetting {
      * 
      * @param sValue property string value
      */
+    @Override
     protected void loadValue(String sValue) {
         if (algorithm != null && !isEncrypted(sValue)) {
             setValue(encrypt(algorithm, sValue));

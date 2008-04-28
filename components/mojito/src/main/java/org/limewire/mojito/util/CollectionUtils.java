@@ -126,10 +126,12 @@ public final class CollectionUtils {
      */
     public static <T> Collection<T> getCollection(final Collection<T> c, final int count) {
         return new AbstractCollection<T>() {
+            @Override
             public Iterator<T> iterator() {
                 return CollectionUtils.iterator(c, count);
             }
 
+            @Override
             public int size() {
                 return Math.min(c.size(), count);
             }

@@ -174,6 +174,7 @@ public final class NIOSocketTest extends BaseTestCase {
                 socket.setSoTimeout(10);
 
                 ChannelReadObserver observer = new RCROAdapter() {
+                    @Override
                     public void handleRead() throws IOException {
                         source.interestRead(false);
                     }

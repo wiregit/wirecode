@@ -174,11 +174,13 @@ public class WriteHandshakeStateTest extends LimeTestCase {
             this.outgoingData = ByteBuffer.wrap(data.getBytes());
         }
 
+        @Override
         protected ByteBuffer createOutgoingData() throws IOException {
             createOutgoingData++;
             return outgoingData;
         }
 
+        @Override
         protected void processWrittenHeaders() throws IOException {
             this.processWrittenHeaders = true;
         }

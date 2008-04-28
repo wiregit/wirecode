@@ -59,6 +59,7 @@ public class NameValue <V> implements Map.Entry<String, V> {
 		return old;
 	}
         
+    @Override
     public String toString() {
         return "name=" + _name + ", value=" + _value;
     }

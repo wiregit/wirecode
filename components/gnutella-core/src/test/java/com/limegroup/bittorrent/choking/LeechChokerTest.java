@@ -37,6 +37,7 @@ public class LeechChokerTest extends LimeTestCase {
     }
     
     private Mockery mockery;
+    @Override
     public void setUp() throws Exception {
         mockery = new Mockery();
     }
@@ -47,6 +48,7 @@ public class LeechChokerTest extends LimeTestCase {
     public void testStartRunShutdown() throws Exception {
         final ScheduledExecutorService ses = mockery.mock(ScheduledExecutorService.class);
         Module m = new AbstractModule() {
+            @Override
             public void configure() {
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toInstance(ses);
             }
@@ -98,6 +100,7 @@ public class LeechChokerTest extends LimeTestCase {
             }
         };
         Module m = new AbstractModule() {
+            @Override
             public void configure() {
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toInstance(myService);
             }
@@ -121,6 +124,7 @@ public class LeechChokerTest extends LimeTestCase {
         final UploadServices uServices = mockery.mock(UploadServices.class);
 
         Module m = new AbstractModule() {
+            @Override
             public void configure() {
                 bind(UploadServices.class).toInstance(uServices);
             }
@@ -162,6 +166,7 @@ public class LeechChokerTest extends LimeTestCase {
             }
         };
         Module m = new AbstractModule() {
+            @Override
             public void configure() {
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toInstance(myService);
             }
@@ -250,6 +255,7 @@ public class LeechChokerTest extends LimeTestCase {
             }
         };
         Module m = new AbstractModule() {
+            @Override
             public void configure() {
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toInstance(myService);
             }
@@ -312,6 +318,7 @@ public class LeechChokerTest extends LimeTestCase {
             }
         };
         Module m = new AbstractModule() {
+            @Override
             public void configure() {
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("nioExecutor")).toInstance(myService);
             }

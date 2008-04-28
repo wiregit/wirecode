@@ -9,10 +9,12 @@ public class BERational extends NumberToken<Double> {
         super(chan);
     }
     
+    @Override
     public int getType() {
         return RATIONAL;
     }
     
+    @Override
     protected Double getResult(BigInteger rawValue) {
         double ret = Double.longBitsToDouble(rawValue.longValue());
         return ret * multiplier;

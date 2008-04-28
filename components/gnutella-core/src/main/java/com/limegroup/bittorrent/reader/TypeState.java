@@ -19,7 +19,8 @@ class TypeState extends BTReadMessageState {
 		super(readerState);
 	}
 	
-	public BTReadMessageState addData() throws BadBTMessageException {
+	@Override
+    public BTReadMessageState addData() throws BadBTMessageException {
 		BTDataSource buf = readerState.getDataSource();
 		if (buf.size() < 1)
 			return null;
@@ -41,7 +42,8 @@ class TypeState extends BTReadMessageState {
 			return new MessageState(readerState,type);
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		return "type state of "+readerState;
 	}
 

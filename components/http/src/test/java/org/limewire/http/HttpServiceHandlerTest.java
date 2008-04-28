@@ -83,6 +83,7 @@ public class HttpServiceHandlerTest extends BaseTestCase {
                 return null;
             }
             
+            @Override
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
                 response.setEntity(stringEntity);
@@ -95,6 +96,7 @@ public class HttpServiceHandlerTest extends BaseTestCase {
                 return null;
             }
             
+            @Override
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
                 response.setEntity(nioEntity);

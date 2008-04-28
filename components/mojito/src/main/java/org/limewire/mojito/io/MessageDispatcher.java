@@ -678,6 +678,7 @@ public abstract class MessageDispatcher {
             }
         }
         
+        @Override
         protected boolean removeEldestEntry(Map.Entry<MessageID, Receipt> eldest) {
             Receipt receipt = eldest.getValue();
             

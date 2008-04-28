@@ -62,6 +62,7 @@ public abstract class NumberToken<T extends Number> extends Token<T> {
         }
     }
     
+    @Override
     public void handleRead() throws IOException {
         if (done)
             throw new IllegalStateException("this token is done.  Don't read it!");
@@ -114,6 +115,7 @@ public abstract class NumberToken<T extends Number> extends Token<T> {
     
     protected abstract T getResult(BigInteger rawValue) throws IOException;
     
+    @Override
     protected boolean isDone() {
         return done;
     }

@@ -21,6 +21,7 @@ public class DualMessageHandler implements MessageHandler {
         b.handleMessage(msg, addr, handler);
     }
     
+    @Override
     public String toString() {
         return "DualHandler for {" + a + "} and {" + b + "}";
     }

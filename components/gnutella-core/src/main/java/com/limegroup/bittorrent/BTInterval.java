@@ -33,7 +33,8 @@ public class BTInterval extends LongInterval {
 		return blockId;
 	}
 	
-	public boolean equals(Object other) {
+	@Override
+    public boolean equals(Object other) {
 		if (! (other instanceof BTInterval))
 			return false;
 		
@@ -44,7 +45,8 @@ public class BTInterval extends LongInterval {
 		return super.equals(other);
 	}
 	
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		if (hashCode == 0) {
 			hashCode = 17 * getId();
 			hashCode *= 37 + getLow();
@@ -57,7 +59,8 @@ public class BTInterval extends LongInterval {
 		return blockId;
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		return getId()+":"+super.toString();
 	}
     

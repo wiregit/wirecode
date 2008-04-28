@@ -1194,6 +1194,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * for execution
      * @throws NullPointerException if command is null
      */
+    @Override
     public void execute(Runnable command) {
         if (command == null)
             throw new NullPointerException();
@@ -1245,6 +1246,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * {@link java.lang.RuntimePermission}<tt>("modifyThread")</tt>,
      * or the security manager's <tt>checkAccess</tt> method denies access.
      */
+    @Override
     public void shutdown() {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
@@ -1277,6 +1279,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * {@link java.lang.RuntimePermission}<tt>("modifyThread")</tt>,
      * or the security manager's <tt>checkAccess</tt> method denies access.
      */
+    @Override
     public List<Runnable> shutdownNow() {
         List<Runnable> tasks;
         final ReentrantLock mainLock = this.mainLock;
@@ -1293,6 +1296,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
         return tasks;
     }
 
+    @Override
     public boolean isShutdown() {
         return runStateOf(ctl.get()) != RUNNING;
     }
@@ -1307,15 +1311,18 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * to properly terminate.
      * @return true if terminating but not yet terminated
      */
+    @Override
     public boolean isTerminating() {
         int rs = runStateOf(ctl.get());
         return rs == SHUTDOWN || rs == STOP;
     }
 
+    @Override
     public boolean isTerminated() {
         return runStateOf(ctl.get()) == TERMINATED;
     }
 
+    @Override
     public boolean awaitTermination(long timeout, TimeUnit unit)
         throws InterruptedException {
         long nanos = unit.toNanos(timeout);
@@ -1338,6 +1345,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * Invokes <tt>shutdown</tt> when this executor is no longer
      * referenced and there are no threads.
      */
+    @Override
     protected void finalize() {
         shutdown();
     }
@@ -1349,6 +1357,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * @throws NullPointerException if threadFactory is null
      * @see #getThreadFactory
      */
+    @Override
     public void setThreadFactory(ThreadFactory threadFactory) {
         if (threadFactory == null)
             throw new NullPointerException();
@@ -1361,6 +1370,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * @return the current thread factory
      * @see #setThreadFactory
      */
+    @Override
     public ThreadFactory getThreadFactory() {
         return threadFactory;
     }
@@ -1372,6 +1382,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * @throws NullPointerException if handler is null
      * @see #getRejectedExecutionHandler
      */
+    @Override
     public void setRejectedExecutionHandler(RejectedExecutionHandler handler) {
         if (handler == null)
             throw new NullPointerException();
@@ -1384,6 +1395,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * @return the current handler
      * @see #setRejectedExecutionHandler
      */
+    @Override
     public RejectedExecutionHandler getRejectedExecutionHandler() {
         return handler;
     }
@@ -1400,6 +1412,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * less than zero
      * @see #getCorePoolSize
      */
+    @Override
     public void setCorePoolSize(int corePoolSize) {
         if (corePoolSize < 0)
             throw new IllegalArgumentException();
@@ -1426,6 +1439,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * @return the core number of threads
      * @see #setCorePoolSize
      */
+    @Override
     public int getCorePoolSize() {
         return corePoolSize;
     }
@@ -1437,6 +1451,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * if all core threads have already been started.
      * @return true if a thread was started
      */
+    @Override
     public boolean prestartCoreThread() {
         return workerCountOf(ctl.get()) < corePoolSize &&
             addWorker(null, true);
@@ -1448,6 +1463,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * new tasks are executed.
      * @return the number of threads started
      */
+    @Override
     public int prestartAllCoreThreads() {
         int n = 0;
         while (addWorker(null, true))
@@ -1509,6 +1525,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      *         less than the {@linkplain #getCorePoolSize core pool size}
      * @see #getMaximumPoolSize
      */
+    @Override
     public void setMaximumPoolSize(int maximumPoolSize) {
         if (maximumPoolSize <= 0 || maximumPoolSize < corePoolSize)
             throw new IllegalArgumentException();
@@ -1523,6 +1540,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * @return the maximum allowed number of threads
      * @see #setMaximumPoolSize
      */
+    @Override
     public int getMaximumPoolSize() {
         return maximumPoolSize;
     }
@@ -1540,6 +1558,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * if time is zero and allowsCoreThreadTimeOut
      * @see #getKeepAliveTime
      */
+    @Override
     public void setKeepAliveTime(long time, TimeUnit unit) {
         if (time < 0)
             throw new IllegalArgumentException();
@@ -1561,6 +1580,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * @return the time limit
      * @see #setKeepAliveTime
      */
+    @Override
     public long getKeepAliveTime(TimeUnit unit) {
         return unit.convert(keepAliveTime, TimeUnit.NANOSECONDS);
     }
@@ -1575,6 +1595,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      *
      * @return the task queue
      */
+    @Override
     public BlockingQueue<Runnable> getQueue() {
         return workQueue;
     }
@@ -1595,6 +1616,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * @param task the task to remove
      * @return true if the task was removed
      */
+    @Override
     public boolean remove(Runnable task) {
         boolean removed;
         final ReentrantLock mainLock = this.mainLock;
@@ -1619,6 +1641,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * However, this method may fail to remove tasks in
      * the presence of interference by other threads.
      */
+    @Override
     public void purge() {
         final BlockingQueue<Runnable> q = workQueue;
         try {
@@ -1647,6 +1670,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      *
      * @return the number of threads
      */
+    @Override
     public int getPoolSize() {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
@@ -1663,6 +1687,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      *
      * @return the number of threads
      */
+    @Override
     public int getActiveCount() {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
@@ -1684,6 +1709,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      *
      * @return the number of threads
      */
+    @Override
     public int getLargestPoolSize() {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
@@ -1702,6 +1728,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      *
      * @return the number of tasks
      */
+    @Override
     public long getTaskCount() {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
@@ -1727,6 +1754,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      *
      * @return the number of tasks
      */
+    @Override
     public long getCompletedTaskCount() {
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
@@ -1756,6 +1784,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * @param t the thread that will run task r.
      * @param r the task that will be executed.
      */
+    @Override
     protected void beforeExecute(Thread t, Runnable r) { }
 
     /**
@@ -1805,6 +1834,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * @param t the exception that caused termination, or null if
      * execution completed normally.
      */
+    @Override
     protected void afterExecute(Runnable r, Throwable t) { }
 
     /**
@@ -1813,6 +1843,7 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
      * overridings, subclasses should generally invoke
      * <tt>super.terminated</tt> within this method.
      */
+    @Override
     protected void terminated() { }
 
     /* Predefined RejectedExecutionHandlers */

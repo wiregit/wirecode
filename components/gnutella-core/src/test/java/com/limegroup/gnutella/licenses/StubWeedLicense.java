@@ -15,6 +15,7 @@ class StubWeedLicense extends WeedLicense {
         this.page = page;
     }
     
+    @Override
     protected String getBodyFromURL(String url, LimeHttpClient httpClient) {
         return page;
     }

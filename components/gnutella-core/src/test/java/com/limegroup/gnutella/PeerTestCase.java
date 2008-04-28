@@ -81,10 +81,12 @@ public abstract class PeerTestCase extends LimeTestCase {
         return injector.getInstance(ActivityCallback.class);
     }
     
+    @Override
     protected void setUp() throws Exception {
         setUp(LimeTestUtils.createInjector());
     }
     
+    @Override
     protected void tearDown() throws Exception {
         if (connectionServices != null)
             connectionServices.disconnect();

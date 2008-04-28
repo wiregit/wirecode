@@ -96,6 +96,7 @@ public class BasicSettingsGroup extends AbstractSettingsGroup {
         return null; //unable the find the setting we are looking for
     }
     
+    @Override
     public String toString() {
         return FACTORY.toString();
     }

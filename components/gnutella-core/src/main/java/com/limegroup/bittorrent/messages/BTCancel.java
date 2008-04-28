@@ -61,7 +61,8 @@ public class BTCancel extends BTMessage {
 		return in;
 	}
 
-	public ByteBuffer getPayload() {
+	@Override
+    public ByteBuffer getPayload() {
 		if (_payload == null) {
 			_payload = ByteBuffer.allocate(12);
 			_payload.order(ByteOrder.BIG_ENDIAN);
@@ -75,7 +76,8 @@ public class BTCancel extends BTMessage {
 	}
 	
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return "BTCancel (" + in + ")" ;
 	}
 }

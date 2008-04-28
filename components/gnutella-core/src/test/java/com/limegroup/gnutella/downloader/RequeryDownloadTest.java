@@ -130,6 +130,7 @@ public class RequeryDownloadTest extends LimeTestCase {
     }
     
     
+    @Override
     public void setUp() throws Exception {
         final LocalSocketAddressProviderStub localSocketAddressProviderStub = new LocalSocketAddressProviderStub();
         localSocketAddressProviderStub.setLocalAddressPrivate(false);
@@ -195,6 +196,7 @@ public class RequeryDownloadTest extends LimeTestCase {
        ifm.addEntry(incompleteFile, vf, true);
     }
        
+    @Override
     public void tearDown() {
         if(testUploader != null)
             testUploader.stopThread();
@@ -379,6 +381,7 @@ public class RequeryDownloadTest extends LimeTestCase {
             super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder, oobHandlerFactory, macManager,limeACKHandler);
         } 
         
+        @Override
         public void sendDynamicQuery(QueryRequest query) {
             broadcasts.add(query);
             super.sendDynamicQuery(query); //add GUID to route table

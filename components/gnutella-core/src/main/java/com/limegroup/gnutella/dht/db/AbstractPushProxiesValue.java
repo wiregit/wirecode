@@ -94,6 +94,7 @@ public abstract class AbstractPushProxiesValue implements PushProxiesValue {
         return hashCode;
     }
     
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("GUID=").append(new GUID(getGUID())).append("\n");

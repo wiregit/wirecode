@@ -123,7 +123,9 @@ public abstract class Token<T> {
             super(null); // No channel to read from
             result = this; // The object we parsed is this one
         }
+        @Override
         public void handleRead() throws IOException {}
+        @Override
         protected boolean isDone() {
             return true; // There is no data to parse
         }

@@ -25,6 +25,7 @@ public class M4AReaderTest extends AudioTestBase {
         return buildTestSuite(M4AReaderTest.class);
     }
     
+    @Override
     public void setUp(){
         Injector injector = LimeTestUtils.createInjector();
         metaDataFactory = injector.getInstance(MetaDataFactory.class);

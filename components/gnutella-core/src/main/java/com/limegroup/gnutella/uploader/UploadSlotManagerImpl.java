@@ -423,6 +423,7 @@ public class UploadSlotManagerImpl implements UploadSlotManager {
         return ret;
     }
     
+    @Override
     public synchronized String toString() {
         StringBuilder ret = new StringBuilder();
         ret.append("active:");
@@ -479,6 +480,7 @@ public class UploadSlotManagerImpl implements UploadSlotManager {
             this.priority = priority;
         }
         
+        @Override
         public boolean equals(Object o) {
             if (! (o instanceof UploadSlotRequest))
                 return false;
@@ -507,6 +509,7 @@ public class UploadSlotManagerImpl implements UploadSlotManager {
             this.queuable = queuable;
         }
         
+        @Override
         boolean isQueuable() {
             return queuable;
         }
@@ -525,6 +528,7 @@ public class UploadSlotManagerImpl implements UploadSlotManager {
             return (UploadSlotListener) getUser();
         }
         
+        @Override
         boolean isQueuable() {
             return getPriority() == BT_SEED;
         }
@@ -548,6 +552,7 @@ public class UploadSlotManagerImpl implements UploadSlotManager {
             return ret;
         }
         
+        @Override
         public boolean add(E e) {
             lastMod = System.currentTimeMillis();
             counter.recordArrival();
@@ -555,6 +560,7 @@ public class UploadSlotManagerImpl implements UploadSlotManager {
             return super.add(e);
         }
         
+        @Override
         public void add(int index, E e) {
             lastMod = System.currentTimeMillis();
             counter.recordArrival();
@@ -562,12 +568,14 @@ public class UploadSlotManagerImpl implements UploadSlotManager {
             super.add(index, e);
         }
         
+        @Override
         public E remove(int index) {
             lastMod = System.currentTimeMillis();
             counter.recordDeparture();
             return super.remove(index);
         }
         
+        @Override
         public boolean remove(Object e) {
             boolean ret = super.remove(e);
             if (ret) {

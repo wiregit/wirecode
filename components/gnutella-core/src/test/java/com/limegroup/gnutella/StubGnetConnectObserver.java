@@ -70,6 +70,7 @@ public class StubGnetConnectObserver implements GnetConnectObserver {
         return finishedThread;
     }
     
+    @Override
     public String toString() {
         return "ngok: " + noGOK + ", code: " + code + ", msg: " + msg + ", badHandshake: " + badHandshake + ", connect: " + connect + "shutdown: " + shutdown + ", finishedThread: " + finishedThread;
     }

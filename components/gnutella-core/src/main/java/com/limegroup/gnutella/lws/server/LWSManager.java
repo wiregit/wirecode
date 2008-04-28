@@ -178,6 +178,7 @@ public interface LWSManager {
             return name;
         }
         
+        @Override
         public String toString() {
             return "Handler(" + name() + ")";
         }

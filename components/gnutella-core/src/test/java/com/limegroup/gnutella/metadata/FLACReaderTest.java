@@ -21,6 +21,7 @@ public class FLACReaderTest extends AudioTestBase {
         super(name);
     }
     
+    @Override
     public void setUp(){
         Injector injector = LimeTestUtils.createInjector();
         metaDataFactory = injector.getInstance(MetaDataFactory.class);

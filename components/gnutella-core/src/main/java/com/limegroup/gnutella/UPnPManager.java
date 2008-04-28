@@ -389,9 +389,11 @@ public class UPnPManager  {
 		}
 		
 		Thread waiter = new Thread("UPnP Waiter") {
-		    public void run() {
+		    @Override
+            public void run() {
                 Thread cleaner = new Thread("UPnP Cleaner") {
-        			public void run() {
+        			@Override
+                    public void run() {
         				LOG.debug("start cleaning");
         				if (tcp != null) removeMapping(tcp);
         				if (udp != null) removeMapping(udp);
@@ -413,7 +415,8 @@ public class UPnPManager  {
         lifecycleManager.addShutdownItem(waiter); 
 	}
 	
-	public void finalize() {
+	@Override
+    public void finalize() {
 		stop();
 	}
 
@@ -499,7 +502,8 @@ public class UPnPManager  {
 			_description=description;
 		}
 		
-		public String toString() {
+		@Override
+        public String toString() {
 			return _externalAddress+":"+_externalPort+"->"+_internalAddress+":"+_internalPort+
 				"@"+_protocol+" desc: "+_description;
 		}

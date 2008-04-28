@@ -429,6 +429,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
         return ret;
 	}
 
+    @Override
     protected void writePayload(OutputStream out) throws IOException {
         out.write(PAYLOAD);
     }
@@ -822,7 +823,8 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
         return baos.toByteArray();
     }
     
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		if(_hashCode == 0) {
 			int result = 17;
 			result = (37*result) + QUERY.hashCode();
@@ -839,7 +841,8 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
 	}
 
 	// overrides Object.toString
-	public boolean equals(Object o) {
+	@Override
+    public boolean equals(Object o) {
 		if(o == this) return true;
 		if(!(o instanceof QueryRequestImpl)) return false;
 		QueryRequestImpl qr = (QueryRequestImpl)o;
@@ -853,6 +856,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
 	}
 
 
+    @Override
     public String toString() {
  		return "<query: \""+getQuery()+"\", "+
             "ttl: "+getTTL()+", "+

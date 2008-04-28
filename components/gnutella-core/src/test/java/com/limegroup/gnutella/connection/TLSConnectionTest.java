@@ -62,6 +62,7 @@ public class TLSConnectionTest extends LimeTestCase {
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
     }
    
+    @Override
     public void setUp() throws Exception {
         injector = LimeTestUtils.createInjector();
         

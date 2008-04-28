@@ -55,6 +55,7 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
                 return null;
             }
             
+            @Override
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
                 response.setReasonPhrase("Feature Not Active");
@@ -83,6 +84,7 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
                 return null;
             }
             
+            @Override
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
                 response.setStatusCode(HttpStatus.SC_BAD_REQUEST);

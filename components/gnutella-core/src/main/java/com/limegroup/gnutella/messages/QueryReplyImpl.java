@@ -294,11 +294,13 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
      * per the guid of query request
      * @param guid The guid to be set
      */
+    @Override
     public void setGUID(GUID guid) {
         super.setGUID(guid);
     }
 
 	// inherit doc comment
+    @Override
     public void writePayload(OutputStream out) throws IOException {
         out.write(_payload);
     }
@@ -913,6 +915,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         return _payload;
     }
 
+    @Override
     public String toString() {
         return ("QueryReply::\r\n"+
 				getResultCount()+" hits\r\n"+

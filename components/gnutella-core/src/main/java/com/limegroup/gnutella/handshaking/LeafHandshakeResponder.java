@@ -34,6 +34,7 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
      * @return the <tt>HandshakeResponse</tt> with the handshake 
      *  headers to send in response to the connection attempt
      */
+    @Override
     protected HandshakeResponse respondToOutgoing(HandshakeResponse response) {
 
         // only connect to ultrapeers.
@@ -73,6 +74,7 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
      * @return the <tt>HandshakeResponse</tt> with the handshake 
      *  headers to send in response to the connection attempt
      */
+    @Override
     protected HandshakeResponse respondToIncoming(HandshakeResponse hr) {
 		if (hr.isCrawler()) {
 			return HandshakeResponse.createCrawlerResponse(handshakeServices);

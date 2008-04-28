@@ -30,7 +30,8 @@ public abstract class BaseTestCase extends AssertComparisons {
      * bug 6435126
      */
     private static final Thread INTERRUPT_FIXER = new Thread() {
-    	public void run() {
+    	@Override
+        public void run() {
     		try {
     			Thread.sleep(Integer.MAX_VALUE);
     		} catch (InterruptedException ignore){}
@@ -174,7 +175,8 @@ public abstract class BaseTestCase extends AssertComparisons {
      * will still be run.
      *
 	 */
-	public void runBare() throws Throwable {
+	@Override
+    public void runBare() throws Throwable {
         _currentTestName = getName();
         if(System.getProperty("junit.test.hidetestname", "${hidetestname}").equals("${hidetestname}")) {
             System.out.println("Running test: " + _currentTestName);
@@ -208,6 +210,7 @@ public abstract class BaseTestCase extends AssertComparisons {
      * add errors from the ErrorService callback (giving us errors that were
      * triggered from outside of the test thread).
      */
+    @Override
     public void run(TestResult result) {
         _testResult = result;
         super.run(result);
@@ -246,6 +249,7 @@ public abstract class BaseTestCase extends AssertComparisons {
     private final void setupTestTimer() {
         _startTimeForTest = System.currentTimeMillis();
         _testKiller = new TimerTask() {
+            @Override
             public void run() {
                 long now = System.currentTimeMillis();
                 error(new RuntimeException("Stalled!  Took " +
@@ -344,7 +348,8 @@ public abstract class BaseTestCase extends AssertComparisons {
      */
     private static Test warning(final String message) {
     	return new TestCase("warning") {
-    		protected void runTest() {
+    		@Override
+            protected void runTest() {
     			fail(message);
     		}
     	};

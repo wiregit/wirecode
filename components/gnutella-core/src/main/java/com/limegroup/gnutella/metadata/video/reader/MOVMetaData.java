@@ -32,6 +32,7 @@ public class MOVMetaData extends VideoDataReader {
         super(f);
     }
 
+    @Override
     protected void parseFile(File f) throws IOException {
         RandomAccessFile in = null;
         
@@ -316,6 +317,7 @@ public class MOVMetaData extends VideoDataReader {
             return this.name.equals(name);
         }
         
+        @Override
         public String toString() {
             return name + "/" + size + "/" + Long.toHexString(size);
         }

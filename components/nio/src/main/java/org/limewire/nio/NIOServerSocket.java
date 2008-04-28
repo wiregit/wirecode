@@ -130,6 +130,7 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
      * CONSTRUCTING THIS <code>NIOServerSocket</code>. All other attempts will 
      * cause an immediate <code>RuntimeException</code>.
      */
+    @Override
     public Socket accept() throws IOException {
         if(observer instanceof BlockingObserver)
             return ((BlockingObserver)observer).accept();
@@ -161,18 +162,21 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
     }
     
     /** Binds the socket to the endpoint & starts listening for incoming connections. */
+    @Override
     public void bind(SocketAddress endpoint) throws IOException {
         socket.bind(endpoint);
         NIODispatcher.instance().registerAccept(channel, this);
     }
      
     /** Binds the socket to the endpoint & starts listening for incoming connections. */
+    @Override
     public void bind(SocketAddress endpoint, int backlog) throws IOException {
         socket.bind(endpoint, backlog);
         NIODispatcher.instance().registerAccept(channel, this);
     }
     
     /** Shuts down this NIOServerSocket. */
+    @Override
     public void close() throws IOException {
         IOException exception;
         
@@ -227,54 +231,67 @@ public class NIOServerSocket extends ServerSocket implements AcceptChannelObserv
     /////////// Below are simple wrappers for the socket.
     /////////////////////////////////////////////////////////////    
 
+    @Override
     public ServerSocketChannel getChannel() {
         return socket.getChannel();
     }
  
+    @Override
     public InetAddress getInetAddress() {
         return socket.getInetAddress();
     }
     
+    @Override
     public int getLocalPort() {
         return socket.getLocalPort();
     }
     
+    @Override
     public SocketAddress getLocalSocketAddress() {
         return socket.getLocalSocketAddress();
     }
     
+    @Override
     public int getReceiveBufferSize() throws SocketException {
         return socket.getReceiveBufferSize();
     }
     
+    @Override
     public boolean getReuseAddress() throws SocketException {
         return socket.getReuseAddress();
     }
     
+    @Override
     public int getSoTimeout() throws IOException {
         return socket.getSoTimeout();
     }
     
+    @Override
     public boolean isBound() {
         return socket.isBound();
     }
     
+    @Override
     public boolean isClosed() {
         return socket.isClosed();
     }
     
+    @Override
     public void setReceiveBufferSize(int size) throws SocketException {
         socket.setReceiveBufferSize(size);
     }
     
+    @Override
     public void setReuseAddress(boolean on) throws SocketException {
         socket.setReuseAddress(on);
     }
     
+    @Override
     public void setSoTimeout(int timeout) throws SocketException {
         socket.setSoTimeout(timeout);
     }
     
+    @Override
     public String toString() {
         return "NIOServerSocket::" + socket.toString();
     }

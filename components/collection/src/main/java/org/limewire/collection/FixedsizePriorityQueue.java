@@ -173,6 +173,7 @@ public class FixedsizePriorityQueue<E> implements Iterable<E> {
         return capacity;
     }
 
+    @Override
     public String toString() {
         return tree.toString();
     }

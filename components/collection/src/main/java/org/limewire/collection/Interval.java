@@ -59,6 +59,7 @@ class Interval extends Range implements Serializable {
     /* (non-Javadoc)
      * @see org.limewire.collection.Range#toBytes()
      */
+    @Override
     public byte [] toBytes() {
     	byte [] res = new byte[8];
     	toBytes(res,0);
@@ -68,6 +69,7 @@ class Interval extends Range implements Serializable {
     /* (non-Javadoc)
      * @see org.limewire.collection.Range#toBytes(byte[], int)
      */
+    @Override
     public void toBytes(byte [] dest, int offset) {
         ByteUtils.int2beb(low,dest,offset);
         ByteUtils.int2beb(high,dest,offset+4);
@@ -77,6 +79,7 @@ class Interval extends Range implements Serializable {
     /* (non-Javadoc)
      * @see org.limewire.collection.Range#getLow()
      */
+    @Override
     public final long getLow() {
         return low;
     }
@@ -84,10 +87,12 @@ class Interval extends Range implements Serializable {
     /* (non-Javadoc)
      * @see org.limewire.collection.Range#getHigh()
      */
+    @Override
     public final long getHigh() {
         return high;
     }
     
+    @Override
     public final boolean isLong() {
         return false;
     }

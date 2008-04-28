@@ -27,18 +27,22 @@ class StubSelectionKey extends SelectionKey {
         this.readyOps = ops;
     }
 
+    @Override
     public void cancel() {
         valid = false;
     }
 
+    @Override
     public SelectableChannel channel() {
         return channel;
     }
 
+    @Override
     public int interestOps() {
         return interestOps;
     }
 
+    @Override
     public SelectionKey interestOps(int ops) {
         if(!valid)
             throw new CancelledKeyException();
@@ -46,16 +50,19 @@ class StubSelectionKey extends SelectionKey {
         return this;
     }
 
+    @Override
     public boolean isValid() {
         return valid;
     }
 
+    @Override
     public int readyOps() {
         if(!valid)
             throw new CancelledKeyException();
         return readyOps;
     }
 
+    @Override
     public Selector selector() {
         return selector;
     }

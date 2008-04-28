@@ -34,7 +34,8 @@ public class BTPieceMessage extends BTMessage implements BTPiece {
 		return _data;
 	}
 
-	public ByteBuffer getPayload() {
+	@Override
+    public ByteBuffer getPayload() {
 		ByteBuffer payload = ByteBuffer.allocate(_data.length + 8);
 		payload.order(ByteOrder.BIG_ENDIAN);
 		payload.putInt(in.getId());
@@ -44,11 +45,13 @@ public class BTPieceMessage extends BTMessage implements BTPiece {
 		return payload;
 	}
 	
-	public boolean isUrgent() {
+	@Override
+    public boolean isUrgent() {
 		return true;
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		return "BTPiece (" + in.getId() + ";" + in.getLow() + ";" + _data.length + ")" ;
 	}
 }

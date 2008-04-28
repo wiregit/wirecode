@@ -33,6 +33,7 @@ public class DHTManagerTest extends DHTTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
     protected void setUp() throws Exception {
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         

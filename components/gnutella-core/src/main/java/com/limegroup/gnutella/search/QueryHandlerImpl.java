@@ -663,6 +663,7 @@ final class QueryHandlerImpl implements Inspectable, QueryHandler {
     }
 
     // overrides Object.toString
+    @Override
     public String toString() {
         return "QueryHandler: QUERY: " + QUERY;
     }

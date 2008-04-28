@@ -27,6 +27,7 @@ public class DownloaderGuidAlternateLocationFinderTest extends BaseTestCase {
         super(name);
     }
 
+    @Override
     protected void setUp() throws Exception {
         context = new Mockery();
     }

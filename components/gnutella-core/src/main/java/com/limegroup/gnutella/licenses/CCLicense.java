@@ -89,6 +89,7 @@ class CCLicense extends AbstractLicense {
     }
     
     /** Clones this CCLicense. */
+    @Override
     protected CCLicense clone() {
         try {
             return (CCLicense)super.clone();
@@ -152,6 +153,7 @@ class CCLicense extends AbstractLicense {
     /**
      * Erases all data associated with a verification.
      */
+    @Override
     protected void clear() {
         if(allWorks != null)
             allWorks.clear();
@@ -160,6 +162,7 @@ class CCLicense extends AbstractLicense {
     /**
      * Locates the RDF from the body of the URL.
      */
+    @Override
     protected String getBody(String url, LimeHttpClient httpClient) {
         return locateRDF(super.getBody(url, httpClient));
     }
@@ -267,6 +270,7 @@ class CCLicense extends AbstractLicense {
             return required != null || permitted != null || prohibited != null;
         }
         
+        @Override
         public String toString() {
             return "details:: license: " + licenseURL;
         }
@@ -303,6 +307,7 @@ class CCLicense extends AbstractLicense {
      * Parses through the XML.  If this is live data, we look for works.
      * Otherwise (it isn't from the verifier), we only look for licenses.
      */
+    @Override
     protected void parseDocumentNode(Node doc, LicenseCache licenseCache, LimeHttpClient httpClient) {
         NodeList children = doc.getChildNodes();
         

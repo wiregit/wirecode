@@ -140,6 +140,7 @@ public class ActiveDHTNodeController extends AbstractDHTController {
         }
     }
 
+    @Override
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
         //handle connection specific events
         Connection c = evt.getConnection();
@@ -170,6 +171,7 @@ public class ActiveDHTNodeController extends AbstractDHTController {
         
     }
 
+    @Override
     public List<IpPort> getActiveDHTNodes(int maxNodes) {
         if(!isRunning() || !dht.isBootstrapped()) {
             return Collections.emptyList();

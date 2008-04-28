@@ -188,7 +188,8 @@ public abstract class AbstractAlternateLocation implements AlternateLocation {
 	 *  of the <tt>AlternateLocation</tt> location argument,
 	 *  and otherwise returns <tt>false</tt>
 	 */
-	public boolean equals(Object obj) {
+	@Override
+    public boolean equals(Object obj) {
 		if(obj == this) return true;
 		if(!(obj instanceof AbstractAlternateLocation)) return false;
 		AbstractAlternateLocation other = (AbstractAlternateLocation)obj;
@@ -230,7 +231,8 @@ public abstract class AbstractAlternateLocation implements AlternateLocation {
 	 *
 	 * @return a hash code value for this object
 	 */
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		
         return 17*37+this.SHA1_URN.hashCode();        
 	}

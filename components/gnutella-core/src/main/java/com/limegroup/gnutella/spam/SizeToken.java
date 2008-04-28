@@ -70,6 +70,7 @@ public class SizeToken extends AbstractToken {
 		return TokenType.SIZE;
 	}
 
+    @Override
     public final int hashCode() {
         // Even when we support files larger than
         // 2 GB, the upper 32 bits of the file size
@@ -78,6 +79,7 @@ public class SizeToken extends AbstractToken {
         return (int)(_size);
     }
     
+    @Override
     public final boolean equals(Object o) {
         if (o == null)
             return false;
@@ -89,7 +91,8 @@ public class SizeToken extends AbstractToken {
 	/**
 	 * overrides method from <tt>Object</tt>
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		return "" + _size + " " + _bad;
 	}
 }

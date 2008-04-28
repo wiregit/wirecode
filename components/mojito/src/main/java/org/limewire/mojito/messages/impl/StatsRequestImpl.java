@@ -86,11 +86,13 @@ public class StatsRequestImpl extends AbstractRequestMessage
         initSignature(signature);
     }
     
+    @Override
     protected void writeBody(MessageOutputStream out) throws IOException {
         out.writeStatisticType(request);
         out.writeSignature(signature);
     }
     
+    @Override
     public String toString() {
         return "StatsRequest: " + request;
     }

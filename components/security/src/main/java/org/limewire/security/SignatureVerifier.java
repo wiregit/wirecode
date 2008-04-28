@@ -45,6 +45,7 @@ public class SignatureVerifier {
         this.digAlg = digAlg;
     }
     
+    @Override
     public String toString() {
         //String alg = digAlg == null ? algorithm : digAlg + "with" + algorithm;
         return "text: " + new String(plainText) + ", sig: " + new String(signature) + 

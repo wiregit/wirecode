@@ -424,6 +424,7 @@ public class HeadPongImpl extends AbstractVendorMessage implements HeadPong {
         return _routingBroken;
     }
     
+    @Override
     public String toString() {
         return "HeadPong: " +
             " isRoutingBroken: "+ isRoutingBroken()+
@@ -526,6 +527,7 @@ public class HeadPongImpl extends AbstractVendorMessage implements HeadPong {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.messages.vendor.HeadPongI#getPayload()
      */
+    @Override
     public byte[] getPayload() {
         return super.getPayload();
     }

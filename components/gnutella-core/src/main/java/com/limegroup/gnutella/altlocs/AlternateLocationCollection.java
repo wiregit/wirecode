@@ -231,7 +231,8 @@ public class AlternateLocationCollection<T extends AlternateLocation>
 	 * @return the string representation of all alternate locations in 
 	 *  this collection
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
         StringBuilder sb = new StringBuilder();
 		sb.append("Alternate Locations: ");
 		synchronized(this) {
@@ -244,6 +245,7 @@ public class AlternateLocationCollection<T extends AlternateLocation>
 	}
 
     
+    @Override
     public boolean equals(Object o) {
         if(o == this) return true;
         if(!(o instanceof AlternateLocationCollection))
@@ -270,6 +272,7 @@ public class AlternateLocationCollection<T extends AlternateLocation>
             super(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"));
         }
         
+        @Override
         public boolean add(AlternateLocation loc) {
             throw new UnsupportedOperationException();
         }

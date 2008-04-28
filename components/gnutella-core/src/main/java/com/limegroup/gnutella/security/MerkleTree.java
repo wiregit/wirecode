@@ -2,7 +2,7 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: MerkleTree.java,v 1.1 2008-01-25 16:59:25 sberlin Exp $
+ * $Id: MerkleTree.java,v 1.2 2008-04-28 18:44:59 sberlin Exp $
  */
 package com.limegroup.gnutella.security;
 
@@ -51,10 +51,12 @@ public class MerkleTree extends MessageDigest {
         this.internalDigest = internalDigest;
     }
 
+    @Override
     protected int engineGetDigestLength() {
         return HASHSIZE;
     }
 
+    @Override
     protected void engineUpdate(byte in) {
         byteCount += 1;
         buffer[bufferOffset++] = in;
@@ -64,6 +66,7 @@ public class MerkleTree extends MessageDigest {
         }
     }
 
+    @Override
     protected void engineUpdate(byte[] in, int offset, int length) {
         byteCount += length;
         nodes.ensureCapacity(log2Ceil(byteCount / BLOCKSIZE));
@@ -89,6 +92,7 @@ public class MerkleTree extends MessageDigest {
         }
     }
 
+    @Override
     protected byte[] engineDigest() {
         byte[] hash = new byte[HASHSIZE];
         try {
@@ -99,6 +103,7 @@ public class MerkleTree extends MessageDigest {
         return hash;
     }
 
+    @Override
     protected int engineDigest(byte[] buf, int offset, int len) throws DigestException {
         if (len < HASHSIZE)
             throw new DigestException();
@@ -141,6 +146,7 @@ public class MerkleTree extends MessageDigest {
         return last;
     }
 
+    @Override
     protected void engineReset() {
         bufferOffset = 0;
         byteCount = 0;
@@ -153,6 +159,7 @@ public class MerkleTree extends MessageDigest {
      * 
      * @see java.security.MessageDigest#clone()
      */
+    @Override
     public Object clone() throws CloneNotSupportedException {
         throw new CloneNotSupportedException();
     }

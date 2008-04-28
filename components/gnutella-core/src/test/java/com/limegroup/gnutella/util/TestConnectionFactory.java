@@ -229,6 +229,7 @@ public class TestConnectionFactory {
     }
 
     static final class HitQueryRouteTable extends QueryRouteTable {
+        @Override
         public boolean contains(QueryRequest qr) {
             return true;
         }

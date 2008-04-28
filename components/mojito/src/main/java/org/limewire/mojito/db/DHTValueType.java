@@ -87,10 +87,12 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
         return type - o.type;
     }
 
+    @Override
     public int hashCode() {
         return type;
     }
     
+    @Override
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -101,6 +103,7 @@ public final class DHTValueType implements Comparable<DHTValueType>, Serializabl
         return compareTo((DHTValueType)o)==0;
     }
     
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         if (name.equals(UNKNOWN_NAME)) {

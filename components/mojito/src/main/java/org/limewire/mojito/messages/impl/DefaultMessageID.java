@@ -216,10 +216,12 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         return 0;
     }
 
+    @Override
     public int hashCode() {
         return hashCode;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -244,6 +246,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
         return ArrayUtils.toBinString(messageId);
     }
 
+    @Override
     public String toString() {
         return "MessageID: " + toHexString();
     }
@@ -258,6 +261,7 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
                 data[i] ^= RANDOM_PAD[i];
         }
         
+        @Override
         public String toString() {
             return "DHTTokenData: " + ArrayUtils.toHexString(getData())+ " for "+addr;
         }
@@ -273,10 +277,12 @@ public class DefaultMessageID implements MessageID, Comparable<DefaultMessageID>
             super(data, manager);
         }
 
+        @Override
         protected byte[] getFromMAC(byte[] mac, TokenData ignored) {
             return mac;
         }
         
+        @Override
         public String toString() {
             return "MessageSecurityToken: " + ArrayUtils.toHexString(getBytes());
         }

@@ -416,7 +416,8 @@ public class FileDesc implements StringLookup {
     }       
     
 	// overrides Object.toString to provide a more useful description
-	public String toString() {
+	@Override
+    public String toString() {
 		return ("FileDesc:\r\n"+
 				"name:     "+_name+"\r\n"+
 				"index:    "+_index+"\r\n"+

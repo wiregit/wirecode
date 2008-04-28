@@ -105,6 +105,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
                 tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider);
     }
     
+    @Override
     public void initialize() {
         MagnetOptions magnet = getMagnet();
         assert (magnet != null);
@@ -134,6 +135,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      * overrides ManagedDownloader to ensure that we issue requests to the known
      * locations until we find out enough information to start the download 
      */
+    @Override
     protected DownloadStatus initializeDownload() {
         
         // ask ranker since the alt loc manager might have added extra alt locs
@@ -190,6 +192,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      * Overrides ManagedDownloader to use the query words 
      * specified by the MAGNET URI.
      */
+    @Override
     public QueryRequest newRequery()
         throws CantResumeException {
         MagnetOptions magnet = getMagnet();
@@ -211,6 +214,7 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
      * <p>
      * We only allow for additions if the download has a sha1.  
      */
+    @Override
     protected boolean allowAddition(RemoteFileDesc other) {        
         // Allow if we have a hash and other matches it.
 		URN otherSHA1 = other.getSHA1Urn();
@@ -224,7 +228,8 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 	 * Overridden for internal purposes, returns result from super method
 	 * call.
      */
-	protected synchronized boolean addDownloadForced(RemoteFileDesc rfd,
+	@Override
+    protected synchronized boolean addDownloadForced(RemoteFileDesc rfd,
 													 boolean cache) {
 		if (!hasRFD())
 			initPropertiesMap(rfd);
@@ -234,7 +239,8 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
     /**
 	 * Only allow requeries when <code>downloadSHA1</code> is not null.
      */
-	protected boolean canSendRequeryNow() {
+	@Override
+    protected boolean canSendRequeryNow() {
 		return getSha1Urn() != null ? super.canSendRequeryNow() : false;
 	}
 
@@ -242,7 +248,8 @@ class MagnetDownloaderImpl extends ManagedDownloaderImpl implements MagnetDownlo
 	 * Overridden to make sure it calls the super method only if 
 	 * the filesize is known.
 	 */
-	protected void initializeIncompleteFile() throws IOException {
+	@Override
+    protected void initializeIncompleteFile() throws IOException {
 		if (getContentLength() != -1) {
 			super.initializeIncompleteFile();
 		}

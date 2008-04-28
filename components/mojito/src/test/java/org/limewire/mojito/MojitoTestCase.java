@@ -21,6 +21,7 @@ public abstract class MojitoTestCase extends BaseTestCase {
         MojitoProps.instance().getFactory().getRevertSetting().setValue(false);
     }
     
+    @Override
     public void preSetUp() throws Exception {
         super.preSetUp();
         

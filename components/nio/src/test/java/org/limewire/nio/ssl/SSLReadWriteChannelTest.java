@@ -49,6 +49,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
         return buildTestSuite(SSLReadWriteChannelTest.class);
     }
     
+    @Override
     public void tearDown() throws Exception {
         // Make sure the NIODispatcher queue is flushed after each test.
         NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {public void run() {}}).get();

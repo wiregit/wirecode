@@ -86,10 +86,12 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
     public void setSettings() {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
     }
     
+    @Override
     public void setUp() throws Exception {
         UDP_ACCESS = new DatagramSocket(9000);
         UDP_ACCESS.setSoTimeout(TIMEOUT*2);
@@ -288,6 +290,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         // request
         final GUID fGuid = new GUID(m.getGUID());
         Thread runLater = new Thread() {
+            @Override
             public void run() {
                 try {
                     Thread.sleep(2000);
@@ -379,6 +382,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
 
     //////////////////////////////////////////////////////////////////
+    @Override
     public int getNumberOfPeers() {
         return 1;
     }
@@ -399,6 +403,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             return rfd;
         }
 
+        @Override
         public void handleQueryResult(RemoteFileDesc rfd,
                                       HostData data,
                                       Set locs) {

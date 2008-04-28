@@ -36,6 +36,7 @@ public class NetworkStatisticContainer extends StatisticContainer {
         super(nodeId);
     }
     
+    @Override
     public void writeStats(Writer writer) throws IOException {
         writer.write("Network Stats:\n");
         super.writeStats(writer);
@@ -169,6 +170,7 @@ public class NetworkStatisticContainer extends StatisticContainer {
     
         
     protected static class SizeStatistic extends AbstractStatistic{
+        @Override
         public void addData(int data) {
             super.addData(data);
             super.storeCurrentStat();

@@ -170,6 +170,7 @@ public class PushProxiesPublisher implements DHTEventListener {
     }
 
 
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder("PushProxiesPublisher: ");
         buffer.append(lastPublishedValue);

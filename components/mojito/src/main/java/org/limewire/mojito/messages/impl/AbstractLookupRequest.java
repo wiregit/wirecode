@@ -67,6 +67,7 @@ abstract class AbstractLookupRequest extends AbstractRequestMessage
         return lookupId;
     }
 
+    @Override
     protected void writeBody(MessageOutputStream out) throws IOException {
         out.writeKUID(lookupId);
     }

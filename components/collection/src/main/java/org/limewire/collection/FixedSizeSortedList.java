@@ -51,6 +51,7 @@ public class FixedSizeSortedList<E> extends SortedList<E> {
         this.capacity = capacity;
     }
     
+    @Override
     public boolean add(E e) {
         if (size() == capacity)
             remove(last());

@@ -104,6 +104,7 @@ public class FixedsizeForgetfulHashSet<E> extends AbstractSet<E> implements Set<
      * @return an Iterator over the elements in this set.
      * @see ConcurrentModificationException
      */
+    @Override
     public Iterator<E> iterator() {
         return map.keySet().iterator();
     }
@@ -113,6 +114,7 @@ public class FixedsizeForgetfulHashSet<E> extends AbstractSet<E> implements Set<
      *
      * @return the number of elements in this set (its cardinality).
      */
+    @Override
     public int size() {
         return map.size();
     }
@@ -122,6 +124,7 @@ public class FixedsizeForgetfulHashSet<E> extends AbstractSet<E> implements Set<
      *
      * @return <tt>true</tt> if this set contains no elements.
      */
+    @Override
     public boolean isEmpty() {
         return map.isEmpty();
     }
@@ -132,6 +135,7 @@ public class FixedsizeForgetfulHashSet<E> extends AbstractSet<E> implements Set<
      * @param o element whose presence in this set is to be tested.
      * @return <tt>true</tt> if this set contains the specified element.
      */
+    @Override
     public boolean contains(Object o) {
         return map.containsKey(o);
     }
@@ -144,6 +148,7 @@ public class FixedsizeForgetfulHashSet<E> extends AbstractSet<E> implements Set<
      * @return <tt>true</tt> if the set did not already contain the specified
      * element.
      */
+    @Override
     public boolean add(E o) {
         return map.put(o, PRESENT)==null;
     }
@@ -154,6 +159,7 @@ public class FixedsizeForgetfulHashSet<E> extends AbstractSet<E> implements Set<
      * @param o object to be removed from this set, if present.
      * @return <tt>true</tt> if the set contained the specified element.
      */
+    @Override
     public boolean remove(Object o) {
         return map.remove(o)==PRESENT;
     }
@@ -161,6 +167,7 @@ public class FixedsizeForgetfulHashSet<E> extends AbstractSet<E> implements Set<
     /**
      * Removes all of the elements from this set.
      */
+    @Override
     public void clear() {
         map.clear();
     }
@@ -171,6 +178,7 @@ public class FixedsizeForgetfulHashSet<E> extends AbstractSet<E> implements Set<
      *
      * @return a shallow copy of this set.
      */
+    @Override
     @SuppressWarnings("unchecked")
     public FixedsizeForgetfulHashSet<E> clone() {
         try { 

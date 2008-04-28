@@ -231,6 +231,7 @@ public class ConnectionStatus {
         return HASH_TREE;
     }
 
+    @Override
     public String toString() {
         switch(STATUS) {
         case TYPE_NO_FILE: return "No File";

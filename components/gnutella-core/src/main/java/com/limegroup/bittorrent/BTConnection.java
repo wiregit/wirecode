@@ -799,7 +799,8 @@ PieceSendListener, PieceReadListener {
 		}
 	}
 
-	public boolean equals(Object o) {
+	@Override
+    public boolean equals(Object o) {
 		if (o instanceof BTConnection) {
 			BTConnection other = (BTConnection) o;
 			return other._endpoint.equals(_endpoint);
@@ -807,7 +808,8 @@ PieceSendListener, PieceReadListener {
 		return false;
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		StringBuilder b = new StringBuilder(_socket == null? "new" : "("+getHost());
 		if (isChoked())
 			b.append(" Ced");

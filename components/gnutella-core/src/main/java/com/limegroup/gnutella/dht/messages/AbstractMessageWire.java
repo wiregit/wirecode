@@ -72,6 +72,7 @@ abstract class AbstractMessageWire<T extends DHTMessage>
         throw new UnsupportedOperationException();
     }
     
+    @Override
     public String toString() {
         return delegate.toString();
     }

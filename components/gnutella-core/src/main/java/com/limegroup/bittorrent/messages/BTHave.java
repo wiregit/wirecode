@@ -50,7 +50,8 @@ public class BTHave extends BTMessage {
 		return _pieceNum;
 	}
 
-	public ByteBuffer getPayload() {
+	@Override
+    public ByteBuffer getPayload() {
 		if (_payload == null) {
 			_payload = ByteBuffer.allocate(4);
 			_payload.order(ByteOrder.BIG_ENDIAN);
@@ -61,7 +62,8 @@ public class BTHave extends BTMessage {
 		return _payload;
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		return "BTHave (" + _pieceNum + ")" ;
 	}
 }

@@ -89,6 +89,7 @@ public class SimpleTimer extends AbstractExecutorService implements ScheduledExe
     // Does not use ScheduledTimerTask so as to avoid creating the Future.
     public void execute(final Runnable command) {
         TimerTask tt = new TimerTask() {
+            @Override
             public void run() {
                 try {
                     command.run();

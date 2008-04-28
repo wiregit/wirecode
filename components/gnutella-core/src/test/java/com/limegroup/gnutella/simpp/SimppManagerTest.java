@@ -82,6 +82,7 @@ public class SimppManagerTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    @Override
     public void setUp() throws Exception {
         
         setSettings();

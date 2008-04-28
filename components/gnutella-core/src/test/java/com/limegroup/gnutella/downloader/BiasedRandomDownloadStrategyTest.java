@@ -52,6 +52,7 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
     public void setUp() throws Exception {
         fileSize = 1024 * 1024 * 5; // 5MB
         blockSize = 128 * 1024; // 128k
@@ -316,6 +317,7 @@ public class BiasedRandomDownloadStrategyTest extends LimeTestCase {
         /* Set up a strategy that thinks the user is idle */
         strategy = new BiasedRandomDownloadStrategy(fileSize) {
             private long idleTime;
+            @Override
             protected long getIdleTime() {
                 return idleTime;
             }

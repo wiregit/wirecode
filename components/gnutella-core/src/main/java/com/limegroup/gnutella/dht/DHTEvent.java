@@ -30,6 +30,7 @@ public class DHTEvent extends EventObject {
         return type;
     }
     
+    @Override
     public String toString() {
         return type.toString();
     }

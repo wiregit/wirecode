@@ -48,6 +48,7 @@ public class FindNodeRequestImpl extends AbstractLookupRequest
         super(context, OpCode.FIND_NODE_REQUEST, src, messageId, msgVersion, in);
     }
 
+    @Override
     public String toString() {
         return "FindNodeRequest: " + lookupId+ " from "+getContact();
     }

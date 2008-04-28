@@ -53,6 +53,7 @@ public abstract class Range implements Serializable {
         return createRange(singleton, singleton);
     }
     
+    @Override
     public String toString() {
         if (getLow()==getHigh())
             return String.valueOf(getLow());
@@ -60,6 +61,7 @@ public abstract class Range implements Serializable {
             return String.valueOf(getLow())+"-"+String.valueOf(getHigh());
     }
 
+    @Override
     public boolean equals(Object o) {
         if (! (o instanceof Range))
             return false;
@@ -67,6 +69,7 @@ public abstract class Range implements Serializable {
         return getLow()==other.getLow() && getHigh()==other.getHigh();
     }
     
+    @Override
     public int hashCode() {
         return (int)((getLow() * getHigh()) % Integer.MAX_VALUE);
     }

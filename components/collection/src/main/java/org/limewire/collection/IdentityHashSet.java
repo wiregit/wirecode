@@ -93,7 +93,8 @@ implements Set<E>, Cloneable, java.io.Serializable
 	 * @return an Iterator over the elements in this set.
 	 * @see ConcurrentModificationException
 	 */
-	public Iterator<E> iterator() {
+	@Override
+    public Iterator<E> iterator() {
 		return map.keySet().iterator();
 	}
 
@@ -102,7 +103,8 @@ implements Set<E>, Cloneable, java.io.Serializable
 	 *
 	 * @return the number of elements in this set (its cardinality).
 	 */
-	public int size() {
+	@Override
+    public int size() {
 		return map.size();
 	}
 
@@ -111,7 +113,8 @@ implements Set<E>, Cloneable, java.io.Serializable
 	 *
 	 * @return <tt>true</tt> if this set contains no elements.
 	 */
-	public boolean isEmpty() {
+	@Override
+    public boolean isEmpty() {
 		return map.isEmpty();
 	}
 
@@ -121,7 +124,8 @@ implements Set<E>, Cloneable, java.io.Serializable
 	 * @param o element whose presence in this set is to be tested.
 	 * @return <tt>true</tt> if this set contains the specified element.
 	 */
-	public boolean contains(Object o) {
+	@Override
+    public boolean contains(Object o) {
 		return map.containsKey(o);
 	}
 
@@ -133,7 +137,8 @@ implements Set<E>, Cloneable, java.io.Serializable
 	 * @return <tt>true</tt> if the set did not already contain the specified
 	 * element.
 	 */
-	public boolean add(E o) {
+	@Override
+    public boolean add(E o) {
 		return map.put(o, PRESENT)==null;
 	}
 
@@ -143,14 +148,16 @@ implements Set<E>, Cloneable, java.io.Serializable
 	 * @param o object to be removed from this set, if present.
 	 * @return <tt>true</tt> if the set contained the specified element.
 	 */
-	public boolean remove(Object o) {
+	@Override
+    public boolean remove(Object o) {
 		return map.remove(o)==PRESENT;
 	}
 
 	/**
 	 * Removes all of the elements from this set.
 	 */
-	public void clear() {
+	@Override
+    public void clear() {
 		map.clear();
 	}
 
@@ -160,7 +167,8 @@ implements Set<E>, Cloneable, java.io.Serializable
 	 *
 	 * @return a shallow copy of this set.
 	 */
-	@SuppressWarnings("unchecked")
+	@Override
+    @SuppressWarnings("unchecked")
     public Object clone() {
 		try { 
 			IdentityHashSet<E> newSet = (IdentityHashSet<E>) super.clone();

@@ -228,6 +228,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
         statsTracker = injector.getInstance(DownloadStatsTracker.class);
     }
 
+    @Override
     protected void tearDown() throws Exception {
         if (lifecycleManager != null) lifecycleManager.shutdown();
         

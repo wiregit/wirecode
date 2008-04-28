@@ -71,6 +71,7 @@ public class LocalHTTPAcceptor extends BasicHttpAcceptor {
             return null;
         }
         
+        @Override
         public void handle(HttpRequest request, HttpResponse response,
                 HttpContext context) throws HttpException, IOException {
             final String uri = request.getRequestLine().getUri();
@@ -90,6 +91,7 @@ public class LocalHTTPAcceptor extends BasicHttpAcceptor {
             return null;
         }
         
+        @Override
         public void handle(HttpRequest request, HttpResponse response,
                 HttpContext context) throws HttpException, IOException {
             response.setStatusCode(HttpStatus.SC_NO_CONTENT);
@@ -110,6 +112,7 @@ public class LocalHTTPAcceptor extends BasicHttpAcceptor {
             return null;
         }
         
+        @Override
         public void handle(HttpRequest request, HttpResponse response,
                 HttpContext context) throws HttpException, IOException {
             String uri = request.getRequestLine().getUri();

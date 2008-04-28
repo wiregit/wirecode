@@ -40,6 +40,7 @@ public class XMLParsingUtils {
      * a ThreadLocal to contain the instance of the Lime parser
      */
     private static ThreadLocal<LimeParser> _parserContainer = new ThreadLocal<LimeParser>() {
+        @Override
         protected LimeParser initialValue() {
             return new LimeParser();
         }
@@ -152,6 +153,7 @@ public class XMLParsingUtils {
             _reader.parse(input);
         }
         
+        @Override
         public void startElement(String namespaceUri, String localName, 
                                  String qualifiedName, Attributes attributes) {
             

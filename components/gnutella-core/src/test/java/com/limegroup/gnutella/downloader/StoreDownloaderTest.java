@@ -51,6 +51,7 @@ public class StoreDownloaderTest extends LimeTestCase{
         return buildTestSuite(StoreDownloaderTest.class);
     }
     
+    @Override
     public void setUp() throws Exception {
         doSetUp();
     }

@@ -105,7 +105,8 @@ public class HeadTest extends LimeTestCase {
 	}
 	
 	
-	public void setUp() throws Exception {
+	@Override
+    public void setUp() throws Exception {
 	    SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
 	    mockery = new Mockery();
 	    downloadManager = mockery.mock(DownloadManager.class);
@@ -179,6 +180,7 @@ public class HeadTest extends LimeTestCase {
 		_partial = new IncompleteFileDescStub("incomplete",_havePartial,3);
 		_partial.setRangesByte(_ranges.toBytes());
         _partialLarge = new IncompleteFileDescStub("incompleteLArge", _largeURN, 4) {
+            @Override
             public long getFileSize() {
                 return 0xFFFFFFFF00l;
             }

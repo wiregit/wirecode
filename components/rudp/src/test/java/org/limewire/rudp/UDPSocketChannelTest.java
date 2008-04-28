@@ -464,49 +464,60 @@ public class UDPSocketChannelTest extends BaseTestCase {
             super(null, new DefaultRUDPContext());
         }
 
+        @Override
         protected void close() throws IOException {
             closed = true;
         }
 
+        @Override
         protected void connect(InetSocketAddress addr) throws IOException {
             connected = true;
             this.addr = addr;
         }
 
+        @Override
         protected DataWindow getReadWindow() {
             return readWindow;
         }
 
+        @Override
         protected InetSocketAddress getSocketAddress() {
             return addr;
         }
 
+        @Override
         protected boolean isClosed() {
             return closed;
         }
 
+        @Override
         protected boolean isConnected() {
             return connected;
         }
 
+        @Override
         protected boolean isConnecting() {
             return connecting;
         }
 
+        @Override
         protected boolean prepareOpenConnection() throws IOException {
             preparedOpenConnection = true;
             return prepareOpenConnectionRetValue;
         }
 
+        @Override
         protected void sendKeepAlive() {
             sentKeepAlive = true;
         }
 
+        @Override
         protected void wakeupWriteEvent(boolean force) {
             wokeupWriteEvent = true;
             wokeupWriteEventWasForced = force;
         }
 
+        @Override
         protected int getChunkLimit() {
             return chunkLimit;
         }

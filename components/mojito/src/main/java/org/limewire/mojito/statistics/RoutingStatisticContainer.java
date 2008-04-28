@@ -80,6 +80,7 @@ public class RoutingStatisticContainer extends StatisticContainer {
         super(nodeId);
     }
     
+    @Override
     public void writeStats(Writer writer) throws IOException {
         writer.write("Routing Stats:\n");
         super.writeStats(writer);
@@ -87,6 +88,7 @@ public class RoutingStatisticContainer extends StatisticContainer {
 
     protected class NodeCountStatistic extends SimpleStatistic{
 
+        @Override
         public void incrementStat() {
             super.incrementStat();
             NODE_COUNT.incrementStat();

@@ -453,7 +453,8 @@ public final class UrnCache {
 		 *  as this object, or if it has the same modification time and the same
 		 *  path, otherwise returns <tt>false</tt>
 		 */
-		public boolean equals(Object o) {
+		@Override
+        public boolean equals(Object o) {
 			if(this == o) return true;
 			if(!(o instanceof UrnSetKey)) return false;
 			UrnSetKey key = (UrnSetKey)o;
@@ -469,7 +470,8 @@ public final class UrnCache {
 		 *
 		 * @return the hash code for this instance
 		 */
-		public int hashCode() {
+		@Override
+        public int hashCode() {
 			return _hashCode;
 		}
 

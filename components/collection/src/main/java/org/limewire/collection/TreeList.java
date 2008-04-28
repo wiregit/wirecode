@@ -91,6 +91,7 @@ public class TreeList<E> extends AbstractList<E> {
      * @param index  the index to retrieve
      * @return the element at the specified index
      */
+    @Override
     public E get(int index) {
         checkInterval(index, 0, size() - 1);
         return root.get(index).getValue();
@@ -101,6 +102,7 @@ public class TreeList<E> extends AbstractList<E> {
      * 
      * @return the current size
      */
+    @Override
     public int size() {
         return size;
     }
@@ -110,6 +112,7 @@ public class TreeList<E> extends AbstractList<E> {
      * 
      * @return an iterator over the list
      */
+    @Override
     public Iterator<E> iterator() {
         // override to go 75% faster
         return listIterator(0);
@@ -120,6 +123,7 @@ public class TreeList<E> extends AbstractList<E> {
      * 
      * @return the new iterator
      */
+    @Override
     public ListIterator<E> listIterator() {
         // override to go 75% faster
         return listIterator(0);
@@ -131,6 +135,7 @@ public class TreeList<E> extends AbstractList<E> {
      * @param fromIndex  the index to start from
      * @return the new iterator
      */
+    @Override
     public ListIterator<E> listIterator(int fromIndex) {
         // override to go 75% faster
         // cannot use EmptyIterator as iterator.add() must work
@@ -143,6 +148,7 @@ public class TreeList<E> extends AbstractList<E> {
      * 
      * @return the index of the object, -1 if not found
      */
+    @Override
     public int indexOf(Object object) {
         // override to go 75% faster
         if (root == null) {
@@ -156,6 +162,7 @@ public class TreeList<E> extends AbstractList<E> {
      * 
      * @return true if the object is found
      */
+    @Override
     public boolean contains(Object object) {
         return (indexOf(object) >= 0);
     }
@@ -165,6 +172,7 @@ public class TreeList<E> extends AbstractList<E> {
      * 
      * @return the list as an array
      */
+    @Override
     public Object[] toArray() {
         // override to go 20% faster
         Object[] array = new Object[size()];
@@ -181,6 +189,7 @@ public class TreeList<E> extends AbstractList<E> {
      * @param index  the index to add before
      * @param obj  the element to add
      */
+    @Override
     public void add(int index, E obj) {
         modCount++;
         checkInterval(index, 0, size());
@@ -200,6 +209,7 @@ public class TreeList<E> extends AbstractList<E> {
      * @return the previous object at that index
      * @throws IndexOutOfBoundsException if the index is invalid
      */
+    @Override
     public E set(int index, E obj) {
         checkInterval(index, 0, size() - 1);
         AVLNode<E> node = root.get(index);
@@ -209,6 +219,7 @@ public class TreeList<E> extends AbstractList<E> {
     }
     
     /** Removes the object. */
+    @Override
     public boolean remove(Object o) {
         int idx = indexOf(o);
         if(idx != -1)
@@ -223,6 +234,7 @@ public class TreeList<E> extends AbstractList<E> {
      * @param index  the index to remove
      * @return the previous object at that index
      */
+    @Override
     public E remove(int index) {
         modCount++;
         checkInterval(index, 0, size() - 1);
@@ -235,6 +247,7 @@ public class TreeList<E> extends AbstractList<E> {
     /**
      * Clears the list, removing all entries.
      */
+    @Override
     public void clear() {
         modCount++;
         root = null;
@@ -770,6 +783,7 @@ public class TreeList<E> extends AbstractList<E> {
         /**
          * Used for debugging.
          */
+        @Override
         public String toString() {
             return "AVLNode(" + relativePosition + "," + (left != null) + "," + value +
                 "," + (getRightSubTree() != null) + ", faedelung " + rightIsNext + " )";

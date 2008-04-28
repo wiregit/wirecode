@@ -29,11 +29,13 @@ public class LifecycleManagerImplTest extends BaseTestCase {
         return buildTestSuite(LifecycleManagerImplTest.class);
     }
 
+    @Override
     public void setUp() throws Exception {
         mockery = new Mockery();
         locator = mockery.mock(DHTPeerLocator.class);
         publisher = mockery.mock(DHTPeerPublisher.class);
         module = new AbstractModule() {
+            @Override
             public void configure() {
                 bind(DHTPeerLocator.class).toInstance(locator);
                 bind(DHTPeerPublisher.class).toInstance(publisher);                

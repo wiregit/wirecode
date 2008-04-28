@@ -86,6 +86,7 @@ public class PingResult implements Result {
         return time;
     }
     
+    @Override
     public String toString() {
         return node + ", externalAddress=" + externalAddress 
                     + ", estimatedSize=" + estimatedSize

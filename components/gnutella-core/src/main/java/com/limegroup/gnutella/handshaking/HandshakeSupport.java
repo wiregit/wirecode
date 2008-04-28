@@ -99,6 +99,7 @@ class HandshakeSupport extends HeaderSupport {
      * Returns true if this wasn't a blank line and more headers are expected,
      * returns false if this was a blank line and no more headers are expected.
      */
+    @Override
     public boolean processReadHeader(String line) {
         if(line.equals(""))
             return false;
@@ -129,6 +130,7 @@ class HandshakeSupport extends HeaderSupport {
 
     
     /** Returns the number of headers we've read so far. */
+    @Override
     public int getHeadersReadSize() {
         return readHeaders.size();
     }

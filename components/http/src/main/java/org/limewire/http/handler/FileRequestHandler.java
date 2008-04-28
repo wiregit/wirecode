@@ -73,6 +73,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         return null;
     }
     
+    @Override
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
         File file = getFile(request);         

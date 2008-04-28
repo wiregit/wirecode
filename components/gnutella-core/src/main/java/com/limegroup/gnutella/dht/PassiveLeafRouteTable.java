@@ -140,6 +140,7 @@ class PassiveLeafRouteTable implements RouteTable {
         return bucket.size() + 1;
     }
     
+    @Override
     public synchronized String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(getLocalNode()).append("\n");
@@ -358,6 +359,7 @@ class PassiveLeafRouteTable implements RouteTable {
         public void touch() {
         }
 
+        @Override
         public String toString() {
             return CollectionUtils.toString(map.values());
         }

@@ -16,6 +16,7 @@ public final class UncompressingInputStream extends InflaterInputStream {
       super(in, flate);
     }
     
+    @Override
     public int read(byte[] b, int off, int len) throws IOException {
         try {
             return super.read(b, off, len);

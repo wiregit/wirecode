@@ -41,11 +41,13 @@ public class InspectionResponseFactoryImplTest extends LimeTestCase {
     private Injector injector;
     private FECUtils fecUtils;
     
+    @Override
     public void setUp() throws Exception {
         mockery = new Mockery();
         inspector = mockery.mock(Inspector.class);
         fecUtils = mockery.mock(FECUtils.class);
         Module m = new AbstractModule() {
+            @Override
             public void configure() {
                 bind(Inspector.class).toInstance(inspector);
                 bind(FECUtils.class).toInstance(fecUtils);

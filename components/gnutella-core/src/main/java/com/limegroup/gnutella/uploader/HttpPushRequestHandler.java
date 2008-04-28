@@ -67,6 +67,7 @@ public class HttpPushRequestHandler extends SimpleNHttpRequestHandler {
         return null;
     }
 
+    @Override
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
         HTTPUploader uploader = null;

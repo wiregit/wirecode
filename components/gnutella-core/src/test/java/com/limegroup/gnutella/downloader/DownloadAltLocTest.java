@@ -41,6 +41,7 @@ public class DownloadAltLocTest extends DownloadTestCase {
         return buildTestSuite(DownloadAltLocTest.class);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         // need some extra time for these tests

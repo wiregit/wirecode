@@ -30,7 +30,8 @@ public class LimeXMLSchemaRepositoryTest extends LimeTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-	public void setUp() throws Exception {
+	@Override
+    public void setUp() throws Exception {
 	    Expand.expandFile(
             TestUtils.getResourceFile("com/limegroup/gnutella/xml/xml.war"), 
             CommonUtils.getUserSettingsDir()

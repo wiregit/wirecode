@@ -51,6 +51,7 @@ public class PassiveDHTNodeControllerTest extends DHTTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
     public void setUp() throws Exception {
         DHTTestUtils.setSettings(PORT);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);

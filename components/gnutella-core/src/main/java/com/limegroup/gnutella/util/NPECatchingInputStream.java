@@ -18,6 +18,7 @@ public class NPECatchingInputStream extends FilterInputStream {
         super(in);
     }
     
+    @Override
     public int read() throws IOException {
         try {
             return in.read();
@@ -26,6 +27,7 @@ public class NPECatchingInputStream extends FilterInputStream {
         }
     }
     
+    @Override
     public int read(byte[] b, int off, int len) throws IOException {
         try {
             return in.read(b, off, len);
@@ -34,6 +36,7 @@ public class NPECatchingInputStream extends FilterInputStream {
         }
     }
     
+    @Override
     public long skip(long n) throws IOException {
         try {
             return in.skip(n);
@@ -42,6 +45,7 @@ public class NPECatchingInputStream extends FilterInputStream {
         }
     }
     
+    @Override
     public void close() throws IOException {
         try {
             in.close();

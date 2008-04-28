@@ -111,6 +111,7 @@ public class ConverterObjectInputStream extends ObjectInputStream {
      * <li>Otherwise the original ObjectStreamClass is returned.</li> 
      * <ul>
      */ 
+    @Override
     protected ObjectStreamClass readClassDescriptor() throws 
       IOException, ClassNotFoundException { 
         ObjectStreamClass read = super.readClassDescriptor(); 

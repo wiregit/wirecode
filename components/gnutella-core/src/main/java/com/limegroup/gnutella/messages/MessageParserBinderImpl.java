@@ -105,6 +105,7 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     }
     
     private class PingRequestParser extends GnutellaMessageParser {
+        @Override
         protected Message parse(byte[] guid, byte ttl, byte hops, byte[] payload, Network network)
                 throws BadPacketException {
             return pingRequestFactory.createFromNetwork(guid, ttl, hops, payload, network);
@@ -112,6 +113,7 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     }
     
     private class PingReplyParser extends GnutellaMessageParser {
+        @Override
         protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, Network network) throws BadPacketException {
             return pingReplyFactory.createFromNetwork(guid, ttl, hops, payload, network);
@@ -119,6 +121,7 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     }
     
     private class QueryRequestParser extends GnutellaMessageParser {
+        @Override
         protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, Network network) throws BadPacketException {
             if (payload.length < 3) {
@@ -130,6 +133,7 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     }
     
     private class QueryReplyParser extends GnutellaMessageParser {
+        @Override
         protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, Network network) throws BadPacketException {
             if (payload.length < 26) {
@@ -142,6 +146,7 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     }
     
     private static class PushRequestParser extends GnutellaMessageParser {
+        @Override
         protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, Network network) throws BadPacketException {
             return new PushRequestImpl(guid, ttl, hops, payload, network);
@@ -149,6 +154,7 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     }
     
     private static class RouteTableUpdateParser extends GnutellaMessageParser {
+        @Override
         protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, Network network) throws BadPacketException {
             // The exact subclass of RouteTableMessage returned depends on
@@ -160,6 +166,7 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     }
     
     private class VendorMessageParser extends GnutellaMessageParser {
+        @Override
         protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, Network network) throws BadPacketException {
             return vendorMessageFactory.deriveVendorMessage(guid, ttl, hops, payload, network);
@@ -167,6 +174,7 @@ public class MessageParserBinderImpl implements MessageParserBinder {
     }
     
     private class VendorMessageStableParser extends GnutellaMessageParser {
+        @Override
         protected Message parse(byte[] guid, byte ttl, byte hops, 
                 byte[] payload, Network network) throws BadPacketException {
             return vendorMessageFactory.deriveVendorMessage(guid, ttl, hops, payload, network);

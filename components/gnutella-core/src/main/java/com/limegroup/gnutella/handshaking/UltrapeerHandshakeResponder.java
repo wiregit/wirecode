@@ -32,7 +32,8 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
 	 *
 	 * @param response the headers read from the connection
 	 */
-	protected HandshakeResponse respondToOutgoing(HandshakeResponse response) {
+	@Override
+    protected HandshakeResponse respondToOutgoing(HandshakeResponse response) {
 	    
 		//Outgoing connection.
 		
@@ -66,7 +67,8 @@ public class UltrapeerHandshakeResponder extends DefaultHandshakeResponder {
 	 *
 	 * @param response the headers read from the connection
 	 */
-	protected HandshakeResponse respondToIncoming(HandshakeResponse response) {
+	@Override
+    protected HandshakeResponse respondToIncoming(HandshakeResponse response) {
  		
 		// if this is a connections from the crawler, return the special crawler 
         // response

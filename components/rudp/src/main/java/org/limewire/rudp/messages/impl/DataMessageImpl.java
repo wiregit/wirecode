@@ -64,7 +64,8 @@ class DataMessageImpl extends RUDPMessageImpl implements DataMessage {
             return _data2.get(i-MAX_DATA1_SIZE + _data2.position());
     }
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return "DataMessage DestID:"+getConnectionID()+" len:"+
           getDataLength()+" seq:"+getSequenceNumber();
 	}

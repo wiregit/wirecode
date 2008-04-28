@@ -31,6 +31,7 @@ public class GUIDTest extends com.limegroup.gnutella.util.LimeTestCase {
         return buildTestSuite(GUIDTest.class);
     }
 
+    @Override
     public void setUp() {
         //Prevents NullPointerException's in testIsX.
         //Otherwise not needed.

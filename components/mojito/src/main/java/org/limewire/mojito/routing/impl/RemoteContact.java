@@ -339,10 +339,12 @@ public class RemoteContact implements Contact {
         }
     }
     
+    @Override
     public int hashCode() {
         return nodeId.hashCode();
     }
     
+    @Override
     public boolean equals(Object o) {
         if (!(o instanceof Contact) 
                 || o instanceof LocalContact) {
@@ -363,6 +365,7 @@ public class RemoteContact implements Contact {
         init();
     }
     
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(ContactUtils.toString(getNodeID(), getContactAddress()))

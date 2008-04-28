@@ -39,17 +39,21 @@ public class HTTPDownloaderStub extends HTTPDownloader {
                 tcpBandwidthStatistics, networkInstanceUtils);
     }
 
+    @Override
     public void addFailedAltLoc(AlternateLocation loc) {
 
     }
 
+    @Override
     public void addSuccessfulAltLoc(AlternateLocation loc) {
 
 	}
-	public boolean browseEnabled() {
+	@Override
+    public boolean browseEnabled() {
 		return false;
 	}
-	public boolean chatEnabled() {
+	@Override
+    public boolean chatEnabled() {
 		return false;
 	}
 	public void connectHTTP(int start, int stop, boolean supportQueueing)
@@ -59,7 +63,8 @@ public class HTTPDownloaderStub extends HTTPDownloader {
 
 
 	}
-	public void initializeTCP() throws IOException {
+	@Override
+    public void initializeTCP() throws IOException {
 
 	}
 	public void consumeBodyIfNecessary() {
@@ -71,70 +76,89 @@ public class HTTPDownloaderStub extends HTTPDownloader {
 	AlternateLocationCollection getAltLocsReceived() {
 		return null;
 	}
-	public long getAmountRead() {
+	@Override
+    public long getAmountRead() {
 		return 0;
 	}
-	public long getAmountToRead() {
+	@Override
+    public long getAmountToRead() {
 		return 0;
 	}
-	public float getAverageBandwidth() {
+	@Override
+    public float getAverageBandwidth() {
 		return 0f;
 	}
-	public String getFileName() {
+	@Override
+    public String getFileName() {
 		return null;
 	}
-	public byte[] getGUID() {
+	@Override
+    public byte[] getGUID() {
 		return null;
 	}
-	public long getIndex() {
+	@Override
+    public long getIndex() {
 		return 0l;
 	}
-	public InetAddress getInetAddress() {
+	@Override
+    public InetAddress getInetAddress() {
 		return null;
 	}
-	public long getInitialReadingPoint() {
+	@Override
+    public long getInitialReadingPoint() {
 		return 0;
 	}
-	public float getMeasuredBandwidth() throws InsufficientDataException {
+	@Override
+    public float getMeasuredBandwidth() throws InsufficientDataException {
 		return 0f;
 	}
-	public int getPort() {
+	@Override
+    public int getPort() {
 		return 0;
 	}
-	public RemoteFileDesc getRemoteFileDesc() {
+	@Override
+    public RemoteFileDesc getRemoteFileDesc() {
 		return null;
 	}
-	public long getTotalAmountRead() {
+	@Override
+    public long getTotalAmountRead() {
 		return 0;
 	}
-	public String getVendor() {
+	@Override
+    public String getVendor() {
 		return null;
 	}
-	public boolean hasHashTree() {
+	@Override
+    public boolean hasHashTree() {
 		return true;
 	}
-	public boolean isActive() {
+	@Override
+    public boolean isActive() {
 		return false;
 	}
-	public boolean isHTTP11() {
+	@Override
+    public boolean isHTTP11() {
 		return false;
 	}
 	public boolean isPush() {
 		return false;
 	}
-	public void measureBandwidth() {
+	@Override
+    public void measureBandwidth() {
 		
 	}
 	public ConnectionStatus requestHashTree() {
 		return null;
 	}
-	public void stop() {
+	@Override
+    public void stop() {
 		
 	}
 	public void stopAt(int stop) {
 		
 	}
-	public String toString() {
+	@Override
+    public String toString() {
 		return "HTTPDownloader stub";
 	}
 }

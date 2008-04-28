@@ -30,7 +30,8 @@ public final class ThrottleWriterTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-	public void setUp() {
+	@Override
+    public void setUp() {
 	    THROTTLE.clear();
 	}
 	

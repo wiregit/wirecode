@@ -459,6 +459,7 @@ public final class SearchResultHandler {
         
         public void markAsFinished() { markAsFinished = true; }
 
+        @Override
         public String toString() {
             return "" + _guid + ":" + _numGoodResults + ":" + _nextReportNum;
         }

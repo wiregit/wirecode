@@ -138,6 +138,7 @@ public final class GeocodeInformation {
         names2values.put(p, value);
     }
 
+    @Override
     public String toString() {
         return String.valueOf(names2values);
     }

@@ -59,7 +59,8 @@ public class MultiRRIterator<T> extends MultiIterator<T> {
 		current = iterators.length - 1;
 	}
 	
-	protected void positionCurrent() {
+	@Override
+    protected void positionCurrent() {
 		int steps = 0;
 		while (steps <= iterators.length) {
 			if (current == iterators.length-1)

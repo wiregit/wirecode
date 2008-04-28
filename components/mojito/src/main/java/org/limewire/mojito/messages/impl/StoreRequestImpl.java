@@ -69,11 +69,13 @@ public class StoreRequestImpl extends AbstractRequestMessage implements StoreReq
         return values;
     }
 
+    @Override
     protected void writeBody(MessageOutputStream out) throws IOException {
         out.writeSecurityToken(securityToken);
         out.writeDHTValueEntities(values);
     }
 
+    @Override
     public String toString() {
         return "StoreRequest: " + values;
     }

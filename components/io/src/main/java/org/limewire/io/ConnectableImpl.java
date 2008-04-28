@@ -52,6 +52,7 @@ public class ConnectableImpl implements Connectable {
         return ipPort.getInetSocketAddress();
     }
     
+    @Override
     public String toString() {
         return ipPort + ", tlsCapable: " + tlsCapable;
     }

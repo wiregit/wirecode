@@ -344,6 +344,7 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
         }
     }
     
+    @Override
     public String toString() {
         return PROPS.toString();
     }

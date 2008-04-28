@@ -90,6 +90,7 @@ class PingIteratorFactory {
             return context.getMessageDispatcher().send(nodeId, dst, request, responseHandler);
         }
         
+        @Override
         public String toString() {
             return "ContactPinger: " + nodes;
         }
@@ -149,6 +150,7 @@ class PingIteratorFactory {
             return context.getMessageDispatcher().send(nodeId, dst, request, responseHandler);
         }
         
+        @Override
         public String toString() {
             return "CollisionPinger: " + sender;
         }
@@ -194,6 +196,7 @@ class PingIteratorFactory {
             return context.getMessageDispatcher().send(null, dst, request, responseHandler);
         }
         
+        @Override
         public String toString() {
             return "SocketAddressPinger: " + hosts.toString();
         }
@@ -252,6 +255,7 @@ class PingIteratorFactory {
             return context.getMessageDispatcher().send(nodeId, dst, request, responseHandler);
         }
         
+        @Override
         public String toString() {
             return "EntryPinger: " + entries.toString();
         }

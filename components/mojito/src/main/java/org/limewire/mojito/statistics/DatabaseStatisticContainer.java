@@ -33,6 +33,7 @@ public class DatabaseStatisticContainer extends StatisticContainer {
         super(nodeId);
     }
 
+    @Override
     public void writeStats(Writer writer) throws IOException {
         writer.write("Database Stats:\n");
         super.writeStats(writer);

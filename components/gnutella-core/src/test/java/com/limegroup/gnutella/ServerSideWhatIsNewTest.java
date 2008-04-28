@@ -115,6 +115,7 @@ public class ServerSideWhatIsNewTest
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        
     
+    @Override
     public void setUp() throws Exception  {
         injector = LimeTestUtils.createInjector();
         super.setUp(injector);

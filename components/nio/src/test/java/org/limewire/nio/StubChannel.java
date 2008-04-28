@@ -29,32 +29,39 @@ class StubChannel extends SocketChannel {
         }
     }
 
+    @Override
     public boolean connect(SocketAddress remote) throws IOException {
         this.connectAddr = remote;
         return connect;
     }
 
+    @Override
     public boolean finishConnect() throws IOException {
         this.finishConnect = true;
         return true;
     }
 
+    @Override
     public boolean isConnected() {
         return connected;
     }
 
+    @Override
     public boolean isConnectionPending() {
         return connectionPending;
     }
 
+    @Override
     public int read(ByteBuffer dst) throws IOException {
         return 0;
     }
 
+    @Override
     public long read(ByteBuffer[] dsts, int offset, int length) throws IOException {
         return 0;
     }
 
+    @Override
     public Socket socket() {
         return socket;
     }
@@ -63,17 +70,21 @@ class StubChannel extends SocketChannel {
         this.socket = socket;
     }
 
+    @Override
     public int write(ByteBuffer src) throws IOException {
         return 0;
     }
 
+    @Override
     public long write(ByteBuffer[] srcs, int offset, int length) throws IOException {
         return 0;
     }
 
+    @Override
     protected void implCloseSelectableChannel() throws IOException {
     }
 
+    @Override
     protected void implConfigureBlocking(boolean block) throws IOException {
     }
 

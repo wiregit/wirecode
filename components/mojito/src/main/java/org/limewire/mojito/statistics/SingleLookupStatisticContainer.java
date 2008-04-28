@@ -67,6 +67,7 @@ abstract class SingleLookupStatisticContainer extends StatisticContainer {
         globalLookupStats.GLOBAL_LOOKUP_TIMEOUTS.incrementStat();
     }
     
+    @Override
     public void writeStats(Writer writer) throws IOException {
         writer.write("Lookup: "+lookupKey+"\n");
         super.writeStats(writer);

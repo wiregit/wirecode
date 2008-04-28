@@ -26,6 +26,7 @@ public class PushDownloadManagerTest extends LimeTestCase {
         return buildTestSuite(PushDownloadManagerTest.class);
     }
 
+    @Override
     protected void setUp() throws Exception {
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override

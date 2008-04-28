@@ -268,10 +268,12 @@ public class ReadHandshakeStateTest extends LimeTestCase {
             super(support);
         }
         
+        @Override
         protected void processConnectLine() throws IOException {
             this.processedConnectLine = true;
         }
 
+        @Override
         protected void processHeaders() throws IOException {
             this.processedHeaders = true;
         }

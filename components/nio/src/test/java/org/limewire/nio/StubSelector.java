@@ -24,9 +24,11 @@ class StubSelector extends AbstractSelector {
         super(null);
     }
 
+    @Override
     protected void implCloseSelector() throws IOException {
     }
 
+    @Override
     protected SelectionKey register(AbstractSelectableChannel ch, int ops, Object att) {
         if(!(ch instanceof StubChannel))
             throw new IllegalSelectorException();
@@ -36,22 +38,27 @@ class StubSelector extends AbstractSelector {
         return key;
     }
 
+    @Override
     public Set keys() {
         return keys;
     }
 
+    @Override
     public int select() throws IOException {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public int select(long timeout) throws IOException {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Set selectedKeys() {
         return selectedKeys;
     }
 
+    @Override
     public int selectNow() throws IOException {
         selectedKeys.clear();
         for(Iterator i = keys.iterator(); i.hasNext();) {
@@ -66,6 +73,7 @@ class StubSelector extends AbstractSelector {
         return selectedKeys.size();
     }
 
+    @Override
     public Selector wakeup() {
         return this;
     }

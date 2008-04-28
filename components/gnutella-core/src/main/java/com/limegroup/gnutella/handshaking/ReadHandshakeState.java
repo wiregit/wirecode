@@ -27,12 +27,14 @@ abstract class ReadHandshakeState extends ReadHeadersIOState {
          * Ensures the initial connect line is GNUTELLA/0.6
          * or a higher version of the protocol.
          */
+        @Override
         protected void processConnectLine() throws IOException {
             if (!((HandshakeSupport)support).notLessThan06(connectLine))
                 throw new IOException("not a valid connect string!");
         }
 
         /** Does nothing. */
+        @Override
         protected void processHeaders() throws IOException {}
     }
     
@@ -43,6 +45,7 @@ abstract class ReadHandshakeState extends ReadHeadersIOState {
         }
         
         /** Ensures that the connect line began with GNUTELLA/0.6 */
+        @Override
         protected void processConnectLine() throws IOException {
             // We do this here, as opposed to in other states, so that
             // our response to the crawler can go through the wire prior
@@ -61,6 +64,7 @@ abstract class ReadHandshakeState extends ReadHeadersIOState {
         }
 
         /** Ensures that the response contained a valid status code. */
+        @Override
         protected void processHeaders() throws IOException {
             HandshakeResponse theirResponse = ((HandshakeSupport)support).createRemoteResponse(connectLine);
             switch(theirResponse.getStatusCode()) {

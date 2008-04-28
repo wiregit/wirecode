@@ -103,6 +103,7 @@ public class AddressToken extends AbstractToken {
     /**
      * implements interface <tt>Token</tt>
      */
+    @Override
     public double getImportance() {
         // Throw out AddressTokens first, since they
         // can mostly be regenerated from the list of
@@ -152,10 +153,12 @@ public class AddressToken extends AbstractToken {
 		return TokenType.ADDRESS;
 	}
 
+    @Override
     public final int hashCode() {
         return _hashCode;
     }
     
+    @Override
     public final boolean equals(Object o) {
         if (o == null)
             return false;
@@ -173,7 +176,8 @@ public class AddressToken extends AbstractToken {
 	/**
 	 * overrides method from <tt>Object</tt>
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		return "" + (0xFF & _address[0]) + "." + (0xFF & _address[1]) + "."
 				+ (0xFF & _address[2]) + "." + (0xFF & _address[3]) + ":"
 				+ (0xFFFF & _port) + " " + _bad;

@@ -464,6 +464,7 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
         return FREE_ULTRAPEER_SLOTS;
     }
 
+    @Override
     protected void writePayload(OutputStream out) throws IOException {
         out.write(PAYLOAD);
     }
@@ -652,6 +653,7 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
     }
 
     // overrides Object.toString
+    @Override
     public String toString() {
         return "PingReply("+getAddress()+":"+getPort()+
             ", free ultrapeers slots: "+hasFreeUltrapeerSlots()+
@@ -718,6 +720,7 @@ public class PingReplyImpl extends AbstractMessage implements IpPort, Connectabl
         return PAYLOAD;
     }
     
+    @Override
     public Class<? extends Message> getHandlerClass() {
         return PingReply.class;
     }

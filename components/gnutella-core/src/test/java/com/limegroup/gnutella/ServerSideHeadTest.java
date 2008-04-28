@@ -85,6 +85,7 @@ public class ServerSideHeadTest extends LimeTestCase {
     	lifecycleManager.start();
     }
     
+    @Override
     public void tearDown() throws Exception {
         socket1.close();
         socket2.close();

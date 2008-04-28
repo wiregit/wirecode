@@ -102,6 +102,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         verifiedHosts = new TreeSet<RemoteFileDesc>(RFD_COMPARATOR);
     }
     
+    @Override
     @SuppressWarnings("unchecked")
     public synchronized boolean addToPool(Collection<? extends RemoteFileDesc> c)  {
         List<? extends RemoteFileDesc> l;
@@ -127,6 +128,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         return ret;
     }
     
+    @Override
     public synchronized boolean addToPool(RemoteFileDesc host){
         boolean ret = addInternal(host);
         pingNewHosts();
@@ -177,6 +179,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
             testedLocations.contains(host);
     }
     
+    @Override
     public synchronized RemoteFileDesc getBest() throws NoSuchElementException {
         if (!hasMore())
             return null;
@@ -268,6 +271,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
     }
     
     
+    @Override
     protected Collection<RemoteFileDesc> getPotentiallyBusyHosts() {
         return newHosts;
     }
@@ -304,6 +308,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         return flags;
     }
     
+    @Override
     public synchronized boolean hasMore() {
         return !(verifiedHosts.isEmpty() && newHosts.isEmpty() && testedLocations.isEmpty());
     }
@@ -404,6 +409,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         return !running || verifiedHosts.size() >= DownloadSettings.MAX_VERIFIED_HOSTS.getValue();
     }
     
+    @Override
     protected synchronized void clearState(){
         if (myGUID != null) {
             messageRouter.unregisterMessageListener(myGUID.bytes(),this);
@@ -411,6 +417,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         }
     }
     
+    @Override
     public synchronized Collection<RemoteFileDesc> getShareableHosts(){
         List<RemoteFileDesc>  ret = new ArrayList<RemoteFileDesc> (verifiedHosts.size()+newHosts.size()+testedLocations.size());
         ret.addAll(verifiedHosts);
@@ -419,6 +426,7 @@ public class PingRanker extends AbstractSourceRanker implements MessageListener,
         return ret;
     }
     
+    @Override
     public synchronized int getNumKnownHosts() {
         return verifiedHosts.size()+newHosts.size()+testedLocations.size();
     }

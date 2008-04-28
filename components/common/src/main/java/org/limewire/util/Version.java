@@ -90,6 +90,7 @@ public class Version implements Comparable<Version> {
     /**
      * Returns the version.
      */
+    @Override
     public String toString() {
         return getVersion();
     }
@@ -119,6 +120,7 @@ public class Version implements Comparable<Version> {
     /**
      * Equality.
      */
+    @Override
     public boolean equals(Object o) {
         return compareTo((Version)o) == 0;
     }

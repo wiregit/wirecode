@@ -61,6 +61,7 @@ public class AbstractPushEndpointTest extends BaseTestCase {
         return buildTestSuite(AbstractPushEndpointTest.class);
     }
     
+    @Override
     public void setUp() throws Exception {
         ppi1 = new IpPortImpl("1.2.3.4", 1235);
         ppi2 = new IpPortImpl("1.2.3.5", 1235);

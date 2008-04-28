@@ -27,6 +27,7 @@ public class UniqueHostPinger extends UDPPingerImpl {
         super(messageRouter, backgroundExecutor, udpService, pingRequestFactory);
     }    
     
+    @Override
     protected void sendSingleMessage(IpPort host, Message m) {
         if (_recent.contains(host))
             return;

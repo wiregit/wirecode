@@ -46,6 +46,7 @@ public class HttpClientManagerTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
     public void setUp() throws Exception {
         // TODO: this statically injects HttpClientManager -- fix! 
         injector = LimeTestUtils.createInjector();
@@ -65,6 +66,7 @@ public class HttpClientManagerTest extends LimeTestCase {
         }
     }
     
+    @Override
     public void tearDown() throws Exception {
         for(int i = 0; i < 11; i++) {
             httpServers[i].shutdown();

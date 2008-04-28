@@ -124,6 +124,7 @@ public class FindNodeResult extends LookupResult {
         return hop;
     }
     
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append(getLookupID()).append(" (time=").append(time).append("ms, hop=").append(hop).append(")\n");

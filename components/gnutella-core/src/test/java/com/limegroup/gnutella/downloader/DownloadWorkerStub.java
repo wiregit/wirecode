@@ -19,14 +19,17 @@ class DownloadWorkerStub extends DownloadWorker {
                 pushDownloadManager, socketsManager, new DownloadStatsTrackerImpl());
     }
 
+    @Override
     HTTPDownloader getDownloader() {
         return null;
     }
 
+    @Override
     public RemoteFileDesc getRFD() {
         return null;
     }
 
+    @Override
     void interrupt() {
     }
 

@@ -365,6 +365,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         // This ID is the identity hash code
         // ====================================================================================================================================
         lwsManager.registerHandler("GetDownloadProgress", new LWSManagerCommandResponseHandlerWithCallback("GetDownloadProgress") {          
+            @Override
             protected String handleRest(Map<String, String> args) {
                 return getDownloadProgress();
             }  
@@ -384,6 +385,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         // ====================================================================================================================================
         lwsManager.registerHandler("Download", new LWSManagerCommandResponseHandlerWithCallback("Download") {
 
+            @Override
             protected String handleRest(Map<String, String> args) {
                 //
                 // The relative URL
@@ -565,6 +567,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         
         protected abstract void takeAction(Downloader d);
         
+        @Override
         protected final String handleRest(Map<String, String> args) {
             //
             // The id of the downloader we want to pause
@@ -609,6 +612,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         
         protected abstract void takeAction(Downloader d);
         
+        @Override
         protected final String handleRest(Map<String, String> args) {
             //
             // Find the downloaders and compare by System.identityHashCode()

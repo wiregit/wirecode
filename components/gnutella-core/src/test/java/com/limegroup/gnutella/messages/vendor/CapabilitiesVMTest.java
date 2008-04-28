@@ -36,6 +36,7 @@ public class CapabilitiesVMTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    @Override
     public void setUp() throws Exception {
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override

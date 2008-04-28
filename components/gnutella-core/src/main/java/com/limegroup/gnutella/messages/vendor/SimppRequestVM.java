@@ -22,6 +22,7 @@ public final class SimppRequestVM extends AbstractVendorMessage {
         return getVersion() == OLD_KEY_VERSION;
     }
     
+    @Override
     public String toString() {
         return "{SimppRequestVM:"+super.toString()+"}";
     }

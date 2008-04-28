@@ -29,6 +29,7 @@ class BEList extends BEAbstractCollection<List<Object>> {
         return getNextToken(chan);
     }
     
+    @Override
     public int getType() {
         return LIST;
     }

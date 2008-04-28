@@ -107,6 +107,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
         queryReplyHandler = (QueryReplyHandler) injector.getInstance(Key.get(ReplyHandler.class, Names.named("forMeReplyHandler")));
     }
 
+    @Override
     protected void tearDown() throws Exception {
         injector.getInstance(LifecycleManager.class).shutdown();
     }
@@ -127,6 +128,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                 return null;
             }
             
+            @Override
             public void handle(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
                 httpResponse.setStatusCode(400);
             }
@@ -185,6 +187,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                 return null;
             }
             
+            @Override
             public void handle(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
                 httpResponse.setHeader("Content-Type", "application/foo-bar");
             }
@@ -210,6 +213,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                 return null;
             }
             
+            @Override
             public void handle(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
                 httpResponse.setHeader("Content-Encoding", "zip");
             }
@@ -236,6 +240,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
         ArrayList<QueryReply> replies = new ArrayList<QueryReply>();
 
+        @Override
         public void handleQueryReply(QueryReply queryReply, ReplyHandler receivingConnection) {
             replies.add(queryReply);
         }

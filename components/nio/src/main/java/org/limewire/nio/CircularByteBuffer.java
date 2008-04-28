@@ -237,6 +237,7 @@ public class CircularByteBuffer {
     	return capacity;
     }
     
+    @Override
     public String toString() {
     	return "circular buffer in:"+in+" out:"+out;
     }

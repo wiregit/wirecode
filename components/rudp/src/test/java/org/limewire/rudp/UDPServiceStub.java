@@ -161,6 +161,7 @@ public class UDPServiceStub implements UDPService {
 			return 0;
 		}
 
+        @Override
         public String toString() {
             if (_dp != null)
                 return _dp.toString();
@@ -168,6 +169,7 @@ public class UDPServiceStub implements UDPService {
                 return "null";
         }
         
+        @Override
         public void run() {
         	_receiver.receive(this);
         }
@@ -250,7 +252,8 @@ public class UDPServiceStub implements UDPService {
 	 * Overrides Object.toString to give more informative information
 	 * about the class.
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		return "UDPServerStub\r\n loopback";
 	}
 

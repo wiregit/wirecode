@@ -40,18 +40,22 @@ public class SimpleFileManager extends FileManagerImpl {
         super(new FileManagerControllerAdapter());
     }
 
+    @Override
     public boolean shouldIncludeXMLInResponse(QueryRequest qr) {
         return false;
     }
     
+    @Override
     public void addXMLToResponse(Response r, FileDesc fd) {
         r.setDocument(fd.getXMLDocument());
     }
     
+    @Override
     public void fileChanged(File f) {
         throw new UnsupportedOperationException("unsupported");
     }
     
+    @Override
     public boolean isValidXMLMatch(Response r, LimeXMLDocument doc) {
         return true;
     }
@@ -60,6 +64,7 @@ public class SimpleFileManager extends FileManagerImpl {
      * Override the fd to create a fake fd for store files so we dont 
      *	need to read real store files for tests
      */
+    @Override
     protected void loadFile(FileDesc fd, File file,
             List<? extends LimeXMLDocument> metadata, Set<? extends URN> urns) {
         

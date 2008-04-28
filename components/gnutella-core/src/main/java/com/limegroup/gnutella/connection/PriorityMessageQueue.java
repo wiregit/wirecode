@@ -52,6 +52,7 @@ public class PriorityMessageQueue extends AbstractMessageQueue {
         this._queue=new BucketQueue<Message>(PRIORITIES, capacity);
     }
 
+    @Override
     protected Message addInternal (Message m) {
         return _queue.insert(m, priority(m));
     }
@@ -106,6 +107,7 @@ public class PriorityMessageQueue extends AbstractMessageQueue {
             return priority;
     }
 
+    @Override
     protected Message removeNextInternal() {        
         if (_queue.isEmpty())
             return null;
@@ -113,6 +115,7 @@ public class PriorityMessageQueue extends AbstractMessageQueue {
             return _queue.extractMax();
     }
     
+    @Override
     public int size() {
         return _queue.size();
     }

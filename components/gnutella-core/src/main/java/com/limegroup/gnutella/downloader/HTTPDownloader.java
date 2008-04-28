@@ -1461,6 +1461,7 @@ public class HTTPDownloader implements BandwidthTracker {
             _stateMachine.handleRead();
         }
 
+        @Override
         protected boolean processRead(ReadableByteChannel channel, ByteBuffer buffer) throws IOException {
             if(doingWrite)
                 return true;
@@ -1781,6 +1782,7 @@ public class HTTPDownloader implements BandwidthTracker {
      */
 	////////////////////////////// Unit Test ////////////////////////////////
 
+    @Override
     public String toString() {
         return "<"+_host+":"+_port+", "+getFileName()+">";
     }

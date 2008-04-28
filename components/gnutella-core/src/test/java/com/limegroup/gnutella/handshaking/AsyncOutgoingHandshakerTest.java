@@ -211,6 +211,7 @@ public class AsyncOutgoingHandshakerTest extends LimeTestCase {
             this.baseWriter = baseWriter;
         }
         
+        @Override
         public InetAddress getInetAddress() {
             try {
                 return InetAddress.getByName("127.0.0.1");

@@ -54,7 +54,8 @@ public final class MessageReaderTest extends LimeTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-	public void setUp() throws Exception {
+	@Override
+    public void setUp() throws Exception {
 
         final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
         networkManagerStub.setAddress(new byte[] { 127, 0, 0, 1 });

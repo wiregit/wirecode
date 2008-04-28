@@ -282,6 +282,7 @@ public class KUID implements Comparable<KUID>, Serializable {
         return dest;
     }
     
+    @Override
     public int hashCode() {
         return hashCode;
     }
@@ -303,6 +304,7 @@ public class KUID implements Comparable<KUID>, Serializable {
     /**
      * Returns whether or not both KUIDs are equal
      */
+    @Override
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -342,6 +344,7 @@ public class KUID implements Comparable<KUID>, Serializable {
         return toBigInteger().bitLength();
     }
     
+    @Override
     public String toString() {
         return toHexString();
     }
@@ -356,6 +359,7 @@ public class KUID implements Comparable<KUID>, Serializable {
          * Random Numbers.
          */
         MessageDigestInput randomNumbers = new MessageDigestInput() {
+            @Override
             public void update(MessageDigest md) {
                 byte[] random = new byte[LENGTH * 2];
                 GENERATOR.nextBytes(random);
@@ -369,6 +373,7 @@ public class KUID implements Comparable<KUID>, Serializable {
          * add some randomness.
          */
         MessageDigestInput properties = new MessageDigestInput() {
+            @Override
             public void update(MessageDigest md) {
                 Properties props = System.getProperties();
                 try {
@@ -390,6 +395,7 @@ public class KUID implements Comparable<KUID>, Serializable {
          * are off. Should be a good source for randomness.
          */
         MessageDigestInput millis = new MessageDigestInput() {
+            @Override
             public void update(MessageDigest md) {
                 long millis = System.currentTimeMillis();
                 md.update((byte)((millis >> 56L) & 0xFFL));
@@ -407,6 +413,7 @@ public class KUID implements Comparable<KUID>, Serializable {
          * VM/machine dependent pseudo time.
          */
         MessageDigestInput nanos = new MessageDigestInput() {
+            @Override
             public void update(MessageDigest md) {
                 long nanos = System.nanoTime();
                 md.update((byte)((nanos >> 56L) & 0xFFL));

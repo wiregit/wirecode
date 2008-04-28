@@ -110,10 +110,12 @@ class DynamicQRTStorage implements QRTTableStorage {
         return storage.nextSetBit(i);
     }
 
+    @Override
     public DynamicQRTStorage clone() {
         return new DynamicQRTStorage(storage.clone());
     }
     
+    @Override
     public boolean equals(Object o) {
         if (o instanceof DynamicQRTStorage)
             o = ((DynamicQRTStorage)o).storage;

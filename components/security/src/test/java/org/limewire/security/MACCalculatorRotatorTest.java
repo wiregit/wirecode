@@ -163,14 +163,17 @@ public class MACCalculatorRotatorTest extends BaseTestCase {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public <T> Future<T> submit(Callable<T> task) {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public Future<?> submit(Runnable task) {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public <T> Future<T> submit(Runnable task, T result) {
             throw new UnsupportedOperationException();
         }
@@ -251,14 +254,17 @@ public class MACCalculatorRotatorTest extends BaseTestCase {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public <T> Future<T> submit(Callable<T> task) {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public Future<?> submit(Runnable task) {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public <T> Future<T> submit(Runnable task, T result) {
             throw new UnsupportedOperationException();
         }

@@ -33,6 +33,7 @@ class BitSetQRTTableStorage implements QRTTableStorage {
         return bitSet.cardinality() * 100.0 / bitTableLength;
     }
     
+    @Override
     public QRTTableStorage clone() {
         return new BitSetQRTTableStorage((BitSet)bitSet.clone(), bitTableLength);
     }
@@ -144,6 +145,7 @@ class BitSetQRTTableStorage implements QRTTableStorage {
         return bitSet.nextSetBit(i);
     }
     
+    @Override
     public boolean equals(Object o) {
         if (! (o instanceof QRTTableStorage)) 
             return false;

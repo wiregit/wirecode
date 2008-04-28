@@ -31,6 +31,7 @@ public class FixedsizePriorityQueueTest extends BaseTestCase {
         return buildTestSuite(FixedsizePriorityQueueTest.class);
     }    
     
+    @Override
     public void setUp() {
         q=new FixedsizePriorityQueue(Comparators.integerComparator(), 4);
         assertNull(q.insert(three));

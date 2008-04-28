@@ -45,7 +45,8 @@ public final class UDPConnectNIOTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
     
-	public void setUp() throws Exception {
+	@Override
+    public void setUp() throws Exception {
         RUDPMessageFactory factory = new DefaultMessageFactory();
         stubService = new UDPServiceStub(factory);
         udpSelectorProvider = new UDPSelectorProvider(new DefaultRUDPContext(
@@ -60,6 +61,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
         stubService.addReceiver(PORT_2, PORT_1, 10, 0);
     }
     
+    @Override
     public void tearDown() throws Exception {
         // Clear out the receiver parameters for the UDPServiceStub
         stubService.clearReceivers();

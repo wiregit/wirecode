@@ -12,10 +12,12 @@ public class SimpleReadHeaderState extends ReadHeadersIOState {
         super(new HeaderSupport(), stat, maxHeaders, maxHeaderSize);
     }
 
+    @Override
     protected void processConnectLine() throws IOException {
         // Does nothing.
     }
 
+    @Override
     protected void processHeaders() throws IOException {
         // Does nothing.
     }

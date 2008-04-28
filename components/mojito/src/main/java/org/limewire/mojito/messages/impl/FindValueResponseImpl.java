@@ -80,12 +80,14 @@ public class FindValueResponseImpl extends AbstractLookupResponse
         return requestLoad;
     }
 
+    @Override
     protected void writeBody(MessageOutputStream out) throws IOException {
         out.writeFloat(requestLoad);
         out.writeDHTValueEntities(entities);
         out.writeKUIDs(secondaryKeys);
     }
     
+    @Override
     public String toString() {
         return "FindValueResponse: " + entities;
     }

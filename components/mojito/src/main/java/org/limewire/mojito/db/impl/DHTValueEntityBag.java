@@ -144,10 +144,12 @@ public class DHTValueEntityBag implements Serializable {
         return values.isEmpty();
     }
     
+    @Override
     public int hashCode() {
         return primaryKey.hashCode();
     }
     
+    @Override
     public boolean equals(Object o) {
         if (o == this) {
             return true;

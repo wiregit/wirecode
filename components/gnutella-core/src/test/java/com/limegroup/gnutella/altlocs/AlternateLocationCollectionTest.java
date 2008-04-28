@@ -43,7 +43,8 @@ public final class AlternateLocationCollectionTest extends LimeTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 
-	protected void setUp() {
+	@Override
+    protected void setUp() {
 		Injector injector = LimeTestUtils.createInjector();
 		alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
 

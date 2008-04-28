@@ -60,6 +60,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
     private QueryRequestFactory queryRequestFactory;
     private MessageFactory messageFactory;
 
+    @Override
     public void setUp() throws Exception {
         launchBackend();              
               
@@ -105,6 +106,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
         // you support any vendor message....
     }
     
+    @Override
     public void tearDown() throws Exception {
         if ( _leaf1 != null )
             _leaf1.close();
@@ -261,6 +263,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
            new TCPConnectBackVendorMessage(_tcpSock.getLocalPort());
         final BlockingConnection c = _leaf1;
         Thread sendThread = new Thread() {
+            @Override
             public void run() {
                 try {
                     sleep(2*1000);
@@ -303,6 +306,7 @@ public class VendorMessageSupportTest extends LimeTestCase {
                                            guid);
         final BlockingConnection c = _leaf1;
         Thread sendThread = new Thread() {
+            @Override
             public void run() {
                 try {
                     sleep(2*1000);

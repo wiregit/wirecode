@@ -48,6 +48,7 @@ public final class StringSetting extends AbstractSetting {
      * @param sValue property string value
      *
      */
+    @Override
     protected void loadValue(String sValue) {
         value = sValue;
     }

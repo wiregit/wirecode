@@ -63,6 +63,7 @@ public class WeedInfo extends WRMXML {
     /**
      * Determines if this WeedInfo is valid.
      */
+    @Override
     public boolean isValid() {
         return  LAINFO.equals(_lainfo) &&
                 LURL.equals(_licenseDistributorURL) &&
@@ -95,6 +96,7 @@ public class WeedInfo extends WRMXML {
     /**
      * Extends WRMXML's parseChild to look for Weed-specific elements.
      */
+    @Override
     protected void parseChild(String parentNodeName, String name, String attribute, String value) {
         super.parseChild(parentNodeName, name, attribute, value);
         

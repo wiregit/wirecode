@@ -66,7 +66,8 @@ public class IpPortForSelf implements IpPort, Connectable {
         return new InetSocketAddress(getInetAddress(), getPort());
     }
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		return getAddress() +":"+getPort();
 	}
     public boolean isTLSCapable() {

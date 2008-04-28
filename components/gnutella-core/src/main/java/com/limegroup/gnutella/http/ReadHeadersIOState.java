@@ -52,6 +52,7 @@ public abstract class ReadHeadersIOState extends ReadState {
      * otherwise it will return false indiciating it's time to move on to the next
      * state.
      */
+    @Override
     protected boolean processRead(ReadableByteChannel rc, ByteBuffer buffer) throws IOException {
         boolean allDone = false;
         while(!allDone) {

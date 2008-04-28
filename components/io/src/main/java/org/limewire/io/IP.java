@@ -212,6 +212,7 @@ public class IP {
     /**
      * Returns the stuff as a string.
      */
+    @Override
     public String toString() {
         return toString(addr) + "/" + toString(mask); 
     }
@@ -248,6 +249,7 @@ public class IP {
      * To be equal, the two compared sets must have the same netmask, and their
      * start address (computed from the ip and netmask) must be equal.
      */
+    @Override
     public boolean equals(Object other) {
         if (other instanceof IP) {
             IP ip = (IP)other;
@@ -258,6 +260,7 @@ public class IP {
         }
     }
 
+    @Override
     public int hashCode() {
         return addr^mask;
     }

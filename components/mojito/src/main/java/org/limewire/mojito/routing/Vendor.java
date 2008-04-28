@@ -54,6 +54,7 @@ public class Vendor implements Serializable, Comparable<Vendor> {
         return vendorId;
     }
     
+    @Override
     public int hashCode() {
         return vendorId;
     }
@@ -62,6 +63,7 @@ public class Vendor implements Serializable, Comparable<Vendor> {
         return vendorId - o.vendorId;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -72,6 +74,7 @@ public class Vendor implements Serializable, Comparable<Vendor> {
         return vendorId == ((Vendor)o).vendorId;
     }
     
+    @Override
     public String toString() {
         return ArrayUtils.toString(vendorId);
     }

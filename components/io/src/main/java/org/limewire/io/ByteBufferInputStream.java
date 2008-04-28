@@ -48,6 +48,7 @@ public class ByteBufferInputStream extends InputStream {
         return buffers;
     }
     
+    @Override
     public int available() {
         int available = 0;
         for(int i = buffers.length-1; i >= index; --i) {
@@ -56,12 +57,14 @@ public class ByteBufferInputStream extends InputStream {
         return available;
     }
     
+    @Override
     public void close() {
         index = 0;
         mark = -1;
         buffers = EMPTY;
     }
 
+    @Override
     public void mark(int readlimit) {
         if (index < buffers.length) {
             mark = index;
@@ -71,6 +74,7 @@ public class ByteBufferInputStream extends InputStream {
         }
     }
 
+    @Override
     public void reset() {
         if (mark != -1) {
             index = mark;
@@ -81,10 +85,12 @@ public class ByteBufferInputStream extends InputStream {
         }
     }
 
+    @Override
     public boolean markSupported() {
         return true;
     }
 
+    @Override
     public int read() {
         while(index < buffers.length) {
             ByteBuffer b = buffers[index];
@@ -99,10 +105,12 @@ public class ByteBufferInputStream extends InputStream {
         return -1;
     }
     
+    @Override
     public int read(byte[] b) {
         return read(b, 0, b.length);
     }
 
+    @Override
     public int read(byte[] b, int off, int len) {
         if (b == null) {
             throw new NullPointerException();
@@ -144,6 +152,7 @@ public class ByteBufferInputStream extends InputStream {
         return (r > 0 ? r : -1);
     }
     
+    @Override
     public long skip(long n) {
         long s = 0L;
         while(index < buffers.length) {

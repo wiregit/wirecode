@@ -24,11 +24,13 @@ public class BTUnchoke extends BTMessage {
 		super(UNCHOKE);
 	}
 	
-	public ByteBuffer getPayload() {
+	@Override
+    public ByteBuffer getPayload() {
 		return EMPTY_PAYLOAD;
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		return "BTUnchoke";
 	}
 

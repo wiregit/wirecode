@@ -291,6 +291,7 @@ public class BucketQueue<E> implements Cloneable, Iterable<E> {
     }
 
     /** Returns a shallow copy of this, of type BucketQueue */
+    @Override
     public BucketQueue<E> clone() {
         return new BucketQueue<E>(this);        
     }
@@ -305,6 +306,7 @@ public class BucketQueue<E> implements Cloneable, Iterable<E> {
         */
     }
 
+    @Override
     public String toString() {
         StringBuilder buf=new StringBuilder();
         buf.append("[");

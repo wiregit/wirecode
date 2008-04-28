@@ -26,6 +26,7 @@ public class RandomDownloadStrategyTest extends LimeTestCase {
 
     private IntervalSet availableBytes;
 
+    @Override
     public void setUp() throws Exception {
         fileSize = 12345;
         blockSize = 1234;

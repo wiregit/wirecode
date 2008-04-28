@@ -231,6 +231,7 @@ public class SparseIntSet extends AbstractSet<Integer> {
         return point >= 0;
     }
     
+    @Override
     public Iterator<Integer> iterator() {
         return new ArrayIterator();
     }

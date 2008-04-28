@@ -111,6 +111,7 @@ public abstract class AbstractServer implements Runnable  {
         runner = null;
     }    
     
+    @Override
     public final String toString() {
         return name;
     }
@@ -224,6 +225,7 @@ public abstract class AbstractServer implements Runnable  {
             notify();
         }
         
+        @Override
         public String toString() {
             return name;
         }

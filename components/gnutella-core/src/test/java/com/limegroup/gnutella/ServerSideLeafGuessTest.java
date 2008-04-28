@@ -72,6 +72,7 @@ public class ServerSideLeafGuessTest extends ClientSideTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
     public void setUp() throws Exception {
         networkManagerStub = new NetworkManagerStub();
         Injector injector = LimeTestUtils.createInjector(new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));

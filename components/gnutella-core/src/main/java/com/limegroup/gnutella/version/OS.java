@@ -56,6 +56,7 @@ class OS {
     /**
      * Returns the OS as a string.
      */
+    @Override
     public String toString() {
         return os;
     }

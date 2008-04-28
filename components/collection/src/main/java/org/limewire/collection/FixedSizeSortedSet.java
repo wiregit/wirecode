@@ -232,6 +232,7 @@ public class FixedSizeSortedSet<E> implements Iterable<E> {
 
     
     ////////////////////////Sorted Set methods///////////////////////
+    @Override
     @SuppressWarnings("unchecked")
     public Object  clone() {
         FixedSizeSortedSet<E> ret = new FixedSizeSortedSet<E>(_maxSize);
@@ -339,6 +340,7 @@ public class FixedSizeSortedSet<E> implements Iterable<E> {
         return (_map.get(o) != null); //some equal key exists in the map
     }
 
+    @Override
     public boolean equals(Object o) {
         if(o==null)
             return false;
@@ -350,6 +352,7 @@ public class FixedSizeSortedSet<E> implements Iterable<E> {
         return (_sortedSet.equals(other._sortedSet) && _map.equals(other._map));
     }
 
+    @Override
     public int hashCode() {
         return _sortedSet.hashCode() + 37*_map.hashCode(); 
     }

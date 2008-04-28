@@ -39,11 +39,13 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
         addAll(c);
     }
     
+    @Override
     public String toString() {
         return isEmpty() ? "{Empty UrnSet}" : "UrnSet of: " + sha1;
     }
     
     /** Clones this set. */
+    @Override
     public UrnSet clone() {
         UrnSet c = new UrnSet();
         c.sha1 = sha1;
@@ -51,6 +53,7 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
     }
     
     /** Returns the hashcode for this UrnSet. */
+    @Override
     public int hashCode() {
         return sha1 == null ? 0 : sha1.hashCode();
     }
@@ -67,6 +70,7 @@ public class UrnSet implements Set<URN>, Iterable<URN>, Cloneable, Serializable 
      * Determines if this set contains all the same objects
      * as another set.
      */
+    @Override
     public boolean equals(Object o) {
         if (o == this)
             return true;

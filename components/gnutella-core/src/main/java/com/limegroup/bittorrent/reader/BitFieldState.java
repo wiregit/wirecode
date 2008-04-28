@@ -40,7 +40,8 @@ class BitFieldState extends BTReadMessageState {
 		length = readerState.getLength();
 	}
 	
-	public BTReadMessageState addData() throws BadBTMessageException {
+	@Override
+    public BTReadMessageState addData() throws BadBTMessageException {
 
 		BTDataSource buf = readerState.getDataSource();
 
@@ -72,7 +73,8 @@ class BitFieldState extends BTReadMessageState {
 		readerState.getHandler().processMessage(field);
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return "BitFieldReader for "+readerState;
 	}
 

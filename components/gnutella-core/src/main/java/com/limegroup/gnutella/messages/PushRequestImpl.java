@@ -135,6 +135,7 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
         }
     }
 
+    @Override
     protected void writePayload(OutputStream out) throws IOException {
 		out.write(payload);
     }
@@ -186,6 +187,7 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
 	    return PushRequest.class;
 	}
 	
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("PushRequest(");
         builder.append(super.toString()).append("\n");

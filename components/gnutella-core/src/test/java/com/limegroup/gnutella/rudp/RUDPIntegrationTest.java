@@ -69,6 +69,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
     }
     
+    @Override
     public void setUp() throws Exception {
         setSettings();
         Injector injector = LimeTestUtils.createInjector();

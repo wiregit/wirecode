@@ -21,6 +21,7 @@ public class AudioPlayerListenerTest extends BaseTestCase {
         return buildTestSuite(AudioPlayerListenerTest.class);
     }
     
+    @Override
     public void setUp() {
         player = new LimeWirePlayer();
         listener = new testAudioPlayerListener();

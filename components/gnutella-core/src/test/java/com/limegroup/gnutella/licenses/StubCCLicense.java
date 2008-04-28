@@ -38,6 +38,7 @@ class StubCCLicense extends CCLicense {
             return uri;
     }
     
+    @Override
     protected String getBodyFromURL(String url, LimeHttpClient httpClient) {
         if(url.equals(getLicenseURI().toString()))
             return page;

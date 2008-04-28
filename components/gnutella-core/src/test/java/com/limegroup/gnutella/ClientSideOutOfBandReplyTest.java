@@ -520,6 +520,7 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
     
     //////////////////////////////////////////////////////////////////
 
+    @Override
     public int getNumberOfPeers() {
         return 3;
     }

@@ -87,6 +87,7 @@ public class ForgetfulHashMap<K, V> extends HashMap<K, V> {
      *  older mapping if necessary.  The return value is undefined; it
      *  exists solely to conform with the superclass' signature.
      */
+    @Override
     public V put(K key, V value) {
         V ret=super.put(key,value);
         //Purge oldest entry if we're all full, or if we'll become full
@@ -107,6 +108,7 @@ public class ForgetfulHashMap<K, V> extends HashMap<K, V> {
 
     /** Calls put on all keys in t.  See put(Object, Object) for 
      *  specification. */
+    @Override
     public void putAll(Map<? extends K, ? extends V> t) {
         for(Map.Entry<? extends K, ? extends V> entry : t.entrySet())
             put(entry.getKey(), entry.getValue());

@@ -53,9 +53,11 @@ public class InterClientTest extends PeerTestCase {
     
     private UpdateRequest dummy = new UpdateRequest();
     
+    @Override
     public void setUp() throws Exception {
         myActivityCallback = new MyActivityCallback();
         Module m = new AbstractModule() {
+            @Override
             public void configure() {
                 bind(ActivityCallback.class).toInstance(myActivityCallback);
             }
@@ -67,6 +69,7 @@ public class InterClientTest extends PeerTestCase {
         doInitialExchange();
     }
     
+    @Override
     public void tearDown() throws Exception {
         super.tearDown();
         if(PEER != null)
@@ -405,6 +408,7 @@ public class InterClientTest extends PeerTestCase {
     }
 
     /* Required for PeerTestCase. */
+    @Override
     protected ActivityCallback getActivityCallback() {
         return new MyActivityCallback();
     }
@@ -413,6 +417,7 @@ public class InterClientTest extends PeerTestCase {
     private static class MyActivityCallback extends ActivityCallbackStub {
         UpdateInformation lastUpdate;
         
+        @Override
         public void updateAvailable(UpdateInformation info) {
             lastUpdate = info;
         }
@@ -446,6 +451,7 @@ public class InterClientTest extends PeerTestCase {
             this.requestsCompressed = requestsCompressed;
         }
         
+        @Override
         public int getVersion() {
             return version;
         }

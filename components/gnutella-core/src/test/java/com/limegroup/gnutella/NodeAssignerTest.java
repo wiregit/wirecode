@@ -57,6 +57,7 @@ public class NodeAssignerTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    @Override
     protected void setUp() throws Exception {
         setSettings();
         mockery = new Mockery();
@@ -123,6 +124,7 @@ public class NodeAssignerTest extends LimeTestCase {
         DHTSettings.ENABLE_PASSIVE_LEAF_DHT_MODE.setValue(true);
     }
 
+    @Override
     protected void tearDown() throws Exception {
         nodeAssigner.stop();
     }

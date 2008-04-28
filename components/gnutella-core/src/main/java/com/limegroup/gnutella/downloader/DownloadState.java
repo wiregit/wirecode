@@ -42,6 +42,7 @@ class DownloadState {
         this.http11 = http11;
     }
     
+    @Override
     public String toString() {
         return stateFor(state); // + ", prior: " + _lastFewStates;
     }

@@ -766,7 +766,8 @@ public class UDPService implements ReadWriteObserver {
 	 *
 	 * @return the <tt>DatagramSocket</tt> data
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		return "UDPService::channel: " + _channel;
 	}
 

@@ -25,6 +25,7 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
     private MessageRouterImpl mr;
     private Mockery mockery;
     
+    @Override
     public void setUp() throws Exception {
         
         mockery = new Mockery();

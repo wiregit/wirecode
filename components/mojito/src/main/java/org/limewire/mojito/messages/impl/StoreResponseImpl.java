@@ -60,10 +60,12 @@ public class StoreResponseImpl extends AbstractResponseMessage
         return statusCodes;
     }
     
+    @Override
     protected void writeBody(MessageOutputStream out) throws IOException {
         out.writeStoreStatusCodes(statusCodes);
     }
     
+    @Override
     public String toString() {
         return "StoreResponse:\n" + CollectionUtils.toString(statusCodes);
     }

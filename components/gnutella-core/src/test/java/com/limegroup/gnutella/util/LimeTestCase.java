@@ -139,6 +139,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * This must also set the ErrorService's callback, so it
      * associates with the correct test object.
      */
+    @Override
     protected void preSetUp() throws Exception {
         super.preSetUp();        
         setupUniqueDirectories();
@@ -174,6 +175,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
      * Called after each test's tearDown.
      * Used to remove directories and possibly other things.
      */
+    @Override
     protected void postTearDown() {
         cleanFiles(_baseDir, false);
         super.postTearDown();

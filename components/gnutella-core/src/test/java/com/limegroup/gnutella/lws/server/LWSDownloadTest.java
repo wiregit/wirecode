@@ -25,6 +25,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
     /**
      * Set up the little web server.
      */
+    @Override
     protected void afterSetup() {
         super.afterSetup();
 
@@ -43,6 +44,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
     /**
      * Tear down the little web server.
      */
+    @Override
     protected void afterTearDown() {
         super.afterTearDown();
         server.stop();
@@ -306,6 +308,7 @@ public class LWSDownloadTest extends AbstractCommunicationSupportWithNoLocalServ
         String s;
         public void set(String s) {this.s = s;}
         public String get() {return s;}
+        @Override
         public String toString() {return get();}
     }
     

@@ -96,11 +96,13 @@ public class BlockingServerSocketAdapter extends ServerSocket {
         bind(new InetSocketAddress(bindAddr, port), backlog);
     }
 
+    @Override
     public void bind(SocketAddress endpoint, int backlog) throws IOException {
         delegate.bind(endpoint, backlog);
         startListening();
     }
 
+    @Override
     public void bind(SocketAddress endpoint) throws IOException {
         delegate.bind(endpoint);
         startListening();
@@ -112,72 +114,89 @@ public class BlockingServerSocketAdapter extends ServerSocket {
      * throw an IllegalBlockingModeException, as the AcceptObserver
      * will be asynchronously routed all the connections.
      */
+    @Override
     public Socket accept() throws IOException {
         if(observer != null)
             throw new IllegalBlockingModeException();
         return delegate.accept();
     }
 
+    @Override
     public void close() throws IOException {
         delegate.close();
     }
 
+    @Override
     public boolean equals(Object obj) {
         return delegate.equals(obj);
     }
 
+    @Override
     public ServerSocketChannel getChannel() {
         return delegate.getChannel();
     }
 
+    @Override
     public InetAddress getInetAddress() {
         return delegate.getInetAddress();
     }
 
+    @Override
     public int getLocalPort() {
         return delegate.getLocalPort();
     }
 
+    @Override
     public SocketAddress getLocalSocketAddress() {
         return delegate.getLocalSocketAddress();
     }
 
+    @Override
     public int getReceiveBufferSize() throws SocketException {
         return delegate.getReceiveBufferSize();
     }
 
+    @Override
     public boolean getReuseAddress() throws SocketException {
         return delegate.getReuseAddress();
     }
 
+    @Override
     public int getSoTimeout() throws IOException {
         return delegate.getSoTimeout();
     }
 
+    @Override
     public int hashCode() {
         return delegate.hashCode();
     }
 
+    @Override
     public boolean isBound() {
         return delegate.isBound();
     }
 
+    @Override
     public boolean isClosed() {
         return delegate.isClosed();
     }
 
+    @Override
     public void setReceiveBufferSize(int size) throws SocketException {
         delegate.setReceiveBufferSize(size);
     }
 
+    @Override
     public void setReuseAddress(boolean on) throws SocketException {
         delegate.setReuseAddress(on);
     }
 
+    @Override
     public void setSoTimeout(int timeout) throws SocketException {
         delegate.setSoTimeout(timeout);
     }
 
+    @Override
     public String toString() {
         return delegate.toString();
     }

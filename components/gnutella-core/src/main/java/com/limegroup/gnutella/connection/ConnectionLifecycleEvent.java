@@ -75,6 +75,7 @@ public class ConnectionLifecycleEvent extends EventObject {
         return (type.equals(EventType.CONNECTION_CAPABILITIES));
     }
     
+    @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer("ConnectionLifecycleEvent: [event=");
         buffer.append(type);

@@ -46,6 +46,7 @@ public class SortedList<E> extends TreeList<E> {
         this.comparator = comparator;
     }
 
+    @Override
     public boolean add(E e) {
         add(getIndex(e), e);
         return true;

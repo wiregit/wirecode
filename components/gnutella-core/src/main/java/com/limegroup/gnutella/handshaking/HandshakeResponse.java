@@ -1162,6 +1162,7 @@ public class HandshakeResponse {
         return value;
     }
 
+    @Override
     public String toString() {
         return "<"+STATUS_CODE+", "+STATUS_MESSAGE+">"+HEADERS;
     }

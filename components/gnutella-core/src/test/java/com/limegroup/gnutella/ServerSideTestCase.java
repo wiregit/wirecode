@@ -141,6 +141,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
 	    
 	}
     
+    @Override
     protected void setUp() throws Exception {
         setUp(LimeTestUtils.createInjector());
     }
@@ -189,7 +190,8 @@ public abstract class ServerSideTestCase extends LimeTestCase {
         }
     }
 
-	public void tearDown() throws Exception {
+	@Override
+    public void tearDown() throws Exception {
 	    // there was an error in setup, return so we can see the actual exception
 	    if (connectionServices == null)
 	        return;

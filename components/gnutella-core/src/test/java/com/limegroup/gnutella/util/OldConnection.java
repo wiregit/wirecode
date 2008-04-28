@@ -59,6 +59,7 @@ public final class OldConnection extends TestConnection {
                 networkInstanceUtils);
     }
 
+    @Override
     public String toString() {
         return "OLD TEST CONNECTION";
     }

@@ -348,6 +348,7 @@ public class QueryRouteTable {
 
 
     /** True if o is a QueryRouteTable with the same entries of this. */
+    @Override
     public boolean equals(Object o) {
         if ( this == o )
             return true;
@@ -366,11 +367,13 @@ public class QueryRouteTable {
         return true;
     }
 
+    @Override
     public int hashCode() {
         return storage.hashCode() * 17;
     }
 
 
+    @Override
     public String toString() {
         return "QueryRouteTable: " + storage.toString();
     }

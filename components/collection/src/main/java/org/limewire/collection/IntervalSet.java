@@ -528,6 +528,7 @@ public class IntervalSet implements Iterable<Range>, Serializable{
      * (so they should never be modified), but the <code>TreeSet</code> this is
      * backed off of is new.
      */
+    @Override
     public IntervalSet clone() {
         IntervalSet ret = new IntervalSet();
         for(Range interval : this)
@@ -577,11 +578,13 @@ public class IntervalSet implements Iterable<Range>, Serializable{
     /**
      * Lists the contained intervals.
      */
+    @Override
     public String toString() {
         return intervals.toString();
     }
     
     /** Compares two <code>IntervalSet</code>s */
+    @Override
     public boolean equals(Object o) {
         if(o == this) {
             return true;

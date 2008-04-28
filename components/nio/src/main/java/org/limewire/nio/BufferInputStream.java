@@ -75,6 +75,7 @@ class BufferInputStream extends InputStream implements Shutdownable {
     }
     
     /** Reads a single byte from the buffer. */
+    @Override
     public int read() throws IOException {
         synchronized(LOCK) {
             waitImpl();
@@ -97,6 +98,7 @@ class BufferInputStream extends InputStream implements Shutdownable {
     }
     
     /** Reads a chunk of data from the buffer */
+    @Override
     public int read(byte[] buf, int off, int len) throws IOException {
         if (len == 0)
             return 0;
@@ -123,6 +125,7 @@ class BufferInputStream extends InputStream implements Shutdownable {
     }
     
     /** Determines how much data can be read without blocking */
+    @Override
     public int available() throws IOException {
         synchronized(LOCK) {
             return buffer.position();
@@ -160,6 +163,7 @@ class BufferInputStream extends InputStream implements Shutdownable {
     }
     
     /** Closes this InputStream & the Socket that it's associated with */
+    @Override
     public void close() throws IOException  {
         shutdownHandler.shutdown();
     }

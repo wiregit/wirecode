@@ -270,6 +270,7 @@ public class TestUploader {
         
         //spawn loop();
         Thread t = new ManagedThread() {
+            @Override
             public void run() {
                 loop(port);
             }

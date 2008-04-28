@@ -144,6 +144,7 @@ public class AltLocModel implements StorableModel {
         
     }
 
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder("AltLocPublisher: ");
         synchronized (values) {

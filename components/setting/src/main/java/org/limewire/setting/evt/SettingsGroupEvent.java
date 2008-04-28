@@ -75,6 +75,7 @@ public class SettingsGroupEvent {
         return group;
     }
     
+    @Override
     public String toString() {
         return type + ": " + group;
     }

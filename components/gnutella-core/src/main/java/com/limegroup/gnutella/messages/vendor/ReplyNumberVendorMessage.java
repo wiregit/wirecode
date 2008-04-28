@@ -104,6 +104,7 @@ public final class ReplyNumberVendorMessage extends AbstractVendorMessage {
             return (getPayload()[1] & UNSOLICITED) == UNSOLICITED;
     }
 
+    @Override
     public boolean equals(Object other) {
         if (other instanceof ReplyNumberVendorMessage) {
             GUID myGuid = new GUID(getGUID());
@@ -119,6 +120,7 @@ public final class ReplyNumberVendorMessage extends AbstractVendorMessage {
 
     /** Overridden purely for stats handling.
      */
+    @Override
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
     }

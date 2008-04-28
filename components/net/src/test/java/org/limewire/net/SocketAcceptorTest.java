@@ -24,9 +24,11 @@ public class SocketAcceptorTest extends BaseTestCase {
         return buildTestSuite(SocketAcceptorTest.class);
     }
     
+    @Override
     public void setUp() throws Exception {
     }
     
+    @Override
     public void tearDown() throws Exception {
         if (acceptor != null) {
             acceptor.bind(0);

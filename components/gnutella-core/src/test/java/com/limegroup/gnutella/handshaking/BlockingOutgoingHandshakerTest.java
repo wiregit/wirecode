@@ -166,6 +166,7 @@ public class BlockingOutgoingHandshakerTest extends LimeTestCase {
     }
         
     private static class AddressedSocket extends Socket {
+        @Override
         public InetAddress getInetAddress() {
             try {
                 return InetAddress.getByName("127.0.0.1");

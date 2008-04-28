@@ -234,6 +234,7 @@ public class FileManagerEvent extends EventObject {
         return isFileManagerLoading() || isFileManagerLoaded();
     }
     
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder("FileManagerEvent: [event=").append(type);
         

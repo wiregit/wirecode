@@ -37,6 +37,7 @@ public final class PongCacherImplTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    @Override
     public void setUp() throws Exception {
         context = new Mockery();
         connectionServices = context.mock(ConnectionServices.class);

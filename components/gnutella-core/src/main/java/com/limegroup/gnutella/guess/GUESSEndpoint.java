@@ -21,6 +21,7 @@ public final class GUESSEndpoint extends IpPortImpl {
         
     /** Returns true if two GUESSEndpoint objects are equal.
      */
+    @Override
     public boolean equals(Object o) {
         boolean retBool = false;
         if (o instanceof GUESSEndpoint) {
@@ -32,6 +33,7 @@ public final class GUESSEndpoint extends IpPortImpl {
             
     /** Returns this' hashCode.
      */
+    @Override
     public int hashCode() {
         int result = 79;
         result = 37*result + getAddress().hashCode();
@@ -39,6 +41,7 @@ public final class GUESSEndpoint extends IpPortImpl {
         return result;
     }
 
+    @Override
     public String toString() {
         return "GUESSEndpoint: " + getInetAddress() + ":" + getPort();
     }

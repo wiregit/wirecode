@@ -265,6 +265,7 @@ public final class MessagesSupportedVendorMessage extends AbstractVendorMessage 
     }
     
     // override super
+    @Override
     public boolean equals(Object other) {
         // basically two of these messages are the same if the support the same
         // messages
@@ -278,6 +279,7 @@ public final class MessagesSupportedVendorMessage extends AbstractVendorMessage 
     
     
     // override super
+    @Override
     public int hashCode() {
         return 17*_messagesSupported.hashCode();
     }
@@ -341,6 +343,7 @@ public final class MessagesSupportedVendorMessage extends AbstractVendorMessage 
                 return -1;
         }
 
+        @Override
         public boolean equals(Object other) {
             if (other instanceof SupportedMessageBlock) {
                 SupportedMessageBlock vmp = (SupportedMessageBlock) other;
@@ -352,6 +355,7 @@ public final class MessagesSupportedVendorMessage extends AbstractVendorMessage 
             return false;
         }
 
+        @Override
         public int hashCode() {
             return _hashCode;
         }
@@ -369,6 +373,7 @@ public final class MessagesSupportedVendorMessage extends AbstractVendorMessage 
 
     /** Overridden purely for stats handling.
      */
+    @Override
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
     }

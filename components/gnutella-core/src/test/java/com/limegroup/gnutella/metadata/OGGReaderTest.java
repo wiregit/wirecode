@@ -25,6 +25,7 @@ public class OGGReaderTest extends AudioTestBase {
         return buildTestSuite(OGGReaderTest.class);
     }
     
+    @Override
     public void setUp(){
         Injector injector = LimeTestUtils.createInjector();
         metaDataFactory = injector.getInstance(MetaDataFactory.class);

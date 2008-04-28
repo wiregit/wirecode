@@ -108,6 +108,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
     
     /** Clears the Trie (i.e. removes all elements). */
+    @Override
     public void clear() {
         root.key = null;
         root.bitIndex = -1;
@@ -123,11 +124,13 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
     
     /** Returns true if the Trie is empty */
+    @Override
     public boolean isEmpty() {
         return size == 0;
     }
     
     /** Returns the number items in the Trie */
+    @Override
     public int size() {
         return size;
     }
@@ -154,6 +157,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * exists it will be replaced. In the latter case it will return
      * the old value.
      */
+    @Override
     public V put(K key, V value) {
         if (key == null) {
             throw new NullPointerException("Key cannot be null");
@@ -265,6 +269,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * Returns the Value whose Key equals our lookup Key
      * or null if no such key exists.
      */
+    @Override
     public V get(Object k) {
         TrieEntry<K, V> entry = getEntry(k);
         return entry != null ? entry.getValue() : null;
@@ -568,6 +573,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * This may throw ClassCastException if the object is not
      * of type K.
      */
+    @Override
     public boolean containsKey(Object k) {
         K key = asKey(k);
         if(key == null)
@@ -579,6 +585,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
     
     /** Returns true if this Trie contains the specified value. */
+    @Override
     public boolean containsValue(Object o) {
         for(V v : values())
             if(valEquals(v, o))
@@ -595,6 +602,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      * @param k the Key to delete
      * @return Returns the deleted Value
      */
+    @Override
     public V remove(Object k) {
         K key = asKey(k);
         if(key == null)
@@ -945,6 +953,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
     
     /** Returns each entry as a string. */
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("Trie[").append(size()).append("]={\n");
@@ -1058,6 +1067,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             this.predecessor = this;
         }
         
+        @Override
         public boolean equals(Object o) {
             if(o == this) {
                 return true;
@@ -1119,6 +1129,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return !isInternalNode();
         }
 
+        @Override
         public String toString() {
             StringBuilder buffer = new StringBuilder();
             
@@ -1399,6 +1410,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
               (firstExcluded == null ? null : firstExcluded.key);
         }
 
+        @Override
         public boolean hasNext() {
             return next != null && next.key != firstExcludedKey;
         }
@@ -1432,10 +1444,12 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     private transient volatile Set<Map.Entry<K,V>>  entrySet = null;
     
     private class EntrySet extends AbstractSet<Map.Entry<K,V>> {
+        @Override
         public Iterator<Map.Entry<K,V>> iterator() {
             return newEntryIterator();
         }
         
+        @Override
         public boolean contains(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
@@ -1444,16 +1458,19 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return candidate != null && candidate.equals(o);
         }
         
+        @Override
         public boolean remove(Object o) {
             int size = size();
             PatriciaTrie.this.remove(o);
             return size != size();
         }
         
+        @Override
         public int size() {
             return size;
         }
         
+        @Override
         public void clear() {
             PatriciaTrie.this.clear();
         }
@@ -1470,26 +1487,32 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      *
      * @return a set view of the keys contained in this map.
      */
+    @Override
     public Set<K> keySet() {
         Set<K> ks = keySet;
         return (ks != null ? ks : (keySet = new KeySet()));
     }
 
     private class KeySet extends AbstractSet<K> {
+        @Override
         public Iterator<K> iterator() {
             return newKeyIterator();
         }
+        @Override
         public int size() {
             return size;
         }
+        @Override
         public boolean contains(Object o) {
             return containsKey(o);
         }
+        @Override
         public boolean remove(Object o) {
             int size = size();
             PatriciaTrie.this.remove(o);
             return size != size();
         }
+        @Override
         public void clear() {
             PatriciaTrie.this.clear();
         }
@@ -1506,6 +1529,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
      *
      * @return a collection view of the values contained in this map.
      */
+    @Override
     public Collection<V> values() {
         Collection<V> vs = values;
         return (vs != null ? vs : (values = new Values()));
@@ -1517,18 +1541,23 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
     }
 
     private class Values extends AbstractCollection<V> {
+        @Override
         public Iterator<V> iterator() {
             return newValueIterator();
         }
+        @Override
         public int size() {
             return size;
         }
+        @Override
         public boolean contains(Object o) {
             return containsValue(o);
         }
+        @Override
         public void clear() {
             PatriciaTrie.this.clear();
         }
+        @Override
         public boolean remove(Object o) {
             for(Iterator<V> i =  iterator(); i.hasNext(); ) {
                 V v = i.next();
@@ -1891,6 +1920,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             fromInclusive = false;
         }
         
+        @Override
         public K firstKey() {
             fixup();
             TrieEntry<K,V> e;
@@ -1906,6 +1936,7 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return first;
         }
 
+        @Override
         public K lastKey() {
             fixup();
             TrieEntry<K,V> e;
@@ -1921,18 +1952,22 @@ public class PatriciaTrie<K, V> extends AbstractMap<K, V> implements Trie<K, V>,
             return last;
         }
         
+        @Override
         protected boolean inRange(K key) {
             return keyAnalyzer.isPrefix(prefix, offset, length, key);
         }
 
+        @Override
         protected boolean inRange2(K key) {
             return keyAnalyzer.isPrefix(prefix, offset, length, key);
         }
         
+        @Override
         protected boolean inToRange(K key, boolean forceInclusive) {
             return keyAnalyzer.isPrefix(prefix, offset, length, key);
         }
         
+        @Override
         protected boolean inFromRange(K key, boolean forceInclusive) {
             return keyAnalyzer.isPrefix(prefix, offset, length, key);
         }

@@ -58,6 +58,7 @@ public class UpdateCollectionImpl implements UpdateCollection {
     /**
      * A string rep of the collection.
      */
+    @Override
     public String toString() {
         return "Update Collection, id: " + collectionId + ", timestamp: " + collectionTimestamp +
                ", data: " + updateDataList;

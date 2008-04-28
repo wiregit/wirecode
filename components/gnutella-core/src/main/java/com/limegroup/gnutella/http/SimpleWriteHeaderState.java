@@ -21,6 +21,7 @@ public class SimpleWriteHeaderState extends WriteHeadersIOState {
         this.headers = headers;
     }
 
+    @Override
     protected ByteBuffer createOutgoingData() throws IOException {
         StringBuilder sb = new StringBuilder(connectLine.length() + headers.size() * 25);
         sb.append(connectLine).append("\r\n");
@@ -30,6 +31,7 @@ public class SimpleWriteHeaderState extends WriteHeadersIOState {
         return ByteBuffer.wrap(sb.toString().getBytes()); // TODO: conversion?
     }
 
+    @Override
     protected void processWrittenHeaders() throws IOException {
         // does nothing.
     }

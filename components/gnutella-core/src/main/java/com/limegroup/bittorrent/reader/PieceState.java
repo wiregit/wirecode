@@ -30,7 +30,8 @@ class PieceState extends BTReadMessageState implements NECallable<BTPiece> {
 	/** Whether we are expecting someone to write our data to disk */
 	private boolean writeExpected;
 	
-	public BTReadMessageState addData() throws BadBTMessageException {
+	@Override
+    public BTReadMessageState addData() throws BadBTMessageException {
 		// if we're expecting disk write, do nothing.
 		if (writeExpected)
 			return null;
@@ -86,7 +87,8 @@ class PieceState extends BTReadMessageState implements NECallable<BTPiece> {
 		return null;
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		return "Piece "+complete + 
 		" offset "+currentOffset+
 		" welcome "+welcome+

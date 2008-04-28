@@ -75,6 +75,7 @@ public final class AddressSecurityToken extends AbstractSecurityToken {
         return code;
     }
     
+    @Override
     protected byte [] getFromMAC(byte [] key, TokenData ignored) {
         for (int i = key.length - 1; i >= 0; --i) {
             // The old prepareForNetwork() seemed to leave cobbs encoding to get
@@ -97,6 +98,7 @@ public final class AddressSecurityToken extends AbstractSecurityToken {
         return isFor(new AddressTokenData(ip, port));
     }
     
+    @Override
     public int hashCode() {
        return _hashCode;
     }
@@ -104,6 +106,7 @@ public final class AddressSecurityToken extends AbstractSecurityToken {
     /** Returns a String with the <code>AddressSecurityToken</code> represented 
      * in hexadecimal.
      */
+    @Override
     public String toString() {
         return "{AddressSecurityToken: " + (new BigInteger(1, getBytes())).toString(16) + "}";
     }
@@ -120,6 +123,7 @@ public final class AddressSecurityToken extends AbstractSecurityToken {
                key.length <= MAX_QK_SIZE_IN_BYTES;
     }
     
+    @Override
     protected boolean isValidBytes(byte [] key) {
         return isValidSecurityTokenBytes(key);
     }

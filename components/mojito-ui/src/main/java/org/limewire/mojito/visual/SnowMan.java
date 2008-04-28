@@ -48,6 +48,7 @@ class SnowMan extends Painter {
         this.nodeId = nodeId;
     }
     
+    @Override
     public void paint(Component c, Graphics2D g2) {
         int width = c.getWidth();
         int height = c.getHeight();
@@ -74,6 +75,7 @@ class SnowMan extends Painter {
         g2.fill(dot);
     }
     
+    @Override
     public void handle(EventType type, KUID nodeId, SocketAddress dst, OpCode opcode, boolean request) {
         if (nodeId == null) {
             return;
@@ -84,6 +86,7 @@ class SnowMan extends Painter {
         }
     }
     
+    @Override
     public void clear() {
         synchronized (nodes) {
             nodes.clear();

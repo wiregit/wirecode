@@ -31,10 +31,12 @@ public class LongInterval extends Range implements Serializable {
         this(singleton, singleton);
     }
     
+    @Override
     public final long getLow() {
         return low;
     }
     
+    @Override
     public final long getHigh() {
         return high;
     }
@@ -42,6 +44,7 @@ public class LongInterval extends Range implements Serializable {
     /* (non-Javadoc)
      * @see org.limewire.collection.Range#toBytes()
      */
+    @Override
     public byte [] toBytes() {
         if (isLong()) {
             byte [] res = new byte[10];
@@ -57,6 +60,7 @@ public class LongInterval extends Range implements Serializable {
     /* (non-Javadoc)
      * @see org.limewire.collection.Range#toBytes(byte[], int)
      */
+    @Override
     public void toBytes(byte [] dest, int offset) {
         if (!isLong()) {
             toBytes8(dest, offset);
@@ -79,6 +83,7 @@ public class LongInterval extends Range implements Serializable {
         ByteUtils.int2beb((int)high,dest,offset+4);
     }
     
+    @Override
     public final boolean isLong() {
         // if intervals are properly constructed through the Range factory
         // method this would not happen, but just in case we check.

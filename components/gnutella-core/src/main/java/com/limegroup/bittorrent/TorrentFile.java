@@ -23,7 +23,8 @@ public class TorrentFile extends File {
 		end = -1; 
 	}
 	
-	public long length() {
+	@Override
+    public long length() {
 		return length;
 	}
 	

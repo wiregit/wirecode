@@ -33,6 +33,7 @@ public class DelayedBufferWriterTest extends BaseTestCase {
         return buildTestSuite(DelayedBufferWriterTest.class);
     }
 
+    @Override
     public void setUp() throws Exception {
         source = new WriteBufferChannel();
         sink = new WriteBufferChannel();

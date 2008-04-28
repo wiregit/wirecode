@@ -56,6 +56,7 @@ public final class IntSetting extends AbstractNumberSetting<Integer> {
      * @param sValue property string value
      *
      */
+    @Override
     protected void loadValue(String sValue) {
         try {
             value = Integer.parseInt(sValue.trim());
@@ -64,6 +65,7 @@ public final class IntSetting extends AbstractNumberSetting<Integer> {
         }
     }
     
+    @Override
     protected Comparable<Integer> convertToComparable(String value) {
         return new Integer(value);
     }

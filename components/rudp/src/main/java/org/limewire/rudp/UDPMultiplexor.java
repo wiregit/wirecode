@@ -111,6 +111,7 @@ public class UDPMultiplexor extends AbstractSelector {
             context.getTransportListener().eventPending();
 	}
 
+    @Override
     protected void implCloseSelector() throws IOException {
         throw new IllegalStateException("should never be closed.");
     }
@@ -120,6 +121,7 @@ public class UDPMultiplexor extends AbstractSelector {
      * If we've already stored over the limit of channels, this will store
      * the channel in a temporary list to be cancelled on the next selection.
      */
+    @Override
     protected synchronized SelectionKey register(AbstractSelectableChannel ch, int ops, Object att) {
         int connID;
         
@@ -159,6 +161,7 @@ public class UDPMultiplexor extends AbstractSelector {
     /**
      * Returns all {@link SelectionKey SelectionKeys} this Selector is currently in control of.
      */
+    @Override
     public Set<SelectionKey> keys() {
         UDPSocketChannel[] channels = _channels;
         Set<SelectionKey> keys = new HashSet<SelectionKey>();
@@ -173,19 +176,23 @@ public class UDPMultiplexor extends AbstractSelector {
         return keys;
     }
 
+    @Override
     public int select() throws IOException {
         throw new UnsupportedOperationException("blocking select not supported");
     }
 
+    @Override
     public int select(long timeout) throws IOException {
         throw new UnsupportedOperationException("blocking select not supported");
     }
 
+    @Override
     public Set<SelectionKey> selectedKeys() {
         return selectedKeys;
     }
 
     /** Polls through all available channels and returns those that are ready. */
+    @Override
     public int selectNow() throws IOException {
         UDPSocketChannel[] array = _channels;
         UDPSocketChannel[] removed = null;
@@ -244,6 +251,7 @@ public class UDPMultiplexor extends AbstractSelector {
         return selectedKeys.size();
     }
 
+    @Override
     public Selector wakeup() {
         // Does nothing, since this never blocks.
         return this;

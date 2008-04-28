@@ -19,6 +19,7 @@ public class ChatManagerTest extends BaseTestCase {
         super(name);
     }
 
+    @Override
     protected void setUp() throws Exception {
         address = InetAddress.getByAddress(new byte[] { 1, 2, 3, 4 });
     }

@@ -24,15 +24,18 @@ public class BTInterested extends BTMessage {
 		super(INTERESTED);
 	}
 
-	public ByteBuffer getPayload() {
+	@Override
+    public ByteBuffer getPayload() {
 		return EMPTY_PAYLOAD;
 	}
 
-	public boolean isUrgent() {
+	@Override
+    public boolean isUrgent() {
 		return true;
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		return "BTInterested" ;
 	}
 

@@ -636,6 +636,7 @@ public class PingReplyTest extends LimeTestCase {
         
         // a pong carrying invalid port
         e = new Endpoint("1.2.3.4",5) {
+            @Override
             public int getPort() {
                 return 0;
             }
@@ -1103,6 +1104,7 @@ public class PingReplyTest extends LimeTestCase {
                     ipFilter, connectionCheckerManager, pingRequestFactory, networkInstanceUtils);
         }
         
+        @Override
         public int getNumFreeNonLeafSlots() {
             return NUM_FREE_NON_LEAF_SLOTS != 0 ? NUM_FREE_NON_LEAF_SLOTS : super.getNumFreeNonLeafSlots(); 
         }
@@ -1111,6 +1113,7 @@ public class PingReplyTest extends LimeTestCase {
             NUM_FREE_NON_LEAF_SLOTS = numFreeNonLeafSlots;
         }
         
+        @Override
         public int getNumFreeLeafSlots() {
             return NUM_FREE_LEAF_SLOTS != 0 ? NUM_FREE_LEAF_SLOTS : super.getNumFreeLeafSlots();
         }

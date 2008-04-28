@@ -21,10 +21,12 @@ public final class VersionUtilsTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
     public void setUp() {
         storedJavaVersion = System.getProperty("java.version");
     }
     
+    @Override
     public void tearDown() {
         setJavaVersion(storedJavaVersion);
     }

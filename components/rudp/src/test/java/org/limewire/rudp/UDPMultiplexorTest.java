@@ -185,6 +185,7 @@ public class UDPMultiplexorTest extends BaseTestCase {
             super((SelectorProvider)null, context);
         }
         
+        @Override
         UDPConnectionProcessor getProcessor() {
             return stubProcessor;
         }
@@ -214,6 +215,7 @@ public class UDPMultiplexorTest extends BaseTestCase {
             super(channel, context);
         }
         
+        @Override
         protected int readyOps() {
             return readyOps;
         }
@@ -222,6 +224,7 @@ public class UDPMultiplexorTest extends BaseTestCase {
             this.readyOps = readyOps;
         }
 
+        @Override
         protected void handleMessage(RUDPMessage msg) {
 			this.msg = msg;
 		}

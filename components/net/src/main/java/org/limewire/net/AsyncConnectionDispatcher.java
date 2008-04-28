@@ -105,14 +105,17 @@ public class AsyncConnectionDispatcher extends AbstractChannelInterestReader {
         }
     }
     
+    @Override
     public int read(ByteBuffer dst) {
         return BufferUtils.transfer(buffer, dst, false);
     }
 
+    @Override
     public long read(ByteBuffer [] dst) {
         return BufferUtils.transfer(buffer, dst, 0, dst.length, false);
     }
     
+    @Override
     public long read(ByteBuffer [] dst, int offset, int length) {
         return BufferUtils.transfer(buffer, dst, offset, length, false);
     }

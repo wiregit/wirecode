@@ -50,6 +50,7 @@ public class RequeryManagerTest extends LimeTestCase {
     
     private URN sha1Urn;
     
+    @Override
     public void setUp() throws Exception {
         DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
         RequeryManager.NO_DELAY = true;
@@ -493,6 +494,7 @@ public class RequeryManagerTest extends LimeTestCase {
         private volatile DHTEventListener listener;
         private volatile boolean on;
         
+        @Override
         public void addEventListener(DHTEventListener listener) {
             this.listener = listener;
         }

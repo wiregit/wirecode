@@ -53,6 +53,7 @@ public class RemoteHostData {
 
     //////////////////hashtable  methods///////////////
 
+    @Override
     public boolean equals(Object o) {
         if(this == o)
             return true;
@@ -63,6 +64,7 @@ public class RemoteHostData {
                 Arrays.equals(_clientGUID, other._clientGUID) );
     }
 
+    @Override
     public int hashCode() {
         if(_hashcode == 0) {
             int result = 17;

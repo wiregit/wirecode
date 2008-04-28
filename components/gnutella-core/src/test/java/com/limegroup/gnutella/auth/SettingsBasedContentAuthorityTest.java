@@ -70,6 +70,7 @@ public class SettingsBasedContentAuthorityTest extends LimeTestCase {
         final int[] randoms = new int[] { 0, 2, 1, 0, 1, 0, 0, 1, 2, 2 };
         
         SettingsBasedContentAuthority auth = new SettingsBasedContentAuthority(ipPortContentAuthorityFactory) {
+            @Override
             public Random newRandom() {
                 return new StubRandom(randoms);
             }
@@ -105,6 +106,7 @@ public class SettingsBasedContentAuthorityTest extends LimeTestCase {
             this.rnds = rnds;
         }
         
+        @Override
         public int nextInt(int i) {
             return rnds[next++];
         }

@@ -76,6 +76,7 @@ public class PipedSocketFactory {
             this.remote = remote;
         }
 
+        @Override
         public InetAddress getInetAddress() {
             try {
                 return InetAddress.getByName(remote);
@@ -84,6 +85,7 @@ public class PipedSocketFactory {
             }
         }
 
+        @Override
         public InetAddress getLocalAddress() {
             try {
                 return InetAddress.getByName(local);

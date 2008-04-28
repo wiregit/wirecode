@@ -38,6 +38,7 @@ class UrlRemoteFileDescImpl extends RemoteFileDescImpl implements RemoteFileDesc
      * Returns the URL specified at construction time, which might be totally
      * independent of getName()/getIndex().
      */
+    @Override
     public URL getUrl() {
         return _url;
     }

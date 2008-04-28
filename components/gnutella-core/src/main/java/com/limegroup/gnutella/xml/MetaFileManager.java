@@ -51,6 +51,7 @@ public class MetaFileManager extends FileManagerImpl {
      * 
      * Used to search XML information in addition to normal searches.
      */
+    @Override
     public synchronized Response[] query(QueryRequest request) {
         Response[] result = super.query(request);
 
@@ -69,6 +70,7 @@ public class MetaFileManager extends FileManagerImpl {
     /**
      * Determines if this file has a valid XML match.
      */
+    @Override
     protected boolean isValidXMLMatch(Response r, LimeXMLDocument doc) {
         return LimeXMLUtils.match(r.getDocument(), doc, true);
     }
@@ -78,6 +80,7 @@ public class MetaFileManager extends FileManagerImpl {
      * Currently only includes XML if the request desires it or if the request
      * wants an out of band reply.
      */
+    @Override
     protected boolean shouldIncludeXMLInResponse(QueryRequest qr) {
         return qr.desiresXMLResponses() || qr.desiresOutOfBandReplies();
     }
@@ -98,6 +101,7 @@ public class MetaFileManager extends FileManagerImpl {
      * @param fd the <tt>FileDesc</tt> that provides access to the
      *        <tt>LimeXMLDocuments</tt> to add to the response
      */
+    @Override
     protected void addXMLToResponse(Response response, FileDesc fd) {
         List<LimeXMLDocument> docs = fd.getLimeXMLDocuments();
         if (docs.size() == 0)
@@ -121,6 +125,7 @@ public class MetaFileManager extends FileManagerImpl {
      * that the existing metadata is the one that's added, short-circuiting any
      * infinite loops.
      */
+    @Override
     public void fileChanged(File f) {
         if (LOG.isTraceEnabled())
             LOG.debug("File Changed: " + f);
@@ -263,6 +268,7 @@ public class MetaFileManager extends FileManagerImpl {
     /**
      * Notification that FileManager loading is starting.
      */
+    @Override
     protected void loadStarted(int revision) {
         fileManagerController.setAnnotateEnabled(false);
 
@@ -279,6 +285,7 @@ public class MetaFileManager extends FileManagerImpl {
     /**
      * Notification that FileManager loading is finished.
      */
+    @Override
     protected void loadFinished(int revision) {
         // save ourselves to disk every minute
         if (saver == null) {
@@ -299,6 +306,7 @@ public class MetaFileManager extends FileManagerImpl {
     /**
      * Notification that a single FileDesc has its URNs.
      */
+    @Override
     protected void loadFile(FileDesc fd, File file, List<? extends LimeXMLDocument> metadata,
             Set<? extends URN> urns) {
         super.loadFile(fd, file, metadata, urns);
@@ -318,6 +326,7 @@ public class MetaFileManager extends FileManagerImpl {
 
     }
 
+    @Override
     protected void save() {
         if (isLoadFinished()) {
             Collection<LimeXMLReplyCollection> replies = fileManagerController.getCollections();
@@ -360,6 +369,7 @@ public class MetaFileManager extends FileManagerImpl {
      * build the QRT table call to super.buildQRT and add XML specific Strings
      * to QRT
      */
+    @Override
     protected void buildQRT() {
         super.buildQRT();
         for (String string : getXMLKeyWords())

@@ -185,6 +185,7 @@ public class PassiveDHTNodeController extends AbstractDHTController {
      * Note: Although a passive node does not have accurate info in its RT 
      * (except for direct leafs), we still return nodes. 
      */
+    @Override
     public List<IpPort> getActiveDHTNodes(int maxNodes) {
         if(!isRunning() || !getMojitoDHT().isBootstrapped()) {
             return Collections.emptyList();
@@ -196,6 +197,7 @@ public class PassiveDHTNodeController extends AbstractDHTController {
     /**
      * Handle connection-specific lifecycle events only. 
      */
+    @Override
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
         //handle connection specific events
         Connection c = evt.getConnection();

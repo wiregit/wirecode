@@ -67,6 +67,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.LimeTestCase {
             _socket = new DatagramSocket();
             _socket.setSoTimeout(1000);
             Thread listener = new Thread() {
+                    @Override
                     public void run() {
                         listenLoop();
                     }

@@ -20,6 +20,7 @@ public class FECUtilsImplTest extends LimeTestCase {
     
     private FECUtils fecUtils;
     
+    @Override
     public void setUp() throws Exception {
         Injector injector = LimeTestUtils.createInjector();
         fecUtils = injector.getInstance(FECUtils.class);

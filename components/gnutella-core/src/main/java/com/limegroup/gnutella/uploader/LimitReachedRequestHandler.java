@@ -79,6 +79,7 @@ public class LimitReachedRequestHandler extends SimpleNHttpRequestHandler {
         return null;
     }
 
+    @Override
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
         httpHeaderUtils.addProxyHeader(response);

@@ -32,19 +32,23 @@ public class PromotionBinderRequestorImpl extends AbstractPromotionBinderRequest
         this.applicationServices = applicationServices;
     }
  
+    @Override
     protected void error(Exception e) {
         LOG.error("Error processing promotion binder", e);
     }
 
+    @Override
     protected String getUserAgent() {
         return LimeWireUtils.getHttpServer();
     }
 
+    @Override
     protected InputStream makeRequest(final HttpPost post, HttpParams params)throws HttpException, IOException {
         HttpResponse response = exe.execute(post);
         return response.getEntity().getContent();
     }
     
+    @Override
     public String alterUrl(String url) {
         return LimeWireUtils.addLWInfoToUrl(url, applicationServices.getMyGUID());
     } 

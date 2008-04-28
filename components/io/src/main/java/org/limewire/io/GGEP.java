@@ -619,6 +619,7 @@ public class GGEP {
     /** @return True if the two Maps that represent header/data pairs are
      *  equivalent.
      */
+    @Override
     public boolean equals(Object o) {
 		if(o == this) return true;
         if (! (o instanceof GGEP))
@@ -645,7 +646,8 @@ public class GGEP {
     }
                 
 	// overrides Object.hashCode to be consistent with equals
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		if(hashCode == 0) {
 			hashCode = 37 * _props.hashCode();
 		}

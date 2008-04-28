@@ -119,6 +119,7 @@ public final class UDPConnectBackVendorMessage extends AbstractVendorMessage {
 
     /** Overridden purely for stats handling.
      */
+    @Override
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
     }

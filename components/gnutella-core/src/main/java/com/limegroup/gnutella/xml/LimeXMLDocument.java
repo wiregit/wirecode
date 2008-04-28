@@ -514,7 +514,8 @@ public class LimeXMLDocument implements StringLookup {
 	 * @return <tt>true</tt> if the objects are equal, <tt>false</tt>
 	 *  otherwise
 	 */
-	public boolean equals(Object o) {
+	@Override
+    public boolean equals(Object o) {
 		if(o == this)
 		    return true;
 		if(o == null)
@@ -540,7 +541,8 @@ public class LimeXMLDocument implements StringLookup {
 	 *
 	 * @return a hashcode for this object for use in hash-based collections
 	 */
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		if(hashCode == 0) {
 			int result = 17;
 			if(fieldToValue != null)
@@ -559,7 +561,8 @@ public class LimeXMLDocument implements StringLookup {
 	/**
 	 * Returns the XML identifier for the string.
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 	    return getXMLString();
     }
     

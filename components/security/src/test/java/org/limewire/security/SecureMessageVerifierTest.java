@@ -57,6 +57,7 @@ public class SecureMessageVerifierTest extends BaseTestCase {
     /** Tests a bad message doesn't secure. */
     public void testFails() throws Exception {
         SecureMessage m1 = new StubSecureMessage() {
+            @Override
             public void updateSignatureWithSecuredBytes(Signature signature) throws SignatureException {
                 super.updateSignatureWithSecuredBytes(signature);
                 signature.update(new byte[100]);
@@ -87,6 +88,7 @@ public class SecureMessageVerifierTest extends BaseTestCase {
     public void testNoPublicKey() throws Exception {
         SecureMessage m1 = new StubSecureMessage();
         SecureMessageVerifier vf = new SecureMessageVerifierImpl("","") {
+            @Override
             protected PublicKey createPublicKey() {
                 return null;
             }
@@ -102,6 +104,7 @@ public class SecureMessageVerifierTest extends BaseTestCase {
     /** Tests attempting to secure with a different signature. */
     public void testWrongSignature() throws Exception {
         SecureMessage m1 = new StubSecureMessage() {
+            @Override
             public byte[] getSecureSignature() {
                 byte[] sig = super.getSecureSignature();
                 sig[0]++;
@@ -141,10 +144,12 @@ public class SecureMessageVerifierTest extends BaseTestCase {
             signature = sig.sign();
         }
 
+        @Override
         public byte[] getSecureSignature() {
             return signature;
         }
 
+        @Override
         public void updateSignatureWithSecuredBytes(Signature signature) throws SignatureException {
             signature.update(data);
         }

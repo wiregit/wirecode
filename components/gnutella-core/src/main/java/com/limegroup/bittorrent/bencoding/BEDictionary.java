@@ -14,19 +14,23 @@ class BEDictionary extends BEAbstractCollection<Map<String, Object>> {
         super(chan);
     }
     
+    @Override
     public int getType() {
         return DICTIONARY;
     }
     
+    @Override
     protected Map<String, Object> createCollection() {
         return new HashMap<String, Object>();
     }
     
+    @Override
     protected void add(Object o) {
         BEEntry e = (BEEntry)o;
         result.put(e.key, e.value);
     }
     
+    @Override
     protected Token<?> getNewElement() {
         return new BEEntry(chan);
     }
@@ -52,6 +56,7 @@ class BEDictionary extends BEAbstractCollection<Map<String, Object>> {
             result = this;
         }
         
+        @Override
         public void handleRead() throws IOException {
             if (keyToken == null && key == null) {
                 Token t = getNextToken(chan);
@@ -101,10 +106,12 @@ class BEDictionary extends BEAbstractCollection<Map<String, Object>> {
                 throw new IllegalStateException("token is done - don't read to it "+key+" "+value);
         } 
         
+        @Override
         protected boolean isDone() {
             return key != null && value != null; 
         }
         
+        @Override
         public Object getResult() {
             if (lastEntry)
                 return Token.TERMINATOR;

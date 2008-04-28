@@ -49,6 +49,7 @@ public class LimeTestSuite extends TestSuite {
      * Before & after tests are run, it sets the error callback
      * to itself to catch any stray errors.
      */
+    @Override
     public void run(TestResult result) {
         _beforeTests = true;
         _testResult = result;
@@ -220,7 +221,8 @@ public class LimeTestSuite extends TestSuite {
             "LimeTestSuite - Before Test Errors" :
             "LimeTestSuite - After Test Errors";
     	return new TestCase(testName) {
-    		protected void runTest() {
+    		@Override
+            protected void runTest() {
     		    if ( thrown instanceof AssertionFailedError )
     		        result.addFailure(this, (AssertionFailedError)thrown);
     		    else
@@ -234,7 +236,8 @@ public class LimeTestSuite extends TestSuite {
 	 */
 	public static Test warning(final String message) {
 		return new TestCase("warning") {
-			protected void runTest() {
+			@Override
+            protected void runTest() {
 				fail(message);
 			}
 		};
@@ -245,9 +248,12 @@ public class LimeTestSuite extends TestSuite {
 	 */
     public static Test warning(final String message, final Throwable thrown) {
 		return new BaseTestCase("warning") {
-		    public void preSetUp() {}
-		    public void postTearDown() {}
-			protected void runTest() {			    
+		    @Override
+            public void preSetUp() {}
+		    @Override
+            public void postTearDown() {}
+			@Override
+            protected void runTest() {			    
 				fail(message, thrown);
 			}
 		};

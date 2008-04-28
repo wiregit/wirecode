@@ -94,6 +94,7 @@ public class SettingsGroupManagerEvent {
         return group;
     }
     
+    @Override
     public String toString() {
         return type.toString();
     }

@@ -62,10 +62,12 @@ public class StatusCode implements Serializable, Comparable<StatusCode> {
         return code - other.code;
     }
     
+    @Override
     public int hashCode() {
         return code;
     }
     
+    @Override
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -76,6 +78,7 @@ public class StatusCode implements Serializable, Comparable<StatusCode> {
         return compareTo((StatusCode)o) == 0;
     }
     
+    @Override
     public String toString() {
         return code + ": " + description;
     }

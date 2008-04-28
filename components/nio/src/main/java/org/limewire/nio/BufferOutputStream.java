@@ -54,6 +54,7 @@ import org.limewire.nio.observer.WriteObserver;
     }
     
     /** Writes a single byte to the buffer. */
+    @Override
     public void write(int x) throws IOException {
         synchronized(LOCK) {
             waitImpl();
@@ -66,6 +67,7 @@ import org.limewire.nio.observer.WriteObserver;
     }
     
     /** Writes a chunk of data to the buffer */
+    @Override
     public void write(byte[] buf, int off, int len) throws IOException {
         synchronized(LOCK) {
             while(len > 0) {
@@ -83,6 +85,7 @@ import org.limewire.nio.observer.WriteObserver;
     }
     
     /** Forces all data currently in the buffer to be written to the channel. */
+    @Override
     public void flush() throws IOException {
         synchronized(LOCK) {
             // Since that adds no data to the buffer, we do not need to interest a write.
@@ -120,6 +123,7 @@ import org.limewire.nio.observer.WriteObserver;
     }
     
     /** Closes this InputStream & the Socket that it's associated with */
+    @Override
     public void close() {
         handler.shutdown();
     }

@@ -154,6 +154,7 @@ public final class LimeACKVendorMessage extends AbstractVendorMessage {
         return out.toByteArray();
     }
 
+    @Override
     public boolean equals(Object other) {
         if (other instanceof LimeACKVendorMessage) {
             LimeACKVendorMessage o = (LimeACKVendorMessage)other;
@@ -174,6 +175,7 @@ public final class LimeACKVendorMessage extends AbstractVendorMessage {
 
     /** Overridden purely for stats handling.
      */
+    @Override
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
     }

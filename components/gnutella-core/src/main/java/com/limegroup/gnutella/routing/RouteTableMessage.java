@@ -33,6 +33,7 @@ public abstract class RouteTableMessage extends AbstractMessage {
     }
 
 
+    @Override
     protected void writePayload(OutputStream out) throws IOException {
         out.write(variant);
         writePayloadData(out);

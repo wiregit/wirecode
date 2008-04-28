@@ -131,6 +131,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
                 return null;
             }
             
+            @Override
             public void handle(HttpRequest request, HttpResponse response,
                                HttpContext context) throws org.apache.http.HttpException,
                     IOException {

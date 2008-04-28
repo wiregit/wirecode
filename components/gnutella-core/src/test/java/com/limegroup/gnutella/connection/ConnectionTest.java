@@ -43,6 +43,7 @@ public class ConnectionTest extends LimeTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    @Override
     public void setUp() throws Exception {
         routedConnectionFactory = LimeTestUtils.createInjector().getInstance(RoutedConnectionFactory.class);
         
@@ -52,6 +53,7 @@ public class ConnectionTest extends LimeTestCase {
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
     }
     
+    @Override
     public void tearDown() throws Exception {
         ACCEPTOR.shutdown();
         

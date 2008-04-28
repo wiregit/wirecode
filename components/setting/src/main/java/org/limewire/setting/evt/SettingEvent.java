@@ -75,6 +75,7 @@ public class SettingEvent {
         return setting;
     }
     
+    @Override
     public String toString() {
         return type + ": " + setting;
     }

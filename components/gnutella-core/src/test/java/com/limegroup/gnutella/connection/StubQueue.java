@@ -19,6 +19,7 @@ public class StubQueue extends BasicQueue {
         startDropIn = i;
     }
     
+    @Override
     public void add(Message m) {
         if(size() > 0 && startDropIn-- <= 0 && numToDrop > 0) {
             numToDrop--;
@@ -29,6 +30,7 @@ public class StubQueue extends BasicQueue {
         super.add(m);
     }
     
+    @Override
     public Message removeNext() {
         while(size() > 0) {
             if(startDropIn-- <= 0 && numToDrop > 0) {
@@ -43,6 +45,7 @@ public class StubQueue extends BasicQueue {
         return super.removeNext();
     }
     
+    @Override
     public int resetDropped() { 
         int d = dropped;
         dropped = 0;
@@ -51,13 +54,16 @@ public class StubQueue extends BasicQueue {
         
     
     /** Returns the number of queued messages. */
+    @Override
     public int size() {
         return super.size();
     }
     
+    @Override
     public void resetCycle() {}
     
     /** Determines if this is empty. */
+    @Override
     public boolean isEmpty() {
         return super.isEmpty();
     }

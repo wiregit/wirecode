@@ -114,10 +114,12 @@ public interface StoreResponse extends ResponseMessage {
             return statusCode;
         }
         
+        @Override
         public int hashCode() {
             return primaryKey.hashCode() ^ secondaryKey.hashCode();
         }
         
+        @Override
         public boolean equals(Object o) {
             if (o == this) {
                 return true;
@@ -131,6 +133,7 @@ public interface StoreResponse extends ResponseMessage {
                     && statusCode.equals(other.statusCode);
         }
         
+        @Override
         public String toString() {
             return "PrimaryKey=" + primaryKey 
                         + ", secondaryKey=" + secondaryKey 

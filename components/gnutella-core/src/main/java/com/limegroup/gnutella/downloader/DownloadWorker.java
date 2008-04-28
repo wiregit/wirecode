@@ -369,6 +369,7 @@ public class DownloadWorker {
         }
 
         _downloader.consumeBody(new State() {
+            @Override
             protected void handleState(boolean success) {
                 if (!success)
                     handleRFDFailure();
@@ -452,6 +453,7 @@ public class DownloadWorker {
     private void beginDownload() {
         try {
             _downloader.doDownload(new State() {
+                @Override
                 protected void handleState(boolean success) {
                     if (success) {
                         _rfd.resetFailedCount();
@@ -518,6 +520,7 @@ public class DownloadWorker {
 
         if (shouldRequest) {
             _downloader.requestHashTree(_manager.getSha1Urn(), new State() {
+                @Override
                 protected void handleState(boolean success) {
                 }
             });
@@ -548,6 +551,7 @@ public class DownloadWorker {
         } else {
             _manager.removeQueuedWorker(this);
             _downloader.downloadThexBody(_manager.getSha1Urn(), new State() {
+                @Override
                 protected void handleState(boolean success) {
                     HashTree newTree = _downloader.getHashTree();
                     _manager.hashTreeRead(newTree);
@@ -1466,6 +1470,7 @@ public class DownloadWorker {
         return _downloader;
     }
 
+    @Override
     public String toString() {
         return _workerName + "[" + _currentState + "] -> " + _rfd;
     }
@@ -1565,6 +1570,7 @@ public class DownloadWorker {
          * Notification that the push succeeded. Starts the download if the
          * connection still exists.
          */
+        @Override
         public void handleConnect(Socket socket) {
             // LOG.debug(_rfd + " -- Handling connect from PushConnector");
             HTTPDownloader dl = httpDownloaderFactory.create(socket, _rfd, _commonOutFile,
@@ -1645,6 +1651,7 @@ public class DownloadWorker {
          * Upon successful connect, create the HTTPDownloader with the right
          * socket, and proceed to continue downloading.
          */
+        @Override
         public void handleConnect(Socket socket) {
             this.connectingSocket = null;
 

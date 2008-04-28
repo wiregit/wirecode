@@ -23,6 +23,7 @@ public class TestPredeterminedRandom extends Random {
      * 
      * @return a float from floatIterator,
      */
+    @Override
     public synchronized float nextFloat() {
         Float ret = (Float) floatIterator.next();
         return ret.floatValue();
@@ -35,6 +36,7 @@ public class TestPredeterminedRandom extends Random {
      * 
      * @return a float from floatIterator,
      */
+    @Override
     public synchronized int nextInt() {
         Integer ret = (Integer) intIterator.next();
         return ret.intValue();
@@ -47,6 +49,7 @@ public class TestPredeterminedRandom extends Random {
      * 
      * @return a long from longIterator
      */
+    @Override
     public synchronized long nextLong() {
         Long ret = (Long) longIterator.next();
         return ret.longValue();

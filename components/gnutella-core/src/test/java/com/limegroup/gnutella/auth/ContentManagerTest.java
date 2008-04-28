@@ -42,6 +42,7 @@ public class ContentManagerTest extends LimeTestCase {
 
     }
     
+    @Override
     public void setUp() throws Exception {
 		URN_1 = URN.createSHA1Urn(S_URN_1);
 		URN_2 = URN.createSHA1Urn(S_URN_2);

@@ -816,6 +816,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      * 
      * @see com.limegroup.gnutella.RoutedConnection#close()
      */
+    @Override
     protected void closeImpl() {
         IOUtils.close(deflater);
         IOUtils.close(inflater);
@@ -879,6 +880,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         }
     }
 
+    @Override
     public void processReadMessage(Message m) {
         super.processReadMessage(m);
         _connectionStats.addReceived();
@@ -947,6 +949,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     }
 
     // raise access for MessageReceiver
+    @Override
     public byte getSoftMax() {
         return super.getSoftMax();
     }
@@ -1111,6 +1114,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         send(pushRequest);
     }
 
+    @Override
     public void handleVendorMessage(VendorMessage vm) {
         // let Connection do as needed....
         super.handleVendorMessage(vm);

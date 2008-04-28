@@ -167,6 +167,7 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
          */
         class GiveKey extends HandlerWithCallback {
 
+            @Override
             public void handleRest(final Map<String, String> args, StringCallback cb) {
                 String publicKey = args.get(LWSDispatcherSupport.Parameters.PUBLIC);
                 if (publicKey == null) {
@@ -197,6 +198,7 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
             return RemoteServerImpl.getCommand(request);
         }
         
+        @Override
         protected boolean isAuthenticated() {
             // This doesn't matter
             return false;
@@ -222,16 +224,19 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
             this.ip = ip;
         }
 
+        @Override
         public boolean equals(final Object o) {
             if (!(o instanceof Pair)) return false;
             Pair that = (Pair) o;
             return this.key.equals(that.key) && this.ip.equals(that.ip);
         }
 
+        @Override
         public int hashCode() {
             return this.key.hashCode() << 16 + this.ip.hashCode();
         }
 
+        @Override
         public String toString() {
             return "<" + key + "," + ip + ">";
         }

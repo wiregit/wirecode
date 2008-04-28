@@ -29,6 +29,7 @@ public class I18NConvertTest extends BaseTestCase {
         return buildTestSuite(I18NConvertTest.class);
     }
 
+    @Override
     public void setUp() throws Exception {
         //read in a file and do the tests from there.
         FileInputStream fin = 
@@ -80,6 +81,7 @@ public class I18NConvertTest extends BaseTestCase {
         }
     }
     
+    @Override
     public void tearDown() throws Exception {
        // System.out.println("tear down");
         if(_last && _buf != null)

@@ -75,6 +75,7 @@ public class IPFilterTest extends LimeTestCase {
         hostileFilter = context.mock(IPFilter.class);
 
         Module m = new AbstractModule() {
+            @Override
             public void configure() {
                 bind(IPFilter.class).annotatedWith(Names.named("hostileFilter")).toInstance(hostileFilter);
             }

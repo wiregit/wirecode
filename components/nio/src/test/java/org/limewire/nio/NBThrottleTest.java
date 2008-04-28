@@ -36,7 +36,8 @@ public final class NBThrottleTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-	public void setUp() throws Exception {
+	@Override
+    public void setUp() throws Exception {
 	    THROTTLE = newNBThrottle(true, RATE, MILLIS_PER_TICK);
 	    
 	    for(int i = 0; i < DATA.length; i++)

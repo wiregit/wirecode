@@ -147,6 +147,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         List<RemoteFileDesc> results = new LinkedList<RemoteFileDesc>();
 
+        @Override
         public void handleQueryResult(RemoteFileDesc rfd, HostData data, Set alts) {
             results.add(rfd);
         }
@@ -159,14 +160,17 @@ public class SearchResultHandlerTest extends LimeTestCase {
     @Singleton
     private static class StubVerifier extends ResponseVerifierImpl {
 
+        @Override
         public synchronized boolean matchesQuery(byte[] guid, Response response) {
             return true;
         }
 
+        @Override
         public boolean isMandragoreWorm(byte[] guid, Response response) {
             return false;
         }
 
+        @Override
         public boolean matchesType(byte[] guid, Response response) {
             return true;
         } 

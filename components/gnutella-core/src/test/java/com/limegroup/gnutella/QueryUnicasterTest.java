@@ -82,6 +82,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
     public void setUp() throws Exception {
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
@@ -100,6 +101,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
         lifecycleManager.start();
     }
     
+    @Override
     protected void tearDown() throws Exception {
         lifecycleManager.shutdown();
     }
@@ -120,6 +122,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
         for (int i = 0; i < NUM_UDP_LOOPS; i++) {
             final int index = i;
             udpLoopers[i] = new Thread() {
+                    @Override
                     public void run() {
                         udpLoop(5000 + index);
                     }
@@ -219,6 +222,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.LimeTestCase
         for (int i = 0; i < NUM_UDP_LOOPS; i++) {
             final int index = i;
             udpLoopers[i] = new Thread() {
+                    @Override
                     public void run() {
                         udpLoop(5000 + index);      //  Bugfix: port 5000+i not 5500+i
                     }

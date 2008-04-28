@@ -173,6 +173,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
             return rfd;
         }
 
+        @Override
         public void handleQueryResult(RemoteFileDesc rfd,
                                       HostData data,
                                       Set locs) {

@@ -97,6 +97,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         return buildTestSuite(ManagedDownloaderTest.class);
     }
     
+    @Override
     public void setUp() throws Exception {
         doSetUp();
     }
@@ -132,6 +133,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         RequeryManager.NO_DELAY = false;
     }
 
+    @Override
     protected void tearDown() throws Exception {
         background.shutdown();
     }
@@ -700,14 +702,17 @@ public class ManagedDownloaderTest extends LimeTestCase {
         }
     	
     	public boolean _addedFailed,_addedSuccessfull;
-   		public void addFailedAltLoc(AlternateLocation loc) {
+   		@Override
+        public void addFailedAltLoc(AlternateLocation loc) {
    			_addedFailed = true;
 		}
-		public void addSuccessfulAltLoc(AlternateLocation loc) {
+		@Override
+        public void addSuccessfulAltLoc(AlternateLocation loc) {
 			_addedSuccessfull=true;
 		}
 		
-		public RemoteFileDesc getRemoteFileDesc() {
+		@Override
+        public RemoteFileDesc getRemoteFileDesc() {
 			return rfd;
 		}
 		
@@ -715,7 +720,8 @@ public class ManagedDownloaderTest extends LimeTestCase {
 			_stubFalts=doesIt;
 		}
 		
-		public boolean wantsFalts(){
+		@Override
+        public boolean wantsFalts(){
 			return _stubFalts;
 		}
     }
@@ -765,6 +771,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
             this.httpDownloader = httpDownloader;
         }
 
+        @Override
         public HTTPDownloader getDownloader() {
             return httpDownloader;
         }

@@ -61,7 +61,8 @@ public class SynMessageImpl extends RUDPMessageImpl implements SynMessage {
 		return _protocolVersionNumber; 
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return "SynMessage DestID:"+getConnectionID()+
 		  " SrcID:"+_senderConnectionID+" vNo:"+_protocolVersionNumber;
 	}

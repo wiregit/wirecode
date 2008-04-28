@@ -59,6 +59,7 @@ public class UDPHostCacheTest extends LimeTestCase {
         return buildTestSuite(UDPHostCacheTest.class);
     }
     
+    @Override
     public void setUp() throws Exception {
         final NetworkManagerStub networkManagerStub = new NetworkManagerStub();
         networkManagerStub.setAddress(new byte[] { 1, 1, 1, 1 });
@@ -504,6 +505,7 @@ public class UDPHostCacheTest extends LimeTestCase {
                     connectionServices, networkInstanceUtils);
         }
         
+        @Override
         protected boolean fetch(Collection<? extends ExtendedEndpoint> hosts) {
             if(doRealFetch) {
                 return super.fetch(hosts);
@@ -517,12 +519,14 @@ public class UDPHostCacheTest extends LimeTestCase {
             }
         }
         
+        @Override
         protected PingRequest getPing() {
             PingRequest pr = super.getPing();
             guid = pr.getGUID();
             return pr;
         }
         
+        @Override
         protected void decrementFailures() {
             if(doRealDecrement) {
                 super.decrementFailures();

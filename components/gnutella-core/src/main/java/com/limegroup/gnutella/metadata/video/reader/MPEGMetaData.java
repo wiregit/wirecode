@@ -31,6 +31,7 @@ public class MPEGMetaData extends VideoDataReader {
         super(f);
     }
 
+    @Override
     protected void parseFile(File f) throws IOException {
         RandomAccessFile raf = null;
         try {

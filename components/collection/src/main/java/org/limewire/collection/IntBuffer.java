@@ -397,11 +397,13 @@ public final class IntBuffer implements Cloneable, Iterable<Integer> {
     }
 
     /** Returns a shallow copy of this, of type <tt>IntBuffer</tt> */
+    @Override
     public Object clone() {
         return new IntBuffer(this);        
     }
 
 	// overrides Object.toString to return more information
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("[");

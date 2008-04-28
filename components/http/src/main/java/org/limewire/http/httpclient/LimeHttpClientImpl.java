@@ -34,6 +34,7 @@ class LimeHttpClientImpl extends DefaultHttpClient implements SocketWrappingHttp
      * @return an <code>HttpRequestRetryHandler</code> that always returns
      * <code>false</code>
      */
+    @Override
     protected HttpRequestRetryHandler createHttpRequestRetryHandler() {
         return new HttpRequestRetryHandler() {
             public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {

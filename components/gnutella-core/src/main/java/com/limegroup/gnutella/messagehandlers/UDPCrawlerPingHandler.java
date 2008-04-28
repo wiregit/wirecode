@@ -41,7 +41,8 @@ public class UDPCrawlerPingHandler extends RestrictedResponder {
         this.udpCrawlerPongFactory = udpCrawlerPongFactory;
     }
     
-	protected void processAllowedMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
+	@Override
+    protected void processAllowedMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
 		assert msg instanceof UDPCrawlerPing;
 		if (!_UDPListRequestors.add(handler.getInetAddress()))
 			return;

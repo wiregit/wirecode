@@ -20,10 +20,12 @@ class BELong extends NumberToken<Long> {
         super(chan);
     }
 
+    @Override
     public int getType() {
         return LONG;
     }
     
+    @Override
     protected Long getResult(BigInteger rawValue) throws IOException {
         if (rawValue.compareTo(MAX) > 0)
             throw new IOException("too big");

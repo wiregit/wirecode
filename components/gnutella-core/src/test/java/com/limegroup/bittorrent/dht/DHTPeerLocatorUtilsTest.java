@@ -23,6 +23,7 @@ public class DHTPeerLocatorUtilsTest extends BaseTestCase {
         return buildTestSuite(DHTPeerLocatorUtilsTest.class);
     }
 
+    @Override
     public void setUp() throws Exception {
     }
 

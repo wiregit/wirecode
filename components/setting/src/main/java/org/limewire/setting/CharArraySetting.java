@@ -59,6 +59,7 @@ public final class CharArraySetting extends AbstractSetting {
      * Load value from property string value
      * @param sValue property string value
      */
+    @Override
     protected void loadValue(String sValue) {
         value = sValue.trim().toCharArray();
     }

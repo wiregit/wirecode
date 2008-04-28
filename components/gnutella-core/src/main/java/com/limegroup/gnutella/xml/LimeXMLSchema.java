@@ -308,6 +308,7 @@ public class LimeXMLSchema {
         return schemaStr;
     }
     
+    @Override
     public boolean equals(Object o) {
         if( o == this )
             return true;
@@ -316,6 +317,7 @@ public class LimeXMLSchema {
         return _schemaURI.equals(((LimeXMLSchema)o)._schemaURI);
     }
     
+    @Override
     public int hashCode() {
         return _schemaURI.hashCode();
     }

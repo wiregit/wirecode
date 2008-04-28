@@ -241,6 +241,7 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
             return isValid;
         }
         
+        @Override
         public final String toString() {
             return "<publicKey=" + getPublicKey() + ",sharedKey=" + getSharedKey() + ",isValid=" + isValid() + ">";
         }

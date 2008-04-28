@@ -247,6 +247,7 @@ public class TestConnectionManager extends ConnectionManagerImpl {
     /**
      * Accessor for the custom list of connections.
      */
+    @Override
     public List<RoutedConnection> getInitializedConnections() {
         return CONNECTIONS;
     }
@@ -256,10 +257,12 @@ public class TestConnectionManager extends ConnectionManagerImpl {
         CONNECTIONS.addAll(connections);
     }
     
+    @Override
     public List<RoutedConnection> getInitializedClientConnections() {
         return LEAF_CONNECTIONS;
     }
 
+    @Override
     public boolean isSupernode() {
         return ULTRAPEER;
     }

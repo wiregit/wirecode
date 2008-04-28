@@ -39,7 +39,8 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
 		junit.textui.TestRunner.run(suite());
 	}
 
-	protected void setUp() {
+	@Override
+    protected void setUp() {
 	    Injector injector = LimeTestUtils.createInjector();
 	    pushEndpointFactory = injector.getInstance(PushEndpointFactory.class);
 	    remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);

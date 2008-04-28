@@ -94,6 +94,7 @@ public final class ConnectionWatchdog {
                 return false;
         }
 
+        @Override
         public String toString() {
             return "{sent: "+sent+", sdropped: "+sentDropped+"}";
         }

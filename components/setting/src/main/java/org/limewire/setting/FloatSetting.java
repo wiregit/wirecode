@@ -56,6 +56,7 @@ public class FloatSetting extends AbstractNumberSetting<Float> {
      * @param sValue property string value
      *
      */
+    @Override
     protected void loadValue(String sValue) {
         try {
             value = Float.valueOf(sValue.trim()).floatValue();
@@ -64,6 +65,7 @@ public class FloatSetting extends AbstractNumberSetting<Float> {
         }
     }
 
+    @Override
     protected Comparable<Float> convertToComparable(String value) {
         return new Float(value);
     }

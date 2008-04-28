@@ -52,7 +52,8 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 	 *
 	 * @return the size of the file on disk, in bytes
 	 */
-	public long getFileSize() {
+	@Override
+    public long getFileSize() {
 		return _size;
 	}
 
@@ -61,7 +62,8 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
 	 * 
 	 * @return the name of this file
 	 */
-	public String getFileName() {
+	@Override
+    public String getFileName() {
 		return _name;
 	}
     
@@ -177,7 +179,8 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     }
 
 	// overrides Object.toString to provide a more useful description
-	public String toString() {
+	@Override
+    public String toString() {
 		return ("IncompleteFileDesc:\r\n"+
 				"name:     "+_name+"\r\n"+
 				"index:    "+getIndex()+"\r\n");

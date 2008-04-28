@@ -27,6 +27,7 @@ public final class CompressingOutputStream extends DeflaterOutputStream {
     /**
      * Insure all remaining data will be output.
      */
+    @Override
     public void flush() throws IOException {
         if( def.finished() ) return;
         
@@ -47,6 +48,7 @@ public final class CompressingOutputStream extends DeflaterOutputStream {
         super.flush();
     }
     
+    @Override
     protected void deflate() throws IOException {
         try {
             // DO NOT CALL super.deflate(), it is wrong.

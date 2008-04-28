@@ -49,6 +49,7 @@ abstract class AbstractResponseMessage extends AbstractDHTMessage
         super(context, opcode, src, messageId, msgVersion, in);
     }
     
+    @Override
     protected final Contact createContact(SocketAddress src, Vendor vendor, Version version,
             KUID nodeId, SocketAddress contactAddress, int instanceId, int flags) {
         return ContactFactory.createLiveContact(src, vendor, version, nodeId, contactAddress, instanceId, flags);

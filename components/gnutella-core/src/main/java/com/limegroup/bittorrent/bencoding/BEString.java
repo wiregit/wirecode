@@ -65,6 +65,7 @@ class BEString extends Token<byte[]> {
         this.firstSizeByte = firstChar; 
     }
 
+    @Override
     public void handleRead() throws IOException {
 
     	// If we haven't read the whole length prefix yet, 
@@ -146,6 +147,7 @@ class BEString extends Token<byte[]> {
      * @return true if it is, false if it needs more read notifications to 
      * finish
      */
+    @Override
     protected boolean isDone() {
 
     	// We're only done if we parsed the size to make a buffer that big, 
@@ -159,6 +161,7 @@ class BEString extends Token<byte[]> {
      * 
      * @return Token.STRING
      */
+    @Override
     public int getType() {
         return STRING;
     }

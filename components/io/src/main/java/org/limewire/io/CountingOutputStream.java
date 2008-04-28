@@ -17,6 +17,7 @@ public final class CountingOutputStream extends FilterOutputStream {
         super(out);
     }
     
+    @Override
     public void write(int b) throws IOException {
         out.write(b);
         if(_isCounting)
@@ -24,6 +25,7 @@ public final class CountingOutputStream extends FilterOutputStream {
         return;
     }
     
+    @Override
     public void write(byte[] b, int off, int len) throws IOException {
         // do NOT call super.write(b, off, len) as that will call
         // write(b) and double-count each byte.
@@ -32,6 +34,7 @@ public final class CountingOutputStream extends FilterOutputStream {
             _count += len;
     }
     
+    @Override
     public void close() throws IOException {
         out.close();
     }    

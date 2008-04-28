@@ -12,13 +12,16 @@ class BEBoolean extends Token<Boolean> {
         super(null);
         result = value;
     }
+    @Override
     public int getType() {
         return Token.BOOLEAN;
     }
+    @Override
     public boolean isDone() {
         return true;
     }
 
+    @Override
     public void handleRead() throws IOException {
     }
 }

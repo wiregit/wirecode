@@ -24,8 +24,10 @@ public class InspectionUtilsTest extends BaseTestCase {
         return buildTestSuite(InspectionUtilsTest.class);
     }
     
+    @Override
     public void setUp() throws Exception {
         Module m = new AbstractModule() {
+            @Override
             public void configure() {
                 bind(TestInterface.class).to(TestClass.class);
                 bind(TestInterface2.class).to(TestClass2.class);
@@ -225,6 +227,7 @@ class TestClass implements TestInterface{
         this.reference = reference;
     }
     
+    @Override
     public String toString() {
         return "testclass";
     }
@@ -248,6 +251,7 @@ class TestClass2 implements TestInterface2 {
         this.reference = reference;
     }
     
+    @Override
     public String toString() {
         return "testclass2";
     }

@@ -277,6 +277,7 @@ public abstract class AbstractSetting implements Setting {
      */
     abstract protected void loadValue(String sValue);    
 
+    @Override
     public String toString() {
         return KEY + "=" + getValueAsString();
     }

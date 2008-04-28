@@ -367,6 +367,7 @@ public class LimeWireCoreModule extends AbstractModule {
     
     @Singleton
     private static class InspectionVerifierProvider extends AbstractLazySingletonProvider<SecureMessageVerifier> {
+        @Override
         protected SecureMessageVerifier createObject() {
             return new SecureMessageVerifierImpl("GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAEYRDUD6O2YID3ORGATJV7UQLUEJORGPY4ETQUH3SKDGITTQENVN6IRZBDJOUZLD6UKX2APFEEA6IJVMCURT4VWBICX5L7GKAUYU325AMMNR7PW6GWGXHR24D5HVTIO6JZ2VRMTOIE7GIZPINPOJXWYDUZQG57ZVBII6XHW2KGITQKQLODJTZGRJHELY6BRXL7VHHQDGCIBWYU",
                         null);
@@ -375,6 +376,7 @@ public class LimeWireCoreModule extends AbstractModule {
     
     @Singleton
     private static class UnlimitedExecutorProvider extends AbstractLazySingletonProvider<ExecutorService> {
+        @Override
         protected ExecutorService createObject() {
             return ExecutorsHelper.newThreadPool(ExecutorsHelper.daemonThreadFactory("IdleThread"));
         }
@@ -382,6 +384,7 @@ public class LimeWireCoreModule extends AbstractModule {
     
     @Singleton
     private static class BackgroundTimerProvider extends AbstractLazySingletonProvider<ScheduledExecutorService> {
+        @Override
         protected ScheduledExecutorService createObject() {
             return new SimpleTimer(true);
         }
@@ -389,6 +392,7 @@ public class LimeWireCoreModule extends AbstractModule {
     
     @Singleton
     private static class MessageExecutorProvider extends AbstractLazySingletonProvider<ExecutorService> {
+        @Override
         protected ExecutorService createObject() {
             return ExecutorsHelper.newProcessingQueue("Message-Executor");
         }
@@ -396,6 +400,7 @@ public class LimeWireCoreModule extends AbstractModule {
 
     @Singleton
     private static class DHTExecutorProvider extends AbstractLazySingletonProvider<ExecutorService> {
+        @Override
         protected ExecutorService createObject() {
             return ExecutorsHelper.newProcessingQueue("DHT-Executor");
         }

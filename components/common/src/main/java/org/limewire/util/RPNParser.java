@@ -147,6 +147,7 @@ public class RPNParser {
      * predicate for the == operation.
      */
     static class EqualsPredicate extends Predicate {
+        @Override
         public boolean evaluate(String... operands) {
             if (operands.length != 2)
                 throw new IllegalArgumentException();
@@ -158,6 +159,7 @@ public class RPNParser {
      * predicate for the || operation.
      */
     static class ORPredicate extends Predicate {
+        @Override
         public boolean evaluate(String... operands) {
             if (operands.length != 2)
                 throw new IllegalArgumentException();
@@ -169,6 +171,7 @@ public class RPNParser {
      * predicate for the && operation.
      */
     static class ANDPredicate extends Predicate {
+        @Override
         public boolean evaluate(String... operands) {
             if (operands.length != 2)
                 throw new IllegalArgumentException();
@@ -180,11 +183,13 @@ public class RPNParser {
      * predicate for the ! operation.  
      */
     static class NOTPredicate extends Predicate {
+        @Override
         public boolean evaluate(String... operands) {
             if (operands.length != 1)
                 throw new IllegalArgumentException();
             return !strictBoolean(operands[0]);
         }
+        @Override
         public int numOperands() {
             return 1;
         }
@@ -194,6 +199,7 @@ public class RPNParser {
      * predicate for the > operation.
      */
     static class GreaterPredicate extends Predicate {
+        @Override
         public boolean evaluate (String... operands) {
             if (operands.length != 2)
                 throw new IllegalArgumentException();
@@ -205,6 +211,7 @@ public class RPNParser {
      * predicate for the < operation.
      */
     static class LessPredicate extends Predicate {
+        @Override
         public boolean evaluate (String... operands) {
             if (operands.length != 2)
                 throw new IllegalArgumentException();
@@ -216,6 +223,7 @@ public class RPNParser {
      * Predicate for the String.contains operation
      */
     static class ContainsPredicate extends Predicate {
+        @Override
         public boolean evaluate (String... operands) {
             if (operands.length != 2)
                 throw new IllegalArgumentException();
@@ -227,6 +235,7 @@ public class RPNParser {
      * Predicate for matching a pattern
      */
     static class MatchesPredicate extends Predicate {
+        @Override
         public boolean evaluate (String... operands) {
             if (operands.length != 2)
                 throw new IllegalArgumentException();

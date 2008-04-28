@@ -949,7 +949,8 @@ class VerifyingFolder implements TorrentDiskManager {
 			return ret;
 		}
 		
-		public BlockRangeMap clone() {
+		@Override
+        public BlockRangeMap clone() {
 			BlockRangeMap clone = new BlockRangeMap(size());
 			for (Map.Entry<Integer, IntervalSet> e : entrySet())
 				clone.put(e.getKey(), e.getValue().clone());

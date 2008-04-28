@@ -80,6 +80,7 @@ public final class LeafConnection extends NewConnection {
         }
     }
 
+    @Override
     public String toString() {
         return descriptor + ": " + QRT;
     }

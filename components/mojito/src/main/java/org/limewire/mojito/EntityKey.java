@@ -145,10 +145,12 @@ public class EntityKey {
         return valueType;
     }
     
+    @Override
     public int hashCode() {
         return hashCode;
     }
     
+    @Override
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -172,6 +174,7 @@ public class EntityKey {
         }
     }
     
+    @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder();
         buffer.append("Contact: ").append(getContact()).append("\n");

@@ -44,6 +44,7 @@ public final class PingerTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    @Override
     public void setUp() {
  
         context = new Mockery();

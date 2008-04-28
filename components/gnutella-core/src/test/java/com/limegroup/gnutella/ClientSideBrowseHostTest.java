@@ -359,6 +359,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
             return remoteFileDesc;
         }
         
+        @Override
         public void handleQueryResult(RemoteFileDesc rfd,
                                       HostData data,
                                       Set locs) {

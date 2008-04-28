@@ -72,6 +72,7 @@ public class FileDescStub extends FileDesc {
         return s;
     }
 
+    @Override
     public long getFileSize() {
         return DEFAULT_SIZE;
     }

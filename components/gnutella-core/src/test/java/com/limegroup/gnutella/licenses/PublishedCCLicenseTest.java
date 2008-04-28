@@ -128,7 +128,8 @@ public class PublishedCCLicenseTest extends LimeTestCase {
     }
     
     private class CommentExtractor extends HTMLEditorKit.ParserCallback {
-		public void handleComment(char[] data, int pos) {
+		@Override
+        public void handleComment(char[] data, int pos) {
 //			System.err.println("about to parse Comment");
 			synchronized (rdfLock) {
 				rdf = new String(data);

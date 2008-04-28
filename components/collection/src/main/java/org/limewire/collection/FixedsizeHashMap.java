@@ -112,6 +112,7 @@ public class FixedsizeHashMap<K, V> {
      * Returns the string representation of the mappings
      * @return the string representation of the mappings
      */
+    @Override
     public synchronized String toString() {
         return hashMap.toString();
     }

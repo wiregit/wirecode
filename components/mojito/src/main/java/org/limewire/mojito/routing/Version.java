@@ -66,6 +66,7 @@ public class Version implements Serializable, Comparable<Version> {
         return version;
     }
     
+    @Override
     public int hashCode() {
         return version;
     }
@@ -74,6 +75,7 @@ public class Version implements Serializable, Comparable<Version> {
         return version - o.version;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o == this) {
             return true;
@@ -84,6 +86,7 @@ public class Version implements Serializable, Comparable<Version> {
         return version == ((Version)o).version;
     }
     
+    @Override
     public String toString() {
         return getMajor() + "." + getMinor();
     }

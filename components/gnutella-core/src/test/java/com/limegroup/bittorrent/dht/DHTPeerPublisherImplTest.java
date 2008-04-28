@@ -95,6 +95,7 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
         return buildTestSuite(DHTPeerPublisherImplTest.class);
     }
 
+    @Override
     public void setUp() throws Exception {
         IP = "124.0.0.1".getBytes("US-ASCII");
         ID = "123".getBytes("US-ASCII");
@@ -119,6 +120,7 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
         }
 
         module = new AbstractModule() {
+            @Override
             public void configure() {
                 bind(ManagedTorrent.class).toInstance(managedTorrentOne);
                 bind(ManagedTorrent.class).toInstance(managedTorrentTwo);

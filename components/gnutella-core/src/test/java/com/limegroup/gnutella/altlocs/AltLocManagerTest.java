@@ -21,6 +21,7 @@ public class AltLocManagerTest extends LimeTestCase {
     private AltLocManager manager;
     private AlternateLocationFactory factory; 
 
+    @Override
     public void setUp() {
         
         Injector injector = LimeTestUtils.createInjector();

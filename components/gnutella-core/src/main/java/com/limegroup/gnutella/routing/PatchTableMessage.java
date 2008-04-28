@@ -66,6 +66,7 @@ public class PatchTableMessage extends RouteTableMessage {
         System.arraycopy(dataSrc, dataSrcStart, data, 0, data.length);
     }
 
+    @Override
     protected void writePayloadData(OutputStream out) throws IOException {
         //Does NOT include variant
         byte[] buf=new byte[4+data.length];
@@ -134,6 +135,7 @@ public class PatchTableMessage extends RouteTableMessage {
         return data;
     }
 
+    @Override
     public String toString() {
         StringBuilder buf=new StringBuilder();
         buf.append("{PATCH, Sequence: "+getSequenceNumber()+"/"+getSequenceSize()

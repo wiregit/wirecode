@@ -105,6 +105,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
          *
          * @return the string representation of this URN type
          */
+        @Override
         public String toString() {
             return URN_NAMESPACE_ID + descriptor;
         }
@@ -568,6 +569,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
      * @param o the object to compare against
      * @return <tt>true</tt> if the URNs are equal, <tt>false</tt> otherwise
      */
+    @Override
     public boolean equals(Object o) {
         if(o == this) return true;
         if (!(o instanceof URN)) return false;
@@ -593,7 +595,8 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 *
 	 * @return a hash code value for this object
 	 */
-	public int hashCode() {
+	@Override
+    public int hashCode() {
 		if(hashCode == 0) {
 			int result = 17;
 			result = (37*result) + this._urnString.hashCode();
@@ -608,7 +611,8 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 *
 	 * @return the string representation of the URN
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		return _urnString;
 	}
 

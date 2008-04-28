@@ -159,10 +159,12 @@ abstract class AbstractResultHandler extends DHTFutureAdapter<FindValueResult> {
         listener.searchFailed();
     }
     
+    @Override
     public int hashCode() {
         return key.hashCode();
     }
     
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

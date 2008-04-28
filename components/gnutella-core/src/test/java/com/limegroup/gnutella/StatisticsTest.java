@@ -23,6 +23,7 @@ public class StatisticsTest extends com.limegroup.gnutella.util.LimeTestCase {
         return buildTestSuite(StatisticsTest.class);
     }
 
+    @Override
     public void setUp() {
         ApplicationSettings.LAST_SHUTDOWN_TIME.setValue(0);
         ApplicationSettings.FRACTIONAL_UPTIME.setValue(0.0f);

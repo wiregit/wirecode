@@ -54,6 +54,7 @@ public interface StatsRequest extends RequestMessage, DHTSecureMessage {
             return type;
         }
         
+        @Override
         public String toString() {
             return name() + " (" + toByte() + ")";
         }

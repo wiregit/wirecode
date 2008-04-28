@@ -489,6 +489,7 @@ public class StringTrie<V> {
      * concrete state.  (The version of toString commented out below returns
      * a representation of the abstract state of this.
      */
+    @Override
     public String toString() {
         StringBuilder buf = new StringBuilder();
         buf.append("<root>");
@@ -804,6 +805,7 @@ final class TrieNode<E> {
     } */
 
     // inherits javadoc comment.
+    @Override
     public String toString() {
         Object val = getValue();
         if (val != null)

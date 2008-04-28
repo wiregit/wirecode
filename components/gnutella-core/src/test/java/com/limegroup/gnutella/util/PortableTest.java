@@ -27,6 +27,7 @@ public class PortableTest extends BaseTestCase {
     
     private static final File portableProps = new File("portable.props");
 
+    @Override
     public void tearDown() {
         // Delete the portable.props we may have made
         portableProps.delete();

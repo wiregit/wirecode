@@ -39,6 +39,7 @@ public class IntervalSetTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
     
+    @Override
     public void setUp() {
         iSet = new IntervalSet();
     }

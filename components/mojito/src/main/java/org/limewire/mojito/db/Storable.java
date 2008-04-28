@@ -98,6 +98,7 @@ public class Storable {
         setLocationCount(result.getLocations().size());
     }
     
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         synchronized (this) {

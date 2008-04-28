@@ -58,6 +58,7 @@ public class MediaType implements Serializable {
         // the id is taken from old limewire builds, versions 4.4 to 4.12
         private static final long serialVersionUID = 8621997774686329539L; //3728385699213635375L;
         
+        @Override
         public boolean matches(String ext) {
             return true;
         }

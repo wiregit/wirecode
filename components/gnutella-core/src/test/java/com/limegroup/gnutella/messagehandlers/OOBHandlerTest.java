@@ -66,6 +66,7 @@ public class OOBHandlerTest extends BaseTestCase {
     ResponseFactory responseFactory;
     QueryReplyFactory queryReplyFactory;
     
+    @Override
     public void setUp() throws Exception {
         router = new MyMessageRouter();
         router.start();
@@ -920,6 +921,7 @@ public class OOBHandlerTest extends BaseTestCase {
             this.port = port;
         }
 
+        @Override
         public void reply(Message m) {
             this.m = m;
         }

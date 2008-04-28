@@ -816,6 +816,7 @@ private static class SchemaFieldInfoPair
         return _fieldInfo;
     }
     
+    @Override
     public String toString()
     {
         return "[" + _field + ":" + _fieldInfo + "]";

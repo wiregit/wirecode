@@ -114,6 +114,7 @@ class WeedLicense extends AbstractLicense {
     }
 
     /** Clears prior validation information. */    
+    @Override
     protected void clear() {
         valid = false;
         artist = null;
@@ -124,6 +125,7 @@ class WeedLicense extends AbstractLicense {
     /**
      * Overriden to retrieve the body of data from a special URI.
      */
+    @Override
     protected String getBody(String url, LimeHttpClient httpClient) {
         return super.getBody(url + "&data=1", httpClient);
     }
@@ -138,6 +140,7 @@ class WeedLicense extends AbstractLicense {
 	 *       <Price>1.2500</Price>
      *  </WeedVerifyData>
      */
+    @Override
     protected void parseDocumentNode(Node doc, LicenseCache licenseCache, LimeHttpClient httpClient) {
         if(!doc.getNodeName().equals("WeedVerifyData"))
             return;

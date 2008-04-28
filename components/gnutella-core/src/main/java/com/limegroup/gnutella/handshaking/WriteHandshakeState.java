@@ -41,6 +41,7 @@ public abstract class WriteHandshakeState extends WriteHeadersIOState {
         /**
          * Creates a response using the responder and wraps it into a ByteBuffer.
          */
+        @Override
         protected ByteBuffer createOutgoingData() throws IOException {
             // The distinction between requests is not necessary for correctness,
             // but is useful.  The getReadHandshakeRemoteResponse() method will
@@ -61,6 +62,7 @@ public abstract class WriteHandshakeState extends WriteHeadersIOState {
          * Throws an IOException if we wrote a code other than 'OK'.
          * Increments the appropriate statistics also.
          */
+        @Override
         protected void processWrittenHeaders() throws IOException {
             if(outgoing) {
                 switch(response.getStatusCode()) {
@@ -101,6 +103,7 @@ public abstract class WriteHandshakeState extends WriteHeadersIOState {
         }
 
         /** Returns a ByteBuffer of the initial connect request & headers. */
+        @Override
         protected ByteBuffer createOutgoingData() {
             StringBuilder sb = new StringBuilder();
             support.appendConnectLine(sb);
@@ -109,6 +112,7 @@ public abstract class WriteHandshakeState extends WriteHeadersIOState {
         }
         
         /** Does nothing. */
+        @Override
         protected void processWrittenHeaders() {}
     }
     

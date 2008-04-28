@@ -931,6 +931,7 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
      * 
      * @see com.limegroup.bittorrent.ManagedTorrent#equals(java.lang.Object)
      */
+    @Override
     public boolean equals(Object o) {
         if (!(o instanceof ManagedTorrentImpl))
             return false;

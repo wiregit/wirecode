@@ -42,6 +42,7 @@ public class LimitedSocketControllerTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
     
+    @Override
     public void setUp() throws Exception {
         listenSocket = new ServerSocket(LISTEN_PORT);
         listenSocket.setReuseAddress(true);
@@ -50,6 +51,7 @@ public class LimitedSocketControllerTest extends BaseTestCase {
         controller = new LimitedSocketController(proxyManager, new EmptySocketBindingSettings(), 2);
     }
     
+    @Override
     public void tearDown() throws Exception {
         listenSocket.close();
     }

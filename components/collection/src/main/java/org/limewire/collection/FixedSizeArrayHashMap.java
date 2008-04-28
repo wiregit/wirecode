@@ -180,10 +180,12 @@ public class FixedSizeArrayHashMap<K, V> extends HashMap<K, V> implements Random
     private transient volatile Set<Map.Entry<K, V>>        entrySet = null;
     
     private class EntrySet extends AbstractSet<Map.Entry<K,V>> {
+        @Override
         public Iterator<Map.Entry<K,V>> iterator() {
             return newEntryIterator();
         }
         
+        @Override
         public boolean contains(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
@@ -193,14 +195,17 @@ public class FixedSizeArrayHashMap<K, V> extends HashMap<K, V> implements Random
             return containsKey(key) && get(key).equals(value);
         }
         
+        @Override
         public boolean remove(Object o) {
             throw new UnsupportedOperationException();
         }
         
+        @Override
         public int size() {
             return FixedSizeArrayHashMap.this.size();
         }
         
+        @Override
         public void clear() {
             FixedSizeArrayHashMap.this.clear();
         }
@@ -244,6 +249,7 @@ public class FixedSizeArrayHashMap<K, V> extends HashMap<K, V> implements Random
     public Set<K> keySet() {
         if (keySet == null) {
             keySet = new AbstractSet<K>() {
+                @Override
                 public Iterator<K> iterator() {
                     return new Iterator<K>() {
                         private Iterator<Map.Entry<K,V>> i = entrySet().iterator();
@@ -262,10 +268,12 @@ public class FixedSizeArrayHashMap<K, V> extends HashMap<K, V> implements Random
                     };
                 }
         
+                @Override
                 public int size() {
                     return FixedSizeArrayHashMap.this.size();
                 }
         
+                @Override
                 public boolean contains(Object k) {
                     return FixedSizeArrayHashMap.this.containsKey(k);
                 }
@@ -298,9 +306,11 @@ public class FixedSizeArrayHashMap<K, V> extends HashMap<K, V> implements Random
      *
      * @return a collection view of the values contained in this map.
      */
+    @Override
     public Collection<V> values() {
         if (values == null) {
             values = new AbstractCollection<V>() {
+                @Override
                 public Iterator<V> iterator() {
                     return new Iterator<V>() {
                         private Iterator<Map.Entry<K,V>> i = entrySet().iterator();
@@ -319,10 +329,12 @@ public class FixedSizeArrayHashMap<K, V> extends HashMap<K, V> implements Random
                     };
                 }
             
+                @Override
                 public int size() {
                     return FixedSizeArrayHashMap.this.size();
                 }
         
+                @Override
                 public boolean contains(Object v) {
                     return FixedSizeArrayHashMap.this.containsValue(v);
                 }

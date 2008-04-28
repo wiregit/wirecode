@@ -16,6 +16,7 @@ public class BlockingOutputStream extends OutputStream {
         _delegate=delegate;
     }
 
+    @Override
     public synchronized void write(int b) throws IOException {
         if (_bytesBeforeBlock<=0) {
             //Wait until closed
@@ -34,6 +35,7 @@ public class BlockingOutputStream extends OutputStream {
         _bytesBeforeBlock--;        
     }
 
+    @Override
     public synchronized void close() throws IOException {
         _closed=true;
         notifyAll();

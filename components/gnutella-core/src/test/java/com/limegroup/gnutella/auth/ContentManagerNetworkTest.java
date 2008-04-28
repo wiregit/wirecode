@@ -51,6 +51,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
     }
     
     
+    @Override
     public void setUp() throws Exception {
         injector = LimeTestUtils.createInjector();
         
@@ -123,6 +124,7 @@ public class ContentManagerNetworkTest extends LimeTestCase {
         
         mgr.stop();
         mgr = new ContentManager(ipPortContentAuthorityFactory) {
+            @Override
             protected ContentAuthority getDefaultContentAuthority() {
                 return ipPortContentAuthorityFactory
                         .createIpPortContentAuthority(authority);

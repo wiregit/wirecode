@@ -83,6 +83,7 @@ class UpdateData implements Cloneable, UpdateInformation {
     /**
      * The data.
      */
+    @Override
     public String toString() {
         return "\n{" + 
             "from: " + fromVersion + ", to: " + toVersion + ", for: " + forVersion + 
@@ -226,6 +227,7 @@ class UpdateData implements Cloneable, UpdateInformation {
     /**
      * Clones a new update data that is exactly like this one.
      */
+    @Override
     public Object clone() {
         Object clone = null;
         try {

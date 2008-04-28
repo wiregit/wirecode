@@ -67,6 +67,7 @@ public class GUESSServerSideTest extends LimeTestCase {
         return buildTestSuite(GUESSServerSideTest.class);
     }
     
+    @Override
     public void setUp() throws Exception {
         launchBackend();
 		Injector injector = LimeTestUtils.createInjector();

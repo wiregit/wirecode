@@ -430,6 +430,7 @@ public class VerifyingFile {
     	return verifiedBlocks.toBytes();
     }
     
+    @Override
     public String toString() {
         return dumpState();
     }
@@ -859,6 +860,7 @@ public class VerifyingFile {
                 "invalid length "+length+ " vs buf "+buf.length;
         }
         
+        @Override
         public void runChunkJob(byte[] buf) {
     		try {
     		    if(LOG.isTraceEnabled())
@@ -884,6 +886,7 @@ public class VerifyingFile {
             }
         }
         
+        @Override
         public void finish() {
             synchronized(VerifyingFile.this) {
                 try {

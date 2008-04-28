@@ -92,10 +92,12 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.LimeTestCase {
     private static class TestActivityCallback extends ActivityCallbackStub {
         private List<Downloader> downloaders=new LinkedList<Downloader>();
     
+        @Override
         public void addDownload(Downloader d) {
             downloaders.add(d);
         }
     
+        @Override
         public void removeDownload(Downloader d) {
             downloaders.remove(d);
         }

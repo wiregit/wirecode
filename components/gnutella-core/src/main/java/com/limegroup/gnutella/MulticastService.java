@@ -258,7 +258,8 @@ public final class MulticastService implements Runnable {
 	 *
 	 * @return the <tt>MulticastSocket</tt> data
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		return "MulticastService\r\nsocket: "+_socket;
 	}
 

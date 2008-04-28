@@ -46,6 +46,7 @@ public final class LeafHandshakeResponderTest extends LimeTestCase {
      * For further tests on whether how handshaking works in response to these
      * settings, see HandshakeResponseTest.
      */
+    @Override
     public void setUp() {
         ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
         ConnectionSettings.ENCODE_DEFLATE.setValue(true);

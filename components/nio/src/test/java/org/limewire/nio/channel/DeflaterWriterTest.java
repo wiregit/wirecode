@@ -36,7 +36,8 @@ public final class DeflaterWriterTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-	public void tearDown() {
+	@Override
+    public void tearDown() {
 	    DEFLATER.end();
 	    INFLATER.end();
 	}

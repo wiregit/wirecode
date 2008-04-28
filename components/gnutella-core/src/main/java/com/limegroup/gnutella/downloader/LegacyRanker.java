@@ -25,7 +25,8 @@ public class LegacyRanker extends AbstractSourceRanker {
 		rfds = new HashSet<RemoteFileDesc>();
 	}
 	
-	public synchronized boolean addToPool(RemoteFileDesc host) {
+	@Override
+    public synchronized boolean addToPool(RemoteFileDesc host) {
         if (LOG.isDebugEnabled())
             LOG.debug("adding host "+host+" to be ranked");
 		return rfds.add(host);
@@ -42,7 +43,8 @@ public class LegacyRanker extends AbstractSourceRanker {
      *  isn't strictly needed.
      * @return the best file/endpoint location 
      */
-	public synchronized RemoteFileDesc getBest() {
+	@Override
+    public synchronized RemoteFileDesc getBest() {
 		if (!hasMore())
             return null;
         
@@ -97,18 +99,22 @@ public class LegacyRanker extends AbstractSourceRanker {
         return ret;
     }
 	
-	public boolean hasMore() {
+	@Override
+    public boolean hasMore() {
 		return !rfds.isEmpty();
 	}
 
+    @Override
     public Collection<RemoteFileDesc> getShareableHosts() {
         return rfds;
     }
     
+    @Override
     protected Collection<RemoteFileDesc> getPotentiallyBusyHosts() {
         return rfds;
     }
     
+    @Override
     public int getNumKnownHosts() {
         return rfds.size();
     }

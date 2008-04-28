@@ -31,6 +31,7 @@ public class CircularByteBufferTest extends BaseTestCase {
     
     static StubCache cache;
     
+    @Override
     public void setUp() {
     	cache = new StubCache();
     }
