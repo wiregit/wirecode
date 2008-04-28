@@ -363,35 +363,35 @@ public final class FileUtilsTest extends BaseTestCase {
         
         // user's home directory
         expected = (new File(System.getProperty("user.home")));
-        actual = FileUtils.resolveSpecialPath("HOME>");
+        actual = FileUtils.resolveSpecialPath("Home>");
         assertEquals(expected, actual);
         expected = (new File(System.getProperty("user.home"), "folder"));
-        actual = FileUtils.resolveSpecialPath("HOME>folder");
+        actual = FileUtils.resolveSpecialPath("Home>folder");
         assertEquals(expected, actual);
         expected = (new File(System.getProperty("user.home"), "folder/subfolder"));
-        actual = FileUtils.resolveSpecialPath("HOME>folder/subfolder");
+        actual = FileUtils.resolveSpecialPath("Home>folder/subfolder");
         assertEquals(expected, actual);
         
         // platform shell documents directory
         expected = (new File(System.getProperty("user.home"), "Documents"));
-        actual = FileUtils.resolveSpecialPath("DOCUMENTS>");
+        actual = FileUtils.resolveSpecialPath("Documents>");
         assertEquals(expected, actual);
         expected = (new File(System.getProperty("user.home"), "Documents/folder"));
-        actual = FileUtils.resolveSpecialPath("DOCUMENTS>folder");
+        actual = FileUtils.resolveSpecialPath("Documents>folder");
         assertEquals(expected, actual);
         expected = (new File(System.getProperty("user.home"), "Documents/folder/subfolder"));
-        actual = FileUtils.resolveSpecialPath("DOCUMENTS>folder/subfolder");
+        actual = FileUtils.resolveSpecialPath("Documents>folder/subfolder");
         assertEquals(expected, actual);
         
         // platform shell desktop directory
         expected = (new File(System.getProperty("user.home"), "Desktop"));
-        actual = FileUtils.resolveSpecialPath("DESKTOP>");
+        actual = FileUtils.resolveSpecialPath("Desktop>");
         assertEquals(expected, actual);
         expected = (new File(System.getProperty("user.home"), "Desktop/folder"));
-        actual = FileUtils.resolveSpecialPath("DESKTOP>folder");
+        actual = FileUtils.resolveSpecialPath("Desktop>folder");
         assertEquals(expected, actual);
         expected = (new File(System.getProperty("user.home"), "Desktop/folder/subfolder"));
-        actual = FileUtils.resolveSpecialPath("DESKTOP>folder/subfolder");
+        actual = FileUtils.resolveSpecialPath("Desktop>folder/subfolder");
         assertEquals(expected, actual);
     }
     
