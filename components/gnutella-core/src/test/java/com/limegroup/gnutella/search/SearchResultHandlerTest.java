@@ -1,12 +1,20 @@
 package com.limegroup.gnutella.search;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import junit.framework.Test;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.limewire.collection.IntervalSet;
+import org.limewire.collection.KeyValue;
+import org.limewire.collection.Range;
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortSet;
 import org.limewire.security.SecureMessage;
 import org.limewire.util.NameValue;
 
@@ -15,29 +23,37 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ForMeReplyHandler;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.ResponseVerifier;
 import com.limegroup.gnutella.ResponseVerifierImpl;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnSet;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
+import com.limegroup.gnutella.xml.LimeXMLNames;
 
 public class SearchResultHandlerTest extends LimeTestCase {
     
     private LimeXMLDocumentFactory factory;
     private MyActivityCallback callback;
     private LimeXMLDocumentHelper limeXMLDocumentHelper;
-    private SearchResultHandler searchResultHandler;
+    private SearchResultHandlerImpl searchResultHandler;
     private ResponseFactory responseFactory;
     private QueryReplyFactory queryReplyFactory;
-
+    private LimeXMLDocumentFactory limeXmlDocumentFactory;
+    private RemoteFileDescFactory remoteFileDescFactory;
+    
     public SearchResultHandlerTest(String name) {
         super(name);
     }
@@ -56,6 +72,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
             @Override
             protected void configure() {
                 bind(ResponseVerifier.class).to(StubVerifier.class);
+                bind(SearchResultHandler.class).to(SearchResultHandlerImpl.class);
             }
         });
 
@@ -65,19 +82,38 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         factory = injector.getInstance(LimeXMLDocumentFactory.class);
         
-        searchResultHandler = injector.getInstance(SearchResultHandler.class);
+        searchResultHandler = (SearchResultHandlerImpl)injector.getInstance(SearchResultHandler.class);
         
         responseFactory = injector.getInstance(ResponseFactory.class);
         
         queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+        
+        limeXmlDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
+        
+        remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
     }
     
     public void testSecureActionSent() throws Exception {
+        Mockery m = new Mockery();
+        final QueryRequest queryRequest = m.mock(QueryRequest.class);
+        final byte[] guid = GUID.makeGuid();
+        
+        m.checking(new Expectations() {{
+            atLeast(1).of(queryRequest).isBrowseHostQuery();
+            will(returnValue(false));
+            atLeast(1).of(queryRequest).isWhatIsNewRequest();
+            will(returnValue(false));
+            atLeast(1).of(queryRequest).getGUID();
+            will(returnValue(guid));
+        }});
+        
+        searchResultHandler.addQuery(queryRequest);
+        
         List<NameValue<String>> list = new LinkedList<NameValue<String>>();
         list.add(new NameValue<String>("audios__audio__action__", "http://somewhere.com"));
         LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         Response actionResponse = responseFactory.createResponse(0, 1, "test", actionDoc);
-        QueryReply reply = newQueryReply(new Response[] { actionResponse } );
+        QueryReply reply = newQueryReply(new Response[] {actionResponse}, guid);
         reply.setSecureStatus(SecureMessage.SECURE);
         assertEquals(0, callback.results.size());
         searchResultHandler.handleQueryReply(reply);
@@ -86,6 +122,8 @@ public class SearchResultHandlerTest extends LimeTestCase {
         assertNotNull(rfd.getXMLDocument());
         assertEquals("http://somewhere.com", rfd.getXMLDocument().getAction());
         assertEquals(SecureMessage.SECURE, rfd.getSecureStatus());
+        
+        m.assertIsSatisfied();
     }
     
     public void testInsecureActionNotSent() throws Exception {
@@ -94,13 +132,26 @@ public class SearchResultHandlerTest extends LimeTestCase {
         list.add(new NameValue<String>("audios__audio__action__", "http://somewhere.com"));
         LimeXMLDocument actionDoc = factory.createLimeXMLDocument(list, "http://www.limewire.com/schemas/audio.xsd");
         actionResponse.setDocument(actionDoc);
-        QueryReply reply = newQueryReply(new Response[] { actionResponse } );
+        QueryReply reply = newQueryReply(new Response[] { actionResponse }, null );
         assertEquals(0, callback.results.size());
         searchResultHandler.handleQueryReply(reply);
         assertEquals(0, callback.results.size());        
     }
     
     public void testInsecureResponseWithoutActionSent() throws Exception {
+        Mockery m = new Mockery();
+        final QueryRequest queryRequest = m.mock(QueryRequest.class);
+        final byte[] guid = GUID.makeGuid();
+        
+        m.checking(new Expectations() {{
+            atLeast(1).of(queryRequest).isBrowseHostQuery();
+            atLeast(1).of(queryRequest).isWhatIsNewRequest();
+            atLeast(1).of(queryRequest).getGUID();
+            will(returnValue(guid));
+        }});
+        
+        searchResultHandler.addQuery(queryRequest);
+        
         Response actionResponse = responseFactory.createResponse(0, 1, "test");
         List<NameValue<String>> list = new LinkedList<NameValue<String>>();
         list.add(new NameValue<String>("audios__audio__action__", "http://somewhere.com"));
@@ -108,7 +159,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         actionResponse.setDocument(actionDoc);
         
         Response noDoc = responseFactory.createResponse(1, 2, "other");
-        QueryReply reply = newQueryReply(new Response[] { actionResponse, noDoc } );
+        QueryReply reply = newQueryReply(new Response[] { actionResponse, noDoc }, guid );
         assertEquals(0, callback.results.size());
         searchResultHandler.handleQueryReply(reply);
         assertEquals(1, callback.results.size());
@@ -125,7 +176,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         actionResponse.setDocument(actionDoc);
         
         Response noDoc = responseFactory.createResponse(1, 2, "other");
-        QueryReply reply = newQueryReply(new Response[] { actionResponse, noDoc } );
+        QueryReply reply = newQueryReply(new Response[] { actionResponse, noDoc }, null );
         reply.setSecureStatus(SecureMessage.FAILED);
         
         assertEquals(0, callback.results.size());
@@ -133,9 +184,431 @@ public class SearchResultHandlerTest extends LimeTestCase {
         assertEquals(0, callback.results.size());        
     }
     
-    private QueryReply newQueryReply(Response[] responses) throws Exception {
+    private byte[] setTestParameters(Mockery m, 
+                                     final QueryRequest queryRequest, 
+                                     final QueryReply queryReply, 
+                                     final IntervalSet intervalSet,
+                                     final HostData hostData,
+                                     final Set<URN> urns) throws Exception {
+        final byte[] guid = GUID.makeGuid();
+        
+        final Response response = m.mock(Response.class);
+        final List<Response> responses = Collections.singletonList(response);
+        final Set<IpPort> ipPorts = new IpPortSet();
+        final RemoteFileDesc remoteFileDesc = m.mock(RemoteFileDesc.class);
+        
+        urns.add(URN.createSHA1Urn("urn:sha1:TGRPKSWLZP5OYTRMBDIJXABKQBSNOK7L"));
+        urns.add(URN.createTTRootUrn("urn:ttroot:TUND2DAYI6FGPPCBWOZIYZCERDGRSS5YDRDRHQA"));
+        
+        List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
+        map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
+        final LimeXMLDocument limeXmlDocument = limeXmlDocumentFactory.createLimeXMLDocument(map, LimeXMLNames.APPLICATION_SCHEMA);
+        
+        m.checking(new Expectations() {{
+            allowing(queryRequest).isBrowseHostQuery();
+        
+            allowing(queryRequest).isWhatIsNewRequest();
+        
+            allowing(queryRequest).getGUID();
+            will(returnValue(guid));
+        
+            allowing(queryReply).getGUID();
+            will(returnValue(guid));
+            
+            allowing(queryReply).isBrowseHostReply();
+            will(returnValue(false));
+            
+            allowing(queryReply).getResultsAsList();
+            will(returnValue(responses));
+            
+            allowing(queryReply).getIPBytes();
+            will(returnValue(new byte[]{127,0,0,1}));
+            
+            atLeast(1).of(response).getRanges();
+            will(returnValue(intervalSet));
+            
+            atLeast(1).of(response).getDocument();
+            will(returnValue(limeXmlDocument));
+            
+            atLeast(1).of(response).getUrns();
+            will(returnValue(urns));
+            
+            atLeast(1).of(response).getLocations();
+            will(returnValue(ipPorts));
+            
+            atLeast(1).of(response).getSize();
+            will(returnValue((long)15));
+            
+            atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
+            will(returnValue(remoteFileDesc));
+            
+            allowing(remoteFileDesc).setSecureStatus(0);
+            
+            allowing(queryReply).getSecureStatus();
+            
+            atLeast(1).of(hostData).getMessageGUID();
+            will(returnValue(guid));
+        }});
+        
+        return guid;
+    }
+    
+    /**
+     * Tests the adding of a partial search result (as defined by
+     * the presence of an IntervalSet in the QueryResponse), to a
+     * SearchResultHandler; verifies that the SearchResultStats
+     * indicates the presence of a single available location.
+     * 
+     * @throws Exception
+     */
+    public void testAddPartialSearchResultGetNumOfLoc() throws Exception {
+       Mockery m = new Mockery();
+       
+       final QueryRequest queryRequest = m.mock(QueryRequest.class);
+       final QueryReply queryReply = m.mock(QueryReply.class);
+       final HostData hostData = m.mock(HostData.class);
+       final Set<URN> urns = new UrnSet();
+       final IntervalSet intervalSet = new IntervalSet();
+       
+       intervalSet.add( Range.createRange(0,15) );
+       
+       setTestParameters(m, queryRequest, queryReply, intervalSet, hostData, urns);
+       
+       SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
+       SearchResultHandlerImpl.GuidCount gc = (SearchResultHandlerImpl.GuidCount)srs;
+       
+       assertEquals(0, gc.getNumResultsForURN(urns.iterator().next()));
+       srs.addQueryReply(searchResultHandler, queryReply, hostData);
+       assertEquals(1, gc.getNumResultsForURN(urns.iterator().next()));
+       
+       m.assertIsSatisfied();
+    }
+    
+    public void testAddPartialSearchResultGetPercentAvailable() throws Exception {
+        Mockery m = new Mockery();
+        
+        final QueryRequest queryRequest = m.mock(QueryRequest.class);
+        final QueryReply queryReply = m.mock(QueryReply.class);
+        final HostData hostData = m.mock(HostData.class);
+        final Set<URN> urns = new UrnSet();
+        final IntervalSet intervalSet = new IntervalSet();
+        
+        intervalSet.add( Range.createRange( 0, 2) );
+        intervalSet.add( Range.createRange( 4, 6) );
+        intervalSet.add( Range.createRange( 8,10) );
+        intervalSet.add( Range.createRange(12,14) );
+        
+        setTestParameters(m, queryRequest, queryReply, intervalSet, hostData, urns);
+        
+        SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
+        
+        assertEquals(0.0, srs.getPercentAvailable(urns.iterator().next()), 0.0);
+        srs.addQueryReply(searchResultHandler, queryReply, hostData);
+        assertEquals(80.0, srs.getPercentAvailable(urns.iterator().next()), 0.0);
+        
+        m.assertIsSatisfied();
+     }
+     
+    /**
+     * Add a QueryRequest and a QueryReply that represents
+     * a whole search result and make sure that it is
+     * account for properly.
+     * 
+     * @throws Exception
+     */
+    public void testAddWholeSearchResultGetNumberOfLocations() throws Exception {
+        Mockery m = new Mockery();
+        
+        final QueryRequest queryRequest = m.mock(QueryRequest.class);
+        final QueryReply queryReply = m.mock(QueryReply.class);
+        final HostData hostData = m.mock(HostData.class);
+        final Set<URN> urns = new UrnSet();
+        
+        setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
+        
+        SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
+        SearchResultHandlerImpl.GuidCount gc = (SearchResultHandlerImpl.GuidCount)srs;
+        
+        assertEquals(0, gc.getNumResultsForURN(urns.iterator().next()));
+        srs.addQueryReply(searchResultHandler, queryReply, hostData);
+        assertEquals(1, gc.getNumResultsForURN(urns.iterator().next()));
+        
+        m.assertIsSatisfied();
+    }
+    
+    /**
+     * Add a QueryRequest and a QueryReply then remove the associated
+     * GUID and verify that the GUID was successfully removed.
+     * 
+     * @throws Exception
+     */
+    public void testRemoveQuery() throws Exception {
+        Mockery m = new Mockery();
+        
+        final QueryRequest queryRequest = m.mock(QueryRequest.class);
+        final QueryReply queryReply = m.mock(QueryReply.class);
+        final HostData hostData = m.mock(HostData.class);
+        final Set<URN> urns = new UrnSet();
+        
+        byte[] guid = setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
+        
+        SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
+        SearchResultHandlerImpl.GuidCount gc = (SearchResultHandlerImpl.GuidCount)srs;
+        
+        assertEquals(0, gc.getNumResultsForURN(urns.iterator().next()));
+        srs.addQueryReply(searchResultHandler, queryReply, hostData);
+        assertEquals(1, gc.getNumResultsForURN(urns.iterator().next()));
+        
+        searchResultHandler.removeQuery(new GUID(guid));
+        
+        assertEquals(null, searchResultHandler.removeQueryInternal(new GUID(guid)));
+        
+        m.assertIsSatisfied();
+    }
+    
+    /**
+     * If we add a QueryReply via accountAndUpdateDynamicQueriers()
+     * without a QueryRequest, it should silently fail. If we try
+     * to remove the associated GUID, it should return NULL, which
+     * confirms that the QueryReply was not in fact added.
+     * 
+     * @throws Exception
+     */
+    public void testAccountAndUpdateDynamicQueriersWithoutQueryRequest() throws Exception {
+        Mockery m = new Mockery();
+        
+        final QueryReply queryReply = m.mock(QueryReply.class);
+        final HostData hostData = m.mock(HostData.class);
+        final byte[] guid = GUID.makeGuid();
+        
+        m.checking(new Expectations() {{
+            atLeast(1).of(queryReply).getGUID();
+            will(returnValue(guid));
+        }});
+        
+        searchResultHandler.accountAndUpdateDynamicQueriers(queryReply, hostData);
+        assertEquals(null, searchResultHandler.removeQueryInternal(new GUID(guid)));
+        
+        m.assertIsSatisfied();
+    }
+    
+    /**
+     * The percent available for a URN should be 100 if there
+     * is at least a single whole search result.
+     * 
+     * 
+     * @throws Exception
+     */
+    public void testAddWholeSearchResultGetPercentAvailable() throws Exception {
+        // add query request
+        // add query reply
+        //   get search result stats
+        //   cast into guid count
+        // verify count via getNumResultsForURN
+        
+        Mockery m = new Mockery();
+        
+        final QueryRequest queryRequest = m.mock(QueryRequest.class);
+        final QueryReply queryReply = m.mock(QueryReply.class);
+        final HostData hostData = m.mock(HostData.class);
+        final Set<URN> urns = new UrnSet();
+        
+        setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
+        
+        SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
+        
+        assertEquals(0.0, srs.getPercentAvailable(urns.iterator().next()), 0.0);
+        srs.addQueryReply(searchResultHandler, queryReply, hostData);
+        assertEquals(100.0, srs.getPercentAvailable(urns.iterator().next()), 0.0);
+        
+        m.assertIsSatisfied();
+    }
+    
+    /**
+     * Add a QueryRequest and then a QueryReply. Mark the
+     * SearchResultStats as finished and verify that its
+     * state is in deed updated accordingly.
+     * 
+     * @throws Exception
+     */
+    public void testMarkAsFinished() throws Exception {
+        // add a request
+        // add a reply
+        // mark the srs as finished
+        // verify that it reports as being finished
+        
+        Mockery m = new Mockery();
+        
+        final QueryRequest queryRequest = m.mock(QueryRequest.class);
+        
+        List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
+        map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
+        
+        m.checking(new Expectations() {{
+            atLeast(1).of(queryRequest).isBrowseHostQuery();
+            
+            atLeast(1).of(queryRequest).isWhatIsNewRequest();
+            
+            atLeast(1).of(queryRequest).getGUID();
+            will(returnValue(new byte[16]));
+        }});
+        
+        SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
+        SearchResultHandlerImpl.GuidCount gc = (SearchResultHandlerImpl.GuidCount)srs;
+        
+        assertEquals(false, gc.isFinished());
+        ((SearchResultHandlerImpl.GuidCount)srs).markAsFinished();
+        assertEquals(true, gc.isFinished());
+        
+        m.assertIsSatisfied();
+    }
+    
+    /**
+     * 
+     * @throws Exception
+     */
+    public void testIncrement() throws Exception {
+        // add request
+        // verify zero results
+        // increment
+        // verify one result
+        
+        Mockery m = new Mockery();
+        
+        final QueryRequest queryRequest = m.mock(QueryRequest.class);
+        
+        List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
+        map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
+        
+        m.checking(new Expectations() {{
+            atLeast(1).of(queryRequest).isBrowseHostQuery();
+            
+            atLeast(1).of(queryRequest).isWhatIsNewRequest();
+            
+            atLeast(1).of(queryRequest).getGUID();
+            will(returnValue(new byte[16]));
+        }});
+        
+        SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
+        
+        assertEquals(0, srs.getNumResults());
+        ((SearchResultHandlerImpl.GuidCount)srs).increment(1);
+        assertEquals(1, srs.getNumResults());
+        
+        m.assertIsSatisfied();
+    }
+    
+    /**
+     * 
+     * @throws Exception
+     */
+    public void testNumResultsWithHandleQueryReply() throws Exception {
+        // add a request
+        // verify zero results
+        // add a reply
+        // verify one result
+        
+        Mockery m = new Mockery();
+        
+        final QueryRequest queryRequest = m.mock(QueryRequest.class);
+        final QueryReply queryReply = m.mock(QueryReply.class);
+        final HostData hostData = m.mock(HostData.class);
+        final Set<URN> urns = new UrnSet();
+        
+        setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
+        
+        SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
+        
+        assertEquals(0, srs.getNumResults());
+        srs.addQueryReply(searchResultHandler, queryReply, hostData);
+        assertEquals(1, srs.getNumResults());
+        
+        m.assertIsSatisfied();
+    }
+    
+    /**
+     * 
+     * 
+     * 
+     * @throws Exception
+     */
+    public void testGetNumResultsForQuery() throws Exception {
+        // add query request
+        // verify zero results for guid
+        // add query reply
+        // verify one result for guid
+        
+        Mockery m = new Mockery();
+        
+        final QueryRequest queryRequest = m.mock(QueryRequest.class);
+        final QueryReply queryReply = m.mock(QueryReply.class);
+        final HostData hostData = m.mock(HostData.class);
+        final Set<URN> urns = new UrnSet();
+  
+        byte[] guid = setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
+        
+        assertEquals(-1, searchResultHandler.getNumResultsForQuery(new GUID(guid)));
+        
+        SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
+        
+        assertEquals(0, searchResultHandler.getNumResultsForQuery(new GUID(guid)));
+        srs.addQueryReply(searchResultHandler, queryReply, hostData);
+        assertEquals(1, searchResultHandler.getNumResultsForQuery(new GUID(guid)));
+        
+        m.assertIsSatisfied();
+    }
+    
+    /**
+     * 
+     * @throws Exception
+     */
+    public void testIsWhatIsNew() throws Exception {
+        // add query request
+        //   is what is new request
+        // use query reply to call isWhatIsNew
+        // verify that it is true
+        
+        Mockery m = new Mockery();
+        
+        final QueryRequest queryRequest = m.mock(QueryRequest.class);
+        final QueryReply queryReply = m.mock(QueryReply.class);
+        
+        List<KeyValue<String, String>> map = new ArrayList<KeyValue<String, String>>();
+        map.add(new KeyValue<String, String>(LimeXMLNames.APPLICATION_NAME, "value"));
+        final byte[] guid = GUID.makeGuid();
+        
+        m.checking(new Expectations() {{
+            atLeast(1).of(queryRequest).isBrowseHostQuery();
+            
+            atLeast(1).of(queryRequest).isWhatIsNewRequest();
+            will(returnValue(true));
+            
+            atLeast(1).of(queryRequest).getGUID();
+            will(returnValue(guid));
+            
+            atLeast(1).of(queryReply).getGUID();
+            will(returnValue(guid));
+        }});
+        
+        assertEquals(false, searchResultHandler.isWhatIsNew(queryReply));
+        searchResultHandler.addQuery(queryRequest);
+        assertEquals(true, searchResultHandler.isWhatIsNew(queryReply));
+        
+        m.assertIsSatisfied();
+    }
+    
+    
+    
+    
+    
+    
+    
+    private QueryReply newQueryReply(Response[] responses, byte[] guid) throws Exception {
+        if (guid == null)
+            guid = GUID.makeGuid();
+        
         QueryReply reply = 
-               queryReplyFactory.createQueryReply(new byte[16], (byte)1, 6346,
+               queryReplyFactory.createQueryReply(guid, (byte)1, 6346,
                 new byte[] { (byte)1, (byte)1, (byte)1, (byte)1 }, 1, responses, new byte[16], LimeXMLDocumentHelper.getAggregateString(responses).getBytes(), false, false,
                 true, true, false, false, false, IpPort.EMPTY_SET, null);
         ForMeReplyHandler.addXMLToResponses(reply, limeXMLDocumentHelper);

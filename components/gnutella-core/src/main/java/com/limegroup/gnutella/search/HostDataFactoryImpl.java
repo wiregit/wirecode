@@ -83,7 +83,7 @@ public class HostDataFactoryImpl implements HostDataFactory {
         else
             speed = ByteUtils.long2int(reply.getSpeed()); //safe cast
         
-        return new HostData(clientGuid, messageGuid, speed, firewalled, busy, multicast,
+        return new HostDataImpl(clientGuid, messageGuid, speed, firewalled, busy, multicast,
                 chatEnabled, browseHostEnabled, measuredSpeed, ip, port, quality, vendor, proxies,
                 supportsFwt, fwtVersion, tlsCapable);
                 

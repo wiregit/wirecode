@@ -5,7 +5,6 @@ import java.util.Set;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
-import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -15,6 +14,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.SearchResultHandler;
+import com.limegroup.gnutella.search.SearchResultStats;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
@@ -119,21 +119,27 @@ public class SearchServicesImpl implements SearchServices {
     	return queryStats.get().getLastQueryTime();
     }
 
-    /** Just aggregates some common code in query() and queryWhatIsNew().
-     */ 
-    private void recordAndSendQuery(final QueryRequest qr, 
+    /**
+     * Just aggregates some common code in query() and queryWhatIsNew().
+     * 
+     * @param qr the search request 
+     * @param type
+     * @return The new stats object for this query.
+     */
+    private SearchResultStats recordAndSendQuery(final QueryRequest qr, 
                                            final MediaType type) {
         queryStats.get().recordQuery();
         responseVerifier.get().record(qr, type);
-        searchResultHandler.get().addQuery(qr); // so we can leaf guide....
+        SearchResultStats stats = searchResultHandler.get().addQuery(qr); // so we can leaf guide....
         messageRouter.get().sendDynamicQuery(qr);
+        
+        return stats;
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.SearchServices#queryWhatIsNew(byte[], com.limegroup.gnutella.MediaType)
      */
-    public void queryWhatIsNew(final byte[] guid, final MediaType type) {
-    	try {
+    public SearchResultStats queryWhatIsNew(final byte[] guid, final MediaType type) {
             QueryRequest qr = null;
             if (GUID.addressesMatch(guid, networkManager.get().getAddress(), networkManager.get().getPort())) {
                 // if the guid is encoded with my address, mark it as needing out
@@ -151,21 +157,16 @@ public class SearchServicesImpl implements SearchServices {
             if(FilterSettings.FILTER_WHATS_NEW_ADULT.getValue())
                 mutableGUIDFilter.get().addGUID(guid);
     
-            recordAndSendQuery(qr, type);
-    	} catch(Throwable t) {
-    		ErrorService.error(t);
-    	}
+            return recordAndSendQuery(qr, type);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.SearchServices#query(byte[], java.lang.String, java.lang.String, com.limegroup.gnutella.MediaType)
      */
-    public void query(final byte[] guid, 
+    public SearchResultStats query(final byte[] guid, 
     						 final String query, 
     						 final String richQuery, 
     						 final MediaType type) {
-    
-    	try {
             QueryRequest qr = null;
             if (networkManager.get().isIpPortValid() && (new GUID(guid)).addressesMatch(networkManager.get().getAddress(), 
                     networkManager.get().getPort())) {
@@ -180,24 +181,21 @@ public class SearchServicesImpl implements SearchServices {
             }
             else
                 qr = queryRequestFactory.get().createQuery(guid, query, richQuery, type);
-            recordAndSendQuery(qr, type);
-    	} catch(Throwable t) {
-    		ErrorService.error(t);
-    	}
+            return recordAndSendQuery(qr, type);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.SearchServices#query(byte[], java.lang.String)
      */
-    public void query(byte[] guid, String query) {
-        query(guid, query, null);
+    public SearchResultStats query(byte[] guid, String query) {
+        return query(guid, query, null);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.SearchServices#query(byte[], java.lang.String, com.limegroup.gnutella.MediaType)
      */
-    public void query(byte[] guid, String query, MediaType type) {
-    	query(guid, query, "", type);
+    public SearchResultStats query(byte[] guid, String query, MediaType type) {
+    	return query(guid, query, "", type);
     }
 
     /* (non-Javadoc)

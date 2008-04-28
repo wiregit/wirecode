@@ -153,6 +153,7 @@ import com.limegroup.gnutella.metadata.MetaDataFactoryImpl;
 import com.limegroup.gnutella.rudp.LimeWireGnutellaRudpModule;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.HostDataFactoryImpl;
+import com.limegroup.gnutella.search.LimeWireSearchModule;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryDispatcherImpl;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
@@ -211,6 +212,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireHashTreeModule());        
         binder().install(new LimeWireDHTModule());
         binder().install(new LimeWireHttpModule());
+        binder().install(new LimeWireSearchModule());
         binder().install(new LimeWireStatisticsModule());
         binder().install(new LimeWireGnutellaStatisticsModule());
         binder().install(new LimeWireGnutellaRudpModule());

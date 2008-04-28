@@ -1,18 +1,19 @@
 package com.limegroup.gnutella.filters;
 
 import java.util.List;
-import java.util.Set;
 import java.util.Vector;
 
 import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
-import org.limewire.io.IpPort;
 import org.limewire.util.BaseTestCase;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -32,6 +33,7 @@ public class KeywordFilterTest extends BaseTestCase {
     PingRequest pingRequestMock = null;
     Mockery context;
     
+    private ResponseFactory responseFactory;
     
     
 	public KeywordFilterTest(String name) {
@@ -48,13 +50,21 @@ public class KeywordFilterTest extends BaseTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+//              bind(ResponseVerifier.class).to(StubVerifier.class);
+//              bind(SearchResultHandler.class).to(SearchResultHandlerImpl.class);
+            }
+        });
         
         context = new Mockery();
                 
         queryRequestMock = context.mock(QueryRequest.class);
         queryReplyMock = context.mock(QueryReply.class);
         pingRequestMock = context.mock(PingRequest.class);
+        
+        responseFactory = injector.getInstance(ResponseFactory.class);
     }
     
     private void keywordContextValue(QueryRequest query, String keyword){
@@ -190,12 +200,8 @@ public class KeywordFilterTest extends BaseTestCase {
         long index = 0;
         long size = 0;
         LimeXMLDocument emptyDoc = null;
-        Set<URN> emptyurns = null;
-        Set<IpPort> alternateLocations = null;
-        long creationTime = 0;
-        byte[] extensions = null;
         
-        qrResponse = new Response(index,size,response, -1, emptyurns, emptyDoc, alternateLocations, creationTime, extensions,null, false);
+        qrResponse = responseFactory.createResponse(index, size, response, emptyDoc);
                      
         /*
          * add Response to Response List

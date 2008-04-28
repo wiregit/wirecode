@@ -1020,7 +1020,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
     public void testIsMetaFileWithAllLocales() throws Exception {
         for (Locale locale : Locale.getAvailableLocales()) {
             Locale.setDefault(locale);
-            Response response = new Response(100, 100, "hello world.torrent", "hello world.torrent".getBytes("UTF-8").length,
+            Response response = new ResponseImpl(100, 100, "hello world.torrent", "hello world.torrent".getBytes("UTF-8").length,
                     null, null, null, 5000, null, null, false);
             assertTrue("Failed for locale: " + locale, response.isMetaFile());
         }

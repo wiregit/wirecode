@@ -2725,7 +2725,6 @@ public abstract class FileManagerImpl implements FileManager {
     }
 
     /** A bunch of inspectables for FileManager */
-    @SuppressWarnings("unused")
     @InspectableContainer
     private class FMInspectables {
         /*
