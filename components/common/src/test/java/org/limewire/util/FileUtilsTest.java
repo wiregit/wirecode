@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.limewire.util.SystemUtils.SpecialLocations;
+
 import junit.framework.Test;
 
 /**
@@ -373,24 +375,24 @@ public final class FileUtilsTest extends BaseTestCase {
         assertEquals(expected, actual);
         
         // platform shell documents directory
-        expected = (new File(System.getProperty("user.home"), "Documents"));
+        expected = new File(SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS));
         actual = FileUtils.resolveSpecialPath("Documents>");
         assertEquals(expected, actual);
-        expected = (new File(System.getProperty("user.home"), "Documents/folder"));
+        expected = new File(SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS), "folder");
         actual = FileUtils.resolveSpecialPath("Documents>folder");
         assertEquals(expected, actual);
-        expected = (new File(System.getProperty("user.home"), "Documents/folder/subfolder"));
+        expected = new File(SystemUtils.getSpecialPath(SpecialLocations.DOCUMENTS), "folder/subfolder");
         actual = FileUtils.resolveSpecialPath("Documents>folder/subfolder");
         assertEquals(expected, actual);
         
         // platform shell desktop directory
-        expected = (new File(System.getProperty("user.home"), "Desktop"));
+        expected = new File(SystemUtils.getSpecialPath(SpecialLocations.DESKTOP));
         actual = FileUtils.resolveSpecialPath("Desktop>");
         assertEquals(expected, actual);
-        expected = (new File(System.getProperty("user.home"), "Desktop/folder"));
+        expected = new File(SystemUtils.getSpecialPath(SpecialLocations.DESKTOP), "folder");
         actual = FileUtils.resolveSpecialPath("Desktop>folder");
         assertEquals(expected, actual);
-        expected = (new File(System.getProperty("user.home"), "Desktop/folder/subfolder"));
+        expected = new File(SystemUtils.getSpecialPath(SpecialLocations.DESKTOP), "folder/subfolder");
         actual = FileUtils.resolveSpecialPath("Desktop>folder/subfolder");
         assertEquals(expected, actual);
     }
