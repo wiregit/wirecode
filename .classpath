@@ -39,6 +39,8 @@
 	<classpathentry kind="src" path="core/examples/mojito"/>
 	<classpathentry kind="src" output="components/geocode/build/classes" path="components/geocode/src/main/java"/>
 	<classpathentry kind="src" output="components/geocode/build/tests" path="components/geocode/src/test/java"/>
+	<classpathentry kind="src" path="components/filemanager/src/main/java"/>
+	<classpathentry kind="src" path="components/filemanager/src/test/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-net.jar"/>
