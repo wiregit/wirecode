@@ -34,7 +34,7 @@ public interface CapabilitiesVM extends VendorMessage.ControlMessage {
     /**
      * The current version of this message.
      */
-    public static final int VERSION = 0;
+    public static final int VERSION = 1;
 
     
     /**

@@ -1,42 +1,21 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import java.io.ByteArrayOutputStream;
+import java.util.Map;
+import java.util.TreeMap;
 
-import org.limewire.util.ByteOrder;
-
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.Message.Network;
+import org.limewire.collection.Comparators;
 
 public class CapabilitiesVMStubHelper {
     
-    public static CapabilitiesVMImpl.SupportedMessageBlock makeSMB(byte[] capability, int version) {
-        return new CapabilitiesVMImpl.SupportedMessageBlock(capability, version);
-    }
-
     public static CapabilitiesVM makeCapibilitesWithSimpp(int simppNumber) throws Exception {
-        //1. prepare the SMB
-        CapabilitiesVMImpl.SupportedMessageBlock simppSMB =
-            makeSMB(new byte[] { 'S', 'I', 'P', 'M' }, simppNumber);
-        //2. make the payload
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ByteOrder.short2leb((short)1, baos);
-        simppSMB.encode(baos);
-        byte[] payload = baos.toByteArray();
-        byte[] guid = GUID.makeGuid();
-        return new CapabilitiesVMImpl(guid, (byte)1, (byte)0, 1, payload, Network.UNKNOWN);
+        Map<byte[], Integer> caps = new TreeMap<byte[], Integer>(new Comparators.ByteArrayComparator());
+        caps.put(new byte[] { 'S', 'I', 'P', 'M' }, simppNumber);
+        return new CapabilitiesVMImpl(caps);
     }
     
     public static CapabilitiesVM makeCapabilitiesWithUpdate(int id) throws Exception {
-        //1. prepare the SMB
-        CapabilitiesVMImpl.SupportedMessageBlock smb =
-            makeSMB(new byte[] { 'U', 'P', 'L', 'M' }, id);
-            
-        //2. make the payload
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ByteOrder.short2leb((short)1, baos);
-        smb.encode(baos);
-        byte[] payload = baos.toByteArray();
-        byte[] guid = GUID.makeGuid();
-        return new CapabilitiesVMImpl(guid, (byte)1, (byte)0, 1, payload, Network.UNKNOWN);        
+        Map<byte[], Integer> caps = new TreeMap<byte[], Integer>(new Comparators.ByteArrayComparator());
+        caps.put(new byte[] { 'U', 'P', 'L', 'M' }, id);
+        return new CapabilitiesVMImpl(caps);        
     }
 }

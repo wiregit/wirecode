@@ -8,6 +8,7 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.Comparators;
 import org.limewire.collection.IntHashMap;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
@@ -26,7 +27,7 @@ public class VendorMessageFactoryImpl implements VendorMessageFactory {
     
     private static final Log LOG = LogFactory.getLog(VendorMessageFactoryImpl.class);
     
-    private static final Comparator<byte[]> COMPARATOR = new ByteArrayComparator();
+    private static final Comparator<byte[]> COMPARATOR = new Comparators.ByteArrayComparator();
     
     /** Map (VendorID -> Map (selector -> Parser)) */
     private volatile Map<byte[], IntHashMap<VendorMessageParser>> VENDORS =
@@ -135,20 +136,5 @@ public class VendorMessageFactoryImpl implements VendorMessageFactory {
         }
         
         return parser.parse(guid, ttl, hops, version, restOf, network);
-    }
-    
-    private static class ByteArrayComparator implements Comparator<byte[]> {
-        public int compare(byte[] a, byte[] b) {
-            int d = 0;
-            for(int i = 0; i < a.length; i++) {
-                d = (a[i] & 0xFF) - (b[i] & 0xFF);
-                if (d < 0) {
-                    return -1;
-                } else if (d > 0) {
-                    return 1;
-                }
-            }
-            return 0;
-        }        
     }
 }

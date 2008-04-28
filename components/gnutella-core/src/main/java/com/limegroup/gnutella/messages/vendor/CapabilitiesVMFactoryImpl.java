@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.TreeMap;
+
+import org.limewire.collection.Comparators;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -50,59 +52,31 @@ public class CapabilitiesVMFactoryImpl implements CapabilitiesVMFactory {
         currentCapabilities = new CapabilitiesVMImpl(getSupportedMessages());
     }
 
-    // ADD NEW CAPABILITIES HERE AS YOU BUILD THEM....
     /**
      * Adds all supported capabilities to the given set.
      */
     // protected for testing
-    protected Set<CapabilitiesVMImpl.SupportedMessageBlock> getSupportedMessages() {
-        Set<CapabilitiesVMImpl.SupportedMessageBlock> supported = new HashSet<CapabilitiesVMImpl.SupportedMessageBlock>();
-        CapabilitiesVMImpl.SupportedMessageBlock smb = null;
+    protected Map<byte[], Integer> getSupportedMessages() {
+        Map<byte[], Integer> supported = new TreeMap<byte[], Integer>(new Comparators.ByteArrayComparator());
         
         // old shutoff capabilities -- the maxid for each.
-        smb = new CapabilitiesVMImpl.SupportedMessageBlock(
-                new byte[] {'I', 'M', 'P', 'P' }, 2147483647);
-        supported.add(smb);
-        smb = new CapabilitiesVMImpl.SupportedMessageBlock(
-                new byte[] { 'L', 'M', 'U', 'P' }, 2147483647);
-        supported.add(smb);
+        supported.put(new byte[] {'I', 'M', 'P', 'P' }, 2147483647);
+        supported.put(new byte[] { 'L', 'M', 'U', 'P' }, 2147483647);
         
-        smb = new CapabilitiesVMImpl.SupportedMessageBlock(
-                CapabilitiesVM.FEATURE_SEARCH_BYTES,
-                FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR);
-        supported.add(smb);
-                
-        smb = new CapabilitiesVMImpl.SupportedMessageBlock(
-                CapabilitiesVM.SIMPP_BYTES, simppManager.get().getVersion());
-        supported.add(smb);
-        
-        smb = new CapabilitiesVMImpl.SupportedMessageBlock(
-                CapabilitiesVM.UPDATE_BYTES, updateHandler.get().getLatestId());
-        supported.add(smb);
-        
-        smb = new CapabilitiesVMImpl.SupportedMessageBlock(
-                CapabilitiesVM.INCOMING_TCP_BYTES,
-                networkManager.get().acceptedIncomingConnection() ? 1 : 0);        
-        supported.add(smb);
-        
-        smb = new CapabilitiesVMImpl.SupportedMessageBlock(
-                CapabilitiesVM.FWT_SUPPORT_BYTES,
-                networkManager.get().supportsFWTVersion());        
-        supported.add(smb);
+        supported.put(CapabilitiesVM.FEATURE_SEARCH_BYTES, FeatureSearchData.FEATURE_SEARCH_MAX_SELECTOR);
+        supported.put(CapabilitiesVM.SIMPP_BYTES, simppManager.get().getVersion());
+        supported.put(CapabilitiesVM.UPDATE_BYTES, updateHandler.get().getLatestId());
+        supported.put(CapabilitiesVM.INCOMING_TCP_BYTES, networkManager.get().acceptedIncomingConnection() ? 1 : 0);
+        supported.put(CapabilitiesVM.FWT_SUPPORT_BYTES, networkManager.get().supportsFWTVersion());
         
         if (dhtManager.get().isMemberOfDHT()) {
             DHTMode mode = dhtManager.get().getDHTMode();
             assert (mode != null);
-            smb = new CapabilitiesVMImpl.SupportedMessageBlock(mode
-                    .getCapabilityName(), dhtManager.get().getVersion()
-                    .shortValue());
-            supported.add(smb);
+            supported.put(mode.getCapabilityName(), dhtManager.get().getVersion().shortValue());
         }
 
         if (SSLSettings.isIncomingTLSEnabled()) {
-            smb = new CapabilitiesVMImpl.SupportedMessageBlock(
-                    CapabilitiesVM.TLS_SUPPORT_BYTES, 1);
-            supported.add(smb);
+            supported.put(CapabilitiesVM.TLS_SUPPORT_BYTES, 1);
         }
 
         return supported;

@@ -253,6 +253,19 @@ public final class Comparators {
         }
     }
     
+    /** Compares two byte arrays. */
+    public static class ByteArrayComparator implements Comparator<byte[]> {
+        public int compare(byte[] a, byte[] b) {
+            for(int i = 0; i < a.length; i++) {
+                if(a[i] > b[i])
+                    return 1;
+                else if(a[i] < b[i])
+                    return -1;
+            }
+            return 0;
+        }        
+    }
+
     /**
      * Compares two Integer objects numerically.  This function is identical
      * to the Integer compareTo method.  The Integer compareTo method

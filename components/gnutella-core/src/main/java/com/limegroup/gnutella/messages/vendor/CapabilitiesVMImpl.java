@@ -5,10 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.TreeMap;
 
+import org.limewire.collection.Comparators;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
@@ -18,10 +18,8 @@ import com.limegroup.gnutella.messages.FeatureSearchData;
 
 public class CapabilitiesVMImpl extends AbstractVendorMessage implements CapabilitiesVM {
     
-    /**
-     * The capabilities supported.
-     */
-    private final Set<SupportedMessageBlock> _capabilitiesSupported;
+    /** The capabilities supported. */
+    private final Map<byte[], Integer> capabilities;
 
     /**
      * Constructs a new CapabilitiesVM from data read off the network.
@@ -30,20 +28,26 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
                    int version, byte[] payload, Network network) throws BadPacketException {
         super(guid, ttl, hops, F_NULL_VENDOR_ID, F_CAPABILITIES, version,
               payload, network);
-
-        _capabilitiesSupported = new HashSet<SupportedMessageBlock>();
+        capabilities = new TreeMap<byte[], Integer>(new Comparators.ByteArrayComparator());
         
         // populate the Set of supported messages....
         try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(getPayload());
+            ByteArrayInputStream bais = new ByteArrayInputStream(payload);
             int vectorSize = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
             // constructing the SMB will cause a BadPacketException if the
             // network data is invalid
             for (int i = 0; i < vectorSize; i++) {
-                _capabilitiesSupported.add(new SupportedMessageBlock(bais));
+                readCapability(bais, false);
+            }
+            
+            if(bais.available() > 0) {
+                vectorSize = ByteOrder.ushort2int(ByteOrder.leb2short(bais));
+                for(int i = 0; i < vectorSize; i++) {
+                    readCapability(bais, true);
+                }
             }
         } catch (IOException ioe) {
-            ErrorService.error(ioe); // impossible.
+            throw new BadPacketException(ioe);
         }
     }
 
@@ -52,21 +56,32 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
      * Internal constructor for creating the sole instance of our 
      * CapabilitiesVM.
      */
-    CapabilitiesVMImpl(Set<SupportedMessageBlock> _capabilitiesSupported) {
+    CapabilitiesVMImpl(Map<byte[], Integer> _capabilitiesSupported) {
         super(F_NULL_VENDOR_ID, F_CAPABILITIES, VERSION, derivePayload(_capabilitiesSupported));
-        this._capabilitiesSupported = _capabilitiesSupported;
+        this.capabilities = _capabilitiesSupported;
     }
     
     /**
      * Generates the default payload, using all our supported messages.
      */
-    private static byte[] derivePayload(Set<SupportedMessageBlock> hashSet) {
+    private static byte[] derivePayload(Map<byte[], Integer> allCapabilities) {
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)hashSet.size(), baos);
-            for(SupportedMessageBlock currSMP : hashSet)
-                currSMP.encode(baos);
-            return baos.toByteArray();
+            Map<byte[], Integer> capsNeedingInt = new TreeMap<byte[], Integer>(new Comparators.ByteArrayComparator());
+            
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteOrder.short2leb((short)allCapabilities.size(), out);
+            for(Map.Entry<byte[], Integer> entry : allCapabilities.entrySet()) {
+                writeCapability(out, entry.getKey(), entry.getValue(), false);
+                if(entry.getValue() > 65535)
+                    capsNeedingInt.put(entry.getKey(), entry.getValue());
+            }
+            if(capsNeedingInt.size() > 0) {
+                ByteOrder.short2leb((short)capsNeedingInt.size(), out);
+                for(Map.Entry<byte[], Integer> entry : capsNeedingInt.entrySet()) {
+                    writeCapability(out, entry.getKey(), entry.getValue(), true);
+                }   
+            }
+            return out.toByteArray();
         } catch (IOException ioe) {
             ErrorService.error(ioe); // impossible.
             return null;
@@ -79,12 +94,11 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
      * of the message supported.
      */
     public int supportsCapability(byte[] capabilityName) {
-        for(SupportedMessageBlock currSMP : _capabilitiesSupported) {
-            int version = currSMP.matches(capabilityName);
-            if (version > -1)
-                return version;
-        }
-        return -1;
+        Integer version = capabilities.get(capabilityName);
+        if(version == null || version <= -1)
+            return -1;
+        else
+            return version;
     }
     
     /**
@@ -172,7 +186,7 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
         // two of these messages are the same if the support the same messages
         if (other instanceof CapabilitiesVMImpl) {
             CapabilitiesVMImpl vmp = (CapabilitiesVMImpl) other;
-            return _capabilitiesSupported.equals(vmp._capabilitiesSupported);
+            return capabilities.equals(vmp.capabilities);
         }
 
         return false;
@@ -180,85 +194,31 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
     
     // override super
     public int hashCode() {
-        return 17*_capabilitiesSupported.hashCode();
+        return capabilities.hashCode();
     }
     
-
-    /** Container for vector elements.
-     */  
-    public static class SupportedMessageBlock {
-        final byte[] _capabilityName;
-        final int _version;
-        final int _hashCode;
+    private void readCapability(InputStream input, boolean allow4ByteVersion) throws IOException {
+        int required = allow4ByteVersion ? 8 : 6;
         
-        public String toString() {
-            return new String(_capabilityName) + "/" + _version;
-        }
-
-        public SupportedMessageBlock(byte[] capabilityName, int version) {
-            _capabilityName = capabilityName;
-            _version = version;
-            _hashCode = computeHashCode(_capabilityName, _version);
-        }
-
-        /**
-         * Constructs a new SupportedMessageBlock with data from the 
-         * InputStream.  If not enough data is available,
-         * throws BadPacketException.
-         */
-        public SupportedMessageBlock(InputStream encodedBlock)
-          throws BadPacketException, IOException {
-            if (encodedBlock.available() < 6)
-                throw new BadPacketException("invalid block.");
-            
-            // first 4 bytes are capability name
-            _capabilityName = new byte[4];
-            encodedBlock.read(_capabilityName, 0, _capabilityName.length);
-
-            _version = ByteOrder.ushort2int(ByteOrder.leb2short(encodedBlock));
-            _hashCode = computeHashCode(_capabilityName, _version);
-
-        }
+        if (input.available() < required)
+            throw new IOException("invalid block.");
         
-        /**
-         * Writes this capability (and version) to the OutputStream.
-         */
-        public void encode(OutputStream out) throws IOException {
-            out.write(_capabilityName);
-            ByteOrder.short2leb((short)_version, out);
-        }
-
-        /** @return 0 or more if this matches the message you are looking for.
-         *  Otherwise returns -1;
-         */
-        public int matches(byte[] capabilityName) {
-            if (Arrays.equals(_capabilityName, capabilityName))
-                return _version;
-            else 
-                return -1;
-        }
-
-        public boolean equals(Object other) {
-            if (other instanceof SupportedMessageBlock) {
-                SupportedMessageBlock vmp = (SupportedMessageBlock) other;
-                return ((_version == vmp._version) &&
-                        (Arrays.equals(_capabilityName, vmp._capabilityName))
-                        );
-            }
-            return false;
-        }
-
-        public int hashCode() {
-            return _hashCode;
-        }
+        byte[] name = new byte[4];
+        input.read(name, 0, name.length);
         
-        private static int computeHashCode(byte[] capabilityName, int version) {
-            int hashCode = 0;
-            hashCode += 37*version;
-            for (int i = 0; i < capabilityName.length; i++)
-                hashCode += 37*capabilityName[i];
-            return hashCode;
-        }
+        int version = allow4ByteVersion ?
+                ByteOrder.leb2int(input) : 
+                ByteOrder.ushort2int(ByteOrder.leb2short(input));
+                
+        capabilities.put(name, version);
+    }
+    
+    static void writeCapability(OutputStream out, byte[] name, int version, boolean allow4ByteVersion) throws IOException {
+        out.write(name);
+        if(allow4ByteVersion)
+            ByteOrder.int2leb(version, out);
+        else
+            ByteOrder.short2leb((short)version, out);
     }
 
     /** Overridden purely for stats handling.
@@ -268,7 +228,7 @@ public class CapabilitiesVMImpl extends AbstractVendorMessage implements Capabil
     }
 
     public String toString() {
-        return "{CapabilitiesVM:"+super.toString()+"; supporting: " + _capabilitiesSupported + "}";
+        return "{CapabilitiesVM:"+super.toString()+"; supporting: " + capabilities + "}";
     }
 
 }
