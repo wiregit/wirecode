@@ -159,6 +159,7 @@ import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
 import com.limegroup.gnutella.settings.SettingsBackedProxySettings;
 import com.limegroup.gnutella.settings.SettingsBackedSocketBindingSettings;
+import com.limegroup.gnutella.simpp.LimeWireSimppModule;
 import com.limegroup.gnutella.statistics.LimeWireGnutellaStatisticsModule;
 import com.limegroup.gnutella.tigertree.LimeWireHashTreeModule;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
@@ -219,6 +220,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimewireGeocodeModule(GeocoderImpl.class));        
         binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, 
                 PromotionServicesImpl.class));
+        binder().install(new LimeWireSimppModule());
         
         bind(LimeWireCore.class);
         

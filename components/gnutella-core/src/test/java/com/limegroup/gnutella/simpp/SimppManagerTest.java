@@ -488,7 +488,7 @@ public class SimppManagerTest extends LimeTestCase {
         FileUtils.copy(inputFile, _simppFile);
         
 //        PrivilegedAccessor.setValue(SimppManager.class, "INSTANCE", null);
-        PrivilegedAccessor.setValue(SimppManager.class, "MIN_VERSION", 
+        PrivilegedAccessor.setValue(SimppManagerImpl.class, "MIN_VERSION", 
                                     new Integer(0));//so we can use 1,2,3
         //reload the SimppManager and Capabilities VM
         if (capabilitiesVMFactory != null) {
