@@ -15,14 +15,14 @@ public class UpdateMessageVerifierImplTest extends BaseTestCase {
     
     public static Test suite() {
         return buildTestSuite(UpdateMessageVerifierImplTest.class);
-    }
+    }   
 
     public void testDefaultBindings() {
         Injector injector = LimeTestUtils.createInjector();
         assertEquals(UpdateMessageVerifierImpl.class, injector.getInstance(UpdateMessageVerifier.class).getClass());
     }
     
-    private final String SIGNED_ASDF = "GAWAEFDW7Q73ILI2N5FSNPS7ASVYZ646BFYLZLQCCQ6G3VLJD4EE7KNGHVUDPLCALWTH2R4BLQ||asdf\n";
+    private final String SIGNED_ASDF = "GAWAEFCXLZGA6CDODRDP35ZRU3XQS7LGUK3OH4ICCR5FMKRSATRE4RSHBGJ6CB34E5RAYQATJY||asdf\n";
     
     public void testMessageVerifies() {
         Injector injector = LimeTestUtils.createInjector();

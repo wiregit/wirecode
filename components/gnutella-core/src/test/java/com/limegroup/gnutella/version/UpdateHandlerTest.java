@@ -44,7 +44,7 @@ import com.limegroup.gnutella.stubs.ScheduledExecutorServiceStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class UpdateHandlerTest extends LimeTestCase {
-
+    
     public UpdateHandlerTest(String name) {
         super(name);
     }
