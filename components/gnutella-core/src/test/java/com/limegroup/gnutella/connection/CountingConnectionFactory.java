@@ -2,6 +2,7 @@ package com.limegroup.gnutella.connection;
 
 import java.net.Socket;
 
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 
@@ -23,6 +24,7 @@ public class CountingConnectionFactory implements BlockingConnectionFactory {
     private final MessagesSupportedVendorMessage supportedVendorMessage;
     private final MessageFactory messageFactory;
     private final NetworkManager networkManager;
+    private final NetworkInstanceUtils networkInstanceUtils;
     
 
     @Inject
@@ -30,13 +32,15 @@ public class CountingConnectionFactory implements BlockingConnectionFactory {
             Provider<SocketsManager> socketsManager,
             Provider<Acceptor> acceptor,
             MessagesSupportedVendorMessage supportedVendorMessage,
-            MessageFactory messageFactory, NetworkManager networkManager) {
+            MessageFactory messageFactory, NetworkManager networkManager,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.capabilitiesVMFactory = capabilitiesVMFactory;
         this.socketsManager = socketsManager;
         this.acceptor = acceptor;
         this.supportedVendorMessage = supportedVendorMessage;
         this.messageFactory = messageFactory;
         this.networkManager = networkManager;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
     
     public CountingConnection createConnection(Socket socket) {
@@ -51,7 +55,7 @@ public class CountingConnectionFactory implements BlockingConnectionFactory {
             ConnectType connectType) {
         return new CountingConnection(host, port, connectType, capabilitiesVMFactory,
                 socketsManager.get(), acceptor.get(), supportedVendorMessage,
-                messageFactory, networkManager);
+                messageFactory, networkManager, networkInstanceUtils);
     }
     
 }

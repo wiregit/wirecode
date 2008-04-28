@@ -17,9 +17,10 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.collection.FixedsizePriorityQueue;
+import org.limewire.io.GGEP;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.LocalSocketAddressProvider;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
@@ -32,7 +33,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
-import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.GGEPKeys;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
@@ -50,7 +51,6 @@ public class HostCatcherTest extends LimeTestCase {
     
     private HostCatcher hostCatcher;
     private Injector injector;
-    private LocalSocketAddressProvider oldProvider;
 
     public HostCatcherTest(String name) {
         super(name);
@@ -78,11 +78,6 @@ public class HostCatcherTest extends LimeTestCase {
         injector = LimeTestUtils.createInjector();
         hostCatcher = injector.getInstance(HostCatcher.class);
         hostCatcher.initialize();
-        oldProvider = LocalSocketAddressService.getSharedProvider();
-    }
-    
-    public void tearDown() {
-        LocalSocketAddressService.setSocketAddressProvider(oldProvider);
     }
     
     /**
@@ -606,7 +601,7 @@ public class HostCatcherTest extends LimeTestCase {
         
         // Test with UDPHC pongs.
         GGEP ggep = new GGEP();
-        ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
+        ggep.put(GGEPKeys.GGEP_HEADER_UDP_HOST_CACHE);
         PingReply pr = pingReplyFactory.create(GUID.makeGuid(), (byte)1, 1,
                     new byte[] { 1, 1, 1, 1 },
                     0, 0, false, ggep);
@@ -624,7 +619,7 @@ public class HostCatcherTest extends LimeTestCase {
         
         // Test with a name in the cache.
         ggep = new GGEP();
-        ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE, "www.limewire.org");
+        ggep.put(GGEPKeys.GGEP_HEADER_UDP_HOST_CACHE, "www.limewire.org");
         pr = pingReplyFactory.create(GUID.makeGuid(), (byte)1, 1,
                     new byte[] { 5, 4, 3, 2 },
                     0, 0, false, ggep);
@@ -652,7 +647,7 @@ public class HostCatcherTest extends LimeTestCase {
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
         out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
         out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
-        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        ggep.put(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
         PingReply pr = pingReplyFactory.create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
@@ -674,8 +669,8 @@ public class HostCatcherTest extends LimeTestCase {
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
         out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
         out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
-        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
-        ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
+        ggep.put(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        ggep.put(GGEPKeys.GGEP_HEADER_UDP_HOST_CACHE);
         PingReply pr = pingReplyFactory.create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
@@ -697,7 +692,7 @@ public class HostCatcherTest extends LimeTestCase {
         	"www.limewire.com:6379\n"+
         	"www.eff.org\n"+
             "www.test.org:1";
-        ggep.putCompressed(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, addrs.getBytes());
+        ggep.putCompressed(GGEPKeys.GGEP_HEADER_PACKED_HOSTCACHES, addrs.getBytes());
         PingReply pr = pingReplyFactory.create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
             0, 0, false, ggep);
@@ -824,30 +819,30 @@ public class HostCatcherTest extends LimeTestCase {
 
     @SuppressWarnings("unchecked")
     public void testPingTagging() throws Exception {
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
-            public byte[] getLocalAddress() {
-                return null;
-            }
-
-            public int getLocalPort() {
-                return 0;
-            }
-
-            public boolean isLocalAddressPrivate() {
-                return false;
-            };
-
-            public boolean isTLSCapable() {
-                return false;
-            }
-        });
-        
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);
+                bind(LocalSocketAddressProvider.class).toInstance(new LocalSocketAddressProvider() {
+                    public byte[] getLocalAddress() {
+                        return null;
+                    }
+
+                    public int getLocalPort() {
+                        return 0;
+                    }
+
+                    public boolean isLocalAddressPrivate() {
+                        return false;
+                    };
+
+                    public boolean isTLSCapable() {
+                        return false;
+                    }
+                });
             }
         });
+        
         hostCatcher = injector.getInstance(HostCatcher.class);
         hostCatcher.initialize();       
         
@@ -960,10 +955,10 @@ public class HostCatcherTest extends LimeTestCase {
         out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
         out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
         out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
-        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        ggep.put(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
         // mark the second & third items as TLS
-        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS_TLS, (0x40 | 0x20));
-        ggep.put(GGEP.GGEP_HEADER_TLS_CAPABLE); // mark this guy as TLS capable.
+        ggep.put(GGEPKeys.GGEP_HEADER_PACKED_IPPORTS_TLS, (0x40 | 0x20));
+        ggep.put(GGEPKeys.GGEP_HEADER_TLS_CAPABLE); // mark this guy as TLS capable.
         PingReply pr = pingReplyFactory.create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 0, 1, 0 },
             0, 0, false, ggep);
@@ -1013,19 +1008,22 @@ public class HostCatcherTest extends LimeTestCase {
         private final PingRequestFactory pingRequestFactory;
         private final ConnectionServices connectionServices;
         private final Provider<HostCatcher> hostCatcher;
+        private final NetworkInstanceUtils networkInstanceUtils;
 
         @Inject
         public UDPHostCacheFactoryStub(Provider<MessageRouter> messageRouter,
                 PingRequestFactory pingRequestFactory, ConnectionServices connectionServices,
-                Provider<HostCatcher> hostCatcher) {
+                Provider<HostCatcher> hostCatcher, NetworkInstanceUtils networkInstanceUtils) {
             this.messageRouter = messageRouter;
             this.pingRequestFactory = pingRequestFactory;
             this.connectionServices = connectionServices;
             this.hostCatcher = hostCatcher;
+            this.networkInstanceUtils = networkInstanceUtils;
         }
 
         public UDPHostCache createUDPHostCache(UDPPinger pinger) {
-            return new StubUDPBootstrapper(pinger, messageRouter, pingRequestFactory, connectionServices, hostCatcher);
+            return new StubUDPBootstrapper(pinger, messageRouter, pingRequestFactory,
+                    connectionServices, hostCatcher, networkInstanceUtils);
         }
 
         public UDPHostCache createUDPHostCache(long expiryTime, UDPPinger pinger) {
@@ -1040,8 +1038,9 @@ public class HostCatcherTest extends LimeTestCase {
         
         public StubUDPBootstrapper(UDPPinger pinger, Provider<MessageRouter> messageRouter,
                 PingRequestFactory pingRequestFactory, ConnectionServices connectionServices,
-                Provider<HostCatcher> hostCatcher) {
-            super(pinger, messageRouter, pingRequestFactory, connectionServices);
+                Provider<HostCatcher> hostCatcher, NetworkInstanceUtils networkInstanceUtils) {
+            super(pinger, messageRouter, pingRequestFactory, connectionServices,
+                    networkInstanceUtils);
             this.hostCatcher = hostCatcher;
         }
 

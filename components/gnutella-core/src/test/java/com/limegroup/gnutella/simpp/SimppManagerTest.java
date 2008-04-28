@@ -16,6 +16,7 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -77,7 +78,7 @@ public class SimppManagerTest extends LimeTestCase {
         return buildTestSuite(SimppManagerTest.class);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         junit.textui.TestRunner.run(suite());
     }
 
@@ -106,18 +107,14 @@ public class SimppManagerTest extends LimeTestCase {
     }
     
     private void setSettings() throws Exception {
-        String simppDir = "com/limegroup/gnutella/simpp/";
 
-        OLD_SIMPP_FILE = TestUtils.getResourceFile(simppDir+"oldFile.xml");
-        MIDDLE_SIMPP_FILE = TestUtils.getResourceFile
-                                                 (simppDir+"middleFile.xml");
-        NEW_SIMPP_FILE = TestUtils.getResourceFile(simppDir+"newFile.xml");
-        DEF_SIG_FILE = TestUtils.getResourceFile(simppDir+"defSigFile.xml");
-        DEF_MESSAGE_FILE = TestUtils.getResourceFile
-                                               (simppDir+"defMessageFile.xml");
-        BAD_XML_FILE = TestUtils.getResourceFile(simppDir+"badXmlFile.xml");
-        RANDOM_BYTES_FILE = TestUtils.getResourceFile
-                                                    (simppDir+"randFile.xml");
+        OLD_SIMPP_FILE    = TestUtils.getResourceInPackage("oldFile.xml", SimppManagerTest.class);
+        MIDDLE_SIMPP_FILE = TestUtils.getResourceInPackage("middleFile.xml", SimppManagerTest.class);
+        NEW_SIMPP_FILE    = TestUtils.getResourceInPackage("newFile.xml", SimppManagerTest.class);
+        DEF_SIG_FILE      = TestUtils.getResourceInPackage("defSigFile.xml", SimppManagerTest.class);
+        DEF_MESSAGE_FILE  = TestUtils.getResourceInPackage("defMessageFile.xml",SimppManagerTest.class);
+        BAD_XML_FILE      = TestUtils.getResourceInPackage("badXmlFile.xml", SimppManagerTest.class);
+        RANDOM_BYTES_FILE = TestUtils.getResourceInPackage("randFile.xml", SimppManagerTest.class);
 
         assertTrue(OLD_SIMPP_FILE.exists());
         assertTrue(MIDDLE_SIMPP_FILE.exists());
@@ -126,13 +123,6 @@ public class SimppManagerTest extends LimeTestCase {
         assertTrue(BAD_XML_FILE.exists());
         assertTrue(RANDOM_BYTES_FILE.exists());
         
-        // TODO: make simpp more than 1 class with 1 method.
-        File pub = TestUtils.getResourceFile(simppDir+"pub1.key");
-        File pub2 = new File(".", "pub1.key");
-        pub2.delete();
-        FileUtils.copy(pub, pub2);
-        assertTrue("local public key doesn't exist", pub2.exists());
-
         _simppFile = new File(_settingsDir, "simpp.xml");
 
         //set up the correct simpp version
@@ -155,7 +145,7 @@ public class SimppManagerTest extends LimeTestCase {
                                                    new String[] {"127.*.*.*"});
         
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
-        ConnectionSettings.PORT.setValue(PORT);
+        NetworkSettings.PORT.setValue(PORT);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
         UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
@@ -165,7 +155,7 @@ public class SimppManagerTest extends LimeTestCase {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         
         ConnectionSettings.DISABLE_UPNP.setValue(true);
-        ConnectionSettings.PORT.setValue(PORT);
+        NetworkSettings.PORT.setValue(PORT);
         
         ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");

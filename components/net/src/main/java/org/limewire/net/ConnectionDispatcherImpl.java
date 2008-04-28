@@ -11,7 +11,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.IOUtils;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+
+import com.google.inject.Inject;
 
 public class ConnectionDispatcherImpl implements ConnectionDispatcher {
     
@@ -29,7 +32,11 @@ public class ConnectionDispatcherImpl implements ConnectionDispatcher {
      */
     private int longestWordSize = 0;
     
-    public ConnectionDispatcherImpl() {
+    private final NetworkInstanceUtils networkInstanceUtils;
+    
+    @Inject
+    public ConnectionDispatcherImpl(NetworkInstanceUtils networkInstanceUtils) {
+        this.networkInstanceUtils = networkInstanceUtils;
     }
     
     public int getMaximumWordSize() {
@@ -72,6 +79,7 @@ public class ConnectionDispatcherImpl implements ConnectionDispatcher {
         try {
             client.setSoTimeout(0);
         } catch(SocketException se) {
+            se.printStackTrace();
             LOG.warn("Unable to set soTimeout, closing client", se);
             IOUtils.close(client);
             return;
@@ -82,8 +90,7 @@ public class ConnectionDispatcherImpl implements ConnectionDispatcher {
        
         // no protocol available to handle this word 
         if (delegator == null) {
-            // FIXME notify some listener
-//            HTTPStat.UNKNOWN_REQUESTS.incrementStat();
+            System.out.println("no pro: " + word);
         	if (LOG.isErrorEnabled())
         		LOG.error("Unknown protocol: " + word);
         	IOUtils.close(client);
@@ -98,7 +105,7 @@ public class ConnectionDispatcherImpl implements ConnectionDispatcher {
      * supposed to be local, and whether the reading should happen
      * in a new thread or not.
      */
-    private static class Delegator {
+    private class Delegator {
     	private final ConnectionAcceptor acceptor;
     	private final boolean localOnly, blocking;
     	
@@ -118,7 +125,7 @@ public class ConnectionDispatcherImpl implements ConnectionDispatcher {
     			drop = true;
             }
             
-    		if (!localOnly && localHost && NetworkUtils.isPrivateAddress(sock.getLocalAddress())) {
+    		if (!localOnly && localHost && networkInstanceUtils.isPrivateAddress(sock.getLocalAddress())) {
                 LOG.debug("Dropping because we want an external connection, and this is localhost");
     			drop = true;
             }

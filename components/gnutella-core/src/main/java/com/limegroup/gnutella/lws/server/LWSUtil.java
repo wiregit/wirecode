@@ -37,5 +37,5 @@ public final class LWSUtil {
             // no the end of the world
         }
         return new Tagged<String>(result, true);
-    }
+    } 
 }

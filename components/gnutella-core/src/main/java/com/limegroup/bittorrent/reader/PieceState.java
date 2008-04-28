@@ -5,8 +5,6 @@ import org.limewire.collection.NECallable;
 import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTPiece;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
-import com.limegroup.bittorrent.statistics.BTMessageStat;
-import com.limegroup.bittorrent.statistics.BTMessageStatBytes;
 
 /**
  * State that parses the Piece message. 
@@ -80,9 +78,6 @@ class PieceState extends BTReadMessageState implements NECallable<BTPiece> {
 		}
 		
 		if (currentOffset + available == complete.getHigh() + 1) {
-			BTMessageStat.INCOMING_PIECE.incrementStat();
-			BTMessageStatBytes.INCOMING_PIECE.addData(5 + length);
-			
 			// we're done receiving this piece, request more.
 			readerState.getHandler().finishReceivingPiece();
 			if (!writeExpected)

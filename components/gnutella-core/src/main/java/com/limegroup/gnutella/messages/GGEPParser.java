@@ -2,6 +2,8 @@ package com.limegroup.gnutella.messages;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.GGEP;
 
 /**
  * Allows multiple GGEP blocks to be parsed, storing
@@ -17,6 +19,8 @@ public class GGEPParser {
     private GGEP secure  = null;
     private int secureStart = -1;
     private int secureEnd = -1;
+    private int normalStart = -1;
+    private int normalEnd = -1;
     
     /**
      * Scans through the data, starting at idx, looking for the first
@@ -50,12 +54,14 @@ public class GGEPParser {
                     break;
                 
                 GGEP ggep = new GGEP(data, idx, storage);
-                if(ggep.hasKey(GGEP.GGEP_HEADER_SECURE_BLOCK)) {
+                if(ggep.hasKey(GGEPKeys.GGEP_HEADER_SECURE_BLOCK)) {
                     secure = ggep;
                     secureStart = idx;
                     secureEnd = storage[0];
                     break;
                 } else {
+                    normalStart = idx;
+                    normalEnd = storage[0];
                     if(normal == null)
                         normal = ggep;
                     else
@@ -90,5 +96,12 @@ public class GGEPParser {
     public int getSecureEndIndex() {
         return secureEnd;
     }
-
+    
+    public int getNormalStartIndex() {
+        return normalStart;
+    }
+    
+    public int getNormalEndIndex() {
+        return normalEnd;
+    }
 }

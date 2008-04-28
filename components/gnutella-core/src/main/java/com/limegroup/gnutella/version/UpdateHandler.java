@@ -46,4 +46,9 @@ public interface UpdateHandler {
      */
     public void inNetworkDownloadFinished(final URN urn, final boolean good);
 
+    /**
+     * Returns the final bytes that the old key system used for update responses.
+     */
+    public byte[] getOldUpdateResponse();
+
 }

@@ -7,10 +7,12 @@ import java.util.List;
 
 import junit.framework.Test;
 
-import org.limewire.collection.NameValue;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.GGEP;
+import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.util.NameValue;
 import org.limewire.util.PrivilegedAccessor;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GUID;
@@ -46,12 +48,15 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
+            }
+        });
         pingRequestFactory = injector.getInstance(PingRequestFactory.class);
         messageFactory = injector.getInstance(MessageFactory.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
-        
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
     }
 
     public void testQueryKeyPing() throws Exception {
@@ -70,7 +75,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     public void testGGEPPing() throws Exception {
         // first make a GGEP block....
         GGEP ggepBlock = new GGEP(true);
-        ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+        ggepBlock.put(GGEPKeys.GGEP_HEADER_QUERY_KEY_SUPPORT);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ggepBlock.write(baos);
 
@@ -270,7 +275,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     public void testSupportsCachedPongData() throws Exception {
         List ggeps = new LinkedList();
-        ggeps.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS));
+        ggeps.add(new NameValue(GGEPKeys.GGEP_HEADER_SUPPORT_CACHE_PONGS));
         PingRequest pr = make(ggeps);
         assertTrue(pr.supportsCachedPongs());
         byte[] data = pr.getSupportsCachedPongData();
@@ -278,7 +283,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
         assertEquals(0, data.length);
         
         ggeps.clear();
-        ggeps.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, new byte[1]));
+        ggeps.add(new NameValue(GGEPKeys.GGEP_HEADER_SUPPORT_CACHE_PONGS, new byte[1]));
         pr = make(ggeps);
         assertTrue(pr.supportsCachedPongs());
         data = pr.getSupportsCachedPongData();
@@ -288,7 +293,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.LimeTestCase {
     
     public void testRequestsDHTIPP() throws Exception{
         List ggeps = new LinkedList();
-        ggeps.add(new NameValue(GGEP.GGEP_HEADER_DHT_IPPORTS));
+        ggeps.add(new NameValue(GGEPKeys.GGEP_HEADER_DHT_IPPORTS));
         PingRequest pr = make(ggeps);
         assertTrue(pr.requestsDHTIPP());
         assertFalse(pr.supportsCachedPongs());

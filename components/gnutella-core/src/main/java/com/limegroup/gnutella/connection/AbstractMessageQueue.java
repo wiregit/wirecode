@@ -60,7 +60,6 @@ public abstract class AbstractMessageQueue implements MessageQueue {
     
     private void drop(Message m) {
         _dropped++;
-        m.recordDrop();
         messageCounter.countMessage(m);
     }
     

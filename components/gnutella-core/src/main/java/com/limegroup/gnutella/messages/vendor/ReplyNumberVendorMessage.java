@@ -8,7 +8,6 @@ import org.limewire.util.ByteOrder;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "LIME/12".
  *  This message contains a unsigned byte (1-255) that tells you how many
@@ -122,13 +121,6 @@ public final class ReplyNumberVendorMessage extends AbstractVendorMessage {
      */
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
-        SentMessageStatHandler.UDP_REPLY_NUMBER.addMessage(this);
-    }
-
-    /** Overridden purely for stats handling.
-     */
-    public void recordDrop() {
-        super.recordDrop();
     }
     
     public boolean isOOBv3() {

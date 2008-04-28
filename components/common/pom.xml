@@ -46,7 +46,7 @@
       <groupId>com.google.code.guice</groupId>
       <artifactId>guice</artifactId>
       <version>1.0</version>
-    </dependency>    
+    </dependency>
     <dependency>
       <groupId>org.limewire</groupId>
       <artifactId>lw-test-util</artifactId>

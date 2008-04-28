@@ -66,9 +66,8 @@ public class PromotionSearcherImpl implements PromotionSearcher {
        exec.execute(new Searcher(query, callback, userLocation));
     }
 
-    public void init(final int maxNumberOfResults) throws InitializeException {
+    public void init(final int maxNumberOfResults) {
         this.maxNumberOfResults = maxNumberOfResults;
-        searcherDatabase.init();
     }
 
     /**

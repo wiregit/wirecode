@@ -18,7 +18,8 @@ import java.util.zip.GZIPInputStream;
 import junit.framework.Test;
 
 import org.limewire.collection.FixedSizeExpiringSet;
-import org.limewire.io.IPPortCombo;
+import org.limewire.io.IpPort;
+import org.limewire.io.NetworkUtils;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
 
@@ -51,6 +52,7 @@ import com.limegroup.gnutella.messages.vendor.VendorMessageFactory.VendorMessage
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.EmptyResponder;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -144,7 +146,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
                 new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
                 new String[] {localIP,"127.*.*.*"});
-        ConnectionSettings.PORT.setValue(PORT);
+        NetworkSettings.PORT.setValue(PORT);
         
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
@@ -159,7 +161,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
 	public void setUp() throws Exception {
         PORT++;
         setSettings();
-        assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
+        assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
         
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
@@ -185,7 +187,7 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         connectionServices.connect();	
 		connect();
         assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
+					 NetworkSettings.PORT.getValue());
         
         Object handler = messageRouter.getUDPMessageHandler(UDPCrawlerPing.class);
         PrivilegedAccessor.setValue(handler,
@@ -291,32 +293,32 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         byte [] current = new byte[6];
         
         System.arraycopy(payload,index,current,0,6);
-        IPPortCombo e = IPPortCombo.getCombo(current);
+        IpPort e = NetworkUtils.getIpPort(current, java.nio.ByteOrder.LITTLE_ENDIAN);
         assertEquals(UP1.getInetAddress(),e.getInetAddress());
         assertEquals(UP1.getPort(), e.getPort());
         index +=6;
         System.arraycopy(payload,index,current,0,6);
-        e = IPPortCombo.getCombo(current);
+        e = NetworkUtils.getIpPort(current, java.nio.ByteOrder.LITTLE_ENDIAN);
         assertEquals(UP2.getInetAddress(),e.getInetAddress());
         assertEquals(UP2.getPort(), e.getPort());
         index +=6;
         System.arraycopy(payload,index,current,0,6);
-        e = IPPortCombo.getCombo(current);
+        e = NetworkUtils.getIpPort(current, java.nio.ByteOrder.LITTLE_ENDIAN);
         assertEquals(UP3.getInetAddress(),e.getInetAddress());
         assertEquals(UP3.getPort(), e.getPort());
         index +=6;
         System.arraycopy(payload,index,current,0,6);
-        e = IPPortCombo.getCombo(current);
+        e = NetworkUtils.getIpPort(current, java.nio.ByteOrder.LITTLE_ENDIAN);
         assertEquals(LEAF_1.getInetAddress(),e.getInetAddress());
         assertEquals(LEAF_1.getPort(), e.getPort());
         index +=6;
         System.arraycopy(payload,index,current,0,6);
-        e = IPPortCombo.getCombo(current);
+        e = NetworkUtils.getIpPort(current, java.nio.ByteOrder.LITTLE_ENDIAN);
         assertEquals(LEAF_2.getInetAddress(),e.getInetAddress());
         assertEquals(LEAF_2.getPort(), e.getPort());
         index +=6;
         System.arraycopy(payload,index,current,0,6);
-        e = IPPortCombo.getCombo(current);
+        e = NetworkUtils.getIpPort(current, java.nio.ByteOrder.LITTLE_ENDIAN);
         assertEquals(LEAF_3.getInetAddress(),e.getInetAddress());
         assertEquals(LEAF_3.getPort(), e.getPort());
  	}
@@ -564,8 +566,8 @@ public class UDPCrawlerMessagesTest extends LimeTestCase {
         //the offset should be correctly set
         byte[] current = new byte[6];
         System.arraycopy(payload,7,current,0,6);
-        IPPortCombo combo = 
-            IPPortCombo.getCombo(current);
+        IpPort combo = 
+            NetworkUtils.getIpPort(current, java.nio.ByteOrder.LITTLE_ENDIAN);
         Endpoint e = new Endpoint(combo.getInetAddress(),combo.getPort());
         assertEquals(UP1.getInetAddress(),e.getInetAddress());
         assertTrue(e.getPort() == UP1.getPort());

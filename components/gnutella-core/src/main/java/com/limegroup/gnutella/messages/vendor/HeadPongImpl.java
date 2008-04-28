@@ -14,7 +14,10 @@ import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.IntervalSet;
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.GGEP;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
@@ -26,10 +29,7 @@ import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.DownloadWorker;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**
@@ -82,9 +82,9 @@ public class HeadPongImpl extends AbstractVendorMessage implements HeadPong {
     /** available ranges */
     private IntervalSet _ranges;
     /** the altlocs that were sent, if any */
-    private Set<IpPort> _altLocs;
+    private Set<IpPort> _altLocs = Collections.emptySet();
     /** the firewalled altlocs that were sent, if any */
-    private Set<PushEndpoint> _pushLocs;
+    private Set<PushEndpoint> _pushLocs = Collections.emptySet();
     /** the queue status, can be negative */
     private int _queueStatus;
     /** whether the other host has the file at all */
@@ -148,8 +148,7 @@ public class HeadPongImpl extends AbstractVendorMessage implements HeadPong {
         pushEndpointFactory = null;
     }
     
-
-    
+    @Override
     public Class<HeadPong> getHandlerClass() {
         return HeadPong.class;
     }
@@ -356,15 +355,11 @@ public class HeadPongImpl extends AbstractVendorMessage implements HeadPong {
     public Set<RemoteFileDesc> getAllLocsRFD(RemoteFileDesc original, RemoteFileDescFactory remoteFileDescFactory){
         Set<RemoteFileDesc> ret = new HashSet<RemoteFileDesc>();
         
-        if (_altLocs!=null) {
-            for(IpPort current : _altLocs)
-                ret.add(remoteFileDescFactory.createRemoteFileDesc(original, current));
-        }
+        for(IpPort current : _altLocs)
+            ret.add(remoteFileDescFactory.createRemoteFileDesc(original, current));
         
-        if (_pushLocs!=null) {
-            for(PushEndpoint current : _pushLocs)
-                ret.add(remoteFileDescFactory.createRemoteFileDesc(original, current));
-        }
+        for(PushEndpoint current : _pushLocs)
+            ret.add(remoteFileDescFactory.createRemoteFileDesc(original, current));
         
         return ret;
     }

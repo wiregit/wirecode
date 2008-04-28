@@ -80,12 +80,6 @@ public abstract class FileManagerImpl implements FileManager {
     private static final ExecutorService LOADER = ExecutorsHelper.newProcessingQueue("FileManagerLoader");
     
     /**
-     * An index value that describes store files which have a file descriptor but are not
-     * shared. 
-     */
-    private static final int STORE_FILEDESC_INDEX = Integer.MAX_VALUE;
-    
-    /**
      * delay between qrp updates should the simpp words change.
      * Not final for testing.  Betas update faster for experiments.
      */
@@ -112,6 +106,11 @@ public abstract class FileManagerImpl implements FileManager {
      *  _files[i]._path is the incomplete directory if _files[i] is an IncompleteFileDesc.
      */
     private List<FileDesc> _files;
+    
+    /**
+     * The list of store files. 
+     */
+    private List<FileDesc> _storeFiles;
     
     /**
      * The total size of all complete files, in bytes.
@@ -193,6 +192,13 @@ public abstract class FileManagerImpl implements FileManager {
      * _files[i].getUrns(), _urnMap.get(k) contains i.
      */
     private Map<URN, IntSet> _urnMap;
+    
+    /**
+     * A map of appropriately case-normalized URN strings to the
+     * indices of _store files. Needed to allow store file modification
+     * to happen.
+     */
+    private Map<URN, IntSet> _urnStoreMap;
     
     /**
      * The set of file extensions to share, sorted by StringComparator. 
@@ -412,9 +418,11 @@ public abstract class FileManagerImpl implements FileManager {
         _numPendingFiles = 0;
         _numForcedFiles = 0;
         _files = new ArrayList<FileDesc>();
+        _storeFiles = new ArrayList<FileDesc>();
         _keywordTrie = new StringTrie<IntSet>(true);  //ignore case
         _incompleteKeywordTrie = new StringTrie<IntSet>(true);
         _urnMap = new HashMap<URN, IntSet>();
+        _urnStoreMap = new HashMap<URN, IntSet>();
         _extensions = new HashSet<String>();
 		_completelySharedDirectories = new HashSet<File>();
         _incompletesShared = new IntSet();
@@ -529,7 +537,7 @@ public abstract class FileManagerImpl implements FileManager {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#isValidIndex(int)
      */
-    public synchronized boolean isValidIndex(int i) {
+    public synchronized boolean isValidSharedIndex(int i) {
         return (i >= 0 && i < _files.size());
     }
 
@@ -563,7 +571,7 @@ public abstract class FileManagerImpl implements FileManager {
      * @see com.limegroup.gnutella.FileManager#isUrnShared(com.limegroup.gnutella.URN)
      */
     public synchronized boolean isUrnShared(final URN urn) {
-        FileDesc fd = getFileDescForUrn(urn);
+        FileDesc fd = getSharedFileDescForUrn(urn);
         return fd != null && !(fd instanceof IncompleteFileDesc);
     }
 
@@ -574,19 +582,52 @@ public abstract class FileManagerImpl implements FileManager {
         if (!urn.isSHA1())
             throw new IllegalArgumentException();
         
-		IntSet indices = _urnMap.get(urn);
-		if(indices == null) return null;
-
-		IntSet.IntSetIterator iter = indices.iterator();
-		
-        //Pick the first non-null non-Incomplete FileDesc.
-        FileDesc ret = null;
-		while ( iter.hasNext() 
-               && ( ret == null || ret instanceof IncompleteFileDesc) ) {
-			int index = iter.next();
-            ret = _files.get(index);
-		}
-        return ret;
+        if( _urnMap.get(urn) != null ) {
+            return getSharedFileDescForUrn(urn);
+        } else if ( _urnStoreMap.get(urn) != null ) {
+            return getStoreFileDescForUrn(urn);
+        } else {
+            return null;
+        }
+	}
+	
+	/**
+	 * Given a urn, attempts to locate a Shared FileDesc for that urn
+	 */
+	public synchronized FileDesc getSharedFileDescForUrn(final URN urn) {
+        if (!urn.isSHA1())
+            throw new IllegalArgumentException();
+        
+        if( _urnMap.get(urn) != null ) 
+        	return getFileDescForUrn(urn, _urnMap, _files);
+        else
+        	return null;
+	}
+	
+	/**
+	 * Given a urn, attempts to locate a Store FileDesc for that urn
+	 */
+	private synchronized FileDesc getStoreFileDescForUrn(final URN urn) {
+		return getFileDescForUrn(urn, _urnStoreMap, _storeFiles);
+	}
+	
+	/**
+	 * Given a URN returns the FileDesc associated with that URN.
+	 */
+	private synchronized FileDesc getFileDescForUrn(final URN urn, Map<URN, IntSet> map, List<FileDesc> files) {
+	    IntSet indices = map.get(urn);
+        if(indices == null) return null;
+	    
+        IntSet.IntSetIterator iter = indices.iterator();
+	        
+	    //Pick the first non-null non-Incomplete FileDesc.
+	    FileDesc ret = null;
+	    while ( iter.hasNext() 
+	               && ( ret == null || ret instanceof IncompleteFileDesc) ) {
+	        int index = iter.next();
+	        ret = files.get(index);
+	    }
+	    return ret;
 	}
 	
 	/* (non-Javadoc)
@@ -777,7 +818,7 @@ public abstract class FileManagerImpl implements FileManager {
             resetVariables();
 
             // Load the extensions. 
-            String[] extensions = StringArraySetting.decode(SharingSettings.EXTENSIONS_TO_SHARE.getValue().toLowerCase());
+            String[] extensions = StringArraySetting.decode(SharingSettings.EXTENSIONS_TO_SHARE.getValue().toLowerCase(Locale.US));
                         
             for( String ext : extensions ) {
                 _extensions.add(ext);
@@ -1124,7 +1165,7 @@ public abstract class FileManagerImpl implements FileManager {
                     if(f.isDirectory())
                         removeFolderIfShared(f, folder);
                     else if(f.isFile() && !_individualSharedFiles.contains(f)) {
-                        if(removeFileIfShared(f) == null)
+                        if(removeFileIfSharedOrStore(f) == null)
                             fileManagerController.clearPendingShare(f);
                         if(isStoreFile(f)) 
                             _data.SPECIAL_STORE_FILES.remove(f);	
@@ -1376,8 +1417,10 @@ public abstract class FileManagerImpl implements FileManager {
                 // try loading the fd so we can check the LimeXML info
                 loadFile(fd, file, metadata, urns);
 
-                // check LimeXML to determine if is a store file
-                if (isStoreXML(fd.getXMLDocument())) {
+                // check LimeXML to determine if is a store file or the sha1 is mapped to a store file 
+                //  (the sha1 check is needed if duplicate store files are loaded since the second file 
+                //  will not have a unique LimeXMLDoc associated with it)
+                if (isStoreXML(fd.getXMLDocument()) || _urnStoreMap.containsKey(fd.getSHA1Urn()) ) { 
                     addStoreFile(fd, file, urns, addFileType, notify, callback);
                 } else if (addFileType == AddType.ADD_SHARE) {
                     addSharedFile(file, fd, urns, addFileType, notify, callback);
@@ -1415,19 +1458,26 @@ public abstract class FileManagerImpl implements FileManager {
     private synchronized void addStoreFile(FileDesc fd, File file, Set<? extends URN> urns, AddType addFileType,
             final boolean notify, final FileEventListener callback) {
         if(LOG.isDebugEnabled())
-            LOG.debug("Sharing file: " + file);
-        
+            LOG.debug("Store file: " + file);
+
         // if this file is in a shared folder, add to individual store files
         if( addFileType == AddType.ADD_SHARE)
             _data.SPECIAL_STORE_FILES.add(file);
 
         //store files are not part of the _files list so recreate fd with invalid index in _files
-        FileDesc fileDesc = createFileDesc(file, urns, STORE_FILEDESC_INDEX);
+        FileDesc fileDesc = createFileDesc(file, urns, _storeFiles.size());
         //add the xml doc to the new FileDesc
         if( fd.getXMLDocument() != null )
             fileDesc.addLimeXMLDocument(fd.getXMLDocument());
     
+        _storeFiles.add(fileDesc); 
         _storeToFileDescMap.put(file, fileDesc);
+        
+        fileManagerController.fileAdded(file, fileDesc.getSHA1Urn());
+        
+        // Ensure file can be found by URN lookups
+        this.updateStoreUrnIndex(fileDesc);
+        _needRebuild = true;   
         
         FileManagerEvent evt = new FileManagerEvent(FileManagerImpl.this, Type.ADD_STORE_FILE, fileDesc);
         if(notify) // sometimes notify the GUI
@@ -1478,7 +1528,7 @@ public abstract class FileManagerImpl implements FileManager {
         }
 
         // Ensure file can be found by URN lookups
-        this.updateUrnIndex(fileDesc);
+        this.updateSharedUrnIndex(fileDesc);
         _needRebuild = true;            
         
         FileManagerEvent evt = new FileManagerEvent(FileManagerImpl.this, addFileType.getSuccessType(), fileDesc);
@@ -1535,10 +1585,15 @@ public abstract class FileManagerImpl implements FileManager {
 			return null;
 		}
 		
+		// if its a store file it can't be shared thus it can't be unshared,
+		//    just return null
+		if( isStoreFile(file))
+		    return null;
+		
 		// remove file already here to heed against race conditions
 		// wrt to filemanager events being handled on other threads
 		boolean removed = _individualSharedFiles.remove(file); 
-		FileDesc fd = removeFileIfShared(file);
+		FileDesc fd = removeFileIfSharedOrStore(file);
 		if (fd == null) {
             fileManagerController.clearPendingShare(file);
         } else {
@@ -1553,8 +1608,23 @@ public abstract class FileManagerImpl implements FileManager {
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#removeFileIfShared(java.io.File)
      */
-    public synchronized FileDesc removeFileIfShared(File f) {
-        return removeFileIfShared(f, true);
+    public synchronized FileDesc removeFileIfSharedOrStore(File f) {
+        return removeFileIfSharedOrStore(f, true);
+    }
+    
+    /**
+     * removes a file desc from the map if it exists and is shared or is a store
+     * file
+     */
+    protected synchronized FileDesc removeFileIfSharedOrStore(File f, boolean notify) {
+        FileDesc toRemove = getFileDescForFile(f);
+        if( toRemove == null )
+            return null;
+        
+        if( _storeFiles.contains(toRemove) )
+            return removeStoreFile(f, notify);
+        else
+            return removeFileIfShared(f, notify);
     }
     
     /**
@@ -1585,7 +1655,7 @@ public abstract class FileManagerImpl implements FileManager {
         // We also return false, because the file was never really
         // "shared" to begin with.
         if (fd instanceof IncompleteFileDesc) {
-            removeUrnIndex(fd, false);
+            removeSharedUrnIndex(fd, false);
             removeKeywords(_incompleteKeywordTrie, fd);
             _numIncompleteFiles--;
             boolean removed = _incompletesShared.remove(i);
@@ -1614,7 +1684,7 @@ public abstract class FileManagerImpl implements FileManager {
         removeKeywords(_keywordTrie, fd);
 
         //Remove hash information.
-        removeUrnIndex(fd, true);
+        removeSharedUrnIndex(fd, true);
   
         // Notify the GUI...
         if (notify) {
@@ -1652,9 +1722,17 @@ public abstract class FileManagerImpl implements FileManager {
         FileDesc fd = _storeToFileDescMap.get(f);
         if (fd == null)
             return null;
+        
+        int i = fd.getIndex();
+        assert _storeFiles.get(i).getFile().equals(f) : "invariant broken!";
+        
+        _storeFiles.set(i, null);
 
         _data.SPECIAL_STORE_FILES.remove(f);
         _storeToFileDescMap.remove(f);
+
+        //Remove hash information.
+        removeStoreUrnIndex(fd, true);
  
         // Notify the GUI...
         if (notify) {
@@ -1736,7 +1814,7 @@ public abstract class FileManagerImpl implements FileManager {
                public void handleResponse(URN urn, ContentResponseData r) {
                    _requestingValidation.remove(fd.getSHA1Urn());
                    if(r != null && !r.isOK())
-                       removeFileIfShared(fd.getFile());
+                       removeFileIfSharedOrStore(fd.getFile());
                }
             });
         }
@@ -1747,7 +1825,7 @@ public abstract class FileManagerImpl implements FileManager {
     ///////////////////////////////////////////////////////////////////////////
 	
     public synchronized void fileURNSUpdated(FileDesc fd) {
-        updateUrnIndex(fd);
+        updateSharedUrnIndex(fd);
         if (fd instanceof IncompleteFileDesc) {
             IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
             if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
@@ -1764,17 +1842,32 @@ public abstract class FileManagerImpl implements FileManager {
      * @effects enters the given FileDesc into the _urnMap under all its 
      * reported URNs
      */
-    private synchronized void updateUrnIndex(FileDesc fileDesc) {
+    private synchronized void updateSharedUrnIndex(FileDesc fileDesc) {
+        updateUrnIndex(fileDesc, _urnMap);
+    }
+    
+    /**
+     * @effects enters the given FileDesc into the _urnStoreMap under all its 
+     * reported URNs, store urns are not returned in queries
+     */
+    private synchronized void updateStoreUrnIndex(FileDesc fileDesc) {
+        updateUrnIndex(fileDesc, _urnStoreMap);
+    }
+    
+    /**
+	 * Generic method for adding a fileDesc's URNS to a map
+	 */
+    private synchronized void updateUrnIndex(FileDesc fileDesc, Map<URN, IntSet> map) {
         for(URN urn : fileDesc.getUrns()) {
             if (!urn.isSHA1())
                 continue;
-			IntSet indices=_urnMap.get(urn);
-			if (indices==null) {
-				indices=new IntSet();
-				_urnMap.put(urn, indices);
-			}
-			indices.add(fileDesc.getIndex());
-		}
+            IntSet indices=map.get(urn);
+            if (indices==null) {
+                indices=new IntSet();
+                map.put(urn, indices);
+            }
+            indices.add(fileDesc.getIndex());
+        }
     }
     
     /**
@@ -1792,26 +1885,38 @@ public abstract class FileManagerImpl implements FileManager {
     }
 
     /** 
-     * Removes any URN index information for desc
+     * Removes any URN index information for desc from shared files
      * @param purgeState true if any state should also be removed (creation time, altlocs) 
      */
-    private synchronized void removeUrnIndex(FileDesc fileDesc, boolean purgeState) {
+    private synchronized void removeSharedUrnIndex(FileDesc fileDesc, boolean purgeState) {
+        removeUrnIndex(fileDesc, _urnMap, purgeState);
+    }
+    
+    /** 
+     * Removes any URN index information for desc from store files
+     * @param purgeState true if any state should also be removed (creation time, altlocs) 
+     */
+    private synchronized void removeStoreUrnIndex(FileDesc fileDesc, boolean purgeState) {
+        removeUrnIndex(fileDesc, _urnStoreMap, purgeState);
+    }
+    
+    private synchronized void removeUrnIndex(FileDesc fileDesc, Map<URN, IntSet> map, boolean purgeState) {
         for(URN urn : fileDesc.getUrns()) {
             if (!urn.isSHA1())
                 continue;
             //Lookup each of desc's URN's ind _urnMap.  
             //(It better be there!)
-            IntSet indices=_urnMap.get(urn);
+            IntSet indices=map.get(urn);
             if (indices == null) {
                 assert fileDesc instanceof IncompleteFileDesc;
                 return;
             }
-            
+
             //Delete index from set.  Remove set if empty.
             indices.remove(fileDesc.getIndex());
             if (indices.size()==0 && purgeState) {
                 fileManagerController.lastUrnRemoved(urn);
-                _urnMap.remove(urn);
+                map.remove(urn);
             }
 		}
     }
@@ -1842,7 +1947,7 @@ public abstract class FileManagerImpl implements FileManager {
         List<LimeXMLDocument> xmlDocs = new LinkedList<LimeXMLDocument>(toRemove.getLimeXMLDocuments());
         
         // if its a shared file, store files all have the same index in their filedescriptor
-        if( toRemove.getIndex() != STORE_FILEDESC_INDEX ) { 
+        if( !_storeFiles.contains(toRemove)) {
 		    final FileDesc removed = removeFileIfShared(oldName, false);
             assert removed == toRemove : "invariant broken.";
 		    if (_data.SPECIAL_FILES_TO_SHARE.remove(oldName) && !isFileInCompletelySharedDirectory(newName))
@@ -2047,14 +2152,15 @@ public abstract class FileManagerImpl implements FileManager {
 	
     /** Returns true if file has a shareable extension.  Case is ignored. */
     private static boolean hasShareableExtension(File file) {
-        if(file == null) return false;
-        String filename = file.getName();
-        int begin = filename.lastIndexOf(".");
-        if (begin == -1)
+        if(file == null)
             return false;
-
-        String ext = filename.substring(begin + 1).toLowerCase();
-        return _extensions.contains(ext);
+        
+        String extension = FileUtils.getFileExtension(file);
+        if (extension != null) {
+            return _extensions.contains(extension.toLowerCase(Locale.US));
+        } else {
+            return false;
+        }
     }
     
     /* (non-Javadoc)
@@ -2107,7 +2213,7 @@ public abstract class FileManagerImpl implements FileManager {
 		if (_data.FILES_NOT_TO_SHARE.contains(file))
 			return false;
 		if (isFileInCompletelySharedDirectory(file)) {
-	        if (file.getName().toUpperCase().startsWith("LIMEWIRE"))
+	        if (file.getName().toUpperCase(Locale.US).startsWith("LIMEWIRE"))
 				return true;
 			if (!hasShareableExtension(file))
 	        	return false;
@@ -2155,26 +2261,8 @@ public abstract class FileManagerImpl implements FileManager {
         if (includeExcludedDirectories && _data.DIRECTORIES_NOT_TO_SHARE.contains(folder))
             return false;
         
-        //  check for system roots
-        File[] faRoots = File.listRoots();
-        if (faRoots != null && faRoots.length > 0) {
-            for (int i = 0; i < faRoots.length; i++) {
-                if (folder.equals(faRoots[i]))
-                    return false;
-            }
-        }
-        
-        // Check for the folder name being 'Cookies', or 'Cookies\Low' [vista]
-        // TODO: Make sure this is i18n-safe
-        String name = folder.getName().toLowerCase(Locale.US);
-        if(name.equals("cookies"))
+        if(SharingUtils.isFolderBanned(folder))
             return false;
-        else if(name.equals("low")) {
-            String parent = folder.getParent();
-            if(parent != null && parent.toLowerCase(Locale.US).equals("cookies"))
-                return false;
-        }
-        
         
         return true;
     }
@@ -2303,7 +2391,9 @@ public abstract class FileManagerImpl implements FileManager {
         // see if there are any files to send....
         // NOTE: we only request up to 3 urns.  we don't need to worry
         // about partial files because we don't add them to the cache.
-        List<URN> urnList = fileManagerController.getNewestUrns(request, 3);
+    	// NOTE: this doesn't return Store files. getNewestUrns only 
+    	//		 returns the top 3 shared files
+        List<URN> urnList = fileManagerController.getNewestSharedUrns(request, 3);
         if (urnList.size() == 0)
             return EMPTY_RESPONSES;
         
@@ -2635,7 +2725,6 @@ public abstract class FileManagerImpl implements FileManager {
     }
 
     /** A bunch of inspectables for FileManager */
-    @SuppressWarnings("unused")
     @InspectableContainer
     private class FMInspectables {
         /*

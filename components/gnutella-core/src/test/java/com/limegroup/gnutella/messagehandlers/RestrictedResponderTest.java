@@ -9,8 +9,10 @@ import java.util.concurrent.Executor;
 
 import junit.framework.Test;
 
+import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
@@ -28,7 +30,6 @@ import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPReplyHandlerCache;
 import com.limegroup.gnutella.UDPReplyHandlerFactory;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.vendor.RoutableGGEPMessage;
@@ -246,7 +247,7 @@ public class RestrictedResponderTest extends BaseTestCase {
         ReplyHandler handler;
         public TestResponder(SecureMessageVerifier verifier) {
             super(ipSetting, verifier, versionSetting, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache, 
-                    new ImmediateExecutor());
+                    new ImmediateExecutor(), new SimpleNetworkInstanceUtils());
         }
 
         @Override

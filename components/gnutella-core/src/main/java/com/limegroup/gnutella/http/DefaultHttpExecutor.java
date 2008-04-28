@@ -10,8 +10,8 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.params.HttpParams;
 import org.limewire.collection.Cancellable;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.http.HttpClientManager;
-import org.limewire.http.LimeHttpClient;
+import org.limewire.http.httpclient.HttpClientUtils;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.nio.observer.Shutdownable;
 
 import com.google.inject.Inject;
@@ -68,7 +68,7 @@ public class DefaultHttpExecutor implements HttpExecutor {
     }
 	
 	public void releaseResources(HttpResponse response) {
-        HttpClientManager.releaseConnection(response);
+        HttpClientUtils.releaseConnection(response);
 	}
 
 	public Shutdownable executeAny(HttpClientListener listener, 
@@ -98,10 +98,6 @@ public class DefaultHttpExecutor implements HttpExecutor {
 		} catch (IOException failed) {
 			return !listener.requestFailed(method, null, failed);
 		} catch (HttpException e) {
-            IOException ioe = new IOException();
-            ioe.initCause(e);
-            return !listener.requestFailed(method, null, ioe);
-        } catch (InterruptedException e) {
             IOException ioe = new IOException();
             ioe.initCause(e);
             return !listener.requestFailed(method, null, ioe);

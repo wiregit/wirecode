@@ -2,9 +2,13 @@ package com.limegroup.gnutella;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.NIODispatcher;
+import org.limewire.promotion.PromotionSearcher;
+import org.limewire.promotion.PromotionServices;
 import org.limewire.rudp.RUDPContext;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.rudp.UDPSelectorProvider;
@@ -17,9 +21,12 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.limegroup.bittorrent.BTContextFactory;
+import com.limegroup.bittorrent.BTMetaInfoFactory;
 import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
 import com.limegroup.bittorrent.TorrentManager;
+import com.limegroup.bittorrent.dht.DHTPeerLocator;
+import com.limegroup.bittorrent.dht.DHTPeerPublisher;
 import com.limegroup.bittorrent.disk.DiskManagerFactory;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
 import com.limegroup.bittorrent.tracking.TrackerFactory;
@@ -58,7 +65,6 @@ import com.limegroup.gnutella.licenses.LicenseCache;
 import com.limegroup.gnutella.licenses.LicenseFactory;
 import com.limegroup.gnutella.licenses.LicenseVerifier;
 import com.limegroup.gnutella.lws.server.LWSManager;
-import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -73,6 +79,7 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPongFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
+import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
@@ -82,6 +89,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.statistics.QueryStats;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
@@ -580,10 +588,6 @@ public class LimeWireCore {
     public Provider<UDPCrawlerPingHandler> getUDPCrawlerPingHandlerFactory() {
         return injector.getProvider(UDPCrawlerPingHandler.class);
     }
-    
-    public Provider<AdvancedToggleHandler> getAdvancedToggleHandlerFactory() {
-        return injector.getProvider(AdvancedToggleHandler.class);
-    }
 
     public FileResponseEntityFactory getFileRepsoneEntityFactory() {
         return injector.getInstance(FileResponseEntityFactory.class);
@@ -619,6 +623,10 @@ public class LimeWireCore {
 
     public LimeXMLDocumentFactory getLimeXMLDocumentFactory() {
         return injector.getInstance(LimeXMLDocumentFactory.class);
+    }
+
+    public MetaDataFactory getMetaDataFactory() {
+        return injector.getInstance(MetaDataFactory.class);
     }
 
     public LimeXMLDocumentHelper getLimeXMLDocumentHelper() {
@@ -668,5 +676,36 @@ public class LimeWireCore {
     public RemoteFileDescFactory getRemoteFileDescFactory() {
         return injector.getInstance(RemoteFileDescFactory.class);
     }
+
+    public LimeHttpClient getLimeHttpClient() {
+        return injector.getInstance(LimeHttpClient.class);
+    }
+
+    public TcpBandwidthStatistics getTcpBandwidthStatistics() {
+        return injector.getInstance(TcpBandwidthStatistics.class);
+    }
     
+    public NetworkInstanceUtils getNetworkInstanceUtils() {
+        return injector.getInstance(NetworkInstanceUtils.class);
+    }
+    
+    public DHTPeerPublisher getDHTPeerPublisher() {
+        return injector.getInstance(DHTPeerPublisher.class);
+    }
+    
+    public DHTPeerLocator getDHTPeerLocator() {
+        return injector.getInstance(DHTPeerLocator.class);
+    }
+    
+    public BTMetaInfoFactory getBTMetaInfoFactory() {
+        return injector.getInstance(BTMetaInfoFactory.class);
+    }    
+    
+    public PromotionSearcher getPromotionSearcher() {
+        return injector.getInstance(PromotionSearcher.class);
+    }   
+    
+    public PromotionServices getPromotionServices() {
+        return injector.getInstance(PromotionServices.class);
+    }
 }

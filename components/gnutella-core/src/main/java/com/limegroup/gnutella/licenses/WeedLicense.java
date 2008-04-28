@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.net.URI;
 import java.net.URL;
 
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.service.ErrorService;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -42,9 +43,9 @@ class WeedLicense extends AbstractLicense {
     private boolean valid;
     
     /** Builds the URI from the given cid & vid. */
-    public static final URI buildURI(String cid, String vid) {
+    public static URI buildURI(String cid, String vid) {
         try {
-            return new URI((URI + "?" + VID + "=" + vid + "&" + CID + "=" + cid));
+            return URIUtils.toURI((URI + "?" + VID + "=" + vid + "&" + CID + "=" + cid));
         } catch(URISyntaxException bad) {
             URIUtils.error(bad);
             return null;
@@ -123,8 +124,8 @@ class WeedLicense extends AbstractLicense {
     /**
      * Overriden to retrieve the body of data from a special URI.
      */
-    protected String getBody(String url) {
-        return super.getBody(url + "&data=1");
+    protected String getBody(String url, LimeHttpClient httpClient) {
+        return super.getBody(url + "&data=1", httpClient);
     }
         
     /**
@@ -137,7 +138,7 @@ class WeedLicense extends AbstractLicense {
 	 *       <Price>1.2500</Price>
      *  </WeedVerifyData>
      */
-    protected void parseDocumentNode(Node doc, LicenseCache licenseCache) {
+    protected void parseDocumentNode(Node doc, LicenseCache licenseCache, LimeHttpClient httpClient) {
         if(!doc.getNodeName().equals("WeedVerifyData"))
             return;
         

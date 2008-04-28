@@ -4,27 +4,27 @@ import java.io.IOException;
 
 import junit.framework.Test;
 
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.nio.NHttpConnection;
+import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.protocol.NHttpRequestHandler;
+import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestHandler;
 import org.cybergarage.http.HTTPStatus;
 import org.limewire.http.HttpAcceptorListener;
-import org.limewire.http.HttpClientManager;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.http.httpclient.HttpClientUtils;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.SocketAcceptor;
 import org.limewire.util.BaseTestCase;
-
-import com.google.inject.Injector;
-import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 
 //ITEST
 public class HTTPAcceptorTest extends BaseTestCase {
@@ -36,7 +36,6 @@ public class HTTPAcceptorTest extends BaseTestCase {
     private HttpClient client;
 
     private SocketAcceptor socketAcceptor;
-    private Injector injector;
 
     public HTTPAcceptorTest(String name) {
         super(name);
@@ -48,12 +47,9 @@ public class HTTPAcceptorTest extends BaseTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        // make sure local connections are accepted
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
-
-        ConnectionDispatcher connectionDispatcher = new ConnectionDispatcherImpl();
+        ConnectionDispatcher connectionDispatcher = new ConnectionDispatcherImpl(new SimpleNetworkInstanceUtils(false));
         socketAcceptor = new SocketAcceptor(connectionDispatcher);
-        httpAcceptor = new HTTPAcceptor();
+        httpAcceptor = new HTTPAcceptor(null);
         connectionDispatcher.addConnectionAcceptor(httpAcceptor, false, httpAcceptor.getHttpMethods());
         
         socketAcceptor.bind(PORT);
@@ -76,7 +72,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
             response = client.execute(method);
             assertEquals(HTTPStatus.BAD_REQUEST, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         method = new HttpGet("http://localhost:" + PORT + "/update.xml");
@@ -84,7 +80,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
             response = client.execute(method);
             assertEquals(HTTPStatus.BAD_REQUEST, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -105,20 +101,15 @@ public class HTTPAcceptorTest extends BaseTestCase {
             assertTrue(listener.opened);
             // bad request, so connection should have been closed
             assertTrue(listener.closed);
-            assertNotNull(listener.request);
-            assertEquals("GET", listener.request.getRequestLine().getMethod());
-            assertEquals("/", listener.request.getRequestLine().getUri());
-            assertEquals(HttpVersion.HTTP_1_1, listener.request.getRequestLine().getProtocolVersion());
             LimeTestUtils.waitForNIO();
             LimeTestUtils.waitForNIO();
             assertNotNull(listener.response);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         listener.opened = false;
         listener.closed = false;
-        listener.request = null;
         listener.response = null;
 
         httpAcceptor.removeAcceptorListener(listener);
@@ -127,15 +118,19 @@ public class HTTPAcceptorTest extends BaseTestCase {
             client.execute(method);
             assertFalse(listener.opened);
             assertFalse(listener.closed);
-            assertNull(listener.request);
             assertNull(listener.response);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
     public void testRegisterUnregisterHandler() throws Exception {
-        HttpRequestHandler handler = new HttpRequestHandler() {
+        NHttpRequestHandler handler = new SimpleNHttpRequestHandler() {
+            public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+                    HttpContext context) throws HttpException, IOException {
+                return null;
+            }
+            
             public void handle(HttpRequest request, HttpResponse response,
                                HttpContext context) throws org.apache.http.HttpException,
                     IOException {
@@ -152,7 +147,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_ACCEPTED, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         httpAcceptor.unregisterHandler("/");
@@ -161,7 +156,7 @@ public class HTTPAcceptorTest extends BaseTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -175,8 +170,6 @@ public class HTTPAcceptorTest extends BaseTestCase {
 
         HttpResponse response;
 
-        HttpRequest request;
-
         public void connectionClosed(NHttpConnection conn) {
             this.conn = conn;
             this.closed = true;
@@ -185,11 +178,6 @@ public class HTTPAcceptorTest extends BaseTestCase {
         public void connectionOpen(NHttpConnection conn) {
             this.conn = conn;
             this.opened = true;
-        }
-
-        public void requestReceived(NHttpConnection conn, HttpRequest request) {
-            this.conn = conn;
-            this.request = request;
         }
 
         public void responseSent(NHttpConnection conn, HttpResponse response) {

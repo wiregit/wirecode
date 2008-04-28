@@ -11,6 +11,7 @@ import java.util.Random;
 
 import junit.framework.Test;
 
+import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.ChannelReadObserver;
 import org.limewire.nio.channel.ChannelReader;
@@ -27,6 +28,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
     
     private UDPServiceStub stubService;
     private UDPMultiplexor udpMultiplexor;
+    private UDPSelectorProvider udpSelectorProvider;
 
     private final int PORT_1 = 6346;
     private final int PORT_2 = 6348;
@@ -46,17 +48,12 @@ public final class UDPConnectNIOTest extends BaseTestCase {
 	public void setUp() throws Exception {
         RUDPMessageFactory factory = new DefaultMessageFactory();
         stubService = new UDPServiceStub(factory);
-        final UDPSelectorProvider provider = new UDPSelectorProvider(new DefaultRUDPContext(
+        udpSelectorProvider = new UDPSelectorProvider(new DefaultRUDPContext(
                 factory, NIODispatcher.instance().getTransportListener(),
                 stubService, new DefaultRUDPSettings()));
-        udpMultiplexor = provider.openSelector();
+        udpMultiplexor = udpSelectorProvider.openSelector();
         stubService.setUDPMultiplexor(udpMultiplexor);
-        UDPSelectorProvider.setDefaultProviderFactory(new UDPSelectorProviderFactory() {
-            public UDPSelectorProvider createProvider() {
-                return provider;
-            }
-        });
-        NIODispatcher.instance().registerSelector(udpMultiplexor, provider.getUDPSocketChannelClass());
+        NIODispatcher.instance().registerSelector(udpMultiplexor, udpSelectorProvider.getUDPSocketChannelClass());
         
         // Add some simulated connections to the UDPServiceStub
         stubService.addReceiver(PORT_1, PORT_2, 10, 0);
@@ -71,7 +68,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
     
     
     private StubConnectObserver setupConnection() throws Exception {
-        UDPConnection conn  = new UDPConnection();
+        AbstractNBSocket conn = udpSelectorProvider.openSocketChannel().socket();
         StubConnectObserver stub = new StubConnectObserver();
         conn.connect(new InetSocketAddress("127.0.0.1", PORT_2), 5000, stub);
         return stub;
@@ -81,7 +78,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
         StubConnectObserver stub = setupConnection();
         
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", PORT_1);
-        UDPConnection socket = new UDPConnection();
+        AbstractNBSocket socket = udpSelectorProvider.openSocketChannel().socket();
         socket.setSoTimeout(1000);
         socket.connect(addr);
         
@@ -123,7 +120,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
     }
     
     public void testSetReadObserverGoesThroughChains() throws Exception {
-        UDPConnection socket = new UDPConnection();
+        AbstractNBSocket socket = udpSelectorProvider.openSocketChannel().socket();
         
         RCROAdapter entry = new RCROAdapter();
         socket.setReadObserver(entry);
@@ -149,7 +146,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
     
     public void testBlockingConnect() throws Exception {
         setupConnection();        
-        UDPConnection socket = new UDPConnection();
+        AbstractNBSocket socket = udpSelectorProvider.openSocketChannel().socket();
         socket.connect(new InetSocketAddress("127.0.0.1", PORT_1));
         assertTrue(socket.isConnected());
         socket.close();
@@ -158,7 +155,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
     }
     
     public void testBlockingConnectFailing() throws Exception {
-        UDPConnection socket = new UDPConnection();
+        AbstractNBSocket socket = udpSelectorProvider.openSocketChannel().socket();
         try {
             socket.connect(new InetSocketAddress("127.0.0.1", 9999));
             fail("shouldn't have connected");
@@ -168,7 +165,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
     }
     
     public void testBlockingConnectTimesOut() throws Exception {
-        UDPConnection socket = new UDPConnection();
+        AbstractNBSocket socket = udpSelectorProvider.openSocketChannel().socket();
         try {
             socket.connect(new InetSocketAddress("127.0.0.1", 9999), 1000);
             fail("shouldn't have connected");
@@ -179,7 +176,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
     
     public void testNonBlockingConnect() throws Exception {
         setupConnection();
-        UDPConnection socket = new UDPConnection();
+        AbstractNBSocket socket = udpSelectorProvider.openSocketChannel().socket();
         StubConnectObserver observer = new StubConnectObserver();
         socket.connect(new InetSocketAddress("127.0.0.1", PORT_1), 5000, observer);
         observer.waitForResponse(5500);
@@ -194,7 +191,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
     }
     
     public void testNonBlockingConnectFailing() throws Exception {
-        UDPConnection socket = new UDPConnection();
+        AbstractNBSocket socket = udpSelectorProvider.openSocketChannel().socket();
         StubConnectObserver observer = new StubConnectObserver(); 
         
 
@@ -211,7 +208,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
     }
     
     public void testNonBlockingConnectTimesOut() throws Exception {
-        UDPConnection socket = new UDPConnection();
+        AbstractNBSocket socket = udpSelectorProvider.openSocketChannel().socket();
         StubConnectObserver observer = new StubConnectObserver();
         socket.connect(new InetSocketAddress("127.0.0.1", PORT_1), 1000, observer);
         observer.waitForResponse(1500);
@@ -224,7 +221,7 @@ public final class UDPConnectNIOTest extends BaseTestCase {
     public void testSoTimeoutUsedForNonBlockingRead() throws Exception {
         StubConnectObserver stub = setupConnection();
         InetSocketAddress addr = new InetSocketAddress("127.0.0.1", PORT_1);
-        UDPConnection socket = new UDPConnection();
+        AbstractNBSocket socket = udpSelectorProvider.openSocketChannel().socket();
         socket.setSoTimeout(1000);
         socket.connect(addr);
 

@@ -10,11 +10,15 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import junit.framework.Test;
+
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.NetworkUtils;
@@ -29,11 +33,10 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-
-import junit.framework.Test;
 
 public class BrowseHostHandlerTest extends LimeTestCase {
 
@@ -84,7 +87,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
                 .singleton(sharedDirectory));
 
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.PORT.setValue(PORT);
+        NetworkSettings.PORT.setValue(PORT);
 
         injector = LimeTestUtils.createInjectorAndStart(new AbstractModule() {
             @Override
@@ -118,7 +121,12 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
     public void testBrowseHostBadHTTPStatus() throws Exception {
         HTTPAcceptor httpAcceptor = injector.getInstance(HTTPAcceptor.class);
-        httpAcceptor.registerHandler("/", new HttpRequestHandler() {
+        httpAcceptor.registerHandler("/", new SimpleNHttpRequestHandler() {
+            public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+                    HttpContext context) throws HttpException, IOException {
+                return null;
+            }
+            
             public void handle(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
                 httpResponse.setStatusCode(400);
             }
@@ -171,7 +179,12 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
     public void testBrowseHostBadContentType() throws Exception {
         HTTPAcceptor httpAcceptor = injector.getInstance(HTTPAcceptor.class);
-        httpAcceptor.registerHandler("/", new HttpRequestHandler() {
+        httpAcceptor.registerHandler("/", new SimpleNHttpRequestHandler() {
+            public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+                    HttpContext context) throws HttpException, IOException {
+                return null;
+            }
+            
             public void handle(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
                 httpResponse.setHeader("Content-Type", "application/foo-bar");
             }
@@ -191,7 +204,12 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
     public void testBrowseHostBadContentEncoding() throws Exception {
         HTTPAcceptor httpAcceptor = injector.getInstance(HTTPAcceptor.class);
-        httpAcceptor.registerHandler("/", new HttpRequestHandler() {
+        httpAcceptor.registerHandler("/", new SimpleNHttpRequestHandler() {
+            public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+                    HttpContext context) throws HttpException, IOException {
+                return null;
+            }
+            
             public void handle(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext) throws HttpException, IOException {
                 httpResponse.setHeader("Content-Encoding", "zip");
             }

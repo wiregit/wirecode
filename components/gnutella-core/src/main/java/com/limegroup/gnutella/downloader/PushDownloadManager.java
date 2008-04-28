@@ -4,6 +4,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -17,27 +18,30 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.limewire.collection.IntWrapper;
 import org.limewire.concurrent.ExecutorsHelper;
-import org.limewire.http.DefaultHttpParams;
 import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.ConnectionAcceptor;
+import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.channel.AbstractChannelInterestReader;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.ConnectObserver;
 import org.limewire.nio.observer.Shutdownable;
-import org.limewire.rudp.UDPConnection;
+import org.limewire.rudp.UDPSelectorProvider;
 import org.limewire.util.Base32;
 import org.limewire.util.BufferUtils;
 
@@ -48,10 +52,12 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.PushEndpointCache;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SocketProcessor;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientListener;
 import com.limegroup.gnutella.http.HttpExecutor;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -59,8 +65,6 @@ import com.limegroup.gnutella.messages.PushRequestImpl;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.statistics.DownloadStat;
-import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.MultiShutdownable;
 import com.limegroup.gnutella.util.URLDecoder;
 
@@ -86,8 +90,8 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      * number of files that we have sent a udp push for and are waiting a connection.
      * LOCKING: obtain UDP_FAILOVER if manipulating the contained sets as well!
      */
-    private final Map<byte[], IntWrapper>  
-        UDP_FAILOVER = new TreeMap<byte[], IntWrapper>(new GUID.GUIDByteComparator());
+    private final Map<byte[], AtomicInteger>  
+        UDP_FAILOVER = new TreeMap<byte[], AtomicInteger>(new GUID.GUIDByteComparator());
     
 
     /**
@@ -98,35 +102,45 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      */
     private final Provider<SocketProcessor> socketProcessor;
     private final Provider<HttpExecutor> httpExecutor;
+    private final Provider<HttpParams> defaultParams;
     private final ScheduledExecutorService backgroundExecutor;    
     private final NetworkManager networkManager;
     private final Provider<MessageRouter> messageRouter;    
     private final Provider<IPFilter> ipFilter;
     private final Provider<UDPService> udpService;
     private final CopyOnWriteArrayList<PushedSocketHandler> pushHandlers = new CopyOnWriteArrayList<PushedSocketHandler>();
-  
+    private final Provider<UDPSelectorProvider> udpSelectorProvider;
+    
+    private final Provider<PushEndpointCache> pushEndpointCache;
+    
     @Inject
     public PushDownloadManager(
             Provider<MessageRouter> router,
             Provider<HttpExecutor> executor,
+            @Named("defaults") Provider<HttpParams> defaultParams,
             @Named("backgroundExecutor") ScheduledExecutorService scheduler,
             Provider<SocketProcessor> processor,
     		NetworkManager networkManager,
-    		 Provider<IPFilter> ipFilter,
-    		Provider<UDPService> udpService) {
+    		Provider<IPFilter> ipFilter,
+    		Provider<UDPService> udpService,
+    		Provider<UDPSelectorProvider> udpSelectorProvider,
+    		Provider<PushEndpointCache> pushEndpointCache) {
     	this.messageRouter = router;
     	this.httpExecutor = executor;
-    	this.backgroundExecutor = scheduler;
+        this.defaultParams = defaultParams;
+        this.backgroundExecutor = scheduler;
     	this.socketProcessor = processor;
     	this.networkManager = networkManager;
         this.ipFilter = ipFilter;
         this.udpService = udpService;
+        this.udpSelectorProvider = udpSelectorProvider;
+        this.pushEndpointCache = pushEndpointCache;
     }
 
     public void register(PushedSocketHandler handler) {
         pushHandlers.add(handler);
     }
-
+    
     public boolean isBlocking() {
         return true;
     }
@@ -143,7 +157,6 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      * @requires "GIV " is already read from the socket
      */
     public void acceptConnection(String word, Socket socket) {
-        HTTPStat.GIV_REQUESTS.incrementStat();
         ((NIOMultiplexor)socket).setReadObserver(new GivParser(socket));
     }
     
@@ -164,11 +177,17 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      *  <tt>false</tt>
      */
     public void sendPush(RemoteFileDesc file, MultiShutdownable observer) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Sending push: " + file);
+        }
+        
         //Make sure we know our correct address/port.
         // If we don't, we can't send pushes yet.
         byte[] addr = networkManager.getAddress();
+        // TODO check stable udp port if we're interested in fwts?
         int port = networkManager.getPort();
         if(!NetworkUtils.isValidAddress(addr) || !NetworkUtils.isValidPort(port)) {
+            LOG.debug("no valid address or port yet");
             if(observer != null)
                 observer.shutdown();
             return;
@@ -186,8 +205,10 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
             // if we can do FWT, offload a TCP pusher.
             if (networkManager.canDoFWT())
                 sendPushTCP(file, guid, observer);
-            else if (observer != null)
+            else if (observer != null) {
+                LOG.debug("Firewalled and can't do FWT yet");
                 observer.shutdown();
+            }
 
             return;
         }
@@ -275,6 +296,8 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         for(IpPort ppi : file.getPushProxies()) {
             if (ipFilter.get().allow(ppi.getAddress())) {
                 udpService.send(pr, ppi.getInetSocketAddress());
+            } else {
+                removePushProxy(file.getClientGUID(), ppi);
             }
         }
         
@@ -313,11 +336,13 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      * @param data
      */
     private void sendPushThroughNetwork(PushData data) {
+        LOG.debug("sending through network");
         // at this stage, there is no additional shutdownable to notify.
         data.getMultiShutdownable().addShutdownable(null);
 
         // if push proxies failed, but we need a fw-fw transfer, give up.
         if (data.isFWTransfer() && !networkManager.acceptedIncomingConnection()) {
+            LOG.debug("through network, FWT and not accepted incoming connection");
             data.getMultiShutdownable().shutdown();
             return;
         }
@@ -325,6 +350,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         byte[] addr = networkManager.getAddress();
         int port = networkManager.getPort();
         if (!NetworkUtils.isValidAddressAndPort(addr, port)) {
+            LOG.debug("through network, no valid address or port");
             data.getMultiShutdownable().shutdown();
             return;
         }
@@ -344,6 +370,7 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         try {
             messageRouter.get().sendPushRequest(pr);
         } catch (IOException e) {
+            LOG.debug("no route sending through network");
             // this will happen if we have no push route.
             data.getMultiShutdownable().shutdown();
         }
@@ -355,16 +382,17 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
      * is told to send the push through the network.
      */
     private void sendPushThroughProxies(PushData data, Set<? extends IpPort> proxies) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("sending through proxies: " + proxies);
+        }
         byte[] externalAddr = networkManager.getExternalAddress();
         // if a fw transfer is necessary, but our external address is invalid,
         // then exit immediately 'cause nothing will work.
         if (data.isFWTransfer() && !NetworkUtils.isValidAddress(externalAddr)) {
+            LOG.debug("FWT, but no valid external address yet");
         	data.getMultiShutdownable().shutdown();
             return;
         }
-
-        byte[] addr = networkManager.getAddress();
-        int port = networkManager.getPort();
 
         //TODO: send push msg directly to a proxy if you're connected to it.
 
@@ -375,18 +403,20 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
           (data.isFWTransfer() ? ("&file=" + PushRequest.FW_TRANS_INDEX) : "") +
           (SSLSettings.isIncomingTLSEnabled() ? "&tls=true" : "");
             
-        final String nodeString = "X-Node";
-        final String nodeValue =
-            NetworkUtils.ip2string(data.isFWTransfer() ? externalAddr : addr) +
-            ":" + port;
+        final String nodeString = HTTPHeaderName.NODE.httpStringValue();
+        final String nodeValue = data.isFWTransfer() ?
+                NetworkUtils.ip2string(externalAddr) + ":" + networkManager.getStableUDPPort() : 
+                    NetworkUtils.ip2string(networkManager.getAddress()) + ":" + networkManager.getPort();
 
         // the methods to execute
         final List<HttpHead> methods = new ArrayList<HttpHead>();
 
         // try to contact each proxy
         for(IpPort ppi : proxies) {
-            if (!ipFilter.get().allow(ppi.getAddress()))
+            if (!ipFilter.get().allow(ppi.getAddress())) {
+                removePushProxy(data.file.getClientGUID(), ppi);
                 continue;
+            }
             String protocol = "http://";
             if(ppi instanceof Connectable) {
                 if(((Connectable)ppi).isTLSCapable())
@@ -400,20 +430,37 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
                 head.addHeader("Cache-Control", "no-cache");
                 methods.add(head);
             } catch (URISyntaxException e) {
-                LOG.error(e);
+                LOG.error("invlaid URI", e);
+                removePushProxy(data.file.getClientGUID(), ppi);
             }            
         }        
         
         if(!methods.isEmpty()) {
             HttpClientListener l = new PushHttpClientListener(methods, data);
-            HttpParams params = new DefaultHttpParams();
+            HttpParams params = new BasicHttpParams();
             HttpConnectionParams.setConnectionTimeout(params, 5000);
             HttpConnectionParams.setSoTimeout(params, 5000);
+            params = new DefaultedHttpParams(params, defaultParams.get());
             Shutdownable s = httpExecutor.get().executeAny(l, PUSH_THREAD_POOL, methods, params, data.getMultiShutdownable());
             data.getMultiShutdownable().addShutdownable(s);
         } else {
             sendPushThroughNetwork(data);    
         }
+    }
+    
+    private void removePushProxy(byte[] guid, URI uri) {
+        try {
+            IpPort pushProxy = new IpPortImpl(uri.getHost(), uri.getPort());
+            removePushProxy(guid, pushProxy);
+        } catch (UnknownHostException uhe) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("exception on host that should have worked", uhe);
+            }
+        }
+    }
+    
+    private void removePushProxy(byte[] guid, IpPort pushProxy) {
+        pushEndpointCache.get().removePushProxy(guid, pushProxy);
     }
     
     /**
@@ -433,9 +480,18 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     	}
     	
     	public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
-    		LOG.warn("PushProxy request exception", exc);
+    	    if (LOG.isWarnEnabled()) {
+    	        LOG.warn("PushProxy request exception: " + request.getURI(), exc);
+    	    }
     		httpExecutor.get().releaseResources(response);
     		methods.remove(request);
+
+    		URI uri = request.getURI();
+    		if (LOG.isDebugEnabled()) {
+                LOG.debug("Removing push proxy: " + uri + " for " + new GUID(data.file.getClientGUID()));
+            }
+    		removePushProxy(data.file.getClientGUID(), uri);
+    		
     		if (methods.isEmpty()) // all failed
                 sendPushThroughNetwork(data);
             return true;
@@ -446,21 +502,23 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     		int statusCode = response.getStatusLine().getStatusCode();
     		httpExecutor.get().releaseResources(response);
     		if (statusCode == 202) {
-    			if(LOG.isInfoEnabled())
-    				LOG.info("Succesful push proxy: " + request);
+    			if(LOG.isDebugEnabled())
+    				LOG.debug("Successful push proxy: " + request.getURI());
     			
     			if (data.isFWTransfer()) {
-    				UDPConnection socket = new UDPConnection();
+    			    LOG.debug("Starting fwt communication");
+    			    AbstractNBSocket socket = udpSelectorProvider.get().openSocketChannel().socket();
                     data.getMultiShutdownable().addShutdownable(socket);
     				socket.connect(data.getFile().getInetSocketAddress(), 20000, new FWTConnectObserver(socketProcessor.get()));
                 }
                 
                 return false; // don't need to process any more methods.
-    		}
-            
+    		} 
             
     		if(LOG.isWarnEnabled())
-    		    LOG.warn("Invalid push proxy: " + request + ", response: " + response.getStatusLine().getStatusCode());
+    		    LOG.warn("Invalid push proxy: " + request.getURI() + ", response: " + response.getStatusLine().getStatusCode() + ", reason: " + response.getStatusLine().getReasonPhrase());
+    		
+    		removePushProxy(data.file.getClientGUID(), request.getURI());
 
     		if (methods.isEmpty()) // all failed 
     		    sendPushThroughNetwork(data);
@@ -498,12 +556,12 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     private void addUDPFailover(RemoteFileDesc file) {
         synchronized (UDP_FAILOVER) {
             byte[] key = file.getClientGUID();
-            IntWrapper requests = UDP_FAILOVER.get(key);
+            AtomicInteger requests = UDP_FAILOVER.get(key);
             if (requests == null) {
-                requests = new IntWrapper(0);
+                requests = new AtomicInteger(0);
                 UDP_FAILOVER.put(key, requests);
             }
-            requests.addInt(1);
+            requests.addAndGet(1);
         }
     }
     
@@ -515,10 +573,9 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     private void cancelUDPFailover(byte[] clientGUID) {
         synchronized (UDP_FAILOVER) {
             byte[] key = clientGUID;
-            IntWrapper requests = UDP_FAILOVER.get(key);
+            AtomicInteger requests = UDP_FAILOVER.get(key);
             if (requests != null) {
-            	requests.addInt(-1);
-                if (requests.getInt() <= 0)
+                if (requests.decrementAndGet() <= 0)
                     UDP_FAILOVER.remove(key);
             }
         }
@@ -585,15 +642,14 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
     		byte[] key =_file.getClientGUID();
 
     		synchronized(UDP_FAILOVER) {
-    			IntWrapper requests = UDP_FAILOVER.get(key);
-    			if (requests!=null && requests.getInt() > 0) {
-    				requests.addInt(-1);
-    				if (requests.getInt() == 0)
-    					UDP_FAILOVER.remove(key);
-    				return true;
+    			AtomicInteger requests = UDP_FAILOVER.get(key);
+    			if (requests!=null && requests.get() > 0) {
+    			    if (requests.decrementAndGet() == 0) {
+    			        UDP_FAILOVER.remove(key);
+    			    }
+                    return true;
     			}
     		}
-
     		return false;
     	}
    }
@@ -697,12 +753,10 @@ public class PushDownloadManager implements ConnectionAcceptor, PushedSocketHand
         public void handleIOException(IOException iox) {}
 
         public void handleConnect(Socket socket) throws IOException {
-            DownloadStat.FW_FW_SUCCESS.incrementStat();
             processor.processSocket(socket, "GIV");
         }
 
         public void shutdown() {
-            DownloadStat.FW_FW_FAILURE.incrementStat();
         }
     }
     

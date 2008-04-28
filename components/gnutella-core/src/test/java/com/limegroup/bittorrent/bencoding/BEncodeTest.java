@@ -105,6 +105,12 @@ public class BEncodeTest extends LimeTestCase {
         assertEquals(Token.BOOLEAN, t.getType());
         assertSame(BEBoolean.TRUE, t);
         assertEquals(Boolean.TRUE,t.getResult());
+        
+        // rational
+        chan.setString("r");
+        t = Token.getNextToken(chan);
+        assertEquals(Token.RATIONAL, t.getType());
+        assertEquals(1,chan.src.position());
     }
     
     /** 
@@ -278,6 +284,21 @@ public class BEncodeTest extends LimeTestCase {
             t.handleRead();
             fail(" too small didn't throw");
         } catch (IOException expected) {}
+    }
+    
+    /**
+     * tests parsing of a rational value
+     */
+    public void testRational() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        BEncoder b = BEncoder.getEncoder(baos);
+        b.encodeRational(0.4);
+        String encoded = new String(baos.toByteArray());
+        assertEquals("r4600877379321698714e",encoded);
+        chan.setString(encoded);
+        Double d = (Double)Token.parse(baos.toByteArray());
+        assertEquals(0.4, d);
+        
     }
     
     /**

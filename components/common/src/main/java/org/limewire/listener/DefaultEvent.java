@@ -3,7 +3,7 @@ package org.limewire.listener;
 /**
  * A default, simple implementation of Event.
  */
-public class DefaultEvent<T, E extends Enum> implements Event<T, E> {
+public class DefaultEvent<T, E> implements Event<T, E> {
     
     private final T source;
     private final E event;
@@ -21,4 +21,12 @@ public class DefaultEvent<T, E extends Enum> implements Event<T, E> {
         return event;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(getClass().getSimpleName());
+        builder.append(": ");
+        builder.append("source: ").append(source);
+        builder.append(", type: " + event);
+        return builder.toString();
+    }
 }

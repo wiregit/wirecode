@@ -3,7 +3,6 @@ package com.limegroup.gnutella.handshaking;
 import java.util.Properties;
 
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.statistics.HandshakingStat;
 
 /**
  * A very simple responder to be used by leaf-nodes during the
@@ -39,7 +38,6 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
 
         // only connect to ultrapeers.
         if (!response.isUltrapeer()) {
-            HandshakingStat.LEAF_OUTGOING_REJECT_LEAF.incrementStat();
             return HandshakeResponse.createLeafRejectOutgoingResponse(HandshakeStatus.WE_ARE_LEAVES);
         }
 
@@ -55,7 +53,6 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
         
         HandshakeStatus status = handshakeServices.getHandshakeStatusForResponse(response);
         if(!status.isAcceptable()) {
-            HandshakingStat.LEAF_OUTGOING_REJECT_OLD_UP.incrementStat();
             return HandshakeResponse.createLeafRejectOutgoingResponse(status);
         }
         
@@ -65,9 +62,7 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
 		if (response.isDeflateAccepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}
-        
-        HandshakingStat.LEAF_OUTGOING_ACCEPT.incrementStat();
-        
+                
         return HandshakeResponse.createAcceptOutgoingResponse(ret);
     }
 
@@ -80,13 +75,11 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
      */
     protected HandshakeResponse respondToIncoming(HandshakeResponse hr) {
 		if (hr.isCrawler()) {
-		    HandshakingStat.INCOMING_CRAWLER.incrementStat();
 			return HandshakeResponse.createCrawlerResponse(handshakeServices);
 		}
 		
         //if not an ultrapeer, reject.
         if (!hr.isUltrapeer()) {
-            HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
             return HandshakeResponse.createLeafRejectOutgoingResponse(HandshakeStatus.WE_ARE_LEAVES);
         }		
         
@@ -95,7 +88,6 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
         //If we already have enough ultrapeers, reject.
         HandshakeStatus status = handshakeServices.getHandshakeStatusForResponse(hr);
         if (!status.isAcceptable()) {
-            HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
             return HandshakeResponse.createLeafRejectIncomingResponse(hr, status, handshakeServices);
         } 
 
@@ -103,8 +95,6 @@ public final class LeafHandshakeResponder extends DefaultHandshakeResponder {
 		if (hr.isDeflateAccepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}         
-
-        HandshakingStat.LEAF_INCOMING_ACCEPT.incrementStat();
 
         //b) We're not a leaf yet, so accept the incoming connection
         return HandshakeResponse.createAcceptIncomingResponse(hr, ret, handshakeServices);

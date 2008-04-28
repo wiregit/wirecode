@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.AbstractModule;
@@ -30,8 +30,6 @@ public class StoreFileManagerTest extends FileManagerTest {
     protected void setUp() throws Exception {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
         
         cleanFiles(_incompleteDir, false);
         cleanFiles(_sharedDir, false);
@@ -42,6 +40,7 @@ public class StoreFileManagerTest extends FileManagerTest {
             @Override
             protected void configure() {
                 bind(FileManager.class).to(SimpleFileManager.class);
+                bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
             }
         });
         fman = (FileManagerImpl)injector.getInstance(FileManager.class);

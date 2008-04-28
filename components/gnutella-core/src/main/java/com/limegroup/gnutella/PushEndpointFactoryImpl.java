@@ -2,15 +2,17 @@ package com.limegroup.gnutella;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.nio.ByteOrder;
 import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.IPPortCombo;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 
 import com.google.inject.Inject;
@@ -25,13 +27,16 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
 
     private final Provider<PushEndpointCache> pushEndpointCache;
     private final Provider<SelfEndpoint> selfProvider;
+    private final NetworkInstanceUtils networkInstanceUtils;
     
     @Inject
     public PushEndpointFactoryImpl(
             Provider<PushEndpointCache> pushEndpointCache,
-            Provider<SelfEndpoint> selfProvider) {
+            Provider<SelfEndpoint> selfProvider, 
+            NetworkInstanceUtils networkInstanceUtils) {
         this.pushEndpointCache = pushEndpointCache;
         this.selfProvider = selfProvider;
+        this.networkInstanceUtils = networkInstanceUtils;
     }       
     
     public PushEndpoint createPushEndpoint(byte[] guid) {
@@ -47,7 +52,7 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
     }
 
     public PushEndpoint createPushEndpoint(byte[] guid, Set<? extends IpPort> proxies, byte features, int version, IpPort addr) {
-        return new PushEndpoint(guid, proxies, features, version, addr, pushEndpointCache.get());
+        return new PushEndpointImpl(guid, proxies, features, version, addr, pushEndpointCache.get(), networkInstanceUtils);
     }
 
     public PushEndpoint createPushEndpoint(String httpString) throws IOException {
@@ -102,7 +107,9 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
                 boolean tlsCapable = tlsProxies != null && tlsProxies.isSet(proxies.size());
                 // if its not the header, try to parse it as a push proxy
                 try {
-                    proxies.add(NetworkUtils.parseIpPort(current, tlsCapable));
+                    Connectable ipp = NetworkUtils.parseIpPort(current, tlsCapable);
+                    if(!networkInstanceUtils.isPrivateAddress(ipp.getInetAddress()))
+                        proxies.add(ipp);
                     continue;
                 } catch(IOException ohWell) {
                     tlsProxies = null; // stop adding TLS, since our index may be off
@@ -113,14 +120,16 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
             // only the first occurence of port:ip is parsed
             if (addr==null) {
                 try {
-                    addr = NetworkUtils.parsePortIp(current);
+                    IpPort ipp = NetworkUtils.parsePortIp(current);
+                    if(!networkInstanceUtils.isPrivateAddress(ipp.getInetAddress()))
+                        addr = ipp;
                 }catch(IOException notBad) {}
             }
             
         }
         
         // if address isn't there or private, reset address and fwt
-        if (addr == null || !NetworkUtils.isValidExternalIpPort(addr)) {
+        if (addr == null || !networkInstanceUtils.isValidExternalIpPort(addr)) {
             fwtVersion = 0;
             addr = null;
         }
@@ -146,7 +155,7 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
             byte [] host = new byte[6];
             dais.readFully(host);
             try {
-                addr = IPPortCombo.getCombo(host);
+                addr = NetworkUtils.getIpPort(host, ByteOrder.LITTLE_ENDIAN);
             } catch(InvalidDataException ide) {
                 throw new BadPacketException(ide);
             }
@@ -168,7 +177,7 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
         for (int i = 0; i < number; i++) {
             dais.readFully(tmp);
             try {
-                IpPort ipp = IPPortCombo.getCombo(tmp);
+                IpPort ipp = NetworkUtils.getIpPort(tmp, ByteOrder.LITTLE_ENDIAN);
                 if(bn != null && bn.isSet(i))
                     ipp = new ConnectableImpl(ipp, true);
                 proxies.add(ipp);
@@ -179,7 +188,6 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
         
         /** this adds the read set to the existing proxies */
         PushEndpoint pe = createPushEndpoint(guid, proxies, features, version, addr);
-        pe.updateProxies(true);
         return pe;
     }    
     

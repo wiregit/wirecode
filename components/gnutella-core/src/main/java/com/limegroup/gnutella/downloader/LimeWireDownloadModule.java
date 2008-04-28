@@ -36,6 +36,7 @@ public class LimeWireDownloadModule extends AbstractModule {
         bind(DownloadSerializeSettings.class).to(DownloadSerializeSettingsImpl.class);
         bind(OldDownloadConverter.class).to(OldDownloadConverterImpl.class);
         bind(DownloadSerializeSettings.class).annotatedWith(Names.named("oldDownloadSettings")).to(OldDownloadSettings.class);
+        bind(DownloadStatsTracker.class).to(DownloadStatsTrackerImpl.class);
     }
 
 }

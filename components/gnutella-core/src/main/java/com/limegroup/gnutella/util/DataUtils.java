@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Set;
 
 import org.limewire.util.ByteOrder;
@@ -102,7 +103,7 @@ public final class DataUtils {
             str = "0" + str;
             buf.append( str );
         }
-        return buf.toString().toUpperCase();
+        return buf.toString().toUpperCase(Locale.US);
     }
 
 }

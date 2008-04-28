@@ -2,7 +2,7 @@ package com.limegroup.bittorrent.tracking;
 
 import java.net.URI;
 
-import org.limewire.http.LimeHttpClient;
+import org.limewire.http.httpclient.LimeHttpClient;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -37,7 +37,7 @@ public class TrackerFactoryImpl implements TrackerFactory {
      */
     public Tracker create(URI uri, TorrentContext context,
             ManagedTorrent torrent) {
-        return new Tracker(uri, context, torrent, networkManager, applicationServices, httpClientProvider);
+        return new TrackerImpl(uri, context, torrent, networkManager, applicationServices, httpClientProvider);
     }
 
 }

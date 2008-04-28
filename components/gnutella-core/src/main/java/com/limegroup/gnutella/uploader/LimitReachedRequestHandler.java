@@ -2,13 +2,15 @@ package com.limegroup.gnutella.uploader;
 
 import java.io.IOException;
 
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.entity.NStringEntity;
+import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestHandler;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
@@ -20,7 +22,7 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
  * Responds with an HTTP 503 error signaling that the limit of allowed uploads
  * has been reached.
  */
-public class LimitReachedRequestHandler implements HttpRequestHandler {
+public class LimitReachedRequestHandler extends SimpleNHttpRequestHandler {
 
     /** Time to wait for a retry-after because we're validating the file */
     public static final String RETRY_AFTER_VALIDATING = 20 + "";
@@ -71,6 +73,11 @@ public class LimitReachedRequestHandler implements HttpRequestHandler {
         this.httpHeaderUtils = httpHeaderUtils;
         this.altLocManager = altLocManager;
     }
+    
+    public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+            HttpContext context) throws HttpException, IOException {
+        return null;
+    }
 
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
@@ -98,6 +105,6 @@ public class LimitReachedRequestHandler implements HttpRequestHandler {
 
         uploader.setState(UploadStatus.LIMIT_REACHED);
         response.setStatusCode(HttpStatus.SC_SERVICE_UNAVAILABLE);
-        response.setEntity(new StringEntity(errorMsg));
+        response.setEntity(new NStringEntity(errorMsg));
     }
 }

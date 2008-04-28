@@ -16,7 +16,8 @@ import org.apache.http.HttpException;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
-import org.limewire.http.SocketWrappingHttpClient;
+import org.limewire.http.httpclient.SocketWrappingHttpClient;
+import org.limewire.io.NetworkInstanceUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -45,6 +46,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
 
     private final MessageFactory messageFactory;
     private Provider<SocketWrappingHttpClient> clientProvider;
+    private final NetworkInstanceUtils networkInstanceUtils;
 
     @Inject
     public BrowseHostHandlerManagerImpl(@Named("backgroundExecutor")
@@ -55,7 +57,8 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
                                         @Named("forMeReplyHandler")Provider<ReplyHandler> forMeReplyHandler,
                                         MessageFactory messageFactory,
                                         RemoteFileDescFactory remoteFileDescFactory,
-                                        Provider<SocketWrappingHttpClient> clientProvider) {
+                                        Provider<SocketWrappingHttpClient> clientProvider,
+                                        NetworkInstanceUtils networkInstanceUtils) {
         this.activityCallback = activityCallback;
         this.socketsManager = socketsManager;
         this.pushDownloadManager = pushDownloadManager;
@@ -64,6 +67,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
         this.backgroundExecutor = backgroundExecutor;
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.clientProvider = clientProvider;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
     
     public void initialize() {
@@ -93,7 +97,7 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
                         }
                     },
                 activityCallback.get(), socketsManager, pushDownloadManager,
-                forMeReplyHandler, messageFactory, remoteFileDescFactory, clientProvider);
+                forMeReplyHandler, messageFactory, remoteFileDescFactory, clientProvider, networkInstanceUtils);
     }
 
     /** @return true if the Push was handled by me. */

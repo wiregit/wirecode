@@ -36,8 +36,6 @@ import com.limegroup.gnutella.dht.messages.StoreResponseWireImpl;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /**
  * LimeMessageDispatcher re-routes DHTMessage(s) through the LimeWire core so
@@ -153,8 +151,6 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements
         udpService.get().send(data, dst, true);
         dhtMessageCounter.countMessage((Message)tag.getMessage());
         register(tag);
-        SentMessageStatHandler.UDP_DHT_MSG.addMessage((Message) tag
-                .getMessage());
 
         if (LOG.isInfoEnabled()) {
             LOG.info("Sent: " + tag);
@@ -183,7 +179,6 @@ public class LimeMessageDispatcherImpl extends MessageDispatcher implements
             return;
         }
 
-        ReceivedMessageStatHandler.UDP_DHT_MESSAGE.addMessage(msg);
         DHTMessage dhtMessage = (DHTMessage) msg;
         ((RemoteContact) dhtMessage.getContact())
                 .fixSourceAndContactAddress(addr);

@@ -7,7 +7,6 @@ import org.limewire.net.ConnectionAcceptor;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.statistics.HTTPStat;
 
 /**
  * Listener for control requests that dispatches them through ExternalControl.
@@ -27,8 +26,6 @@ public class ControlRequestAcceptor implements ConnectionAcceptor {
     }
 
     public void acceptConnection(String word, Socket sock) {
-        if (word.equals("MAGNET"))
-            HTTPStat.MAGNET_REQUESTS.incrementStat();
         externalControl.get().fireControlThread(sock, word.equals("MAGNET"));
     }
 }

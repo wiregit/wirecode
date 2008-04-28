@@ -1118,6 +1118,22 @@ public abstract class AssertComparisons extends TestCase {
     static public void assertLessThanOrEquals(String msg, byte expected, byte actual) {
         assertLessThanOrEquals( msg, new Byte(expected), new Byte(actual) );
     }
+    
+    static public void assertEmpty(Collection collection) {
+        assertEmpty("should have been empty: " + collection, collection);
+    }
+    
+    static public void assertEmpty(String msg, Collection collection) {
+        assertTrue(msg, collection.isEmpty());
+    }
+    
+    static public void assertNotEmpty(Collection collection) {
+        assertNotEmpty("should not have been empty: " + collection, collection);
+    }
+    
+    static public void assertNotEmpty(String msg, Collection collection) {
+        assertFalse(msg, collection.isEmpty());
+    }
 
     /**
      * Assert that an object actual is either less than, greater than,

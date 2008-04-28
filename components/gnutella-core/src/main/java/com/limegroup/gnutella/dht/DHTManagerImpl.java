@@ -1,5 +1,9 @@
 package com.limegroup.gnutella.dht;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -23,9 +27,14 @@ import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.Database;
+import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Bucket;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.RouteTable;
@@ -369,6 +378,52 @@ public class DHTManagerImpl implements DHTManager {
             }
         });
     }
+    
+    /**
+     * Calls the {@link MojitoDHT#put} if a bootstrappable DHT is available.
+     * Also handles the locking properly to ensure thread safety.
+     * 
+     * @param eKey the entity key used to perform lookup in the DHT.
+     * 
+     * @return an instance of <code>DHTFuture</code> containing the result of the lookup. 
+     * <br> Returns null if DHT is unavailable or the DHT is not bootstrapped.
+     *          
+     */
+    public synchronized DHTFuture<FindValueResult> get(EntityKey eKey) {
+        MojitoDHT mojitoDHT = getMojitoDHT();
+        
+        if (LOG.isDebugEnabled())
+            LOG.debug("DHT:" + mojitoDHT);
+        
+        if (mojitoDHT == null || !mojitoDHT.isBootstrapped()) {
+            LOG.debug("DHT is null or is not bootstrapped");                
+            return null;
+        }            
+        return mojitoDHT.get(eKey);
+    }
+    
+    /**
+     * Calls the {@link MojitoDHT#put} if a bootstrappable DHT is available.
+     * Also handles the locking properly to ensure thread safety.
+     * 
+     * @param key a unique id used as a key to find the associated value.
+     * @param value the value which will be stored in the DHT.
+     * 
+     * @return an instance of <code>DHTFuture</code> containing the result of the storage.
+     * <br> Returns null if DHT is unavailable or the DHT is not bootstrapped.
+     */
+    public synchronized DHTFuture<StoreResult> put(KUID key, DHTValue value) {
+        MojitoDHT mojitoDHT = getMojitoDHT();
+
+        if (LOG.isDebugEnabled())
+            LOG.debug("DHT: " + mojitoDHT);
+
+        if (mojitoDHT == null || !mojitoDHT.isBootstrapped()) {
+            LOG.debug("DHT is null or unable to bootstrap");                
+            return null;
+        }
+        return mojitoDHT.put(key, value);
+    }
 
     /** a bunch of inspectables */
     @SuppressWarnings("unused")
@@ -639,6 +694,21 @@ public class DHTManagerImpl implements DHTManager {
               }
               return ret;
           }
+        };
+        
+        @InspectionPoint("dht internal format stats")
+        public Inspectable mojitoStats = new Inspectable() {
+            public Object inspect() {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                Writer w = new OutputStreamWriter(baos);
+                try {
+                    getMojitoDHT().getDHTStats().dump(w, false);
+                    w.flush();
+                    return baos.toByteArray();
+                } catch (IOException impossible) {
+                    return impossible.getMessage();
+                }
+            }
         };
         
         /** Histograms of the stored keys with various detail */

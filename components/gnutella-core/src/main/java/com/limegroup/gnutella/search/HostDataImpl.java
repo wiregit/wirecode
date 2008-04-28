@@ -3,12 +3,6 @@ package com.limegroup.gnutella.search;
 import java.util.Set;
 
 import org.limewire.io.IpPort;
-import org.limewire.io.NetworkUtils;
-import org.limewire.util.ByteOrder;
-
-import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.QueryReply;
 
 /**
  * This class contains data about a host that has returned a query hit,
@@ -132,6 +126,7 @@ public class HostDataImpl implements HostData {
      * @param reply the <tt>QueryReply</tt> instance from which host data
      *        should be extracted.
      */
+    /*
     protected HostDataImpl(QueryReply reply, NetworkManager networkManager) {
         CLIENT_GUID = reply.getClientGUID();
         MESSAGE_GUID = reply.getGUID();
@@ -193,6 +188,7 @@ public class HostDataImpl implements HostData {
         else
             SPEED = ByteOrder.long2int(reply.getSpeed()); //safe cast
     }
+    */
 
     public byte[] getClientGUID() {
         return CLIENT_GUID;

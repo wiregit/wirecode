@@ -14,8 +14,9 @@ import java.util.zip.Inflater;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
-import org.limewire.io.NetworkUtils;
-import org.limewire.io.Pools;
+import org.limewire.io.IOUtils;
+import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.NBThrottle;
@@ -95,8 +96,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
-import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
+import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
@@ -190,7 +190,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             CompositeQueue.QUEUE_TIME);
 
     /** The OutputRunner */
-    private OutputRunner _outputRunner;
+    private volatile OutputRunner _outputRunner;
 
     /** Keeps track of sent/received [dropped] & bandwidth. */
     private final ConnectionStats _connectionStats = new ConnectionStats();
@@ -243,12 +243,12 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     /**
      * Variable for the <tt>QueryRouteTable</tt> received for this connection.
      */
-    private QueryRouteTable _lastQRPTableReceived;
+    private volatile QueryRouteTable _lastQRPTableReceived;
 
     /**
      * Variable for the <tt>QueryRouteTable</tt> sent for this connection.
      */
-    private QueryRouteTable _lastQRPTableSent;
+    private volatile QueryRouteTable _lastQRPTableSent;
 
     /**
      * Whether or not this was a supernode <-> client connection when message
@@ -317,10 +317,15 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     @SuppressWarnings("unused")
     private final SecureMessageVerifier secureMessageVerifier;
     
+    private final OutOfBandStatistics outOfBandStatistics;
+    
+    private final NetworkInstanceUtils networkInstanceUtils;
+    
     /** writers of statistics if any */
-    enum StatsWriters {TOP, DEFLATER, DELAYER, THROTTLE }
+    private static enum StatsWriters {TOP, DEFLATER, DELAYER, THROTTLE }
     private final Map<StatsWriters,StatisticGatheringWriter> statsWriters = new HashMap<StatsWriters,StatisticGatheringWriter>();
     private volatile MessageCounter incoming, outgoing;
+    private volatile long droppedBadHops, droppedBadAddress,droppedFW;
 
     /**
      * Creates a new outgoing connection to the specified host on the specified
@@ -344,9 +349,10 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
             SpamFilterFactory spamFilterFactory, MessageReaderFactory messageReaderFactory,
             MessageFactory messageFactory, ApplicationServices applicationServices,
-            SecureMessageVerifier secureMessageVerifier) {
+            SecureMessageVerifier secureMessageVerifier, OutOfBandStatistics outOfBandStatistics,
+            NetworkInstanceUtils networkInstanceUtils) {
         super(host, port, type, capabilitiesVMFactory, supportedVendorMessage, networkManager,
-                acceptor);
+                acceptor, networkInstanceUtils);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -367,6 +373,8 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         this._personalFilter = spamFilterFactory.createPersonalFilter();
         this.secureMessageVerifier = secureMessageVerifier;
         this.socketsManager = socketsManager;
+        this.outOfBandStatistics = outOfBandStatistics;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
 
     /**
@@ -389,8 +397,10 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
             SpamFilterFactory spamFilterFactory, MessageReaderFactory messageReaderFactory,
             MessageFactory messageFactory, ApplicationServices applicationServices,
-            SecureMessageVerifier secureMessageVerifier) {
-        super(socket, capabilitiesVMFactory, supportedVendorMessage, networkManager, acceptor);
+            SecureMessageVerifier secureMessageVerifier, OutOfBandStatistics outOfBandStatistics,
+            NetworkInstanceUtils networkInstanceUtils) {
+        super(socket, capabilitiesVMFactory, supportedVendorMessage, networkManager, acceptor,
+                networkInstanceUtils);
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -411,6 +421,8 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         this._personalFilter = spamFilterFactory.createPersonalFilter();
         this.secureMessageVerifier = secureMessageVerifier;
         this.socketsManager = null;
+        this.outOfBandStatistics = outOfBandStatistics;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
 
     /*
@@ -469,7 +481,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      *            connection, e.g., the server responded with HTTP, closed the
      *            the connection during handshaking, etc.
      */
-    void initialize(Properties requestHeaders, HandshakeResponder responder, int timeout,
+    protected void initialize(Properties requestHeaders, HandshakeResponder responder, int timeout,
             GnetConnectObserver observer) throws IOException {
         responder.setLocalePreferencing(_useLocalPreference);
 
@@ -516,11 +528,11 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         handshakeInitialized(shaker);
 
         if (isWriteDeflated()) {
-            deflater = Pools.getDeflaterPool().borrowObject();
+            deflater = new Deflater();
         }
 
         if (isReadDeflated()) {
-            inflater = Pools.getInflaterPool().borrowObject();
+            inflater = new Inflater();
         }
 
         getConnectionBandwidthStatistics().setCompressionOption(isWriteDeflated(),
@@ -655,6 +667,9 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         return _lastQRPTableReceived == null ? -1 : _lastQRPTableReceived.getEmptyUnits();
     }
 
+    private int getQueryRouteTableUnitsWithLoad(int load) {
+        return _lastQRPTableReceived == null ? -1 : _lastQRPTableReceived.getUnitsWithLoad(load);
+    }
     /*
      * (non-Javadoc)
      * 
@@ -727,15 +742,39 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      * @see com.limegroup.gnutella.RoutedConnection#send(com.limegroup.gnutella.messages.Message)
      */
     public void send(Message m) {
-        // if Hops Flow is in effect, and this is a QueryRequest, and the
-        // hoppage is too biggage, discardage time...
-        int smh = hopsFlowMax;
-        if (smh > -1 && (m instanceof QueryRequest) && m.getHops() >= smh)
-            return;
-
+        if (m instanceof QueryRequest && !shouldSendQuery((QueryRequest)m))
+                return;
+        
         _outputRunner.send(m);
     }
 
+    /**
+     * @return true if the query should be sent.
+     * default access for testing.
+     */
+    boolean shouldSendQuery(QueryRequest query) {
+        // if Hops Flow is in effect, and this is a QueryRequest, and the
+        // hoppage is too biggage, discardage time...
+        int smh = hopsFlowMax;
+        if (smh > -1 && query.getHops() >= smh)
+            return false;
+        
+        // if we are an ultrapeer sending a query to a leaf, check its firewall status
+        boolean send = true;
+        if (isSupernodeClientConnection() && MessageSettings.ULTRAPEER_FIREWALL_FILTERING.getValue()) {
+            boolean incomingTCP = getConnectionCapabilities().canAcceptIncomingTCP();
+            boolean fwt = getConnectionCapabilities().canDoFWT();
+            
+            // if either party can accept tcp, send.
+            // otherwise send if both sides can do fwt.
+            if (!incomingTCP && query.isFirewalledSource()) 
+                send = fwt && query.canDoFirewalledTransfer();
+            if (send)
+                droppedFW++;
+        }
+        return send;
+    }
+    
     /*
      * (non-Javadoc)
      * 
@@ -778,10 +817,8 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      * @see com.limegroup.gnutella.RoutedConnection#close()
      */
     protected void closeImpl() {
-        if (deflater != null)
-            Pools.getDeflaterPool().returnObject(deflater);
-        if (inflater != null)
-            Pools.getInflaterPool().returnObject(inflater);
+        IOUtils.close(deflater);
+        IOUtils.close(inflater);
 
         if (_outputRunner != null)
             _outputRunner.shutdown();
@@ -860,13 +897,22 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
     private void handleMessageInternal(Message m) {
         // Run through the route spam filter and drop accordingly.
         if (isSpam(m)) {
-            ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
             _connectionStats.addReceivedDropped();
         } else {
             if (m instanceof QueryReply) {
-                _connectionStats.replyReceived((QueryReply) m);
+                QueryReply reply = (QueryReply)m;
+                _connectionStats.replyReceived(reply);
+                
                 if (m.getHops() == 0)
-                    clientGUID = ((QueryReply) m).getClientGUID();
+                    clientGUID = reply.getClientGUID();
+                
+                if (MessageSettings.RETURN_PATH_IN_REPLIES.getValue() && 
+                        connectionManager.isActiveSupernode() &&
+                        !reply.hasSecureData()) {
+                    m = queryReplyFactory.createWithReturnPathInfo(reply, 
+                            myIp == null ? null : new IpPortImpl(myIp,networkManager.getPort()), 
+                                    this);
+                }
             }
 
             if (m instanceof QueryRequest)
@@ -934,8 +980,8 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             }
         }
 
-        if (!networkManager.isOOBCapable() || !OutOfBandThroughputStat.isSuccessRateGreat()
-                || !OutOfBandThroughputStat.isOOBEffectiveForProxy())
+        if (!networkManager.isOOBCapable() || !outOfBandStatistics.isSuccessRateGreat()
+                || !outOfBandStatistics.isOOBEffectiveForProxy())
             return query;
 
         // everything is a go - we need to do the following:
@@ -960,7 +1006,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         // 2) set up mappings between the guids
         guidMap.addMapping(origGUID, oobGUID);
 
-        OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
+        outOfBandStatistics.addSentQuery();
         return query;
     }
 
@@ -978,17 +1024,21 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
             return !_routeFilter.allow(m);
         
         // leafs can only send hops == 0
-        if (isSupernodeClientConnection() && m.getHops() != 0)
+        if (isSupernodeClientConnection() && m.getHops() != 0) {
+            droppedBadHops++;
             return true;
+        }
         
         // replies with hops 0 must match the address.
         if (m instanceof QueryReply && m.getHops() == 0) {
             QueryReply reply = (QueryReply)m;
             byte [] ip = reply.getIPBytes();
-            if (!NetworkUtils.isPrivateAddress(ip) &&
+            if (!networkInstanceUtils.isPrivateAddress(ip) &&
                     !reply.hasSecureData() &&
-                    !Arrays.equals(ip, getAddressBytes()))
-                    return true;
+                    !Arrays.equals(ip, getAddressBytes())) {
+                droppedBadAddress++;
+                return true;
+            }
         }
         return !_routeFilter.allow(m);
     }
@@ -1036,7 +1086,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         // its source ip matches.
         if (myIp != null && 
                 queryReply.isLocal() &&
-                !NetworkUtils.isPrivateAddress(queryReply.getIPBytes()) &&
+                !networkInstanceUtils.isPrivateAddress(queryReply.getIPBytes()) &&
                 !queryReply.hasSecureData()) // don't mess with signed results
             queryReply = queryReplyFactory.createWithNewAddress(myIp, queryReply);
         send(queryReply);
@@ -1348,11 +1398,18 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         data.put("nmr", getNumMessagesReceived());
         data.put("nms", getNumMessagesSent());
         _connectionStats.addStats(data);
-        data.put("or", _outputRunner.inspect());
+        Inspectable or = _outputRunner;
+        if (or != null)
+            data.put("or", or.inspect());
         data.put("nrmd", getNumReceivedMessagesDropped());
         data.put("nsmd", getNumSentMessagesDropped());
         data.put("qrteu", getQueryRouteTableEmptyUnits());
+        data.put("qrtul1", getQueryRouteTableUnitsWithLoad(1));
+        data.put("qrtul2", getQueryRouteTableUnitsWithLoad(2));
+        data.put("qrtul3", getQueryRouteTableUnitsWithLoad(3));
+        data.put("qrtul4", getQueryRouteTableUnitsWithLoad(4));
         data.put("qrtpf", getQueryRouteTablePercentFull());
+        data.put("qrtue", getQueryRouteTableUnitsInUse());
         data.put("qrts", getQueryRouteTableSize());
         data.put("bl", isBusyLeaf());
         data.put("k", isKillable());
@@ -1383,6 +1440,14 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
         // message counters
         data.put("incoming",incoming.inspect());
         data.put("outgoing",outgoing.inspect());
+        
+        
+        // dropped replies
+        data.put("badHops",droppedBadHops);
+        data.put("badAddr",droppedBadAddress);
+        
+        // dropped queries
+        data.put("fwdrop",droppedFW);
         
         return data;
     }

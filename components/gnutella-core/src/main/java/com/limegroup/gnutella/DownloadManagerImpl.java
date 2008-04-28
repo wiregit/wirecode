@@ -21,6 +21,8 @@ import org.limewire.collection.MultiIterable;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.EventListenerList;
 import org.limewire.service.MessageService;
 import org.limewire.util.FileUtils;
 
@@ -29,6 +31,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.BTMetaInfo;
+import com.limegroup.bittorrent.BTMetaInfoFactory;
 import com.limegroup.bittorrent.TorrentFileSystem;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -45,6 +48,7 @@ import com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.downloader.ResumeDownloader;
 import com.limegroup.gnutella.downloader.StoreDownloader;
+import com.limegroup.gnutella.downloader.Visitor;
 import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.downloader.serial.DownloadSerializer;
@@ -87,7 +91,7 @@ public class DownloadManagerImpl implements DownloadManager {
     private volatile boolean downloadsReadFromDisk = false;
     
     /** The number if IN-NETWORK active downloaders.  We don't count these when
-     * determing how many downloaders are active.
+     * determining how many downloaders are active.
      */
     private int innetworkCount = 0;
 
@@ -116,6 +120,9 @@ public class DownloadManagerImpl implements DownloadManager {
      */
     private Runnable _waitingPump;
     
+    private final EventListenerList<DownloadManagerEvent> listeners =
+        new EventListenerList<DownloadManagerEvent>();
+    
     private final NetworkManager networkManager;
     private final DownloadCallback innetworkCallback;
     private final Provider<DownloadCallback> downloadCallback;
@@ -127,6 +134,7 @@ public class DownloadManagerImpl implements DownloadManager {
     private final DownloadSerializer downloadSerializer;
     private final IncompleteFileManager incompleteFileManager;
     private final RemoteFileDescFactory remoteFileDescFactory;
+    private final BTMetaInfoFactory btMetaInfoFactory;
     
     @Inject
     public DownloadManagerImpl(NetworkManager networkManager,
@@ -139,7 +147,8 @@ public class DownloadManagerImpl implements DownloadManager {
             CoreDownloaderFactory coreDownloaderFactory,
             DownloadSerializer downloaderSerializer,
             IncompleteFileManager incompleteFileManager,
-            RemoteFileDescFactory remoteFileDescFactory) {
+            RemoteFileDescFactory remoteFileDescFactory,
+            BTMetaInfoFactory btMetaInfoFactory) {
         this.networkManager = networkManager;
         this.innetworkCallback = innetworkCallback;
         this.downloadCallback = downloadCallback;
@@ -151,6 +160,7 @@ public class DownloadManagerImpl implements DownloadManager {
         this.downloadSerializer = downloaderSerializer;
         this.incompleteFileManager = incompleteFileManager;
         this.remoteFileDescFactory = remoteFileDescFactory;
+        this.btMetaInfoFactory = btMetaInfoFactory;
     }
 
     /* (non-Javadoc)
@@ -173,14 +183,16 @@ public class DownloadManagerImpl implements DownloadManager {
     
     /**
      * Adds a new downloader to this manager.
-     * @param downloader
+     * @param downloader the core downloader
      */
+    // TODO merge this with initializeDownload
     public void addNewDownloader(CoreDownloader downloader) {
         synchronized(this) {
             waiting.add(downloader);
-            downloader.initialize();
-            callback(downloader).addDownload(downloader);
         }
+        fireEvent(downloader, DownloadManagerEvent.Type.ADDED);
+        downloader.initialize();
+        callback(downloader).addDownload(downloader);
     }
 
     /* (non-Javadoc)
@@ -309,10 +321,6 @@ public class DownloadManagerImpl implements DownloadManager {
      * 
      * Closes the socket if neither BrowseHostHandler nor any ManagedDownloaders wanted it.
      * 
-     * @param file
-     * @param index
-     * @param clientGUID
-     * @param socket
      */
     private synchronized boolean handleIncomingPush(String file, int index, byte [] clientGUID, Socket socket) {
          boolean handled = false;
@@ -364,7 +372,7 @@ public class DownloadManagerImpl implements DownloadManager {
                 i.remove();
                 cleanupCompletedDownload(md, false);
             }
-            // handle downloads from LWS seperately, only allow 1 at a time
+            // handle downloads from LWS separately, only allow 1 at a time
             else if( storeDownloadCount == 0 && md.getDownloadType() == DownloaderType.STORE ) {
                     i.remove();
                     storeDownloadCount++;
@@ -505,16 +513,18 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     void clearAllDownloads() {
-        List<Downloader> buf;
+        List<CoreDownloader> buf;
         synchronized(this) {
-            buf = new ArrayList<Downloader>(active.size() + waiting.size());
+            buf = new ArrayList<CoreDownloader>(active.size() + waiting.size());
             buf.addAll(active);
             buf.addAll(waiting);
             active.clear();
             waiting.clear();
         }
-        for(Downloader md : buf ) 
+        for(CoreDownloader md : buf ) { 
             md.stop();
+            fireEvent(md, DownloadManagerEvent.Type.REMOVED);
+        }
     }
            
     /* (non-Javadoc)
@@ -581,7 +591,7 @@ public class DownloadManagerImpl implements DownloadManager {
         //Note: If the filename exists, it would be nice to check that we are
         //not already downloading the file by calling conflicts with the
         //filename...the problem is we cannot do this effectively without the
-        //size of the file (atleast, not without being risky in assuming that
+        //size of the file (at least, not without being risky in assuming that
         //two files with the same name are the same file). So for now we will
         //just leave it and download the same file twice.
 
@@ -707,7 +717,7 @@ public class DownloadManagerImpl implements DownloadManager {
         
         BTMetaInfo info;
         try {
-            info = new BTMetaInfo(memento);
+            info = btMetaInfoFactory.createBTMetaInfoFromMemento(memento);
         } catch(InvalidDataException ide) {
             throw new CantResumeException(name);
         }
@@ -794,6 +804,7 @@ public class DownloadManagerImpl implements DownloadManager {
                 writeSnapshot(); // Save state for crash recovery.
             }
         });
+        fireEvent(md, DownloadManagerEvent.Type.ADDED);
     }
     
     /**
@@ -807,8 +818,6 @@ public class DownloadManagerImpl implements DownloadManager {
      * Returns true if there already exists a download for the same file.
      * <p>
      * Same file means: same urn, or as fallback same filename + same filesize
-     * @param rfds
-     * @return
      */
     private boolean conflicts(RemoteFileDesc[] rfds, File... fileName) {
         URN urn = null;
@@ -1002,6 +1011,8 @@ public class DownloadManagerImpl implements DownloadManager {
         // Enable auto shutdown
         if(active.isEmpty() && waiting.isEmpty())
             callback(dl).downloadsComplete();
+        
+        fireEvent(dl, DownloadManagerEvent.Type.REMOVED);
     }           
     
     /* (non-Javadoc)
@@ -1087,14 +1098,31 @@ public class DownloadManagerImpl implements DownloadManager {
         return fileName;
     }
     
-    // ---------------------------------------------------------------
-    // Implementation of LWSIntegrationServicesDelegate
-
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.DownloadMI#getAllDownloaders()
      */
     public final Iterable<CoreDownloader> getAllDownloaders() {
         return activeAndWaiting;
+    }
+    
+    // ---------------------------------------------------------------
+    // Implementation of LWSIntegrationServicesDelegate    
+
+    public synchronized void visitDownloads(Visitor<CoreDownloader> visitor) {
+        for (CoreDownloader downloader : activeAndWaiting) {
+            visitor.visit(downloader);
+        }
     }    
 
+    private void fireEvent(CoreDownloader downloader, DownloadManagerEvent.Type type) {
+        listeners.broadcast(new DownloadManagerEvent(downloader, type));
+    }
+
+    public void addListener(EventListener<DownloadManagerEvent> listener) {
+        listeners.addListener(listener);
+    }
+
+    public boolean removeListener(EventListener<DownloadManagerEvent> listener) {
+        return listeners.removeListener(listener);
+    }
 }

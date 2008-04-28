@@ -13,6 +13,8 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.limewire.http.handler.BasicMimeTypeProvider;
 import org.limewire.http.handler.FileRequestHandler;
+import org.limewire.http.httpclient.HttpClientUtils;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.SocketAcceptor;
@@ -57,7 +59,7 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
     }
 
     private void initializeAcceptor(int timeout, String... methods) throws Exception {
-        connectionDispatcher = new ConnectionDispatcherImpl();
+        connectionDispatcher = new ConnectionDispatcherImpl(new SimpleNetworkInstanceUtils());
         
         acceptor = new SocketAcceptor(connectionDispatcher);
         acceptor.bind(PORT);
@@ -81,7 +83,7 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
         HttpTestUtils.waitForNIO();
     }
 
-    public void testDefaultHandler() throws IOException, Exception {
+    public void testDefaultHandlerHead() throws IOException, Exception {
         initializeAcceptor(TIMEOUT, "HEAD");
 
         HttpHead method = new HttpHead("http://localhost:" + PORT + "/");
@@ -90,7 +92,20 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
             result = client.execute(method);
             assertEquals(HttpStatus.SC_NOT_IMPLEMENTED, result.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(result);
+            HttpClientUtils.releaseConnection(result);
+        }
+    }
+    
+    public void testDefaultHandlerGet() throws IOException, Exception {
+        initializeAcceptor(TIMEOUT, "GET");
+
+        HttpGet method = new HttpGet("http://localhost:" + PORT + "/");
+        HttpResponse result = null;
+        try {
+            result = client.execute(method);
+            assertEquals(HttpStatus.SC_NOT_IMPLEMENTED, result.getStatusLine().getStatusCode());
+        } finally {
+            HttpClientUtils.releaseConnection(result);
         }
     }
 
@@ -121,7 +136,7 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
             // TODO assertFalse(client.getHttpConnectionManager().getConnection(hostConfig).isOpen());
             assertLessThan("Expected connection close", data.length, i);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
     
@@ -153,7 +168,7 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
             }
             assertEquals(data.length, i);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
     
@@ -167,7 +182,7 @@ public class BasicHttpAcceptorTest extends BaseTestCase {
             fail("Expected IOException, got: " + result.getStatusLine().getStatusCode());
         } catch (IOException expected) {
         } finally {
-            HttpClientManager.releaseConnection(result);
+            HttpClientUtils.releaseConnection(result);
         }
     }
 

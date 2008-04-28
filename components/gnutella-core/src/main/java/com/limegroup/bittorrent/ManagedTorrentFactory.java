@@ -2,6 +2,13 @@ package com.limegroup.bittorrent;
 
 public interface ManagedTorrentFactory {
 
-    public ManagedTorrent create(TorrentContext context);
+    /**
+     * Creates an instance of ManagedTorrent for a .torrent file based on the
+     * torrent context
+     * 
+     * @param context
+     * @return a new instance of ManagedTorrent
+     */
+    public ManagedTorrent createFromContext(TorrentContext context);
 
 }

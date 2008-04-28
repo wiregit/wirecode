@@ -59,6 +59,7 @@ public class LicenseCache {
     private boolean dirty = false;
 
     LicenseCache() {
+        // TODO move this out of construction
         deserialize(); 
     }
     
@@ -111,6 +112,10 @@ public class LicenseCache {
     private void deserialize() {
         ObjectInputStream ois = null;
         try {
+            if (!CACHE_FILE.exists()) {
+                // finally-block will initialize maps
+                return;
+            }
             ois = new ObjectInputStream(
                     new BufferedInputStream(
                         new FileInputStream(CACHE_FILE)));

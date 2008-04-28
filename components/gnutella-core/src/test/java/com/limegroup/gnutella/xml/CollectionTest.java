@@ -6,14 +6,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import junit.framework.Test;
 
-import org.limewire.collection.NameValue;
+import org.limewire.util.NameValue;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
@@ -26,7 +26,6 @@ import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 
-@SuppressWarnings("unchecked")
 public class CollectionTest extends LimeTestCase {
 
     FileDesc[] files = new FileDesc[3];
@@ -83,7 +82,7 @@ public class CollectionTest extends LimeTestCase {
         assertTrue("Necessary file test1.mp3 cannot be found!", test1.exists());
         assertTrue("Necessary file test2.mp3 cannot be found!", test2.exists());
         
-        Set urns;
+        Set<URN> urns;
         urns = UrnHelper.calculateAndCacheURN(mason, urnCache);
         files[0] = new FileDesc(mason, urns, 0);
         urns = UrnHelper.calculateAndCacheURN(test1, urnCache);
@@ -100,7 +99,7 @@ public class CollectionTest extends LimeTestCase {
         LimeXMLReplyCollection collection = limeXMLReplyCollectionFactory.createLimeXMLReplyCollection(audioSchemaURI);
         assertEquals(0, collection.getCount());
         for(int i = 0; i < files.length; i++)
-            collection.initialize(files[i], Collections.EMPTY_LIST);
+            collection.initialize(files[i], LimeXMLDocument.EMPTY_LIST);
         assertEquals(0, collection.getCount());            
         for(int i = 0; i < files.length; i++)
             collection.createIfNecessary(files[i]);
@@ -141,7 +140,7 @@ public class CollectionTest extends LimeTestCase {
         LimeXMLReplyCollection collection = limeXMLReplyCollectionFactory.createLimeXMLReplyCollection(videoSchemaURI);
         assertEquals(0, collection.getCount());
         for(int i = 0; i < files.length; i++)
-            collection.initialize(files[i], Collections.EMPTY_LIST);
+            collection.initialize(files[i], LimeXMLDocument.EMPTY_LIST);
         assertEquals(0, collection.getCount());            
         for(int i = 0; i < files.length; i++)
             collection.createIfNecessary(files[i]);
@@ -168,15 +167,15 @@ public class CollectionTest extends LimeTestCase {
         LimeXMLReplyCollection collection = limeXMLReplyCollectionFactory.createLimeXMLReplyCollection(audioSchemaURI);
         assertEquals(0, collection.getCount());
         for(int i = 0; i < files.length; i++)
-            collection.initialize(files[i], Collections.EMPTY_LIST);
+            collection.initialize(files[i], LimeXMLDocument.EMPTY_LIST);
         assertEquals(0, collection.getCount());            
         for(int i = 0; i < files.length; i++)
             collection.createIfNecessary(files[i]);
         assertEquals("LimeXMLCollection count wrong!", 2, collection.getCount());
 
         // make sure that a simple match works....
-        List nameVals = new ArrayList();
-        nameVals.add(new NameValue(TITLE_KEY, "tfie"));
+        List<NameValue<String>> nameVals = new ArrayList<NameValue<String>>();
+        nameVals.add(new NameValue<String>(TITLE_KEY, "tfie"));
         LimeXMLDocument searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
         List results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
@@ -184,8 +183,8 @@ public class CollectionTest extends LimeTestCase {
                      
         // Ensure that a search for a matching title doesn't work
         // if we put it in the artist field ...
-        nameVals = new ArrayList();
-        nameVals.add(new NameValue(ARTIST_KEY, "tfie"));
+        nameVals = new ArrayList<NameValue<String>>();
+        nameVals.add(new NameValue<String>(ARTIST_KEY, "tfie"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
@@ -194,8 +193,8 @@ public class CollectionTest extends LimeTestCase {
         // make sure a little more complex match works, no mp3 has album but one
         // has a title beginning with s
         nameVals.clear();
-        nameVals.add(new NameValue(ALBUM_KEY, "susheel"));
-        nameVals.add(new NameValue(TITLE_KEY, "o"));
+        nameVals.add(new NameValue<String>(ALBUM_KEY, "susheel"));
+        nameVals.add(new NameValue<String>(TITLE_KEY, "o"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
@@ -203,9 +202,9 @@ public class CollectionTest extends LimeTestCase {
 
         // has two matching, one null
         nameVals.clear();
-        nameVals.add(new NameValue(TITLE_KEY, "tfield"));
-        nameVals.add(new NameValue(ALBUM_KEY, "ignored"));
-        nameVals.add(new NameValue(ARTIST_KEY, "afield"));
+        nameVals.add(new NameValue<String>(TITLE_KEY, "tfield"));
+        nameVals.add(new NameValue<String>(ALBUM_KEY, "ignored"));
+        nameVals.add(new NameValue<String>(ARTIST_KEY, "afield"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
@@ -213,8 +212,8 @@ public class CollectionTest extends LimeTestCase {
 
         // has two matching
         nameVals.clear();
-        nameVals.add(new NameValue(TITLE_KEY, "othertf"));
-        nameVals.add(new NameValue(ARTIST_KEY, "otherafi"));
+        nameVals.add(new NameValue<String>(TITLE_KEY, "othertf"));
+        nameVals.add(new NameValue<String>(ARTIST_KEY, "otherafi"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results", 
@@ -222,8 +221,8 @@ public class CollectionTest extends LimeTestCase {
 
         // has one off by one....
         nameVals.clear();
-        nameVals.add(new NameValue(TITLE_KEY, "othert"));
-        nameVals.add(new NameValue(ARTIST_KEY, "othra"));
+        nameVals.add(new NameValue<String>(TITLE_KEY, "othert"));
+        nameVals.add(new NameValue<String>(ARTIST_KEY, "othra"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
@@ -231,8 +230,8 @@ public class CollectionTest extends LimeTestCase {
 
         // has all nulls, this was a terrible bug in previous versions...
         nameVals.clear();
-        nameVals.add(new NameValue(ALBUM_KEY, "swi"));
-        nameVals.add(new NameValue(TRACK_KEY, "ferb"));
+        nameVals.add(new NameValue<String>(ALBUM_KEY, "swi"));
+        nameVals.add(new NameValue<String>(TRACK_KEY, "ferb"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
@@ -240,7 +239,7 @@ public class CollectionTest extends LimeTestCase {
 
         // has all nulls, this was a terrible bug in previous versions...
         nameVals.clear();
-        nameVals.add(new NameValue(TRACK_KEY, "ferb"));
+        nameVals.add(new NameValue<String>(TRACK_KEY, "ferb"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
@@ -248,7 +247,7 @@ public class CollectionTest extends LimeTestCase {
                          
         // test matching on numeric value ...
         nameVals.clear();
-        nameVals.add(new NameValue(BITRATE_KEY, "64"));
+        nameVals.add(new NameValue<String>(BITRATE_KEY, "64"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
@@ -256,7 +255,7 @@ public class CollectionTest extends LimeTestCase {
                         
         // test things don't match on partial numeric value...
         nameVals.clear();
-        nameVals.add(new NameValue(BITRATE_KEY, "6"));
+        nameVals.add(new NameValue<String>(BITRATE_KEY, "6"));
         searchDoc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, audioSchemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
@@ -274,11 +273,11 @@ public class CollectionTest extends LimeTestCase {
         assertEquals(0, videoCollection.getCount());
         
         for(int i = 0; i < files.length; i++)
-            audioCollection.initialize(files[i], Collections.EMPTY_LIST);
+            audioCollection.initialize(files[i], LimeXMLDocument.EMPTY_LIST);
         assertEquals("LimeXMLCollection count wrong!", 2, audioCollection.getCount());
         
         for(int i = 0; i < files.length; i++)
-            videoCollection.initialize(files[i], Collections.EMPTY_LIST);
+            videoCollection.initialize(files[i], LimeXMLDocument.EMPTY_LIST);
         assertEquals("LimeXMLCollection count wrong!", 2, videoCollection.getCount());
 
         // test assocation
@@ -291,7 +290,7 @@ public class CollectionTest extends LimeTestCase {
 
 
         // test keyword generation
-        List keywords = audioCollection.getKeyWords();
+        List<String> keywords = audioCollection.getKeyWords();
         assertEquals("Wrong keyword count!", 8, keywords.size());
         assertTrue("Correct keywords not in map!", 
                           (keywords.contains("othertfield") && 
@@ -397,7 +396,7 @@ public class CollectionTest extends LimeTestCase {
     
     private void createFiles() throws Exception {
         MetaDataReader reader = metaDataReader;
-        HashMap map = new HashMap();
+        Map<URN, LimeXMLDocument> map = new HashMap<URN, LimeXMLDocument>();
         LimeXMLDocument doc = null;
         // make audio.collection
         doc = reader.readDocument(test1);
@@ -409,17 +408,17 @@ public class CollectionTest extends LimeTestCase {
         write(map, new File(marker, "audio.collection"));
         
         // made video.collection
-        List nameVals = new ArrayList();
-        map = new HashMap();
-        nameVals.add(new NameValue("videos__video__director__","daswani"));
-        nameVals.add(new NameValue("videos__video__title__","susheel"));
+        List<NameValue<String>> nameVals = new ArrayList<NameValue<String>>();
+        map = new HashMap<URN, LimeXMLDocument>();
+        nameVals.add(new NameValue<String>("videos__video__director__","daswani"));
+        nameVals.add(new NameValue<String>("videos__video__title__","susheel"));
         doc = limeXMLDocumentFactory.createLimeXMLDocument(nameVals, videoSchemaURI);
         doc.initIdentifier(test2);
         doc.getXMLString();
         map.put(getHash(test2), doc);
-        nameVals = new ArrayList();
-        nameVals.add(new NameValue("videos__video__director__","file"));
-        nameVals.add(new NameValue("videos__video__title__","null"));
+        nameVals = new ArrayList<NameValue<String>>();
+        nameVals.add(new NameValue<String>("videos__video__director__","file"));
+        nameVals.add(new NameValue<String>("videos__video__title__","null"));
         doc = limeXMLDocumentFactory.createLimeXMLDocument("<?xml version=\"1.0\"?><videos xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/video.xsd\"><video title=\"null\" director=\"file\" ></video></videos>");
         doc.initIdentifier(mason);
         doc.getXMLString();
@@ -427,9 +426,13 @@ public class CollectionTest extends LimeTestCase {
         write(map, new File(marker, "video.collection"));
     }
     
-    private void write(Object o, File f) throws Exception {
+    private void write(Map<URN, LimeXMLDocument> docs, File f) throws Exception {
+        Map<URN, String> strings = new HashMap<URN, String>(docs.size());
+        for(Map.Entry<URN, LimeXMLDocument> entry : docs.entrySet()) {
+            strings.put(entry.getKey(), entry.getValue().getXMLString());
+        }
         ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(f)));
-        out.writeObject(o);
+        out.writeObject(strings);
         out.flush();
         out.close();
     }
@@ -438,8 +441,8 @@ public class CollectionTest extends LimeTestCase {
         File audioFile = TestUtils.getResourceFile(fileLocation + "audio.collection");
         File videoFile = TestUtils.getResourceFile(fileLocation + "video.collection");
         limeXMLProperties.getXMLDocsDir().mkdirs();
-        File newAudio  = new File(limeXMLProperties.getXMLDocsDir(), "audio.sxml");
-        File newVideo  = new File(limeXMLProperties.getXMLDocsDir(), "video.sxml");
+        File newAudio  = new File(limeXMLProperties.getXMLDocsDir(), "audio.sxml2");
+        File newVideo  = new File(limeXMLProperties.getXMLDocsDir(), "video.sxml2");
         assertTrue("Necessary file audio.collection cannot be found!", audioFile.exists());
         assertTrue("Necessary file video.collection cannot be found!", videoFile.exists());
         if(!audioFile.renameTo(newAudio))

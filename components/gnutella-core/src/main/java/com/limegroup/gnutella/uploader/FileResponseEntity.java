@@ -7,11 +7,13 @@ import java.nio.ByteBuffer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
-import org.limewire.http.AbstractHttpNIOEntity;
-import org.limewire.http.HttpIOSession;
+import org.apache.http.nio.ContentEncoder;
+import org.apache.http.nio.IOControl;
+import org.limewire.http.entity.AbstractProducingNHttpEntity;
 import org.limewire.http.entity.FilePieceReader;
 import org.limewire.http.entity.Piece;
 import org.limewire.http.entity.PieceListener;
+import org.limewire.http.reactor.HttpIOSession;
 import org.limewire.nio.NIODispatcher;
 
 import com.google.inject.Provider;
@@ -22,7 +24,7 @@ import com.limegroup.gnutella.Constants;
  * An event based {@link HttpEntity} that uploads a {@link File}. A
  * corresponding {@link HTTPUploader} is updated with progress.
  */
-public class FileResponseEntity extends AbstractHttpNIOEntity {
+public class FileResponseEntity extends AbstractProducingNHttpEntity {
 
     private static final Log LOG = LogFactory.getLog(FileResponseEntity.class);
     
@@ -72,7 +74,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
     }
 
     @Override
-    public void initialize() {
+    public void initialize(ContentEncoder contentEncoder, IOControl ioctrl) {
         if (LOG.isDebugEnabled())
             LOG.debug("Initializing upload of " + file.getName() + " [begin=" + begin + ",length=" + length + "]");
 
@@ -84,12 +86,11 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
         HttpIOSession ioSession = uploader.getSession().getIOSession();
         ioSession.setThrottle(bandwidthManager.get().getWriteThrottle(ioSession.getSocket()));
 
-        reader = new FilePieceReader(NIODispatcher.instance().getBufferCache(), file, begin, length, new PieceHandler());
+        reader = new FilePieceReader(NIODispatcher.instance().getBufferCache(), file, begin, length, new PieceHandler(ioctrl));
         reader.start();
     }
     
-    @Override
-    public void finished() {
+    public void finish() {
         if (LOG.isDebugEnabled())
             LOG.debug("Finished upload of " + file.getName() + " [begin=" + begin + ",length=" + length + ",remaining=" + remaining + "]");
 
@@ -100,10 +101,10 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
     }
     
     @Override
-    public boolean handleWrite() throws IOException {
+    public boolean writeContent(ContentEncoder contentEncoder, IOControl ioctrl) throws IOException {
         // flush current buffer
         if (buffer != null && buffer.hasRemaining()) {
-            int written = write(buffer);
+            int written = contentEncoder.write(buffer);
             uploader.addAmountUploaded(written);
             if (buffer.hasRemaining()) {
                 activateTimeout();
@@ -131,7 +132,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
                         // need to wait for the disk, PieceHandler will turn
                         // interest back on when the next piece is available
                         buffer = null;
-                        interestWrite(false);
+                        ioctrl.suspendOutput();
                         activateTimeout();
                         return true;
                     }
@@ -143,16 +144,12 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
             if (LOG.isTraceEnabled())
                 LOG.trace("Uploading " + file.getName() + " [remaining=" + remaining + "+" + buffer.remaining() + "]");
 
-            written = write(buffer);
+            written = contentEncoder.write(buffer);
             uploader.addAmountUploaded(written);
         } while (written > 0 && remaining > 0);
 
         activateTimeout();
         return remaining > 0 || buffer.hasRemaining();
-    }
-
-    private synchronized void interestWrite(boolean status) {
-        interestWrite(this, status);
     }
 
     @Override
@@ -168,6 +165,11 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
     }
     
     private class PieceHandler implements PieceListener {
+        private final IOControl ioControl;
+        
+        public PieceHandler(IOControl ioControl) {
+            this.ioControl = ioControl;
+        }
 
         public void readFailed(IOException e) {
             if (LOG.isWarnEnabled())
@@ -176,7 +178,7 @@ public class FileResponseEntity extends AbstractHttpNIOEntity {
         }
 
         public void readSuccessful() {
-            FileResponseEntity.this.interestWrite(true);
+            ioControl.requestOutput();
         }
 
     }

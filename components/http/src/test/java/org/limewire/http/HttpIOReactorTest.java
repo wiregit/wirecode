@@ -1,18 +1,16 @@
 package org.limewire.http;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-
 import junit.framework.TestCase;
 
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
+import org.limewire.http.reactor.DefaultDispatchedIOReactor;
 
 public class HttpIOReactorTest extends TestCase {
 
     public void testHttpIOReactor() throws Exception {
         try {
-            new HttpIOReactor(null);
+            new DefaultDispatchedIOReactor(null, null);
             fail("Expected IllegalArgumentException");
         } catch (IllegalArgumentException expected) {
         }
@@ -20,7 +18,7 @@ public class HttpIOReactorTest extends TestCase {
 
     public void testExecute() throws Exception {
         HttpParams params = new BasicHttpParams();
-        HttpIOReactor reactor = new HttpIOReactor(params);
+        DefaultDispatchedIOReactor reactor = new DefaultDispatchedIOReactor(params, null);
         try {
             reactor.execute(null);
             fail("Expected IllegalArgumentException");
@@ -28,15 +26,9 @@ public class HttpIOReactorTest extends TestCase {
         }
     }
 
-    public void testGetHttpParams() {
-        HttpParams params = new BasicHttpParams();
-        HttpIOReactor reactor = new HttpIOReactor(params);
-        assertSame(params, reactor.getHttpParams());
-    }
-
     public void testShutdown() throws Exception {
         HttpParams params = new BasicHttpParams();
-        HttpIOReactor reactor = new HttpIOReactor(params);
+        DefaultDispatchedIOReactor reactor = new DefaultDispatchedIOReactor(params, null);
         try {
             reactor.shutdown();
             fail("Expected UnsupportedOperationException");
@@ -44,26 +36,6 @@ public class HttpIOReactorTest extends TestCase {
         }
     }
 
-    public void testConnect() {
-        HttpParams params = new BasicHttpParams();
-        HttpIOReactor reactor = new HttpIOReactor(params);
-        SocketAddress remoteAddress = new InetSocketAddress(9999);
-        try {
-            reactor.connect(remoteAddress, null, null, null);
-            fail("Expected UnsupportedOperationException");
-        } catch (UnsupportedOperationException expected) {
-        }
-    }
-
-    public void testAcceptConnection() {
-        HttpParams params = new BasicHttpParams();
-        HttpIOReactor reactor = new HttpIOReactor(params);
-        SocketAddress remoteAddress = new InetSocketAddress(9999);
-        try {
-            reactor.connect(remoteAddress, null, null, null);
-            fail("Expected UnsupportedOperationException");
-        } catch (UnsupportedOperationException expected) {
-        }
-    }
+    // TODO: Test acceptConnection!
 
 }

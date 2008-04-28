@@ -4,9 +4,10 @@ import java.util.Collections;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.io.GGEP;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.GGEPKeys;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
@@ -163,10 +164,10 @@ public class MessageTestUtils {
         GGEP ggep = new GGEP();
         
         if (dailyUptime >= 0)
-            ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
+            ggep.put(GGEPKeys.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
         
         if (isGUESSCapable && isUltrapeer) {
-            ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT);
+            ggep.put(GGEPKeys.GGEP_HEADER_UNICAST_SUPPORT);
         }
         
         if (isUltrapeer) { 
@@ -191,6 +192,6 @@ public class MessageTestUtils {
         payload[0] = 0;
         payload[1] = freeLeaf ? (byte)10 : (byte)0;
         payload[2] = freeUp ? (byte)10 : (byte)0;
-        ggep.put(GGEP.GGEP_HEADER_UP_SUPPORT, payload);
+        ggep.put(GGEPKeys.GGEP_HEADER_UP_SUPPORT, payload);
     }
 }

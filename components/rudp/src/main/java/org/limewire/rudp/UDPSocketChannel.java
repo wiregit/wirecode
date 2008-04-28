@@ -2,16 +2,15 @@ package org.limewire.rudp;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
-import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.nio.AbstractNBSocket;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.InterestReadableByteChannel;
 import org.limewire.nio.channel.InterestWritableByteChannel;
@@ -29,7 +28,7 @@ import org.limewire.util.BufferUtils;
  * we can make it implement InterestReadChannel & InterestWriteChannel, so
  * we don't need the additional InterestAdapter.
  */
-class UDPSocketChannel extends SocketChannel implements InterestReadableByteChannel,
+class UDPSocketChannel extends AbstractNBSocketChannel implements InterestReadableByteChannel,
                                                         InterestWritableByteChannel,
                                                         ChunkReleaser {
     
@@ -42,7 +41,7 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
     private final RUDPContext context;
     
     /** The Socket object this UDPSocketChannel is used for. */
-    private Socket socket;
+    private final AbstractNBSocket socket;
     
     /** The DataWindow containing incoming read data. */
     private final DataWindow readData;
@@ -71,6 +70,7 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
         this.processor = new UDPConnectionProcessor(this, context);
         this.readData = processor.getReadWindow();
         this.chunks = new ArrayList<ByteBuffer>(5);
+        this.socket = new UDPConnection(context, this);
         allocateNewChunk();
         try {
             configureBlocking(false);
@@ -86,6 +86,7 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
         this.processor = processor;
         this.readData = processor.getReadWindow();
         this.chunks = new ArrayList<ByteBuffer>(5);
+        this.socket = new UDPConnection(context, this);
         allocateNewChunk();
         try {
             configureBlocking(false);
@@ -357,12 +358,8 @@ class UDPSocketChannel extends SocketChannel implements InterestReadableByteChan
         return processor.isConnecting();
     }
 
-    public Socket socket() {
+    public AbstractNBSocket socket() {
         return socket;
-    }
-
-    void setSocket(Socket socket) {
-        this.socket = socket;
     }
 
     public long read(ByteBuffer[] dsts, int offset, int length) throws IOException {

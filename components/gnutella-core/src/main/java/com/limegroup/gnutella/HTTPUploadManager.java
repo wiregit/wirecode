@@ -17,6 +17,7 @@ import org.apache.http.HttpInetConnection;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.nio.NHttpConnection;
+import org.apache.http.nio.protocol.NHttpRequestHandler;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
@@ -25,6 +26,7 @@ import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.http.HttpAcceptorListener;
 import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
+import org.limewire.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -34,7 +36,7 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.statistics.UploadStat;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.uploader.FileRequestHandler;
 import com.limegroup.gnutella.uploader.HTTPUploadSession;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager;
@@ -192,29 +194,22 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
     private final Provider<HTTPAcceptor> httpAcceptor;
     
+    private final TcpBandwidthStatistics tcpBandwidthStatistics;
+    
     @Inject
-    public HTTPUploadManager(UploadSlotManager slotManager, HttpRequestHandlerFactory httpRequestHandlerFactory, Provider<ContentManager> contentManager,
-            Provider<HTTPAcceptor> httpAcceptor, Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback) {
-        if (slotManager == null) {
-            throw new IllegalArgumentException("slotManager may not be null");
-        }
-        if (httpAcceptor == null) {
-            throw new IllegalArgumentException("acceptor may not be null");
-        }
-        if (activityCallback == null) {
-            throw new IllegalArgumentException("activityCallback may not be null");
-        }        
-        if (fileManager == null) {
-            throw new IllegalArgumentException("fileManager may not be null");
-        }
-
-        this.slotManager = slotManager;
+    public HTTPUploadManager(UploadSlotManager slotManager,
+            HttpRequestHandlerFactory httpRequestHandlerFactory,
+            Provider<ContentManager> contentManager, Provider<HTTPAcceptor> httpAcceptor,
+            Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback,
+            TcpBandwidthStatistics tcpBandwidthStatistics) {
+        this.slotManager = Objects.nonNull(slotManager, "slotManager");
         this.httpRequestHandlerFactory = httpRequestHandlerFactory;
         this.contentManager = contentManager;
         this.freeLoaderRequestHandler = httpRequestHandlerFactory.createFreeLoaderRequestHandler();
-        this.httpAcceptor = httpAcceptor;
-        this.fileManager = fileManager;
-        this.activityCallback = activityCallback;
+        this.httpAcceptor = Objects.nonNull(httpAcceptor, "httpAcceptor");
+        this.fileManager = Objects.nonNull(fileManager, "fileManager");
+        this.activityCallback = Objects.nonNull(activityCallback, "activityCallback");
+        this.tcpBandwidthStatistics = Objects.nonNull(tcpBandwidthStatistics, "tcpBandwidthStatistics");
     }
 
     /**
@@ -236,7 +231,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         httpAcceptor.get().registerHandler("/", httpRequestHandlerFactory.createBrowseRequestHandler());
 
         // push-proxy requests
-        HttpRequestHandler pushProxyHandler = httpRequestHandlerFactory.createPushProxyRequestHandler();
+        NHttpRequestHandler pushProxyHandler = httpRequestHandlerFactory.createPushProxyRequestHandler();
         httpAcceptor.get().registerHandler("/gnutella/push-proxy", pushProxyHandler);
         httpAcceptor.get().registerHandler("/gnet/push-proxy", pushProxyHandler);
 
@@ -276,9 +271,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             HttpContext context, HTTPUploader uploader) throws HttpException,
             IOException {
         assert started;
-        
-        UploadStat.FREELOADER.incrementStat();
-
         uploader.setState(UploadStatus.FREELOADER);
         freeLoaderRequestHandler.handle(request, response, context);
     }
@@ -324,18 +316,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
             localUploads.remove(uploader);
         }
 
-        switch (state) {
-        case COMPLETE:
-            UploadStat.COMPLETED.incrementStat();
-            if (lastState == UploadStatus.UPLOADING
-                    || lastState == UploadStatus.THEX_REQUEST)
-                UploadStat.COMPLETED_FILE.incrementStat();
-            break;
-        case INTERRUPTED:
-            UploadStat.INTERRUPTED.incrementStat();
-            break;
-        }
-
         if (uploader.getUploadType() != null
                 && !uploader.getUploadType().isInternal()) {
             FileDesc fd = uploader.getFileDesc();
@@ -369,10 +349,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         if (uploader.isVisible()) {
             return;
         }
-
-        // We want to increment attempted only for uploads that may
-        // have a chance of failing.
-        UploadStat.ATTEMPTED.incrementStat();
 
         // We are going to notify the gui about the new upload, and let
         // it decide what to do with it - will act depending on it's
@@ -494,7 +470,6 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 && hostLimitReached(session.getHost())) {
             if (LOG.isDebugEnabled())
                 LOG.debug("host limit reached for " + session.getHost());
-            UploadStat.LIMIT_REACHED_GREEDY.incrementStat();
             return QueueStatus.REJECTED;
         }
 
@@ -743,7 +718,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
                 cleanupFinishedUploader(uploader);
 
-                uploader = new HTTPUploader(filename, session);
+                uploader = new HTTPUploader(filename, session, tcpBandwidthStatistics);
             } else {
                 // reuse existing uploader object
                 uploader.reinitialize();
@@ -839,10 +814,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 }
             }
         }
-
-        public void requestReceived(NHttpConnection conn, HttpRequest request) {
-        }
-
+        
         public void responseSent(NHttpConnection conn, HttpResponse response) {
             assert started;
             
@@ -857,6 +829,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
                 if (session.getQueueStatus() == QueueStatus.QUEUED) {
                     session.getIOSession().setSocketTimeout(
                             HTTPUploadSession.MAX_POLL_TIME);
+                    conn.requestInput();  // make sure the new socket timeout is used.
                 }
             }
         }

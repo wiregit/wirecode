@@ -12,7 +12,7 @@ import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.http.AltLocTracker;
-import com.limegroup.gnutella.statistics.UploadStat;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 
 /**
  * Maintains state for an HTTP upload.
@@ -45,8 +45,12 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
     private PushEndpoint pushEndpoint;
 
     public HTTPUploader(String fileName, HTTPUploadSession session) {
-        super(fileName, session);
+        super(fileName, session, null);
 	}
+    
+    public HTTPUploader(String fileName, HTTPUploadSession session, TcpBandwidthStatistics tcpBandwidthStatistics) {
+        super(fileName, session, tcpBandwidthStatistics);
+    }
 	    
     @Override
     public void reinitialize() {
@@ -81,7 +85,6 @@ public class HTTPUploader extends AbstractUploader implements Uploader {
         // for testing: if the uploader was not initialized from a real
         // connection it does not have an IO session
         if (getSession().getIOSession() != null) {
-            UploadStat.STALLED.incrementStat();
             getSession().getIOSession().shutdown();
         }
 	}

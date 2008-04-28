@@ -55,4 +55,32 @@ public class MessageSettings extends LimeProps {
      */
     public static final BooleanSetting OOB_REDUNDANCY =
         FACTORY.createRemoteBooleanSetting("OOB_REDUNDANCY", false, "MessageSettings.OOBRedundancy");
+    
+    /**
+     * Whether to add return path in replies.
+     */
+    public static final BooleanSetting RETURN_PATH_IN_REPLIES = 
+        FACTORY.createRemoteBooleanSetting("RETURN_PATH_IN_REPLIES",
+                true,"MessageSettings.returnPathInReplies");
+    
+    /**
+     * Whether to zero the OOB bytes of the guid as described in experiment LWC-1313
+     */
+    public static final BooleanSetting GUID_ZERO_EXPERIMENT = 
+        FACTORY.createRemoteBooleanSetting("GUID_ZERO_EXPERIMENT", false, 
+                "MessageSettings.guidZeroExperiment");
+    
+    /**
+     * Whether ultrapeers should filter queries to leaves based on firewall status.
+     * Described in LWC-1309
+     */
+    public static final BooleanSetting ULTRAPEER_FIREWALL_FILTERING =
+        FACTORY.createRemoteBooleanSetting("ULTRAPEER_FIREWALL_FILTERING",true,
+                "MessageSettings.ultrapeerFirewallFiltering");
+    
+    /** 
+     * The maximum number of UDP replies to buffer up.  For testing.
+     */
+    public static final IntSetting MAX_BUFFERED_OOB_REPLIES =
+        FACTORY.createIntSetting("MAX_BUFFERED_OOB_REPLIES", 250);
 }

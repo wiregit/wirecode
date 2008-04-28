@@ -75,6 +75,16 @@
       <artifactId>lw-lwsserver</artifactId>
       <version>${limewire.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.limewire</groupId>
+      <artifactId>lw-promotion</artifactId>
+      <version>${limewire.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.limewire</groupId>
+      <artifactId>lw-geocode</artifactId>
+      <version>${limewire.version}</version>
+    </dependency>
 	<!-- Customized LimeWire Jars --> 
 	<dependency>
       <groupId>org.limewire</groupId>
@@ -127,6 +137,11 @@
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <version>1.2.14</version>
+    </dependency>	
+    <dependency>
+      <groupId>org.jaudiotagger</groupId>
+      <artifactId>jaudiotagger</artifactId>
+      <version>1.0</version>
     </dependency>	
 	<!-- Scoped Jars -->
     <dependency>

@@ -2,7 +2,9 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 
-public interface NetworkManager {
+import org.limewire.service.Service;
+
+public interface NetworkManager extends Service {
 
     /** @return true if your IP and port information is valid.
      */
@@ -94,4 +96,7 @@ public interface NetworkManager {
     public GUID getSolicitedGUID();
     
     public int supportsFWTVersion();
+    
+    /** A convenience stub. */
+    public boolean isPrivateAddress(byte[] addr);
 }

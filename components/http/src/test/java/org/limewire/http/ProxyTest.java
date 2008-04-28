@@ -7,25 +7,27 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
+import junit.framework.Test;
+
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.limewire.concurrent.SimpleTimer;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.IOUtils;
+import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.net.EmptySocketBindingSettings;
 import org.limewire.net.LimeWireNetModule;
 import org.limewire.net.ProxySettings;
-import org.limewire.net.ProxySettings.ProxyType;
 import org.limewire.net.SocketBindingSettings;
 import org.limewire.net.SocketsManager;
+import org.limewire.net.ProxySettings.ProxyType;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Names;
-
-import junit.framework.Test;
 
 public class ProxyTest extends BaseTestCase {
 
@@ -37,6 +39,7 @@ public class ProxyTest extends BaseTestCase {
 
     private ProxySettingsStub proxySettings;
     private SocketsManager socketsManager;
+    private LimeHttpClient httpClient;
 
     public ProxyTest(String name) {
         super(name);
@@ -66,10 +69,13 @@ public class ProxyTest extends BaseTestCase {
                 bind(ScheduledExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(timer);
                 bind(ExecutorService.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(timer);
                 bind(Executor.class).annotatedWith(Names.named("backgroundExecutor")).toInstance(timer);
+                bind(NetworkInstanceUtils.class).to(SimpleNetworkInstanceUtils.class);
             }
         });        
         
         socketsManager = injector.getInstance(SocketsManager.class);
+        httpClient = injector.getInstance(LimeHttpClient.class);
+        
         
         proxySettings.setProxyForPrivate(true);
         proxySettings.setProxyHost("127.0.0.1");
@@ -296,10 +302,9 @@ public class ProxyTest extends BaseTestCase {
         fps.setHttpRequest(true);
 
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile.txt";
-        HttpClient client = HttpClientManager.getNewClient();
         HttpGet get = new HttpGet(connectTo);
         get.addHeader("connection", "close");
-        HttpResponse response = client.execute(get);
+        HttpResponse response = httpClient.execute(get);
         byte[] resp = IOUtils.readFully(response.getEntity().getContent());
         assertEquals("invalid response from server", "hello", new String(resp));
         get.abort();
@@ -315,10 +320,9 @@ public class ProxyTest extends BaseTestCase {
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile2.txt";
         HttpGet get = new HttpGet(connectTo);
         get.addHeader("connection", "close");
-        HttpClient client = HttpClientManager.getNewClient();
         // release the connections.
         // TODO client.setHttpConnectionManager(new SimpleHttpConnectionManager());
-        HttpResponse response = client.execute(get);
+        HttpResponse response = httpClient.execute(get);
         String resp = new String(IOUtils.readFully(response.getEntity().getContent()));
         assertEquals("invalid response from server", "hello", resp);
         get.abort();
@@ -334,10 +338,9 @@ public class ProxyTest extends BaseTestCase {
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile3.txt";
         HttpGet get = new HttpGet(connectTo);
         get.addHeader("connection", "close");
-        HttpClient client = HttpClientManager.getNewClient();
         // release the connections.
         // TODO client.setHttpConnectionManager(new SimpleHttpConnectionManager());
-        HttpResponse response = client.execute(get);
+        HttpResponse response = httpClient.execute(get);
         String resp = new String(IOUtils.readFully(response.getEntity().getContent()));
         assertEquals("invalid response from server", "hello", resp);
         get.abort();
@@ -353,10 +356,9 @@ public class ProxyTest extends BaseTestCase {
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile4.txt";
         HttpGet get = new HttpGet(connectTo);
         get.addHeader("connection", "close");
-        HttpClient client = HttpClientManager.getNewClient();
         // release the connections.
         // TODO client.setHttpConnectionManager(new SimpleHttpConnectionManager());
-        HttpResponse response = client.execute(get);
+        HttpResponse response = httpClient.execute(get);
         String resp = new String(IOUtils.readFully(response.getEntity().getContent()));
         assertEquals("invalid response from server", "hello", resp);
         get.abort();
@@ -376,10 +378,9 @@ public class ProxyTest extends BaseTestCase {
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile3.txt";
         HttpGet get = new HttpGet(connectTo);
         get.addHeader("connection", "close");
-        HttpClient client = HttpClientManager.getNewClient();
         // release the connections.
         // TODO client.setHttpConnectionManager(new SimpleHttpConnectionManager());
-        HttpResponse response = client.execute(get);
+        HttpResponse response = httpClient.execute(get);
         String resp = new String(IOUtils.readFully(response.getEntity().getContent()));
         assertEquals("invalid response from server", "hello", resp);
         get.abort();
@@ -399,10 +400,9 @@ public class ProxyTest extends BaseTestCase {
         String connectTo = "http://" + "localhost:" + DEST_PORT + "/myFile4.txt";
         HttpGet get = new HttpGet(connectTo);
         get.addHeader("connection", "close");
-        HttpClient client = HttpClientManager.getNewClient();
         // release the connections.
         // TODO client.setHttpConnectionManager(new SimpleHttpConnectionManager());
-        HttpResponse response = client.execute(get);
+        HttpResponse response = httpClient.execute(get);
         String resp = new String(IOUtils.readFully(response.getEntity().getContent()));
         assertEquals("invalid response from server", "hello", resp);
         get.abort();

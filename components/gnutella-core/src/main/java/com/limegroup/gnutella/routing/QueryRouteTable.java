@@ -9,9 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
-import org.limewire.collection.BitSet;
 import org.limewire.io.IOUtils;
-import org.limewire.io.Pools;
 
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -87,13 +85,9 @@ public class QueryRouteTable {
      *  QRP is really not used in full by the Gnutella Ultrapeer protocol, hence
      *  the easy optimization of only using BitSets.
      */
-    private BitSet bitTable;
     
-    /**
-     * The cached resized QRT.
-     */
-    private QueryRouteTable resizedQRT = null;
-
+    private volatile QRTTableStorage storage;
+    
     /** The 'logical' length of the BitSet.  Needed because the BitSet accessor
      *  methods don't seem to offer what is needed.
      */
@@ -112,11 +106,6 @@ public class QueryRouteTable {
      *  in message N.) */
     private volatile Inflater uncompressor;
     
-    /** A cleaner to ensure we return the uncompressor. */
-    private Cleaner cleaner;
-
-
-
     /////////////////////////////// Basic Methods ///////////////////////////
 
 
@@ -163,7 +152,7 @@ public class QueryRouteTable {
      */
     private void initialize(int size, byte infinity) {
         this.bitTableLength = size;
-        this.bitTable = new BitSet();
+        this.storage = new DynamicQRTStorage(bitTableLength);
         this.sequenceNumber = -1;
         this.sequenceSize = -1;
         this.nextPatch = 0;
@@ -184,24 +173,30 @@ public class QueryRouteTable {
      * The return value is from 0 to 100.
      */
     public double getPercentFull() {
-        double set = bitTable.cardinality();
-        return ( set / bitTableLength ) * 100.0;
+        return storage.getPercentFull();
 	}
 	
 	/**
 	 * Returns the number of empty elements in the table.
 	 */
 	public int getEmptyUnits() {
-	    return bitTable.unusedUnits();
+	    return storage.getUnusedUnits();
 	}
 	
 	/**
 	 * Returns the total number of units allocated for storage.
 	 */
 	public int getUnitsInUse() {
-	    return bitTable.getUnitsInUse();
+	    return storage.getUnitsInUse();
 	}
 
+	/**
+     * @return the number of units with specified load.
+     */
+    public int getUnitsWithLoad(int load) {
+        return storage.numUnitsWithLoad(load);
+    }
+    
     /**
      * Returns true if a response could be generated for qr.  Note that a return
      * value of true does not necessarily mean that a response will be
@@ -306,7 +301,7 @@ public class QueryRouteTable {
     // In the new version, we will not accept TTLs for methods.  Tables are only
     // 1 hop deep....
     private final boolean contains(int hash) {
-        return bitTable.get(hash);
+        return storage.get(hash);
     }
 
     /**
@@ -323,9 +318,8 @@ public class QueryRouteTable {
 		byte log2 = Utilities.log2(bitTableLength);
         for (int i=0; i<keywords.length; i++) {
             int hash=HashFunction.hash(keywords[i], log2);
-            if (!bitTable.get(hash)) {
-                resizedQRT = null;
-                bitTable.set(hash);
+            if (!storage.get(hash)) {
+                storage.set(hash);
             }
         }
     }
@@ -334,9 +328,8 @@ public class QueryRouteTable {
     public void addIndivisible(String iString) {
         final int hash = HashFunction.hash(iString, 
                                            Utilities.log2(bitTableLength));
-        if (!bitTable.get(hash)) {
-            resizedQRT = null;
-            bitTable.set(hash);
+        if (!storage.get(hash)) {
+            storage.set(hash);
         }
     }
 
@@ -348,46 +341,11 @@ public class QueryRouteTable {
      *    @modifies this
      */
     public void addAll(QueryRouteTable qrt) {
-        this.bitTable.or( qrt.resize(this.bitTableLength) );
+        this.storage.or( qrt.storage.resize(this.bitTableLength) );
+        this.storage.compact();
     }
     
-    /**
-     * Scales the internal cached BitSet to size 'newSize'
-     */
-    private BitSet resize(int newSize) {
-        // if this bitTable is already the correct size,
-        // return it
-        if ( bitTableLength == newSize )
-            return bitTable;
-            
-        // if we already have a cached resizedQRT and
-        // it is the correct size, then use it.
-        if ( resizedQRT != null && resizedQRT.bitTableLength == newSize )
-            return resizedQRT.bitTable;
 
-        // we must construct a new QRT of this size.            
-        resizedQRT = new QueryRouteTable(newSize);
-        
-        //This algorithm scales between tables of different lengths.
-        //Refer to the query routing paper for a full explanation.
-        //(The below algorithm, contributed by Philippe Verdy,
-        // uses integer values instead of decimal values
-        // as both double & float can cause precision problems on machines
-        // with odd setups, causing the wrong values to be set in tables)
-        final int m = this.bitTableLength;
-        final int m2 = resizedQRT.bitTableLength;
-        for (int i = this.bitTable.nextSetBit(0); i >= 0;
-          i = this.bitTable.nextSetBit(i + 1)) {
-             // floor(i*m2/m)
-             final int firstSet = (int)(((long)i * m2) / m);
-             i = this.bitTable.nextClearBit(i + 1);
-             // ceil(i*m2/m)
-             final int lastNotSet = (int)(((long)i * m2 - 1) / m + 1);
-             resizedQRT.bitTable.set(firstSet, lastNotSet);
-        }
-        
-        return resizedQRT.bitTable;
-    }
 
     /** True if o is a QueryRouteTable with the same entries of this. */
     public boolean equals(Object o) {
@@ -401,20 +359,20 @@ public class QueryRouteTable {
         QueryRouteTable other=(QueryRouteTable)o;
         if (this.bitTableLength!=other.bitTableLength)
             return false;
-
-        if (!this.bitTable.equals(other.bitTable))
+        
+        if (!this.storage.equals(other.storage))
             return false;
 
         return true;
     }
 
     public int hashCode() {
-        return bitTable.hashCode() * 17;
+        return storage.hashCode() * 17;
     }
 
 
     public String toString() {
-        return "QueryRouteTable : " + bitTable.toString();
+        return "QueryRouteTable: " + storage.toString();
     }
 
 
@@ -472,9 +430,7 @@ public class QueryRouteTable {
             try {
                 //a) If first message, create uncompressor (if needed).
                 if (m.getSequenceNumber()==1) {
-                    if(cleaner == null)
-                        cleaner = new Cleaner(this);
-                    uncompressor = Pools.getInflaterPool().borrowObject();
+                    uncompressor = new Inflater();
                 }       
                 assert uncompressor!=null : 
                     "Null uncompressor.  Sequence: "+m.getSequenceNumber();
@@ -500,17 +456,15 @@ public class QueryRouteTable {
                                              + bitTableLength);
             // All negative values indicate presence
             if (data[i] < 0) {
-                bitTable.set(nextPatch);
-                resizedQRT = null;
+                storage.set(nextPatch);
             }
             // All positive values indicate absence
             else if (data[i] > 0) {
-                bitTable.clear(nextPatch);
-                resizedQRT = null;
+                storage.clear(nextPatch);
             }
             nextPatch++;
         }
-        bitTable.compact();
+        storage.compact();
 
         //4. Update sequence numbers.
         this.sequenceSize=m.getSequenceSize();
@@ -523,7 +477,7 @@ public class QueryRouteTable {
             this.nextPatch=0; //TODO: is this right?
             // if this last message was compressed, release the uncompressor.
             if( this.uncompressor != null ) {
-                Pools.getInflaterPool().returnObject(uncompressor);
+                IOUtils.close(uncompressor);
                 this.uncompressor = null;
             }
         }   
@@ -585,12 +539,12 @@ public class QueryRouteTable {
             //      Because this is an xOr, we know that if 
             //      this.bitTable.get is true, prev.bitTable.get
             //      is false, and vice versa.            
-            if(!this.bitTable.equals(prev.bitTable) ) {
-                BitSet xOr = (BitSet)this.bitTable.clone();
-                xOr.xor(prev.bitTable);
-                for (int i=xOr.nextSetBit(0); i >= 0; i=xOr.nextSetBit(i+1)) {
-                    data[i] = this.bitTable.get(i) ?
-                        keywordPresent : keywordAbsent;
+            if(!this.storage.equals(prev.storage) ) {
+                QRTTableStorage xOr = this.storage.clone();
+                xOr.xor(prev.storage);
+                for (int i : xOr) {
+                    data[i] = this.storage.get(i) ?
+                            keywordPresent : keywordAbsent;
                     needsPatch = true;
                 }
             }
@@ -600,7 +554,7 @@ public class QueryRouteTable {
         //1b. If there was no previous table, scan through the table using
         //    nextSetBit, avoiding bitTableLength calls to BitSet.get(int).
         else {
-            for (int i=bitTable.nextSetBit(0);i>=0;i=bitTable.nextSetBit(i+1)){
+            for (int i : storage) {
                 data[i] = keywordPresent;
                 needsPatch = true;
             }
@@ -685,7 +639,7 @@ public class QueryRouteTable {
      */
     public byte [] getRawDump() {
         byte [] ret = new byte[bitTableLength / 8];
-        for(int i = bitTable.nextSetBit(0); i >= 0; i = bitTable.nextSetBit(i+1)) 
+        for(int i : storage) 
             ret[i / 8] = (byte) (ret[i / 8] | (1 << (7 - i % 8)));
         return ret;
     }
@@ -721,24 +675,5 @@ public class QueryRouteTable {
             return (byte)(0xF0 | b);
         else
             return b;        
-    }
-    
-    /**
-     * A simple cleaner that will ensure inflater objects are returned.
-     * This is used so that only QueryRouteTables that have ever received
-     * an inflater are scheduled for finalization.
-     */
-    private static class Cleaner {
-        private final QueryRouteTable qrt;
-        
-        Cleaner(QueryRouteTable toClean) {
-            this.qrt = toClean;
-        }
-        
-        protected void finalize() {
-            Inflater inf = qrt.uncompressor;
-            if(inf != null)
-                Pools.getInflaterPool().returnObject(inf);
-        }
     }
 }

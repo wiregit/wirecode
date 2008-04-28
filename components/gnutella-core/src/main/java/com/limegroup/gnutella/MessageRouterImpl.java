@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +31,8 @@ import org.limewire.collection.NoMoreStorageException;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.inspection.Inspectable;
+import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
@@ -59,9 +59,9 @@ import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
 import com.limegroup.gnutella.messagehandlers.DualMessageHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
+import com.limegroup.gnutella.messagehandlers.LimeACKHandler;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
@@ -77,7 +77,6 @@ import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
-import com.limegroup.gnutella.messages.vendor.AdvancedStatsToggle;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
@@ -115,11 +114,6 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.statistics.LimeSentMessageStat;
-import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
-import com.limegroup.gnutella.statistics.RouteErrorStat;
-import com.limegroup.gnutella.statistics.RoutedQueryStat;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 
@@ -183,10 +177,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     private RouteTable _headPongRouteTable = 
     	new RouteTable(10, MAX_ROUTE_TABLE_SIZE);
 
-    /** How long to buffer up out-of-band replies.
-     */
-    private static final long CLEAR_TIME = 30 * 1000; // 30 seconds
-    
     /**
      * The amount of time after which to expire an OOBSession.
      */
@@ -196,22 +186,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
      */
     private static final long HOPS_FLOW_INTERVAL = 15 * 1000; // 15 seconds
 
-    /** The maximum number of UDP replies to buffer up.  Non-final for 
-     *  testing.
-     */
-    public static final int MAX_BUFFERED_REPLIES = 250;
-    
-    private int maxBufferedReplies = MAX_BUFFERED_REPLIES;
-
-    /**
-     * Keeps track of QueryReplies to be sent after recieving LimeAcks (sent
-     * if the sink wants them).  Cleared every CLEAR_TIME seconds.
-     * TimedGUID->QueryResponseBundle.
-     */
-    private final Map<GUID.TimedGUID, QueryResponseBundle> _outOfBandReplies =
-        new Hashtable<GUID.TimedGUID, QueryResponseBundle>();
-
-    
     private final BypassedResultsCache _bypassedResultsCache;
     
     /**
@@ -267,11 +241,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
      */
     private static final int HIGH_HOPS_RESPONSE_LIMIT = 10;
 
-    /**
-     * The lifetime of OOBs guids.
-     */
-    private static final long TIMED_GUID_LIFETIME = 25 * 1000; 
-
     /** Keeps track of Listeners of GUIDs. */
     private volatile Map<byte[], List<MessageListener>> _messageListeners =
         Collections.emptyMap();
@@ -312,6 +281,15 @@ public abstract class MessageRouterImpl implements MessageRouter {
     @InspectionPoint("dropped replies")
     private final DroppedReplyCounter droppedReplyCounter = new DroppedReplyCounter(); 
     
+    @InspectionPoint("duplicate queries")
+    private final DuplicateQueryCounter duplicateQueryCounter = new DuplicateQueryCounter();
+    
+    @InspectionPoint("last hop counter for ultrapeers")
+    private final LastHopCounter lastHopCounter = new LastHopCounter();
+    
+    @InspectablePrimitive("leaf connection qrp hits")
+    private final InspectionHistogram<Integer> leafQRPHits = new InspectionHistogram<Integer>();
+    
     protected final NetworkManager networkManager;
     protected final QueryRequestFactory queryRequestFactory;
     protected final QueryHandlerFactory queryHandlerFactory;
@@ -345,10 +323,10 @@ public abstract class MessageRouterImpl implements MessageRouter {
     protected final GuidMap multicastGuidMap;
     private final Provider<InspectionRequestHandler> inspectionRequestHandlerFactory;
     private final Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory;
-    private final Provider<AdvancedToggleHandler> advancedToggleHandlerFactory;
     private final Provider<OOBHandler> oobHandlerFactory;
     private final Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager;
-
+    protected final Provider<LimeACKHandler> limeAckHandler;
+    
     private final PingRequestFactory pingRequestFactory;
 
     private final MessageHandlerBinder messageHandlerBinder;
@@ -396,10 +374,10 @@ public abstract class MessageRouterImpl implements MessageRouter {
             UDPReplyHandlerCache udpReplyHandlerCache,
             Provider<InspectionRequestHandler> inspectionRequestHandlerFactory,
             Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
-            Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
             PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
             Provider<OOBHandler> oobHandlerFactory,
-            Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager) {
+            Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager,
+            Provider<LimeACKHandler> limeACKHandler) {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.queryHandlerFactory = queryHandlerFactory;
@@ -430,7 +408,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         this.simppManager = simppManager;
         this.updateHandler = updateHandler;
         this.udpCrawlerPingHandlerFactory = udpCrawlerPingHandlerFactory;
-        this.advancedToggleHandlerFactory = advancedToggleHandlerFactory;
         this.pingRequestFactory = pingRequestFactory;
         this.messageHandlerBinder = messageHandlerBinder;
         this.multicastGuidMap = guidMapManager.getMap();
@@ -438,6 +415,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         this.inspectionRequestHandlerFactory = inspectionRequestHandlerFactory;
         this.oobHandlerFactory = oobHandlerFactory;
         this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
+        this.limeAckHandler = limeACKHandler;
 
         _clientGUID = applicationServices.getMyGUID();
         _bypassedResultsCache = new BypassedResultsCache(activityCallback, downloadManager);
@@ -558,8 +536,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
 		
 	    QRP_PROPAGATOR.start();
 
-        // schedule a runner to clear unused out-of-band replies
-        backgroundExecutor.scheduleWithFixedDelay(new Expirer(), CLEAR_TIME, CLEAR_TIME, TimeUnit.MILLISECONDS);
         // schedule a runner to clear guys we've connected back to
         backgroundExecutor.scheduleWithFixedDelay(new ConnectBackExpirer(), 10 * CLEAR_TIME, 
                                10 * CLEAR_TIME, TimeUnit.MILLISECONDS);
@@ -603,14 +579,15 @@ public abstract class MessageRouterImpl implements MessageRouter {
         setUDPMessageHandler(QueryReply.class, new UDPQueryReplyHandler(oobHandler));
         setUDPMessageHandler(PingRequest.class, new UDPPingRequestHandler());
         setUDPMessageHandler(PingReply.class, new UDPPingReplyHandler());
-        setUDPMessageHandler(LimeACKVendorMessage.class, new UDPLimeACKVendorMessageHandler());
+        LimeACKHandler ackHandler = limeAckHandler.get();
+        ackHandler.start();
+        setUDPMessageHandler(LimeACKVendorMessage.class, ackHandler);
         setUDPMessageHandler(ReplyNumberVendorMessage.class, oobHandler);
         setUDPMessageHandler(UDPCrawlerPing.class, udpCrawlerPingHandlerFactory.get());
         setUDPMessageHandler(HeadPing.class, new UDPHeadPingHandler());
         setUDPMessageHandler(UpdateRequest.class, new UDPUpdateRequestHandler());
         setUDPMessageHandler(ContentResponse.class, new UDPContentResponseHandler());
         setUDPMessageHandler(InspectionRequest.class, inspectionHandler);
-        setUDPMessageHandler(AdvancedStatsToggle.class, advancedToggleHandlerFactory.get());
         
         setMulticastMessageHandler(QueryRequest.class, new MulticastQueryRequestHandler());
         //setMulticastMessageHandler(QueryReply.class, new MulticastQueryReplyHandler());
@@ -831,7 +808,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
 		    return;
 
         udpService.send(reply, addr.getAddress(), addr.getPort());
-		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
 	}
 
 	/**
@@ -945,7 +921,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     }
 
     private void tallyDupQuery(QueryRequest request) {
-        ReceivedMessageStatHandler.TCP_DUPLICATE_QUERIES.addMessage(request);
+        duplicateQueryCounter.duplicateQuery(request);
     }
 
 	/**
@@ -1168,44 +1144,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         }
     }
 
-    /** Handles a ACK message - looks up the QueryReply and sends it out of
-     *  band.
-     */
-    protected void handleLimeACKMessage(LimeACKVendorMessage ack,
-                                        InetSocketAddress addr) {
-
-        GUID.TimedGUID refGUID = new GUID.TimedGUID(new GUID(ack.getGUID()),
-                                                    TIMED_GUID_LIFETIME);
-        QueryResponseBundle bundle = _outOfBandReplies.remove(refGUID);
-        
-        // token is null for old oob messages, it will just be ignored then
-        SecurityToken securityToken = ack.getSecurityToken();
-       
-        if ((bundle != null) && (ack.getNumResults() > 0)) {
-            InetAddress iaddr = addr.getAddress();
-            int port = addr.getPort();
-
-            //convert responses to QueryReplies, but only send as many as the
-            //node wants
-            Iterable<QueryReply> iterable;
-            if (ack.getNumResults() < bundle._responses.length) {
-                // TODO move selection to responseToQueryReplies methods for randomization
-                Response[] desired = new Response[ack.getNumResults()];
-                System.arraycopy(bundle._responses, 0, desired, 0, desired.length);
-                iterable = responsesToQueryReplies(desired, bundle._query, 1, securityToken);
-            } else { 
-                iterable = responsesToQueryReplies(bundle._responses, 
-                                                   bundle._query, 1, securityToken);
-            }
-            
-            //send the query replies
-            for(QueryReply queryReply : iterable)
-                udpService.send(queryReply, iaddr, port);
-        }
-        // else some sort of routing error or attack?
-        // TODO: tally some stat stuff here
-    }
-    
     /**
      * Adds the sender of the reply message to an internal cache under the guid of the message
      * if the sender can receive unsolicited UDP.
@@ -1265,26 +1203,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         return _queryRouteTable.getReplyHandler(guid.bytes()) != null;
     }
 
-    /** Stores (for a limited time) the resps for later out-of-band delivery -
-     *  interacts with handleLimeACKMessage
-     *  @return true if the operation failed, false if not (i.e. too busy)
-     */
-    protected boolean bufferResponsesForLaterDelivery(QueryRequest query,
-                                                      Response[] resps) {
-        // store responses by guid for later retrieval
-        synchronized (_outOfBandReplies) {
-            if (_outOfBandReplies.size() < maxBufferedReplies) {
-                GUID.TimedGUID tGUID = 
-                    new GUID.TimedGUID(new GUID(query.getGUID()),
-                                       TIMED_GUID_LIFETIME);
-                _outOfBandReplies.put(tGUID, new QueryResponseBundle(query, 
-                                                                     resps));
-                return true;
-            }
-            return false;
-        }
-    }
-    
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.MessageRouter#isHostUnicastQueried(com.limegroup.gnutella.GUID, org.limewire.io.IpPort)
      */
@@ -1694,9 +1612,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
                 hitConnections.subList(startIndex, startIndex+hitConnections.size()/4);
         }
         
-        int notSent = list.size() - hitConnections.size();
-        RoutedQueryStat.LEAF_DROP.addData(notSent);
-        
         for(int i=0; i<hitConnections.size(); i++) {
             RoutedConnection mc = hitConnections.get(i);
             
@@ -1704,8 +1619,9 @@ public abstract class MessageRouterImpl implements MessageRouter {
             // we have already ensured it hits the routing table
             // by filling up the 'hitsConnection' list.
             mc.send(query);
-            RoutedQueryStat.LEAF_SEND.incrementStat();
         }
+        
+        leafQRPHits.count(hitConnections.size());
 	}
 
 	/**
@@ -1749,8 +1665,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     protected void multicastQueryRequest(QueryRequest query) {
 		// set the TTL on outgoing udp queries to 1
 		query.setTTL((byte)1);
-		// record the stat
-		SentMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(query);
 				
 		multicastService.send(query);
 	}	
@@ -1779,10 +1693,13 @@ public abstract class MessageRouterImpl implements MessageRouter {
 		List<RoutedConnection> list = connectionManager.getInitializedConnections();
         int limit = list.size();
 
+        int forwarded = 0;
 		for(int i=0; i<limit; i++) {
 			RoutedConnection mc = list.get(i);      
-            forwardQueryToUltrapeer(query, handler, mc);  
+            forwarded += forwardQueryToUltrapeer(query, handler, mc) ? 1 : 0;  
         }
+		if (query.getTTL() == 1)
+		    lastHopCounter.countMessage(query.getHops(), forwarded);
     }
 
     /**
@@ -1841,37 +1758,33 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @param ultrapeer the Ultrapeer to send the query to
      */
     // default access for testing
-    void forwardQueryToUltrapeer(QueryRequest query, 
+    boolean forwardQueryToUltrapeer(QueryRequest query, 
                                          ReplyHandler handler,
                                          RoutedConnection ultrapeer) {    
         // don't send a query back to the guy who sent it
-        if(ultrapeer == handler) return;
+        if(ultrapeer == handler) return false;
 
         // make double-sure we don't send a query received
         // by a leaf to other Ultrapeers
-        if(ultrapeer.getConnectionCapabilities().isClientSupernodeConnection()) return;
+        if(ultrapeer.getConnectionCapabilities().isClientSupernodeConnection()) return false;
 
         // make sure that the ultrapeer understands feature queries.
         if(query.isFeatureQuery() && 
            !ultrapeer.getConnectionCapabilities().getRemoteHostSupportsFeatureQueries())
-             return;
+             return false;
 
         // is this the last hop for the query??
 		boolean lastHop = query.getTTL() == 1; 
            
         // if it's the last hop to an Ultrapeer that sends
         // query route tables, route it.
-        if(lastHop &&
-           ultrapeer.isUltrapeerQueryRoutingConnection()) {
-            boolean sent = sendRoutedQueryToHost(query, ultrapeer, handler);
-            if(sent)
-                RoutedQueryStat.ULTRAPEER_SEND.incrementStat();
-            else
-                RoutedQueryStat.ULTRAPEER_DROP.incrementStat();
+        if(lastHop && ultrapeer.isUltrapeerQueryRoutingConnection()) {
+            return sendRoutedQueryToHost(query, ultrapeer, handler);
         } else {
             // otherwise, just send it out
             ultrapeer.send(query);
         }
+        return true;
     }
 
 
@@ -1983,14 +1896,12 @@ public abstract class MessageRouterImpl implements MessageRouter {
         ReplyHandler replyHandler =
             _pingRouteTable.getReplyHandler(reply.getGUID());
 
-        if(replyHandler != null) {
+        if (replyHandler != null) {
             replyHandler.handlePingReply(reply, handler);
-        }
-        else {
-            RouteErrorStat.PING_REPLY_ROUTE_ERRORS.incrementStat();
+        } else {
             handler.countDroppedMessage();
         }
-		boolean supportsUnicast = reply.supportsUnicast();
+        boolean supportsUnicast = reply.supportsUnicast();
         
         //Then, if a marked pong from an Ultrapeer that we've never seen before,
         //send to all leaf connections except replyHandler (which may be null),
@@ -2064,17 +1975,9 @@ public abstract class MessageRouterImpl implements MessageRouter {
                 queryUnicaster.handleQueryReply(queryReply);
 
             } else {
-				RouteErrorStat.HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
-                final byte ttl = queryReply.getTTL();
-                if (ttl < RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL.length)
-				    RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL[ttl].incrementStat();
-                else
-				    RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL[RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL.length-1].incrementStat();
                 handler.countDroppedMessage();
             }
-        }
-        else {
-			RouteErrorStat.NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+        } else {
             handler.countDroppedMessage();
         }
     }
@@ -2124,7 +2027,10 @@ public abstract class MessageRouterImpl implements MessageRouter {
         if( rh == forMeReplyHandler ) return false;
         
         // Reason 3 -- drop if TTL is 0.
-        if( ttl == 0 ) return true;                
+        if( ttl == 0 ) {
+            droppedReplyCounter.dropTTL0();
+            return true;                
+        }
 
         // Reason 1 ...
         
@@ -2156,19 +2062,18 @@ public abstract class MessageRouterImpl implements MessageRouter {
      */
     private void handleSimppRequest(final SimppRequestVM simppReq, 
                                                   final ReplyHandler handler ) {
-        if(simppReq.getVersion() > SimppRequestVM.VERSION)
-            return; //we are not going to deal with these types of requests. 
-        byte[] simppBytes = simppManager.get().getSimppBytes();
-        if(simppBytes != null && simppBytes.length > 0 ) {
-            SimppVM simppVM = new SimppVM(simppBytes);
+        byte[] data = simppReq.isOldRequest() ? simppManager.get().getOldUpdateResponse() :
+                                                simppManager.get().getSimppBytes();
+        
+        if(data != null && data.length > 0 ) {
+            SimppVM simppVM = SimppVM.createSimppResponse(simppReq, data);
             try {
                 handler.handleSimppVM(simppVM);
-            } catch(IOException iox) {//uanble to send the SimppVM. Nothing I can do
+            } catch(IOException iox) {
                 return;
             }
         }
     }
-    
 
     /**
      * Passes on the SimppVM to the SimppManager which will verify it and
@@ -2177,31 +2082,35 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * all connections.
      */
     private void handleSimppVM(SimppVM simppVM, ReplyHandler handler) {
-        simppManager.get().checkAndUpdate(handler, simppVM.getPayload());
+        if(simppVM.isNewVersion()) {
+            simppManager.get().checkAndUpdate(handler, simppVM.getData());
+        }
     }
 
     /**
      *  Handles an update request by sending a response.
      */
     private void handleUpdateRequest(UpdateRequest req, ReplyHandler handler ) {
-
-        byte[] data = updateHandler.get().getLatestBytes();
+        byte[] data = req.isOldRequest() ? updateHandler.get().getOldUpdateResponse() :
+                                           updateHandler.get().getLatestBytes();
         if(data != null) {
             UpdateResponse msg = UpdateResponse.createUpdateResponse(data,req);
             handler.reply(msg);
         }
-    }
-    
-    /** Handles a ContentResponse msg -- passing it to the ContentManager. */
-    private void handleContentResponse(ContentResponse msg, ReplyHandler handler) {
-        contentManager.handleContentResponse(msg);
     }
 
     /**
      * Passes the request onto the update manager.
      */
     private void handleUpdateResponse(UpdateResponse resp, ReplyHandler handler) {
-        updateHandler.get().handleNewData(resp.getUpdate(), handler);
+        if(resp.isNewVersion()) {
+            updateHandler.get().handleNewData(resp.getUpdate(), handler);
+        }
+    }
+    
+    /** Handles a ContentResponse msg -- passing it to the ContentManager. */
+    private void handleContentResponse(ContentResponse msg, ReplyHandler handler) {
+        contentManager.handleContentResponse(msg);
     }
 
     /**
@@ -2297,7 +2206,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         assert push.getTTL() == 1 : "multicast push ttl not 1";
         
         multicastService.send(push);
-        SentMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(push);
     }
 
 
@@ -2324,8 +2232,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @param security token might be null
      * @return Iterable of QueryReply
      */
-    // default access for testing
-    Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
+    public Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
                                              QueryRequest queryRequest,
                                              final int REPLY_LIMIT, SecurityToken securityToken) {
 
@@ -2518,7 +2425,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
             qr.setTTL((byte)(request.getHops()+1));
             try {
                 sendQueryReply(qr);
-                LimeSentMessageStat.LIME_REPLIES_SENT.incrementStat();
             } catch (IOException ignored) {}
         }
         
@@ -2867,30 +2773,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         return _headPongRouteTable;
     }
     
-    /**
-     * Default access for testing only. 
-     */
-    Map<GUID.TimedGUID, QueryResponseBundle> getOutOfBandReplies() {
-        return _outOfBandReplies;
-    }
-    
-    /**
-     * Default access use for testing only. 
-     */
-    void setMaxBufferedReplies(int maxBufferedReplies) {
-        this.maxBufferedReplies = maxBufferedReplies;
-    }
-    
-    private static class QueryResponseBundle {
-        public final QueryRequest _query;
-        public final Response[] _responses;
-        
-        public QueryResponseBundle(QueryRequest query, Response[] responses) {
-            _query = query;
-            _responses = responses;
-        }
-    }
-
     /** Expires the UDP-Reply cache. */
     private class UDPReplyCleaner implements Runnable {
         public void run() {
@@ -2902,26 +2784,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
         }
         
     }
-
-    /** Can be run to invalidate out-of-band ACKs that we are waiting for....
-     */
-    private class Expirer implements Runnable {
-        public void run() {
-            Set<GUID.TimedGUID> toRemove = new HashSet<GUID.TimedGUID>();
-            synchronized (_outOfBandReplies) {
-                long now = System.currentTimeMillis();
-                for(GUID.TimedGUID currQB : _outOfBandReplies.keySet()) {
-                    if ((currQB != null) && (currQB.shouldExpire(now)))
-                        toRemove.add(currQB);
-                }
-                // done iterating through _outOfBandReplies, remove the 
-                // keys now...
-                for(GUID.TimedGUID next : toRemove)
-                    _outOfBandReplies.remove(next);
-            }
-        }
-    }
-
 
     /** This is run to clear out the registry of connect back attempts...
      *  Made package access for easy test access.
@@ -2950,6 +2812,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
 
         /* small optimization:
            send only HopsFlowVendorMessages if the busy state changed */
+    	@InspectablePrimitive("last upload slot busy state")
         private static boolean _oldBusyState = false;
            
         public void run() {
@@ -3004,21 +2867,18 @@ public abstract class MessageRouterImpl implements MessageRouter {
      */
     private class PingRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
             handlePingRequestPossibleDuplicate((PingRequest)msg, handler);
         }
     }
     
     private class PingReplyHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
             handlePingReply((PingReply)msg, handler);
         }
     }
     
     private class QueryRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
             handleQueryRequestPossibleDuplicate(
                 (QueryRequest)msg, (RoutedConnection)handler);
         }
@@ -3026,7 +2886,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     
     private class QueryReplyHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
             // if someone sent a TCP QueryReply with the MCAST header,
             // that's bad, so ignore it.
             QueryReply qmsg = (QueryReply)msg;
@@ -3036,7 +2895,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     
     private class ResetTableHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
             handleResetTableMessage((ResetTableMessage)msg,
                     (RoutedConnection)handler);
         }
@@ -3044,7 +2902,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     
     private class PatchTableHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(msg);
             handlePatchTableMessage((PatchTableMessage)msg,
                     (RoutedConnection)handler); 
         }
@@ -3052,7 +2909,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     
     private class TCPConnectBackHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_TCP_CONNECTBACK.addMessage(msg);
             handleTCPConnectBackRequest((TCPConnectBackVendorMessage) msg,
                     (RoutedConnection)handler);
         }
@@ -3060,7 +2916,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     
     private class UDPConnectBackHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.TCP_UDP_CONNECTBACK.addMessage(msg);
             handleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
                     (RoutedConnection)handler);
         }
@@ -3159,33 +3014,20 @@ public abstract class MessageRouterImpl implements MessageRouter {
                 // a TTL above zero may indicate a malicious client, as UDP
                 // messages queries should not be sent with TTL above 1.
                 //if(msg.getTTL() > 0) return;
-                if (!handleUDPQueryRequestPossibleDuplicate(
-                  (QueryRequest)msg, handler) ) {
-                    ReceivedMessageStatHandler.UDP_DUPLICATE_QUERIES.addMessage(msg);
-                }  
+                handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, handler);
             }
-            ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
         }
     }
     
     private class UDPPingRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
             handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler, addr);
         }
     }
     
     private class UDPPingReplyHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
             handleUDPPingReply((PingReply)msg, handler, addr.getAddress(), addr.getPort());
-        }
-    }
-    
-    private class UDPLimeACKVendorMessageHandler implements MessageHandler {
-        public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-            ReceivedMessageStatHandler.UDP_LIME_ACK.addMessage(msg);
-            handleLimeACKMessage((LimeACKVendorMessage)msg, addr);
         }
     }
     
@@ -3216,18 +3058,13 @@ public abstract class MessageRouterImpl implements MessageRouter {
     public class MulticastQueryRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr,
                 ReplyHandler handler) {
-            if (!handleUDPQueryRequestPossibleDuplicate((QueryRequest) msg, handler)) {
-                ReceivedMessageStatHandler.MULTICAST_DUPLICATE_QUERIES
-                        .addMessage(msg);
-            }
-            ReceivedMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(msg);
+            handleUDPQueryRequestPossibleDuplicate((QueryRequest) msg, handler);
         }
     }
     
     public class MulticastQueryReplyHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, 
                 ReplyHandler handler) {
-            ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
             handleQueryReply((QueryReply)msg, handler);
         }
     }
@@ -3235,7 +3072,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     public class MulticastPingRequestHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, 
                 ReplyHandler handler) {
-            ReceivedMessageStatHandler.MULTICAST_PING_REQUESTS.addMessage(msg);
             handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler, addr);
         }
     }
@@ -3243,7 +3079,6 @@ public abstract class MessageRouterImpl implements MessageRouter {
     public class MulticastPingReplyHandler implements MessageHandler {
         public void handleMessage(Message msg, InetSocketAddress addr, 
                 ReplyHandler handler) {
-            ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
             handleUDPPingReply((PingReply)msg, handler, addr.getAddress(), addr.getPort());
         }
     }
@@ -3357,6 +3192,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         private final Buffer<Short> tooManyResults = new Buffer<Short>(50);
         private final Buffer<Byte> ttls = new Buffer<Byte>(50);
         private final Buffer<Integer> bytesRouted = new Buffer<Integer>(50);
+        private long totalDropped, droppedTTL0;
         
         public synchronized Object inspect() {
             byte [] tooManyResultsByte = new byte[tooManyResults.getSize() * 2];
@@ -3371,23 +3207,114 @@ public abstract class MessageRouterImpl implements MessageRouter {
             for (int i = 0; i < bytesRouted.getSize(); i++)
                 ByteOrder.int2beb(bytesRouted.get(i), bytesRoutedByte, i * 4);
             
-            Map<String,byte []> ret = new HashMap<String,byte []>();
+            Map<String,Object> ret = new HashMap<String,Object>();
             ret.put("tooMany",tooManyResultsByte);
             ret.put("ttls",ttlsByte);
             ret.put("bytes",bytesRoutedByte);
+            ret.put("total",totalDropped);
+            ret.put("ttl0",droppedTTL0);
             return ret;
         }
         
         public synchronized void tooManyResults(short numResults) {
-            if (LimeWireUtils.isBetaRelease())
-                tooManyResults.add(numResults);
+            if (!LimeWireUtils.isBetaRelease())
+                return;
+            totalDropped++;
+            tooManyResults.add(numResults);
         }
         
         public synchronized void ttlByteDrop(byte ttl, int bytes) {
             if (!LimeWireUtils.isBetaRelease())
                 return;
+            totalDropped++;
             ttls.add(ttl);
             bytesRouted.add(bytes);
+        }
+        
+        public synchronized void dropTTL0() {
+            // not checking isBeta since these fields are already allocated
+            totalDropped++;
+            droppedTTL0++;
+        }
+    }
+    
+    private static class LastHopCounter implements Inspectable {
+        private final Map<Byte,InspectionHistogram<Integer>> lastHopRouted = 
+            new HashMap<Byte,InspectionHistogram<Integer>>();
+        
+        public synchronized Object inspect() {
+            Map<String,Object> ret = new HashMap<String,Object>();
+            for (byte b : lastHopRouted.keySet())
+                ret.put(String.valueOf(b),lastHopRouted.get(b).inspect());
+            return ret;
+        }
+        
+        public synchronized void countMessage(byte hops, int connections) {
+            InspectionHistogram<Integer> histogram = lastHopRouted.get(hops);
+            if (histogram == null) {
+                histogram = new InspectionHistogram<Integer>();
+                lastHopRouted.put(hops, histogram);
+            }
+            histogram.count(connections);
+        }
+    }
+    private static class DuplicateQueryCounter implements Inspectable {
+        private final Buffer<Long> duplicateTimes = new Buffer<Long>(100);
+        private final Buffer<Byte> duplicateHops = new Buffer<Byte>(100);
+        private final Buffer<Byte> duplicateTTLs = new Buffer<Byte>(100);
+        private long totalDropped;
+        
+        private final Buffer<GUID> lastNGUIDs = new Buffer<GUID>(100);
+        private final Map<GUID, Integer> counts = new HashMap<GUID,Integer>();
+        private int highestEver;
+        
+        
+        public synchronized void duplicateQuery(QueryRequest r) {
+            totalDropped++;
+            if (!LimeWireUtils.isBetaRelease())
+                return;
+            
+            duplicateTimes.add(System.currentTimeMillis());
+            duplicateHops.add(r.getHops());
+            duplicateTTLs.add(r.getTTL());
+            GUID g = new GUID(r.getGUID());
+            Integer num = counts.get(g);
+            if (num != null) {
+                num++;
+                highestEver = Math.max(highestEver, num);
+                counts.put(g,num);
+                return;
+            }
+            
+            num = 1;
+            counts.put(g, num);
+            GUID ejected = lastNGUIDs.add(g);
+            if (ejected != null)
+                counts.remove(ejected);
+        }
+        
+        public synchronized Object inspect() {
+            Map<String,Object> ret = new HashMap<String,Object>();
+            ret.put("total",totalDropped);
+            ret.put("highest",highestEver);
+            
+            byte [] ttlsByte = new byte[duplicateTTLs.getSize()];
+            for (int i = 0; i < duplicateTTLs.getSize(); i++)
+                ttlsByte[i] = duplicateTTLs.get(i);
+            
+            byte [] hopsByte = new byte[duplicateHops.getSize()];
+            for (int i = 0; i < duplicateHops.getSize(); i++)
+                hopsByte[i] = duplicateHops.get(i);
+            
+            byte [] timesByte = new byte[duplicateTimes.getSize() * 8];
+            for (int i = 0; i < duplicateTimes.getSize(); i++)
+                ByteOrder.long2beb(duplicateTimes.get(i), timesByte, i * 8);
+            
+            ret.put("ttls",ttlsByte);
+            ret.put("hops",hopsByte);
+            ret.put("times",timesByte);
+            ret.put("hist", new HashMap<GUID,Integer>(counts));
+            return ret;
         }
     }
     

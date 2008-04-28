@@ -20,12 +20,14 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.DefaultedHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import org.limewire.http.DefaultHttpParams;
 import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
+import org.limewire.util.Base32;
 import org.limewire.util.Clock;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -47,12 +49,12 @@ import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker;
+import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
-import com.limegroup.gnutella.NetworkUpdateSanityChecker.RequestType;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.downloader.InNetworkDownloader;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
@@ -144,6 +146,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
     private final Provider<ActivityCallback> activityCallback;
     private final ConnectionServices connectionServices;
     private final Provider<HttpExecutor> httpExecutor;
+    private final Provider<HttpParams> defaultParams;
     private final Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker;
     private final CapabilitiesVMFactory capabilitiesVMFactory;
     private final Provider<ConnectionManager> connectionManager;
@@ -154,17 +157,17 @@ public class UpdateHandlerImpl implements UpdateHandler {
     private final UpdateMessageVerifier updateMessageVerifier;
     private final RemoteFileDescFactory remoteFileDescFactory;
     
-    private volatile String timeoutUpdateLocation = "http://update0.limewire.com/update.def";
-    private volatile List<String> maxedUpdateList = Arrays.asList("http://update1.limewire.com/update.def",
-            "http://update2.limewire.com/update.def",
-            "http://update3.limewire.com/update.def",
-            "http://update4.limewire.com/update.def",
-            "http://update5.limewire.com/update.def",
-            "http://update6.limewire.com/update.def",
-            "http://update7.limewire.com/update.def",
-            "http://update8.limewire.com/update.def",
-            "http://update9.limewire.com/update.def",
-            "http://update10.limewire.com/update.def");
+    private volatile String timeoutUpdateLocation = "http://update0.limewire.com/v2/update.def";
+    private volatile List<String> maxedUpdateList = Arrays.asList("http://update1.limewire.com/v2/update.def",
+            "http://update2.limewire.com/v2/update.def",
+            "http://update3.limewire.com/v2/update.def",
+            "http://update4.limewire.com/v2/update.def",
+            "http://update5.limewire.com/v2/update.def",
+            "http://update6.limewire.com/v2/update.def",
+            "http://update7.limewire.com/v2/update.def",
+            "http://update8.limewire.com/v2/update.def",
+            "http://update9.limewire.com/v2/update.def",
+            "http://update10.limewire.com/v2/update.def");
     private volatile int minMaxHttpRequestDelay = 1000 * 60;
     private volatile int maxMaxHttpRequestDelay = 1000 * 60 * 30;
     private volatile int silentPeriodForMaxHttpRequest = 1000 * 60 * 5;
@@ -174,6 +177,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
             Provider<ActivityCallback> activityCallback,
             ConnectionServices connectionServices,
             Provider<HttpExecutor> httpExecutor,
+            @Named("defaults") Provider<HttpParams> defaultParams,
             Provider<NetworkUpdateSanityChecker> networkUpdateSanityChecker,
             CapabilitiesVMFactory capabilitiesVMFactory,
             Provider<ConnectionManager> connectionManager,
@@ -188,6 +192,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
         this.activityCallback = activityCallback;
         this.connectionServices = connectionServices;
         this.httpExecutor = httpExecutor;
+        this.defaultParams = defaultParams;
         this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.capabilitiesVMFactory = capabilitiesVMFactory;
         this.connectionManager = connectionManager;
@@ -545,9 +550,10 @@ public class UpdateHandlerImpl implements UpdateHandler {
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         get.addHeader(HTTPHeaderName.CONNECTION.httpStringValue(),"close");
         httpRequestControl.requestActive();
-        HttpParams params = new DefaultHttpParams();
+        HttpParams params = new BasicHttpParams();
         HttpConnectionParams.setConnectionTimeout(params, 10000);
         HttpConnectionParams.setSoTimeout(params, 10000);
+        params = new DefaultedHttpParams(params, defaultParams.get());
         httpExecutor.get().execute(get, params, new RequestHandler());
     }
     
@@ -661,7 +667,7 @@ public class UpdateHandlerImpl implements UpdateHandler {
             List<FileDesc> shared = fileManager.get().getSharedFilesInDirectory(SharingUtils.PREFERENCE_SHARE);
             for (FileDesc fd : shared) {
                 if (fd.getSHA1Urn() != null && !urns.contains(fd.getSHA1Urn())) {
-                    fileManager.get().removeFileIfShared(fd.getFile());
+                    fileManager.get().removeFileIfSharedOrStore(fd.getFile());
                     fd.getFile().delete();
                 }
             }
@@ -964,6 +970,10 @@ public class UpdateHandlerImpl implements UpdateHandler {
         void requestFinished() {
             requestActive.set(false);
         }
+    }
+
+    public byte[] getOldUpdateResponse() {
+        return Base32.decode("I5AVOQKFIZCE4Q2RKFATKVBWKBKVEWSOJRFU6WS2JVIUCR2QGRJESNBVIE3UESKDINIUCSSWIZKE2WCHGZKFMMS2GJAVSTKCGQ2TINSLIRFEQWCRG5KEITL4PQ6HK4DEMF2GKIDJMQ6SEMRRGQ3TIOBTGY2DOIRAORUW2ZLTORQW24B5EIYSEPQKEAQCAPDNONTSAZTSN5WT2IRXGYXDONZOG42SEIDGN5ZD2IRYGYXDQOBOHA2SEIDUN46SEOBWFY4DSLRYGURCA5LSNQ6SE2DUORYDULZPO53XOLTMNFWWK53JOJSS4Y3PNUXXK4DEMF2GKIRAON2HS3DFHURDAIRAN5ZT2ISXNFXGI33XOMRCA5LSNY6SE5LSNY5GE2LUOBZGS3TUHJIEYUCSKRIEET2BKJBE6U2BJNIECTKHKZJTEU2MGU3VGM2HIRGFCLRXIZIEGR2NG43VGSCPKFGVAUSQJU2UGNKMJ5NEKT2EG43EGRK2IQ2E2USBIVGESIRAOVRW63LNMFXGIPJHEISCKIRAF5JSOIDVNZQW2ZJ5EJGGS3LFK5UXEZKXNFXDILRRGYXDMLTFPBSSEIDTNF5GKPJCGQ2TANRSGU3CEPQKEAQCAIBAEA6GYYLOM4QGSZB5E5SW4JZ6BIQCAIBAEAQCAIB4EFNUGRCBKRAVWNBOGE3C4NRAKVJE4XK5HYFCAIBAEAQCAPBPNRQW4ZZ6BIQCAIB4F5WXGZZ6BIQCAIBAEAQDY3LTM4QGM4TPNU6SENBOHAXDCIRAMZXXEPJCGQXDCNROGYRCA5LSNQ6SE2DUORYDULZPO53XOLTMNFWWK53JOJSS4Y3PNUXXK4DEMF2GKIRAMZZGKZJ5EJ2HE5LFEIQG64Z5EJLWS3TEN53XGIRAON2HS3DFHURDIIRAOVZG4PJCOVZG4OTCNF2HA4TJNZ2DUUCMKBJFIUCCJ5AVEQSPKNAUWUCBJVDVMUZSKNGDKN2TGNDUITCRFY3UMUCDI5GTON2TJBHVCTKQKJIE2NKDGVGE6WSFJ5CDONSDIVNEINCNKJAUKTCJEIQHKY3PNVWWC3TEHUTSEJBFEIQC6UZHEB2W4YLNMU6SETDJNVSVO2LSMVLWS3RUFYYTMLRWFZSXQZJCEBZWS6TFHURDINJQGYZDKNRCHYFCAIBAEAQCAPDMMFXGOIDJMQ6SOZLOE47AUIBAEAQCAIB4EFNUGRCBKRAVWCRAEAQCAIBAHR2GCYTMMUQGC3DJM5XD2Y3FNZ2GK4RAOZQWY2LHNY6WGZLOORSXEPR4ORZD4PDUMQ7AUPDDMVXHIZLSHY6GEPSVOJTWK3TUEBGGS3LFK5UXEZJAKNSWG5LSNF2HSICVOBSGC5DFEBAXMYLJNRQWE3DFFY6GE4R6BJIGYZLBONSSAVLQMRQXIZJAJFWW2ZLENFQXIZLMPEXDYYTSHY6GE4R6HQXWEPQKJFTCA5DIMUQHK4DEMF2GKIDEN5SXGIDON52CA53POJVSYIDWNFZWS5B4MJZD4CTIOR2HAORPF53XO5ZONRUW2ZLXNFZGKLTDN5WS6ZDPO5XGY33BMQ6GE4R6EBTG64RAORUGKIDMMF2GK43UEB3GK4TTNFXW4IDPMYQEY2LNMVLWS4TFFY6C6YR6HQXWGZLOORSXEPR4F52GIPR4F52HEPR4F52GCYTMMU7AUIBAEAQCAIC5LU7AUIBAEAQCAIB4F5WGC3THHYFCAIBAEAQCAPBPNVZWOPQKEAQCAIBAEAFCAIBAEAQCAPDNONTSAZTSN5WT2IRUFY4C4MJCEBTG64R5EI2C4MJWFY3CEIDVOJWD2ITIOR2HAORPF53XO5ZONRUW2ZLXNFZGKLTDN5WS65LQMRQXIZJCEBZXI6LMMU6SENBCHYFCAIBAEAQCAPDMMFXGOIDJMQ6SOZLOE47AUIBAEAQCAIB4EFNUGRCBKRAVWCRAEAQCAIBAHR2GCYTMMUQGC3DJM5XD2Y3FNZ2GK4RAOZQWY2LHNY6WGZLOORSXEPR4ORZD4PDUMQ7AUPDDMVXHIZLSHY6GEPSVOJTWK3TUEBGGS3LFK5UXEZJAKNSWG5LSNF2HSICVOBSGC5DFEBAXMYLJNRQWE3DFFY6GE4R6BJIGYZLBONSSAVLQMRQXIZJAJFWW2ZLENFQXIZLMPEXDYYTSHY6GE4R6HQXWEPQKJFTCA5DIMUQHK4DEMF2GKIDEN5SXGIDON52CA53POJVSYIDWNFZWS5B4MJZD4CTIOR2HAORPF53XO5ZONRUW2ZLXNFZGKLTDN5WS6ZDPO5XGY33BMQ6GE4R6EBTG64RAORUGKIDMMF2GK43UEB3GK4TTNFXW4IDPMYQEY2LNMVLWS4TFFY6C6YR6HQXWGZLOORSXEPR4F52GIPR4F52HEPR4F52GCYTMMU7AUIBAEAQCAIC5LU7AUIBAEAQCAIB4F5WGC3THHYFCAIBAEAQCAPBPNVZWOPQKHQXXK4DEMF2GKPQK");
     }
     
 }

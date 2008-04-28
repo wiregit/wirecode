@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
@@ -20,6 +21,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import junit.framework.Test;
 
+import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
+import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.PrivilegedAccessor;
@@ -58,9 +64,11 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.version.UpdateHandler;
 
@@ -132,7 +140,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     private void setSettings() throws Exception {
-        ConnectionSettings.PORT.setValue(6346);
+        NetworkSettings.PORT.setValue(6346);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
@@ -162,19 +170,35 @@ public class ConnectionManagerTest extends LimeTestCase {
      */
     public void testAllowUltrapeer2UltrapeerConnection() throws Exception {
         HandshakeResponse hr = createTestResponse("Morpheus 3.3");
-        boolean allow = ConnectionManagerImpl.allowUltrapeer2UltrapeerConnection(hr);
+        boolean allow = ((ConnectionManagerImpl)connectionManager).allowUltrapeer2UltrapeerConnection(hr);
         assertFalse("connection should not have been allowed", allow);
         
         hr = createTestResponse("Bearshare 3.3");
-        allow = ConnectionManagerImpl.allowUltrapeer2UltrapeerConnection(hr);
+        allow = ((ConnectionManagerImpl)connectionManager).allowUltrapeer2UltrapeerConnection(hr);
         assertTrue("connection should have been allowed", allow);
         
         hr = createTestResponse("LimeWire 3.3");
-        allow = ConnectionManagerImpl.allowUltrapeer2UltrapeerConnection(hr);
+        allow = ((ConnectionManagerImpl)connectionManager).allowUltrapeer2UltrapeerConnection(hr);
+        assertFalse("connection should not have been allowed", allow);
+        
+        hr = createTestResponse("LimeWire 4.13.9");
+        allow = ((ConnectionManagerImpl)connectionManager).allowUltrapeer2UltrapeerConnection(hr);
+        assertFalse("connection should not have been allowed", allow);
+        
+        hr = createTestResponse("LimeWire 4.14.8");
+        allow = ((ConnectionManagerImpl)connectionManager).allowUltrapeer2UltrapeerConnection(hr);
+        assertFalse("connection should not have been allowed", allow);
+        
+        hr = createTestResponse("LimeWire 4.16.6");
+        allow = ((ConnectionManagerImpl)connectionManager).allowUltrapeer2UltrapeerConnection(hr);
         assertTrue("connection should have been allowed", allow);
         
+        hr = createTestResponse("LimeWire 5.6.7");
+        allow = ((ConnectionManagerImpl)connectionManager).allowUltrapeer2UltrapeerConnection(hr);
+        assertTrue("connection should not have been allowed", allow);
+        
         hr = createTestResponse("Shareaza 3.3");
-        allow = ConnectionManagerImpl.allowUltrapeer2UltrapeerConnection(hr);
+        allow = ((ConnectionManagerImpl)connectionManager).allowUltrapeer2UltrapeerConnection(hr);
         assertTrue("connection should have been allowed", allow);
     }
     
@@ -731,11 +755,12 @@ public class ConnectionManagerTest extends LimeTestCase {
                 Provider<MulticastService> multicastService,
                 UniqueHostPinger uniqueHostPinger,
                 UDPHostCacheFactory udpHostCacheFactory,
-                PingRequestFactory pingRequestFactory) {
+                PingRequestFactory pingRequestFactory, 
+                NetworkInstanceUtils networkInstanceUtils) {
             super(backgroundExecutor, connectionServices, connectionManager,
                     udpService, dhtManager, queryUnicaster, ipFilter,
                     multicastService, uniqueHostPinger, udpHostCacheFactory,
-                    pingRequestFactory);
+                    pingRequestFactory, networkInstanceUtils);
             resetLatches();
         }
         
@@ -806,11 +831,12 @@ public class ConnectionManagerTest extends LimeTestCase {
                 Provider<MulticastService> multicastService,
                 UniqueHostPinger uniqueHostPinger,
                 UDPHostCacheFactory udpHostCacheFactory,
-                PingRequestFactory pingRequestFactory) {
+                PingRequestFactory pingRequestFactory, 
+                NetworkInstanceUtils networkInstanceUtils) {
             super(backgroundExecutor, connectionServices, connectionManager,
                     udpService, dhtManager, queryUnicaster, ipFilter,
                     multicastService, uniqueHostPinger, udpHostCacheFactory,
-                    pingRequestFactory);
+                    pingRequestFactory, networkInstanceUtils);
         }
         
         final BlockingQueue<EndpointObserver> observers = 
@@ -862,6 +888,7 @@ public class ConnectionManagerTest extends LimeTestCase {
         private final MessageReaderFactory messageReaderFactory;
         private final MessageFactory messageFactory;
         private final ApplicationServices applicationServices;
+        private final NetworkInstanceUtils networkInstanceUtils;
 
         @Inject
         public TestManagedConnectionFactory(Provider<ConnectionManager> connectionManager, NetworkManager networkManager,
@@ -880,7 +907,8 @@ public class ConnectionManagerTest extends LimeTestCase {
                 SpamFilterFactory spamFilterFactory,
                 MessageReaderFactory messageReaderFactory,
                 MessageFactory messageFactory,
-                ApplicationServices applicationServices) {
+                ApplicationServices applicationServices, 
+                NetworkInstanceUtils networkInstanceUtils) {
             this.networkManager = networkManager;
             this.queryRequestFactory = queryRequestFactory;
             this.headersFactory = headersFactory;
@@ -902,6 +930,7 @@ public class ConnectionManagerTest extends LimeTestCase {
             this.messageReaderFactory = messageReaderFactory;
             this.messageFactory = messageFactory;
             this.applicationServices = applicationServices;
+            this.networkInstanceUtils = networkInstanceUtils;
         }
         
         public RoutedConnection createRoutedConnection(String host, int port) {
@@ -915,7 +944,7 @@ public class ConnectionManagerTest extends LimeTestCase {
                             , capabilitiesVMFactory, socketsManager, acceptor.get(),
                     supportedVendorMessage, simppManager, updateHandler, connectionServices,
                     guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
-                    applicationServices);
+                    applicationServices, networkInstanceUtils);
         }
         
         public TestManagedConnection createTestConnection() {
@@ -925,7 +954,7 @@ public class ConnectionManagerTest extends LimeTestCase {
                             , capabilitiesVMFactory, socketsManager, acceptor.get(),
                     supportedVendorMessage, simppManager, updateHandler, connectionServices,
                     guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
-                    applicationServices);
+                    applicationServices, networkInstanceUtils);
         }
         
         public TestManagedConnection createSupernodeClientConnection(boolean lime) {
@@ -981,7 +1010,8 @@ public class ConnectionManagerTest extends LimeTestCase {
                 SpamFilterFactory spamFilterFactory,
                 MessageReaderFactory messageReaderFactory,
                 MessageFactory messageFactory,
-                ApplicationServices applicationServices) {
+                ApplicationServices applicationServices,
+                NetworkInstanceUtils networkInstanceUtils) {
             super("1.2.3." + ++lastHost, 6346, ConnectType.PLAIN,                 
                     connectionManager, networkManager, queryRequestFactory, headersFactory,
                     handshakeResponderFactory, queryReplyFactory, messageDispatcher,                           networkUpdateSanityChecker, 
@@ -990,7 +1020,7 @@ public class ConnectionManagerTest extends LimeTestCase {
                     simppManager, updateHandler,
                     connectionServices, guidMapManager, spamFilterFactory,
                     messageReaderFactory, messageFactory,
-                    applicationServices, null);
+                    applicationServices, null, null, networkInstanceUtils);
         }
 
         @Override

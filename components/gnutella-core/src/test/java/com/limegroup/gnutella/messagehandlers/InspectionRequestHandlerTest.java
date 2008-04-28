@@ -85,6 +85,8 @@ public class InspectionRequestHandlerTest extends BaseTestCase {
             one(messageRouter).forwardInspectionRequestToLeaves(request);
             one(factory).createResponses(request);
             will(returnValue(responses));
+            one(request).getSendInterval();
+            will(returnValue(500));
         }});
         InspectionRequestHandler irh = injector.getInstance(InspectionRequestHandler.class);
         irh.handleMessage(request, new InetSocketAddress("1.2.3.4",1), replyHandler);
@@ -105,6 +107,52 @@ public class InspectionRequestHandlerTest extends BaseTestCase {
                 assertGreaterThanOrEquals(450, current - last);
                 last = current;
             }
+        }
+    }
+    
+    public void testClearsPrevious() throws Exception {
+        // prepare a bunch of responses
+        FilterSettings.INSPECTOR_IP_ADDRESSES.setValue(new String[]{"1.2.3.4"});
+        final InspectionRequest request = mockery.mock(InspectionRequest.class);
+        final TestReplyHandler replyHandler = new TestReplyHandler();
+        final InspectionResponse [] responses = new InspectionResponse[5];
+        for (int i = 0; i < responses.length; i++)
+            responses[i] = new TestInspectionResponse();
+        
+        mockery.checking(new Expectations() {{
+            one(messageRouter).forwardInspectionRequestToLeaves(request);
+            one(factory).createResponses(request);
+            will(returnValue(responses));
+            one(request).getSendInterval();
+            will(returnValue(100));
+        }});
+        InspectionRequestHandler irh = injector.getInstance(InspectionRequestHandler.class);
+        irh.handleMessage(request, new InetSocketAddress("1.2.3.4",1), replyHandler);
+        mockery.assertIsSatisfied();
+        
+        // receive 3 out of 5 (1 right away, 2 delayed)
+        Thread.sleep( 2 * 120);
+       
+        synchronized(replyHandler) {
+            assertEquals(3, replyHandler.timestamps.size());
+            assertEquals(3, replyHandler.messages.size());
+        }
+        
+        // now send another inspection request
+        final InspectionRequest emptyRequest = mockery.mock(InspectionRequest.class);
+        mockery.checking(new Expectations(){{
+            one(messageRouter).forwardInspectionRequestToLeaves(emptyRequest);
+            one(factory).createResponses(emptyRequest);
+            will(returnValue(new InspectionResponse[0]));
+        }});
+        irh.handleMessage(emptyRequest, new InetSocketAddress("1.2.3.4",1), replyHandler);
+        mockery.assertIsSatisfied();
+        
+        // wait and wait.. no more responses from the last request should be received
+        Thread.sleep(300);
+        synchronized(replyHandler) {
+            assertEquals(3, replyHandler.timestamps.size());
+            assertEquals(3, replyHandler.messages.size());
         }
     }
     

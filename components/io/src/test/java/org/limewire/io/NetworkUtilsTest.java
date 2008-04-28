@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -64,10 +65,6 @@ public class NetworkUtilsTest extends BaseTestCase {
         "169.253.0.0",
         "169.255.0.0",
     };
-    
-    private static LocalSocketAddressProvider defaultProvider;
-    
-    private static LocalSocketAddressProviderStub stubProvider;
 
     public NetworkUtilsTest(String name) {
         super(name);
@@ -75,16 +72,6 @@ public class NetworkUtilsTest extends BaseTestCase {
 
     public static Test suite() {
         return buildTestSuite(NetworkUtilsTest.class);
-    }
-    
-    public void setUp() {
-        defaultProvider = LocalSocketAddressService.getSharedProvider();
-        stubProvider = new LocalSocketAddressProviderStub();
-        LocalSocketAddressService.setSocketAddressProvider(stubProvider);
-    }
-    
-    public void tearDown() {
-        LocalSocketAddressService.setSocketAddressProvider(defaultProvider);
     }
 
     public void testIsDottedIPV4() throws Exception {
@@ -150,17 +137,16 @@ public class NetworkUtilsTest extends BaseTestCase {
      * network with a string argument.
      */
     public void testIsPrivateAddressWithString() throws Exception {
-        stubProvider.setLocalAddressPrivate(true);
         for(int i=0; i<PUBLIC_ADDRESSES.length; i++) {
             String address = PUBLIC_ADDRESSES[i];
             assertTrue("should not be a private address: "+address, 
-                       !NetworkUtils.isPrivateAddress(address));
+                       !NetworkUtils.isPrivateAddress(InetAddress.getByName(address)));
         }
 
         for(int i=0; i<PRIVATE_ADDRESSES.length; i++) {
             String address = PRIVATE_ADDRESSES[i];
             assertTrue("should be a private address: "+address, 
-                       NetworkUtils.isPrivateAddress(address));
+                       NetworkUtils.isPrivateAddress(InetAddress.getByName(address)));
         }
     }
 
@@ -169,8 +155,6 @@ public class NetworkUtilsTest extends BaseTestCase {
      * with the address is bytes.
      */
     public void testIsPrivateAddress() throws Exception {
-        stubProvider.setLocalAddressPrivate(true);
-        
         for(int i=0; i<PUBLIC_ADDRESSES.length; i++) {
             InetAddress addr = InetAddress.getByName(PUBLIC_ADDRESSES[i]);
             
@@ -293,29 +277,6 @@ public class NetworkUtilsTest extends BaseTestCase {
         assertEquals("252.253.254.255",NetworkUtils.ip2string(buf));        
     }
     
-    /**
-     * Tests the isMe method.
-     */
-    public void testIsMe() throws Exception {
-        stubProvider.setLocalPort(6346);
-        assertTrue(NetworkUtils.isMe("localhost", 6346));
-        assertTrue(NetworkUtils.isMe("127.1.2.1", 6346));            
-        assertTrue(NetworkUtils.isMe(new byte[] { (byte)127, 0, 0, 0 }, 6346));
-        
-        stubProvider.setLocalPort(6345);
-        assertFalse(NetworkUtils.isMe("localhost", 6346));
-        assertFalse(NetworkUtils.isMe("127.1.2.1", 6346));            
-        assertFalse(NetworkUtils.isMe(new byte[] { (byte)127, 0, 0, 0 }, 6346));
-        
-        stubProvider.setLocalPort(6346);
-        stubProvider.setLocalAddress(new byte[] {(byte)123, (byte)132, (byte)231, 0});
-        assertTrue(NetworkUtils.isMe("123.132.231.0", 6346));        
-        assertTrue(NetworkUtils.isMe(new byte[] {(byte)123, (byte)132, (byte)231, 0}, 6346));
-
-        assertFalse(NetworkUtils.isMe("123.132.231.1", 6346));        
-        assertFalse(NetworkUtils.isMe(new byte[] {(byte)123, (byte)132, (byte)231, 1}, 6346));
-        
-    }
     
     public void testGetAddressV6Bytes() throws UnknownHostException {
         
@@ -342,8 +303,6 @@ public class NetworkUtilsTest extends BaseTestCase {
     }
     
     public void testIsPrivateAddressIPv6() throws UnknownHostException {
-        stubProvider.setLocalAddressPrivate(true);
-        
         // A private IPv4-mapped address 
         InetAddress addr1 = InetAddress.getByName("[::ffff:192.168.1.0]");
         assertInstanceof(Inet4Address.class, addr1);
@@ -629,8 +588,6 @@ public class NetworkUtilsTest extends BaseTestCase {
     }
     
     public void testIsPrivateIPv4CompatibleAddress() throws UnknownHostException {
-        stubProvider.setLocalAddressPrivate(true);
-        
         InetAddress addr1 = InetAddress.getByName("[::0000:10.0.0.1]");
         assertInstanceof(Inet6Address.class, addr1);
         assertTrue(((Inet6Address)addr1).isIPv4CompatibleAddress());
@@ -796,5 +753,43 @@ public class NetworkUtilsTest extends BaseTestCase {
     private static void assertTLS(IpPort ipp) {
         assertInstanceof(Connectable.class, ipp);
         assertTrue(((Connectable)ipp).isTLSCapable());
+    }
+    
+    public void testGetBytes() throws Exception {
+        byte[] big = { 127, 0, 0, 1, 0, 1 };
+        assertEquals(big, NetworkUtils.getBytes(new IpPortImpl("127.0.0.1:1"), ByteOrder.BIG_ENDIAN));
+        
+        big = new byte[] { 127, 0, 0, 1, (byte)0xFF, (byte)0xFE };
+        assertEquals(big, NetworkUtils.getBytes(new IpPortImpl("127.0.0.1:65534"), ByteOrder.BIG_ENDIAN));
+        
+        big = new byte[] { 127, 0, 0, 1, (byte)0xFF, (byte)0xFF };
+        assertEquals(big, NetworkUtils.getBytes(new IpPortImpl("127.0.0.1:65535"), ByteOrder.BIG_ENDIAN));
+        
+        byte[] little = { 127, 0, 0, 1, 1, 0 };
+        assertEquals(little, NetworkUtils.getBytes(new IpPortImpl("127.0.0.1:1"), ByteOrder.LITTLE_ENDIAN));
+        
+        little = new byte[] { 127, 0, 0, 1, (byte)0xFE, (byte)0xFF };
+        assertEquals(little, NetworkUtils.getBytes(new IpPortImpl("127.0.0.1:65534"), ByteOrder.LITTLE_ENDIAN));
+        
+        little = new byte[] { 127, 0, 0, 1, (byte)0xFF, (byte)0xFF };
+        assertEquals(little, NetworkUtils.getBytes(new IpPortImpl("127.0.0.1:65535"), ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    public void testHexMask() throws Exception {
+        assertEquals(0,NetworkUtils.getHexMask(0));
+        assertEquals(0xFFFFFFFF, NetworkUtils.getHexMask(32));
+        try {
+            NetworkUtils.getHexMask(-1);
+            fail(" negative mask");
+        } catch (IllegalArgumentException expected){}
+        try {
+            NetworkUtils.getHexMask(33);
+            fail(" too big mask");
+        } catch (IllegalArgumentException expected){}
+        assertEquals(0xFF000000, NetworkUtils.getHexMask(8));
+        assertEquals(0xFFF00000, NetworkUtils.getHexMask(12));
+        assertEquals(0xFFFF0000, NetworkUtils.getHexMask(16));
+        assertEquals(0xFFFFF000, NetworkUtils.getHexMask(20));
+        assertEquals(0xFFFFFF00, NetworkUtils.getHexMask(24));
     }
 }

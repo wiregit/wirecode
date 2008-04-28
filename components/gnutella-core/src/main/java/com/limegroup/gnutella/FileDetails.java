@@ -47,4 +47,9 @@ public interface FileDetails {
 	 */	
 	boolean isFirewalled();
 	
+	/**
+	 * Returns the client guid of the remote host, could be <code>null</code> if
+	 * not available. 
+	 */
+	byte[] getClientGUID();
 }

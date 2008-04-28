@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -14,10 +15,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.limewire.http.HttpClientManager;
+import org.apache.http.util.EntityUtils;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
@@ -85,25 +85,25 @@ public abstract class AbstractLicense implements MutableLicense, Serializable, C
      * Retrieves the body of a URL from a webserver.
      *
      * Returns null if the page could not be found.
+     * @param httpClient TODO
      */
-    protected String getBody(String url) {
-        return getBodyFromURL(url);
+    protected String getBody(String url, LimeHttpClient httpClient) {
+        return getBodyFromURL(url, httpClient);
     }
     
     /**
      * Contacts the given URL and downloads returns the body of the
      * HTTP request.
+     * @param httpClient TODO
      */
-    protected String getBodyFromURL(String url) {
+    protected String getBodyFromURL(String url, LimeHttpClient httpClient) {
         if (LOG.isTraceEnabled())
             LOG.trace("Contacting: " + url);
         HttpResponse response = null;
         try {
-            HttpClient client = HttpClientManager.getNewClient();
             HttpGet get = new HttpGet(url);
             get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
-
-            response = client.execute(get);
+            response = httpClient.execute(get);
             String result;
             if (response.getEntity() != null) {
                 result = EntityUtils.toString(response.getEntity());
@@ -117,16 +117,15 @@ public abstract class AbstractLicense implements MutableLicense, Serializable, C
             LOG.warn("Can't contact license server: " + url, e);
         } catch (URISyntaxException e) {
             LOG.warn("Can't contact license server: " + url, e);
-        } catch (InterruptedException e) {
-            LOG.warn("Can't contact license server: " + url, e);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            httpClient.releaseConnection(response);
         }
         return null;
     }
     
-    /** Parses the document node of the XML. */
-    protected abstract void parseDocumentNode(Node node, LicenseCache licenseCache);
+    /** Parses the document node of the XML. 
+     * @param httpClient TODO*/
+    protected abstract void parseDocumentNode(Node node, LicenseCache licenseCache, LimeHttpClient httpClient);
     
     /**
      * Attempts to parse the given XML.
@@ -135,8 +134,9 @@ public abstract class AbstractLicense implements MutableLicense, Serializable, C
      *
      * If this is a request directly from our Verifier, 'liveData' is true.
      * Subclasses may use this to know where the XML data is coming from.
+     * @param httpClient TODO
      */
-    protected void parseXML(String xml, LicenseCache licenseCache) {
+    protected void parseXML(String xml, LicenseCache licenseCache, LimeHttpClient httpClient) {
         if(xml == null)
             return;
         
@@ -160,15 +160,15 @@ public abstract class AbstractLicense implements MutableLicense, Serializable, C
         	return;
         }
         
-        parseDocumentNode(d.getDocumentElement(), licenseCache);
+        parseDocumentNode(d.getDocumentElement(), licenseCache, httpClient);
     }
 
-    public void verify(LicenseCache licenseCache) {
+    public void verify(LicenseCache licenseCache, LimeHttpClient httpClient) {
         setVerified(AbstractLicense.VERIFYING);
         clear();
 
-        String body = getBody(getLicenseURI().toString());
-        parseXML(body, licenseCache);
+        String body = getBody(getLicenseURI().toString(), httpClient);
+        parseXML(body, licenseCache, httpClient);
         setLastVerifiedTime(System.currentTimeMillis());
         setVerified(AbstractLicense.VERIFIED);
         

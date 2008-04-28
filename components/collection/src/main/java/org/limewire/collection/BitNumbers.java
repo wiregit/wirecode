@@ -1,5 +1,9 @@
 package org.limewire.collection;
 
+import java.util.Locale;
+import java.util.Arrays;
+
+
 
 /** 
  * Allows storage & retrieval of numbers based on the index of an
@@ -115,6 +119,20 @@ public class BitNumbers {
         return true;
     }
     
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof BitNumbers) {
+            BitNumbers other = (BitNumbers)obj;
+            return Arrays.equals(toByteArray(), other.toByteArray());
+        }
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(toByteArray());
+    }
+    
     /** A hexadecimal representation of the byte[] */
     public String toHexString() {
         if(isEmpty()) {
@@ -128,7 +146,7 @@ public class BitNumbers {
                 String hex = Integer.toHexString(data[i] & 0x00FF);
                 if(hex.length() == 1)
                     sb.append("0");
-                sb.append(hex.toUpperCase());
+                sb.append(hex.toUpperCase(Locale.US));
             }
             sb.setLength(lastNonZero * 2 + 2); // erase empty fields.
             if(sb.length() > 1 && sb.charAt(sb.length()-1) == '0')

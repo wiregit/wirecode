@@ -7,29 +7,30 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpStatus;
-import org.apache.http.impl.nio.DefaultNHttpServerConnection;
 import org.apache.http.nio.NHttpConnection;
+import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.protocol.NHttpRequestHandler;
+import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.BasicHttpAcceptor;
 import org.limewire.http.HttpAcceptorListener;
-import org.limewire.http.HttpIOSession;
+import org.limewire.http.reactor.HttpIOSession;
 import org.limewire.nio.NIODispatcher;
+import org.limewire.statistic.Statistic;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.http.HTTPConnectionData;
 import com.limegroup.gnutella.http.HttpContextParams;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.statistics.BandwidthStat;
-import com.limegroup.gnutella.statistics.HTTPStat;
-import com.limegroup.gnutella.statistics.UploadStat;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics.StatisticType;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
@@ -42,25 +43,30 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
 
     private static final String[] SUPPORTED_METHODS = new String[] { "GET", "HEAD", };
 
-    private final HttpRequestHandler notFoundHandler;
+    private final NHttpRequestHandler notFoundHandler;
 
     @Inject
-    public HTTPAcceptor() {
+    public HTTPAcceptor(TcpBandwidthStatistics tcpBandwidthStatistics) {
         super(createDefaultParams(LimeWireUtils.getHttpServer(), Constants.TIMEOUT), SUPPORTED_METHODS);
 
-        this.notFoundHandler = new HttpRequestHandler() {
+        this.notFoundHandler = new SimpleNHttpRequestHandler() {
+            public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+                    HttpContext context) throws HttpException, IOException {
+                return null;
+            }
+            
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
-                UploadStat.FILE_NOT_FOUND.incrementStat();
-
                 response.setReasonPhrase("Feature Not Active");
                 response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             }
         };
         
         addAcceptorListener(new ConnectionEventListener());
-        addRequestInterceptor(new RequestStatisticTracker());
-        addResponseInterceptor(new HeaderStatisticTracker());
+        if(tcpBandwidthStatistics != null)
+            addResponseInterceptor(new HeaderStatisticTracker(tcpBandwidthStatistics));
+        else
+            LOG.warn("Not tracking TCP header bandwidth!");
 
         inititalizeDefaultHandlers();
     }
@@ -71,11 +77,14 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
         registerHandler("/gnutella/res/*", notFoundHandler);
 
         // return 400 for unmatched requests
-        registerHandler("*", new HttpRequestHandler() {
+        registerHandler("*", new SimpleNHttpRequestHandler() {
+            public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+                    HttpContext context) throws HttpException, IOException {
+                return null;
+            }
+            
             public void handle(HttpRequest request, HttpResponse response,
                     HttpContext context) throws HttpException, IOException {
-                UploadStat.MALFORMED_REQUEST.incrementStat();
-
                 response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
             }
         });
@@ -93,8 +102,7 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
             return;
         }
         
-        DefaultNHttpServerConnection conn = getReactor().acceptConnection(null,
-                socket);
+        NHttpConnection conn = getReactor().acceptConnection(null, socket);
         if (conn != null)
             HttpContextParams.setConnectionData(conn.getContext(), data);
     }
@@ -102,7 +110,7 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
     /**
      * Returns a handler that responds with a HTTP 404 error.
      */
-    public HttpRequestHandler getNotFoundHandler() {
+    public NHttpRequestHandler getNotFoundHandler() {
         return notFoundHandler;
     }
 
@@ -122,64 +130,16 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
         }
 
         public void fatalIOException(IOException e, NHttpConnection conn) {
-            if (HttpContextParams.isPush(conn.getContext())) {
-                if (HttpContextParams.isFirewalled(conn.getContext())) {
-                    UploadStat.FW_FW_FAILURE.incrementStat();
-                }
-                UploadStat.PUSH_FAILED.incrementStat();
-            }
         }
 
         public void fatalProtocolException(HttpException e, NHttpConnection conn) {
         }
 
-        public void requestReceived(NHttpConnection conn, HttpRequest request) {
-        }
-
         public void responseSent(NHttpConnection conn, HttpResponse response) {
-            HttpIOSession session = HttpContextParams.getIOSession(conn
-                    .getContext());
-            session
-                    .setSocketTimeout(SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT
-                            .getValue());
+            HttpIOSession session = HttpContextParams.getIOSession(conn.getContext());
+            session.setSocketTimeout(SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT.getValue());
             session.setThrottle(null);
-        }
-
-    }
-
-    /**
-     * Updates statistics when a request is received.
-     */
-    private class RequestStatisticTracker implements HttpRequestInterceptor {
-
-        public void process(HttpRequest request, HttpContext context)
-                throws HttpException, IOException {
-            String method = request.getRequestLine().getMethod();
-            if (HttpContextParams.isSubsequentRequest(context)) {
-                if ("GET".equals(method))
-                    UploadStat.SUBSEQUENT_GET.incrementStat();
-                else if ("HEAD".equals(method))
-                    UploadStat.SUBSEQUENT_HEAD.incrementStat();
-                else
-                    UploadStat.SUBSEQUENT_UNKNOWN.incrementStat();
-                HttpContextParams.setSubsequentRequest(context, true);
-            } else {
-                if (HttpContextParams.isPush(context)) {
-                    if ("GET".equals(method))
-                        UploadStat.PUSHED_GET.incrementStat();
-                    else if ("HEAD".equals(method))
-                        UploadStat.PUSHED_HEAD.incrementStat();
-                    else
-                        UploadStat.PUSHED_UNKNOWN.incrementStat();
-                } else {
-                    if ("GET".equals(method))
-                        HTTPStat.GET_REQUESTS.incrementStat();
-                    else if ("HEAD".equals(method))
-                        HTTPStat.HEAD_REQUESTS.incrementStat();
-                    else
-                        HTTPStat.UNKNOWN_REQUESTS.incrementStat();
-                }
-            }
+            conn.requestInput();  // make sure the new socket timeout is used.
         }
 
     }
@@ -188,6 +148,11 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
      * Tracks the bandwidth used when sending a response.
      */
     private class HeaderStatisticTracker implements HttpResponseInterceptor {
+        private final Statistic headerUpstream;
+        
+        HeaderStatisticTracker(TcpBandwidthStatistics tcpBandwidthStatistics) {
+            this.headerUpstream = tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_UPSTREAM);
+        }
 
         /*
          * XXX iterating over all headers is rather inefficient since the size
@@ -195,13 +160,11 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
          * DefaultNHttpServerConnection.submitResponse() but can't be easily
          * made accessible
          */
-        public void process(HttpResponse response, HttpContext context)
-                throws HttpException, IOException {
+        public void process(HttpResponse response, HttpContext context) throws HttpException,
+                IOException {
             for (Iterator it = response.headerIterator(); it.hasNext();) {
                 Header header = (Header) it.next();
-                BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header
-                        .getName().length()
-                        + 2 + header.getValue().length());
+                headerUpstream.addData(header.getName().length() + 2 + header.getValue().length());
             }
         }
 

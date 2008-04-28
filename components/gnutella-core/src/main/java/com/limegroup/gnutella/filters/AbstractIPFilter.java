@@ -15,6 +15,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
 
 abstract class AbstractIPFilter implements IPFilter {
 
@@ -35,6 +36,12 @@ abstract class AbstractIPFilter implements IPFilter {
         } else if (m instanceof PushRequest) {
             PushRequest push=(PushRequest)m;
             return getIP(push.getIP());
+        } else if (m instanceof QueryRequest) {
+            QueryRequest query = (QueryRequest)m;
+            if (query.desiresOutOfBandReplies())
+                return getIP(query.getGUID());
+            else
+                return ALLOWED;
         }
         else if (m instanceof DHTMessage){
             DHTMessage message = (DHTMessage)m;
@@ -53,7 +60,7 @@ abstract class AbstractIPFilter implements IPFilter {
     private IP getIP(byte [] host) {
         IP ip = null;
         try {
-            ip = new IP(host);
+            ip = new IP(host, 0);
         } catch(IllegalArgumentException badHost) {
         }
         return ip;

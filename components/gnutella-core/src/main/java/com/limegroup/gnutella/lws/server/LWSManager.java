@@ -3,6 +3,7 @@ package com.limegroup.gnutella.lws.server;
 
 import java.util.Map;
 
+import org.apache.http.nio.protocol.NHttpRequestHandler;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.lws.server.LWSConnectionListener;
 import org.limewire.lws.server.LWSDispatcher;
@@ -30,22 +31,23 @@ import org.limewire.lws.server.LWSDispatcher;
  * this package changes, but it's meant to exemplify using this class:
  * 
  * <pre>
- * LimeWireCore.getLWSManger().registerHandler(&quot;Back&quot;, new StoreManager.AbstractHandler.OK(&quot;Back&quot;) {
+ * LWSManager mgr = inj.getInstance(LWSManager.class);
+ * mgr.registerHandler(&quot;Back&quot;, new StoreManager.AbstractHandler.OK(&quot;Back&quot;) {
  *     protected void doHandle(Map&lt;String, String&gt; args) {
  *         MediaPlayerComponent.instance().backSong();
  *     }
  * });
- * LimeWireCore.getLWSManger().registerHandler(&quot;Stop&quot;, new StoreManager.AbstractHandler.OK(&quot;Stop&quot;) {
+ * mgr.registerHandler(&quot;Stop&quot;, new StoreManager.AbstractHandler.OK(&quot;Stop&quot;) {
  *     protected void doHandle(Map&lt;String, String&gt; args) {
  *         MediaPlayerComponent.instance().doStopSong();
  *     }
  * });
- * LimeWireCore.getLWSManger().registerHandler(&quot;Play&quot;, new StoreManager.AbstractHandler.OK(&quot;Play&quot;) {
+ * mgr.registerHandler(&quot;Play&quot;, new StoreManager.AbstractHandler.OK(&quot;Play&quot;) {
  *     protected void doHandle(Map&lt;String, String&gt; args) {
  *         MediaPlayerComponent.instance().playSong();
  *     }
  * });
- * LimeWireCore.getLWSManger().registerHandler(&quot;Next&quot;, new StoreManager.AbstractHandler.OK(&quot;Next&quot;) {
+ * mgr.registerHandler(&quot;Next&quot;, new StoreManager.AbstractHandler.OK(&quot;Next&quot;) {
  *     protected void doHandle(Map&lt;String, String&gt; args) {
  *         MediaPlayerComponent.instance().nextSong();
  *     }
@@ -67,7 +69,7 @@ public interface LWSManager {
      * @return the instance of {@link HttpRequestHandler} responsible for
      *         passing along messages
      */
-    HttpRequestHandler getHandler();
+    NHttpRequestHandler getHandler();
         
     /**
      * Returns <code>true</code> if <code>this</code> is connected.

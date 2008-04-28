@@ -207,11 +207,11 @@ abstract class AbstractDHTMessage implements DHTMessage {
         try {
             // Destination
             SocketAddress myExternalAddress = context.getContactAddress();
-            signature.update(NetworkUtils.getBytes(myExternalAddress));
+            signature.update(NetworkUtils.getBytes(myExternalAddress, java.nio.ByteOrder.BIG_ENDIAN));
 
             // Source
             SocketAddress contactAddress = getContact().getContactAddress();
-            signature.update(NetworkUtils.getBytes(contactAddress));
+            signature.update(NetworkUtils.getBytes(contactAddress, java.nio.ByteOrder.BIG_ENDIAN));
         } catch (UnknownHostException err) {
             throw new SignatureException(err);
         }

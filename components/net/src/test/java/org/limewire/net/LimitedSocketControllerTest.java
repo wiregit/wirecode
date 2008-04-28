@@ -7,6 +7,7 @@ import java.net.Socket;
 
 import junit.framework.Test;
 
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.net.ProxySettings.ProxyType;
 import org.limewire.nio.NBSocketFactory;
 import org.limewire.nio.NIOSocketFactory;
@@ -45,7 +46,7 @@ public class LimitedSocketControllerTest extends BaseTestCase {
         listenSocket = new ServerSocket(LISTEN_PORT);
         listenSocket.setReuseAddress(true);
         proxySettings = new ProxySettingsStub();
-        proxyManager = new ProxyManagerImpl(proxySettings);
+        proxyManager = new ProxyManagerImpl(proxySettings, new SimpleNetworkInstanceUtils());
         controller = new LimitedSocketController(proxyManager, new EmptySocketBindingSettings(), 2);
     }
     
@@ -76,8 +77,8 @@ public class LimitedSocketControllerTest extends BaseTestCase {
     public void testWaitsForTurn() throws Exception {
         ConnectObserverStub o1 = new ConnectObserverStub();
         ConnectObserverStub o2 = new ConnectObserverStub();
-        controller.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o1);
-        controller.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o2);
+        controller.connect(FACTORY, BAD_GOOGLE_ADDR, null, TIMEOUT, o1);
+        controller.connect(FACTORY, BAD_GOOGLE_ADDR, null, TIMEOUT, o2);
         // the above two will stall for awhile while trying to connect...
         long then = System.currentTimeMillis();
         connect(false, true);
@@ -88,8 +89,8 @@ public class LimitedSocketControllerTest extends BaseTestCase {
     public void testWaitsForTurnNB() throws Exception {
         ConnectObserverStub o1 = new ConnectObserverStub();
         ConnectObserverStub o2 = new ConnectObserverStub();
-        controller.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o1);
-        controller.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o2);
+        controller.connect(FACTORY, BAD_GOOGLE_ADDR, null, TIMEOUT, o1);
+        controller.connect(FACTORY, BAD_GOOGLE_ADDR, null, TIMEOUT, o2);
         // the above two will stall for awhile while trying to connect...
         long then = System.currentTimeMillis();
         connect(true, true);
@@ -99,16 +100,16 @@ public class LimitedSocketControllerTest extends BaseTestCase {
     
     public void testRemoveObserver() throws Exception {
         ConnectObserverStub o1 = new ConnectObserverStub();
-        controller.connect(FACTORY, LISTEN_ADDR, 0, o1);
+        controller.connect(FACTORY, LISTEN_ADDR, null, 0, o1);
         assertFalse(controller.removeConnectObserver(o1));
         
         ConnectObserverStub o2 = new ConnectObserverStub();
         ConnectObserverStub o3 = new ConnectObserverStub();
-        controller.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o2);
-        controller.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o3);
+        controller.connect(FACTORY, BAD_GOOGLE_ADDR, null, TIMEOUT, o2);
+        controller.connect(FACTORY, BAD_GOOGLE_ADDR, null, TIMEOUT, o3);
 
         ConnectObserverStub o4 = new ConnectObserverStub();
-        controller.connect(FACTORY, LISTEN_ADDR, 0, o4);
+        controller.connect(FACTORY, LISTEN_ADDR, null, 0, o4);
         assertTrue(controller.removeConnectObserver(o4));
         o3.waitForResponse(60000); // wait until o2 & o3 finish, make sure 4 didn't try
         Thread.sleep(1000);
@@ -123,16 +124,16 @@ public class LimitedSocketControllerTest extends BaseTestCase {
         proxySettings.setProxyType(ProxyType.SOCKS5);
         
         ConnectObserverStub o1 = new ConnectObserverStub();
-        controller.connect(FACTORY, LISTEN_ADDR, 0, o1);
+        controller.connect(FACTORY, LISTEN_ADDR, null, 0, o1);
         assertFalse(controller.removeConnectObserver(o1));
         
         ConnectObserverStub o2 = new ConnectObserverStub();
         ConnectObserverStub o3 = new ConnectObserverStub();
-        controller.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o2);
-        controller.connect(FACTORY, BAD_GOOGLE_ADDR, TIMEOUT, o3);
+        controller.connect(FACTORY, BAD_GOOGLE_ADDR, null, TIMEOUT, o2);
+        controller.connect(FACTORY, BAD_GOOGLE_ADDR, null, TIMEOUT, o3);
 
         ConnectObserverStub o4 = new ConnectObserverStub();
-        controller.connect(FACTORY, LISTEN_ADDR, 0, o4);
+        controller.connect(FACTORY, LISTEN_ADDR, null, 0, o4);
         assertTrue(controller.removeConnectObserver(o4));
         o3.waitForResponse(60000); // wait until o2 & o3 finish, make sure 4 didn't try
         Thread.sleep(1000);
@@ -145,10 +146,10 @@ public class LimitedSocketControllerTest extends BaseTestCase {
         if (success) {
             Socket s;
             if (!nb) {
-                s = controller.connect(FACTORY, LISTEN_ADDR, 0, null);
+                s = controller.connect(FACTORY, LISTEN_ADDR, null, 0, null);
             } else {
                 ConnectObserverStub o = new ConnectObserverStub();
-                s = controller.connect(FACTORY, LISTEN_ADDR, 0, o);
+                s = controller.connect(FACTORY, LISTEN_ADDR, null, 0, o);
                 o.waitForResponse(60000);
                 assertEquals(s, o.getSocket());
                 assertNull(o.getIoException());
@@ -159,14 +160,14 @@ public class LimitedSocketControllerTest extends BaseTestCase {
         } else {
             if (!nb) {
                 try {
-                    controller.connect(FACTORY, BAD_ADDR, 0, null);
+                    controller.connect(FACTORY, BAD_ADDR, null, 0, null);
                     fail("acceptedConnection from a bad proxy server");
                 } catch (IOException iox) {
                     // Good -- expected behaviour
                 }
             } else {
                 ConnectObserverStub o = new ConnectObserverStub();
-                controller.connect(FACTORY, BAD_ADDR, 0, o);
+                controller.connect(FACTORY, BAD_ADDR, null, 0, o);
                 o.waitForResponse(60000);
                 assertNull(o.getSocket());
                 assertNull(o.getIoException());

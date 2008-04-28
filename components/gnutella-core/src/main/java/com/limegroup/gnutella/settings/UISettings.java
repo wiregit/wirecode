@@ -108,21 +108,92 @@ public final class UISettings extends LimeProps {
     public static final BooleanSetting SHOW_NOTIFICATIONS = 
         FACTORY.createBooleanSetting("SHOW_NOTIFICATIONS", true);
     
-    /** Url for into pic. */
-    public static final StringSetting INTRO_URL = FACTORY.createRemoteStringSetting("INTRO_URL",
-            "http://clientpix.limewire.com/pix/intro.png", "UI.introUrl");
-    
-    /** Url for after-search pic. */
-    public static final StringSetting AFTER_SEARCH_URL = FACTORY.createRemoteStringSetting("AFTER_SEARCH_URL",
-            "http://clientpix.limewire.com/pix/aftersearch.png", "UI.afterSearchUrl");
-    
     /** Whether or not to use network-based images, or just always use built-in ones. */
-    public static final BooleanSetting USE_NETWORK_IMAGES = FACTORY.createRemoteBooleanSetting("USE_NETWORK_IMAGES",
-            false, "UI.useNetworkImages");
+    private static final BooleanSetting USE_NETWORK_IMAGES = FACTORY.createRemoteBooleanSetting("USE_NETWORK_IMAGES",
+            true, "UI.useNetworkImages");
     
-    /** Place where you go to after clicking the link. */
-    public static final StringSetting AFTER_SERACH_CLICK_LINK = FACTORY.createRemoteStringSetting("AFTER_SERACH_CLICK_LINK",
-            "http://www.limewire.com/clientpro?", "UI.afterSearchClickLink");
+    /** Collection of info for the 'Getting Started' image. */
+    public static final ImageInfo INTRO_IMAGE_INFO = new ImageInfoImpl(true);
+    
+    /** Collection of info for the 'After Search' image. */
+    public static final ImageInfo AFTER_SEARCH_IMAGE_INFO = new ImageInfoImpl(false);
+    
+    public static interface ImageInfo {     
+        /** The URL to pull the image from. */
+        public String getImageUrl();
+        /** Whether or not PRO users should show this pic. */
+        public boolean canProShowPic();
+        /** Whether or not this pic can have an outgoing link. */
+        public boolean canLink();
+        /** The outgoing link if triggered from the backup image. */
+        public String getLocalLinkUrl();
+        /** The outgoing link if triggered from the network image. */
+        public String getNetworkLinkUrl();
+        /** True if network images should be used. */
+        public boolean useNetworkImage();
+        /** True if this is the 'Into' pic. */
+        boolean isIntro();
+    }
+    
+    private static class ImageInfoImpl implements ImageInfo {
+        private final boolean intro;
+        private final StringSetting imageUrl;
+        private final BooleanSetting proShowPic;
+        private final BooleanSetting canLink;
+        private final StringSetting localLink;
+        private final StringSetting networkLink;
+        
+        ImageInfoImpl(boolean intro) {
+            this.intro = intro;
+            imageUrl = FACTORY.createRemoteStringSetting(key("URL"), 
+                "http://clientpix.limewire.com/pix/" + (intro ? "intro" : "afterSearch"), remoteKey("Url"));
+            proShowPic = FACTORY.createRemoteBooleanSetting(key("PRO_SHOW"), 
+                false, remoteKey("ProShow"));
+            canLink = FACTORY.createRemoteBooleanSetting(key("HAS_LINK"), 
+                !intro, remoteKey("CanLink"));
+            localLink = FACTORY.createRemoteStringSetting(key("LOCAL_LINK"), 
+                "http://www.limewire.com/clientpro?", remoteKey("ClickLinkLocal"));
+            networkLink = FACTORY.createRemoteStringSetting(key("NETWORK_LINK"), 
+                "http://www.limewire.com/clientpro?", remoteKey("ClickLink"));
+        }
+        
+        private String key(String key) {
+            return intro ? "INTRO_" + key : "AFTER_SEARCH_" + key;
+        }
+        
+        private String remoteKey(String key) {
+                                        // DO NOT CHANGE THIS -- A BUG THAT MUST STAY.
+            return intro ? "UI.intro" + key : " + UI.afterSearch" + key;
+        }
+
+        public boolean canLink() {
+            return canLink.getValue();
+        }
+
+        public boolean canProShowPic() {
+            return proShowPic.getValue();
+        }
+
+        public String getImageUrl() {
+            return imageUrl.getValue();
+        }
+
+        public String getLocalLinkUrl() {
+            return localLink.getValue();
+        }
+
+        public String getNetworkLinkUrl() {
+            return networkLink.getValue();
+        }
+        
+        public boolean useNetworkImage() {
+            return USE_NETWORK_IMAGES.getValue();
+        }
+        
+        public boolean isIntro() {
+            return intro;
+        }
+    }
     
 
 

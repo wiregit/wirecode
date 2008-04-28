@@ -45,6 +45,7 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
     
     /** 
      * Constructs a new downloader that's gonna work off the network.
+     * @param pushListProvider TODO
      */
     @Inject
     InNetworkDownloaderImpl(SaveLocationManager saveLocationManager, DownloadManager downloadManager,
@@ -58,13 +59,13 @@ class InNetworkDownloaderImpl extends ManagedDownloaderImpl implements InNetwork
             VerifyingFileFactory verifyingFileFactory, DiskController diskController,
              IPFilter ipFilter, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             Provider<MessageRouter> messageRouter, Provider<HashTreeCache> tigerTreeCache,
-            ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory) throws SaveLocationException {
+            ApplicationServices applicationServices, RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider) throws SaveLocationException {
         super(saveLocationManager, downloadManager, fileManager, incompleteFileManager,
                 downloadCallback, networkManager, alternateLocationFactory, requeryManagerFactory,
                 queryRequestFactory, onDemandUnicaster, downloadWorkerFactory, altLocManager,
                 contentManager, sourceRankerFactory, urnCache, savedFileManager,
                 verifyingFileFactory, diskController, ipFilter, backgroundExecutor, messageRouter,
-                tigerTreeCache, applicationServices, remoteFileDescFactory);
+                tigerTreeCache, applicationServices, remoteFileDescFactory, pushListProvider);
     }
     
     /* (non-Javadoc)

@@ -1,8 +1,5 @@
 package com.limegroup.gnutella.http;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,32 +16,6 @@ public class FeaturesWriter {
     @Inject
     public FeaturesWriter(NetworkManager networkManager) {
         this.networkManager = networkManager;
-    }
-
-    /**
-     * Utility method for writing the currently supported features
-     * to the <tt>Writer</tt>.
-     */
-    public void writeFeatures(Writer writer) throws IOException {
-        Set<HTTPHeaderValue> features = getFeaturesValue();
-        // Write X-Features header.h
-        if (features.size() > 0) {
-            HTTPUtils.writeHeader(HTTPHeaderName.FEATURES,
-                    new HTTPHeaderValueCollection(features), writer);
-        }
-    }
-
-    /**
-     * Utility method for writing the currently supported features
-     * to the <tt>OutputStream</tt>.
-     */
-    public void writeFeatures(OutputStream stream) throws IOException {
-        Set<HTTPHeaderValue> features = getFeaturesValue();
-        // Write X-Features header.
-        if (features.size() > 0) {
-            HTTPUtils.writeHeader(HTTPHeaderName.FEATURES,
-                    new HTTPHeaderValueCollection(features), stream);
-        }
     }
 
     /**

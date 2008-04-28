@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.util;
 
+import java.util.Locale;
 import java.util.Random;
 
 /**
@@ -54,7 +55,7 @@ public final class UUID {
      * are checked.
      */
     public UUID(String uuid) {
-        this.uuid = uuid.toLowerCase();
+        this.uuid = uuid.toLowerCase(Locale.US);
         if(uuid.length() != 36)
             throw new IllegalArgumentException();
     }

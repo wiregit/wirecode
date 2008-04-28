@@ -34,7 +34,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /** 
  * This class runs a single thread which sends unicast UDP queries to a master
@@ -229,7 +228,6 @@ public final class QueryUnicaster {
                     // send a AddressSecurityToken Request
                     PingRequest pr = pingRequestFactory.createQueryKeyRequest();
                     udpService.get().send(pr,toQuery.getInetAddress(), toQuery.getPort());
-                    SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
                     // DO NOT RE-ADD ENDPOINT - we'll do that if we get a
                     // AddressSecurityToken Reply!!
                     continue; // try another up above....
@@ -253,7 +251,6 @@ public final class QueryUnicaster {
                             udpService.get().send(qrToSend, 
                                             ip, toQuery.getPort());
 							currentHostUsed = true;
-							SentMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(qrToSend);
 							currQB._hostsQueried.add(toQuery);
                         }
                     }
@@ -375,9 +372,7 @@ public final class QueryUnicaster {
 				PingRequest pr = 
                 pingRequestFactory.createPingRequest(udpService.get().getSolicitedGUID().bytes(),
                         (byte)1, (byte)0);
-                udpService.get().send(pr, endpoint.getInetAddress(), 
-                                           endpoint.getPort());
-				SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
+                udpService.get().send(pr, endpoint.getInetAddress(), endpoint.getPort());
 				_testUDPPingsSent++;
 			}
 			LOG.debug("QueryUnicaster.addUnicastEndpoint(): released lock.");
@@ -514,7 +509,6 @@ public final class QueryUnicaster {
                     InetAddress ip = toReturn.getInetAddress();
                     udpService.get().send(pr, ip, toReturn.getPort());
                     _pingList.add(toReturn);
-					SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
                 }
             }
             return toReturn;

@@ -5,6 +5,8 @@ import java.net.Socket;
 import java.util.Collection;
 import java.util.List;
 
+import org.limewire.listener.ListenerSupport;
+
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.CantResumeException;
@@ -18,22 +20,23 @@ import com.limegroup.gnutella.version.DownloadInformation;
 
 
 /** 
- * The list of all downloads in progress.  DownloadManager has a fixed number 
- * of download slots given by the MAX_SIM_DOWNLOADS property.  It is
- * responsible for starting downloads and scheduling and queueing them as 
+ * The list of all downloads in progress.  <code>DownloadManager</code> has a 
+ * fixed number of download slots given by the MAX_SIM_DOWNLOADS property.  It 
+ * is responsible for starting downloads and scheduling and queueing them as 
  * needed.  This class is thread safe.<p>
  *
- * As with other classes in this package, a DownloadManager instance may not be
- * used until initialize(..) is called.  The arguments to this are not passed
- * in to the constructor in case there are circular dependencies.<p>
+ * As with other classes in this package, a <code>DownloadManager</code> instance 
+ * may not be used until initialize(..) is called.  The arguments to this are 
+ * not passed in to the constructor in case there are circular dependencies.<p>
  *
- * DownloadManager provides ways to serialize download state to disk.  Reads 
- * are initiated by RouterService, since we have to wait until the GUI is
- * initiated.  Writes are initiated by this, since we need to be notified of
- * completed downloads.  Downloads in the COULDNT_DOWNLOAD state are not 
+ * <code>DownloadManager</code> provides ways to serialize download state to 
+ * disk.  Reads are initiated by RouterService, since we have to wait until the 
+ * GUI is initiated.  Writes are initiated by this, since we need to be notified 
+ * of completed downloads.  Downloads in the COULDNT_DOWNLOAD state are not 
  * serialized.  
  */
-public interface DownloadManager extends BandwidthTracker, SaveLocationManager, LWSIntegrationServicesDelegate, PushedSocketHandler {
+public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
+LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadManagerEvent> {
     
     /**
      * Adds a new downloader that this will manager.
@@ -43,12 +46,6 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
     /** 
      * Initializes this manager. <b>This method must be called before any other
      * methods are used.</b> 
-     *     @uses RouterService.getCallback for the UI callback 
-     *       to notify of download changes
-     *     @uses RouterService.getMessageRouter for the message 
-     *       router to use for sending push requests
-     *     @uses RouterService.getFileManager for the FileManager
-     *       to check if files exist
      */
     public void initialize();
 
@@ -67,8 +64,10 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
     public boolean hasInNetworkDownload();
 
     /**
-     * Kills all in-network downloaders that are not present in the list of URNs
-     * @param urns a current set of urns that we are downloading in-network.
+     * Kills all in-network downloaders that are not present in the list of 
+     * DownloadInformations
+     * @param updates a current set of DownloadInformation that we are 
+     * downloading in-network.
      */
     public void killDownloadersNotListed(Collection<? extends DownloadInformation> updates);
 
@@ -136,6 +135,7 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
      * @param alts a List of secondary RFDs to use for other sources
      * @param queryGUID the guid of the query that resulted in the RFDs being
      * downloaded.
+     * @param overwrite whether or not to overwrite the file
      * @param saveDir can be null, then the default save directory is used
      * @param fileName can be null, then the first filename of one of element of
      * <code>files</code> is taken.
@@ -157,34 +157,34 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
      * complete file; otherwise it will be taken from any search results or
      * guessed from <tt>defaultURLs</tt>.
      *
-     * @param urn the hash of the file (exact topic), or null if unknown
-     * @param textQuery requery keywords (keyword topic), or null if unknown
+     * @param magnet information fields extracted from a magnet link
+     * @param overwrite whether or not to overwrite the file
+     * @param saveDir can be null, then the default save directory is used
      * @param filename the final file name, or <code>null</code> if unknown
-     * @param saveLocation can be null, then the default save location is used
-     * @param defaultURLs the initial locations to try (exact source), or null 
-     *  if unknown
-     *
-     * @exception IllegalArgumentException all urn, textQuery, filename are
-     *  null 
-     * @throws SaveLocationException 
+     * @exception IllegalArgumentException if the magnet is not downloadable
+     * @throws SaveLocationException if the file can't save because of an 
+     * existing file in the location
      */
     public Downloader download(MagnetOptions magnet, boolean overwrite, File saveDir,
             String fileName) throws IllegalArgumentException, SaveLocationException;
 
     /**
-     * Creates a new LimeWire Store (LWS) download. Store downloads are handled in a similar fashion as
-     * MAGNET links except there are no alternative locations.  <tt>filename</tt> should always
-     * be specified since we have complete control over META-DATA for these downloads, it will 
-     * be used as the name of the complete file. Unlike all other downloads performed here, 
-     * saveDir is a unique directory specified in the options menu under Store Downloads
+     * Creates a new LimeWire Store (LWS) download. Store downloads are handled 
+     * in a similar fashion as MAGNET links except there are no alternative 
+     * locations.  <tt>filename</tt> should always be specified since we have 
+     * complete control over META-DATA for these downloads, it will be used as 
+     * the name of the complete file. Unlike all other downloads performed here, 
+     * saveDir is a unique directory specified in the options menu under Store 
+     * Downloads.
      * 
-     * @param store - Descriptor describing the download from the store including URN
-     * @param overwrite - true if same file names should be overwritten
-     * @param saveDir - directory to save the completed file into
-     * @param fileName - name of the completed file
-     * @return
-     * @throws IllegalArgumentException
-     * @throws SaveLocationException
+     * @param rfd Descriptor describing the download from the store including URN
+     * @param overwrite true if same file names should be overwritten; false if
+     * the user should be notified of a duplicate file name
+     * @param saveDir directory to save the completed file into
+     * @param fileName name of the completed file
+     * @return a download object
+     * @throws IllegalArgumentException if there is a bad argument
+     * @throws SaveLocationException if the file is already downloading
      */
     public Downloader downloadFromStore(RemoteFileDesc rfd, boolean overwrite, File saveDir,
             String fileName) throws IllegalArgumentException, SaveLocationException;
@@ -192,8 +192,9 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
     /**
      * Starts a resume download for the given incomplete file.
      * @exception CantResumeException incompleteFile is not a valid 
-     *  incomplete file
-     * @throws SaveLocationException 
+     * incomplete file
+     * @throws SaveLocationException if the file can't save because of an 
+     * existing file in the location 
      */
     public Downloader download(File incompleteFile) throws CantResumeException,
             SaveLocationException;
@@ -210,7 +211,7 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
      * Returns <code>true</code> if there already is a download with the same urn. 
      * @param urn may be <code>null</code>, then a check based on the fileName
      * and the fileSize is performed
-     * @return
+     * @return true if there is a conflict
      */
     public boolean conflicts(URN urn, long fileSize, File... fileName);
 
@@ -218,12 +219,12 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
      * Returns <code>true</code> if there already is a download that is or
      * will be saving to this file location.
      * @param candidateFile the final file location.
-     * @return
+     * @return true if the file's save location is already used
      */
     public boolean isSaveLocationTaken(File candidateFile);
 
     /** 
-     * Adds all responses (and alternates) in qr to any downloaders, if
+     * Adds all responses (and alternates) in <code>qr</code> to any downloaders, if
      * appropriate.
      */
     public void handleQueryReply(QueryReply qr);
@@ -239,7 +240,7 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
 
     /**
      * Bumps the priority of an inactive download either up or down
-     * by amt (if amt==0, bump to start/end of list).
+     * by an amount (if amt==0, bump to start/end of list).
      */
     public void bumpPriority(Downloader downl, boolean up, int amt);
 
@@ -248,7 +249,7 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
      * more sources to download.  May not actually send the requery if it doing
      * so would exceed the maximum requery rate.
      * @param query the requery to send, which should have a marked GUID.
-     *  Queries are subjected to global rate limiting iff they have marked 
+     *  Queries are subjected to global rate limiting if and only if they have marked 
      *  requery GUIDs.
      */
     public void sendQuery(QueryRequest query);
@@ -274,8 +275,8 @@ public interface DownloadManager extends BandwidthTracker, SaveLocationManager, 
     
     /** Writes a snapshot of all downloaders in this and all incomplete files to
      *  the file named DOWNLOAD_SNAPSHOT_FILE.  It is safe to call this method
-     *  at any time for checkpointing purposes.  Returns true iff the file was
-     *  successfully written. */
+     *  at any time for checkpointing purposes.  Returns true if and only if the 
+     *  file was successfully written. */
     public void writeSnapshot();
 
 }

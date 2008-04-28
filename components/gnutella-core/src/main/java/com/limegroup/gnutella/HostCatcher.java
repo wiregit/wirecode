@@ -42,6 +42,7 @@ import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.CommonUtils;
 
@@ -321,6 +322,7 @@ public class HostCatcher {
     private final Provider<IPFilter> ipFilter;
     private final Provider<MulticastService> multicastService;
     private final UniqueHostPinger uniqueHostPinger;
+    private final NetworkInstanceUtils networkInstanceUtils;
 
     private final PingRequestFactory pingRequestFactory;
     
@@ -335,7 +337,8 @@ public class HostCatcher {
             Provider<MulticastService> multicastService,
             UniqueHostPinger uniqueHostPinger,
             UDPHostCacheFactory udpHostCacheFactory,
-            PingRequestFactory pingRequestFactory) {
+            PingRequestFactory pingRequestFactory,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.backgroundExecutor = backgroundExecutor;
         this.connectionServices = connectionServices;
         this.connectionManager = connectionManager;
@@ -346,6 +349,7 @@ public class HostCatcher {
         this.multicastService = multicastService;
         this.uniqueHostPinger = uniqueHostPinger;
         this.pingRequestFactory = pingRequestFactory;
+        this.networkInstanceUtils = networkInstanceUtils;
         
         // TODO: this could also be solved with a named injection to get the
         //       UniqHostPinger and not its super class
@@ -883,7 +887,7 @@ public class HostCatcher {
      * @return true iff e was actually added 
      */
     private synchronized boolean addPermanent(ExtendedEndpoint e) {
-        if (NetworkUtils.isPrivateAddress(e.getInetAddress()))
+        if (networkInstanceUtils.isPrivateAddress(e.getInetAddress()))
             return false;
         if (permanentHostsSet.contains(e))
             //TODO: we could adjust the key
@@ -940,15 +944,16 @@ public class HostCatcher {
             return false;
         }
         
-        if(NetworkUtils.isPrivateAddress(addr))
+        if(networkInstanceUtils.isPrivateAddress(addr)) {
             return false;
+        }
 
         //We used to check that we're not connected to e, but now we do that in
         //ConnectionFetcher after a call to getAnEndpoint.  This is not a big
         //deal, since the call to "set.contains(e)" below ensures no duplicates.
         //Skip if this would connect us to our listening port.  TODO: I think
         //this check is too strict sometimes, which makes testing difficult.
-        if (NetworkUtils.isMe(addr, host.getPort()))
+        if (networkInstanceUtils.isMe(addr, host.getPort()))
             return false;
 
         //Skip if this host is banned.

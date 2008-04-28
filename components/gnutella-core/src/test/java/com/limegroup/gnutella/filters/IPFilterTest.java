@@ -171,16 +171,43 @@ public class IPFilterTest extends LimeTestCase {
     }
 
     /** 
-     *  Ensure that the message is ignored as
-     *   QueryRequests should always pass through the
-     *   filter.
+     *  Checks that only queries that desire oob are filtered.
      */
     public void testFilterByQueryRequest() {
         context.checking(new Expectations()
-        {{ never(queryRequest);
+        {{ 
+            one(queryRequest).desiresOutOfBandReplies();
+            will(returnValue(false));
         }});
         
         assertTrue(filter.allow(queryRequest));
+        context.assertIsSatisfied();
+        
+        final byte[] guid = new byte[16];
+        guid[0] = 1;
+        final IP toMatch = new IP("1.0.0.0");
+        context.checking(new Expectations()
+        {{ 
+            one(queryRequest).desiresOutOfBandReplies();
+            will(returnValue(true));
+            one(queryRequest).getGUID();
+            will(returnValue(guid));
+            one(hostileFilter).allow(toMatch);
+            will(returnValue(true));
+        }});
+        
+        assertTrue(filter.allow(queryRequest));
+        context.assertIsSatisfied();
+        
+        guid[0] = 13;
+        context.checking(new Expectations()
+        {{ 
+            one(queryRequest).desiresOutOfBandReplies();
+            will(returnValue(true));
+            one(queryRequest).getGUID();
+            will(returnValue(guid));
+        }});
+        assertFalse(filter.allow(queryRequest));
         context.assertIsSatisfied();
     }
     

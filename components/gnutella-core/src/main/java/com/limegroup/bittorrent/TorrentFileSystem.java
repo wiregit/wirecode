@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -32,11 +33,18 @@ public class TorrentFileSystem {
 	
 	/**
 	 * a list of <tt>TorrentFile</tt> for every file in this torrent
+	 * LOCKING: this
 	 */
 	private final List<TorrentFile> _files;
 	
 	/**
+	 * Unmodifiable view over _files to be exposed to the outside world.
+	 */
+	private final List<TorrentFile>_unmodFiles;
+	
+	/**
 	 * any folders that are contained in the torrent
+	 * LOCKING: this
 	 */
 	private final Collection<File> _folders = new HashSet<File>();
 	
@@ -61,6 +69,7 @@ public class TorrentFileSystem {
         this._name = torrentFileSystemMemento.getName();
         this._totalSize = torrentFileSystemMemento.getTotalSize();
         this._files = torrentFileSystemMemento.getFiles();
+        this._unmodFiles = Collections.unmodifiableList(_files);
         _folders.addAll(torrentFileSystemMemento.getFolders());
         this._incompleteFile = torrentFileSystemMemento.getIncompleteFile();
         this._completeFile = torrentFileSystemMemento.getCompleteFile();
@@ -128,7 +137,8 @@ public class TorrentFileSystem {
             _files = new ArrayList<TorrentFile>(1);
             _files.add(f);
 		}
-		
+        
+		_unmodFiles = Collections.unmodifiableList(_files);
 		_totalSize = calculateTotalSize(_files);
         if (_totalSize <= 0)
             throw new ValueException("invalid size "+_totalSize);
@@ -137,8 +147,14 @@ public class TorrentFileSystem {
 	public TorrentFileSystemMemento toMemento() {
 	    TorrentFileSystemMemento memento = new TorrentFileSystemMementoImpl();
 	    memento.setCompleteFile(_completeFile);
-	    memento.setFiles(_files);
-	    memento.setFolders(_folders);
+	    List<TorrentFile> files;
+	    Collection<File> folders;
+	    synchronized(this) {
+	        files = new ArrayList<TorrentFile>(_files);
+	        folders = new HashSet<File>(_folders); 
+	    }
+	    memento.setFiles(files);
+	    memento.setFolders(folders);
 	    memento.setIncompleteFile(_incompleteFile);
 	    memento.setName(_name);
 	    memento.setTotalSize(_totalSize);
@@ -174,7 +190,7 @@ public class TorrentFileSystem {
 	 * @return list of files holding the complete torrent.
 	 */
 	public List<TorrentFile> getFiles() {
-		return _files;
+		return _unmodFiles;
 	}
 	
 	/**
@@ -183,7 +199,7 @@ public class TorrentFileSystem {
 	 */
 	public Collection<File> getFilesAndFolders() {
 		if (_filesAndFolders == null)
-			_filesAndFolders = new MultiCollection<File>(_files,_folders);
+			_filesAndFolders = new MultiCollection<File>(_unmodFiles,Collections.unmodifiableCollection(_folders));
 		return _filesAndFolders;
 	}
 	
@@ -252,7 +268,7 @@ public class TorrentFileSystem {
 	 * Updates the folders in the torrent to start at the 
 	 * new base path.
 	 */
-	private void updateFolderReferences(File completeBase) {
+	private synchronized void updateFolderReferences(File completeBase) {
 		int offset = _completeFile.getAbsolutePath().length();
 		String newPath = completeBase.getAbsolutePath();
 		Collection<File> newFolders = new HashSet<File>(_folders.size());

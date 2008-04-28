@@ -5,6 +5,8 @@ import java.io.File;
 
 import junit.framework.Test;
 
+import org.limewire.io.GGEP;
+import org.limewire.util.Base32;
 import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
@@ -16,7 +18,6 @@ import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.PeerTestCase;
 import com.limegroup.gnutella.connection.BlockingConnection;
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.AbstractVendorMessage;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
@@ -46,11 +47,12 @@ public class InterClientTest extends PeerTestCase {
         return buildTestSuite(InterClientTest.class);
     }    
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         junit.textui.TestRunner.run(suite());
     }
     
-    static UpdateRequest dummy = new UpdateRequest();
+    private UpdateRequest dummy = new UpdateRequest();
+    
     public void setUp() throws Exception {
         myActivityCallback = new MyActivityCallback();
         Module m = new AbstractModule() {
@@ -127,7 +129,10 @@ public class InterClientTest extends PeerTestCase {
         m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNotNull(m);
         assertInstanceof(UpdateResponse.class, m);
-        assertEquals(data, payload(m));
+        byte[] payload = payload(m);
+        GGEP ggep = new GGEP(payload, 0);
+        assertEquals(data, ggep.get("U"));
+        assertEquals(1, ggep.getHeaders().size());
     }
     
     /**
@@ -320,13 +325,31 @@ public class InterClientTest extends PeerTestCase {
         Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNull(m);
         
-        UpdateRequestStub request = new UpdateRequestStub(2,false,false);
+        UpdateRequestStub request = new UpdateRequestStub(UpdateRequest.VERSION+1,false,false);
         byte[] data = setCurrent(-10);
         PEER.send(request);
         PEER.flush();
         m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
         assertNotNull(m);
-        assertEquals(data,payload(m));
+        byte [] payload = payload(m);
+        GGEP g = new GGEP(payload,0);
+        assertEquals(g.getBytes("U"),data);
+        assertFalse(g.hasKey("C"));
+    }
+    
+    /** Tests that requests from older versions get responded to properly. */
+    public void testOldRequestGetsMaxVersionNoGGEP() throws Exception {
+        assertEquals(0, getUpdateHandler().getLatestId());
+        
+        // We should get no response, since we have no data to give.
+        PEER.send(new UpdateRequestStub(1, false, false));
+        PEER.flush();
+        Message m = BlockingConnectionUtils.getFirstInstanceOfMessageType(PEER, UpdateResponse.class);
+        assertNotNull(m);
+        
+        byte[] payload = payload(m);
+        assertEquals("I5AVOQKFIZCE4Q2RKFATKVBWKBKVEWSOJRFU6WS2JVIUCR2QGRJESNBVIE3UESKDINIUCSSWIZKE2WCHGZKFMMS2GJAVSTKCGQ2TINSLIRFEQWCRG5KEITL4PQ6HK4DEMF2GKIDJMQ6SEMRRGQ3TIOBTGY2DOIRAORUW2ZLTORQW24B5EIYSEPQKEAQCAPDNONTSAZTSN5WT2IRXGYXDONZOG42SEIDGN5ZD2IRYGYXDQOBOHA2SEIDUN46SEOBWFY4DSLRYGURCA5LSNQ6SE2DUORYDULZPO53XOLTMNFWWK53JOJSS4Y3PNUXXK4DEMF2GKIRAON2HS3DFHURDAIRAN5ZT2ISXNFXGI33XOMRCA5LSNY6SE5LSNY5GE2LUOBZGS3TUHJIEYUCSKRIEET2BKJBE6U2BJNIECTKHKZJTEU2MGU3VGM2HIRGFCLRXIZIEGR2NG43VGSCPKFGVAUSQJU2UGNKMJ5NEKT2EG43EGRK2IQ2E2USBIVGESIRAOVRW63LNMFXGIPJHEISCKIRAF5JSOIDVNZQW2ZJ5EJGGS3LFK5UXEZKXNFXDILRRGYXDMLTFPBSSEIDTNF5GKPJCGQ2TANRSGU3CEPQKEAQCAIBAEA6GYYLOM4QGSZB5E5SW4JZ6BIQCAIBAEAQCAIB4EFNUGRCBKRAVWNBOGE3C4NRAKVJE4XK5HYFCAIBAEAQCAPBPNRQW4ZZ6BIQCAIB4F5WXGZZ6BIQCAIBAEAQDY3LTM4QGM4TPNU6SENBOHAXDCIRAMZXXEPJCGQXDCNROGYRCA5LSNQ6SE2DUORYDULZPO53XOLTMNFWWK53JOJSS4Y3PNUXXK4DEMF2GKIRAMZZGKZJ5EJ2HE5LFEIQG64Z5EJLWS3TEN53XGIRAON2HS3DFHURDIIRAOVZG4PJCOVZG4OTCNF2HA4TJNZ2DUUCMKBJFIUCCJ5AVEQSPKNAUWUCBJVDVMUZSKNGDKN2TGNDUITCRFY3UMUCDI5GTON2TJBHVCTKQKJIE2NKDGVGE6WSFJ5CDONSDIVNEINCNKJAUKTCJEIQHKY3PNVWWC3TEHUTSEJBFEIQC6UZHEB2W4YLNMU6SETDJNVSVO2LSMVLWS3RUFYYTMLRWFZSXQZJCEBZWS6TFHURDINJQGYZDKNRCHYFCAIBAEAQCAPDMMFXGOIDJMQ6SOZLOE47AUIBAEAQCAIB4EFNUGRCBKRAVWCRAEAQCAIBAHR2GCYTMMUQGC3DJM5XD2Y3FNZ2GK4RAOZQWY2LHNY6WGZLOORSXEPR4ORZD4PDUMQ7AUPDDMVXHIZLSHY6GEPSVOJTWK3TUEBGGS3LFK5UXEZJAKNSWG5LSNF2HSICVOBSGC5DFEBAXMYLJNRQWE3DFFY6GE4R6BJIGYZLBONSSAVLQMRQXIZJAJFWW2ZLENFQXIZLMPEXDYYTSHY6GE4R6HQXWEPQKJFTCA5DIMUQHK4DEMF2GKIDEN5SXGIDON52CA53POJVSYIDWNFZWS5B4MJZD4CTIOR2HAORPF53XO5ZONRUW2ZLXNFZGKLTDN5WS6ZDPO5XGY33BMQ6GE4R6EBTG64RAORUGKIDMMF2GK43UEB3GK4TTNFXW4IDPMYQEY2LNMVLWS4TFFY6C6YR6HQXWGZLOORSXEPR4F52GIPR4F52HEPR4F52GCYTMMU7AUIBAEAQCAIC5LU7AUIBAEAQCAIB4F5WGC3THHYFCAIBAEAQCAPBPNVZWOPQKEAQCAIBAEAFCAIBAEAQCAPDNONTSAZTSN5WT2IRUFY4C4MJCEBTG64R5EI2C4MJWFY3CEIDVOJWD2ITIOR2HAORPF53XO5ZONRUW2ZLXNFZGKLTDN5WS65LQMRQXIZJCEBZXI6LMMU6SENBCHYFCAIBAEAQCAPDMMFXGOIDJMQ6SOZLOE47AUIBAEAQCAIB4EFNUGRCBKRAVWCRAEAQCAIBAHR2GCYTMMUQGC3DJM5XD2Y3FNZ2GK4RAOZQWY2LHNY6WGZLOORSXEPR4ORZD4PDUMQ7AUPDDMVXHIZLSHY6GEPSVOJTWK3TUEBGGS3LFK5UXEZJAKNSWG5LSNF2HSICVOBSGC5DFEBAXMYLJNRQWE3DFFY6GE4R6BJIGYZLBONSSAVLQMRQXIZJAJFWW2ZLENFQXIZLMPEXDYYTSHY6GE4R6HQXWEPQKJFTCA5DIMUQHK4DEMF2GKIDEN5SXGIDON52CA53POJVSYIDWNFZWS5B4MJZD4CTIOR2HAORPF53XO5ZONRUW2ZLXNFZGKLTDN5WS6ZDPO5XGY33BMQ6GE4R6EBTG64RAORUGKIDMMF2GK43UEB3GK4TTNFXW4IDPMYQEY2LNMVLWS4TFFY6C6YR6HQXWGZLOORSXEPR4F52GIPR4F52HEPR4F52GCYTMMU7AUIBAEAQCAIC5LU7AUIBAEAQCAIB4F5WGC3THHYFCAIBAEAQCAPBPNVZWOPQKHQXXK4DEMF2GKPQK",
+                Base32.encode(payload));
     }
     
     private  void setCurrentId(int i) throws Exception {
@@ -372,7 +395,7 @@ public class InterClientTest extends PeerTestCase {
     }
     
     private static Message getCVM(int i) throws Exception {
-        return CapabilitiesVMStubHelper.makeUpdateVM(i);
+        return CapabilitiesVMStubHelper.makeCapabilitiesWithUpdate(i);
     }
     
     private void doInitialExchange() throws Exception {
@@ -395,7 +418,7 @@ public class InterClientTest extends PeerTestCase {
         }
     }
     
-    static byte [] derivePayload(boolean hasGGEP, boolean requestsCompressed) throws Exception {
+    private static byte[] derivePayload(boolean hasGGEP, boolean requestsCompressed) throws Exception {
         if (!hasGGEP)
             return DataUtils.EMPTY_BYTE_ARRAY;
         

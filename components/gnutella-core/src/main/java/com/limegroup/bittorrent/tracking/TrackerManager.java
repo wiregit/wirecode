@@ -187,6 +187,7 @@ public class TrackerManager {
 				if (response.FAILURE_REASON != null) {
 					t.recordFailure();
                     lastFailureReason = response.FAILURE_REASON;
+                    torrent.trackerRequestFailed();
 				} else
 					t.recordSuccess();
 		} else {

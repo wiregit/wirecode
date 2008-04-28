@@ -112,7 +112,7 @@ public interface FileManager {
      * @return <tt>true</tt> if the index is within range of our shared
      *  file data structure, otherwise <tt>false</tt>
      */
-    public abstract boolean isValidIndex(int i);
+    public abstract boolean isValidSharedIndex(int i);
 
     /**
      * Returns the <tt>URN<tt> for the File.  May return null;
@@ -141,6 +141,17 @@ public interface FileManager {
      *  <tt>null</tt> if no matching <tt>FileDesc</tt> could be found
      */
     public abstract FileDesc getFileDescForUrn(final URN urn);
+    
+    /**
+     * Returns the shared <tt>FileDesc</tt> for the specified URN. This only returns 
+     * one <tt>FileDesc</tt>, even though multiple indices are possible with 
+     * HUGE v. 0.93.
+     *
+     * @param urn the urn for the file
+     * @return the <tt>FileDesc</tt> corresponding to the requested urn, or
+     *  <tt>null</tt> if no matching shared <tt>FileDesc</tt> could be found
+     */
+    public FileDesc getSharedFileDescForUrn(final URN urn);
 
     /**
      * Returns a list of all shared incomplete file descriptors.
@@ -289,7 +300,7 @@ public interface FileManager {
      *  other files.  Note that the file is not actually removed from
      *  disk.
      */
-    public abstract FileDesc removeFileIfShared(File f);
+    public abstract FileDesc removeFileIfSharedOrStore(File f);
 
     /**
      * Adds an incomplete file to be used for partial file sharing.

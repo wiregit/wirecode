@@ -133,16 +133,19 @@ public class DaapSettings extends LimeProps {
      * Gets the user's name, in possessive format.
      */
     private static String getPossessiveUserName() {
-        String name = System.getProperty("user.name", "Unknown");
-        if(OSUtils.isCocoaFoundationAvailable()) {
-            String n = MacOSXUtils.getUserName();
-            if(n != null)
-                name = n;
-        }
+        String name = null;
+        
+        if (OSUtils.isMacOSX())
+            name = MacOSXUtils.getUserName();
+        
+        if (name == null)
+            name = System.getProperty("user.name", "Unknown");
+        
         if(!name.endsWith("s"))
             name += "'s";
         else
             name += "'";
+        
         return name;
     }
 }

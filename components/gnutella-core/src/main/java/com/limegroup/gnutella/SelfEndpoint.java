@@ -1,40 +1,43 @@
 package com.limegroup.gnutella;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Set;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
-import org.limewire.rudp.UDPConnection;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
-public class SelfEndpoint extends PushEndpoint {
+public class SelfEndpoint extends AbstractPushEndpoint {
     private final NetworkManager networkManager;
     private final Provider<ConnectionManager> connectionManager;
-    private final Provider<UDPService> udpService;
+    private final ApplicationServices applicationServices;
+    private final PushEndpointCache pushEndpointCache;
+    private final NetworkInstanceUtils networkInstanceUtils;
     
     @Inject
     SelfEndpoint(NetworkManager networkManager,
             ApplicationServices applicationServices,
             Provider<ConnectionManager> connectionManager,
-            Provider<UDPService> udpService) {
-        super(applicationServices.getMyGUID(), IpPort.EMPTY_SET,
-                PushEndpoint.PLAIN, UDPConnection.VERSION, null, null);
+            PushEndpointCache pushEndpointCache,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.networkManager = networkManager;
+        this.applicationServices = applicationServices;
         this.connectionManager = connectionManager;
-        this.udpService = udpService;
+        this.pushEndpointCache = pushEndpointCache;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
 
     /**
      * delegate the call to connection manager
      */
-    @Override
     public Set<? extends IpPort> getProxies() {
         return connectionManager.get().getPushProxies();
     }
@@ -42,7 +45,6 @@ public class SelfEndpoint extends PushEndpoint {
     /**
      * we always have the same features
      */
-    @Override
     public byte getFeatures() {
         return 0;
     }
@@ -50,8 +52,7 @@ public class SelfEndpoint extends PushEndpoint {
     /**
      * we support the same FWT version if we support FWT at all
      */
-    @Override
-    public int supportsFWTVersion() {
+    public int getFWTVersion() {
         return networkManager.supportsFWTVersion();
     }
 
@@ -59,12 +60,11 @@ public class SelfEndpoint extends PushEndpoint {
      * Our address is our external address if it is valid and external.
      * Otherwise we return the BOGUS_IP 
      */
-    @Override
     public String getAddress() {
         byte[] addr = networkManager.getExternalAddress();
 
         if (NetworkUtils.isValidAddress(addr)
-                && !NetworkUtils.isPrivateAddress(addr))
+                && !networkInstanceUtils.isPrivateAddress(addr))
             return NetworkUtils.ip2string(addr);
 
         return RemoteFileDesc.BOGUS_IP;
@@ -74,7 +74,6 @@ public class SelfEndpoint extends PushEndpoint {
      * @return our external address.  First converts it to string since
      * 1.3 jvms does not support getting it from byte[].
      */
-    @Override
     public InetAddress getInetAddress() {
         try {
             return InetAddress.getByName(getAddress());
@@ -86,16 +85,14 @@ public class SelfEndpoint extends PushEndpoint {
     /**
      * Our port is our external port
      */
-    @Override
     public int getPort() {
         if (networkManager.canDoFWT()
                 && !networkManager.acceptedIncomingConnection())
-            return udpService.get().getStableUDPPort();
+            return networkManager.getStableUDPPort();
         return networkManager.getPort();
     }
 
-    @Override
-    protected IpPort getValidExternalAddress() {
+    public IpPort getValidExternalAddress() {
         try {
             String addr = getAddress();
             int port = getPort();
@@ -109,9 +106,29 @@ public class SelfEndpoint extends PushEndpoint {
         }
     }
     
-    @Override
     public boolean isLocal() {
         return true;
+    }
+
+    public PushEndpoint createClone() {
+        return new PushEndpointImpl(getClientGUID(), getProxies(), getFeatures(),
+                getFWTVersion(), getValidExternalAddress(), pushEndpointCache, networkInstanceUtils);
+    }
+
+    public byte[] getClientGUID() {
+        return applicationServices.getMyGUID();
+    }
+
+    public void updateProxies(boolean good) {
+    }
+
+    public InetSocketAddress getInetSocketAddress() {
+        IpPort externalAddress = getValidExternalAddress();
+        if (externalAddress != null) {
+            return externalAddress.getInetSocketAddress();
+        } else {
+            return null;
+        }
     }
     
 }

@@ -2,6 +2,8 @@ package com.limegroup.gnutella.messages;
 
 import java.io.IOException;
 
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.GGEP;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.URN;

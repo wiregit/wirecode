@@ -13,7 +13,6 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**
@@ -62,7 +61,6 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 */
 	public void handlePingReply(PingReply pong, ReplyHandler handler) {
         udpService.send(pong, addr);
-		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(pong);
 	}
 
 	/**
@@ -76,7 +74,6 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 */
 	public void handleQueryReply(QueryReply hit, ReplyHandler handler) {
         udpService.send(hit, addr);
-		SentMessageStatHandler.UDP_QUERY_REPLIES.addMessage(hit);
 	}
 
 	/**
@@ -90,7 +87,6 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 */
 	public void handlePushRequest(PushRequest request, ReplyHandler handler) {
         udpService.send(request, addr);
-		SentMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(request);
 	}
 
 	public void countDroppedMessage() {}

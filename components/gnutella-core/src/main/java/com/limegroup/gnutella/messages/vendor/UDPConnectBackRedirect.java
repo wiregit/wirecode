@@ -112,11 +112,4 @@ public final class UDPConnectBackRedirect extends AbstractVendorMessage {
         super.writePayload(out);
     }
 
-    /** Overridden purely for stats handling.
-     */
-    public void recordDrop() {
-        super.recordDrop();
-    }
-
-
 }

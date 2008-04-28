@@ -14,10 +14,7 @@ import org.limewire.nio.channel.InterestWritableByteChannel;
 /** 
  *  A reliable UDP connection.
  */
-public class UDPConnection extends AbstractNBSocket {
-    
-    /** The current version of the reliable UDP protocol. */
-    public static final byte VERSION = (byte) 1;
+class UDPConnection extends AbstractNBSocket implements RUDPSocket {
     
     /** Channel backing the socket. */
     private final UDPSocketChannel channel;
@@ -31,32 +28,11 @@ public class UDPConnection extends AbstractNBSocket {
     /**
      * Creates an unconnected <code>UDPConnection</code>. You must call {@link #connect(SocketAddress) connect(...)} to connect.
      */
-    public UDPConnection() {
-        this(UDPSelectorProvider.defaultProvider());
-    }
-    
-    public UDPConnection(UDPSelectorProvider provider) {
-        this.context = provider.getContext();
-        channel = provider.openSocketChannel();
-        channel.setSocket(this);
+    UDPConnection(RUDPContext context, UDPSocketChannel channel) {
+        this.context = context;
+        this.channel = channel;
         setInitialReader();
         setInitialWriter();  
-    }
-    
-    /**
-     *  Create a <code>UDPConnection</code> connected to the given IP/Port.
-     */
-    public UDPConnection(String ip, int port) throws IOException {
-        // Handle the real work in the processor
-        this(InetAddress.getByName(ip), port);
-    }     
-
-    /**
-     *  Creates a <code>UDPConnection</code> connected to the given IP/Port.
-     */
-    public UDPConnection(InetAddress ip, int port) throws IOException {
-		this();
-        connect(new InetSocketAddress(ip, port));
     }
 
     /** Returns the <code>UDPSocketChannel</code>, since it already implements 
@@ -170,8 +146,7 @@ public class UDPConnection extends AbstractNBSocket {
         throw new SocketException("not implemented");
     }
 
-    public synchronized void setSendBufferSize(int size)
-      throws SocketException {
+    public synchronized void setSendBufferSize(int size) throws SocketException {
         throw new SocketException("not implemented");
     }
 
@@ -179,13 +154,11 @@ public class UDPConnection extends AbstractNBSocket {
         throw new SocketException("not implemented");
     }
 
-    public synchronized void setReceiveBufferSize(int size)
-      throws SocketException{
+    public synchronized void setReceiveBufferSize(int size) throws SocketException {
         throw new SocketException("not implemented");
     }
 
-    public synchronized int getReceiveBufferSize()
-      throws SocketException{
+    public synchronized int getReceiveBufferSize() throws SocketException {
         throw new SocketException("not implemented");
     }
 
@@ -220,5 +193,7 @@ public class UDPConnection extends AbstractNBSocket {
     public void shutdownOutput() throws IOException {
         throw new IOException("not implemented");
     }
+    
+    
     
 }

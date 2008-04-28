@@ -13,7 +13,6 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-import com.limegroup.gnutella.downloader.RemoteFileDescUtils;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -59,7 +58,7 @@ public class StoreDownloaderFactoryTest extends LimeTestCase{
         long size = 100;
         
         // create rfd with the same filename as passed into the factory
-        RemoteFileDesc rfd = RemoteFileDescUtils.createRemoteFileDesc(remoteFileDescFactory, file.toURL(), fileName, urn, size);
+        RemoteFileDesc rfd = remoteFileDescFactory.createUrlRemoteFileDesc(file.toURL(), fileName, urn, size);
         
         assertNotNull(rfd);
         

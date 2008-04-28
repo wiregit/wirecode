@@ -858,8 +858,11 @@ class VerifyingFolder implements TorrentDiskManager {
 	public BTDiskManagerMemento toMemento() {
 	    BTDiskManagerMemento memento = new BTDiskManagerMementoImpl();
         synchronized(this) {
-            // TODO: this is a shallow copy, so IntervalSet can still be mutated
-            memento.setPartialBlocks(new HashMap<Integer, IntervalSet>(partialBlocks));
+            // Deep-copy the IntervalSet to avoid ConcurrentModificationExceptions
+            Map<Integer, IntervalSet> partial = new HashMap<Integer, IntervalSet>(partialBlocks.size());
+            for(Map.Entry<Integer, IntervalSet> entry : partialBlocks.entrySet())
+                partial.put(entry.getKey(), entry.getValue().clone());
+            memento.setPartialBlocks(partial);
             memento.setVerifiedBlocks((BitSet)verifiedBlocks.clone());
             memento.setVerifying(isVerifying);
         }

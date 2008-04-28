@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.http.httpclient.LimeHttpClient;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -20,10 +21,12 @@ public class LicenseVerifier {
             .newProcessingQueue("LicenseVerifier");
 
     private final Provider<LicenseCache> licenseCache;
+    private final Provider<LimeHttpClient> httpClientProvider;
 
     @Inject
-    public LicenseVerifier(Provider<LicenseCache> licenseCache) {
+    public LicenseVerifier(Provider<LicenseCache> licenseCache, Provider<LimeHttpClient> httpClientProvider) {
         this.licenseCache = licenseCache;
+        this.httpClientProvider = httpClientProvider;
     }
 
     /**
@@ -58,7 +61,7 @@ public class LicenseVerifier {
         }
 
         public void run() {
-            license.verify(licenseCache.get());
+            license.verify(licenseCache.get(), httpClientProvider.get());
             if (verificationListener != null) {
                 verificationListener.licenseVerified(license);
             }

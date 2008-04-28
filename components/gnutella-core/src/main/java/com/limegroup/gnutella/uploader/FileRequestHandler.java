@@ -2,16 +2,19 @@ package com.limegroup.gnutella.uploader;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.http.BasicHeaderProcessor;
 import org.limewire.http.MalformedHeaderException;
 import org.limewire.http.RangeHeaderInterceptor;
@@ -38,7 +41,6 @@ import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.http.UserAgentHeaderInterceptor;
 import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.tigertree.HashTreeWriteHandler;
@@ -48,11 +50,11 @@ import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;
 
 /**
  * Handles upload requests for files and THEX trees.
- *   
+ * 
  * @see FileResponseEntity
  * @see THEXResponseEntity
  */
-public class FileRequestHandler implements HttpRequestHandler {
+public class FileRequestHandler extends SimpleNHttpRequestHandler {
 
     private static final Log LOG = LogFactory.getLog(FileRequestHandler.class);
 
@@ -67,9 +69,13 @@ public class FileRequestHandler implements HttpRequestHandler {
     private static final String INACTIVE_RETRY_AFTER = "" + (60 * 60);
 
     private final HTTPUploadSessionManager sessionManager;
+
     private final FileManager fileManager;
+
     private final HTTPHeaderUtils httpHeaderUtils;
+
     private final HttpRequestHandlerFactory httpRequestHandlerFactory;
+
     private final Provider<CreationTimeCache> creationTimeCache;
 
     private final FileResponseEntityFactory fileResponseEntityFactory;
@@ -83,18 +89,16 @@ public class FileRequestHandler implements HttpRequestHandler {
     private final Provider<HashTreeCache> tigerTreeCache;
 
     private final PushEndpointFactory pushEndpointFactory;
-    
+
     private final HashTreeWriteHandlerFactory tigerWriteHandlerFactory;
-    
+
     @Inject
-    FileRequestHandler(HTTPUploadSessionManager sessionManager,
-            FileManager fileManager, HTTPHeaderUtils httpHeaderUtils,
-            HttpRequestHandlerFactory httpRequestHandlerFactory,
-            Provider<CreationTimeCache> creationTimeCache, FileResponseEntityFactory fileResponseEntityFactory, 
-            AltLocManager altLocManager,
+    FileRequestHandler(HTTPUploadSessionManager sessionManager, FileManager fileManager,
+            HTTPHeaderUtils httpHeaderUtils, HttpRequestHandlerFactory httpRequestHandlerFactory,
+            Provider<CreationTimeCache> creationTimeCache,
+            FileResponseEntityFactory fileResponseEntityFactory, AltLocManager altLocManager,
             AlternateLocationFactory alternateLocationFactory,
-            Provider<DownloadManager> downloadManager,
-            Provider<HashTreeCache> tigerTreeCache,
+            Provider<DownloadManager> downloadManager, Provider<HashTreeCache> tigerTreeCache,
             PushEndpointFactory pushEndpointFactory,
             HashTreeWriteHandlerFactory tigerWriteHandlerFactory) {
         this.sessionManager = sessionManager;
@@ -111,11 +115,15 @@ public class FileRequestHandler implements HttpRequestHandler {
         this.tigerWriteHandlerFactory = tigerWriteHandlerFactory;
     }
     
-    public void handle(HttpRequest request, HttpResponse response,
+    public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
             HttpContext context) throws HttpException, IOException {
+        return null;
+    }
+
+    public void handle(HttpRequest request, HttpResponse response, HttpContext context)
+            throws HttpException, IOException {
         if (LOG.isDebugEnabled())
-            LOG.debug("Handling upload request: "
-                    + request.getRequestLine().getUri());
+            LOG.debug("Handling upload request: " + request.getRequestLine().getUri());
 
         FileRequest fileRequest = null;
         HTTPUploader uploader = null;
@@ -126,9 +134,8 @@ public class FileRequestHandler implements HttpRequestHandler {
             if (FileRequestParser.isURNGet(uri)) {
                 fileRequest = FileRequestParser.parseURNGet(fileManager, uri);
                 if (fileRequest == null) {
-                    uploader = sessionManager.getOrCreateUploader(request,
-                            context, UploadType.INVALID_URN,
-                            "Invalid URN query");
+                    uploader = sessionManager.getOrCreateUploader(request, context,
+                            UploadType.INVALID_URN, "Invalid URN query");
                     uploader.setState(UploadStatus.FILE_NOT_FOUND);
                     response.setStatusCode(HttpStatus.SC_NOT_FOUND);
                 }
@@ -146,8 +153,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         if (fileRequest != null) {
             FileDesc fd = getFileDesc(fileRequest);
             if (fd != null) {
-                uploader = findFileAndProcessHeaders(request, response,
-                        context, fileRequest, fd);
+                uploader = findFileAndProcessHeaders(request, response, context, fileRequest, fd);
             } else {
                 uploader = sessionManager.getOrCreateUploader(request, context,
                         UploadType.SHARED_FILE, fileRequest.filename);
@@ -157,23 +163,21 @@ public class FileRequestHandler implements HttpRequestHandler {
         }
 
         assert uploader != null;
-        updateStatistics(uploader);
-        
+
         sessionManager.sendResponse(uploader, response);
     }
 
     /**
      * Looks up file in {@link FileManager} and processes request headers.
      */
-    private HTTPUploader findFileAndProcessHeaders(HttpRequest request,
-            HttpResponse response, HttpContext context,
-            FileRequest fileRequest, FileDesc fd) throws IOException,
+    private HTTPUploader findFileAndProcessHeaders(HttpRequest request, HttpResponse response,
+            HttpContext context, FileRequest fileRequest, FileDesc fd) throws IOException,
             HttpException {
         // create uploader
         UploadType type = (SharingUtils.isForcedShare(fd)) ? UploadType.FORCED_SHARE
                 : UploadType.SHARED_FILE;
-        HTTPUploader uploader = sessionManager.getOrCreateUploader(request,
-                context, type, fd.getFileName());
+        HTTPUploader uploader = sessionManager.getOrCreateUploader(request, context, type, fd
+                .getFileName());
         uploader.setFileDesc(fd);
 
         // process headers
@@ -181,9 +185,10 @@ public class FileRequestHandler implements HttpRequestHandler {
         RangeHeaderInterceptor rangeHeaderInterceptor = new RangeHeaderInterceptor();
         processor.addInterceptor(rangeHeaderInterceptor);
         processor.addInterceptor(new FeatureHeaderInterceptor(uploader));
-        processor.addInterceptor(new AltLocHeaderInterceptor(uploader, altLocManager, alternateLocationFactory));
+        processor.addInterceptor(new AltLocHeaderInterceptor(uploader, altLocManager,
+                alternateLocationFactory));
         processor.addInterceptor(new FWNodeInfoInterceptor(uploader, pushEndpointFactory));
-        if (!uploader.getFileName().toUpperCase().startsWith("LIMEWIRE")) {
+        if (!uploader.getFileName().toUpperCase(Locale.US).startsWith("LIMEWIRE")) {
             processor.addInterceptor(new UserAgentHeaderInterceptor(uploader));
         }
         try {
@@ -197,8 +202,7 @@ public class FileRequestHandler implements HttpRequestHandler {
         }
 
         if (UserAgentHeaderInterceptor.isFreeloader(uploader.getUserAgent())) {
-            sessionManager.handleFreeLoader(request, response, context,
-                    uploader);
+            sessionManager.handleFreeLoader(request, response, context, uploader);
             return uploader;
         }
 
@@ -207,7 +211,7 @@ public class FileRequestHandler implements HttpRequestHandler {
             response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             return uploader;
         }
-        
+
         if (!fileRequest.isThexRequest()) {
             if (rangeHeaderInterceptor.hasRequestedRanges()) {
                 Range[] ranges = rangeHeaderInterceptor.getRequestedRanges();
@@ -226,7 +230,7 @@ public class FileRequestHandler implements HttpRequestHandler {
                 return uploader;
             }
         }
-        
+
         // start upload
         if (fileRequest.isThexRequest()) {
             handleTHEXRequest(request, response, context, uploader, fd);
@@ -237,27 +241,24 @@ public class FileRequestHandler implements HttpRequestHandler {
         return uploader;
     }
 
-    private void handleMalformedRequest(HttpResponse response,
-            HTTPUploader uploader) {
-        UploadStat.MALFORMED_REQUEST.incrementStat();
-
+    private void handleMalformedRequest(HttpResponse response, HTTPUploader uploader) {
         uploader.setState(UploadStatus.MALFORMED_REQUEST);
         response.setStatusCode(HttpStatus.SC_BAD_REQUEST);
         response.setReasonPhrase("Malformed Request");
     }
 
     /**
-     * Enqueues <code>request</code> and handles <code>uploader</code>
-     * in respect to the returned queue status.
+     * Enqueues <code>request</code> and handles <code>uploader</code> in
+     * respect to the returned queue status.
      */
-    private void handleFileUpload(HttpContext context, HttpRequest request,
-            HttpResponse response, HTTPUploader uploader, FileDesc fd)
-            throws IOException, HttpException {
+    private void handleFileUpload(HttpContext context, HttpRequest request, HttpResponse response,
+            HTTPUploader uploader, FileDesc fd) throws IOException, HttpException {
         if (!uploader.getSession().isAccepted()) {
             QueueStatus queued = sessionManager.enqueue(context, request);
             switch (queued) {
             case REJECTED:
-                httpRequestHandlerFactory.createLimitReachedRequestHandler(uploader).handle(request, response, context);
+                httpRequestHandlerFactory.createLimitReachedRequestHandler(uploader).handle(
+                        request, response, context);
                 break;
             case BANNED:
                 uploader.setState(UploadStatus.BANNED_GREEDY);
@@ -280,27 +281,23 @@ public class FileRequestHandler implements HttpRequestHandler {
     }
 
     /**
-     * Processes an accepted file upload by adding headers and setting the entity.
+     * Processes an accepted file upload by adding headers and setting the
+     * entity.
      */
-    protected void handleAccept(HttpContext context, HttpRequest request,
-            HttpResponse response, HTTPUploader uploader, FileDesc fd)
-            throws IOException, HttpException {
+    protected void handleAccept(HttpContext context, HttpRequest request, HttpResponse response,
+            HTTPUploader uploader, FileDesc fd) throws IOException, HttpException {
 
         assert fd != null;
-        
-        response
-                .addHeader(HTTPHeaderName.DATE.create(HTTPUtils.getDateValue()));
-        response.addHeader(HTTPHeaderName.CONTENT_DISPOSITION
-                .create("attachment; filename=\""
-                        + HTTPUtils.encode(uploader.getFileName(), "US-ASCII")
-                        + "\""));
+
+        response.addHeader(HTTPHeaderName.DATE.create(HTTPUtils.getDateValue()));
+        response.addHeader(HTTPHeaderName.CONTENT_DISPOSITION.create("attachment; filename=\""
+                + HTTPUtils.encode(uploader.getFileName(), "US-ASCII") + "\""));
 
         if (uploader.containedRangeRequest()) {
             // uploadEnd is an EXCLUSIVE index internally, but HTTP uses an
             // INCLUSIVE index.
             String value = "bytes " + uploader.getUploadBegin() + "-"
-                    + (uploader.getUploadEnd() - 1) + "/"
-                    + uploader.getFileSize();
+                    + (uploader.getUploadEnd() - 1) + "/" + uploader.getFileSize();
             response.addHeader(HTTPHeaderName.CONTENT_RANGE.create(value));
         }
 
@@ -316,8 +313,8 @@ public class FileRequestHandler implements HttpRequestHandler {
             // it's possible t do that because we don't use the same
             // uploader for different files
             if (creationTimeCache.get().getCreationTime(urn) != null) {
-                response.addHeader(HTTPHeaderName.CREATION_TIME
-                        .create(creationTimeCache.get().getCreationTime(urn).toString()));
+                response.addHeader(HTTPHeaderName.CREATION_TIME.create(creationTimeCache.get()
+                        .getCreationTime(urn).toString()));
             }
         }
 
@@ -334,8 +331,8 @@ public class FileRequestHandler implements HttpRequestHandler {
             response.addHeader(HTTPHeaderName.THEX_URI.create(tree));
         }
 
-        response.setEntity(fileResponseEntityFactory.createFileResponseEntity(uploader,
-                fd.getFile()));
+        response.setEntity(fileResponseEntityFactory.createFileResponseEntity(uploader, fd
+                .getFile()));
         uploader.setState(UploadStatus.UPLOADING);
 
         if (uploader.isPartial()) {
@@ -349,15 +346,14 @@ public class FileRequestHandler implements HttpRequestHandler {
      * Processes an accepted THEX tree upload by adding headers and setting the
      * entity.
      */
-    private void handleTHEXRequest(HttpRequest request, HttpResponse response,
-            HttpContext context, HTTPUploader uploader, FileDesc fd)
-            throws HttpException, IOException {
+    private void handleTHEXRequest(HttpRequest request, HttpResponse response, HttpContext context,
+            HTTPUploader uploader, FileDesc fd) throws HttpException, IOException {
         // reset the poll interval to allow subsequent requests right away
         uploader.getSession().updatePollTime(QueueStatus.BYPASS);
 
-        // do not count THEX transfers towards the total amount 
+        // do not count THEX transfers towards the total amount
         uploader.setIgnoreTotalAmountUploaded(true);
-        
+
         HashTree tree = tigerTreeCache.get().getHashTree(fd);
         if (tree == null) {
             // tree was requested before hashing completed
@@ -365,8 +361,9 @@ public class FileRequestHandler implements HttpRequestHandler {
             response.setStatusCode(HttpStatus.SC_NOT_FOUND);
             return;
         }
-        
-        HashTreeWriteHandler tigerWriteHandler = tigerWriteHandlerFactory.createTigerWriteHandler(tree);
+
+        HashTreeWriteHandler tigerWriteHandler = tigerWriteHandlerFactory
+                .createTigerWriteHandler(tree);
 
         // XXX reset range to size of THEX tree
         int outputLength = tigerWriteHandler.getOutputLength();
@@ -378,23 +375,22 @@ public class FileRequestHandler implements HttpRequestHandler {
         // response.addHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN.create(fd.getSHA1Urn()));
 
         uploader.setState(UploadStatus.THEX_REQUEST);
-        response.setEntity(new THEXResponseEntity(uploader, tigerWriteHandler, uploader.getFileSize()));
+        response.setEntity(new THEXResponseEntity(uploader, tigerWriteHandler, uploader
+                .getFileSize()));
         response.setStatusCode(HttpStatus.SC_OK);
     }
 
     /**
      * Processes a request for an invalid range.
      */
-    private void handleInvalidRange(HttpResponse response,
-            HTTPUploader uploader, FileDesc fd) {
+    private void handleInvalidRange(HttpResponse response, HTTPUploader uploader, FileDesc fd) {
         httpHeaderUtils.addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
         httpHeaderUtils.addRangeHeader(response, uploader, fd);
         httpHeaderUtils.addProxyHeader(response);
 
         if (fd instanceof IncompleteFileDesc) {
             if (!downloadManager.get().isActivelyDownloading(fd.getSHA1Urn())) {
-                response.addHeader(HTTPHeaderName.RETRY_AFTER
-                        .create(INACTIVE_RETRY_AFTER));
+                response.addHeader(HTTPHeaderName.RETRY_AFTER.create(INACTIVE_RETRY_AFTER));
             }
         }
 
@@ -406,16 +402,18 @@ public class FileRequestHandler implements HttpRequestHandler {
     /**
      * Processes a queued file upload by adding headers.
      */
-    private void handleQueued(HttpContext context, HttpRequest request,
-            HttpResponse response, HTTPUploader uploader, FileDesc fd)
-            throws IOException, HttpException {
+    private void handleQueued(HttpContext context, HttpRequest request, HttpResponse response,
+            HTTPUploader uploader, FileDesc fd) throws IOException, HttpException {
         // if not queued, this should never be the state
         int position = uploader.getSession().positionInQueue();
-        assert(position != -1);
+        assert (position != -1);
 
         String value = "position=" + (position + 1) + ", pollMin="
                 + (HTTPUploadSession.MIN_POLL_TIME / 1000) + /* mS to S */
-                ", pollMax=" + (HTTPUploadSession.MAX_POLL_TIME / 1000) /* mS to S */;
+                ", pollMax=" + (HTTPUploadSession.MAX_POLL_TIME / 1000) /*
+                                                                         * mS to
+                                                                         * S
+                                                                         */;
         response.addHeader(HTTPHeaderName.QUEUE.create(value));
 
         httpHeaderUtils.addAltLocationsHeader(response, uploader.getAltLocTracker(), altLocManager);
@@ -450,7 +448,7 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         // first verify the file index
         synchronized (fileManager) {
-            if (fileManager.isValidIndex(index)) {
+            if (fileManager.isValidSharedIndex(index)) {
                 fd = fileManager.get(index);
             }
         }
@@ -464,7 +462,8 @@ public class FileRequestHandler implements HttpRequestHandler {
 
         if (!request.filename.equals(fd.getFileName())) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Invalid file name in request: " + request + ", expected: " + fd.getFileName());
+                LOG.debug("Invalid file name in request: " + request + ", expected: "
+                        + fd.getFileName());
             }
             return null;
         }
@@ -475,7 +474,7 @@ public class FileRequestHandler implements HttpRequestHandler {
     private boolean validateHeaders(HTTPUploader uploader, boolean thexRequest) {
         final FileDesc fd = uploader.getFileDesc();
         assert fd != null;
-        
+
         // If it's the wrong URN, File Not Found it.
         URN urn = uploader.getRequestedURN();
         if (urn != null && !fd.containsUrn(urn)) {
@@ -514,42 +513,13 @@ public class FileRequestHandler implements HttpRequestHandler {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("File has changed on disk, resharing: " + file);
                 }
-                fileManager.removeFileIfShared(file);
+                fileManager.removeFileIfSharedOrStore(file);
                 fileManager.addFileIfShared(file);
                 return false;
             }
         }
 
         return true;
-    }
-
-    protected void updateStatistics(HTTPUploader uploader) {
-        switch (uploader.getState()) {
-        case UNAVAILABLE_RANGE:
-            UploadStat.UNAVAILABLE_RANGE.incrementStat();
-            break;
-        case FILE_NOT_FOUND:
-            UploadStat.FILE_NOT_FOUND.incrementStat();
-            break;
-        case LIMIT_REACHED:
-            UploadStat.LIMIT_REACHED.incrementStat();
-            break;
-        case QUEUED:
-            UploadStat.QUEUED.incrementStat();
-            break;
-        case BANNED_GREEDY:
-            UploadStat.BANNED.incrementStat();
-            break;
-        case CONNECTING:
-            UploadStat.UPLOADING.incrementStat();
-            break;
-        case THEX_REQUEST:
-            UploadStat.THEX.incrementStat();
-            break;
-        case COMPLETE:
-        case INTERRUPTED:
-            throw new IllegalStateException("Invalid state in FileRequestHandler.updateStatistics()");
-        }
     }
 
 }

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Locale;
 
 /**
  * Type-safe enum for HTTP request methods, as specified in RFC 2616.
@@ -23,7 +24,7 @@ public abstract class HTTPRequestMethod {
 	private HTTPRequestMethod(String methodName) {
 		// store the method name in upper case to make string
 		// comparisons easier
-		METHOD_NAME = methodName.toUpperCase();
+		METHOD_NAME = methodName.toUpperCase(Locale.US);
 	}
 
     public String getMethod() {

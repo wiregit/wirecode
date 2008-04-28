@@ -5,9 +5,9 @@ import junit.framework.Test;
 import org.limewire.collection.Function;
 import org.limewire.io.Connectable;
 import org.limewire.io.LocalSocketAddressProvider;
-import org.limewire.io.LocalSocketAddressService;
 import org.limewire.util.BaseTestCase;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
@@ -18,6 +18,7 @@ import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 public class AltLocUtilsTest extends BaseTestCase {
 
     private AlternateLocationFactory alternateLocationFactory;
+    private LocalSocketAddressProviderStub localSocketAddressProvider;
 
 
     public AltLocUtilsTest(String name) {
@@ -32,12 +33,19 @@ public class AltLocUtilsTest extends BaseTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         
-        Injector injector = LimeTestUtils.createInjector();
         
-        LocalSocketAddressProviderStub localSocketAddressProvider = new LocalSocketAddressProviderStub();
+        localSocketAddressProvider = new LocalSocketAddressProviderStub();
+        
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(LocalSocketAddressProvider.class).toInstance(localSocketAddressProvider);
+            }
+        });
+        
+        
         localSocketAddressProvider.setTLSCapable(true);
         localSocketAddressProvider.setLocalPort(6346);
-        LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProvider);
         
         this.alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
     }
@@ -174,33 +182,26 @@ public class AltLocUtilsTest extends BaseTestCase {
     
     public void testParseAlternateLocationsSkipsLocalHost() throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        LocalSocketAddressProvider oldProvider = LocalSocketAddressService.getSharedProvider();
-        LocalSocketAddressProviderStub stub = new LocalSocketAddressProviderStub();
-        LocalSocketAddressService.setSocketAddressProvider(stub);
-        try {
-            stub.setLocalAddress(new byte[] { 8, 7, 1, 2 } );
-            stub.setLocalPort(1234);
-            // Note that EC == 111011, but only 4 get passed to the function.
-            // TLS=EC is meant to apply to the whole set, including localhost, but we filter it out
-            // before handing it on.
-            String data = "tls=EC,1.2.3.4,1.2.3.5,1.2.3.6,8.7.1.2:1234,8.7.1.2:1,1.2.3.8:101";
-            AltLocUtils.parseAlternateLocations(UrnHelper.SHA1, data, true, alternateLocationFactory, new Function<AlternateLocation, Void>() {
-                int i = 0;
-                public Void apply(AlternateLocation argument) {
-                    switch(i++) {
-                    case 0: checkDirect(argument, UrnHelper.SHA1, "1.2.3.4", 6346, true); break;
-                    case 1: checkDirect(argument, UrnHelper.SHA1, "1.2.3.5", 6346, true); break;
-                    case 2: checkDirect(argument, UrnHelper.SHA1, "1.2.3.6", 6346, true); break;
-                    case 3: checkDirect(argument, UrnHelper.SHA1, "8.7.1.2", 1, true); break;
-                    case 4: checkDirect(argument, UrnHelper.SHA1, "1.2.3.8", 101, true); break;
-                    default: fail("invalid i: " + i + ", argument: " + argument);
-                    }
-                    return null;
+        localSocketAddressProvider.setLocalAddress(new byte[] { 8, 7, 1, 2 } );
+        localSocketAddressProvider.setLocalPort(1234);
+        // Note that EC == 111011, but only 4 get passed to the function.
+        // TLS=EC is meant to apply to the whole set, including localhost, but we filter it out
+        // before handing it on.
+        String data = "tls=EC,1.2.3.4,1.2.3.5,1.2.3.6,8.7.1.2:1234,8.7.1.2:1,1.2.3.8:101";
+        AltLocUtils.parseAlternateLocations(UrnHelper.SHA1, data, true, alternateLocationFactory, new Function<AlternateLocation, Void>() {
+            int i = 0;
+            public Void apply(AlternateLocation argument) {
+                switch(i++) {
+                case 0: checkDirect(argument, UrnHelper.SHA1, "1.2.3.4", 6346, true); break;
+                case 1: checkDirect(argument, UrnHelper.SHA1, "1.2.3.5", 6346, true); break;
+                case 2: checkDirect(argument, UrnHelper.SHA1, "1.2.3.6", 6346, true); break;
+                case 3: checkDirect(argument, UrnHelper.SHA1, "8.7.1.2", 1, true); break;
+                case 4: checkDirect(argument, UrnHelper.SHA1, "1.2.3.8", 101, true); break;
+                default: fail("invalid i: " + i + ", argument: " + argument);
                 }
-            });
-        } finally {
-            LocalSocketAddressService.setSocketAddressProvider(oldProvider);
-        }
+                return null;
+            }
+        });
     }
     
     private void checkDirect(AlternateLocation alt, URN sha1, String host, int port, boolean tls) {

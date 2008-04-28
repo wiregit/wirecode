@@ -14,6 +14,7 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.MultiRRIterator;
 import org.limewire.io.Connectable;
 import org.limewire.io.CountingOutputStream;
+import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
@@ -36,7 +37,6 @@ import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -198,8 +198,8 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
         GGEP ggep = new GGEP();
         
         URN urn = ping.getUrn();
-        FileDesc desc = fileManager.get().getFileDescForUrn(urn);
-        // Easy case: no file, add code & exit.
+        FileDesc desc = fileManager.get().getSharedFileDescForUrn(urn);
+        // Easy case: no file, add code & exit
         if(desc == null) {
             ggep.put(HeadPong.CODE, HeadPong.FILE_NOT_FOUND);
             return writeGGEP(ggep);
@@ -286,7 +286,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     	DataOutputStream daos = new DataOutputStream(caos);
     	byte retCode=0;
     	URN urn = ping.getUrn();
-    	FileDesc desc = fileManager.get().getFileDescForUrn(urn);
+    	FileDesc desc = fileManager.get().getSharedFileDescForUrn(urn);
     	boolean didNotSendAltLocs=false;
     	boolean didNotSendPushAltLocs = false;
     	boolean didNotSendRanges = false;

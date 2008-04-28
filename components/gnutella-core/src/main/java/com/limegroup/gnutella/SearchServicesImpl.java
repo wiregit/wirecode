@@ -5,7 +5,6 @@ import java.util.Set;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
-import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -18,7 +17,7 @@ import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.search.SearchResultStats;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
-import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
+import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 import com.limegroup.gnutella.statistics.QueryStats;
 
 @Singleton
@@ -35,6 +34,7 @@ public class SearchServicesImpl implements SearchServices {
     private final Provider<NetworkManager> networkManager;
     private final Provider<QueryRequestFactory> queryRequestFactory;
     private final BrowseHostHandlerManager browseHostHandlerManager;
+    private final OutOfBandStatistics outOfBandStatistics;
     
     @Inject
     public SearchServicesImpl(Provider<ResponseVerifier> responseVerifier,
@@ -47,7 +47,8 @@ public class SearchServicesImpl implements SearchServices {
             Provider<QueryStats> queryStats,
             Provider<NetworkManager> networkManager,
             Provider<QueryRequestFactory> queryRequestFactory,
-            BrowseHostHandlerManager browseHostHandlerManager) {
+            BrowseHostHandlerManager browseHostHandlerManager,
+            OutOfBandStatistics outOfBandStatistics) {
         this.responseVerifier = responseVerifier;
         this.queryUnicaster = queryUnicaster;
         this.searchResultHandler = searchResultHandler;
@@ -59,6 +60,7 @@ public class SearchServicesImpl implements SearchServices {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.browseHostHandlerManager = browseHostHandlerManager;
+        this.outOfBandStatistics = outOfBandStatistics;
     }
 
     /* (non-Javadoc)
@@ -147,7 +149,7 @@ public class SearchServicesImpl implements SearchServices {
                 // it seems tremendously unlikely, even over the course of a 
                 // VERY long lived client
                 qr = queryRequestFactory.get().createWhatIsNewOOBQuery(guid, (byte)2, type);
-                OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
+                outOfBandStatistics.addSentQuery();
             }
             else
                 qr = queryRequestFactory.get().createWhatIsNewQuery(guid, (byte)2, type);
@@ -174,9 +176,8 @@ public class SearchServicesImpl implements SearchServices {
                 // delivery of results.  bad things may happen in this case but 
                 // it seems tremendously unlikely, even over the course of a 
                 // VERY long lived client
-                qr = queryRequestFactory.get().createOutOfBandQuery(guid, query, richQuery,
-                                                       type);
-                OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
+                qr = queryRequestFactory.get().createOutOfBandQuery(guid, query, richQuery, type);
+                outOfBandStatistics.addSentQuery();
             }
             else
                 qr = queryRequestFactory.get().createQuery(guid, query, richQuery, type);
@@ -202,7 +203,7 @@ public class SearchServicesImpl implements SearchServices {
      */
     public byte[] newQueryGUID() {
         byte []ret;
-        if (networkManager.get().isOOBCapable() && OutOfBandThroughputStat.isOOBEffectiveForMe())
+        if (networkManager.get().isOOBCapable() && outOfBandStatistics.isOOBEffectiveForMe())
             ret = GUID.makeAddressEncodedGuid(networkManager.get().getAddress(), networkManager.get().getPort());
         else
             ret = GUID.makeGuid();

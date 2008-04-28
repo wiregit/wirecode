@@ -16,6 +16,7 @@ public final class LWSSettings extends LimeProps {
 
     /**
      * The hostname to which we connect for authentication.
+     * <br>e.g. <code>1.2.3.4</code>
      */
     public static final StringSetting LWS_AUTHENTICATION_HOSTNAME = FACTORY.createRemoteStringSetting(
             "LWS_AUTHENTICATION_HOSTNAME", "", "LWSSettings.lwsAuthenticationHostname");
@@ -23,24 +24,26 @@ public final class LWSSettings extends LimeProps {
     /**
      * The port on which we connect for authentication. This can be
      * <code><= 0</code> for no port.
+     * <br>e.g. <code>80</code>
      */
     public static final IntSetting LWS_AUTHENTICATION_PORT = FACTORY.createRemoteIntSetting(
             "LWS_AUTHENTICATION_PORT", 8080, "LWSSettings.lwsAuthenticationPort", -Integer.MIN_VALUE,
             10000);
     
     /**
-     * The hostname to which we connect for downloads.
+     * Allow us to turn on/off SSL messages to the Server.
      */
-    public static final StringSetting LWS_DOWNLOAD_HOSTNAME = FACTORY.createRemoteStringSetting(
-            "LWS_DOWNLOAD_HOSTNAME", "", "LWSSettings.lwsDownloadHostname");
+    public static final BooleanSetting LWS_USE_SSL = FACTORY.createRemoteBooleanSetting(
+            "LWS_USE_SSL", false, "LWSSettings.lwsUseSSL");    
+    
 
     /**
-     * The port on which we connect for downloads. This can be
-     * <code><= 0</code> for no port.
+     * The entire prefix to put before a url is downloaded.  This is encoded/decoded many times
+     * so needs to be all together.  This also makes it clearer.  <b>This HAS to end in a <code>/</code></b>.
+     * <br>e.g. <code>1.2.3.4:80</code>
      */
-    public static final IntSetting LWS_DOWNLOAD_PORT = FACTORY.createRemoteIntSetting(
-            "LWS_DOWNLOAD_PORT", 80, "LWSSettings.lwsDownloadPost", -Integer.MIN_VALUE,
-            10000);   
+    public static final StringSetting LWS_DOWNLOAD_PREFIX = FACTORY.createRemoteStringSetting(
+            "LWS_DOWNLOAD_PREFIX", "", "LWSSettings.lwsDownloadPrefix"); 
     
     /**
      * The hostname to which we connect for adding to playlists.
@@ -61,5 +64,5 @@ public final class LWSSettings extends LimeProps {
      */
     public static final BooleanSetting LWS_IS_ENABLED = FACTORY.createRemoteBooleanSetting(
             "LWS_IS_ENABLED", true, "LWSSettings.lwsIsEnabled");
-
+   
 }

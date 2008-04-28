@@ -147,6 +147,8 @@ public class BTUploader implements Uploader, TorrentEventListener {
         case COMPLETE:
         case STARTING:
         case STOP_REQUESTED:
+        //handled in TorrentDHTManager
+        case FIRST_CHUNK_VERIFIED:
 		}
 	}
 	

@@ -778,13 +778,19 @@ public class BitSet implements Cloneable, java.io.Serializable {
      * Returns the number of units that are completely 0.
      */
     public int unusedUnits() {
+        return numUnitsWithLoad(0);
+    }
+    
+    /**
+     * @return the number of units with specified load.
+     */
+    public int numUnitsWithLoad(int load) {
         int sum = 0;
         for(int i = 0; i < unitsInUse; i++)
-            if(bitCount(bits[i]) == 0)
+            if(bitCount(bits[i]) == load)
                 sum++;
         return sum;
     }
-    
     /**
      * Returns the number of units in use.
      */

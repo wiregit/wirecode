@@ -1,10 +1,12 @@
 package com.limegroup.gnutella.stubs;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.io.Connectable;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 
@@ -37,7 +39,7 @@ public class ConnectionManagerStub extends ConnectionManagerImpl {
 
     private Boolean connected;
 
-    private Set<? extends Connectable> pushProxies;
+    private Set<Connectable> pushProxies;
 
     private Boolean fullyConnected;
 
@@ -54,13 +56,13 @@ public class ConnectionManagerStub extends ConnectionManagerImpl {
             RoutedConnectionFactory managedConnectionFactory,
             Provider<MessageRouter> messageRouter, Provider<QueryUnicaster> queryUnicaster,
             SocketsManager socketsManager, ConnectionServices connectionServices,
-            Provider<NodeAssigner> nodeAssigner, 
-             Provider<IPFilter> ipFilter,
-            ConnectionCheckerManager connectionCheckerManager, PingRequestFactory pingRequestFactory) {
+            Provider<NodeAssigner> nodeAssigner, Provider<IPFilter> ipFilter,
+            ConnectionCheckerManager connectionCheckerManager, PingRequestFactory pingRequestFactory,
+            NetworkInstanceUtils networkInstanceUtils) {
         super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor, simppManager,
                 capabilitiesVMFactory, managedConnectionFactory, messageRouter, queryUnicaster,
                 socketsManager, connectionServices, nodeAssigner, ipFilter,
-                connectionCheckerManager, pingRequestFactory);
+                connectionCheckerManager, pingRequestFactory, networkInstanceUtils);
     }
 
     /** Calls c.close iff enableRemove */
@@ -102,11 +104,11 @@ public class ConnectionManagerStub extends ConnectionManagerImpl {
     }
 
     public void setPushProxies(Set<? extends Connectable> pushProxies) {
-        this.pushProxies = pushProxies;
+        this.pushProxies = Collections.unmodifiableSet(pushProxies);
     }
 
     @Override
-    public Set<? extends Connectable> getPushProxies() {
+    public Set<Connectable> getPushProxies() {
         if (pushProxies != null)
             return pushProxies;
         else

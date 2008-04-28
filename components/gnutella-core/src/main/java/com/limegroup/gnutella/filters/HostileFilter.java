@@ -4,7 +4,9 @@ package com.limegroup.gnutella.filters;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IP;
+import org.limewire.io.NetworkInstanceUtils;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.FilterSettings;
 
@@ -15,6 +17,13 @@ public class HostileFilter extends  AbstractIPFilter {
     
     
     private volatile IPList hostileHosts = new IPList();
+    
+    private final NetworkInstanceUtils networkInstanceUtils;
+    
+    @Inject
+    public HostileFilter(NetworkInstanceUtils networkInstanceUtils) {
+        this.networkInstanceUtils = networkInstanceUtils;
+    }
     
     /**
      * Refresh the IPFilter's instance.
@@ -32,7 +41,7 @@ public class HostileFilter extends  AbstractIPFilter {
         try {
             for (String ip : allHosts)
                 newHostile.add(new IP(ip));
-            if (newHostile.isValidFilter(false))
+            if (newHostile.isValidFilter(false, networkInstanceUtils))
                 hostileHosts = newHostile;
         } catch (IllegalArgumentException badSimpp){}
     }

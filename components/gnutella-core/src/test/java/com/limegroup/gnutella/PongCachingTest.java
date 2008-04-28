@@ -22,6 +22,7 @@ import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.EmptyResponder;
@@ -124,7 +125,7 @@ public final class PongCachingTest extends LimeTestCase {
             new String[] {"127.*.*.*", "18.239.0.*"});
         // TODO hack: increment static field server port so each test case has its own port
         SERVER_PORT++;
-        ConnectionSettings.PORT.setValue(SERVER_PORT);
+        NetworkSettings.PORT.setValue(SERVER_PORT);
         LimeTestUtils.setSharedDirectories(new File[0]);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
@@ -139,7 +140,7 @@ public final class PongCachingTest extends LimeTestCase {
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
         
         assertEquals("unexpected port", SERVER_PORT, 
-					 ConnectionSettings.PORT.getValue());
+					 NetworkSettings.PORT.getValue());
 
         Injector injector = LimeTestUtils.createInjector();
         connectionFactory = injector.getInstance(BlockingConnectionFactory.class);
@@ -155,7 +156,7 @@ public final class PongCachingTest extends LimeTestCase {
         
 		connect();
 		assertEquals("unexpected port", SERVER_PORT, 
-					 ConnectionSettings.PORT.getValue());
+					 NetworkSettings.PORT.getValue());
 	}
 	
 	public void tearDown() throws Exception {

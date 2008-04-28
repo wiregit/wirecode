@@ -15,6 +15,7 @@ import org.limewire.util.Base32;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.search.ResultCounter;
+import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.util.ClassCNetworks;
 
 /**
@@ -70,10 +71,8 @@ public final class RouteTable implements Inspectable {
      *  into ConnectionManager._initialized[Client]Connections, we would not
      *  need _idMap either.  However, this increases dependenceies.  
      */
-    private Map<byte[], RouteTableEntry> _newMap =
-        new TreeMap<byte[], RouteTableEntry>(new GUID.GUIDByteComparator());
-    private Map<byte[], RouteTableEntry> _oldMap=
-        new TreeMap<byte[], RouteTableEntry>(new GUID.GUIDByteComparator());
+    private Map<byte[], RouteTableEntry> _newMap = new ExperimentalGUIDMap();
+    private Map<byte[], RouteTableEntry> _oldMap= new ExperimentalGUIDMap();
     private int _mseconds;
     private long _nextSwitchTime;
     private int _maxSize;
@@ -534,6 +533,57 @@ public final class RouteTable implements Inspectable {
         */
     }
 
+    
+    /**
+     * @param guid a guid of a message we wish to route
+     * @return the same guid if the zero guid experiment is enabled,
+     * otherwise a clone with the oob-affected bytes zeroed.
+     */
+    private static final byte [] zeroOOBBytes(byte [] guid) {
+        if (!MessageSettings.GUID_ZERO_EXPERIMENT.getValue())
+            return guid;
+        guid = guid.clone();
+        for (int i : new int[]{0,1,2,3,13,14})
+            guid[i] = 0;
+        return guid;
+    }
+    
+    /**
+     * A map that can optionally zero out the OOB-mutated bytes of a guid.
+     */
+    private static class ExperimentalGUIDMap extends TreeMap<byte [], RouteTableEntry> {
+        ExperimentalGUIDMap() {
+            super(new GUID.GUIDByteComparator());
+        }
+
+        @Override
+        public boolean containsKey(Object key) {
+            if (key instanceof byte[])
+                key = zeroOOBBytes((byte[]) key);
+            return super.containsKey(key);
+        }
+
+        @Override
+        public RouteTableEntry get(Object key) {
+            if (key instanceof byte[])
+                key = zeroOOBBytes((byte[]) key);
+            return super.get(key);
+        }
+
+        @Override
+        public RouteTableEntry put(byte[] key, RouteTableEntry value) {
+            key = zeroOOBBytes(key);
+            return super.put(key, value);
+        }
+
+        @Override
+        public RouteTableEntry remove(Object key) {
+            if (key instanceof byte[])
+                key = zeroOOBBytes((byte[]) key);
+            return super.remove(key);
+        }
+    }
+    
     /** 
      * An actual dump of the routing table.  May get big, so 
      * its a good idea to first inspect the stats to see how many

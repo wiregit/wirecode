@@ -2,6 +2,8 @@ package org.limewire.net;
 
 import junit.framework.Test;
 
+import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;
@@ -31,6 +33,7 @@ public class WhoIsRequestTest extends BaseTestCase {
             protected void configure() {
                 bind(ProxySettings.class).to(EmptyProxySettings.class);
                 bind(SocketBindingSettings.class).to(EmptySocketBindingSettings.class);
+                bind(NetworkInstanceUtils.class).to(SimpleNetworkInstanceUtils.class);
             }
         });        
         

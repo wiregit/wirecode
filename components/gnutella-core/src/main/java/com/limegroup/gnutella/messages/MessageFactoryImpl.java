@@ -14,7 +14,6 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**
@@ -104,7 +103,6 @@ public class MessageFactoryImpl implements MessageFactory {
                     throw e;
             }
             if (got == -1) {
-                ReceivedErrorStat.CONNECTION_CLOSED.incrementStat();
                 throw new IOException("Connection closed.");
             }
             i += got;
@@ -116,7 +114,6 @@ public class MessageFactoryImpl implements MessageFactory {
         // than 2^31 bytes, throw an irrecoverable exception to
         // cause this connection to be closed.
         if (length < 0 || length > MessageSettings.MAX_LENGTH.getValue()) {
-            ReceivedErrorStat.INVALID_LENGTH.incrementStat();
             throw new IOException("Unreasonable message length: " + length);
         }
 
@@ -128,7 +125,6 @@ public class MessageFactoryImpl implements MessageFactory {
             for (int i = 0; i < length;) {
                 int got = in.read(payload, i, length - i);
                 if (got == -1) {
-                    ReceivedErrorStat.CONNECTION_CLOSED.incrementStat();
                     throw new IOException("Read EOF before EOM.");
                 }
                 i += got;
@@ -151,7 +147,6 @@ public class MessageFactoryImpl implements MessageFactory {
         // Get Parser based on opcode.
         MessageParser parser = getParser(func);
         if (parser == null) {
-            ReceivedErrorStat.INVALID_CODE.incrementStat();
             throw new BadPacketException("Unrecognized function code: " + func);
         }
         

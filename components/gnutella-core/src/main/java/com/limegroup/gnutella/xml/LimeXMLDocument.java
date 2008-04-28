@@ -2,7 +2,6 @@ package com.limegroup.gnutella.xml;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,12 +14,11 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.NameValue;
+import org.limewire.util.NameValue;
 import org.limewire.util.RPNParser.StringLookup;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.licenses.CCConstants;
 import com.limegroup.gnutella.licenses.License;
@@ -33,18 +31,20 @@ import com.limegroup.gnutella.licenses.LicenseType;
  * 
  * @author  Sumeet Thadani
  */
-public class LimeXMLDocument implements Serializable, StringLookup {
-
-    private static final long serialVersionUID = 7396170507085078485L;
+public class LimeXMLDocument implements StringLookup {
     
     private static final Log LOG = LogFactory.getLog(LimeXMLDocument.class);
 
-    public static final String XML_ID_ATTRIBUTE = "identifier__";
-    public static final String XML_ACTION_ATTRIBUTE = "action__";
-    public static final String XML_ACTION_INFO = "addactiondetail__";
-    public static final String XML_INDEX_ATTRIBUTE = "index__";
-    public static final String XML_LICENSE_ATTRIBUTE = "license__";
-    public static final String XML_LICENSE_TYPE_ATTRIBUTE = "licensetype__";
+    private static final String XML_ID_ATTRIBUTE = "identifier__";
+    private static final String XML_ACTION_ATTRIBUTE = "action__";
+    private static final String XML_ACTION_INFO = "addactiondetail__";
+            static final String XML_INDEX_ATTRIBUTE = "index__";
+    private static final String XML_LICENSE_ATTRIBUTE = "license__";
+    private static final String XML_LICENSE_TYPE_ATTRIBUTE = "licensetype__";
+    private static final String VERSION_STRING = "internal_version";
+    private static final String XML_VERSION_ATTRIBUTE = VERSION_STRING + "__";
+    
+    public static final List<LimeXMLDocument> EMPTY_LIST = Collections.emptyList();
     
     /**
      * The current version of LimeXMLDocuments.
@@ -52,17 +52,14 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      * Increment this number as features are added which require
      * reparsing documents on disk.
      */
-    private static final int CURRENT_VERSION = 2;
+    private static final int CURRENT_VERSION = 3;
 
 	/**
 	 * Cached hash code for this instance.
 	 */
-	private volatile transient int hashCode = 0;
+	private volatile int hashCode = 0;
 
-    //TODO2: Need to build in the ability to work with multiple instances
-    //of some fields. 
-    
-    /**
+	/**
      * Map of canonical attribute name -> value.
      */
     private Map<String, String> fieldToValue = new HashMap<String, String>();
@@ -75,54 +72,46 @@ public class LimeXMLDocument implements Serializable, StringLookup {
     /**
      * The cached string of attributes.
      */
-    private transient String attributeString;
+    private String attributeString;
 
     /** 
      * The file this is related to.  Can be null if pure meta-data.
      */
-    private transient File fileId;
+    private File fileId;
     
     /**
      * The action that this doc has.
      */
-    private transient String action;
+    private String action;
     
-    private transient String actionDetail;
+    private String actionDetail;
     
     /**
      * The version of this LimeXMLDocument.
      */
-    private int version = CURRENT_VERSION;
-    boolean isCurrent() { return version == CURRENT_VERSION; }
-    void setCurrent() { version = CURRENT_VERSION; }
+    private volatile int version;
     
     /**
      * Cached list of keywords.  Because keywords are only filled up
      * upon construction, they can be cached upon retrieval.
      */
-    private transient List<String> CACHED_KEYWORDS = null;
+    private List<String> CACHED_KEYWORDS = null;
     
     /** The kind of license this has. */
-    private transient volatile LicenseType licenseType = LicenseType.NO_LICENSE;
+    private volatile LicenseType licenseType = LicenseType.NO_LICENSE;
 
-    private transient volatile LicenseFactory licenseFactory;
-    
-    @Inject
-    private static Provider<LicenseFactory> globalLicenseFactory;
-
-    private transient volatile Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository;
-
-    @Inject
-    private static Provider<LimeXMLSchemaRepository> globalLimeXMLSchemaRepository;
+    private final LicenseFactory licenseFactory;
+    private final Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository;
     
     /**
      * Constructs a LimeXMLDocument with the given string.
      */
-    LimeXMLDocument(String xml, LicenseFactory licenseFactory, Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository)
-      throws SAXException, SchemaNotFoundException, IOException {
+    LimeXMLDocument(String xml, LicenseFactory licenseFactory,
+            Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) throws SAXException,
+            SchemaNotFoundException, IOException {
         this.licenseFactory = licenseFactory;
         this.limeXMLSchemaRepository = limeXMLSchemaRepository;
-        if(xml==null || xml.equals(""))
+        if (xml == null || xml.equals(""))
             throw new SAXException("null or empty string");
 
         InputSource doc = new InputSource(new StringReader(xml));
@@ -148,8 +137,9 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      * @param schemaURI The schema URI for the LimeXMLDocument to be
      * created
      */    
-    LimeXMLDocument(Map<String, String> map, String schemaURI, String keyPrefix, LicenseFactory licenseFactory, Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) 
-      throws IOException {
+    LimeXMLDocument(Map<String, String> map, String schemaURI, String keyPrefix,
+            LicenseFactory licenseFactory, Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository)
+            throws IOException {
         this.licenseFactory = licenseFactory;
         this.limeXMLSchemaRepository = limeXMLSchemaRepository;
         if(map.isEmpty())
@@ -174,7 +164,8 @@ public class LimeXMLDocument implements Serializable, StringLookup {
      * created
      */
     LimeXMLDocument(Collection<? extends Map.Entry<String, String>> nameValueList,
-                           String schemaURI, LicenseFactory licenseFactory, Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
+            String schemaURI, LicenseFactory licenseFactory,
+            Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
         this.licenseFactory = licenseFactory;
         this.limeXMLSchemaRepository = limeXMLSchemaRepository;
         if(nameValueList.isEmpty())
@@ -208,17 +199,6 @@ public class LimeXMLDocument implements Serializable, StringLookup {
             return false;
             
         return true;
-    }
-
-    /**
-     * Reads the object and initializes transient fields.
-     */
-    private void readObject(java.io.ObjectInputStream in)
-      throws IOException, ClassNotFoundException {
-        licenseFactory = globalLicenseFactory.get();
-        limeXMLSchemaRepository = globalLimeXMLSchemaRepository;
-        in.defaultReadObject();
-        scanFields();
     }
 
     /**
@@ -477,6 +457,22 @@ public class LimeXMLDocument implements Serializable, StringLookup {
             attributeString = constructAttributeString();
         return attributeString;
     }
+
+    /**
+     * Retrieves the XML of this, with the version embedded. This is useful for
+     * serializing the XML.
+     */
+    String getXmlWithVersion() {
+        StringBuilder fullXML = new StringBuilder();
+        LimeXMLDocumentHelper.buildXML(fullXML, getSchema(), getAttributeString() + " " + VERSION_STRING + "=\"" + version + "\"/>");
+        return fullXML.toString();
+    }
+    
+    /** Determines if this XML was built with the current version. */
+    boolean isCurrent() { return version == CURRENT_VERSION; }
+    
+    /** Sets this XML to be current. */
+    void setCurrent() { version = CURRENT_VERSION; }
     
     /**
      * Constructs the open-ended XML that contains the attributes.
@@ -534,7 +530,8 @@ public class LimeXMLDocument implements Serializable, StringLookup {
                  (actionDetail == null ? xmlDoc.actionDetail == null :
                      actionDetail.equals(xmlDoc.actionDetail)) &&
 				(fieldToValue == null ? xmlDoc.fieldToValue == null : 
-				 fieldToValue.equals(xmlDoc.fieldToValue)));
+				 fieldToValue.equals(xmlDoc.fieldToValue)) &&
+				 version == xmlDoc.version);
 	}
 
 	/**
@@ -607,7 +604,23 @@ public class LimeXMLDocument implements Serializable, StringLookup {
             fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE,
                     LicenseType.LIMEWIRE_STORE_PURCHASE.toString());
         }
-
+        
+        // Grab the version, if it exists.
+        String versionString = fieldToValue.get(prefix + XML_VERSION_ATTRIBUTE);
+        if(versionString != null) {
+            try {
+                version = Integer.parseInt(versionString);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Set version to: " + version);
+            } catch(NumberFormatException nfe) {
+                LOG.warn("Unable to set version", nfe);
+                version = CURRENT_VERSION;
+            }
+        } else {
+            version = CURRENT_VERSION;
+        }
+        fieldToValue.remove(prefix + XML_VERSION_ATTRIBUTE);
+        
         if(LOG.isDebugEnabled())
             LOG.debug("Fields after setting: " + fieldToValue);
     }

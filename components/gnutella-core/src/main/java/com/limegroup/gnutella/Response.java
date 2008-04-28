@@ -1,8 +1,5 @@
 package com.limegroup.gnutella;
 
-
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Set;

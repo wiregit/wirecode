@@ -1,16 +1,20 @@
 package com.limegroup.gnutella.browser;
 
 import java.io.IOException;
+import java.util.concurrent.Executor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.entity.NStringEntity;
+import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
-import org.limewire.http.AsyncHttpRequestHandler;
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.http.BasicHttpAcceptor;
 
 import com.google.inject.Inject;
@@ -25,6 +29,8 @@ public class LocalHTTPAcceptor extends BasicHttpAcceptor {
 
     private static final String[] SUPPORTED_METHODS = new String[] { "GET",
         "HEAD", };
+    
+    private final Executor magnetExecutor = ExecutorsHelper.newProcessingQueue("magnet-handler");
 
     /** Magnet request for a default action on parameters */
 //    private static final String MAGNET_DEFAULT = "/magnet10/default.js?";
@@ -59,33 +65,58 @@ public class LocalHTTPAcceptor extends BasicHttpAcceptor {
         //registerHandler("*", new FileRequestHandler(new File("root"), new BasicMimeTypeProvider()));
     }
 
-    private class MagnetCommandRequestHandler implements AsyncHttpRequestHandler {
+    private class MagnetCommandRequestHandler extends SimpleNHttpRequestHandler  {
+        public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+                HttpContext context) throws HttpException, IOException {
+            return null;
+        }
+        
         public void handle(HttpRequest request, HttpResponse response,
                 HttpContext context) throws HttpException, IOException {
-            triggerMagnetHandling(request.getRequestLine().getUri());
+            final String uri = request.getRequestLine().getUri();
+            magnetExecutor.execute(new Runnable() {
+                public void run() {
+                    try {
+                        triggerMagnetHandling(uri);
+                    } catch(IOException ignored) {}
+                }
+            });
         }
     }
 
-    private class MagnetPauseRequestHandler implements AsyncHttpRequestHandler {
+    private class MagnetPauseRequestHandler extends SimpleNHttpRequestHandler {
+        public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+                HttpContext context) throws HttpException, IOException {
+            return null;
+        }
+        
         public void handle(HttpRequest request, HttpResponse response,
                 HttpContext context) throws HttpException, IOException {
-            try {
-                Thread.sleep(2500);
-            } catch (InterruptedException e) {
-            }
             response.setStatusCode(HttpStatus.SC_NO_CONTENT);
+            magnetExecutor.execute(new Runnable() {
+                public void run() {
+                    try {
+                        Thread.sleep(2500);
+                    } catch (InterruptedException e) {
+                    }
+                }
+            });
         }
     }
 
-    private class MagnetDetailRequestHandler implements AsyncHttpRequestHandler {
+    private class MagnetDetailRequestHandler extends SimpleNHttpRequestHandler {
+        public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+                HttpContext context) throws HttpException, IOException {
+            return null;
+        }
+        
         public void handle(HttpRequest request, HttpResponse response,
                 HttpContext context) throws HttpException, IOException {
             String uri = request.getRequestLine().getUri();
             int i = uri.indexOf(MAGNET_DETAIL);
             String command = uri.substring(i + MAGNET_DETAIL.length());
             String page = MagnetHTML.buildMagnetDetailPage(command);
-            // TODO set charset
-            StringEntity entity = new StringEntity(page);
+            NStringEntity entity = new NStringEntity(page);
             entity.setContentType("text/html");
             response.setEntity(entity);
         }

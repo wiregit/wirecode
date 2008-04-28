@@ -13,6 +13,9 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpProcessor;
 import org.apache.http.protocol.HttpProcessor;
+import org.limewire.http.protocol.ExtendedAsyncNHttpServiceHandler;
+import org.limewire.http.reactor.HttpChannel;
+import org.limewire.http.reactor.HttpIOSession;
 import org.limewire.util.BaseTestCase;
 
 public class HttpChannelTest extends BaseTestCase {
@@ -25,7 +28,7 @@ public class HttpChannelTest extends BaseTestCase {
 
     private HttpProcessor httpProcessor;
 
-    private HttpServiceHandler serviceHandler;
+    private ExtendedAsyncNHttpServiceHandler serviceHandler;
 
     private DefaultServerIOEventDispatch eventDispatch;
 
@@ -43,14 +46,14 @@ public class HttpChannelTest extends BaseTestCase {
         connStrategy = new DefaultConnectionReuseStrategy();
         responseFactory = new DefaultHttpResponseFactory();
         httpProcessor = new BasicHttpProcessor();
-        serviceHandler = new HttpServiceHandler(httpProcessor, responseFactory,
+        serviceHandler = new ExtendedAsyncNHttpServiceHandler(httpProcessor, responseFactory,
                 connStrategy, parms);
         eventDispatch = new DefaultServerIOEventDispatch(serviceHandler, parms);
     }
 
     public void testPushBackReadAllAtOnce() throws Exception {
         StubSocket socket = new StubSocket();
-        HttpIOSession session = new HttpIOSession(socket);
+        HttpIOSession session = new HttpIOSession(socket, null);
         StubReadableChannel srcChannel = new StubReadableChannel("abc");
 
         HttpChannel channel = new HttpChannel(session, eventDispatch, "GET");
@@ -68,7 +71,7 @@ public class HttpChannelTest extends BaseTestCase {
 
     public void testPushBackReadSlowly() throws Exception {
         StubSocket socket = new StubSocket();
-        HttpIOSession session = new HttpIOSession(socket);
+        HttpIOSession session = new HttpIOSession(socket, null);
         StubReadableChannel srcChannel = new StubReadableChannel("abc");
 
         HttpChannel channel = new HttpChannel(session, eventDispatch, "GET");
@@ -97,7 +100,7 @@ public class HttpChannelTest extends BaseTestCase {
 
     public void testNoPushBack() throws Exception {
         StubSocket socket = new StubSocket();
-        HttpIOSession session = new HttpIOSession(socket);
+        HttpIOSession session = new HttpIOSession(socket, null);
         StubReadableChannel srcChannel = new StubReadableChannel("abc");
 
         HttpChannel channel = new HttpChannel(session, eventDispatch, null);

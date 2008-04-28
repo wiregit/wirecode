@@ -5,12 +5,15 @@ package com.limegroup.gnutella.uploader;
 
 import java.io.IOException;
 
-import org.limewire.http.AbstractHttpNIOEntity;
+import org.apache.http.nio.ContentEncoder;
+import org.apache.http.nio.ContentEncoderChannel;
+import org.apache.http.nio.IOControl;
+import org.limewire.http.entity.AbstractProducingNHttpEntity;
 import org.limewire.nio.NBThrottle;
 
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.tigertree.ThexWriter;
 import com.limegroup.gnutella.tigertree.HashTreeWriteHandler;
+import com.limegroup.gnutella.tigertree.ThexWriter;
 
 /**
  * Sends a THEX tree as an HTTP message.
@@ -18,7 +21,7 @@ import com.limegroup.gnutella.tigertree.HashTreeWriteHandler;
  * The tree is in compliance with the THEX protocol at
  * http://open-content.net/specs/draft-jchapweske-thex-02.html
  */
-public class THEXResponseEntity extends AbstractHttpNIOEntity {
+public class THEXResponseEntity extends AbstractProducingNHttpEntity {
 
     /**
      * Throttle for the speed of THEX uploads, allow up to 0.5K/s
@@ -48,7 +51,7 @@ public class THEXResponseEntity extends AbstractHttpNIOEntity {
     }
 
     @Override
-    public void initialize() throws IOException {
+    public void initialize(ContentEncoder contentEncoder, IOControl ioctrl) throws IOException {
         this.writer = tigerWriteHandler.createAsyncWriter();
         
         THROTTLE.setRate(UploadSettings.THEX_UPLOAD_SPEED.getValue());
@@ -56,15 +59,14 @@ public class THEXResponseEntity extends AbstractHttpNIOEntity {
     }
 
     @Override
-    public boolean handleWrite() throws IOException {
-        boolean more = writer.process(this, null);
+    public boolean writeContent(ContentEncoder contentEncoder, IOControl ioctrl) throws IOException {
+        boolean more = writer.process(new ContentEncoderChannel(contentEncoder), null);
         uploader.setAmountUploaded(writer.getAmountProcessed());
         activateTimeout();
         return more;
     }
 
-    @Override
-    public void finished() {
+    public void finish() {
         deactivateTimeout();
         this.writer = null;
     }

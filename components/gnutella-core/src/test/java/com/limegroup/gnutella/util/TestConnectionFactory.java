@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.util;
 
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.SecureMessageVerifier;
 
@@ -75,6 +76,8 @@ public class TestConnectionFactory {
     private final ApplicationServices applicationServices;
 
     private final Provider<SecureMessageVerifier> secureMessageVerifier;
+    
+    private final NetworkInstanceUtils networkInstanceUtils;
 
     @Inject
     public TestConnectionFactory(Provider<ConnectionManager> connectionManager,
@@ -89,7 +92,8 @@ public class TestConnectionFactory {
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
             SpamFilterFactory spamFilterFactory, MessageFactory messageFactory,
             MessageReaderFactory messageReaderFactory, ApplicationServices applicationServices,
-            Provider<SecureMessageVerifier> secureMessageVerifier) {
+            Provider<SecureMessageVerifier> secureMessageVerifier,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.connectionManager = connectionManager;
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
@@ -112,6 +116,7 @@ public class TestConnectionFactory {
         this.messageFactory = messageFactory;
         this.messageReaderFactory = messageReaderFactory;
         this.secureMessageVerifier = secureMessageVerifier;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
     
     public OldConnection createOldConnection(int connections) {
@@ -121,7 +126,7 @@ public class TestConnectionFactory {
                         .get(), capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
                 supportedVendorMessage, simppManager, updateHandler, connectionServices,
                 guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
-                applicationServices, secureMessageVerifier.get());
+                applicationServices, secureMessageVerifier.get(), networkInstanceUtils);
     }
 
     /**
@@ -136,7 +141,7 @@ public class TestConnectionFactory {
                 socketsManager.get(), acceptor.get(), supportedVendorMessage, simppManager,
                 updateHandler, connectionServices, guidMapManager, spamFilterFactory,
                 messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier
-                        .get());
+                        .get(), networkInstanceUtils);
     }
 
     /**
@@ -150,7 +155,7 @@ public class TestConnectionFactory {
                 searchResultHandler.get(), capabilitiesVMFactory, socketsManager.get(), acceptor
                         .get(), supportedVendorMessage, simppManager, updateHandler,
                 connectionServices, guidMapManager, spamFilterFactory, messageReaderFactory,
-                messageFactory, applicationServices, secureMessageVerifier.get());
+                messageFactory, applicationServices, secureMessageVerifier.get(), networkInstanceUtils);
     }
 
     /**
@@ -164,7 +169,7 @@ public class TestConnectionFactory {
                 searchResultHandler.get(), capabilitiesVMFactory, socketsManager.get(), acceptor
                         .get(), supportedVendorMessage, simppManager, updateHandler,
                 connectionServices, guidMapManager, spamFilterFactory, messageReaderFactory,
-                messageFactory, applicationServices, secureMessageVerifier.get());
+                messageFactory, applicationServices, secureMessageVerifier.get(), networkInstanceUtils);
     }
 
     public LeafConnection createAltLeafConnection() {
@@ -176,7 +181,7 @@ public class TestConnectionFactory {
                 socketsManager.get(), acceptor.get(), supportedVendorMessage, simppManager,
                 updateHandler, connectionServices, guidMapManager, spamFilterFactory,
                 messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier
-                        .get());
+                        .get(), networkInstanceUtils);
     }
 
     public LeafConnection createWithKeywords(String[] keywords) {
@@ -187,7 +192,7 @@ public class TestConnectionFactory {
                         .get(), capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
                 supportedVendorMessage, simppManager, updateHandler, connectionServices,
                 guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
-                applicationServices, secureMessageVerifier.get());
+                applicationServices, secureMessageVerifier.get(), networkInstanceUtils);
     }
 
     public LeafConnection createLeafConnection(boolean queriesMustBeInRoutingTable) {
@@ -198,7 +203,7 @@ public class TestConnectionFactory {
                 searchResultHandler.get(), capabilitiesVMFactory, socketsManager.get(), acceptor
                         .get(), supportedVendorMessage, simppManager, updateHandler,
                 connectionServices, guidMapManager, spamFilterFactory, messageReaderFactory,
-                messageFactory, applicationServices, secureMessageVerifier.get());
+                messageFactory, applicationServices, secureMessageVerifier.get(), networkInstanceUtils);
     }
 
     public UltrapeerConnection createUltrapeerConnection() {
@@ -209,7 +214,7 @@ public class TestConnectionFactory {
                 socketsManager.get(), acceptor.get(), supportedVendorMessage, simppManager,
                 updateHandler, connectionServices, guidMapManager, spamFilterFactory,
                 messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier
-                        .get());
+                        .get(), networkInstanceUtils);
     }
 
     public UltrapeerConnection createUltrapeerConnection(String[] keywords) {
@@ -220,7 +225,7 @@ public class TestConnectionFactory {
                 socketsManager.get(), acceptor.get(), supportedVendorMessage, simppManager,
                 updateHandler, connectionServices, guidMapManager, spamFilterFactory,
                 messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier
-                        .get());
+                        .get(), networkInstanceUtils);
     }
 
     static final class HitQueryRouteTable extends QueryRouteTable {

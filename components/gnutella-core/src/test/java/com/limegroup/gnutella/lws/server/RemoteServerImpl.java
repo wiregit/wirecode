@@ -196,6 +196,15 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
         protected String getCommand(String request) {
             return RemoteServerImpl.getCommand(request);
         }
+        
+        protected boolean isAuthenticated() {
+            // This doesn't matter
+            return false;
+        }
+
+        public void deauthenticate() {
+            // This isn't used
+        }
     }    
 
     // ---------------------------------------------------------------
@@ -236,6 +245,9 @@ public class RemoteServerImpl extends AbstractServer implements RemoteServer {
     }
 
     public String lookupPrivateKey(String publicKey, String ip) {
+        if (publicKey == null) {
+            return LWSDispatcherSupport.ErrorCodes.INVALID_PUBLIC_KEY_OR_IP;
+        }
         Pair p = new Pair(publicKey, ip);
         String privateKey = pairs2privateKeys.get(p);
         String res = privateKey == null 

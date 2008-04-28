@@ -7,6 +7,7 @@ import junit.framework.Test;
 
 import org.jmock.Expectations;
 import org.jmock.Mockery;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.inject.Providers;
 import org.limewire.util.BaseTestCase;
 
@@ -28,12 +29,12 @@ public class LicenseVerifierTest extends BaseTestCase {
         Mockery context = new Mockery();
         
         final LicenseCache licenseCache = new LicenseCache(); 
-        final LicenseVerifier licenseVerifier = new LicenseVerifier(Providers.of(licenseCache));
+        final LicenseVerifier licenseVerifier = new LicenseVerifier(Providers.of(licenseCache), Providers.nullProvider(LimeHttpClient.class));
                 
         final License license = context.mock(License.class);
         
         context.checking(new Expectations() {{ 
-            one(license).verify(licenseCache);
+            one(license).verify(licenseCache, null);
         }});
         
         Listener listener = new Listener();
@@ -48,12 +49,12 @@ public class LicenseVerifierTest extends BaseTestCase {
         Mockery context = new Mockery();
         
         final LicenseCache licenseCache = new LicenseCache(); 
-        final LicenseVerifier licenseVerifier = new LicenseVerifier(Providers.of(licenseCache));
+        final LicenseVerifier licenseVerifier = new LicenseVerifier(Providers.of(licenseCache), Providers.nullProvider(LimeHttpClient.class));
                 
         final License license = context.mock(License.class);
         
         context.checking(new Expectations() {{ 
-            one(license).verify(licenseCache);
+            one(license).verify(licenseCache, null);
         }});
         
         Listener listener = new Listener();

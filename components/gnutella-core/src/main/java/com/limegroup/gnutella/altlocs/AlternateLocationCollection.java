@@ -126,8 +126,11 @@ public class AlternateLocationCollection<T extends AlternateLocation>
                 LOCATIONS.remove(alt);
 
                 alt.increment();
-                alt.promote();
-                alt.resetSent();
+                if (alt instanceof AbstractAlternateLocation) {
+                    AbstractAlternateLocation absAlt = (AbstractAlternateLocation)alt;
+                    absAlt.promote();
+                    absAlt.resetSent();
+                }
                 ret =  false;
                 LOCATIONS.add(alt); //add incremented version
 
@@ -156,7 +159,10 @@ public class AlternateLocationCollection<T extends AlternateLocation>
             } else {
                 LOCATIONS.remove(loc);
 
-                loc.demote(); //one more strike and you are out...
+                if (loc instanceof AbstractAlternateLocation) {
+                    AbstractAlternateLocation absAlt = (AbstractAlternateLocation)loc;
+                    absAlt.demote(); //one more strike and you are out...
+                }
                 LOCATIONS.add(loc); //make it replace the older loc
 
                 return false;

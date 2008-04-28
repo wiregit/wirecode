@@ -4,16 +4,14 @@
 package com.limegroup.gnutella.messagehandlers;
 
 import java.net.InetSocketAddress;
-import java.util.EnumMap;
-import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
-import com.limegroup.gnutella.statistics.RouteErrorStat;
 
 /**
  * Handles push request on all networks by looking up the corresponding reply handler
@@ -21,22 +19,21 @@ import com.limegroup.gnutella.statistics.RouteErrorStat;
  */
 public class AllNetworkPushRequestHandler implements MessageHandler {
     
-    private final Map<Network, ReceivedMessageStatHandler> statsHandlerByNetwork = new EnumMap<Network, ReceivedMessageStatHandler>(Network.class);
-    private final MessageRouter messageRouter; 
-
-    {
-        statsHandlerByNetwork.put(Network.TCP, ReceivedMessageStatHandler.TCP_PUSH_REQUESTS);
-        statsHandlerByNetwork.put(Network.UDP, ReceivedMessageStatHandler.UDP_PUSH_REQUESTS);
-        statsHandlerByNetwork.put(Network.MULTICAST, ReceivedMessageStatHandler.MULTICAST_DUPLICATE_QUERIES);
-    }
+    private static final Log LOG = LogFactory.getLog(AllNetworkPushRequestHandler.class);
+    
+    private final MessageRouter messageRouter;
     
     public AllNetworkPushRequestHandler(MessageRouter messageRouter) {
         this.messageRouter = messageRouter;
     }
     
     public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
-        statsHandlerByNetwork.get(msg.getNetwork()).addMessage(msg);
         PushRequest request = (PushRequest)msg;
+        
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("received push: " + request);
+        }
+        
         if (handler == null) {
             throw new NullPointerException("null ReplyHandler");
         }
@@ -46,7 +43,9 @@ public class AllNetworkPushRequestHandler implements MessageHandler {
         if(replyHandler != null) {
             replyHandler.handlePushRequest(request, handler);
         } else {
-            RouteErrorStat.PUSH_REQUEST_ROUTE_ERRORS.incrementStat();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("no handler found for: " + request);
+            }
             handler.countDroppedMessage();
         }
     }

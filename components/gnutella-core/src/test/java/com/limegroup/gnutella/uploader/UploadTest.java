@@ -15,34 +15,38 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import junit.framework.Test;
+
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.conn.HttpRoute;
+import org.apache.http.conn.ConnectionPoolTimeoutException;
 import org.apache.http.conn.ManagedClientConnection;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpRequest;
+import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.util.EntityUtils;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.http.HttpClientManager;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.http.httpclient.HttpClientUtils;
+import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
@@ -64,6 +68,7 @@ import com.limegroup.gnutella.security.Tiger;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -73,8 +78,6 @@ import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.tigertree.HashTreeCacheImpl;
 import com.limegroup.gnutella.tigertree.HashTreeUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
-
-import junit.framework.Test;
 
 /**
  * Test that a client uploads a file correctly. Depends on a file containing the
@@ -109,7 +112,7 @@ public class UploadTest extends LimeTestCase {
     /** The verifying file for the shared incomplete file */
     private VerifyingFile vf;
 
-    private HttpClient client;
+    private LimeHttpClient client;
 
     protected String protocol;
 
@@ -155,7 +158,12 @@ public class UploadTest extends LimeTestCase {
         assertGreaterThan("Expected file to contain data", 0, target.length());
 
         // initialize services
-        injector = LimeTestUtils.createInjector();
+        injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
+            }
+        });
         
         startServices();
 
@@ -171,7 +179,7 @@ public class UploadTest extends LimeTestCase {
         
         // add incomplete file to file manager
         File incFile = new File(_incompleteDir, incName);
-        fileManager.removeFileIfShared(incFile);
+        fileManager.removeFileIfSharedOrStore(incFile);
         CommonUtils.copyResourceFile(testDirName + "/" + incName, incFile, false);
         URN urn = URN.createSHA1Urn(incompleteHash);
         Set<URN> urns = new HashSet<URN>();
@@ -185,7 +193,7 @@ public class UploadTest extends LimeTestCase {
         assertEquals("Unexpected uploads in progress", 0, uploadManager.uploadsInProgress());
         assertEquals("Unexpected queued uploads", 0, uploadManager.getNumQueuedUploads());
 
-        client = HttpClientManager.getNewClient();
+        client = injector.getInstance(LimeHttpClient.class);
         
         //client = new DefaultHttpClient();
         //Scheme https = client.getConnectionManager().getSchemeRegistry().getScheme("https");
@@ -207,7 +215,7 @@ public class UploadTest extends LimeTestCase {
                 .setValue(new String[] { "*.*.*.*" });
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
-        ConnectionSettings.PORT.setValue(PORT);
+        NetworkSettings.PORT.setValue(PORT);
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
         UploadSettings.HARD_MAX_UPLOADS.setValue(10);
@@ -225,8 +233,6 @@ public class UploadTest extends LimeTestCase {
     }
 
     private void startServices() throws Exception {
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
-        
         HTTPAcceptor httpAcceptor = injector.getInstance(HTTPAcceptor.class);
         httpAcceptor.start();
         
@@ -268,7 +274,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("abcdefghijklmnopqrstuvwxyz", result);
         } finally {                                
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -288,7 +294,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("cdefghijklmnopqrstuvwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -308,7 +314,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("cdefghijklmnopqrstuvwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -331,7 +337,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("cdef", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -351,7 +357,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("cdef", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -371,7 +377,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("vwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -391,7 +397,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("abcdefghijklmnopqrstuvwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -411,7 +417,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("cdef", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
     
@@ -428,7 +434,7 @@ public class UploadTest extends LimeTestCase {
                     "Content-range").getValue());
             assertNull(response.getEntity());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -446,7 +452,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("abcdefghijklmnopqrstuvwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -464,7 +470,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("abcdefghijklmnopqrstuvwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -483,7 +489,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("cdefghijklmnopqrstuvwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -495,7 +501,7 @@ public class UploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_REQUESTED_RANGE_NOT_SATISFIABLE, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -514,7 +520,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("cdefghijklmnopqrstuvwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -536,7 +542,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("cdef", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -562,7 +568,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("cdef", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -581,7 +587,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("vwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -600,7 +606,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("abcdefghijklmnopqrstuvwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -624,7 +630,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("cdef", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
         method = new HttpGet(incompleteHashUrl);
         method.addHeader("Range", "bytes 1-3");
@@ -639,7 +645,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("cd", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         method = new HttpGet(incompleteHashUrl);
@@ -655,7 +661,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("defg", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
         method = new HttpGet(incompleteHashUrl);
         method.addHeader("Range", "bytes 0-20");
@@ -670,7 +676,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("cdefg", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -726,7 +732,7 @@ public class UploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            client.releaseConnection(response);
         }
         method = new HttpGet(url);
         try {
@@ -740,7 +746,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("abcdefghijklmnopqrstuvwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
         method = new HttpGet(url);
         try {
@@ -754,7 +760,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("abcdefghijklmnopqrstuvwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         method = new HttpHead(url);
@@ -762,7 +768,7 @@ public class UploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
         method = new HttpGet(url);
         try {
@@ -776,7 +782,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("abcdefghijklmnopqrstuvwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -795,7 +801,7 @@ public class UploadTest extends LimeTestCase {
         } catch (IOException expected) {
             // expected result
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // request a very long filename
@@ -806,7 +812,7 @@ public class UploadTest extends LimeTestCase {
         } catch (IOException expected) {
             // expected result
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -826,7 +832,7 @@ public class UploadTest extends LimeTestCase {
         } catch (IOException expected) {
             // expected result
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -842,7 +848,7 @@ public class UploadTest extends LimeTestCase {
         } catch (IOException expected) {
             // expected result
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -863,7 +869,7 @@ public class UploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
     
@@ -886,7 +892,7 @@ public class UploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
     }
@@ -904,7 +910,7 @@ public class UploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -971,7 +977,7 @@ public class UploadTest extends LimeTestCase {
                 fail("Expected free loader page, got: " + body);
             }
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -992,7 +998,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("abcdefghijklmnopqrstuvwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
         assertConnectionIsOpen(true, method);
 
@@ -1008,7 +1014,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZ\n", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -1020,7 +1026,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_REQUESTED_RANGE_NOT_SATISFIABLE,
                     response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertConnectionIsOpen(true, method);
@@ -1031,7 +1037,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_REQUESTED_RANGE_NOT_SATISFIABLE,
                     response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -1052,7 +1058,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("bytes 50-102499", response.getFirstHeader(
                     "X-Available-Ranges").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertConnectionIsOpen(true, method);
@@ -1069,7 +1075,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("bytes 50-102499, 150050-252449", response
                     .getFirstHeader("X-Available-Ranges").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertConnectionIsOpen(true, method);
@@ -1086,7 +1092,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("bytes 50-102499, 150050-252449", response
                     .getFirstHeader("X-Available-Ranges").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertConnectionIsOpen(true, method);
@@ -1106,7 +1112,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals("bytes 50-252449", response.getFirstHeader(
                     "X-Available-Ranges").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -1120,7 +1126,7 @@ public class UploadTest extends LimeTestCase {
                     response.getStatusLine().getStatusCode());
             assertEquals("Requested Range Unavailable", response.getStatusLine().getReasonPhrase());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertConnectionIsOpen(true, method);
@@ -1134,7 +1140,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusLine().getStatusCode());
             assertEquals("Not Found", response.getStatusLine().getReasonPhrase());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertConnectionIsOpen(true, method);
@@ -1149,7 +1155,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusLine().getStatusCode());
             assertEquals("Not Found", response.getStatusLine().getReasonPhrase());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertConnectionIsOpen(true, method);
@@ -1163,7 +1169,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
             assertEquals("Malformed Request", response.getStatusLine().getReasonPhrase());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertConnectionIsOpen(false, method);
@@ -1178,7 +1184,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
             assertEquals("Malformed Request", response.getStatusLine().getReasonPhrase());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertConnectionIsOpen(false, method);
@@ -1192,7 +1198,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
             assertEquals("Malformed Request", response.getStatusLine().getReasonPhrase());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertConnectionIsOpen(false, method);
@@ -1207,7 +1213,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
             assertEquals("Malformed Request", response.getStatusLine().getReasonPhrase());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertConnectionIsOpen(false, method);
@@ -1223,7 +1229,7 @@ public class UploadTest extends LimeTestCase {
             // the connection was either closed or timed out due to a failed TLS
             // handshake
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
         assertConnectionIsOpen(false, method);
     }
@@ -1236,7 +1242,7 @@ public class UploadTest extends LimeTestCase {
              }
         };
         // TODO method.setUseExpectHeader(true);
-        method.setEntity(new StringEntity("Foo"));
+        method.setEntity(new NStringEntity("Foo"));
         HttpResponse response = null;
         try {
             response = client.execute(method);
@@ -1246,7 +1252,7 @@ public class UploadTest extends LimeTestCase {
         } catch (HttpException expected) {
             // expected result
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -1269,7 +1275,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(creationTime + "", response.getFirstHeader(
                     "X-Create-Time").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -1301,7 +1307,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(creationTime + "", response.getFirstHeader(
                     "X-Create-Time").getValue());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -1318,7 +1324,7 @@ public class UploadTest extends LimeTestCase {
             assertTrue(header.contains("browse/1.0"));
             assertTrue(header.contains("chat/0.1"));
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertConnectionIsOpen(true, method);
@@ -1332,7 +1338,7 @@ public class UploadTest extends LimeTestCase {
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             assertNull(method.getFirstHeader("X-Features"));
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         assertConnectionIsOpen(false, method);
@@ -1348,7 +1354,7 @@ public class UploadTest extends LimeTestCase {
             assertTrue(header.contains("browse/1.0"));
             assertFalse(header.contains("chat/0.1"));
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -1365,7 +1371,7 @@ public class UploadTest extends LimeTestCase {
             String header = response.getFirstHeader("X-Thex-URI").getValue();
             assertEquals("/uri-res/N2X?" + hash + ";" + tree.getRootHash(), header);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -1387,7 +1393,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("abcdefghijklmnopqrstuvwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // the request is checked for a valid bitprint length
@@ -1397,7 +1403,7 @@ public class UploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // but not for the valid base32 root -- in the future we may
@@ -1415,7 +1421,7 @@ public class UploadTest extends LimeTestCase {
             }
             assertEquals("abcdefghijklmnopqrstuvwxyz", result);
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         // make sure "bitprint:" is required for bitprint uploading.
@@ -1425,7 +1431,7 @@ public class UploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
     
@@ -1436,7 +1442,7 @@ public class UploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         method = new HttpGet(host + "/uri-res/N2X?" + "no_hash");
@@ -1444,7 +1450,7 @@ public class UploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -1479,7 +1485,7 @@ public class UploadTest extends LimeTestCase {
             // more extensive validity checks are in HashTreeTest
             // this is just checking to make sure we sent the right tree.
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -1494,7 +1500,7 @@ public class UploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusLine().getStatusCode());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -1529,7 +1535,7 @@ public class UploadTest extends LimeTestCase {
                 response = client.execute(method);
                 assertEquals(HttpStatus.SC_NOT_FOUND, response.getStatusLine().getStatusCode());
             } finally {
-                HttpClientManager.releaseConnection(response);
+                HttpClientUtils.releaseConnection(response);
             }
 
             latch.await(500, TimeUnit.MILLISECONDS);
@@ -1548,7 +1554,7 @@ public class UploadTest extends LimeTestCase {
                 }
                 assertEquals("abc", result);
             } finally {
-                HttpClientManager.releaseConnection(response);
+                HttpClientUtils.releaseConnection(response);
             }
         } finally {
             fileManager.removeFileEventListener(listener);
@@ -1556,10 +1562,10 @@ public class UploadTest extends LimeTestCase {
         
     }
 
-    private void assertConnectionIsOpen(boolean open, HttpUriRequest request) throws InterruptedException {
+    private void assertConnectionIsOpen(boolean open, HttpUriRequest request) throws InterruptedException, ConnectionPoolTimeoutException {
         URI uri = request.getURI();
         HttpRoute route = new HttpRoute(new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme()));
-        ManagedClientConnection connection = client.getConnectionManager().getConnection(route);
+        ManagedClientConnection connection = client.getConnectionManager().requestConnection(route).getConnection(0, null);
         assertEquals(open, connection.isOpen());
         client.getConnectionManager().releaseConnection(connection);
     }

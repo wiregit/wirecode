@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.collection.NameValue;
+import org.limewire.util.NameValue;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -27,7 +27,7 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.FileManagerEvent.Type;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.metadata.AudioMetaData;
+import com.limegroup.gnutella.metadata.audio.AudioMetaData;
 
 /**
  * This class handles querying shared files with XML data and returning XML data
@@ -144,7 +144,7 @@ public class MetaFileManager extends FileManagerImpl {
             }
         }
 
-        final FileDesc removed = removeFileIfShared(f, false);
+        final FileDesc removed = removeFileIfSharedOrStore(f, false);
         assert fd == removed : "wanted to remove: " + fd + "\ndid remove: " + removed;
 
         synchronized (this) {
@@ -156,9 +156,9 @@ public class MetaFileManager extends FileManagerImpl {
                 // Retarget the event for the GUI.
                 FileManagerEvent newEvt = null;
 
-                if (evt.isAddEvent()) {
+                if (evt.isAddEvent() || evt.isAddStoreEvent()) {
                     FileDesc fd = evt.getFileDescs()[0];
-                    fileManagerController.fileChanged(fd.getSHA1Urn(), cTime);
+                  	fileManagerController.fileChanged(fd.getSHA1Urn(), cTime);
                     newEvt = new FileManagerEvent(MetaFileManager.this, Type.CHANGE_FILE, removed,
                             fd);
                 } else {
@@ -217,12 +217,33 @@ public class MetaFileManager extends FileManagerImpl {
      * Removes the LimeXMLDocuments associated with the removed FileDesc from
      * the various LimeXMLReplyCollections.
      */
+    @Override
     protected synchronized FileDesc removeFileIfShared(File f, boolean notify) {
         FileDesc fd = super.removeFileIfShared(f, notify);
         // nothing removed, ignore.
         if (fd == null)
             return null;
 
+        removeFileDesc(fd, notify);
+        return fd;
+    }
+    
+    /**
+     * Removes the LimeXMLDocuments associated with the removed FileDesc from
+     * the various LimeXMLReplyCollections.
+     */
+    @Override 
+    protected synchronized FileDesc removeStoreFile(File f, boolean notify) {
+    	FileDesc fd = super.removeStoreFile(f,notify);
+        // nothing removed, ignore.
+        if (fd == null)
+            return null;
+
+        removeFileDesc(fd, notify);
+        return fd;
+    }
+    
+    private synchronized void removeFileDesc(FileDesc fd, boolean notify) {
         // Get the schema URI of each document and remove from the collection
         // We must remember the schemas and then remove the doc, or we will
         // get a concurrent mod exception because removing the doc also
@@ -237,7 +258,6 @@ public class MetaFileManager extends FileManagerImpl {
                 col.removeDoc(fd);
         }
         _needRebuild = true;
-        return fd;
     }
 
     /**
@@ -413,9 +433,10 @@ public class MetaFileManager extends FileManagerImpl {
                 res = fileManagerController.createPureMetadataResponse();
             } else { // meta-data about a specific file
                 FileDesc fd = getFileDescForFile(file);
-                if (fd == null || fd instanceof IncompleteFileDesc) {
+                if (fd == null || fd instanceof IncompleteFileDesc || isStoreFile(file)) {
                     // fd == null is bad -- would mean MetaFileManager is out of sync.
                     // fd incomplete should never happen, but apparently is somehow...
+                    // fd is store file, shouldn't be returning query hits for it then..
                     continue;
                 } else { // we found a file with the right name
                     res = fileManagerController.createResponse(fd);

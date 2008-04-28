@@ -19,6 +19,7 @@ import junit.framework.Test;
 
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
@@ -545,13 +546,13 @@ public class FWTDetectionTest extends LimeTestCase {
                 RoutedConnectionFactory managedConnectionFactory,
                 Provider<MessageRouter> messageRouter, Provider<QueryUnicaster> queryUnicaster,
                 SocketsManager socketsManager, ConnectionServices connectionServices,
-                Provider<NodeAssigner> nodeAssigner, 
-                 Provider<IPFilter> ipFilter,
-                ConnectionCheckerManager connectionCheckerManager, PingRequestFactory pingRequestFactory) {
-            super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor, simppManager,
-                    capabilitiesVMFactory, managedConnectionFactory, messageRouter, queryUnicaster,
-                    socketsManager, connectionServices, nodeAssigner, ipFilter, connectionCheckerManager,
-                    pingRequestFactory);
+                Provider<NodeAssigner> nodeAssigner, Provider<IPFilter> ipFilter,
+                ConnectionCheckerManager connectionCheckerManager,
+                PingRequestFactory pingRequestFactory, NetworkInstanceUtils networkInstanceUtils) {
+            super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor,
+                    simppManager, capabilitiesVMFactory, managedConnectionFactory, messageRouter,
+                    queryUnicaster, socketsManager, connectionServices, nodeAssigner, ipFilter,
+                    connectionCheckerManager, pingRequestFactory, networkInstanceUtils);
         }
 
         private boolean connected;

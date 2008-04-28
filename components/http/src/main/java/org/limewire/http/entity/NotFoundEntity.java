@@ -3,14 +3,14 @@ package org.limewire.http.entity;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.http.HttpRequest;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.nio.entity.NStringEntity;
 import org.apache.http.protocol.HTTP;
 
 /**
  * An entity that provides a 404 error page in response to a request for a
  * non-existing document.
  */
-public class NotFoundEntity extends StringEntity {
+public class NotFoundEntity extends NStringEntity {
 
     private static final String HTML_TEXT_TYPE = "text/html";
 

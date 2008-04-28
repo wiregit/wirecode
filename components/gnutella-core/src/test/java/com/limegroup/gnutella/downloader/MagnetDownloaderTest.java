@@ -2,16 +2,19 @@ package com.limegroup.gnutella.downloader;
 
 import junit.framework.Test;
 
-import org.limewire.io.LocalSocketAddressService;
+import org.jmock.Mockery;
+import org.limewire.io.LocalSocketAddressProvider;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.name.Names;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.browser.MagnetOptions;
+import com.limegroup.gnutella.dht.db.PushEndpointService;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
@@ -27,6 +30,8 @@ public class MagnetDownloaderTest extends LimeTestCase {
 
 	//private static final Log LOG = LogFactory.getLog(MagnetDownloaderTest.class);
     private DownloadManager downloadManager;
+    private Mockery context;
+    private PushEndpointService pushEndpointService;
 	
     /**
      * Creates a new test instance.
@@ -47,9 +52,11 @@ public class MagnetDownloaderTest extends LimeTestCase {
     
     
     public void setUp() throws Exception {
-        LocalSocketAddressProviderStub localSocketAddressProviderStub = new LocalSocketAddressProviderStub();
+        final LocalSocketAddressProviderStub localSocketAddressProviderStub = new LocalSocketAddressProviderStub();
         localSocketAddressProviderStub.setLocalAddressPrivate(false);
-        LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProviderStub);
+        
+        context = new Mockery();
+        pushEndpointService = context.mock(PushEndpointService.class);
         
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
            @Override
@@ -57,6 +64,8 @@ public class MagnetDownloaderTest extends LimeTestCase {
                bind(FileManager.class).to(FileManagerStub.class);
                bind(MessageRouter.class).to(MessageRouterStub.class);
                bind(ConnectionManager.class).to(ConnectionManagerStub.class);
+               bind(LocalSocketAddressProvider.class).toInstance(localSocketAddressProviderStub);
+               bind(PushEndpointService.class).annotatedWith(Names.named("pushEndpointManager")).toInstance(pushEndpointService);
             } 
         });
         
@@ -141,4 +150,5 @@ public class MagnetDownloaderTest extends LimeTestCase {
 		assertTrue("Should be hash only", opts[0].isHashOnly());
 		downloadManager.download(opts[0], true, null, null);
     }
+
 }

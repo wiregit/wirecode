@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.licenses;
 
+import org.limewire.http.httpclient.LimeHttpClient;
+
 class StubWeedLicense extends WeedLicense {
     
     private final String page;
@@ -13,7 +15,7 @@ class StubWeedLicense extends WeedLicense {
         this.page = page;
     }
     
-    protected String getBodyFromURL(String url) {
+    protected String getBodyFromURL(String url, LimeHttpClient httpClient) {
         return page;
     }
     

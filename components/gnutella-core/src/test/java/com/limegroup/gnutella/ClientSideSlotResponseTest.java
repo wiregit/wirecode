@@ -23,6 +23,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.uploader.HttpRequestHandlerFactory;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
@@ -123,10 +124,14 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         boolean isServiceable, mayBeServiceable;
     	
         @Inject
-        UploadManagerStub(UploadSlotManager slotManager, HttpRequestHandlerFactory httpRequestHandlerFactory, Provider<ContentManager> contentManager,
-                Provider<HTTPAcceptor> httpAcceptor, Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback) {
-            super(slotManager, httpRequestHandlerFactory, contentManager, httpAcceptor, fileManager, activityCallback);
-    	}
+        UploadManagerStub(UploadSlotManager slotManager,
+                HttpRequestHandlerFactory httpRequestHandlerFactory,
+                Provider<ContentManager> contentManager, Provider<HTTPAcceptor> httpAcceptor,
+                Provider<FileManager> fileManager, Provider<ActivityCallback> activityCallback,
+                TcpBandwidthStatistics tcpBandwidthStatistics) {
+            super(slotManager, httpRequestHandlerFactory, contentManager, httpAcceptor,
+                    fileManager, activityCallback, tcpBandwidthStatistics);
+        }
 		@Override
 		public synchronized boolean isServiceable() {
 			return isServiceable;

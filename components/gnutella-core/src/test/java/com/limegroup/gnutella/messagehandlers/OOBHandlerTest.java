@@ -861,6 +861,12 @@ public class OOBHandlerTest extends BaseTestCase {
                 Response[] responses, QueryRequest queryRequest) {
             return null;
         }
+        
+        public Iterable<QueryReply> responsesToQueryReplies(
+                Response[] responses, QueryRequest queryRequest,
+                int num, SecurityToken tok) {
+            return null;
+        }
 
         public void sendDynamicQuery(QueryRequest query) {
         }

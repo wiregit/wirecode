@@ -1,7 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
-import java.nio.channels.SelectableChannel;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -10,33 +8,27 @@ import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.AbstractLazySingletonProvider;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.SimpleTimer;
+import org.limewire.geocode.LimewireGeocodeModule;
 import org.limewire.http.LimeWireHttpModule;
 import org.limewire.inject.AbstractModule;
 import org.limewire.inspection.Inspector;
 import org.limewire.inspection.InspectorImpl;
+import org.limewire.io.LimeWireIOModule;
 import org.limewire.io.LocalSocketAddressProvider;
-import org.limewire.io.LocalSocketAddressService;
-import org.limewire.io.Pools;
+import org.limewire.mojito.LimeWireMojitoModule;
 import org.limewire.mojito.io.MessageDispatcherFactory;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.ConnectionDispatcherImpl;
 import org.limewire.net.LimeWireNetModule;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.NIODispatcher;
-import org.limewire.rudp.DefaultUDPSelectorProviderFactory;
-import org.limewire.rudp.RUDPContext;
-import org.limewire.rudp.RUDPSettings;
-import org.limewire.rudp.UDPMultiplexor;
-import org.limewire.rudp.UDPSelectorProvider;
-import org.limewire.rudp.UDPSelectorProviderFactory;
-import org.limewire.rudp.UDPService;
-import org.limewire.rudp.messages.RUDPMessageFactory;
-import org.limewire.rudp.messages.impl.DefaultMessageFactory;
+import org.limewire.promotion.LimeWirePromotionModule;
 import org.limewire.security.SecureMessageVerifier;
 import org.limewire.security.SecureMessageVerifierImpl;
 import org.limewire.security.SecurityToken;
 import org.limewire.security.SettingsProvider;
-import org.limewire.statistic.StatisticsManager;
+import org.limewire.security.certificate.LimeWireSecurityCertificateModule;
+import org.limewire.statistic.LimeWireStatisticsModule;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -48,6 +40,8 @@ import com.limegroup.bittorrent.BTConnectionFactory;
 import com.limegroup.bittorrent.BTConnectionFactoryImpl;
 import com.limegroup.bittorrent.BTContextFactory;
 import com.limegroup.bittorrent.BTContextFactoryImpl;
+import com.limegroup.bittorrent.BTMetaInfoFactory;
+import com.limegroup.bittorrent.BTMetaInfoFactoryImpl;
 import com.limegroup.bittorrent.BTUploaderFactory;
 import com.limegroup.bittorrent.BTUploaderFactoryImpl;
 import com.limegroup.bittorrent.ManagedTorrentFactory;
@@ -55,8 +49,13 @@ import com.limegroup.bittorrent.ManagedTorrentFactoryImpl;
 import com.limegroup.bittorrent.TorrentEvent;
 import com.limegroup.bittorrent.TorrentEventListener;
 import com.limegroup.bittorrent.TorrentManager;
+import com.limegroup.bittorrent.TorrentManagerImpl;
 import com.limegroup.bittorrent.choking.ChokerFactory;
 import com.limegroup.bittorrent.choking.ChokerFactoryImpl;
+import com.limegroup.bittorrent.dht.DHTPeerLocator;
+import com.limegroup.bittorrent.dht.DHTPeerLocatorImpl;
+import com.limegroup.bittorrent.dht.DHTPeerPublisher;
+import com.limegroup.bittorrent.dht.DHTPeerPublisherImpl;
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactory;
 import com.limegroup.bittorrent.handshaking.BTConnectionFetcherFactoryImpl;
 import com.limegroup.bittorrent.tracking.TrackerFactory;
@@ -93,8 +92,10 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerImpl;
 import com.limegroup.gnutella.dht.DHTNodeFetcherFactory;
 import com.limegroup.gnutella.dht.DHTNodeFetcherFactoryImpl;
+import com.limegroup.gnutella.dht.LimeWireDHTModule;
 import com.limegroup.gnutella.dht.db.AltLocValueFactory;
 import com.limegroup.gnutella.dht.db.AltLocValueFactoryImpl;
+import com.limegroup.gnutella.dht.db.PushEndpointService;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.dht.db.PushProxiesValueFactoryImpl;
 import com.limegroup.gnutella.dht.io.LimeMessageDispatcherFactoryImpl;
@@ -105,6 +106,7 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.LocalIPFilter;
 import com.limegroup.gnutella.filters.SpamFilterFactory;
 import com.limegroup.gnutella.filters.SpamFilterFactoryImpl;
+import com.limegroup.gnutella.geocode.GeocoderImpl;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponderFactoryImpl;
 import com.limegroup.gnutella.handshaking.HandshakeServices;
@@ -146,10 +148,9 @@ import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactoryImpl;
 import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinder;
 import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinderImpl;
-import com.limegroup.gnutella.rudp.LimeRUDPContext;
-import com.limegroup.gnutella.rudp.LimeRUDPSettings;
-import com.limegroup.gnutella.rudp.LimeUDPService;
-import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageFactory;
+import com.limegroup.gnutella.metadata.MetaDataFactory;
+import com.limegroup.gnutella.metadata.MetaDataFactoryImpl;
+import com.limegroup.gnutella.rudp.LimeWireGnutellaRudpModule;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.HostDataFactoryImpl;
 import com.limegroup.gnutella.search.LimeWireSearchModule;
@@ -159,6 +160,7 @@ import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
 import com.limegroup.gnutella.settings.SettingsBackedProxySettings;
 import com.limegroup.gnutella.settings.SettingsBackedSocketBindingSettings;
+import com.limegroup.gnutella.statistics.LimeWireGnutellaStatisticsModule;
 import com.limegroup.gnutella.tigertree.LimeWireHashTreeModule;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactoryImpl;
@@ -176,7 +178,6 @@ import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.version.UpdateHandlerImpl;
 import com.limegroup.gnutella.version.UpdateMessageVerifier;
 import com.limegroup.gnutella.version.UpdateMessageVerifierImpl;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactoryImpl;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
@@ -210,7 +211,18 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireHashTreeModule());
         binder().install(new LimeWireSearchModule());
         
+        binder().install(new LimeWireHashTreeModule());        
+        binder().install(new LimeWireDHTModule());
         binder().install(new LimeWireHttpModule());
+        binder().install(new LimeWireStatisticsModule());
+        binder().install(new LimeWireGnutellaStatisticsModule());
+        binder().install(new LimeWireGnutellaRudpModule());
+        binder().install(new LimeWireIOModule());
+        binder().install(new LimeWireMojitoModule());
+        binder().install(new LimeWireSecurityCertificateModule());
+        binder().install(new LimewireGeocodeModule(GeocoderImpl.class));        
+        binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, 
+                PromotionServicesImpl.class));
         
         bind(LimeWireCore.class);
         
@@ -247,14 +259,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(QueryReplyFactory.class).to(QueryReplyFactoryImpl.class);
         bind(MessageDispatcherFactory.class).to(LimeMessageDispatcherFactoryImpl.class);
         bind(CapabilitiesVMFactory.class).to(CapabilitiesVMFactoryImpl.class);
-        bind(UDPSelectorProviderFactory.class).to(DefaultUDPSelectorProviderFactory.class);
-        bind(RUDPContext.class).to(LimeRUDPContext.class);
-        bind(UDPSelectorProvider.class).toProvider(DefaultUDPSelectorProviderFactory.class);
-        bind(UDPMultiplexor.class).toProvider(UDPMultiplexorProvider.class);
-        bind(UDPService.class).to(LimeUDPService.class);
-        bind(RUDPMessageFactory.class).to(LimeRUDPMessageFactory.class);
-        bind(RUDPSettings.class).to(LimeRUDPSettings.class);
-        bind(RUDPMessageFactory.class).annotatedWith(Names.named("delegate")).to(DefaultMessageFactory.class);
         bind(BTContextFactory.class).to(BTContextFactoryImpl.class);
         bind(LifecycleManager.class).to(LifecycleManagerImpl.class);
         bind(LocalPongInfo.class).to(LocalPongInfoImpl.class);
@@ -281,6 +285,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(GuidMapManager.class).to(GuidMapManagerImpl.class);
         bind(BrowseHostHandlerManager.class).to(BrowseHostHandlerManagerImpl.class);
         bind(PushEndpointCache.class).to(PushEndpointCacheImpl.class);
+        bind(PushEndpointService.class).annotatedWith(Names.named("pushEndpointCache")).to(PushEndpointCacheImpl.class);
         bind(FileResponseEntityFactory.class).to(FileResponseEntityFactoryImpl.class);
         bind(MessageFactory.class).to(MessageFactoryImpl.class);
         bind(MessageReaderFactory.class).to(MessageReaderFactoryImpl.class);
@@ -292,6 +297,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(LimeXMLReplyCollectionFactory.class).to(LimeXMLReplyCollectionFactoryImpl.class);
         bind(LicenseFactory.class).to(LicenseFactoryImpl.class);
         bind(LimeXMLDocumentFactory.class).to(LimeXMLDocumentFactoryImpl.class);
+        bind(MetaDataFactory.class).to(MetaDataFactoryImpl.class);
         bind(InstantMessengerFactory.class).to(InstantMessengerFactoryImpl.class);
         bind(SaveLocationManager.class).to(DownloadManager.class);
         bind(BTUploaderFactory.class).to(BTUploaderFactoryImpl.class);
@@ -315,6 +321,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(IPFilter.class).annotatedWith(Names.named("hostileFilter")).to(HostileFilter.class);
         bind(UploadSlotManager.class).to(UploadSlotManagerImpl.class);
         bind(new TypeLiteral<EventDispatcher<TorrentEvent, TorrentEventListener>>(){}).to(TorrentManager.class);
+        bind(TorrentManager.class).to(TorrentManagerImpl.class);
         bind(BandwidthManager.class).to(BandwidthManagerImpl.class);
         bind(SecureMessageVerifier.class).toProvider(SecureMessageVerifierProvider.class);
         bind(SecureMessageVerifier.class).annotatedWith(Names.named("inspection")).toProvider(InspectionVerifierProvider.class);
@@ -328,25 +335,22 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(ConnectionManager.class).to(ConnectionManagerImpl.class);
         bind(MessageHandlerBinder.class).to(MessageHandlerBinderImpl.class);
         bind(QueryDispatcher.class).to(QueryDispatcherImpl.class);
+        bind(DHTPeerPublisher.class).to(DHTPeerPublisherImpl.class);
+        bind(DHTPeerLocator.class).to(DHTPeerLocatorImpl.class);
         bind(Acceptor.class).to(AcceptorImpl.class);        
         bind(UpdateHandler.class).to(UpdateHandlerImpl.class);
         bind(SecurityToken.TokenProvider.class).to(SecurityToken.AddressSecurityTokenProvider.class);
         bind(UpdateMessageVerifier.class).to(UpdateMessageVerifierImpl.class);
         bind(InspectionResponseFactory.class).to(InspectionResponseFactoryImpl.class);
         bind(FECUtils.class).to(FECUtilsImpl.class);
+        bind(NodeAssigner.class).to(NodeAssignerImpl.class);
+        bind(BTMetaInfoFactory.class).to(BTMetaInfoFactoryImpl.class);
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
         bindAll(Names.named("dhtExecutor"), ExecutorService.class, DHTExecutorProvider.class, Executor.class);
         bindAll(Names.named("messageExecutor"), ExecutorService.class, MessageExecutorProvider.class, Executor.class);
         bindAll(Names.named("nioExecutor"), ScheduledExecutorService.class, NIOScheduledExecutorServiceProvider.class, ExecutorService.class, Executor.class);
-
-        // TODO: statically injecting these for now...
-        requestStaticInjection(UDPSelectorProvider.class);  // This one might need to stay
-        requestStaticInjection(LimeXMLDocument.class);
-        requestStaticInjection(StatisticsManager.class);
-        requestStaticInjection(Pools.class);
-        requestStaticInjection(LocalSocketAddressService.class);
                         
         // TODO: This is odd -- move to initialize & LifecycleManager?
         bind(Statistics.class).asEagerSingleton();
@@ -360,60 +364,16 @@ public class LimeWireCoreModule extends AbstractModule {
     private static class SecureMessageVerifierProvider extends AbstractLazySingletonProvider<SecureMessageVerifier> {
         @Override
         protected SecureMessageVerifier createObject() {
-            return new SecureMessageVerifierImpl("GCBADOBQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7" +
-                    "VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5" +
-                    "RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O" +
-                    "5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV" +
-                    "37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2B" +
-                    "BOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOE" +
-                    "EBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7Y" +
-                    "L7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76" +
-                    "Z5ESUA4BQUAAFAMBACDW4TNFXK772ZQN752VPKQSFXJWC6PPSIVTHKDNLRUIQ7UF" +
-                    "4J2NF6J2HC5LVC4FO4HYLWEWSB3DN767RXILP37KI5EDHMFAU6HIYVQTPM72WC7FW" +
-                    "SAES5K2KONXCW65VSREAPY7BF24MX72EEVCZHQOCWHW44N4RG5NPH2J4EELDPXMNR" +
-                    "WNYU22LLSAMBUBKW3KU4QCQXG7NNY", null);    
+            return new SecureMessageVerifierImpl("GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAHR2O6ZOZA4SFMDNGGUC7PDA7W7HMUGEA32R7SCKAANQXFWMOD6KJE43YM53HIPVADVKFL5FA6MKL5GHTBHIURAWGGQTXPEGPLXB7KYTMC6TAPUPFYGNWB4THDQVN4PDARIU3UGXQKFHNAQFL6TUJBA6KXTBLAJBSXD54J6NUVIECRUOA7R57AH6GWGO7VOBDRTIYBXPSY7FTI",
+                        null);    
         }
     };
     
     @Singleton
     private static class InspectionVerifierProvider extends AbstractLazySingletonProvider<SecureMessageVerifier> {
         protected SecureMessageVerifier createObject() {
-            return new SecureMessageVerifierImpl("GCBADOBQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA" +
-                    "7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WW" +
-                    "J5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7" +
-                    "O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37" +
-                    "SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655" +
-                    "S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2" +
-                    "ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7" +
-                    "IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76" +
-                    "Z5ESUA4BQUAAFAMBACDJO4PTIV3332EWTALOMF5V3RO5BVEMHPVD4INLMQRIZ5" +
-                    "PW5RS7QJUGSINVNG4OTDO4FWJY5C3MQBQP7DXNOPQFJAVBCUE2VG3HWA34FPSLRIYBBGQVSQDQTQUS4" +
-                    "T6HW3OQNG2DPVGCIIWTCK6XMW3SK6PEQBWH6MIAL4FX3OYVWRG2ZKVBHBMJ564CKEPYDW3" +
-                    "TJRPIU4UA24I", null);
-        }
-    }
-    
-    @Singleton
-    private static class UDPMultiplexorProvider extends AbstractLazySingletonProvider<UDPMultiplexor> {
-        private final UDPSelectorProvider provider;
-        private final NIODispatcher nioDispatcher;
-        
-        @Inject
-        public UDPMultiplexorProvider(UDPSelectorProvider provider,
-                NIODispatcher nioDispatcher) {
-            this.provider = provider;
-            this.nioDispatcher = nioDispatcher;
-        }
-        
-        @Override
-        protected UDPMultiplexor createObject() {
-            UDPMultiplexor multiplexor = provider.openSelector();
-            SelectableChannel socketChannel = provider.openSocketChannel();
-            try {
-                socketChannel.close();
-            } catch(IOException ignored) {}
-            nioDispatcher.registerSelector(multiplexor, socketChannel.getClass());
-            return multiplexor;
+            return new SecureMessageVerifierImpl("GCBADNZQQIASYBQHFKDERTRYAQATBAQBD4BIDAIA7V7VHAI5OUJCSUW7JKOC53HE473BDN2SHTXUIAGDDY7YBNSREZUUKXKAEJI7WWJ5RVMPVP6F6W5DB5WLTNKWZV4BHOAB2NDP6JTGBN3LTFIKLJE7T7UAI6YQELBE7O5J277LPRQ37A5VPZ6GVCTBKDYE7OB7NU6FD3BQENKUCNNBNEJS6Z27HLRLMHLSV37SEIBRTHORJAA4OAQVACLWAUEPCURQXTFSSK4YFIXLQQF7AWA46UBIDAIA67Q2BBOWTM655S54VNODNOCXXF4ZJL537I5OVAXZK5GAWPIHQJTVCWKXR25NIWKP4ZYQOEEBQC2ESFTREPUEYKAWCO346CJSRTEKNYJ4CZ5IWVD4RUUOBI5ODYV3HJTVSFXKG7YL7IQTKYXR7NRHUAJEHPGKJ4N6VBIZBCNIQPP6CWXFT4DJFC3GL2AHWVJFMQAUYO76Z5ESUA4BQQAAFAMAEYRDUD6O2YID3ORGATJV7UQLUEJORGPY4ETQUH3SKDGITTQENVN6IRZBDJOUZLD6UKX2APFEEA6IJVMCURT4VWBICX5L7GKAUYU325AMMNR7PW6GWGXHR24D5HVTIO6JZ2VRMTOIE7GIZPINPOJXWYDUZQG57ZVBII6XHW2KGITQKQLODJTZGRJHELY6BRXL7VHHQDGCIBWYU",
+                        null);
         }
     }
     

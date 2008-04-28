@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
+
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
 
 /**
  * Vendor message that toggles collecting of advanced stats on or off.

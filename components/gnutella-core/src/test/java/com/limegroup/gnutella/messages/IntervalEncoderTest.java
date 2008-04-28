@@ -4,6 +4,8 @@ import junit.framework.Test;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.io.GGEP;
+import org.limewire.util.Base32;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -224,6 +226,13 @@ public class IntervalEncoderTest extends LimeTestCase {
         assertEquals(1,decoded.getNumberOfIntervals());
         assertEquals(0,decoded.getFirst().getLow());
         assertEquals(1023,decoded.getFirst().getHigh());
+        
+        String encoded = "AEBAIBAQCAA4IAAAAAAA";
+        byte [] pr3 = Base32.decode(encoded);
+        g = new GGEP();
+        g.put("PR3",pr3);
+        IntervalEncoder.decode(734147846L, g);
+        // if it didn't throw fix works.
     }
     
 

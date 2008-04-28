@@ -43,7 +43,7 @@ package org.limewire.statistic;
  */
 public abstract class BasicStatistic extends AbstractStatistic {
 
-	protected BasicStatistic() {
-		StatisticsManager.instance().addBasicStatistic(this);
+	protected BasicStatistic(StatisticAccumulator statisticAccumulator) {
+		statisticAccumulator.addBasicStatistic(this);
 	}
 }

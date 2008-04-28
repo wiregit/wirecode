@@ -4,6 +4,7 @@ import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
@@ -145,6 +146,33 @@ public class SharingUtils {
     
     public static boolean isApplicationSpecialShareDirectory(File directory) {
         return directory.equals(SharingUtils.APPLICATION_SPECIAL_SHARE);
+    }
+
+    /**
+     * Returns true if this folder should never be a shared or saved folder.
+     */
+    public static boolean isFolderBanned(File folder) {        
+        //  check for system roots
+        File[] faRoots = File.listRoots();
+        if (faRoots != null && faRoots.length > 0) {
+            for (int i = 0; i < faRoots.length; i++) {
+                if (folder.equals(faRoots[i]))
+                    return true;
+            }
+        }
+        
+        // Check for the folder name being 'Cookies', or 'Cookies\Low' [vista]
+        // TODO: Make sure this is i18n-safe
+        String name = folder.getName().toLowerCase(Locale.US);
+        if(name.equals("cookies"))
+            return true;
+        else if(name.equals("low")) {
+            String parent = folder.getParent();
+            if(parent != null && parent.toLowerCase(Locale.US).equals("cookies"))
+                return true;
+        }
+        
+        return false;
     }
     
 }

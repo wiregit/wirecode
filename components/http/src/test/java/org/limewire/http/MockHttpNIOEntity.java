@@ -6,7 +6,11 @@ package org.limewire.http;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-public class MockHttpNIOEntity extends AbstractHttpNIOEntity {
+import org.apache.http.nio.ContentEncoder;
+import org.apache.http.nio.IOControl;
+import org.limewire.http.entity.AbstractProducingNHttpEntity;
+
+public class MockHttpNIOEntity extends AbstractProducingNHttpEntity {
 
     IOException exception;
     
@@ -27,8 +31,7 @@ public class MockHttpNIOEntity extends AbstractHttpNIOEntity {
         this.contentLength = data.length();
     }
     
-    @Override
-    public void finished() {
+    public void finish() {
         this.finished = true;
     }
 
@@ -38,17 +41,17 @@ public class MockHttpNIOEntity extends AbstractHttpNIOEntity {
     }
 
     @Override
-    public boolean handleWrite() throws IOException {
+    public boolean writeContent(ContentEncoder contentEncoder, IOControl ioctrl) throws IOException {
         if (exception != null) {
             throw new IOException();
         }
-        write(ByteBuffer.wrap(data.getBytes(), transferred, 1));
+        contentEncoder.write(ByteBuffer.wrap(data.getBytes(), transferred, 1));
         transferred++;
         return transferred < contentLength;
     }
 
     @Override
-    public void initialize() throws IOException {
+    public void initialize(ContentEncoder contentEncoder, IOControl ioctrl) throws IOException {
         initialized = true;
     }
 

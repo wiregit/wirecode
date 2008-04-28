@@ -31,7 +31,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.routing.Contact;
@@ -39,6 +41,8 @@ import org.limewire.mojito.routing.ContactFactory;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.impl.LocalContact;
+
+import com.google.inject.Inject;
 
 
 /**
@@ -48,6 +52,13 @@ public final class ContactUtils {
 
     private static final Log LOG = LogFactory.getLog(ContactUtils.class);
     
+    @Inject
+    private static volatile NetworkInstanceUtils networkInstanceUtils = new SimpleNetworkInstanceUtils();
+    
+    public static void setNetworkInstanceUtils(NetworkInstanceUtils networkInstanceUtils) {
+        ContactUtils.networkInstanceUtils = networkInstanceUtils;
+    }
+
     /**
      * A helper method to compare longs.
      */
@@ -165,7 +176,7 @@ public final class ContactUtils {
      * LOCAL_IS_PRIVATE to false!
      */
     public static boolean isPrivateAddress(InetAddress addr) {
-        return NetworkUtils.isPrivateAddress(addr);
+        return networkInstanceUtils.isPrivateAddress(addr);
     }
     
     /**
@@ -177,7 +188,7 @@ public final class ContactUtils {
      * LOCAL_IS_PRIVATE to false!
      */
     public static boolean isPrivateAddress(SocketAddress address) {
-        return NetworkUtils.isPrivateAddress(address);
+        return networkInstanceUtils.isPrivateAddress(address);
     }
     
     /**

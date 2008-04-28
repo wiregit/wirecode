@@ -29,13 +29,11 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.statistics.DownloadStat;
-import com.limegroup.gnutella.statistics.NumericalDownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.MultiShutdownable;
 
 /**
- * Class that performs the logic of downloading a file from a single host.
+ * Performs the logic of downloading a file from a single host.
  */
 public class DownloadWorker {
     /*
@@ -65,7 +63,7 @@ public class DownloadWorker {
      * beginDownload, handleQueued, or finishHttpLoop
      * 
      * Each 'if needed' method can return true or false. True means that an
-     * operation is being performend and upon success or failure the state
+     * operation is being performed and upon success or failure the state
      * machine will continue. Success generally calls incrementState again to
      * move to the next state. Failure generally calls finishHttpLoop to stop
      * the download. False means the operation does not need to be performed and
@@ -121,7 +119,7 @@ public class DownloadWorker {
     private static final int MIN_SPLIT_SIZE = 16 * 1024; // 16 KB
 
     /**
-     * The lowest (cumulative) bandwith we will accept without stealing the
+     * The lowest (cumulative) bandwidth we will accept without stealing the
      * entire grey area from a downloader for a new one
      */
     private static final float MIN_ACCEPTABLE_SPEED = DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC
@@ -194,6 +192,7 @@ public class DownloadWorker {
     private final RemoteFileDesc _rfd;
 
     private final VerifyingFile _commonOutFile;
+    private final DownloadStatsTracker statsTracker;
 
     /**
      * Whether I was interrupted before starting
@@ -201,15 +200,17 @@ public class DownloadWorker {
     private final AtomicBoolean _interrupted = new AtomicBoolean(false);
 
     /**
-     * The downloader that will do the actual downloading TODO: un-volatilize
-     * after fixing the assertion failures
+     * The downloader that will do the actual downloading 
      */
+     //TODO: un-volatilize after fixing the assertion failures
+     
     private volatile HTTPDownloader _downloader;
 
     /**
-     * Whether I should release the ranges that I have leased for download TODO:
-     * un-volatilize after fixing the assertion failures
-     */
+     * Whether I should release the ranges that I have leased for download 
+     */ 
+     //TODO: un-volatilize after fixing the assertion failures
+     
     private volatile boolean _shouldRelease;
 
     /**
@@ -240,7 +241,8 @@ public class DownloadWorker {
             ScheduledExecutorService backgroundExecutor,
             ScheduledExecutorService nioExecutor,
             Provider<PushDownloadManager> pushDownloadManager,
-            SocketsManager socketsManager) {
+            SocketsManager socketsManager,
+            DownloadStatsTracker statsTracker) {
         this.httpDownloaderFactory = httpDownloaderFactory;
         this.backgroundExecutor = backgroundExecutor;
         this.nioExecutor = nioExecutor;
@@ -249,6 +251,7 @@ public class DownloadWorker {
         _manager = manager;
         _rfd = rfd;
         _commonOutFile = vf;
+        this.statsTracker = statsTracker;
         _currentState = new DownloadState();
 
         // if we'll be debugging, we want to distinguish the different workers
@@ -376,8 +379,6 @@ public class DownloadWorker {
 
     /**
      * Handles a failure of an RFD.
-     * 
-     * @param rfd
      */
     private void handleRFDFailure() {
         _rfd.incrementFailedCount();
@@ -445,7 +446,7 @@ public class DownloadWorker {
      * either finish the download (if an error occurred) or move to the next
      * state.
      * 
-     * A succesful download will reset the failed count on the RFD. A
+     * A successful download will reset the failed count on the RFD. A
      * DiskException while downloading will notify the manager of a problem.
      */
     private void beginDownload() {
@@ -454,15 +455,7 @@ public class DownloadWorker {
                 protected void handleState(boolean success) {
                     if (success) {
                         _rfd.resetFailedCount();
-                        if (_currentState.isHttp11())
-                            DownloadStat.SUCCESSFUL_HTTP11.incrementStat();
-                        else
-                            DownloadStat.SUCCESSFUL_HTTP10.incrementStat();
                     } else {
-                        if (_currentState.isHttp11())
-                            DownloadStat.FAILED_HTTP11.incrementStat();
-                        else
-                            DownloadStat.FAILED_HTTP10.incrementStat();
                         _manager.workerFailed(DownloadWorker.this);
                     }
 
@@ -619,7 +612,7 @@ public class DownloadWorker {
         // make sure that we're not in _downloaders if we're
         // sleeping/queued. this would ONLY be possible
         // if some uploader was misbehaved and queued
-        // us after we succesfully managed to download some
+        // us after we successfully managed to download some
         // information. despite the rarity of the situation,
         // we should be prepared.
         _manager.removeActiveWorker(this);
@@ -661,7 +654,7 @@ public class DownloadWorker {
      * 
      * This will return immediately, scheduling callbacks for the connection
      * events. The appropriate ConnectObserver (Push or Direct) will be notified
-     * via handleConnect if succesful or shutdown if not. From there, the rest
+     * via handleConnect if successful or shutdown if not. From there, the rest
      * of the download may start.
      */
     private void establishConnection() {
@@ -675,7 +668,7 @@ public class DownloadWorker {
             return;
         }
 
-        final boolean needsPush = _rfd.needsPush();
+        final boolean needsPush = _rfd.needsPush(statsTracker);
 
         synchronized (_manager) {
             DownloadStatus state = _manager.getState();
@@ -700,8 +693,8 @@ public class DownloadWorker {
             LOG.debug("WORKER: attempting connect to " + _rfd.getHost() + ":"
                     + _rfd.getPort());
 
+        // TODO move to DownloadStatsTracker?
         _manager.incrementTriedHostsCount();
-        DownloadStat.CONNECTION_ATTEMPTS.incrementStat();
 
         if (_rfd.isReplyToMulticast()) {
             // Start with a push connect, fallback to a direct connect, and do
@@ -820,9 +813,6 @@ public class DownloadWorker {
      * Assigns a white area or a grey area to a downloader. Sets the state, and
      * checks if this downloader has been interrupted.
      * 
-     * @param _downloader The downloader to which this method assigns either a
-     *        grey area or white area.
-     * @return the ConnectionStatus.
      */
     private boolean assignAndRequest() {
         if (LOG.isTraceEnabled())
@@ -899,7 +889,6 @@ public class DownloadWorker {
                 completeAssignGrey(victim, range);
 
         } catch (NoSuchElementException nsex) {
-            DownloadStat.NSE_EXCEPTION.incrementStat();
             LOG.debug(_downloader, nsex);
 
             return handleNoMoreDownloaders();
@@ -910,55 +899,46 @@ public class DownloadWorker {
             return handleNoRanges();
 
         } catch (TryAgainLaterException talx) {
-            DownloadStat.TAL_EXCEPTION.incrementStat();
             LOG.debug(_downloader, talx);
 
             return handleTryAgainLater();
 
         } catch (RangeNotAvailableException rnae) {
-            DownloadStat.RNA_EXCEPTION.incrementStat();
             LOG.debug(_downloader, rnae);
 
             return handleRangeNotAvailable();
 
         } catch (FileNotFoundException fnfx) {
-            DownloadStat.FNF_EXCEPTION.incrementStat();
             LOG.debug(_downloader, fnfx);
 
             return handleFileNotFound();
 
         } catch (NotSharingException nsx) {
-            DownloadStat.NS_EXCEPTION.incrementStat();
             LOG.debug(_downloader, nsx);
 
             return handleNotSharing();
 
         } catch (QueuedException qx) {
-            DownloadStat.Q_EXCEPTION.incrementStat();
             LOG.debug(_downloader, qx);
 
             return handleQueued(qx.getQueuePosition(), qx.getMinPollTime());
 
         } catch (ProblemReadingHeaderException prhe) {
-            DownloadStat.PRH_EXCEPTION.incrementStat();
             LOG.debug(_downloader, prhe);
 
             return handleProblemReadingHeader();
 
         } catch (UnknownCodeException uce) {
-            DownloadStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
             LOG.debug(_downloader, uce);
 
             return handleUnknownCode();
 
         } catch (ContentUrnMismatchException cume) {
-            DownloadStat.CONTENT_URN_MISMATCH_EXCEPTION.incrementStat();
             LOG.debug(_downloader, cume);
 
             return ConnectionStatus.getNoFile();
 
         } catch (IOException iox) {
-            DownloadStat.IO_EXCEPTION.incrementStat();
             LOG.debug(_downloader, iox);
 
             return handleIO();
@@ -966,10 +946,6 @@ public class DownloadWorker {
         }
 
         // did not throw exception? OK. we are downloading
-        DownloadStat.RESPONSE_OK.incrementStat();
-        if (_rfd.getFailedCount() > 0)
-            DownloadStat.RETRIED_SUCCESS.incrementStat();
-
         _rfd.resetFailedCount();
 
         synchronized (_manager) {
@@ -1070,8 +1046,6 @@ public class DownloadWorker {
 
     /**
      * picks an unclaimed interval from the verifying file
-     * 
-     * @param http11 whether the downloader is http 11
      * 
      * @throws NoSuchRangeException if the remote host is partial and doesn't
      *         have the ranges we need
@@ -1187,10 +1161,6 @@ public class DownloadWorker {
     /**
      * Completes assigning a grey portion to a downloader. This accounts for
      * changes in the victim's downloaded range while we were requesting.
-     * 
-     * @param victim
-     * @param slowestRange
-     * @throws IOException
      */
     private void completeAssignGrey(DownloadWorker victim, Range slowestRange)
             throws IOException {
@@ -1351,7 +1321,6 @@ public class DownloadWorker {
     /**
      * Returns true if the victim is going below minimum speed.
      * 
-     * @return
      */
     boolean isSlow() {
         float ourSpeed = getOurSpeed();
@@ -1373,7 +1342,7 @@ public class DownloadWorker {
      * The file does not have such ranges
      */
     private ConnectionStatus handleNoRanges() {
-        // forget the ranges we are preteding uploader is busy.
+        // forget the ranges we are pretending uploader is busy.
         _rfd.setAvailableRanges(null);
 
         // if this RFD did not already give us a retry-after header
@@ -1509,8 +1478,6 @@ public class DownloadWorker {
 
     /**
      * Starts a new thread that will perform the download.
-     * 
-     * @param dl
      */
     private void startDownload(HTTPDownloader dl) {
         _downloader = dl;
@@ -1538,7 +1505,7 @@ public class DownloadWorker {
 
     /**
      * A simple IOStateObserver that will increment state upon completion and
-     * finish on close/shutdown, but offer the abillity for something to be done
+     * finish on close/shutdown, but offer the ability for something to be done
      * prior to moving on in each case.
      */
     private abstract class State implements IOStateObserver {
@@ -1583,9 +1550,6 @@ public class DownloadWorker {
          * call _manager.forgetRFD(_rfd) if the push fails. If
          * directConnectOnFailure is true, this will attempt a direct connection
          * if the push fails. Upon success, this will always start the download.
-         * 
-         * @param forgetOnFailure
-         * @param directConnectOnFailure
          */
         PushConnector(boolean forgetOnFailure, boolean directConnectOnFailure) {
             this.forgetOnFailure = forgetOnFailure;
@@ -1607,11 +1571,8 @@ public class DownloadWorker {
                     _manager instanceof InNetworkDownloader);
             try {
                 dl.initializeTCP();
-                DownloadStat.CONNECT_PUSH_SUCCESS.incrementStat();
+                statsTracker.successfulPushConnect();
             } catch (IOException iox) {
-                // LOG.debug(_rfd + " -- IOX after starting connected from
-                // PushConnector.");
-                DownloadStat.PUSH_FAILURE_LOST.incrementStat();
                 failed();
                 return;
             }
@@ -1626,6 +1587,7 @@ public class DownloadWorker {
 
         /** Notification that the push failed. */
         public void shutdown() {
+            statsTracker.failedPushConnect();
             // if it was already shutdown, don't shutdown again.
             if (shutdown.getAndSet(true))
                 return;
@@ -1633,8 +1595,6 @@ public class DownloadWorker {
             Shutdownable canceller = toCancel;
             if (canceller != null)
                 canceller.shutdown();
-            // LOG.debug(_rfd + " -- Handling shutdown from PushConnector");
-            DownloadStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
             failed();
         }
 
@@ -1666,8 +1626,6 @@ public class DownloadWorker {
      * A ConnectObserver for starting the download via a direct connect.
      */
     private class DirectConnector extends HTTPConnectObserver {
-        private long createTime = System.currentTimeMillis();
-
         private boolean pushConnectOnFailure;
 
         private Socket connectingSocket;
@@ -1678,29 +1636,24 @@ public class DownloadWorker {
          * Creates a new DirectConnection. If pushConnectOnFailure is true, this
          * will attempt a push connection if the direct connect fails. Upon
          * success, this will always start a new download.
-         * 
-         * @param pushConnectOnFailure
          */
         DirectConnector(boolean pushConnectOnFailure) {
             this.pushConnectOnFailure = pushConnectOnFailure;
         }
 
         /**
-         * Upon succesful connect, create the HTTPDownloader with the right
+         * Upon successful connect, create the HTTPDownloader with the right
          * socket, and proceed to continue downloading.
          */
         public void handleConnect(Socket socket) {
             this.connectingSocket = null;
 
-            // LOG.debug(_rfd + " -- Handling connect from DirectConnector");
-            NumericalDownloadStat.TCP_CONNECT_TIME.addData((int) (System
-                    .currentTimeMillis() - createTime));
-            DownloadStat.CONNECT_DIRECT_SUCCESS.incrementStat();
             HTTPDownloader dl = httpDownloaderFactory.create(socket, _rfd, _commonOutFile,
                     _manager instanceof InNetworkDownloader);
             try {
                 dl.initializeTCP(); // already connected, timeout doesn't
                                     // matter.
+                statsTracker.successfulDirectConnect();
             } catch (IOException iox) {
                 shutdown(); // if it immediately IOX's, try a push instead.
                 return;
@@ -1710,16 +1663,16 @@ public class DownloadWorker {
         }
 
         /**
-         * Upon unsuccesful connect, try using a push (if pushConnectOnFailure
+         * Upon unsuccessful connect, try using a push (if pushConnectOnFailure
          * is true).
          */
         public void shutdown() {
+            statsTracker.failedDirectConnect();
             this.shutdown = true;
             this.connectingSocket = null;
 
-            // LOG.debug(_rfd + " -- Handling shutdown from DirectConnnector");
-            DownloadStat.CONNECT_DIRECT_FAILURES.incrementStat();
             if (pushConnectOnFailure) {
+                statsTracker.increment(DownloadStatsTracker.PushReason.DIRECT_FAILED);
                 connectWithPush(new PushConnector(false, false));
             } else {
                 finishConnect();

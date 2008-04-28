@@ -1,7 +1,7 @@
 /*
  * $HeadURL: http://svn.apache.org/repos/asf/jakarta/httpcomponents/httpcore/trunk/module-nio/src/test/java/org/apache/http/nio/mockup/TestHttpServer.java $
- * $Revision: 1.3 $
- * $Date: 2007-07-05 17:27:47 $
+ * $Revision: 1.3.122.1 $
+ * $Date: 2008-04-28 15:48:38 $
  *
  * ====================================================================
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -36,31 +36,31 @@ import java.io.IOException;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.impl.nio.DefaultServerIOEventDispatch;
-import org.apache.http.nio.protocol.BufferingHttpServiceHandler;
+import org.apache.http.nio.protocol.AsyncNHttpServiceHandler;
 import org.apache.http.nio.protocol.EventListener;
+import org.apache.http.nio.protocol.NHttpRequestHandlerRegistry;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpProcessor;
-import org.apache.http.protocol.HttpRequestHandler;
-import org.apache.http.protocol.HttpRequestHandlerRegistry;
 import org.apache.http.protocol.ResponseConnControl;
 import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
-import org.limewire.http.HttpIOReactor;
+import org.limewire.http.reactor.DefaultDispatchedIOReactor;
+import org.limewire.nio.NIODispatcher;
 
 public class HttpTestServer {
 
-    private final HttpRequestHandlerRegistry registry;
+    private final NHttpRequestHandlerRegistry registry;
 
-    private HttpIOReactor reactor;
+    private DefaultDispatchedIOReactor reactor;
 
     private HttpParams params = new BasicHttpParams();
 
     public HttpTestServer(HttpParams params) throws IOException {
         this.params = params;
-        this.registry = new HttpRequestHandlerRegistry();
+        this.registry = new NHttpRequestHandlerRegistry();
     }
 
     public void execute(EventListener listener) throws IOException {
@@ -70,7 +70,7 @@ public class HttpTestServer {
         processor.addInterceptor(new ResponseContent());
         processor.addInterceptor(new ResponseConnControl());
 
-        BufferingHttpServiceHandler serviceHandler = new BufferingHttpServiceHandler(
+        AsyncNHttpServiceHandler serviceHandler = new AsyncNHttpServiceHandler(
                 processor, new DefaultHttpResponseFactory(),
                 new DefaultConnectionReuseStrategy(), params);
 
@@ -78,19 +78,14 @@ public class HttpTestServer {
 
         serviceHandler.setHandlerResolver(this.registry);
 
-        reactor = new HttpIOReactor(params);
+        reactor = new DefaultDispatchedIOReactor(params, NIODispatcher.instance().getScheduledExecutorService());
         IOEventDispatch ioEventDispatch = new DefaultServerIOEventDispatch(
-                serviceHandler, reactor.getHttpParams());
+                serviceHandler, params);
         reactor.execute(ioEventDispatch);
     }
 
-    public HttpIOReactor getReactor() {
+    public DefaultDispatchedIOReactor getReactor() {
         return reactor;
-    }
-    
-    public void registerHandler(final String pattern,
-            final HttpRequestHandler handler) {
-        this.registry.register(pattern, handler);
     }
 
 }

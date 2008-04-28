@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.service.ErrorService;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -159,8 +160,8 @@ class CCLicense extends AbstractLicense {
     /**
      * Locates the RDF from the body of the URL.
      */
-    protected String getBody(String url) {
-        return locateRDF(super.getBody(url));
+    protected String getBody(String url, LimeHttpClient httpClient) {
+        return locateRDF(super.getBody(url, httpClient));
     }
     
     ///// WORK & DETAILS CODE ///
@@ -302,7 +303,7 @@ class CCLicense extends AbstractLicense {
      * Parses through the XML.  If this is live data, we look for works.
      * Otherwise (it isn't from the verifier), we only look for licenses.
      */
-    protected void parseDocumentNode(Node doc, LicenseCache licenseCache) {
+    protected void parseDocumentNode(Node doc, LicenseCache licenseCache, LimeHttpClient httpClient) {
         NodeList children = doc.getChildNodes();
         
         // Do a first pass for Work elements.
@@ -324,7 +325,7 @@ class CCLicense extends AbstractLicense {
         // If this was from the verifier, see if we need to get any more
         // license details.
         if (licenseCache != null) {
-            updateLicenseDetails(licenseCache);
+            updateLicenseDetails(licenseCache, httpClient);
         }
             
         return;
@@ -455,8 +456,9 @@ class CCLicense extends AbstractLicense {
     /**
      * Updates the license details, potentially retrieving information
      * from the licenseURL in each Details.
+     * @param httpClient TODO
      */
-    private void updateLicenseDetails(LicenseCache licenseCache) {
+    private void updateLicenseDetails(LicenseCache licenseCache, LimeHttpClient httpClient) {
         if(allWorks == null)
             return;
         
@@ -474,7 +476,7 @@ class CCLicense extends AbstractLicense {
                         LOG.debug("Using cached data for url: " + url);
                     body = locateRDF((String)data);
                 } else {
-                    body = getBody(url);
+                    body = getBody(url, httpClient);
                     if(body != null)
                         licenseCache.addData(url, body);
                     else
@@ -484,7 +486,7 @@ class CCLicense extends AbstractLicense {
                 // parsing MUST NOT alter allWorks,
                 // otherwise a ConcurrentMod will happen
                 if(body != null)
-                    parseXML(body, null);
+                    parseXML(body, null, httpClient);
              }
         }
     }

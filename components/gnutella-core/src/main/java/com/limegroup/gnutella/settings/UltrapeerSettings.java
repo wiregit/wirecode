@@ -34,7 +34,7 @@ public final class UltrapeerSettings extends LimeProps {
 	 * Setting for the maximum leaf connections.
 	 */
 	public static final IntSetting MAX_LEAVES =
-		FACTORY.createRemoteIntSetting("MAX_LEAVES", 30,"UltrapeerSettings.maxLeaves",16,96);
+		FACTORY.createRemoteIntSetting("MAX_LEAVES", 30,"UltrapeerSettings.maxLeavesV2",16,96);
     
     /**
      * The minimum number of upstream kbytes per second that 

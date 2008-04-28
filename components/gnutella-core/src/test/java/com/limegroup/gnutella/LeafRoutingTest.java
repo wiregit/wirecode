@@ -39,6 +39,7 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -92,7 +93,7 @@ public class LeafRoutingTest extends LimeTestCase {
         //this and manually configure a client in leaf mode to listen on port
         //6669, with no slots and no connections.  But you need to re-enable
         //the interactive prompts below.
-        ConnectionSettings.PORT.setValue(SERVER_PORT);
+        NetworkSettings.PORT.setValue(SERVER_PORT);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
@@ -114,7 +115,7 @@ public class LeafRoutingTest extends LimeTestCase {
     @Override
     public void setUp() throws Exception  {
         doSettings();
-        assertEquals("unexpected port", SERVER_PORT, ConnectionSettings.PORT.getValue());
+        assertEquals("unexpected port", SERVER_PORT, NetworkSettings.PORT.getValue());
         
         final NetworkManagerStub networkManager = new NetworkManagerStub();
         networkManager.setAddress(new byte[] { 127, 0, 0, 1 });
@@ -140,7 +141,7 @@ public class LeafRoutingTest extends LimeTestCase {
         
         lifecycleManager.start();
         connectionServices.connect();
-        assertEquals("unexpected port", SERVER_PORT, ConnectionSettings.PORT.getValue());
+        assertEquals("unexpected port", SERVER_PORT, NetworkSettings.PORT.getValue());
         connect();
     }
     

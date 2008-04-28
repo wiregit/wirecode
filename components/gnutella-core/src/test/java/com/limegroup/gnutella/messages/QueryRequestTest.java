@@ -7,11 +7,13 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.io.GGEP;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.MACCalculatorRepositoryManager;
@@ -119,7 +121,7 @@ public final class QueryRequestTest extends LimeTestCase {
                 ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
                 qk.write(qkBytes);
                 GGEP ggepBlock = new GGEP(true); // do COBS
-                ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
+                ggepBlock.put(GGEPKeys.GGEP_HEADER_QUERY_KEY_SUPPORT,
                               qkBytes.toByteArray());
                 ggepBlock.write(baos[i]);
                 baos[i].write(0x1c);
@@ -1144,8 +1146,8 @@ public final class QueryRequestTest extends LimeTestCase {
     
     public void testPatchInGGEP() throws Exception {
         GGEP ggep = new GGEP();
-        ggep.put(GGEP.GGEP_HEADER_NO_PROXY);
-        ggep.put(GGEP.GGEP_HEADER_SECURE_OOB);
+        ggep.put(GGEPKeys.GGEP_HEADER_NO_PROXY);
+        ggep.put(GGEPKeys.GGEP_HEADER_SECURE_OOB);
         
         // payload without ggep and huge
         byte[] payload = new byte[] { -32, 0, 115, 117, 115, 104, 0, 117, 114, 110, 58, 28, };
@@ -1475,6 +1477,16 @@ public final class QueryRequestTest extends LimeTestCase {
         assertEquals(query.getMetaMask(), proxy.getMetaMask());
         assertEquals(query.desiresOutOfBandReplies(), proxy.desiresOutOfBandReplies());
         assertEquals(query.getNetwork(), proxy.getNetwork());
+    }
+    
+    public void testIsQueryForLWAllLocales() {
+        for (Locale locale : Locale.getAvailableLocales()) {
+            Locale.setDefault(locale);
+            QueryRequestImpl queryRequest = new QueryRequestImpl(GUID.makeGuid(), (byte)1, 1, "LIMEWIRE", null, null, null, false, Network.TCP, true, 0, true, 0, false, true, null);
+            assertTrue("Failed for locale: " + locale, queryRequest.isQueryForLW());
+            queryRequest = new QueryRequestImpl(GUID.makeGuid(), (byte)1, 1, "limewire", null, null, null, false, Network.TCP, true, 0, true, 0, false, true, null);
+            assertTrue("Failed for locale: " + locale, queryRequest.isQueryForLW());
+        }
     }
     
     private void assertDesiresOutOfBand(QueryRequest query) {

@@ -25,6 +25,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
@@ -48,6 +50,8 @@ import org.limewire.security.SecurityToken;
  */
 public class GetValueResponseHandler extends AbstractResponseHandler<FindValueResult> {
         
+    private static final Log LOG = LogFactory.getLog(GetValueResponseHandler.class);
+    
     private final EntityKey lookupKey;
     
     public GetValueResponseHandler(Context context, 
@@ -69,6 +73,10 @@ public class GetValueResponseHandler extends AbstractResponseHandler<FindValueRe
             .createFindValueRequest(node.getContactAddress(), 
                     primaryKey, Collections.singleton(secondaryKey), valueType);
         
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("start looking for: " + request);
+        }
+        
         try {
             context.getMessageDispatcher().send(node, request, this);
         } catch (IOException err) {
@@ -80,6 +88,10 @@ public class GetValueResponseHandler extends AbstractResponseHandler<FindValueRe
     protected void response(ResponseMessage message, long time) throws IOException {
         if (message instanceof FindValueResponse) {
             FindValueResponse response = (FindValueResponse)message;
+            
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("received response: " + response);
+            }
             
             // Make sure the DHTValueEntities have the expected
             // value type.

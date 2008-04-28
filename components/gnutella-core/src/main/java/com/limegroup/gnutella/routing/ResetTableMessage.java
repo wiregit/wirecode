@@ -6,8 +6,6 @@ import java.io.OutputStream;
 import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 
 /**
@@ -45,8 +43,7 @@ public class ResetTableMessage extends RouteTableMessage {
         byte[] buf=new byte[5];
         ByteOrder.int2leb(tableSize, buf, 0);
         buf[4]=infinity;
-        out.write(buf);   
-		SentMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(this);
+        out.write(buf);
     }
 
     
@@ -84,11 +81,6 @@ public class ResetTableMessage extends RouteTableMessage {
     public int getTableSize() {
         return tableSize;
     }
-
-	// inherit doc comment
-  	public void recordDrop() {
-  		DroppedSentMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(this);
-  	}
 
     public String toString() {
         return "{RESET, tableSize: "+getTableSize()

@@ -108,7 +108,7 @@ public class FileNIOEntityTest extends BaseTestCase {
                 Thread.sleep(50);
             }
         }
-        entity.finished();
+        entity.finish();
     }
 
     public void testGetEmptyFile() throws Exception {
@@ -132,7 +132,7 @@ public class FileNIOEntityTest extends BaseTestCase {
         entity.produceContent(encoder, new MockIOControl());
         assertTrue(encoder.isCompleted());
         assertEquals("", new String(out.toByteArray()));
-        entity.finished();
+        entity.finish();
         assertEquals("", new String(out.toByteArray()));
     }
     

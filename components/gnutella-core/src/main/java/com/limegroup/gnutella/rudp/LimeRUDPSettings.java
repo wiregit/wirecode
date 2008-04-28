@@ -6,7 +6,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.DownloadSettings;
 
 @Singleton
-public class LimeRUDPSettings implements RUDPSettings {
+class LimeRUDPSettings implements RUDPSettings {
 
     public int getMaxSkipAcks() {
         return DownloadSettings.MAX_SKIP_ACKS.getValue();

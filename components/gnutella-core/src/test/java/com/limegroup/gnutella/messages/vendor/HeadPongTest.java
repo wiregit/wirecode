@@ -16,7 +16,10 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.Range;
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.Connectable;
+import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
@@ -38,10 +41,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.helpers.UrnHelper;
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
@@ -374,8 +374,8 @@ public class HeadPongTest extends LimeTestCase {
         
         assertNull(pong.getRanges());
         assertNull(pong.getVendor());
-        assertNull(pong.getAltLocs());
-        assertNull(pong.getPushLocs());
+        assertEmpty(pong.getAltLocs());
+        assertEmpty(pong.getPushLocs());
         assertFalse(pong.isBusy());
         assertFalse(pong.hasCompleteFile());
         assertFalse(pong.isDownloading());
@@ -1152,9 +1152,9 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(-1, in.read());
         
         // Make sure it went in round-robin order for writing.
-        assertEquals(0, pe1.supportsFWTVersion());
-        assertEquals(1, pe2.supportsFWTVersion());
-        assertEquals(0, pe3.supportsFWTVersion());
+        assertEquals(0, pe1.getFWTVersion());
+        assertEquals(1, pe2.getFWTVersion());
+        assertEquals(0, pe3.getFWTVersion());
         
         // Ok, it's easy enough to test the FWT one, since there's only one.
         assertEquals(peFwtGUID.bytes(), pe2.getClientGUID());
@@ -1294,7 +1294,7 @@ public class HeadPongTest extends LimeTestCase {
         assertEquals(0, in.available());
         assertEquals(-1, in.read());
         
-        assertEquals(1, pe1.supportsFWTVersion());
+        assertEquals(1, pe1.getFWTVersion());
         assertEquals(peFwtGUID.bytes(), pe1.getClientGUID());
         assertEquals("20.21.23.23", pe1.getAddress());
         assertEquals(10, pe1.getPort());

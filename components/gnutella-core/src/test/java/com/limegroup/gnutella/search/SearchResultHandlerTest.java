@@ -12,11 +12,11 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.KeyValue;
-import org.limewire.collection.NameValue;
 import org.limewire.collection.Range;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.security.SecureMessage;
+import org.limewire.util.NameValue;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;

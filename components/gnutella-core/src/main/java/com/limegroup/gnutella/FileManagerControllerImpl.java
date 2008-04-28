@@ -170,7 +170,7 @@ public class FileManagerControllerImpl implements FileManagerController {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManagerController#getNewestUrns(com.limegroup.gnutella.messages.QueryRequest, int)
      */
-    public List<URN> getNewestUrns(QueryRequest qr, int number) {
+    public List<URN> getNewestSharedUrns(QueryRequest qr, int number) {
         return creationTimeCache.get().getFiles(qr, number);
     }
     

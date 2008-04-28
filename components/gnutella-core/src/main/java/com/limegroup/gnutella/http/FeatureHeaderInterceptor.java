@@ -3,6 +3,7 @@ package com.limegroup.gnutella.http;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
@@ -139,9 +140,9 @@ public class FeatureHeaderInterceptor implements HeaderInterceptor {
             String protocol = "";
             int slash = feature.indexOf("/");
             if (slash == -1) {
-                protocol = feature.toLowerCase().trim();
+                protocol = feature.toLowerCase(Locale.US).trim();
             } else {
-                protocol = feature.substring(0, slash).toLowerCase().trim();
+                protocol = feature.substring(0, slash).toLowerCase(Locale.US).trim();
             }
             // not interested in the version ...
 

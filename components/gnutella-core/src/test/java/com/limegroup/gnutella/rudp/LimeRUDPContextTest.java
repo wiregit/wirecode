@@ -9,7 +9,6 @@ import org.limewire.rudp.messages.RUDPMessage;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageFactory;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageParser;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -34,14 +33,13 @@ public class LimeRUDPContextTest extends LimeTestCase {
     protected void setUp() throws Exception {
         injector = LimeTestUtils.createInjector();
 		messageFactory = injector.getInstance(MessageFactory.class);
-		messageFactory = injector.getInstance(MessageFactory.class);
     }
     
     public void testReferences() {
         // Make sure there's nothing linked up to RUDP beforehand
         assertNull(messageFactory.getParser(RUDPMessage.F_RUDP_MESSAGE));
         RUDPContext context = injector.getInstance(RUDPContext.class);
-        assertEquals(LimeRUDPMessageFactory.class, context.getMessageFactory().getClass());
+        assertEquals("LimeRUDPMessageFactory", context.getMessageFactory().getClass().getSimpleName());
         assertEquals(LimeUDPService.class, context.getUDPService().getClass());
         assertEquals(LimeRUDPSettings.class, context.getRUDPSettings().getClass());
         assertSame(NIODispatcher.instance().getTransportListener(), context.getTransportListener());

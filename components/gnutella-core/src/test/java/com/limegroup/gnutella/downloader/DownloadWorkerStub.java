@@ -16,7 +16,7 @@ class DownloadWorkerStub extends DownloadWorker {
             ScheduledExecutorService backgroundExecutor, ScheduledExecutorService nioExecutor,
             Provider<PushDownloadManager> pushDownloadManager, SocketsManager socketsManager) {
         super(manager, rfd, vf, httpDownloaderFactory, backgroundExecutor, nioExecutor,
-                pushDownloadManager, socketsManager);
+                pushDownloadManager, socketsManager, new DownloadStatsTrackerImpl());
     }
 
     HTTPDownloader getDownloader() {

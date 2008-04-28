@@ -14,7 +14,6 @@ import org.limewire.util.ByteOrder;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /** The message that lets other know what messages you support.  Everytime you
  *  add a subclass of VendorMessage you should modify this class (assuming your
@@ -372,13 +371,6 @@ public final class MessagesSupportedVendorMessage extends AbstractVendorMessage 
      */
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
-        SentMessageStatHandler.TCP_MESSAGES_SUPPORTED.addMessage(this);
-    }
-
-    /** Overridden purely for stats handling.
-     */
-    public void recordDrop() {
-        super.recordDrop();
     }
 
 }

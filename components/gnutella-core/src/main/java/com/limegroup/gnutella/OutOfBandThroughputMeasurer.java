@@ -9,7 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
+import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 
 @Singleton
 public class OutOfBandThroughputMeasurer {
@@ -17,23 +17,27 @@ public class OutOfBandThroughputMeasurer {
     private static final Log LOG = LogFactory.getLog(OutOfBandThroughputMeasurer.class);
     
     private final ScheduledExecutorService backgroundExecutor;
+    private final OutOfBandStatistics outOfBandStatistics;
 
     @Inject
-    public OutOfBandThroughputMeasurer(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
+    public OutOfBandThroughputMeasurer(@Named("backgroundExecutor")
+    ScheduledExecutorService backgroundExecutor, OutOfBandStatistics outOfBandStatistics) {
         this.backgroundExecutor = backgroundExecutor;
+        this.outOfBandStatistics = outOfBandStatistics;
     }
-    
+
     void initialize() {
         Runnable adjuster = new Runnable() {
             public void run() {
                 if (LOG.isDebugEnabled())
-                    LOG.debug("current success rate "+ OutOfBandThroughputStat.getSuccessRate()+
-                            " based on "+((int)OutOfBandThroughputStat.RESPONSES_REQUESTED.getTotal())+ 
-                            " measurements with a min sample size "+OutOfBandThroughputStat.MIN_SAMPLE_SIZE);
-                if (!OutOfBandThroughputStat.isSuccessRateGreat() &&
-                    !OutOfBandThroughputStat.isSuccessRateTerrible()) {
-                    LOG.debug("boosting sample size by 500");
-                    OutOfBandThroughputStat.MIN_SAMPLE_SIZE += 500;
+                    LOG.debug("current success rate " + outOfBandStatistics.getSuccessRate()
+                            + " based on " + outOfBandStatistics.getRequestedResponses()
+                            + " measurements with a min sample size "
+                            + outOfBandStatistics.getSampleSize());
+                if (!outOfBandStatistics.isSuccessRateGreat()
+                        && !outOfBandStatistics.isSuccessRateTerrible()) {
+                    LOG.debug("boosting sample size");
+                    outOfBandStatistics.increaseSampleSize();
                 }
             }
         };

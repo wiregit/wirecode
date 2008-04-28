@@ -96,7 +96,7 @@ public class DownloadSettings extends LimeProps {
      */
     private static String[] defaultPreviewableExtensions = {"html", "htm", "xml", "txt", "rtf", "tex",
         "mp3", "mp4", "wav", "au", "aif", "aiff", "ra", "ram", "wma", "wmv", "midi", "aifc", "snd",
-        "mpg", "mpeg", "asf", "qt", "mov", "avi", "mpe", "ogg", "rm", "m4a", "flac", "fla"};
+        "mpg", "mpeg", "asf", "qt", "mov", "avi", "mpe", "ogg", "rm", "m4a", "flac", "fla", "flv"};
     public static final StringArraySetting PREVIEWABLE_EXTENSIONS = 
         FACTORY.createRemoteStringArraySetting("PREVIEWABLE_EXTENSIONS", 
                 defaultPreviewableExtensions,

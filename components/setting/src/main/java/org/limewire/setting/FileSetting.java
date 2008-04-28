@@ -61,5 +61,18 @@ public class FileSetting extends AbstractSetting {
         super.setAlwaysSave(on);
         return this;
     }
+    
+    public FileSetting createParentDirs() {
+        File value = getValue();
+        if (value != null) {
+            String parentString = value.getParent();
+            if (parentString != null) {
+                File parent = new File(parentString);
+                if (!parent.isDirectory())
+                    parent.mkdirs();
+            }
+        }
+        return this;
+    }
 
 }

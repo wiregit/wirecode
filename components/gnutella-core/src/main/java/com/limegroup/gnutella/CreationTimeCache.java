@@ -299,7 +299,12 @@ public final class CreationTimeCache {
                         if(urnList.size() >= max)
                             break;
                         
+                        // we only want shared FDs, store files also have cached urns
                         FileDesc fd = fileManager.getFileDescForUrn(currURN);
+                        
+                    	// don't remove store files from the urn cache list
+                    	if( fd != null && fileManager.isStoreFile(fd.getFile()))
+                    		continue;
                         // unfortunately fds can turn into ifds so ignore
                         if ((fd == null) || (fd instanceof IncompleteFileDesc)) {
                             if (toRemove == null)
@@ -413,9 +418,13 @@ public final class CreationTimeCache {
 
 
     /**
-     * Loads values from cache file, if available
+     * Loads values from cache file, if available.
      */
-    private Map<URN, Long> createMap() {
+    Map<URN, Long> createMap() {
+        if (!CTIME_CACHE_FILE.exists()) {
+            dirty = true;
+            return new HashMap<URN, Long>();
+        }
         ObjectInputStream ois = null;
 		try {
             ois = new ConverterObjectInputStream(new BufferedInputStream(

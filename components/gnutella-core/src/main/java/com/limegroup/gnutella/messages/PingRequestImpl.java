@@ -6,12 +6,13 @@ import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.limewire.collection.NameValue;
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.service.ErrorService;
+import org.limewire.util.NameValue;
 
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.DataUtils;
 
 /**
@@ -83,15 +84,7 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
         if(payload != null && payload.length > 0 ) {
             out.write(payload);
         }
-        // the ping is still written even if there's no payload
-        SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
-        //Do nothing...there is no payload!
     }
-
-	// inherit doc comment
-	public void recordDrop() {
-		DroppedSentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
-	}
 
     public String toString() {
         return "PingRequest("+super.toString()+")";
@@ -114,7 +107,7 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
      */
     public void addIPRequest() {
         List<NameValue<?>> l = new LinkedList<NameValue<?>>();
-        l.add(new NameValue(GGEP.GGEP_HEADER_IPPORT));
+        l.add(new NameValue(GGEPKeys.GGEP_HEADER_IPPORT));
         addGGEPs(l);
     }
 
@@ -124,7 +117,7 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
      */
     private void addBasicGGEPs() {
         List<NameValue<?>> l = new LinkedList<NameValue<?>>();
-        l.add(new NameValue<String>(GGEP.GGEP_HEADER_CLIENT_LOCALE, 
+        l.add(new NameValue<String>(GGEPKeys.GGEP_HEADER_CLIENT_LOCALE, 
                             ApplicationSettings.LANGUAGE.getValue()));
         addGGEPs(l);
     }
@@ -155,8 +148,8 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
         if(payload != null && payload.length > 0) {
             try {
                 parseGGEP();
-                if(_ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE))
-                	return _ggep.getString(GGEP.GGEP_HEADER_CLIENT_LOCALE);
+                if(_ggep.hasKey(GGEPKeys.GGEP_HEADER_CLIENT_LOCALE))
+                	return _ggep.getString(GGEPKeys.GGEP_HEADER_CLIENT_LOCALE);
             } catch(BadGGEPBlockException ignored) {
             } catch(BadGGEPPropertyException ignoredToo) {}
         }
@@ -172,7 +165,7 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
         if(payload != null && payload.length > 0) {
             try {
                 parseGGEP();
-                return _ggep.hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
+                return _ggep.hasKey(GGEPKeys.GGEP_HEADER_SUPPORT_CACHE_PONGS);
             } catch(BadGGEPBlockException ignored) {}
         }
         return false;
@@ -189,10 +182,10 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
         if(payload != null && payload.length > 0) {
             try {
                 parseGGEP();
-                if(_ggep.hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS)) {
+                if(_ggep.hasKey(GGEPKeys.GGEP_HEADER_SUPPORT_CACHE_PONGS)) {
                     ret = DataUtils.EMPTY_BYTE_ARRAY;
                     // this may throw, which is why we first set it to an empty value.
-                    return _ggep.getBytes(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
+                    return _ggep.getBytes(GGEPKeys.GGEP_HEADER_SUPPORT_CACHE_PONGS);
                 }
             } catch(BadGGEPBlockException ignored) {
             } catch(BadGGEPPropertyException ignored) {
@@ -209,7 +202,7 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
         if(payload != null && payload.length > 0) {
             try {
                 parseGGEP();
-                return _ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                return _ggep.hasKey(GGEPKeys.GGEP_HEADER_QUERY_KEY_SUPPORT);
             } catch (BadGGEPBlockException ignored) {}
         }
 
@@ -223,7 +216,7 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
        if(payload != null && payload.length > 0) {
            try {
                parseGGEP();
-               return _ggep.hasKey(GGEP.GGEP_HEADER_IPPORT);
+               return _ggep.hasKey(GGEPKeys.GGEP_HEADER_IPPORT);
            } catch(BadGGEPBlockException ignored) {}
         }
 
@@ -237,7 +230,7 @@ public class PingRequestImpl extends AbstractMessage implements PingRequest {
        if(payload != null && payload.length > 0) {
            try {
                parseGGEP();
-               return _ggep.hasKey(GGEP.GGEP_HEADER_DHT_IPPORTS);
+               return _ggep.hasKey(GGEPKeys.GGEP_HEADER_DHT_IPPORTS);
            } catch(BadGGEPBlockException ignored) {}
         }
 

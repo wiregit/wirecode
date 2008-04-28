@@ -17,7 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.io.NetworkUtils;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.security.InvalidSecurityTokenException;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecurityToken;
@@ -36,8 +36,7 @@ import com.limegroup.gnutella.messages.vendor.LimeACKVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
-import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
+import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 
 /**
  * Handles {@link ReplyNumberVendorMessage} and {@link QueryReply} for 
@@ -54,6 +53,10 @@ public class OOBHandler implements MessageHandler, Runnable {
 	private final MACCalculatorRepositoryManager MACCalculatorRepositoryManager;
     
     private final ScheduledExecutorService executor;
+    
+    private final OutOfBandStatistics outOfBandStatistics;
+    
+    private final NetworkInstanceUtils networkInstanceUtils;
 	
     private final Map<Integer,OOBSession> OOBSessions =
         Collections.synchronizedMap(new HashMap<Integer, OOBSession>());
@@ -61,10 +64,14 @@ public class OOBHandler implements MessageHandler, Runnable {
     @Inject
 	public OOBHandler(MessageRouter router, 
             MACCalculatorRepositoryManager MACCalculatorRepositoryManager,
-            @Named("backgroundExecutor") ScheduledExecutorService executor) {
+            @Named("backgroundExecutor") ScheduledExecutorService executor,
+            OutOfBandStatistics outOfBandStatistics,
+            NetworkInstanceUtils networkInstanceUtils) {
 		this.router = router;
 		this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
         this.executor = executor;
+        this.outOfBandStatistics = outOfBandStatistics;
+        this.networkInstanceUtils = networkInstanceUtils;
 	}
 
 	public void handleMessage(Message msg, InetSocketAddress addr, ReplyHandler handler) {
@@ -87,10 +94,10 @@ public class OOBHandler implements MessageHandler, Runnable {
 
         int toRequest;
         
-        if (!router.isQueryAlive(g) || (toRequest = router.getNumOOBToRequest(msg)) < 0) {
+        if (!router.isQueryAlive(g) || (toRequest = router.getNumOOBToRequest(msg)) <= 0) {
             // remember as possible GUESS source though
             router.addBypassedSource(msg, handler);
-            OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(msg.getNumResults());
+            outOfBandStatistics.addBypassedResponse(msg.getNumResults());
             return;
         }
 				
@@ -109,7 +116,7 @@ public class OOBHandler implements MessageHandler, Runnable {
             ack = new LimeACKVendorMessage(g, toRequest);
         
         if (ack != null) {
-            OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(toRequest);
+            outOfBandStatistics.addRequestedResponse(toRequest);
             handler.reply(ack);
             if (MessageSettings.OOB_REDUNDANCY.getValue()) {
                 final LimeACKVendorMessage ackf = ack;
@@ -149,7 +156,7 @@ public class OOBHandler implements MessageHandler, Runnable {
             try {
                 // needs a push, we can update: works for fw-fw case and classic push
                 // or not private, we can update
-                if (reply.getNeedsPush() || !NetworkUtils.isPrivateAddress(reply.getIPBytes())) {
+                if (reply.getNeedsPush() || !networkInstanceUtils.isPrivateAddress(reply.getIPBytes())) {
                     reply.setOOBAddress(handler.getInetAddress(), handler.getPort());
                 }
                 else {
@@ -168,12 +175,9 @@ public class OOBHandler implements MessageHandler, Runnable {
                 router.handleQueryReply(reply, handler);
             return;
         }
-
-        // from here on, it's OOBv3 specific code
-        ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(reply);
         
         int numResps = reply.getResultCount();
-        OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
+        outOfBandStatistics.addReceivedResponse(numResps);
         
         int requestedResponseCount = token.getBytes()[0] & 0xFF;
         

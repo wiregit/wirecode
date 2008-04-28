@@ -25,6 +25,8 @@ import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.DiskException;
 import org.limewire.io.IOUtils;
 import org.limewire.io.InvalidDataException;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.EventListenerList;
 import org.limewire.service.ErrorService;
 import org.limewire.util.FileUtils;
 
@@ -75,7 +77,6 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.statistics.DownloadStat;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.util.QueryUtils;
@@ -89,24 +90,10 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * Smart downloads can use many policies, and these policies are free to change
  * as allowed by the Downloader specification.  This implementation provides
  * swarmed downloads, the ability to download copies of the same file from
- * multiple hosts.  See the accompanying white paper for details.<p>
+ * multiple hosts.  <p>
  *
- * Subclasses may refine the requery behavior by overriding the 
- * newRequery(n), allowAddition(..), and addDownload(..)  methods.
- * MagnetDownloader also redefines the tryAllDownloads(..) method to handle
- * default locations, and the getFileName() method to specify the completed
- * file name.<p>
- * 
- * Subclasses that pass this RemoteFileDesc arrays of size 0 MUST override
- * the getFileName method, otherwise an assert will fail.<p>
- * 
- * This class implements the Serializable interface but defines its own
- * writeObject and readObject methods.  This is necessary because parts of the
- * ManagedDownloader (e.g., sockets) are inherently unserializable.  For this
- * reason, serializing and deserializing a ManagedDownloader M results in a
- * ManagedDownloader M' that is the same as M except it is
- * unconnected. <b>Furthermore, it is necessary to explicitly call
- * initialize(..) after reading a ManagedDownloader from disk.</b>
+ * Subclasses may refine the requery behavior by overriding {@link #newRequery()}
+ * {@link #allowAddition(RemoteFileDesc)}, {@link #addDownload(Collection, boolean)}.
  */
 class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocListener,
         ManagedDownloader, DownloadWorkerSupport {
@@ -153,7 +140,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * All downloads start QUEUED. From there, it will stay queued until a slot
      * is available.
      * 
-     * If atleast one host is available to download from, then the first state
+     * If at least one host is available to download from, then the first state
      * is always CONNECTING. After connecting, a downloader can become: a)
      * DOWNLOADING (actively downloading) b) WAITING_FOR_RETRY (busy hosts) c)
      * ABORTED (user manually stopped the download) c2) PAUSED (user paused the
@@ -161,13 +148,13 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * 
      * If no hosts existed for connecting, or we exhausted our attempts at
      * connecting to all possible hosts, the state will become one of: e)
-     * GAVE_UP (maxxed out on requeries) f) WAITING_FOR_USER (waiting for the
-     * user to initiate a requery) g) ITERATIVE_GUESSING (targetted location of
+     * GAVE_UP (max'ed out on requeries) f) WAITING_FOR_USER (waiting for the
+     * user to initiate a requery) g) ITERATIVE_GUESSING (targeted location of
      * more sources) If the user resumes the download and we were
      * WAITING_FOR_USER, a requery is sent out and we go into
      * WAITING_FOR_RESULTS stage. After we have finished waiting for results (if
      * none arrived), we will either go back to WAITING_FOR_USER (if we are
-     * allowed more requeries), or GAVE_UP (if we maxxed out the requeries).
+     * allowed more requeries), or GAVE_UP (if we maxed out the requeries).
      * After ITERATIVE_GUESSING completes, if no results arrived then we go to
      * WAITING_FOR_USER. Prior to WAITING_FOR_RESULTS, if no connections are
      * active then we wait at WAITING_FOR_CONNECTIONS until connections exist.
@@ -178,7 +165,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * 
      * The download can finish in one of the following states: - COMPLETE
      * (download completed just fine) - ABORTED (user pressed stopped at some
-     * point) - DISK_PROBLEM (limewire couldn't manipulate the file) -
+     * point) - DISK_PROBLEM (LimeWire couldn't manipulate the file) -
      * CORRUPT_FILE (the file was corrupt) - INVALID (content authority didn't
      * allow the transfer)
      * 
@@ -201,9 +188,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * _corruptState and either discards or removes the file.
      * 
      * After the download, if the sha1 does not match the expected, the master
-     * download thread propmts the user whether they want to keep the file or
+     * download thread prompts the user whether they want to keep the file or
      * discard it. If we did not have a tree during the download we remove the
-     * file from partial sharing, otherwise we keep it until the user asnswers
+     * file from partial sharing, otherwise we keep it until the user answers
      * the prompt (which may take a very long time for overnight downloads). The
      * tree itself is purged.
      * 
@@ -225,7 +212,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     
     /** The complete Set of files passed to the constructor.  Must be
      *  maintained in memory to support resume.  allFiles may only contain
-     *  elements of type RemoteFileDesc and URLRemoteFileDesc */
+     *  elements of type RemoteFileDesc and URLRemoteFileDesc
+     */
     private Set<RemoteFileDesc> cachedRFDs;
 
 	/**
@@ -299,7 +287,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 	
     /**
      * The collection of alternate locations we successfully downloaded from
-     * somthing from.
+     * something from.
      */
 	private Set<AlternateLocation> validAlts; 
 	
@@ -419,6 +407,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     
     private long contentLength = -1;
     
+    private final EventListenerList<DownloadStatusEvent> listeners = 
+        new EventListenerList<DownloadStatusEvent>(); 
+    
     protected final DownloadManager downloadManager;
     protected final FileManager fileManager;
     protected final IncompleteFileManager incompleteFileManager;
@@ -442,6 +433,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected final Provider<HashTreeCache> tigerTreeCache;
     protected final ApplicationServices applicationServices;
     protected final RemoteFileDescFactory remoteFileDescFactory;
+    protected final Provider<PushList> pushListProvider;
 
     /**
      * Creates a new ManagedDownload to download the given files.
@@ -464,7 +456,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             IPFilter ipFilter, @Named("backgroundExecutor")
             ScheduledExecutorService backgroundExecutor, Provider<MessageRouter> messageRouter,
             Provider<HashTreeCache> tigerTreeCache, ApplicationServices applicationServices,
-            RemoteFileDescFactory remoteFileDescFactory) {
+            RemoteFileDescFactory remoteFileDescFactory, Provider<PushList> pushListProvider) {
         super(saveLocationManager);
         this.downloadManager = downloadManager;
         this.fileManager = fileManager;
@@ -490,6 +482,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         this.applicationServices = applicationServices;
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.cachedRFDs = new HashSet<RemoteFileDesc>();
+        this.pushListProvider = pushListProvider;
     }
     
     public synchronized void addInitialSources(Collection<RemoteFileDesc> rfds, String defaultFileName) {
@@ -521,6 +514,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#initialize()
      */
     public void initialize() {
+        setState(DownloadStatus.INITIALIZING);
         currentRFDs = new HashSet<RemoteFileDesc>();
         _activeWorkers=new LinkedList<DownloadWorker>();
         _workers=new ArrayList<DownloadWorker>();
@@ -530,7 +524,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         stopped=false;
         paused = false;
         setState(DownloadStatus.QUEUED);
-        pushes = new PushList();
+        pushes = pushListProvider.get();
         corruptState=NOT_CORRUPT_STATE;
         corruptStateLock=new Object();
         altLock = new Object();
@@ -598,7 +592,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
     
     /** 
-     * Verifies the integrity of the RemoteFileDesc[].
+     * Verifies the integrity of the RemoteFileDesc set.
      *
      * At one point in time, LimeWire somehow allowed files with different
      * SHA1s to be placed in the same ManagedDownloader.  This breaks
@@ -966,12 +960,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             return;
         
         URN sha1 = getSha1Urn();
-        if (sha1 != null)
+        if (sha1 != null) {
             incompleteFile = incompleteFileManager.getFileForUrn(sha1);
-        
+        }
         if (incompleteFile == null) { 
             incompleteFile = getIncompleteFile(getSaveFile().getName(), sha1,
-                                               getContentLength());
+                    getContentLength());
         }
         
         if(LOG.isWarnEnabled())
@@ -981,6 +975,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * Retrieves an incomplete file from the given incompleteFileManager with the
      * given name, URN & content-length.
+     * <p>
+     * It can be overridden in subclasses.
+     * </p> 
      */
     protected File getIncompleteFile(String name, URN urn,
                                      long length) throws IOException {
@@ -1008,7 +1005,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                            "\nour hash    : " + getSha1Urn() +
                            "\ntheir hashes: " + ifd.getUrns()+
                            "\nifm.hashes : "+incompleteFileManager.dumpHashes()));
-                fileManager.removeFileIfShared(incompleteFile);
+                fileManager.removeFileIfSharedOrStore(incompleteFile);
             }
         }
         
@@ -1109,8 +1106,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /////////////////////////////// Requery Code ///////////////////////////////
 
     /** 
-     * Returns a new QueryRequest for requery purposes.  Subclasses may wish to
-     * override this to be more or less specific.<p>
+     * Returns a new <code>QueryRequest</code> for requery purposes.  Subclasses 
+     * may wish to override this to be more or less specific.<p>
      *
      * @exception CantResumeException if this doesn't know what to search for 
 	 * @return a new <tt>QueryRequest</tt> for making the requery
@@ -1245,6 +1242,10 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     public synchronized void locationAdded(AlternateLocation loc) {
         assert(loc.getSHA1Urn().equals(getSha1Urn()));
         
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("alt loc added: " + loc);
+        }
+        
         long contentLength = -1L;
         if (loc instanceof DirectDHTAltLoc) {
             long fileSize = ((DirectDHTAltLoc)loc).getFileSize();
@@ -1302,19 +1303,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @see com.limegroup.gnutella.downloader.ManagedDownloader#addDownload(com.limegroup.gnutella.RemoteFileDesc, boolean)
      */
     public synchronized boolean addDownload(RemoteFileDesc rfd, boolean cache) {
-        // never add to a stopped download.
-        if(stopped || isCompleted())
-            return false;
-        
-        if (!allowAddition(rfd))
-            return false;
-        
-        rfd.setDownloading(true);
-        
-        if(!hostIsAllowed(rfd))
-            return false;
-        
-        return addDownloadForced(rfd, cache);
+        return addDownload(Collections.singleton(rfd), cache);
     }
     
     /* (non-Javadoc)
@@ -1326,8 +1315,15 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         
         List<RemoteFileDesc> l = new ArrayList<RemoteFileDesc>(c.size());
         for(RemoteFileDesc rfd : c) {
-            if (hostIsAllowed(rfd) && allowAddition(rfd))
-                l.add(rfd);
+            if (allowAddition(rfd)) {
+                // this is set here and not for all remote descs since only these
+                // could have possible come from the UI, this should be solved differently
+                // this is set even if the host is not allowed as a download source for UI's sake
+                rfd.setDownloading(true);
+                if (hostIsAllowed(rfd)) {
+                    l.add(rfd);
+                }
+            }
         }
         
         return addDownloadForced(l,cache);
@@ -1349,42 +1345,31 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     protected synchronized boolean addDownloadForced(RemoteFileDesc rfd,
                                                            boolean cache) {
-
-        // DO NOT DOWNLOAD FROM YOURSELF.
-        if( rfd.isMe(applicationServices.getMyGUID()) )
-            return true;
-        
-        // already downloading from the host
-        if (currentRFDs.contains(rfd))
-            return true;
-        
-        prepareRFD(rfd,cache);
-        
-        if (ranker.addToPool(rfd)){
-            //if(LOG.isTraceEnabled())
-                //LOG.trace("added rfd: " + rfd);
-            receivedNewSources = true;
-        }
-        
-        return true;
+        // the singleton impl calls the collection impl and not the other way round,
+        // so that the ping ranker gets a collection and only fires off one round of pinging
+        return addDownloadForced(Collections.singleton(rfd), cache);
     }
     
     protected synchronized final boolean addDownloadForced(Collection<? extends RemoteFileDesc> c, boolean cache) {
+        // create copy, argument might not be modifiable
+        Set<RemoteFileDesc> copy = new HashSet<RemoteFileDesc>(c);
         // remove any rfds we're currently downloading from 
-        c.removeAll(currentRFDs);
+        copy.removeAll(currentRFDs);
         
-        for (Iterator<? extends RemoteFileDesc> iter = c.iterator(); iter.hasNext();) {
+        byte[] myGUID = applicationServices.getMyGUID();
+        for (Iterator<RemoteFileDesc> iter = copy.iterator(); iter.hasNext();) {
             RemoteFileDesc rfd =  iter.next();
-            if (rfd.isMe(applicationServices.getMyGUID())) {
+            // do not download from ourselves
+            if (rfd.isMe(myGUID)) {
                 iter.remove();
-                continue;
+            } else { 
+                prepareRFD(rfd,cache);
             }
-            prepareRFD(rfd,cache);
          //   if(LOG.isTraceEnabled())
          //       LOG.trace("added rfd: " + rfd);
         }
         
-        if ( ranker.addToPool(c) ) {
+        if ( ranker.addToPool(copy) ) {
          //   if(LOG.isTraceEnabled())
         //        LOG.trace("added rfds: " + c);
             receivedNewSources = true;
@@ -1644,20 +1629,9 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
                 //spurious count increments in the local
                 //AlternateLocationCollections
                 if(!validAlts.contains(local)) {
-                    if(rfd.isFromAlternateLocation() )
-                        if (rfd.needsPush())
-                            DownloadStat.PUSH_ALTERNATE_WORKED.incrementStat();
-                        else
-                            DownloadStat.ALTERNATE_WORKED.incrementStat(); 
                     validAlts.add(local);
                 }
             }  else {
-                    if(rfd.isFromAlternateLocation() )
-                        if(local instanceof PushAltLoc)
-                                DownloadStat.PUSH_ALTERNATE_NOT_ADDED.incrementStat();
-                        else
-                                DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
-                    
                     validAlts.remove(local);
                     invalidAlts.add(rfd.getRemoteHostData());
                     recentInvalidAlts.add(local);
@@ -1746,7 +1720,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         //a) Special case for saved corrupt fragments.  We don't worry about
         //removing holes.
         if (state==DownloadStatus.CORRUPT_FILE) 
-            return corruptFile; //m	ay be null
+            return corruptFile; //may be null
         //b) If the file is being downloaded, create *copy* of first
         //block of incomplete file.  The copy is needed because some
         //programs, notably Windows Media Player, attempt to grab
@@ -1814,8 +1788,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * locations, resuming, waiting, and retrying as necessary. Also takes care
      * of moving file from incomplete directory to save directory and adding
      * file to the library.  Called from dloadManagerThread.  
-     * @param deserialized True if this downloader was deserialized from disk,
-     * false if it was newly constructed.
      */
     protected DownloadStatus performDownload() {
         if(checkHosts()) {//files is global
@@ -1866,7 +1838,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
     /**
      * Tries to initialize the download location and the verifying file. 
-     * @return GAVE_UP if we had no sources, DISK_PROBLEM if such occured, 
+     * @return GAVE_UP if we had no sources, DISK_PROBLEM if such occurred, 
      * CONNECTING if we're ready to connect
      */
     protected DownloadStatus initializeDownload() {
@@ -1899,7 +1871,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * Verifies the completed file against the SHA1 hash and saves it.  If
      * there is corruption, it asks the user whether to discard or keep the file 
-     * @return COMPLETE if all went fine, DISK_PROBLEM if not.
+     * @return {@link DownloadStatus#COMPLETE} if all went fine, 
+     * {@link DownloadStatus#DISK_PROBLEM} if not.
      * @throws InterruptedException if we get interrupted while waiting for user
      * response.
      */
@@ -1994,7 +1967,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         // unshare the file if we didn't have a tree
         // otherwise we will have shared only the parts that verified
         if (commonOutFile.getHashTree() == null) 
-            fileManager.removeFileIfShared(incompleteFile);
+            fileManager.removeFileIfSharedOrStore(incompleteFile);
         
         // purge the tree
         tigerTreeCache.get().purgeTree(getSha1Urn());
@@ -2045,7 +2018,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         //because IFM.purge() is called frequently in DownloadManager.
         
         try {
-            saveFile = getSuggestedSaveLocation(saveFile);
+            saveFile = getSuggestedSaveLocation(saveFile, incompleteFile);
         } catch (IOException e) {
             return DownloadStatus.DISK_PROBLEM;
         }
@@ -2065,7 +2038,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         //Add file to library.
         // first check if it conflicts with the saved dir....
         if (saveFile.exists())
-            fileManager.removeFileIfShared(saveFile);
+            fileManager.removeFileIfSharedOrStore(saveFile);
 
         // add file hash to manager for fast lookup
         addFileHash(fileHash, saveFile);
@@ -2081,12 +2054,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * For example, could create a folder substructure and use a template based on ID3 information
      * for music. 
      * 
-     * @param saveFile - the current file location to save the incomplete download to
-     * @return - the location to save the actual download to
+     * @param defaultSaveFile the current file location to save the incomplete download to
+     * @return the location to save the actual download to
      * @throws IOException
      */
-    protected File getSuggestedSaveLocation(File saveFile) throws IOException{
-        return saveFile;
+    protected File getSuggestedSaveLocation(File defaultSaveFile, File newDownloadFile) throws IOException{
+        return defaultSaveFile;
     }
     
     /**
@@ -2118,8 +2091,8 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * Upon saving a downloaded file, if the file is to be shared the tiger tree should
      * be saved in order to speed up sharing the file across gnutella
      * 
-     * @param fileHash - urn to save the tree of
-     * @return the root fo the tree
+     * @param fileHash urn to save the tree of
+     * @return the root of the tree
      */
     protected URN saveTreeHash(URN fileHash) {
             // save the trees!
@@ -2166,7 +2139,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
     
     /**
-     * Initializes the verifiying file.
+     * Initializes the verifying file.
      */
     private void openVerifyingFile() throws IOException {
 
@@ -2180,7 +2153,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     }
     
     /**
-     * Starts a new Worker thread for the given RFD.
+     * Starts a new Worker thread for the given <code>RemoteFileDesc</code>.
      */
     private void startWorker(final RemoteFileDesc rfd) {
         DownloadWorker worker = downloadWorkerFactory.create(this, rfd, commonOutFile);
@@ -2581,7 +2554,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
     /////////////////////////////Display Variables////////////////////////////
 
-    public synchronized void setState(DownloadStatus newState) {
+    public void setState(DownloadStatus newState) {
         setState(newState, Long.MAX_VALUE);
     }
 
@@ -2592,9 +2565,16 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      * @param time the time we expect to state in this state, in 
      *  milliseconds. 
      */
-    synchronized void setState(DownloadStatus newState, long time) {
+    void setState(DownloadStatus newState, long time) {
+        DownloadStatus oldState = null;
+        synchronized (this) {
+            oldState = this.state;
             this.state=newState;
             this.stateTime=System.currentTimeMillis()+time;
+        }
+        if (oldState != newState) {
+            fireEventLater(newState);
+        }
     }
     
     /**
@@ -3141,5 +3121,38 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             rfds.add(remoteFileDescFactory.createFromMemento(memento));
         }
         return rfds;
+    }
+
+    /**
+     * Only for testing. 
+     */
+    Set<RemoteFileDesc> getCachedRFDs() {
+        return cachedRFDs;
+    }
+    
+    /**
+     * Fires status event in background executro thread. 
+     */
+    private void fireEventLater(final DownloadStatus status) {
+        backgroundExecutor.execute(new Runnable() {
+            public void run() {
+                listeners.broadcast(new DownloadStatusEvent(ManagedDownloaderImpl.this, status));
+            }
+        });
+    }
+
+    public void addListener(EventListener<DownloadStatusEvent> listener) {
+        listeners.addListener(listener);
+    }
+
+    public boolean removeListener(EventListener<DownloadStatusEvent> listener) {
+        return listeners.removeListener(listener);
+    }
+
+    /**
+     * @return the source ranker being used or null if none is set.
+     */
+    protected SourceRanker getSourceRanker() {
+        return ranker;
     }
 }

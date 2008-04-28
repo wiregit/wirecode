@@ -44,7 +44,7 @@ package org.limewire.statistic;
  */
 public abstract class BasicKilobytesStatistic extends AbstractKilobytesStatistic {
 
-    public BasicKilobytesStatistic() {
-		StatisticsManager.instance().addBasicStatistic(this);
+    public BasicKilobytesStatistic(StatisticAccumulator statisticAccumulator) {
+        statisticAccumulator.addBasicStatistic(this);
 	}
 }

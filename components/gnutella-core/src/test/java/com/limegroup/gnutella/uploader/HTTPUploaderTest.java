@@ -7,13 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import junit.framework.Test;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.limewire.http.HttpClientManager;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.http.httpclient.HttpClientUtils;
+import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.net.ConnectionDispatcher;
 
 import com.google.inject.AbstractModule;
@@ -32,13 +34,12 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.LimeTestCase;
-
-import junit.framework.Test;
 
 public class HTTPUploaderTest extends LimeTestCase {
 
@@ -72,7 +73,7 @@ public class HTTPUploaderTest extends LimeTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        ConnectionSettings.PORT.setValue(PORT);
+        NetworkSettings.PORT.setValue(PORT);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
 
@@ -84,10 +85,13 @@ public class HTTPUploaderTest extends LimeTestCase {
         urns.put(urn1, fd1);
         descs.add(fd1);
 
+        final LocalSocketAddressProviderStub localSocketAddressProvider = new LocalSocketAddressProviderStub();
+        localSocketAddressProvider.setTLSCapable(true);
         Injector injector = LimeTestUtils.createInjector(MyActivityCallback.class, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(FileManager.class).to(FileManagerStub.class);
+                bind(LocalSocketAddressProvider.class).toInstance(localSocketAddressProvider);
             } 
         });        
 
@@ -100,8 +104,6 @@ public class HTTPUploaderTest extends LimeTestCase {
         acceptor = injector.getInstance(Acceptor.class);
         httpAcceptor = injector.getInstance(HTTPAcceptor.class);
         uploadManager = injector.getInstance(HTTPUploadManager.class);
-
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub().setTLSCapable(true));
 
         acceptor.setListeningPort(PORT);
         acceptor.start();
@@ -139,7 +141,7 @@ public class HTTPUploaderTest extends LimeTestCase {
             assertFalse(uploader.isBrowseHostEnabled());
             assertEquals("127.0.0.1", uploader.getHost());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         method = new HttpGet(host + "/uri-res/N2R?" + urn1);
@@ -154,7 +156,7 @@ public class HTTPUploaderTest extends LimeTestCase {
             assertEquals("127.0.0.1", uploader.getHost());
 
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         method = new HttpGet(host + "/uri-res/N2R?" + urn1);
@@ -170,7 +172,7 @@ public class HTTPUploaderTest extends LimeTestCase {
             assertEquals(456, uploader.getGnutellaPort());
             assertEquals("123.123.123.123", uploader.getHost());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
 
         method = new HttpGet(host + "/uri-res/N2R?" + urn1);
@@ -185,7 +187,7 @@ public class HTTPUploaderTest extends LimeTestCase {
             assertEquals(456, uploader.getGnutellaPort());
             assertEquals("123.123.123.123", uploader.getHost());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
     }
 
@@ -211,7 +213,7 @@ public class HTTPUploaderTest extends LimeTestCase {
             Thread.sleep(500);
             assertGreaterThanOrEquals(1000, uploader.amountUploaded());
         } finally {
-            HttpClientManager.releaseConnection(response);
+            HttpClientUtils.releaseConnection(response);
         }
         LimeTestUtils.waitForNIO();
         assertEquals(UploadStatus.COMPLETE, uploader.getState());

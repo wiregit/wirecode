@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.messages;
 
+import org.limewire.io.GGEP;
+
 /** Simple wrapper storing a GGEP block, it's start position & it's end position. */
 public class SecureGGEPData {
     private final GGEP ggep;

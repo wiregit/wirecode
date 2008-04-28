@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Periodic;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.Inject;
@@ -32,8 +35,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
  */
 public class InspectionRequestHandler extends RestrictedResponder {
     
-    /** Send back encoded responses this often */
-    private final static int SEND_INTERVAL = 500;
+    private static final Log LOG = LogFactory.getLog(InspectionRequestHandler.class);
     
     private final Provider<MessageRouter> router;
     private final InspectionResponseFactory factory;
@@ -51,16 +53,22 @@ public class InspectionRequestHandler extends RestrictedResponder {
      */
     private ReplyHandler currentHandler;
     
+    /**
+     * The current interval at which to send encoded responses.
+     */
+    private int currentInterval;
+    
     @Inject
-    public InspectionRequestHandler(Provider<MessageRouter> router, NetworkManager networkManager, 
-            SimppManager simppManager, 
-            UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache,
-            InspectionResponseFactory factory, @Named("inspection") SecureMessageVerifier inspectionVerifier,
-            @Named("messageExecutor") ExecutorService dispatch,
-            @Named("backgroundExecutor") ScheduledExecutorService background) {
-        super(FilterSettings.INSPECTOR_IP_ADDRESSES, 
-                inspectionVerifier,
-                MessageSettings.INSPECTION_VERSION, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache, dispatch);
+    public InspectionRequestHandler(Provider<MessageRouter> router, NetworkManager networkManager,
+            SimppManager simppManager, UDPReplyHandlerFactory udpReplyHandlerFactory,
+            UDPReplyHandlerCache udpReplyHandlerCache, InspectionResponseFactory factory,
+            @Named("inspection")
+            SecureMessageVerifier inspectionVerifier, @Named("messageExecutor")
+            ExecutorService dispatch, @Named("backgroundExecutor")
+            ScheduledExecutorService background, NetworkInstanceUtils networkInstanceUtils) {
+        super(FilterSettings.INSPECTOR_IP_ADDRESSES, inspectionVerifier,
+                MessageSettings.INSPECTION_VERSION, networkManager, simppManager,
+                udpReplyHandlerFactory, udpReplyHandlerCache, dispatch, networkInstanceUtils);
         this.router = router;
         this.factory = factory;
         sender = new Periodic(new Runnable() {
@@ -76,32 +84,45 @@ public class InspectionRequestHandler extends RestrictedResponder {
         assert msg instanceof InspectionRequest;
         InspectionRequest ir = (InspectionRequest)msg;
         
+        if (LOG.isDebugEnabled())
+            LOG.debug("processing allowed message" + msg);
+        
         // send first response back right away
         InspectionResponse []r = factory.createResponses(ir);
-        if (r.length > 0 && r[0].shouldBeSent())
+        if (r.length > 0 && r[0].shouldBeSent()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("sending response: " + r + " to: " + handler); 
+            }
             handler.reply(r[0]);
+        }
         router.get().forwardInspectionRequestToLeaves(ir);
         
-        // schedule the rest of the responses if any
-        if (r.length < 2)
-            return;
-        
         synchronized(this) {
+            // clear any previously scheduled responses
+            queue.clear();
+            
+            if (r.length < 2)
+                return;
+            // schedule the rest of the responses if any
+
             for (int i = 1; i < r.length; i++)
                 queue.add(r[i]);
             currentHandler = handler;
+            currentInterval = ir.getSendInterval();
         }
-        sender.rescheduleIfSooner(SEND_INTERVAL);
+        sender.rescheduleIfSooner(currentInterval);
     }
     
     private void send() {
         InspectionResponse resp = null;
         ReplyHandler handler = null;
+        int interval;
         synchronized(this) {
             if (!queue.isEmpty()) {
                 resp = queue.remove(0);
                 handler = currentHandler;
             }
+            interval = currentInterval;
         }
         
         if (resp == null || handler == null) {
@@ -109,8 +130,12 @@ public class InspectionRequestHandler extends RestrictedResponder {
             return;
         }
         
-        if (resp.shouldBeSent())
+        if (resp.shouldBeSent()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("resending response: " + resp + " to: " + handler); 
+            }
             handler.reply(resp);
-        sender.rescheduleIfLater(SEND_INTERVAL);
+        }
+        sender.rescheduleIfLater(interval);
     }
 }

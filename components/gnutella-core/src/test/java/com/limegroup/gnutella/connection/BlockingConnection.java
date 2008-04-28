@@ -16,7 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.CompressingOutputStream;
 import org.limewire.io.IOUtils;
-import org.limewire.io.Pools;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.UncompressingInputStream;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -85,8 +85,10 @@ public class BlockingConnection extends AbstractConnection {
     BlockingConnection(String host, int port, ConnectType connectType,
             CapabilitiesVMFactory capabilitiesVMFactory, SocketsManager socketsManager,
             Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
-            MessageFactory messageFactory, NetworkManager networkManager) {
-        super(host, port, connectType, capabilitiesVMFactory, supportedVendorMessage, networkManager, acceptor);
+            MessageFactory messageFactory, NetworkManager networkManager,
+            NetworkInstanceUtils networkInstanceUtils) {
+        super(host, port, connectType, capabilitiesVMFactory, supportedVendorMessage,
+                networkManager, acceptor, networkInstanceUtils);
         this.messageFactory = messageFactory;
         this.socketsManager = socketsManager;
     }
@@ -104,8 +106,10 @@ public class BlockingConnection extends AbstractConnection {
      */
     BlockingConnection(Socket socket, CapabilitiesVMFactory capabilitiesVMFactory,
             Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
-            MessageFactory messageFactory, NetworkManager networkManager) {
-        super(socket, capabilitiesVMFactory, supportedVendorMessage, networkManager, acceptor);
+            MessageFactory messageFactory, NetworkManager networkManager,
+            NetworkInstanceUtils networkInstanceUtils) {
+        super(socket, capabilitiesVMFactory, supportedVendorMessage, networkManager, acceptor,
+                networkInstanceUtils);
         this.socketsManager = null;
         this.messageFactory = messageFactory;
     }
@@ -159,12 +163,12 @@ public class BlockingConnection extends AbstractConnection {
         // implicitly in the finalization of the Deflater & Inflater)
         // releases these buffers.
         if (isWriteDeflated()) {
-            _deflater = Pools.getDeflaterPool().borrowObject();
+            _deflater = new Deflater();
             _out = new CompressingOutputStream(_out, _deflater);
         }
 
         if (isReadDeflated()) {
-            _inflater = Pools.getInflaterPool().borrowObject();
+            _inflater = new Inflater();
             _in = new UncompressingInputStream(_in, _inflater);
         }
         
@@ -317,11 +321,8 @@ public class BlockingConnection extends AbstractConnection {
      * @see com.limegroup.gnutella.Connection#close()
      */
     protected void closeImpl() {
-        if (_deflater != null)
-            Pools.getDeflaterPool().returnObject(_deflater);
-        if (_inflater != null)
-            Pools.getInflaterPool().returnObject(_inflater);
-
+        IOUtils.close(_deflater);
+        IOUtils.close(_inflater);
         IOUtils.close(_in);
         IOUtils.close(_out);
     }

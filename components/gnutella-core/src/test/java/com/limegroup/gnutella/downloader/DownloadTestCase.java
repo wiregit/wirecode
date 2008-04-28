@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
+import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
@@ -31,7 +32,6 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.UDPService;
@@ -41,6 +41,7 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.auth.ContentManager;
+import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -49,13 +50,14 @@ import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.util.LimeTestCase;
 
-public class DownloadTestCase extends LimeTestCase {
+public abstract class DownloadTestCase extends LimeTestCase {
 
-    private static final Log LOG = LogFactory.getLog(DownloadTestCase.class);
+    protected final Log LOG = LogFactory.getLog(getClass());
 
     protected final GUID guid = new GUID(GUID.makeGuid());
 
@@ -127,6 +129,7 @@ public class DownloadTestCase extends LimeTestCase {
     protected MessageFactory messageFactory;
     
     protected RemoteFileDescFactory remoteFileDescFactory;
+    protected DownloadStatsTracker statsTracker;
 
     protected DownloadTestCase(String name) {
         super(name);
@@ -136,13 +139,14 @@ public class DownloadTestCase extends LimeTestCase {
         DOWNLOAD_WAIT_TIME = time;
     }
     
+    @Override
     protected void setUp() throws Exception {
         setDownloadWaitTime(DEFAULT_WAIT_TIME);
         // raise the download-bytes-per-sec so stealing is easier
         DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(10);
 
         activityCallback = new MyCallback();
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
+        injector = LimeTestUtils.createInjector(LocalSocketAddressProviderStub.STUB_MODULE, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ActivityCallback.class).toInstance(activityCallback);
@@ -172,10 +176,9 @@ public class DownloadTestCase extends LimeTestCase {
 
         ScheduledExecutorService scheduledExecutorService = injector.getInstance(Key.get(
                 ScheduledExecutorService.class, Names.named("backgroundExecutor")));
-        scheduledExecutorService.scheduleWithFixedDelay(click, 0, NodeAssigner.TIMER_DELAY,
-                TimeUnit.MILLISECONDS);
+        scheduledExecutorService.scheduleWithFixedDelay(click, 0, 1000, TimeUnit.MILLISECONDS);
 
-        LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
+        lifecycleManager = injector.getInstance(LifecycleManager.class);
         lifecycleManager.start();
 
         acceptor = injector.getInstance(Acceptor.class);
@@ -222,9 +225,12 @@ public class DownloadTestCase extends LimeTestCase {
         headPongFactory = injector.getInstance(HeadPongFactory.class);
         socketsManager = injector.getInstance(SocketsManager.class);
         messageFactory = injector.getInstance(MessageFactory.class);
+        statsTracker = injector.getInstance(DownloadStatsTracker.class);
     }
 
     protected void tearDown() throws Exception {
+        if (lifecycleManager != null) lifecycleManager.shutdown();
+        
         for (int i = 0; i < testUploaders.length; i++) {
             if (testUploaders[i] != null) {
                 testUploaders[i].reset();
@@ -238,9 +244,13 @@ public class DownloadTestCase extends LimeTestCase {
             injector.getInstance(
                     Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor")))
                     .shutdownNow();
+        
+        if (lifecycleManager != null) {
+            lifecycleManager.shutdown();
+        }
     }
 
-    protected void deleteAllFiles() {
+    private void deleteAllFiles() {
         if (!dataDir.exists())
             return;
 
@@ -248,19 +258,12 @@ public class DownloadTestCase extends LimeTestCase {
         for (int i = 0; i < files.length; i++) {
             if (files[i].isDirectory()) {
                 if (files[i].getName().equalsIgnoreCase("incomplete"))
-                    deleteDirectory(files[i]);
+                    FileUtils.deleteRecursive(files[i]);
                 else if (files[i].getName().equals(saveDir.getName()))
-                    deleteDirectory(files[i]);
+                    FileUtils.deleteRecursive(files[i]);
             }
         }
         dataDir.delete();
-    }
-
-    protected void deleteDirectory(File dir) {
-        File[] files = dir.listFiles();
-        for (int i = 0; i < files.length; i++)
-            files[i].delete();
-        dir.delete();
     }
 
     protected void tGeneric(RemoteFileDesc[] rfds) throws Exception {
@@ -282,8 +285,23 @@ public class DownloadTestCase extends LimeTestCase {
     protected void tGeneric(RemoteFileDesc[] rfds, RemoteFileDesc[] later,
             List<? extends RemoteFileDesc> alts) throws Exception {
         Downloader download = null;
-
         download = downloadServices.download(rfds, alts, null, false);
+        tGeneric(download, later, rfds);
+    }
+    
+    protected void tGeneric(MagnetOptions magnet) throws Exception {
+        Downloader download = downloadServices.download(magnet, false);
+        tGeneric(download, null, null);
+    }
+    
+    /**
+     * Performs a generic download of the file specified in <tt>rfds</tt>.
+     * 
+     * @param later can be null
+     * @param rfds can be null
+     */
+    protected void tGeneric(Downloader download, RemoteFileDesc[] later,
+            RemoteFileDesc[] rfds) throws Exception {
         if (later != null) {
             Thread.sleep(100);
             for (int i = 0; i < later.length; i++)
@@ -297,7 +315,7 @@ public class DownloadTestCase extends LimeTestCase {
             fail("FAILED: complete corrupt");
 
         IncompleteFileManager ifm = downloadManager.getIncompleteFileManager();
-        for (int i = 0; i < rfds.length; i++) {
+        for (int i = 0; rfds != null && i < rfds.length; i++) {
             File incomplete = ifm.getFile(rfds[i]);
             VerifyingFile vf = ifm.getEntry(incomplete);
             assertNull("verifying file should be null", vf);
@@ -394,18 +412,22 @@ public class DownloadTestCase extends LimeTestCase {
     }
 
     /** Returns true if the complete file exists and is complete */
-    protected boolean isComplete() {
-        LOG.debug("file is " + savedFile.getPath());
-        if (savedFile.length() < TestFile.length()) {
-            LOG.debug("File too small by: " + (TestFile.length() - savedFile.length()));
+    protected final boolean isComplete() {
+        return isComplete(savedFile, TestFile.length());
+    }
+    
+    protected final boolean isComplete(File f, long length) {
+        LOG.debug("file is " + f.getPath());
+        if (f.length() < length) {
+            LOG.debug("File too small by: " + (length - f.length()));
             return false;
         } else if (savedFile.length() > TestFile.length()) {
-            LOG.debug("File too large by: " + (savedFile.length() - TestFile.length()));
+            LOG.debug("File too large by: " + (length - f.length()));
             return false;
         }
         FileInputStream stream = null;
         try {
-            stream = new FileInputStream(savedFile);
+            stream = new FileInputStream(f);
             for (int i = 0;; i++) {
                 int c = stream.read();
                 if (c == -1)//eof
@@ -434,6 +456,8 @@ public class DownloadTestCase extends LimeTestCase {
     protected final int COMPLETE = 2;
 
     protected final int INVALID = 3;
+
+    private LifecycleManager lifecycleManager;
 
     protected void waitForComplete(boolean corrupt) {
         waitForCompleteImpl(corrupt ? CORRUPT : COMPLETE);

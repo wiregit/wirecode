@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.simpp;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,7 +50,7 @@ public class SimppParser {
         int len = children.getLength();
         for(int i= 0; i< len; i++) {
             Node node = children.item(i);
-            String nodeName = node.getNodeName().toLowerCase().trim();
+            String nodeName = node.getNodeName().toLowerCase(Locale.US).trim();
             String value = LimeXMLUtils.getText(node.getChildNodes());
             if(nodeName.equals(VERSION)) {
                 String ver = value;

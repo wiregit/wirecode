@@ -17,6 +17,7 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -498,9 +499,9 @@ public class UDPHostCacheTest extends LimeTestCase {
         
         @Inject
         public StubCache(UDPPinger pinger, Provider<MessageRouter> messageRouter,
-                PingRequestFactory pingRequestFactory, ConnectionServices connectionServices) {
+                PingRequestFactory pingRequestFactory, ConnectionServices connectionServices, NetworkInstanceUtils networkInstanceUtils) {
             super(EXPIRY_TIME, pinger, messageRouter, pingRequestFactory,
-                    connectionServices);
+                    connectionServices, networkInstanceUtils);
         }
         
         protected boolean fetch(Collection<? extends ExtendedEndpoint> hosts) {

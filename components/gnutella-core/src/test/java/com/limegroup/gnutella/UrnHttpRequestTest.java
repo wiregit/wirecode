@@ -7,15 +7,20 @@ import java.util.Random;
 import junit.framework.Test;
 
 import org.apache.http.Header;
+import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHttpRequest;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPUtils;
+import com.limegroup.gnutella.http.HttpTestUtils;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -36,8 +41,8 @@ public final class UrnHttpRequestTest extends LimeTestCase {
     private HTTPUploadManager uploadManager;
 
     private LifecycleManager lifeCycleManager;
-
-    private HTTPAcceptor acceptor;
+    
+    private NetworkManager networkManager;
 
     public UrnHttpRequestTest(String name) {
         super(name);
@@ -63,13 +68,14 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         }
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 
         // initialize services
         Injector injector = LimeTestUtils.createInjector();
 
         uploadManager = (HTTPUploadManager) injector.getInstance(UploadManager.class);
         
-        acceptor = injector.getInstance(HTTPAcceptor.class);
+        networkManager = injector.getInstance(NetworkManager.class);
         
         // start services
         lifeCycleManager = injector.getInstance(LifecycleManager.class);
@@ -241,7 +247,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      */
     private void sendRequestThatShouldSucceed(HttpRequest request, FileDesc fd)
             throws Exception {
-        HttpResponse response = acceptor.testProcess(request);
+        HttpResponse response = getResponse(request);
         assertEquals(200, response.getStatusLine().getStatusCode());
 
         // clean up any created uploaders
@@ -259,7 +265,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
                     .matchesStartOfString(curString)) {
                 URN curUrn = null;
                 try {
-                    String tmpString = HTTPUtils.extractHeaderValue(curString);
+                    String tmpString = HttpTestUtils.extractHeaderValue(curString);
                     curUrn = URN.createSHA1Urn(tmpString);
                 } catch (IOException e) {
                     assertTrue("unexpected exception: " + e, false);
@@ -276,7 +282,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
                 continue;
             } else if (HTTPHeaderName.CONTENT_LENGTH
                     .matchesStartOfString(curString)) {
-                String value = HTTPUtils.extractHeaderValue(curString);
+                String value = HttpTestUtils.extractHeaderValue(curString);
                 assertEquals("sizes should match for " + fd, (int) fd
                         .getFileSize(), Integer.parseInt(value));
             } else if (HTTPHeaderName.SERVER.matchesStartOfString(curString)) {
@@ -293,7 +299,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      */
     private void sendRequestThatShouldFail(HttpRequest request, String error)
             throws Exception {
-        HttpResponse response = acceptor.testProcess(request);
+        HttpResponse response = getResponse(request);
         assertEquals("unexpected HTTP response", error, getStatusLine(response));
     }
 
@@ -301,6 +307,11 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         return response.getProtocolVersion() + " "
                 + response.getStatusLine().getStatusCode() + " "
                 + response.getStatusLine().getReasonPhrase();
+    }
+    
+    private HttpResponse getResponse(HttpRequest request) throws HttpException, IOException, InterruptedException {
+        HttpClient client = new DefaultHttpClient();
+        return client.execute(new HttpHost("127.0.0.1", networkManager.getPort(), "http"), request);
     }
 
 }

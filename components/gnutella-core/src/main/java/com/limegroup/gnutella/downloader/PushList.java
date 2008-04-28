@@ -7,8 +7,9 @@ import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.NetworkUtils;
+import org.limewire.io.NetworkInstanceUtils;
 
+import com.google.inject.Inject;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 
@@ -19,6 +20,13 @@ public class PushList {
 
     /** Map of clientGUID -> List of potential pushes with that GUID. */
     private final TreeMap<byte[], List<Push>> pushers = new TreeMap<byte[], List<Push>>(GUID.GUID_BYTE_COMPARATOR);
+    
+    private final NetworkInstanceUtils networkInstanceUtils;
+    
+    @Inject
+    public PushList(NetworkInstanceUtils networkInstanceUtils) {
+        this.networkInstanceUtils = networkInstanceUtils;
+    }
     
     /** Adds a host that wants to be notified of a push. */
     public void addPushHost(PushDetails details, HTTPConnectObserver observer) {
@@ -115,7 +123,7 @@ public class PushList {
         LOG.debug("No exact match, using first private|bogus address.");
         for(Iterator<? extends Push> i = hosts.iterator(); i.hasNext();) {
             Push next = i.next();
-            if(NetworkUtils.isPrivateAddress(next.details.getAddress()) ||
+            if(networkInstanceUtils.isPrivateAddress(next.details.getAddress()) ||
                next.details.getAddress().equals(RemoteFileDesc.BOGUS_IP)) {
                 i.remove();
                 return next;

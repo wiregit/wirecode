@@ -4,13 +4,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.GGEP;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 
-import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.util.DataUtils;
 
 /** A Gnutella push request, used to download files behind a firewall. */
@@ -37,17 +37,14 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
              byte[] payload, Network network) throws BadPacketException {
         super(guid, Message.F_PUSH, ttl, hops, payload.length, network);
         if (payload.length < STANDARD_PAYLOAD_SIZE) {
-            ReceivedErrorStat.PUSH_INVALID_PAYLOAD.incrementStat();
             throw new BadPacketException("Payload too small: "+payload.length);
         }
         this.payload=payload;
 		if(!NetworkUtils.isValidPort(getPort())) {
-		    ReceivedErrorStat.PUSH_INVALID_PORT.incrementStat();
 			throw new BadPacketException("invalid port");
 		}
 		String ip = NetworkUtils.ip2string(payload, 20);
 		if(!NetworkUtils.isValidAddress(ip)) {
-		    ReceivedErrorStat.PUSH_INVALID_ADDRESS.incrementStat();
 		    throw new BadPacketException("invalid address: " + ip);
 		}
     }
@@ -121,7 +118,7 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
     public boolean isTLSCapable() {
         parseGGEP();
         if(ggep != null && ggep != NULL_GGEP) {
-            return ggep.hasKey(GGEP.GGEP_HEADER_TLS_CAPABLE);
+            return ggep.hasKey(GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
         } else {
             return false;
         }
@@ -140,7 +137,6 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
 
     protected void writePayload(OutputStream out) throws IOException {
 		out.write(payload);
-		SentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(this);
     }
 
     /* (non-Javadoc)
@@ -185,22 +181,19 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
         return ByteOrder.ushort2int(ByteOrder.leb2short(payload, 24));
     }
 
-	// inherit doc comment
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.messages.PushRequest#recordDrop()
-     */
-	public void recordDrop() {
-		DroppedSentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(this);
-	}
-
 	@Override
 	public Class<? extends Message> getHandlerClass() {
 	    return PushRequest.class;
 	}
 	
     public String toString() {
-        return "PushRequest("+super.toString()+" "+
-            NetworkUtils.ip2string(getIP())+":"+getPort()+")";
+        StringBuilder builder = new StringBuilder("PushRequest(");
+        builder.append(super.toString()).append("\n");
+        builder.append(NetworkUtils.ip2string(getIP())+":"+getPort()).append("\n");
+        builder.append("FWT push: ").append(isFirewallTransferPush()).append("\n");
+        builder.append("TLS: ").append(isTLSCapable()).append("\n");
+        builder.append("Client GUID: ").append(GUID.toHexString(getClientGUID())).append("\n");
+        return builder.toString();
     }
     
     /** A simple GGEP helper that precaches commonly used GGEPs. */
@@ -208,7 +201,7 @@ public class PushRequestImpl extends AbstractMessage implements PushRequest {
         private static final byte[] TLS_GGEP;
         static {
             GGEP tlsGGEP = new GGEP();
-            tlsGGEP.put(GGEP.GGEP_HEADER_TLS_CAPABLE);
+            tlsGGEP.put(GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             try {
                 tlsGGEP.write(out);

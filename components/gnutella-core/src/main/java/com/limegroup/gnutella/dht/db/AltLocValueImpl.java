@@ -3,14 +3,14 @@ package com.limegroup.gnutella.dht.db;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 import org.limewire.util.ByteOrder;
 
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.security.MerkleTree;
 
 /**

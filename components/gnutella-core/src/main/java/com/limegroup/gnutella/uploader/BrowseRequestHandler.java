@@ -7,15 +7,20 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.nio.ContentEncoder;
+import org.apache.http.nio.ContentEncoderChannel;
+import org.apache.http.nio.IOControl;
+import org.apache.http.nio.entity.ConsumingNHttpEntity;
+import org.apache.http.nio.protocol.SimpleNHttpRequestHandler;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpRequestHandler;
-import org.limewire.http.AbstractHttpNIOEntity;
 import org.limewire.http.HttpCoreUtils;
-import org.limewire.nio.observer.WriteObserver;
+import org.limewire.http.entity.AbstractProducingNHttpEntity;
+import org.limewire.nio.channel.NoInterestWritableByteChannel;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.Constants;
@@ -31,14 +36,13 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
-import com.limegroup.gnutella.statistics.UploadStat;
 
 /**
  * Responds to Gnutella browse requests by returning a list of all shared files.
  * Only supports the application/x-gnutella-packets mime-type, browsing through
  * HTML is not supported.
  */
-public class BrowseRequestHandler implements HttpRequestHandler {
+public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
 
     private static final Log LOG = LogFactory.getLog(BrowseRequestHandler.class);
     
@@ -56,10 +60,14 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         this.fileManager = fileManager;
         this.messageRouter = messageRouter;
     }
+    
+    public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
+            HttpContext context) throws HttpException, IOException {
+        return null;
+    }
 
     public void handle(HttpRequest request, HttpResponse response,
             HttpContext context) throws HttpException, IOException {
-        UploadStat.BROWSE_HOST.incrementStat();
         
         HTTPUploader uploader = sessionManager.getOrCreateUploader(request,
                 context, UploadType.BROWSE_HOST, "Browse-File");
@@ -79,7 +87,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         sessionManager.sendResponse(uploader, response);
     }
 
-    public class BrowseResponseEntity extends AbstractHttpNIOEntity {
+    public class BrowseResponseEntity extends AbstractProducingNHttpEntity {
 
         private static final int RESPONSES_PER_REPLY = 10;
         
@@ -110,7 +118,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
         }
         
         @Override
-        public void initialize() throws IOException {
+        public void initialize(ContentEncoder contentEncoder, IOControl ioctrl) throws IOException {
             SentMessageHandler sentMessageHandler = new SentMessageHandler() {
                 public void processSentMessage(Message m) {
                     uploader.addAmountUploaded(m.getTotalLength());
@@ -119,20 +127,16 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             };
             
             sender = new MessageWriter(new ConnectionStats(), new BasicQueue(), sentMessageHandler);
-            sender.setWriteChannel(this);
-            
+            sender.setWriteChannel(new NoInterestWritableByteChannel(new ContentEncoderChannel(
+                    contentEncoder)));
+
             query = queryRequestFactory.createBrowseHostQuery();
             iterable = fileManager.getIndexingIterator(query.desiresXMLResponses() || 
                     query.desiresOutOfBandReplies());
         }
         
         @Override
-        public void interestWrite(WriteObserver observer, boolean status) {
-            // we are never interested in turning write interest off 
-        }
-        
-        @Override
-        public boolean handleWrite() throws IOException {
+        public boolean writeContent(ContentEncoder contentEncoder, IOControl ioctrl) throws IOException {
             addMessages();
             
             boolean more = sender.handleWrite();
@@ -164,8 +168,7 @@ public class BrowseRequestHandler implements HttpRequestHandler {
             }
         }
 
-        @Override
-        public void finished() {
+        public void finish() {
             deactivateTimeout();
             sender = null;
         }

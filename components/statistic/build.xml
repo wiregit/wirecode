@@ -15,7 +15,6 @@
         <do.setup-properties component="statistic">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
-			    <pathelement location="${limewire.lib.jars}/commons-pool.jar"/>
 			    <path refid="build.limewire.components.common.buildpath"/>
 			    <path refid="build.limewire.components.collection.buildpath"/>
 			</src-classpath>

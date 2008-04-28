@@ -106,6 +106,12 @@ public class CreationTimeCacheTest extends LimeTestCase {
         Map map = getUrnToTime(ctCache);
         assertEquals(toSerialize, map);
     }
+    
+    public void testMapCreationNoExistingMap() throws Exception {
+        CreationTimeCache creationTimeCache = new CreationTimeCache(fileManager);
+        Map<URN, Long> map = creationTimeCache.createMap();
+        assertTrue(map.isEmpty());
+    }
 
 
     /** Tests the getFiles().iterator() method.

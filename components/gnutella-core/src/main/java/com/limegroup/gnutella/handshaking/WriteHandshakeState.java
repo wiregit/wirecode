@@ -5,8 +5,6 @@ import java.nio.ByteBuffer;
 import java.util.Properties;
 
 import com.limegroup.gnutella.http.WriteHeadersIOState;
-import com.limegroup.gnutella.statistics.BandwidthStat;
-import com.limegroup.gnutella.statistics.HandshakingStat;
 
 /** Superclass for HandshakeStates that are written out. */
 public abstract class WriteHandshakeState extends WriteHeadersIOState {
@@ -15,7 +13,7 @@ public abstract class WriteHandshakeState extends WriteHeadersIOState {
     protected final HandshakeSupport support;
     
     protected WriteHandshakeState(HandshakeSupport support) {
-        super(BandwidthStat.GNUTELLA_HEADER_UPSTREAM_BANDWIDTH);
+        super(null);
         this.support = support;
     }
     
@@ -67,10 +65,8 @@ public abstract class WriteHandshakeState extends WriteHeadersIOState {
             if(outgoing) {
                 switch(response.getStatusCode()) {
                 case HandshakeResponse.OK:
-                    HandshakingStat.SUCCESSFUL_OUTGOING.incrementStat();
                     break;
                 case HandshakeResponse.SLOTS_FULL:
-                    HandshakingStat.OUTGOING_CLIENT_REJECT.incrementStat();
                     throw NoGnutellaOkException.CLIENT_REJECT;
                 case HandshakeResponse.LOCALE_NO_MATCH:
                     //if responder's locale preferencing was set 
@@ -78,7 +74,6 @@ public abstract class WriteHandshakeState extends WriteHeadersIOState {
                     //(currently in use by the dedicated connectionfetcher)
                     throw NoGnutellaOkException.CLIENT_REJECT_LOCALE;
                 default:
-                    HandshakingStat.OUTGOING_CLIENT_UNKNOWN.incrementStat();
                     throw NoGnutellaOkException.createClientUnknown(response.getStatusCode());
                 }
             } else {
@@ -87,10 +82,8 @@ public abstract class WriteHandshakeState extends WriteHeadersIOState {
                    case HandshakeResponse.CRAWLER_CODE: // let the crawler IOX in ReadResponse
                         break;
                     case HandshakeResponse.SLOTS_FULL:
-                        HandshakingStat.INCOMING_CLIENT_REJECT.incrementStat();
                         throw NoGnutellaOkException.CLIENT_REJECT;
-                    default: 
-                        HandshakingStat.INCOMING_CLIENT_UNKNOWN.incrementStat();
+                    default:
                         throw NoGnutellaOkException.createClientUnknown(response.getStatusCode());
                 }
             }

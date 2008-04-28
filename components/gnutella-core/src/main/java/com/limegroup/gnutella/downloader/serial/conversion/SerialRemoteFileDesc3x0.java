@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.xml.SerialXml;
 
 class SerialRemoteFileDesc3x0 implements Serializable, SerialRemoteFileDesc {
 
@@ -125,7 +126,7 @@ class SerialRemoteFileDesc3x0 implements Serializable, SerialRemoteFileDesc {
      * @see com.limegroup.gnutella.downloader.serial.conversion.SerialRemoteFileDesc#getXml()
      */
     public String getXml() {
-        return _xmlDocs != null && _xmlDocs.length > 0 ? _xmlDocs[0].getXml() : null;
+        return _xmlDocs != null && _xmlDocs.length > 0 ? _xmlDocs[0].getXml(false) : null;
     }
 
     /* (non-Javadoc)

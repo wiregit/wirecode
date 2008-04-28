@@ -434,6 +434,30 @@ public class CommonUtils {
     }
     
     /**
+     * Sanitizes a String for use in a directory and file name 
+	 * and removes any illegal characters from it
+	 * 
+     * @param name String to check
+     * @return sanitized String
+     */
+    public static String santizeString(String name) {
+        for (int i = 0; i < ILLEGAL_CHARS_ANY_OS.length; i++) 
+            name = name.replace(ILLEGAL_CHARS_ANY_OS[i], '_');
+        
+        if ( OSUtils.isWindows() || OSUtils.isOS2() ) {
+            for (int i = 0; i < ILLEGAL_CHARS_WINDOWS.length; i++) 
+                name = name.replace(ILLEGAL_CHARS_WINDOWS[i], '_');
+        } else if ( OSUtils.isLinux() || OSUtils.isSolaris() ) {
+            for (int i = 0; i < ILLEGAL_CHARS_UNIX.length; i++) 
+                name = name.replace(ILLEGAL_CHARS_UNIX[i], '_');
+        } else if (OSUtils.isMacOSX()) {
+            for(int i = 0; i < ILLEGAL_CHARS_MACOS.length; i++)
+                name = name.replace(ILLEGAL_CHARS_MACOS[i], '_');
+        }
+        return name;
+    }
+    
+    /**
      * Returns the prefix of <code>string</code> which takes up a maximum
      * of <code>maxBytes</code>.
      * @throws CharacterCodingException 

@@ -10,23 +10,20 @@ import org.limewire.nio.observer.Shutdownable;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.altlocs.AltLocManager;
-import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.DHTManagerStub;
 import com.limegroup.gnutella.dht.NullDHTController;
 import com.limegroup.gnutella.dht.db.AltLocFinder;
-import com.limegroup.gnutella.dht.db.AltLocSearchListener;
+import com.limegroup.gnutella.dht.db.SearchListener;
 import com.limegroup.gnutella.downloader.RequeryManager.QueryType;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -51,6 +48,8 @@ public class RequeryManagerTest extends LimeTestCase {
     private Mockery mockery;
     private Sequence sequence;
     
+    private URN sha1Urn;
+    
     public void setUp() throws Exception {
         DHTSettings.ENABLE_DHT_ALT_LOC_QUERIES.setValue(true);
         RequeryManager.NO_DELAY = true;
@@ -72,6 +71,8 @@ public class RequeryManagerTest extends LimeTestCase {
         dhtManager = (MyDHTManager)injector.getInstance(DHTManager.class);    
         altLocFinder = (MyAltLocFinder)injector.getInstance(AltLocFinder.class);
         requeryManagerFactory = injector.getInstance(RequeryManagerFactory.class);
+        
+        sha1Urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         
         setPro(false);
     }
@@ -97,13 +98,16 @@ public class RequeryManagerTest extends LimeTestCase {
     public void testCancelsQueries() throws Exception {
         dhtManager.on = true;
         RequeryManager requeryManager = requeryManagerFactory.createRequeryManager(requeryListener);
+        
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength()); inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         requeryManager.activate();
         requeryManager.sendQuery();
-        assertSame(requeryManager, altLocFinder.listener);
+        assertSame(requeryManager.searchHandler, altLocFinder.listener);
         assertTrue(requeryManager.isWaitingForResults());
         assertFalse(altLocFinder.cancelled);
         
@@ -145,10 +149,12 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength()); inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         requeryManager.sendQuery();
-        assertSame(requeryManager, altLocFinder.listener);
+        assertSame(requeryManager.searchHandler, altLocFinder.listener);
         
         // But immediately after, requires an activate (for gnet query)
         assertTrue(requeryManager.canSendQueryAfterActivate());
@@ -164,11 +170,13 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength()); inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         // and we should start a lookup
         requeryManager.sendQuery();
-        assertSame(requeryManager, altLocFinder.listener);
+        assertSame(requeryManager.searchHandler, altLocFinder.listener);
         assertTrue(requeryManager.canSendQueryAfterActivate());
         assertFalse(requeryManager.canSendQueryNow());
         
@@ -290,11 +298,13 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         // and we should start a lookup
         requeryManager.sendQuery();
-        assertSame(requeryManager, altLocFinder.listener);
+        assertSame(requeryManager.searchHandler, altLocFinder.listener);
         assertFalse(requeryManager.canSendQueryAfterActivate());
         assertFalse(requeryManager.canSendQueryNow());
         
@@ -313,10 +323,12 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         requeryManager.sendQuery();
-        assertSame(requeryManager, altLocFinder.listener);
+        assertSame(requeryManager.searchHandler, altLocFinder.listener);
         assertFalse(requeryManager.canSendQueryAfterActivate());
         assertFalse(requeryManager.canSendQueryNow());
         
@@ -337,10 +349,12 @@ public class RequeryManagerTest extends LimeTestCase {
         // with dht on, start a requery
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         requeryManager.sendQuery();
-        assertSame(requeryManager, altLocFinder.listener);
+        assertSame(requeryManager.searchHandler, altLocFinder.listener);
         assertTrue(requeryManager.isWaitingForResults());
         
         // pretend the dht lookup fails
@@ -388,10 +402,12 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         requeryManager.sendQuery();
-        assertSame(requeryManager, altLocFinder.listener); // sent a DHT query
+        assertSame(requeryManager.searchHandler, altLocFinder.listener); // sent a DHT query
         assertTrue(requeryManager.isWaitingForResults());
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupFinished(QueryType.DHT);  inSequence(sequence);
@@ -431,10 +447,12 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         requeryManager.sendQuery();
-        assertSame(requeryManager, altLocFinder.listener); // sent a DHT query
+        assertSame(requeryManager.searchHandler, altLocFinder.listener); // sent a DHT query
         assertTrue(requeryManager.isWaitingForResults());
         
         // now turn the dht off
@@ -456,10 +474,12 @@ public class RequeryManagerTest extends LimeTestCase {
         assertTrue(requeryManager.canSendQueryNow());
         mockery.checking(new Expectations() {{
             one(requeryListener).lookupStarted(QueryType.DHT, dhtQueryLength());  inSequence(sequence);
-            one(requeryListener).getSHA1Urn(); inSequence(sequence);
+            one(requeryListener).getSHA1Urn();
+            will(returnValue(sha1Urn));
+            inSequence(sequence);
         }});
         requeryManager.sendQuery();
-        assertSame(requeryManager, altLocFinder.listener); // sent a DHT query
+        assertSame(requeryManager.searchHandler, altLocFinder.listener); // sent a DHT query
         assertTrue(requeryManager.isWaitingForResults());
     }
     
@@ -490,22 +510,13 @@ public class RequeryManagerTest extends LimeTestCase {
     }
     
     @Singleton    
-    private static class MyAltLocFinder extends AltLocFinder {
+    private static class MyAltLocFinder implements AltLocFinder {
         
-        @Inject
-        public MyAltLocFinder(DHTManager manager,
-                AlternateLocationFactory alternateLocationFactory, AltLocManager altLocManager,
-                PushEndpointFactory pushEndpointFactory) {
-            super(manager, alternateLocationFactory, altLocManager, pushEndpointFactory);
-            // TODO Auto-generated constructor stub
-        }
-
-        private volatile AltLocSearchListener listener;
+        private volatile SearchListener<AlternateLocation> listener;
         
         volatile boolean cancelled;
         
-        @Override
-        public Shutdownable findAltLocs(URN urn, AltLocSearchListener listener) {
+        public Shutdownable findAltLocs(URN urn, SearchListener<AlternateLocation> listener) {
             this.listener = listener;
             return new Shutdownable() {
                 public void shutdown() {
@@ -514,10 +525,13 @@ public class RequeryManagerTest extends LimeTestCase {
             };
         }
 
-        @Override
-        public boolean findPushAltLocs(GUID guid, URN urn) {
-            return true;
+        public boolean findPushAltLocs(GUID guid, URN urn, SearchListener<AlternateLocation> listener) {
+            return false;
         }
-        
+
+        public AlternateLocation getAlternateLocation(GUID guid, URN urn) {
+            return null;
+        }
+ 
     }
 }

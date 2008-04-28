@@ -70,7 +70,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        setSettings();
+        DHTTestUtils.setSettings(PORT);
                 
         ConnectionSettings.FILTER_CLASS_C.setValue(false);
         dhtBootstrapper = new DHTBootstrapperStub();

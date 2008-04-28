@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.version;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.limewire.util.OSUtils;
@@ -49,7 +50,7 @@ class OS {
         this.os = s;
         this.fromVersion = fromVersion;
         this.toVersion = toVersion;
-        this.acceptable = accept(s.toLowerCase());
+        this.acceptable = accept(s.toLowerCase(Locale.US));
     }
     
     /**
@@ -157,7 +158,7 @@ class OS {
             } catch (VersionFormatException ignore) {}
         }
         
-        String os = OSUtils.getOS().toLowerCase();
+        String os = OSUtils.getOS().toLowerCase(Locale.US);
         
         if(s.equals(os))
             return true;

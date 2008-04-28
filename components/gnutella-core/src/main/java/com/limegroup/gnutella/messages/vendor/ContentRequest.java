@@ -7,13 +7,14 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.limewire.io.BadGGEPBlockException;
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.GGEPKeys;
 
 /**
  * A request for content.
@@ -48,7 +49,7 @@ public class ContentRequest extends AbstractVendorMessage {
             throw new NullPointerException("null sha1");
         
         GGEP ggep =  new GGEP();
-        ggep.put(GGEP.GGEP_HEADER_SHA1, sha1.getBytes());        
+        ggep.put(GGEPKeys.GGEP_HEADER_SHA1, sha1.getBytes());        
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             ggep.write(out);
@@ -62,7 +63,7 @@ public class ContentRequest extends AbstractVendorMessage {
     public URN getURN() {
         try {
             GGEP ggep = new GGEP(getPayload(), 0);
-            return URN.createSHA1UrnFromBytes(ggep.getBytes(GGEP.GGEP_HEADER_SHA1));
+            return URN.createSHA1UrnFromBytes(ggep.getBytes(GGEPKeys.GGEP_HEADER_SHA1));
         } catch (BadGGEPBlockException e) {
         } catch (BadGGEPPropertyException e) {
         } catch(IOException iox) {

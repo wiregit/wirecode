@@ -53,7 +53,7 @@ public interface SocketsManager {
      *
      * @param socket the socket to connect; if <code>null</code> a new <code>Socket</code> will be created
      * @param localAddr the Socket address to bind to locally; can be null
-     * @param addr the host/port to connect to
+     * @param remoteAddr the host/port to connect to
      * @param timeout the desired timeout for connecting, in milliseconds,
      *  or 0 for no timeout. In case of a proxy connection, this timeout
      *  might be exceeded
@@ -63,7 +63,30 @@ public interface SocketsManager {
      *  requested time
      * @throws <tt>IllegalArgumentException</tt> if the port is invalid
      */
-    public Socket connect(NBSocket socket, InetSocketAddress localAddr, InetSocketAddress addr, int timeout, ConnectType type) throws IOException;
+    public Socket connect(NBSocket socket, InetSocketAddress localAddr, InetSocketAddress remoteAddr, int timeout, ConnectType type) throws IOException;
+    
+    /**
+     * Connects and returns a socket to the given host, with a timeout.
+     * The timeout only applies to network conditions.  More time might be spent
+     * waiting for an available slot to connect with.
+     * 
+     * The connection will be attempted with the specified connection type.
+     * For example, to make a plain socket, use ConnectType.PLAIN.
+     * To connect with a TLS Socket, use ConnectType.TLS.
+     *
+     * @param socket the socket to connect; if <code>null</code> a new <code>Socket</code> will be created
+     * @param localAddr the Socket address to bind to locally; can be null
+     * @param remoteAddr the host/port to connect to
+     * @param timeout the desired timeout for connecting, in milliseconds,
+     *  or 0 for no timeout. In case of a proxy connection, this timeout
+     *  might be exceeded
+     * @param type the type of connection to attempt
+     * @return the connected Socket
+     * @throws IOException the connections couldn't be made in the 
+     *  requested time
+     * @throws <tt>IllegalArgumentException</tt> if the port is invalid
+     */
+    public Socket connect(NBSocket socket, InetSocketAddress localAddr, InetSocketAddress remoteAddr, int timeout, ConnectObserver observer, ConnectType type) throws IOException;    
     
     /**
      * Connects and returns a socket to the given host, with a timeout.

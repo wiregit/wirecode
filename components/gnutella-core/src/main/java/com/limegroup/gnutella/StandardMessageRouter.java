@@ -17,8 +17,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.io.IPPortCombo;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.MACCalculatorRepositoryManager;
@@ -32,11 +33,12 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
+import com.limegroup.gnutella.messagehandlers.LimeACKHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
 import com.limegroup.gnutella.messages.FeatureSearchData;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -46,6 +48,7 @@ import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
+import com.limegroup.gnutella.messages.Message.MessageCounter;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
@@ -56,8 +59,6 @@ import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.statistics.ReceivedMessageStat;
-import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
@@ -74,6 +75,13 @@ public class StandardMessageRouter extends MessageRouterImpl {
     private final Statistics statistics;
 
     private final ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory;
+    
+    @InspectionPoint("false positive queries")
+    private final MessageCounter falsePositives = new Message.MessageCounter(50);
+    @InspectionPoint("not serviced queries")
+    private final MessageCounter notServiced = new Message.MessageCounter(500);
+    @InspectionPoint("ignored busy queries")
+    private final MessageCounter ignoredBusy = new Message.MessageCounter(500);
     
     @Inject
     public StandardMessageRouter(NetworkManager networkManager,
@@ -103,12 +111,12 @@ public class StandardMessageRouter extends MessageRouterImpl {
             UDPReplyHandlerCache udpReplyHandlerCache,
             Provider<InspectionRequestHandler> inspectionRequestHandlerFactory,
             Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
-            Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
             Statistics statistics,
             ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory,
             PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
             Provider<OOBHandler> oobHandlerFactory,
-            Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager) {
+            Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager,
+            Provider<LimeACKHandler> limeACKHandler) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
@@ -119,9 +127,9 @@ public class StandardMessageRouter extends MessageRouterImpl {
                 activityCallback, connectionServices, applicationServices,
                 backgroundExecutor, pongCacher, simppManager, updateHandler,
                 guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, 
-                udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory,
+                udpCrawlerPingHandlerFactory, 
                 pingRequestFactory, messageHandlerBinder, oobHandlerFactory, 
-                MACCalculatorRepositoryManager);
+                MACCalculatorRepositoryManager, limeACKHandler);
         this.statistics = statistics;
         this.replyNumberVendorMessageFactory = replyNumberVendorMessageFactory;
     }
@@ -213,11 +221,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
         
         IpPort ipport = null;
         if (request.requestsIP()) {
-            try {
-                ipport = new IPPortCombo(
-                            addr.getAddress().getHostAddress(),
-                            addr.getPort());
-            } catch(IOException tooBad) { }
+            ipport = new IpPortImpl(addr);
         }
         
         List<IpPort> dhthosts = Collections.emptyList();
@@ -304,9 +308,6 @@ public class StandardMessageRouter extends MessageRouterImpl {
         //Only respond if we understand the actual feature, if it had a feature.
         if(!FeatureSearchData.supportsFeature(queryRequest.getFeatureSelector()))
             return false;
-
-        if (queryRequest.isWhatIsNewRequest())
-            ReceivedMessageStat.WHAT_IS_NEW_QUERY_MESSAGES.incrementStat();
                                                 
         // Only send results if we're not busy.  Note that this ignores
         // queue slots -- we're considered busy if all of our "normal"
@@ -314,6 +315,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
         // is necessary because we're always returning more total hits than
         // we have slots available.
         if(!uploadManager.mayBeServiceable() )  {
+            ignoredBusy.countMessage(queryRequest);
             return false;
         }
                                                 
@@ -326,14 +328,8 @@ public class StandardMessageRouter extends MessageRouterImpl {
                                                      
         // Run the local query
         Response[] responses = fileManager.query(queryRequest);
-        
-        if( connectionServices.isShieldedLeaf() && queryRequest.isTCP() ) {
-            if( responses != null && responses.length > 0 )
-                RoutedQueryStat.LEAF_HIT.incrementStat();
-            else
-                RoutedQueryStat.LEAF_FALSE_POSITIVE.incrementStat();
-        }
-
+        if (responses.length == 0)
+            falsePositives.countMessage(queryRequest);
         return sendResponses(responses, queryRequest, handler);
         
     }
@@ -357,8 +353,10 @@ public class StandardMessageRouter extends MessageRouterImpl {
         			filtered.add(r);
         	}
         	
-        	if (filtered.isEmpty()) // nothing to send..
+        	if (filtered.isEmpty()) {// nothing to send..
+        	    notServiced.countMessage(query);
         		return false;
+        	}
         	
         	if (filtered.size() != responses.length)
         		responses = filtered.toArray(new Response[filtered.size()]);
@@ -377,7 +375,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
             // send the replies out-of-band - we need to
             // 1) buffer the responses
             // 2) send a ReplyNumberVM with the number of responses
-            if (bufferResponsesForLaterDelivery(query, responses)) {
+            if (limeAckHandler.get().bufferResponsesForLaterDelivery(query, responses)) {
                 // special out of band handling....
                 InetAddress addr = null;
                 try {

@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -14,30 +16,39 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.inspection.InspectionPoint;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.ByteBufferCache;
 import org.limewire.nio.ssl.SSLEngineTest;
 import org.limewire.nio.ssl.SSLUtils;
+import org.limewire.promotion.PromotionServices;
 import org.limewire.rudp.UDPMultiplexor;
 import org.limewire.service.ErrorService;
 import org.limewire.setting.SettingsGroupManager;
+import org.limewire.statistic.StatisticAccumulator;
 import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
+import org.limewire.util.VersionUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.bittorrent.TorrentManager;
+import com.limegroup.bittorrent.dht.DHTPeerLocator;
+import com.limegroup.bittorrent.dht.DHTPeerPublisher;
 import com.limegroup.bittorrent.handshaking.IncomingConnectionHandler;
+import com.limegroup.gnutella.altlocs.DownloaderGuidAlternateLocationFinder;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.browser.ControlRequestAcceptor;
 import com.limegroup.gnutella.browser.LocalAcceptor;
 import com.limegroup.gnutella.browser.LocalHTTPAcceptor;
 import com.limegroup.gnutella.chat.ChatManager;
 import com.limegroup.gnutella.dht.DHTManager;
+import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.LWSIntegrationServices;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
@@ -53,12 +64,17 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.LWSSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.ThirdPartySearchResultsSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 import com.limegroup.gnutella.version.UpdateHandler;
 
+/**
+ * Provides an implementation of the <code>LifecycleManager</code> to start and
+ * stop the LimeWire components.
+ */
 @Singleton
 public class LifecycleManagerImpl implements LifecycleManager {
     
@@ -107,7 +123,6 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<HashTreeCache> tigerTreeCache;
     private final Provider<DHTManager> dhtManager;
     private final Provider<ByteBufferCache> byteBufferCache;
-    private final Provider<ScheduledExecutorService> backgroundExecutor;
     private final Provider<NetworkManager> networkManager;
     private final Provider<Statistics> statistics;
     private final Provider<ConnectionServices> connectionServices;
@@ -119,6 +134,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<OutOfBandThroughputMeasurer> outOfBandThroughputMeasurer;
     private final Provider<BrowseHostHandlerManager> browseHostHandlerManager;
     private final Provider<DownloadUpgradeTask> downloadUpgradeTask;
+    private final Provider<StatisticAccumulator> statisticAccumulator;
     
     /** A list of items that require running prior to shutting down LW. */
     private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
@@ -126,11 +142,14 @@ public class LifecycleManagerImpl implements LifecycleManager {
     @InspectablePrimitive("time lifecycle finished starting") 
     private long startFinishedTime;
 
-    private final Provider<IncomingConnectionHandler> incomingConnectionHandler;
 
     private final Provider<LicenseFactory> licenseFactory;
-
     private final Provider<ConnectionDispatcher> localConnectionDispatcher;
+    private final Provider<DownloaderGuidAlternateLocationFinder> magnetDownloaderPushEndpointFinder;
+    private final Provider<PushProxiesPublisher> pushProxiesPublisher;    
+    private final Provider<DHTPeerLocator> dhtPeerLocator;    
+    private final Provider<DHTPeerPublisher> dhtPeerPublisher;
+    private final Provider<PromotionServices> promotionServices;
 
     @Inject
     public LifecycleManagerImpl(
@@ -177,7 +196,13 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<LWSIntegrationServices> lwsItegrationServices,
             Provider<OutOfBandThroughputMeasurer> outOfBandThroughputMeasurer,
             Provider<BrowseHostHandlerManager> browseHostHandlerManager,
-            Provider<DownloadUpgradeTask> downloadUpgradeTask) { 
+            Provider<DownloadUpgradeTask> downloadUpgradeTask,
+            Provider<StatisticAccumulator> statisticAccumulator,
+            Provider<DownloaderGuidAlternateLocationFinder> magnetDownloaderPushEndpointFinder,
+            Provider<PushProxiesPublisher> pushProxiesPublisher,
+            Provider<DHTPeerLocator> dhtPeerLocator,
+            Provider<DHTPeerPublisher> dhtPeerPublisher,
+            Provider<PromotionServices> promotionServices) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -209,13 +234,11 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.tigerTreeCache = tigerTreeCache;
         this.dhtManager = dhtManager;
         this.byteBufferCache = byteBufferCache;
-        this.backgroundExecutor = backgroundExecutor;
         this.networkManager = networkManager;
         this.statistics = statistics;
         this.connectionServices = connectionServices;
         this.spamServices = spamServices;
         this.controlRequestAcceptor = controlRequestAcceptor;
-        this.incomingConnectionHandler = incomingConnectionHandler;
         this.licenseFactory = licenseFactory;
         this.limeCoreGlue = limeCoreGlue;
         this.lwsManager = lwsManager;
@@ -223,6 +246,12 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.outOfBandThroughputMeasurer = outOfBandThroughputMeasurer;
         this.browseHostHandlerManager = browseHostHandlerManager;
         this.downloadUpgradeTask = downloadUpgradeTask;
+        this.statisticAccumulator = statisticAccumulator;
+        this.magnetDownloaderPushEndpointFinder = magnetDownloaderPushEndpointFinder;
+        this.pushProxiesPublisher = pushProxiesPublisher;
+        this.dhtPeerLocator = dhtPeerLocator;
+        this.dhtPeerPublisher = dhtPeerPublisher;
+        this.promotionServices = promotionServices;
     }
     
     /* (non-Javadoc)
@@ -264,6 +293,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         connectionManager.get().addEventListener(activityCallback.get());
         connectionManager.get().addEventListener(dhtManager.get());
+        LOG.debug("Installing push proxies publisher");
+        dhtManager.get().addEventListener(pushProxiesPublisher.get());
         
         preinitializeDone.set(true);
     }
@@ -307,10 +338,42 @@ public class LifecycleManagerImpl implements LifecycleManager {
         }
     }
     
-    private void doStart() {
+    /** Details about the shutdown */
+    @SuppressWarnings("unused")
+    @InspectionPoint("ungraceful shutdown details")
+    private final Inspectable ungracefulShutdownDetails = new Inspectable() {
+        public Object inspect() {
+            Map<String, Object> data = new HashMap<String, Object>();
+            data.put("JVM version", VersionUtils.getJavaVersion());
+            data.put("OS", OSUtils.getOS());
+            data.put("OS version", OSUtils.getOSVersion());
+            data.put("graceful shutdown", ApplicationSettings.PREVIOUS_SHUTDOWN_WAS_GRACEFUL.getValue());
+            return data;
+        }
+    };
+    
+    /*
+     * Package private only for testing purposes, no methods outside this 
+     * class should try to access this method.
+     */
+    void doStart() {                                
+        //if previous instance of LimeWire was shutdown properly
+        if(ApplicationSettings.CURRENTLY_RUNNING.getValue()) {
+            ApplicationSettings.PREVIOUS_SHUTDOWN_WAS_GRACEFUL.setValue(false);             
+        } else {
+            ApplicationSettings.PREVIOUS_SHUTDOWN_WAS_GRACEFUL.setValue(true); 
+        }
+        //sets that an instance of LimeWire is running.
+        ApplicationSettings.CURRENTLY_RUNNING.setValue(true);        
+        
+        // save limewire.props & other settings
+        SettingsGroupManager.instance().save();
+        
         loadBackgroundTasksBlocking();
         
 	    LOG.trace("START RouterService");
+	    
+	    statisticAccumulator.get().start();
 
         if(SSLSettings.isIncomingTLSEnabled() || SSLSettings.isOutgoingTLSEnabled()) {
             LOG.trace("START SSL Test");
@@ -350,6 +413,10 @@ public class LifecycleManagerImpl implements LifecycleManager {
         connectionDispatcher.get().addConnectionAcceptor(httpUploadAcceptor.get(), false, httpUploadAcceptor.get().getHttpMethods());
         LOG.trace("STOP HTTPUploadAcceptor");
 
+        LOG.trace("START NetworkManager");
+        networkManager.get().start();
+        LOG.trace("STOP NetworkManager");
+        
         LOG.trace("START Acceptor");
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Connection Listener..."));
 		acceptor.get().start();
@@ -367,7 +434,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
 		LOG.trace("Running download upgrade task");
 		downloadUpgradeTask.get().upgrade();
 		LOG.trace("Download upgrade task run!");
-		
+
 		LOG.trace("START DownloadManager");
 		activityCallback.get().componentLoading(I18nMarker.marktr("Loading Download Management..."));
 		downloadManager.get().initialize();
@@ -402,9 +469,18 @@ public class LifecycleManagerImpl implements LifecycleManager {
 
         LOG.trace("START TorrentManager");
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading BitTorrent Management..."));
-		torrentManager.get().initialize(fileManager.get(), connectionDispatcher.get(), backgroundExecutor.get(), incomingConnectionHandler.get());
+		torrentManager.get().initialize(connectionDispatcher.get());
 		LOG.trace("STOP TorrentManager");
         
+		// add listener before downloads are read to get all add events
+		downloadManager.get().addListener(magnetDownloaderPushEndpointFinder.get());
+		
+		// initialize DHTPeerLocator and DHTPeerPublishers
+		LOG.trace("START DHTPeerLocator and DHTPeerPublisher");
+        dhtPeerLocator.get().init();
+        dhtPeerPublisher.get().init();
+        LOG.trace("STOP DHTPeerLocator and DHTPeerPublisher");
+		
         // Restore any downloads in progress.
         LOG.trace("START DownloadManager.postGuiInit");
         activityCallback.get().componentLoading(I18nMarker.marktr("Loading Old Downloads..."));
@@ -412,7 +488,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         LOG.trace("STOP DownloadManager.postGuiInit");
         
         LOG.trace("START LWSIntegrationServices.postGuiInit");
-        activityCallback.get().componentLoading(I18nMarker.marktr("Attaching LWS Listeners..."));
+        activityCallback.get().componentLoading(I18nMarker.marktr("Attaching LimeWire Store Listeners..."));
         lwsItegrationServices.get().init();
         LOG.trace("STOP LWSIntegrationServices.postGuiInit");
         
@@ -469,6 +545,16 @@ public class LifecycleManagerImpl implements LifecycleManager {
             LOG.trace("END StoreServer");
         } else {
             LOG.trace("Disabling the StoreServer");
+        }
+        
+        // Allow us to enable/disable this remotely
+        if (ThirdPartySearchResultsSettings.PROMOTION_SYSTEM_IS_ENABLED.getValue()) {
+            LOG.trace("START loading promotion system");
+            activityCallback.get().componentLoading(I18nMarker.marktr("Loading Promotion System..."));
+            promotionServices.get().init();
+            LOG.trace("START loading promotion system");
+        } else {
+            LOG.trace("Disabling the promotion system");
         }      
 
         if(ApplicationSettings.AUTOMATIC_MANUAL_GC.getValue())
@@ -530,6 +616,9 @@ public class LifecycleManagerImpl implements LifecycleManager {
         //Update fractional uptime statistics (before writing limewire.props)
         statistics.get().shutdown();
         
+        //records that LimeWire is shutting down properly
+        ApplicationSettings.CURRENTLY_RUNNING.setValue(false);
+        
 		// start closing all active torrents
 		// torrentManager.shutdown();
 		
@@ -554,6 +643,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
         
         downloadManager.get().writeSnapshot();
         
+        downloadManager.get().removeListener(magnetDownloaderPushEndpointFinder.get());
+        
        // torrentManager.writeSnapshot();
         
         fileManager.get().stop(); // Saves UrnCache and CreationTimeCache
@@ -565,6 +656,12 @@ public class LifecycleManagerImpl implements LifecycleManager {
         contentManager.get().stop();
         
         messageRouter.get().stop();
+        
+        localAcceptor.get().stop();
+        
+        statisticAccumulator.get().stop();
+        
+        promotionServices.get().shutDown();
         
         runShutdownItems();
         

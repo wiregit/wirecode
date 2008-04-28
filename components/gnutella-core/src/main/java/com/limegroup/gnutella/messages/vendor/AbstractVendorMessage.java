@@ -8,7 +8,6 @@ import org.limewire.util.ByteOrder;
 
 import com.limegroup.gnutella.messages.AbstractMessage;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 
 public abstract class AbstractVendorMessage extends AbstractMessage implements VendorMessage {
 
@@ -108,16 +107,13 @@ public abstract class AbstractVendorMessage extends AbstractMessage implements V
         super(guid, (byte)0x31, ttl, hops, LENGTH_MINUS_PAYLOAD+payload.length,
               network);
         // set the instance params....
-        if ((vendorID.length != 4)) {
-            ReceivedErrorStat.VENDOR_INVALID_ID.incrementStat();            
+        if ((vendorID.length != 4)) {  
             throw new BadPacketException("Vendor ID Invalid!");
         }
         if ((selector & 0xFFFF0000) != 0) {
-            ReceivedErrorStat.VENDOR_INVALID_SELECTOR.incrementStat();
             throw new BadPacketException("Selector Invalid!");
         }
         if ((version & 0xFFFF0000) != 0) {
-            ReceivedErrorStat.VENDOR_INVALID_VERSION.incrementStat();
             throw new BadPacketException("Version Invalid!");
         }        
         _vendorID = vendorID;
@@ -218,13 +214,6 @@ public abstract class AbstractVendorMessage extends AbstractMessage implements V
     
     protected void writeVendorPayload(OutputStream out) throws IOException {
         out.write(getPayload());
-    }
-
-    // INHERIT COMMENT
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.messages.vendor.VendorMessageI#recordDrop()
-     */
-    public void recordDrop() {
     }
 
     //----------------------------------

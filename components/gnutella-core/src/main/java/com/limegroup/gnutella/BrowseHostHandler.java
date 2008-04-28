@@ -18,15 +18,16 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.params.HttpProtocolParams;
-import org.limewire.http.SocketWrappingHttpClient;
+import org.limewire.http.httpclient.SocketWrappingHttpClient;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
-import org.limewire.rudp.UDPConnection;
+import org.limewire.rudp.RUDPUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.StringUtils;
 
@@ -90,6 +91,7 @@ public class BrowseHostHandler {
     private final MessageFactory messageFactory;
     private final RemoteFileDescFactory remoteFileDescFactory;
     private final Provider<SocketWrappingHttpClient> clientProvider;
+    private final NetworkInstanceUtils networkInstanceUtils;
 
 
     /**
@@ -105,7 +107,8 @@ public class BrowseHostHandler {
                       @Named("forMeReplyHandler")Provider<ReplyHandler> forMeReplyHandler,
                       MessageFactory messageFactory,
                       RemoteFileDescFactory remoteFileDescFactory,
-                      Provider<SocketWrappingHttpClient> clientProvider) {
+                      Provider<SocketWrappingHttpClient> clientProvider, 
+                      NetworkInstanceUtils networkInstanceUtils) {
         _guid = guid;
         _serventID = serventID;
         this.browseHostCallback = browseHostCallback;
@@ -116,6 +119,7 @@ public class BrowseHostHandler {
         this.messageFactory = messageFactory;
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.clientProvider = clientProvider;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
 
     /** 
@@ -211,7 +215,7 @@ public class BrowseHostHandler {
         	RemoteFileDesc fakeRFD = 
         		remoteFileDescFactory.createRemoteFileDesc(host.getAddress(), host.getPort(), SPECIAL_INDEX, "fake",
                     0, _serventID.bytes(), 0, false, 0, false, null, null, false, true, "", proxies,
-                    -1, canDoFWTransfer ? UDPConnection.VERSION : 0, host.isTLSCapable()); 
+                    -1, canDoFWTransfer ? RUDPUtils.VERSION : 0, host.isTLSCapable()); 
         	// register with the map so i get notified about a response to my
         	// Push.
             browseHostCallback.putInfo(_serventID, new PushRequestDetails(this));
@@ -336,7 +340,7 @@ public class BrowseHostHandler {
             try {
                 in = response.getEntity().getContent();
             } catch (IOException e) {
-                LOG.debug("Unable to read a message", e);
+                LOG.debug("Unable to read a single message", e);
                 return;
             }
             Message m = null;
@@ -352,7 +356,7 @@ public class BrowseHostHandler {
                 } // either timeout, or the remote closed.
                 
                 if(m == null)  {
-                    LOG.debug("Unable to read a message");
+                    LOG.debug("Unable to read create message");
                     return;
                 } else {
                     if(m instanceof QueryReply) {
@@ -378,8 +382,8 @@ public class BrowseHostHandler {
 	 */
     private boolean canConnectDirectly(IpPort host) {
         return !ConnectionSettings.LOCAL_IS_PRIVATE.getValue() 
-        		|| !NetworkUtils.isPrivateAddress(host.getAddress())
-        		|| NetworkUtils.isMe(host.getAddress(), host.getPort());
+        		|| !networkInstanceUtils.isPrivateAddress(host.getAddress())
+        		|| networkInstanceUtils.isMe(host.getAddress(), host.getPort());
     }
 
     /**
@@ -389,7 +393,7 @@ public class BrowseHostHandler {
      * instead.
      */
     private boolean isLocalBrowse(IpPort host) {
-        return _serventID == null && NetworkUtils.isPrivateAddress(host.getAddress());
+        return _serventID == null && networkInstanceUtils.isPrivateAddress(host.getAddress());
     }
 
 	public static class PushRequestDetails {

@@ -10,7 +10,6 @@ import org.limewire.io.ByteReader;
 
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.statistics.BandwidthStat;
 
 /**
  * Contains some convenience methods for handshaking.
@@ -66,7 +65,6 @@ class BlockingHandshakeSupport extends HandshakeSupport {
             String line=(new ByteReader(in)).readLine();
             if (line==null)
                 throw new IOException("read null line");
-            BandwidthStat.GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH.addData(line.length());
             return line;
         } catch(NullPointerException npe) {
             throw new IOException();
@@ -128,7 +126,6 @@ class BlockingHandshakeSupport extends HandshakeSupport {
 
         // TODO: character encodings?
         byte[] bytes = s.getBytes();
-        BandwidthStat.GNUTELLA_HEADER_UPSTREAM_BANDWIDTH.addData(bytes.length);
         out.write(bytes);
         out.flush();
     }

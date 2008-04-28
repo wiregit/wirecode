@@ -14,7 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import junit.framework.Test;
 
 import org.limewire.collection.Range;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.util.PrivilegedAccessor;
@@ -61,8 +61,8 @@ import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.guess.OnDemandUnicaster;
-import com.limegroup.gnutella.messagehandlers.AdvancedToggleHandler;
 import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
+import com.limegroup.gnutella.messagehandlers.LimeACKHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
 import com.limegroup.gnutella.messages.PingReplyFactory;
@@ -77,7 +77,7 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
@@ -131,19 +131,22 @@ public class RequeryDownloadTest extends LimeTestCase {
     
     
     public void setUp() throws Exception {
+        final LocalSocketAddressProviderStub localSocketAddressProviderStub = new LocalSocketAddressProviderStub();
+        localSocketAddressProviderStub.setLocalAddressPrivate(false);
         injector = LimeTestUtils.createInjector(new AbstractModule() {
           @Override
             protected void configure() {
               bind(MessageRouter.class).to(TestMessageRouter.class);
               bind(ConnectionManager.class).to(ConnectionManagerStub.class);
               bind(NetworkManager.class).to(NetworkManagerStub.class);
+              bind(LocalSocketAddressProvider.class).toInstance(localSocketAddressProviderStub);
             }  
         });
         
         hash = TestFile.hash();
         NetworkManagerStub networkManager = (NetworkManagerStub) injector
                 .getInstance(NetworkManager.class);
-        networkManager.setListeningPort(ConnectionSettings.PORT.getValue());
+        networkManager.setListeningPort(NetworkSettings.PORT.getValue());
         
         messageRouter = (TestMessageRouter)injector.getInstance(MessageRouter.class);
         routeTable = (RouteTable) PrivilegedAccessor.getValue(messageRouter, "_queryRouteTable");
@@ -158,9 +161,6 @@ public class RequeryDownloadTest extends LimeTestCase {
         testUploader.start("uploader 6666", 6666, false);
         testUploader.setRate(Integer.MAX_VALUE);
         
-        LocalSocketAddressProviderStub localSocketAddressProviderStub = new LocalSocketAddressProviderStub();
-        localSocketAddressProviderStub.setLocalAddressPrivate(false);
-        LocalSocketAddressService.setSocketAddressProvider(localSocketAddressProviderStub);
         RequeryManager.NO_DELAY = true;
 
         new File(getSaveDirectory(), filename).delete();
@@ -370,13 +370,13 @@ public class RequeryDownloadTest extends LimeTestCase {
                 UDPReplyHandlerCache udpReplyHandlerCache,
                 Provider<InspectionRequestHandler> inspectionRequestHandlerFactory,
                 Provider<UDPCrawlerPingHandler> udpCrawlerPingHandlerFactory,
-                Provider<AdvancedToggleHandler> advancedToggleHandlerFactory,
                 Statistics statistics,
                 ReplyNumberVendorMessageFactory replyNumberVendorMessageFactory,
                 PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
                 Provider<OOBHandler> oobHandlerFactory,
-                Provider<MACCalculatorRepositoryManager> macManager) {
-            super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, advancedToggleHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder, oobHandlerFactory, macManager);
+                Provider<MACCalculatorRepositoryManager> macManager,
+                Provider<LimeACKHandler> limeACKHandler) {
+            super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder, oobHandlerFactory, macManager,limeACKHandler);
         } 
         
         public void sendDynamicQuery(QueryRequest query) {

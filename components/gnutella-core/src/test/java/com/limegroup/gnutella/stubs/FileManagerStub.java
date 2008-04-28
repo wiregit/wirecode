@@ -53,7 +53,7 @@ public class FileManagerStub extends FileManagerImpl {
     }
     
     @Override
-    public boolean isValidIndex(int i) {
+    public boolean isValidSharedIndex(int i) {
         return true;
     }
     
@@ -71,6 +71,18 @@ public class FileManagerStub extends FileManagerImpl {
         	return null;
         else if (_urns.containsKey(urn))
         	return (FileDesc)_urns.get(urn);
+        else
+            return new FileDescStub("other.txt");
+    }
+    
+    @Override
+    public synchronized FileDesc getSharedFileDescForUrn(final URN urn) {
+        if(urn.toString().equals(FileDescStub.DEFAULT_URN))
+            return fdStub;
+        else if (urn.equals(NOT_HAVE))
+            return null;
+        else if (_urns.containsKey(urn))
+            return (FileDesc)_urns.get(urn);
         else
             return new FileDescStub("other.txt");
     }
@@ -116,6 +128,18 @@ public class FileManagerStub extends FileManagerImpl {
     
     public List getRemoveRequests() {
         return removeRequests;
+    }
+    
+    @Override
+    public synchronized FileDesc removeFileIfSharedOrStore(File f) {
+        removeRequests.add(f);
+        return super.removeFileIfSharedOrStore(f);
+    }
+    
+    @Override
+    protected synchronized FileDesc removeFileIfSharedOrStore(File f, boolean notify) {
+        removeRequests.add(f);
+        return super.removeFileIfSharedOrStore(f, notify);
     }
 
     @Override

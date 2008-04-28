@@ -10,20 +10,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.limewire.collection.BitNumbers;
 import org.limewire.collection.IntervalSet;
-import org.limewire.collection.NameValue;
+import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.IPPortCombo;
+import org.limewire.io.GGEP;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
+import org.limewire.util.NameValue;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -33,8 +36,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
-import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.GGEPKeys;
 import com.limegroup.gnutella.messages.HUGEExtension;
 import com.limegroup.gnutella.messages.IntervalEncoder;
 import com.limegroup.gnutella.settings.MessageSettings;
@@ -65,17 +67,19 @@ public class ResponseFactoryImpl implements ResponseFactory {
     private final AltLocManager altLocManager;
     private final Provider<CreationTimeCache> creationTimeCache;
     private final IPFilter ipFilter;
+    private final NetworkInstanceUtils networkInstanceUtils;
 
     private final LimeXMLDocumentFactory limeXMLDocumentFactory;
 
     @Inject
     public ResponseFactoryImpl(AltLocManager altLocManager,
-            Provider<CreationTimeCache> creationTimeCache, 
-             IPFilter ipFilter, LimeXMLDocumentFactory limeXMLDocumentFactory) {
+            Provider<CreationTimeCache> creationTimeCache, IPFilter ipFilter,
+            LimeXMLDocumentFactory limeXMLDocumentFactory, NetworkInstanceUtils networkInstanceUtils) {
         this.altLocManager = altLocManager;
         this.creationTimeCache = creationTimeCache;
         this.ipFilter = ipFilter;
         this.limeXMLDocumentFactory = limeXMLDocumentFactory;
+        this.networkInstanceUtils = networkInstanceUtils;
     }
 
     /* (non-Javadoc)
@@ -243,7 +247,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
     }
 
     /**
-     * Constructs an xml string from the given extension sting.
+     * Constructs an xml string from the given extension string.
      * 
      * @param name the name of the file to construct the string for
      * @param ext an individual between-the-nulls string (note that there can be
@@ -262,8 +266,8 @@ public class ResponseFactoryImpl implements ResponseFactory {
         String second = tok.nextToken();
         assert first != null;
         assert second != null;
-        first = first.toLowerCase();
-        second = second.toLowerCase();
+        first = first.toLowerCase(Locale.US);
+        second = second.toLowerCase(Locale.US);
         String length = "";
         String bitrate = "";
         boolean bearShare1 = false;
@@ -392,7 +396,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
                 DirectAltLoc al = iter.next();
                 if (al.canBeSent(AlternateLocation.MESH_RESPONSE)) {
                     IpPort host = al.getHost();
-                    if (!NetworkUtils.isMe(host)) {
+                    if (!networkInstanceUtils.isMe(host)) {
                         if (endpoints == null)
                             endpoints = new IpPortSet();
 
@@ -428,26 +432,26 @@ public class ResponseFactoryImpl implements ResponseFactory {
         GGEP info = new GGEP(true);
         if (ggep.locations.size() > 0) {
             byte[] output = NetworkUtils.packIpPorts(ggep.locations);
-            info.put(GGEP.GGEP_HEADER_ALTS, output);
+            info.put(GGEPKeys.GGEP_HEADER_ALTS, output);
             BitNumbers bn = HTTPHeaderUtils.getTLSIndices(ggep.locations);
             if (!bn.isEmpty())
-                info.put(GGEP.GGEP_HEADER_ALTS_TLS, bn.toByteArray());
+                info.put(GGEPKeys.GGEP_HEADER_ALTS_TLS, bn.toByteArray());
         }
 
         if (ggep.createTime > 0)
-            info.put(GGEP.GGEP_HEADER_CREATE_TIME, ggep.createTime / 1000);
+            info.put(GGEPKeys.GGEP_HEADER_CREATE_TIME, ggep.createTime / 1000);
 
         if (ggep.size64 > Integer.MAX_VALUE && ggep.size64 <= MAX_FILE_SIZE)
-            info.put(GGEP.GGEP_HEADER_LARGE_FILE, ggep.size64);
+            info.put(GGEPKeys.GGEP_HEADER_LARGE_FILE, ggep.size64);
         
         if (ggep.ranges != null) {
             IntervalEncoder.encode(size, info, ggep.ranges);
             if (!ggep.verified)
-                info.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED);
+                info.put(GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED);
         }
         
         if (ggep.ttroot != null && MessageSettings.TTROOT_IN_GGEP.getValue())
-            info.put(GGEP.GGEP_HEADER_TTROOT,ggep.ttroot.getBytes());
+            info.put(GGEPKeys.GGEP_HEADER_TTROOT,ggep.ttroot.getBytes());
 
         info.write(out);
     }
@@ -469,39 +473,39 @@ public class ResponseFactoryImpl implements ResponseFactory {
 
         // if the block has a ALTS value, get it, parse it,
         // and move to the next.
-        if (ggep.hasKey(GGEP.GGEP_HEADER_ALTS)) {
+        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_ALTS)) {
             byte[] tlsData = null;
-            if (ggep.hasKey(GGEP.GGEP_HEADER_ALTS_TLS)) {
+            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_ALTS_TLS)) {
                 try {
-                    tlsData = ggep.getBytes(GGEP.GGEP_HEADER_ALTS_TLS);
+                    tlsData = ggep.getBytes(GGEPKeys.GGEP_HEADER_ALTS_TLS);
                 } catch (BadGGEPPropertyException ignored) {
                 }
             }
             BitNumbers bn = tlsData == null ? null : new BitNumbers(tlsData);
             try {
                 locations = parseLocations(bn, ggep
-                        .getBytes(GGEP.GGEP_HEADER_ALTS));
+                        .getBytes(GGEPKeys.GGEP_HEADER_ALTS));
             } catch (BadGGEPPropertyException bad) {
             }
         }
 
-        if (ggep.hasKey(GGEP.GGEP_HEADER_CREATE_TIME)) {
+        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_CREATE_TIME)) {
             try {
-                createTime = ggep.getLong(GGEP.GGEP_HEADER_CREATE_TIME) * 1000;
+                createTime = ggep.getLong(GGEPKeys.GGEP_HEADER_CREATE_TIME) * 1000;
             } catch (BadGGEPPropertyException bad) {
             }
         }
 
-        if (ggep.hasKey(GGEP.GGEP_HEADER_LARGE_FILE)) {
+        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_LARGE_FILE)) {
             try {
-                size64 = ggep.getLong(GGEP.GGEP_HEADER_LARGE_FILE);
+                size64 = ggep.getLong(GGEPKeys.GGEP_HEADER_LARGE_FILE);
             } catch (BadGGEPPropertyException bad) {
             }
         }
         
-        if (ggep.hasKey(GGEP.GGEP_HEADER_TTROOT)) {
+        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_TTROOT)) {
             try {
-                byte []tt = ggep.get(GGEP.GGEP_HEADER_TTROOT);
+                byte []tt = ggep.get(GGEPKeys.GGEP_HEADER_TTROOT);
                 if (tt != null)
                     ttroot = URN.createTTRootFromBytes(tt);
             } catch (IOException bad){}
@@ -511,7 +515,7 @@ public class ResponseFactoryImpl implements ResponseFactory {
         IntervalSet ranges = null;
         try {
             ranges = IntervalEncoder.decode(size64,ggep);
-            verified = !ggep.hasKey(GGEP.GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED);
+            verified = !ggep.hasKey(GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_UNVERIFIED);
         } catch (BadGGEPPropertyException ignore){}
         
         
@@ -542,14 +546,14 @@ public class ResponseFactoryImpl implements ResponseFactory {
             System.arraycopy(data, i * 6, current, 0, 6);
             IpPort ipp;
             try {
-                ipp = IPPortCombo.getCombo(current);
+                ipp = NetworkUtils.getIpPort(current, java.nio.ByteOrder.LITTLE_ENDIAN);
             } catch (InvalidDataException ide) {
                 tlsHosts = null; // turn off TLS
                 continue;
             }
 
             // if we're me or banned, ignore.
-            if (!ipFilter.allow(ipp.getAddress()) || NetworkUtils.isMe(ipp))
+            if (!ipFilter.allow(ipp.getAddress()) || networkInstanceUtils.isMe(ipp))
                 continue;
 
             if (locations == null)

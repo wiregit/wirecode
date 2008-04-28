@@ -2,7 +2,7 @@ package com.limegroup.gnutella.uploader;
 
 import java.net.InetAddress;
 
-import org.limewire.http.HttpIOSession;
+import org.limewire.http.reactor.HttpIOSession;
 
 import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.uploader.HTTPUploadSessionManager.QueueStatus;

@@ -4,7 +4,10 @@ import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IP;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.SecureMessageVerifier;
@@ -26,6 +29,9 @@ import com.limegroup.gnutella.simpp.SimppManager;
  * contained in a simppable whitelist.
  */
 abstract class RestrictedResponder implements SimppListener, MessageHandler {
+    
+    private static final Log LOG = LogFactory.getLog(RestrictedResponder.class);
+    
     /** list of hosts that we can send responses to */
     private volatile IPList allowed;
     /** setting to check for updates to the host list */
@@ -39,11 +45,14 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
     private final UDPReplyHandlerFactory udpReplyHandlerFactory;
     private final UDPReplyHandlerCache udpReplyHandlerCache;
     private final Executor messageExecutorService; 
+    private final NetworkInstanceUtils networkInstanceUtils;
     
     public RestrictedResponder(StringArraySetting setting, NetworkManager networkManager,
-            SimppManager simppManager, UDPReplyHandlerFactory udpReplyHandlerFactory, UDPReplyHandlerCache udpReplyHandlerCache,
-            Executor messageExecutor) {
-        this(setting, null, null, networkManager, simppManager, udpReplyHandlerFactory, udpReplyHandlerCache,messageExecutor);
+            SimppManager simppManager, UDPReplyHandlerFactory udpReplyHandlerFactory,
+            UDPReplyHandlerCache udpReplyHandlerCache, Executor messageExecutor,
+            NetworkInstanceUtils networkInstanceUtils) {
+        this(setting, null, null, networkManager, simppManager, udpReplyHandlerFactory,
+                udpReplyHandlerCache, messageExecutor, networkInstanceUtils);
     }
     
     /**
@@ -56,11 +65,10 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
     // and also cleaned up
     public RestrictedResponder(StringArraySetting setting, 
             SecureMessageVerifier verifier,
-            LongSetting lastRoutedVersion,
-            NetworkManager networkManager,
-            SimppManager simppManager,
-            UDPReplyHandlerFactory udpReplyHandlerFactory,
-            UDPReplyHandlerCache udpReplyHandlerCache, Executor messageExecutorService) {
+            LongSetting lastRoutedVersion, NetworkManager networkManager,
+            SimppManager simppManager, UDPReplyHandlerFactory udpReplyHandlerFactory,
+            UDPReplyHandlerCache udpReplyHandlerCache, Executor messageExecutorService,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.setting = setting;
         this.verifier = verifier;
         this.lastRoutedVersion = lastRoutedVersion;
@@ -68,6 +76,7 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
         this.udpReplyHandlerFactory = udpReplyHandlerFactory;
         this.udpReplyHandlerCache = udpReplyHandlerCache;
         this.messageExecutorService = messageExecutorService;
+        this.networkInstanceUtils = networkInstanceUtils;
         allowed = new IPList();
         allowed.add("*.*.*.*");
         simppManager.addListener(this);
@@ -79,7 +88,7 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
         try {
             for (String ip : setting.getValue())
                 newCrawlers.add(new IP(ip));
-            if (newCrawlers.isValidFilter(false))
+            if (newCrawlers.isValidFilter(false, networkInstanceUtils))
                 allowed = newCrawlers;
         } catch (IllegalArgumentException badSimpp) {}
     }
@@ -97,8 +106,13 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
                 processRoutableMessage((RoutableGGEPMessage)msg, addr, handler);
         } else {
             // just check the return address.
-            if (!allowed.contains(new IP(handler.getAddress())))
+            IP ip = new IP(handler.getAddress());
+            if (!allowed.contains(ip)) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("restricted message not allowed from ip: " + ip);
+                }
                 return;
+            }
             processAllowedMessage(msg, addr, handler);
         }
     }
@@ -126,9 +140,13 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
         } else if (msg.getRoutableVersion() < 0) // no routable version either? drop.
             return;
 
-        
-        if (!allowed.contains(new IP(handler.getAddress())))
+        IP ip = new IP(handler.getAddress()); 
+        if (!allowed.contains(ip)) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("restricted message not allowed from ip: " + ip);
+            }
             return;
+        }
         
         // check if its a newer version than the last we routed.
         long routableVersion = msg.getRoutableVersion();
@@ -156,8 +174,12 @@ abstract class RestrictedResponder implements SimppListener, MessageHandler {
         }
         
         public void handleSecureMessage(final SecureMessage sm, boolean passed) {
-            if (!passed)
+            if (!passed) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Message: " + sm + "didn't verify");
+                }
                 return;
+            }
             messageExecutorService.execute(new Runnable() {
                 public void run() {
                     processRoutableMessage((RoutableGGEPMessage)sm, addr, handler);

@@ -11,7 +11,6 @@ import org.limewire.nio.observer.IOErrorObserver;
 
 import com.limegroup.bittorrent.BTMessageHandler;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
-import com.limegroup.bittorrent.statistics.BandwidthStat;
 
 public class BTMessageReader implements ChannelReadObserver, PieceParseListener {
 	
@@ -81,9 +80,7 @@ public class BTMessageReader implements ChannelReadObserver, PieceParseListener 
 				int read = 0;
 				if(!bufferFull()) 
 					read = _in.read(_channel);
-				if (read > 0)
-					count(read);
-				else 
+				if (read <= 0) 
 					break;
 				processState();
 				if (bufferFull())  
@@ -117,13 +114,6 @@ public class BTMessageReader implements ChannelReadObserver, PieceParseListener 
 		} 
 	}
 	
-	/**
-	 * update stats.
-	 */
-	private void count(int read) {
-		BandwidthStat.BITTORRENT_MESSAGE_DOWNSTREAM_BANDWIDTH.addData(read);
-	}
-
 	/**
 	 * Implement ChannelReadObserver interface
 	 */

@@ -17,6 +17,9 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.security.Tiger;
 import com.limegroup.gnutella.tigertree.dime.TigerDimeReadUtils;
 
+/**
+ * Default implementation of {@link HashTreeFactory}.
+ */
 /* This is public for tests, but should always be referenced by its interface in real code. */
 @Singleton
 public class HashTreeFactoryImpl implements HashTreeFactory {

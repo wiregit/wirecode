@@ -10,8 +10,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
+import org.limewire.io.BadGGEPPropertyException;
+import org.limewire.io.GGEP;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.service.ErrorService;
@@ -27,9 +30,6 @@ import com.limegroup.gnutella.UrnSet;
 import com.limegroup.gnutella.messages.HUGEExtension.GGEPBlock;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
@@ -282,32 +282,32 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
                 // get query key in byte form....
                 ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
                 this.QUERY_KEY.write(qkBytes);
-                ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
+                ggepBlock.put(GGEPKeys.GGEP_HEADER_QUERY_KEY_SUPPORT,
                               qkBytes.toByteArray());
             }
 
             // add the What Is header
             if (_featureSelector > 0)
-                ggepBlock.put(GGEP.GGEP_HEADER_FEATURE_QUERY, _featureSelector);
+                ggepBlock.put(GGEPKeys.GGEP_HEADER_FEATURE_QUERY, _featureSelector);
 
             // add a GGEP-block if we shouldn't proxy
             if (_doNotProxy) {
-                ggepBlock.put(GGEP.GGEP_HEADER_NO_PROXY);
+                ggepBlock.put(GGEPKeys.GGEP_HEADER_NO_PROXY);
             }
 
             // add a meta flag
             if (_metaMask != null)
-                ggepBlock.put(GGEP.GGEP_HEADER_META, _metaMask.intValue());
+                ggepBlock.put(GGEPKeys.GGEP_HEADER_META, _metaMask.intValue());
 
             // mark oob query to require support of security tokens
             if (canReceiveOutOfBandReplies) {
                 _isSecurityTokenRequired = true;
-                ggepBlock.put(GGEP.GGEP_HEADER_SECURE_OOB);
+                ggepBlock.put(GGEPKeys.GGEP_HEADER_SECURE_OOB);
             }
             
             if (SearchSettings.desiresPartialResults()) {
                 _partialResultsDesired = true;
-                ggepBlock.put(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX);
+                ggepBlock.put(GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_PREFIX);
             }
             
             // if there are GGEP headers, write them out...
@@ -393,24 +393,20 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
 		if(QUERY.length() == 0 &&
 		   parser.richQuery.length() == 0 &&
 		   QUERY_URNS.size() == 0) {
-		    ReceivedErrorStat.QUERY_EMPTY.incrementStat();
 			throw new BadPacketException("empty query");
 		}       
         if(QUERY.length() > MAX_QUERY_LENGTH) {
-            ReceivedErrorStat.QUERY_TOO_LARGE.incrementStat();
             //throw BadPacketException.QUERY_TOO_BIG;
             throw new BadPacketException("query too big: " + QUERY);
         }        
 
         if(parser.richQuery.length() > MAX_XML_QUERY_LENGTH) {
-            ReceivedErrorStat.QUERY_XML_TOO_LARGE.incrementStat();
             //throw BadPacketException.XML_QUERY_TOO_BIG;
             throw new BadPacketException("xml too big: " + parser.richQuery);
         }
 
         if(!(QUERY_URNS.size() > 0 && QUERY.equals(QueryRequestImpl.DEFAULT_URN_QUERY))
            && hasIllegalChars(QUERY)) {
-            ReceivedErrorStat.QUERY_ILLEGAL_CHARS.incrementStat();
             //throw BadPacketException.ILLEGAL_CHAR_IN_QUERY;
             throw new BadPacketException("illegal chars: " + QUERY);
         }
@@ -435,7 +431,6 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
 
     protected void writePayload(OutputStream out) throws IOException {
         out.write(PAYLOAD);
-		SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
     }
 
     /**
@@ -663,12 +658,12 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
     public boolean isQueryForLW() {
         for (String term : SearchSettings.LIME_SEARCH_TERMS.getValue()) {
             if (getQuery().length() > 0 &&
-                    getQuery().toLowerCase().contains(term))
+                    getQuery().toLowerCase(Locale.US).contains(term))
                 return true;
 
             if (getRichQuery() != null) {
                 for (String keyword : getRichQuery().getKeyWords())
-                    if (keyword.toLowerCase().contains(term))
+                    if (keyword.toLowerCase(Locale.US).contains(term))
                         return true;
             }
         }
@@ -748,11 +743,6 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
             return _metaMask.intValue();
         return 0;
     }
-
-	// inherit doc comment
-	public void recordDrop() {
-		DroppedSentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
-	}
     
     /** Marks this as being an re-originated query. */
     public void originate() {
@@ -994,26 +984,26 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
 
                 if(ggep != null) {
                     try {
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
-                            byte[] qkBytes = ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+                            byte[] qkBytes = ggep.getBytes(GGEPKeys.GGEP_HEADER_QUERY_KEY_SUPPORT);
                             addressSecurityToken = new AddressSecurityToken(qkBytes, manager);
                         }
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
-                            featureSelector = ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY)) {
+                        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_FEATURE_QUERY))
+                            featureSelector = ggep.getInt(GGEPKeys.GGEP_HEADER_FEATURE_QUERY);
+                        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_NO_PROXY)) {
                             doNotProxy = true;
                         }
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
-                            metaMask = new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
+                        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_META)) {
+                            metaMask = new Integer(ggep.getInt(GGEPKeys.GGEP_HEADER_META));
                             // if the value is something we can't handle, don't even set it
                             if ((metaMask.intValue() < 4) || (metaMask.intValue() > 248))
                                 metaMask = null;
                         }
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
+                        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_SECURE_OOB)) {
                             hasSecurityTokenRequest = true;
                         }
                         
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_PARTIAL_RESULT_PREFIX))
+                        if (ggep.hasKey(GGEPKeys.GGEP_HEADER_PARTIAL_RESULT_PREFIX))
                             partialResultsDesired = true;
                         
                     } catch (BadGGEPPropertyException ignored) {}

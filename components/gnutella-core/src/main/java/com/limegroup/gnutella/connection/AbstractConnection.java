@@ -9,6 +9,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.limewire.io.IOUtils;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.nio.ssl.SSLUtils;
@@ -27,6 +28,7 @@ import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 
 /**
  * A basic implementation of {@link Connection}. The only methods that
@@ -149,6 +151,8 @@ public abstract class AbstractConnection implements Connection {
      */
     protected static final IOException CONNECTION_CLOSED = new IOException("connection closed");
 
+    private final NetworkInstanceUtils networkInstanceUtils;
+    
     /**
      * Creates an uninitialized outgoing Gnutella connection.
      * 
@@ -159,9 +163,9 @@ public abstract class AbstractConnection implements Connection {
     AbstractConnection(String host, int port, ConnectType connectType,
             CapabilitiesVMFactory capabilitiesVMFactory,
             MessagesSupportedVendorMessage supportedVendorMessage, NetworkManager networkManager,
-            Acceptor acceptor) {
+            Acceptor acceptor, NetworkInstanceUtils networkInstanceUtils) {
         this(host, port, connectType, null, capabilitiesVMFactory, supportedVendorMessage,
-                networkManager, acceptor);
+                networkManager, acceptor, networkInstanceUtils);
     }
 
     /**
@@ -172,16 +176,17 @@ public abstract class AbstractConnection implements Connection {
      */
     AbstractConnection(Socket socket, CapabilitiesVMFactory capabilitiesVMFactory,
             MessagesSupportedVendorMessage supportedVendorMessage, NetworkManager networkManager,
-            Acceptor acceptor) {
+            Acceptor acceptor, NetworkInstanceUtils networkInstanceUtils) {
         this(socket.getInetAddress().getHostAddress(), socket.getPort(), SSLUtils
                 .isTLSEnabled(socket) ? ConnectType.TLS : ConnectType.PLAIN, socket,
-                capabilitiesVMFactory, supportedVendorMessage, networkManager, acceptor);
+                capabilitiesVMFactory, supportedVendorMessage, networkManager, acceptor,
+                networkInstanceUtils);
     }
 
     private AbstractConnection(String host, int port, ConnectType connectType, Socket socket,
             CapabilitiesVMFactory capabilitiesVMFactory,
             MessagesSupportedVendorMessage supportedVendorMessage, NetworkManager networkManager,
-            Acceptor acceptor) {
+            Acceptor acceptor, NetworkInstanceUtils networkInstanceUtils) {
         if (host == null)
             throw new NullPointerException("null host");
         if (!NetworkUtils.isValidPort(port))
@@ -199,6 +204,7 @@ public abstract class AbstractConnection implements Connection {
         this.networkManager = networkManager;
         this.acceptor = acceptor;
         this.simpleProtocolBandwidthTracker = new SimpleProtocolBandwidthTracker();
+        this.networkInstanceUtils = networkInstanceUtils;
         byte [] hostBytes = null;
         try {
             hostBytes = InetAddress.getByName(getAddress()).getAddress();
@@ -547,7 +553,7 @@ public abstract class AbstractConnection implements Connection {
         InetAddress localAddress = getSocket().getLocalAddress();
         if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue()
                 && getSocket().getInetAddress().equals(localAddress)
-                && getPort() == ConnectionSettings.PORT.getValue()) {
+                && getPort() == NetworkSettings.PORT.getValue()) {
             throw new IOException("Connection to self");
         }
 
@@ -598,7 +604,7 @@ public abstract class AbstractConnection implements Connection {
         }
 
         // invalid or private, exit
-        if (!NetworkUtils.isValidAddress(ia) || NetworkUtils.isPrivateAddress(ia))
+        if (!NetworkUtils.isValidAddress(ia) || networkInstanceUtils.isPrivateAddress(ia))
             return;
 
         myIp = ia.getAddress();

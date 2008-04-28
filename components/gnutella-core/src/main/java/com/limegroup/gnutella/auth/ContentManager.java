@@ -13,11 +13,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.service.ErrorService;
+import org.limewire.service.Service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.Service;
 import com.limegroup.gnutella.messages.vendor.ContentRequest;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
 import com.limegroup.gnutella.settings.ContentSettings;

@@ -14,7 +14,6 @@
         <do.setup-properties component="io">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
-			    <pathelement location="${limewire.lib.jars}/commons-pool.jar"/>
 			    <path refid="build.limewire.components.common.buildpath"/>
 			</src-classpath>
         </do.setup-properties>

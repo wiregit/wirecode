@@ -3,8 +3,8 @@ package org.limewire.http.entity;
 import java.io.IOException;
 
 import org.apache.http.protocol.HttpContext;
-import org.limewire.http.HttpIOReactor;
-import org.limewire.http.HttpIOSession;
+import org.limewire.http.reactor.DefaultDispatchedIOReactor;
+import org.limewire.http.reactor.HttpIOSession;
 
 public class BasicFileTransferMonitor implements FileTransferMonitor {
 
@@ -12,7 +12,7 @@ public class BasicFileTransferMonitor implements FileTransferMonitor {
 
     public BasicFileTransferMonitor(HttpContext context) {
         if (context != null) {
-            this.ioSession = (HttpIOSession) context.getAttribute(HttpIOReactor.IO_SESSION_KEY);
+            this.ioSession = (HttpIOSession) context.getAttribute(DefaultDispatchedIOReactor.IO_SESSION_KEY);
         } else {
             this.ioSession = null;
         }

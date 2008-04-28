@@ -26,6 +26,7 @@ import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.message.BasicLineParser;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.TestUtils;
@@ -72,10 +73,12 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
+import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 //ITEST
@@ -127,7 +130,7 @@ public class PushUploadTest extends LimeTestCase {
                 .setValue(new String[] { "*.*.*.*" });
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {
                 "127.*.*.*", InetAddress.getLocalHost().getHostAddress() });
-        ConnectionSettings.PORT.setValue(PORT);
+        NetworkSettings.PORT.setValue(PORT);
 
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
         UploadSettings.HARD_MAX_UPLOADS.setValue(10);
@@ -549,18 +552,19 @@ public class PushUploadTest extends LimeTestCase {
         private boolean acceptedIncomingConnection = true;
 
         @Inject
-        public MyNetworkManager(Provider<UDPService> udpService,
-                Provider<Acceptor> acceptor, Provider<DHTManager> dhtManager,
-                Provider<ConnectionManager> connectionManager,
-                Provider<ActivityCallback> activityCallback) {
-            super(udpService, acceptor, dhtManager, connectionManager, activityCallback);
+        public MyNetworkManager(Provider<UDPService> udpService, Provider<Acceptor> acceptor,
+                Provider<DHTManager> dhtManager, Provider<ConnectionManager> connectionManager,
+                Provider<ActivityCallback> activityCallback, OutOfBandStatistics outOfBandStatistics, 
+                NetworkInstanceUtils networkInstanceUtils, Provider<CapabilitiesVMFactory> capabilitiesVMFactory) {
+            super(udpService, acceptor, dhtManager, connectionManager, activityCallback,
+                    outOfBandStatistics, networkInstanceUtils, capabilitiesVMFactory);
         }
-        
+
         @Override
         public boolean acceptedIncomingConnection() {
             return acceptedIncomingConnection;
         }
-        
+
     }
 
     @Singleton
@@ -583,11 +587,12 @@ public class PushUploadTest extends LimeTestCase {
                 Provider<NodeAssigner> nodeAssigner,
                 Provider<IPFilter> ipFilter,
                 ConnectionCheckerManager connectionCheckerManager,
-                PingRequestFactory pingRequestFactory) {
+                PingRequestFactory pingRequestFactory,
+                NetworkInstanceUtils networkInstanceUtils) {
             super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor,
                     simppManager, capabilitiesVMFactory, managedConnectionFactory,
                     messageRouter, queryUnicaster, socketsManager, connectionServices,
-                    nodeAssigner, ipFilter, connectionCheckerManager, pingRequestFactory);
+                    nodeAssigner, ipFilter, connectionCheckerManager, pingRequestFactory, networkInstanceUtils);
         }
         
         @Override

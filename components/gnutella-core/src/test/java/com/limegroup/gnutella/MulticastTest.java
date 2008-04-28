@@ -23,6 +23,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
@@ -40,7 +41,7 @@ public class MulticastTest extends LimeTestCase {
     private  UnicastedHandler U_HANDLER;
         
 	private static final String MP3_NAME =
-        "com/limegroup/gnutella/metadata/mpg2layII_1504h_16k_frame56_24000hz_joint_CRCOrigID3v1&2_test27.mp3";
+        "com/limegroup/gnutella/metadata/mpg2layI_0h_128k_frame54_22050hz_joint_CRCOrig_test33.mp3";
 
     private MessageRouterImpl messageRouter;
 
@@ -73,18 +74,18 @@ public class MulticastTest extends LimeTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
     
-    private static void setSettings() throws Exception {
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"*.*.*.*"});
+    private void setSettings() throws Exception {
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(new String[] { "*.*.*.*" });
         // Set the local host to not be banned so pushes can go through
         String ip = InetAddress.getLocalHost().getHostAddress();
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {ip});
-        ConnectionSettings.PORT.setValue(TEST_PORT);
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] { ip });
+        NetworkSettings.PORT.setValue(TEST_PORT);
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
         File mp3 = TestUtils.getResourceFile(MP3_NAME);
         assertTrue(mp3.exists());
-        FileUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));
+        File result = new File(_sharedDir, "metadata.mp3");
+        FileUtils.copy(mp3, result);
+        assertTrue(result.exists());
 
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
@@ -133,7 +134,7 @@ public class MulticastTest extends LimeTestCase {
         messageRouter.addUDPMessageHandler(QueryReply.class, U_HANDLER);
         messageRouter.addUDPMessageHandler(PushRequest.class, U_HANDLER);
         
-        fileManager.loadSettingsAndWait(2000);
+        fileManager.loadSettingsAndWait(3000);
         
         assertEquals("unexpected number of shared files", 1, fileManager.getNumFiles() );
     }
@@ -414,7 +415,7 @@ public class MulticastTest extends LimeTestCase {
 
         File temp = new File(_savedDir, "metadata.mp3");
         if (temp.exists()) {
-            fileManager.removeFileIfShared(temp);
+            fileManager.removeFileIfSharedOrStore(temp);
             temp.delete();
         }
         sleep(2 * DELAY);

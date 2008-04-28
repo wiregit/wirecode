@@ -2,29 +2,31 @@ package com.limegroup.gnutella.lws.server;
 
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import java.net.URISyntaxException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.protocol.HttpRequestHandler;
+import org.apache.http.nio.protocol.NHttpRequestHandler;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 import org.limewire.lws.server.AbstractReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSConnectionListener;
 import org.limewire.lws.server.LWSDispatcher;
 import org.limewire.lws.server.LWSDispatcherFactory;
 import org.limewire.lws.server.LWSDispatcherFactoryImpl;
 import org.limewire.lws.server.LWSDispatcherSupport;
-import org.limewire.lws.server.LWSDispatcherSupport.Responses;
 import org.limewire.lws.server.LWSReceivesCommandsFromDispatcher;
 import org.limewire.lws.server.LWSSenderOfMessagesToServer;
 import org.limewire.lws.server.StringCallback;
+import org.limewire.lws.server.LWSDispatcherSupport.Responses;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -40,6 +42,8 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  */
 @Singleton
 public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToServer {
+    
+    private final static Log LOG = LogFactory.getLog(LWSManagerImpl.class);
     
     /** The page for making commands to The LimeWire Store server. */
     final static String COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES 
@@ -67,7 +71,6 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     }
     
     public LWSManagerImpl(HttpExecutor exe, String host, int port, LWSDispatcherFactory lwsDispatcherFactory) {
-        
         this.exe = exe;
         this.dispatcher = lwsDispatcherFactory.createDispatcher(this, new  AbstractReceivesCommandsFromDispatcher() {
             public String receiveCommand(String cmd, Map<String, String> args) {
@@ -77,9 +80,12 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         
         // Construct the hostname and port to which we connect for authentication
         // from remote settings
-        StringBuffer hostNameAndPortBuffer = new StringBuffer(host);
+        StringBuilder hostNameAndPortBuffer = new StringBuilder(host);
         if (port > 0) hostNameAndPortBuffer.append(":").append(port);
         this.hostNameAndPort = hostNameAndPortBuffer.toString();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("hostname and port: " + hostNameAndPort);
+        }
         //
         // remember when we're connected
         //
@@ -118,7 +124,7 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
     // Implementation of LWSManager
     // -----------------------------------------------------------------
 
-    public final HttpRequestHandler getHandler() {
+    public final NHttpRequestHandler getHandler() {
         return dispatcher;
     }
     
@@ -162,14 +168,24 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
                                           final Map<String, String> args, 
                                           final StringCallback cb) throws IOException {
         String url = constructURL(msg, args);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("sending URL " + url);
+        }
         final HttpGet get;
         try {
             get = new HttpGet(url);
         } catch (URISyntaxException e) {
+            LOG.error("Making HTTP Get", e);
             IOException ioe = new IOException();
             ioe.initCause(e);
             throw ioe;
         }
+        
+        if(get.getURI().getHost() == null) {
+            LOG.error("null host!");
+            throw new IOException("null host!");
+        }
+        
         get.addHeader("User-Agent", LimeWireUtils.getHttpServer());
         //
         // we don't care what this response is, because we are
@@ -184,11 +200,17 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         exe.execute(get, params, new HttpClientListener() {
             
             public boolean requestComplete(HttpUriRequest request, HttpResponse response) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("requestComplete");
+                }
                 exe.releaseResources(response);
                 return false;
             }
             
             public boolean requestFailed(HttpUriRequest request, HttpResponse response, IOException exc) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("requestFailed");
+                }            
                 exe.releaseResources(response);
                 return false;
             }
@@ -196,11 +218,19 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
         });
         
     }
+     
+    // ---------------------------------------------------------------------------------
+    // Private
+    // ---------------------------------------------------------------------------------    
     
     private String constructURL(final String msg, final Map<String, String> args) {
-        StringBuffer url = new StringBuffer("http://")
-            .append(hostNameAndPort)
-            .append(COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES);
+        StringBuilder url = new StringBuilder("http");
+        if (LWSSettings.LWS_USE_SSL.getValue()) {
+            url.append("s");
+        }
+        url.append("://")
+           .append(hostNameAndPort)
+           .append(COMMAND_PAGE_WITH_LEADING_AND_TRAILING_SLASHES);
         url.append(msg);
         for (Map.Entry<String, String> e : args.entrySet()) {
             url.append("/");
@@ -236,5 +266,5 @@ public final class LWSManagerImpl implements LWSManager, LWSSenderOfMessagesToSe
                 return res;
             }
         }
-    }  
+    } 
 }

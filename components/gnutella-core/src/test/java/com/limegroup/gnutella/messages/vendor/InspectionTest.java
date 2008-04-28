@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
+import java.security.Signature;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,10 +19,11 @@ import junit.framework.Test;
 
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
+import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.security.SecureMessageVerifier;
-import org.limewire.util.Base32;
+import org.limewire.security.SecureMessageVerifierImpl;
 import org.limewire.util.ByteOrder;
 
 import com.google.inject.AbstractModule;
@@ -28,15 +33,17 @@ import com.google.inject.name.Names;
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.ServerSideTestCase;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.GGEPKeys;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.Message.Network;
+import com.limegroup.gnutella.messages.vendor.RoutableGGEPMessage.GGEPSigner;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 
@@ -62,6 +69,8 @@ public class InspectionTest extends ServerSideTestCase {
     private ConnectionManager connectionManager;
 
     private NetworkManager networkManager;
+    
+    private KeyPair keyPair;
 
     
     public InspectionTest(String name) {
@@ -96,11 +105,16 @@ public class InspectionTest extends ServerSideTestCase {
     
     @Override
     public void setUp() throws Exception {
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN"); 
+        keyGen.initialize(1024, random);        
+        keyPair = keyGen.generateKeyPair();
+        final SecureMessageVerifier smv = new SecureMessageVerifierImpl(keyPair.getPublic(), "testSMV");
+        
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                // This test uses the default SMV for inspection.
-                bind(SecureMessageVerifier.class).annotatedWith(Names.named("inspection")).to(SecureMessageVerifier.class);
+                bind(SecureMessageVerifier.class).annotatedWith(Names.named("inspection")).toInstance(smv);
                 // Binding must be applied otherwise InspectionUtil won't find it.
                 bind(InspectionTest.class).toInstance(InspectionTest.this);
             }
@@ -114,19 +128,43 @@ public class InspectionTest extends ServerSideTestCase {
         networkManager = injector.getInstance(NetworkManager.class);
     }
     
-    private InspectionRequest getRequest(String base32) throws Exception {
-        ByteArrayInputStream bais = new ByteArrayInputStream(Base32.decode(base32));
-        return (InspectionRequest) messageFactory.read(bais, Network.TCP);
+    private class Signer implements GGEPSigner {
+        public GGEP getSecureGGEP(GGEP original) {
+            try {
+                Signature sig = Signature.getInstance("SHA1withDSA"); 
+                sig.initSign(keyPair.getPrivate());
+                
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                original.write(out);
+                
+                sig.update(out.toByteArray());
+                byte[] signature = sig.sign();
+                GGEP ggep = new GGEP();
+                ggep.put(GGEPKeys.GGEP_HEADER_SECURE_BLOCK);
+                ggep.put(GGEPKeys.GGEP_HEADER_SIGNATURE, signature);
+                return ggep;
+            } catch(Throwable t) {
+                throw new RuntimeException(t);
+            }
+        }
     }
-
+    
+    @SuppressWarnings("unchecked")
+    private <T extends Message> T recreate(T req) throws Exception {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        req.write(out);
+        ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        return (T) messageFactory.read(in, Network.TCP);
+    }
+    
     public void testInspection() throws Exception {
         inspectedValue = "a";
         otherValue = "b";
-        // "com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue",
-        // "com.limegroup.gnutella.messages.vendor.InspectionTest,otherValue",
-        // "com.limegroup.gnutella.messages.vendor.InspectionTest,invalidValue");
-        String requestStr = "4X2I4BXJNR62FTBLHBCQVEZMAAYQCAFAAAAAATCJJVCR4AABADBSCSMBK54JZJOOWEGYAMAMAXIYLEAXMABHURA7EVP4DETDI6YZH6JJ3AAMU246FZNSHYMGHJWHNKR2AMRISGW4KOC5HAQWDN2KQ57EMDJRGHQ3X6EXEJMZ3DZSPRHCY34AHMFOET6D4PG2WBHJ7AKWIEA4GASTIJAIGU2JI5XDALACCQF3G6NAYMM4VFTZXOAQG7SPZPXSIA5NYABBIHMQ37ZF6US4CCYALOEU3KI4PAULVX5MA";
-        InspectionRequest request = getRequest(requestStr);
+        InspectionRequest request = new InspectionRequestImpl(new Signer(),
+                "com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue",
+                "com.limegroup.gnutella.messages.vendor.InspectionTest,otherValue",
+                "com.limegroup.gnutella.messages.vendor.InspectionTest,invalidValue");
+        request = recreate(request);
         assertEquals(1, request.getRoutableVersion());
         assertEquals(false, request.requestsTimeStamp());
         assertNull(request.getReturnAddress());
@@ -140,11 +178,11 @@ public class InspectionTest extends ServerSideTestCase {
         assertEquals(1, response.size());
         assertEquals("a",new String((byte[])response.get("0")));
         
-                // "com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue",
-                // "com.limegroup.gnutella.messages.vendor.InspectionTest,otherValue",
-                // "com.limegroup.gnutella.messages.vendor.InspectionTest,invalidValue");
-        requestStr = "6UMOPYGZP6KPHLSLZXTXHE4ZAAYQCAFDAAAAATCJJVCR4AABADBSCSMBK54JZJOOWEGYAMAMAXIYLEAXMABHURA7EVP4DETDI6YZH6JJ3AAMU246FZNSHYMGHJWHNKR2AMRISGW4KOC5HAQWDN2KQ57EMDJRGHQ3X6EXEJMZ3DZSPRHCY34AHMFOET6D4PG2WBHJ6AKUICAVMQICYMBFGQSAQNJUSR3OGAWAEFB5H4SLMDRVDL3IOS7FB6IINOWQZCNM3KACCRU35H5NDMKRTS3QDETE36QIPMW6JDGSJA";
-        request = getRequest(requestStr);
+        request = new InspectionRequestImpl(new GUID(), new Signer(), true, false, -1, 2, null, null, 
+                "com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue",
+                "com.limegroup.gnutella.messages.vendor.InspectionTest,otherValue",
+                "com.limegroup.gnutella.messages.vendor.InspectionTest,invalidValue");
+        request = recreate(request);
         assertEquals(2, request.getRoutableVersion());
         assertEquals(true, request.requestsTimeStamp());
         assertNull(request.getReturnAddress());
@@ -157,14 +195,16 @@ public class InspectionTest extends ServerSideTestCase {
     }
 
     public void testEmpty() throws Exception {
-        String requestStr = "MLRUKAU25UMVXW3ROTPAUHN4AAYQCAEMAAAAATCJJVCR4AABADBSCSMBIN4JYBOBJMFMAIAMAXAAXFO4UN56SPXIIMBPTCBRT27TGPMMKQGHGRZNTJPAPKSMQZGJ4SF26AIZWXWPQV7CJPBBZ4RX4WLFPSWIKH3GAUNARAKWIEA4GASTIJAIGU2JI5XDALACCRR36MRH2OJAYKSCWJHPAFJDSZJY7RFBEYBBI5JLVMUEVPPD23CER5QCB5DMJLRM35UFE";
-        InspectionRequest request = getRequest(requestStr);
+        InspectionRequest request = new InspectionRequestImpl(new Signer(),
+                "com.limegroup.gnutella.messages.vendor.InspectionTest,invalidValue");
+        request = recreate(request);
         assertEquals("com.limegroup.gnutella.messages.vendor.InspectionTest,invalidValue", request.getRequestedFields()[0]);
         assertEquals(1, request.getRequestedFields().length);
         try {
             tryMessage(request);
             fail("should not receive anything");
-        }catch(IOException expected){}
+        } catch (IOException expected){
+        }
     }
     
     public void testInvalidSig() throws Exception {
@@ -172,11 +212,12 @@ public class InspectionTest extends ServerSideTestCase {
                 new RoutableGGEPMessage.GGEPSigner() {
                     public GGEP getSecureGGEP(GGEP original) {
                         GGEP ret = new GGEP(true);
-                        ret.put(GGEP.GGEP_HEADER_SECURE_BLOCK);
-                        ret.put(GGEP.GGEP_HEADER_SIGNATURE," adsf adsf asdf ".getBytes());
+                        ret.put(GGEPKeys.GGEP_HEADER_SECURE_BLOCK);
+                        ret.put(GGEPKeys.GGEP_HEADER_SIGNATURE," adsf adsf asdf ".getBytes());
                         return ret;
                     }
                 }, "com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue");
+        request = recreate(request);
         try {
             tryMessage(request);
             fail("should not receive anything");
@@ -190,10 +231,14 @@ public class InspectionTest extends ServerSideTestCase {
         LEAF[0].flush();
         
         // create a request with a return address and one without
-        String routedStr = "TJDZMNSU2BMQBE665ZF6V2EFAAYQCAEZAAAAATCJJVCR4AABADBSCSMBIR4JYJOHXME4AMAMAXAILAXWJBX5EC73EEGPUGCLZ36CS4W56UYNE2MQDVTZD6BJVAZBSMSZSD2MER3MXI6RO6WN6CDKY276YV4FQDZ6TO5RVYCCKJAUOAT7AECACICOQFLECAWDAJJUEQEDKNEUO3ZQFUBBKAET3DOHWUHCAUYMMHGNC3JX2SE2FZNQIKACCRYF4HPDK5WODOJ2N2EWPEAFHYEKJNGF5Q";
-        String notRoutedStr = "CHWVX3POK3SAFPSS7S2MDKL5AAYQCAENAAAAATCJJVCR4AABADBSCSMBIR4JYJOHXME4AMAMAXAILAXWJBX5EC73EEGPUGCLZ36CS4W56UYNE2MQDVTZD6BJVAZBSMSZSD2MER3MXI6RO6WN6CDKY276YV4FQDZ6TO5RVYEBKZAQDQYCKNBEBA2TJFDW4MBMAIKFYBTXLHNXOKCRELJKZA75AHO5WOQ25DTQEFAJ7753YUSGPK33J4MEQHC2PJOIZXAQ6GI";
-        InspectionRequest routed = getRequest(routedStr);
-        InspectionRequest notRouted = getRequest(notRoutedStr);
+        InspectionRequest notRouted = new InspectionRequestImpl(new Signer(), 
+                "com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue");
+        notRouted = recreate(notRouted);
+
+        InspectionRequest routed = new InspectionRequestImpl(new GUID(), new Signer(), true,
+                false, -1, 2, new IpPortImpl("127.0.0.1", 20000), null,
+                "com.limegroup.gnutella.messages.vendor.InspectionTest,inspectedValue");
+        routed = recreate(routed);
         
         assertEquals(1, notRouted.getRoutableVersion());
         assertNull(notRouted.getReturnAddress());

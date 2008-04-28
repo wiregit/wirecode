@@ -12,7 +12,8 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.library.SharingUtils;
-import com.limegroup.gnutella.statistics.BandwidthStat;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics.StatisticType;
 
 /**
  * Provides an implementation of the {@link Uploader} interface.
@@ -89,11 +90,14 @@ public abstract class AbstractUploader implements Uploader {
 
     /** The upload type of this uploader. */
     private UploadType uploadType;
+    
+    private final TcpBandwidthStatistics tcpBandwidthStatistics;
 
-    public AbstractUploader(String fileName, HTTPUploadSession session) {
+    public AbstractUploader(String fileName, HTTPUploadSession session, TcpBandwidthStatistics tcpBandwidthStatistics) {
         this.session = session;
         this.filename = fileName;
         this.firstReply = true;
+        this.tcpBandwidthStatistics = tcpBandwidthStatistics;
     }
 
     /**
@@ -167,12 +171,11 @@ public abstract class AbstractUploader implements Uploader {
     public void addAmountUploaded(int written) {
         assert written >= 0;
 
-        if (written > 0) {
+        if (written > 0 && tcpBandwidthStatistics != null) {
             if (isForcedShare())
-                BandwidthStat.HTTP_BODY_UPSTREAM_INNETWORK_BANDWIDTH
-                        .addData(written);
+                tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_BODY_INNETWORK_UPSTREAM).addData(written);
             else
-                BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(written);
+                tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_BODY_UPSTREAM).addData(written);
         }
         synchronized (bwLock) {
             amountUploaded += written;

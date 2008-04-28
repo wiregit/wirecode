@@ -23,6 +23,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.util.ByteOrder;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
@@ -59,7 +60,6 @@ import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.stubs.UploadManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
-import de.vdheide.mp3.ByteOrder;
 
 /**
  * this class tests the handling of udp head requests and responses.
@@ -246,7 +246,7 @@ public class HeadTest extends LimeTestCase {
 		
 		assertFalse(pong.hasFile());
 		assertFalse(pong.hasCompleteFile());
-		assertNull(pong.getAltLocs());
+		assertEmpty(pong.getAltLocs());
 		assertNull(pong.getRanges());
 	}
 	
@@ -298,13 +298,13 @@ public class HeadTest extends LimeTestCase {
 		assertTrue(pong.hasFile());
 		assertTrue(pong.isFirewalled());
 		assertTrue(pong.hasCompleteFile());
-		assertNull(pong.getAltLocs());
+		assertEmpty(pong.getAltLocs());
 		assertNull(pong.getRanges());
 		
 		assertTrue(pongi.hasFile());
 		assertTrue(pongi.isFirewalled());
 		assertFalse(pongi.hasCompleteFile());
-		assertNull(pongi.getAltLocs());
+		assertEmpty(pongi.getAltLocs());
 		assertNull(pongi.getRanges());
     }
     
@@ -331,13 +331,13 @@ public class HeadTest extends LimeTestCase {
 		assertFalse(pong.isFirewalled());
 		assertTrue(pong.hasFile());
 		assertTrue(pong.hasCompleteFile());
-		assertNull(pong.getAltLocs());
+		assertEmpty(pong.getAltLocs());
 		assertNull(pong.getRanges());
 		
 		assertTrue(pongi.hasFile());
 		assertFalse(pongi.isFirewalled());
 		assertFalse(pongi.hasCompleteFile());
-		assertNull(pongi.getAltLocs());
+		assertEmpty(pongi.getAltLocs());
 		assertNull(pongi.getRanges());
 	}
 	
@@ -604,7 +604,7 @@ public class HeadTest extends LimeTestCase {
         
 		
 		assertNotNull(pong2.getRanges());
-		assertNull(pong2.getAltLocs());
+		assertEmpty(pong2.getAltLocs());
 		
 		//restore medium ranges to partial file
 		_partial.setRangesByte(_rangesMedium.toBytes());
@@ -617,7 +617,7 @@ public class HeadTest extends LimeTestCase {
 		HeadPong pong1 = headPongFactory.create(ping1);
         clearStoredProxies();
         pong1 = reparse(pong1);
-		assertNull(pong1.getPushLocs());
+		assertEmpty(pong1.getPushLocs());
     }
     
     public void testPushAltLocsReturned() throws Exception {
@@ -631,10 +631,15 @@ public class HeadTest extends LimeTestCase {
 		HeadPong pong1 = headPongFactory.create(ping1);
         clearStoredProxies();
         pong1 = reparse(pong1);
+        // this used to be done in the factory and is now handled by PingRanker,
+        // so simulate ping ranker here
+        for (PushEndpoint pushEndpoint : pong1.getPushLocs()) {
+            pushEndpoint.updateProxies(true);
+        }
 
 		assertNull(pong1.getRanges());
-		assertNull(pong1.getAltLocs());
-		assertNotNull(pong1.getPushLocs());
+		assertEmpty(pong1.getAltLocs());
+		assertNotEmpty(pong1.getPushLocs());
 		
 		RemoteFileDesc dummy = 
 		    remoteFileDescFactory.createRemoteFileDesc("www.limewire.org", 6346, 10, "asdf", 10, GUID.makeGuid(), 10, true, 2,
@@ -645,7 +650,7 @@ public class HeadTest extends LimeTestCase {
 		RemoteFileDesc rfd = (RemoteFileDesc)received.toArray()[0]; 
 		PushEndpoint point = rfd.getPushAddr();
 		assertEquals(pushCollectionPE,point);
-		assertEquals(pushCollectionPE.getProxies().size(),point.getProxies().size());
+		assertEquals(pushCollectionPE.getProxies() + " expected to have the same size as " + point.getProxies(), pushCollectionPE.getProxies().size(),point.getProxies().size());
         Set parsedProxies = new IpPortSet(point.getProxies());
 		parsedProxies.retainAll(pushCollectionPE.getProxies());
 		assertEquals(pushCollectionPE.getProxies().size(),parsedProxies.size());
@@ -663,7 +668,7 @@ public class HeadTest extends LimeTestCase {
 		HeadPong pong1 = headPongFactory.create(ping1);
         clearStoredProxies();
         pong1 = reparse(pong1);
-		assertNull(pong1.getPushLocs());
+		assertEmpty(pong1.getPushLocs());
 	}
     
     public void testTLSPushLocs() throws Exception {
@@ -673,8 +678,7 @@ public class HeadTest extends LimeTestCase {
         clearStoredProxies();
         pong = reparse(pong);
         assertNull(pong.getRanges());
-        assertNull(pong.getAltLocs());
-        assertNotNull(pong.getPushLocs());
+        assertEmpty(pong.getAltLocs());
         assertEquals(1, pong.getPushLocs().size());
         Set<? extends IpPort> proxies = pong.getPushLocs().iterator().next().getProxies();
         assertEquals(3, proxies.size());
@@ -725,8 +729,7 @@ public class HeadTest extends LimeTestCase {
         clearStoredProxies();
         pong = reparse(pong);
         assertNull(pong.getRanges());
-        assertNull(pong.getAltLocs());
-        assertNotNull(pong.getPushLocs());
+        assertEmpty(pong.getAltLocs());
         assertEquals(1, pong.getPushLocs().size());
         Set<? extends IpPort> proxies = pong.getPushLocs().iterator().next().getProxies();
         assertEquals(3, proxies.size());
@@ -769,8 +772,8 @@ public class HeadTest extends LimeTestCase {
         clearStoredProxies();
         pong = reparse(pong);
 		
-		assertNotNull(pong.getAltLocs());
-		assertNotNull(pong.getPushLocs());
+		assertNotEmpty(pong.getAltLocs());
+		assertNotEmpty(pong.getPushLocs());
 		
 		RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc("1.2.3.4", 1, 1, "filename", 1, null, 1, false, 1,
                 false, null, null, false, false, "", null, 1, false);

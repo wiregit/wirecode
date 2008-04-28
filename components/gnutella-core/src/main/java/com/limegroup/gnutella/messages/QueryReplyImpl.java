@@ -19,13 +19,14 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.limewire.collection.BitNumbers;
+import org.limewire.io.BadGGEPPropertyException;
 import org.limewire.io.ConnectableImpl;
-import org.limewire.io.IPPortCombo;
+import org.limewire.io.GGEP;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkUtils;
-import org.limewire.rudp.UDPConnection;
+import org.limewire.rudp.RUDPUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecurityToken;
 import org.limewire.service.ErrorService;
@@ -40,9 +41,6 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
-import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 import com.limegroup.gnutella.util.DataUtils;
 
@@ -73,7 +71,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     /** The mask for extracting the busy flag from the QHD common area. */
     private static final byte SPEED_MASK=(byte)0x10;
     /** The mask for extracting the GGEP flag from the QHD common area. */
-    private static final byte GGEP_MASK=(byte)0x20;
+    static final byte GGEP_MASK=(byte)0x20;
     /** The mask for extracting the chat flag from the QHD private area. */
     private static final byte CHAT_MASK=(byte)0x01;
     
@@ -117,18 +115,15 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         this._payload = payload;
         
 		if(!NetworkUtils.isValidPort(getPort())) {
-		    ReceivedErrorStat.REPLY_INVALID_PORT.incrementStat();
 			throw new BadPacketException("invalid port");
 		}
 		if( (getSpeed() & 0xFFFFFFFF00000000L) != 0) {
-		    ReceivedErrorStat.REPLY_INVALID_SPEED.incrementStat();
 			throw new BadPacketException("invalid speed: " + getSpeed());
 		} 		
 		
 		setAddress();
 		
 		if(!NetworkUtils.isValidAddress(getIPBytes())) {
-		    ReceivedErrorStat.REPLY_INVALID_ADDRESS.incrementStat();
 		    throw new BadPacketException("invalid address");
 		}
 		
@@ -136,7 +131,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         //repOk();
     }
 
-    QueryReplyImpl(byte[] guid, byte ttl, int port, byte[] ip, long speed,
+    protected QueryReplyImpl(byte[] guid, byte ttl, int port, byte[] ip, long speed,
             Response[] responses, byte[] clientGUID, byte[] xmlBytes,
             boolean includeQHD, boolean needsPush, boolean isBusy,
             boolean finishedUpload, boolean measuredSpeed,
@@ -306,7 +301,6 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 	// inherit doc comment
     public void writePayload(OutputStream out) throws IOException {
         out.write(_payload);
-		SentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
     }
     
     /**
@@ -505,7 +499,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         SecureGGEPData sg = _data.getSecureGGEP();
         if(sg != null) {
             try {
-                return sg.getGGEP().getBytes(GGEP.GGEP_HEADER_SIGNATURE);
+                return sg.getGGEP().getBytes(GGEPKeys.GGEP_HEADER_SIGNATURE);
             } catch(BadGGEPPropertyException bgpe) {
                 return null;
             }
@@ -760,6 +754,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 			if (i >= (_payload.length-16)) {   //see above
                 throw new BadPacketException("No QHD");
             }
+			
             //Attempt to verify.  Results are not copied to this until verified.
             String vendorT=null;
             int pushFlagT=UNDEFINED;
@@ -788,9 +783,11 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             int length=ByteOrder.ubyte2int(_payload[i]);
             if (length<=0)
                 throw new BadPacketException("Common payload length zero.");
+            
             i++;
             if ((i + length) > (_payload.length-16)) // 16 is trailing GUID size
                 throw new BadPacketException("Common payload length imprecise!");
+            _data.setQHDOffset(i-1);
 
             //c) extract push and busy bits from common payload
             // REMEMBER THAT THE PUSH BIT IS SET OPPOSITE THAN THE OTHERS.
@@ -811,21 +808,23 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
                     parser.scanForGGEPs(_payload, i + 2);
                     GGEP ggep = parser.getNormalGGEP();
                     if (ggep != null) {
+                        _data.setGGEPStart(parser.getNormalStartIndex());
+                        _data.setGGEPEnd(parser.getNormalEndIndex());
                         try {
-                            supportsBrowseHostT = ggep.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST);
-                            if (ggep.hasKey(GGEP.GGEP_HEADER_FW_TRANS)) {
-                                _data.setFwTransferVersion(ggep.getBytes(GGEP.GGEP_HEADER_FW_TRANS)[0]);
+                            supportsBrowseHostT = ggep.hasKey(GGEPKeys.GGEP_HEADER_BROWSE_HOST);
+                            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_FW_TRANS)) {
+                                _data.setFwTransferVersion(ggep.getBytes(GGEPKeys.GGEP_HEADER_FW_TRANS)[0]);
                                 _data.setSupportsFWTransfer(_data.getFwTransferVersion() > 0);
                             }
-                            replyToMulticastT = ggep.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+                            replyToMulticastT = ggep.hasKey(GGEPKeys.GGEP_HEADER_MULTICAST_RESPONSE);
                             proxies = _ggepUtil.getPushProxies(ggep);
-                            if (ggep.hasKey(GGEP.GGEP_HEADER_SECURE_OOB)) {
-                                securityToken = ggep.getBytes(GGEP.GGEP_HEADER_SECURE_OOB);
+                            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_SECURE_OOB)) {
+                                securityToken = ggep.getBytes(GGEPKeys.GGEP_HEADER_SECURE_OOB);
                                 if (securityToken == null || securityToken.length == 0) {
                                     throw new BadPacketException("Message had empty OOB security token");
                                 }
                             }
-                            supportsTLST = ggep.hasKey(GGEP.GGEP_HEADER_TLS_CAPABLE);
+                            supportsTLST = ggep.hasKey(GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
                         } catch (BadGGEPPropertyException bgpe) {
                         }
                     }
@@ -959,7 +958,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 		if( isMCastReply ) {
 		    iFirewalled = false;
 		    heFirewalled = NO;
-		} else if(NetworkUtils.isPrivateAddress(this.getIPBytes())) {
+		} else if(networkManager.isPrivateAddress(this.getIPBytes())) {
 			heFirewalled = YES;
 		} else {
 			try {
@@ -1020,11 +1019,6 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         return quality==0 || quality==2;
 	}
 
-	// inherit doc comment
-	public void recordDrop() {
-		DroppedSentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
-	}
-
     /** Handles all our GGEP stuff.  Caches potential GGEP blocks for efficiency.
      */
     static class GGEPUtil {
@@ -1060,13 +1054,13 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         public GGEPUtil() {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             _standardGGEP = create(out);
-            _bhGGEP = create(out, GGEP.GGEP_HEADER_BROWSE_HOST);
-            _mcGGEP = create(out, GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
-            _mcTLSGGEP = create(out, GGEP.GGEP_HEADER_MULTICAST_RESPONSE, GGEP.GGEP_HEADER_TLS_CAPABLE);
-            _bhAndMC = create(out, GGEP.GGEP_HEADER_BROWSE_HOST, GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
-            _bhTLSGGEP = create(out, GGEP.GGEP_HEADER_BROWSE_HOST, GGEP.GGEP_HEADER_TLS_CAPABLE);
-            _bhMCAndTLS = create(out, GGEP.GGEP_HEADER_BROWSE_HOST, GGEP.GGEP_HEADER_MULTICAST_RESPONSE, GGEP.GGEP_HEADER_TLS_CAPABLE);
-            _tlsGGEP = create(out, GGEP.GGEP_HEADER_TLS_CAPABLE);
+            _bhGGEP = create(out, GGEPKeys.GGEP_HEADER_BROWSE_HOST);
+            _mcGGEP = create(out, GGEPKeys.GGEP_HEADER_MULTICAST_RESPONSE);
+            _mcTLSGGEP = create(out, GGEPKeys.GGEP_HEADER_MULTICAST_RESPONSE, GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
+            _bhAndMC = create(out, GGEPKeys.GGEP_HEADER_BROWSE_HOST, GGEPKeys.GGEP_HEADER_MULTICAST_RESPONSE);
+            _bhTLSGGEP = create(out, GGEPKeys.GGEP_HEADER_BROWSE_HOST, GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
+            _bhMCAndTLS = create(out, GGEPKeys.GGEP_HEADER_BROWSE_HOST, GGEPKeys.GGEP_HEADER_MULTICAST_RESPONSE, GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
+            _tlsGGEP = create(out, GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
         }
         
         private byte[] create(ByteArrayOutputStream out, String... headers) {
@@ -1103,16 +1097,16 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 
                 // write easy extensions if applicable
                 if (supportsBH)
-                    retGGEP.put(GGEP.GGEP_HEADER_BROWSE_HOST);
+                    retGGEP.put(GGEPKeys.GGEP_HEADER_BROWSE_HOST);
                 if (isMulticastResponse)
-                    retGGEP.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+                    retGGEP.put(GGEPKeys.GGEP_HEADER_MULTICAST_RESPONSE);
                 if (supportsTLS)
-                    retGGEP.put(GGEP.GGEP_HEADER_TLS_CAPABLE);
+                    retGGEP.put(GGEPKeys.GGEP_HEADER_TLS_CAPABLE);
                 if (supportsFWTransfer)
-                    retGGEP.put(GGEP.GGEP_HEADER_FW_TRANS,
-                                new byte[] {UDPConnection.VERSION});
+                    retGGEP.put(GGEPKeys.GGEP_HEADER_FW_TRANS,
+                                new byte[] {RUDPUtils.VERSION});
                 if (securityToken != null) {
-                    retGGEP.put(GGEP.GGEP_HEADER_SECURE_OOB, securityToken.getBytes());
+                    retGGEP.put(GGEPKeys.GGEP_HEADER_SECURE_OOB, securityToken.getBytes());
                 }
 
                 // if a PushProxyInterface is valid, write up to MAX_PROXIES
@@ -1123,9 +1117,8 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
                     Iterator<? extends IpPort> iter = proxies.iterator();
                     while(iter.hasNext() && (numWritten < MAX_PROXIES)) {
                         IpPort ppi = iter.next();
-                        IPPortCombo combo = new IPPortCombo(ppi.getInetSocketAddress());
                         try {
-                            baos.write(combo.toBytes());
+                            baos.write(NetworkUtils.getBytes(ppi, java.nio.ByteOrder.LITTLE_ENDIAN));
                             numWritten++;
                         } catch (IOException ignored) { } // cannot happen on ByteArrayOutputStream
                     }
@@ -1134,10 +1127,10 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
                 try {
                     // add the PushProxies
                     if (numWritten > 0) {
-                        retGGEP.put(GGEP.GGEP_HEADER_PUSH_PROXY, baos.toByteArray());
+                        retGGEP.put(GGEPKeys.GGEP_HEADER_PUSH_PROXY, baos.toByteArray());
                         // add the TLS push proxies info, if any.
                         if(!bn.isEmpty())
-                            retGGEP.put(GGEP.GGEP_HEADER_PUSH_PROXY_TLS, bn.toByteArray());
+                            retGGEP.put(GGEPKeys.GGEP_HEADER_PUSH_PROXY_TLS, bn.toByteArray());
                     }
                     // set up return value
                     baos.reset();
@@ -1179,15 +1172,15 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             BitNumbers bn = null;
             
             // First try and get the bits for which PPs support TLS.
-            if(ggep.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY_TLS)) {
+            if(ggep.hasKey(GGEPKeys.GGEP_HEADER_PUSH_PROXY_TLS)) {
                 try {
-                    bn = new BitNumbers(ggep.getBytes(GGEP.GGEP_HEADER_PUSH_PROXY_TLS));
+                    bn = new BitNumbers(ggep.getBytes(GGEPKeys.GGEP_HEADER_PUSH_PROXY_TLS));
                 } catch(BadGGEPPropertyException bad) {}
             }
             
-            if (ggep.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY)) {
+            if (ggep.hasKey(GGEPKeys.GGEP_HEADER_PUSH_PROXY)) {
                 try {
-                    byte[] proxyBytes = ggep.getBytes(GGEP.GGEP_HEADER_PUSH_PROXY);
+                    byte[] proxyBytes = ggep.getBytes(GGEPKeys.GGEP_HEADER_PUSH_PROXY);
                     ByteArrayInputStream bais = new ByteArrayInputStream(proxyBytes);
                     int i = 0;
                     while (bais.available() > 0) {
@@ -1196,7 +1189,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
                             try {
                                 if(proxies == null)
                                     proxies = new IpPortSet();
-                                IpPort ipp = IPPortCombo.getCombo(combo);
+                                IpPort ipp = NetworkUtils.getIpPort(combo, java.nio.ByteOrder.LITTLE_ENDIAN);
                                 // make it a connectable if the TLS bit is set.
                                 if(bn != null && bn.isSet(i))
                                     ipp = new ConnectableImpl(ipp, true);
@@ -1218,5 +1211,20 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
  
     public boolean isLocal() {
         return local;
+    }
+    
+    int getGGEPStart() {
+        parseResults();
+        return _data.getGGEPStart();
+    }
+    
+    int getGGEPEnd() {
+        parseResults();
+        return _data.getGGEPEnd();
+    }
+    
+    int getQHDOffset() {
+        parseResults();
+        return _data.getQHDOffset();
     }
 }

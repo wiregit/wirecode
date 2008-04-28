@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.limewire.util.FileUtils;
 
@@ -84,6 +85,9 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
     /** An internal Setting to store the last expire time */
     private LongSetting LAST_EXPIRE_TIME = null;
     
+    /** An internal Setting that controls whether or not unlisted remote settings revert to default. */
+    private BooleanSetting REVERT_UNLISTED_REMOTE = null;
+    
     /** <tt>File</tt> object from which settings are loaded and saved */    
     private File SETTINGS_FILE;
     
@@ -137,7 +141,8 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
      */
     public SettingsFactory(File settingsFile, String heading) {
         SETTINGS_FILE = settingsFile;
-        if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
+        if (SETTINGS_FILE.isDirectory())
+            SETTINGS_FILE.delete();
         HEADING = heading;
         reload();
     }
@@ -172,12 +177,25 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
     public synchronized Iterator<AbstractSetting> iterator() {
         return settings.iterator();
     }
+    
+    /**
+     * Returns the setting that controls whether or not remote settings
+     * are reverted when loaded.
+     */
+    public BooleanSetting getRevertSetting() {
+        return REVERT_UNLISTED_REMOTE;
+    }
 
     /**
      * Reloads the settings with the predefined settings file from
      * disk.
      */
     public synchronized void reload() {
+        // Setup the key that tells us whether or not to revert
+        // remote settings that are not listed in the remote updates.
+        if(REVERT_UNLISTED_REMOTE == null)
+            REVERT_UNLISTED_REMOTE = createBooleanSetting("REVERT_UNLISTED_REMOTE", true); 
+        
         // If the props file doesn't exist, the init sequence will prompt
         // the user for the required values, so return.  If this is not 
         // loading limewire.props, but rather something like themes.txt,
@@ -204,12 +222,10 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
                 markFailure();
             }
             
-        } catch(FileNotFoundException e) {
-            
+        } catch(FileNotFoundException e) {            
             if (SETTINGS_FILE.exists()) {
                 markFailure();
             }
-
         } finally {
             FileUtils.close(fis);
         }
@@ -246,7 +262,8 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
      */
     public synchronized void changeFile(File toUse) {
         SETTINGS_FILE = toUse;
-        if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
+        if (SETTINGS_FILE.isDirectory())
+            SETTINGS_FILE.delete();
         revertToDefault();
         reload();
     }
@@ -352,6 +369,21 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
             return true;
         } else {
             return false;
+        }
+    }
+    
+    /**
+     * If we're reverting unlisted remote settings, then go through every setting
+     * we know of that's considered remote and revert it, if it isn't in the list
+     * of current remotely set settings.
+     */
+    public synchronized void revertRemoteSettingsUnlessIn(Set<String> keySet) {
+        if(REVERT_UNLISTED_REMOTE.getValue()) {
+            for(Map.Entry<String, AbstractSetting> entry : remoteKeyToSetting.entrySet()) {
+                if(!keySet.contains(entry.getKey())) {
+                    entry.getValue().revertToDefault();
+                }
+            }
         }
     }
     
@@ -504,12 +536,7 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
      */
     public synchronized FileSetting createFileSetting(String key, 
                                                       File defaultValue) {
-        String parentString = defaultValue.getParent();
-        if( parentString != null ) {
-            File parent = new File(parentString);
-            if(!parent.isDirectory())
-                parent.mkdirs();
-        }
+        // Creation of parent dirs removed per LWC-1323.
 
         FileSetting result = 
             new FileSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
@@ -810,8 +837,14 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
             }
             
             String remoteValue = remoteManager.getUnloadedValueFor(remoteKey);
-            if(remoteValue != null)
+            if(remoteValue != null) {
                 setting.setValueInternal(remoteValue);
+            } else if(REVERT_UNLISTED_REMOTE.getValue()) {
+                // As we load this setting, if it's not in the remote settings,
+                // revert it.  It's OK if we revert settings that are later added
+                // to a remote setting, because it'll update the value.
+                setting.revertToDefault();
+            }
             //update the mapping of the remote key to the setting.
             remoteKeyToSetting.put(remoteKey, setting);
         }

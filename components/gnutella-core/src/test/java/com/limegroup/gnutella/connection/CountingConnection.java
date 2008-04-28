@@ -2,6 +2,7 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 
@@ -26,11 +27,12 @@ public class CountingConnection extends BlockingConnection {
     public CountingConnection(String host, int port, ConnectType connectType,
             CapabilitiesVMFactory capabilitiesVMFactory, SocketsManager socketsManager,
             Acceptor acceptor, MessagesSupportedVendorMessage supportedVendorMessage,
-            MessageFactory messageFactory, NetworkManager networkManager) {
-        super(host, port, ConnectType.PLAIN, capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage, messageFactory, networkManager);
+            MessageFactory messageFactory, NetworkManager networkManager,
+            NetworkInstanceUtils networkInstanceUtils) {
+        super(host, port, ConnectType.PLAIN, capabilitiesVMFactory, socketsManager, acceptor,
+                supportedVendorMessage, messageFactory, networkManager, networkInstanceUtils);
         countEnabled = true;
     }
-
 
     public Message receive() throws IOException, BadPacketException {
         Message m = null;

@@ -11,6 +11,7 @@ import org.limewire.collection.Trie;
 import org.limewire.collection.PatriciaTrie.KeyAnalyzer;
 import org.limewire.collection.Trie.Cursor;
 import org.limewire.io.IP;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.ByteOrder;
 
@@ -119,8 +120,14 @@ public class IPList {
         return ip != null && ip.contains(lookup);
     }
     
-    public synchronized boolean isValidFilter(boolean allowPrivateIPs) {
-        ValidFilter filter = new ValidFilter(allowPrivateIPs);
+    /**
+     * Determines if this filter is valid.  If private IPs are not allowed,
+     * NetworkInstanceUtils must be non-null in order to check if an address
+     * is considered private.  If allowPrivateIPs is true, networkInstanceUtils
+     * can be null.
+     */
+    public synchronized boolean isValidFilter(boolean allowPrivateIPs, NetworkInstanceUtils networkInstanceUtils) {
+        ValidFilter filter = new ValidFilter(allowPrivateIPs, networkInstanceUtils);
         ips.traverse(filter);
         return filter.isValid();
     }
@@ -192,13 +199,15 @@ public class IPList {
         private long counter;
         
         private final boolean allowPrivateIPs;
+        private final NetworkInstanceUtils networkInstanceUtils;
         
         public boolean isValid() {
             return !isInvalid && ((counter/(float)TOTAL_SPACE) < MAX_LIST_SPACE) ;
         }
         
-        public ValidFilter(boolean allowPrivateIPs) {
+        public ValidFilter(boolean allowPrivateIPs, NetworkInstanceUtils networkInstanceUtils) {
             this.allowPrivateIPs = allowPrivateIPs;
+            this.networkInstanceUtils = networkInstanceUtils;
         }
         
         public SelectStatus select(Entry<? extends IP, ? extends IP> entry) {
@@ -206,7 +215,7 @@ public class IPList {
             byte[] buf = new byte[4];
             ByteOrder.int2beb(key.addr,buf,0);
             
-            if(!allowPrivateIPs && NetworkUtils.isPrivateAddress(buf)) {
+            if(!allowPrivateIPs && networkInstanceUtils.isPrivateAddress(buf)) {
                 isInvalid = true;
                 return SelectStatus.EXIT;
             }

@@ -156,10 +156,6 @@ public interface PingReply extends Message {
      */
     boolean isUltrapeer();
 
-    // inherit doc comment
-    void recordDrop();
-
-
     /**
      * Implements <tt>IpPort</tt> interface.  Returns the <tt>InetAddress</tt>
      * for this host.

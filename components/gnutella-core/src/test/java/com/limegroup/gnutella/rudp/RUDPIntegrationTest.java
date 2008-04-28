@@ -30,6 +30,7 @@ import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHelper;
 import com.limegroup.gnutella.rudp.messages.RUDPMessageHandlerHelper;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class RUDPIntegrationTest extends LimeTestCase {
@@ -62,7 +63,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
         String localIP = InetAddress.getLocalHost().getHostAddress();
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(new String[] {"127.*.*.*", localIP});
-        ConnectionSettings.PORT.setValue(PORT);
+        NetworkSettings.PORT.setValue(PORT);
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);

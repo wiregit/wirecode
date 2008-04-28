@@ -9,27 +9,27 @@ import com.limegroup.gnutella.messages.Message.Network;
 
 public class CapabilitiesVMStubHelper {
     
-    public static CapabilitiesVM.SupportedMessageBlock makeSMB(byte[] capability, int version) {
-        return new CapabilitiesVM.SupportedMessageBlock(capability, version);
+    public static CapabilitiesVMImpl.SupportedMessageBlock makeSMB(byte[] capability, int version) {
+        return new CapabilitiesVMImpl.SupportedMessageBlock(capability, version);
     }
 
-    public static CapabilitiesVM makeCapVM(int simppNumber) throws Exception {
+    public static CapabilitiesVM makeCapibilitesWithSimpp(int simppNumber) throws Exception {
         //1. prepare the SMB
-        CapabilitiesVM.SupportedMessageBlock simppSMB =
-            makeSMB(new byte[] { 'I', 'M', 'P', 'P' }, simppNumber);
+        CapabilitiesVMImpl.SupportedMessageBlock simppSMB =
+            makeSMB(new byte[] { 'S', 'I', 'P', 'M' }, simppNumber);
         //2. make the payload
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ByteOrder.short2leb((short)1, baos);
         simppSMB.encode(baos);
         byte[] payload = baos.toByteArray();
         byte[] guid = GUID.makeGuid();
-        return new CapabilitiesVM(guid, (byte)1, (byte)0, 1, payload, Network.UNKNOWN);
+        return new CapabilitiesVMImpl(guid, (byte)1, (byte)0, 1, payload, Network.UNKNOWN);
     }
     
-    public static CapabilitiesVM makeUpdateVM(int id) throws Exception {
+    public static CapabilitiesVM makeCapabilitiesWithUpdate(int id) throws Exception {
         //1. prepare the SMB
-        CapabilitiesVM.SupportedMessageBlock smb =
-            makeSMB(new byte[] { 'L', 'M', 'U', 'P' }, id);
+        CapabilitiesVMImpl.SupportedMessageBlock smb =
+            makeSMB(new byte[] { 'U', 'P', 'L', 'M' }, id);
             
         //2. make the payload
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -37,6 +37,6 @@ public class CapabilitiesVMStubHelper {
         smb.encode(baos);
         byte[] payload = baos.toByteArray();
         byte[] guid = GUID.makeGuid();
-        return new CapabilitiesVM(guid, (byte)1, (byte)0, 1, payload, Network.UNKNOWN);        
+        return new CapabilitiesVMImpl(guid, (byte)1, (byte)0, 1, payload, Network.UNKNOWN);        
     }
 }

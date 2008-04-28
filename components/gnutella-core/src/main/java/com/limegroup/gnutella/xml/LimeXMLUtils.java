@@ -24,7 +24,6 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
 import org.limewire.io.IOUtils;
-import org.limewire.io.Pools;
 import org.limewire.util.I18NConvert;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -368,6 +367,14 @@ public class LimeXMLUtils {
     }
     
     /** 
+     * Returns true if LimeWire can edit the meta data of this Audio file,
+     * false otherwise
+     */
+    public static boolean isSupportedAudioEditableFormat(String file) {
+        return isMP3File(file) || isOGGFile(file) || isM4AFile(file) || isFLACFile(file);
+    }
+    
+    /** 
      * Returns true if LimeWire might be able to read the Meta Data of 
      * this Video file.
      */
@@ -408,6 +415,14 @@ public class LimeXMLUtils {
     }
     
     /**
+     * Returns true if LimeWire can edit the meta data of this file,
+     * false otherwise
+     */
+    public static boolean isSupportedEditableFormat(String file) {
+        return isSupportedAudioEditableFormat(file);
+    }
+    
+    /**
      * @return whether LimeWire supports writing metadata into the file of specific type.
      * (we may be able to parse the metadata, but not annotate it)
      */
@@ -431,7 +446,7 @@ public class LimeXMLUtils {
     }
     
     public static boolean isFilePublishable(String file) {
-    	 return isMP3File(file) || isOGGFile(file);
+    	 return isMP3File(file);
     }
     
     /**
@@ -661,7 +676,7 @@ public class LimeXMLUtils {
         DeflaterOutputStream gos = null;
         Deflater def = null;
         try {
-            def = Pools.getDeflaterPool().borrowObject();
+            def = new Deflater();
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             gos=new DeflaterOutputStream(baos, def);
             gos.write(data, 0, data.length);
@@ -676,7 +691,7 @@ public class LimeXMLUtils {
             return null;
         } finally {
             IOUtils.close(gos);
-            Pools.getDeflaterPool().returnObject(def);
+            IOUtils.close(def);
         }
     }
 
@@ -794,7 +809,7 @@ public class LimeXMLUtils {
         InflaterInputStream gis = null;
         Inflater inf = null;
         try {
-            inf = Pools.getInflaterPool().borrowObject();
+            inf = new Inflater();
             gis =new InflaterInputStream(bais, inf);
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             while (true) {
@@ -806,7 +821,7 @@ public class LimeXMLUtils {
             return baos.toByteArray();
         } finally {
             IOUtils.close(gis);
-            Pools.getInflaterPool().returnObject(inf);
+            IOUtils.close(inf);
         }
     }
 

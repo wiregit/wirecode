@@ -259,9 +259,6 @@ public interface QueryRequest extends Message {
      */
     public int getMetaMask();
 
-    // inherit doc comment
-    public void recordDrop();
-
     /** Marks this as being an re-originated query. */
     public void originate();
 

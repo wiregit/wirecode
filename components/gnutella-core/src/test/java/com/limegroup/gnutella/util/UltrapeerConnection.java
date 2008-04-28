@@ -2,6 +2,7 @@ package com.limegroup.gnutella.util;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.SecureMessageVerifier;
 
@@ -48,13 +49,14 @@ public final class UltrapeerConnection extends NewConnection {
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
             SpamFilterFactory spamFilterFactory, MessageReaderFactory messageReaderFactory,
             MessageFactory messageFactory, ApplicationServices applicationServices,
-            SecureMessageVerifier secureMessageVerifier) {
-        super(connections, queriesMustBeInRoutingTable,qrt, connectionManager, networkManager,
+            SecureMessageVerifier secureMessageVerifier, NetworkInstanceUtils networkInstanceUtils) {
+        super(connections, queriesMustBeInRoutingTable, qrt, connectionManager, networkManager,
                 queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
                 messageDispatcher, networkUpdateSanityChecker, searchResultHandler,
                 capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage,
                 simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory,
-                messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier);
+                messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier,
+                networkInstanceUtils);
 
         if (keywords != null) {
             for (int i = 0; i < keywords.length; i++) {

@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
+import org.limewire.io.GGEP;
+
 import junit.framework.Test;
 
 import com.google.inject.Injector;

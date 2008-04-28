@@ -76,6 +76,15 @@ public class KeywordFilter implements SpamFilter {
     }
 
     /**
+     * Returns list of banned keywords.
+     * 
+     * Package private for testing.
+     */
+    List<String> getBannedKeywords() {
+        return ban;
+    }
+    
+    /**
      * @modifies this
      * @effects bans .vbs files
      */

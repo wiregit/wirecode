@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import org.limewire.collection.FixedSizeExpiringSet;
+import org.limewire.io.NetworkInstanceUtils;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.NetworkManager;
@@ -33,11 +34,10 @@ public class UDPCrawlerPingHandler extends RestrictedResponder {
     public UDPCrawlerPingHandler(NetworkManager networkManager,
             SimppManager simppManager,
             UDPReplyHandlerFactory udpReplyHandlerFactory,
-            UDPReplyHandlerCache udpReplyHandlerCache,
-            UDPCrawlerPongFactory udpCrawlerPongFactory
-            ) {
-        super(FilterSettings.CRAWLER_IP_ADDRESSES, networkManager,
-                simppManager, udpReplyHandlerFactory, udpReplyHandlerCache, null);
+            UDPReplyHandlerCache udpReplyHandlerCache, UDPCrawlerPongFactory udpCrawlerPongFactory,
+            NetworkInstanceUtils networkInstanceUtils) {
+        super(FilterSettings.CRAWLER_IP_ADDRESSES, networkManager, simppManager,
+                udpReplyHandlerFactory, udpReplyHandlerCache, null, networkInstanceUtils);
         this.udpCrawlerPongFactory = udpCrawlerPongFactory;
     }
     

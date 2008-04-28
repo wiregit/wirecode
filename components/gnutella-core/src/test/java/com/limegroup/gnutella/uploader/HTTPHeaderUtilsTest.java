@@ -19,6 +19,7 @@ import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.util.BaseTestCase;
@@ -271,18 +272,19 @@ public class HTTPHeaderUtilsTest extends BaseTestCase {
                 Provider<NodeAssigner> nodeAssigner,  
                  Provider<IPFilter> ipFilter,
                 ConnectionCheckerManager connectionCheckerManager,
-                PingRequestFactory pingRequestFactory) {
+                PingRequestFactory pingRequestFactory,
+                NetworkInstanceUtils networkInstanceUtils) {
             super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor, simppManager,
                     capabilitiesVMFactory, managedConnectionFactory, messageRouter, queryUnicaster,
                     socketsManager, connectionServices, nodeAssigner, ipFilter, connectionCheckerManager,
-                    pingRequestFactory);
+                    pingRequestFactory, networkInstanceUtils);
             
         }
 
         private Set<Connectable> proxies;
         
         @Override
-        public Set<? extends Connectable> getPushProxies() {
+        public Set<Connectable> getPushProxies() {
             return proxies;
         }
         

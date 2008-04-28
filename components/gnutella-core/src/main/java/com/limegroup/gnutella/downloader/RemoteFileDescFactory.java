@@ -1,8 +1,11 @@
 package com.limegroup.gnutella.downloader;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Set;
 
+import org.apache.http.HttpException;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 
@@ -110,5 +113,13 @@ public interface RemoteFileDescFactory {
      */
     public RemoteFileDesc createUrlRemoteFileDesc(String host, int port, String filename, long size,
             Set<? extends URN> urns, URL url);
+    
+    /**
+     * Constructs a URLRemoteFileDesc, looking up the size from the URL if no size is known.<p>
+     * 
+     * <b>This method can block if the size is <= 0.</b>
+     */
+    public RemoteFileDesc createUrlRemoteFileDesc(URL url, String filename, URN urn, long size)
+            throws IOException, URISyntaxException, HttpException, InterruptedException;
 
 }

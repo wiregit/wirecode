@@ -177,12 +177,6 @@ public final class ConnectionSettings extends LimeProps {
         FACTORY.createIntSetting("CONNECTION_SPEED", SpeedConstants.CABLE_SPEED_INT);
     
     /**
-	 * The port to connect on
-	 */
-    public static final IntSetting PORT =
-        FACTORY.createIntSetting("PORT", 6346);
-    
-    /**
 	 * Sets whether or not the users ip address should be forced to
 	 * the value they have entered.
 	 */
@@ -366,7 +360,7 @@ public final class ConnectionSettings extends LimeProps {
      */
     public static final PowerOfTwoSetting QRT_SIZE_IN_KIBI_ENTRIES =
         FACTORY.createRemotePowerOfTwoSetting("QRT_SIZE_IN_KIBI_ENTRIES", 128,
-                "ConnectionSettings.QRTSize", 128, 256);
+                "ConnectionSettings.QRTSizeV2", 128, 256);
     
     /**
      * 

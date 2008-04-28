@@ -16,9 +16,11 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.ByteBufferOutputStream;
 import org.limewire.io.IpPort;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.observer.ReadWriteObserver;
@@ -163,15 +165,20 @@ public class UDPService implements ReadWriteObserver {
     private final Provider<QueryUnicaster> queryUnicaster;
     private final ScheduledExecutorService backgroundExecutor;
     private final ConnectionServices connectionServices;
-
-
     private final MessageFactory messageFactory;
-
-
     private final PingRequestFactory pingRequestFactory;
+    private final NetworkInstanceUtils networkInstanceUtils;
     
     @InspectionPoint("udp sent messages")
     private final Message.MessageCounter sentMessageCounter = new Message.MessageCounter(50);
+    
+    @InspectionPoint("fwt capable")
+    @SuppressWarnings("unused")
+    private final Inspectable fwtCapable = new Inspectable() {
+        public Object inspect() {
+            return canDoFWT();
+        }
+    };
 
 	@Inject
     public UDPService(NetworkManager networkManager,
@@ -183,7 +190,8 @@ public class UDPService implements ReadWriteObserver {
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             ConnectionServices connectionServices,
             MessageFactory messageFactory,
-            PingRequestFactory pingRequestFactory) {
+            PingRequestFactory pingRequestFactory,
+            NetworkInstanceUtils networkInstanceUtils) {
         this.networkManager = networkManager;
         this.messageDispatcher = messageDispatcher;
         this.hostileFilter = hostileFilter;
@@ -195,6 +203,7 @@ public class UDPService implements ReadWriteObserver {
         this.connectionServices = connectionServices;
         this.messageFactory = messageFactory;
         this.pingRequestFactory = pingRequestFactory;
+        this.networkInstanceUtils = networkInstanceUtils;
 
         OUTGOING_MSGS = new LinkedList<SendBundle>();
 	    byte[] backing = new byte[BUFFER_SIZE];
@@ -247,7 +256,7 @@ public class UDPService implements ReadWriteObserver {
      * @exception IOException Thrown if the DatagramSocket could not be
      * created.
      */
-    DatagramSocket newListeningSocket(int port) throws IOException {
+    public DatagramSocket newListeningSocket(int port) throws IOException {
         try {
             DatagramChannel channel = DatagramChannel.open();
             channel.configureBlocking(false);
@@ -269,7 +278,7 @@ public class UDPService implements ReadWriteObserver {
      *  return value of newListeningSocket(int).  A value of null disables 
      *  UDP sending and receiving.
 	 */
-	void setListeningSocket(DatagramSocket datagramSocket) {
+	public void setListeningSocket(DatagramSocket datagramSocket) {
 	    if(_channel != null) {
 	        try {
 	            _channel.close();
@@ -426,6 +435,7 @@ public class UDPService implements ReadWriteObserver {
                             _lastReportedPort = r.getMyPort();
                         }
                     }
+                    updateFWTState();
                 }
                 
             }
@@ -457,7 +467,7 @@ public class UDPService implements ReadWriteObserver {
         //      2) the non-connected party _is_ private, and the LOCAL_IS_PRIVATE is set to false
         return
                 !connectionManager.get().isConnectedTo(host)
-            &&  !NetworkUtils.isPrivateAddress(addr.getAddress())
+            &&  !networkInstanceUtils.isPrivateAddress(addr.getAddress())
              ;
 
     }
@@ -644,14 +654,22 @@ public class UDPService implements ReadWriteObserver {
 	    if (!canReceiveSolicited()) 
 	        return false;
 
+	    boolean ret = !ConnectionSettings.LAST_FWT_STATE.getValue();
 	    if (!connectionServices.isConnected())
-	        return !ConnectionSettings.LAST_FWT_STATE.getValue();
+	        return ret;
 	    
+	    synchronized(this) {
+	        if (_numReceivedIPPongs < 1) 
+	            return ret;
+	    }
+	    
+	    updateFWTState();
+	    return !ConnectionSettings.LAST_FWT_STATE.getValue();
+	}
+	
+	private void updateFWTState() {
 	    boolean ret = true;
 	    synchronized(this) {     	
-	        if (_numReceivedIPPongs < 1) 
-	            return !ConnectionSettings.LAST_FWT_STATE.getValue();
-	        
 	        if (LOG.isTraceEnabled()) {
 	            LOG.trace("stable "+_portStable+
 	                    " last reported port "+_lastReportedPort+
@@ -664,18 +682,15 @@ public class UDPService implements ReadWriteObserver {
 	        
 	        ret= 
 	            NetworkUtils.isValidAddress(networkManager.getExternalAddress()) && 
-	    		_portStable;
+	            _portStable;
 	        
 	        if (_numReceivedIPPongs == 1){
 	            ret = ret &&
-	            	(_lastReportedPort == acceptor.get().getPort(false) ||
+	            (_lastReportedPort == acceptor.get().getPort(false) ||
 	                    _lastReportedPort == networkManager.getPort());
 	        }
 	    }
-	    
 	    ConnectionSettings.LAST_FWT_STATE.setValue(!ret);
-	    
-	    return ret;
 	}
 	
 	// Some getters for bug reporting 

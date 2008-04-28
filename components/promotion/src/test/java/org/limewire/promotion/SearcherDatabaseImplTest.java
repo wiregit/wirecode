@@ -1,5 +1,6 @@
 package org.limewire.promotion;
 
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
@@ -17,10 +18,9 @@ public class SearcherDatabaseImplTest extends BaseTestCase {
         return buildTestSuite(SearcherDatabaseImplTest.class);
     }
 
-    public void testQuery() throws Exception {
+    public void testQuery() throws SQLException {
         SearcherDatabaseImpl searcherDatabase = new SearcherDatabaseImpl(new KeywordUtilImpl(),
-                null, null, null);
-        searcherDatabase.init();
+                null, null, null, new SimplePromotionServicesImpl());
         searcherDatabase.clear();
 
         PromotionMessageContainer promo = new PromotionMessageContainer();

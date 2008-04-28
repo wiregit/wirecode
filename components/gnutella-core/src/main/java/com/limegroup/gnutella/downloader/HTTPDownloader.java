@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -30,6 +31,7 @@ import org.limewire.io.Connectable;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.nio.channel.InterestReadableByteChannel;
@@ -40,7 +42,7 @@ import org.limewire.nio.statemachine.IOStateMachine;
 import org.limewire.nio.statemachine.IOStateObserver;
 import org.limewire.nio.statemachine.ReadSkipState;
 import org.limewire.nio.statemachine.ReadState;
-import org.limewire.rudp.UDPConnection;
+import org.limewire.rudp.RUDPSocket;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Provider;
@@ -75,11 +77,11 @@ import com.limegroup.gnutella.http.SimpleWriteHeaderState;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.statistics.BandwidthStat;
-import com.limegroup.gnutella.statistics.DownloadStat;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
+import com.limegroup.gnutella.statistics.TcpBandwidthStatistics.StatisticType;
+import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.ThexReader;
 import com.limegroup.gnutella.tigertree.ThexReaderFactory;
-import com.limegroup.gnutella.tigertree.HashTree;
 
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as
@@ -97,7 +99,7 @@ import com.limegroup.gnutella.tigertree.HashTree;
  * dl.connectHTTP(startByte, stopByte);
  * dl.doDownload();
  * </pre> 
- * LOCKING: _writtenGoodLocs and _goodLocs are both synchronized on _goodLocs
+ * LOCKING: _writtenGoodLocs and _goodLocs are both synchronized on _goodLocs<p>
  * LOCKING: _writtenBadLocs and _badLocs are both synchronized on _badLocs
  */
 
@@ -287,6 +289,8 @@ public class HTTPDownloader implements BandwidthTracker {
     private final PushEndpointFactory pushEndpointFactory;
     private final RemoteFileDescFactory remoteFileDescFactory;
     private final ThexReaderFactory thexReaderFactory;
+    private final TcpBandwidthStatistics tcpBandwidthStatistics;
+    private final NetworkInstanceUtils networkInstanceUtils;
 
     HTTPDownloader(Socket socket, RemoteFileDesc rfd,
             VerifyingFile incompleteFile, boolean inNetwork,
@@ -295,12 +299,12 @@ public class HTTPDownloader implements BandwidthTracker {
             DownloadManager downloadManager,
             CreationTimeCache creationTimeCache,
             BandwidthManager bandwidthManager,
-            Provider<PushEndpointCache> pushEndpointCache,
-            PushEndpointFactory pushEndpointFactory,
-            RemoteFileDescFactory remoteFileDescFactory,
-            ThexReaderFactory thexReaderFactory) {
-        
-        if(requireSocket && socket == null)
+            Provider<PushEndpointCache> pushEndpointCache, PushEndpointFactory pushEndpointFactory,
+            RemoteFileDescFactory remoteFileDescFactory, ThexReaderFactory thexReaderFactory,
+            TcpBandwidthStatistics tcpBandwidthStatistics,
+            NetworkInstanceUtils networkInstanceUtils) {
+
+        if (requireSocket && socket == null)
             throw new NullPointerException("null socket");
         
         this.networkManager = networkManager;
@@ -312,6 +316,8 @@ public class HTTPDownloader implements BandwidthTracker {
         this.pushEndpointFactory = pushEndpointFactory;
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.thexReaderFactory = thexReaderFactory;
+        this.tcpBandwidthStatistics = tcpBandwidthStatistics;
+        this.networkInstanceUtils = networkInstanceUtils;
         _rfd= Objects.nonNull(rfd, "rfd");
         _socket=socket;
         _incompleteFile=incompleteFile;
@@ -396,11 +402,11 @@ public class HTTPDownloader implements BandwidthTracker {
     
     ///////////////////////////////// Connection /////////////////////////////
 
-    /** 
+    /**
      * Initializes the TCP connection by installing readers & writers
      * on the socket and setting the appropriate keepAlive & soTimeout
      * socket options.
-     * 
+     * <p>
      * If the TCP connection could not be initialized, this
      * throws an IOException.
      */
@@ -434,20 +440,23 @@ public class HTTPDownloader implements BandwidthTracker {
         connectHTTP(start, stop, supportQueueing, -1, observer);
     }
     
-    /** 
+    /**
      * Sends a GET request using an already open socket, and reads all 
      * headers.  The actual ranges downloaded MAY NOT be the same
      * as the 'start' and 'stop' parameters, as HTTP allows the server
      * to respond with any satisfiable subrange of the request.
-     *
+     * <p>
      * Users of this class should examine getInitialReadingPoint()
      * and getAmountToRead() to determine what the effective start & stop
-     * ranges are, and update external datastructures appropriately.
+     * ranges are, and update external datastructures appropriately.<p>
+     * <pre>
      *  int newStart = dloader.getInitialReadingPoint();
      *  int newStop = (dloader.getAmountToRead() - 1) + newStart; // INCLUSIVE
+     *  </pre>
      * or
+     * <pre>
      *  int newStop = dloader.getAmountToRead() + newStart; // EXCLUSIVE
-     *
+     *  </pre>
      * <p>
      * @param start The byte at which the HTTPDownloader should begin
      * @param stop the index just past the last byte to read;
@@ -535,7 +544,7 @@ public class HTTPDownloader implements BandwidthTracker {
         headers.add(HTTPHeaderName.RANGE.create("bytes=" + _initialReadingPoint + "-" + (stop-1)));
         
 		if (networkManager.acceptedIncomingConnection() &&
-           !NetworkUtils.isPrivateAddress(networkManager.getAddress())) {
+           !networkInstanceUtils.isPrivateAddress(networkManager.getAddress())) {
             int port = networkManager.getPort();
             String host = NetworkUtils.ip2string(networkManager.getAddress());
             headers.add(HTTPHeaderName.NODE.create(host + ":" + port));
@@ -568,11 +577,11 @@ public class HTTPDownloader implements BandwidthTracker {
         SimpleWriteHeaderState writer = new SimpleWriteHeaderState(
                 "GET " + _rfd.getUrl().getFile() + " HTTP/1.1",
                 headers,
-                _inNetwork ? BandwidthStat.HTTP_HEADER_UPSTREAM_INNETWORK_BANDWIDTH :
-                             BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH);
+                _inNetwork ? tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_INNETWORK_UPSTREAM) :
+                             tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_UPSTREAM));
         SimpleReadHeaderState reader = new SimpleReadHeaderState(
-                _inNetwork ? BandwidthStat.HTTP_HEADER_DOWNSTREAM_INNETWORK_BANDWIDTH :
-                             BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH,
+                _inNetwork ? tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_INNETWORK_DOWNSTREAM) :
+                             tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_DOWNSTREAM),
                              DownloadSettings.MAX_HEADERS.getValue(),
                              DownloadSettings.MAX_HEADER_SIZE.getValue());
         
@@ -671,9 +680,9 @@ public class HTTPDownloader implements BandwidthTracker {
         SimpleWriteHeaderState writer = new SimpleWriteHeaderState(
                 "GET " + _thexUri + " HTTP/1.1",
                 headers,
-                BandwidthStat.GNUTELLA_UPSTREAM_BANDWIDTH);
+                tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_UPSTREAM));
         SimpleReadHeaderState reader = new SimpleReadHeaderState(
-                BandwidthStat.GNUTELLA_DOWNSTREAM_BANDWIDTH,
+                tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_HEADER_DOWNSTREAM),
                 DownloadSettings.MAX_HEADERS.getValue(),
                 DownloadSettings.MAX_HEADER_SIZE.getValue());
         
@@ -870,12 +879,12 @@ public class HTTPDownloader implements BandwidthTracker {
                 // per the PFSP spec, a 503 should be returned. But if the
                 // uploader returns a "Avaliable-Ranges" header regardless of
                 // whether it is really busy or just does not have the requested
-                // range, we cannot really distingush between the two cases on
+                // range, we cannot really distinguish between the two cases on
                 // the client side.
                 
                 //For the most part clients send 416 when they have other ranges
                 //that may match the clients need. From LimeWire 4.0.6 onwards
-                //LimeWire will treate 503s to mean either busy or queued BUT
+                //LimeWire will treat 503s to mean either busy or queued BUT
                 //NOT partial range available.
 
                 //if( _rfd.isPartialSource() )
@@ -898,7 +907,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * Does nothing except for throwing an exception if the
      * X-Gnutella-Content-URN header does not match
      * 
-     * @param str
+     * @param value
      *            the header <tt>String</tt>
      * @param sha1
      *            the <tt>URN</tt> we expect
@@ -945,12 +954,7 @@ public class HTTPDownloader implements BandwidthTracker {
         AltLocUtils.parseAlternateLocations(_rfd.getSHA1Urn(), altStr, allowTLS, alternateLocationFactory, new Function<AlternateLocation, Void>() {
             public Void apply(AlternateLocation location) {
                 RemoteFileDesc rfd = location.createRemoteFileDesc(_rfd.getSize(), remoteFileDescFactory);
-                if(_locationsReceived.add(rfd)) {
-                    if (location instanceof DirectAltLoc)
-                        DownloadStat.ALTERNATE_COLLECTED.incrementStat();
-                    else
-                        DownloadStat.PUSH_ALTERNATE_COLLECTED.incrementStat();
-                }
+                _locationsReceived.add(rfd);
                 return null;
             }
         });
@@ -1010,7 +1014,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		token = tokenizer.nextToken();
 		
 		// the first token should contain HTTP
-		if (token.toUpperCase().indexOf("HTTP") < 0 )
+		if (token.toUpperCase(Locale.US).indexOf("HTTP") < 0 )
 			throw new NoHTTPOKException("got: " + str);
         // does the server support http 1.1?
         else 
@@ -1201,7 +1205,7 @@ public class HTTPDownloader implements BandwidthTracker {
                                                             throws IOException {
         IntervalSet availableRanges = new IntervalSet();
 
-        line = line.toLowerCase();
+        line = line.toLowerCase(Locale.US);
         // start parsing after the word "bytes"
         int start = line.indexOf("bytes") + 6;
         // if start == -1 the word bytes has not been found
@@ -1326,9 +1330,9 @@ public class HTTPDownloader implements BandwidthTracker {
             String protocol = "";
             int slash = feature.indexOf("/");
             if(slash == -1) {
-                protocol = feature.toLowerCase().trim();
+                protocol = feature.toLowerCase(Locale.US).trim();
             } else {
-                protocol = feature.substring(0, slash).toLowerCase().trim();
+                protocol = feature.substring(0, slash).toLowerCase(Locale.US).trim();
             }
             // ignore the version for now.
 
@@ -1425,9 +1429,9 @@ public class HTTPDownloader implements BandwidthTracker {
     }
     
     private void updatePEAddress() throws IOException {
-        if (_socket instanceof UDPConnection) {
+        if (_socket instanceof RUDPSocket) {
             IpPort newAddr = new IpPortImpl(_socket.getInetAddress(), _socket.getPort()); 
-            if (NetworkUtils.isValidExternalIpPort(newAddr))
+            if (networkInstanceUtils.isValidExternalIpPort(newAddr))
                 pushEndpointCache.get().setAddr(_rfd.getClientGUID(),newAddr);
         }
     }
@@ -1520,9 +1524,9 @@ public class HTTPDownloader implements BandwidthTracker {
                 
                 int totalRead = buffer.position();
                 if (_inNetwork)
-                    BandwidthStat.HTTP_BODY_DOWNSTREAM_INNETWORK_BANDWIDTH.addData(totalRead);
+                    tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_BODY_INNETWORK_DOWNSTREAM).addData(totalRead);
                 else
-                    BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(totalRead);
+                    tcpBandwidthStatistics.getStatistic(StatisticType.HTTP_BODY_DOWNSTREAM).addData(totalRead);
                 
                 // If nothing could be read at all, leave.
                 if(totalRead == 0) {

@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.util;
 
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.SocketsManager;
 import org.limewire.security.SecureMessageVerifier;
 
@@ -60,13 +61,14 @@ public final class LeafConnection extends NewConnection {
             Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
             SpamFilterFactory spamFilterFactory, MessageReaderFactory messageReaderFactory,
             MessageFactory messageFactory, ApplicationServices applicationServices,
-            SecureMessageVerifier secureMessageVerifier) {
+            SecureMessageVerifier secureMessageVerifier, NetworkInstanceUtils networkInstanceUtils) {
         super(connections, queriesMustBeInRoutingTable, qrt, connectionManager, networkManager,
                 queryRequestFactory, headersFactory, handshakeResponderFactory, queryReplyFactory,
                 messageDispatcher, networkUpdateSanityChecker, searchResultHandler,
                 capabilitiesVMFactory, socketsManager, acceptor, supportedVendorMessage,
                 simppManager, updateHandler, connectionServices, guidMapManager, spamFilterFactory,
-                messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier);
+                messageReaderFactory, messageFactory, applicationServices, secureMessageVerifier,
+                networkInstanceUtils);
 
         this.descriptor = descriptor;
 

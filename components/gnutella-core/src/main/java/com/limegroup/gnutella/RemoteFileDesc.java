@@ -9,6 +9,7 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 
+import com.limegroup.gnutella.downloader.DownloadStatsTracker;
 import com.limegroup.gnutella.downloader.serial.RemoteHostMemento;
 
 /**
@@ -239,9 +240,16 @@ public interface RemoteFileDesc extends IpPort, Connectable, FileDetails {
 
     /**
      * 
-     * @return whether a push should be sent tho this rfd.
+     * @return whether a push should be sent to this rfd.
      */
     public boolean needsPush();
+    
+    /**
+     * 
+     * @return whether a push should be sent to this rfd.
+     * @param statsTracker used to track download statistics
+     */
+    public boolean needsPush(DownloadStatsTracker statsTracker);
 
     /**
      * 

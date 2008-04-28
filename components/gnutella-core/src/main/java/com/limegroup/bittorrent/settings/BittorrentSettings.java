@@ -71,4 +71,18 @@ public class BittorrentSettings extends LimeProps {
     public static ProbabilisticBooleanSetting REPORT_DISK_PROBLEMS =
         FACTORY.createRemoteProbabilisticBooleanSetting("REPORT_BT_DISK_PROBLEMS", 
                 0f, "BTSettings.reportDiskProblems",0f,1f);
+    
+    /**
+     * Whether to auto publish the peer as someone sharing the torrent in DHT.
+     */
+    public static BooleanSetting TORRENT_AUTO_PUBLISH = 
+        FACTORY.createRemoteBooleanSetting("TORRENT_AUTO_PUBLISH", true, "BTSettings.disableTorrentAutoPublish");
+    
+    /**
+     * Whether to perform auto lookup in DHT for an alternation location
+     * when there is a tracker failure.
+     */
+    public static BooleanSetting TORRENT_ALTLOC_SEARCH = 
+        FACTORY.createRemoteBooleanSetting("TORRENT_ALTLOC_SEARCH", true, "BTSettings.disableTorrentAltLocSearch");
+
 }

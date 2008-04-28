@@ -2,6 +2,8 @@ package com.limegroup.gnutella.licenses;
 
 import java.net.URI;
 
+import org.limewire.http.httpclient.LimeHttpClient;
+
 class StubCCLicense extends CCLicense {
 
     private static final URI LICENSE_URI;
@@ -36,7 +38,7 @@ class StubCCLicense extends CCLicense {
             return uri;
     }
     
-    protected String getBodyFromURL(String url) {
+    protected String getBodyFromURL(String url, LimeHttpClient httpClient) {
         if(url.equals(getLicenseURI().toString()))
             return page;
         else

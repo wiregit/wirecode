@@ -23,7 +23,14 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
+import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.db.DHTValue;
+import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.net.SocketsManager;
@@ -1106,6 +1113,8 @@ public final class MessageRouterImplTest extends LimeTestCase {
         private final ApplicationServices applicationServices;
         
         private final Provider<SecureMessageVerifier> secureMessageVerifier;
+        
+        private final NetworkInstanceUtils networkInstanceUtils;
 
         @Inject
         public ManagedConnectionStubFactory(Provider<ConnectionManager> connectionManager,
@@ -1120,7 +1129,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
                 Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
                 SpamFilterFactory spamFilterFactory, MessageFactory messageFactory,
                 MessageReaderFactory messageReaderFactory, ApplicationServices applicationServices,
-                Provider<SecureMessageVerifier> secureMessageVerifier) {
+                Provider<SecureMessageVerifier> secureMessageVerifier, NetworkInstanceUtils networkInstanceUtils) {
             this.connectionManager = connectionManager;
             this.networkManager = networkManager;
             this.queryRequestFactory = queryRequestFactory;
@@ -1143,6 +1152,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
             this.messageFactory = messageFactory;
             this.messageReaderFactory = messageReaderFactory;
             this.secureMessageVerifier = secureMessageVerifier;
+            this.networkInstanceUtils = networkInstanceUtils;
         }
 
         
@@ -1153,7 +1163,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
                             .get(), capabilitiesVMFactory, socketsManager.get(), acceptor.get(),
                     supportedVendorMessage, simppManager, updateHandler, connectionServices,
                     guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
-                    applicationServices, secureMessageVerifier.get());
+                    applicationServices, secureMessageVerifier.get(), networkInstanceUtils);
         }
         
     }
@@ -1175,13 +1185,13 @@ public final class MessageRouterImplTest extends LimeTestCase {
                 Provider<ConnectionServices> connectionServices, GuidMapManager guidMapManager,
                 SpamFilterFactory spamFilterFactory, MessageReaderFactory messageReaderFactory,
                 MessageFactory messageFactory, ApplicationServices applicationServices,
-                SecureMessageVerifier secureMessageVerifier) {
+                SecureMessageVerifier secureMessageVerifier, NetworkInstanceUtils networkInstanceUtils) {
             super(host, port, type, connectionManager, networkManager, queryRequestFactory, headersFactory,
                     handshakeResponderFactory, queryReplyFactory, messageDispatcher,
                     networkUpdateSanityChecker, searchResultHandler, capabilitiesVMFactory, socketsManager,
                     acceptor, supportedVendorMessage, simppManager, updateHandler, connectionServices,
                     guidMapManager, spamFilterFactory, messageReaderFactory, messageFactory,
-                    applicationServices, secureMessageVerifier);
+                    applicationServices, secureMessageVerifier, null, networkInstanceUtils);
             
         }
         
@@ -1271,6 +1281,14 @@ public final class MessageRouterImplTest extends LimeTestCase {
         }
 
         public void setEnabled(boolean enabled) {
+        }
+        
+        public DHTFuture<FindValueResult> get(EntityKey eKey) {
+            return null;
+        }
+        
+        public DHTFuture<StoreResult> put(KUID key, DHTValue value) {
+            return null;
         }
     }
 

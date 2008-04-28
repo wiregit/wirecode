@@ -54,10 +54,15 @@ public class OSUtils {
     private static boolean _supportsTray;
 
     /** 
-     * Variable for whether or not we're on MacOSX.
+     * Variable for whether or not we're on Mac OS X.
      */
     private static boolean _isMacOSX;
 
+    /**
+     * Variable for whether or not we're on Mac OS X 10.5 (Leopard)
+     */
+    private static boolean _isMacOSX105;
+    
     /** 
      * Variable for whether or not we're on Linux.
      */
@@ -88,6 +93,7 @@ public class OSUtils {
     	_isLinux = false;
     	_isOS2 = false;
     	_isMacOSX = false;
+    	_isMacOSX105 = false;
     
     	String os = System.getProperty("os.name").toLowerCase(Locale.US);
     
@@ -117,6 +123,9 @@ public class OSUtils {
     	if(os.startsWith("mac os")) {
     		if(os.endsWith("x")) {
     			_isMacOSX = true;
+    			
+    			if (System.getProperty("os.version").startsWith("10.5"))
+    			    _isMacOSX105 = true;
     		}
     	}
     }    
@@ -225,9 +234,9 @@ public class OSUtils {
     }
 
     /** 
-     * Returns whether or not the OS is Mac OSX.
+     * Returns whether or not the OS is Mac OS X.
      *
-     * @return <tt>true</tt> if the application is running on Mac OSX, 
+     * @return <tt>true</tt> if the application is running on Mac OS X, 
      *         <tt>false</tt> otherwise
      */
     public static boolean isMacOSX() {
@@ -235,26 +244,15 @@ public class OSUtils {
     }
 
     /**
-     * Returns whether or not the Cocoa Foundation classes are available.
+     * Returns whether or not the OS version of Mac OS X is 10.5.x.
+     *  
+     * @return <tt>true</tt> if the application is running on Mac OS X 10.5.x,
+     *         <tt>false</tt> otherwise
      */
-    public static boolean isCocoaFoundationAvailable() {
-        if(!isMacOSX())
-            return false;
-            
-        try {
-            Class.forName("com.apple.cocoa.foundation.NSUserDefaults");
-            Class.forName("com.apple.cocoa.foundation.NSMutableDictionary");
-            Class.forName("com.apple.cocoa.foundation.NSMutableArray");
-            Class.forName("com.apple.cocoa.foundation.NSObject");
-            Class.forName("com.apple.cocoa.foundation.NSSystem");
-            return true;
-        } catch(ClassNotFoundException error) {
-            return false;
-        } catch(NoClassDefFoundError error) {
-            return false;
-        }
+    public static boolean isMacOSX105() {
+        return _isMacOSX105;
     }
-
+    
     /** 
      * Returns whether or not the OS is any Mac OS.
      *

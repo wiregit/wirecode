@@ -20,7 +20,7 @@ import junit.framework.Test;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.Range;
-import org.limewire.io.LocalSocketAddressService;
+import org.limewire.io.LocalSocketAddressProvider;
 import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.OSUtils;
@@ -67,6 +67,10 @@ public class FileManagerTest extends LimeTestCase {
     protected File f4 = null;
     protected File f5 = null;
     protected File f6 = null;
+    
+    protected File store1 = null;
+    protected File store2 = null;
+    protected File store3 = null;
    
     //changed to protected so that MetaFileManagerTest can
     //use these variables as well.
@@ -88,10 +92,9 @@ public class FileManagerTest extends LimeTestCase {
     protected void setUp() throws Exception {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-
-        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProviderStub());
         
         cleanFiles(_incompleteDir, false);
+        cleanFiles(_sharedDir, false);
         cleanFiles(_storeDir, false);
 
 
@@ -99,6 +102,7 @@ public class FileManagerTest extends LimeTestCase {
             @Override
             protected void configure() {
                 bind(FileManager.class).to(SimpleFileManager.class);
+                bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
             }
         });
         fman = (FileManagerImpl)injector.getInstance(FileManager.class);
@@ -112,6 +116,10 @@ public class FileManagerTest extends LimeTestCase {
         if (f4!=null) f4.delete();
         if (f5!=null) f5.delete();
         if (f6!=null) f6.delete();	    
+        
+        if(store1!=null) store1.delete();
+        if(store2!=null) store2.delete();
+        if(store3!=null) store3.delete();
     }
         
     public void testGetParentFile() throws Exception {
@@ -120,7 +128,7 @@ public class FileManagerTest extends LimeTestCase {
             new File(f1.getParentFile().getCanonicalPath()),
             new File(_sharedDir.getCanonicalPath()));
     }
-    
+       
     public void testGetSharedFilesWithNoShared() throws Exception {
         List<FileDesc> sharedFiles =  fman.getSharedFilesInDirectory(_sharedDir);
         assertEquals(sharedFiles.toString(), 
@@ -215,7 +223,7 @@ public class FileManagerTest extends LimeTestCase {
         
         // should not be able to remove unshared file
         assertNull("should have not been able to remove f3", 
-				   fman.removeFileIfShared(f3));
+				   fman.removeFileIfSharedOrStore(f3));
 				   
         assertEquals("first file should be f1", f1, fman.get(0).getFile());
         
@@ -266,8 +274,8 @@ public class FileManagerTest extends LimeTestCase {
 
         //Remove file that's shared.  Back to 1 file.                   
         assertEquals(2, fman.getNumFiles());     
-        assertNull("shouldn't have been able to remove unshared file",  fman.removeFileIfShared(f3));
-        assertNotNull("should have been able to remove shared file", fman.removeFileIfShared(f2));
+        assertNull("shouldn't have been able to remove unshared file",  fman.removeFileIfSharedOrStore(f3));
+        assertNotNull("should have been able to remove shared file", fman.removeFileIfSharedOrStore(f2));
         assertEquals("unexpected fman size", 1, fman.getSize());
         assertEquals("unexpected number of files", 1, fman.getNumFiles());
         responses=fman.query(queryRequestFactory.createQuery("unit", (byte)3));
@@ -286,7 +294,7 @@ public class FileManagerTest extends LimeTestCase {
         f2 = createNewTestFile(3);
         waitForLoad();
         f3 = createNewTestFile(11);
-        fman.removeFileIfShared(f2);
+        fman.removeFileIfSharedOrStore(f2);
 
         //Add a new second file, with new index.
         FileManagerEvent result = addIfShared(f3);
@@ -306,9 +314,9 @@ public class FileManagerTest extends LimeTestCase {
             fail("should not have gotten anything");
         } catch (IndexOutOfBoundsException e) { }
         
-        assertFalse("should not be valid", fman.isValidIndex(3));
-        assertTrue("should be valid", fman.isValidIndex(0));
-        assertTrue("should be valid (was at one time)", fman.isValidIndex(1));
+        assertFalse("should not be valid", fman.isValidSharedIndex(3));
+        assertTrue("should be valid", fman.isValidSharedIndex(0));
+        assertTrue("should be valid (was at one time)", fman.isValidSharedIndex(1));
 
         responses=fman.query(queryRequestFactory.createQuery("*unit*", (byte)3));
         assertEquals("unexpected responses length", 2, responses.length);
@@ -326,7 +334,7 @@ public class FileManagerTest extends LimeTestCase {
         f2 = createNewTestFile(3);
         waitForLoad();
         f3 = createNewTestFile(11);
-        fman.removeFileIfShared(f2);
+        fman.removeFileIfSharedOrStore(f2);
         addIfShared(f3);
 
         FileManagerEvent result = renameFile(f2, new File("c:\\asdfoih"));
@@ -463,7 +471,7 @@ public class FileManagerTest extends LimeTestCase {
         assertFalse(fman.getQRT().contains(qrDesiring));
         
         // b) single urn, enough data written -> not shared
-        fman.removeFileIfShared(f);
+        fman.removeFileIfSharedOrStore(f);
         vf = verifyingFileFactory.createVerifyingFile(1024 * 1024);
         vf.addInterval(Range.createRange(0,1024 * 512));
         assertGreaterThan(102400,vf.getBlockSize());
@@ -478,7 +486,7 @@ public class FileManagerTest extends LimeTestCase {
         assertFalse(fman.getQRT().contains(qrDesiring));
         
         // c) two urns, not enough data written -> not shared
-        fman.removeFileIfShared(f);
+        fman.removeFileIfSharedOrStore(f);
         vf = verifyingFileFactory.createVerifyingFile(1024 * 1024);
         vf.addInterval(Range.createRange(0,1024 ));
         assertLessThan(102400,vf.getBlockSize());
@@ -494,7 +502,7 @@ public class FileManagerTest extends LimeTestCase {
         assertFalse(fman.getQRT().contains(qrDesiring));
 
         // d) two urns, enough data written -> shared
-        fman.removeFileIfShared(f);
+        fman.removeFileIfSharedOrStore(f);
         vf = verifyingFileFactory.createVerifyingFile(1024 * 1024);
         vf.addInterval(Range.createRange(0,1024 * 512));
         assertGreaterThan(102400,vf.getBlockSize());
@@ -514,7 +522,7 @@ public class FileManagerTest extends LimeTestCase {
         assertGreaterThan(0,qrpFull);
         
         // now remove the file and qrt should get updated
-        fman.removeFileIfShared(f);
+        fman.removeFileIfSharedOrStore(f);
         assertEquals(0,fman.query(qrDesiring).length);
         assertEquals(0,fman.query(notDesiring).length);
         assertFalse(fman.getQRT().contains(qrDesiring));
@@ -522,7 +530,7 @@ public class FileManagerTest extends LimeTestCase {
         
         // e) two urns, enough data written, sharing disabled -> not shared
         SharingSettings.ALLOW_PARTIAL_SHARING.setValue(false);
-        fman.removeFileIfShared(f);
+        fman.removeFileIfSharedOrStore(f);
         vf = verifyingFileFactory.createVerifyingFile(1024 * 1024);
         vf.addInterval(Range.createRange(0,1024 * 512));
         assertGreaterThan(102400,vf.getBlockSize());
@@ -541,7 +549,7 @@ public class FileManagerTest extends LimeTestCase {
         SharingSettings.ALLOW_PARTIAL_SHARING.setValue(true);
         
         // f) start with one urn, add a second one -> becomes shared
-        fman.removeFileIfShared(f);
+        fman.removeFileIfSharedOrStore(f);
         vf = verifyingFileFactory.createVerifyingFile(1024 * 1024);
         vf.addInterval(Range.createRange(0,1024 * 512));
         assertGreaterThan(102400,vf.getBlockSize());
@@ -589,13 +597,13 @@ public class FileManagerTest extends LimeTestCase {
         fman.addIncompleteFile(new File("b"), urns, "b", 0, verifyingFileFactory.createVerifyingFile(0));
         assertEquals("unexpected shared incomplete", 2, fman.getNumIncompleteFiles());
             
-        fman.removeFileIfShared( new File("a") );
+        fman.removeFileIfSharedOrStore( new File("a") );
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
         
-        fman.removeFileIfShared( new File("c") );
+        fman.removeFileIfSharedOrStore( new File("c") );
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
         
-        fman.removeFileIfShared( new File("b") );
+        fman.removeFileIfSharedOrStore( new File("b") );
         assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
     }
     
@@ -831,7 +839,7 @@ public class FileManagerTest extends LimeTestCase {
 
 
         //now remove one of the files
-        fman.removeFileIfShared(f3);
+        fman.removeFileIfSharedOrStore(f3);
         
         qrt = fman.getQRT();
         
@@ -1411,7 +1419,7 @@ public class FileManagerTest extends LimeTestCase {
         assertTrue(it.hasNext());
         assertTrue(it.hasNext());
         it.next();
-        fman.removeFileIfShared(f2);
+        fman.removeFileIfSharedOrStore(f2);
         assertFalse(it.hasNext());
 
         it = fman.getIndexingIterator(true);
@@ -1567,6 +1575,15 @@ public class FileManagerTest extends LimeTestCase {
         Listener fel = new Listener();
         synchronized(fel) {
             fman.addFileIfShared(f, fel);
+            fel.wait(5000);
+        }
+        return fel.evt;
+    }
+    
+    protected FileManagerEvent addIfShared(File f, List<LimeXMLDocument> l) throws Exception {
+        Listener fel = new Listener();
+        synchronized(fel) {
+            fman.addFileIfShared(f, l, fel);
             fel.wait(5000);
         }
         return fel.evt;

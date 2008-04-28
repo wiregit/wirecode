@@ -4,7 +4,13 @@ import java.net.SocketAddress;
 import java.util.List;
 
 import org.limewire.io.IpPort;
+import org.limewire.mojito.EntityKey;
+import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
+import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.db.DHTValue;
+import org.limewire.mojito.result.FindValueResult;
+import org.limewire.mojito.result.StoreResult;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 
@@ -212,4 +218,8 @@ public interface DHTManager extends ConnectionLifecycleListener,
      * @see com.limegroup.gnutella.messages.vendor.DHTContactsMessage
      */
     public void handleDHTContactsMessage(DHTContactsMessage msg);
+    
+    public DHTFuture<FindValueResult> get(EntityKey eKey);
+    
+    public DHTFuture<StoreResult> put(KUID key, DHTValue value);
 }

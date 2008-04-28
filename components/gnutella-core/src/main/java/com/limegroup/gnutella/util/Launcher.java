@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Locale;
 
 import org.limewire.util.OSUtils;
 import org.limewire.util.StringUtils;
@@ -161,7 +162,7 @@ public final class Launcher {
 	 */
 	public static LimeProcess launchFile(File file) throws IOException, SecurityException {
 		String path = file.getCanonicalPath();
-		String extCheckString = path.toLowerCase();
+		String extCheckString = path.toLowerCase(Locale.US);
 
         // expand pmf files before display
         if (extCheckString.endsWith(".pmf")) {
@@ -172,7 +173,7 @@ public final class Launcher {
             }
 
             path = file.getCanonicalPath();
-            extCheckString = path.toLowerCase();
+            extCheckString = path.toLowerCase(Locale.US);
         }
 
 		if(!extCheckString.endsWith(".exe") &&

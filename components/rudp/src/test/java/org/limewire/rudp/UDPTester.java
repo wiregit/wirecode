@@ -4,6 +4,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.text.NumberFormat;
 
 import org.limewire.nio.NIODispatcher;
@@ -17,7 +19,9 @@ public class UDPTester {
     private static final int BLOCK_SIZE = 512;
     private static long startTime;
     private static long lastTime;
-
+    
+    private static UDPSelectorProvider udpSelectorProvider;
+    
     /**
      * host:port
      */
@@ -39,7 +43,7 @@ public class UDPTester {
                 printHelp();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -47,17 +51,12 @@ public class UDPTester {
         DefaultMessageDispatcher dispatcher = new DefaultMessageDispatcher();
         DefaultUDPService service = new DefaultUDPService(dispatcher);
         RUDPMessageFactory factory = new DefaultMessageFactory();
-        final UDPSelectorProvider provider = new UDPSelectorProvider(new DefaultRUDPContext(
+        udpSelectorProvider = new UDPSelectorProvider(new DefaultRUDPContext(
                 factory, NIODispatcher.instance().getTransportListener(),
                 service, new DefaultRUDPSettings()));
-        UDPMultiplexor udpMultiplexor = provider.openSelector();
+        UDPMultiplexor udpMultiplexor = udpSelectorProvider.openSelector();
         dispatcher.setUDPMultiplexor(udpMultiplexor);
-        UDPSelectorProvider.setDefaultProviderFactory(new UDPSelectorProviderFactory() {
-            public UDPSelectorProvider createProvider() {
-                return provider;
-            }
-        });
-        NIODispatcher.instance().registerSelector(udpMultiplexor, provider.getUDPSocketChannelClass());
+        NIODispatcher.instance().registerSelector(udpMultiplexor, udpSelectorProvider.getUDPSocketChannelClass());
         
         service.start(port);
     }
@@ -68,7 +67,8 @@ public class UDPTester {
     }
 
     public static void echoClient(String host, int port) throws IOException {
-        UDPConnection usock = new UDPConnection(host, port);
+        Socket usock = udpSelectorProvider.openSocketChannel().socket();
+        usock.connect(new InetSocketAddress(host, port));
         usock.setSoTimeout(TIMEOUT);
         
         OutputStream ostream = usock.getOutputStream();
@@ -96,7 +96,8 @@ public class UDPTester {
     }
 
     public static void echoServer(String host, int port) throws IOException {
-        UDPConnection usock = new UDPConnection(host, port);
+        Socket usock = udpSelectorProvider.openSocketChannel().socket();
+        usock.connect(new InetSocketAddress(host, port));
         usock.setSoTimeout(TIMEOUT);
         
         // OutputStream ostream = usock.getOutputStream();

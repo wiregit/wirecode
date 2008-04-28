@@ -8,6 +8,7 @@ import org.apache.http.HttpVersion;
 import org.apache.http.message.BasicHttpResponse;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
+import org.limewire.http.protocol.LimeResponseConnControl;
 
 public class LimeResponseConnControlTest extends TestCase {
 

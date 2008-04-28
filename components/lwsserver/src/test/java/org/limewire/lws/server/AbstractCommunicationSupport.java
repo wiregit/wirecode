@@ -3,27 +3,10 @@ package org.limewire.lws.server;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledExecutorService;
 
-import org.limewire.common.LimeWireCommonModule;
-import org.limewire.concurrent.AbstractLazySingletonProvider;
-import org.limewire.concurrent.SimpleTimer;
-import org.limewire.http.LimeWireHttpModule;
-import org.limewire.inject.AbstractModule;
-import org.limewire.net.EmptySocketBindingSettings;
-import org.limewire.net.LimeWireNetModule;
-import org.limewire.net.ProxySettings;
-import org.limewire.net.SocketBindingSettings;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManagerImpl;
 import org.limewire.util.BaseTestCase;
-
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
-import com.google.inject.name.Names;
 
 /**
  * Provides the basis methods for doing communication. Subclasses should test
@@ -52,6 +35,7 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
     private RemoteServerImpl remoteServer;
     private FakeJavascriptCodeInTheWebpage code;
     private String privateKey;
+    private String sharedKey;
     
     private Thread localThread;
     private Thread remoteThread;    
@@ -182,22 +166,7 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
         remoteThread    = remoteServer.start();
         code            = new FakeJavascriptCodeInTheWebpage(socketsManager, localServer, remoteServer);
 
-        Injector injector = Guice.createInjector(new LimeWireCommonModule(), new LimeWireNetModule(), new LimeWireHttpModule(), new AbstractModule() {
-            protected void configure() {
-                bind(ProxySettings.class).to(ProxySettingsStub.class);
-                bind(SocketBindingSettings.class).to(EmptySocketBindingSettings.class);
-                bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
-            }
-        });        
-
         afterSetup();
-    }
-    
-    @Singleton
-    private static class BackgroundTimerProvider extends AbstractLazySingletonProvider<ScheduledExecutorService> {
-        protected ScheduledExecutorService createObject() {
-            return new SimpleTimer(true);
-        }
     }
 
     @Override
@@ -230,41 +199,92 @@ abstract class AbstractCommunicationSupport extends BaseTestCase {
 
     protected final String getPrivateKey() {
         if (privateKey == null) {
-            String publicKey = getPublicKey();
-            try {
-                Thread.sleep(100);
-            } catch (Exception e) {
-                //
-                // Not crucial, but would like to see the error
-                //
-                e.printStackTrace();
-            }
-            Map<String, String> args = new HashMap<String, String>();
-            args.put(LWSDispatcherSupport.Parameters.PUBLIC, publicKey);
-            //
-            // We'll try this TIMES_TO_TRY_FOR_PRIVATE_KEY times
-            // See the comment at TIMES_TO_TRY_FOR_PRIVATE_KEY for why.
-            //
-            for (int i=0; i<TIMES_TO_TRY_FOR_PRIVATE_KEY; i++) {
-                privateKey = sendMessageFromClientToRemoteServer(LWSDispatcherSupport.Commands.GIVE_KEY, args);
-                if (LWSServerUtil.isValidPrivateKey(privateKey)) break;
-                try {
-                    Thread.sleep(SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES);
-                } catch (InterruptedException e) {
-                    // ignore
-                }
-            }
+            requestPrivateAndSharedKeys();
         }
         return privateKey;
     }
+    
+    protected final String getSharedKey() {
+        if (sharedKey == null) {
+            requestPrivateAndSharedKeys();
+        }
+        return sharedKey;
+    }    
+    
+    protected final static class KeyPair {
+        
+        private final String publicKey;
+        private final String sharedKey;
+        private final boolean isValid;
+        
+        private KeyPair(String publicKey, String sharedKey, boolean isValid) {
+            this.publicKey = publicKey;
+            this.sharedKey = sharedKey;
+            this.isValid = isValid;
+        }
+        
+        protected final String getPublicKey() {
+            return publicKey;
+        }
+        
+        protected final String getSharedKey() {
+            return sharedKey;
+        }
+        
+        /**
+         * Returns whether this request was valid or not.
+         * 
+         * @return whether this request was valid or not.
+         */
+        protected final boolean isValid() {
+            return isValid;
+        }
+        
+        public final String toString() {
+            return "<publicKey=" + getPublicKey() + ",sharedKey=" + getSharedKey() + ",isValid=" + isValid() + ">";
+        }
+    }
 
-    protected final String getPublicKey() {
-        return sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.START_COM, NULL_ARGS);
+    protected final KeyPair getPublicAndSharedKeys() {
+        String res = sendMessageFromWebpageToClient(LWSDispatcherSupport.Commands.START_COM, NULL_ARGS);
+        String parts[] = res.split(" ");
+        if (parts.length < 2) {
+            return new KeyPair(null, null, false);
+        }
+        return new KeyPair(parts[0], sharedKey = parts[1], true);
     }
 
     // -----------------------------------------------------------
     // Private
     // -----------------------------------------------------------
+    
+    private void requestPrivateAndSharedKeys() {
+        KeyPair kp = getPublicAndSharedKeys();
+        String publicKey = kp.getPublicKey();
+        try {
+            Thread.sleep(100);
+        } catch (Exception e) {
+            //
+            // Not crucial, but would like to see the error
+            //
+            e.printStackTrace();
+        }
+        Map<String, String> args = new HashMap<String, String>();
+        args.put(LWSDispatcherSupport.Parameters.PUBLIC, publicKey);
+        //
+        // We'll try this TIMES_TO_TRY_FOR_PRIVATE_KEY times
+        // See the comment at TIMES_TO_TRY_FOR_PRIVATE_KEY for why.
+        //
+        for (int i=0; i<TIMES_TO_TRY_FOR_PRIVATE_KEY; i++) {
+            privateKey = sendMessageFromClientToRemoteServer(LWSDispatcherSupport.Commands.GIVE_KEY, args);
+            if (LWSServerUtil.isValidPrivateKey(privateKey)) break;
+            try {
+                Thread.sleep(SLEEP_TIME_BETWEEN_PRIVATE_KEY_TRIES);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }        
+    }      
     
     private String unwrap(String[] ss) {
         StringBuffer sb = new StringBuffer("{ ");

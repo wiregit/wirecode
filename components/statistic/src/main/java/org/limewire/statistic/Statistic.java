@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.limewire.collection.Buffer;
+import org.limewire.inspection.Inspectable;
 
 /**
  * Defines an interface for generalized access to store and summarize numeric
  * data.
  */
-public interface Statistic {
+public interface Statistic extends Inspectable {
 
 	/**
 	 * Constant for the number of records to hold for each statistic.
@@ -95,14 +96,4 @@ public interface Statistic {
 	void storeCurrentStat();
     
     public void storeStats(Writer writer) throws IOException;
-
-	/**
-	 * Sets whether or not to write this <tt>Statistic</tt> out to a file.
-	 * If it does write to a file, the file name is automatically generated
-	 * from the name of the class, which should easily label the data.
-	 * All data is written in comma-delimited format.
-	 *
-	 * @param write whether or not to write the data to a file
-	 */
-	void setWriteStatToFile(boolean write);
 }

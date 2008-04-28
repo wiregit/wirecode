@@ -7,7 +7,7 @@ import java.util.Collections;
 
 import junit.framework.Test;
 
-import org.limewire.collection.NameValue;
+import org.limewire.util.NameValue;
 
 import com.google.inject.Injector;
 import com.limegroup.gnutella.ForMeReplyHandler;

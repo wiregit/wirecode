@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -27,11 +28,14 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.SystemUtils;
+import org.limewire.util.Version;
+import org.limewire.util.VersionFormatException;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -63,7 +67,6 @@ import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
-import com.limegroup.gnutella.statistics.HTTPStat;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
@@ -274,6 +277,9 @@ public class ConnectionManagerImpl implements ConnectionManager {
     /** List of event listeners for ConnectionLifeCycleEvents. */
     private final CopyOnWriteArrayList<ConnectionLifecycleListener> connectionLifeCycleListeners = 
         new CopyOnWriteArrayList<ConnectionLifecycleListener>();
+    
+    /** The last version of LimeWire we'll connect to */
+    private final Version lastGoodVersion;
 
     private final NetworkManager networkManager;
     private final Provider<HostCatcher> hostCatcher;
@@ -288,8 +294,8 @@ public class ConnectionManagerImpl implements ConnectionManager {
     private final Provider<NodeAssigner> nodeAssigner;
     private final Provider<IPFilter> ipFilter;
     private final ConnectionCheckerManager connectionCheckerManager;
-
     private final PingRequestFactory pingRequestFactory;
+    private final NetworkInstanceUtils networkInstanceUtils;
     
     @Inject
     public ConnectionManagerImpl(NetworkManager networkManager,
@@ -306,7 +312,8 @@ public class ConnectionManagerImpl implements ConnectionManager {
             Provider<NodeAssigner> nodeAssigner, 
              Provider<IPFilter> ipFilter,
             ConnectionCheckerManager connectionCheckerManager,
-            PingRequestFactory pingRequestFactory) {
+            PingRequestFactory pingRequestFactory, 
+            NetworkInstanceUtils networkInstanceUtils) {
         this.networkManager = networkManager;
         this.hostCatcher = hostCatcher;
         this.connectionDispatcher = connectionDispatcher;
@@ -321,6 +328,13 @@ public class ConnectionManagerImpl implements ConnectionManager {
         this.ipFilter = ipFilter;
         this.connectionCheckerManager = connectionCheckerManager;
         this.pingRequestFactory = pingRequestFactory;
+        this.networkInstanceUtils = networkInstanceUtils;
+        
+        Version v = null;
+        try {
+            v = new Version("4.16.6");
+        } catch (VersionFormatException impossible){};
+        lastGoodVersion = v;
     }
 
 
@@ -387,15 +401,10 @@ public class ConnectionManagerImpl implements ConnectionManager {
 
 
     public void acceptConnection(String word, Socket socket) {
-        if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) 
-            HTTPStat.GNUTELLA_REQUESTS.incrementStat();
-        else if (ConnectionSettings.CONNECT_STRING.isDefault() &&
-                word.equals("LIMEWIRE") ) 
-            HTTPStat.GNUTELLA_LIMEWIRE_REQUESTS.incrementStat();
-        else
-            return; //drop it.
-        
-        acceptConnection(socket);
+        if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)
+                || (ConnectionSettings.CONNECT_STRING.isDefault() && word.equals("LIMEWIRE"))) {
+            acceptConnection(socket);
+        }
     }
     
     /**
@@ -450,7 +459,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
      *  mode disabled AND we are not exclusively a DHT node.
      */
     public boolean isSupernodeCapable() {
-        return !NetworkUtils.isPrivate() &&
+        return !networkInstanceUtils.isPrivate() &&
                UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() &&
                !isShieldedLeaf() &&
                !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() &&
@@ -1053,14 +1062,16 @@ public class ConnectionManagerImpl implements ConnectionManager {
      *  
      *  Default access for testing.
      */
-    static boolean allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
-        if(hr.isLimeWire())
-            return true;
+    boolean allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
+        if(hr.isLimeWire()) {
+            return hr.getLimeVersion() == null ||
+            hr.getLimeVersion().compareTo(lastGoodVersion) >= 0;
+        }
         
         String userAgent = hr.getUserAgent();
         if(userAgent == null)
             return false;
-        userAgent = userAgent.toLowerCase();
+        userAgent = userAgent.toLowerCase(Locale.US);
         String[] bad = ConnectionSettings.EVIL_HOSTS.getValue();
         for(int i = 0; i < bad.length; i++)
             if(userAgent.indexOf(bad[i]) != -1)
@@ -1086,7 +1097,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
         String userAgent = hr.getUserAgent();
         if(userAgent == null)
             return false;
-        userAgent = userAgent.toLowerCase();
+        userAgent = userAgent.toLowerCase(Locale.US);
         String[] bad = ConnectionSettings.EVIL_HOSTS.getValue();
         for(int i = 0; i < bad.length; i++)
             if(userAgent.indexOf(bad[i]) != -1)
@@ -1197,7 +1208,7 @@ public class ConnectionManagerImpl implements ConnectionManager {
      *  TODO: should the set of pushproxy UPs be cached and updated as
      *  connections are killed and created?
      */
-    public Set<? extends Connectable> getPushProxies() {
+    public Set<Connectable> getPushProxies() {
         if (isShieldedLeaf()) {
             // this should be fast since leaves don't maintain a lot of
             // connections and the test for proxy support is cached boolean
@@ -1210,9 +1221,9 @@ public class ConnectionManagerImpl implements ConnectionManager {
                     proxies.add(currMC);
             }
             return proxies;
+        } else {
+            return Collections.emptySet();
         }
-
-        return Collections.emptySet();
     }
 
     /**

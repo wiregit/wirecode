@@ -24,6 +24,7 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.EmptyResponder;
@@ -116,7 +117,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"127.*.*.*"});
-        ConnectionSettings.PORT.setValue(PORT);
+        NetworkSettings.PORT.setValue(PORT);
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         // get the resource file for com/limegroup/gnutella
         File berkeley = 
@@ -139,7 +140,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
     @Override
 	public void setUp() throws Exception {
         setSettings();
-        assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
+        assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
 
         Injector injector = LimeTestUtils.createInjector();
         lifecycleManager = injector.getInstance(LifecycleManager.class);
@@ -152,7 +153,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         lifecycleManager.start();
         connectionServices.connect();	
 		connect();
-        assertEquals("unexpected port", PORT, ConnectionSettings.PORT.getValue());
+        assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
 	}
 
     @Override

@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -15,6 +16,7 @@ import junit.framework.Test;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.io.Connectable;
+import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
@@ -33,7 +35,7 @@ import com.limegroup.gnutella.filters.XMLDocFilterTest;
 import com.limegroup.gnutella.filters.IPFilter.IPFilterCallback;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.GGEPKeys;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.settings.MessageSettings;
@@ -437,7 +439,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    GGEP info = new GGEP(true);
 	    // locations: 1.2.3.4:1, 4.3.2.1:2
 	    byte[] alts = { 1, 2, 3, 4, 1, 0, 4, 3, 2, 1, 2, 0 };
-	    info.put(GGEP.GGEP_HEADER_ALTS, alts);
+	    info.put(GGEPKeys.GGEP_HEADER_ALTS, alts);
 	    info.write(baos);
 	    
 	    // write out closing null.
@@ -472,9 +474,9 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         GGEP info = new GGEP(true);
         // locations: 1.2.3.4:1, 4.3.2.1:2, 2.3.4.5:6, 5.4.3.2:7, 2.3.3.2:8
         byte[] alts = { 1, 2, 3, 4, 1, 0, 4, 3, 2, 1, 2, 0, 2, 3, 4, 5, 6, 0, 5, 4, 3, 2, 7, 0, 2, 3, 3, 2, 8, 0 };
-        info.put(GGEP.GGEP_HEADER_ALTS, alts);
+        info.put(GGEPKeys.GGEP_HEADER_ALTS, alts);
         byte[] tlsIdx = { (byte)0xC8 }; // 11001
-        info.put(GGEP.GGEP_HEADER_ALTS_TLS, tlsIdx );        
+        info.put(GGEPKeys.GGEP_HEADER_ALTS_TLS, tlsIdx );        
         info.write(baos);
         
         // write out closing null.
@@ -528,7 +530,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    GGEP info = new GGEP(true);
 	    long time = System.currentTimeMillis();
-	    info.put(GGEP.GGEP_HEADER_CREATE_TIME, time / 1000);
+	    info.put(GGEPKeys.GGEP_HEADER_CREATE_TIME, time / 1000);
 	    info.write(baos);
 	    
 	    // write out closing null.
@@ -561,10 +563,10 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    
 	    GGEP info = new GGEP(true);
 	    long time = System.currentTimeMillis();
-	    info.put(GGEP.GGEP_HEADER_CREATE_TIME, time / 1000);
+	    info.put(GGEPKeys.GGEP_HEADER_CREATE_TIME, time / 1000);
 	    // locations: 1.2.3.4:1, 4.3.2.1:2
 	    byte[] alts = { 1, 2, 3, 4, 1, 0, 4, 3, 2, 1, 2, 0 };
-	    info.put(GGEP.GGEP_HEADER_ALTS, alts);
+	    info.put(GGEPKeys.GGEP_HEADER_ALTS, alts);
 	    info.write(baos);
 	    
 	    
@@ -609,7 +611,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
 	    GGEP info = new GGEP(true);
 	    // locations: 1.2.3.4:1, 4.3.2.1:2
 	    byte[] alts = { 1, 2, 3, 4, 1, 0, 4, 3, 2, 1, 2, 0 };
-	    info.put(GGEP.GGEP_HEADER_ALTS, alts);
+	    info.put(GGEPKeys.GGEP_HEADER_ALTS, alts);
 	    info.write(baos);
 	    
 	    baos.write((byte)0x1c);
@@ -861,7 +863,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         int firstNull = 8;
         while(data[firstNull++] != 0x0);
         GGEP g = new GGEP(data, firstNull);
-        assertEquals(Constants.MAX_FILE_SIZE, g.getLong(GGEP.GGEP_HEADER_LARGE_FILE));
+        assertEquals(Constants.MAX_FILE_SIZE, g.getLong(GGEPKeys.GGEP_HEADER_LARGE_FILE));
         
         // if the file is too large, we do not construct
         try {
@@ -871,7 +873,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         
         // we don't parse responses from network either
         g = new GGEP(true);
-        g.put(GGEP.GGEP_HEADER_LARGE_FILE,Constants.MAX_FILE_SIZE + 1);
+        g.put(GGEPKeys.GGEP_HEADER_LARGE_FILE,Constants.MAX_FILE_SIZE + 1);
         baos = new ByteArrayOutputStream();
         baos.write(data,0, firstNull);
         g.write(baos);
@@ -1013,6 +1015,15 @@ public final class ResponseTest extends com.limegroup.gnutella.util.LimeTestCase
         // go through the data, make sure its in HUGE
         String s = StringUtils.getASCIIString(data);
         assertTrue(s.toLowerCase().contains("ttroot"));
+    }
+    
+    public void testIsMetaFileWithAllLocales() throws Exception {
+        for (Locale locale : Locale.getAvailableLocales()) {
+            Locale.setDefault(locale);
+            Response response = new ResponseImpl(100, 100, "hello world.torrent", "hello world.torrent".getBytes("UTF-8").length,
+                    null, null, null, 5000, null, null, false);
+            assertTrue("Failed for locale: " + locale, response.isMetaFile());
+        }
     }
 
     private void assertResponseParsingFails(Response r) throws Exception {

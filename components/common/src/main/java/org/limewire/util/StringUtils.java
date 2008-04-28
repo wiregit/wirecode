@@ -36,32 +36,35 @@ public class StringUtils {
         COLLATOR = later;
     }
 
-    
-    /** Returns true if input contains the given pattern, which may contain the
+    /**
+     * Returns true if input contains the given pattern, which may contain the
      *  wildcard character '*'.  TODO: need more formal definition.  Examples:
      *
      *  <pre>
-     *  StringUtils.contains("", "") ==> true
-     *  StringUtils.contains("abc", "") ==> true
-     *  StringUtils.contains("abc", "b") ==> true
-     *  StringUtils.contains("abc", "d") ==> false
-     *  StringUtils.contains("abcd", "a*d") ==> true
-     *  StringUtils.contains("abcd", "*a**d*") ==> true
-     *  StringUtils.contains("abcd", "d*a") ==> false
+     *  StringUtils.contains(&quot;&quot;, &quot;&quot;) ==&gt; true
+     *  StringUtils.contains(&quot;abc&quot;, &quot;&quot;) ==&gt; true
+     *  StringUtils.contains(&quot;abc&quot;, &quot;b&quot;) ==&gt; true
+     *  StringUtils.contains(&quot;abc&quot;, &quot;d&quot;) ==&gt; false
+     *  StringUtils.contains(&quot;abcd&quot;, &quot;a*d&quot;) ==&gt; true
+     *  StringUtils.contains(&quot;abcd&quot;, &quot;*a**d*&quot;) ==&gt; true
+     *  StringUtils.contains(&quot;abcd&quot;, &quot;d*a&quot;) ==&gt; false
      *  </pre> 
      */
     public static final boolean contains(String input, String pattern) {
         return contains(input, pattern, false);
     }
 
-    /** Exactly like contains(input, pattern), but case is ignored if
-     *  ignoreCase==true. */
-    public static final boolean contains(String input, String pattern,
-                                         boolean ignoreCase) {
-        //More efficient algorithms are possible, e.g. a modified version of the
+    /**
+     * Exactly like contains(input, pattern), but case is ignored if
+     * ignoreCase==true.
+     */
+    public static final boolean contains(String input, String pattern, boolean ignoreCase) {
+        // More efficient algorithms are possible, e.g. a modified version of
+        // the
         //Rabin-Karp algorithm, but they are unlikely to be faster with such
         //short strings.  Also, some contant time factors could be shaved by
-        //combining the second FOR loop below with the subset(..) call, but that
+        // combining the second FOR loop below with the subset(..) call, but
+        // that
         //just isn't important.  The important thing is to avoid needless
         //allocations.
 
@@ -83,9 +86,7 @@ public class StringUtils {
             }
 
             //2. Match pattern[i..j-1] against input[last...].
-            int k=subset(pattern, i, j,
-                         input, last,
-                         ignoreCase);
+            int k = subset(pattern, i, j, input, last, ignoreCase);
             if (k<0)
                 return false;
 
@@ -104,36 +105,38 @@ public class StringUtils {
         char [] inputChars = input.toCharArray();
         Arrays.sort(inputChars);
         for(int i=0; i<chars.length; i++) {
-            if(Arrays.binarySearch(inputChars, chars[i]) >= 0) return true;
+            if (Arrays.binarySearch(inputChars, chars[i]) >= 0)
+                return true;
         }
         return false;
     }
 
     /** 
      * @requires TODO3: fill this in
-     * @effects returns the the smallest i>=bigStart
-     *  s.t. little[littleStart...littleStop-1] is a prefix of big[i...] 
-     *  or -1 if no such i exists.  If ignoreCase==false, case doesn't matter
-     *  when comparing characters.
+     * @effects returns the the smallest i>=bigStart s.t.
+     *          little[littleStart...littleStop-1] is a prefix of big[i...] or
+     *          -1 if no such i exists. If ignoreCase==false, case doesn't
+     *          matter when comparing characters.
      */
-    private static final int subset(String little, int littleStart, int littleStop,
-                                    String big, int bigStart,
-                                    boolean ignoreCase) {
+    private static final int subset(String little, int littleStart, int littleStop, String big,
+            int bigStart, boolean ignoreCase) {
         //Equivalent to
-        // return big.indexOf(little.substring(littleStart, littleStop), bigStart);
+        // return big.indexOf(little.substring(littleStart, littleStop),
+        // bigStart);
         //but without an allocation.
         //Note special case for ignoreCase below.
         
         if (ignoreCase) {
             final int n=big.length()-(littleStop-littleStart)+1;
-        outerLoop:
-            for (int i=bigStart; i<n; i++) {
-                //Check if little[littleStart...littleStop-1] matches with shift i
+            outerLoop: for (int i = bigStart; i < n; i++) {
+                // Check if little[littleStart...littleStop-1] matches with
+                // shift i
                 final int n2=littleStop-littleStart;
                 for (int j=0 ; j<n2 ; j++) {
                     char c1=big.charAt(i+j); 
                     char c2=little.charAt(littleStart+j);
-                    if (c1!=c2 && c1!=toOtherCase(c2))  //Ignore case. See below.
+                    if (c1 != c2 && c1 != toOtherCase(c2)) // Ignore case. See
+                                                            // below.
                         continue outerLoop;
                 }            
                 return i;
@@ -141,8 +144,7 @@ public class StringUtils {
             return -1;
         } else {
             final int n=big.length()-(littleStop-littleStart)+1;
-        outerLoop:
-            for (int i=bigStart; i<n; i++) {
+            outerLoop: for (int i = bigStart; i < n; i++) {
                 final int n2=littleStop-littleStart;
                 for (int j=0 ; j<n2 ; j++) {
                     char c1=big.charAt(i+j); 
@@ -156,10 +158,11 @@ public class StringUtils {
         }
     }
 
-    /** If c is a lower case ASCII character, returns Character.toUpperCase(c).
-     *  Else if c is an upper case ASCII character, returns Character.toLowerCase(c),
-     *  Else returns c.
-     *  Note that this is <b>not internationalized</b>; but it is fast.
+    /**
+     * If c is a lower case ASCII character, returns Character.toUpperCase(c).
+     * Else if c is an upper case ASCII character, returns
+     * Character.toLowerCase(c), Else returns c. Note that this is <b>not
+     * internationalized</b>; but it is fast.
      */
     public static final char toOtherCase(char c) {
         int i = c; 
@@ -177,7 +180,8 @@ public class StringUtils {
             return c;
         else if (i<=z)    //lower-case
             return (char)(i-SHIFT);
-        else              //non alphabetic
+        else
+            // non alphabetic
             return c;            
     }
 
@@ -190,12 +194,13 @@ public class StringUtils {
 
     /** 
      *  Returns the tokens of s delimited by the given delimiter, without
-     *  returning the delimiter.  Repeated sequences of delimiters are treated
-     *  as one. Examples:
+     * returning the delimiter. Repeated sequences of delimiters are treated as
+     * one. Examples:
+     * 
      *  <pre>
-     *    split("a//b/ c /","/")=={"a","b"," c "}
-     *    split("a b", "/")=={"a b"}.
-     *    split("///", "/")=={}.
+     *    split(&quot;a//b/ c /&quot;,&quot;/&quot;)=={&quot;a&quot;,&quot;b&quot;,&quot; c &quot;}
+     *    split(&quot;a b&quot;, &quot;/&quot;)=={&quot;a b&quot;}.
+     *    split(&quot;///&quot;, &quot;/&quot;)=={}.
      *  </pre>
      *
      * <b>Note that whitespace is preserved if it is not part of the delimiter.</b>
@@ -226,14 +231,14 @@ public class StringUtils {
      * Examples:
      *
     *  <pre>
-     *    split("a//b/ c /","/")=={"a","","b"," c ", ""}
-     *    split("a b", "/")=={"a b"}.
-     *    split("///", "/")=={"","","",""}.
+     *    split(&quot;a//b/ c /&quot;,&quot;/&quot;)=={&quot;a&quot;,&quot;&quot;,&quot;b&quot;,&quot; c &quot;, &quot;&quot;}
+     *    split(&quot;a b&quot;, &quot;/&quot;)=={&quot;a b&quot;}.
+     *    split(&quot;///&quot;, &quot;/&quot;)=={&quot;&quot;,&quot;&quot;,&quot;&quot;,&quot;&quot;}.
      *  </pre>
      *
-     * @return an array A s.t. s.equals(A[0]+d0+A[1]+d1+...+A[N]), where 
-     *  for all dI, dI.size()==1 && delimiters.indexOf(dI)>=0; and for
-     *  all c in A[i], delimiters.indexOf(c)<0
+     * @return an array A s.t. s.equals(A[0]+d0+A[1]+d1+...+A[N]), where for all
+     *         dI, dI.size()==1 && delimiters.indexOf(dI)>=0; and for all c in
+     *         A[i], delimiters.indexOf(c)<0
      */
     public static String[] splitNoCoalesce(String s, String delimiters) {
         //Tokenize s based on delimiters, adding to buffer.
@@ -264,10 +269,9 @@ public class StringUtils {
     }
 
     /**
-     * This method will compare the two strings using 
-     * full decomposition and only look at primary differences
-     * The comparision will ignore case as well as  
-     * differences like FULLWIDTH vs HALFWIDTH
+     * This method will compare the two strings using full decomposition and
+     * only look at primary differences The comparision will ignore case as well
+     * as differences like FULLWIDTH vs HALFWIDTH
      */
     public static int compareFullPrimary(String s1, String s2) {
         return COLLATOR.compare(s1, s2);
@@ -275,6 +279,7 @@ public class StringUtils {
 
     /** 
      * Returns true iff s starts with prefix, ignoring case.
+     * 
      * @return true iff s.toUpperCase().startsWith(prefix.toUpperCase())
      */
     public static boolean startsWithIgnoreCase(String s, String prefix) {
@@ -333,17 +338,17 @@ public class StringUtils {
 
     /**
      * Helper method to obtain the starting index of a substring within another
-     * string, ignoring their case.  This method is expensive because it has
-     * to set each character of each string to lower case before doing the
+     * string, ignoring their case. This method is expensive because it has to
+     * set each character of each string to lower case before doing the
      * comparison.  Uses the default <code>Locale</code> for case conversion.
      *
      * @param str the string in which to search for the <tt>substring</tt>
      *  argument
      * @param substring the substring to search for in <tt>str</tt>
      * @return if the <tt>substring</tt> argument occurs as a substring within
-     *  <tt>str</tt>, then the index of the first character of the first such
-     *  substring is returned; if it does not occur as a substring, -1 is
-     *  returned
+     *         <tt>str</tt>, then the index of the first character of the
+     *         first such substring is returned; if it does not occur as a
+     *         substring, -1 is returned
      */
     public static int indexOfIgnoreCase(String str, String substring) {
     	return indexOfIgnoreCase(str, substring, Locale.getDefault());
@@ -351,20 +356,21 @@ public class StringUtils {
 
     /**
      * Helper method to obtain the starting index of a substring within another
-     * string, ignoring their case.  This method is expensive because it has  
-     * to set each character of each string to lower case before doing the 
+     * string, ignoring their case. This method is expensive because it has to
+     * set each character of each string to lower case before doing the
      * comparison.
      * 
      * @param str the string in which to search for the <tt>substring</tt>
      *  argument
      * @param substring the substring to search for in <tt>str</tt>
-     * @param locale the <code>Locale</code> to use when converting the
-     *  case of <code>str</code> and <code>substring</code>.  This is necessary because
-     *  case conversion is <code>Locale</code> specific.
+     * @param locale the <code>Locale</code> to use when converting the case
+     *        of <code>str</code> and <code>substring</code>. This is
+     *        necessary because case conversion is <code>Locale</code>
+     *        specific.
      * @return if the <tt>substring</tt> argument occurs as a substring within  
-     *  <tt>str</tt>, then the index of the first character of the first such  
-     *  substring is returned; if it does not occur as a substring, -1 is 
-     *  returned
+     *         <tt>str</tt>, then the index of the first character of the
+     *         first such substring is returned; if it does not occur as a
+     *         substring, -1 is returned
      */
     public static int indexOfIgnoreCase(String str, String substring, Locale locale) {
     	// Look for the index after the expensive conversion to lower case.
@@ -372,16 +378,16 @@ public class StringUtils {
     }
 
 	/**
-     * Utility wrapper for getting a String object out of
-     * byte [] using the ascii encoding.
+     * Utility wrapper for getting a String object out of byte [] using the
+     * ascii encoding.
      */
     public static String getASCIIString(byte [] bytes) {
     	return getEncodedString(bytes, "ISO-8859-1");
     }
     
     /**
-     * Utility wrapper for getting a String object out of
-     * byte [] using the UTF-8 encoding.
+     * Utility wrapper for getting a String object out of byte [] using the
+     * UTF-8 encoding.
      */
     public static String getUTF8String(byte [] bytes) {
     	return getEncodedString(bytes, "UTF-8");
@@ -403,8 +409,8 @@ public class StringUtils {
 	 * delimiter, without Examples:
 	 * 
 	 * <pre>
-	 *     explode({ "a", "b" }, " ") == "a b"
-	 *     explode({ "a", "b" }, "") == "ab"
+     *     explode({ &quot;a&quot;, &quot;b&quot; }, &quot; &quot;) == &quot;a b&quot;
+     *     explode({ &quot;a&quot;, &quot;b&quot; }, &quot;&quot;) == &quot;ab&quot;
 	 * </pre>
 	 */
     public static String explode(String[] array, String delimeter) {
@@ -437,4 +443,35 @@ public class StringUtils {
     }
     
     //Unit tests: tests/com/limegroup/gnutella/util/StringUtils
+
+    /**
+     * A wrapped version of {@link String#getBytes(String)} that changes the
+     * unlikely encoding exception into a runtime exception. Returns empty array
+     * if the passed in string is null.
+     */
+    public static byte[] toUTF8Bytes(String string) {
+        if (string == null)
+            return new byte[0];
+        try {
+            return string.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException("UTF-8 not supported?", ex);
+        }
+    }
+
+    /**
+     * A wrapped version of {@link String#String(byte[], String)} that changes
+     * the unlikely encoding exception into a runtime exception. Returns null if
+     * the passed in array is null.
+     */
+    public static String toStringFromUTF8Bytes(byte[] bytes) {
+        if (bytes == null)
+            return null;
+        try {
+            return new String(bytes, "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException("UTF-8 not supported?", ex);
+        }
+    }
+
 }

@@ -10,11 +10,8 @@
 	<import file="../common/build-macros.xml" />
 	<import file="../common/build.xml" />
     <import file="../net/build.xml"/>
-	<import file="../geocode/build.xml"/>
-	<import file="../http/build.xml"/>
-	<import file="../security/build.xml"/>
 
-    <target name="initialize" depends="lw-common.initialize, lw-net.initialize, lw-http.initialize, lw-geocode.initialize, lw-security.initialize" 
+    <target name="initialize" depends="lw-common.initialize, lw-net.initialize, lw-geocode.initialize" 
 	    unless="initialized.promotion">
 		<do.setup-properties component="promotion">
 			<src-classpath>
@@ -30,7 +27,6 @@
       </src-classpath>
       <build-tests-classpath>
         <path refid="tests.limewire.components.net.classpath"/>
-      	<path refid="tests.limewire.components.common.classpath"/>
       </build-tests-classpath>
     </do.setup-properties>
 	  </target>

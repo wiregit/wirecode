@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.http;
 
-import org.limewire.rudp.UDPConnection;
+import org.limewire.rudp.RUDPUtils;
 
 /**
  * This class defines a set of constants for use in HTTP messages.
@@ -76,5 +76,5 @@ public final class HTTPConstants {
 	public static final double PUSH_LOCS_VERSION=0.1;
 	
 	//this is the same as the version of the Firewall-to-Firewall transfer
-	public static final double FWT_TRANSFER_VERSION=UDPConnection.VERSION;  
+	public static final double FWT_TRANSFER_VERSION=RUDPUtils.VERSION;  
 }

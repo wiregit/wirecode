@@ -3,12 +3,11 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-import org.limewire.io.IPPortCombo;
+import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 import org.limewire.util.ByteOrder;
 import org.limewire.util.StringUtils;
@@ -257,14 +256,7 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
      * @return 6-byte value representing the address and port.
      */
     private static byte[] packIPAddress(InetAddress addr, int port) {
-        try {
-            // i do it during construction....
-            IPPortCombo combo = 
-                new IPPortCombo(addr.getHostAddress(), port);
-            return combo.toBytes();
-        } catch (UnknownHostException uhe) {
-            throw new IllegalArgumentException(uhe.getMessage());
-        }
+        return NetworkUtils.getBytes(addr, port, java.nio.ByteOrder.LITTLE_ENDIAN);
     }
 
 }

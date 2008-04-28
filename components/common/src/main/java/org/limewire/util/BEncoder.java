@@ -28,8 +28,10 @@ import java.util.TreeMap;
  */
 public class BEncoder {
 
-    /** Identifies a bencoded number. */
+    /** Identifies a bencoded real number. */
     public static final byte I;
+    /** Identifies a bencoded rational number. */
+    public static final byte R;
     /** Identifies a bencoded dictionary. */
     public static final byte D;
     /** Identifies a bencoded list. */
@@ -54,6 +56,7 @@ public class BEncoder {
         byte colon = 0;
         byte t = 0;
         byte f = 0;
+        byte r = 0;
 
         try {
 
@@ -64,6 +67,7 @@ public class BEncoder {
             colon = ":".getBytes(ASCII)[0];
             t = "t".getBytes(ASCII)[0];
             f = "f".getBytes(ASCII)[0];
+            r = "r".getBytes(ASCII)[0];
 
         } catch (UnsupportedEncodingException impossible) {
 
@@ -77,6 +81,7 @@ public class BEncoder {
         E = e;
         TRUE = t;
         FALSE = f;
+        R = r;
     }
     
     private final boolean fail, bool;
@@ -125,6 +130,23 @@ public class BEncoder {
     public void encodeInt(Number n) throws IOException {
         String numerals = String.valueOf(n.longValue());
         output.write(I);
+        output.write(numerals.getBytes(ASCII));
+        output.write(E);
+    }
+    
+
+    /**
+     * Bencodes the given Rational Number to the given OutputStream.
+     * 
+     * Writes the base 10 digits of the number's internal memory representation
+     * between the letters "r" and "e".
+     * 
+     * @param output An OutputStream for this method to write bencoded data to
+     * @param n      The number to bencode and write
+     */
+    public void encodeRational(Number n) throws IOException {
+        String numerals = String.valueOf(Double.doubleToLongBits(n.doubleValue()));
+        output.write(R);
         output.write(numerals.getBytes(ASCII));
         output.write(E);
     }
@@ -201,8 +223,12 @@ public class BEncoder {
     		encodeDict((Map)object);
     	else if (object instanceof Iterable<?>)
     		encodeList((Iterable<?>)object);
-    	else if (object instanceof Number)
-    		encodeInt((Number)object);
+    	else if (object instanceof Number) {
+    	    if (object instanceof Double || object instanceof Float)
+    	        encodeRational((Number)object);
+    	    else
+    	        encodeInt((Number)object);
+    	}
     	else if (object instanceof String)
     		encodeByteArray(((String)object).getBytes(encoding));
     	else if (object instanceof byte[])

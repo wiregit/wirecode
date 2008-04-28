@@ -37,6 +37,8 @@ public abstract class Token<T> {
     public static final int DICTIONARY = 3;
     /** A boolean Token */
     public static final int BOOLEAN = 4;
+    /** A rational Token */
+    public static final int RATIONAL = 5;
 
     /** The normal ACSII text encoding to use in bencoding for BitTorrent. */
     protected static final String ASCII = "ISO-8859-1";
@@ -158,6 +160,8 @@ public abstract class Token<T> {
         
         if (b[0] == BEncoder.I)
             return new BELong(chan);
+        if (b[0] == BEncoder.R)
+            return new BERational(chan);
         else if (b[0] == BEncoder.D)
             return new BEDictionary(chan);
         else if (b[0] == BEncoder.L)

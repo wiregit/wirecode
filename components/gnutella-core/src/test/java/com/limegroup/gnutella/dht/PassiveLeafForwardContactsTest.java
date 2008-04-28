@@ -2,7 +2,7 @@ package com.limegroup.gnutella.dht;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -11,14 +11,12 @@ import java.util.Set;
 import junit.framework.Test;
 
 import org.limewire.mojito.MojitoDHT;
-import org.limewire.mojito.MojitoFactory;
 import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.settings.ContextSettings;
-import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.settings.NetworkSettings;
+import org.limewire.mojito.util.MojitoUtils;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ConnectionManager;
@@ -36,9 +34,10 @@ import com.limegroup.gnutella.handshaking.HeadersFactory;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMImpl;
 import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM.SupportedMessageBlock;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMImpl.SupportedMessageBlock;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -61,8 +60,6 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     private List<MojitoDHT> dhts;
     
-    private int k;
-
     private Injector injector;
 
     private ConnectionManager connectionManager;
@@ -113,21 +110,8 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         
         dhtManager = injector.getInstance(DHTManager.class);
         // Start and bootstrap a bunch of DHT Nodes
-        k = KademliaSettings.REPLICATION_PARAMETER.getValue();
-        dhts = new ArrayList<MojitoDHT>();
-        for (int i = 0; i < 2*k; i++) {
-            MojitoDHT dht = MojitoFactory.createDHT("DHT-" + i);
-            dht.bind(2000 + i);
-            dht.start();
-            
-            if (i > 0) {
-                Thread.sleep(100);
-                dht.bootstrap(dhts.get(i-1).getContactAddress()).get();
-            }
-            
-            dhts.add(dht);
-        }
-        dhts.get(0).bootstrap(dhts.get(1).getContactAddress()).get();
+        dhts = Collections.emptyList();
+        dhts = MojitoUtils.createBootStrappedDHTs(2);
     }
 
     private void doSettings() {
@@ -152,11 +136,11 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
                 new String[] {"127.*.*.*"});
         
-        ConnectionSettings.PORT.setValue(PORT);
+        com.limegroup.gnutella.settings.NetworkSettings.PORT.setValue(PORT);
         ConnectionSettings.FORCED_PORT.setValue(PORT);
         
         assertEquals("unexpected port", PORT, 
-                 ConnectionSettings.PORT.getValue());
+                 com.limegroup.gnutella.settings.NetworkSettings.PORT.getValue());
         
         DHTSettings.DISABLE_DHT_USER.setValue(false);
         DHTSettings.DISABLE_DHT_NETWORK.setValue(false);
@@ -396,7 +380,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
     
     private void addPassiveLeafCapability() {
         CapabilitiesVMFactoryImplStub factory = (CapabilitiesVMFactoryImplStub) injector.getInstance(CapabilitiesVMFactory.class);
-        SupportedMessageBlock messageBlock = new CapabilitiesVM.SupportedMessageBlock(DHTMode.PASSIVE_LEAF.getCapabilityName(), Integer.valueOf(0));
+        SupportedMessageBlock messageBlock = new CapabilitiesVMImpl.SupportedMessageBlock(DHTMode.PASSIVE_LEAF.getCapabilityName(), Integer.valueOf(0));
         factory.addMessageBlock(messageBlock);
     }
 
@@ -411,22 +395,17 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         return c;
     }
     
-    private class NodeAssignerStub extends NodeAssigner {
-        @Inject
-        public NodeAssignerStub() {
-            super(null,null,null,null,null,null,null,null,null);
-        }
+    private class NodeAssignerStub implements NodeAssigner {
 
-        @Override
         public boolean isTooGoodUltrapeerToPassUp() {
             return false;
         }
 
-        @Override
+
         public void start() {
         }
 
-        @Override
+
         public void stop() {
         }
         
