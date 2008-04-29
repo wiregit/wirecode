@@ -8,6 +8,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.LifecycleManager;
@@ -90,7 +91,19 @@ public class SimppManagerTest extends LimeTestCase {
     }
     
     public void createSimppManager() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(SimppDataProvider.class).toInstance(new SimppDataProvider() {
+                    public byte[] getDefaultData() {
+                        return null;
+                    }
+                    public byte[] getOldUpdateResponse() {
+                        return new SimppDataProviderImpl().getOldUpdateResponse();
+                    }
+                });
+            }
+        });
 		capabilitiesVMFactory = injector.getInstance(CapabilitiesVMFactory.class);
 		connectionServices = injector.getInstance(ConnectionServices.class);
 		simppManager = injector.getInstance(SimppManager.class);
