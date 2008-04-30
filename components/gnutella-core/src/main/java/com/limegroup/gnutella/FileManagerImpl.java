@@ -541,17 +541,6 @@ public abstract class FileManagerImpl implements FileManager {
         return (i >= 0 && i < _files.size());
     }
 
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#getURNForFile(java.io.File)
-     */    
-    public synchronized URN getURNForFile(File f) {
-        FileDesc fd = getFileDescForFile(f);
-        if (fd != null) return fd.getSHA1Urn();
-        return null;
-    }
-
-
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#getFileDescForFile(java.io.File)
      */

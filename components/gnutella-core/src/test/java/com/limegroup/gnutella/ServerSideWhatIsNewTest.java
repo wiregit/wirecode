@@ -170,8 +170,8 @@ public class ServerSideWhatIsNewTest
         assertEquals(2, fileManager.getNumFiles());
 
         FileManager fm = fileManager;
-        URN berkeleyURN = fm.getURNForFile(berkeley);
-        URN susheelURN = fm.getURNForFile(susheel);
+        URN berkeleyURN = fm.getFileDescForFile(berkeley).getSHA1Urn();
+        URN susheelURN = fm.getFileDescForFile(susheel).getSHA1Urn();
 
         Map urnToLong =  creationTimeCache.getUrnToTime();
         assertEquals(2, urnToLong.size());
@@ -298,8 +298,8 @@ public class ServerSideWhatIsNewTest
     // fine
     public void testAddSharedFiles() throws Exception {
         FileManager fm = fileManager;
-        URN berkeleyURN = fm.getURNForFile(berkeley);
-        URN susheelURN = fm.getURNForFile(susheel);
+        URN berkeleyURN = fm.getFileDescForFile(berkeley).getSHA1Urn();
+        URN susheelURN = fm.getFileDescForFile(susheel).getSHA1Urn();
 
         tempFile1 = new File("tempFile1.txt");
         tempFile2 = new File("tempFile2.txt");
@@ -346,8 +346,8 @@ public class ServerSideWhatIsNewTest
         fileManager.loadSettingsAndWait(1000);
         assertEquals("Files were not loaded by filemanager", 4, fileManager.getNumFiles());
 
-        URN tempFile1URN = fm.getURNForFile(tempFile1);
-        URN tempFile2URN = fm.getURNForFile(tempFile2);
+        URN tempFile1URN = fm.getFileDescForFile(tempFile1).getSHA1Urn();
+        URN tempFile2URN = fm.getFileDescForFile(tempFile2).getSHA1Urn();
 
         assertEquals(4, urnToLong.size());
         assertNotNull(""+urnToLong, urnToLong.get(berkeleyURN));
@@ -404,7 +404,7 @@ public class ServerSideWhatIsNewTest
         testAddSharedFiles();
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
-        URN tempFile1URN = fm.getURNForFile(tempFile1);
+        URN tempFile1URN = fm.getFileDescForFile(tempFile1).getSHA1Urn();
         Long cTime = ctCache.getCreationTime(tempFile1URN);
 
         FileWriter writer = null;
@@ -442,9 +442,9 @@ public class ServerSideWhatIsNewTest
         assertNotNull(afterChanged);
         assertNotSame(beforeChanged, afterChanged);
         
-        assertNotNull(fm.getURNForFile(tempFile1));
-        assertNotEquals(tempFile1URN, fm.getURNForFile(tempFile1));
-        assertEquals(ctCache.getCreationTime(fm.getURNForFile(tempFile1)),
+        assertNotNull(fm.getFileDescForFile(tempFile1).getSHA1Urn());
+        assertNotEquals(tempFile1URN, fm.getFileDescForFile(tempFile1).getSHA1Urn());
+        assertEquals(ctCache.getCreationTime(fm.getFileDescForFile(tempFile1).getSHA1Urn()),
                      cTime);
 
         // now just send another What Is New query and make sure everything
@@ -488,7 +488,7 @@ public class ServerSideWhatIsNewTest
         testAddSharedFiles();
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
-        URN tempFile1URN = fm.getURNForFile(tempFile1);
+        URN tempFile1URN = fm.getFileDescForFile(tempFile1).getSHA1Urn();
 //        URN tempFile2URN = fm.getURNForFile(tempFile2);
         // we are changing tempFile1 to become tempFile2 - but since we
         // call fileChanged(), then the common URN should get tempFile1's
@@ -525,10 +525,10 @@ public class ServerSideWhatIsNewTest
         FileDesc afterChanged = fm.getFileDescForFile(tempFile1);
         assertNotNull(afterChanged);
         assertNotSame(beforeChanged, afterChanged);
-        assertNotNull(fm.getURNForFile(tempFile1));
-        assertNotEquals(tempFile1URN, fm.getURNForFile(tempFile1));
-        assertEquals(fm.getURNForFile(tempFile1), fm.getURNForFile(tempFile2));
-        assertEquals(ctCache.getCreationTime(fm.getURNForFile(tempFile1)),
+        assertNotNull(fm.getFileDescForFile(tempFile1).getSHA1Urn());
+        assertNotEquals(tempFile1URN, fm.getFileDescForFile(tempFile1).getSHA1Urn());
+        assertEquals(fm.getFileDescForFile(tempFile1).getSHA1Urn(), fm.getFileDescForFile(tempFile2).getSHA1Urn());
+        assertEquals(ctCache.getCreationTime(fm.getFileDescForFile(tempFile1).getSHA1Urn()),
                      cTime);
 
         // now just send another What Is New query and make sure everything
@@ -623,7 +623,7 @@ public class ServerSideWhatIsNewTest
         Thread.sleep(2000);
         assertEquals("num shared files", 1, fileManager.getNumFiles());
 
-        URN susheelURN = fm.getURNForFile(susheel);
+        URN susheelURN = fm.getFileDescForFile(susheel).getSHA1Urn();
         {
             Map urnToLong = creationTimeCache.getUrnToTime(); 
             assertEquals(""+urnToLong, 1, urnToLong.size());
@@ -672,7 +672,7 @@ public class ServerSideWhatIsNewTest
 
         File newFile = new File(_savedDir, "whatever.txt");
         assertTrue(newFile.getAbsolutePath()+" didn't exist", newFile.exists());
-        URN newFileURN = fm.getURNForFile(newFile);
+        URN newFileURN = fm.getFileDescForFile(newFile).getSHA1Urn();
         assertEquals(TestFile.hash(), newFileURN);
         assertEquals(newFileURN.toString(), cTime, ctCache.getCreationTime(newFileURN));
 
@@ -744,7 +744,7 @@ public class ServerSideWhatIsNewTest
 
         File newFile = new File(_savedDir, "anita.txt");
         assertTrue(newFile.exists());
-        URN newFileURN = fm.getURNForFile(newFile);
+        URN newFileURN = fm.getFileDescForFile(newFile).getSHA1Urn();
         assertEquals(cTime[0], ctCache.getCreationTime(newFileURN));
     }
 
@@ -811,27 +811,24 @@ public class ServerSideWhatIsNewTest
             // make sure the installer urns are not in the cache
             {
                 assertTrue(winInstaller.exists());
-                URN installerURN = fm.getURNForFile(winInstaller);
-                assertNull(ctCache.getCreationTime(installerURN));
+                assertNull(fm.getFileDescForFile(winInstaller));
             }
             {
                 assertTrue(winInstaller.exists());
-                URN installerURN = fm.getURNForFile(linInstaller);
-                assertNull(ctCache.getCreationTime(installerURN));
+                assertNull(fm.getFileDescForFile(linInstaller));
             }
             {
                 assertTrue(winInstaller.exists());
-                URN installerURN = fm.getURNForFile(osxInstaller);
-                assertNull(ctCache.getCreationTime(installerURN));
+                assertNull(fm.getFileDescForFile(osxInstaller));
             }
             // make sure berkeley and susheel are in the cache.
             {
                 assertTrue(berkeley.exists());
-                assertNotNull(ctCache.getCreationTime(fm.getURNForFile(berkeley)));
+                assertNotNull(ctCache.getCreationTime(fm.getFileDescForFile(berkeley).getSHA1Urn()));
             }
             {
                 assertTrue(susheel.exists());
-                assertNotNull(ctCache.getCreationTime(fm.getURNForFile(susheel)));
+                assertNotNull(ctCache.getCreationTime(fm.getFileDescForFile(susheel).getSHA1Urn()));
             }
         
         } finally {        

@@ -115,11 +115,6 @@ public interface FileManager {
     public abstract boolean isValidSharedIndex(int i);
 
     /**
-     * Returns the <tt>URN<tt> for the File.  May return null;
-     */
-    public abstract URN getURNForFile(File f);
-
-    /**
      * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt>
      * or null if the file is not shared.
      */
