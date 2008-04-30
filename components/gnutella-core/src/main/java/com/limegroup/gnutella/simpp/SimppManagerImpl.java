@@ -97,7 +97,6 @@ public class SimppManagerImpl implements SimppManager {
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
             SimppDataProvider simppDataProvider) {
-        Thread.dumpStack();
         this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.clock = clock;
         this.applicationServices = applicationServices;
