@@ -97,6 +97,7 @@ public class SimppManagerImpl implements SimppManager {
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             @Named("defaults") Provider<HttpParams> defaultParams,
             SimppDataProvider simppDataProvider) {
+        Thread.dumpStack();
         this.networkUpdateSanityChecker = networkUpdateSanityChecker;
         this.clock = clock;
         this.applicationServices = applicationServices;
@@ -105,7 +106,6 @@ public class SimppManagerImpl implements SimppManager {
         this.backgroundExecutor = backgroundExecutor;
         this.defaultParams = defaultParams;
         this.simppDataProvider = simppDataProvider;
-        initialize(); // TODO: move elsewhere
     }
     
     List<String> getMaxUrls() {
@@ -141,7 +141,7 @@ public class SimppManagerImpl implements SimppManager {
     }
     
     
-    private void initialize() {
+    public void initialize() {
         LOG.trace("Initializing SimppManager");
         backgroundExecutor.execute(new Runnable() {
             public void run() {

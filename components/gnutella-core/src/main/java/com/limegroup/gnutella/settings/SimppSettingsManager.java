@@ -50,6 +50,7 @@ public class SimppSettingsManager implements RemoteSettingManager {
     public void updateSimppSettings(String simppSettings) {
         if(_remoteController == null)
             throw new IllegalStateException("No RemoteSettingController set!");
+        
         synchronized(_remoteController) {
             byte[] settings = null;
             try {            

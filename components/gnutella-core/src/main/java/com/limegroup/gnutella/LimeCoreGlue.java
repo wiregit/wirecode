@@ -112,6 +112,8 @@ public class LimeCoreGlue {
         MojitoProps.instance().getFactory().setRemoteSettingManager(mojito);
         core.updateSimppSettings(simppManager.get().getPropsString());
         mojito.updateSimppSettings(simppManager.get().getPropsString());
+        
+        simppManager.get().initialize();
     }
     
     /** Simple exception for failure to install. */

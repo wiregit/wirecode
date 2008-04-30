@@ -6,6 +6,8 @@ import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 
 public interface SimppManager {
+    
+    public void initialize();
 
     public int getVersion();
 
