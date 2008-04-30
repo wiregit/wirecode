@@ -174,7 +174,9 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
 
     public RemoteFileDesc createUrlRemoteFileDesc(String host, int port, String filename,
             long size, Set<? extends URN> urns, URL url) {
-        return new UrlRemoteFileDescImpl(host, port, filename, size, urns, url, networkInstanceUtils);
+        RemoteFileDesc rfd = new UrlRemoteFileDescImpl(host, port, filename, size, urns, url, networkInstanceUtils);
+        rfd.setHTTP11(false);
+        return rfd;
     }
 
     public RemoteFileDesc createUrlRemoteFileDesc(URL url, String filename, URN urn, long size)
