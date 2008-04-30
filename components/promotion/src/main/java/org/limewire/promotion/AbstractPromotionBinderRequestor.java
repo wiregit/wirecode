@@ -5,13 +5,15 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpException;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
@@ -46,9 +48,8 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
         // data_<i>: data for the ith UserQueryEvent
         //
 
-        int curParam = 0;
-        NameValuePair[] nameValuePairs = new NameValuePair[2*queries.size() + 1];
-        nameValuePairs[curParam++] = new BasicNameValuePair("id", String.valueOf(id));
+        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(2*queries.size() + 1);
+        nameValuePairs.add(new BasicNameValuePair("id", String.valueOf(id)));
         int i = 0;
         for (UserQueryEvent e : queries) {
             //
@@ -56,8 +57,8 @@ public abstract class AbstractPromotionBinderRequestor implements PromotionBinde
             //
             UserQueryEventData data = new UserQueryEventData(e);
             String dataStr = new String(new Base64().encode(data.getData()));
-            nameValuePairs[curParam++] = new BasicNameValuePair("query_" + i, data.getQuery()); 
-            nameValuePairs[curParam++] = new BasicNameValuePair("data_" + i, dataStr);
+            nameValuePairs.add(new BasicNameValuePair("query_" + i, data.getQuery())); 
+            nameValuePairs.add(new BasicNameValuePair("data_" + i, dataStr));
             i++;
         }
         HttpPost tmp = null;

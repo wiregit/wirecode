@@ -1,5 +1,6 @@
 package org.limewire.http.protocol;
 
+import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -83,7 +84,9 @@ public class ExtendedAsyncNHttpServiceHandler extends AsyncNHttpServiceHandler {
     protected void closeConnection(NHttpConnection conn, Throwable cause) {
         // Make sure outgoing connections are cleaned up.
         ServerConnState state = (ServerConnState)conn.getContext().getAttribute(CONN_STATE);
-        state.finishOutput();
+        try {
+            state.finishOutput();
+        } catch(IOException ignored) {}
         
         super.closeConnection(conn, cause);
     }
@@ -91,7 +94,9 @@ public class ExtendedAsyncNHttpServiceHandler extends AsyncNHttpServiceHandler {
     @Override
     protected void shutdownConnection(NHttpConnection conn, Throwable cause) {
         ServerConnState state = (ServerConnState)conn.getContext().getAttribute(CONN_STATE);
-        state.finishOutput();
+        try {
+            state.finishOutput();
+        } catch(IOException ignored) {}
         
         super.shutdownConnection(conn, cause);
     }

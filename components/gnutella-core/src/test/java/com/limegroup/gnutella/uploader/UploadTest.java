@@ -1565,7 +1565,7 @@ public class UploadTest extends LimeTestCase {
     private void assertConnectionIsOpen(boolean open, HttpUriRequest request) throws InterruptedException, ConnectionPoolTimeoutException {
         URI uri = request.getURI();
         HttpRoute route = new HttpRoute(new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme()));
-        ManagedClientConnection connection = client.getConnectionManager().requestConnection(route).getConnection(0, null);
+        ManagedClientConnection connection = client.getConnectionManager().requestConnection(route, null).getConnection(0, null);
         assertEquals(open, connection.isOpen());
         client.getConnectionManager().releaseConnection(connection);
     }

@@ -1,12 +1,12 @@
 package org.limewire.http.httpclient;
 
-import java.net.Socket;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
-import org.apache.http.conn.SocketFactory;
 import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.conn.scheme.SocketFactory;
 import org.apache.http.params.HttpParams;
 
 import com.google.inject.Inject;

@@ -93,11 +93,11 @@
 	<classpathentry kind="lib" path="lib/jars/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jaudiotagger.jar"/>
 	<classpathentry kind="lib" path="lib/jars/aopalliance.jar"/>
-	<classpathentry kind="lib" path="lib/jars/httpcore-4.0-beta2-20080303.182830-4.jar"/>
-	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.0-beta2-20080303.182830-4.jar"/>
-	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-alpha4-20080321.114022-5.jar"/>
 	<classpathentry kind="lib" path="lib/jars/dnsjava.jar"/>
 	<classpathentry kind="lib" path="lib/jars/hsqldb.jar"/>
 	<classpathentry kind="lib" path="lib/jars/compile/swt-stub.jar"/>
+	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-alpha4-20080427.214350-9.jar"/>
+	<classpathentry kind="lib" path="lib/jars/httpcore-4.0-beta2-20080408.115743-9.jar"/>
+	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.0-beta2-20080408.115743-9.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

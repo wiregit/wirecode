@@ -8,9 +8,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.ClientConnectionRequest;
-import org.apache.http.conn.Scheme;
-import org.apache.http.conn.SchemeRegistry;
 import org.apache.http.conn.routing.HttpRoute;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.HttpParams;
 import org.limewire.service.ErrorService;
@@ -32,11 +32,11 @@ class ReapingClientConnectionManager extends ThreadSafeClientConnManager {
     }
     
     @Override
-    public ClientConnectionRequest requestConnection(HttpRoute route) {
+    public ClientConnectionRequest requestConnection(HttpRoute route, Object state) {
         // The manager is set in this way b/c it is a
         // bad idea to pass "this" in a constructor
         connectionCloser.setManagerOnce(this);
-        return super.requestConnection(route);
+        return super.requestConnection(route, state);
     }
 
     @Override
