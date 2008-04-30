@@ -515,35 +515,36 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     public void initialize() {
         setState(DownloadStatus.INITIALIZING);
-        currentRFDs = new HashSet<RemoteFileDesc>();
-        _activeWorkers=new LinkedList<DownloadWorker>();
-        _workers=new ArrayList<DownloadWorker>();
-        _queuedWorkers = new HashMap<DownloadWorker, Integer>();
-		chatList=new DownloadChatList();
-        browseList=new DownloadBrowseHostList();
-        stopped=false;
-        paused = false;
-        setState(DownloadStatus.QUEUED);
-        pushes = pushListProvider.get();
-        corruptState=NOT_CORRUPT_STATE;
-        corruptStateLock=new Object();
-        altLock = new Object();
-        numMeasures = 0;
-        averageBandwidth = 0f;
-        queuePosition=Integer.MAX_VALUE;
-        queuedVendor = "";
-        triedLocatingSources = false;
-		ranker = getSourceRanker(null);
-        ranker.setMeshHandler(this);
         
+        // Every setter needs the lock.
         synchronized(this) {
+            currentRFDs = new HashSet<RemoteFileDesc>();
+            _activeWorkers=new LinkedList<DownloadWorker>();
+            _workers=new ArrayList<DownloadWorker>();
+            _queuedWorkers = new HashMap<DownloadWorker, Integer>();
+    		chatList=new DownloadChatList();
+            browseList=new DownloadBrowseHostList();
+            stopped=false;
+            paused = false;
+            pushes = pushListProvider.get();
+            corruptState=NOT_CORRUPT_STATE;
+            corruptStateLock=new Object();
+            altLock = new Object();
+            numMeasures = 0;
+            averageBandwidth = 0f;
+            queuePosition=Integer.MAX_VALUE;
+            queuedVendor = "";
+            triedLocatingSources = false;
+    		ranker = getSourceRanker(null);
+            ranker.setMeshHandler(this);            
             for(RemoteFileDesc rfd : cachedRFDs) {
                 if(getSha1Urn() != null)
                     break;
                 if(rfd.getSHA1Urn() != null)
                     setSha1Urn(rfd.getSHA1Urn());
             }
-        }
+        }        
+        setState(DownloadStatus.QUEUED);
         
 		if (getSha1Urn() != null) 
 		    altLocManager.addListener(getSha1Urn(),this);

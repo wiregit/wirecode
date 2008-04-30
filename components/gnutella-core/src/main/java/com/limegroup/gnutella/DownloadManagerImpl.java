@@ -185,14 +185,8 @@ public class DownloadManagerImpl implements DownloadManager {
      * Adds a new downloader to this manager.
      * @param downloader the core downloader
      */
-    // TODO merge this with initializeDownload
     public void addNewDownloader(CoreDownloader downloader) {
-        synchronized(this) {
-            waiting.add(downloader);
-        }
-        fireEvent(downloader, DownloadManagerEvent.Type.ADDED);
-        downloader.initialize();
-        callback(downloader).addDownload(downloader);
+        initializeDownload(downloader, false);
     }
 
     /* (non-Javadoc)
@@ -557,7 +551,7 @@ public class DownloadManagerImpl implements DownloadManager {
             coreDownloaderFactory.createManagedDownloader(files, 
                 queryGUID, saveDir, fileName, overwrite);
 
-        initializeDownload(downloader);
+        initializeDownload(downloader, true);
         
         //Now that the download is started, add the sources w/o caching
         downloader.addDownload(alts,false);
@@ -599,7 +593,7 @@ public class DownloadManagerImpl implements DownloadManager {
         MagnetDownloader downloader = 
             coreDownloaderFactory.createMagnetDownloader( magnet,
                 overwrite, saveDir, fileName);
-        initializeDownload(downloader);
+        initializeDownload(downloader, true);
         return downloader;
     }
 
@@ -631,7 +625,7 @@ public class DownloadManagerImpl implements DownloadManager {
             coreDownloaderFactory.createStoreDownloader(rfd,  
                                   saveDir, fileName, overwrite);
 
-        initializeDownload(downloader);
+        initializeDownload(downloader, true);
         
         return downloader;
     }
@@ -689,7 +683,7 @@ public class DownloadManagerImpl implements DownloadManager {
             throw new CantResumeException(incompleteFile.getName());
         }
         
-        initializeDownload(downloader);
+        initializeDownload(downloader, true);
         return downloader;
     }
     
@@ -742,7 +736,7 @@ public class DownloadManagerImpl implements DownloadManager {
         incompleteFileManager.purge();
         ManagedDownloader d = coreDownloaderFactory.createInNetworkDownloader(
                 info, dir, now);
-        initializeDownload(d);
+        initializeDownload(d, true);
         return d;
     }
     
@@ -758,7 +752,7 @@ public class DownloadManagerImpl implements DownloadManager {
         else
             torrentManager.get().killTorrentForFile(system.getCompleteFile());
         CoreDownloader ret = coreDownloaderFactory.createBTDownloader(info);
-        initializeDownload(ret);
+        initializeDownload(ret, true);
         return ret;
     }
     
@@ -795,15 +789,18 @@ public class DownloadManagerImpl implements DownloadManager {
      * 3) Notifies the callback about the new downloader.
      * 4) Writes the new snapshot out to disk.
      */
-    private void initializeDownload(CoreDownloader md) {
+    private synchronized void initializeDownload(CoreDownloader md, boolean saveState) {
         md.initialize();
         waiting.add(md);
         callback(md).addDownload(md);
-        backgroundExecutor.execute(new Runnable() {
-            public void run() {
-                writeSnapshot(); // Save state for crash recovery.
-            }
-        });
+        if(saveState) {
+            backgroundExecutor.execute(new Runnable() {
+                public void run() {
+                    writeSnapshot(); // Save state for crash recovery.
+                }
+            });
+        }
+        // TODO: do this outside the lock
         fireEvent(md, DownloadManagerEvent.Type.ADDED);
     }
     
