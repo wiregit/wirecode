@@ -57,26 +57,21 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             createDBIfNeeded();
         } catch(SQLException sqlException) {
             throw new InitializeException(sqlException);
+        } catch (DatabaseExecutionException e) {
+            throw new InitializeException(e);
         }
     }
     
     public void shutDown() {
         if (connection != null) {
             try {
-                if (connection.isClosed()) return;
-            } catch (SQLException e1) {
-                // ignore
-            }
-            try {
                 executeUpdate("SHUTDOWN");
                 connection.close();
-            } catch (SQLException ignore) {
+            } catch (DatabaseExecutionException ignore) {
                 // ignore
-            } catch (RuntimeException e) {
-                // If the underlying exception is an SQL exception this is OK
-                Throwable t = e.getCause();
-                if (!(t instanceof SQLException)) throw e;
-            }
+            } catch (SQLException e) {
+                // ignore
+            } 
         }        
     }
 
@@ -86,7 +81,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
      * 
      * @see {@link java.sql.Statement#executeUpdate(String)}
      */
-    private int executeUpdate(final String sql, final Object... values) {
+    private int executeUpdate(final String sql, final Object... values) throws DatabaseExecutionException {
         try {
             final PreparedStatement statement = connection.prepareStatement(sql);
             try {
@@ -101,7 +96,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
                 statement.close();
             }
         } catch (SQLException ex) {
-            throw new RuntimeException("SQLException during update", ex);
+            throw new DatabaseExecutionException("SQLException during update");
         }
     }
     
@@ -135,8 +130,9 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
      * 
      * @param stmts statements to execute
      * @return the total number of affected rows and executing multiple updates synchronously.
+     * @throws DatabaseExecutionException 
      */
-    private synchronized int executeUpdates(Stmt... stmts) {
+    private synchronized int executeUpdates(Stmt... stmts) throws DatabaseExecutionException {
         int numAffectedRows = 0;
         for (Stmt stmt : stmts) {
             numAffectedRows += executeUpdate(stmt.sql, stmt.values);
@@ -147,8 +143,9 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
     /**
      * Creates a statement and runs the given SQL, then returns the results of a
      * call to "CALL IDENTITY()"
+     * @throws DatabaseExecutionException 
      */
-    private long executeInsert(final String sql, final Object... values) {
+    private long executeInsert(final String sql, final Object... values) throws DatabaseExecutionException {
         try {
             executeUpdate(sql, values);
             PreparedStatement statement = connection.prepareStatement("CALL IDENTITY()");
@@ -168,7 +165,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
         }
     }
 
-    private void createDBIfNeeded() {
+    private void createDBIfNeeded() throws DatabaseExecutionException {
         try {
             query("foo");
         } catch (RuntimeException ignored) {
@@ -177,7 +174,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
         }
     }
 
-    public void clear() {
+    public void clear() throws DatabaseExecutionException {
         executeUpdates(
                 stmt("DROP TABLE keywords IF EXISTS"),
                 stmt("DROP TABLE entries IF EXISTS"),
@@ -196,14 +193,14 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
              );
     }
 
-    public void expungeExpired() {
+    public void expungeExpired() throws DatabaseExecutionException {
         executeUpdates(
                 stmt("DELETE FROM entries WHERE valid_end_dt < CURRENT_TIMESTAMP"),
                 stmt("DELETE FROM binders WHERE valid_end_dt < CURRENT_TIMESTAMP")
         );
     }
 
-    private synchronized void saveBinder(final PromotionBinder binder) {
+    private synchronized void saveBinder(final PromotionBinder binder) throws DatabaseExecutionException {
         executeUpdate("DELETE FROM binders where binder_unique_name = ?", binder.getUniqueName());
         executeInsert(
                 "INSERT INTO binders (binder_unique_name, binder_bucket_id, valid_end_dt, binder_blob) VALUES (?,?,?,?)",
@@ -270,8 +267,9 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
     /**
      * Does the actual ingestion of the given promo entry, inserting it into the
      * db. Package-visible for testing.
+     * @throws DatabaseExecutionException 
      */
-    synchronized void ingest(final PromotionMessageContainer promo, final String binderUniqueName) {
+    synchronized void ingest(final PromotionMessageContainer promo, final String binderUniqueName) throws DatabaseExecutionException {
         executeUpdate("DELETE FROM entries WHERE unique_id = ?", promo.getUniqueID());
         final long entryID = executeInsert(
                 "INSERT INTO entries "
@@ -285,7 +283,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
                     keywordUtil.normalizeQuery(keyword), binderUniqueName, entryID);
     }
 
-    public void ingest(final PromotionBinder binder) {
+    public void ingest(final PromotionBinder binder) throws DatabaseExecutionException {
         for (PromotionMessageContainer promo : binder.getPromoMessageList())
             ingest(promo, binder.getUniqueName());
         saveBinder(binder);

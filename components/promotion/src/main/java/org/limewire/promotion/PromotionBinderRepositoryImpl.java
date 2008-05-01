@@ -16,6 +16,8 @@ public class PromotionBinderRepositoryImpl implements PromotionBinderRepository 
     private final ImpressionsCollector impressionsCollector;
 
     private final SearcherDatabase searcherDatabase;
+    
+    private final PromotionServices promotionServices;
 
     /** The search URL. */
     private String searchUrl;
@@ -25,16 +27,22 @@ public class PromotionBinderRepositoryImpl implements PromotionBinderRepository 
 
     @Inject
     public PromotionBinderRepositoryImpl(final PromotionBinderRequestor requestor,
-            final ImpressionsCollector impressionsCollector, final SearcherDatabase searcherDatabase) {
+            final ImpressionsCollector impressionsCollector, final SearcherDatabase searcherDatabase, PromotionServices promotionServices) {
         this.requestor = requestor;
         this.impressionsCollector = impressionsCollector;
         this.searcherDatabase = searcherDatabase;
+        this.promotionServices = promotionServices;
     }
 
     public PromotionBinder getBinderForBucket(final long bucketNumber) {
         // See if we have a cached binder...
         final int bucket = (int) (bucketNumber % modulus);
-        searcherDatabase.expungeExpired();
+        try {
+            searcherDatabase.expungeExpired();
+        } catch (DatabaseExecutionException e) {
+            promotionServices.shutDown();
+            return null;
+        }
         final PromotionBinder binder = searcherDatabase.getBinder(bucket);
         if (binder != null)
             return binder;

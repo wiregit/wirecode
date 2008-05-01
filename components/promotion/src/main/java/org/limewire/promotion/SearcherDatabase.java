@@ -15,8 +15,10 @@ public interface SearcherDatabase {
      * signature verification is not run during this phase, instead waiting
      * until the query phase to validate that results actually came from the
      * given signed binder.
+     * 
+     * @throws DatabaseExecutionException if a database operation goes badly
      */
-    void ingest(PromotionBinder binder);
+    void ingest(PromotionBinder binder) throws DatabaseExecutionException;
 
     /**
      * @return a binder that was previously ingested by a call to
@@ -32,13 +34,17 @@ public interface SearcherDatabase {
 
     /**
      * Removes all expired entries from the database.
+     *
+     * @throws DatabaseExecutionException if a database operation goes badly
      */
-    void expungeExpired();
+    void expungeExpired() throws DatabaseExecutionException;
 
     /**
      * Drops the database and recreates an empty one.
+     * 
+     * @throws DatabaseExecutionException if a database operation goes badly
      */
-    void clear();
+    void clear() throws DatabaseExecutionException;
 
     /**
      * Performs a search of the database for the given query. The query will be
@@ -46,8 +52,10 @@ public interface SearcherDatabase {
      * 
      * @param query the search the user entered in the main search box
      * @return A list of {@link QueryResult} instances that match the query
+     * 
+     * @throws DatabaseExecutionException if a database operation goes badly
      */
-    List<QueryResult> query(String query);
+    List<QueryResult> query(String query) throws DatabaseExecutionException;
 
     /**
      * Provides a wrapper around the {@link PromotionMessageContainer} and

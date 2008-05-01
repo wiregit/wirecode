@@ -26,20 +26,24 @@ public class PromotionSearcherImpl implements PromotionSearcher {
     private final ImpressionsCollector impressionsCollector;
 
     private final PromotionBinderRepository promotionBinderRepository;
-    
+
+    private final PromotionServices promotionServices;
+
     private final ExecutorService exec;
-    
+
     private volatile int maxNumberOfResults = 5;
 
     @Inject
     public PromotionSearcherImpl(final KeywordUtilImpl keywordUtil,
             final SearcherDatabase searcherDatabase,
             final ImpressionsCollector impressionsCollector,
-            final PromotionBinderRepository promotionBinderRepository) {
+            final PromotionBinderRepository promotionBinderRepository,
+            final PromotionServices promotionServices) {
         this.keywordUtil = keywordUtil;
         this.searcherDatabase = searcherDatabase;
         this.impressionsCollector = impressionsCollector;
         this.promotionBinderRepository = promotionBinderRepository;
+        this.promotionServices = promotionServices;
         this.exec = ExecutorsHelper.newThreadPool("SearcherThread");
     }
 
@@ -63,7 +67,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
      */
     public void search(final String query, final PromotionSearchResultsCallback callback,
             final GeocodeInformation userLocation) {
-       exec.execute(new Searcher(query, callback, userLocation));
+        exec.execute(new Searcher(query, callback, userLocation));
     }
 
     public void init(final int maxNumberOfResults) throws InitializeException {
@@ -129,11 +133,26 @@ public class PromotionSearcherImpl implements PromotionSearcher {
             // OK, start the meat of the query!
             final Date timeQueried = new Date();
             // Get the binder (maybe cached), ingest it, and search...
-            PromotionBinder binder = promotionBinderRepository.getBinderForBucket(keywordUtil.getHashValue(normalizedQuery));
-            if (binder != null)
-                searcherDatabase.ingest(binder);
-            searcherDatabase.expungeExpired();
-            final List<QueryResult> results = searcherDatabase.query(normalizedQuery);
+            PromotionBinder binder = null;
+            List<QueryResult> results = null;
+            binder = promotionBinderRepository.getBinderForBucket(keywordUtil.getHashValue(normalizedQuery));
+            try {
+                if (binder != null) {
+                    searcherDatabase.ingest(binder);
+                }
+                searcherDatabase.expungeExpired();
+                results = searcherDatabase.query(normalizedQuery);
+            } catch (DatabaseExecutionException e) {
+                promotionServices.shutDown();
+            }
+
+            if (results == null) {
+                //
+                // This will happen if an error occured in a database operation
+                //
+                return;
+            }
+
             removeInvalidResults(results);
 
             int shownResults = 0;
@@ -144,21 +163,23 @@ public class PromotionSearcherImpl implements PromotionSearcher {
                 if (Math.random() <= probability) {
                     // Looks like we can show this result...
                     // Verify it!
-                    if (isMessageValid(result.getPromotionMessageContainer(),
-                            result.getBinderUniqueName(), timeQueried.getTime())) {
+                    if (isMessageValid(result.getPromotionMessageContainer(), result
+                            .getBinderUniqueName(), timeQueried.getTime())) {
                         if (!result.getPromotionMessageContainer().isImpressionOnly()) {
                             shownResults++;
                             callback.process(result.getPromotionMessageContainer());
                         }
                         // record we just showed this result.
-                        impressionsCollector.recordImpression(query, timeQueried,
-                                new Date(), result.getPromotionMessageContainer(),
-                                result.getBinderUniqueName());
+                        impressionsCollector
+                                .recordImpression(query, timeQueried, new Date(), result
+                                        .getPromotionMessageContainer(), result
+                                        .getBinderUniqueName());
                     }
                 }
-                
-                // Exit early if we're done.  Assumes impression-only are sorted at top.
-                if(shownResults >= maxNumberOfResults)
+
+                // Exit early if we're done. Assumes impression-only are sorted
+                // at top.
+                if (shownResults >= maxNumberOfResults)
                     break;
             }
         }
