@@ -18,6 +18,7 @@ import org.limewire.util.BaseTestCase;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointCache;
+import com.limegroup.gnutella.settings.DHTSettings;
 
 public class PushEndpointManagerImplTest extends BaseTestCase {
 
@@ -39,6 +40,8 @@ public class PushEndpointManagerImplTest extends BaseTestCase {
     @Override
     @SuppressWarnings({ "cast", "unchecked" })
     protected void setUp() throws Exception {
+        DHTSettings.ENABLE_PUSH_PROXY_QUERIES.setValue(true);
+        
         context = new Mockery();
         
         // the players

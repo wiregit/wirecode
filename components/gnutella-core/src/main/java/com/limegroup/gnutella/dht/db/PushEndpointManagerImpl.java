@@ -94,6 +94,12 @@ class PushEndpointManagerImpl implements PushEndpointService {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Starting dht search for: " + guid);
         }
+        
+        if (!DHTSettings.ENABLE_PUSH_PROXY_QUERIES.getValue()) {
+            listener.searchFailed();
+            return;
+        }
+        
         pushEndpointFinder.findPushEndpoint(guid, new SearchListener<PushEndpoint>() {
                 public void handleResult(PushEndpoint result) {
                     // notify cache about it

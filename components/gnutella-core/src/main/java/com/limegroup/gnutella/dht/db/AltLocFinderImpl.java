@@ -92,7 +92,9 @@ class AltLocFinderImpl implements AltLocFinder {
                 // In any case the creator of both values should be the 
                 // same Node!
                 InetAddress creatorAddress = ((InetSocketAddress)altLocEntity.getCreator().getContactAddress()).getAddress();
-                if (!pushEndpoint.getInetAddress().equals(creatorAddress)) {
+                InetAddress externalAddress = pushEndpoint.getInetAddress();
+                // external address can be null if not retrieved from DHT
+                if (externalAddress != null && !externalAddress.equals(creatorAddress)) {
                     if (LOG.isWarnEnabled()) {
                         LOG.warn("Creator of " + altLocEntity + " and found " + pushEndpoint + " do not match!");
                     }
