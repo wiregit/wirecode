@@ -9,14 +9,12 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
-import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.connection.RoutedConnection;
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.QueryRouteTable;
@@ -223,20 +221,7 @@ final class QueryHandlerImpl implements Inspectable, QueryHandler {
             throw new NullPointerException("null query");
         }
 
-        // build it from scratch if it's from us
-        if (query.getHops() == 0) {
-            return queryRequestFactory.createQuery(query, ttl);
-        } else {
-            try {
-                return queryRequestFactory.createNetworkQuery(query.getGUID(), ttl,
-                        query.getHops(), query.getPayload(), query.getNetwork());
-            } catch (BadPacketException e) {
-                // this should never happen, since the query was already
-                // read from the network, so report an error
-                ErrorService.error(e);
-                return null;
-            }
-        }
+        return queryRequestFactory.createQuery(query, ttl);
     }
 
     public QueryRequest getTemplateQueryRequest() {
@@ -481,7 +466,7 @@ final class QueryHandlerImpl implements Inspectable, QueryHandler {
 
         // send the query directly along the connection, but if the query didn't
         // go through send back 0....
-        if (!messageRouter.originateQuery(query, mc))
+        if (!messageRouter.sendInitialQuery(query, mc))
             return 0;
 
         byte ttl = query.getTTL();

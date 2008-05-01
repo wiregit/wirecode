@@ -1482,6 +1482,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
 		if(query == null) {
 			throw new NullPointerException("null QueryHandler");
 		}
+		
 		// get the result counter so we can track the number of results
 		ResultCounter counter = 
 			_queryRouteTable.routeReply(query.getGUID(), 
@@ -1817,7 +1818,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.MessageRouter#originateQuery(com.limegroup.gnutella.messages.QueryRequest, com.limegroup.gnutella.RoutedConnection)
      */
-    public boolean originateQuery(QueryRequest query, RoutedConnection mc) {
+    public boolean sendInitialQuery(QueryRequest query, RoutedConnection mc) {
         if( query == null )
             throw new NullPointerException("null query");
         if( mc == null )
@@ -1829,10 +1830,13 @@ public abstract class MessageRouterImpl implements MessageRouter {
         // necessarily need to exist.  We could be shooting ourselves
         // in the foot by not sending this, rendering Feature Searches
         // inoperable for some users connected to bad Ultrapeers.
-        if(query.isFeatureQuery() && !mc.getConnectionCapabilities().getRemoteHostSupportsFeatureQueries())
+        if (query.isFeatureQuery()
+                && !mc.getConnectionCapabilities().getRemoteHostSupportsFeatureQueries()) {
             return false;
+        }
         
-        mc.originateQuery(query);
+        query.originate(); // ensure it gets put in the right priority.
+        mc.send(query);
         return true;
     }
     

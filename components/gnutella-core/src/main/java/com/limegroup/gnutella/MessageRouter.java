@@ -222,12 +222,10 @@ public interface MessageRouter extends Service {
     /**
      * Generates a new dynamic query.  This method is used to send a new 
      * dynamic query from this host (the user initiated this query directly,
-     * so it's replies are intended for this node.
+     * so it's replies are intended for this node).
      *
      * @param query the <tt>QueryRequest</tt> instance that generates
      *  queries for this dynamic query
-     * @throws <tt>NullPointerException</tt> if the <tt>QueryHandler</tt> 
-     *  argument is <tt>null</tt>
      */
     public void sendDynamicQuery(QueryRequest query);
 
@@ -244,13 +242,14 @@ public interface MessageRouter extends Service {
             ReplyHandler handler);
 
     /**
-     * Originates a new query request to the RoutedConnection.
+     * Used to send the first request to a specific ultrapeer
+     * when dynamic querying.
      *
      * @param request The query to send.
      * @param mc The RoutedConnection to send the query along
      * @return false if the query was not sent, true if so
      */
-    public boolean originateQuery(QueryRequest query, RoutedConnection mc);
+    public boolean sendInitialQuery(QueryRequest query, RoutedConnection mc);
 
     /**
      * The default handler for QueryReplies received in

@@ -259,9 +259,9 @@ public interface QueryRequest extends Message {
      */
     public int getMetaMask();
 
-    /** Marks this as being an re-originated query. */
+    /** Marks this as being created by us. */
     public void originate();
 
-    /** Determines if this is an originated query */
+    /** Determines if this query was created by us. */
     public boolean isOriginated();
 }

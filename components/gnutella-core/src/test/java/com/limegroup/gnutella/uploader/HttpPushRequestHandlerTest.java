@@ -264,7 +264,7 @@ public class HttpPushRequestHandlerTest extends BaseTestCase {
             return false;
         }
 
-        public boolean originateQuery(QueryRequest query, RoutedConnection mc) {
+        public boolean sendInitialQuery(QueryRequest query, RoutedConnection mc) {
             // TODO Auto-generated method stub
             return false;
         }

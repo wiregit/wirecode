@@ -356,6 +356,10 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createDoNotProxyQuery(com.limegroup.gnutella.messages.QueryRequest)
      */
     public QueryRequest createDoNotProxyQuery(QueryRequest qr) {
+        if (!GUID.isLimeGUID(qr.getGUID())) {
+            throw new IllegalArgumentException(
+                    "query request from different vendor cannot not be unmarked");
+        }
         if (!qr.isOriginated()) {
             throw new IllegalArgumentException("query not originated from here");
         }
@@ -380,7 +384,7 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
             return createNetworkQuery(qr.getGUID(), ttl, qr.getHops(), qr
                     .getPayload(), qr.getNetwork());
         } catch (BadPacketException ioe) {
-            throw new IllegalArgumentException(ioe.getMessage());
+            throw new IllegalArgumentException(ioe);
         }
     }
 

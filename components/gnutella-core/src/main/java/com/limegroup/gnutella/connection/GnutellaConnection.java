@@ -782,7 +782,7 @@ public class GnutellaConnection extends AbstractConnection implements ReplyHandl
      */
     public void originateQuery(QueryRequest query) {
         query.originate();
-
+        
         if (LOG.isTraceEnabled()) {
             LOG.trace("do not proxy condition "
                     + getConnectionCapabilities().isClientSupernodeConnection() + " "

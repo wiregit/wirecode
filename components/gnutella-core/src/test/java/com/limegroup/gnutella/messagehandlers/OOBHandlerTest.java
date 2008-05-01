@@ -842,7 +842,7 @@ public class OOBHandlerTest extends BaseTestCase {
             return false;
         }
 
-        public boolean originateQuery(QueryRequest query, RoutedConnection mc) {
+        public boolean sendInitialQuery(QueryRequest query, RoutedConnection mc) {
             return false;
         }
 
