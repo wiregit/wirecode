@@ -79,6 +79,7 @@ public class FileManagerTest extends LimeTestCase {
     protected Response[] responses;
     protected List<FileDesc> sharedFiles;
     protected Injector injector;
+    protected SharedFilesKeywordIndex keywordIndex;
 
     public FileManagerTest(String name) {
         super(name);
@@ -106,6 +107,7 @@ public class FileManagerTest extends LimeTestCase {
             }
         });
         fman = (FileManagerImpl)injector.getInstance(FileManager.class);
+        keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
     }
 	
     @Override
@@ -208,15 +210,15 @@ public class FileManagerTest extends LimeTestCase {
             
         // it is important to check the query at all bounds,
         // including tests for case.
-        responses=fman.query(queryRequestFactory.createQuery("unit",(byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("unit",(byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("FileManager", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("FileManager", (byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("test", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("test", (byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("file", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("file", (byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery(
+        responses=keywordIndex.query(queryRequestFactory.createQuery(
             "FileManager UNIT tEsT", (byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);        
                 
@@ -252,7 +254,7 @@ public class FileManagerTest extends LimeTestCase {
         
         assertEquals("unexpected number of files", 2, fman.getNumFiles());
         assertEquals("unexpected fman size", 4, fman.getSize());
-        responses=fman.query(queryRequestFactory.createQuery("unit", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("unit", (byte)3));
         assertNotEquals("responses gave same index",
             responses[0].getIndex(), responses[1].getIndex() );
         for (int i=0; i<responses.length; i++) {
@@ -278,7 +280,7 @@ public class FileManagerTest extends LimeTestCase {
         assertNotNull("should have been able to remove shared file", fman.removeFileIfSharedOrStore(f2));
         assertEquals("unexpected fman size", 1, fman.getSize());
         assertEquals("unexpected number of files", 1, fman.getNumFiles());
-        responses=fman.query(queryRequestFactory.createQuery("unit", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("unit", (byte)3));
         assertEquals("unexpected response length", 1, responses.length);
         sharedFiles=fman.getSharedFilesInDirectory(_sharedDir);
         assertEquals("unexpected files length", 1, sharedFiles.size());
@@ -302,7 +304,7 @@ public class FileManagerTest extends LimeTestCase {
         assertNotNull(result.getFileDescs()[0]);
         assertEquals("unexpected file size", 12, fman.getSize());
         assertEquals("unexpedted number of files", 2, fman.getNumFiles());
-        responses=fman.query(queryRequestFactory.createQuery("unit", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("unit", (byte)3));
         assertEquals("unexpected response length", 2, responses.length);
         assertNotEquals("unexpected response[0] index", 1, responses[0].getIndex());
         assertNotEquals("unexpected response[1] index", 1, responses[1].getIndex());
@@ -318,7 +320,7 @@ public class FileManagerTest extends LimeTestCase {
         assertTrue("should be valid", fman.isValidSharedIndex(0));
         assertTrue("should be valid (was at one time)", fman.isValidSharedIndex(1));
 
-        responses=fman.query(queryRequestFactory.createQuery("*unit*", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("*unit*", (byte)3));
         assertEquals("unexpected responses length", 2, responses.length);
 
         sharedFiles = fman.getSharedFilesInDirectory(_sharedDir);
@@ -383,7 +385,7 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals(f6, result.getFileDescs()[0].getFile());
         assertEquals("unexpected number of files", 3, fman.getNumFiles());
         assertEquals("unexpected fman size", Integer.MAX_VALUE, fman.getSize());
-        responses=fman.query(queryRequestFactory.createQuery("*.*", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("*.*", (byte)3));
         assertEquals("unexpected responses length", 3, responses.length);
         assertEquals("files differ", responses[0].getName(), f3.getName());
         assertEquals("files differ", responses[1].getName(), f5.getName());
@@ -467,7 +469,7 @@ public class FileManagerTest extends LimeTestCase {
         fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
         assertFalse(ifd.hasUrnsAndPartialData());
-        assertEquals(0,fman.query(qrDesiring).length);
+        assertEquals(0,keywordIndex.query(qrDesiring).length);
         assertFalse(fman.getQRT().contains(qrDesiring));
         
         // b) single urn, enough data written -> not shared
@@ -482,7 +484,7 @@ public class FileManagerTest extends LimeTestCase {
         fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
         assertFalse(ifd.hasUrnsAndPartialData());
-        assertEquals(0,fman.query(qrDesiring).length);
+        assertEquals(0,keywordIndex.query(qrDesiring).length);
         assertFalse(fman.getQRT().contains(qrDesiring));
         
         // c) two urns, not enough data written -> not shared
@@ -498,7 +500,7 @@ public class FileManagerTest extends LimeTestCase {
         fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
         assertFalse(ifd.hasUrnsAndPartialData());
-        assertEquals(0,fman.query(qrDesiring).length);
+        assertEquals(0,keywordIndex.query(qrDesiring).length);
         assertFalse(fman.getQRT().contains(qrDesiring));
 
         // d) two urns, enough data written -> shared
@@ -515,16 +517,16 @@ public class FileManagerTest extends LimeTestCase {
         fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
         assertTrue(ifd.hasUrnsAndPartialData());
-        assertGreaterThan(0,fman.query(qrDesiring).length);
-        assertEquals(0,fman.query(notDesiring).length);
+        assertGreaterThan(0,keywordIndex.query(qrDesiring).length);
+        assertEquals(0,keywordIndex.query(notDesiring).length);
         assertTrue(fman.getQRT().contains(qrDesiring));
         double qrpFull = fman.getQRT().getPercentFull();
         assertGreaterThan(0,qrpFull);
         
         // now remove the file and qrt should get updated
         fman.removeFileIfSharedOrStore(f);
-        assertEquals(0,fman.query(qrDesiring).length);
-        assertEquals(0,fman.query(notDesiring).length);
+        assertEquals(0,keywordIndex.query(qrDesiring).length);
+        assertEquals(0,keywordIndex.query(notDesiring).length);
         assertFalse(fman.getQRT().contains(qrDesiring));
         assertLessThan(qrpFull,fman.getQRT().getPercentFull());
         
@@ -543,8 +545,8 @@ public class FileManagerTest extends LimeTestCase {
         fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
         assertTrue(ifd.hasUrnsAndPartialData());
-        assertEquals(0,fman.query(qrDesiring).length);
-        assertEquals(0,fman.query(notDesiring).length);
+        assertEquals(0,keywordIndex.query(qrDesiring).length);
+        assertEquals(0,keywordIndex.query(notDesiring).length);
         assertFalse(fman.getQRT().contains(qrDesiring));
         SharingSettings.ALLOW_PARTIAL_SHARING.setValue(true);
         
@@ -560,14 +562,14 @@ public class FileManagerTest extends LimeTestCase {
         fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
         assertFalse(ifd.hasUrnsAndPartialData());
-        assertEquals(0,fman.query(qrDesiring).length);
+        assertEquals(0,keywordIndex.query(qrDesiring).length);
         assertFalse(fman.getQRT().contains(qrDesiring));
         
         ifd.setTTRoot(UrnHelper.TTROOT);
         assertTrue(ifd.hasUrnsAndPartialData());
         fman.fileURNSUpdated(ifd);
-        assertGreaterThan(0,fman.query(qrDesiring).length);
-        assertEquals(0,fman.query(notDesiring).length);
+        assertGreaterThan(0,keywordIndex.query(qrDesiring).length);
+        assertEquals(0,keywordIndex.query(notDesiring).length);
         assertTrue(fman.getQRT().contains(qrDesiring));
         
         // g) start with two urns, add data -> becomes shared
@@ -608,9 +610,9 @@ public class FileManagerTest extends LimeTestCase {
     }
     
     /**
-     * Tests that responses are not returned for IncompleteFiles.
+     * Tests that responses are not returned for zero size IncompleteFiles.
      */
-    public void testQueryRequestsDoNotReturnIncompleteFiles() {
+    public void testQueryRequestsDoNotReturnZeroSizeIncompleteFiles() {
         VerifyingFileFactory verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         
@@ -625,7 +627,8 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());            
             
         QueryRequest qr = queryRequestFactory.createQuery(urn, "sambe");
-        Response[] hits = fman.query(qr);
+        assertTrue(qr.desiresPartialResults());
+        Response[] hits = keywordIndex.query(qr);
         assertNotNull(hits);
         assertEquals("unexpected number of resp.", 0, hits.length);
     }
@@ -708,7 +711,7 @@ public class FileManagerTest extends LimeTestCase {
 			queryUrnSet.add(urn);
 			for(int j = 0; j < requestedUrnSets.length; j++) {
 				QueryRequest qr = queryRequestFactory.createQuery(queryUrnSet);
-				Response[] hits = fman.query(qr);
+				Response[] hits = keywordIndex.query(qr);
 				assertEquals("there should only be one response", 1, hits.length);
 				assertEquals("responses should be equal", testResponse, hits[0]);		
 			}
@@ -741,7 +744,7 @@ public class FileManagerTest extends LimeTestCase {
             }
             
 			QueryRequest qr = queryRequestFactory.createQuery(name);
-			Response[] hits = fman.query(qr);
+			Response[] hits = keywordIndex.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
 			// one response, don't test.
@@ -790,7 +793,7 @@ public class FileManagerTest extends LimeTestCase {
             }
             
 			QueryRequest qr = queryRequestFactory.createQuery(name);
-			Response[] hits = fman.query(qr);
+			Response[] hits = keywordIndex.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
 			// one response, don't test.
@@ -1400,13 +1403,13 @@ public class FileManagerTest extends LimeTestCase {
         f3 = createNewTestFile(11);
 
         assertEquals(2, fman.getNumFiles());
-        Iterator<Response> it = fman.getIndexingIterator(false);
-        Response response = it.next();
-        assertEquals(response.getName(), f1.getName());
-        assertNull(response.getDocument());
+        Iterator<FileDesc> it = fman.getIndexingIterator();
+        FileDesc response = it.next();
+        assertEquals(response.getFileName(), f1.getName());
+        assertNotNull(response.getLimeXMLDocuments());
         response = it.next();
-        assertEquals(response.getName(), f2.getName());
-        assertNull(response.getDocument());
+        assertEquals(response.getFileName(), f2.getName());
+        assertNotNull(response.getLimeXMLDocuments());
         assertFalse(it.hasNext());
         try {
             response = it.next();
@@ -1414,7 +1417,7 @@ public class FileManagerTest extends LimeTestCase {
         } catch (NoSuchElementException e) {
         }
         
-        it = fman.getIndexingIterator(false);
+        it = fman.getIndexingIterator();
         assertTrue(it.hasNext());
         assertTrue(it.hasNext());
         assertTrue(it.hasNext());
@@ -1422,9 +1425,9 @@ public class FileManagerTest extends LimeTestCase {
         fman.removeFileIfSharedOrStore(f2);
         assertFalse(it.hasNext());
 
-        it = fman.getIndexingIterator(true);
+        it = fman.getIndexingIterator();
         response = it.next();
-        assertNotNull(response.getDocument());
+        assertNotNull(response.getXMLDocument());
         assertFalse(it.hasNext());
     }
     
@@ -1445,7 +1448,7 @@ public class FileManagerTest extends LimeTestCase {
         return queryRequestFactory.createQuery(norm);
     }
 	
-	private void addFilesToLibrary() throws Exception {
+	protected void addFilesToLibrary() throws Exception {
 		String dirString = "com/limegroup/gnutella";
 		File testDir = TestUtils.getResourceFile(dirString);
 		testDir = testDir.getCanonicalFile();

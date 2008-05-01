@@ -23,19 +23,21 @@ import org.limewire.http.entity.AbstractProducingNHttpEntity;
 import org.limewire.nio.channel.NoInterestWritableByteChannel;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.Uploader.UploadStatus;
 import com.limegroup.gnutella.connection.BasicQueue;
 import com.limegroup.gnutella.connection.ConnectionStats;
 import com.limegroup.gnutella.connection.MessageWriter;
 import com.limegroup.gnutella.connection.SentMessageHandler;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.OutgoingQueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.QueryRequestFactory;
 
 /**
  * Responds to Gnutella browse requests by returning a list of all shared files.
@@ -47,18 +49,18 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
     private static final Log LOG = LogFactory.getLog(BrowseRequestHandler.class);
     
     private final HTTPUploadSessionManager sessionManager;
-    private final QueryRequestFactory queryRequestFactory;
     private final FileManager fileManager;
-    private final MessageRouter messageRouter;
+    private final Provider<ResponseFactory> responseFactory;
+    private final OutgoingQueryReplyFactory outgoingQueryReplyFactory;
 
     @Inject
     BrowseRequestHandler(HTTPUploadSessionManager sessionManager,
-            QueryRequestFactory queryRequestFactory, FileManager fileManager,
-            MessageRouter messageRouter) {
+            FileManager fileManager, Provider<ResponseFactory> responseFactory,
+            OutgoingQueryReplyFactory outgoingQueryReplyFactory) {
         this.sessionManager = sessionManager;
-        this.queryRequestFactory = queryRequestFactory;
         this.fileManager = fileManager;
-        this.messageRouter = messageRouter;
+        this.responseFactory = responseFactory;
+        this.outgoingQueryReplyFactory = outgoingQueryReplyFactory;
     }
     
     public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
@@ -96,13 +98,13 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
 
         private final HTTPUploader uploader;
 
-        private QueryRequest query;
-
-        private Iterator<Response> iterable;
+        private Iterator<FileDesc> iterable;
 
         private MessageWriter sender;
         
         private volatile int pendingMessageCount = 0;
+        
+        private GUID sessionGUID = new GUID();
 
         public BrowseResponseEntity(HTTPUploader uploader) {
             this.uploader = uploader;
@@ -130,10 +132,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
             sender = new MessageWriter(new ConnectionStats(), new BasicQueue(), sentMessageHandler);
             sender.setWriteChannel(new NoInterestWritableByteChannel(new ContentEncoderChannel(
                     contentEncoder)));
-
-            query = queryRequestFactory.createBrowseHostQuery();
-            iterable = fileManager.getIndexingIterator(query.desiresXMLResponses() || 
-                    query.desiresOutOfBandReplies());
+            iterable = fileManager.getIndexingIterator();
         }
         
         @Override
@@ -158,11 +157,12 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
             
             List<Response> responses = new ArrayList<Response>(RESPONSES_PER_REPLY); 
             for (int i = 0; iterable.hasNext() && i < RESPONSES_PER_REPLY; i++) {
-                responses.add(iterable.next());
+                responses.add(responseFactory.get().createResponse(iterable.next()));
             }
             
-            Iterable<QueryReply> it = messageRouter.responsesToQueryReplies(
-                    responses.toArray(new Response[0]), query);
+            Iterable<QueryReply> it = outgoingQueryReplyFactory.createReplies(responses.toArray(new Response[0]),
+                    10, null, sessionGUID.bytes(), (byte)1, false, false);
+            
             for (QueryReply queryReply : it) {
                 sender.send(queryReply);
                 pendingMessageCount++;

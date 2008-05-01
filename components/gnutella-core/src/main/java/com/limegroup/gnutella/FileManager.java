@@ -1,14 +1,14 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
+import org.limewire.collection.IntSet;
+
 import com.limegroup.gnutella.downloader.VerifyingFile;
-import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
@@ -20,20 +20,6 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  */
 public interface FileManager {
 
-    /** The string used by Clip2 reflectors to index hosts. */
-    public static final String INDEXING_QUERY = "    ";
-
-    /** The string used by LimeWire to browse hosts. */
-    public static final String BROWSE_QUERY = "*.*";
-
-    /** A type-safe empty LimeXMLDocument list. */
-    public static final List<LimeXMLDocument> EMPTY_DOCUMENTS = Collections.emptyList();
-
-    /**
-     * Characters used to tokenize queries and file names.
-     */
-    public static final String DELIMITERS = " -._+/*()\\,";
-   
     /** Asynchronously loads all files by calling loadSettings.  Sets this's
      *  callback to be "callback", and notifies "callback" of all file loads.
      *      @modifies this
@@ -85,7 +71,7 @@ public interface FileManager {
      * Returns the number of forcibly shared files.
      */
     public abstract int getNumForcedFiles();
-
+    
     /**
      * Returns the file descriptor with the given index.  Throws
      * IndexOutOfBoundsException if the index is out of range.  It is also
@@ -102,6 +88,12 @@ public interface FileManager {
     public abstract FileDesc get(int i);
 
     /**
+     * Returns set of indices of {@link FileDesc file descs} that have URN <code>
+     * urn</code> or null if there are none.
+     */    
+    public IntSet getIndicesForUrn(URN urn);
+    
+    /**
      * Determines whether or not the specified index is valid.  The index
      * is valid if it is within range of the number of files shared, i.e.,
      * if:<p>
@@ -116,10 +108,16 @@ public interface FileManager {
 
     /**
      * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt>
-     * or null if the file is not shared.
+     * or null if the file is not shared or not a store file.
      */
     public abstract FileDesc getFileDescForFile(File f);
 
+    /**
+     * Returns the shared <tt>FileDesc</tt> that is wrapping this <tt>File</tt>
+     * or null if the file is not shared.
+     */
+    FileDesc getSharedFileDescForFile(File file);
+    
     /**
      * Determines whether or not the specified URN is shared in the library
      * as a complete file.
@@ -454,17 +452,6 @@ public interface FileManager {
     public abstract QueryRouteTable getQRT();
 
     /**
-     * Returns an array of all responses matching the given request.  If there
-     * are no matches, the array will be empty (zero size).
-     *
-     * Incomplete Files are NOT returned in responses to queries.
-     *
-     * Design note: returning an empty array requires no extra allocations,
-     * as empty arrays are immutable.
-     */
-    public abstract Response[] query(QueryRequest request);
-
-    /**
      * @return true if there exists an application-shared file with the
      * provided name.
      */
@@ -483,7 +470,7 @@ public interface FileManager {
     /** 
      * Returns an iterator for all shared files. 
      */
-    public abstract Iterator<Response> getIndexingIterator(final boolean includeXML);
+    public abstract Iterator<FileDesc> getIndexingIterator();
     
     /**
      * Notification that an IncompleteFileDesc has been updated.

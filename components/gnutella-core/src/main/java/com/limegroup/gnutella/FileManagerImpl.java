@@ -27,11 +27,8 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
-import org.limewire.collection.Function;
 import org.limewire.collection.IntSet;
 import org.limewire.collection.MultiCollection;
-import org.limewire.collection.MultiIterator;
-import org.limewire.collection.StringTrie;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
@@ -42,9 +39,7 @@ import org.limewire.setting.StringArraySetting;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.FileUtils;
-import org.limewire.util.I18NConvert;
 import org.limewire.util.RPNParser;
-import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
 import com.limegroup.gnutella.FileManagerEvent.Type;
@@ -54,7 +49,6 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.licenses.LicenseType;
-import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -161,28 +155,6 @@ public abstract class FileManagerImpl implements FileManager {
      */
     private Map<File, FileDesc> _fileToFileDescMap;
 
-    /**
-     * A trie mapping keywords in complete filenames to the indices in _files.
-     * Keywords are the tokens when the filename is tokenized with the
-     * characters from DELIMITERS as delimiters.
-     * 
-     * IncompleteFile keywords are NOT stored.
-     * 
-     * INVARIANT: For all keys k in _keywordTrie, for all i in the IntSet
-     * _keywordTrie.get(k), _files[i]._path.substring(k)!=-1. Likewise for all
-     * i, for all k in _files[i]._path where _files[i] is not an
-     * IncompleteFileDesc, _keywordTrie.get(k) contains i.
-     */
-    @InspectableForSize("size of keyword trie")
-    private StringTrie<IntSet> _keywordTrie;
-    
-    /**
-     * A trie mapping keywords in complete filenames to the indices in _files.
-     * Contains ONLY incomplete keywords.
-     */
-    @InspectableForSize("size of incomplete keyword trie")
-    private StringTrie<IntSet> _incompleteKeywordTrie;
-    
     /**
      * A map of appropriately case-normalized URN strings to the
      * indices in _files.  Used to make query-by-hash faster.
@@ -364,25 +336,6 @@ public abstract class FileManagerImpl implements FileManager {
      * Boolean for checking if the QRT needs to be rebuilt.
      */
     protected static volatile boolean _needRebuild = true;
-
-    private static final boolean isDelimiter(char c) {
-        switch (c) {
-        case ' ':
-        case '-':
-        case '.':
-        case '_':
-        case '+':
-        case '/':
-        case '*':
-        case '(':
-        case ')':
-        case '\\':
-        case ',':
-            return true;
-        default:
-            return false;
-        }
-    }
     
     private final QRPUpdater qrpUpdater = new QRPUpdater();
 
@@ -419,8 +372,6 @@ public abstract class FileManagerImpl implements FileManager {
         _numForcedFiles = 0;
         _files = new ArrayList<FileDesc>();
         _storeFiles = new ArrayList<FileDesc>();
-        _keywordTrie = new StringTrie<IntSet>(true);  //ignore case
-        _incompleteKeywordTrie = new StringTrie<IntSet>(true);
         _urnMap = new HashMap<URN, IntSet>();
         _urnStoreMap = new HashMap<URN, IntSet>();
         _extensions = new HashSet<String>();
@@ -533,6 +484,10 @@ public abstract class FileManagerImpl implements FileManager {
     public synchronized FileDesc get(int i) {
         return _files.get(i);
     }
+    
+    public synchronized IntSet getIndicesForUrn(URN urn) {
+        return _urnMap.get(urn);
+    }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#isValidIndex(int)
@@ -554,6 +509,10 @@ public abstract class FileManagerImpl implements FileManager {
         	return _fileToFileDescMap.get(f);
         else
             return _storeToFileDescMap.get(f);
+    }
+    
+    public synchronized FileDesc getSharedFileDescForFile(File file) {
+        return _fileToFileDescMap.get(file);
     }
     
     /* (non-Javadoc)
@@ -768,9 +727,6 @@ public abstract class FileManagerImpl implements FileManager {
     protected void loadFinished(int revision) {
         if(LOG.isDebugEnabled())
             LOG.debug("Finished loading revision: " + revision);
-        
-        // Various cleanup & persisting...
-        trim();
         fileManagerController.loadFinished();
         save();
         fileManagerController.loadFinishedPostSave();
@@ -879,7 +835,7 @@ public abstract class FileManagerImpl implements FileManager {
         for(File file : list) {
             if(_revision != revision)
                 break;
-            addFileIfSharedOrStore(file, EMPTY_DOCUMENTS, true, _revision, null, AddType.ADD_SHARE);
+            addFileIfSharedOrStore(file, LimeXMLDocument.EMPTY_LIST, true, _revision, null, AddType.ADD_SHARE);
         }
         
         // Update the store directory and add only files from the LWS
@@ -898,13 +854,11 @@ public abstract class FileManagerImpl implements FileManager {
         for(File file: storeList) {
             if(_revision != revision)
                 break;
-            addFileIfSharedOrStore(file, EMPTY_DOCUMENTS, true, _revision, null, AddType.ADD_STORE);
+            addFileIfSharedOrStore(file, LimeXMLDocument.EMPTY_LIST, true, _revision, null, AddType.ADD_STORE);
         }
         
         _isUpdating = false;
 
-        trim();
-        
         if(LOG.isDebugEnabled())
             LOG.debug("Finished queueing shared files for revision: " + revision);
             
@@ -995,7 +949,7 @@ public abstract class FileManagerImpl implements FileManager {
         if (file_list == null)
             return;
         for(int i = 0; i < file_list.length && _revision == revision; i++)
-            addFileIfSharedOrStore(file_list[i], EMPTY_DOCUMENTS, true, _revision, null, AddType.ADD_SHARE);
+            addFileIfSharedOrStore(file_list[i], LimeXMLDocument.EMPTY_LIST, true, _revision, null, AddType.ADD_SHARE);
             
         // Exit quickly (without doing the dir lookup) if revisions changed.
         if(_revision != revision)
@@ -1063,7 +1017,7 @@ public abstract class FileManagerImpl implements FileManager {
         if (file_list == null)
             return;
         for(int i = 0; i < file_list.length && _revision == revision; i++)
-            addFileIfSharedOrStore(file_list[i], EMPTY_DOCUMENTS, true, _revision, null, AddType.ADD_STORE);
+            addFileIfSharedOrStore(file_list[i], LimeXMLDocument.EMPTY_LIST, true, _revision, null, AddType.ADD_STORE);
             
         // Exit quickly (without doing the dir lookup) if revisions changed.
         if(_revision != revision)
@@ -1238,14 +1192,14 @@ public abstract class FileManagerImpl implements FileManager {
      * @see com.limegroup.gnutella.FileManager#addFileAlways(java.io.File)
      */
 	public void addFileAlways(File file) {
-		addFileAlways(file, EMPTY_DOCUMENTS, null);
+		addFileAlways(file, LimeXMLDocument.EMPTY_LIST, null);
 	}
 	
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#addFileAlways(java.io.File, com.limegroup.gnutella.FileEventListener)
      */
 	public void addFileAlways(File file, FileEventListener callback) {
-	    addFileAlways(file, EMPTY_DOCUMENTS, callback);
+	    addFileAlways(file, LimeXMLDocument.EMPTY_LIST, callback);
 	}
 	
 	/* (non-Javadoc)
@@ -1280,21 +1234,21 @@ public abstract class FileManagerImpl implements FileManager {
          _data.FILES_NOT_TO_SHARE.remove(file);
          if (!isFileShareable(file))
              _transientSharedFiles.add(file);
-         addFileIfSharedOrStore(file, EMPTY_DOCUMENTS, true, _revision, callback, AddType.ADD_SHARE);
+         addFileIfSharedOrStore(file, LimeXMLDocument.EMPTY_LIST, true, _revision, callback, AddType.ADD_SHARE);
      }
 	
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#addFileIfShared(java.io.File)
      */
    public void addFileIfShared(File file) {
-       addFileIfSharedOrStore(file, EMPTY_DOCUMENTS, true, _revision, null, AddType.ADD_SHARE);
+       addFileIfSharedOrStore(file, LimeXMLDocument.EMPTY_LIST, true, _revision, null, AddType.ADD_SHARE);
    }
    
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#addFileIfShared(java.io.File, com.limegroup.gnutella.FileEventListener)
      */
     public void addFileIfShared(File file, FileEventListener callback) {
-        addFileIfSharedOrStore(file, EMPTY_DOCUMENTS, true, _revision, callback, AddType.ADD_SHARE);
+        addFileIfSharedOrStore(file, LimeXMLDocument.EMPTY_LIST, true, _revision, callback, AddType.ADD_SHARE);
     }
     
     /* (non-Javadoc)
@@ -1506,8 +1460,6 @@ public abstract class FileManagerImpl implements FileManager {
         if(SharingUtils.isForcedShareDirectory(parent))
             _numForcedFiles++;
 	
-       loadKeywords(_keywordTrie, fileDesc);
-	
         // Commit the time in the CreactionTimeCache, but don't share
         // the installer.  We populate free LimeWire's with free installers
         // so we have to make sure we don't influence the what is new
@@ -1526,26 +1478,6 @@ public abstract class FileManagerImpl implements FileManager {
         callback.handleFileEvent(evt); // always notify the individual callback.
     }
     
-    /**
-     * @param trie to update
-     * @param fd to load keywords from
-     */
-    private void loadKeywords(StringTrie<IntSet> trie, FileDesc fd) {
-        // Index the filename.  For each keyword...
-        String[] keywords = extractKeywords(fd);
-        
-        for (int i = 0; i < keywords.length; i++) {
-            String keyword = keywords[i];
-            //Ensure the _keywordTrie has a set of indices associated with keyword.
-            IntSet indices = trie.get(keyword);
-            if (indices == null) {
-                indices = new IntSet();
-                trie.add(keyword, indices);
-            }
-            //Add fileIndex to the set.
-            indices.add(fd.getIndex());
-        }
-    }
     
     /**
      * Creates a file descriptor for a given file and a set of urns
@@ -1645,7 +1577,6 @@ public abstract class FileManagerImpl implements FileManager {
         // "shared" to begin with.
         if (fd instanceof IncompleteFileDesc) {
             removeSharedUrnIndex(fd, false);
-            removeKeywords(_incompleteKeywordTrie, fd);
             _numIncompleteFiles--;
             boolean removed = _incompletesShared.remove(i);
             assert removed : "File "+i+" not found in " + _incompletesShared;
@@ -1670,8 +1601,6 @@ public abstract class FileManagerImpl implements FileManager {
         }
 
 
-        removeKeywords(_keywordTrie, fd);
-
         //Remove hash information.
         removeSharedUrnIndex(fd, true);
   
@@ -1683,20 +1612,6 @@ public abstract class FileManagerImpl implements FileManager {
         }
         
         return fd;
-    }
-    
-    private void removeKeywords(StringTrie<IntSet> trie, FileDesc fd) {
-        //Remove references to this from index.
-        String[] keywords = extractKeywords(fd);
-        for (int j = 0; j < keywords.length; j++) {
-            String keyword = keywords[j];
-            IntSet indices = trie.get(keyword);
-            if (indices != null) {
-                indices.remove(fd.getIndex());
-                if (indices.size() == 0)
-                    trie.remove(keyword);
-            }
-        }        
     }
     
     protected synchronized FileDesc removeStoreFile(File f, boolean notify){
@@ -1813,16 +1728,22 @@ public abstract class FileManagerImpl implements FileManager {
     //  Search, utility, etc...
     ///////////////////////////////////////////////////////////////////////////
 	
-    public synchronized void fileURNSUpdated(FileDesc fd) {
-        updateSharedUrnIndex(fd);
-        if (fd instanceof IncompleteFileDesc) {
-            IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
-            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
-                    SharingSettings.LOAD_PARTIAL_KEYWORDS.getValue() &&
-                    ifd.hasUrnsAndPartialData()) {
-                loadKeywords(_incompleteKeywordTrie, fd);
-                _needRebuild = true;
+    public void fileURNSUpdated(FileDesc fd) {
+        FileManagerEvent event = null; 
+        synchronized (this) {
+            updateSharedUrnIndex(fd);
+            if (fd instanceof IncompleteFileDesc) {
+                IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
+                if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
+                        SharingSettings.LOAD_PARTIAL_KEYWORDS.getValue() &&
+                        ifd.hasUrnsAndPartialData()) {
+                    event = new FileManagerEvent(this, Type.CHANGE_FILE, fd);                    
+                    _needRebuild = true;
+                }
             }
+        }
+        if (event != null) {
+            dispatchFileEvent(event);
         }
     }
     
@@ -1859,20 +1780,6 @@ public abstract class FileManagerImpl implements FileManager {
         }
     }
     
-    /**
-     * Utility method to perform standardized keyword extraction for the given
-     * <tt>FileDesc</tt>.  This handles extracting keywords according to 
-     * locale-specific rules.
-     * 
-     * @param fd the <tt>FileDesc</tt> containing a file system path with 
-     *  keywords to extact
-     * @return an array of keyword strings for the given file
-     */
-    private static String[] extractKeywords(FileDesc fd) {
-        return StringUtils.split(I18NConvert.instance().getNorm(fd.getPath()), 
-            DELIMITERS);
-    }
-
     /** 
      * Removes any URN index information for desc from shared files
      * @param purgeState true if any state should also be removed (creation time, altlocs) 
@@ -1992,17 +1899,7 @@ public abstract class FileManagerImpl implements FileManager {
     }
 
 
-    /** Ensures that this's index takes the minimum amount of space.  Only
-     *  affects performance, not correctness; hence no modifies clause. */
-    private synchronized void trim() {
-        _keywordTrie.trim(new Function<IntSet, IntSet>() {
-            public IntSet apply(IntSet intSet) {
-                intSet.trim();
-                return intSet;
-            }
-        });
-    }
-
+    
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#validateSensitiveFile(java.io.File)
@@ -2303,261 +2200,6 @@ public abstract class FileManagerImpl implements FileManager {
 
     ////////////////////////////////// Queries ///////////////////////////////
 
-    /**
-     * Constant for an empty <tt>Response</tt> array to return when there are
-     * no matches.
-     */
-    private static final Response[] EMPTY_RESPONSES = new Response[0];
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#query(com.limegroup.gnutella.messages.QueryRequest)
-     */
-    public synchronized Response[] query(QueryRequest request) {
-        String str = request.getQuery();
-        boolean includeXML = shouldIncludeXMLInResponse(request);
-
-        //Special case: return up to 3 of your 'youngest' files.
-        if (request.isWhatIsNewRequest()) 
-            return respondToWhatIsNewRequest(request, includeXML);
-
-        //Special case: return everything for Clip2 indexing query ("    ") and
-        //browse queries ("*.*").  If these messages had initial TTLs too high,
-        //StandardMessageRouter will clip the number of results sent on the
-        //network.  Note that some initial TTLs are filterd by GreedyQuery
-        //before they ever reach this point.
-        if (str.equals(INDEXING_QUERY) || str.equals(BROWSE_QUERY))
-            return respondToIndexingQuery(includeXML);
-
-        //Normal case: query the index to find all matches.  TODO: this
-        //sometimes returns more results (>255) than we actually send out.
-        //That's wasted work.
-        //Trie requires that getPrefixedBy(String, int, int) passes
-        //an already case-changed string.  Both search & urnSearch
-        //do this kind of match, so we canonicalize the case for them.
-        str = _keywordTrie.canonicalCase(str);        
-        IntSet matches = search(str, null, request.desiresPartialResults());
-        if(request.getQueryUrns().size() > 0)
-            matches = urnSearch(request.getQueryUrns(),matches);
-        
-        if (matches==null)
-            return EMPTY_RESPONSES;
-
-        List<Response> responses = new LinkedList<Response>();
-        final MediaType.Aggregator filter = MediaType.getAggregator(request);
-        LimeXMLDocument doc = request.getRichQuery();
-
-        // Iterate through our hit indices to create a list of results.
-        for (IntSet.IntSetIterator iter=matches.iterator(); iter.hasNext();) { 
-            int i = iter.next();
-            FileDesc desc = _files.get(i);
-            assert desc != null : "unexpected null in FileManager for query:\n"+ request;
-
-            if ((filter != null) && !filter.allow(desc.getFileName()))
-                continue;
-
-            desc.incrementHitCount();
-            fileManagerController.handleSharedFileUpdate(desc.getFile());
-
-            Response resp = fileManagerController.createResponse(desc);
-            if(includeXML) {
-                addXMLToResponse(resp, desc);
-                if(doc != null && resp.getDocument() != null &&
-                   !isValidXMLMatch(resp, doc))
-                    continue;
-            }
-            responses.add(resp);
-        }
-        if (responses.size() == 0)
-            return EMPTY_RESPONSES;
-        return responses.toArray(new Response[responses.size()]);
-    }
-
-    /**
-     * Responds to a what is new request.
-     */
-    private Response[] respondToWhatIsNewRequest(QueryRequest request, 
-                                                 boolean includeXML) {
-        // see if there are any files to send....
-        // NOTE: we only request up to 3 urns.  we don't need to worry
-        // about partial files because we don't add them to the cache.
-    	// NOTE: this doesn't return Store files. getNewestUrns only 
-    	//		 returns the top 3 shared files
-        List<URN> urnList = fileManagerController.getNewestSharedUrns(request, 3);
-        if (urnList.size() == 0)
-            return EMPTY_RESPONSES;
-        
-        // get the appropriate responses
-        Response[] resps = new Response[urnList.size()];
-        for (int i = 0; i < urnList.size(); i++) {
-            URN currURN = urnList.get(i);
-            FileDesc desc = getFileDescForUrn(currURN);
-            
-            // should never happen since we don't add times for IFDs and
-            // we clear removed files...
-            if ((desc==null) || (desc instanceof IncompleteFileDesc))
-                throw new RuntimeException("Bad Rep - No IFDs allowed!");
-            
-            // Formulate the response
-            Response r = fileManagerController.createResponse(desc);
-            if(includeXML)
-                addXMLToResponse(r, desc);
-            
-            // Cache it
-            resps[i] = r;
-        }
-        return resps;
-    }
-
-    /** Responds to a Indexing (mostly BrowseHost) query - gets all the shared
-     *  files of this client.
-     */
-    private Response[] respondToIndexingQuery(boolean includeXML) {
-        //Special case: if no shared files, return null
-        // This works even if incomplete files are shared, because
-        // they are added to _numIncompleteFiles and not _numFiles.
-        if (_numFiles==0)
-            return EMPTY_RESPONSES;
-
-        //Extract responses for all non-null (i.e., not deleted) files.
-        //Because we ignore all incomplete files, _numFiles continues
-        //to work as the expected size of ret.
-        Response[] ret=new Response[_numFiles-_numForcedFiles];
-        int j=0;
-        for (int i=0; i<_files.size(); i++) {
-            FileDesc desc = _files.get(i);
-            // If the file was unshared or is an incomplete file,
-            // DO NOT SEND IT.
-            if (desc==null || desc instanceof IncompleteFileDesc || SharingUtils.isForcedShare(desc)) 
-                continue;
-        
-            assert j<ret.length : "_numFiles is too small";
-            ret[j] = fileManagerController.createResponse(desc);
-            if(includeXML)
-                addXMLToResponse(ret[j], desc);
-            j++;
-        }
-        assert j==ret.length : "_numFiles is too large";
-        return ret;
-    }
-
-    
-    /**
-     * A normal FileManager will never include XML.
-     * It is expected that MetaFileManager overrides this and returns
-     * true in some instances.
-     */
-    protected abstract boolean shouldIncludeXMLInResponse(QueryRequest qr);
-    
-    /**
-     * This implementation does nothing.
-     */
-    protected abstract void addXMLToResponse(Response res, FileDesc desc);
-    
-    /**
-     * Determines whether we should include the response based on XML.
-     */
-    protected abstract boolean isValidXMLMatch(Response res, LimeXMLDocument doc);
-
-
-    /**
-     * Returns a set of indices of files matching q, or null if there are no
-     * matches.  Subclasses may override to provide different notions of
-     * matching.  The caller of this method must not mutate the returned
-     * value.
-     */
-    protected IntSet search(String query, IntSet priors, boolean partial) {
-        //As an optimization, we lazily allocate all sets in case there are no
-        //matches.  TODO2: we can avoid allocating sets when getPrefixedBy
-        //returns an iterator of one element and there is only one keyword.
-        IntSet ret=priors;
-
-        //For each keyword in the query....  (Note that we avoid calling
-        //StringUtils.split and take advantage of Trie's offset/limit feature.)
-        for (int i=0; i<query.length(); ) {
-            if (isDelimiter(query.charAt(i))) {
-                i++;
-                continue;
-            }
-            int j;
-            for (j=i+1; j<query.length(); j++) {
-                if (isDelimiter(query.charAt(j)))
-                    break;
-            }
-
-            //Search for keyword, i.e., keywords[i...j-1].  
-            Iterator<IntSet> iter= _keywordTrie.getPrefixedBy(query, i, j);
-            if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
-                    SharingSettings.ALLOW_PARTIAL_RESPONSES.getValue() &&
-                    partial)
-                iter = new MultiIterator<IntSet>(iter,_incompleteKeywordTrie.getPrefixedBy(query, i, j));
-            
-            if (iter.hasNext()) {
-                //Got match.  Union contents of the iterator and store in
-                //matches.  As an optimization, if this is the only keyword and
-                //there is only one set returned, return that set without 
-                //copying.
-                IntSet matches=null;
-                while (iter.hasNext()) {                
-                    IntSet s= iter.next();
-                    if (matches==null) {
-                        if (i==0 && j==query.length() && !(iter.hasNext()))
-                            return s;
-                        matches=new IntSet();
-                    }
-                    matches.addAll(s);
-                }
-
-                //Intersect matches with ret.  If ret isn't allocated,
-                //initialize to matches.
-                if (ret==null)   
-                    ret=matches;
-                else
-                    ret.retainAll(matches);
-            } else {
-                //No match.  Optimizaton: no matches for keyword => failure
-                return null;
-            }
-            
-            //Optimization: no matches after intersect => failure
-            if (ret.size()==0)
-                return null;        
-            i=j;
-        }
-        if (ret==null || ret.size()==0)
-            return null;
-        return ret;
-    }
-    
-    /**
-     * Find all files with matching full URNs
-     */
-    private synchronized IntSet urnSearch(Iterable<URN> urnsIter, IntSet priors) {
-        IntSet ret = priors;
-        for(URN urn : urnsIter) {
-            IntSet hits = _urnMap.get(urn);
-            if(hits!=null) {
-                // double-check hits to be defensive (not strictly needed)
-                IntSet.IntSetIterator iter = hits.iterator();
-                while(iter.hasNext()) {
-                    FileDesc fd = _files.get(iter.next());
-        		    // If the file is unshared or an incomplete file
-        		    // DO NOT SEND IT.
-        		    if(fd == null || fd instanceof IncompleteFileDesc)
-        			    continue;
-                    if(fd.containsUrn(urn)) {
-                        // still valid
-                        if(ret==null) ret = new IntSet();
-                        ret.add(fd.getIndex());
-                    } 
-                }
-            }
-        }
-        return ret;
-    }
-    
- 
-    
-
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#isFileApplicationShared(java.lang.String)
      */
@@ -2604,12 +2246,12 @@ public abstract class FileManagerImpl implements FileManager {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#getIndexingIterator(boolean)
      */
-    public Iterator<Response> getIndexingIterator(final boolean includeXML) {
-        return new Iterator<Response>() {
+    public Iterator<FileDesc> getIndexingIterator() {
+        return new Iterator<FileDesc>() {
             int startRevision = _revision;
             /** Points to the index that is to be examined next. */
             int index = 0;
-            Response preview;
+            FileDesc preview;
 
             private boolean preview() {
                 assert preview == null;
@@ -2627,9 +2269,7 @@ public abstract class FileManagerImpl implements FileManager {
                         if (desc == null || desc instanceof IncompleteFileDesc || SharingUtils.isForcedShare(desc)) 
                             continue;
 
-                        preview = fileManagerController.createResponse(desc);
-                        if(includeXML)
-                            addXMLToResponse(preview, desc);
+                        preview = desc;
                         return true;
                     }
                     return false;
@@ -2652,9 +2292,9 @@ public abstract class FileManagerImpl implements FileManager {
                 return preview != null || preview();
             }
 
-            public Response next() {
+            public FileDesc next() {
                 if (hasNext()) {
-                    Response item = preview;
+                    FileDesc item = preview;
                     preview = null;
                     return item;
                 }

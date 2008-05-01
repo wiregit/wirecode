@@ -250,4 +250,8 @@ public class QueryRequestStub implements QueryRequest {
         return 0;
     }
 
+    public boolean shouldIncludeXMLInResponse() {
+        return false;
+    }
+
 }

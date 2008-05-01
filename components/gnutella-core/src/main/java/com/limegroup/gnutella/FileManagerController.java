@@ -3,14 +3,12 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
-import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
@@ -34,12 +32,6 @@ public interface FileManagerController {
 
     public void lastUrnRemoved(URN urn);
 
-    /**
-     * NOTE: this is only returning newest URNs of shared files, store
-     * file are ignored here even if they are part of the newest files
-     */
-    public List<URN> getNewestSharedUrns(QueryRequest qr, int number);
-
     public ContentResponseData getResponseDataFor(URN urn);
 
     public void requestValidation(URN urn, ContentResponseObserver observer);
@@ -49,10 +41,6 @@ public interface FileManagerController {
     public Long getCreationTime(URN urn);
 
     public void fileChanged(URN urn, Long time);
-
-    public Response createResponse(FileDesc desc);
-
-    public Response createPureMetadataResponse();
 
     public void loadFinishedPostSave();
 

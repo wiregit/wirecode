@@ -1,13 +1,10 @@
 package com.limegroup.gnutella.stubs;
 
 import java.net.InetSocketAddress;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.net.SocketsManager;
 import org.limewire.security.MACCalculatorRepositoryManager;
-import org.limewire.security.SecurityToken;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -29,7 +26,7 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PongCacher;
 import com.limegroup.gnutella.QueryUnicaster;
 import com.limegroup.gnutella.ReplyHandler;
-import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.SharedFilesKeywordIndex;
 import com.limegroup.gnutella.StandardMessageRouter;
 import com.limegroup.gnutella.Statistics;
 import com.limegroup.gnutella.UDPReplyHandlerCache;
@@ -42,10 +39,10 @@ import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.LimeACKHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
+import com.limegroup.gnutella.messages.OutgoingQueryReplyFactory;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
-import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
@@ -95,8 +92,9 @@ public class MessageRouterStub extends StandardMessageRouter {
             PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
             Provider<OOBHandler> oobHandlerFactory,
             Provider<MACCalculatorRepositoryManager> macManager,
-            Provider<LimeACKHandler> limeACKHandler) {
-        super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder,oobHandlerFactory,macManager,limeACKHandler);
+            Provider<LimeACKHandler> limeACKHandler, OutgoingQueryReplyFactory outgoingQueryReplyFactory,
+            SharedFilesKeywordIndex sharedFilesKeywordIndex) {
+        super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder,oobHandlerFactory,macManager,limeACKHandler, outgoingQueryReplyFactory, sharedFilesKeywordIndex);
     }
     
     @Override
@@ -119,17 +117,5 @@ public class MessageRouterStub extends StandardMessageRouter {
     protected void respondToUDPPingRequest(PingRequest request, 
                                            InetSocketAddress addr,
                                            ReplyHandler handler) {}
-
-    @Override
-    protected List<QueryReply> createQueryReply(byte[] guid, byte ttl,
-                                    long speed, 
-                                    Response[] res, byte[] clientGUID, 
-                                    boolean busy, 
-                                    boolean uploaded, 
-                                    boolean measuredSpeed, 
-                                    boolean isFromMcast,
-                                    boolean shouldMarkForFWTransfer,
-                                    SecurityToken securityToken) {
-        return Collections.emptyList();
-    }
+    
 }

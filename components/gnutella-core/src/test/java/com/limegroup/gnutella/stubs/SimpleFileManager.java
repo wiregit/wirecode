@@ -7,15 +7,12 @@ import java.util.Set;
 
 import org.limewire.util.NameValue;
 
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManagerController;
 import com.limegroup.gnutella.FileManagerImpl;
-import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLNames;
@@ -41,23 +38,8 @@ public class SimpleFileManager extends FileManagerImpl {
     }
 
     @Override
-    public boolean shouldIncludeXMLInResponse(QueryRequest qr) {
-        return false;
-    }
-    
-    @Override
-    public void addXMLToResponse(Response r, FileDesc fd) {
-        r.setDocument(fd.getXMLDocument());
-    }
-    
-    @Override
     public void fileChanged(File f) {
         throw new UnsupportedOperationException("unsupported");
-    }
-    
-    @Override
-    public boolean isValidXMLMatch(Response r, LimeXMLDocument doc) {
-        return true;
     }
     
     /**

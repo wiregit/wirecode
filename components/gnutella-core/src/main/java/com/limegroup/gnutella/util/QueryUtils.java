@@ -9,7 +9,6 @@ import java.util.StringTokenizer;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.settings.SearchSettings;
 
 public class QueryUtils {
@@ -40,7 +39,7 @@ public class QueryUtils {
     	
         //Separate by whitespace and _, etc.
         Set<String> ret=new LinkedHashSet<String>();
-        String delim = FileManager.DELIMITERS;
+        String delim = QueryUtils.DELIMITERS;
         char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
         StringBuilder sb = new StringBuilder(delim.length() + illegal.length);
         sb.append(illegal).append(delim);
@@ -76,7 +75,7 @@ public class QueryUtils {
     public static final String removeIllegalChars(String name) {
         String ret = "";
         
-        String delim = FileManager.DELIMITERS;
+        String delim = QueryUtils.DELIMITERS;
         char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
         StringBuilder sb = new StringBuilder(delim.length() + illegal.length);
         sb.append(illegal).append(delim);
@@ -168,5 +167,10 @@ public class QueryUtils {
     public static String createQueryString(String name) {
     	return createQueryString(name, false);
     }
+
+    /**
+     * Characters used to tokenize queries and file names.
+     */
+    public static final String DELIMITERS = " -._+/*()\\,";
 
 }

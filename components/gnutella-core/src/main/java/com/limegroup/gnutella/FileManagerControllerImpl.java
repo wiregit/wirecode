@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.ScheduledExecutorService;
@@ -17,14 +16,12 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
-import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
-import com.limegroup.gnutella.xml.LimeXMLProperties;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 import com.limegroup.gnutella.xml.LimeXMLSchema;
@@ -39,7 +36,6 @@ public class FileManagerControllerImpl implements FileManagerController {
     private final Provider<CreationTimeCache> creationTimeCache;
     private final Provider<ContentManager> contentManager;
     private final Provider<AltLocManager> altLocManager;
-    private final Provider<ResponseFactory> responseFactory;
     private final Provider<SavedFileManager> savedFileManager;
     private final Provider<SimppManager> simppManager;
     private final Provider<UpdateHandler> updateHandler;
@@ -64,7 +60,6 @@ public class FileManagerControllerImpl implements FileManagerController {
             Provider<CreationTimeCache> creationTimeCache,
             Provider<ContentManager> contentManager,
             Provider<AltLocManager> altLocManager,
-            Provider<ResponseFactory> responseFactory,
             Provider<SavedFileManager> savedFileManager,
             Provider<SimppManager> simppManager,
             Provider<UpdateHandler> updateHandler,
@@ -80,7 +75,6 @@ public class FileManagerControllerImpl implements FileManagerController {
         this.creationTimeCache = creationTimeCache;
         this.contentManager = contentManager;
         this.altLocManager = altLocManager;
-        this.responseFactory = responseFactory;
         this.savedFileManager = savedFileManager;
         this.simppManager = simppManager;
         this.updateHandler = updateHandler;
@@ -168,13 +162,6 @@ public class FileManagerControllerImpl implements FileManagerController {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManagerController#getNewestUrns(com.limegroup.gnutella.messages.QueryRequest, int)
-     */
-    public List<URN> getNewestSharedUrns(QueryRequest qr, int number) {
-        return creationTimeCache.get().getFiles(qr, number);
-    }
-    
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManagerController#getResponseDataFor(com.limegroup.gnutella.URN)
      */
     public ContentResponseData getResponseDataFor(URN urn) {
@@ -207,14 +194,6 @@ public class FileManagerControllerImpl implements FileManagerController {
 
     public Long getCreationTime(URN urn) {
         return creationTimeCache.get().getCreationTime(urn);
-    }
-
-    public Response createPureMetadataResponse() {
-        return responseFactory.get().createResponse(LimeXMLProperties.DEFAULT_NONFILE_INDEX, 0, " ");
-    }
-
-    public Response createResponse(FileDesc desc) {
-        return responseFactory.get().createResponse(desc);
     }
 
     public void loadFinishedPostSave() {

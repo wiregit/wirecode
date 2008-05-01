@@ -151,6 +151,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private final Provider<DHTPeerPublisher> dhtPeerPublisher;
     private final Provider<PromotionServices> promotionServices;
 
+    private final Provider<SharedFilesKeywordIndex> sharedFilesKeywordIndex;
+
     @Inject
     public LifecycleManagerImpl(
              Provider<IPFilter> ipFilter,
@@ -202,7 +204,8 @@ public class LifecycleManagerImpl implements LifecycleManager {
             Provider<PushProxiesPublisher> pushProxiesPublisher,
             Provider<DHTPeerLocator> dhtPeerLocator,
             Provider<DHTPeerPublisher> dhtPeerPublisher,
-            Provider<PromotionServices> promotionServices) { 
+            Provider<PromotionServices> promotionServices,
+            Provider<SharedFilesKeywordIndex> sharedFilesKeywordIndex) { 
         this.ipFilter = ipFilter;
         this.simppManager = simppManager;
         this.acceptor = acceptor;
@@ -252,6 +255,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         this.dhtPeerLocator = dhtPeerLocator;
         this.dhtPeerPublisher = dhtPeerPublisher;
         this.promotionServices = promotionServices;
+        this.sharedFilesKeywordIndex = sharedFilesKeywordIndex;
     }
     
     /* (non-Javadoc)
@@ -287,6 +291,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         LimeCoreGlue.preinstall();
         
         fileManager.get().addFileEventListener(activityCallback.get());
+        fileManager.get().addFileEventListener(sharedFilesKeywordIndex.get());
         //allow incoming RUDP messages to be forwarded correctly.
         LimeRUDPMessageHandler handler = new LimeRUDPMessageHandler(udpMultiplexor.get());
         handler.install(messageRouter.get());      

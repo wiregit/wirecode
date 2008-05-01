@@ -9,6 +9,22 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public interface QueryRequest extends Message {
 
+    /** 
+     * The string used by Clip2 reflectors to index hosts.
+     * 
+     * Deprecated: queries are not sent out with this and LimeWire will
+     * respond with an empty result set.
+     */
+    public static final String INDEXING_QUERY = "    ";
+
+    /**
+     * The string used by LimeWire to browse hosts.
+     *
+     * Deprecated: queries are not sent out with this and LimeWire will
+     * respond with an empty result set.
+     */
+    public static final String BROWSE_QUERY = "*.*";
+    
     /**
      * Constant for the default query TTL.
      */
@@ -264,4 +280,9 @@ public interface QueryRequest extends Message {
 
     /** Determines if this is an originated query */
     public boolean isOriginated();
+    
+    /**
+     * @return whether or not a response to this query should include XML.
+     */
+    public boolean shouldIncludeXMLInResponse();
 }

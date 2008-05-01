@@ -77,15 +77,15 @@ public class StoreFileManagerTest extends FileManagerTest {
         // it is important to check the query at all bounds,
         // including tests for case.
         // IMPORTANT: the store files should never show up in any of these
-        responses=fman.query(queryRequestFactory.createQuery("unit",(byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("unit",(byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("FileManager", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("FileManager", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("test", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("test", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("file", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("file", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery(
+        responses=keywordIndex.query(queryRequestFactory.createQuery(
             "FileManager UNIT tEsT", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);        
                 
@@ -173,15 +173,15 @@ public class StoreFileManagerTest extends FileManagerTest {
         // it is important to check the query at all bounds,
         // including tests for case.
         // IMPORTANT: the store files should never show up in any of these
-        responses=fman.query(queryRequestFactory.createQuery("unit",(byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("unit",(byte)3));
         assertEquals("Unexpected number of responses", 2, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("FileManager", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("FileManager", (byte)3));
         assertEquals("Unexpected number of responses", 2, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("test", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("test", (byte)3));
         assertEquals("Unexpected number of responses", 2, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("file", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("file", (byte)3));
         assertEquals("Unexpected number of responses", 2, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery(
+        responses=keywordIndex.query(queryRequestFactory.createQuery(
             "FileManager UNIT tEsT", (byte)3));
         assertEquals("Unexpected number of responses", 2, responses.length);        
                 
@@ -418,15 +418,15 @@ public class StoreFileManagerTest extends FileManagerTest {
         // it is important to check the query at all bounds,
         // including tests for case.
         // IMPORTANT: the store files should never show up in any of these
-        responses=fman.query(queryRequestFactory.createQuery("unit",(byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("unit",(byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("FileManager", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("FileManager", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("test", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("test", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("file", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("file", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery(
+        responses=keywordIndex.query(queryRequestFactory.createQuery(
             "FileManager UNIT tEsT", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);  
     }

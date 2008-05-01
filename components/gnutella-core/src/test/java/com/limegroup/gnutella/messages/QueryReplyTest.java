@@ -54,6 +54,7 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
+import com.limegroup.gnutella.SharedFilesKeywordIndex;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
@@ -1130,6 +1131,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         FileManager fileManager = injector.getInstance(FileManager.class);
+        SharedFilesKeywordIndex keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
         addFilesToLibrary();
         addAlternateLocationsToFiles();
         
@@ -1148,7 +1150,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             }
             
 			QueryRequest qr = queryRequestFactory.createQuery(fd.getFileName());
-			Response[] hits = fileManager.query(qr);
+			Response[] hits = keywordIndex.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
 			// one response, don't test.
@@ -1193,6 +1195,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         MessageFactory messageFactory = injector.getInstance(MessageFactory.class);
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         FileManager fileManager = injector.getInstance(FileManager.class);
+        SharedFilesKeywordIndex keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
+        
         addFilesToLibrary();
         addCreationTimeToFiles();
         boolean checked = false;
@@ -1212,7 +1216,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             }
             
 			QueryRequest qr = queryRequestFactory.createQuery(fd.getFileName());
-			Response[] hits = fileManager.query(qr);
+			Response[] hits = keywordIndex.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
 			// one response, don't test.

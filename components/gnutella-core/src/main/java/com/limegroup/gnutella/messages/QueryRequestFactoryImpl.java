@@ -10,7 +10,6 @@ import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.NetworkManager;
@@ -480,16 +479,6 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.messages.QueryRequestFactory#createBrowseHostQuery()
-     */
-    public QueryRequest createBrowseHostQuery() {
-        return createQueryRequest(QueryRequestImpl.newQueryGUID(false), (byte) 1,
-                FileManager.INDEXING_QUERY, "", URN.NO_URN_SET, null,
-                !networkManager.acceptedIncomingConnection(), Network.UNKNOWN,
-                false, 0, false, 0, false);
-    }
-
-    /* (non-Javadoc)
      * @see com.limegroup.gnutella.messages.QueryRequestFactory#createNonFirewalledQuery(java.lang.String, byte)
      */
     public QueryRequest createNonFirewalledQuery(String query, byte ttl) {
@@ -643,22 +632,6 @@ public class QueryRequestFactoryImpl implements QueryRequestFactory {
                 addressSecurityToken, isFirewalled, network,
                 canReceiveOutOfBandReplies, featureSelector, doNotProxy,
                 metaFlagMask, true);
-    }
-
-    /**
-     * Constructs a query with an optional 'normalize' parameter, which if
-     * false, does not normalize the query string.
-     */
-    private QueryRequest createQueryRequest(byte[] guid, byte ttl,
-            String query, String richQuery, Set<? extends URN> queryUrns,
-            AddressSecurityToken addressSecurityToken, boolean isFirewalled,
-            Network network, boolean canReceiveOutOfBandReplies,
-            int featureSelector, boolean doNotProxy, int metaFlagMask,
-            boolean normalize) {
-        return createQueryRequest(guid, ttl, 0, query, richQuery, queryUrns,
-                addressSecurityToken, isFirewalled, network,
-                canReceiveOutOfBandReplies, featureSelector, doNotProxy,
-                metaFlagMask, normalize);
     }
 
     /* (non-Javadoc)

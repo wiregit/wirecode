@@ -708,4 +708,8 @@ public class LimeWireCore {
     public PromotionServices getPromotionServices() {
         return injector.getInstance(PromotionServices.class);
     }
+
+    public SharedFilesKeywordIndex getSharedFilesKeywordIndex() {
+        return injector.getInstance(SharedFilesKeywordIndex.class);
+    }
 }

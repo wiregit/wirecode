@@ -167,11 +167,11 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
         assertEquals(fileManager.getNumFiles(), files.size());
 
-        for (Iterator<Response> it = fileManager.getIndexingIterator(false); it.hasNext();) {
-            Response result = it.next();
-            boolean contained = files.remove(result.getName());
+        for (Iterator<FileDesc> it = fileManager.getIndexingIterator(); it.hasNext();) {
+            FileDesc result = it.next();
+            boolean contained = files.remove(result.getFileName());
             assertTrue("File is missing in browse response: "
-                    + result.getName(), contained);
+                    + result.getFileName(), contained);
         }
         assertTrue("Browse returned more results than shared: " + files,
                 files.isEmpty());

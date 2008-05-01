@@ -51,6 +51,7 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.ResponseFactoryImpl;
 import com.limegroup.gnutella.RouteTable;
+import com.limegroup.gnutella.SharedFilesKeywordIndex;
 import com.limegroup.gnutella.Statistics;
 import com.limegroup.gnutella.UDPReplyHandlerCache;
 import com.limegroup.gnutella.UDPService;
@@ -65,6 +66,7 @@ import com.limegroup.gnutella.messagehandlers.InspectionRequestHandler;
 import com.limegroup.gnutella.messagehandlers.LimeACKHandler;
 import com.limegroup.gnutella.messagehandlers.OOBHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
+import com.limegroup.gnutella.messages.OutgoingQueryReplyFactory;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -377,8 +379,10 @@ public class RequeryDownloadTest extends LimeTestCase {
                 PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
                 Provider<OOBHandler> oobHandlerFactory,
                 Provider<MACCalculatorRepositoryManager> macManager,
-                Provider<LimeACKHandler> limeACKHandler) {
-            super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder, oobHandlerFactory, macManager,limeACKHandler);
+                Provider<LimeACKHandler> limeACKHandler,
+                OutgoingQueryReplyFactory outgoingQueryReplyFactory,
+                SharedFilesKeywordIndex sharedFilesKeywordIndex) {
+            super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder, oobHandlerFactory, macManager,limeACKHandler, outgoingQueryReplyFactory, sharedFilesKeywordIndex);
         } 
         
         @Override

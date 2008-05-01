@@ -43,4 +43,5 @@ public interface ResponseFactory {
      */
     public Response createFromStream(InputStream is) throws IOException;
 
+    public Response createPureMetadataResponse();
 }
