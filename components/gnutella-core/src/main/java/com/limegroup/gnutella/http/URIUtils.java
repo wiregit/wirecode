@@ -1,15 +1,13 @@
 package com.limegroup.gnutella.http;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.StringTokenizer;
-import java.io.UnsupportedEncodingException;
 
 import org.limewire.http.Constants;
 import org.limewire.service.ErrorService;
-
-import com.limegroup.gnutella.settings.BugSettings;
 
 /**
  * Utilities for URIs
@@ -17,19 +15,6 @@ import com.limegroup.gnutella.settings.BugSettings;
 public class URIUtils {
     
     private static final String RESERVED = ";/?:@&=+$,";
-
-    /**
-     * a temporary method to allow the tracking of URI's
-     * that cannot be constructed via java.net.URI.
-     * 
-     * Sends feedback via the ErrorService.
-     * 
-     * @param e
-     */
-    public static void error(URISyntaxException e) {
-        if (BugSettings.SEND_URI_BUGS.getValue())
-            ErrorService.error(e);
-    }
 
     /**
      * Creates a <code>URI</code> from the input string.

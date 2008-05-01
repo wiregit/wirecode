@@ -47,7 +47,6 @@ class WeedLicense extends AbstractLicense {
         try {
             return URIUtils.toURI((URI + "?" + VID + "=" + vid + "&" + CID + "=" + cid));
         } catch(URISyntaxException bad) {
-            URIUtils.error(bad);
             return null;
         }  
     }

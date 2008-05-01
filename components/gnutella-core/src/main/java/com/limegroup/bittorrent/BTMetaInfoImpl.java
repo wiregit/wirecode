@@ -277,7 +277,7 @@ public class BTMetaInfoImpl implements BTMetaInfo {
 			validateURI(trackerURI);
 			_trackers = new URI[] { trackerURI };
 		} catch (URISyntaxException e) {
-            URIUtils.error(e);
+            //URIUtils.error(e);
             throw new ValueException("bad tracker: " + data.getAnnounce());
 		}
 
