@@ -309,7 +309,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     protected VerifyingFile commonOutFile;
     
     /** A list of pushing hosts. */
-    private PushList pushes;
+    private volatile PushList pushes;
 
     ///////////////////////// Variables for GUI Display  /////////////////
     /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,

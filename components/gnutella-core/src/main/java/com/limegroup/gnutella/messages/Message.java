@@ -130,6 +130,9 @@ public interface Message extends Comparable<Message> {
      */
     public static class MessageCounter implements Inspectable {
         
+        private final Map<Class, EnumMap<Network, MessageTypeCounter>> counts = 
+            new HashMap<Class, EnumMap<Network,MessageTypeCounter>>();
+        
         private final int history;
         
         /**
@@ -139,8 +142,6 @@ public interface Message extends Comparable<Message> {
             this.history = history;
         }
 
-        private Map<Class, EnumMap<Network, MessageTypeCounter>> counts = 
-            new HashMap<Class, EnumMap<Network,MessageTypeCounter>>();
 
         public synchronized void countMessage(Message msg) {
             EnumMap<Network, MessageTypeCounter> m = counts.get(msg.getClass());
