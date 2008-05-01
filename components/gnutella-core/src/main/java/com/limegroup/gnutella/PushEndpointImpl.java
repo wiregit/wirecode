@@ -8,6 +8,7 @@ import java.util.Set;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.service.ErrorService;
 
 public class PushEndpointImpl extends AbstractPushEndpoint {
     /**
@@ -69,6 +70,9 @@ public class PushEndpointImpl extends AbstractPushEndpoint {
         } else
             _proxies = Collections.emptySet();
 		_externalAddr = addr;
+		
+		if(addr != null && addr.getAddress().equals(RemoteFileDesc.BOGUS_IP))
+		    ErrorService.error(new IllegalStateException("constructing PEI w/ bogus IP!"));
 	}
 
 	/**
@@ -80,10 +84,11 @@ public class PushEndpointImpl extends AbstractPushEndpoint {
         IpPort ret = getIpPort();
 	    if (ret == null || !networkInstanceUtils.isValidExternalIpPort(ret))
 	        return null;
-        
-        assert !ret.getAddress().equals(RemoteFileDesc.BOGUS_IP) : 
-            "bogus ip address leaked, field is "+_externalAddr+
-            " cache contains "+pushEndpointCache.getCached(_guid);
+	    
+	    // This shouldn't be possible... but we can workaround it.
+	    if(ret.getAddress().equals(RemoteFileDesc.BOGUS_IP))
+	        return null;
+	    
         
 	    return ret;
 	}
