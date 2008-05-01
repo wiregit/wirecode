@@ -96,7 +96,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
                 statement.close();
             }
         } catch (SQLException ex) {
-            throw new DatabaseExecutionException("SQLException during update");
+            throw new DatabaseExecutionException(ex);
         }
     }
     

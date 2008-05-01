@@ -5,12 +5,21 @@ package org.limewire.promotion;
  * various operations in class {@link SearcherDatabase}.
  */
 public class DatabaseExecutionException extends Exception {
-    
-    public DatabaseExecutionException(String msg) {
-        super(msg);
-    }
-    
+
     public DatabaseExecutionException() {
-        
+        super();
     }
+
+    public DatabaseExecutionException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public DatabaseExecutionException(String message) {
+        super(message);
+    }
+
+    public DatabaseExecutionException(Throwable cause) {
+        super(cause);
+    }
+    
 }
