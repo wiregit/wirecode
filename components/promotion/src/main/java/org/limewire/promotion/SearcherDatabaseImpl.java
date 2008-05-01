@@ -63,6 +63,11 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
     public void shutDown() {
         if (connection != null) {
             try {
+                if (connection.isClosed()) return;
+            } catch (SQLException e1) {
+                // ignore
+            }
+            try {
                 executeUpdate("SHUTDOWN");
                 connection.close();
             } catch (SQLException ignore) {
