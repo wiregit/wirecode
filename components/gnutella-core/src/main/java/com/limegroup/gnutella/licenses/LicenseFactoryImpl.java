@@ -155,7 +155,7 @@ public final class LicenseFactoryImpl implements LicenseFactory {
                 throw new URISyntaxException(uri.toString(), "Invalid authority: " + authority);
             
         } catch(URISyntaxException e) {
-            URIUtils.error(e);
+            //URIUtils.error(e);
             uri = null;
             LOG.error("Unable to create URI", e);
         }
