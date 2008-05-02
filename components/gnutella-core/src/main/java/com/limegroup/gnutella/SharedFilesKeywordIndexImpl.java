@@ -240,6 +240,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                     loadKeywords(keywordTrie, fileDesc);
                 }
             }
+            break;
         case REMOVE_FILE:
             for (FileDesc fileDesc : fileDescs) {
                 if (fileDesc instanceof IncompleteFileDesc) {
@@ -248,11 +249,15 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                     removeKeywords(keywordTrie, fileDesc);
                 }
             }
+            break;
         case RENAME_FILE:
+            break;
         case FILEMANAGER_LOADED:
             trim();
+            break;
         case FILEMANAGER_LOADING:
             clear();
+            break;
         }
     }
     
@@ -266,14 +271,16 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         
         for (int i = 0; i < keywords.length; i++) {
             String keyword = keywords[i];
-            //Ensure the _keywordTrie has a set of indices associated with keyword.
-            IntSet indices = trie.get(keyword);
-            if (indices == null) {
-                indices = new IntSet();
-                trie.add(keyword, indices);
+            synchronized (trie) {
+                //Ensure the _keywordTrie has a set of indices associated with keyword.
+                IntSet indices = trie.get(keyword);
+                if (indices == null) {
+                    indices = new IntSet();
+                    trie.add(keyword, indices);
+                }
+                //Add fileIndex to the set.
+                indices.add(fd.getIndex());
             }
-            //Add fileIndex to the set.
-            indices.add(fd.getIndex());
         }
     }
     
@@ -283,11 +290,13 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         String[] keywords = extractKeywords(fd);
         for (int j = 0; j < keywords.length; j++) {
             String keyword = keywords[j];
-            IntSet indices = trie.get(keyword);
-            if (indices != null) {
-                indices.remove(fd.getIndex());
-                if (indices.size() == 0)
-                    trie.remove(keyword);
+            synchronized (trie) {
+                IntSet indices = trie.get(keyword);
+                if (indices != null) {
+                    indices.remove(fd.getIndex());
+                    if (indices.size() == 0)
+                        trie.remove(keyword);
+                }
             }
         }        
     }

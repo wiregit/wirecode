@@ -108,6 +108,7 @@ public class FileManagerTest extends LimeTestCase {
         });
         fman = (FileManagerImpl)injector.getInstance(FileManager.class);
         keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
+        fman.addFileEventListener(keywordIndex);
     }
 	
     @Override
