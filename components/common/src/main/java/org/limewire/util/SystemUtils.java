@@ -30,8 +30,10 @@ public class SystemUtils {
             // Only load the library on systems where we've made it.
             if (OSUtils.isWindows() && !OSUtils.isGoodWindows())
                 System.loadLibrary("SystemUtilitiesA");
-            else if(OSUtils.isMacOSX() || OSUtils.isWindows()) 
-                System.loadLibrary("SystemUtilities");
+            else if (OSUtils.isMacOSX105())
+                System.loadLibrary("SystemUtilitiesLeopard");
+            else if (OSUtils.isMacOSX() || OSUtils.isWindows()) 
+                System.loadLibrary("SystemUtilitiesTiger");
             
             canLoad = true;
         } catch(UnsatisfiedLinkError noGo) {
