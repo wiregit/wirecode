@@ -575,7 +575,7 @@ public class UPnPManager  {
 				if(LOG.isDebugEnabled())
 				    LOG.debug("Analyzing: " + current);
 				    
-				if(current._description == null)
+				if(current._description == null || current._internalAddress == null)
 				    continue;
 				
 				// does it have our description?
