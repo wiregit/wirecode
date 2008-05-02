@@ -1143,7 +1143,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 if(LOG.isDebugEnabled())
                     LOG.debug(_rfd + " Content-Range like */?, " + str);
                 synchronized(this) {
-                    return Range.createRange(0, _amountToRead - 1);
+                    return Range.createRange(0, Math.max(_amountToRead - 1, 0));
                 }
             }
 
