@@ -147,8 +147,8 @@ public abstract class AbstractPushEndpoint implements PushEndpoint {
             // and is valid, non-private and if the port is valid as well.
             IpPort address = getValidExternalAddress();
             if (address!=null) {
-                String addr = getAddress();
-                int port = getPort();
+                String addr = address.getAddress();
+                int port = address.getPort();
                 if (!addr.equals(RemoteFileDesc.BOGUS_IP) && 
                         NetworkUtils.isValidPort(port)){
                     httpString.append(port)

@@ -129,7 +129,8 @@ public class PushEndpointFactoryImpl implements PushEndpointFactory {
         }
         
         // if address isn't there or private, reset address and fwt
-        if (addr == null || !networkInstanceUtils.isValidExternalIpPort(addr)) {
+        if (addr == null || !networkInstanceUtils.isValidExternalIpPort(addr)
+                || addr.equals(RemoteFileDesc.BOGUS_IP)) {
             fwtVersion = 0;
             addr = null;
         }

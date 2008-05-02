@@ -151,12 +151,20 @@ class RemoteFileDescFactoryImpl implements RemoteFileDescFactory {
             int FWTVersion, PushEndpoint pe, boolean tlsCapable) {
         if (firewalled) {
             if (pe == null) {
-                try {
-                    pe = pushEndpointFactory.createPushEndpoint(clientGUID, proxies,
-                            PushEndpoint.PLAIN, FWTVersion, new IpPortImpl(host, port));
-                } catch (UnknownHostException uhe) {
-                    throw new IllegalArgumentException(uhe);
+                // Don't allow the bogus_ip in here.
+                IpPort ipp;
+                if(!host.equals(RemoteFileDesc.BOGUS_IP)) {
+                    try {
+                        ipp = new IpPortImpl(host, port);
+                    } catch(UnknownHostException uhe) {
+                        throw new IllegalArgumentException(uhe);
+                    }
+                } else {
+                    ipp = null;
+                    FWTVersion = 0;
                 }
+                pe = pushEndpointFactory.createPushEndpoint(clientGUID, proxies,
+                        PushEndpoint.PLAIN, FWTVersion, ipp);
             }
             clientGUID = pe.getClientGUID();
         } else {
