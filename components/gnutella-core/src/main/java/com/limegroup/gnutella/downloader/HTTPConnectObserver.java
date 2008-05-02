@@ -10,7 +10,7 @@ import org.limewire.nio.observer.ConnectObserver;
  * Specialized base class for download-related Observers for better 
  * type safety
  */
-abstract class HTTPConnectObserver implements ConnectObserver {
+public abstract class HTTPConnectObserver implements ConnectObserver {
 
     /**
      * unlike other ConnectObservers these do not throw.
