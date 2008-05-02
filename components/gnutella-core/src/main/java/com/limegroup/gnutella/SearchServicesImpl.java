@@ -5,6 +5,7 @@ import java.util.Set;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
+import org.limewire.util.DebugRunnable;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -70,11 +71,11 @@ public class SearchServicesImpl implements SearchServices {
       final Connectable host, GUID guid, GUID serventID, 
       final Set<? extends IpPort> proxies, final boolean canDoFWTransfer) {
         final BrowseHostHandler handler = browseHostHandlerManager.createBrowseHostHandler(guid, serventID);
-        ThreadExecutor.startThread(new Runnable() {
+        ThreadExecutor.startThread(new DebugRunnable(new Runnable() {
             public void run() {
                 handler.browseHost(host, proxies, canDoFWTransfer);
             }
-        }, "BrowseHoster" );
+        }), "BrowseHoster" );
         
         return handler;
     }

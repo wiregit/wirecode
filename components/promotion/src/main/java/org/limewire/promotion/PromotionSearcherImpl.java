@@ -153,29 +153,36 @@ public class PromotionSearcherImpl implements PromotionSearcher {
                 return;
             }
 
-            removeInvalidResults(results);
+            removeInvalidResults(results, timeQueried);
 
-            int shownResults = 0;
+            List<QueryResult> visibleResults = new ArrayList<QueryResult>(results.size());
             for (QueryResult result : results) {
-                final float probability = result.getPromotionMessageContainer().getProbability();
-                // Introduce some randomness into results using
-                // the probability field if we don't have room
-                if (Math.random() <= probability) {
-                    // Looks like we can show this result...
-                    // Verify it!
-                    if (isMessageValid(result.getPromotionMessageContainer(), result
-                            .getBinderUniqueName(), timeQueried.getTime())) {
-                        if (!result.getPromotionMessageContainer().isImpressionOnly()) {
-                            shownResults++;
-                            callback.process(result.getPromotionMessageContainer());
-                        }
-                        // record we just showed this result.
-                        impressionsCollector
-                                .recordImpression(query, timeQueried, new Date(), result
-                                        .getPromotionMessageContainer(), result
-                                        .getBinderUniqueName());
-                    }
+                if (result.getPromotionMessageContainer().isImpressionOnly()) {
+                    impressionsCollector.recordImpression(query, timeQueried, new Date(), result
+                            .getPromotionMessageContainer(), result.getBinderUniqueName());
+                } else {
+                    visibleResults.add(result);
                 }
+            }
+            
+            int shownResults = 0;
+            int idx = 0;
+            for(QueryResult result : visibleResults) {
+                final float probability = result.getPromotionMessageContainer().getProbability();
+                int remainingToIterateThrough = visibleResults.size() - idx;
+                int remainingMaxToShow = maxNumberOfResults - shownResults;
+                if (remainingToIterateThrough <= remainingMaxToShow
+                        || Math.random() <= probability) {
+                    shownResults++;
+                    callback.process(result.getPromotionMessageContainer());
+                    // record we just showed this result.
+                    impressionsCollector
+                            .recordImpression(query, timeQueried, new Date(), result
+                                    .getPromotionMessageContainer(), result
+                                    .getBinderUniqueName());
+                }
+                
+                idx++;
 
                 // Exit early if we're done. Assumes impression-only are sorted
                 // at top.
@@ -196,7 +203,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
          * Strips out results that don't seem to be valid due to territory,
          * radius, or other restriction.
          */
-        private void removeInvalidResults(List<QueryResult> results) {
+        private void removeInvalidResults(List<QueryResult> results, Date timeQueried) {
             for (QueryResult result : new ArrayList<QueryResult>(results)) {
                 PromotionMessageContainer promo = result.getPromotionMessageContainer();
                 List<GeoRestriction> restrictions = promo.getGeoRestrictions();
@@ -246,6 +253,12 @@ public class PromotionSearcherImpl implements PromotionSearcher {
                             continue;
                         }
                     }
+                }
+                
+                if (!isMessageValid(result.getPromotionMessageContainer(), result
+                        .getBinderUniqueName(), timeQueried.getTime())) {
+                    results.remove(result);
+                    continue;
                 }
             }
         }
