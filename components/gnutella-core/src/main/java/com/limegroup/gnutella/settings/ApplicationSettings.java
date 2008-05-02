@@ -15,6 +15,7 @@ import org.limewire.util.OSUtils;
  * Settings for LimeWire application
  */
 public class ApplicationSettings extends LimeProps {
+
     private ApplicationSettings() {}
     
     /**
@@ -289,6 +290,10 @@ public class ApplicationSettings extends LimeProps {
     /** Whether collecting and reporting usage stats is allowed */
     public static final BooleanSetting USAGE_STATS =
         FACTORY.createBooleanSetting("USAGE_STATS", false);
+    
+    /** If simpp should be initialized when core is initialized. */
+    public static final BooleanSetting INITIALIZE_SIMPP =
+        FACTORY.createBooleanSetting("INITIALIZE_SIMPP", true);
     
     /**
      * Gets the current language setting.

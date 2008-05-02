@@ -10,6 +10,7 @@ import org.limewire.util.CommonUtils;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.LimeProps;
 import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -113,7 +114,8 @@ public class LimeCoreGlue {
         core.updateSimppSettings(simppManager.get().getPropsString());
         mojito.updateSimppSettings(simppManager.get().getPropsString());
         
-        simppManager.get().initialize();
+        if(ApplicationSettings.INITIALIZE_SIMPP.getValue())
+            simppManager.get().initialize();
     }
     
     /** Simple exception for failure to install. */

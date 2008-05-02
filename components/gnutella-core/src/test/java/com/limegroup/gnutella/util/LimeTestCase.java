@@ -15,6 +15,7 @@ import org.limewire.util.TestUtils;
 import com.limegroup.gnutella.Backend;
 import com.limegroup.gnutella.LimeCoreGlue;
 import com.limegroup.gnutella.LimeTestUtils;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -198,6 +199,7 @@ public abstract class LimeTestCase extends BaseTestCase implements ErrorCallback
         SettingsGroupManager.instance().revertToDefault();
         LimeProps.instance().getFactory().getRevertSetting().setValue(false);
         MojitoProps.instance().getFactory().getRevertSetting().setValue(false);
+        ApplicationSettings.INITIALIZE_SIMPP.setValue(false);
         ConnectionSettings.FILTER_CLASS_C.setValue(false);
         ConnectionSettings.DISABLE_UPNP.setValue(true);
         ConnectionSettings.ALLOW_DUPLICATE.setValue(true);
