@@ -56,8 +56,10 @@ public class MetaDataFactoryImpl implements MetaDataFactory {
                 return parseMultipleFormat(f);
         } catch (OutOfMemoryError e) {
             LOG.warn("Ran out of memory while parsing.",e);
-        } catch (IllegalArgumentException e) {
-            return null;
+            throw (IOException)new IOException().initCause(e);
+        } catch (Exception e) {
+            LOG.warn("Exception parsing file.",e);
+            throw (IOException)new IOException().initCause(e);
         }
         return null;
     }
