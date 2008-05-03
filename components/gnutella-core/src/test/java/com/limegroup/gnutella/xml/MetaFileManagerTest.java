@@ -22,6 +22,7 @@ import com.limegroup.gnutella.FileManagerImpl;
 import com.limegroup.gnutella.FileManagerTest;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.SharedFilesKeywordIndex;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.QueryRouteTable;
@@ -65,6 +66,8 @@ public class MetaFileManagerTest extends FileManagerTest {
         injector.getInstance(Acceptor.class).setAddress(InetAddress.getLocalHost());
 
         fman = (FileManagerImpl)injector.getInstance(FileManager.class);
+        keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
+        fman.addFileEventListener(keywordIndex);
 
         limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
         
