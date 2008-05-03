@@ -361,8 +361,7 @@ public class FileManagerTest extends LimeTestCase {
     }
     
     public void testIgnoreHugeFiles() throws Exception {
-        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-        
+
         f3 = createNewTestFile(11);   
         waitForLoad();
         f1 = createNewTestFile(1);
@@ -386,11 +385,6 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals(f6, result.getFileDescs()[0].getFile());
         assertEquals("unexpected number of files", 3, fman.getNumFiles());
         assertEquals("unexpected fman size", Integer.MAX_VALUE, fman.getSize());
-        responses=keywordIndex.query(queryRequestFactory.createQuery("*.*", (byte)3));
-        assertEquals("unexpected responses length", 3, responses.length);
-        assertEquals("files differ", responses[0].getName(), f3.getName());
-        assertEquals("files differ", responses[1].getName(), f5.getName());
-        assertEquals("files differ", responses[2].getName(), f6.getName());
     }
     
     /**
@@ -457,6 +451,8 @@ public class FileManagerTest extends LimeTestCase {
             will(returnValue(true));
             atLeast(1).of(notDesiring).desiresPartialResults();
             will(returnValue(false));
+            allowing(qrDesiring).shouldIncludeXMLInResponse();
+            will(returnValue(true));
         }});
         
         // a) single urn, not enough data written -> not shared
@@ -1407,10 +1403,10 @@ public class FileManagerTest extends LimeTestCase {
         Iterator<FileDesc> it = fman.getIndexingIterator();
         FileDesc response = it.next();
         assertEquals(response.getFileName(), f1.getName());
-        assertNotNull(response.getLimeXMLDocuments());
+        assertNotNull(response.getXMLDocument());
         response = it.next();
         assertEquals(response.getFileName(), f2.getName());
-        assertNotNull(response.getLimeXMLDocuments());
+        assertNotNull(response.getXMLDocument());
         assertFalse(it.hasNext());
         try {
             response = it.next();
