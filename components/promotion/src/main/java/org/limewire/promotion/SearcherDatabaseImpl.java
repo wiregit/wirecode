@@ -251,7 +251,13 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
         } catch (SQLException ex) {
             throw new RuntimeException("SQLException during query.", ex);
         } catch (PromotionException ex) {
-            throw new RuntimeException("PromotionException caught.", ex);
+            //
+            // LWC-1452: This is only thrown when the binder has an invalid date
+            //           or is corrupt.  In any case, do not show an exception
+            //           here, simply return null.  By returning null we signal
+            //           that this binder needs to be re-ingested from the network.
+            //
+            return null;
         } finally {
             if (statement != null) {
                 try {
