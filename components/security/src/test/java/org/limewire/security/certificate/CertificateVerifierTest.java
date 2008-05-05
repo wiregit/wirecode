@@ -7,8 +7,11 @@ import java.security.cert.Certificate;
 
 import junit.framework.Test;
 
+import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.util.BaseTestCase;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -25,7 +28,12 @@ public class CertificateVerifierTest extends BaseTestCase {
 
     @Override
     public void setUp() throws Exception {
-        injector = Guice.createInjector(new LimeWireSecurityCertificateModule());
+        injector = Guice.createInjector(new LimeWireSecurityCertificateModule(), new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(LimeHttpClient.class).to(SimpleLimeHttpClient.class);
+            }
+        });
     }
 
     public void testIsValidCertificatePass() throws IOException, KeyStoreException {

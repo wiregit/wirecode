@@ -10,11 +10,14 @@ import javax.crypto.KeyGenerator;
 
 import junit.framework.Test;
 
+import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.http.httpclient.SimpleLimeHttpClient;
 import org.limewire.security.LimeWireSecurityModule;
 import org.limewire.security.certificate.CipherProvider.CipherType;
 import org.limewire.security.certificate.CipherProvider.SignatureType;
 import org.limewire.util.BaseTestCase;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
@@ -88,7 +91,12 @@ public class CipherProviderTest extends BaseTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        Injector injector = Guice.createInjector(new LimeWireSecurityModule());
+        Injector injector = Guice.createInjector(new LimeWireSecurityModule(), new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(LimeHttpClient.class).to(SimpleLimeHttpClient.class);
+            }
+        });
         cipherProvider = injector.getInstance(CipherProvider.class);
     }
 
