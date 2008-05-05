@@ -7,7 +7,6 @@ import junit.framework.Test;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.stubs.HTTPConnectObserverStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class PushListTest extends LimeTestCase {
@@ -90,9 +89,12 @@ public class PushListTest extends LimeTestCase {
     }
     
     public void testGetExactHostMultipleConnectsToSameHost() {
-        PushDetails details = new PushDetails(new GUID().bytes(), "addresss");
-        PushDetails details1 = new PushDetails(new GUID().bytes(), "addresss");
-        PushDetails details2 = new PushDetails(new GUID().bytes(), "addresss");
+        GUID guid = new GUID();
+        String address = "address";
+        
+        PushDetails details = new PushDetails(guid.bytes(), address);
+        PushDetails details1 = new PushDetails(guid.bytes(), address);
+        PushDetails details2 = new PushDetails(guid.bytes(), address);
         HTTPConnectObserver observer = new HTTPConnectObserverStub();
         
         pushList.addPushHost(details, observer);
@@ -122,9 +124,12 @@ public class PushListTest extends LimeTestCase {
     }
     
     public void testGetHostMultipleConnectsToSameHost() {
-        PushDetails details = new PushDetails(new GUID().bytes(), "addresss");
-        PushDetails details1 = new PushDetails(new GUID().bytes(), "addresss");
-        PushDetails details2 = new PushDetails(new GUID().bytes(), "addresss");
+        GUID guid = new GUID();
+        String address = "address";
+        
+        PushDetails details = new PushDetails(guid.bytes(), address);
+        PushDetails details1 = new PushDetails(guid.bytes(), address);
+        PushDetails details2 = new PushDetails(guid.bytes(), address);
         HTTPConnectObserver observer = new HTTPConnectObserverStub();
         
         pushList.addPushHost(details, observer);
