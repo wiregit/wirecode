@@ -177,7 +177,7 @@ public class PushProxiesPublisher implements DHTEventListener {
         return buffer.toString();
     }
     
-    public void handleDHTEvent(DHTEvent event) {
+    public synchronized void handleDHTEvent(DHTEvent event) {
         if (event.getType() == Type.CONNECTED) {
             LOG.debug("starting push proxy publishing");
             if (publishingFuture != null) {
