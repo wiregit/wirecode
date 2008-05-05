@@ -15,6 +15,7 @@ import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.NetworkSettings;
@@ -176,6 +177,8 @@ public class SimppManagerTest extends LimeTestCase {
         ConnectionSettings.FORCED_PORT.setValue(PORT);
         
         UltrapeerSettings.NEED_MIN_CONNECT_TIME.setValue(false);
+        
+        ApplicationSettings.INITIALIZE_SIMPP.setValue(true);
     }
     
     ////////////////////////////////tests/////////////////////////////////////
