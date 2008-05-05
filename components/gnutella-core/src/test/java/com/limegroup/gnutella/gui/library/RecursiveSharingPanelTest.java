@@ -34,7 +34,7 @@ public class RecursiveSharingPanelTest extends GUIBaseTestCase {
     
     public void testRetainAncestorsSingleFile() {
         RecursiveSharingPanel panel = new RecursiveSharingPanel();
-        panel.setFileFilter(new FileFilter() {
+        panel.setRootFilter(new FileFilter() {
             public boolean accept(File pathname) {
                 return true;
             }
@@ -52,7 +52,7 @@ public class RecursiveSharingPanelTest extends GUIBaseTestCase {
                 new File("/blah")
         };
         RecursiveSharingPanel panel = new RecursiveSharingPanel();
-        panel.setFileFilter(new FileFilter() {
+        panel.setRootFilter(new FileFilter() {
             public boolean accept(File pathname) {
                 return true;
             }
@@ -74,7 +74,7 @@ public class RecursiveSharingPanelTest extends GUIBaseTestCase {
                 new File("/blah")
         };
         RecursiveSharingPanel panel = new RecursiveSharingPanel();
-        panel.setFileFilter(new FileFilter() {
+        panel.setRootFilter(new FileFilter() {
             public boolean accept(File pathname) {
                 return true;
             }
