@@ -303,7 +303,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
         //sanitize data to remove any illegal chars for file names/directories
         artist = CommonUtils.santizeString(artist);
         album = CommonUtils.santizeString(album);
-        track = CommonUtils.santizeString(track);
+        track = sanitizeTrack(track);
         title = CommonUtils.santizeString(title);
 
         subs.put(StoreTemplateProcessor.ARTIST_LABEL, artist);
@@ -314,6 +314,22 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
         return true;
     }
     
+    /**
+     * Removes the number of tracks on the album and returns just the track number
+     * of this song. If the song is a single digit, it adds a zero before it
+     * 
+     * TODO: should modify tag reader to return track and total tracks seperately to
+     * avoid needing to do this
+     */
+    private static String sanitizeTrack(String track) {
+        String[] subStrings = track.split("/");
+        
+        String trackNumber = subStrings[0].trim();
+        if( trackNumber.length() == 1)
+            trackNumber = 0 + trackNumber;
+        
+        return trackNumber;
+    }
    
     /**
      * Store files aren't shared so don't bother saving the tree
