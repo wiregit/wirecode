@@ -130,6 +130,8 @@ class PushEndpointManagerImpl implements PushEndpointService {
     void purge() {
         long currentTime = System.currentTimeMillis();
         for (Entry<GUID, AtomicLong> entry : lastSearchTimeByGUID.entrySet()) {
+            assert entry != null : "entry is null: " + lastSearchTimeByGUID;
+            assert entry.getValue() != null : "value of entry is null: " + lastSearchTimeByGUID;
             if (currentTime - entry.getValue().get() > 2 * timeBetweenSearches) {
                 lastSearchTimeByGUID.remove(entry.getKey(), entry.getValue());
             }
