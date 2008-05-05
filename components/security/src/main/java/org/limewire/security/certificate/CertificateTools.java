@@ -1,8 +1,8 @@
 package org.limewire.security.certificate;
 
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 
@@ -51,10 +51,10 @@ public class CertificateTools {
         return new File(CommonUtils.getUserSettingsDir(), "certificate/");
     }
 
-    public static URL getKeyStoreURL() {
+    public static URI getKeyStoreURI() {
         try {
-            return new URL(CertificateProps.getKeyStoreURLString());
-        } catch (MalformedURLException ex) {
+            return new URI(CertificateProps.getKeyStoreURLString());
+        } catch (URISyntaxException ex) {
             throw new RuntimeException("MalformedURL '" + CertificateProps.getKeyStoreURLString()
                     + "'", ex);
         }

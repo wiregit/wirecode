@@ -7,7 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -15,8 +14,15 @@ import java.security.cert.CertificateException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpException;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
+import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.IOUtils;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 /**
@@ -24,23 +30,28 @@ import com.google.inject.Singleton;
  * the preferences directory.
  */
 @Singleton
-public class KeyStoreProviderImpl implements KeyStoreProvider {
-    private KeyStore keyStore = null;
+class KeyStoreProviderImpl implements KeyStoreProvider {
+    private volatile KeyStore keyStore = null;
 
-    private File keyStoreLocation;
-
-    private char[] keyStorePassword;
+    private final Provider<LimeHttpClient> httpClient;
+    private volatile File keyStoreLocation;
+    private volatile char[] keyStorePassword;
 
     private final Log LOG = LogFactory.getLog(KeyStoreProviderImpl.class);
 
-    public KeyStoreProviderImpl() {
+    @Inject
+    KeyStoreProviderImpl(Provider<LimeHttpClient> httpClient) {
+        this.httpClient = httpClient;
         this.keyStoreLocation = CertificateTools.getKeyStoreLocation();
         this.keyStorePassword = CertificateTools.getKeyStorePassword();
     }
-
-    public KeyStoreProviderImpl(File keyStoreLocation, char[] keyStorePassword) {
-        this.keyStoreLocation = keyStoreLocation;
-        this.keyStorePassword = keyStorePassword;
+    
+    void setKeyStoreLocation(File location) {
+        this.keyStoreLocation = location;
+    }
+    
+    void setKeyStorePassword(char[] password) {
+        this.keyStorePassword = password;
     }
 
     public KeyStore getKeyStore() throws IOException {
@@ -77,9 +88,9 @@ public class KeyStoreProviderImpl implements KeyStoreProvider {
     }
 
     KeyStore getKeyStoreFromNetwork() throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) CertificateTools.getKeyStoreURL()
-                .openConnection();
-        connection.setRequestMethod("GET");
+        LimeHttpClient client = httpClient.get();
+        HttpGet get = new HttpGet(CertificateTools.getKeyStoreURI());
+        
 
         KeyStore newKeyStore;
         try {
@@ -87,11 +98,16 @@ public class KeyStoreProviderImpl implements KeyStoreProvider {
         } catch (KeyStoreException ex) {
             throw new IOException("KeyStoreException instantiating keystore: " + ex.getMessage());
         }
+        HttpResponse response = null;
         try {
-            connection.connect();
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            try {
+                response = client.execute(get);
+            } catch(HttpException httpX) {
+                throw (IOException)new IOException().initCause(httpX);
+            }
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 try {
-                    newKeyStore.load(connection.getInputStream(), keyStorePassword);
+                    newKeyStore.load(response.getEntity().getContent(), keyStorePassword);
                 } catch (NoSuchAlgorithmException ex) {
                     throw IOUtils.getIOException(
                             "NoSuchAlgorithmException while parsing keystore: ", ex);
@@ -102,11 +118,11 @@ public class KeyStoreProviderImpl implements KeyStoreProvider {
                 return newKeyStore;
             } else {
                 throw new IOException("Failed to download new keystore ("
-                        + CertificateTools.getKeyStoreURL().toString() + "): "
-                        + connection.getResponseCode() + " " + connection.getResponseMessage());
+                        + CertificateTools.getKeyStoreURI().toString() + "): "
+                        + response.getStatusLine());
             }
         } finally {
-            connection.disconnect();
+            client.releaseConnection(response);
         }
     }
 

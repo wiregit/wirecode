@@ -11,6 +11,9 @@ import java.security.cert.X509Certificate;
 
 import junit.framework.Test;
 
+import org.limewire.http.httpclient.LimeHttpClient;
+import org.limewire.http.httpclient.SimpleLimeHttpClient;
+import org.limewire.inject.Providers;
 import org.limewire.util.BaseTestCase;
 
 public class KeyStoreProviderTest extends BaseTestCase {
@@ -27,7 +30,7 @@ public class KeyStoreProviderTest extends BaseTestCase {
     }
 
     public void testGetKeyStoreFromNetwork() throws IOException, KeyStoreException {
-        KeyStoreProviderImpl ksp = new KeyStoreProviderImpl();
+        KeyStoreProviderImpl ksp = new KeyStoreProviderImpl(Providers.of((LimeHttpClient)new SimpleLimeHttpClient()));
         KeyStore keystore = ksp.getKeyStoreFromNetwork();
         validateKeyStore(keystore);
     }
@@ -53,7 +56,9 @@ public class KeyStoreProviderTest extends BaseTestCase {
         File location = File.createTempFile("lwunit", "keystore");
         location.deleteOnExit();
 
-        KeyStoreProviderImpl ksp = new KeyStoreProviderImpl(location, getUnitKeyStorePassword());
+        KeyStoreProviderImpl ksp = new KeyStoreProviderImpl(Providers.of((LimeHttpClient)new SimpleLimeHttpClient()));
+        ksp.setKeyStoreLocation(location);
+        ksp.setKeyStorePassword(getUnitKeyStorePassword());
         KeyStore keystore = ksp.getKeyStoreFromNetwork();
         keystore.store(new FileOutputStream(location), getUnitKeyStorePassword());
 
@@ -67,7 +72,9 @@ public class KeyStoreProviderTest extends BaseTestCase {
         location.delete();
         try {
             assertFalse(location.exists());
-            KeyStoreProviderImpl ksp = new KeyStoreProviderImpl(location, getUnitKeyStorePassword());
+            KeyStoreProviderImpl ksp = new KeyStoreProviderImpl(Providers.of((LimeHttpClient)new SimpleLimeHttpClient()));
+            ksp.setKeyStoreLocation(location);
+            ksp.setKeyStorePassword(getUnitKeyStorePassword());
             assertFalse(ksp.isCached());
 
             // Make sure caching works

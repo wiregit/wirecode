@@ -39,7 +39,7 @@
 		  <do.clean component="promotion" />
 	  </target>
 
-	<target name="compile" depends="lw-common.compile">
+	<target name="compile" depends="lw-common.compile, lw-geocode.compile-src">
 		<do.compile component="promotion" />
 	</target>
 

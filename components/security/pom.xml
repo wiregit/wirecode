@@ -32,7 +32,7 @@
     </dependency>
     <dependency>
       <groupId>org.limewire</groupId>
-      <artifactId>lw-io</artifactId>
+      <artifactId>lw-http</artifactId>
       <version>${limewire.version}</version>
     </dependency>
     <dependency>
