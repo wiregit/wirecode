@@ -1,16 +1,16 @@
-# Papiamento translation for limewire
-# Copyright (c) 2007 Rosetta Contributors and Canonical Ltd 2007
+# Kurdish translation for limewire
+# Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
 # This file is distributed under the same license as the limewire package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2008-05-05 11:31-0400\n"
-"PO-Revision-Date: 2008-02-10 13:39+0000\n"
-"Last-Translator: kyle102 <Unknown>\n"
-"Language-Team: Papiamento <pap@li.org>\n"
+"PO-Revision-Date: 2008-04-24 17:27+0000\n"
+"Last-Translator: Arîn Bawer Kurdson <serhildane@msn.com>\n"
+"Language-Team: Kurdish <ku@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -19,21 +19,19 @@ msgstr ""
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
+#, fuzzy
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"LimeWire no por a warda e informacion necesario den bo computer paso bo Hard "
-"Disk ta full. Pa sigui usa LimeWire bo mester traha luga den bo Hard Drive."
+"Limewire nikarîn ji nivîsandin dosyaye pewiste, lewre diske pedanti we "
+"tijiye. Ji berdewamkirin bikaranin LimeWire, we talkirin diske pedanti we."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
-"LimeWire no a por a habri e file necesario paso, e file ta wordo blokea dor "
-"di un otro programa. LimeWire por actua inesperadamente te ora e programa "
-"unblock e file."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:54
 msgid ""
@@ -41,9 +39,6 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
-"LimeWire no por a warda un file necesario paso bo no tin suficiente permiso "
-"pa esaki. Bo preferencianan no lo por wordo warda pa e siguiente baiha cu bo "
-"subi, of Limwire lo por actua den maneranan inespera."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:56
 msgid ""
@@ -51,25 +46,18 @@ msgid ""
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
 msgstr ""
-"LimeWire no por habri e file necesario paso e ta contene letternan of "
-"symbolonan cu no ta wordo cubri den bo systema operativo. LimeWire por actua "
-"den maneranan insespera."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:60
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
-"LimeWire no por Download e file nan cu bo e selecta paso bo Hard Disk ta "
-"yen. Pa sigui hasi uso di LimeWire porfabor traha luga den bo Hard Drive."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:62
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr ""
-"Limewire no por a download e file selecta paso e ta wordo usa dor di un otro "
-"programa. Porfabor sera e programa aki y purba di download atrobe."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:64
 msgid ""
@@ -78,9 +66,6 @@ msgid ""
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
-"LimeWire no por a traha  of continua save un file incompleto pa e download "
-"cu bo a selecta paso bo no tin suficiente permiso pa save filenan den e "
-"folder ey. Porfabos selecta un otro destination pa save esakinan."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:66
 msgid ""
@@ -88,8 +73,6 @@ msgid ""
 "because the filename contains characters which are not supported by your "
 "operating system."
 msgstr ""
-"LimeWire no por a habri e file incompleto cu bo a selecta paso e ta contene "
-"letternan of symbolonan cu no ta wordo cubri den bo systema operativo."
 
 #: core/com/limegroup/gnutella/AcceptorImpl.java:284
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:35
@@ -97,8 +80,6 @@ msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
-"LimeWire no por a traha un port pa recibi connection drentando. Algun "
-"servicionan di LimeWire no lo traha den e manera espera."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:225
 msgid ""
@@ -106,9 +87,6 @@ msgid ""
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
-"Nos Disculpa, LimeWire no por a haya bo Download nan pendiente, Bo por habri "
-"LimeWire di nobo anto bai na bo Library, anto wak bo \"Filenan Imcompleto\", "
-"anto click riba Resumi"
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:227
 msgid ""
@@ -119,56 +97,55 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:380
 msgid "Loading TLS Encryption..."
-msgstr "Habriendo Encryption TLS"
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:392
 msgid "Loading Safe Content Management..."
-msgstr "Habriendo Maneho di Contenido Sigura"
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:397
 msgid "Loading Message Router..."
-msgstr "Habriendo Message Router..."
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:402
 msgid "Checking for Updates..."
-msgstr "Buscando Informacion pa Update"
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:407
 msgid "Loading Upload Management..."
-msgstr "Habriendo Maneho di Upload..."
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:421
 msgid "Loading Connection Listener..."
 msgstr ""
-"Habriendo scuchado di Connection ( pa gara tur connectionnan drentando)"
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:430
 msgid "Loading Connection Management..."
-msgstr "Habriendo Maneho di Contenido"
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:439
 msgid "Loading Download Management..."
-msgstr "Habriendo Maneho di Download"
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:445
 msgid "Loading Ultrapeer/DHT Management..."
-msgstr "Habirendo Maneho di Ultrapeer/DHT..."
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:450
 msgid "Locating Peers..."
-msgstr "Localisando Peers"
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:466
 msgid "Loading Shared Files..."
-msgstr "Preparando Files Comparti..."
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:471
 msgid "Loading BitTorrent Management..."
-msgstr "Preparando Meneho pa BitTorrent"
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:486
 msgid "Loading Old Downloads..."
-msgstr "Preparando Download Pendiente"
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:491
 msgid "Attaching LimeWire Store Listeners..."
@@ -176,31 +153,31 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:496
 msgid "Loading Directed Querier..."
-msgstr "Preparando Directed Querier"
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:501
 msgid "Loading Magnet Listener..."
-msgstr "Preparando Magnet Listner"
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:512
 msgid "Loading Peer Listener..."
-msgstr "Preparando Scuchado di Peers"
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:517
 msgid "Loading Stale Connection Management..."
-msgstr "Preparando Maneho di Connecion Stale"
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:522
 msgid "Loading Saved Files..."
-msgstr "Preparando File nan warda"
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:527
 msgid "Loading Spam Management..."
-msgstr "Preparando Maneho di Spam"
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:532
 msgid "Loading Network Listeners..."
-msgstr "Preparando Scuchado di Netwerk"
+msgstr ""
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:553
 msgid "Loading Promotion System..."
@@ -209,39 +186,39 @@ msgstr ""
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
 msgid "All Types"
-msgstr "Tur File"
+msgstr ""
 
 #: core/com/limegroup/gnutella/MediaType.java:46
 msgid "Documents"
-msgstr "Documento"
+msgstr ""
 
 #: core/com/limegroup/gnutella/MediaType.java:47
 msgid "Programs"
-msgstr "Programa"
+msgstr ""
 
 #: core/com/limegroup/gnutella/MediaType.java:48
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:87
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:36
 msgid "Audio"
-msgstr "Audio"
+msgstr ""
 
 #: core/com/limegroup/gnutella/MediaType.java:49
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
 #: gui/com/limegroup/gnutella/gui/DaapManager.java:123
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
 msgid "Video"
-msgstr "Video"
+msgstr ""
 
 #: core/com/limegroup/gnutella/MediaType.java:50
 msgid "Images"
-msgstr "Imagen"
+msgstr ""
 
 #. show warning and return
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:150
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:124
 #, java-format
 msgid "Could not process bad MAGNET link {0}"
-msgstr "No por a procesa e Magnet Linke {0} e ta malo"
+msgstr ""
 
 #. show warning but proceed
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:156
@@ -250,8 +227,6 @@ msgid ""
 "One or more URLs in the MAGNET link were invalid. Your file may not download "
 "correctly."
 msgstr ""
-"Un of mas di e URL nan den e MAGNET link tawata invalido. Bo file porta no "
-"lo download correctamente."
 
 #: core/com/limegroup/gnutella/browser/ExternalControl.java:167
 #, java-format
@@ -285,42 +260,42 @@ msgstr ""
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:71
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:41
 msgid "For Turbo-Charged searches get LimeWire PRO."
-msgstr "Pa Turbo search busca LimeWire PRO"
+msgstr ""
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:75
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:45
 msgid "Support LimeWire's peer-to-peer development. Get PRO."
-msgstr "Aporta na desaroyo di  LimeWire su peer-to-peer. Busca PRO"
+msgstr ""
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:79
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:49
 msgid "Purchase LimeWire PRO to help us make downloads faster."
-msgstr "Cumpra LimeWire PRO pa yuda nos hasi e download nan bai mas lihe."
+msgstr ""
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:82
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:52
 msgid "For Turbo-Charged downloads get LimeWire PRO."
-msgstr "Pa Turbo Download busca LimeWire PRO"
+msgstr ""
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:85
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:55
 msgid "Support open networks. Get LimeWire PRO."
-msgstr "Pa por traha cu Netwerk nan habri. Buca LimeWire PRO"
+msgstr ""
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:89
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:59
 msgid "Support open source and open protocols. Get LimeWire PRO."
-msgstr "Pa por traha cu fuente habri y protocol nan habri. LimeWire PRO"
+msgstr ""
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:92
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:62
 msgid "For Turbo-Charged performance get LimeWire PRO."
-msgstr "Pa pa trahamento mas lihe, busca LimeWire PRO"
+msgstr ""
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:95
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:65
 msgid "Keep the Internet open. Get LimeWire PRO."
-msgstr "Tene Internet Habri. Busca LimeWire PRO"
+msgstr ""
 
 #: core/com/limegroup/gnutella/settings/UpdateSettings.java:98
 #: gui/com/limegroup/gnutella/gui/StatusLinkHandler.java:68
