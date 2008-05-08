@@ -71,14 +71,6 @@ public interface HostData {
 	public boolean isFirewalled();
 
 	/**
-	 * Returns whether or not the remote host is busy.
-	 *
-	 * @return <tt>true</tt> if the remote host is busy,
-	 *  otherwise <tt>false</tt>
-	 */
-	public boolean isBusy();
-
-	/**
 	 * Returns whether or not the remote host has browse host enabled.
 	 *
 	 * @return <tt>true</tt> if the remote host has browse host enabled,
@@ -93,16 +85,6 @@ public interface HostData {
 	 *  otherwise <tt>false</tt>
 	 */
 	public boolean isChatEnabled();
-
-	/**
-	 * Returns whether or not the remote host is reporting a speed that 
-	 * has been measured by the application, as opposed to simply selected
-	 * by the user..
-	 *
-	 * @return <tt>true</tt> if the remote host has as measured speed,
-	 *  otherwise <tt>false</tt>
-	 */
-	public boolean isMeasuredSpeed();
 	
 	/**
 	 * Returns whether or not this was a response to a multicast query.
@@ -118,12 +100,6 @@ public interface HostData {
      * @return a <tt>Set</tt> of push proxies, which can be empty
      */
     public Set<? extends IpPort> getPushProxies();
-
-    /**
-     * Returns whether or not this Host can do Firewalled Transfer.
-     *
-     */
-    public boolean supportsFWTransfer();
     
     /**
      * 

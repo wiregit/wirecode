@@ -34,10 +34,8 @@ public class HostDataFactoryImpl implements HostDataFactory {
         int port = reply.getPort();
 
         boolean firewalled        = true;
-        boolean busy              = true;
         boolean browseHostEnabled = false;
         boolean chatEnabled       = false;
-        boolean measuredSpeed     = false;
         boolean multicast         = false;
         String  vendor = "";
 
@@ -45,19 +43,7 @@ public class HostDataFactoryImpl implements HostDataFactory {
             firewalled = reply.getNeedsPush() || networkInstanceUtils.isPrivateAddress(ip);
         } catch (BadPacketException e) {
             firewalled = true;
-        }
-        
-        try { 
-            measuredSpeed = reply.getIsMeasuredSpeed();
-        } catch (BadPacketException e) { 
-            measuredSpeed = false;
-        }
-        try {
-            busy = reply.getIsBusy();
-        } catch (BadPacketException bad) {
-            busy = true;
-        }
-        
+        }        
         
         try {
             vendor = reply.getVendor();
@@ -69,11 +55,9 @@ public class HostDataFactoryImpl implements HostDataFactory {
         multicast = reply.isReplyToMulticastQuery();
 
         firewalled = firewalled && !multicast;
-        measuredSpeed = measuredSpeed || multicast;
         boolean ifirewalled = !networkManager.acceptedIncomingConnection();
         int quality = reply.calculateQualityOfService(ifirewalled, networkManager);
         Set<? extends IpPort> proxies = reply.getPushProxies();
-        boolean supportsFwt = reply.getSupportsFWTransfer();
         int fwtVersion = reply.getFWTransferVersion();
         boolean tlsCapable = reply.isTLSCapable();
 
@@ -83,9 +67,9 @@ public class HostDataFactoryImpl implements HostDataFactory {
         else
             speed = ByteUtils.long2int(reply.getSpeed()); //safe cast
         
-        return new HostDataImpl(clientGuid, messageGuid, speed, firewalled, busy, multicast,
-                chatEnabled, browseHostEnabled, measuredSpeed, ip, port, quality, vendor, proxies,
-                supportsFwt, fwtVersion, tlsCapable);
+        return new HostDataImpl(clientGuid, messageGuid, speed, firewalled, multicast,
+                chatEnabled, browseHostEnabled, ip, port, quality, vendor, proxies,
+                fwtVersion, tlsCapable);
                 
     }
 

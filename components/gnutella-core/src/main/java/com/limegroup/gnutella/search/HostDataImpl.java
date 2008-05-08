@@ -30,11 +30,6 @@ public class HostDataImpl implements HostData {
      * Constant for whether or not the host is firewalled.
      */
     private final boolean FIREWALLED;
-
-    /**
-     * Constant for whether or not the host is busy.
-     */
-    private final boolean BUSY;
     
     /**
      * Constant for whether or not this is a reply to a multicast query
@@ -50,11 +45,6 @@ public class HostDataImpl implements HostData {
      * Constant for whether or not browse host is enabled.
      */
     private final boolean BROWSE_HOST_ENABLED;
-
-    /**
-     * Constant for whether or not the speed is measured.
-     */
-    private final boolean MEASURED_SPEED;
 
     /**
      * Constant for port the host is listening on.
@@ -82,11 +72,6 @@ public class HostDataImpl implements HostData {
      * The <tt>Set</tt> of PushProxies for this host.
      */
     private final Set<? extends IpPort> PROXIES;
-
-    /**
-     * Constant for the Firewalled Transfer status of this badboy.
-     */
-    private final boolean CAN_DO_FWTRANSFER;
     
     /**
      * the version of the Firewall Transfer supported. 0 if not supported
@@ -98,24 +83,21 @@ public class HostDataImpl implements HostData {
     
     /** Constructs a HostData with all the given fields. */
     public HostDataImpl(byte[] clientGuid, byte[] messageGuid, int speed, boolean firewalled,
-            boolean busy, boolean multicast, boolean chatEnabled, boolean browseHostEnabled,
-            boolean measuredSpeed, String ip, int port, int quality, String vendorCode,
-            Set<? extends IpPort> proxies, boolean canDoFw2Fw, int fwtVersion, boolean tlsCapable) {
+                        boolean multicast, boolean chatEnabled, boolean browseHostEnabled,
+                        String ip, int port, int quality, String vendorCode,
+                        Set<? extends IpPort> proxies, int fwtVersion, boolean tlsCapable) {
         this.CLIENT_GUID = clientGuid;
         this.MESSAGE_GUID = messageGuid;
         this.SPEED = speed;
         this.FIREWALLED = firewalled;
-        this.BUSY = busy;
         this.MULTICAST = multicast;
         this.CHAT_ENABLED = chatEnabled;
         this.BROWSE_HOST_ENABLED = browseHostEnabled;
-        this.MEASURED_SPEED = measuredSpeed;
         this.IP = ip;
         this.PORT = port;
         this.QUALITY = quality;
         this.VENDOR_CODE = vendorCode;
         this.PROXIES = proxies;
-        this.CAN_DO_FWTRANSFER = canDoFw2Fw;
         this.FWT_VERSION = fwtVersion;
         this.TLS_CAPABLE = tlsCapable;
     }
@@ -222,20 +204,12 @@ public class HostDataImpl implements HostData {
         return FIREWALLED;
     }
 
-    public boolean isBusy() {
-        return BUSY;
-    }
-
     public boolean isBrowseHostEnabled() {
         return BROWSE_HOST_ENABLED;
     }
 
     public boolean isChatEnabled() {
         return CHAT_ENABLED;
-    }
-
-    public boolean isMeasuredSpeed() {
-        return MEASURED_SPEED;
     }
     
     public boolean isReplyToMulticastQuery() {
@@ -244,10 +218,6 @@ public class HostDataImpl implements HostData {
 
     public Set<? extends IpPort> getPushProxies() {
         return PROXIES;
-    }
-
-    public boolean supportsFWTransfer() {
-        return CAN_DO_FWTRANSFER;
     }
     
     public int getFWTVersionSupported() {
