@@ -151,8 +151,6 @@ import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinderImpl;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaDataFactoryImpl;
 import com.limegroup.gnutella.rudp.LimeWireGnutellaRudpModule;
-import com.limegroup.gnutella.search.HostDataFactory;
-import com.limegroup.gnutella.search.HostDataFactoryImpl;
 import com.limegroup.gnutella.search.LimeWireSearchModule;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryDispatcherImpl;
@@ -248,7 +246,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(QueryHandlerFactory.class).to(QueryHandlerFactoryImpl.class);
         bind(QueryRequestFactory.class).to(QueryRequestFactoryImpl.class);
         bind(RoutedConnectionFactory.class).to(RoutedConnectionFactoryImpl.class);
-        bind(HostDataFactory.class).to(HostDataFactoryImpl.class);
         bind(AltLocValueFactory.class).to(AltLocValueFactoryImpl.class);
         bind(AlternateLocationFactory.class).to(AlternateLocationFactoryImpl.class);
         bind(LocalFileDetailsFactory.class).to(LocalFileDetailsFactoryImpl.class);

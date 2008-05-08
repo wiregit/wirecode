@@ -8,6 +8,7 @@ import java.util.Set;
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.security.SecurityToken;
 import org.limewire.util.ByteUtils;
 
@@ -15,20 +16,22 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
+import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.util.DataUtils;
 
 @Singleton
 public class QueryReplyFactoryImpl implements QueryReplyFactory {
     
-    private final HostDataFactory hostDataFactory;
     private final ResponseFactory responseFactory;
-
+    private final NetworkManager networkManager;
+    private final NetworkInstanceUtils networkInstanceUtils;
+    
     @Inject
-    public QueryReplyFactoryImpl(HostDataFactory hostDataFactory,
+    public QueryReplyFactoryImpl(NetworkManager networkManager, NetworkInstanceUtils networkInstanceUtils,
             ResponseFactory responseFactory) {
-        this.hostDataFactory = hostDataFactory;
+        this.networkManager = networkManager;
+        this.networkInstanceUtils = networkInstanceUtils;
         this.responseFactory = responseFactory;
     }
 
@@ -417,7 +420,7 @@ public class QueryReplyFactoryImpl implements QueryReplyFactory {
     public QueryReply createFromNetwork(byte[] guid, byte ttl, byte hops,
             byte[] payload, Network network) throws BadPacketException {
         return new QueryReplyImpl(guid, ttl, hops, payload, network,
-                hostDataFactory, responseFactory);
+                networkInstanceUtils, networkManager, responseFactory);
     }
 
     protected QueryReply createInternal(byte[] guid, byte ttl, int port,
@@ -431,7 +434,7 @@ public class QueryReplyFactoryImpl implements QueryReplyFactory {
                 clientGUID, xmlBytes, includeQHD, needsPush, isBusy,
                 finishedUpload, measuredSpeed, supportsChat, supportsBH,
                 isMulticastReply, supportsFWTransfer, proxies, securityToken,
-                hostDataFactory, responseFactory);
+                networkInstanceUtils, networkManager, responseFactory);
     }
 
 }

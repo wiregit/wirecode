@@ -25,6 +25,7 @@ import org.limewire.io.GGEP;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.security.SecureMessage;
@@ -38,7 +39,7 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.search.HostDataFactory;
+import com.limegroup.gnutella.search.HostDataImpl;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
@@ -100,17 +101,19 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     /** The cached clientGUID. */  
     private byte[] clientGUID = null;    
 
-    private final HostDataFactory hostDataFactory;
+    private final NetworkManager networkManager;
+    private final NetworkInstanceUtils networkInstanceUtils;
     private final ResponseFactory responseFactory;
     
     private final boolean local;
     
     
     QueryReplyImpl(byte[] guid, byte ttl, byte hops, byte[] payload,
-            Network network, HostDataFactory hostDataFactory,
+            Network network, NetworkInstanceUtils networkInstanceUtils, NetworkManager networkManager,
             ResponseFactory responseFactory) throws BadPacketException {
         super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length, network);
-        this.hostDataFactory = hostDataFactory;
+        this.networkManager = networkManager;
+        this.networkInstanceUtils = networkInstanceUtils;
         this.responseFactory = responseFactory;
         this._payload = payload;
         
@@ -137,11 +140,12 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             boolean finishedUpload, boolean measuredSpeed,
             boolean supportsChat, boolean supportsBH, boolean isMulticastReply,
             boolean supportsFWTransfer, Set<? extends IpPort> proxies,
-            SecurityToken securityToken, HostDataFactory hostDataFactory,
+            SecurityToken securityToken, NetworkInstanceUtils networkInstanceUtils, NetworkManager networkManager,
             ResponseFactory responseFactory) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte) 0, 0, Network.UNKNOWN);
 
-        this.hostDataFactory = hostDataFactory;
+        this.networkManager = networkManager;
+        this.networkInstanceUtils = networkInstanceUtils;
         this.responseFactory = responseFactory;
         this.local = true;
         if (xmlBytes.length > XML_MAX_SIZE)
@@ -888,7 +892,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             _data.setTLSCapable(supportsTLST);
             
             // MUST BE LAST -- This accesses everything set above
-            _data.setHostData(hostDataFactory.createHostData(this));
+            _data.setHostData(new HostDataImpl(this, networkInstanceUtils, networkManager));
         } catch (BadPacketException e) {
             return;
         } catch (IndexOutOfBoundsException e) {

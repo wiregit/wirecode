@@ -3,6 +3,12 @@ package com.limegroup.gnutella.search;
 import java.util.Set;
 
 import org.limewire.io.IpPort;
+import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.util.ByteUtils;
+
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.QueryReply;
 
 /**
  * This class contains data about a host that has returned a query hit,
@@ -80,6 +86,62 @@ public class HostDataImpl implements HostData {
 
     /** If the host supports TLS connections. */
     private final boolean TLS_CAPABLE;
+    
+    public HostDataImpl(QueryReply reply, NetworkInstanceUtils networkInstanceUtils, NetworkManager networkManager) {
+        byte[] clientGuid = reply.getClientGUID();
+        byte[] messageGuid = reply.getGUID();
+        String ip = reply.getIP();
+        int port = reply.getPort();
+
+        boolean firewalled        = true;
+        boolean browseHostEnabled = false;
+        boolean chatEnabled       = false;
+        boolean multicast         = false;
+        String  vendor = "";
+
+        try {
+            firewalled = reply.getNeedsPush() || networkInstanceUtils.isPrivateAddress(ip);
+        } catch (BadPacketException e) {
+            firewalled = true;
+        }        
+        
+        try {
+            vendor = reply.getVendor();
+        } catch(BadPacketException bad) {
+        }
+
+        browseHostEnabled = reply.getSupportsBrowseHost();
+        chatEnabled = reply.getSupportsChat() && !firewalled;
+        multicast = reply.isReplyToMulticastQuery();
+
+        firewalled = firewalled && !multicast;
+        boolean ifirewalled = !networkManager.acceptedIncomingConnection();
+        int quality = reply.calculateQualityOfService(ifirewalled, networkManager);
+        Set<? extends IpPort> proxies = reply.getPushProxies();
+        int fwtVersion = reply.getFWTransferVersion();
+        boolean tlsCapable = reply.isTLSCapable();
+
+        int speed;
+        if ( multicast )
+            speed = Integer.MAX_VALUE;
+        else
+            speed = ByteUtils.long2int(reply.getSpeed()); //safe cast
+        
+        this.CLIENT_GUID = clientGuid;
+        this.MESSAGE_GUID = messageGuid;
+        this.SPEED = speed;
+        this.FIREWALLED = firewalled;
+        this.MULTICAST = multicast;
+        this.CHAT_ENABLED = chatEnabled;
+        this.BROWSE_HOST_ENABLED = browseHostEnabled;
+        this.IP = ip;
+        this.PORT = port;
+        this.QUALITY = quality;
+        this.VENDOR_CODE = vendor;
+        this.PROXIES = proxies;
+        this.FWT_VERSION = fwtVersion;
+        this.TLS_CAPABLE = tlsCapable;  
+    }
     
     /** Constructs a HostData with all the given fields. */
     public HostDataImpl(byte[] clientGuid, byte[] messageGuid, int speed, boolean firewalled,
