@@ -11,7 +11,6 @@ import org.limewire.io.IpPort;
 import org.limewire.security.SecureMessage;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.search.HostData;
 
@@ -214,13 +213,8 @@ public interface QueryReply extends Message, SecureMessage {
      *
      * @return a int from -1 to 3, with -1 for "never work" and 3 for "always
      * work".  Typically a return value of N means N+1 stars will be displayed
-     * in the GUI.
-     * @param iFirewalled switch to indicate if the client is firewalled or
-     * not.  See RouterService.acceptingIncomingConnection or Acceptor for
-     * details.  
-     */
-    public int calculateQualityOfService(boolean iFirewalled,
-            NetworkManager networkManager);
+     * in the GUI. */
+    public int calculateQualityOfService();
 
     public byte[] getPayload();
     

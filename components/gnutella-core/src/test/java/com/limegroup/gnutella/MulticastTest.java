@@ -49,8 +49,6 @@ public class MulticastTest extends LimeTestCase {
 
     private SearchServices searchServices;
 
-    private NetworkManager networkManager;
-
     private PushDownloadManager pushDownloadManager;
 
     private DownloadServices downloadServices;
@@ -114,7 +112,6 @@ public class MulticastTest extends LimeTestCase {
         connectionServices = injector.getInstance(ConnectionServices.class);
         messageRouter = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
         searchServices = injector.getInstance(SearchServices.class);
-        networkManager = injector.getInstance(NetworkManager.class);
         pushDownloadManager = injector.getInstance(PushDownloadManager.class);
         downloadServices = injector.getInstance(DownloadServices.class);
         forMeReplyHandler = injector.getInstance(ForMeReplyHandler.class);
@@ -214,8 +211,8 @@ public class MulticastTest extends LimeTestCase {
         
         // wipe out the address so the first addr == my addr check isn't used
         wipeAddress(qr);
-        assertEquals("wrong qos", 4, qr.calculateQualityOfService(false, networkManager));
-        assertEquals("wrong qos", 4, qr.calculateQualityOfService(true, networkManager));
+        assertEquals("wrong qos", 4, qr.calculateQualityOfService());
+        assertEquals("wrong qos", 4, qr.calculateQualityOfService());
 	}
     
     /**

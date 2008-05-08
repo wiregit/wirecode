@@ -87,7 +87,7 @@ public class HostDataImpl implements HostData {
     /** If the host supports TLS connections. */
     private final boolean TLS_CAPABLE;
     
-    public HostDataImpl(QueryReply reply, NetworkInstanceUtils networkInstanceUtils, NetworkManager networkManager) {
+    public HostDataImpl(QueryReply reply, NetworkInstanceUtils networkInstanceUtils) {
         byte[] clientGuid = reply.getClientGUID();
         byte[] messageGuid = reply.getGUID();
         String ip = reply.getIP();
@@ -115,8 +115,7 @@ public class HostDataImpl implements HostData {
         multicast = reply.isReplyToMulticastQuery();
 
         firewalled = firewalled && !multicast;
-        boolean ifirewalled = !networkManager.acceptedIncomingConnection();
-        int quality = reply.calculateQualityOfService(ifirewalled, networkManager);
+        int quality = reply.calculateQualityOfService();
         Set<? extends IpPort> proxies = reply.getPushProxies();
         int fwtVersion = reply.getFWTransferVersion();
         boolean tlsCapable = reply.isTLSCapable();

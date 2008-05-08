@@ -892,7 +892,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             _data.setTLSCapable(supportsTLST);
             
             // MUST BE LAST -- This accesses everything set above
-            _data.setHostData(new HostDataImpl(this, networkInstanceUtils, networkManager));
+            _data.setHostData(new HostDataImpl(this, networkInstanceUtils));
         } catch (BadPacketException e) {
             return;
         } catch (IndexOutOfBoundsException e) {
@@ -939,12 +939,9 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
      *
      * @return a int from -1 to 3, with -1 for "never work" and 3 for "always
      * work".  Typically a return value of N means N+1 stars will be displayed
-     * in the GUI.
-     * @param iFirewalled switch to indicate if the client is firewalled or
-     * not.  See RouterService.acceptingIncomingConnection or Acceptor for
-     * details.  
-     */
-	public int calculateQualityOfService(boolean iFirewalled, NetworkManager networkManager) {
+     * in the GUI. */
+	public int calculateQualityOfService() {
+        boolean iFirewalled = !networkManager.acceptedIncomingConnection();
         final int YES=1;
         final int MAYBE=0;
         final int NO=-1;

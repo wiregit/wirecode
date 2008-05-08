@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.InvalidKeyException;
 import java.security.InvalidParameterException;
 import java.security.PrivateKey;
@@ -33,6 +34,7 @@ import org.limewire.io.GGEP;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortImpl;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
@@ -59,6 +61,7 @@ import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.Message.Network;
+import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
@@ -737,7 +740,6 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
     public void testCalculateQualityOfService() {
         QueryReplyFactory queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
-        NetworkManager networkManager = injector.getInstance(NetworkManager.class);
         final byte[] addr=new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
         QueryReply reachableNonBusy=queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6346,
                 addr, 0l, new Response[0], new byte[16], false, false, true, false,
@@ -755,16 +757,16 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
                 addr, 0l, new Response[0], new byte[16], false);
         
         //Remember that a return value of N corresponds to N+1 stars
-        assertEquals(3,  reachableNonBusy.calculateQualityOfService(false, networkManager));
-        assertEquals(3,  reachableNonBusy.calculateQualityOfService(true, networkManager));
-        assertEquals(1,  reachableBusy.calculateQualityOfService(false, networkManager));
-        assertEquals(1,  reachableBusy.calculateQualityOfService(true, networkManager));
-        assertEquals(2,  unreachableNonBusy.calculateQualityOfService(false, networkManager));
-        assertEquals(-1, unreachableNonBusy.calculateQualityOfService(true, networkManager));
-        assertEquals(0,  unreachableBusy.calculateQualityOfService(false, networkManager));
-        assertEquals(-1, unreachableBusy.calculateQualityOfService(true, networkManager));        
-        assertEquals(0,  oldStyle.calculateQualityOfService(false, networkManager));
-        assertEquals(0,  oldStyle.calculateQualityOfService(true, networkManager));
+        assertEquals(3,  reachableNonBusy.calculateQualityOfService());
+        assertEquals(3,  reachableNonBusy.calculateQualityOfService());
+        assertEquals(1,  reachableBusy.calculateQualityOfService());
+        assertEquals(1,  reachableBusy.calculateQualityOfService());
+        assertEquals(2,  unreachableNonBusy.calculateQualityOfService());
+        assertEquals(-1, unreachableNonBusy.calculateQualityOfService());
+        assertEquals(0,  unreachableBusy.calculateQualityOfService());
+        assertEquals(-1, unreachableBusy.calculateQualityOfService());        
+        assertEquals(0,  oldStyle.calculateQualityOfService());
+        assertEquals(0,  oldStyle.calculateQualityOfService());
     }
 
 
@@ -1900,5 +1902,42 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         return (QueryReplyImpl) messageFactory.read(bais, Network.TCP);
+    }
+    
+    public void testHostData() throws UnknownHostException, BadPacketException {
+        NetworkInstanceUtils networkInstanceUtils = injector.getInstance(NetworkInstanceUtils.class);
+        QueryReplyFactory queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+        ResponseFactory responseFactory = injector.getInstance(ResponseFactory.class);
+        Response r = responseFactory.createResponse(0, 1, "test");
+        QueryReply query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
+                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], false, false,
+                false, false, false, false, false, IpPort.EMPTY_SET, _token);
+        
+        HostData data  = query.getHostData();
+        assertEquals(query.getClientGUID(), data.getClientGUID());
+        assertEquals(query.getFWTransferVersion(), data.getFWTVersionSupported());
+        assertEquals(query.getIP(), data.getIP());
+        assertEquals(query.getGUID(), data.getMessageGUID());
+        assertEquals(query.getPort(), data.getPort());
+        assertEquals(query.getPushProxies(), data.getPushProxies());
+        assertEquals(query.calculateQualityOfService(), data.getQuality());
+        assertEquals(query.getSpeed(), data.getSpeed());
+        assertEquals(query.getVendor(), data.getVendorCode());
+        assertEquals(query.getSupportsBrowseHost(), data.isBrowseHostEnabled());
+        // TODO replace long conditional below with data.isFirewalled();
+        // TODO only issue is that isFirewalled is reset after this check in HostDataImpl()
+        // TODO to take into account isMulticast
+        assertEquals(query.getSupportsChat() && !(query.getNeedsPush() || networkInstanceUtils.isPrivateAddress(ip)), data.isChatEnabled());
+        assertEquals((query.getNeedsPush() || networkInstanceUtils.isPrivateAddress(ip)) && !query.isReplyToMulticastQuery(), data.isFirewalled());
+        assertEquals(query.isReplyToMulticastQuery(), data.isReplyToMulticastQuery());
+        assertEquals(query.isTLSCapable(), data.isTLSCapable());
+    }
+    
+    public void testHostDataExceptionCases() throws UnknownHostException, BadPacketException {
+        // TODO                
+    }
+    
+    public void testHostDataMassageCases() throws UnknownHostException, BadPacketException {
+        // TODO                
     }
 }

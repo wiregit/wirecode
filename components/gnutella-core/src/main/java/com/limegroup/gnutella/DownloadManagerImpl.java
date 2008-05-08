@@ -122,8 +122,7 @@ public class DownloadManagerImpl implements DownloadManager {
     
     private final EventListenerList<DownloadManagerEvent> listeners =
         new EventListenerList<DownloadManagerEvent>();
-    
-    private final NetworkManager networkManager;
+
     private final DownloadCallback innetworkCallback;
     private final Provider<DownloadCallback> downloadCallback;
     private final Provider<MessageRouter> messageRouter;
@@ -137,8 +136,7 @@ public class DownloadManagerImpl implements DownloadManager {
     private final BTMetaInfoFactory btMetaInfoFactory;
     
     @Inject
-    public DownloadManagerImpl(NetworkManager networkManager,
-            @Named("inNetwork") DownloadCallback innetworkCallback,
+    public DownloadManagerImpl(@Named("inNetwork") DownloadCallback innetworkCallback,
             Provider<DownloadCallback> downloadCallback,
             Provider<MessageRouter> messageRouter,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
@@ -149,7 +147,6 @@ public class DownloadManagerImpl implements DownloadManager {
             IncompleteFileManager incompleteFileManager,
             RemoteFileDescFactory remoteFileDescFactory,
             BTMetaInfoFactory btMetaInfoFactory) {
-        this.networkManager = networkManager;
         this.innetworkCallback = innetworkCallback;
         this.downloadCallback = downloadCallback;
         this.messageRouter = messageRouter;
@@ -868,8 +865,7 @@ public class DownloadManagerImpl implements DownloadManager {
     public void handleQueryReply(QueryReply qr) {
         // first check if the qr is of 'sufficient quality', if not just
         // short-circuit.
-        if (qr.calculateQualityOfService(
-                !networkManager.acceptedIncomingConnection(), networkManager) < 1)
+        if (qr.calculateQualityOfService() < 1)
             return;
 
         List<Response> responses;
