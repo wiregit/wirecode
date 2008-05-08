@@ -16,7 +16,6 @@ import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.collection.IntervalSet;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
-import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.util.ByteUtils;
@@ -112,7 +111,7 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         LOG.trace("entered SearchResultHandler.addQuery(QueryRequest)");
         if (!qr.isBrowseHostQuery() && !qr.isWhatIsNewRequest())
             spamManager.get().startedQuery(qr);
-        GuidCount gc = new GuidCount(qr, remoteFileDescFactory, spamManager, activityCallback, searchServices);
+        GuidCount gc = new GuidCount(qr);
         GUID_COUNTS.add(gc);
         
         return gc;
@@ -201,12 +200,140 @@ class SearchResultHandlerImpl implements SearchResultHandler {
             }
         }
 
-        // throw away results that aren't secure.
-        int secureStatus = qr.getSecureStatus();
-        if(secureStatus == SecureMessage.FAILED)
-            return;
+        int numGoodToSendToFrontEnd = addQueryReply(qr, data);
+        accountAndUpdateDynamicQueriers(qr, data, numGoodToSendToFrontEnd);
+    }
+    
+    public int addQueryReply(QueryReply qr, HostData data) {
+            List<Response> results = null;
+            double numBad = 0;
+            int numGood = 0;
+            
+            try {
+                results = qr.getResultsAsList();
+            } catch (BadPacketException e) {
+                LOG.debug("Error gettig results", e);
+                return 0;
+            }
+
+            // throw away results that aren't secure.
+            int secureStatus = qr.getSecureStatus();
+            if(secureStatus == SecureMessage.FAILED)
+                return 0;
+            
+            boolean skipSpam = isWhatIsNew(qr) || qr.isBrowseHostReply();
+
+            for (Response response : results) {
+                if (!qr.isBrowseHostReply() && secureStatus != SecureMessage.SECURE) {
+                    if (!searchServices.matchesType(data.getMessageGUID(), response))
+                        continue;
+
+                    if (!searchServices.matchesQuery(data.getMessageGUID(), response))
+                        continue;
+                }
+
+                // Throw away results from Mandragore Worm
+                if (searchServices.isMandragoreWorm(data.getMessageGUID(), response))
+                    continue;
+                
+                // If there was an action, only allow it if it's a secure message.
+                LimeXMLDocument doc = response.getDocument();
+                if (ApplicationSettings.USE_SECURE_RESULTS.getValue() &&
+                   doc != null && !"".equals(doc.getAction()) && secureStatus != SecureMessage.SECURE) {
+                   continue;
+                }
+                
+                // we'll be showing the result to the user, count it
+                countClassC(qr,response);
+                RemoteFileDesc rfd = response.toRemoteFileDesc(data, remoteFileDescFactory);
+                rfd.setSecureStatus(secureStatus);
+                
+                if (skipSpam || !spamManager.get().isSpam(rfd)) {
+                    numGood += addSource(response, qr);
+                }
+                else {
+                    numBad++;
+                }
+                
+                activityCallback.get().handleQueryResult(rfd, data, response.getLocations());
+                    
+            } //end of response loop
+            
+            numGood += Math.ceil(numBad * SearchSettings.SPAM_RESULT_RATIO.getValue());
+            GuidCount gc = retrieveResultStats(new GUID(qr.getGUID()));
+            if(gc != null) {
+                gc.increment(numGood);
+            }
+            
+            return numGood;
+        }
+
+    private int addSource(Response response, QueryReply reply) {
+        if (response.getRanges() != null)
+            return addPartialSource(response, reply);
+        else
+            return addCompleteSource(response, reply);
+    }
+
+    private int addPartialSource(Response response, QueryReply qr) {
+        Set<URN> urns = response.getUrns();
+        IntervalSet is = response.getRanges();
+        long size = response.getSize();
+        ResourceLocationCounter rlc = null;
+        URN urn = getFirstSha1Urn(urns);
+        int count_dif = 0;
         
-        accountAndUpdateDynamicQueriers(qr, data);
+        if (urn != null) {
+            GuidCount gc = retrieveResultStats(new GUID(qr.getGUID()));
+            if(gc != null) {
+                if (null == (rlc = gc.getIntervalSets().get(urn)))
+                    gc.getIntervalSets().put(urn, (rlc = new ResourceLocationCounter(urn, size)));
+                
+                int count_before = rlc.getLocationCount();
+                rlc.addPartialSource( is );
+                int count_after = rlc.getLocationCount();
+                
+                count_dif = count_after - count_before;
+                
+                if (count_dif > 0)
+                    rlc.updateDisplayLocationCount(count_dif);    
+            }
+        }
+        
+        return count_dif;
+    }
+        
+    private int addCompleteSource(Response response, QueryReply qr) {
+        Set<URN> urns = response.getUrns();
+        long size = response.getSize();
+        int altCnt = response.getLocations().size();
+        ResourceLocationCounter rlc = null;
+        URN urn = getFirstSha1Urn(urns);
+        int maxAlts = FilterSettings.MAX_ALTS_TO_DISPLAY.getValue();
+        
+        if (urn != null) {
+            GuidCount gc = retrieveResultStats(new GUID(qr.getGUID()));
+            if(gc != null) {
+                if (null == (rlc = gc.getIntervalSets().get(urn)))
+                    gc.getIntervalSets().put(urn, (rlc = new ResourceLocationCounter(urn, size)));
+                
+                rlc.incrementWholeSources();
+                rlc.updateDisplayLocationCount(altCnt > maxAlts ? maxAlts+1 : altCnt+1);
+            }
+        }
+        return 1;
+    }
+    
+    /**
+     * Returns the first SHA1 URN from the urns set, if there is one.
+     * Null, otherwise.
+     */
+    private URN getFirstSha1Urn(Set<URN> urns) {
+        for (URN urn : urns) {
+            if (urn.isSHA1())
+                return urn;
+        }        
+        return null;
     }
 
     void countClassC(QueryReply qr, Response r) {
@@ -229,8 +356,8 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         }
     }
 
-    void accountAndUpdateDynamicQueriers(final QueryReply qr, HostData data /*,
-                                                 final int numGoodSentToFrontEnd */ ) {
+    void accountAndUpdateDynamicQueriers(final QueryReply qr, HostData data,
+                                                 final int numGoodSentToFrontEnd) {
         LOG.trace("SRH.accountAndUpdateDynamicQueriers(): entered.");
         
         // get the correct GuidCount
@@ -241,8 +368,6 @@ class SearchResultHandlerImpl implements SearchResultHandler {
             // 1. we could be under attack - hits not meant for us
             // 2. programmer error - ejected a query we should not have
             return;
-        
-        int numGoodSentToFrontEnd = gc.addQueryReply(this, qr, data);
             
         // we should execute if results were consumed. technically Ultrapeers 
         // don't use this info, but we are keeping it around for further use.
@@ -329,10 +454,6 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         private final long _time;
         private final GUID _guid;
         private final QueryRequest _qr;
-        private final RemoteFileDescFactory _remoteFileDescFactory;
-        private final Provider<SpamManager> _spamManager;
-        private final Provider<ActivityCallback> _activityCallback;
-        private final SearchServices _searchServices;
         private int _numGoodResults;
         private int _nextReportNum = REPORT_INTERVAL;
         private boolean markAsFinished = false;
@@ -344,18 +465,10 @@ class SearchResultHandlerImpl implements SearchResultHandler {
          */
         private final Map<URN, ResourceLocationCounter> _isets = new HashMap<URN, ResourceLocationCounter>();
         
-        public GuidCount(QueryRequest qr, 
-                         RemoteFileDescFactory remoteFileDescFactory, 
-                         Provider<SpamManager> spamManager,
-                         Provider<ActivityCallback> activityCallback,
-                         SearchServices searchServices) {
+        public GuidCount(QueryRequest qr) {
             _qr = qr;
             _guid = new GUID(qr.getGUID());
             _time = System.currentTimeMillis();
-            _remoteFileDescFactory = remoteFileDescFactory;
-            _spamManager = spamManager;
-            _activityCallback = activityCallback;
-            _searchServices = searchServices;
         }
 
         public GUID getGUID() { return _guid; }
@@ -426,145 +539,11 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         public String toString() {
             return "" + _guid + ":" + _numGoodResults + ":" + _nextReportNum;
         }
-        
-        public int addQueryReply(SearchResultHandler srh, QueryReply qr, HostData data) {
-            return addQueryReply( (SearchResultHandlerImpl)srh, qr, data);
-        }
-        
-        public int addQueryReply(SearchResultHandlerImpl srh, QueryReply qr, HostData data) {
-            List<Response> results = null;
-            double numBad = 0;
-            int numGood = 0;
-            
-            try {
-                results = qr.getResultsAsList();
-            } catch (BadPacketException e) {
-                LOG.debug("Error gettig results", e);
-                return 0;
-            }
 
-            // throw away results that aren't secure.
-            int secureStatus = qr.getSecureStatus();
-            if(secureStatus == SecureMessage.FAILED)
-                return 0;
-            
-            boolean skipSpam = srh.isWhatIsNew(qr) || qr.isBrowseHostReply();
+        public Map<URN, ResourceLocationCounter> getIntervalSets() {
+            return _isets;
+        }
 
-            for (Response response : results) {
-                if (!qr.isBrowseHostReply() && secureStatus != SecureMessage.SECURE) {
-                    if (!_searchServices.matchesType(data.getMessageGUID(), response))
-                        continue;
-
-                    if (!_searchServices.matchesQuery(data.getMessageGUID(), response))
-                        continue;
-                }
-
-                // Throw away results from Mandragore Worm
-                if (_searchServices.isMandragoreWorm(data.getMessageGUID(), response))
-                    continue;
-                
-                // If there was an action, only allow it if it's a secure message.
-                LimeXMLDocument doc = response.getDocument();
-                if (ApplicationSettings.USE_SECURE_RESULTS.getValue() &&
-                   doc != null && !"".equals(doc.getAction()) && secureStatus != SecureMessage.SECURE) {
-                   continue;
-                }
-                
-                // the interval set, if there is one, represents the
-                // subset of the file data that this responding client
-                // has available.
-                //
-                IntervalSet is = response.getRanges();
-                
-                // we'll be showing the result to the user, count it
-                srh.countClassC(qr,response);
-                RemoteFileDesc rfd = response.toRemoteFileDesc(data, _remoteFileDescFactory);
-                rfd.setSecureStatus(secureStatus);
-                Set<? extends IpPort> alts = response.getLocations();
-                
-                if (skipSpam || !_spamManager.get().isSpam(rfd)) {
-                    if (is != null)
-                        numGood += addPartialSource(response.getUrns(), is, response.getSize());
-                    else
-                        numGood += addLocation(response.getUrns(), response.getSize(), alts.size());
-                }
-                else
-                    numBad++;
-                
-                _activityCallback.get().handleQueryResult(rfd, data, alts);
-                    
-            } //end of response loop
-            
-            numGood += Math.ceil(numBad * SearchSettings.SPAM_RESULT_RATIO.getValue());
-            _numGoodResults += numGood;
-            
-            return numGood;
-        }
-        
-        /**
-         * Returns the first SHA1 URN from the urns set, if there is one.
-         * Null, otherwise.
-         */
-        private URN getFirstSha1Urn(Set<URN> urns) {
-            for (URN urn : urns) {
-                if (urn.isSHA1())
-                    return urn;
-            }
-            
-            return null;
-        }
-        
-        /**
-         * Adds the given IntervalSet to our internal map,
-         * keyed on the appropriate URN, where the appropriate
-         * URN is presently the first sha1 URN that we find. 
-         * 
-         * @param urns A Set of URNs, typically from a Response
-         * @param is An IntervalSet, typically from a Response
-         * @param size Size of the file in bytes
-         * @return Returns the number of new locations that exist for the
-         *         given Set<URN> based on the IntervalSet.
-         * 
-         */
-        private int addPartialSource(Set<URN> urns, IntervalSet is, long size) {
-            ResourceLocationCounter rlc = null;
-            URN urn = getFirstSha1Urn(urns);
-            int count_dif = 0;
-            
-            if (urn != null) {
-                if (null == (rlc = _isets.get(urn)))
-                    _isets.put(urn, (rlc = new ResourceLocationCounter(urn, size)));
-                
-                int count_before = rlc.getLocationCount();
-                rlc.addPartialSource( is );
-                int count_after = rlc.getLocationCount();
-                
-                count_dif = count_after - count_before;
-                
-                if (count_dif > 0)
-                    rlc.updateDisplayLocationCount(count_dif);
-                
-            }
-            
-            return count_dif;
-        }
-        
-        private int addLocation(Set<URN> urns, long size, int altCnt) {
-            ResourceLocationCounter rlc = null;
-            URN urn = getFirstSha1Urn(urns);
-            int maxAlts = FilterSettings.MAX_ALTS_TO_DISPLAY.getValue();
-            
-            if (urn != null) {
-                if (null == (rlc = _isets.get(urn)))
-                    _isets.put(urn, (rlc = new ResourceLocationCounter(urn, size)));
-                
-                rlc.incrementWholeSources();
-                rlc.updateDisplayLocationCount(altCnt > maxAlts ? maxAlts+1 : altCnt+1);
-            }
-            
-            return 1;
-        }
-        
         public QueryResultHandler getResultHandler (final URN urn) {
             final GuidCount gc = this;
             
