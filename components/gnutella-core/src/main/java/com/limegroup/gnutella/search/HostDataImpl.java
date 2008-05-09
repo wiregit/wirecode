@@ -93,10 +93,10 @@ public class HostDataImpl implements HostData {
         String ip = reply.getIP();
         int port = reply.getPort();
 
-        boolean firewalled        = true;
-        boolean browseHostEnabled = false;
-        boolean chatEnabled       = false;
-        boolean multicast         = false;
+        boolean browseHostEnabled;
+        boolean firewalled;
+        boolean chatEnabled;
+        boolean multicast;
         String  vendor = "";
 
         try {

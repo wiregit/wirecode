@@ -1,41 +1,21 @@
 package com.limegroup.gnutella.messages;
 
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.security.InvalidKeyException;
-import java.security.InvalidParameterException;
-import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.SignatureSpi;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.TreeSet;
-
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
+import com.limegroup.gnutella.library.SharingUtils;
+import com.limegroup.gnutella.messages.Message.Network;
+import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.search.HostDataImpl;
+import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.stubs.NetworkManagerStub;
+import com.limegroup.gnutella.stubs.SimpleFileManager;
 import junit.framework.Test;
-
 import org.limewire.collection.BitNumbers;
-import org.limewire.io.BadGGEPBlockException;
-import org.limewire.io.Connectable;
-import org.limewire.io.ConnectableImpl;
-import org.limewire.io.GGEP;
-import org.limewire.io.IpPort;
-import org.limewire.io.IpPortImpl;
-import org.limewire.io.IpPortSet;
-import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.io.NetworkUtils;
+import org.limewire.io.*;
 import org.limewire.security.AddressSecurityToken;
 import org.limewire.security.MACCalculatorRepositoryManager;
 import org.limewire.security.SecureMessage;
@@ -45,30 +25,14 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.StringUtils;
 import org.limewire.util.TestUtils;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.limegroup.gnutella.CreationTimeCache;
-import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.ResponseFactory;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.altlocs.AltLocManager;
-import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
-import com.limegroup.gnutella.library.SharingUtils;
-import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.stubs.NetworkManagerStub;
-import com.limegroup.gnutella.stubs.SimpleFileManager;
+import java.io.*;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.security.*;
+import java.util.*;
 
 /**
  * This class tests the QueryReply class.
@@ -1934,10 +1898,118 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     }
     
     public void testHostDataExceptionCases() throws UnknownHostException, BadPacketException {
-        // TODO                
+        NetworkInstanceUtils networkInstanceUtils = injector.getInstance(NetworkInstanceUtils.class);
+        QueryReplyFactory queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+        ResponseFactory responseFactory = injector.getInstance(ResponseFactory.class);
+        Response r = responseFactory.createResponse(0, 1, "test");
+        QueryReply query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
+                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], false, false,
+                false, false, false, false, false, IpPort.EMPTY_SET, _token);
+
+        // vendor
+        QueryReply replyProxy = (QueryReply)Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{QueryReply.class}, new ExceptionThrower(query, "getVendor"));
+        HostData data = new HostDataImpl(replyProxy, networkInstanceUtils);
+        assertEquals("", data.getVendorCode());
+
+         // isFirewalled
+        replyProxy = (QueryReply)Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{QueryReply.class}, new ExceptionThrower(query, "getNeedsPush"));
+        data = new HostDataImpl(replyProxy, networkInstanceUtils);
+        assertEquals(true, data.isFirewalled());
     }
     
-    public void testHostDataMassageCases() throws UnknownHostException, BadPacketException {
-        // TODO                
+    public void testHostDataMassageIsChatEnabled() throws UnknownHostException, BadPacketException {
+        NetworkInstanceUtils networkInstanceUtils = injector.getInstance(NetworkInstanceUtils.class);
+        QueryReplyFactory queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+        ResponseFactory responseFactory = injector.getInstance(ResponseFactory.class);
+        Response r = responseFactory.createResponse(0, 1, "test");
+
+        // getSupportsBrowseHost() = false
+        // isFirewalled = false
+        QueryReply query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
+                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], false, false,
+                false, false, false, false, false, IpPort.EMPTY_SET, _token);
+
+        HostData data  = query.getHostData();
+        assertEquals(false, data.isChatEnabled());
+
+        // getSupportsBrowseHost() = false
+        // isFirewalled = true
+        query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
+                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], false, false,
+                false, false, true, false, false, IpPort.EMPTY_SET, _token);
+
+        data  = query.getHostData();
+        assertEquals(true, data.isChatEnabled());
+
+        // getSupportsBrowseHost() = true
+        // isFirewalled = false
+        query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
+                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], true, false,
+                false, false, false, false, false, IpPort.EMPTY_SET, _token);
+
+        data  = query.getHostData();
+        assertEquals(false, data.isChatEnabled());
+
+        // getSupportsBrowseHost() = true
+        // isFirewalled = true
+        query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
+                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], true, false,
+                false, false, true, false, false, IpPort.EMPTY_SET, _token);
+
+        data  = query.getHostData();
+        assertEquals(false, data.isChatEnabled());
+    }
+
+    public void testHostDataMassageGetSpeed() throws UnknownHostException, BadPacketException {
+        NetworkInstanceUtils networkInstanceUtils = injector.getInstance(NetworkInstanceUtils.class);
+        QueryReplyFactory queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+        ResponseFactory responseFactory = injector.getInstance(ResponseFactory.class);
+        Response r = responseFactory.createResponse(0, 1, "test");
+
+        // isReplyToMulticast = false
+        QueryReply query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
+                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], false, false,
+                false, false, false, false, false, IpPort.EMPTY_SET, _token);
+
+        HostData data  = query.getHostData();
+        assertEquals(30945L, data.getSpeed());
+
+        // isReplyToMulticast = true
+        query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
+                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], false, false,
+                false, false, false, true, false, IpPort.EMPTY_SET, _token);
+
+        query.setMulticastAllowed(true);
+        data  = query.getHostData();
+        assertEquals(Integer.MAX_VALUE, data.getSpeed());
+    }
+
+    abstract class ObjectWrapper implements InvocationHandler{
+        String methodName;
+        Object o;
+
+        ObjectWrapper(Object o, String methodName) {
+            this.o = o;
+            this.methodName = methodName;
+        }
+
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if(method.getName().equals(methodName)) {
+                return specialInvoke(proxy, method, args);
+            } else {
+                return method.invoke(o, args);
+            }
+        }
+
+        abstract Object specialInvoke(Object proxy, Method method, Object[] args) throws Throwable;
+    }
+
+    class ExceptionThrower extends ObjectWrapper {
+        ExceptionThrower(Object o, String methodName) {
+            super(o, methodName);
+        }
+        Object specialInvoke(Object proxy, Method method, Object[] args) throws Throwable {
+            throw new BadPacketException();
+        }
     }
 }
