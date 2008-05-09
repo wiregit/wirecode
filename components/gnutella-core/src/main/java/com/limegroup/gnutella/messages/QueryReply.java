@@ -81,7 +81,7 @@ public interface QueryReply extends Message, SecureMessage {
      */
     public byte[] getIPBytes();
 
-    public long getSpeed();
+    public int getSpeed();
 
     /**
      * Returns the Response[].  Throws BadPacketException if this

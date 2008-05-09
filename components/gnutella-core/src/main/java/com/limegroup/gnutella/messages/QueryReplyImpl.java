@@ -120,8 +120,10 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 		if(!NetworkUtils.isValidPort(getPort())) {
 			throw new BadPacketException("invalid port");
 		}
-		if( (getSpeed() & 0xFFFFFFFF00000000L) != 0) {
-			throw new BadPacketException("invalid speed: " + getSpeed());
+        
+        // 0xFFFFFFFF00000000L = Integer.MIN_VALUE * 2
+        if( (getSpeedFromPayload() & 0xFFFFFFFF00000000L) != 0) {
+			throw new BadPacketException("invalid speed: " + getSpeedFromPayload());
 		} 		
 		
 		setAddress();
@@ -372,8 +374,13 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         return _address;
     }
 
-    public long getSpeed() {
+    private long getSpeedFromPayload() {
         return ByteUtils.uint2long(ByteUtils.leb2int(_payload,7));
+    }
+    
+    public int getSpeed() {
+        // TODO move to QueryReply decorator?
+        return isReplyToMulticastQuery() ? Integer.MAX_VALUE : ByteUtils.long2int(getSpeedFromPayload()); //safe cast;
     }
     
     /**

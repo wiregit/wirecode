@@ -120,11 +120,7 @@ public class HostDataImpl implements HostData {
         int fwtVersion = reply.getFWTransferVersion();
         boolean tlsCapable = reply.isTLSCapable();
 
-        int speed;
-        if ( multicast )
-            speed = Integer.MAX_VALUE;
-        else
-            speed = ByteUtils.long2int(reply.getSpeed()); //safe cast
+        int speed = reply.getSpeed();
         
         this.CLIENT_GUID = clientGuid;
         this.MESSAGE_GUID = messageGuid;

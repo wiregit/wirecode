@@ -703,6 +703,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 	}
 
     public void testCalculateQualityOfService() {
+        NetworkInstanceUtils networkInstanceUtils = injector.getInstance(NetworkInstanceUtils.class);
         QueryReplyFactory queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
         final byte[] addr=new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
         QueryReply reachableNonBusy=queryReplyFactory.createQueryReply(new byte[16], (byte)5, 6346,
@@ -721,6 +722,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
                 addr, 0l, new Response[0], new byte[16], false);
         
         //Remember that a return value of N corresponds to N+1 stars
+        
         assertEquals(3,  reachableNonBusy.calculateQualityOfService());
         assertEquals(3,  reachableNonBusy.calculateQualityOfService());
         assertEquals(1,  reachableBusy.calculateQualityOfService());
@@ -1925,39 +1927,26 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
         // getSupportsBrowseHost() = false
         // isFirewalled = false
-        QueryReply query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
-                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], false, false,
-                false, false, false, false, false, IpPort.EMPTY_SET, _token);
-
-        HostData data  = query.getHostData();
+        HostData data = getHostDataWithChatEnabledInputs(queryReplyFactory, r, false, false);
         assertEquals(false, data.isChatEnabled());
 
-        // getSupportsBrowseHost() = false
-        // isFirewalled = true
-        query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
-                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], false, false,
-                false, false, true, false, false, IpPort.EMPTY_SET, _token);
-
-        data  = query.getHostData();
+        data = getHostDataWithChatEnabledInputs(queryReplyFactory, r, false, true);
         assertEquals(true, data.isChatEnabled());
 
-        // getSupportsBrowseHost() = true
-        // isFirewalled = false
-        query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
-                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], true, false,
-                false, false, false, false, false, IpPort.EMPTY_SET, _token);
-
-        data  = query.getHostData();
+        data = getHostDataWithChatEnabledInputs(queryReplyFactory, r, true, false);
         assertEquals(false, data.isChatEnabled());
 
-        // getSupportsBrowseHost() = true
-        // isFirewalled = true
-        query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
-                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], true, false,
-                false, false, true, false, false, IpPort.EMPTY_SET, _token);
-
-        data  = query.getHostData();
+        data = getHostDataWithChatEnabledInputs(queryReplyFactory, r, true, true);
         assertEquals(false, data.isChatEnabled());
+    }
+
+    private HostData getHostDataWithChatEnabledInputs(QueryReplyFactory queryReplyFactory, Response r, boolean supportsChat, boolean isFirewalled) throws UnknownHostException, BadPacketException {
+        // needsPush is a shorthand for isFirewalled, if isMulticast = false
+        QueryReply query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
+                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], isFirewalled, false,
+                false, false, supportsChat, false, false, IpPort.EMPTY_SET, _token);
+
+        return query.getHostData();
     }
 
     public void testHostDataMassageGetSpeed() throws UnknownHostException, BadPacketException {
@@ -1983,6 +1972,49 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         data  = query.getHostData();
         assertEquals(Integer.MAX_VALUE, data.getSpeed());
     }
+    
+    public void testHostDataMassageIsFirewalled() throws UnknownHostException, BadPacketException {
+        NetworkInstanceUtils networkInstanceUtils = injector.getInstance(NetworkInstanceUtils.class);
+        QueryReplyFactory queryReplyFactory = injector.getInstance(QueryReplyFactory.class);
+        ResponseFactory responseFactory = injector.getInstance(ResponseFactory.class);
+        Response r = responseFactory.createResponse(0, 1, "test");
+
+        HostData data = getHostDataWithFirewallInputs(queryReplyFactory, r, false, false, false);
+        assertEquals(false, data.isFirewalled());
+
+        data = getHostDataWithFirewallInputs(queryReplyFactory, r, false, false, true);
+        assertEquals(false, data.isFirewalled());
+        
+        data = getHostDataWithFirewallInputs(queryReplyFactory, r, false, true, false);
+        assertEquals(true, data.isFirewalled());
+        
+        data = getHostDataWithFirewallInputs(queryReplyFactory, r, false, true, true);
+        assertEquals(false, data.isFirewalled());
+        
+        data = getHostDataWithFirewallInputs(queryReplyFactory, r, true, false, false);
+        assertEquals(true, data.isFirewalled());
+
+        data = getHostDataWithFirewallInputs(queryReplyFactory, r, true, false, true);
+        assertEquals(false, data.isFirewalled());
+        
+        data = getHostDataWithFirewallInputs(queryReplyFactory, r, true, true, false);
+        assertEquals(true, data.isFirewalled());
+        
+        data = getHostDataWithFirewallInputs(queryReplyFactory, r, true, true, true);
+        assertEquals(false, data.isFirewalled());
+        
+    }
+
+    private HostData getHostDataWithFirewallInputs(QueryReplyFactory queryReplyFactory, Response r, boolean needsPush, boolean isPrivateAddress, boolean isReplyToMulticast) throws UnknownHostException, BadPacketException {
+        NetworkInstanceUtils networkInstanceUtils = injector.getInstance(NetworkInstanceUtils.class);
+        QueryReply query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
+                InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], needsPush, false,
+                false, false, false, isReplyToMulticast, false, IpPort.EMPTY_SET, _token);
+        query.setMulticastAllowed(true);
+
+        NetworkInstanceUtils networkInstanceUtilsProxy = (NetworkInstanceUtils)Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{NetworkInstanceUtils.class}, new BooleanReturner(networkInstanceUtils, "isPrivateAddress", isPrivateAddress));
+        return new HostDataImpl(query, networkInstanceUtilsProxy);
+    }
 
     abstract class ObjectWrapper implements InvocationHandler{
         String methodName;
@@ -2002,6 +2034,23 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         }
 
         abstract Object specialInvoke(Object proxy, Method method, Object[] args) throws Throwable;
+    }
+    
+    class BooleanReturner extends ObjectWrapper {
+        boolean returnValue;
+
+        BooleanReturner(Object o, String methodName, boolean returnValue) {
+            super(o, methodName);
+            this.returnValue = returnValue;
+        }
+        
+        Object specialInvoke(Object proxy, Method method, Object[] args) throws Throwable {
+            return returnValue;
+        }
+        
+        void setReturnValue(boolean returnValue) {
+            this.returnValue = returnValue;
+        }
     }
 
     class ExceptionThrower extends ObjectWrapper {

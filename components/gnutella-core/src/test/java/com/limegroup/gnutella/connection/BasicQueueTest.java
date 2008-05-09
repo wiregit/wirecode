@@ -167,7 +167,7 @@ public class BasicQueueTest extends LimeTestCase {
             allowing(qr).getTTL(); will(returnValue((byte)5));
             atLeast(1).of(qr).getPort(); will(returnValue(port));
             allowing(qr).getIPBytes(); will(returnValue(IP));
-            allowing(qr).getSpeed(); will(returnValue((long)0));
+            allowing(qr).getSpeed(); will(returnValue(0));
         }});
         
         return qr;

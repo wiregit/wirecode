@@ -180,7 +180,7 @@ class SearchResultHandlerImpl implements SearchResultHandler {
                 LOG.debug("Ignoring because low quality");
                 return;
             }
-            if(data.getSpeed() < SearchSettings.MINIMUM_SEARCH_SPEED.getValue()) {
+            if(qr.getSpeed() < SearchSettings.MINIMUM_SEARCH_SPEED.getValue()) {
                 LOG.debug("Ignoring because low speed");
                 return;
             }
@@ -212,7 +212,7 @@ class SearchResultHandlerImpl implements SearchResultHandler {
             try {
                 results = qr.getResultsAsList();
             } catch (BadPacketException e) {
-                LOG.debug("Error gettig results", e);
+                LOG.debug("Error getting results", e);
                 return 0;
             }
 
