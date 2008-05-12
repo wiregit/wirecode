@@ -877,7 +877,7 @@ public class DownloadManagerImpl implements DownloadManager {
             return; // bad packet, do nothing.
         }
         
-        addDownloadWithResponses(responses, data);
+        addDownloadWithResponses(responses, qr);
     }
 
     /**
@@ -885,10 +885,10 @@ public class DownloadManagerImpl implements DownloadManager {
      * up to any existing downloaders, adding them as possible
      * sources if they do.
      */
-    private void addDownloadWithResponses(List<? extends Response> responses, HostData data) {
+    private void addDownloadWithResponses(List<? extends Response> responses, QueryReply queryReply) {
         if(responses == null)
             throw new NullPointerException("null responses");
-        if(data == null)
+        if(queryReply == null)
             throw new NullPointerException("null hostdata");
 
         // need to synch because active and waiting are not thread safe
@@ -909,7 +909,7 @@ public class DownloadManagerImpl implements DownloadManager {
         //that would cause a conflict with downloader y.  Check for this.
         for(Response r : responses) {
             // Don't bother with making XML from the EQHD.
-            RemoteFileDesc rfd = r.toRemoteFileDesc(data, remoteFileDescFactory);
+            RemoteFileDesc rfd = r.toRemoteFileDesc(queryReply, remoteFileDescFactory);
             for(Downloader current : downloaders) {
                 if ( !(current instanceof ManagedDownloader))
                     continue; // can't add sources to torrents yet

@@ -44,7 +44,6 @@ import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
@@ -405,7 +404,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
         @Override
         public void handleQueryResult(RemoteFileDesc rfd,
-                                      HostData data,
+                                      QueryReply queryReply,
                                       Set locs) {
             this.rfd = rfd;
             latch.countDown();

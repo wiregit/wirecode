@@ -550,12 +550,35 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         return _data.isTLSCapable();
     }
 
-    /** 
+    private boolean getSupportsChatFromPayload() {
+        parseResults();
+        return _data.isSupportsChat();
+    }
+
+    /**
      * Returns true iff the client supports chat.
      */
     public boolean getSupportsChat() {
-        parseResults();
-        return _data.isSupportsChat();
+        // TODO move to QueryReply decorator?
+        boolean firewalled = isFirewalledHack();
+        return getSupportsChatFromPayload() && !firewalled;
+    }
+
+    private boolean isFirewalledHack() {
+        // In theory, this method should be removed,
+        // and callers should use isFirewalled().
+        // However, that code also takes into account whether
+        // the message was multicast, whereas the legacy piece of
+        // code that did the getSupportsChat logic did *not*
+        // use that information; need to verify with the team
+        // that replacing this with isFirewalled() is ok.
+        boolean firewalled;
+        try {
+            firewalled = getNeedsPush() || networkInstanceUtils.isPrivateAddress(getIP());
+        } catch (BadPacketException e) {
+            firewalled = true;
+        }
+        return firewalled;
     }
 
     /** @return true if the remote host can firewalled transfers.
@@ -1029,6 +1052,16 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 	public static boolean isFirewalledQuality(int quality) {
         return quality==0 || quality==2;
 	}
+
+    public boolean isFirewalled() {
+        boolean firewalled;
+        try {
+            firewalled = getNeedsPush() || networkInstanceUtils.isPrivateAddress(getIP());
+        } catch (BadPacketException e) {
+            firewalled = true;
+        }
+        return firewalled && !isReplyToMulticastQuery();
+    }
 
     /** Handles all our GGEP stuff.  Caches potential GGEP blocks for efficiency.
      */

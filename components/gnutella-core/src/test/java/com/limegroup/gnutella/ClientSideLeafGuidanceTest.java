@@ -13,14 +13,10 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.QueryReplyFactory;
-import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.spam.SpamManager;
@@ -421,7 +417,7 @@ public class ClientSideLeafGuidanceTest extends ClientSideTestCase {
         
 
         public void handleQueryResult(RemoteFileDesc rfdParam,
-                                      HostData data,
+                                      QueryReply queryReply,
                                       Set locs) {
             responses.add(rfdParam);
         }

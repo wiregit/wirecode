@@ -278,7 +278,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
        SearchResultHandlerImpl.GuidCount gc = (SearchResultHandlerImpl.GuidCount)srs;
        
        assertEquals(0, gc.getNumResultsForURN(urns.iterator().next()));
-       searchResultHandler.addQueryReply(queryReply, hostData);
+       searchResultHandler.addQueryReply(queryReply);
        assertEquals(1, gc.getNumResultsForURN(urns.iterator().next()));
        
        m.assertIsSatisfied();
@@ -303,7 +303,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         
         assertEquals(0.0, srs.getPercentAvailable(urns.iterator().next()), 0.0);
-        searchResultHandler.addQueryReply(queryReply, hostData);
+        searchResultHandler.addQueryReply(queryReply);
         assertEquals(80.0, srs.getPercentAvailable(urns.iterator().next()), 0.0);
         
         m.assertIsSatisfied();
@@ -330,7 +330,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         SearchResultHandlerImpl.GuidCount gc = (SearchResultHandlerImpl.GuidCount)srs;
         
         assertEquals(0, gc.getNumResultsForURN(urns.iterator().next()));
-        searchResultHandler.addQueryReply(queryReply, hostData);
+        searchResultHandler.addQueryReply(queryReply);
         assertEquals(1, gc.getNumResultsForURN(urns.iterator().next()));
         
         m.assertIsSatisfied();
@@ -346,7 +346,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
         assertEquals(0, callback.results.size());
-        searchResultHandler.addQueryReply(queryReply, hostData);
+        searchResultHandler.addQueryReply(queryReply);
         assertEquals(1, callback.results.size());
         
         m.assertIsSatisfied();
@@ -372,7 +372,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         SearchResultHandlerImpl.GuidCount gc = (SearchResultHandlerImpl.GuidCount)srs;
         
         assertEquals(0, gc.getNumResultsForURN(urns.iterator().next()));
-        searchResultHandler.addQueryReply(queryReply, hostData);
+        searchResultHandler.addQueryReply(queryReply);
         assertEquals(1, gc.getNumResultsForURN(urns.iterator().next()));
         
         searchResultHandler.removeQuery(new GUID(guid));
@@ -402,7 +402,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
             will(returnValue(guid));
         }});
         
-        searchResultHandler.accountAndUpdateDynamicQueriers(queryReply, hostData, 1);
+        searchResultHandler.accountAndUpdateDynamicQueriers(queryReply, 1);
         assertEquals(null, searchResultHandler.removeQueryInternal(new GUID(guid)));
         
         m.assertIsSatisfied();
@@ -434,7 +434,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         
         assertEquals(0.0, srs.getPercentAvailable(urns.iterator().next()), 0.0);
-        searchResultHandler.addQueryReply(queryReply, hostData);
+        searchResultHandler.addQueryReply(queryReply);
         assertEquals(100.0, srs.getPercentAvailable(urns.iterator().next()), 0.0);
         
         m.assertIsSatisfied();
@@ -536,7 +536,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         
         assertEquals(0, srs.getResultHandler(null).getNumberOfLocations());
-        searchResultHandler.addQueryReply(queryReply, hostData);
+        searchResultHandler.addQueryReply(queryReply);
         assertEquals(1, srs.getNumResults());
         
         m.assertIsSatisfied();
@@ -568,7 +568,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         
         assertEquals(0, searchResultHandler.getNumResultsForQuery(new GUID(guid)));
-        searchResultHandler.addQueryReply(queryReply, hostData);
+        searchResultHandler.addQueryReply(queryReply);
         assertEquals(1, searchResultHandler.getNumResultsForQuery(new GUID(guid)));
         
         m.assertIsSatisfied();
@@ -637,7 +637,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         List<RemoteFileDesc> results = new LinkedList<RemoteFileDesc>();
 
         @Override
-        public void handleQueryResult(RemoteFileDesc rfd, HostData data, Set alts) {
+        public void handleQueryResult(RemoteFileDesc rfd, QueryReply queryReply, Set alts) {
             results.add(rfd);
         }
         

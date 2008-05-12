@@ -100,21 +100,15 @@ public class HostDataImpl implements HostData {
         String  vendor = "";
 
         try {
-            firewalled = reply.getNeedsPush() || networkInstanceUtils.isPrivateAddress(ip);
-        } catch (BadPacketException e) {
-            firewalled = true;
-        }        
-        
-        try {
             vendor = reply.getVendor();
         } catch(BadPacketException bad) {
         }
 
         browseHostEnabled = reply.getSupportsBrowseHost();
-        chatEnabled = reply.getSupportsChat() && !firewalled;
+        chatEnabled = reply.getSupportsChat();
         multicast = reply.isReplyToMulticastQuery();
 
-        firewalled = firewalled && !multicast;
+        firewalled = reply.isFirewalled();
         int quality = reply.calculateQualityOfService();
         Set<? extends IpPort> proxies = reply.getPushProxies();
         int fwtVersion = reply.getFWTransferVersion();

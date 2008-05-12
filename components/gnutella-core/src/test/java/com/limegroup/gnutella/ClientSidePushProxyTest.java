@@ -43,7 +43,6 @@ import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
 import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -561,7 +560,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
         }
 
         @Override
-        public void handleQueryResult(RemoteFileDesc rfd, HostData data,
+        public void handleQueryResult(RemoteFileDesc rfd, QueryReply queryReply,
                 Set locs) {
             rfdLock.lock();
             try {

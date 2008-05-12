@@ -172,11 +172,11 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         }
 
         // always handle reply to multicast queries.
-        if( !data.isReplyToMulticastQuery() && !qr.isBrowseHostReply() ) {
+        if( !qr.isReplyToMulticastQuery() && !qr.isBrowseHostReply() ) {
             // note that the minimum search quality will always be greater
             // than -1, so -1 qualities (the impossible case) are never
             // displayed
-            if(data.getQuality() < SearchSettings.MINIMUM_SEARCH_QUALITY.getValue()) {
+            if(qr.calculateQualityOfService() < SearchSettings.MINIMUM_SEARCH_QUALITY.getValue()) {
                 LOG.debug("Ignoring because low quality");
                 return;
             }
@@ -200,11 +200,11 @@ class SearchResultHandlerImpl implements SearchResultHandler {
             }
         }
 
-        int numGoodToSendToFrontEnd = addQueryReply(qr, data);
-        accountAndUpdateDynamicQueriers(qr, data, numGoodToSendToFrontEnd);
+        int numGoodToSendToFrontEnd = addQueryReply(qr);
+        accountAndUpdateDynamicQueriers(qr, numGoodToSendToFrontEnd);
     }
     
-    public int addQueryReply(QueryReply qr, HostData data) {
+    public int addQueryReply(QueryReply qr) {
             List<Response> results = null;
             double numBad = 0;
             int numGood = 0;
@@ -225,15 +225,15 @@ class SearchResultHandlerImpl implements SearchResultHandler {
 
             for (Response response : results) {
                 if (!qr.isBrowseHostReply() && secureStatus != SecureMessage.SECURE) {
-                    if (!searchServices.matchesType(data.getMessageGUID(), response))
+                    if (!searchServices.matchesType(qr.getGUID(), response))
                         continue;
 
-                    if (!searchServices.matchesQuery(data.getMessageGUID(), response))
+                    if (!searchServices.matchesQuery(qr.getGUID(), response))
                         continue;
                 }
 
                 // Throw away results from Mandragore Worm
-                if (searchServices.isMandragoreWorm(data.getMessageGUID(), response))
+                if (searchServices.isMandragoreWorm(qr.getGUID(), response))
                     continue;
                 
                 // If there was an action, only allow it if it's a secure message.
@@ -245,7 +245,7 @@ class SearchResultHandlerImpl implements SearchResultHandler {
                 
                 // we'll be showing the result to the user, count it
                 countClassC(qr,response);
-                RemoteFileDesc rfd = response.toRemoteFileDesc(data, remoteFileDescFactory);
+                RemoteFileDesc rfd = response.toRemoteFileDesc(qr, remoteFileDescFactory);
                 rfd.setSecureStatus(secureStatus);
                 
                 if (skipSpam || !spamManager.get().isSpam(rfd)) {
@@ -255,7 +255,7 @@ class SearchResultHandlerImpl implements SearchResultHandler {
                     numBad++;
                 }
                 
-                activityCallback.get().handleQueryResult(rfd, data, response.getLocations());
+                activityCallback.get().handleQueryResult(rfd, qr, response.getLocations());
                     
             } //end of response loop
             
@@ -356,8 +356,8 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         }
     }
 
-    void accountAndUpdateDynamicQueriers(final QueryReply qr, HostData data,
-                                                 final int numGoodSentToFrontEnd) {
+    void accountAndUpdateDynamicQueriers(final QueryReply qr,
+                                         final int numGoodSentToFrontEnd) {
         LOG.trace("SRH.accountAndUpdateDynamicQueriers(): entered.");
         
         // get the correct GuidCount

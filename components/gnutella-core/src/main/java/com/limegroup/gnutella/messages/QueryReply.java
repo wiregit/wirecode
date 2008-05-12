@@ -222,4 +222,6 @@ public interface QueryReply extends Message, SecureMessage {
      * @return if this reply is created locally. false means from network.
      */
     public boolean isLocal();
+
+    public boolean isFirewalled();
 }
