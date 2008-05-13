@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-05 11:31-0400\n"
+"POT-Creation-Date: 2008-05-12 11:31-0400\n"
 "PO-Revision-Date: 2008-02-15 10:38+0000\n"
 "Last-Translator: Huw Jones <Unknown>\n"
 "Language-Team: none\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=n==1 ? 0 : n==2 ? 1 : (n != 8 || n != 11) ? "
 "2 : 3;\n"
-"X-Launchpad-Export-Date: 2008-05-06 03:52+0000\n"
+"X-Launchpad-Export-Date: 2008-05-13 03:53+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #, fuzzy
@@ -4304,7 +4304,7 @@ msgstr ""
 "LimeWire.</html>"
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:34
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
 msgid "Lookup File with Bitzi"
 msgstr "Edrych Fyny'r Ffeil gyda Bitzi"
 
@@ -4400,7 +4400,7 @@ msgstr "Gweld Fy {0} Ffeils i Rannu"
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:785
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:580
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:570
 #, java-format
 msgid "Search for Keywords: {0}"
 msgstr "Chwilio am y Geiriau {0}"
@@ -4511,8 +4511,8 @@ msgstr "Yn methu chwilio'r partner {0} ."
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:241
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:950
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:43
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:44
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:53
 msgid "Browse Host"
@@ -5412,7 +5412,7 @@ msgid "Save Folder"
 msgstr "Ffolder Cadw"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:122
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:150
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:154
 #: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:33
 msgid "Shared Folders"
 msgstr "Ffolderi Wedi'u Rhannu"
@@ -5806,19 +5806,19 @@ msgstr ""
 "gallu dad-ddewis unrhyw ffolderi ti ddim am rannu. (Ti'n gallu newid dy "
 "ffolderi rhannu ar unrhyw adeg yn opsiynnau LimeWire.)"
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:337
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:341
 msgid "Legend"
 msgstr "Allwedd"
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:346
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:350
 msgid "Folder is fully shared including all subfolders."
 msgstr "Mae'r ffolder i gyd yn cael ei rannu yn cynnwys y ffolderi tu mewn."
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:360
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:364
 msgid "Folder is not shared and no subfolders are shared."
 msgstr "Nid yw'r ffolder neu ffolderi tu mewn yn cael eu rannu."
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:368
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:372
 msgid "Folder's files and some subfolders are shared."
 msgstr "Mae ffeiliau yn y ffolder a rhai ffolderi tu mewn yn cael eu rhannu."
 
@@ -6224,11 +6224,11 @@ msgid "Content"
 msgstr "Cynnwys"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:391
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:336
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:514
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:619
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:644
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:326
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:504
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:609
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:634
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:113
 msgid "Junk"
 msgstr "Ysbwriel"
 
@@ -7679,34 +7679,34 @@ msgid "View in Browser..."
 msgstr "Gweld Mewn Rhaglen Chwilio..."
 
 #. mark 'em red
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:334
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:500
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:641
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:113
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:324
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:490
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:631
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:115
 msgid "Not Junk"
 msgstr "Dim yn Ysbwriel"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:337
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:515
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:620
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:645
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:327
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:505
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:610
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:635
 msgid "Mark selected search results as Junk"
 msgstr "Marcio canlyniadau wedi'u dewis fel Ysbwriel"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:501
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:642
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:491
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:632
 msgid "Mark selected search results as Not Junk"
 msgstr "Marcio canlyniadau wedi'u dewis fel Nid Ysbwriel"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:564
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:554
 msgid "Search More"
 msgstr "Chwilio Mwy"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:728
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:718
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr "Eisiau blocio canlyniadau'r chwilio o'r rhestr canlynol o letywyr?"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1075
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1065
 msgid "More Info..."
 msgstr "Mwy o Wybodaeth..."
 
@@ -7735,12 +7735,12 @@ msgid "Search for Program Files, Including exe, zip, gz, and More"
 msgstr "Chwilio am Ffeiliau Rhaglenni, yn cynnwys exe. zip, gz a Mwy"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:42
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:89
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
 msgid "Download"
 msgstr "Llwytho i lawr"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:44
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
 msgid "Stop Search"
 msgstr "Stopio'r Chwilio"
 
@@ -7831,43 +7831,43 @@ msgstr "Chwilio y Rhwydwaith am y Geiriau"
 msgid "The address format is incorrect, please use host:port."
 msgstr "Mae fformat y cyfeiriad yn anghywir, defnyddia letywr:porth."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
 msgid "Close Search"
 msgstr "Cau'r Chwilio"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
 msgid "Launch Action"
 msgstr "Lansio"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
 msgid "Chat With Host"
 msgstr "Sgwrsio gyda Lletywr"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
 msgid "Repeat Search"
 msgstr "Chwilio eto"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
 msgid "Block Hosts"
 msgstr "Blocio Partner"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
 msgid "Mark As"
 msgstr "Marcio Fel"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:115
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:117
 msgid "Get More Results"
 msgstr "Cael Mwy o Ganlyniadau"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:143
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:147
 msgid "Loading Search Window..."
 msgstr "Llwytho Ffenestr Chwilio..."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:341
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:345
 msgid "Firewalled Host"
 msgstr "Lletywr gyda Wal Tan"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:460
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:464
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
 "network."
@@ -7875,28 +7875,28 @@ msgstr ""
 "Rhaid i dy chwiliad cael o leiaf 3 llythyren i er mwyn peidio tagu'r "
 "rhwydwaith."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:465
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:469
 msgid ""
 "Your search is too long. Please make your search smaller and try again."
 msgstr ""
 "Mae dy chwiliad yn rhy hir. Rhaid gwneud y chwilio'n llai a thrio eto."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:468
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:472
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:476
 msgid ""
 "Your search is too specific. Please make your search smaller and try again."
 msgstr ""
 "Mae dy chwiliad yn rhy benodol. Rhaid gwneud y chwilio'n llai ac wedyn trio "
 "eto."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:477
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:481
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
 "Plis aros, mae rhaid i LimeWire gorffen llwytho cyn ddechrau chwilio."
 
 #. if not connected or connecting, show one message.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:486
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:490
 msgid ""
 "You are not connected to the network. To connect, select \"Connect\" from "
 "the \"File\" menu. Your search may not return any results until you connect."
@@ -7906,7 +7906,7 @@ msgstr ""
 "iti gysylltu."
 
 #. if attempting to connect, show another.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:489
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:493
 msgid ""
 "LimeWire is currently connecting to the network. Your search may not return "
 "many results until you are fully connected to the network."
@@ -7914,7 +7914,7 @@ msgstr ""
 "Mae LimeWire wrthi'n cysylltu a'r rhwydwaith. Efallai fydd dy chwilio ddim "
 "yn darganfod unrhyw ganlynadau nes iti gysylltu."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:798
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:801
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
@@ -7922,7 +7922,7 @@ msgstr ""
 "Mae un o'r ffeiliau'n raglen gweithredol a gall cynnwys firws. Wyt ti'n siwr "
 "dy fod di am ei Lwytho i Lawr?"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:487
+#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:476
 #, java-format
 msgid "Could not browse host {0}."
 msgstr ""

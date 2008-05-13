@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2008-05-05 11:31-0400\n"
+"POT-Creation-Date: 2008-05-12 11:31-0400\n"
 "PO-Revision-Date: 2008-04-30 02:55+0000\n"
 "Last-Translator: Zaor <Unknown>\n"
 "Language-Team: Norwegian Bokmal <nb@li.org>\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-05-06 03:53+0000\n"
+"X-Launchpad-Export-Date: 2008-05-13 03:52+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
@@ -2800,7 +2800,7 @@ msgstr ""
 "den nyeste offisielle versjoen av LimeWire.</body></html>"
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:34
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
 msgid "Lookup File with Bitzi"
 msgstr "Sjekk Filen med Bitzi"
 
@@ -2898,7 +2898,7 @@ msgstr "Se mine {0} Delte Filer"
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:785
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:580
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:570
 #, java-format
 msgid "Search for Keywords: {0}"
 msgstr "Søk etter Nøkkelord: {0}"
@@ -3009,8 +3009,8 @@ msgstr "Kunne ikke sende chat melding"
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:241
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:950
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:43
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:44
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:53
 msgid "Browse Host"
@@ -3911,7 +3911,7 @@ msgid "Save Folder"
 msgstr "Lagre Mappe"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:122
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:150
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:154
 #: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:33
 msgid "Shared Folders"
 msgstr "Delte Mapper"
@@ -4310,19 +4310,19 @@ msgstr ""
 "mapper du ikke vil dele. (Du kan endre dine lagrede mapper når som helst i "
 "LimeWire's innstillinger.)"
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:337
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:341
 msgid "Legend"
 msgstr "Billedtekst"
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:346
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:350
 msgid "Folder is fully shared including all subfolders."
 msgstr "Mappe n er fult delt inkludert alle undermapper."
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:360
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:364
 msgid "Folder is not shared and no subfolders are shared."
 msgstr "Mappen er ikke delt og ingen undermapper er delt."
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:368
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:372
 msgid "Folder's files and some subfolders are shared."
 msgstr "Mappen's filer  og noen undermapper er delt."
 
@@ -4730,11 +4730,11 @@ msgid "Content"
 msgstr "Innhold"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:391
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:336
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:514
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:619
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:644
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:326
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:504
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:609
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:634
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:113
 msgid "Junk"
 msgstr "Søppel"
 
@@ -6172,34 +6172,34 @@ msgid "View in Browser..."
 msgstr "Se i Browser..."
 
 #. mark 'em red
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:334
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:500
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:641
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:113
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:324
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:490
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:631
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:115
 msgid "Not Junk"
 msgstr "Ikke Søppel"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:337
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:515
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:620
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:645
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:327
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:505
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:610
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:635
 msgid "Mark selected search results as Junk"
 msgstr "Marker valgte resultater som Søppel"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:501
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:642
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:491
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:632
 msgid "Mark selected search results as Not Junk"
 msgstr "Marker valgte resultater som Ikke Søppel"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:564
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:554
 msgid "Search More"
 msgstr "Søk Mer"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:728
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:718
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr "Vil du blokkere søkeresultater fra verten ved"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1075
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1065
 msgid "More Info..."
 msgstr "Mer info ..."
 
@@ -6228,12 +6228,12 @@ msgid "Search for Program Files, Including exe, zip, gz, and More"
 msgstr "Søk etter Program Filer, inkludert exe, zip, gz, og Mer"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:42
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:89
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
 msgid "Download"
 msgstr "Last ned"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:44
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
 msgid "Stop Search"
 msgstr "Stopp Søk"
 
@@ -6324,43 +6324,43 @@ msgstr "Søk Nettverket for Gitte ord"
 msgid "The address format is incorrect, please use host:port."
 msgstr "Adressen er uriktig, vennligst bruk host:port."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
 msgid "Close Search"
 msgstr "Lukk Søk"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
 msgid "Launch Action"
 msgstr "Utfør Handling"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
 msgid "Chat With Host"
 msgstr "Snakk med Vert"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
 msgid "Repeat Search"
 msgstr "Gjenta Søk"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
 msgid "Block Hosts"
 msgstr "Blokker Vert"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
 msgid "Mark As"
 msgstr "Marker Som"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:115
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:117
 msgid "Get More Results"
 msgstr "Få flere Resultater"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:143
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:147
 msgid "Loading Search Window..."
 msgstr "Laster Søkevindu..."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:341
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:345
 msgid "Firewalled Host"
 msgstr "Brannmur vert"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:460
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:464
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
 "network."
@@ -6368,26 +6368,26 @@ msgstr ""
 "Søket ditt må være minst tre bokstaver langt for å unngå overbelasting av "
 "nettverket."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:465
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:469
 msgid ""
 "Your search is too long. Please make your search smaller and try again."
 msgstr "Søket ditt er for langt. Vennligst lag søket mindre og prøv igjen."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:468
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:472
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:476
 msgid ""
 "Your search is too specific. Please make your search smaller and try again."
 msgstr ""
 "Søket ditt er for nøyaktig. Vennligst lag søket mindre og prøv igjen."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:477
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:481
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
 "Vennligst vent, LimeWire må fullføre loadingen før et søk kan bli startet."
 
 #. if not connected or connecting, show one message.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:486
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:490
 msgid ""
 "You are not connected to the network. To connect, select \"Connect\" from "
 "the \"File\" menu. Your search may not return any results until you connect."
@@ -6396,7 +6396,7 @@ msgstr ""
 "\"Fil\" menyen. Ditt søk gir ikke resultater før du kobler til."
 
 #. if attempting to connect, show another.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:489
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:493
 msgid ""
 "LimeWire is currently connecting to the network. Your search may not return "
 "many results until you are fully connected to the network."
@@ -6404,7 +6404,7 @@ msgstr ""
 "Limewire kobler nå til nettverket. Ditt søk vil nok ikke gi så mange "
 "resultater før du er fullstendig tilkoblet nettverket."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:798
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:801
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
@@ -6412,7 +6412,7 @@ msgstr ""
 "En av de valgte filene er et kjørbart program og kan inneholde et virus. Er "
 "du sikker på at du vil laste det ned?"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:487
+#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:476
 #, java-format
 msgid "Could not browse host {0}."
 msgstr "Kunne ikke bla igjennom vert {0} ."

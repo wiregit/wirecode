@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-05 11:31-0400\n"
-"PO-Revision-Date: 2007-08-23 13:53+0000\n"
-"Last-Translator: Lime Wire <Unknown>\n"
+"POT-Creation-Date: 2008-05-12 11:31-0400\n"
+"PO-Revision-Date: 2008-05-11 21:53+0000\n"
+"Last-Translator: Harprit Singh <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-05-06 03:52+0000\n"
+"X-Launchpad-Export-Date: 2008-05-13 03:52+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid "LimeWire: Enabling Open Information Sharing"
@@ -459,9 +459,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:282
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreFileNamePaneItem.java:46
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:49
-#, fuzzy
 msgid "Title"
-msgstr "ਫ਼ਾਇਲ(&F)"
+msgstr "ਸਿਰਲੇਖ"
 
 #. *
 #. * Variables for displaying substitutable values, visual form
@@ -479,9 +478,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:286
 #: gui/com/limegroup/gnutella/gui/options/panes/StoreFileNamePaneItem.java:44
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistDataLine.java:65
-#, fuzzy
 msgid "Album"
-msgstr "ਲਾਇਸਵਾਇਰ ਬਾਰੇ"
+msgstr "ਐਲਬਮ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:91
 #: gui/com/limegroup/gnutella/gui/mp3/PlayListItem.java:288
@@ -521,9 +519,8 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:96
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:112
-#, fuzzy
 msgid "Language"
-msgstr "ਭਾਸ਼ਾ ਬਦਲੋ(Language)(&H)"
+msgstr "ਭਾਸ਼ਾ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:97
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:121
@@ -546,9 +543,8 @@ msgstr "ਥਾਂ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:100
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:117
-#, fuzzy
 msgid "Copyright"
-msgstr "ਕੌਪੀ ਕਰੋ"
+msgstr "ਕਾਪੀਰਾਈਟ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:101
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:118
@@ -573,9 +569,8 @@ msgid "Studio"
 msgstr "ਔਡ੍ਯੋ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:108
-#, fuzzy
 msgid "Stars"
-msgstr "ਵਂਡੋ"
+msgstr "ਤਾਰੇ"
 
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:113
 msgid "Subtitles"
@@ -759,9 +754,8 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:444
-#, fuzzy
 msgid "Send"
-msgstr "ਗਤਿ"
+msgstr "ਭੇਜੋ"
 
 #: gui/com/limegroup/gnutella/bugs/BugManager.java:455
 #, fuzzy
@@ -828,9 +822,8 @@ msgstr "ਲਾਇਸਵਾਇਰ ਬਾਰੇ"
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:80
 #: gui/com/limegroup/gnutella/gui/GUIMediator.java:262
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:35
-#, fuzzy
 msgid "LimeWire"
-msgstr "ਲਾਇਸਵਾਇਰ PRO"
+msgstr "ਲਾਇਸਵਾਇਰ (LimeWire)"
 
 #. set up close button
 #. *
@@ -838,9 +831,8 @@ msgstr "ਲਾਇਸਵਾਇਰ PRO"
 #. 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:104
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:79
-#, fuzzy
 msgid "Close"
-msgstr "ਬੰਦ ਕਰੋ(&C)"
+msgstr "ਬੰਦ"
 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:106
 msgid "Close This Window"
@@ -1320,9 +1312,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/MessageService.java:96
 #: gui/com/limegroup/gnutella/gui/MessageService.java:212
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:910
-#, fuzzy
 msgid "Error"
-msgstr "ਗ਼ਲਤੀ: {0}"
+msgstr "ਗਲਤੀ"
 
 #: gui/com/limegroup/gnutella/gui/InputFieldDialog.java:67
 msgid "Input"
@@ -1352,9 +1343,8 @@ msgid "Upgrade Java"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:168
-#, fuzzy
 msgid "More Information"
-msgstr "ਹੋਰ ਓਪਸ਼ੰਜ਼"
+msgstr "ਹੋਰ ਜਾਣਕਾਰੀ"
 
 #: gui/com/limegroup/gnutella/gui/JavaVersionNotice.java:169
 #, java-format
@@ -1610,9 +1600,8 @@ msgid "Show Last"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/MonitorView.java:108
-#, fuzzy
 msgid "Searches"
-msgstr "ਹੋਰ ਲਭੋ"
+msgstr "ਖੋਜਾਂ"
 
 #: gui/com/limegroup/gnutella/gui/SaveDirectoryHandler.java:58
 #, java-format
@@ -1716,9 +1705,8 @@ msgid "You are connected to the LimeWire Store"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:596
-#, fuzzy
 msgid "Connection"
-msgstr "ਕਨੈਕਸ਼ੰਜ਼"
+msgstr "ਕੁਨੈਕਸ਼ਨ"
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:599
 msgid "Disconnected"
@@ -1733,7 +1721,7 @@ msgstr "ਤੁਸੀਂ ਡਿਸਕਨੈੱਕਟਿੱਡ ਹੋ.ਫ਼ਾਇਲ
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:603
 #, fuzzy
 msgid "Starting"
-msgstr "ਸ਼ੁਰੂ ਹੋਯਾ"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/StatusLine.java:604
 msgid "You are currently connecting to the network"
@@ -2712,9 +2700,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:236
 #: gui/com/limegroup/gnutella/gui/startup/StartupBanner.java:26
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:201
-#, fuzzy
 msgid "Later"
-msgstr "ਚਿਪਕਾਓ"
+msgstr "ਬਾਅਦ ਵਿੱਚ"
 
 #: gui/com/limegroup/gnutella/gui/UpgradeWindow.java:238
 #: gui/com/limegroup/gnutella/gui/startup/StartupBanner.java:27
@@ -2744,7 +2731,7 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:34
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
 msgid "Lookup File with Bitzi"
 msgstr "ਫ਼ਾਇਲ ਨੂੰ Bitziਨਾਲ ਲਭੋ"
 
@@ -2818,9 +2805,8 @@ msgstr "ਪਰੋਗਰੈਮ ਬੰਦ ਕਰੋ"
 #: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:27
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:834
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1237
-#, fuzzy
 msgid "Launch"
-msgstr "ਕੰਮ ਸ਼ੁਰੂ ਕਰੋ"
+msgstr "ਚਲਾਓ"
 
 #: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:29
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1239
@@ -2839,7 +2825,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:785
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:580
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:570
 #, java-format
 msgid "Search for Keywords: {0}"
 msgstr "{0} ਮੁੱਖ ਸ਼ਬਦ ਲੱਭੋ"
@@ -2909,9 +2895,8 @@ msgstr "ਹੋਸਟ ਨੂੰ ਬਲੌਕ ਕਿਤਾ ਜਾਏ"
 #. * chat send button.
 #. 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:59
-#, fuzzy
 msgid "Send Message"
-msgstr "ਲੌਗ ਵੇਖੋ"
+msgstr "ਸੁਨੇਹਾ ਭੇਜੋ"
 
 #. *
 #. * Constant for the locale-specific resource key for the toolTip of the
@@ -2954,8 +2939,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:241
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:950
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:43
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:44
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:53
 #, fuzzy
@@ -3077,18 +3062,16 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:123
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:58
-#, fuzzy
 msgid "Connecting..."
-msgstr "ਕਨੈਕਸ਼ੰਜ਼"
+msgstr "ਕੁਨੈਕਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ..."
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:129
 msgid "Outgoing"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:135
-#, fuzzy
 msgid "Incoming"
-msgstr "ਆਇਕੰ"
+msgstr "ਆ ਰਹੇ"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:141
 #, fuzzy
@@ -3109,7 +3092,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:42
 #, fuzzy
 msgid "Connecting"
-msgstr "ਕਨੈਕਸ਼ੰਜ਼"
+msgstr "ਕੁਨੈਕਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:69
 msgid "Leaves"
@@ -3401,9 +3384,8 @@ msgstr "ਚੈਟ"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:387
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:259
-#, fuzzy
 msgid "Progress"
-msgstr "ਪ੍ਰੋਗ੍ਰੈੰਜ਼"
+msgstr "ਤਰੱਕੀ"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:395
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:329
@@ -3512,9 +3494,8 @@ msgid "Choose Save Location"
 msgstr "ਸੇਵ ਕਰਣ ਦੀ ਜਗਹ ਦਓ"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:754
-#, fuzzy
 msgid "Search..."
-msgstr "ਹੋਰ ਲਭੋ"
+msgstr "ਖੋਜ..."
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:826
 msgid "Clear Download"
@@ -3774,7 +3755,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:66
 #, fuzzy
 msgid "Language:"
-msgstr "ਭਾਸ਼ਾ ਬਦਲੋ(Language)(&H)"
+msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:63
 msgid "Miscellaneous Settings"
@@ -3807,9 +3788,8 @@ msgid "System Startup"
 msgstr "ਸ਼ੁਰੂ ਹੋਣ ਤੇ ਸੁਝਾਵ ਦਿਖਾਊਂ"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:121
-#, fuzzy
 msgid "Start Automatically"
-msgstr "ਖ਼ੁਦ’ਬਖ਼ੁਦ ਕ੍ਮ ਬਣੇ"
+msgstr "ਆਟੋਮੈਟਿਕ ਸ਼ੁਰੂ ਕਰੋ"
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:125
 msgid ""
@@ -3867,7 +3847,7 @@ msgid "Save Folder"
 msgstr "ਫ਼ੋਲਡਰ ਵਂਡੋ"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:122
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:150
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:154
 #: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:33
 #, fuzzy
 msgid "Shared Folders"
@@ -3994,14 +3974,12 @@ msgstr "ਲਭੋ ਅਤੇ ਡਾਉੰਲੋਡ ਕਰੋ"
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:300
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:576
 #: gui/com/limegroup/gnutella/gui/tabs/SearchDownloadTab.java:41
-#, fuzzy
 msgid "Search"
-msgstr "ਹੋਰ ਲਭੋ"
+msgstr "ਖੋਜ"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchResultsHolder.java:29
-#, fuzzy
 msgid "Search Results"
-msgstr "ਖੋਜ ਦੇ ਪਰਿਣਾਮ ਦੇ ਫ਼ਿਲਟਰਾਂ ਨੂੰ ਦੇਖੋ"
+msgstr "ਖੋਜ ਨਤੀਜੇ"
 
 #: gui/com/limegroup/gnutella/gui/library/LibrarySearchResultsHolder.java:33
 msgid "Holds the Results of the Last Search"
@@ -4257,19 +4235,19 @@ msgid ""
 "any time in LimeWire's options.)"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:337
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:341
 msgid "Legend"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:346
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:350
 msgid "Folder is fully shared including all subfolders."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:360
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:364
 msgid "Folder is not shared and no subfolders are shared."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:368
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:372
 msgid "Folder's files and some subfolders are shared."
 msgstr ""
 
@@ -4666,7 +4644,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:383
 #, fuzzy
 msgid "Searching"
-msgstr "ਹੋਰ ਲਭੋ"
+msgstr "ਖੋਜ ਜਾਰੀ ਹੈ"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:385
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:32
@@ -4685,11 +4663,11 @@ msgid "Content"
 msgstr "ਕਨੇਕਟ(&O)"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:391
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:336
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:514
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:619
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:644
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:326
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:504
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:609
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:634
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:113
 msgid "Junk"
 msgstr "ਜੰਕ ਹੈ"
 
@@ -4751,9 +4729,8 @@ msgstr "ਨਵੇ ਓਪਸ਼ੰਜ਼ ਰੀਸਟਾਰਟ ਕਰਣ ਦੇ ਬਾ�
 #. * <tt>PaneItem</tt>.
 #. 
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:35
-#, fuzzy
 msgid "Folder:"
-msgstr "ਸਾਰੇ ਫ਼ੋਲਡਰ"
+msgstr "ਫੋਲਡਰ:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AbstractDirPaneItem.java:57
 #, fuzzy
@@ -6101,34 +6078,34 @@ msgid "View in Browser..."
 msgstr ""
 
 #. mark 'em red
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:334
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:500
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:641
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:113
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:324
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:490
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:631
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:115
 msgid "Not Junk"
 msgstr "ਜੰਕ ਨਈ ਹੈ"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:337
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:515
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:620
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:645
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:327
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:505
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:610
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:635
 msgid "Mark selected search results as Junk"
 msgstr "ਇੱਸ ਖੋਜ ਨੂੰ ਜੰਕ ਮਾਰਕ ਕਰੋ"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:501
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:642
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:491
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:632
 msgid "Mark selected search results as Not Junk"
 msgstr "ਇੱਸ ਖੋਜ ਨੂੰ ਜੰਕ ਮਾਰਕ ਨਾ ਕਰੋ"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:564
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:554
 msgid "Search More"
 msgstr "ਹੋਰ ਲਭੋ"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:728
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:718
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr "ਤੁਸੀਂ ਇਸ ਹੋਸਟ ਦੇ ਨਤੀਜੇ ਹਟਾਣਾ ਚਾੰਦੇ ਹੋ"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1075
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1065
 msgid "More Info..."
 msgstr ""
 
@@ -6157,12 +6134,12 @@ msgid "Search for Program Files, Including exe, zip, gz, and More"
 msgstr "ਪ੍ਰੋਗ੍ਰੈਮ ਫ਼ਾਇਲਾਂ ਲਭੋ, ਜਿੱਦਾਂ ਜ਼ਿੱਪ, ਈ ਏਕਸ ਈ, ਜੀਜ਼ੈੱਡ ਵਰਗੀਆਂ."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:42
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:89
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
 msgid "Download"
 msgstr "ਡਾਉੰਲੋਡ"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:44
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
 #, fuzzy
 msgid "Stop Search"
 msgstr "ਖੋਜ ਨੂੰ ਬੰਦ ਕਰੋ"
@@ -6252,81 +6229,81 @@ msgstr "ਦਿੱਤੇ ਸ਼ਬਦਾਂ ਬਾਰੇ ਨੈੱਟਵਰਕ ’�
 msgid "The address format is incorrect, please use host:port."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
 msgid "Close Search"
 msgstr "ਖੋਜ ਨੂੰ ਬੰਦ ਕਰੋ"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
 msgid "Launch Action"
 msgstr "ਕੰਮ ਸ਼ੁਰੂ ਕਰੋ"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
 msgid "Chat With Host"
 msgstr "ਹੋਸਟ ਨਾਲ ਗੱਲ ਕਰੋ"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
 msgid "Repeat Search"
 msgstr "ਖੋਜ ਦੁਹਰਾਓ"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
 msgid "Block Hosts"
 msgstr "ਹੋਸਟ ਨੂੰ ਬਲੌਕ ਕਿਤਾ ਜਾਏ"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
 msgid "Mark As"
 msgstr "ਮਾਰਕ ਕਰੋ"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:115
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:117
 msgid "Get More Results"
 msgstr "ਹੋਰ ਰਿਜ਼ਲਟ ਪਾਓ"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:143
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:147
 #, fuzzy
 msgid "Loading Search Window..."
 msgstr "ਸੁਝਾਵ ਲੋਡ ਹੋ ਰਹੇ ਹਨ..."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:341
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:345
 msgid "Firewalled Host"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:460
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:464
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
 "network."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:465
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:469
 msgid ""
 "Your search is too long. Please make your search smaller and try again."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:468
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:472
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:476
 msgid ""
 "Your search is too specific. Please make your search smaller and try again."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:477
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:481
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
 
 #. if not connected or connecting, show one message.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:486
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:490
 msgid ""
 "You are not connected to the network. To connect, select \"Connect\" from "
 "the \"File\" menu. Your search may not return any results until you connect."
 msgstr "ਤੁਸੀਂ ਨੈੱਟਵਰਕ ਨਾਲ ਨਈ ਜੁੜੇ, ਫ਼ਾਇਲ ਮੇਨਿਊ ਤੋਂ ਕਨੇਕਟ ਦਬਾਓ"
 
 #. if attempting to connect, show another.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:489
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:493
 msgid ""
 "LimeWire is currently connecting to the network. Your search may not return "
 "many results until you are fully connected to the network."
 msgstr ""
 "ਤੁਸੀਂ ਨੈੱਟਵਰਕ ਨਾਲ ਪੂਰੀ ਤਰਹ ਨਈ ਜੁੜੇ. ਜੇ ਕਨੇਕਸ਼ਨ ਨਾ ਹੋਯਾ, ਤੇ ਖੋਜ ਸਟੀਕ ਨਈ ਹੋ ਪਾਣੀ"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:798
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:801
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
@@ -6334,7 +6311,7 @@ msgstr ""
 "ਇੰਨਾਂ ਵਿੱਚੋਂ ਇਕ ਫ਼ਾਇਲ executable ਹੈ ਓਹ ਇੱਕ ਵਾਇਰਸ ਵੀ ਹੋ ਸਕਦੀ ਹੈ! ਤੁਸੀਂ ਓਹਨੂੰ "
 "ਪੱਕਾ ਡਾਉੰਲੋਡ ਕਰਣਾ ਚਾੰਦੇ ਹੋ?"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:487
+#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:476
 #, java-format
 msgid "Could not browse host {0}."
 msgstr ""
@@ -6611,9 +6588,8 @@ msgid "Remove Inactive Uploads"
 msgstr "ਸੁਸਤ ਡਾਉੰਲੋਡ ਹਟਾਓ"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:48
-#, fuzzy
 msgid "Uploading"
-msgstr "ਹੁਣ ਦੇ ਅੱਪਲੋਡ"
+msgstr "ਅੱਪਲੋਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:54
 msgid "Upload Limit Reached"
@@ -6629,7 +6605,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:78
 msgid "File Not Found"
-msgstr ""
+msgstr "ਫਾਇਲ ਨਹੀਂ ਮਿਲੀ"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:84
 msgid "Queued at"
@@ -6676,9 +6652,8 @@ msgid "Seeding"
 msgstr "ਗਤਿ"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:37
-#, fuzzy
 msgid "Invalid Filename"
-msgstr "ਫ਼ਾਇਲ ਦਾ ਨਾਂ"
+msgstr "ਗਲਤ ਫਾਇਲ ਨਾਂ"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:40
 #, fuzzy
@@ -6691,11 +6666,11 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:46
 msgid "Folder Does Not Exist"
-msgstr ""
+msgstr "ਫੋਲਡਰ ਮੌਜੂਦ ਨਹੀਂ ਹੈ"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:49
 msgid "File Already Exists"
-msgstr ""
+msgstr "ਫਾਇਲ ਪਹਿਲਾਂ ਹੀ ਮੌਜੂਦ ਹੈ"
 
 #: gui/com/limegroup/gnutella/gui/util/CoreExceptionHandler.java:52
 #, fuzzy
@@ -6795,14 +6770,13 @@ msgstr "ਹੋਰ ਓਪਸ਼ੰਜ਼"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/AbstractMetaInfoPanel.java:74
 msgid "Info"
-msgstr ""
+msgstr "ਜਾਣਕਾਰੀ"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:93
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:273
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:372
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:443
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:534
-#, fuzzy
 msgid "Publish License"
 msgstr "ਲਾਇਸੈੰਸ"
 
@@ -6858,7 +6832,6 @@ msgid "Allow modification of your work?"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCPublishWizard.java:438
-#, fuzzy
 msgid "Save details to file"
 msgstr "ਇਸ ਪਲੇਲਿਸਟ ਨੂੰ ਸੇਵ ਕਰੋ"
 
@@ -6924,13 +6897,12 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:149
-#, fuzzy
 msgid "Copy to Clipboard"
-msgstr "ਚੁੰਬਕੀ ਲਿੰਕ ਨੂੰ ਕਲਿੱਪਬੋਰਡ ਤੇ ਚੇਪੋ"
+msgstr "ਕਲਿੱਪਬੋਰਡ ਵਿੱਚ ਨਕਲ"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:53
 msgid "Kind:"
-msgstr ""
+msgstr "ਕਿਸਮ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/DetailsPanel.java:79
 #, fuzzy
@@ -6984,16 +6956,16 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:72
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:86
 msgid "Title:"
-msgstr ""
+msgstr "ਸਿਰਲੇਖ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:38
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:88
 msgid "Artist:"
-msgstr ""
+msgstr "ਕਲਾਕਾਰ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:39
 msgid "Album:"
-msgstr ""
+msgstr "ਐਲਬਮ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:40
 msgid "Genre:"
@@ -7002,13 +6974,12 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:41
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:57
 msgid "Year:"
-msgstr ""
+msgstr "ਸਾਲ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:42
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:56
-#, fuzzy
 msgid "Type:"
-msgstr "ਤਰਹ"
+msgstr "ਕਿਸਮ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:43
 msgid "Track:"
@@ -7017,7 +6988,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:45
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:59
 msgid "Length:"
-msgstr ""
+msgstr "ਲੰਬਾਈ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:46
 msgid "Bitrate:"
@@ -7100,14 +7071,12 @@ msgid "Author:"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:79
-#, fuzzy
 msgid "Name:"
-msgstr "ਨਾਂ"
+msgstr "ਨਾਂ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:80
-#, fuzzy
 msgid "Publisher:"
-msgstr "ਪਬਲਿਸ਼..."
+msgstr "ਪਬਲਿਸ਼ਰ:"
 
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:81
 msgid "Platform:"

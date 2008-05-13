@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-05 11:31-0400\n"
-"PO-Revision-Date: 2008-04-12 08:14+0000\n"
-"Last-Translator: vagman2008 <vaggos333a@yahoo.gr>\n"
+"POT-Creation-Date: 2008-05-12 11:31-0400\n"
+"PO-Revision-Date: 2008-05-12 14:18+0000\n"
+"Last-Translator: merianosnikos <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-05-06 03:53+0000\n"
+"X-Launchpad-Export-Date: 2008-05-13 03:52+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Bookmarks: 545,366,72,79,138,-1,-1,-1,-1,-1\n"
 
@@ -1973,7 +1973,7 @@ msgstr "Φόρτωση ακροατών δικτύου..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:553
 msgid "Loading Promotion System..."
-msgstr ""
+msgstr "Φορτώνεται το σύστημα διαφημίσεων…"
 
 #. These are used as resource keys to retreive descriptions in the GUI
 #: core/com/limegroup/gnutella/MediaType.java:44
@@ -4519,12 +4519,16 @@ msgid ""
 "preferences such as your saved folder, shared folder, upload bandwidth, etc. "
 "These preferences (and more) are available at {0}."
 msgstr ""
+"Μπορείτε να παραμετροποιήσεται το LimeWire όπως εσείς θέλετε αλλάζοντας "
+"διάφορες ρυθμίσεις όπως είναι ο φάκελος αποθήκευσης, ο φάκελος διαμοιρασμού, "
+"εύρος ζώνης ανεβάσματος κ.α. Αυτές οι ρυθμίσεις (και άλλες πολλές ) είναι "
+"διαθέσιμες στο {0}"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:344
 #, java-format
 msgid ""
 "You can find out which version of LimeWire you are using by choosing {0}."
-msgstr ""
+msgstr "Μπορείτε να δείτε την έκδοση του LimeWire επιλέγοντας το {0}"
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:345
 msgid ""
@@ -4888,7 +4892,7 @@ msgstr ""
 "κατεβάστε τη νεότερη επίσημη έκδοση του LimeWire.</html>"
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:34
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
 msgid "Lookup File with Bitzi"
 msgstr "Αναζήτηση αρχείου στο Bitzi..."
 
@@ -4986,7 +4990,7 @@ msgstr "Εμφάνιση των {0} διαμοιραζόμενων αρχείω�
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:785
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:580
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:570
 #, java-format
 msgid "Search for Keywords: {0}"
 msgstr "Αναζήτηση για λέξεις κλειδιά: {0}"
@@ -5099,8 +5103,8 @@ msgstr "Δεν ήταν δυνατή η αποστολή μηνύματος συ
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:241
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:950
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:43
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:44
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:53
 msgid "Browse Host"
@@ -6013,7 +6017,7 @@ msgid "Save Folder"
 msgstr "Αποθήκευση καταλόγου"
 
 #: gui/com/limegroup/gnutella/gui/init/SaveWindow.java:122
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:150
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:154
 #: gui/com/limegroup/gnutella/gui/options/panes/SharedDirPaneItem.java:33
 msgid "Shared Folders"
 msgstr "Διαμοιραζόμενοι κατάλογοι"
@@ -6418,19 +6422,19 @@ msgstr ""
 "(Μπορείτε να αλλάξετε τις επιλογές για τους διαμοιραζόμενους καταλόγους "
 "οποιαδήποτε στιγμή μέσα από τις επιλογές του LimeWire.)"
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:337
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:341
 msgid "Legend"
 msgstr "Υπόμνημα"
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:346
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:350
 msgid "Folder is fully shared including all subfolders."
 msgstr "Ολόκληρος ο κατάλογος και όλοι οι υποκατάλογοί του διαμοιράζονται"
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:360
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:364
 msgid "Folder is not shared and no subfolders are shared."
 msgstr "Δεν διαμοιράζεται ο κατάλογος και οι υποκατάλογοί του."
 
-#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:368
+#: gui/com/limegroup/gnutella/gui/library/RecursiveSharingPanel.java:372
 msgid "Folder's files and some subfolders are shared."
 msgstr "Τα αρχεία του καταλόγου και ορισμένοι υποκατάλογοι διαμοιράζονται."
 
@@ -6838,11 +6842,11 @@ msgid "Content"
 msgstr "Περιεχόμενο"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:391
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:336
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:514
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:619
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:644
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:326
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:504
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:609
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:634
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:113
 msgid "Junk"
 msgstr "Ανεπιθύμητα"
 
@@ -8348,36 +8352,36 @@ msgid "View in Browser..."
 msgstr "Εμφάνιση στον περιηγητή..."
 
 #. mark 'em red
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:334
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:500
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:641
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:113
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:324
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:490
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:631
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:115
 msgid "Not Junk"
 msgstr "Μη ανεπιθύμητα"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:337
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:515
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:620
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:645
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:327
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:505
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:610
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:635
 msgid "Mark selected search results as Junk"
 msgstr "Σημείωση των επιλεγμένων αποτελεσμάτων ως ανεπιθύμητων"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:501
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:642
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:491
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:632
 msgid "Mark selected search results as Not Junk"
 msgstr "Σημείωση των επιλεγμένων αποτελεσμάτων ως μη ανεπιθύμητων"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:564
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:554
 msgid "Search More"
 msgstr "Αναζήτηση για περισσότερα"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:728
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:718
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr ""
 "Θέλετε να μπλοκάρετε τα αποτελέσματα αναζήτησης από την παρακάτω λίστα "
 "κόμβων;"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1075
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1065
 msgid "More Info..."
 msgstr "Περισσότερες πληροφορίες..."
 
@@ -8413,12 +8417,12 @@ msgstr ""
 "άλλων"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:42
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:89
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
 msgid "Download"
 msgstr "Λήψη αρχείου"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:44
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
 msgid "Stop Search"
 msgstr "Διακοπή αναζήτησης"
 
@@ -8512,43 +8516,43 @@ msgstr ""
 "Μη έγκυρη μορφή διεύθυνσης, παρακαλούμε επιλέξτε μορφή του τύπου "
 "«κόμβος:θύρα»."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
 msgid "Close Search"
 msgstr "Κλείσιμο αναζήτησης"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
 msgid "Launch Action"
 msgstr "Εκκίνηση ενέργειας"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
 msgid "Chat With Host"
 msgstr "Συνομιλία με τον κόμβο"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
 msgid "Repeat Search"
 msgstr "Επανάληψη αναζήτησης"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
 msgid "Block Hosts"
 msgstr "Μπλοκάρισμα κόμβου"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
 msgid "Mark As"
 msgstr "Σημείωση ως"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:115
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:117
 msgid "Get More Results"
 msgstr "Περισσότερα αποτελέσματα"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:143
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:147
 msgid "Loading Search Window..."
 msgstr "Φόρτωση παραθύρου αναζήτησης..."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:341
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:345
 msgid "Firewalled Host"
 msgstr "Κόμβος πίσω από τείχος προστασίας"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:460
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:464
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
 "network."
@@ -8556,22 +8560,22 @@ msgstr ""
 "Η αναζήτησή σας πρέπει να αποτελείται τουλάχιστον από τρεις χαρακτήρες, για "
 "να αποφευχθεί η συμφόρηση του δικτύου."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:465
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:469
 msgid ""
 "Your search is too long. Please make your search smaller and try again."
 msgstr ""
 "Η έρευνά σας έχει πολλούς όρους. Παρακαλούμε, χρησιμοποιήστε λιγότερους και "
 "ξαναδοκιμάστε."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:468
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:472
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:476
 msgid ""
 "Your search is too specific. Please make your search smaller and try again."
 msgstr ""
 "Η έρευνά σας είναι πολύ εξειδικευμένη. Παρακαλούμε, χρησιμοποιήστε "
 "λιγότερους όρους και ξαναδοκιμάστε."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:477
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:481
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
@@ -8579,7 +8583,7 @@ msgstr ""
 "μπορέσετε να κάνετε αναζήτηση."
 
 #. if not connected or connecting, show one message.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:486
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:490
 msgid ""
 "You are not connected to the network. To connect, select \"Connect\" from "
 "the \"File\" menu. Your search may not return any results until you connect."
@@ -8589,7 +8593,7 @@ msgstr ""
 "μέχρι να συνδεθείτε."
 
 #. if attempting to connect, show another.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:489
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:493
 msgid ""
 "LimeWire is currently connecting to the network. Your search may not return "
 "many results until you are fully connected to the network."
@@ -8597,7 +8601,7 @@ msgstr ""
 "Αυτή τη στιγμή το LimeWire συνδέεται στο δίκτυο. Ίσως να μην επιστραφούν "
 "αποτελέσματα μέχρι να συνδεθείτε πλήρως στο δίκτυο."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:798
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:801
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
@@ -8605,7 +8609,7 @@ msgstr ""
 "Ένα από τα επιλεγμένα αρχεία είναι εκτελέσιμο πρόγραμμα και μπορεί να "
 "περιέχει κάποιον ιό. Είστε σίγουρος ότι θέλετε να πραγματοποιηθεί η λήψη;"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:487
+#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:476
 #, java-format
 msgid "Could not browse host {0}."
 msgstr "Δεν ήταν δυνατή η περιήγηση στον κόμβο {0} ."
