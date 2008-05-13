@@ -26,7 +26,10 @@ import org.limewire.mojito.util.ArrayUtils;
 import org.limewire.mojito.util.FixedSizeHashMap;
 
 /**
- * Specifies the type of a <code>DHTValue</code>.
+ * Specifies the type of a DHT value. You can use the existing values (BINARY, 
+ * LIME, or TEXT) and, or you can define your own type. You can use existing, 
+ * your own and the "ANY" type when looking up nodes. However, ANY can not
+ * be used an actual type (only for looking up nodes).
  */
 public final class DHTValueType implements Comparable<DHTValueType>, Serializable {
     

@@ -94,8 +94,8 @@ public class StorablePublisher implements Runnable {
     }
     
     /**
-     * The RepublishTask publishes DHTValue(s) one-by-one by going
-     * through a List of DHTValues. Every time a store finishes it
+     * Publishes DHTValue(s) one-by-one by going
+     * through a List of DHTValues. Every time a store finishes, it
      * continues with the next DHTValue until all DHTValues have
      * been republished
      */
@@ -106,7 +106,7 @@ public class StorablePublisher implements Runnable {
         private DHTFuture<StoreResult> future = null;
         
         /**
-         * Stops the RepublishTask
+         * Stops the PublishTask
          */
         public synchronized void stop() {
             if (future != null) {
@@ -118,14 +118,14 @@ public class StorablePublisher implements Runnable {
         }
         
         /**
-         * Returns whether or not the RepublishTask is done
+         * Returns whether or not the PublishTask is done
          */
         public synchronized boolean isDone() {
             return values == null || !values.hasNext();
         }
         
         /**
-         * Starts the republishing.
+         * Starts the PublishTask.
          */
         public synchronized void start() {
             assert (isDone());
@@ -146,7 +146,7 @@ public class StorablePublisher implements Runnable {
         }
         
         /**
-         * Republishes the next <code>DHTValue</code>.
+         * Publishes the next <code>DHTValue</code>.
          */
         private synchronized boolean next() {
             if (isDone()) {

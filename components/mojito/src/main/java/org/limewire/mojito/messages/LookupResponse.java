@@ -20,7 +20,7 @@
 package org.limewire.mojito.messages;
 
 /**
- * An interface for LookupResponse implementations
+ * Defines an interface for a lookup response.
  */
 public interface LookupResponse extends ResponseMessage {
     

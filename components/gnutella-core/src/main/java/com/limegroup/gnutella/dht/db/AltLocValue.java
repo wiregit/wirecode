@@ -6,6 +6,9 @@ import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.routing.Version;
 
+/**
+ * Defines an interface of an alternative location DHT value.
+ */
 public interface AltLocValue extends DHTValue, Serializable {
 
     /*
@@ -52,7 +55,7 @@ public interface AltLocValue extends DHTValue, Serializable {
     public boolean isFirewalled();
 
     /**
-     * @return true if the altloc supports tls
+     * @return true if the alternative location supports TLS
      */
     public boolean supportsTLS();
 

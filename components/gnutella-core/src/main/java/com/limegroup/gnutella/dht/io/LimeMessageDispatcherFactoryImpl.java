@@ -14,6 +14,9 @@ import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 
+/**
+ * Creates {@link LimeMessageDispatcherImpl}s.
+ */
 @Singleton
 public class LimeMessageDispatcherFactoryImpl implements
         MessageDispatcherFactory {

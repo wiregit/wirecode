@@ -5,6 +5,9 @@ import org.limewire.mojito.db.DHTValueType;
 import org.limewire.mojito.exceptions.DHTValueException;
 import org.limewire.mojito.routing.Version;
 
+/**
+ * Defines an interface to create <code>PushProxiesValue</code>s.
+ */
 public interface PushProxiesValueFactory extends DHTValueFactory<PushProxiesValue> {
 
     public PushProxiesValue createDHTValue(DHTValueType type, Version version,

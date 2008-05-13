@@ -44,7 +44,7 @@ import org.limewire.security.SecureMessageCallback;
 import org.limewire.security.Verifier;
 
 /**
- * This is a stand alone/reference implementation of MessageDispatcher
+ * This is a stand alone/reference implementation of <code>MessageDispatcher</code>.
  */
 public class MessageDispatcherImpl extends MessageDispatcher implements Runnable {
 
@@ -73,12 +73,12 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     private static final long SELECTOR_SLEEP = 50L;
     
     /**
-     * A flag whether or not this MD is running
+     * A flag whether or not this MessageDispatcher is running
      */
     private volatile boolean running = false;
     
     /**
-     * A flag whether or not this MD is accepting incoming 
+     * A flag whether or not this MessageDispatcher is accepting incoming 
      * Requests and Responses
      */
     private volatile boolean accepting = false;
@@ -99,7 +99,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
     private final Object lock = new Object();
 
     /**
-     * The Thread this MD is running on
+     * The Thread this MessageDispatcher is running on
      */
     private Thread thread;
     
@@ -436,7 +436,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
         // be done on a different Thread than MessageDispatcher's
         // Executor Thread. On the other hand are the chances slim to none
         // that a Node will ever receive a SecureMessage. It's a trade off
-        // at the end if it's really an issue or waste of ressources...
+        // at the end if it's really an issue or waste of resources...
         // NOTE: LimeDHTMessageDispatcher is using a different implementation!
         //       This is the stand alone implementation!
         
@@ -524,7 +524,7 @@ public class MessageDispatcherImpl extends MessageDispatcher implements Runnable
      * leave the ByteBuffer untouched!
      */
     // We could pass a slice to this method to enforce the expected
-    // behavior but there's maybe an use-case like Kadmlia over TCP
+    // behavior but there's maybe an use-case like Kademlia over TCP
     // where it makes sense to send the data piece-by-piece...
     private boolean send(SocketAddress dst, ByteBuffer data) throws IOException {
         return channel.send(data, dst) > 0;

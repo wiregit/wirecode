@@ -33,7 +33,7 @@ import org.limewire.mojito.util.EntryImpl;
 import org.limewire.security.SecurityToken;
 
 /**
- * The StoreManager class manages 
+ * Manages storing values along a path.
  */
 public class StoreManager extends AbstractManager<StoreResult> {
     
@@ -42,8 +42,8 @@ public class StoreManager extends AbstractManager<StoreResult> {
     }
     
     /**
-     * Stores a collection of DHTValues on the DHT. All DHTValues
-     * must have the same valueId!
+     * Stores a collection of <code>DHTValueEntity</code>s on the DHT. All 
+     * <code>DHTValueEntity</code>s must have the same valueId.
      */
     public DHTFuture<StoreResult> store(Collection<? extends DHTValueEntity> values) {
         StoreProcess task = new StoreProcess(context, values);
@@ -54,7 +54,8 @@ public class StoreManager extends AbstractManager<StoreResult> {
     }
     
     /**
-     * Stores a collection of DHTValues at the given Contact.
+     * Stores a collection of <code>DHTValueEntity</code> at the given 
+     * <code>Contact</code>.
      */
     public DHTFuture<StoreResult> store(Contact node, SecurityToken securityToken, 
             Collection<? extends DHTValueEntity> values) {

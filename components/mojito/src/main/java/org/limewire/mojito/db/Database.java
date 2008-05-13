@@ -27,12 +27,12 @@ import java.util.Set;
 import org.limewire.mojito.KUID;
 
 
-/**<p>
+/**
  * Defines an interface to implement databases. 
- * </p>
+ * <p>
  * Mojito ships with an in-memory database but you may use this
  * interface to implement a custom <code>Database</code> that is
- * build on top of BDBJE for example.
+ * built on top of BDBJE, for example.
  */
 public interface Database extends Serializable {
     
@@ -40,7 +40,7 @@ public interface Database extends Serializable {
      * Sets the <code>DatabaseSecurityConstraint</code>. Use null to reset 
      * the default constraint.
      * 
-     * @param securityConstraint The security constraint 
+     * @param securityConstraint the security constraint 
      */
     public void setDatabaseSecurityConstraint(
             DatabaseSecurityConstraint securityConstraint);
@@ -50,7 +50,7 @@ public interface Database extends Serializable {
      * whether or not it's empty. 
      * 
      * @param entity DHTValue to store (add or remove)
-     * @return Whether or not the given DHTValue was added or removed
+     * @return whether or not the given DHTValue was added or removed
      */
     public boolean store(DHTValueEntity entity);
     
@@ -62,8 +62,10 @@ public interface Database extends Serializable {
     /**
      * Removes the given <code>DHTValue</code> from the Database
      * 
-     * @param DHTValueImpl to remove
-     * @return Whether or not the given DHTValue was removed
+     * @param primaryKey key of key-value to remove
+     * @param secondaryKey value of key-value to remove
+     * @return previous value associated with specified key, or null 
+     * if there was no mapping for the <code>secondaryKey</code>.
      */
     public DHTValueEntity remove(KUID primaryKey, KUID secondaryKey);
     
@@ -76,11 +78,17 @@ public interface Database extends Serializable {
     /**
      * Returns a <code>DHTValueBag</code> for the given ValueID, or null if no bag exists.
      * 
-     * @param primaryKey The <code>KUID</code> of the value to lookup in the database
+     * @param primaryKey the <code>KUID</code> of the value to lookup in the database
      */
     public Map<KUID, DHTValueEntity> get(KUID primaryKey);
     
     /**
+     * Returns the load factor for a <code>KUID</code> Will increment the load value
+     * before returning if <code>incrementLoad</code> is set to <code>true</code>.
+     * 
+     * @param primaryKey key of the Node to get the load value
+     * @param incrementLoad whether or not to increase the exponential moving average 
+     * (EMA, http://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average)
      * 
      */
     public float getRequestLoad(KUID primaryKey, boolean incrementLoad);

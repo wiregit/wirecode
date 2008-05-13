@@ -61,14 +61,14 @@ import org.limewire.mojito.util.EntryImpl;
 import org.limewire.security.SecurityToken;
 
 /**
- * The StoreProcess controls the whole process of storing
+ * Controls the whole process of storing
  * values along a path. There are 3 different options:
- * 
- * 1) No Contact(s) are specified.
+ * <pre>
+ * 1) No Contact is specified.
  *    The StoreProcess will do a full lookup for the k-closest 
  *    Nodes and will store the value(s) along the path.
  *    
- * 2) A single Contact is specified but SecurityToken is missing.
+ * 2) A single Contact is specified but a SecurityToken is missing.
  *    The StoreProcess will try to obtain the SecurityToken
  *    and will store the value(s) at the given Node.
  *    
@@ -77,9 +77,9 @@ import org.limewire.security.SecurityToken;
  *    It's meant for DHT implementations (say you want to create a
  *    DHT is a closed environment where SecurityTokens make little
  *    sense).
- *    
- * Regards values and the first case. It's possible to store multiple
- * values in a batch but all values must have the same primary key!
+ * </pre>   
+ * Regarding values and the first case, it's possible to store multiple
+ * values in a batch but all values must have the same primary key.
  */
 class StoreProcess implements DHTTask<StoreResult> {
     

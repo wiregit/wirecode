@@ -41,8 +41,8 @@ import org.limewire.security.SecurityUtils;
 
 /**
  * KUID stands for Kademlia Unique Identifier and represents 
- * an 160bit value.
- * 
+ * a 160-bit integer.
+ * <p>
  * This class is immutable!
  */
 public class KUID implements Comparable<KUID>, Serializable {
@@ -53,9 +53,9 @@ public class KUID implements Comparable<KUID>, Serializable {
     
     public static final int LENGTH = 20;
     
-    public static final int LENGTH_IN_BITS = LENGTH * 8; // 160 bit
+    public static final int LENGTH_IN_BITS = LENGTH * 8; // 160-bit
     
-    /** Bits from MSB to LSB */
+    /** Bits from Most Significant Bits (MSB) to Least Significant Bits (LSB) */
     private static final int[] BITS = {
         0x80,
         0x40,
@@ -216,7 +216,7 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * Returns the xor distance between the current and given KUID.
+     * Returns the XOR distance between the current and given KUID.
      */
     public KUID xor(KUID nodeId) {
         byte[] result = new byte[id.length];
@@ -239,11 +239,29 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
-     * Returns true if this KUID is nearer to <tt>targetId</tt> than
-     * <tt>otherId</tt>.
      * 
-     * @param targetId The target ID
-     * @param otherId The other KUID to compare to
+     * 
+     * Returns true if the distance from this KUID to <tt>targetId</tt>, is 
+     * smaller than the distance from <tt>otherId</tt> to <tt>targetId</tt>.
+     * 
+     * <pre>
+     *  KUID thisKUID = KUID.createWithHexString("0000000000000000000000000000000000000000");
+     *  KUID targetID = KUID.createWithHexString("0000000000000000000000000000000000000001");
+     *  KUID otherID  = KUID.createWithHexString("1000000000000000000000000000000000000000");
+     *        
+     *  System.out.println("Distance thisKUID to targetID: " + thisKUID.xor(targetID));
+     *  System.out.println("Distance otherID  to targetID: " + otherID.xor(targetID));
+     *  
+     *  System.out.println("thisKUID to targetID is closer than otherID to targetID: " 
+     *                     + thisKUID.isNearerTo(targetID, otherID));
+     * 
+     * Output:
+     * Distance thisKUID to targetID: 0000000000000000000000000000000000000001
+     * Distance otherID  to targetID: 1000000000000000000000000000000000000001
+     * thisKUID to targetID is closer than otherID to targetID: true
+     * </pre>
+     * @param targetId the target ID
+     * @param otherId the other KUID to compare to
      * 
      * @return true if this KUID is nearer to targetID, false otherwise
      */
@@ -254,7 +272,7 @@ public class KUID implements Comparable<KUID>, Serializable {
         for (int i = 0; i < id.length; i++){
             xorToSelf = (id[i] ^ targetId.id[i]) & 0xFF;
             xorToOther = (otherId.id[i] ^ targetId.id[i]) & 0xFF;
-            
+
             if (xorToSelf < xorToOther) {
                 return true;
             } else if (xorToSelf > xorToOther) {
@@ -391,7 +409,7 @@ public class KUID implements Comparable<KUID>, Serializable {
         };
         
         /*
-         * System time in millis (GMT). Many computer clocks
+         * System time in milliseconds (GMT). Many computer clocks
          * are off. Should be a good source for randomness.
          */
         MessageDigestInput millis = new MessageDigestInput() {
@@ -467,9 +485,6 @@ public class KUID implements Comparable<KUID>, Serializable {
         }
     }
     
-    /**
-     * See KUID.createRandomNodeID()
-     */
     private abstract static class MessageDigestInput 
             implements Comparable<MessageDigestInput> {
         
@@ -521,6 +536,7 @@ public class KUID implements Comparable<KUID>, Serializable {
      * Creates a random ID with the specified byte prefix
      * 
      * @param prefix the fixed prefix bytes
+     * @param depth of the Bucket in the Trie
      * @return a random KUID starting with the given prefix
      */
     public static KUID createPrefxNodeID(KUID prefix, int depth) {
@@ -533,6 +549,8 @@ public class KUID implements Comparable<KUID>, Serializable {
      * Creates a random ID with the specified byte prefix
      * 
      * @param prefix the fixed prefix bytes
+     * @param depth of the Bucket in the Trie
+     * @param random random bytes
      * @return a random KUID starting with the given prefix
      */
     private static KUID createPrefxNodeID(KUID prefix, int depth, byte[] random) {
@@ -558,7 +576,7 @@ public class KUID implements Comparable<KUID>, Serializable {
     public static final KeyAnalyzer<KUID> KEY_ANALYZER = new KUIDKeyAnalyzer();
     
     /**
-     * A PATRICIA Trie KeyAnalyzer for KUIDs
+     * A <code>PatriciaTrie</code> <code>KeyAnalyzer</code> for <code>KUIDs</code>.
      */
     private static class KUIDKeyAnalyzer implements KeyAnalyzer<KUID> {
         

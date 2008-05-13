@@ -55,7 +55,7 @@ import com.limegroup.gnutella.util.ClassCNetworks;
 /**
  * This DHT manager starts either an active or a passive DHT controller.
  * It also handles switching from one mode to the other.
- * 
+ * <p>
  * This class offloads blocking operations to a threadpool
  * so that it never blocks on critical threads such as MessageDispatcher.
  */
@@ -108,7 +108,8 @@ public class DHTManagerImpl implements DHTManager {
      * methods. The executor MUST be single-threaded, otherwise there will be 
      * failures.
      * 
-     * @param service
+     * @param service executor for executing blocking DHT methods
+     * @param dhtControllerFactory creates DHT node controllers
      */
     @Inject
     public DHTManagerImpl(@Named("dhtExecutor") Executor service, DHTControllerFactory dhtControllerFactory) {
@@ -174,11 +175,11 @@ public class DHTManagerImpl implements DHTManager {
     }
     
     /**
-     * Creates and returns a Runnable that switches the DHT from
-     * the current DHTMode to the given DHTMode.
+     * Creates and returns a Runnable that switches the DHT node from
+     * the current <code>DHTMode</code> to the given <code>mode</code>.
      * 
-     * @param mode The new Mode of the DHT
-     * @return Runnable that switches the Mode
+     * @param mode the new mode of the DHT node
+     * @return Runnable that switches the mode
      */
     private Runnable createSwitchModeCommand(final DHTMode mode) {
         Runnable command = new DebugRunnable(new Runnable() {
@@ -274,7 +275,7 @@ public class DHTManagerImpl implements DHTManager {
     
     /**
      * Adds a listener to DHT Events.
-     * 
+     * <p>
      * Be aware that listeners will receive events after
      * after the DHT has dispatched them.  It is possible that
      * the DHT's status may have changed between the time the 
@@ -290,11 +291,11 @@ public class DHTManagerImpl implements DHTManager {
 
     /**
      * Sends an event to all listeners.
-     * 
+     * <p>
      * Be aware that to prevent deadlock, listeners may receive
      * the event long after the DHT's status has changed, and the
      * current status may be very different.
-     * 
+     * <p>
      * No events will be received in a different order than they were
      * dispatched, though.
      */
@@ -319,7 +320,6 @@ public class DHTManagerImpl implements DHTManager {
      * This getter is for internal use only. The Mojito DHT is not meant to
      * be handled or passed around independently, as only the DHT controllers 
      * know how to interact correctly with it.
-     * 
      */
     public synchronized MojitoDHT getMojitoDHT() {
         return controller.getMojitoDHT();
@@ -329,7 +329,7 @@ public class DHTManagerImpl implements DHTManager {
      * Shuts the DHT down if we got disconnected from the network.
      * The nodeAssigner will take care of restarting this DHT node if 
      * it still qualifies.
-     * 
+     * <p>
      * If this event is not related to disconnection from the network, it
      * is forwarded to the controller for proper handling.
      */

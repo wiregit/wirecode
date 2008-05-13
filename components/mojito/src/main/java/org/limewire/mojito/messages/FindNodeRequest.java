@@ -20,8 +20,9 @@
 package org.limewire.mojito.messages;
 
 
+
 /**
- * An interface for FindNodeRequest implementations
+ * Defines an interface for a <code>OpCode.FIND_NODE_REQUEST</code>.
  */
 public interface FindNodeRequest extends LookupRequest {
     

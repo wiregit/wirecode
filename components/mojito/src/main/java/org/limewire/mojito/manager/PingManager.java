@@ -40,7 +40,7 @@ import org.limewire.mojito.util.ContactUtils;
 
 
 /**
- * The PingManager takes care of concurrent Pings and makes sure
+ * Takes care of concurrent Pings and makes sure
  * a single Node cannot be pinged multiple times in parallel.
  */
 public class PingManager extends AbstractManager<PingResult> {
@@ -104,9 +104,6 @@ public class PingManager extends AbstractManager<PingResult> {
         return collisionPing(node.getContactAddress(), Collections.singleton(node));
     }
     
-    /**
-     * 
-     */
     public DHTFuture<PingResult> collisionPing(Set<? extends Contact> nodes) {
         return collisionPing(null, nodes);
     }
@@ -124,9 +121,9 @@ public class PingManager extends AbstractManager<PingResult> {
     /**
      * Sends a ping to the remote Node
      * 
-     * @param sender The local Node
-     * @param nodeId The remote Node's KUID (can be null)
-     * @param key The remote Node's address
+     * @param sender the local Node
+     * @param key the remote Node's address
+     * @param pinger sends ping requests
      */
     private DHTFuture<PingResult> ping(Contact sender, SocketAddress key, PingIterator pinger) {
         PingFuture future = null;

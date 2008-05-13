@@ -28,7 +28,7 @@ import org.limewire.mojito.routing.impl.RemoteContact;
 
 
 /**
- * A Factory class to create Contacts
+ * Creates <code>Contact</code>s.
  */
 public class ContactFactory {
     
@@ -37,8 +37,8 @@ public class ContactFactory {
     /**
      * Creates and returns a local Contact
      * 
-     * @param vendor Our vendor ID
-     * @param version The version
+     * @param vendor our vendor ID
+     * @param version the version
      * @param firewalled whether or not we're firewalled
      */
     public static Contact createLocalContact(Vendor vendor, Version version, boolean firewalled) {
@@ -48,9 +48,9 @@ public class ContactFactory {
     /**
      * Creates and returns a local Contact
      * 
-     * @param vendor Our vendor ID
-     * @param version The version
-     * @param nodeId Our Node ID
+     * @param vendor our vendor ID
+     * @param version the version
+     * @param nodeId our Node ID
      * @param firewalled whether or not we're firewalled
      */
     public static Contact createLocalContact(Vendor vendor, Version version, 
@@ -62,13 +62,15 @@ public class ContactFactory {
      * Creates and returns a live Contact. A live Contact is a Node
      * that send us a Message
      * 
-     * @param sourceAddress The source address
-     * @param vendor The Vendor ID of the Node
-     * @param version The Version
-     * @param nodeId The NodeID of the Contact
-     * @param contactAddress The address where to send requests and responses
-     * @param instanceId The instanceId of the Node
-     * @param whether or not the Node is firewalled
+     * @param sourceAddress the source address
+     * @param vendor the Vendor ID of the Node
+     * @param version the Version
+     * @param nodeId the NodeID of the Contact
+     * @param contactAddress the address where to send requests and responses
+     * @param instanceId the instanceId of the Node
+     * @param flags describe the Contact to create, for example, {@link Contact#DEFAULT_FLAG}, 
+     * {@link Contact#FIREWALLED_FLAG} or {@link Contact#SHUTDOWN_FLAG}, 
+     * and future flags.
      */
     public static Contact createLiveContact(SocketAddress sourceAddress, Vendor vendor, 
             Version version, KUID nodeId, SocketAddress contactAddress, int instanceId, int flags) {
@@ -79,10 +81,10 @@ public class ContactFactory {
     /**
      * Creates and returns an unknown Contact
      * 
-     * @param vendor The Vendor ID of the Node
-     * @param version The Version
-     * @param nodeId The NodeID of the Contact
-     * @param contactAddress The address where to send requests and responses
+     * @param vendor the Vendor ID of the Node
+     * @param version the Version
+     * @param nodeId the NodeID of the Contact
+     * @param contactAddress the address where to send requests and responses
      */
     public static Contact createUnknownContact(Vendor vendor, Version version, 
             KUID nodeId, SocketAddress contactAddress) {

@@ -26,7 +26,7 @@ import org.limewire.mojito.db.DHTValueType;
 
 
 /**
- * An interface for FindValueRequest implementations
+ * Defines an interface for a <code>OpCode.FIND_VALUE_REQUEST</code>. 
  */
 public interface FindValueRequest extends LookupRequest {
     

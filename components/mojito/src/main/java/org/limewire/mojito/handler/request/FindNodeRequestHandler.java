@@ -38,7 +38,7 @@ import org.limewire.mojito.util.ContactUtils;
 
 
 /**
- * The FindNodeRequestHandler handles incoming FIND_NODE requests
+ * Handles incoming FIND_NODE requests.
  */
 public class FindNodeRequestHandler extends AbstractRequestHandler {
 
@@ -56,7 +56,7 @@ public class FindNodeRequestHandler extends AbstractRequestHandler {
      * nodes instead of returning the closest nodes to the lookup key. The reason for this is that 
      * passive nodes do not have accurate routing tables.
      * 
-     * @param request The LookupRequest for this lookup
+     * @param message the RequestMessage for this lookup
      * @throws IOException
      */
     @Override

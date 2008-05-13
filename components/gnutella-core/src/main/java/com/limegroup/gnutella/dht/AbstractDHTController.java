@@ -49,23 +49,32 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 /**
- * The controller for the LimeWire Gnutella DHT. 
- * A node should connect to the DHT only if it has previously been designated as capable 
- * by the <tt>NodeAssigner</tt> or if it is forced to. 
- * Once the node is a DHT node, if <tt>EXCLUDE_ULTRAPEERS</tt> is set to true, 
- * it should no try to connect as an ultrapeer (@see RouterService.isExclusiveDHTNode()). 
- *
- * The NodeAssigner should be the only class to have the authority to 
- * initialize the DHT and connect to the network.
- * 
+ * The controller for the LimeWire DHT. A node should connect to the DHT only 
+ * if it has previously been designated as capable by the <tt>NodeAssigner</tt> 
+ * or if it is forced to. Once the node is a DHT node 
+ * (if <tt>EXCLUDE_ULTRAPEERS</tt> is set to true) 
+ * it should not try to connect as an Ultrapeer. 
+ * <p>
+ * The <code>NodeAssigner</code> should be the only class to have the authority 
+ * to initialize the DHT and connect to the network.
+ * <p>
  * This controller can be in one of the four following states:
- * 1) not running.
- * 2) running and bootstrapping: the dht is trying to bootstrap.
- * 3) running and waiting: the dht has failed the bootstrap and is waiting for additional bootstrap hosts.
- * 3) running and bootstrapped.
- * 
- * <b>Warning:</b> The methods in this class are NOT synchronized.
- * 
+ * <ul>
+ * <li> not running.
+ * <li> running and bootstrapping: the DHT is trying to bootstrap.
+ * <li> running and waiting: the DHT has failed the bootstrap and is waiting 
+ * for additional bootstrap hosts.
+ * <li> running and bootstrapped.
+ * </ul>
+ * Nodes are bootstrap in the following order:
+ * <ol> 
+ * <li>If we have received hosts from the Gnutella network, try them.
+ * <li>Else try the persisted routing table (stored contacts from the last session).
+ * <li>Else try the SIMPP list.
+ * <li>Else start the node fetcher and wait for hosts coming from the network.
+ * </ol>
+ * <strong>Warning:</strong> The methods in this class are NOT synchronized.
+ * <p>
  * The current implementation is specific to the Mojito DHT. 
  */
 public abstract class AbstractDHTController implements DHTController {
@@ -133,7 +142,7 @@ public abstract class AbstractDHTController implements DHTController {
         this.mode = mode;
         
         this.dht = createMojitoDHT(vendor, version);
-        
+
         assert (dht != null);
         dht.setMessageDispatcher(dhtControllerFacade.getMessageDispatcherFactory());
         dht.setMACCalculatorRepositoryManager(dhtControllerFacade.getMACCalculatorRespositoryManager());
@@ -187,7 +196,7 @@ public abstract class AbstractDHTController implements DHTController {
                 }
             });
         }
-        
+
         DHTSettings.DHT_NODE_ID.setValue(dht.getLocalNodeID().toHexString());
         DHTStatsManager.clear();
     }
@@ -216,20 +225,24 @@ public abstract class AbstractDHTController implements DHTController {
     }
     
     /**
-     * Start the Mojito DHT and connects it to the network in either passive mode
-     * or active mode if we are not firewalled.
+     * Start the Mojito DHT and connects it to the network in either passive 
+     * mode, or active mode (if we are a Gnutella leaf node). For the node to 
+     * be either passive or active mode, it must meet certain bandwidth settings 
+     * and must be able to receive solicited UDP (for example, non-firewalled).     
+     * <p>
      * The start preconditions are the following:
-     * 1) We are not already connected AND we have at least one initialized Gnutella connection
-     * 2) if we want to actively connect: We are DHT_CAPABLE OR FORCE_DHT_CONNECT is true 
-     * 
-     * @param activeMode true to connect to the DHT in active mode
+     * <p>
+     * We are not already connected, AND 
+     * <ul>
+     * <li>we are not currently running, or
+     * <li>we want to force a connection (FORCE_DHT_CONNECT is true) 
      */
     public void start() {
         if (isRunning() || (!DHTSettings.FORCE_DHT_CONNECT.getValue() 
                 && !dhtControllerFacade.isConnected())) {
             return;
         }
-        
+                
         if(LOG.isDebugEnabled()) {
             LOG.debug("Initializing the DHT");
         }
@@ -258,10 +271,16 @@ public abstract class AbstractDHTController implements DHTController {
     }
     
     /**
-     * Shuts down the dht. If this is an active node, it sends the updated capabilities
-     * to its ultrapeers and persists the DHT. Otherwise, it just saves a list of MRS nodes
-     * to bootstrap from for the next session.
-     * 
+     * Shuts down the DHT. If this is an active node, it sends the updated 
+     * capabilities to its ultrapeers and stores the node's route table to a 
+     * file (active.mojito). Otherwise, as a passive node, it saves a list 
+     * of Most Recently Seen (MRS) nodes to bootstrap for the next session
+     * as long as there was at least two <code>Contact</code>s in the route 
+     * table.
+     * <p>
+     * The persisted route table (stored contacts from the last session) is 
+     * used as a secondary means to bootstrap, if the node didn't receive any 
+     * hosts through the Gnutella network to bootstrap.
      */
     public void stop() {
         LOG.debug("Shutting down DHT Controller");
@@ -280,7 +299,9 @@ public abstract class AbstractDHTController implements DHTController {
      * If it is already bootstrapped, this randomly tries to add the node
      * to the DHT routing table.
      * 
-     * @param hostAddress The SocketAddress of the DHT host.
+     * @param hostAddress the SocketAddress of the DHT host.
+     * @param addToDHTNodeAdder true to add to the random node adder if the DHT 
+     * is bootstrapped.
      */
     protected void addActiveDHTNode(SocketAddress hostAddress, boolean addToDHTNodeAdder) {
         if(!dht.isBootstrapped()){
@@ -311,9 +332,9 @@ public abstract class AbstractDHTController implements DHTController {
      * Returns a list of the Most Recently Seen nodes from the Mojito 
      * routing table.
      * 
-     * @param numNodes The number of nodes to return
+     * @param numNodes the number of nodes to return
      * @param excludeLocal true to exclude the local node
-     * @return A list of DHT <tt>IpPorts</tt>
+     * @return a list of DHT <tt>IpPorts</tt>
      */
     protected List<IpPort> getMRSNodes(int numNodes, boolean excludeLocal) {
         Collection<Contact> nodes = ContactUtils.sort(
@@ -347,10 +368,9 @@ public abstract class AbstractDHTController implements DHTController {
     }
     
     /**
-     * Sends the updated CapabilitiesVM to our connections. This is used
-     * when a node has successfully bootstrapped to the network and wants to notify
-     * its Gnutella peers that they can now bootstrap off of him.
-     * 
+     * Sends the updated <code>CapabilitiesVM</code> to our connections. This 
+     * is used when a node has successfully bootstrapped to the network and wants 
+     * to notify its Gnutella peers that they can now bootstrap off of him.
      */
     public void sendUpdatedCapabilities() {
         
@@ -365,7 +385,7 @@ public abstract class AbstractDHTController implements DHTController {
     
     /**
      * A helper class to easily go back and forth 
-     * from the DHT's RemoteContact to Gnutella's IpPort
+     * from the DHT's RemoteContact to Gnutella's IpPort.
      */
     private static class IpPortRemoteContact implements IpPort {
         
@@ -402,10 +422,9 @@ public abstract class AbstractDHTController implements DHTController {
     }
     
     /**
-     * This class is used to fight against possible DHT clusters 
-     * by periodicaly sending a Mojito ping to the last 30 DHT nodes seen in the Gnutella
+     * Used to fight against possible DHT clusters  by periodically sending 
+     * a Mojito ping to the last MAX_SIZE DHT nodes seen in the Gnutella 
      * network. It is effectively randomly adding them to the DHT routing table.
-     * 
      */
     class RandomNodeAdder implements Runnable {
         
@@ -474,9 +493,6 @@ public abstract class AbstractDHTController implements DHTController {
         }
     }
     
-    /**
-     * A Host Filter that delegates to RouterService's filter
-     */
     private class FilterDelegate implements HostFilter {
         
         public boolean allow(SocketAddress addr) {

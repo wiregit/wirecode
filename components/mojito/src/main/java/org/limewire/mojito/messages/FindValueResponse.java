@@ -26,7 +26,7 @@ import org.limewire.mojito.db.DHTValueEntity;
 
 
 /**
- * An interface for FindValueResponse implementations
+ * Defines an interface for a <code>OpCode.FIND_VALUE_RESPONSE</code>. 
  */
 public interface FindValueResponse extends LookupResponse {
     

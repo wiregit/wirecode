@@ -24,7 +24,7 @@ import java.util.Collection;
 import org.limewire.mojito.routing.Contact;
 
 /**
- * An interface for FindNodeResponse implementations
+ * Defines an interface for a <code>OpCode.FIND_NODE_RESPONSE</code>. 
  */
 public interface FindNodeResponse extends LookupResponse {
     

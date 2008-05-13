@@ -27,6 +27,9 @@ import com.limegroup.gnutella.dht.db.PushProxiesValueFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 
+/**
+ * Glues together DHT connection functionality.
+ */
 @Singleton
 public class DHTControllerFacadeImpl implements DHTControllerFacade {
     
