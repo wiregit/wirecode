@@ -247,7 +247,7 @@ public class MulticastTest extends LimeTestCase {
         List responses = qr.getResultsAsList();
         assertEquals("should only have 1 response", 1, responses.size());
         Response res = (Response)responses.get(0);
-        RemoteFileDesc rfd = res.toRemoteFileDesc(qr.getHostData(), remoteFileDescFactory);
+        RemoteFileDesc rfd = res.toRemoteFileDesc(qr, remoteFileDescFactory);
         
         assertTrue("rfd should be multicast", rfd.isReplyToMulticast());
         
@@ -313,7 +313,7 @@ public class MulticastTest extends LimeTestCase {
         List responses = qr.getResultsAsList();
         assertEquals("should only have 1 response", 1, responses.size());
         Response res = (Response)responses.get(0);
-        RemoteFileDesc rfd = res.toRemoteFileDesc(qr.getHostData(), remoteFileDescFactory);
+        RemoteFileDesc rfd = res.toRemoteFileDesc(qr, remoteFileDescFactory);
         
         assertTrue("rfd should be multicast", rfd.isReplyToMulticast());
         
@@ -378,7 +378,7 @@ public class MulticastTest extends LimeTestCase {
         List responses = qr.getResultsAsList();
         assertEquals("should only have 1 response", 1, responses.size());
         Response res = (Response)responses.get(0);
-        RemoteFileDesc rfd = res.toRemoteFileDesc(qr.getHostData(), remoteFileDescFactory);
+        RemoteFileDesc rfd = res.toRemoteFileDesc(qr, remoteFileDescFactory);
         
         // clear the data to make it easier to look at again...
         M_HANDLER.multicasted.clear();

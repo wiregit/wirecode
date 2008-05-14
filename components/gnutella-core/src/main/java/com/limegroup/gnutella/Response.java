@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import org.limewire.collection.IntervalSet;
 import org.limewire.io.IpPort;
@@ -101,11 +100,6 @@ public interface Response {
     
     public boolean isVerified();
     
-    /**
-     * Returns this Response as a RemoteFileDesc.
-     */
-    public RemoteFileDesc toRemoteFileDesc(HostData data, RemoteFileDescFactory remoteFileDescFactory);
-
     /**
      * Returns this Response as a RemoteFileDesc.
      */

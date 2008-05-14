@@ -184,11 +184,10 @@ public class SearchResultHandlerTest extends LimeTestCase {
         assertEquals(0, callback.results.size());        
     }
     
-    private byte[] setTestParameters(Mockery m, 
-                                     final QueryRequest queryRequest, 
-                                     final QueryReply queryReply, 
+    private byte[] setTestParameters(Mockery m,
+                                     final QueryRequest queryRequest,
+                                     final QueryReply queryReply,
                                      final IntervalSet intervalSet,
-                                     final HostData hostData,
                                      final Set<URN> urns) throws Exception {
         final byte[] guid = GUID.makeGuid();
         
@@ -239,14 +238,14 @@ public class SearchResultHandlerTest extends LimeTestCase {
             atLeast(1).of(response).getSize();
             will(returnValue((long)15));
             
-            atLeast(1).of(response).toRemoteFileDesc(hostData, remoteFileDescFactory);
+            atLeast(1).of(response).toRemoteFileDesc(queryReply, remoteFileDescFactory);
             will(returnValue(remoteFileDesc));
             
             allowing(remoteFileDesc).setSecureStatus(0);
             
             allowing(queryReply).getSecureStatus();
             
-            atLeast(1).of(hostData).getMessageGUID();
+            atLeast(1).of(queryReply).getGUID();
             will(returnValue(guid));
         }});
         
@@ -266,13 +265,12 @@ public class SearchResultHandlerTest extends LimeTestCase {
        
        final QueryRequest queryRequest = m.mock(QueryRequest.class);
        final QueryReply queryReply = m.mock(QueryReply.class);
-       final HostData hostData = m.mock(HostData.class);
        final Set<URN> urns = new UrnSet();
        final IntervalSet intervalSet = new IntervalSet();
        
        intervalSet.add( Range.createRange(0,15) );
        
-       setTestParameters(m, queryRequest, queryReply, intervalSet, hostData, urns);
+       setTestParameters(m, queryRequest, queryReply, intervalSet, urns);
        
        SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
        SearchResultHandlerImpl.GuidCount gc = (SearchResultHandlerImpl.GuidCount)srs;
@@ -289,7 +287,6 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
         final QueryReply queryReply = m.mock(QueryReply.class);
-        final HostData hostData = m.mock(HostData.class);
         final Set<URN> urns = new UrnSet();
         final IntervalSet intervalSet = new IntervalSet();
         
@@ -298,7 +295,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         intervalSet.add( Range.createRange( 8,10) );
         intervalSet.add( Range.createRange(12,14) );
         
-        setTestParameters(m, queryRequest, queryReply, intervalSet, hostData, urns);
+        setTestParameters(m, queryRequest, queryReply, intervalSet, urns);
         
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         
@@ -321,10 +318,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
         final QueryReply queryReply = m.mock(QueryReply.class);
-        final HostData hostData = m.mock(HostData.class);
         final Set<URN> urns = new UrnSet();
         
-        setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
+        setTestParameters(m, queryRequest, queryReply, null, urns);
         
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         SearchResultHandlerImpl.GuidCount gc = (SearchResultHandlerImpl.GuidCount)srs;
@@ -341,10 +337,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
         final QueryReply queryReply = m.mock(QueryReply.class);
-        final HostData hostData = m.mock(HostData.class);
         final Set<URN> urns = new UrnSet();
         
-        setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
+        setTestParameters(m, queryRequest, queryReply, null, urns);
         assertEquals(0, callback.results.size());
         searchResultHandler.addQueryReply(queryReply);
         assertEquals(1, callback.results.size());
@@ -363,10 +358,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
         final QueryReply queryReply = m.mock(QueryReply.class);
-        final HostData hostData = m.mock(HostData.class);
         final Set<URN> urns = new UrnSet();
         
-        byte[] guid = setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
+        byte[] guid = setTestParameters(m, queryRequest, queryReply, null, urns);
         
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         SearchResultHandlerImpl.GuidCount gc = (SearchResultHandlerImpl.GuidCount)srs;
@@ -394,7 +388,6 @@ public class SearchResultHandlerTest extends LimeTestCase {
         Mockery m = new Mockery();
         
         final QueryReply queryReply = m.mock(QueryReply.class);
-        final HostData hostData = m.mock(HostData.class);
         final byte[] guid = GUID.makeGuid();
         
         m.checking(new Expectations() {{
@@ -426,10 +419,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
         final QueryReply queryReply = m.mock(QueryReply.class);
-        final HostData hostData = m.mock(HostData.class);
         final Set<URN> urns = new UrnSet();
         
-        setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
+        setTestParameters(m, queryRequest, queryReply, null, urns);
         
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         
@@ -528,10 +520,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
         final QueryReply queryReply = m.mock(QueryReply.class);
-        final HostData hostData = m.mock(HostData.class);
         final Set<URN> urns = new UrnSet();
         
-        setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
+        setTestParameters(m, queryRequest, queryReply, null, urns);
         
         SearchResultStats srs = searchResultHandler.addQuery(queryRequest);
         
@@ -558,10 +549,9 @@ public class SearchResultHandlerTest extends LimeTestCase {
         
         final QueryRequest queryRequest = m.mock(QueryRequest.class);
         final QueryReply queryReply = m.mock(QueryReply.class);
-        final HostData hostData = m.mock(HostData.class);
         final Set<URN> urns = new UrnSet();
   
-        byte[] guid = setTestParameters(m, queryRequest, queryReply, null, hostData, urns);
+        byte[] guid = setTestParameters(m, queryRequest, queryReply, null, urns);
         
         assertEquals(-1, searchResultHandler.getNumResultsForQuery(new GUID(guid)));
         

@@ -224,4 +224,11 @@ public interface QueryReply extends Message, SecureMessage {
     public boolean isLocal();
 
     public boolean isFirewalled();
+
+    /**
+     * parses the message packet and throws a <code>BadPacketException</code> if the
+     * packet was invalid.
+     * @throws BadPacketException
+     */
+    void validate() throws BadPacketException;
 }

@@ -163,9 +163,8 @@ class SearchResultHandlerImpl implements SearchResultHandler {
     }
     
     public void handleQueryReply(final QueryReply qr) {
-        HostData data;
         try {
-            data = qr.getHostData();
+            qr.validate();
         } catch(BadPacketException bpe) {
             LOG.debug("bad packet reading qr", bpe);
             return;
@@ -188,7 +187,7 @@ class SearchResultHandlerImpl implements SearchResultHandler {
             // we're not on close IPs AND
             // (we are firewalled OR we are a private IP) AND 
             // no chance for FW transfer then drop the reply.
-            if(data.isFirewalled() && 
+            if(qr.isFirewalled() && 
                !networkInstanceUtils.isVeryCloseIP(qr.getIPBytes()) &&               
                (!networkManager.acceptedIncomingConnection() ||
                 networkInstanceUtils.isPrivateAddress(networkManager.getAddress())) &&

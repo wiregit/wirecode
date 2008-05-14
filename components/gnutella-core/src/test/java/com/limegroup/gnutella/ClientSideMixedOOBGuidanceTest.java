@@ -6,16 +6,13 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.Set;
 
 import junit.framework.Test;
 
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
-import org.limewire.util.PrivilegedAccessor;
 
 import com.limegroup.gnutella.connection.BlockingConnection;
-import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
@@ -23,8 +20,6 @@ import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
-import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
 /**

@@ -56,7 +56,6 @@ import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.version.DownloadInformation;
@@ -869,10 +868,9 @@ public class DownloadManagerImpl implements DownloadManager {
             return;
 
         List<Response> responses;
-        HostData data;
         try {
+            qr.validate();
             responses = qr.getResultsAsList();
-            data = qr.getHostData();
         } catch(BadPacketException bpe) {
             return; // bad packet, do nothing.
         }

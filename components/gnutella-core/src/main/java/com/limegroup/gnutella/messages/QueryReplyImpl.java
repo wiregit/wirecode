@@ -107,6 +107,8 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     
     private final boolean local;
     
+    private boolean badPacket;
+    
     
     QueryReplyImpl(byte[] guid, byte ttl, byte hops, byte[] payload,
             Network network, NetworkInstanceUtils networkInstanceUtils, NetworkManager networkManager,
@@ -116,8 +118,9 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         this.networkInstanceUtils = networkInstanceUtils;
         this.responseFactory = responseFactory;
         this._payload = payload;
+        this.badPacket = true;
         
-		if(!NetworkUtils.isValidPort(getPort())) {
+        if(!NetworkUtils.isValidPort(getPort())) {
 			throw new BadPacketException("invalid port");
 		}
         
@@ -150,6 +153,8 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         this.networkInstanceUtils = networkInstanceUtils;
         this.responseFactory = responseFactory;
         this.local = true;
+        this.badPacket = true;
+        
         if (xmlBytes.length > XML_MAX_SIZE)
             throw new IllegalArgumentException("xml too large: " + new String(xmlBytes));
 
@@ -270,6 +275,13 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         }
 
 		setAddress();
+    }
+    
+    public void validate() throws BadPacketException {
+        parseResults();
+        if(badPacket) {
+            throw new BadPacketException();
+        }
     }
     
     /** Writes the 'secureGGEP' GGEP. */
@@ -922,7 +934,8 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             _data.setTLSCapable(supportsTLST);
             
             // MUST BE LAST -- This accesses everything set above
-            _data.setHostData(new HostDataImpl(this, networkInstanceUtils));
+            _data.setHostData(new HostDataImpl(this));
+            badPacket = false;
         } catch (BadPacketException e) {
             return;
         } catch (IndexOutOfBoundsException e) {

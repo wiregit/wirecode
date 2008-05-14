@@ -1910,12 +1910,12 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
         // vendor
         QueryReply replyProxy = (QueryReply)Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{QueryReply.class}, new ExceptionThrower(query, "getVendor"));
-        HostData data = new HostDataImpl(replyProxy, networkInstanceUtils);
+        HostData data = new HostDataImpl(replyProxy);
         assertEquals("", data.getVendorCode());
 
          // isFirewalled
         replyProxy = (QueryReply)Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{QueryReply.class}, new ExceptionThrower(query, "getNeedsPush"));
-        data = new HostDataImpl(replyProxy, networkInstanceUtils);
+        data = new HostDataImpl(replyProxy);
         assertEquals(true, data.isFirewalled());
     }
     
@@ -2007,13 +2007,13 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
     private HostData getHostDataWithFirewallInputs(QueryReplyFactory queryReplyFactory, Response r, boolean needsPush, boolean isPrivateAddress, boolean isReplyToMulticast) throws UnknownHostException, BadPacketException {
         NetworkInstanceUtils networkInstanceUtils = injector.getInstance(NetworkInstanceUtils.class);
-        QueryReply query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
+        NetworkInstanceUtils networkInstanceUtilsProxy = (NetworkInstanceUtils)Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{NetworkInstanceUtils.class}, new BooleanReturner(networkInstanceUtils, "isPrivateAddress", isPrivateAddress));
+                QueryReply query = queryReplyFactory.createQueryReply(GUID.makeGuid(), (byte)1, 1459,
                 InetAddress.getLocalHost().getAddress(), 30945L, new Response[] { r }, GUID.makeGuid(), new byte[0], needsPush, false,
                 false, false, false, isReplyToMulticast, false, IpPort.EMPTY_SET, _token);
         query.setMulticastAllowed(true);
 
-        NetworkInstanceUtils networkInstanceUtilsProxy = (NetworkInstanceUtils)Proxy.newProxyInstance(ClassLoader.getSystemClassLoader(), new Class[]{NetworkInstanceUtils.class}, new BooleanReturner(networkInstanceUtils, "isPrivateAddress", isPrivateAddress));
-        return new HostDataImpl(query, networkInstanceUtilsProxy);
+        return new HostDataImpl(query);
     }
 
     abstract class ObjectWrapper implements InvocationHandler{

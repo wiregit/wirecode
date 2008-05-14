@@ -46,9 +46,9 @@ public class FileDesc implements StringLookup {
     private final long _size;
 
 	/**
-	 * The modification time of the file, which can be updated.
+	 * The modification time of the file.
 	 */
-    private long _modTime;
+    private final long _modTime;
 
 	/**
 	 * Constant <tt>Set</tt> of <tt>URN</tt> instances for the file.  This
@@ -96,17 +96,6 @@ public class FileDesc implements StringLookup {
 	 */
 	private int _completedUploads;
 	    
-    /** A simple constructor, for easier testing. */
-    protected FileDesc() {
-        SHA1_URN = null;
-        _size = -1;
-        _name = null;
-        FILE = null;
-        _index = -1;
-        URNS = null;
-        _path = null;
-    }
-
     /**
 	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
 	 * <tt>File</tt> class and the associated urns.

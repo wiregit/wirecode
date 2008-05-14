@@ -3,10 +3,7 @@ package com.limegroup.gnutella.search;
 import java.util.Set;
 
 import org.limewire.io.IpPort;
-import org.limewire.io.NetworkInstanceUtils;
-import org.limewire.util.ByteUtils;
 
-import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 
@@ -87,7 +84,7 @@ public class HostDataImpl implements HostData {
     /** If the host supports TLS connections. */
     private final boolean TLS_CAPABLE;
     
-    public HostDataImpl(QueryReply reply, NetworkInstanceUtils networkInstanceUtils) {
+    public HostDataImpl(QueryReply reply) {
         byte[] clientGuid = reply.getClientGUID();
         byte[] messageGuid = reply.getGUID();
         String ip = reply.getIP();
