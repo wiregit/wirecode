@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.downloader;
 
+import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -16,9 +18,8 @@ import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.security.SecureMessage;
+import org.limewire.util.Objects;
 
-import com.google.inject.util.Objects;
-import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;

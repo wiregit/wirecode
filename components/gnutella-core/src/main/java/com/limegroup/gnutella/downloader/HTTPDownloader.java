@@ -44,9 +44,9 @@ import org.limewire.nio.statemachine.ReadSkipState;
 import org.limewire.nio.statemachine.ReadState;
 import org.limewire.rudp.RUDPSocket;
 import org.limewire.util.OSUtils;
+import org.limewire.util.Objects;
 
 import com.google.inject.Provider;
-import com.google.inject.util.Objects;
 import com.limegroup.gnutella.AssertFailure;
 import com.limegroup.gnutella.BandwidthManager;
 import com.limegroup.gnutella.BandwidthTracker;

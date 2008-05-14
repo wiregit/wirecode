@@ -169,7 +169,7 @@ public class LimeWireHttpClientModule extends AbstractModule {
     }
     
     @Singleton
-    private class DefaultHttpParamsProvider implements Provider<HttpParams>{
+    private static class DefaultHttpParamsProvider implements Provider<HttpParams>{
         /**
          * The amount of time to wait while trying to connect to a specified
          * host via TCP.  If we exceed this value, an IOException is thrown
