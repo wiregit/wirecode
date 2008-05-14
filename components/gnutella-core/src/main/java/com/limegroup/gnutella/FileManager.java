@@ -419,7 +419,7 @@ public interface FileManager {
      * method assumes all files have already had there ID3 information examined and placed in
      * one of these lists when appropriate
      */
-    public abstract boolean isStoreFile(File file);
+    public abstract boolean isStoreFileLoaded(File file);
 
     /**
      * Returns true if this directory is the folder that is selected to download LWS songs into

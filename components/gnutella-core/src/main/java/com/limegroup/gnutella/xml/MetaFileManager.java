@@ -443,7 +443,7 @@ public class MetaFileManager extends FileManagerImpl {
                 res = fileManagerController.createPureMetadataResponse();
             } else { // meta-data about a specific file
                 FileDesc fd = getFileDescForFile(file);
-                if (fd == null || fd instanceof IncompleteFileDesc || isStoreFile(file)) {
+                if (fd == null || fd instanceof IncompleteFileDesc || isStoreFileLoaded(file)) {
                     // fd == null is bad -- would mean MetaFileManager is out of sync.
                     // fd incomplete should never happen, but apparently is somehow...
                     // fd is store file, shouldn't be returning query hits for it then..

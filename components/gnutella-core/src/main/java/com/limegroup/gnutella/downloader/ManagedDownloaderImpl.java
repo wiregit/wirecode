@@ -2045,7 +2045,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         addFileHash(fileHash, saveFile);
 
         // determine where and how to share the file
-        shareSavedFile();
+        shareSavedFile(saveFile);
 
 		return DownloadStatus.COMPLETE;
     }
@@ -2107,11 +2107,11 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
     /**
      * Shares the newly downloaded file
      */
-    protected void shareSavedFile(){
+    protected void shareSavedFile(File saveFile){
 		if (SharingSettings.SHARE_DOWNLOADED_FILES_IN_NON_SHARED_DIRECTORIES.getValue())
-			fileManager.addFileAlways(getSaveFile(), getXMLDocuments());
+			fileManager.addFileAlways(saveFile, getXMLDocuments());
 		else
-		    fileManager.addFileIfShared(getSaveFile(), getXMLDocuments());
+		    fileManager.addFileIfShared(saveFile, getXMLDocuments());
     }
 
     /** Removes all entries for incompleteFile from incompleteFileManager 

@@ -632,8 +632,8 @@ public class MetaFileManagerTest extends FileManagerTest {
         assertEquals("Unexpected file added", store3, result.getFileDescs()[1].getFile());
 
         // renamed file should not be found, new name file should be found
-        assertFalse(fman.isStoreFile(store1));
-        assertTrue(fman.isStoreFile(store3));
+        assertFalse(fman.isStoreFileLoaded(store1));
+        assertTrue(fman.isStoreFileLoaded(store3));
         // still only two store files
         assertEquals("Unexpected number of store files", 1, fman.getNumStoreFiles());
     }

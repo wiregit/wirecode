@@ -1167,7 +1167,7 @@ public abstract class FileManagerImpl implements FileManager {
                     else if(f.isFile() && !_individualSharedFiles.contains(f)) {
                         if(removeFileIfSharedOrStore(f) == null)
                             fileManagerController.clearPendingShare(f);
-                        if(isStoreFile(f)) 
+                        if(isStoreFileLoaded(f)) 
                             _data.SPECIAL_STORE_FILES.remove(f);	
                     }
                 }
@@ -1359,8 +1359,8 @@ public abstract class FileManagerImpl implements FileManager {
             return;
         }
         
-        if( isStoreFile(file)){
-                return;
+        if(isStoreFileLoaded(file)) {
+            return;
 		}
         
         if(isFileShared(file)) {
@@ -1587,7 +1587,7 @@ public abstract class FileManagerImpl implements FileManager {
 		
 		// if its a store file it can't be shared thus it can't be unshared,
 		//    just return null
-		if( isStoreFile(file))
+		if( isStoreFileLoaded(file))
 		    return null;
 		
 		// remove file already here to heed against race conditions
@@ -2191,7 +2191,7 @@ public abstract class FileManagerImpl implements FileManager {
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#isStoreFile(java.io.File)
      */
-    public boolean isStoreFile(File file) {
+    public boolean isStoreFileLoaded(File file) {
         if( _storeToFileDescMap.containsKey(file) || 
                 _storeDirectories.contains(file)) {
                 return true;
