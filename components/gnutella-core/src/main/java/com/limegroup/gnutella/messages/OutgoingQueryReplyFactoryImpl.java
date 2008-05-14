@@ -86,6 +86,10 @@ public class OutgoingQueryReplyFactoryImpl implements OutgoingQueryReplyFactory 
             SecurityToken securityToken, byte[] guid, byte ttl, boolean isMulticast,
             boolean requestorCanDoFWT) {
         
+        if (responses.length == 0) {
+            return Collections.emptyList();
+        }
+        
         // We should mark our hits if the remote end can do a firewalled
         // transfer AND so can we AND we don't accept tcp incoming AND our
         // external address is valid (needed for input into the reply)
