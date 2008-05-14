@@ -10,6 +10,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -837,45 +838,53 @@ public class AltLocUploadTest extends LimeTestCase {
         }
 
         for (int i = 0; i < 20; i++) {
-            altLocManager.add(
-                    alternateLocationFactory.create("1.1.1." + i + ":6346", hashURN), null);
+            altLocManager.add(alternateLocationFactory.create("1.1.1." + i + ":6346", hashURN), null);
         }
         assertEquals(21, altLocManager.getDirect(
                 fd.getSHA1Urn()).getAltLocsSize());
 
         String pre = "1.1.1.";
-        // note that this value can change depending on iterators,
-        // so this is a very flaky test.
-        /*String required = pre + 16 + post + comma + pre + 13 + post
-                + comma + pre + 10 + post + comma + pre + 15 + post + comma
-                + pre + 12 + post + comma + pre + 1 + post + comma + pre + 14
-                + post + comma + pre + 11 + post + comma + pre + 0 + post
-                + comma + pre + "1:1";*/
         ArrayList<String> required = new ArrayList<String>();
         for (int i = 0; i < 20; i++) {
             required.add(pre + i);    
         }
-        required.add(pre + "1:1");
         method = new HttpGet(hashUrl);
-        HttpProtocolParams.setVersion(client.getParams(), HttpVersion.HTTP_1_0);
         try {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             assertNotNull(response.getFirstHeader("X-Alt"));
-            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
+            // Find only 10 of the items, but not less than 10 & not more than 10.
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue(), 10);
         } finally {
             HttpClientUtils.releaseConnection(response);
         }
     }
 
-    private void assertHeaderEquals(ArrayList<String> required, String value) {
+    private List<String> assertHeaderEquals(ArrayList<String> required, String value, int amountNeeded) {
         String[] valueList = value.replace(" ", "").split(",");
         assertGreaterThan(0, required.size());
-        assertGreaterThan(0, valueList.length);
-        for(String oneValue : valueList) {
-            assertContains(required, oneValue);
-            required.remove(oneValue);
+        List<String> actual = new ArrayList<String>(Arrays.asList(valueList));
+        if(amountNeeded > 0) {
+            assertGreaterThanOrEquals("must give some requirements!", amountNeeded, required.size());
+            assertEquals(amountNeeded, actual.size());
+        } else {
+            assertEquals(required.size(), actual.size());
         }
+        List<String> missing = new ArrayList<String>();
+        List<String> found = new ArrayList<String>();
+        for(String oneValue : required) {
+            if(!actual.contains(oneValue)) {
+                missing.add(oneValue);
+            } else {
+                actual.remove(oneValue);
+                found.add(oneValue);
+            }
+        }
+        assertTrue("wanted: " + amountNeeded + " of: " + required + ", found only: " + found + ", remaining: " + actual, actual.isEmpty());
+        if(amountNeeded < 0) {
+            assertEmpty(missing);
+        }
+        return found;
     }
 
     public void testAltsExpire() throws Exception {
@@ -1130,7 +1139,7 @@ public class AltLocUploadTest extends LimeTestCase {
         AlternateLocation al = alternateLocationFactory.create("1.1.1.1:1", hashURN);
         altLocManager.add(al, null);
         HttpGet method = new HttpGet(hashUrl);
-        method.addHeader("Connection", "close");
+       // method.addHeader("Connection", "close");
         HttpResponse response = null;
         try {
             response = client.execute(method);
@@ -1139,7 +1148,7 @@ public class AltLocUploadTest extends LimeTestCase {
             String value = response.getFirstHeader("X-Alt").getValue();
             assertEquals("1.1.1.1:1", value);
         } finally {
-            HttpClientUtils.releaseConnection(response);
+           HttpClientUtils.releaseConnection(response);
         }
 
         for (int i = 0; i < 20; i++) {
@@ -1150,86 +1159,75 @@ public class AltLocUploadTest extends LimeTestCase {
                 fd.getSHA1Urn()));
 
         String pre = "1.1.1.";
-        // note that this value can change depending on iterators,
-        // so this is a very flaky test.
-        /*String required = null;
-
-        required = pre + 16 + post + comma + pre + 13 + post
-                + comma + pre + 10 + post + comma + pre + 15 + post + comma
-                + pre + 12 + post + comma + pre + 1 + post + comma + pre + 14
-                + post + comma + pre + 11 + post + comma + pre + 0 + post
-                + comma + pre + "1:1";*/
+        
+        List<String> found = new ArrayList<String>();
+        found.add("1.1.1.1:1");
+        
         ArrayList<String> required = new ArrayList<String>();
         for (int i = 0; i < 20; i++) {
             required.add(pre + i);    
         }
-        required.add(pre + "1:1");        
+        
+        // Find everything (up to 10 more) except the initial 1.1.1.1:1
         method = new HttpGet(hashUrl);
         method.addHeader("Range", "bytes=0-1");
         try {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
             assertNotNull(response.getFirstHeader("X-Alt"));
-            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
+            found.addAll(assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue(), 10));
         } finally {
             HttpClientUtils.releaseConnection(response);
         }
 
-        /*required = pre + 5 + post + comma + pre + 2 + post + comma
-                + pre + 18 + post + comma + pre + 7 + post + comma + pre + 4
-                + post + comma + pre + 17 + post + comma + pre + 6 + post
-                + comma + pre + 3 + post + comma + pre + 19 + post + comma
-                + pre + 8 + post;*/
         required = new ArrayList<String>();
         for (int i = 0; i < 20; i++) {
             required.add(pre + i);    
         }
-        required.add(pre + "1:1");
+        required.removeAll(found);
+        
+        // Find everything except the first batch & 1.1.1.1:1
         method = new HttpGet(hashUrl);
         method.addHeader("Range", "bytes=2-3");
         try {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
             assertNotNull(response.getFirstHeader("X-Alt"));
-            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
+            found.addAll(assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue(), 10));
         } finally {
             HttpClientUtils.releaseConnection(response);
         }
 
-        //required = pre + 9 + post;
         required = new ArrayList<String>();
         for (int i = 0; i < 20; i++) {
             required.add(pre + i);    
         }
-        required.add(pre + "1:1"); 
+        required.removeAll(found);
+        
+        // Nothing left to find!
+        assertEquals(0, required.size());
         method = new HttpGet(hashUrl);
         method.addHeader("Range", "bytes=4-5");
         try {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
-            assertNotNull(response.getFirstHeader("X-Alt"));
-            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
+            assertNull(response.getFirstHeader("X-Alt"));
         } finally {
             HttpClientUtils.releaseConnection(response);
         }
 
         // Now if some more are added to file desc, make sure they're reported.
-        altLocManager.add(
-                alternateLocationFactory.create("1.1.1.99:6346", hashURN), null);
-        //required = pre + 99 + post;
-        required = new ArrayList<String>();
-        for (int i = 0; i < 20; i++) {
-            required.add(pre + i);    
-        }
-        required.add(pre + "1:1"); 
-        required.add(pre + "99"); 
+        altLocManager.add(alternateLocationFactory.create("1.1.1.99:6346", hashURN), null);
+        
+        // Find only the additional 1.1.1.99
         method = new HttpGet(hashUrl);
         method.addHeader("Range", "bytes=6-7");
         try {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
             assertNotNull(response.getFirstHeader("X-Alt"));
-            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
+            String value = response.getFirstHeader("X-Alt").getValue();
+            assertEquals("1.1.1.99", value);
         } finally {
             HttpClientUtils.releaseConnection(response);
         }
@@ -1240,7 +1238,6 @@ public class AltLocUploadTest extends LimeTestCase {
         AlternateLocation al = alternateLocationFactory.create("1.1.1.1:1", hashURN);
         altLocManager.add(al, null);
         HttpGet method = new HttpGet(hashUrl);
-        method.addHeader("Connection", "close");
         HttpResponse response = null;
         try {
             response = client.execute(method);
@@ -1294,15 +1291,7 @@ public class AltLocUploadTest extends LimeTestCase {
         // 20-29 returned next
 
         String pre = "1.1.1.";
-        // note that this value can change depending on iterators,
-        // so this is a very flaky test.
-        /*String required = null;
-
-        required = pre + 40 + post + comma + pre + 41 + post
-                + comma + pre + 42 + post + comma + pre + 43 + post + comma
-                + pre + 44 + post + comma + pre + 45 + post + comma + pre + 46
-                + post + comma + pre + 47 + post + comma + pre + 48 + post
-                + comma + pre + 49 + post;*/
+        
         ArrayList<String> required = new ArrayList<String>();
         for (int i = 0; i < 10; i++) {
             required.add(pre + (40 + i));    
@@ -1313,16 +1302,11 @@ public class AltLocUploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
             assertNotNull(response.getFirstHeader("X-Alt"));
-            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue(), 10);
         } finally {
             HttpClientUtils.releaseConnection(response);
         }
 
-        /*required = pre + 16 + post + comma + pre + 13 + post
-                + comma + pre + 10 + post + comma + pre + 18 + post + comma
-                + pre + 15 + post + comma + pre + 12 + post + comma + pre + 17
-                + post + comma + pre + 14 + post + comma + pre + 11 + post
-                + comma + pre + 19 + post;*/
         required = new ArrayList<String>();
         for (int i = 0; i < 10; i++) {
             required.add(pre + (10 + i));    
@@ -1333,16 +1317,11 @@ public class AltLocUploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
             assertNotNull(response.getFirstHeader("X-Alt"));
-            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue(), 10);
         } finally {
             HttpClientUtils.releaseConnection(response);
         }
 
-        /*required = pre + 35 + post + comma + pre + 32 + post
-                + comma + pre + 37 + post + comma + pre + 34 + post + comma
-                + pre + 31 + post + comma + pre + 39 + post + comma + pre + 36
-                + post + comma + pre + 33 + post + comma + pre + 30 + post
-                + comma + pre + 38 + post;*/
         required = new ArrayList<String>();
         for (int i = 0; i < 10; i++) {
             required.add(pre + (30 + i));    
@@ -1353,16 +1332,11 @@ public class AltLocUploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
             assertNotNull(response.getFirstHeader("X-Alt"));
-            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue(), 10);
         } finally {
             HttpClientUtils.releaseConnection(response);
         }
 
-        /*required = pre + 5 + post + comma + pre + 2 + post + comma
-                + pre + 7 + post + comma + pre + 4 + post + comma + pre + 1
-                + post + comma + pre + 9 + post + comma + pre + 6 + post
-                + comma + pre + 3 + post + comma + pre + 0 + post + comma + pre
-                + 8 + post;*/
         required = new ArrayList<String>();
         for (int i = 0; i < 10; i++) {
             required.add(pre + i);    
@@ -1373,16 +1347,11 @@ public class AltLocUploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
             assertNotNull(response.getFirstHeader("X-Alt"));
-            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue(), 10);
         } finally {
             HttpClientUtils.releaseConnection(response);
         }
 
-        /*required = pre + 24 + post + comma + pre + 21 + post
-                + comma + pre + 29 + post + comma + pre + 26 + post + comma
-                + pre + 23 + post + comma + pre + 20 + post + comma + pre + 28
-                + post + comma + pre + 25 + post + comma + pre + 22 + post
-                + comma + pre + 27 + post;*/
         required = new ArrayList<String>();
         for (int i = 0; i < 10; i++) {
             required.add(pre + (20 + i));    
@@ -1393,7 +1362,7 @@ public class AltLocUploadTest extends LimeTestCase {
             response = client.execute(method);
             assertEquals(HttpStatus.SC_PARTIAL_CONTENT, response.getStatusLine().getStatusCode());
             assertNotNull(response.getFirstHeader("X-Alt"));
-            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue());
+            assertHeaderEquals(required, response.getFirstHeader("X-Alt").getValue(), 10);
         } finally {
             HttpClientUtils.releaseConnection(response);
         }
