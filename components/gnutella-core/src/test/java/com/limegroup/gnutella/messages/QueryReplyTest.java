@@ -1132,6 +1132,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         FileManager fileManager = injector.getInstance(FileManager.class);
         SharedFilesKeywordIndex keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
+        fileManager.addFileEventListener(keywordIndex);
         addFilesToLibrary();
         addAlternateLocationsToFiles();
         
@@ -1196,6 +1197,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         FileManager fileManager = injector.getInstance(FileManager.class);
         SharedFilesKeywordIndex keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
+        fileManager.addFileEventListener(keywordIndex);
         
         addFilesToLibrary();
         addCreationTimeToFiles();
