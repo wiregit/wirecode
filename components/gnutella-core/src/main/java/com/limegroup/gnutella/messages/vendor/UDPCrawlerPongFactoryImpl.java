@@ -2,7 +2,6 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
@@ -180,7 +179,7 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
         for(RoutedConnection c : endpointsUP) {
             //pack each entry into a 6 byte array and add it to the result.
             System.arraycopy(
-                    packIPAddress(c.getInetAddress(),c.getPort()),
+                    NetworkUtils.getBytes(c.getInetAddress(), c.getPort(), java.nio.ByteOrder.LITTLE_ENDIAN),
                     0,
                     result,
                     index,
@@ -246,17 +245,6 @@ public class UDPCrawlerPongFactoryImpl implements UDPCrawlerPongFactory {
             System.arraycopy(agentsB,0,result,resTemp.length+2,agentsB.length);
         }
         return result;
-    }
-    
-    
-    /**
-     * copy/pasted from PushProxyRequest.  This should go to NetworkUtils imho
-     * @param addr address of the other person
-     * @param port the port
-     * @return 6-byte value representing the address and port.
-     */
-    private static byte[] packIPAddress(InetAddress addr, int port) {
-        return NetworkUtils.getBytes(addr, port, java.nio.ByteOrder.LITTLE_ENDIAN);
     }
 
 }
