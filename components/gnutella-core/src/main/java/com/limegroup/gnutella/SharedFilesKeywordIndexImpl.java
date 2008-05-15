@@ -26,6 +26,8 @@ import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
+// TODO split this up further and remove query and response from here,
+// or introduce a generic indexing class that can be used
 @Singleton
 public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
@@ -50,7 +52,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
      * Not threadsafe, hold lock on field.
      */
     @InspectableForSize("size of keyword trie")
-    private StringTrie<IntSet> keywordTrie = new StringTrie<IntSet>(true);
+    private final StringTrie<IntSet> keywordTrie = new StringTrie<IntSet>(true);
     
     /**
      * A trie mapping keywords in complete filenames to the indices in _files.
@@ -59,7 +61,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
      * Not threadsafe, hold lock on field.
      */
     @InspectableForSize("size of incomplete keyword trie")
-    private StringTrie<IntSet> incompleteKeywordTrie = new StringTrie<IntSet>(true);
+    private final StringTrie<IntSet> incompleteKeywordTrie = new StringTrie<IntSet>(true);
     
     private final Provider<CreationTimeCache> creationTimeCache;
 
@@ -233,24 +235,17 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         FileDesc[] fileDescs = evt.getFileDescs();
         switch (evt.getType()) {
         case ADD_FILE:
-            for (FileDesc fileDesc : fileDescs) {
-                if (fileDesc instanceof IncompleteFileDesc) {
-                    loadKeywords(incompleteKeywordTrie, fileDesc);
-                } else {
-                    loadKeywords(keywordTrie, fileDesc);
-                }
-            }
+            addFileDescs(fileDescs);
             break;
         case REMOVE_FILE:
-            for (FileDesc fileDesc : fileDescs) {
-                if (fileDesc instanceof IncompleteFileDesc) {
-                    removeKeywords(incompleteKeywordTrie, fileDesc);
-                } else {
-                    removeKeywords(keywordTrie, fileDesc);
-                }
-            }
+            removeFileDescs(fileDescs);
             break;
         case RENAME_FILE:
+            removeFileDescs(fileDescs[0]);
+            addFileDescs(fileDescs[1]);
+            break;
+        case CHANGE_FILE:
+            addFileDescs(fileDescs);
             break;
         case FILEMANAGER_LOADED:
             trim();
@@ -258,6 +253,31 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         case FILEMANAGER_LOADING:
             clear();
             break;
+        }
+    }
+    
+    private void removeFileDescs(FileDesc...fileDescs) {
+        for (FileDesc fileDesc : fileDescs) {
+            if (fileDesc instanceof IncompleteFileDesc) {
+                removeKeywords(incompleteKeywordTrie, fileDesc);
+            } else {
+                removeKeywords(keywordTrie, fileDesc);
+            }
+        }
+    }
+    
+    private void addFileDescs(FileDesc...fileDescs) {
+        boolean indexIncompleteFiles = SharingSettings.ALLOW_PARTIAL_SHARING.getValue()
+        && SharingSettings.LOAD_PARTIAL_KEYWORDS.getValue();
+        for (FileDesc fileDesc : fileDescs) {
+            if (fileDesc instanceof IncompleteFileDesc) {
+                IncompleteFileDesc ifd = (IncompleteFileDesc)fileDesc;
+                if (indexIncompleteFiles && ifd.hasUrnsAndPartialData()) {
+                    loadKeywords(incompleteKeywordTrie, fileDesc);
+                }
+            } else {
+                loadKeywords(keywordTrie, fileDesc);
+            }
         }
     }
     
@@ -326,8 +346,11 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                     break;
             }
 
-            //Search for keyword, i.e., keywords[i...j-1].  
-            Iterator<IntSet> iter= keywordTrie.getPrefixedBy(query, i, j);
+            //Search for keyword, i.e., keywords[i...j-1].
+            Iterator<IntSet> iter;
+            synchronized (keywordTrie) {
+                iter = keywordTrie.getPrefixedBy(query, i, j);
+            }
             if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
                     SharingSettings.ALLOW_PARTIAL_RESPONSES.getValue() &&
                     partial) {
