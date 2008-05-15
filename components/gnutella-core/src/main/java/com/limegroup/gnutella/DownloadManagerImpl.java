@@ -322,9 +322,9 @@ public class DownloadManagerImpl implements DownloadManager {
             if (! (md instanceof ManagedDownloader))
                 continue; // pushes apply to gnutella downloads only
             ManagedDownloader mmd = (ManagedDownloader)md;
-            if (mmd.acceptDownload(file, socket, index, clientGUID))
-                handled = true;
-            break;
+            if (mmd.acceptDownload(file, socket, index, clientGUID)) {
+                return true;
+            }
          }                 
          return handled;
     }
