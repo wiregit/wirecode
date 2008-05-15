@@ -18,9 +18,19 @@ public class QueryUtils {
      */
     private static final List<String> TRIVIAL_WORDS;
     
+    /**
+     * Characters used to tokenize queries and file names.
+     */
+    public static final String DELIMITERS = " -._+/*()\\,";
+    
+    private static final char[] DELIMITERS_CHARACTERS; 
+    
     static {
         // must be lower-case
         TRIVIAL_WORDS = Arrays.asList("the", "an", "a", "and");
+        char[] characters = DELIMITERS.toCharArray();
+        Arrays.sort(characters);
+        DELIMITERS_CHARACTERS = characters;
     }
     
 
@@ -168,9 +178,8 @@ public class QueryUtils {
     	return createQueryString(name, false);
     }
 
-    /**
-     * Characters used to tokenize queries and file names.
-     */
-    public static final String DELIMITERS = " -._+/*()\\,";
-
+    public static final boolean isDelimiter(char c) {
+        return Arrays.binarySearch(DELIMITERS_CHARACTERS, c) >= 0;
+    }
+    
 }

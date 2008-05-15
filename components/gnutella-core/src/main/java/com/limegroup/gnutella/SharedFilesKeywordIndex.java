@@ -2,6 +2,9 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.QueryRequest;
 
+/**
+ * Defines an interface to query for responses of shared files by this peer.
+ */
 public interface SharedFilesKeywordIndex extends FileEventListener {
 
     /**

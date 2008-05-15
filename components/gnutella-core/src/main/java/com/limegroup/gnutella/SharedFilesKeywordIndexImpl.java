@@ -71,13 +71,17 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
     private final Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper;
 
+    private final ActivityCallback activityCallback;
+
     @Inject
     public SharedFilesKeywordIndexImpl(FileManager fileManager, Provider<CreationTimeCache> creationTimeCache,
-            Provider<ResponseFactory> responseFactory, Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper) {
+            Provider<ResponseFactory> responseFactory, Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
+            ActivityCallback activityCallback) {
         this.fileManager = fileManager;
         this.creationTimeCache = creationTimeCache;
         this.responseFactory = responseFactory;
         this.schemaReplyCollectionMapper = schemaReplyCollectionMapper;
+        this.activityCallback = activityCallback;
     }
     
     public Response[] query(QueryRequest request) {
@@ -142,8 +146,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                 continue;
 
             desc.incrementHitCount();
-            // TODO fberger, either add listener to FileDesc or allow index to dispatch change event
-//            fileManagerController.handleSharedFileUpdate(desc.getFile());
+            activityCallback.handleSharedFileUpdate(desc.getFile());
 
             Response resp = responseFactory.get().createResponse(desc);
             if(includeXML) {
@@ -336,13 +339,13 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         //For each keyword in the query....  (Note that we avoid calling
         //StringUtils.split and take advantage of Trie's offset/limit feature.)
         for (int i=0; i<query.length(); ) {
-            if (isDelimiter(query.charAt(i))) {
+            if (QueryUtils.isDelimiter(query.charAt(i))) {
                 i++;
                 continue;
             }
             int j;
             for (j=i+1; j<query.length(); j++) {
-                if (isDelimiter(query.charAt(j)))
+                if (QueryUtils.isDelimiter(query.charAt(j)))
                     break;
             }
 
@@ -450,26 +453,6 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         }
     }
 
-    // TODO move to query utils
-    private static final boolean isDelimiter(char c) {
-        switch (c) {
-        case ' ':
-        case '-':
-        case '.':
-        case '_':
-        case '+':
-        case '/':
-        case '*':
-        case '(':
-        case ')':
-        case '\\':
-        case ',':
-            return true;
-        default:
-            return false;
-        }
-    }
-
     /**
      * Creates a new array, the size of which is less than or equal to
      * normals.length + metas.length.
@@ -533,8 +516,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                 } else { // we found a file with the right name
                     res = responseFactory.get().createResponse(fd);
                     fd.incrementHitCount();
-                    // TODO fberger
-//                    fileManagerController.handleSharedFileUpdate(fd.getFile());
+                    activityCallback.handleSharedFileUpdate(fd.getFile());
                 }
             }
 
