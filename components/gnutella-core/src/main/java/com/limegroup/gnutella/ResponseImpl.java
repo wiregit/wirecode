@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import org.limewire.collection.IntervalSet;
 import org.limewire.io.IpPort;
@@ -239,15 +238,10 @@ class ResponseImpl implements Response {
            cachedRFD.getHost().equals(queryReply.getIP()))
             return cachedRFD;
         else {
-            RemoteFileDesc rfd = null;
-            try {
-                rfd = remoteFileDescFactory.createRemoteFileDesc(queryReply.getIP(), queryReply.getPort(), getIndex(),
-                        getName(), getSize(), queryReply.getClientGUID(), queryReply.getSpeed(), queryReply.getSupportsChat(), queryReply.calculateQualityOfService(), queryReply.getSupportsBrowseHost(),
-                        getDocument(), getUrns(), queryReply.isReplyToMulticastQuery(), queryReply.isFirewalled(), queryReply.getVendor(), queryReply.getPushProxies(), getCreateTime(),
-                        queryReply.getFWTransferVersion(), queryReply.isTLSCapable());
-            } catch (BadPacketException e) {
-                e.printStackTrace();
-            }
+            RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc(queryReply.getIP(), queryReply.getPort(), getIndex(),
+                    getName(), getSize(), queryReply.getClientGUID(), queryReply.getSpeed(), queryReply.getSupportsChat(), queryReply.calculateQualityOfService(), queryReply.getSupportsBrowseHost(),
+                    getDocument(), getUrns(), queryReply.isReplyToMulticastQuery(), queryReply.isFirewalled(), queryReply.getVendor(), queryReply.getPushProxies(), getCreateTime(),
+                    queryReply.getFWTransferVersion(), queryReply.isTLSCapable());
             cachedRFD = rfd;
             return rfd;
         }

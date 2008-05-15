@@ -38,8 +38,6 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.search.HostDataImpl;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
@@ -95,6 +93,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     /** The parsed query reply data. */
     private volatile QueryReplyData _data;
     
+    // TODO move to QueryReply decorator?
     /** Whether or not this reply is allowed to have MCAST. */
     private volatile boolean _multicastAllowed = false;
     
@@ -421,6 +420,19 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     public List<Response> getResultsAsList() throws BadPacketException {
         return Arrays.asList(getResultsArray());
     }
+    
+    /** 
+     * Returns the name of this' vendor, all capitalized.  Throws
+     * BadPacketException if the data couldn't be extracted, either because it
+     * is missing or corrupted. 
+     */
+    private String getVendorFromPayload() throws BadPacketException {
+        parseResults();
+        String vendor = _data.getVendor();
+        if (vendor==null)
+            throw new BadPacketException();
+        return vendor;        
+    }
 
 
     /** 
@@ -428,12 +440,13 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
      * BadPacketException if the data couldn't be extracted, either because it
      * is missing or corrupted. 
      */
-    public String getVendor() throws BadPacketException {
-        parseResults();
-        String vendor = _data.getVendor();
-        if (vendor==null)
-            throw new BadPacketException();
-        return vendor;        
+    public String getVendor() {
+        // TODO move to QueryReply decorator?
+        try {
+            return getVendorFromPayload();
+        } catch (BadPacketException e) {
+            return "";
+        }
     }
 
     /** 
@@ -655,18 +668,6 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     public byte[] getSecurityToken() {
         parseResults();
         return _data.getSecurityToken();
-    }
-    
-    /**
-     * Returns the HostData object describing information
-     * about this QueryReply.
-     */
-    public HostData getHostData() throws BadPacketException {
-        parseResults();
-        HostData hd = _data.getHostData();
-        if( hd == null )
-            throw new BadPacketException();
-        return hd;
     }
     
     /**
@@ -933,8 +934,6 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             _data.setSecurityToken(securityToken);
             _data.setTLSCapable(supportsTLST);
             
-            // MUST BE LAST -- This accesses everything set above
-            _data.setHostData(new HostDataImpl(this));
             badPacket = false;
         } catch (BadPacketException e) {
             return;
@@ -1067,6 +1066,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 	}
 
     public boolean isFirewalled() {
+        // TODO move to QueryReply decorator?
         boolean firewalled;
         try {
             firewalled = getNeedsPush() || networkInstanceUtils.isPrivateAddress(getIP());

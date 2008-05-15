@@ -13,13 +13,8 @@ public class SpamReplyFilter implements SpamFilter {
         if (! (m instanceof QueryReply))
             return true;
 
-        try {
-            String vendor = ((QueryReply) m).getVendor();
-            return !vendor.equals("MUTE");
-        }
-        catch (BadPacketException bpe) {}
-
-        return true;
+        String vendor = ((QueryReply) m).getVendor();
+        return !vendor.equals("MUTE");
     }
 
 }

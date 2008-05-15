@@ -12,7 +12,6 @@ import org.limewire.security.SecureMessage;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.search.HostData;
 
 public interface QueryReply extends Message, SecureMessage {
 
@@ -104,7 +103,7 @@ public interface QueryReply extends Message, SecureMessage {
      * BadPacketException if the data couldn't be extracted, either because it
      * is missing or corrupted. 
      */
-    public String getVendor() throws BadPacketException;
+    public String getVendor();
 
     /** 
      * Returns true if this's push flag is set, i.e., a push download is needed.
@@ -184,12 +183,6 @@ public interface QueryReply extends Message, SecureMessage {
      * this query reply or null the none have been sent.
      */
     public byte[] getSecurityToken();
-
-    /**
-     * Returns the HostData object describing information
-     * about this QueryReply.
-     */
-    public HostData getHostData() throws BadPacketException;
 
     /**
      * Determines if this result has secure data.

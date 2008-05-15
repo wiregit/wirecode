@@ -6,7 +6,6 @@ import java.util.Set;
 import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.util.DataUtils;
 
 class QueryReplyData {
@@ -58,9 +57,6 @@ class QueryReplyData {
     
     /** Whether or not this is a result from a browse-host reply. */  
     private volatile boolean browseHostReply;  
-
-    /**  The HostData containing information about this QueryReply. */
-    private volatile HostData hostData;
     
     /** The data with info about the secure result. */  
     private volatile SecureGGEPData secureGGEP;
@@ -193,14 +189,6 @@ class QueryReplyData {
 
     public void setBrowseHostReply(boolean browseHostReply) {
         this.browseHostReply = browseHostReply;
-    }
-
-    public HostData getHostData() {
-        return hostData;
-    }
-
-    public void setHostData(HostData hostData) {
-        this.hostData = hostData;
     }
 
     public Set<? extends IpPort> getProxies() {
