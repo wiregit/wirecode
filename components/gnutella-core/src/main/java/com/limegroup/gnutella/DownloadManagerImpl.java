@@ -324,6 +324,7 @@ public class DownloadManagerImpl implements DownloadManager {
             ManagedDownloader mmd = (ManagedDownloader)md;
             if (mmd.acceptDownload(file, socket, index, clientGUID))
                 handled = true;
+            break;
          }                 
          return handled;
     }
