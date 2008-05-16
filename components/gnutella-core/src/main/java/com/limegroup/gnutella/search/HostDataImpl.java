@@ -1,8 +1,10 @@
 package com.limegroup.gnutella.search;
 
+import java.net.UnknownHostException;
 import java.util.Set;
 
 import org.limewire.io.IpPort;
+import org.limewire.io.IpPortImpl;
 
 /**
  * This class contains data about a host that has returned a query hit,
@@ -257,5 +259,13 @@ public class HostDataImpl implements HostData {
     public boolean isTLSCapable() {
         return TLS_CAPABLE;
     }
-
+    
+    @Override
+    public String toString() {
+        try {
+            return new IpPortImpl(IP, PORT).toString();
+        } catch (UnknownHostException e) {
+        }
+        return super.toString();
+    }
 }
