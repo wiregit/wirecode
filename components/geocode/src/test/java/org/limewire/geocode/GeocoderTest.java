@@ -12,14 +12,14 @@ import org.limewire.geocode.GeocodeInformation;
 import org.limewire.geocode.Geocoder;
 import org.limewire.util.BaseTestCase;
 
-public class GeocoderTestCase extends BaseTestCase {
+public class GeocoderTest extends BaseTestCase {
 
-    public GeocoderTestCase(String name) {
+    public GeocoderTest(String name) {
         super(name);
     }
     
     public static Test suite() {
-        return buildTestSuite(GeocoderTestCase.class);
+        return buildTestSuite(GeocoderTest.class);
     }
     
     private Geocoder geo;
@@ -68,7 +68,6 @@ public class GeocoderTestCase extends BaseTestCase {
         }
         
         // Make sure we have all the correct properties
-        System.out.println(info);
         for (GeocodeInformation.Property p : GeocodeInformation.getStrings2Properties().values()) {
             assertEquals(p.getValue() + " should be in " + info, props.get(p.getValue()), info.getProperty(p));
         }
