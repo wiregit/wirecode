@@ -22,9 +22,8 @@ package org.limewire.mojito.exceptions;
 import org.limewire.mojito.messages.ResponseMessage;
 
 /**
- * The DHTNoSuchElementException is thrown if an attempt was made to get
- * a DHTValue from a remote Node and the Node did not have the requested
- * value.
+ * Thrown if an attempt was made to get a <code>DHTValue</code> from a 
+ * remote Node and the Node did not have the requested value.
  */
 public class DHTNoSuchElementException extends DHTResponseException {
     

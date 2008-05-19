@@ -25,8 +25,8 @@ import java.util.Map;
 import org.limewire.mojito.util.FixedSizeHashMap;
 
 /**
- * A StatusCode is essentially a 16bit int value and a String which may or may
- * not describes the StatusCode.
+ * A 16 bit <code>int</code> value and a String which may or may
+ * not describe the <code>StatusCode</code>.
  */
 public class StatusCode implements Serializable, Comparable<StatusCode> {
     

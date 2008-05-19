@@ -22,8 +22,8 @@ package org.limewire.mojito.exceptions;
 import java.net.SocketException;
 
 /**
- * The IllegalSocketAddressException is thrown for "illegal" SocketAddresses.
- * Illegal means InetAddresses from the private address space for example.
+ * Thrown for "illegal" SocketAddresses.
+ * Illegal means, for example, InetAddresses from the private address space.
  */
 public class IllegalSocketAddressException extends SocketException {
 

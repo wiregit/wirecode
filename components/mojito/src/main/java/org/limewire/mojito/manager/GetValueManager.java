@@ -28,10 +28,10 @@ import org.limewire.mojito.result.FindValueResult;
 
 
 /**
- * GetValueManager is in widest sense equivalent to FindValueManager
+ * GetValueManager is, in the widest sense, equivalent to <code>FindValueManager</code>
  * but the main difference is that it's used to retrieve the value
  * rather than to find it. That means you must know which Node is storing
- * a value!
+ * a value.
  */
 public class GetValueManager extends AbstractManager<FindValueResult> {
 

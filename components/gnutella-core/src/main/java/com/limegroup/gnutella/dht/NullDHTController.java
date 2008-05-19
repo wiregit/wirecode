@@ -12,10 +12,8 @@ import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 
 /**
- * A class that uses the Null Object pattern to avoid
- * repetitive null checks in DHTManagers
- * 
- * or to be used as stub in tests
+ * Uses the Null Object pattern to avoid repetitive null checks in 
+ * <code>DHTManager</code>s or to be used as stub in tests.
  */
 public class NullDHTController implements DHTController {
 

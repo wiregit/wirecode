@@ -20,7 +20,7 @@
 package org.limewire.mojito.exceptions;
 
 /**
- * A DHTException is thrown as a result of an another exception.
+ * Thrown as a result of an another exception.
  */
 public class DHTException extends Exception {
     

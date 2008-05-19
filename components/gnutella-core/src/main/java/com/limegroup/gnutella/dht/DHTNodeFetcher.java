@@ -32,21 +32,22 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DHTSettings;
 
 /**
- * This class takes care of fetching DHT hosts from the Gnutella network through
- * the use of a UDP ping.
-
- * Implicitely, a request for DHT hosts will also propagate the knowledge 
- * through the network, thanks to the MessageRouter's pong forwarding logic!
- * 
- * First tries to get active nodes directly from the HostCatcher. if that fails, 
- * it tries to send UDP pings to nodes who support the DHT. If that fails too, it
- * sends UDP pings to all nodes in the HostCatcher.
- * 
- * This uses the ranker from the HostCatcher class, which it cancels
- * when the <tt>AbstractDHTController</tt> is able to bootstrap. 
- * 
- * This class can also start a timer task to periodically requests hosts until 
- * the manager is able to bootstrap. 
+ * Fetches DHT hosts from the Gnutella network through the use of a UDP ping.
+ * <p>
+ * Implicitly, a request for DHT hosts will also propagate the knowledge 
+ * through the network, thanks to the <code>MessageRouter</code>'s pong 
+ * forwarding logic.
+ * <p>
+ * First the <code>DHTNodeFetcher</code> tries to get active nodes directly from 
+ * the {@link HostCatcher}. If that fails, it tries to send UDP pings to nodes 
+ * who support the DHT. If that fails too, it sends UDP pings to all nodes in 
+ * the HostCatcher.
+ * <p>
+ * <code>DHTNodeFetcher</code> uses the ranker from the <code>HostCatcher</code>,
+ * which it cancels when the <tt>AbstractDHTController</tt> is able to bootstrap. 
+ * <p>
+ * <code>DHTNodeFetcher</code> can also start a timer task to periodically 
+ * requests hosts until the manager is able to bootstrap. 
  */
 public class DHTNodeFetcher {
     
@@ -74,7 +75,7 @@ public class DHTNodeFetcher {
     private final Object fetcherTaskLock = new Object();
     
     /**
-     * Whether or the fethcer is currently pinging a single host
+     * Whether or not the fetcher is currently pinging a single host
      */
     private final AtomicBoolean pingingSingleHost = new AtomicBoolean(false);
     
@@ -114,7 +115,7 @@ public class DHTNodeFetcher {
      * Requests active DHT hosts from the Gnutella network. This method has to
      * be synchronized because it can be called either directly by the manager
      * or by the timer task.
-     * 
+     * <p>
      * This method gets hosts from the HostCatcher and therefore uses the
      * UniqueHostPinger of the HostCatcher in order to avoid pinging hosts
      * twice.
@@ -188,7 +189,7 @@ public class DHTNodeFetcher {
     /**
      * Sends a UDP ping requesting DHT node to the specified host.
      * 
-     * @param hostAddress The <tt>SocketAddress</tt> of the host to send the ping to.
+     * @param hostAddress the <tt>SocketAddress</tt> of the host to send the ping to.
      */
     public void requestDHTHosts(SocketAddress hostAddress) {
         
@@ -267,7 +268,6 @@ public class DHTNodeFetcher {
     /**
      * Processes the ping reply containing DHT IP:Ports and
      * hands those back to the DHT bootstrapper.
-     * 
      */
     private void processPingReply(Message m) {
         
@@ -301,10 +301,11 @@ public class DHTNodeFetcher {
     /**
      * This <tt>Cancellable</tt> is used to cancel UDP ping requests
      * sent to sets of hosts. Cancelling is triggered by any of the following conditions:
-     * 1) We are now sending a ping to a single host.
-     * 2) The maximum delay has been exceeded
-     * 3) We are not connected to the network
-     * 4) We are not anymore waiting for DHT nodes to bootstrap
+     * <ol>
+     * <li>We are now sending a ping to a single host.
+     * <li>The maximum delay has been exceeded
+     * <li>We are not connected to the network
+     * <li>We are not anymore waiting for DHT nodes to bootstrap
      *
      */
     private class UDPPingRankerCanceller implements Cancellable{

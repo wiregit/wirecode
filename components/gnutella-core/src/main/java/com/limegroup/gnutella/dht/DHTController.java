@@ -31,11 +31,11 @@ public interface DHTController {
     public List<IpPort> getActiveDHTNodes(int maxNodes);
     
     /**
-     * If this node is not bootstrapped, passes the given hostAddress
+     * If this node is not bootstrapped, passes the given <code>hostAddress</code>
      * on to the DHT bootstrapper. If the node is already bootstrapped, 
      * the controller randomly tries to add the node to the DHT routing table.
      * 
-     * @param hostAddress The SocketAddress of the DHT host.
+     * @param hostAddress the SocketAddress of the DHT host.
      */
     public void addActiveDHTNode(SocketAddress hostAddress);
     
@@ -46,7 +46,7 @@ public interface DHTController {
     public void addPassiveDHTNode(SocketAddress hostAddress);
     
     /**
-     * Adds the given Contact to the local RouteTable
+     * Adds the given <code>Contact</code> to the local RouteTable
      */
     public void addContact(Contact node);
     

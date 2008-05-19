@@ -33,7 +33,7 @@ import org.limewire.mojito.util.MessageUtils;
 
 
 /**
- * The PingRequestHandler handles incoming Ping requests.
+ * Handles incoming Ping requests.
  */
 public class PingRequestHandler extends AbstractRequestHandler {
     

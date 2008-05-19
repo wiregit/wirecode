@@ -25,9 +25,9 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.messages.RequestMessage;
 
 /**
- * The DHTBackendException is thrown if an Exception occurred
+ * Thrown if an Exception occurred
  * in the backend which leads to the termination of the process
- * (ping, lookup, store, whatever).
+ * (ping, lookup, store, etc.).
  */
 public class DHTBackendException extends DHTRequestException {
     

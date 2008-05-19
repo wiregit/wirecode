@@ -20,7 +20,7 @@
 package org.limewire.mojito.exceptions;
 
 /**
- * The NotBootstrappedException is thrown if the user is attempting
+ * Thrown if the user is attempting
  * to execute certain operations that require a bootstrapped DHT.
  */
 public class NotBootstrappedException extends IllegalStateException {

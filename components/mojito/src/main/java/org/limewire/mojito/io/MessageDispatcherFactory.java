@@ -22,14 +22,14 @@ package org.limewire.mojito.io;
 import org.limewire.mojito.Context;
 
 /**
- * A factory interface to create instances of {@link MessageDispatcher}
+ * A factory interface to create {@link MessageDispatcher} instances.
  */
 public interface MessageDispatcherFactory {
     
     /**
      * Creates and returns an instance of {@link MessageDispatcher}
      * 
-     * @param context The Mojito {@link Context}
+     * @param context the Mojito {@link Context}
      * @return {@link MessageDispatcher}
      */
     public MessageDispatcher create(Context context);

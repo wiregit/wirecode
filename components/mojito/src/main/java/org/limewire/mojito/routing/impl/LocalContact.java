@@ -37,11 +37,11 @@ import org.limewire.mojito.util.ContactUtils;
 
 
 /**
- * The LocalContact stores the Contact information of the local Node. 
- * Some Methods of LocalContact do nothing or return hard coded 
- * values like getting and setting the Round Trip Time (RTT) and 
- * LocalContact provides some additional Methods to update the
- * local Node's Contact informations.
+ * Stores the contact information of the local Node. 
+ * Some methods of <code>LocalContact</code> do nothing or return hard coded 
+ * values like getting and setting the Round Trip Time (RTT). 
+ * <code>LocalContact</code> provides some additional Methods to update the
+ * local Node's contact information.
  */
 public class LocalContact implements Contact {
 

@@ -20,8 +20,7 @@
 package org.limewire.mojito.exceptions;
 
 /**
- * The DHTBadResponseException is thrown if we received a
- * bad response from a remote Node.
+ * Thrown if we received a bad response from a remote Node.
  */
 public class DHTBadResponseException extends DHTException {
     

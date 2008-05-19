@@ -38,7 +38,7 @@ import org.limewire.mojito.statistics.FindNodeLookupStatisticContainer;
 import org.limewire.security.SecurityToken;
 
 /**
- * The FindNodeResponseHandler class implements FIND_NODE specific features.
+ * Implements FIND_NODE response specific features.
  */
 public class FindNodeResponseHandler 
         extends LookupResponseHandler<FindNodeResult> {

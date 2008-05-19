@@ -20,15 +20,15 @@ import com.limegroup.gnutella.messages.vendor.DHTContactsMessage;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 /**
- * The DHT Manager interface currently defines method to start, stop and perform
+ * The DHT Manager interface defines methods to start, stop and perform
  * operations related to the maintenance of the DHT (bootstrapping, etc.).
- * It also takes care of switching between different DHT modes.
+ * It also takes care of switching between different DHT modes for a DHT node.
  */
 public interface DHTManager extends ConnectionLifecycleListener, 
         EventDispatcher<DHTEvent, DHTEventListener>{
     
     /**
-     * Various modes a DHT Node may have
+     * Defines the modes of a DHT Node (inactive, active, passive and passive leaf).
      */
     public static enum DHTMode {
         
@@ -59,12 +59,12 @@ public interface DHTManager extends ConnectionLifecycleListener,
         /**
          * The PASSIVE_LEAF mode is very similar to PASSIVE mode with
          * two major differences:
-         * 
+         * <p>
          * 1) A passive leaf has a fixed size LRU Map as its RouteTable.
          *    That means it has almost no knowledge of the global DHT
          *    RouteTable and depends entirely on an another peer (Ultrapeer)
-         *    that feeds it continiously with fresh contacts.
-         *    
+         *    that feeds it continuously with fresh contacts.
+         * <p>   
          * 2) A passive leaf node does not perform any Kademlia maintenance
          *    operations!
          */
@@ -136,7 +136,7 @@ public interface DHTManager extends ConnectionLifecycleListener,
     
     /**
      * Starts the DHT Node either in active or passive mode.
-     * 
+     * <p>
      * Note: You can use this method to stop the DHT by passing in
      * DHTMode.INACTIVE. The difference between using this method
      * and the {@link #stop()} method is that stop() is synchronous 
@@ -187,7 +187,7 @@ public interface DHTManager extends ConnectionLifecycleListener,
     public boolean isBootstrapped();
     
     /**
-     * 
+     * Returns whether this Node is part of the DHT.
      */
     public boolean isMemberOfDHT();
     

@@ -3,7 +3,7 @@ package com.limegroup.gnutella.dht;
 import java.net.SocketAddress;
 
 /**
- * The DHT Bootstrapper bootstraps this DHT node to the network
+ * Bootstraps this DHT node to the network.
  */
 interface DHTBootstrapper {
     
@@ -16,7 +16,7 @@ interface DHTBootstrapper {
      * Adds a host to the list of bootstrap hosts 
      * used to bootstrap to the network
      * 
-     * @param hostAddress The <tt>SocketAddress</tt> of the bootstrap host
+     * @param hostAddress the <tt>SocketAddress</tt> of the bootstrap host
      */
     public void addBootstrapHost(SocketAddress hostAddress);
     
@@ -24,7 +24,7 @@ interface DHTBootstrapper {
      * If the bootstrapper is waiting for nodes, pings this host 
      * in order to acquire DHT bootstrap hosts
      * 
-     * @param hostAddress The <tt>SocketAddress</tt> of the host to ping
+     * @param hostAddress the <tt>SocketAddress</tt> of the host to ping
      */
     public void addPassiveNode (SocketAddress hostAddress);
     
@@ -34,7 +34,7 @@ interface DHTBootstrapper {
     public void stop();
     
     /**
-     * Returns wether or not the bootstrapper is waiting for 
+     * Returns whether or not the bootstrapper is waiting for 
      * nodes to bootstrap from.
      */
     public boolean isWaitingForNodes();

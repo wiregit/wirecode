@@ -26,8 +26,8 @@ public interface MessageFactory {
     /**
      * Registers a MessageParser under the provided functionId.
      * 
-     * @param functionId The ID of the function (MessageParser)
-     * @param parser The MessageParser
+     * @param functionId the ID of the function (MessageParser)
+     * @param parser the MessageParser
      */
     public void setParser(byte functionId, MessageParser parser);
 
@@ -49,7 +49,7 @@ public interface MessageFactory {
      *          packets that are ridiculously long and half-completed messages.
      *          The client is not expected to recover from this.
      *          </ul>
-     * @param network The network the message was read from.
+     * @param network the network the message was read from.
      */
     public Message read(InputStream in, Network network, byte softMax)
             throws BadPacketException, IOException;
@@ -77,7 +77,7 @@ public interface MessageFactory {
      *          repeatedly allocating 23-byte arrays. buf may be used when this
      *          returns, but the contents are not guaranteed to contain any
      *          useful data.
-     * @param network The network the message was read from.
+     * @param network the network the message was read from.
      */
     public Message read(InputStream in, Network network, byte[] headerBuf, byte softMax)
             throws BadPacketException, IOException;

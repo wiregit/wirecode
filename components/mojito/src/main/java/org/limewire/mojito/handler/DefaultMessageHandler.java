@@ -49,10 +49,9 @@ import org.limewire.security.SecurityToken;
 
 
 /**
- * The DefaultMessageHandler performs basic Kademlia RouteTable 
- * update operations. That means adding new Nodes if RouteTable 
- * is not full, updating the last seen time stamp of Nodes and 
- * so forth.
+ * Performs basic Kademlia {@link RouteTable}
+ * update operations. That means adding new Nodes if the <code>RouteTable</code>
+ * is not full, updating the last seen time stamp of Nodes and so forth.
  */
 public class DefaultMessageHandler {
     
@@ -101,7 +100,8 @@ public class DefaultMessageHandler {
     }
     
     /**
-     * Adds the given Contact or updates it if it's already in our RouteTable
+     * Adds the given <code>Contact</code> or updates it if it's already in our 
+     * <code>RouteTable</code>
      */
     private synchronized void addLiveContactInfo(Contact node, DHTMessage message) {
         
@@ -260,7 +260,7 @@ public class DefaultMessageHandler {
     }
     
     /**
-     * Determinates whether to remove, forward or to do nothing with the
+     * Determines whether to remove, forward or to do nothing with the
      * value that is associated with the given valueId.
      */
     private Operation getOperation(Contact node, Contact existing, KUID valueId) {

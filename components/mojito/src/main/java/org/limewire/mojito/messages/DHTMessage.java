@@ -27,7 +27,7 @@ import org.limewire.mojito.routing.Version;
 
 
 /**
- * This is an abstract base class for all DHT messages.
+ * Defines the interface for all DHT messages.
  */
 public interface DHTMessage {
     
@@ -35,7 +35,7 @@ public interface DHTMessage {
     public static final int F_DHT_MESSAGE = 0x44; // 'D'
     
     /**
-     * The opcodes of our Messages
+     * The opcodes of the LimeWire DHT messages.
      */
     public static enum OpCode {
         

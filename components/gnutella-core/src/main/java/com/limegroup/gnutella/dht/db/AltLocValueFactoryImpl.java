@@ -11,7 +11,7 @@ import com.limegroup.gnutella.NetworkManager;
 
 
 /**
- * Factory to create AltLocValues
+ * Factory to create {@link AltLocValue}s.
  */
 @Singleton
 public class AltLocValueFactoryImpl implements AltLocValueFactory {
@@ -36,12 +36,6 @@ public class AltLocValueFactoryImpl implements AltLocValueFactory {
         return createFromData(version, value);
     }
 
-    /**
-     * 
-     * @param fileSize
-     * @param ttroot
-     * @return
-     */
     public AltLocValue createAltLocValueForSelf(long fileSize, byte[] ttroot) {
         return new AltLocValueForSelf(fileSize, ttroot, networkManager, applicationServices);
     }

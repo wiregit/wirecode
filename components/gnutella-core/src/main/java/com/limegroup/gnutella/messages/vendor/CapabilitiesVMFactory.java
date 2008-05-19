@@ -1,9 +1,12 @@
 package com.limegroup.gnutella.messages.vendor;
 
+/**
+ * Defines an interface to get and update vendor message capabilities.
+ */
 public interface CapabilitiesVMFactory {
 
     /**
-     * @return A CapabilitiesVM with the set of messages this client supports.
+     * @return a CapabilitiesVM with the set of messages this client supports.
      */
     public CapabilitiesVM getCapabilitiesVM();
 

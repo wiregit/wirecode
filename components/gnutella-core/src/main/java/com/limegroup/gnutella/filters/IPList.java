@@ -20,21 +20,21 @@ import org.limewire.util.ByteUtils;
  * A mutable list of IP addresses.  More specifically, a list of sets of
  * addresses, like "18.239.0.*".  Provides fast operations to find if an address
  * is in the list.  Used to implement IPFilter.  Not synchronized. 
- * 
+ * <p>
  * This class is optimized by the use of a PATRICIA Trie to store the ranges.
  * Many of the optimizations work because of two key properties that we use
  * when inserting items into the Trie.
- * 
+ * <pre>
  *   1) If the item to be inserted is within a range already in the Trie,
  *      the item is not inserted.
  *   2) If the item to be inserted contains any items that are within the
  *      Trie, those items are removed.
- *      
+ * </pre>     
  * Maintaining these properties allows certain necessary optimizations, such as
  * looking at only the closest node when performing a lookup.  If these
  * optimizations were not done, then certain items would appear closer within
  * the Trie, despite there being a range further away that encompassed a given IP.
- * 
+ * <p>
  * Using a PATRICIA allows an intelligent traversal to be done, so that at most
  * 32 comparisons (the number of bits in an address) are performed regardless 
  * of the number of items inserted into the Trie.  It also allows very efficient

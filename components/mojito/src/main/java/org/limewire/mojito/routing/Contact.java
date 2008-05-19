@@ -26,10 +26,10 @@ import org.limewire.mojito.KUID;
 
 
 /**
- * A Contact is a Node in the DHT. The Contact interface
+ * Defines the interface for a Node in the DHT. The <code>Contact</code>
  * encapsulates all required informations to contact the
  * remote Node or to keep track of its current State in
- * our RouteTable.
+ * our <code>RouteTable</code>.
  */
 public interface Contact extends Serializable {
     
@@ -118,7 +118,7 @@ public interface Contact extends Serializable {
      * Note: The source address can be null if the
      * Contact object hasn't been fully initialized
      * yet. The reason for this are different 
-     * initialization paths. To be more preceicely 
+     * initialization paths. To be more precise, 
      * the source address is in certain cases not 
      * available at construction time if the Contact
      * object is created in LimeWire space for example.
@@ -162,7 +162,7 @@ public interface Contact extends Serializable {
     public long getAdaptativeTimeout();
     
     /**
-     * Returns the time of the last successful or unseccssful contact
+     * Returns the time of the last successful or unsuccessful contact
      * attempt
      */
     public long getLastFailedTime();
@@ -194,7 +194,7 @@ public interface Contact extends Serializable {
     public boolean hasFailed();
     
     /**
-     * Returns the number of failures have occured since
+     * Returns the number of failures have occurred since
      * the last successful contact
      */
     public int getFailures();
@@ -229,12 +229,12 @@ public interface Contact extends Serializable {
      * Updates this Contact with information from an existing Contact.
      * 
      * The updated fields are:
-     * 
-     * - Round trip time
-     * - Time stamp
-     * - Last dead or alive time
-     * - Failure count
-     * 
+     * <ul>
+     * <li>Round trip time
+     * <li>Time stamp
+     * <li>Last dead or alive time
+     * <li>Failure count
+     * </ul>
      * The latter three only if this Contact is not alive.
      */
     public void updateWithExistingContact(Contact existing);

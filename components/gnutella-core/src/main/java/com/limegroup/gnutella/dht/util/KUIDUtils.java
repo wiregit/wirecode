@@ -10,7 +10,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 
 /**
- * Utilities to convert between GUID, URN and KUID
+ * Utilities to convert between {@link GUID}, {@link URN} and {@link KUID}.
  */
 public class KUIDUtils {
 

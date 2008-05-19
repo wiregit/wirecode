@@ -17,7 +17,7 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
 
 /**
- * An implementation of DHTValue for Gnutella Push Proxies
+ * An implementation of <code>DHTValue</code> for Gnutella Push Proxies.
  */
 public abstract class AbstractPushProxiesValue implements PushProxiesValue {
 

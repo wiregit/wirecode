@@ -32,7 +32,7 @@ import org.limewire.mojito.statistics.NetworkStatisticContainer;
 
 
 /**
- * The StatsRequestHandler handles incoming Stats requests.
+ * Handles incoming Stats requests.
  */
 public class StatsRequestHandler extends AbstractRequestHandler {
 

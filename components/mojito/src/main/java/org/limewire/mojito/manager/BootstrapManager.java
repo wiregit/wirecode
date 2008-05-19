@@ -30,7 +30,7 @@ import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.routing.Contact;
 
 /**
- * The BootstrapManager manages the bootstrap process and determinates
+ * Manages the bootstrap process and determines
  * whether or not the local Node is bootstrapped.
  */
 public class BootstrapManager extends AbstractManager<BootstrapResult> {

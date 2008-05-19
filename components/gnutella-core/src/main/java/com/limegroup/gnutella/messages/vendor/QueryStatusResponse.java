@@ -19,7 +19,6 @@ public final class QueryStatusResponse extends AbstractVendorMessage {
 
     /**
      * Constructs a new QueryStatusResponse with data from the network.
-     * @param network TODO
      */
     QueryStatusResponse(byte[] guid, byte ttl, byte hops, int version, 
                           byte[] payload, Network network) throws BadPacketException {
@@ -34,10 +33,10 @@ public final class QueryStatusResponse extends AbstractVendorMessage {
 
     /**
      * Constructs a new QueryStatus response to be sent out.
-     * @param numResults The number of results (1-65535) that you have
-     *  for this query.  If you have more than 65535 just send 65535.
-     *  @param replyGUID The guid of the original query/reply that you want to
+     *  @param replyGUID the guid of the original query/reply that you want to
      *  send reply info for.
+     * @param numResults the number of results (1-65535) that you have
+     *  for this query.  If you have more than 65535 just send 65535.
      */
     public QueryStatusResponse(GUID replyGUID, int numResults) {
         super(F_BEAR_VENDOR_ID, F_REPLY_NUMBER, VERSION, 

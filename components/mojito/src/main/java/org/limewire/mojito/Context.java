@@ -406,7 +406,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         if (isRunning()) {
             throw new IllegalStateException("Cannot switch RouteTable while " + getName() + " is running");
         }
-
+        
         if (this.routeTable != null && this.routeTable == routeTable) {
             if (LOG.isErrorEnabled()) {
                 LOG.error("Cannot set the same instance multiple times");
@@ -422,7 +422,7 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
         routeTable.setContactPinger(this);
         routeTable.setNotifier(getDHTExecutorService());
         routeTable.addRouteTableListener(new RoutingStatisticContainer.Listener());
-        
+
         this.routeTable = routeTable;
         
         if (database != null) {
@@ -457,8 +457,8 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /**
      * Sets the Database
      * 
-     * @param database The Database (can be null to use the default Database implemetation)
-     * @param remove Whether or not to remove non local DHTValues
+     * @param database the Database (can be null to use the default Database implementation)
+     * @param remove whether or not to remove non local DHTValues
      */
     private synchronized void setDatabase(Database database, boolean remove) {
         if (isRunning()) {
@@ -483,14 +483,11 @@ public class Context implements MojitoDHT, RouteTable.ContactPinger {
     /**
      * Purge Database makes sure the originator of all local DHTValues 
      * is the LocalContact and that all non local DHTValues get removed
-     * from the Database if they're expired or if <tt>remove</tt> is
-     * true.
-     * 
-     * @param remove Whether or not to remove non local DHTValues
+     * from the Database.
      */
     private void purgeDatabase() {
         // We're assuming the Node IDs are totally random so
-        // chances are slim to none that we're responseible 
+        // chances are slim to none that we're responsible 
         // for the values again. Even if we are there's no way
         // to test it until we've fully re-bootstrapped in
         // which case the other guys will send us the values

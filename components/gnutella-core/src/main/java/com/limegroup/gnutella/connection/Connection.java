@@ -19,7 +19,6 @@ import com.limegroup.gnutella.messages.vendor.VendorMessage;
  * {@link #getConnectionCapabilities()} or
  * {@link #getConnectionBandwidthStatistics()} methods.
  * <p>
- * 
  * <code>Connection</code> exposes no methods for reading or 'starting', as it
  * is possible for two implementations to use very different methods for
  * processing incoming connections. For example, a blocking implementation would
@@ -52,7 +51,7 @@ public interface Connection extends IpPort, Connectable {
     public void sendUpdatedCapabilities();
 
     /**
-     * Sets the port where the conected node listens at, not the one got from
+     * Sets the port where the connected node listens at, not the one got from
      * socket
      */
     void setListeningPort(int port);
@@ -105,7 +104,7 @@ public interface Connection extends IpPort, Connectable {
 
     /**
      * Gets the port that this connection is listening on. If this is an
-     * outgoing connetion, it will return the port to which the socket
+     * outgoing connection, it will return the port to which the socket
      * connected. Otherwise, if it is an incoming connection, it will return the
      * port that the remote side had in the Listen-IP header. If there was no
      * port describe, it will return -1.

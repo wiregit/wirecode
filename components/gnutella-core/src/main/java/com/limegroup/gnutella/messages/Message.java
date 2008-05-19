@@ -12,6 +12,12 @@ import org.limewire.collection.Buffer;
 import org.limewire.inspection.Inspectable;
 import org.limewire.util.ByteUtils;
 
+/** 
+ * Defines the interface for a Gnutella message (packet). See
+ * <a href="http://rfc-gnutella.sourceforge.net/developer/testing/messageArchitecture.html">
+ * Gnutella message architecture</a> for more information.
+ *
+ */
 public interface Message extends Comparable<Message> {
 
     /** The network a message came from or will travel through. */
@@ -72,9 +78,9 @@ public interface Message extends Comparable<Message> {
     public byte getTTL();
 
     /**
-     * If ttl is less than zero, throws IllegalArgumentException.  Otherwise sets
-     * this TTL to the given value.  This is useful when you want certain messages
-     * to travel less than others.
+     * If Time To Live (TTL) is less than zero, throws IllegalArgumentException.  
+     * Otherwise sets this TTL to the given value.  This is useful when you 
+     * want certain messages to travel less than others.
      *    @modifies this' TTL
      */
     public void setTTL(byte ttl) throws IllegalArgumentException;
@@ -125,8 +131,8 @@ public interface Message extends Comparable<Message> {
     //*********************************
     
     /**
-     * counts messages by type and network they came on. 
-     * also counts size in bytes, hops, ttls.
+     * Counts messages by type and network they came on. 
+     * Also counts size in bytes, hops, TTLs.
      */
     public static class MessageCounter implements Inspectable {
         

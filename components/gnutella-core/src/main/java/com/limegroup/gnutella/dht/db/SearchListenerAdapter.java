@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.dht.db;
 
 /**
- * Adapter implmentation of {@link SearchListener} with no-ops. 
+ * Adapter implementation of {@link SearchListener} with no-ops. 
  */
 public class SearchListenerAdapter<Result> implements SearchListener<Result> {
 

@@ -25,14 +25,14 @@ import org.limewire.mojito.messages.RequestMessage;
 
 
 /**
- * Interface to handle incoming requests
+ * Interface to handle incoming requests.
  */
 public interface RequestHandler {
     
     /**
      * Called to handle a request
      * 
-     * @param message The Message to handle
+     * @param message the message to handle
      * @throws IOException
      */
     public void handleRequest(RequestMessage message) throws IOException;

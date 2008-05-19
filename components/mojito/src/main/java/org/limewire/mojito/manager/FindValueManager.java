@@ -33,7 +33,7 @@ import org.limewire.mojito.result.FindValueResult;
 
 
 /**
- * FindValueManager manages lookups for values
+ * Manages lookups for values.
  */
 public class FindValueManager extends AbstractManager<FindValueResult> {
     

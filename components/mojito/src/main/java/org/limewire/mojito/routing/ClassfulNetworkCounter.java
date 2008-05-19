@@ -29,8 +29,8 @@ import org.limewire.mojito.settings.RouteTableSettings;
 import org.limewire.mojito.util.ContactUtils;
 
 /**
- * The ClassfulNetworkCounter keeps track of the number of Contacts
- * that have the same Class C Network address in a Bucket
+ * Keeps track of the number of Contacts
+ * that have the same Class C Network address in a Bucket.
  */
 public class ClassfulNetworkCounter implements Serializable {
     

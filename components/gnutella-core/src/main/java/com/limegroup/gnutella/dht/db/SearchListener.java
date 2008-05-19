@@ -4,7 +4,7 @@ public interface SearchListener<Result> {
     
     /**
      * Called when a result has been found, can be called several times,
-     * depnding on the kind of search.
+     * depending on the kind of search.
      */
     void handleResult(Result result);
 

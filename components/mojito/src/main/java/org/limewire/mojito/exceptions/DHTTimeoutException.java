@@ -27,7 +27,7 @@ import org.limewire.mojito.util.ContactUtils;
 
 
 /**
- * The DHTTimeoutException is thrown if an operation times out,
+ * Thrown if an operation times out,
  * for example if a remote Node does not respond to a ping.
  */
 public class DHTTimeoutException extends DHTRequestException {

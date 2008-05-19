@@ -23,14 +23,14 @@ import java.util.concurrent.Future;
 
 
 /**
- * The DHTFuture extends Futures by Listeners.
+ * Defines an interface to extend <code>Future</code>s with listeners.
  */
 public interface DHTFuture<T> extends Future<T> {
     
     /**
      * Adds a DHTFutureListener to the DHTFuture. The listener
      * is called when the DHTFuture finishes or if it has
-     * alredy finished it will call the listener immediately.
+     * already finished it will call the listener immediately.
      */
     public void addDHTFutureListener(DHTFutureListener<T> listener);
 }

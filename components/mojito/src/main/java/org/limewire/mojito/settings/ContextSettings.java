@@ -28,7 +28,7 @@ import org.limewire.setting.LongSetting;
 import org.limewire.setting.StringSetting;
 
 /**
- * Misc Context Settings
+ * Miscellaneous context settings.
  */
 public class ContextSettings extends MojitoProps {
     
@@ -65,8 +65,8 @@ public class ContextSettings extends MojitoProps {
                 "Mojito.MaxLocalHistorySize", 1, 100);
     
     /**
-     * Wether or not only live Nodes should be used to estimate the
-     * DHT size
+     * Whether or not only live Nodes should be used to estimate the
+     * DHT size.
      */
     public static final BooleanSetting ESTIMATE_WITH_LIVE_NODES_ONLY
         = FACTORY.createRemoteBooleanSetting("ESTIMATE_WITH_LIVE_NODES_ONLY", true, 

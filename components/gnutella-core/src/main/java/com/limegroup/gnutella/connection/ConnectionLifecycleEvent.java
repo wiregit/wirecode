@@ -4,6 +4,7 @@ import java.util.EventObject;
 
 public class ConnectionLifecycleEvent extends EventObject {
     
+    /** Defines the various events during connection. */
     public static enum EventType {
         CONNECTING, 
         CONNECTED, 
@@ -26,10 +27,9 @@ public class ConnectionLifecycleEvent extends EventObject {
 
     /**
      * Constructs a ConnectionLifecycleEvent with no connection associated.
-     * This is usefull for CONNECTED, DISCONNECTED, NO_INTERNET and
-     * ADDRESS_CHANGED events
+     * This is useful for CONNECTED, DISCONNECTED, NO_INTERNET and
+     * ADDRESS_CHANGED events.
      * 
-     * @param manager
      */
     public ConnectionLifecycleEvent(Object source, EventType type) {
         this(source, type, null);

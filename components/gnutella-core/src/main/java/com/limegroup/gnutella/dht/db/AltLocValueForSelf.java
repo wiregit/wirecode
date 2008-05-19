@@ -9,7 +9,7 @@ import com.limegroup.gnutella.security.MerkleTree;
 import com.limegroup.gnutella.settings.SSLSettings;
 
 /**
- * An AltLocValue for the localhost
+ * An {@LINK AltLocValue} for the localhost.
  */
 class AltLocValueForSelf extends AbstractAltLocValue {
     

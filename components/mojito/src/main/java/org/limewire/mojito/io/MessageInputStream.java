@@ -54,10 +54,10 @@ import org.limewire.security.SecurityToken;
 
 
 /**
- * The MessageInputStream reads (parses) a DHTMessage
+ * The MessageInputStream reads (parses) a <code>DHTMessage</code>
  * from a given InputStream.
  * 
- * <b>NOTE</b>: This class is specific to Mojito's Gnutella backed
+ * <strong>NOTE</strong>: This class is specific to Mojito's Gnutella backed
  * Message format. You may or may not be able to use parts of this
  * class for alternative message formats!
  */
@@ -108,7 +108,7 @@ public class MessageInputStream extends DataInputStream {
     /**
      * Reads a DHTValueEntity from the InputStream 
      * 
-     * @param sender The Contact that send us the DHTValue
+     * @param sender the Contact that send us the DHTValue
      */
     public DHTValueEntity readDHTValueEntity(Contact sender, DHTValueFactoryManager factoryManager) throws IOException {
         Contact creator = readContact();
@@ -317,7 +317,7 @@ public class MessageInputStream extends DataInputStream {
     }
     
     /**
-     * Reats and returns a Collection of StoreStatusCode(s)
+     * Reads and returns a Collection of StoreStatusCode(s)
      */
     public Collection<StoreStatusCode> readStoreStatusCodes() throws IOException {
         int size = readUnsignedByte();

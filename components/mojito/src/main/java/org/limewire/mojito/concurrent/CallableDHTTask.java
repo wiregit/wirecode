@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 import org.limewire.concurrent.OnewayExchanger;
 
 /**
- * A CallableDHTTask taks a DHTTask, starts it and waits for
+ * A CallableDHTTask takes a DHTTask, starts it and waits for
  * the result.
  */
 public class CallableDHTTask<T> implements Callable<T> {

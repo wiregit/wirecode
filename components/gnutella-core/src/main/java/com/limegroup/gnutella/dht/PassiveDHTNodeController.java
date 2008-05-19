@@ -34,19 +34,19 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 /**
- * Controlls a passive DHT node. 
- * 
- * As passive nodes are Gnutella ultrapeers, the passive node controller also
- * maintains the list of this ultrapeer's leafs in a separate list. 
- * These leaves are this node's most accurate knowledge of the DHT, as leaf 
- * connections are statefull TCP, and they are therefore propagated in priority
- * in the Gnutella network.
- * 
- * Persistence is implemented in order to be able to bootstrap next session 
- * by saving a few (DHTSettings.NUM_PERSISTED_NODES) MRS nodes. It is not necessary
- * to persist the entire DHT, because we don't want to keep the same nodeID at the next 
- * session, and accuracy of the contacts in the RT is not guaranteed when a node 
- * is passive (as it does not get contacted by the DHT).   
+ * Controls a passive DHT node (an {@link ActiveDHTNodeController} but is a 
+ * Gnutella Ultrapeer). 
+ * <p>
+ * The passive node controller also maintains the list of this ultrapeer's 
+ * leafs in a separate list. These leaves are this node's most accurate knowledge 
+ * of the DHT, as leaf connections are state-full TCP, and they are therefore 
+ * propagated in priority in the Gnutella network.
+ * <p>
+ * Persistence is implemented in order to be able to bootstrap the next session 
+ * by saving a few Most Recently Seen (MRS) nodes. It is not necessary
+ * to persist the entire DHT, because we don't want to keep the same node ID at 
+ * the next session, and accuracy of the contacts in the route table is not guaranteed 
+ * when a node is passive (as it does not get contacted by the DHT).   
  */
 public class PassiveDHTNodeController extends AbstractDHTController {
     
@@ -103,10 +103,9 @@ public class PassiveDHTNodeController extends AbstractDHTController {
     /**
      * This method first adds the given host to the list of bootstrap nodes and 
      * then adds it to this passive node's routing table.
-     * 
+     * <p>
      * Note: This method makes sure the DHT is running already, as adding a node
      * as a leaf involves sending it a DHT ping (in order to get its KUID).
-     * 
      */
     protected void addLeafDHTNode(String host, int port) {
         if(!isRunning()) {
@@ -181,8 +180,8 @@ public class PassiveDHTNodeController extends AbstractDHTController {
 
     /**
      * This method return this passive node's leafs first (they have the highest timestamp)
-     * 
-     * Note: Although a passive node does not have accurate info in its RT 
+     * <p>
+     * Note: Although a passive node does not have accurate info in its route table 
      * (except for direct leafs), we still return nodes. 
      */
     @Override
@@ -195,7 +194,7 @@ public class PassiveDHTNodeController extends AbstractDHTController {
     }
     
     /**
-     * Handle connection-specific lifecycle events only. 
+     * Handle connection-specific life cycle events only. 
      */
     @Override
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {

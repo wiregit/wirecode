@@ -23,8 +23,8 @@ import com.limegroup.gnutella.settings.UploadSettings;
 
 /**
  * This class implements the logic of managing BT uploads and HTTP Uploads.
- * More information available here:  
- * http://limewire.org/wiki/index.php?title=UploadSlotsAndBT
+ * More information available see  
+ * http://wiki.limewire.org/index.php?title=UploadSlotsAndBT
  */
 @Singleton
 public class UploadSlotManagerImpl implements UploadSlotManager {
@@ -35,7 +35,7 @@ public class UploadSlotManagerImpl implements UploadSlotManager {
      * The three priority levels
      */
     private static final int BT_SEED = 0; // low priority
-    private static final int HTTP = 1; // medium periority
+    private static final int HTTP = 1; // medium priority
     private static final int HIGH = 2; // torrent downloads and metafiles.
     
     /** 
@@ -84,7 +84,8 @@ public class UploadSlotManagerImpl implements UploadSlotManager {
      * Polls for an available upload slot. (HTTP-style)
      * 
      * @param user the user that will use the upload slot
-     * @queue if the user can enter the queue 
+     * @parm queue if the user can enter the queue 
+     * @param highPriority if the user needs an upload slot now or never 
      * @return the position in the queue if queued, -1 if rejected,
      * 0 if it can proceed immediately
      */

@@ -31,8 +31,8 @@ import org.limewire.mojito.result.PingResult;
 
 
 /**
- * RouteTable interface that all RouteTable implementations
- * must implement.
+ * Defines the interface for a <a href="http://en.wikipedia.org/wiki/Routing_table">
+ * RouteTable</a>.
  */
 public interface RouteTable extends Serializable {
     
@@ -140,7 +140,7 @@ public interface RouteTable extends Serializable {
     public Collection<Contact> getCachedContacts();
     
     /**
-     * Returns a Bucket that is nearest (xor distance) 
+     * Returns a Bucket that is nearest (XOR distance) 
      * to the given KUID
      */
     public Bucket getBucket(KUID nodeId);
@@ -154,7 +154,7 @@ public interface RouteTable extends Serializable {
      * Returns a List of KUIDs that need to be looked up in order
      * to refresh (or bootstrap) the RouteTable.
      * 
-     * @param bootstrapping Whether or not this refresh is done during bootstrap
+     * @param bootstrapping whether or not this refresh is done during bootstrap
      */
     public Collection<KUID> getRefreshIDs(boolean bootstrapping);
     
@@ -203,20 +203,20 @@ public interface RouteTable extends Serializable {
     /**
      * Adds a RouteTableListener
      * 
-     * @param l The RouteTableListener to add
+     * @param l the RouteTableListener to add
      */
     public void addRouteTableListener(RouteTableListener l);
     
     /**
      * Removes a RouteTableListener
      * 
-     * @param l The RouteTableListener to remove
+     * @param l the RouteTableListener to remove
      */
     public void removeRouteTableListener(RouteTableListener l);
     
     /**
-     * An interface utilized by the RouteTable to access 
-     * external resources
+     * An interface used by the RouteTable to access 
+     * external resources.
      */
     public static interface ContactPinger {
         
@@ -232,13 +232,13 @@ public interface RouteTable extends Serializable {
         /**
          * Invoked when an event occurs
          * 
-         * @param event The event that occurred
+         * @param event the event that occurred
          */
         public void handleRouteTableEvent(RouteTableEvent event);
     }
     
     /**
-     * RouteTableEvents are created and fired for various RouteTable events.
+     * Created and fired for various RouteTable events.
      */
     public static class RouteTableEvent {
         
@@ -308,7 +308,7 @@ public interface RouteTable extends Serializable {
         }
         
         /**
-         * The Bucket where an Event occured
+         * The Bucket where an Event occurred
          */
         public Bucket getBucket() {
             return bucket;
@@ -353,7 +353,7 @@ public interface RouteTable extends Serializable {
         }
         
         /**
-         * Returns the time when this Event occured
+         * Returns the time when this Event occurred
          */
         public long getTimeStamp() {
             return timeStamp;

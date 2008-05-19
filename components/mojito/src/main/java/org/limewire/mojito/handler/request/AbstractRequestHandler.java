@@ -29,7 +29,7 @@ import org.limewire.mojito.messages.RequestMessage;
 
 
 /**
- * An abstract base class for RequestHandlers
+ * An abstract base class for <code>RequestHandler</code>s.
  */
 abstract class AbstractRequestHandler implements RequestHandler {
     

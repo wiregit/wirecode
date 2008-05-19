@@ -30,7 +30,7 @@ import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
 
 /**
- * The AltLocPublisher publishes the localhost as an alternate 
+ * Publishes the localhost as an alternate 
  * locations for rare files. Rare files are files that haven't 
  * been uploaded for a certain amount of time. There are various
  * other ways to determinate the rareness of a file like using

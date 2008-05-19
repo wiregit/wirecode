@@ -31,8 +31,8 @@ import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 /**
- * Controlls an active DHT node.
- * 
+ * Controls an active DHT node.
+ * <p>
  * Active nodes load and persist DHT data, as they keep the same node ID 
  * over multiple sessions and can therefore re-use their local routing table
  * and local database. 
@@ -71,11 +71,11 @@ public class ActiveDHTNodeController extends AbstractDHTController {
                 int routeTableVersion = in.readInt();
                 if (routeTableVersion >= getRouteTableVersion()) {
                     RouteTable routeTable = (RouteTable)in.readObject();
-                    
+
                     Database database = null;
                     try {
                         if (DHTSettings.PERSIST_DHT_DATABASE.getValue()) {
-                            database = (Database)in.readObject();
+                            database = (Database)in.readObject();                                                        
                         }
                     } catch (Throwable ignored) {
                         LOG.error("Throwable", ignored);
@@ -129,7 +129,7 @@ public class ActiveDHTNodeController extends AbstractDHTController {
                     Database database = null;
                     if (DHTSettings.PERSIST_DHT_DATABASE.getValue()) {
                         database = dht.getDatabase();
-                    }
+                    }                    
                     out.writeObject(database);
                 }
                 out.flush();

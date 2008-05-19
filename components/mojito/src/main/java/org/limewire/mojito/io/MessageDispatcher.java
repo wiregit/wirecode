@@ -72,8 +72,7 @@ import org.limewire.security.SecureMessageCallback;
 
 
 /**
- * MessageDispatcher is an abstract class that takes care of
- * all Mojito's communication needs.
+ * An abstract class that takes care of all Mojito's communication needs.
  */
 public abstract class MessageDispatcher {
     
@@ -120,14 +119,14 @@ public abstract class MessageDispatcher {
     
     /**
      * Adds a MessageDispatcherListener.
-     * 
+     * <p>
      * Implementation Note: The listener(s) is not called from a 
-     * seperate event Thread! That means processor intensive tasks
+     * separate event Thread! That means processor intensive tasks
      * that are performed straight in the listener(s) can slowdown 
      * the processing throughput significantly. Offload intensive
-     * tasks to seperate Threads in necessary!
+     * tasks to separate Threads in necessary!
      * 
-     * @param l The MessageDispatcherListener instance to add
+     * @param l the MessageDispatcherListener instance to add
      */
     public void addMessageDispatcherListener(MessageDispatcherListener l) {
         if (l == null) {
@@ -138,9 +137,9 @@ public abstract class MessageDispatcher {
     }
     
     /**
-     * Removes a MessageDispatcherListener
+     * Removes a <code>MessageDispatcherListener</code>.
      * 
-     * @param l The MessageDispatcherListener instance to remove
+     * @param l the MessageDispatcherListener instance to remove
      */
     public void removeMessageDispatcherListener(MessageDispatcherListener l) {
         if (l == null) {
@@ -151,12 +150,12 @@ public abstract class MessageDispatcher {
     }
     
     /**
-     * Binds the DatagramSocket to the given SocketAddress
+     * Binds the DatagramSocket to the given SocketAddress.
      */
     public abstract void bind(SocketAddress address) throws IOException;
     
     /**
-     * Starts the MessageDispatcher
+     * Starts the MessageDispatcher.
      */
     public void start() {
         // Start the CleanupTask
@@ -177,7 +176,7 @@ public abstract class MessageDispatcher {
     }
     
     /**
-     * Stops the MessageDispatcher
+     * Stops the MessageDispatcher.
      */
     public void stop() {
         // Stop the CleanupTask
@@ -198,7 +197,7 @@ public abstract class MessageDispatcher {
     }
     
     /**
-     * Returns whether or not incoming Requests or Respones
+     * Returns whether or not incoming Requests or Responses
      * are accepted. The default implementation returns true.
      */
     public boolean isAccepting() {
@@ -206,17 +205,17 @@ public abstract class MessageDispatcher {
     }
     
     /**
-     * Returns whether or not the MessageDispatcher is bound to a Socket
+     * Returns whether or not the MessageDispatcher is bound to a Socket.
      */
     public abstract boolean isBound();
     
     /**
-     * Returns whether or not the MessageDispatcher is running
+     * Returns whether or not the MessageDispatcher is running.
      */
     public abstract boolean isRunning();
     
     /**
-     * Sends a ResponseMessage to the given Contact
+     * Sends a ResponseMessage to the given Contact.
      */
     public boolean send(Contact contact, ResponseMessage response) 
             throws IOException {
@@ -225,7 +224,7 @@ public abstract class MessageDispatcher {
     
     /**
      * Sends a RequestMessage to the given SocketAddress and registers
-     * a ResponseHandler
+     * a ResponseHandler.
      */
     public boolean send(SocketAddress dst, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
@@ -234,7 +233,7 @@ public abstract class MessageDispatcher {
     
     /**
      * Sends a RequestMessage to the given SocketAddress and registers
-     * a ResponseHandler
+     * a ResponseHandler.
      */
     public boolean send(KUID nodeId, SocketAddress dst, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
@@ -243,7 +242,7 @@ public abstract class MessageDispatcher {
     
     /**
      * Sends a RequestMessage to the given Contact and registers
-     * a ResponseHandler
+     * a ResponseHandler.
      */
     public boolean send(Contact contact, RequestMessage request, 
             ResponseHandler responseHandler) throws IOException {
@@ -964,7 +963,7 @@ public abstract class MessageDispatcher {
         /**
          * Invoked when an event occurs
          * 
-         * @param evt The event that occured
+         * @param evt The event that occurred
          */
         public void handleMessageDispatcherEvent(MessageDispatcherEvent evt);
     }

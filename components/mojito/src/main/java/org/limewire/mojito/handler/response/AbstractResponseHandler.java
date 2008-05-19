@@ -47,7 +47,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
     
     private static final Log LOG = LogFactory.getLog(AbstractResponseHandler.class);
     
-    /** The number of errors that have occured */
+    /** The number of errors that have occurred */
     private int errors = 0;
     
     /** The total time that has elapsed since the request was sent */
@@ -182,7 +182,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
     }
     
     /**
-     * Returns the number of errors that have occured
+     * Returns the number of errors that have occurred
      */
     protected int getErrors() {
         return errors;
@@ -347,7 +347,7 @@ public abstract class AbstractResponseHandler<V extends Result> implements Respo
     
     /**
      * Returns whether or not this handler is done which
-     * means if it has returnded a result or threw an
+     * means if it has returned a result or threw an
      * Exception
      */
     public boolean isDone() {

@@ -18,17 +18,17 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
 
 /**
- * This class contains the necessary information to form a response to a 
+ * Contains the necessary information to form a response to a 
  * connection handshake.  It contains a status code, a status message, and
  * the headers to use in the response.
- *
+ * <p>
  * There are only two ways to create a HandshakeResponse.
- *
- * 1) Create an instance which defaults the status code and status message to
+ * <ol>
+ * <li>Create an instance which defaults the status code and status message to
  *    be "200 OK".  Only the headers used in the response need to be passed in.
- * 
- * 2) Create an instance with a custom status code, status message, and the
+ * <li>Create an instance with a custom status code, status message, and the
  *    headers used in the response.
+ * </ol>
  */
 public class HandshakeResponse {
 
@@ -85,8 +85,8 @@ public class HandshakeResponse {
     public static final String DEFAULT_BAD_STATUS_MESSAGE 
         = "Service Not Available";
     
-    /**
-     * ??? TODO: check about this error code...
+    /*
+     * TODO: check about this error code...
      */
     public static final int LOCALE_NO_MATCH = 577;
     public static final String LOCALE_NO_MATCH_MESSAGE 
@@ -499,7 +499,7 @@ public class HandshakeResponse {
      * the default value of 10.  This is particularly used for the 
      * X-Try-Ultrapeers header.
      * 
-     * @param iter a <tt>Collection</tt> of <tt>IpPort</tt> instances
+     * @param hosts a <tt>Collection</tt> of <tt>IpPort</tt> instances
      * @return a string of the form IP:port,IP:port,... from the given list of 
      *  hosts
      *  
@@ -515,7 +515,7 @@ public class HandshakeResponse {
 	 *
 	 * IP:port,IP:port,IP:port
 	 *
-     * @param iter a <tt>Collection</tt> of <tt>IpPort</tt> instances
+     * @param hosts a <tt>Collection</tt> of <tt>IpPort</tt> instances
 	 * @return a string of the form IP:port,IP:port,... from the given list of 
      *  hosts
      *  Default access for testing.
@@ -758,7 +758,7 @@ public class HandshakeResponse {
     }
 
     /**
-     * Returns whether or not this connnection is encoded in deflate.
+     * Returns whether or not this connection is encoded in deflate.
      */
     public boolean isDeflateEnabled() {
         //this does NOT check the setting because we have already told the
@@ -993,7 +993,7 @@ public class HandshakeResponse {
     }
     
     /**
-     * Utility method for determing whether or not a given header
+     * Utility method for determining whether or not a given header
      * is a given string value.  Case-insensitive.
      *
      * @param headers the headers to check
@@ -1008,7 +1008,7 @@ public class HandshakeResponse {
     }
     
     /**
-     * Utility method for determing whether or not a given header
+     * Utility method for determining whether or not a given header
      * contains a given string value within a comma-delimited list.
      * Case-insensitive.
      *

@@ -11,8 +11,8 @@ import org.limewire.mojito.routing.Version;
 import com.limegroup.gnutella.messages.AbstractMessage;
 
 /**
- * An abstract class that extends from Message and takes a 
- * DHTMessage as a delegate argument
+ * An abstract class that extends from <code>AbstractMessage</code> and takes a 
+ * <code>DHTMessage</code> as a delegate argument.
  */
 abstract class AbstractMessageWire<T extends DHTMessage> 
         extends AbstractMessage implements DHTMessage {

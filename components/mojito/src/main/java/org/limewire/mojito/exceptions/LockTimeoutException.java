@@ -20,7 +20,7 @@
 package org.limewire.mojito.exceptions;
 
 /**
- * The LockTimeoutException is thrown whenever an operation takes too long
+ * Thrown whenever an operation takes too long
  * (too long in sense of that we're giving up to wait for the operation to
  * finish in order to prevent the system from getting locked up which could
  * be a bug). 

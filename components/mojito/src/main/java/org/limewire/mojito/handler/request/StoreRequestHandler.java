@@ -40,7 +40,7 @@ import org.limewire.security.SecurityToken.TokenData;
 
 
 /**
- * The StoreRequestHandler handles incoming store requests as
+ * Handles incoming store requests as 
  * sent by other Nodes. It performs some probability tests to
  * make sure the request makes sense (i.e. if the Key is close
  * to us and so on).

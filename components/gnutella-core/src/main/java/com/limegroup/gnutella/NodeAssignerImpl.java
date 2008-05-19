@@ -94,7 +94,7 @@ class NodeAssignerImpl implements NodeAssigner {
     private int _ultrapeerTries = 0;
     
     /**
-     * Wether or not this node is "Hardcore" capable
+     * Whether or not this node is "Hardcore" capable
      */
     private boolean _isHardcoreCapable;
     
@@ -124,7 +124,7 @@ class NodeAssignerImpl implements NodeAssigner {
      *                      tracking bandwidth used for uploads
      * @param downloadTracker the <tt>BandwidthTracker</tt> instance for
      *                        tracking bandwidth used for downloads
-     * @param connectionManager Reference to the ConnectionManager for this node
+     * @param connectionManager reference to the ConnectionManager for this node
      */
     @Inject
     public NodeAssignerImpl(@Named("uploadTracker") Provider<BandwidthTracker>uploadTracker, 
@@ -164,6 +164,7 @@ class NodeAssignerImpl implements NodeAssigner {
                 assignUltrapeerNode();
                 //check if became DHT capable
                 assignDHTMode();
+                
             }
         };            
         timer = backgroundExecutor.scheduleWithFixedDelay(task, 0, TIMER_DELAY, TimeUnit.MILLISECONDS);
@@ -216,8 +217,8 @@ class NodeAssignerImpl implements NodeAssigner {
     }
     
     /**
-     * Determinates whether or not a node is capable of handling a special
-     * function such as beeing an ultrapeer or connecting to the dht
+     * Determines whether or not a node is capable of handling a special
+     * function such as being an ultrapeer or connecting to the DHT.
      */
     private void setHardcoreCapable() {
         _isHardcoreCapable = 
@@ -247,8 +248,6 @@ class NodeAssignerImpl implements NodeAssigner {
      * uptime, etc.  Does not modify the property if the capabilities
      * are not met.  If the user has disabled ultrapeer support, 
      * sets EVER_ULTRAPEER_CAPABLE to false.
-     * 
-     * @return true if we are or will try to become an ultrapeer, false otherwise
      */
     private void assignUltrapeerNode() {
         if (UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue()) {
@@ -336,7 +335,7 @@ class NodeAssignerImpl implements NodeAssigner {
     }
     
     /**
-     * If we are allready actively part of the DHT, switch to ultrapeer with a given 
+     * If we are already actively part of the DHT, switch to ultrapeer with a given 
      * (possibly biased) probability.
      * 
      * @return true if we switched, false otherwise
@@ -457,10 +456,10 @@ class NodeAssignerImpl implements NodeAssigner {
         
         // We switch the mode if:
         // The current mode is different from the new mode AND we're either
-        //   an Ultrapeer or get selected with a certain likehood.
+        //   an Ultrapeer or get selected with a certain likelihood.
         // OR the current mode is _not_ INACTIVE and the new mode is INACTIVE
         //   as we always want to allow to shut down the DHT! This can happen
-        //   if an Ultrapeer is demoted to a Leaf and does not fulfil the
+        //   if an Ultrapeer is demoted to a Leaf and does not fulfill the
         //   requirements to be an ACTIVE or PASSIVE_LEAF node or if certain
         //   modes are forcibly disabled.
         if (((mode != current) && (isUltrapeer || acceptDHTNode()))
@@ -503,7 +502,7 @@ class NodeAssignerImpl implements NodeAssigner {
     }
     
     /**
-     * Returns whether ot not a Node is PASSIVE_LEAF capable
+     * Returns whether or not a Node is PASSIVE_LEAF capable
      */
     private boolean isPassiveLeafDHTCapable() {
         long averageTime = getAverageTime();
@@ -515,7 +514,7 @@ class NodeAssignerImpl implements NodeAssigner {
     }
     
     /**
-     * Returns whether ot not a Node is ACTIVE capable
+     * Returns whether or not a Node is ACTIVE capable
      */
     private boolean isActiveDHTCapable() {
         long averageTime = getAverageTime();

@@ -25,8 +25,8 @@ import org.limewire.mojito.routing.RouteTable;
 
 /**
  * Passive Nodes (Ultrapeers) use this slightly extended version 
- * of the RouteTable. It maintains an internal mapping of DHT enabled 
- * leaves that are currently connected to the Ultrapeer (Gnutella 
+ * of the <code>RouteTable</code>. It maintains an internal mapping of DHT 
+ * enabled leaves that are currently connected to the Ultrapeer (Gnutella 
  * connections). 
  */
 @SuppressWarnings("serial")
@@ -58,11 +58,13 @@ class PassiveDHTNodeRouteTable implements RouteTable {
     }
 
     /**
-     * Adds a DHT leaf node to the dht routing table, setting a very high timestamp
+     * Adds a DHT leaf node to the DHT routing table, setting a very high timestamp
      * to make sure it always gets contacted first for the first hop of lookups, and 
-     * make sure it always gets returned first when selecting the MRS nodes from the RT.
+     * make sure it always gets returned first when selecting the Most Recently Seen
+     * (MRS) nodes from the RT.
      * 
-     * @param node The DHT leaf node to be added
+     * @param host the IP address of the remote host as a string
+     * @param port the listening port for the remote host
      */
     public void addLeafDHTNode(String host, int port) {
         if(LOG.isDebugEnabled()) {
@@ -123,9 +125,9 @@ class PassiveDHTNodeRouteTable implements RouteTable {
     
     /**
      * Removes the given node from the routing table and tries to replace
-     * it with the Most Recently Seen cached contact.
+     * it with the Most Recently Seen (MRS) cached contact.
      * 
-     * @param nodeId The nodeId of the node to remove
+     * @param nodeId the KUID of the node to remove
      */
     private synchronized void removeAndReplaceWithMRSCachedContact(KUID nodeId) {
         Bucket bucket = getBucket(nodeId);

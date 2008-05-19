@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.messages.vendor;
 
 /** 
- * The message that lets other know what capabilities you support.  Everytime 
+ * The message that lets other know what capabilities you support. Every time 
  * you add a capability you should modify this class.
  *
  */
@@ -18,7 +18,7 @@ public interface CapabilitiesVM extends VendorMessage.ControlMessage {
     /** The new SIMPP capability bytes. */
     static final byte[] SIMPP_BYTES = {'S', 'I', 'P', 'M' };
     
-    /** The new lime update capaibility bytes. */
+    /** The new lime update capability bytes. */
     static final byte[] UPDATE_BYTES = { 'U', 'P', 'L', 'M' };
     
     

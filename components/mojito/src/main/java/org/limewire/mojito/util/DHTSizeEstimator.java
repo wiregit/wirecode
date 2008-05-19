@@ -66,7 +66,7 @@ public class DHTSizeEstimator {
     private long updateEstimatedSizeTime = 0L;
 
     /**
-     * Clears the history and sets everyting to
+     * Clears the history and sets everything to
      * its initial state
      */
     public synchronized void clear() {

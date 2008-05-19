@@ -40,7 +40,7 @@ import org.limewire.mojito.util.DatabaseUtils;
 
 
 /**
- * The FindValueRequestHandler handles incoming FIND_VALUE requests
+ * Handles incoming FIND_VALUE requests.
  */
 public class FindValueRequestHandler extends AbstractRequestHandler {
     

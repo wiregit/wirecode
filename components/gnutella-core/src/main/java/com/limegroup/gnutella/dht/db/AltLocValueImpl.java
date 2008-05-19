@@ -13,9 +13,6 @@ import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.security.MerkleTree;
 
-/**
- * 
- */
 class AltLocValueImpl extends AbstractAltLocValue {
     
     private static final long serialVersionUID = -6975718782217170657L;

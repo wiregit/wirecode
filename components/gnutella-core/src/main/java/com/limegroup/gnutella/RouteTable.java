@@ -28,7 +28,7 @@ import com.limegroup.gnutella.util.ClassCNetworks;
  * ReplyHandler).<p>
  *
  * This class can also optionally keep track of the number of reply bytes 
- * routed per guid.  This can be useful for implementing fair flow-control
+ * routed per GUID.  This can be useful for implementing fair flow-control
  * strategies.
  */
 public final class RouteTable implements Inspectable {
@@ -69,7 +69,7 @@ public final class RouteTable implements Inspectable {
      * TODO3: if IDs were stored in each ReplyHandler, we would not need
      *  _replyMap.  Better yet, if the values of _map were indices (with tags)
      *  into ConnectionManager._initialized[Client]Connections, we would not
-     *  need _idMap either.  However, this increases dependenceies.  
+     *  need _idMap either.  However, this increases dependencies.  
      */
     private Map<byte[], RouteTableEntry> _newMap = new ExperimentalGUIDMap();
     private Map<byte[], RouteTableEntry> _oldMap= new ExperimentalGUIDMap();

@@ -35,7 +35,7 @@ import org.limewire.mojito.settings.KademliaSettings;
 
 
 /**
- * Miscellaneous untilities for the Database
+ * Miscellaneous utilities for the Database.
  */
 public class DatabaseUtils {
     
@@ -58,7 +58,7 @@ public class DatabaseUtils {
         if (nodes.size() < k || nodes.contains(routeTable.getLocalNode())) {
             return creationTime + expirationTime;
             
-        // The value expires inversly proportional otherwise by using
+        // The value expires inversely proportional otherwise by using
         // the xor distance
         } else {
             KUID valueBucketId = routeTable.getBucket(primaryKey).getBucketID();

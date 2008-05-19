@@ -24,7 +24,7 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
 
 /**
- * A Factory class to create or load MojitoDHTs
+ * Creates or loads <code>MojitoDHT</code>s.
  */
 public class MojitoFactory {
     
@@ -33,49 +33,50 @@ public class MojitoFactory {
     private MojitoFactory() {}
     
     /**
-     * Creates a MojitoDHT with default settings
+     * Creates a <code>MojitoDHT</code> with default settings.
      */
     public static MojitoDHT createDHT() {
         return createDHT(DEFAULT_NAME);
     }
     
     /**
-     * Creates a MojitoDHT with the given name
+     * Creates a <code>MojitoDHT</code> with the given name.
      */
     public static MojitoDHT createDHT(String name) {
         return create(name, false);
     }
     
     /**
-     * Creates a MojitoDHT with the given name, vendor code and version
+     * Creates a <code>MojitoDHT</code> with the given name, vendor code and version.
      */
     public static MojitoDHT createDHT(String name, Vendor vendor, Version version) {
         return create(name, vendor, version, false);
     }
     
     /**
-     * Creates a firewalled MojitoDHT
+     * Creates a firewalled <code>MojitoDHT</code>.
      */
     public static MojitoDHT createFirewalledDHT() {
         return createFirewalledDHT(DEFAULT_NAME);
     }
     
     /**
-     * Creates a firewalled MojitoDHT with the given name
+     * Creates a firewalled <code>MojitoDHT</code> with the given name.
      */
     public static MojitoDHT createFirewalledDHT(String name) {
         return create(name, true);
     }
     
     /**
-     * Creates a firewalled MojitoDHT with the given name, vendor code and version
+     * Creates a firewalled <code>MojitoDHT</code> with the given name, 
+     * vendor code and version.
      */
     public static MojitoDHT createFirewalledDHT(String name, Vendor vendor, Version version) {
         return create(name, vendor, version, true);
     }
     
     /**
-     * Creates a MojitoDHT with the given arguments
+     * Creates a <code>MojitoDHT</code> with the given arguments.
      */
     private static Context create(String name, boolean firewalled) {
         return create(name, 
@@ -85,7 +86,7 @@ public class MojitoFactory {
     }
     
     /**
-     * Creates a MojitoDHT with the given arguments
+     * Creates a <code>MojitoDHT</code> with the given arguments.
      */
     private static Context create(String name, Vendor vendor, Version version, boolean firewalled) {
         

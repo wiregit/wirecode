@@ -48,8 +48,8 @@ import org.limewire.mojito.util.ContactUtils;
 
 
 /**
- * The Tag class is a wrapper for outgoing DHTMessages. For 
- * sent Requests you may obtain a Receipt.
+ * A wrapper for outgoing DHTMessages.  
+ * You may obtain a <code>Receipt</code> for sent Requests.
  */
 public class Tag {
     
@@ -105,7 +105,7 @@ public class Tag {
     }
     
     /**
-     * Retruns true if this is a request
+     * Returns true if this is a request
      */
     public boolean isRequest() {
         return responseHandler != null 
@@ -170,7 +170,7 @@ public class Tag {
     }
     
     /**
-     * Marks this Message as sent and returns a Receipt
+     * Marks this Message as sent and returns a <code>Receipt</code>
      * if this is a request
      */
     public Receipt receipt() {
@@ -180,7 +180,7 @@ public class Tag {
     }
     
     /**
-     * Creates and returns a Receipt if this is a request
+     * Creates and returns a <code>Receipt</code> if this is a request
      */
     private Receipt getReceipt() throws IllegalStateException {
         if (sent < 0L) {
@@ -295,7 +295,7 @@ public class Tag {
         }
         
         /**
-         * Returns whether or not this request has timedout
+         * Returns whether or not this request has timed-out
          */
         public boolean timeout() {
             long elapsed = elapsedTime();

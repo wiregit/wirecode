@@ -16,7 +16,7 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpointFactory;
 
 /**
- * Factory to create PushProxiesValues
+ * Factory to create {@link PushProxiesValue}s.
  */
 @Singleton
 public class PushProxiesValueFactoryImpl implements PushProxiesValueFactory {

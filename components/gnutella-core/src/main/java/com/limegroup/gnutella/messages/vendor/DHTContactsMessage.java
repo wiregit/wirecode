@@ -17,7 +17,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 /**
  * Passive DHT nodes (firewalled leafs and ultrapeers) may use the
  * DHTContactsMessage to exchange fresh Contact information with each
- * other to keep their RouteTables updated w/o putting load on the DHT.
+ * other to keep their RouteTables updated without putting load on the DHT.
  */
 public class DHTContactsMessage extends AbstractVendorMessage {
     

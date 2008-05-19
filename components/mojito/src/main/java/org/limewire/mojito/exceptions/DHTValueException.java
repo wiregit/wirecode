@@ -22,7 +22,7 @@ package org.limewire.mojito.exceptions;
 import java.io.IOException;
 
 /**
- * Thrown if there's a problem with a DHTValue.
+ * Thrown if there's a problem with a <code>DHTValue</code>.
  */
 public class DHTValueException extends IOException {
     

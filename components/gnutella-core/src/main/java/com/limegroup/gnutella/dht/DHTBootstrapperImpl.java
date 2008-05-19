@@ -35,7 +35,7 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     private static final Log LOG = LogFactory.getLog(DHTBootstrapperImpl.class);
     
     /**
-     * A list of DHT bootstrap hosts comming from the Gnutella network. 
+     * A list of DHT bootstrap hosts coming from the Gnutella network. 
      * Limit size to 50 for now.
      */
     private final Set<SocketAddress> hosts = new FixedSizeLIFOSet<SocketAddress>(50, EjectionPolicy.FIFO);
@@ -91,11 +91,12 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     
     /**
      * Boostraps in the following order:
-     * 1) If we have received hosts from the Gnutella network, try them.
-     * 2) Else try the persisted routing table.
-     * 3) Else try the SIMPP list.
-     * 4) Else start node fetcher and wait for hosts coming from the network.
-     * 
+     * <ol>
+     * <li>If we have received hosts from the Gnutella network, try them.
+     * <li>Else try the persisted routing table.
+     * <li>Else try the SIMPP list.
+     * <li>Else start node fetcher and wait for hosts coming from the network.
+     * </ol>
      * If at any moment while bootstraping from the routing table 
      * we receive nodes from the network, it should pre-empt the existing
      * bootstrap and start with them. This is achieved by calling cancel on 
@@ -119,11 +120,11 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     }
     
     /**
-     * Adds a host to the head of a list of boostrap hosts ordered by Most Recently Seen.
+     * Adds a host to the head of a list of bootstrap hosts ordered by Most Recently Seen.
      * If this bootstrapper is waiting for hosts or is bootstrapping from the persisted RT, 
      * this method tries to bootstrap immediately after.
      * 
-     * @param hostAddress The SocketAddress of the new bootstrap host.
+     * @param hostAddress the SocketAddress of the new bootstrap host.
      */
     public void addBootstrapHost(SocketAddress hostAddress) {
         synchronized (lock) {
@@ -176,10 +177,10 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     
     /**
      * We're waiting for Nodes if:
-     * 
-     * 1) We're NOT bootstrapped
-     * 2) And there's no bootstrap process active OR we are bootstrapping from routetable
-     * 
+     * <ol>
+     * <li>We're NOT bootstrapped
+     * <li>And there's no bootstrap process active OR we are bootstrapping from routetable
+     * </ol>
      */
     public boolean isWaitingForNodes() {
         synchronized (lock) {
@@ -283,11 +284,11 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
     }
 
     /**
-     * Gets the SIMPP host responsible for the keyspace containing the local node ID.
+     * Gets the SIMPP host responsible for the key space containing the local node ID.
      * 
      * Non-private for testing.
      * 
-     * @return The SocketAddress of a SIMPP bootstrap host, or null if we don't have any.
+     * @return the SocketAddress of a SIMPP bootstrap host, or null if we don't have any.
      */
     SocketAddress getSimppHost() {
         String[] simppHosts = DHTSettings.DHT_BOOTSTRAP_HOSTS.getValue();
@@ -347,9 +348,10 @@ class DHTBootstrapperImpl implements DHTBootstrapper, SimppListener {
      * The PongListener waits for the Ping response (Pong) from a
      * remote Node. If a Node responds we'll begin bootstrapping
      * from it and if it doesn't we'll:
-     * 
-     * 1) start the DHTNodeFetcher if it isn't already running
-     * 2) check the hosts Set for other Nodes and ping 'em
+     * <ol>
+     * <li>start the DHTNodeFetcher if it isn't already running
+     * <li>check the hosts Set for other Nodes and ping 'em
+     * </ol>
      */
     private class PongListener implements DHTFutureListener<PingResult> {
         

@@ -51,7 +51,7 @@ import org.limewire.security.SecurityToken;
 
 
 /**
- * The public interface of the Mojito DHT
+ * Defines the interface of the Mojito DHT, the heart of the DHT.
  */
 public interface MojitoDHT extends Closeable {
     
@@ -109,7 +109,6 @@ public interface MojitoDHT extends Closeable {
      * Binds the DHT to the specified Port number and the
      * any-address
      * 
-     * @param port
      * @throws IOException
      */
     public void bind(int port) throws IOException;
@@ -117,17 +116,12 @@ public interface MojitoDHT extends Closeable {
     /**
      * Binds the DHT to the specified InetAddress and Port number
      * 
-     * @param addr
-     * @param port
      * @throws IOException
      */
     public void bind(InetAddress addr, int port) throws IOException;
     
     /**
      * Binds the DHT to the specified SocketAddress
-     * 
-     * @param address
-     * @throws IOException
      */
     public void bind(SocketAddress address) throws IOException;
     

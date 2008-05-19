@@ -20,7 +20,7 @@
 package org.limewire.mojito.messages;
 
 /**
- * An interface for RequestMessage implementations
+ * An interface for request messages.
  */
 public interface RequestMessage extends DHTMessage {
     

@@ -23,7 +23,7 @@ import org.limewire.mojito.Context;
 
 /**
  * A default implementation of {@link MessageDispatcherFactory} which
- * creates and returns an instance of {@link MessageDispatcherImpl}
+ * creates and returns an instance of {@link MessageDispatcherImpl}.
  */
 public class MessageDispatcherFactoryImpl implements MessageDispatcherFactory {
 

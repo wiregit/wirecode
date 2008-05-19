@@ -30,9 +30,9 @@ import org.limewire.security.SecurityToken;
 
 
 /**
- * MessageFactoryWire takes a true MessageFactory as an argument, 
- * delegates all requests to it and wraps the costructed instances of
- * DHTMessage into "Wire" Messages.
+ * Takes a true <code>MessageFactory</code> as an argument, 
+ * delegates all requests to it and wraps the constructed instances of
+ * <code>DHTMessage</code> into "Wire" Messages.
  */
 public class MessageFactoryWire implements MessageFactory {
     

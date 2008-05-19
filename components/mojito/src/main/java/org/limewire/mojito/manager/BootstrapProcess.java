@@ -55,7 +55,7 @@ import org.limewire.mojito.util.TimeAwareIterable;
 /**
  * The BootstrapProcess controls the whole process of bootstrapping.
  * The sequence looks like this:
- * 
+ * <pre>
  *     0) Find a Node that's connected to the DHT
  * +--->
  * |   1) Lookup own Node ID
@@ -64,8 +64,9 @@ import org.limewire.mojito.util.TimeAwareIterable;
  * |   3) Refresh all Buckets with prefixed random IDs
  * +---4) Prune RouteTable and restart if too many errors in #3
  *     5) Done
- *     
- * TODO: Step 3 can be done in parallel! It would speed up bootstrapping
+ * </pre>
+ */     
+ /* TODO: Step 3 can be done in parallel! It would speed up bootstrapping
  * a lot!
  */
 class BootstrapProcess implements DHTTask<BootstrapResult> {
@@ -415,7 +416,7 @@ class BootstrapProcess implements DHTTask<BootstrapResult> {
     }
     
     /**
-     * Determinates whether or not we're bootstrapped.
+     * Determines whether or not we're bootstrapped.
      */
     private void determinateIfBootstrapped() {
         

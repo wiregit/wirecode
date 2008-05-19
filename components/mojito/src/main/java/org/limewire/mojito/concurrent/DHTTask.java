@@ -24,12 +24,12 @@ import java.util.concurrent.ExecutionException;
 import org.limewire.concurrent.OnewayExchanger;
 
 /**
- * A DHTTask is an asynchronous non-blocking Task
+ * A DHTTask is an asynchronous non-blocking task.
  */
 public interface DHTTask<T> {
     
     /**
-     * The maximum amout of time this DHTTask may be
+     * The maximum amount of time this DHTTask may be
      * active before it's being interrupted. 
      */
     public long getWaitOnLockTimeout();

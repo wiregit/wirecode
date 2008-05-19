@@ -3,9 +3,7 @@ package com.limegroup.gnutella.messages.vendor;
 import com.limegroup.gnutella.messages.Message;
 
 /** Vendor Messages are Gnutella Messages that are NEVER forwarded after
- *  recieved.
- *  This message is abstract because it provides common methods for ALL
- *  VendorMessages, but it makes no sense to instantiate a VendorMessage.
+ *  received.
  */
 public interface VendorMessage extends Message {
     

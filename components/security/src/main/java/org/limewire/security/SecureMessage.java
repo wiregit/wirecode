@@ -5,7 +5,7 @@ import java.security.SignatureException;
 
 
 /** 
- * Defines the interface to allow a message to be secured.
+ * Defines the interface to set a message's security state.
  */
 public interface SecureMessage {
     

@@ -56,7 +56,7 @@ import org.limewire.service.ErrorService;
 
 
 /**
- * A PatriciaTrie bases RouteTable implementation for the Mojito DHT.
+ * A PatriciaTrie based RouteTable implementation for the Mojito DHT.
  * This is the reference implementation.
  */
 public class RouteTableImpl implements RouteTable {
@@ -174,14 +174,14 @@ public class RouteTableImpl implements RouteTable {
 
     /**
      * Adds a RouteTableListener.
-     * 
+     * <p>
      * Implementation Note: The listener(s) is not called from a 
-     * seperate event Thread! That means processor intensive tasks
+     * separate event Thread! That means processor intensive tasks
      * that are performed straight in the listener(s) can slowdown 
      * the processing throughput significantly. Offload intensive
-     * tasks to seperate Threads in necessary!
+     * tasks to separate Threads in necessary!
      * 
-     * @param l The RouteTableListener instance to add
+     * @param l the RouteTableListener instance to add
      */
     public void addRouteTableListener(RouteTableListener l) {
         if (l == null) {
@@ -194,7 +194,7 @@ public class RouteTableImpl implements RouteTable {
     /**
      * Removes a RouteTableListener
      * 
-     * @param l The RouteTableListener instance to remove
+     * @param l the RouteTableListener instance to remove
      */
     public void removeRouteTableListener(RouteTableListener l) {
         if (l == null) {
@@ -269,7 +269,7 @@ public class RouteTableImpl implements RouteTable {
      * This method updates an existing Contact with data from a new Contact.
      * The initial state is that both Contacts have the same Node ID which
      * doesn't mean they're really the same Node. In order to figure out
-     * if they're really equal it's peforming some additional checks and
+     * if they're really equal it's performing some additional checks and
      * there are a few side conditions.
      */
     protected synchronized void updateContactInBucket(Bucket bucket, Contact existing, Contact node) {
@@ -650,7 +650,7 @@ public class RouteTableImpl implements RouteTable {
     
     /**
      * Returns true of it's Okay to add the given Contact to the
-     * givan Bucket as active Contact. See {@link ClassfulNetworkCounter}
+     * given Bucket as active Contact. See {@link ClassfulNetworkCounter}
      * for more information!
      */
     protected synchronized boolean isOkayToAdd(Bucket bucket, Contact node) {

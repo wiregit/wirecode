@@ -46,7 +46,7 @@ import org.limewire.security.SecurityToken;
 
 
 /**
- * The FindValueResponseHandler class implements FIND_VALUE specific features.
+ * Implements FIND_VALUE response specific features.
  */
 public class FindValueResponseHandler extends LookupResponseHandler<FindValueResult> {
     
