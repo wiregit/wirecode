@@ -235,6 +235,8 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     }
     
     public void handleFileEvent(FileManagerEvent evt) {
+        // building tries should be fast and non-blocking so can be done in
+        // dispatch thread
         FileDesc[] fileDescs = evt.getFileDescs();
         switch (evt.getType()) {
         case ADD_FILE:
@@ -363,42 +365,41 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
                 }
                 iter = new MultiIterator<IntSet>(iter, incompleteIndices);
             }
-            
-            if (iter.hasNext()) {
-                //Got match.  Union contents of the iterator and store in
-                //matches.  As an optimization, if this is the only keyword and
-                //there is only one set returned, return that set without 
-                //copying.
-                IntSet matches=null;
-                while (iter.hasNext()) {                
-                    IntSet s= iter.next();
-                    if (matches==null) {
-                        if (i==0 && j==query.length() && !(iter.hasNext()))
-                            return s;
-                        matches=new IntSet();
-                    }
-                    matches.addAll(s);
-                }
 
-                //Intersect matches with ret.  If ret isn't allocated,
-                //initialize to matches.
-                if (ret==null)   
-                    ret=matches;
-                else
-                    ret.retainAll(matches);
-            } else {
-                //No match.  Optimizaton: no matches for keyword => failure
-                return null;
+            synchronized (keywordTrie) {
+                synchronized (incompleteKeywordTrie) {
+                    if (!iter.hasNext()) {
+                        return null;
+                    }
+                    
+                    //Got match.  Union contents of the iterator and store in
+                    //matches.  As an optimization, if this is the only keyword and
+                    //there is only one set returned, return that set without 
+                    //copying.
+                    IntSet matches=null;
+                    while (iter.hasNext()) {                
+                        IntSet s= iter.next();
+                        if (matches == null) {
+                            matches=new IntSet();
+                        }
+                        matches.addAll(s);
+                    }
+                    
+                    //Intersect matches with ret.  If ret isn't allocated,
+                    //initialize to matches.
+                    if (ret == null)   
+                        ret = matches;
+                    else
+                        ret.retainAll(matches);
+                    
+                    //Optimization: no matches after intersect => failure
+                    if (ret.size() == 0)
+                        return null;        
+                    i=j;
+                }
             }
-            
-            //Optimization: no matches after intersect => failure
-            if (ret.size()==0)
-                return null;        
-            i=j;
         }
-        if (ret==null || ret.size()==0)
-            return null;
-        return ret;
+        return ret.size() == 0 ? null : ret;
     }
     
     /**
