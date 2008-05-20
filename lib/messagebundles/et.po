@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-12 11:31-0400\n"
-"PO-Revision-Date: 2008-04-21 07:45+0000\n"
-"Last-Translator: coold1000 <Unknown>\n"
+"POT-Creation-Date: 2008-05-19 11:30-0400\n"
+"PO-Revision-Date: 2008-05-15 12:00+0000\n"
+"Last-Translator: KIPAKAPA <Unknown>\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-05-13 03:53+0000\n"
+"X-Launchpad-Export-Date: 2008-05-20 04:09+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -521,13 +521,12 @@ msgstr ""
 #~ msgstr "LimeWire’I teated"
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:50
-#, fuzzy
 msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
-"LimeWire ei suuda valitud faili tirida, sest kõvaketas on täis, et tirida "
-"veel faile, pead sa vabastama selle jaoks ruumi kõvakettalt."
+"LimeWire ei suuda valitud faili tirida, kõvaketas on täis. Et tirida veel "
+"faile, pead sa vabastama selle jaoks ruumi kõvakettalt."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
 msgid ""
@@ -557,13 +556,12 @@ msgstr ""
 "sinu operatsiooni süsteem ei tunne. LimeWire võib käituda ootamatul viisil."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:60
-#, fuzzy
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
-"LimeWire ei suuda valitud faili tirida, sest kõvaketas on täis, et tirida "
-"veel faile, pead sa vabastama selle jaoks ruumi kõvakettalt."
+"LimeWire ei suuda valitud faili tirida, kõvaketas on täis. Et tirida veel "
+"faile, pead sa vabastama selle jaoks ruumi kõvakettalt."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:62
 msgid ""
@@ -700,7 +698,6 @@ msgid "Loading Saved Files..."
 msgstr "Laen salvestatud faile..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:527
-#, fuzzy
 msgid "Loading Spam Management..."
 msgstr "Laen ühenduse haldamist..."
 
@@ -1217,7 +1214,7 @@ msgstr "Teave LimeWire'st"
 #. * String to be displayed in title bar of LW client.
 #. 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:80
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:262
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:265
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:35
 msgid "LimeWire"
 msgstr "LimeWire &PRO"
@@ -1228,6 +1225,7 @@ msgstr "LimeWire &PRO"
 #. 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:104
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:79
+#: gui/com/limegroup/gnutella/gui/properties/ResultPropertiesDialog.java:105
 msgid "Close"
 msgstr "Sulge"
 
@@ -1469,7 +1467,7 @@ msgstr "Ei"
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:903
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:377
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:240
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:458
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:477
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:792
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:798
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:159
@@ -1554,8 +1552,8 @@ msgstr "T3 või parem"
 msgid "Ethernet"
 msgstr "Ethernet"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:117
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1516
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:120
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1527
 msgid ""
 "Your machine does not appear to have an active Internet connection or a "
 "firewall is blocking LimeWire from accessing the internet. LimeWire will "
@@ -1567,39 +1565,39 @@ msgstr ""
 "ühendada sind võrguga väljaarvadud juhul kui sa valid \"Logi välja\" faili "
 "menüüst."
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:126
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:129
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:25
 msgid "&Search"
 msgstr "Otsi"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:127
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:130
 msgid "&Monitor"
 msgstr "Monitor"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:128
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:131
 msgid "&Connections"
 msgstr "Ühendused"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:129
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:132
 msgid "&Library"
 msgstr "Raamatukogu"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:130
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:133
 msgid "C&onsole"
 msgstr "Konsool"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:131
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:134
 msgid "Lo&gging"
 msgstr "Sisselogimine"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:148
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:172
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:151
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:175
 #, java-format
 msgid "Display the {0} Screen"
 msgstr "Näita {0} ekraani"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:430
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:434
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:433
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:437
 msgid ""
 "LimeWire has encountered a problem during startup and cannot proceed. You "
 "may be able to fix this problem by changing LimeWire's Windows "
@@ -1610,7 +1608,7 @@ msgid ""
 "'OK' button at the bottom and restart LimeWire."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:523
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:534
 msgid ""
 "LimeWire is unable to find a license for this file. Download the file "
 "anyway?\n"
@@ -1620,7 +1618,7 @@ msgid ""
 msgstr ""
 "LimeWire on võimetu leidma sellle faili litsentsi. Kas jätkata tirimist?"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1423
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1434
 #, java-format
 msgid ""
 "LimeWire could not locate your web browser to display the following webpage: "
@@ -1629,13 +1627,13 @@ msgstr ""
 "LimeWire ei suutnud sinu veebibrauseri asukohta määrata ja järgmist "
 "veebilehte kuvada:{0}."
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1442
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1465
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1453
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1476
 msgid "LimeWire will not launch the specified file for security reasons."
 msgstr "LimeWire ei käivita ette määratud faili turvalisuse põhjustel."
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1444
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1467
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1455
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1478
 #, java-format
 msgid ""
 "LimeWire could not launch the specified file.\n"
@@ -1643,8 +1641,8 @@ msgid ""
 "Executed command: {0}."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1447
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1470
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1458
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1481
 msgid "LimeWire could not launch the specified file."
 msgstr "LimeWire ei käivita ette määratud faili turvalisuse põhjustel."
 
@@ -3281,7 +3279,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:785
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:570
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:585
 #, java-format
 msgid "Search for Keywords: {0}"
 msgstr "Otsi võtmesõna: {0}"
@@ -3385,7 +3383,6 @@ msgid "A connection error has occurred"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/chat/ChatFrame.java:253
-#, fuzzy
 msgid "Could not send chat message"
 msgstr "Ei suuda võõrustajat sirvida {0} ."
 
@@ -3467,7 +3464,6 @@ msgstr "Protokoll"
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionDataLine.java:88
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:411
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:283
-#, fuzzy
 msgid "Vendor/Version"
 msgstr "Tarnija"
 
@@ -3534,7 +3530,6 @@ msgstr "Superkasutajad"
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:63
 #: gui/com/limegroup/gnutella/gui/connection/ProtocolHolder.java:20
-#, fuzzy
 msgid "Leaf"
 msgstr "Lehed"
 
@@ -3616,9 +3611,8 @@ msgid "Yes, Try Again"
 msgstr "Jah, Proovi Uuesti"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:116
-#, fuzzy
 msgid "No, Share Nothing"
-msgstr "Arv mitut faili sa jagad"
+msgstr "Ei, ära jaga midagi"
 
 #: gui/com/limegroup/gnutella/gui/dnd/SharedFilesTransferHandler.java:119
 msgid "Do not show this message again."
@@ -3815,9 +3809,8 @@ msgstr "Suurus"
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:358
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:73
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:251
-#, fuzzy
 msgid "Chat"
-msgstr "Saada teade..."
+msgstr "Vestlus"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:387
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:259
@@ -3985,7 +3978,6 @@ msgstr "Puhasta kõik mitteaktiivsed allalaadimised"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:934
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:45
-#, fuzzy
 msgid "Clear Inactive"
 msgstr "Puhasta kõik mitteaktiivsed allalaadimised"
 
@@ -4088,7 +4080,6 @@ msgid "Choose a different location for the Download"
 msgstr "Vali muu koht allalaadimiseks"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:363
-#, fuzzy
 msgid "Append (#)"
 msgstr "Katkestatud (I/O)"
 
@@ -4188,6 +4179,47 @@ msgstr ""
 "LimeWire’it ning vali sätete meelespidamine. Sinu tulemüüri tarkvara võib "
 "võib välja paista erinev alltoodud pildil olevast."
 
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:45
+msgid "You're almost done!"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:46
+msgid "State your intent below to start using LimeWire "
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:48
+msgid ""
+"LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing "
+"authorized files only.  Installing and using either program does not "
+"consitute a license for obtaining or distributing unauthorized content."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:49
+msgid "Find out more..."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:56
+#, java-format
+msgid ""
+"<html><div display=\"block\" color=\"#515151\" size=\"13\">I <b>will not</b> "
+"use LimeWire {0} for copyright infringement.</div></html>"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:64
+#, java-format
+msgid ""
+"<html><div display=\"block\" color=\"#515151\" size=\"13\">I <b>might "
+"use</b> LimeWire {0} for copyright infringement.</div></html>"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/init/IntentWindow.java:26
+msgid "State Your Intent"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/init/IntentWindow.java:27
+msgid "One more thing..."
+msgstr ""
+
 #: gui/com/limegroup/gnutella/gui/init/LanguagePanel.java:78
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:44
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:66
@@ -4220,7 +4252,6 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/init/MiscWindow.java:119
 #: gui/com/limegroup/gnutella/gui/options/panes/StartupPaneItem.java:22
-#, fuzzy
 msgid "System Startup"
 msgstr "Käivita koos süsteemi algkäivitusega:"
 
@@ -4331,21 +4362,21 @@ msgstr "Taasta algne allalaadimis kaust."
 msgid "Choose Another Folder"
 msgstr "Vali muu kaust"
 
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:237
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:244
 msgid "LimeWire Setup Wizard"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:469
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:488
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:256
 msgid "Next >>"
 msgstr "Järgmine >>"
 
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:480
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:499
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:267
 msgid "<< Back"
 msgstr "<< Eelmine"
 
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:491
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:510
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:278
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:164
 msgid "Finish"
@@ -4588,13 +4619,11 @@ msgstr "Lõpeta faili jagamine"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1415
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:864
-#, fuzzy
 msgid "Share Folder"
 msgstr "Jagatud Kaustad"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1445
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:803
-#, fuzzy
 msgid "Stop Sharing Folder"
 msgstr "Lõpeta faili jagamine"
 
@@ -4643,7 +4672,6 @@ msgid "Hide .torrent Files"
 msgstr "Peida .torrenti Failid"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:878
-#, fuzzy
 msgid "Show .torrent Files"
 msgstr "Jagatud failid"
 
@@ -4983,9 +5011,8 @@ msgstr "Taasta kõik programmi algsätted."
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:208
 #: gui/com/limegroup/gnutella/gui/search/FilterBox.java:76
-#, fuzzy
 msgid "Options"
-msgstr "&Valikud"
+msgstr "Sätted"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:225
 msgid ""
@@ -4995,9 +5022,8 @@ msgstr ""
 
 #. set text before adding the document listener
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:256
-#, fuzzy
 msgid "Search here"
-msgstr "Otsi edasi"
+msgstr "Otsi siit"
 
 #. for saving gnutella
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:316
@@ -5028,9 +5054,8 @@ msgstr "Kohad"
 #. uploadSlotsPane.add(new SoftMaximumUploadsPaneItem("UPLOAD_SOFT_MAX"));
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:339
 #: gui/com/limegroup/gnutella/gui/tabs/ConnectionsTab.java:26
-#, fuzzy
 msgid "Connections"
-msgstr "Ühendus"
+msgstr "Ühendused"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:354
 msgid "System Tray"
@@ -5099,10 +5124,10 @@ msgid "Content"
 msgstr "Sisu"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:391
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:326
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:504
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:609
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:634
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:332
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:516
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:624
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:649
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:113
 msgid "Junk"
 msgstr "Rämps"
@@ -5211,9 +5236,8 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AssociationPreferencePaneItem.java:59
-#, fuzzy
 msgid "Use LimeWire for..."
-msgstr "K&asutades LimeWire't"
+msgstr "Kasuta LimeWire't, et"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/AudioPlayerPaneItem.java:22
 msgid "Audio Options"
@@ -5370,7 +5394,6 @@ msgid "Always"
 msgstr "Alati"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ContentFilterPaneItem.java:18
-#, fuzzy
 msgid "Content Filters"
 msgstr "Sisu filtreerimine"
 
@@ -5382,7 +5405,6 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ContentFilterPaneItem.java:28
-#, fuzzy
 msgid "Enable Content Filters"
 msgstr "Võimalda sisu filtreerimist"
 
@@ -5411,9 +5433,8 @@ msgstr "Sisesta võtmesõna:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapPasswordPaneItem.java:38
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:48
-#, fuzzy
 msgid "Password:"
-msgstr "Sisesta võtmesõna:"
+msgstr "Parool:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:21
 msgid ""
@@ -5436,7 +5457,6 @@ msgid "Shared Name:"
 msgstr "Jagatu nimi:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:23
-#, fuzzy
 msgid "File Already Exists Behavior"
 msgstr "Fail juba eksisteerib"
 
@@ -5455,7 +5475,6 @@ msgid "Always Append (#) to the Filename"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DefaultActionPaneItem.java:51
-#, fuzzy
 msgid "Always Ask What to do"
 msgstr "Alati küsi"
 
@@ -5476,12 +5495,10 @@ msgid "Disable Ultrapeer Capabilities:"
 msgstr "Lülita välja Superkasutaja võimalused:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:41
-#, fuzzy
 msgid "Disable Mojito DHT Capabilities:"
 msgstr "Lülita välja Superkasutaja võimalused:"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/DisableCapabilitiesPaneItem.java:45
-#, fuzzy
 msgid "Disable TLS Capabilities:"
 msgstr "Lülita välja Superkasutaja võimalused:"
 
@@ -5554,9 +5571,8 @@ msgid "Display junk at the bottom of search results"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/options/panes/EnableSpamFilterPaneItem.java:38
-#, fuzzy
 msgid "Do not display junk"
-msgstr "Ära mulle seda teadet enam edasta"
+msgstr "Ära edasta rämpsu"
 
 #: gui/com/limegroup/gnutella/gui/options/panes/ExtensionsPaneItem.java:26
 msgid "Shared Extensions"
@@ -5789,7 +5805,6 @@ msgid "Open Dialog to Select a Folder"
 msgstr "Ava kausta valimiseks teateaken."
 
 #: gui/com/limegroup/gnutella/gui/options/panes/MediaTypeDownloadDirMediator.java:239
-#, fuzzy
 msgid "Reset"
 msgstr "Taasta"
 
@@ -6461,6 +6476,22 @@ msgstr "Hoiatus: Fail nimega {0} juba eksisteerib. Ülekirjuta see fail?"
 msgid "Playlist Files (*.m3u)"
 msgstr "Esitlusloendi failid (*.m3u)"
 
+#: gui/com/limegroup/gnutella/gui/properties/ResultProperties.java:21
+msgid "Get Info"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/properties/ResultProperties.java:23
+msgid "Properties"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/properties/ResultProperties.java:55
+msgid "Kbps"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/properties/ResultPropertiesDialog.java:57
+msgid "General"
+msgstr ""
+
 #: gui/com/limegroup/gnutella/gui/search/EndpointHolder.java:24
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:316
 msgid "Multiple"
@@ -6547,34 +6578,34 @@ msgid "View in Browser..."
 msgstr ""
 
 #. mark 'em red
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:324
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:490
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:631
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:330
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:502
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:646
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:115
 msgid "Not Junk"
 msgstr "Mitte rämps"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:327
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:505
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:610
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:635
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:333
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:517
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:625
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:650
 msgid "Mark selected search results as Junk"
 msgstr "Märgi valitud otsingutulemused räpsuks"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:491
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:632
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:503
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:647
 msgid "Mark selected search results as Not Junk"
 msgstr "Märgi valitud otsingutulemused mitterämpsuks"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:554
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:569
 msgid "Search More"
 msgstr "Otsi edasi"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:718
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:733
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr "Kas soovid blokeerida sellelt võõrustajalt tulevad otsingu tulemused"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1065
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1080
 msgid "More Info..."
 msgstr "Rohkem infot..."
 
@@ -6776,7 +6807,7 @@ msgid ""
 "many results until you are fully connected to the network."
 msgstr "LimeWire ühendub võrku. Veel ei tagasta sinu otsing tulemusi."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:801
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:808
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
@@ -6815,7 +6846,7 @@ msgstr "Meedia"
 msgid "... {0} more."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/TableLine.java:743
+#: gui/com/limegroup/gnutella/gui/search/TableLine.java:752
 msgid ""
 "This is a secure result. No information in this result has been tampered."
 msgstr ""

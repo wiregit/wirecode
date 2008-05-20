@@ -1,20 +1,20 @@
-# Chinese (Hong Kong) translation for limewire
-# Copyright (c) 2007 Rosetta Contributors and Canonical Ltd 2007
+# Tamil translation for limewire
+# Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
 # This file is distributed under the same license as the limewire package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2008.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2008-05-19 11:30-0400\n"
-"PO-Revision-Date: 2007-11-08 21:19+0000\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: Chinese (Hong Kong) <zh_HK@li.org>\n"
+"PO-Revision-Date: 2008-05-17 09:58+0000\n"
+"Last-Translator: Abhishek Suresh <abhisheketsuresh@gmail.com>\n"
+"Language-Team: Tamil <ta@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Launchpad-Export-Date: 2008-05-20 04:09+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
@@ -23,12 +23,18 @@ msgid ""
 "LimeWire was unable to write a necessary file because your hard drive is "
 "full. To continue using LimeWire you must free up space on your hard drive."
 msgstr ""
+"உங்கள் ஹார்ட் டிரைவ் முழுதும் நிரப்பப்பட்டுள்ளதால் லைம்வயரால் ஒரு தேவைப்பட்ட "
+"பைலை எழுத முடியவில்லை. லைம்வயரை தொடர்ந்து பயன்படுத்த உங்கள் ஹார்ட் டிரைவில் "
+"இடத்தை உண்டாக்கவேண்டும்."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:52
 msgid ""
 "LimeWire was unable to open a necessary file because another program has "
 "locked the file. LimeWire may act unexpectedly until this file is released."
 msgstr ""
+"இன்னொரு மின்பொருள் பைலை பூட்டிவைத்துள்ளதால் லைம்வயரால் அந்த தேவைப்பட்ட பைலை "
+"திறக்க முடியவில்லை. பைல் விடுவிக்கப்படும்வரை இந்த பைல் எதிர்பார்த்தபடி "
+"நடக்காமலிருக்கலாம்."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:54
 msgid ""
@@ -36,6 +42,10 @@ msgid ""
 "necessary permissions. Your preferences may not be maintained the next time "
 "you start LimeWire, or LimeWire may behave in unexpected ways."
 msgstr ""
+"உமக்கு தேவைப்பட்ட அனுமதி இல்லாததால் லைம்வயரால் ஒரு தேவைப்பட்ட பைலை "
+"எழுதமுடியவில்லை. உமது சொந்த விருப்பங்கள் அடுத்த தடவை லைம்வயரை திறக்கும் "
+"பொழுது பின்பற்றபடாமலிருக்கலாம், அல்லது லைம்வயர் எதிர்பார்க்காத படி நடந்து "
+"கொள்ளலாம்."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:56
 msgid ""
@@ -43,18 +53,27 @@ msgid ""
 "characters which are not supported by your operating system. LimeWire may "
 "behave in unexpected ways."
 msgstr ""
+"தேவைபட்ட ஒரு பைல் பெயரில் உள்ள சில எழுத்துக்கள் உமது கணினி செயல் அமைப்பால் "
+"ஆதரிக்கப்படாததால் லைம்வயரால் அந்த பைலை திறக்க முடியவில்லை. லைம்வயர் "
+"எதிர்பார்க்கப்படாத படி நடந்துகொள்ளலாம்."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:60
 msgid ""
 "LimeWire cannot download the selected file because your hard drive is full. "
 "To download more files, you must free up space on your hard drive."
 msgstr ""
+"உங்கள் ஹார்ட் டிரைவ் முழுதும் நிரப்ப்ப்பட்டுள்ளதால் லைம்வயரால் "
+"தேர்ந்தெடுக்கப்பட்ட ஒரு பைலை எழுத முடியவில்லை. மேலும் பைல்களை டவுன்லோட் "
+"செய்ய உங்கள் ஹார்ட் டிரைவில் இடத்தை உண்டாக்கவேண்டும்."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:62
 msgid ""
 "LimeWire was unable to download the selected file because another program is "
 "using the file. Please close the other program and retry the download."
 msgstr ""
+"இன்னொரு மின்பொருள் தேர்ந்தெடுக்கப்பட்ட பைலை பயன்படுத்துவதால் லைம்வயரால் அந்த "
+"பைலை டவுன்லோட் செய்ய முடியவில்லை. தயவுசெய்து மற்ற மின்பொருளை மூடி மறுபடியும் "
+"இறக்க முயற்சிக்கவும்."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:64
 msgid ""
@@ -63,6 +82,10 @@ msgid ""
 "incomplete folder. To continue using LimeWire, please choose a different "
 "Save Folder."
 msgstr ""
+"உமக்கு முடிக்கப்படாத கோப்பைக்கு பைல்களை எழுத அனுமதி இல்லாததால் லைம்வயரால் "
+"தேர்ந்தெடுக்கப்பட்ட டவுன்லோடிற்க்கு ஒரு முடிக்கப்படாத பைலை உருவாக்கவோ "
+"தொடர்ந்து எழுதவோ முடியவில்லை. லைம்வயரை தொடர்ந்து பயன்படுத்த, இன்னொரு "
+"சேமிப்பு கோப்பையை தேர்ந்தெடுக்கவும்."
 
 #: components/io/src/main/java/org/limewire/io/IOUtils.java:66
 msgid ""
@@ -70,6 +93,9 @@ msgid ""
 "because the filename contains characters which are not supported by your "
 "operating system."
 msgstr ""
+"ஒரு முடிக்கப்படாத பைல் பெயரில் உள்ள சில எழுத்துக்கள் உமது கணினி செயல் "
+"அமைப்பால் ஆதரிக்கப்படாததால் லைம்வயரால் தேர்ந்தெடுக்கப்பட்ட டவுன்லோடிற்கு "
+"அந்த பைலை திறக்க முடியவில்லை."
 
 #: core/com/limegroup/gnutella/AcceptorImpl.java:284
 #: core/com/limegroup/gnutella/browser/LocalAcceptor.java:35
@@ -77,6 +103,9 @@ msgid ""
 "LimeWire was unable to set up a port to listen for incoming connections. "
 "Some features of LimeWire may not work as expected."
 msgstr ""
+"உட்கொள்ளப்படுகின்ற தொடர்புகள்க்கு கேட்க லைம்வயரால் ஒரு நுழைவாயிலை "
+"உருவாக்கமுடியவில்லை. லைம்வயரின் சில அம்சங்கள் எதிர்பார்த்த படி "
+"நடக்காமலிருக்கலாம்."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:225
 msgid ""
@@ -84,6 +113,9 @@ msgid ""
 "going to your Library, viewing your 'Incomplete Files', and clicking to "
 "'Resume' your downloads."
 msgstr ""
+"மன்னிக்கவும், லைம்வயரால் உமது பழைய டவுன்லோட் வேலைகளை புரிந்துகொள்ள "
+"முடியவில்லை. அவற்றை மறுபடியும் ஆரம்பிக்க உமது லைபிரரிக்குச் சென்று, உமது "
+"'முடிக்கப்படாத பைல்களை' பார்த்து, உமது டவுன்லோட்களை 'தொடர' க்ளிக் செய்யவும்."
 
 #: core/com/limegroup/gnutella/DownloadManagerImpl.java:227
 msgid ""

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2008-05-12 11:31-0400\n"
+"POT-Creation-Date: 2008-05-19 11:30-0400\n"
 "PO-Revision-Date: 2008-05-12 19:36+0000\n"
 "Last-Translator: Seanan <Unknown>\n"
 "Language-Team: Irish(Ireland) <ga_IE@li.org>\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n==2 ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2008-05-13 03:53+0000\n"
+"X-Launchpad-Export-Date: 2008-05-20 04:08+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Country: IRELAND\n"
 "X-Poedit-Language: Irish\n"
@@ -731,7 +731,7 @@ msgstr "Maidir le LimeWire"
 #. * String to be displayed in title bar of LW client.
 #. 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:80
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:262
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:265
 #: gui/com/limegroup/gnutella/gui/notify/JDICNotifier.java:35
 msgid "LimeWire"
 msgstr "LimeWire"
@@ -742,6 +742,7 @@ msgstr "LimeWire"
 #. 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:104
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:79
+#: gui/com/limegroup/gnutella/gui/properties/ResultPropertiesDialog.java:105
 msgid "Close"
 msgstr "Dún"
 
@@ -998,7 +999,7 @@ msgstr "Níl"
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:903
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:377
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:240
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:458
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:477
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:792
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:798
 #: gui/com/limegroup/gnutella/gui/library/RecursiveSharingDialog.java:159
@@ -1091,8 +1092,8 @@ msgstr "T3 nó Níos Airde"
 msgid "Ethernet"
 msgstr "Ethernet"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:117
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1516
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:120
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1527
 msgid ""
 "Your machine does not appear to have an active Internet connection or a "
 "firewall is blocking LimeWire from accessing the internet. LimeWire will "
@@ -1104,39 +1105,39 @@ msgstr ""
 "Leanfaidh LimeWire ar aghaidh ag iarraidh nasc leis an líonra go "
 "huathoibríoch mura roghnaíonn tú \"Dínasc\" ón Comhad roghchláir."
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:126
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:129
 #: gui/com/limegroup/gnutella/gui/menu/SearchMenu.java:25
 msgid "&Search"
 msgstr "&Cuardaigh"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:127
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:130
 msgid "&Monitor"
 msgstr "&Scáileán"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:128
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:131
 msgid "&Connections"
 msgstr "&Naisc"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:129
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:132
 msgid "&Library"
 msgstr "&Leabharlann"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:130
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:133
 msgid "C&onsole"
 msgstr "E&allóg"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:131
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:134
 msgid "Lo&gging"
 msgstr "Ag Tai&fead"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:148
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:172
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:151
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:175
 #, java-format
 msgid "Display the {0} Screen"
 msgstr "Taispeáin an Scáileán {0}"
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:430
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:434
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:433
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:437
 msgid ""
 "LimeWire has encountered a problem during startup and cannot proceed. You "
 "may be able to fix this problem by changing LimeWire's Windows "
@@ -1155,7 +1156,7 @@ msgstr ""
 "faoin ticbhosca. Ansin brúigh an cnaipe 'OK' ag an bun agus atosaigh "
 "LimeWire."
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:523
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:534
 msgid ""
 "LimeWire is unable to find a license for this file. Download the file "
 "anyway?\n"
@@ -1168,7 +1169,7 @@ msgstr ""
 "Aire: Ní féidir le LimeWire faire ar inneachar an líonra Gnutella nó é a "
 "rialú. Bíodh meas agat ar do dlíthe cóipcheart áitiúil."
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1423
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1434
 #, java-format
 msgid ""
 "LimeWire could not locate your web browser to display the following webpage: "
@@ -1177,13 +1178,13 @@ msgstr ""
 "Níorbh fhéidir le LimeWire do líonléitheoir a aimsiú chun an leathanach "
 "gréasáin seo a leanas a thaispeáint: {0}."
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1442
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1465
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1453
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1476
 msgid "LimeWire will not launch the specified file for security reasons."
 msgstr "Ní tosóidh LimeWire an comhad sonraithe ar cúiseanna slándála."
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1444
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1467
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1455
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1478
 #, java-format
 msgid ""
 "LimeWire could not launch the specified file.\n"
@@ -1194,8 +1195,8 @@ msgstr ""
 "\n"
 "Treor Rite: {0}."
 
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1447
-#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1470
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1458
+#: gui/com/limegroup/gnutella/gui/GUIMediator.java:1481
 msgid "LimeWire could not launch the specified file."
 msgstr "Níorbh fhéidir le LimeWire an comhad sonraithe a thosú."
 
@@ -3094,7 +3095,7 @@ msgstr "Féach Ar Mo {0} Chomhaid Chomhroinnte"
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:785
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:570
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:585
 #, java-format
 msgid "Search for Keywords: {0}"
 msgstr "Cuardaigh Treoirfhocail: {0}"
@@ -4000,6 +4001,47 @@ msgid ""
 "setting. Your firewall software may look different than the below picture."
 msgstr ""
 
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:45
+msgid "You're almost done!"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:46
+msgid "State your intent below to start using LimeWire "
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:48
+msgid ""
+"LimeWire Basic and LimeWire PRO are peer-to-peer programs for sharing "
+"authorized files only.  Installing and using either program does not "
+"consitute a license for obtaining or distributing unauthorized content."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:49
+msgid "Find out more..."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:56
+#, java-format
+msgid ""
+"<html><div display=\"block\" color=\"#515151\" size=\"13\">I <b>will not</b> "
+"use LimeWire {0} for copyright infringement.</div></html>"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/init/IntentPanel.java:64
+#, java-format
+msgid ""
+"<html><div display=\"block\" color=\"#515151\" size=\"13\">I <b>might "
+"use</b> LimeWire {0} for copyright infringement.</div></html>"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/init/IntentWindow.java:26
+msgid "State Your Intent"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/init/IntentWindow.java:27
+msgid "One more thing..."
+msgstr ""
+
 #: gui/com/limegroup/gnutella/gui/init/LanguagePanel.java:78
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:44
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:66
@@ -4157,21 +4199,21 @@ msgstr "Bain Feidhm as an Fillteán Réamhshocraithe"
 msgid "Choose Another Folder"
 msgstr "Roghnaigh Fillteán Eile"
 
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:237
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:244
 msgid "LimeWire Setup Wizard"
 msgstr "Treoraí Socrú LimeWire"
 
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:469
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:488
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:256
 msgid "Next >>"
 msgstr "Ar Aghaidh >>"
 
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:480
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:499
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:267
 msgid "<< Back"
 msgstr "<< Siar"
 
-#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:491
+#: gui/com/limegroup/gnutella/gui/init/SetupManager.java:510
 #: gui/com/limegroup/gnutella/gui/wizard/Wizard.java:278
 #: gui/com/limegroup/gnutella/gui/xml/editor/CCRDFOuptut.java:164
 msgid "Finish"
@@ -4924,10 +4966,10 @@ msgid "Content"
 msgstr "Inneachair"
 
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:391
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:326
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:504
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:609
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:634
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:332
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:516
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:624
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:649
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:113
 msgid "Junk"
 msgstr "Mangarae"
@@ -6289,6 +6331,22 @@ msgstr ""
 msgid "Playlist Files (*.m3u)"
 msgstr "Comhaid Seinmréim (*.m3u)"
 
+#: gui/com/limegroup/gnutella/gui/properties/ResultProperties.java:21
+msgid "Get Info"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/properties/ResultProperties.java:23
+msgid "Properties"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/properties/ResultProperties.java:55
+msgid "Kbps"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/properties/ResultPropertiesDialog.java:57
+msgid "General"
+msgstr ""
+
 #: gui/com/limegroup/gnutella/gui/search/EndpointHolder.java:24
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:316
 msgid "Multiple"
@@ -6379,38 +6437,38 @@ msgid "View in Browser..."
 msgstr "Féach ar sa Líonléitheoir..."
 
 #. mark 'em red
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:324
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:490
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:631
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:330
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:502
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:646
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:115
 msgid "Not Junk"
 msgstr "Ní Dramhaíl Í Seo"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:327
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:505
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:610
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:635
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:333
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:517
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:625
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:650
 msgid "Mark selected search results as Junk"
 msgstr "Cuir comhartha ar na torthaí cuardach roghnaithe mar Dramhaíl"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:491
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:632
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:503
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:647
 msgid "Mark selected search results as Not Junk"
 msgstr ""
 "Cuir comhartha ar na torthaí cuardach roghnaithe mar Ní Dramhaíl Iad Seo"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:554
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:569
 #, fuzzy
 msgid "Search More"
 msgstr "Cuardaigh Tuilleadh"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:718
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:733
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr ""
 "An dteastaíonn uait cosc a chur ar torthaí cuardach ón na réimeanna óstaigh "
 "seo a leanas?"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1065
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1080
 msgid "More Info..."
 msgstr "Tuilleadh Eolas..."
 
@@ -6628,7 +6686,7 @@ msgstr ""
 "Tá LimeWire ag nascadh leis an líonra faoi láthair. B´fhéidir nach gheofar "
 "mórán torthaí go dtí go bhfuil tú nascadh go hiomlán leis an líonra."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:801
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:808
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
@@ -6670,7 +6728,7 @@ msgstr "Meáin"
 msgid "... {0} more."
 msgstr "... {0} eile."
 
-#: gui/com/limegroup/gnutella/gui/search/TableLine.java:743
+#: gui/com/limegroup/gnutella/gui/search/TableLine.java:752
 msgid ""
 "This is a secure result. No information in this result has been tampered."
 msgstr "Seo toradh slán. Níor bhaineadh leis an fhaisnéis sa toradh seo."
