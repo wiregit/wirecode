@@ -887,7 +887,7 @@ public class DownloadManagerImpl implements DownloadManager {
         if(responses == null)
             throw new NullPointerException("null responses");
         if(queryReply == null)
-            throw new NullPointerException("null hostdata");
+            throw new NullPointerException("null queryReply");
 
         // need to synch because active and waiting are not thread safe
         List<CoreDownloader> downloaders = new ArrayList<CoreDownloader>(active.size() + waiting.size());

@@ -98,10 +98,10 @@ public interface QueryReply extends Message, SecureMessage {
      *  this data couldn't be extracted.  */
     public List<Response> getResultsAsList() throws BadPacketException;
 
-    /** 
-     * Returns the name of this' vendor, all capitalized.  Throws
-     * BadPacketException if the data couldn't be extracted, either because it
-     * is missing or corrupted. 
+    /**
+     * Returns the name of this' vendor, all capitalized.  Returns
+     * the empty String if the data couldn't be extracted, either because it
+     * is missing or corrupted.
      */
     public String getVendor();
 

@@ -434,12 +434,6 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         return vendor;        
     }
 
-
-    /** 
-     * Returns the name of this' vendor, all capitalized.  Throws
-     * BadPacketException if the data couldn't be extracted, either because it
-     * is missing or corrupted. 
-     */
     public String getVendor() {
         // TODO move to QueryReply decorator?
         try {
