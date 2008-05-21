@@ -17,7 +17,7 @@
         <do.setup-properties component="http">
 			<src-classpath>
 				<pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
-				<pathelement location="${limewire.lib.jars}/httpcore-nio-4.0-beta2-20080408.115743-9.jar"/>
+				<pathelement location="${limewire.lib.jars}/httpclient-4.0-alpha5-20080521.173105-4.jar"/>
 				<pathelement location="${limewire.lib.jars}/httpcore-4.0-beta2-20080408.115743-9.jar"/>
 				<pathelement location="${limewire.lib.jars}/httpcore-nio-4.0-beta2-20080408.115743-9.jar"/>
                 <path refid="build.limewire.components.common.buildpath"/>
