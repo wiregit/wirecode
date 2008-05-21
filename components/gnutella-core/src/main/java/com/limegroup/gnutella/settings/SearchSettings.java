@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.settings;
 
+import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.ByteSetting;
 import org.limewire.setting.CharArraySetting;
@@ -8,6 +9,8 @@ import org.limewire.setting.IntSetting;
 import org.limewire.setting.ProbabilisticBooleanSetting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
+
+import com.limegroup.gnutella.util.LimeWireUtils;
 
 
 /**
@@ -399,5 +402,16 @@ public final class SearchSettings extends LimeProps {
     
     public static boolean desiresPartialResults() {
         return DESIRES_PARTIAL_RESULTS.getValue() && DESIRES_PARTIAL_RESULTS_REMOTE.getValue();
+    }
+    
+    /**
+     * Whether or not the user wants to see promotional results.
+     */
+    @InspectablePrimitive("disable promotional results")
+    public static final BooleanSetting DISABLE_PROMOTIONAL_RESULTS = 
+        FACTORY.createBooleanSetting("DISABLE_PROMOTIONAL_RESULTS", false);
+
+    public static final boolean isPromotionalResultsDisabled() {
+        return LimeWireUtils.isPro() && DISABLE_PROMOTIONAL_RESULTS.getValue();
     }
 }
