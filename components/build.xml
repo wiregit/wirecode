@@ -92,6 +92,8 @@
 	     	<include name="${limewire.components.http.relative.antglob.allsources}"/>    
 	     	<include name="${limewire.components.net.relative.antglob.allsources}"/>    
     		<include name="${limewire.components.lwsserver.relative.antglob.allsources}"/>
+    		<include name="${limewire.components.promotion.relative.antglob.allsources}"/>
+    		<include name="${limewire.components.geocode.relative.antglob.allsources}"/>
    			<!-- Add as components are added! -->
 		</fileset>
     
@@ -118,7 +120,7 @@
 	
 	<target name="clean"
 	        description="Cleans all generated data in every component."
-          depends="lw-setting.clean, lw-statistic.clean, lw-rudp.clean, lw-nio.clean, lw-io.clean, lw-security.clean, lw-collection.clean, lw-common.clean, lw-test-util.clean, mojito.clean, mojito-ui.clean, lw-http.clean, lw-net.clean, lw-promotion.clean, lw-geocode.clean"
+          depends="lw-setting.clean, lw-statistic.clean, lw-rudp.clean, lw-nio.clean, lw-io.clean, lw-security.clean, lw-collection.clean, lw-common.clean, lw-test-util.clean, mojito.clean, mojito-ui.clean, lw-http.clean, lw-net.clean, lw-promotion.clean, lw-geocode.clean, lw-lwsserver.clean"
           >
 	    <do.clean component="all"/>
     </target>
@@ -205,10 +207,10 @@
     			<fileset dir="${build.limewire.components.mojito.tests}" includes="**/*Test.class"/>
                	<fileset dir="${build.limewire.components.mojito-ui.tests}" includes="**/*Test.class"/>
                	<fileset dir="${build.limewire.components.http.tests}" includes="**/*Test.class"/>
-           	<fileset dir="${build.limewire.components.net.tests}" includes="**/*Test.class"/>
-           	<fileset dir="${build.limewire.components.lwsserver.tests}" includes="**/*Test.class"/>
-           	<fileset dir="${build.limewire.components.promotion.tests}" includes="**/*Test.class"/>
-           	<fileset dir="${build.limewire.components.geocode.tests}" includes="**/*Test.class"/>
+	           	<fileset dir="${build.limewire.components.net.tests}" includes="**/*Test.class"/>
+	           	<fileset dir="${build.limewire.components.lwsserver.tests}" includes="**/*Test.class"/>
+	           	<fileset dir="${build.limewire.components.promotion.tests}" includes="**/*Test.class"/>
+	           	<fileset dir="${build.limewire.components.geocode.tests}" includes="**/*Test.class"/>
 	            <!-- Add as tests are added. -->
 	         </testLocations>
 	    </do.test-all>
