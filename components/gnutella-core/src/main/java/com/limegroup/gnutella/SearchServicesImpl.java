@@ -15,7 +15,6 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.SearchResultHandler;
-import com.limegroup.gnutella.search.SearchResultStats;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
@@ -127,20 +126,18 @@ public class SearchServicesImpl implements SearchServices {
      * @param type
      * @return The new stats object for this query.
      */
-    private SearchResultStats recordAndSendQuery(final QueryRequest qr, 
+    private void recordAndSendQuery(final QueryRequest qr, 
                                            final MediaType type) {
         queryStats.get().recordQuery();
         responseVerifier.get().record(qr, type);
-        SearchResultStats stats = searchResultHandler.get().addQuery(qr); // so we can leaf guide....
+        searchResultHandler.get().addQuery(qr); // so we can leaf guide....
         messageRouter.get().sendDynamicQuery(qr);
-        
-        return stats;
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.SearchServices#queryWhatIsNew(byte[], com.limegroup.gnutella.MediaType)
      */
-    public SearchResultStats queryWhatIsNew(final byte[] guid, final MediaType type) {
+    public void queryWhatIsNew(final byte[] guid, final MediaType type) {
             QueryRequest qr = null;
             if (GUID.addressesMatch(guid, networkManager.get().getAddress(), networkManager.get().getPort())) {
                 // if the guid is encoded with my address, mark it as needing out
@@ -151,20 +148,20 @@ public class SearchServicesImpl implements SearchServices {
                 // VERY long lived client
                 qr = queryRequestFactory.get().createWhatIsNewOOBQuery(guid, (byte)2, type);
                 outOfBandStatistics.addSentQuery();
-            }
-            else
+            } else {
                 qr = queryRequestFactory.get().createWhatIsNewQuery(guid, (byte)2, type);
+            }
     
             if(FilterSettings.FILTER_WHATS_NEW_ADULT.getValue())
                 mutableGUIDFilter.get().addGUID(guid);
     
-            return recordAndSendQuery(qr, type);
+            recordAndSendQuery(qr, type);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.SearchServices#query(byte[], java.lang.String, java.lang.String, com.limegroup.gnutella.MediaType)
      */
-    public SearchResultStats query(final byte[] guid, 
+    public void query(final byte[] guid, 
     						 final String query, 
     						 final String richQuery, 
     						 final MediaType type) {
@@ -179,24 +176,26 @@ public class SearchServicesImpl implements SearchServices {
                 // VERY long lived client
                 qr = queryRequestFactory.get().createOutOfBandQuery(guid, query, richQuery, type);
                 outOfBandStatistics.addSentQuery();
-            }
-            else
+            } else {
                 qr = queryRequestFactory.get().createQuery(guid, query, richQuery, type);
-            return recordAndSendQuery(qr, type);
+            }
+            
+            
+            recordAndSendQuery(qr, type);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.SearchServices#query(byte[], java.lang.String)
      */
-    public SearchResultStats query(byte[] guid, String query) {
-        return query(guid, query, null);
+    public void query(byte[] guid, String query) {
+        query(guid, query, null);
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.SearchServices#query(byte[], java.lang.String, com.limegroup.gnutella.MediaType)
      */
-    public SearchResultStats query(byte[] guid, String query, MediaType type) {
-    	return query(guid, query, "", type);
+    public void query(byte[] guid, String query, MediaType type) {
+    	query(guid, query, "", type);
     }
 
     /* (non-Javadoc)

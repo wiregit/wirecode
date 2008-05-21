@@ -13,9 +13,9 @@ import java.util.Vector;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.FixedsizeForgetfulHashMap;
-import org.limewire.collection.IntervalSet;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.util.ByteUtils;
@@ -28,7 +28,6 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.QueryResultHandler;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.SearchServices;
@@ -39,29 +38,39 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.spam.SpamManager;
 import com.limegroup.gnutella.util.ClassCNetworks;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
- * Search result information is now tabulated on a per-URN basis with GuidCount
- * pairing a URN with a ResourceLocationCounter. Whole and partial results are
- * accounted for correctly.
- *
+ * Handles incoming search results from the network.  This class parses the 
+ * results from <tt>QueryReply</tt> instances and performs the logic 
+ * necessary to pass those results up to the UI.
  */
 @Singleton
-class SearchResultHandlerImpl implements SearchResultHandler {
-
+final class SearchResultHandlerImpl implements SearchResultHandler {
+    
     private static final Log LOG =
-        LogFactory.getLog(SearchResultHandler.class);
+        LogFactory.getLog(SearchResultHandlerImpl.class);
         
     /**
      * The maximum amount of time to allow a query's processing
      * to pass before giving up on it as an 'old' query.
      */
     private static final int QUERY_EXPIRE_TIME = 30 * 1000; // 30 seconds.
+
+    /**
+     * The "delay" between responses to wait to send a QueryStatusResponse.
+     */
+    public static final int REPORT_INTERVAL = 15;
+
+    /** 
+     * The maximum number of results to send in a QueryStatusResponse -
+     * basically sent to say 'shut off query'.
+     */
+    public static final int MAX_RESULTS = 65535;
+
 
     /** Used to keep track of the number of non-filtered responses per GUID.
      *  I need synchronization for every call I make, so a Vector is fine.
@@ -107,16 +116,27 @@ class SearchResultHandlerImpl implements SearchResultHandler {
       PUBLIC INTERFACE METHODS
      ----------------------------------------------------*/
 
-    public SearchResultStats addQuery(QueryRequest qr) {
+    /**
+     * Adds the Query to the list of queries kept track of.  You should do this
+     * EVERY TIME you start a query so we can leaf guide it when possible.
+     * Also adds the query to the Spam Manager to adjust percentages.
+     *
+     * @param qr The query that has been started.  We really just acces the guid.
+     */ 
+    public void addQuery(QueryRequest qr) {
         LOG.trace("entered SearchResultHandler.addQuery(QueryRequest)");
         if (!qr.isBrowseHostQuery() && !qr.isWhatIsNewRequest())
             spamManager.get().startedQuery(qr);
         GuidCount gc = new GuidCount(qr);
         GUID_COUNTS.add(gc);
-        
-        return gc;
     }
 
+    /**
+     * Removes the Query frome the list of queries kept track of.  You should do
+     * this EVERY TIME you stop a query.
+     *
+     * @param guid the guid of the query that has been removed.
+     */ 
     public void removeQuery(GUID guid) {
         LOG.trace("entered SearchResultHandler.removeQuery(GUID)");
         cncCounter.remove(guid);
@@ -132,6 +152,11 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         }
     }
 
+    /**
+     * Returns a <tt>List</tt> of queries that require replanting into
+     * the network, based on the number of results they've had and/or
+     * whether or not they're new enough.
+     */
     public List<QueryRequest> getQueriesToReSend() {
         LOG.trace("entered SearchResultHandler.getQueriesToSend()");
         List<QueryRequest> reSend = null;
@@ -154,14 +179,42 @@ class SearchResultHandlerImpl implements SearchResultHandler {
             return reSend;
     }        
 
+
+    /**
+     * Use this to see how many results have been displayed to the user for the
+     * specified query.
+     *
+     * @param guid the guid of the query.
+     *
+     * @return the number of non-filtered results for query with guid guid. -1
+     * is returned if the guid was not found....
+     */    
     public int getNumResultsForQuery(GUID guid) {
-        GuidCount gc = retrieveResultStats(guid);
+        GuidCount gc = retrieveGuidCount(guid);
         if (gc != null)
             return gc.getNumResults();
         else
             return -1;
     }
     
+    /**
+     * Determines whether or not the specified 
+    
+    /*---------------------------------------------------    
+      END OF PUBLIC INTERFACE METHODS
+     ----------------------------------------------------*/
+
+    /*---------------------------------------------------    
+      PRIVATE INTERFACE METHODS
+     ----------------------------------------------------*/
+
+
+    /** 
+     * Handles the given query reply. Only one thread may call it at a time.
+     *      
+     * @return <tt>true</tt> if the GUI will (probably) display the results,
+     *  otherwise <tt>false</tt> 
+     */
     public void handleQueryReply(final QueryReply qr) {
         HostData data;
         try {
@@ -191,7 +244,7 @@ class SearchResultHandlerImpl implements SearchResultHandler {
             if(data.isFirewalled() && 
                !networkInstanceUtils.isVeryCloseIP(qr.getIPBytes()) &&               
                (!networkManager.acceptedIncomingConnection() ||
-                networkInstanceUtils.isPrivateAddress(networkManager.getAddress())) &&
+                       networkInstanceUtils.isPrivateAddress(networkManager.getAddress())) &&
                !(networkManager.canDoFWT() && 
                  qr.getSupportsFWTransfer())
                )  {
@@ -200,143 +253,65 @@ class SearchResultHandlerImpl implements SearchResultHandler {
             }
         }
 
-        int numGoodToSendToFrontEnd = addQueryReply(qr, data);
-        accountAndUpdateDynamicQueriers(qr, data, numGoodToSendToFrontEnd);
-    }
-    
-    public int addQueryReply(QueryReply qr, HostData data) {
-            List<Response> results = null;
-            double numBad = 0;
-            int numGood = 0;
+        List<Response> results = null;
+        try {
+            results = qr.getResultsAsList();
+        } catch (BadPacketException e) {
+            LOG.debug("Error gettig results", e);
+            return;
+        }
+
+        // throw away results that aren't secure.
+        int secureStatus = qr.getSecureStatus();
+        if(secureStatus == SecureMessage.FAILED) {
+            return;
+        }
+        
+        boolean skipSpam = isWhatIsNew(qr) || qr.isBrowseHostReply();
+        int numGoodSentToFrontEnd = 0;
+        double numBadSentToFrontEnd = 0;
             
-            try {
-                results = qr.getResultsAsList();
-            } catch (BadPacketException e) {
-                LOG.debug("Error gettig results", e);
-                return 0;
-            }
-
-            // throw away results that aren't secure.
-            int secureStatus = qr.getSecureStatus();
-            if(secureStatus == SecureMessage.FAILED)
-                return 0;
-            
-            boolean skipSpam = isWhatIsNew(qr) || qr.isBrowseHostReply();
-
-            for (Response response : results) {
-                if (!qr.isBrowseHostReply() && secureStatus != SecureMessage.SECURE) {
-                    if (!searchServices.matchesType(data.getMessageGUID(), response))
-                        continue;
-
-                    if (!searchServices.matchesQuery(data.getMessageGUID(), response))
-                        continue;
-                }
-
-                // Throw away results from Mandragore Worm
-                if (searchServices.isMandragoreWorm(data.getMessageGUID(), response))
+        for(Response response : results) {
+            if (!qr.isBrowseHostReply() && secureStatus != SecureMessage.SECURE) {
+                if (!searchServices.matchesType(data.getMessageGUID(), response)) {
                     continue;
-                
-                // If there was an action, only allow it if it's a secure message.
-                LimeXMLDocument doc = response.getDocument();
-                if (ApplicationSettings.USE_SECURE_RESULTS.getValue() &&
-                   doc != null && !"".equals(doc.getAction()) && secureStatus != SecureMessage.SECURE) {
-                   continue;
                 }
-                
-                // we'll be showing the result to the user, count it
-                countClassC(qr,response);
-                RemoteFileDesc rfd = response.toRemoteFileDesc(data, remoteFileDescFactory);
-                rfd.setSecureStatus(secureStatus);
-                
-                if (skipSpam || !spamManager.get().isSpam(rfd)) {
-                    numGood += addSource(response, qr);
+
+                if (!searchServices.matchesQuery(data.getMessageGUID(), response)) {
+                    continue;
                 }
-                else {
-                    numBad++;
-                }
-                
-                activityCallback.get().handleQueryResult(rfd, data, response.getLocations());
-                    
-            } //end of response loop
-            
-            numGood += Math.ceil(numBad * SearchSettings.SPAM_RESULT_RATIO.getValue());
-            GuidCount gc = retrieveResultStats(new GUID(qr.getGUID()));
-            if(gc != null) {
-                gc.increment(numGood);
+            }
+
+            // Throw away results from Mandragore Worm
+            if (searchServices.isMandragoreWorm(data.getMessageGUID(), response)) {
+                continue;
             }
             
-            return numGood;
-        }
-
-    private int addSource(Response response, QueryReply reply) {
-        if (response.getRanges() != null)
-            return addPartialSource(response, reply);
-        else
-            return addCompleteSource(response, reply);
-    }
-
-    private int addPartialSource(Response response, QueryReply qr) {
-        Set<URN> urns = response.getUrns();
-        IntervalSet is = response.getRanges();
-        long size = response.getSize();
-        ResourceLocationCounter rlc = null;
-        URN urn = getFirstSha1Urn(urns);
-        int count_dif = 0;
-        
-        if (urn != null) {
-            GuidCount gc = retrieveResultStats(new GUID(qr.getGUID()));
-            if(gc != null) {
-                if (null == (rlc = gc.getIntervalSets().get(urn)))
-                    gc.getIntervalSets().put(urn, (rlc = new ResourceLocationCounter(urn, size)));
-                
-                int count_before = rlc.getLocationCount();
-                rlc.addPartialSource( is );
-                int count_after = rlc.getLocationCount();
-                
-                count_dif = count_after - count_before;
-                
-                if (count_dif > 0)
-                    rlc.updateDisplayLocationCount(count_dif);    
+            // If there was an action, only allow it if it's a secure message.
+            LimeXMLDocument doc = response.getDocument();
+            if(ApplicationSettings.USE_SECURE_RESULTS.getValue() &&
+               doc != null && !"".equals(doc.getAction()) && secureStatus != SecureMessage.SECURE) {
+                continue;
             }
-        }
+            
+            // we'll be showing the result to the user, count it
+            countClassC(qr,response);
+            RemoteFileDesc rfd = response.toRemoteFileDesc(data, remoteFileDescFactory);
+            rfd.setSecureStatus(secureStatus);
+            Set<? extends IpPort> alts = response.getLocations();
+            activityCallback.get().handleQueryResult(rfd, data, alts);
+            
+            if (skipSpam || !spamManager.get().isSpam(rfd))
+                numGoodSentToFrontEnd++;
+            else 
+                numBadSentToFrontEnd++;
+        } //end of response loop
         
-        return count_dif;
-    }
-        
-    private int addCompleteSource(Response response, QueryReply qr) {
-        Set<URN> urns = response.getUrns();
-        long size = response.getSize();
-        int altCnt = response.getLocations().size();
-        ResourceLocationCounter rlc = null;
-        URN urn = getFirstSha1Urn(urns);
-        int maxAlts = FilterSettings.MAX_ALTS_TO_DISPLAY.getValue();
-        
-        if (urn != null) {
-            GuidCount gc = retrieveResultStats(new GUID(qr.getGUID()));
-            if(gc != null) {
-                if (null == (rlc = gc.getIntervalSets().get(urn)))
-                    gc.getIntervalSets().put(urn, (rlc = new ResourceLocationCounter(urn, size)));
-                
-                rlc.incrementWholeSources();
-                rlc.updateDisplayLocationCount(altCnt > maxAlts ? maxAlts+1 : altCnt+1);
-            }
-        }
-        return 1;
-    }
-    
-    /**
-     * Returns the first SHA1 URN from the urns set, if there is one.
-     * Null, otherwise.
-     */
-    private URN getFirstSha1Urn(Set<URN> urns) {
-        for (URN urn : urns) {
-            if (urn.isSHA1())
-                return urn;
-        }        
-        return null;
+        numBadSentToFrontEnd = Math.ceil(numBadSentToFrontEnd * SearchSettings.SPAM_RESULT_RATIO.getValue());
+        accountAndUpdateDynamicQueriers(qr, numGoodSentToFrontEnd + (int)numBadSentToFrontEnd);
     }
 
-    void countClassC(QueryReply qr, Response r) {
+    private void countClassC(QueryReply qr, Response r) {
         synchronized(cncCounter) {
             GUID searchGuid = new GUID(qr.getGUID());
             Map<URN, ClassCNetworks[]> m = cncCounter.get(searchGuid);
@@ -356,25 +331,26 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         }
     }
 
-    void accountAndUpdateDynamicQueriers(final QueryReply qr, HostData data,
+    private void accountAndUpdateDynamicQueriers(final QueryReply qr,
                                                  final int numGoodSentToFrontEnd) {
+
         LOG.trace("SRH.accountAndUpdateDynamicQueriers(): entered.");
-        
-        // get the correct GuidCount
-        GuidCount gc = retrieveResultStats(new GUID(qr.getGUID()));
-        
-        if (gc == null)
-            // 0. probably just hit lag, or....
-            // 1. we could be under attack - hits not meant for us
-            // 2. programmer error - ejected a query we should not have
-            return;
-            
-        // we should execute if results were consumed. technically Ultrapeers 
-        // don't use this info, but we are keeping it around for further use.
+        // we should execute if results were consumed
+        // technically Ultrapeers don't use this info, but we are keeping it
+        // around for further use
         if (numGoodSentToFrontEnd > 0) {
+            // get the correct GuidCount
+            GuidCount gc = retrieveGuidCount(new GUID(qr.getGUID()));
+            if (gc == null)
+                // 0. probably just hit lag, or....
+                // 1. we could be under attack - hits not meant for us
+                // 2. programmer error - ejected a query we should not have
+                return;
+            
             // update the object
             LOG.trace("SRH.accountAndUpdateDynamicQueriers(): incrementing.");
-            
+            gc.increment(numGoodSentToFrontEnd);
+
             // inform proxying Ultrapeers....
             if (connectionServices.isShieldedLeaf()) {
                 if (!gc.isFinished() && 
@@ -393,13 +369,14 @@ class SearchResultHandlerImpl implements SearchResultHandler {
                                                 numResultsToReport);
                     connectionManager.get().updateQueryStatus(stat);
                 }
+
             }
         }
         LOG.trace("SRH.accountAndUpdateDynamicQueriers(): returning.");
     }
 
 
-    GuidCount removeQueryInternal(GUID guid) {
+    private GuidCount removeQueryInternal(GUID guid) {
         synchronized (GUID_COUNTS) {
             Iterator<GuidCount> iter = GUID_COUNTS.iterator();
             while (iter.hasNext()) {
@@ -414,25 +391,18 @@ class SearchResultHandlerImpl implements SearchResultHandler {
     }
 
 
-    /**
-     * 
-     * @param guid
-     * @return the object by which the stats for the specified GUID can be 
-     *         retrieved.
-     */
-    GuidCount retrieveResultStats(GUID guid) {
+    private GuidCount retrieveGuidCount(GUID guid) {
         synchronized (GUID_COUNTS) {
             for(GuidCount currGC : GUID_COUNTS) {
                 if (currGC.getGUID().equals(guid))
                     return currGC;
             }
         }
-        
         return null;
     }
     
-    boolean isWhatIsNew(QueryReply reply) {
-        GuidCount gc = retrieveResultStats(new GUID(reply.getGUID()));
+    private boolean isWhatIsNew(QueryReply reply) {
+        GuidCount gc = retrieveGuidCount(new GUID(reply.getGUID()));
         return gc != null && gc.getQueryRequest().isWhatIsNewRequest();
     }
     
@@ -443,13 +413,20 @@ class SearchResultHandlerImpl implements SearchResultHandler {
      * created and the amount of results we've received so far
      * for this query.
      */
-    boolean isQueryStillValid(GuidCount gc, long now) {
+    private boolean isQueryStillValid(GuidCount gc, long now) {
         LOG.trace("entered SearchResultHandler.isQueryStillValid(GuidCount)");
         return (now < (gc.getTime() + QUERY_EXPIRE_TIME)) &&
                (gc.getNumResults() < QueryHandler.ULTRAPEER_RESULTS);
     }
 
-    class GuidCount implements SearchResultStats {
+    /*---------------------------------------------------    
+      END OF PRIVATE INTERFACE METHODS
+     ----------------------------------------------------*/
+    
+    /** A container that simply pairs a GUID and an int.  The int should
+     *  represent the number of non-filtered results for the GUID.
+     */
+    private static class GuidCount {
 
         private final long _time;
         private final GUID _guid;
@@ -457,13 +434,6 @@ class SearchResultHandlerImpl implements SearchResultHandler {
         private int _numGoodResults;
         private int _nextReportNum = REPORT_INTERVAL;
         private boolean markAsFinished = false;
-        
-        /**
-         * An IntervalSet represents a partial search result, and in
-         * this Map we organize all of the partial search results by
-         * the associated URN.
-         */
-        private final Map<URN, ResourceLocationCounter> _isets = new HashMap<URN, ResourceLocationCounter>();
         
         public GuidCount(QueryRequest qr) {
             _qr = qr;
@@ -473,93 +443,26 @@ class SearchResultHandlerImpl implements SearchResultHandler {
 
         public GUID getGUID() { return _guid; }
         public int getNumResults() {
-            return _numGoodResults;
+            return _numGoodResults ;
         }
-        
-        public int getNumResultsForURN(URN urn) {
-            ResourceLocationCounter rlc = _isets.get(urn);
-            
-            if (rlc == null)
-                return 0;
-            else
-                return rlc.getLocationCount();
-        }
-        
-        public int getNumDisplayResultsForURN(URN urn) {
-            ResourceLocationCounter rlc = _isets.get(urn);
-            
-            if (rlc == null)
-                return 0;
-            else
-                return rlc.getDisplayLocationCount();
-        }
-        
         public int getNextReportNum() { return _nextReportNum; }
-        
-        /**
-         * Time at which query was started.
-         */
         public long getTime() { return _time; }
-        
-        /**
-         * Returns the QueryRequest instance associated with this GuidCount.
-         */
         public QueryRequest getQueryRequest() { return _qr; }
-        
-        /**
-         * Notes whether this query has been marked as being finished.
-         */
         public boolean isFinished() { return markAsFinished; }
-        
         public void tallyReport() { 
             _nextReportNum = _numGoodResults + REPORT_INTERVAL; 
         }
 
-        public float getPercentAvailable (URN urn) {
-            ResourceLocationCounter rlc = _isets.get(urn);
-            
-            if (rlc == null)
-                return (float)0.0;
-            
-            return rlc.getPercentAvailable();
-        }
-        
-        /**
-         * Increases the "good" search result count by good.
-         */
         public void increment(int good) {
             _numGoodResults += good;
         }
         
-        /**
-         * Marks this search as being finished.
-         */
         public void markAsFinished() { markAsFinished = true; }
 
+        @Override
         public String toString() {
             return "" + _guid + ":" + _numGoodResults + ":" + _nextReportNum;
         }
-
-        public Map<URN, ResourceLocationCounter> getIntervalSets() {
-            return _isets;
-        }
-
-        public QueryResultHandler getResultHandler (final URN urn) {
-            final GuidCount gc = this;
-            
-            return new QueryResultHandler () {
-                public float getPercentAvailable() {
-                    return gc.getPercentAvailable(urn);
-                }
-                public int getNumberOfLocations() {
-                    return gc.getNumResultsForURN(urn);
-                }
-                public int getNumberOfDisplayLocations() {
-                    return gc.getNumDisplayResultsForURN(urn);
-                }
-            };
-        }
-        
     }
     
     @InspectionPoint("search result handler stats")
@@ -586,3 +489,4 @@ class SearchResultHandlerImpl implements SearchResultHandler {
     };
 
 }
+

@@ -31,7 +31,7 @@ public interface SearchResultHandler {
      *
      * @param qr The query that has been started.  We really just access the guid.
      */ 
-    public SearchResultStats addQuery(QueryRequest qr);
+    public void addQuery(QueryRequest qr);
 
     /**
      * Removes the Query from the list of queries kept track of.  You should do
