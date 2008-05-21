@@ -5,8 +5,8 @@ import java.net.InetSocketAddress;
 import java.util.Set;
 
 import org.limewire.io.IpPort;
+import org.limewire.lifecycle.Service;
 import org.limewire.security.SecurityToken;
-import org.limewire.service.Service;
 
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.guess.GUESSEndpoint;

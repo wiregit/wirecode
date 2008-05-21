@@ -12,8 +12,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.lifecycle.Service;
 import org.limewire.service.ErrorService;
-import org.limewire.service.Service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -77,6 +77,8 @@ public class ContentManager implements Service {
     public ContentManager(IpPortContentAuthorityFactory ipPortContentAuthorityFactory) {
         this.ipPortContentAuthorityFactory = ipPortContentAuthorityFactory;
     }
+    
+    public void initialize() {}
     
     /**
      * Initializes this content manager.

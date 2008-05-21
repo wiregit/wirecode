@@ -907,6 +907,9 @@ public class OOBHandlerTest extends BaseTestCase {
 
         public void stop() {
         }
+        
+        public void initialize() {
+        }
     }
     
     private static class MyReplyHandler extends ReplyHandlerStub {

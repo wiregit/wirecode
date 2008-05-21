@@ -62,6 +62,9 @@ public class NetworkManagerImpl implements NetworkManager {
     public void stop() {
         ConnectionSettings.LAST_FWT_STATE.removeSettingListener(fwtListener);
     }
+    
+    public void initialize() {
+    }
 
 
     /* (non-Javadoc)

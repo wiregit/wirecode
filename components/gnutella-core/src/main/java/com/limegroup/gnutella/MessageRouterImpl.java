@@ -526,6 +526,9 @@ public abstract class MessageRouterImpl implements MessageRouter {
         return multicastMessageHandlers.get(clazz);
     }
     
+    public void initialize() {
+    }
+    
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.MessageRouter#initialize()
      */

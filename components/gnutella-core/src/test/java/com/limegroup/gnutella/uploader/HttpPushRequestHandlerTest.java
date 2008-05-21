@@ -347,6 +347,11 @@ public class HttpPushRequestHandlerTest extends BaseTestCase {
                 QueryRequest queryRequest, int replyLimit, SecurityToken token) {
             return null;
         }
+        
+        public void initialize() {
+            // TODO Auto-generated method stub
+            
+        }
 
     }
 }

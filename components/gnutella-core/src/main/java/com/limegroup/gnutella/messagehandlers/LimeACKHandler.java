@@ -9,8 +9,8 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.lifecycle.Service;
 import org.limewire.security.SecurityToken;
-import org.limewire.service.Service;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -49,6 +49,11 @@ public class LimeACKHandler implements MessageHandler, Service {
         this.backgroundExecutor = backgroundExecutor;
         this.messageRouter = messageRouter;
         this.udpService = udpService;
+    }
+    
+    public void initialize() {
+        // TODO Auto-generated method stub
+        
     }
     
     public void start() {

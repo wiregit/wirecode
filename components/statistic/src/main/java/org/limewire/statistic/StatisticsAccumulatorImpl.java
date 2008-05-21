@@ -6,7 +6,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.limewire.service.Service;
+import org.limewire.lifecycle.Service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -29,6 +29,9 @@ final class StatisticsAccumulatorImpl implements StatisticAccumulator, Service {
 	@Inject
 	StatisticsAccumulatorImpl(@Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
 	    this.backgroundExecutor = backgroundExecutor;
+	}
+	
+	public void initialize() {
 	}
 	
 	public void start() {

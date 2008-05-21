@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 
-import org.limewire.service.Service;
+import org.limewire.lifecycle.Service;
 
 public interface NetworkManager extends Service {
 

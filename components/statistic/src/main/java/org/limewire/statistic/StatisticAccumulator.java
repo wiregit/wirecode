@@ -1,6 +1,6 @@
 package org.limewire.statistic;
 
-import org.limewire.service.Service;
+import org.limewire.lifecycle.Service;
 
 /** Defines the interface from which statistics can be accumulated. */
 /* TODO: This shouldn't require it be a service -- the Impl should decide that. */

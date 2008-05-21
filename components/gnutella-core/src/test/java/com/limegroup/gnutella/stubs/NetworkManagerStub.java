@@ -179,4 +179,5 @@ public class NetworkManagerStub implements NetworkManager {
 
     public void start(){}
     public void stop(){}
+    public void initialize() {}
 }
