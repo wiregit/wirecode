@@ -98,6 +98,6 @@
 	<classpathentry kind="lib" path="lib/jars/compile/swt-stub.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-4.0-beta2-20080408.115743-9.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.0-beta2-20080408.115743-9.jar"/>
-	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-alpha4.jar"/>
+	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-alpha5-20080521.173105-4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
