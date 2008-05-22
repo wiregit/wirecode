@@ -1,9 +1,13 @@
 package com.limegroup.gnutella.dht.io;
 
+import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.io.MessageDispatcher;
 import org.limewire.mojito.io.MessageDispatcherFactory;
+import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherEvent;
+import org.limewire.mojito.io.MessageDispatcher.MessageDispatcherListener;
+import org.limewire.mojito.messages.DHTMessage.OpCode;
 import org.limewire.security.SecureMessageVerifier;
 
 import com.google.inject.Inject;
@@ -30,6 +34,17 @@ public class LimeMessageDispatcherFactoryImpl implements
     @InspectionPoint("dht sent messages")
     private final Message.MessageCounter dhtMessageCounter = new Message.MessageCounter(50);
 
+    @InspectionPoint("dht received messages")
+    private final Message.MessageCounter receivedDHTMessageCounter = new Message.MessageCounter(50);
+    
+    @InspectionPoint("dht sent messages histogram")
+    private final InspectionHistogram<OpCode> sentMessagesHistogram = new InspectionHistogram<OpCode>();
+    
+    @InspectionPoint("dht received messages histogram")
+    private final InspectionHistogram<OpCode> receivedMessagesHistogram = new InspectionHistogram<OpCode>();
+    
+    private final CountingMessageDispatcherListener dispatcherListener = new CountingMessageDispatcherListener();
+
     @Inject
     public LimeMessageDispatcherFactoryImpl(
             Provider<com.limegroup.gnutella.MessageDispatcher> messageDispatcher,
@@ -44,8 +59,26 @@ public class LimeMessageDispatcherFactoryImpl implements
     }
 
     public MessageDispatcher create(Context context) {
-        return new LimeMessageDispatcherImpl(context, udpService,
+         LimeMessageDispatcherImpl messageDispatcherImpl = new LimeMessageDispatcherImpl(context, udpService,
                 secureMessageVerifier, messageRouter, messageDispatcher, messageFactory, dhtMessageCounter);
+         messageDispatcherImpl.addMessageDispatcherListener(dispatcherListener);
+         return messageDispatcherImpl;
+    }
+    
+    private class CountingMessageDispatcherListener implements MessageDispatcherListener {
+
+        public void handleMessageDispatcherEvent(MessageDispatcherEvent event) {
+            switch (event.getEventType()) {
+            case MESSAGE_RECEIVED:
+                receivedDHTMessageCounter.countMessage((Message)event.getMessage());
+                receivedMessagesHistogram.count(event.getMessage().getOpCode());
+                break;
+            case MESSAGE_SENT:
+                sentMessagesHistogram.count(event.getMessage().getOpCode());
+                break;
+            }
+        }
+        
     }
 
 }

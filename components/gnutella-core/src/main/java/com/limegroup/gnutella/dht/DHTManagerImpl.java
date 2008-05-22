@@ -24,6 +24,7 @@ import org.limewire.collection.Comparators;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectableContainer;
+import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
@@ -31,6 +32,7 @@ import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.concurrent.DHTFuture;
+import org.limewire.mojito.concurrent.DHTFutureAdapter;
 import org.limewire.mojito.db.DHTValue;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.result.FindValueResult;
@@ -41,7 +43,9 @@ import org.limewire.mojito.routing.RouteTable;
 import org.limewire.mojito.routing.Vendor;
 import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.settings.ContextSettings;
+import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.statistic.StatsUtils;
+import org.limewire.util.ByteUtils;
 import org.limewire.util.DebugRunnable;
 
 import com.google.inject.Inject;
@@ -102,6 +106,12 @@ public class DHTManagerImpl implements DHTManager {
     
     @InspectionPoint("time for dht bootstrap")
     private final BootstrapTimer bootstrapTimer = new BootstrapTimer();
+    
+    @InspectionPoint("dht get statistics")
+    private final TimeValuesInspectable getInspectable = new TimeValuesInspectable();
+    
+    @InspectionPoint("dht put statistics")
+    private final TimeValuesInspectable putInspectable = new TimeValuesInspectable();
     
     /**
      * Constructs the DHTManager, using the given Executor to invoke blocking 
@@ -399,7 +409,16 @@ public class DHTManagerImpl implements DHTManager {
             LOG.debug("DHT is null or is not bootstrapped");                
             return null;
         }            
-        return mojitoDHT.get(eKey);
+
+        // instantiated here so it can record its instantiation time
+        TimeInspector<FindValueResult> inspector = new TimeInspector<FindValueResult>(getInspectable) {
+            public void handleFutureSuccess(FindValueResult result) {
+                count(result.isSuccess());
+            }
+        };
+        DHTFuture<FindValueResult> future = mojitoDHT.get(eKey);
+        future.addDHTFutureListener(inspector);
+        return future;
     }
     
     /**
@@ -422,7 +441,17 @@ public class DHTManagerImpl implements DHTManager {
             LOG.debug("DHT is null or unable to bootstrap");                
             return null;
         }
-        return mojitoDHT.put(key, value);
+        // instantiated here so it can record its instantiation time
+        TimeInspector<StoreResult> inspector = new TimeInspector<StoreResult>(putInspectable) {
+            @Override
+            public void handleFutureSuccess(StoreResult result) {
+                boolean success = result.getLocations().size() > 0.8 * KademliaSettings.REPLICATION_PARAMETER.getValue();
+                count(success);
+            }   
+        };
+        DHTFuture<StoreResult> future = mojitoDHT.put(key, value);
+        future.addDHTFutureListener(inspector);
+        return future;
     }
 
     /** a bunch of inspectables */
@@ -815,5 +844,77 @@ public class DHTManagerImpl implements DHTManager {
             else if (evt.getType() == DHTEvent.Type.CONNECTED && start != 0)
                 stop = System.currentTimeMillis();
         }
+    }
+    
+    static class TimeInspector<T> extends DHTFutureAdapter<T> {
+        
+        private final long startTime = System.currentTimeMillis();
+        private final TimeValuesInspectable values;
+
+        public TimeInspector(TimeValuesInspectable values) {
+            this.values = values;
+        }
+        
+        public int getCurrentDuration() {
+            return ByteUtils.long2int(System.currentTimeMillis() - startTime);
+        }
+        
+        public void count(boolean success) {
+            int time = getCurrentDuration();
+            int index = getIndex(time);
+            if (success) {
+                values.successes.count(index);
+            } else {
+                values.failures.count(index);
+            }
+            synchronized (values) {
+                if (success) {
+                    values.maxSuccessful = Math.max(values.maxSuccessful, time);
+                } else {
+                    values.maxFailed = Math.max(values.maxFailed, time);
+                }
+            }
+        }
+        
+        public int getIndex(int time) {
+            int i;
+            if (time == 0) {
+                i = 0;
+            } else if (time < 5000 && time > 0) {
+                i = time / 500 + 1;
+            } else if (time < 10000) {
+                i = (time - 5000) / 1000 + 11;
+            } else if (time < 60000) {
+                i = (time - 10000) / 5000 + 16;
+            } else if (time < 180000) {
+                i = (time - 60000) / 10000 + 26;
+            } else if (time < 360000) {
+                i = (time - 180000) / 30000 + 38;
+            } else {
+                i = 44;
+            }
+            return i;
+        }
+    }
+    
+    static class TimeValuesInspectable implements Inspectable {
+
+        final InspectionHistogram<Integer> successes = new InspectionHistogram<Integer>();
+        
+        final InspectionHistogram<Integer> failures = new InspectionHistogram<Integer>();
+        
+        volatile int maxSuccessful = 0;
+        
+        volatile int maxFailed = 0;
+        
+        public synchronized Object inspect() {
+            Map<String, Object> values = new HashMap<String, Object>();
+            values.put("success hist", successes.inspect());
+            values.put("failure hist", failures.inspect());
+            values.put("max success", maxSuccessful);
+            values.put("max failure", maxFailed);
+            return values;
+        }
+        
     }
 }

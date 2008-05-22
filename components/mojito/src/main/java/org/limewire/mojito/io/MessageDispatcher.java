@@ -69,6 +69,7 @@ import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito.util.MessageUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
+import org.limewire.util.StringUtils;
 
 
 /**
@@ -1030,6 +1031,11 @@ public abstract class MessageDispatcher {
         
         public EventType getEventType() {
             return type;
+        }
+        
+        @Override
+        public String toString() {
+            return StringUtils.toString(this, nodeId, dst, message, type);
         }
     }
 }

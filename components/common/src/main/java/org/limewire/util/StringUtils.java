@@ -1,14 +1,19 @@
 package org.limewire.util;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.StringTokenizer;
+
+import org.limewire.collection.IdentityHashSet;
 
 
 /**
@@ -471,6 +476,60 @@ public class StringUtils {
             return new String(bytes, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException("UTF-8 not supported?", ex);
+        }
+    }
+    
+    private static ThreadLocal<IdentityHashSet<Object>> threadLocal = new ThreadLocal<IdentityHashSet<Object>>();
+
+    /**
+     * Creates a string that can be returned when overriding {@link Object#toString()}.
+     * 
+     * There are two possible invocations:
+     * 
+     * {@link #toString(Object, Object...) StringUtils.toString(this)} will print out all
+     * fields and their values declared in that class, but not fields of any super
+     * classes.
+     * 
+     * {@link #toString(Object, Object...) StringUtils.toString(this, field1, field3)} will
+     * only return the specified fields declared in that class.
+     * 
+     * Caveat: if the value of a field is <code>null</code>, all fields that have
+     * null values will be returned.
+     */
+    public static String toString(Object thiz, Object...args) {
+        boolean cleanUp = false;
+        try {
+            IdentityHashSet<Object> handledObjects = threadLocal.get();
+            if (handledObjects == null) {
+                cleanUp = true;
+                handledObjects = new IdentityHashSet<Object>();
+                threadLocal.set(handledObjects);
+            }
+            if (handledObjects.contains(thiz)) {
+                return "circular structure";
+            }
+            handledObjects.add(thiz);
+            Map<String, String> fields = new LinkedHashMap<String, String>();
+            for (Field field : thiz.getClass().getDeclaredFields()) {
+                try {
+                    boolean accessible = field.isAccessible();
+                    field.setAccessible(true);
+                    Object value = field.get(thiz);
+                    field.setAccessible(accessible);
+                    if (args.length == 0 || Arrays.asList(args).contains(value)) {
+                        fields.put(field.getName(), String.valueOf(value));
+                    }
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+            return thiz.getClass().getSimpleName() + " " + fields.toString();
+        } finally {
+            if (cleanUp) {
+                threadLocal.set(null);
+            }
         }
     }
 
