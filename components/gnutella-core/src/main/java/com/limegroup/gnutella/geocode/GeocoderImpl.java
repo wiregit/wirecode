@@ -15,7 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.limegroup.gnutella.settings.GeocodeSettings;
 
-public final class GeocoderImpl extends AbstractGeocoder {
+final class GeocoderImpl extends AbstractGeocoder {
     
     private final Provider<LimeHttpClient> httpClient;
     
