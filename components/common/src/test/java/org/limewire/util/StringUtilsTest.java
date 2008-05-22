@@ -297,37 +297,39 @@ public class StringUtilsTest extends BaseTestCase {
         assertEquals("h", StringUtils.explode(in, "kfkdf"));
     }
     
-    public void testToString() {
-        AllFields fields = new AllFields();
-        String result = fields.toString();
-        assertEquals("AllFields {a=a, i=2147483647, n=null, thiz=circular structure}", result);
-        SomeFields someFields = new SomeFields();
-        result = someFields.toString();
-        assertEquals("SomeFields {a=a, n=null}", result);
-    }
-    
-    private static class AllFields {
-        String a = "a";
-        int i = Integer.MAX_VALUE;
-        Object n = null;
-        AllFields thiz = this;
-        
-        @Override
-        public String toString() {
-            return StringUtils.toString(this);
-        }
-    }
-    
-    private static class SomeFields {
-        String a = "a";
-        int i = Integer.MAX_VALUE;
-        Object n = null;
-        SomeFields thiz = this;
-        
-        @Override
-        public String toString() {
-            return StringUtils.toString(this, a, n);
-        }
-    }
+    //Removing for the time being, requires dependency on IdentityHashSet
+//    public void testToString() {
+//        AllFields fields = new AllFields();
+//        String result = fields.toString();
+//        assertEquals("AllFields {a=a, i=2147483647, n=null, thiz=circular structure}", result);
+//        SomeFields someFields = new SomeFields();
+//        result = someFields.toString();
+//        assertEquals("SomeFields {a=a, n=null}", result);
+//    }
+//    
+//    
+//    private static class AllFields {
+//        String a = "a";
+//        int i = Integer.MAX_VALUE;
+//        Object n = null;
+//        AllFields thiz = this;
+//        
+//        @Override
+//        public String toString() {
+//            return StringUtils.toString(this);
+//        }
+//    }
+//    
+//    private static class SomeFields {
+//        String a = "a";
+//        int i = Integer.MAX_VALUE;
+//        Object n = null;
+//        SomeFields thiz = this;
+//        
+//        @Override
+//        public String toString() {
+//            return StringUtils.toString(this, a, n);
+//        }
+//    }
 }
 
