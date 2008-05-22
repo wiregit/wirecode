@@ -20,9 +20,12 @@
 package org.limewire.mojito.io;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -31,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.collection.IdentityHashSet;
 import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
@@ -69,7 +73,6 @@ import org.limewire.mojito.util.HostFilter;
 import org.limewire.mojito.util.MessageUtils;
 import org.limewire.security.SecureMessage;
 import org.limewire.security.SecureMessageCallback;
-import org.limewire.util.StringUtils;
 
 
 /**
@@ -1035,7 +1038,47 @@ public abstract class MessageDispatcher {
         
         @Override
         public String toString() {
-            return StringUtils.toString(this, nodeId, dst, message, type);
+            return toString(this, nodeId, dst, message, type);
+        }
+        
+        private static ThreadLocal<IdentityHashSet<Object>> threadLocal = new ThreadLocal<IdentityHashSet<Object>>();
+        
+        //TODO: remove this, duplicate of StringUtils.toString()...
+        public static String toString(Object thiz, Object...args) {
+            boolean cleanUp = false;
+            try {
+                IdentityHashSet<Object> handledObjects = threadLocal.get();
+                if (handledObjects == null) {
+                    cleanUp = true;
+                    handledObjects = new IdentityHashSet<Object>();
+                    threadLocal.set(handledObjects);
+                }
+                if (handledObjects.contains(thiz)) {
+                    return "circular structure";
+                }
+                handledObjects.add(thiz);
+                Map<String, String> fields = new LinkedHashMap<String, String>();
+                for (Field field : thiz.getClass().getDeclaredFields()) {
+                    try {
+                        boolean accessible = field.isAccessible();
+                        field.setAccessible(true);
+                        Object value = field.get(thiz);
+                        field.setAccessible(accessible);
+                        if (args.length == 0 || Arrays.asList(args).contains(value)) {
+                            fields.put(field.getName(), String.valueOf(value));
+                        }
+                    } catch (IllegalArgumentException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+                return thiz.getClass().getSimpleName() + " " + fields.toString();
+            } finally {
+                if (cleanUp) {
+                    threadLocal.set(null);
+                }
+            }
         }
     }
 }
