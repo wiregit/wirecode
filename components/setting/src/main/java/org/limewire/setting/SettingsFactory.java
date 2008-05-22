@@ -650,6 +650,22 @@ public final class SettingsFactory implements Iterable<AbstractSetting>, RemoteS
         return result;
     }
    
+    /**
+     * Creates a new <tt>PropertiesSetting</tt> instance for a Properties
+     * setting with the specified key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized PropertiesSetting 
+        createPropertiesSetting(String key, Properties defaultValue) {
+        PropertiesSetting result = 
+                       new PropertiesSetting(DEFAULT_PROPS, PROPS, key, 
+                                                                 defaultValue);
+        handleSettingInternal(result, null);
+        return result;
+    }
+   
     public synchronized StringArraySetting createRemoteStringArraySetting(
               String key, String[] defaultValue, String remoteKey) {
         StringArraySetting result = 

@@ -4,10 +4,13 @@ import java.io.IOException;
 
 import org.limewire.io.NetworkUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.EventListenerList;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.NetworkManagerEvent;
 
 @Singleton
 public class NetworkManagerStub implements NetworkManager {
@@ -24,6 +27,8 @@ public class NetworkManagerStub implements NetworkManager {
     private boolean oobCapable;
     private int stableUDPPort = 7777;
     private int fwtVersion;
+
+    private EventListenerList<NetworkManagerEvent> listeners = new EventListenerList<NetworkManagerEvent>();
 
     public boolean acceptedIncomingConnection() {
         return acceptedIncomingConnection;
@@ -180,4 +185,17 @@ public class NetworkManagerStub implements NetworkManager {
     public void start(){}
     public void stop(){}
     public void initialize() {}
+    
+    
+    public void addListener(EventListener<NetworkManagerEvent> listener) {
+        listeners.addListener(listener);
+    }
+
+    public boolean removeListener(EventListener<NetworkManagerEvent> listener) {
+        return listeners.removeListener(listener);
+    }
+    
+    public void fireEvent(NetworkManagerEvent event) {
+        listeners.broadcast(event);
+    }
 }

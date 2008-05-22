@@ -5,6 +5,8 @@ import java.util.Properties;
 
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.listener.EventListener;
+import org.limewire.listener.EventListenerList;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.setting.evt.SettingEvent;
 import org.limewire.setting.evt.SettingListener;
@@ -33,6 +35,9 @@ public class NetworkManagerImpl implements NetworkManager {
     private final NetworkInstanceUtils networkInstanceUtils;
     private final Provider<CapabilitiesVMFactory> capabilitiesVMFactory;
     private final SettingListener fwtListener = new FWTChangeListener();
+    
+    private final EventListenerList<NetworkManagerEvent> listeners =
+        new EventListenerList<NetworkManagerEvent>();
     
     @Inject
     public NetworkManagerImpl(Provider<UDPService> udpService,
@@ -159,10 +164,6 @@ public class NetworkManagerImpl implements NetworkManager {
             connectionManager.get().sendUpdatedCapabilities();
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.NetworkManager#addressChanged()
-     */
-    // TODO: Convert to listener pattern
     public boolean addressChanged() {
         activityCallback.get().handleAddressStateChanged();        
         
@@ -197,6 +198,8 @@ public class NetworkManagerImpl implements NetworkManager {
     		if (c.getConnectionCapabilities().remoteHostSupportsHeaderUpdate() >= HeaderUpdateVendorMessage.VERSION)
     			c.send(huvm);
     	}
+        
+        fireEvent(new NetworkManagerEvent(this, EventType.ADDRESS_CHANGE));
         
         return true;
     }
@@ -257,5 +260,17 @@ public class NetworkManagerImpl implements NetworkManager {
             if (evt.getEventType() == SettingEvent.EventType.VALUE_CHANGED)
                 updateCapabilities();
         }
+    }
+
+    public void addListener(EventListener<NetworkManagerEvent> listener) {
+        listeners.addListener(listener);
+    }
+
+    public boolean removeListener(EventListener<NetworkManagerEvent> listener) {
+        return listeners.removeListener(listener);
+    }
+    
+    private void fireEvent(NetworkManagerEvent event) {
+        listeners.broadcast(event);
     }
 }

@@ -7,7 +7,7 @@ import java.util.Map;
 
 import junit.framework.Test;
 
-import org.limewire.geocode.DefaultGeocoder;
+import org.limewire.geocode.AbstractGeocoder;
 import org.limewire.geocode.GeocodeInformation;
 import org.limewire.geocode.Geocoder;
 import org.limewire.util.BaseTestCase;
@@ -48,8 +48,18 @@ public class GeocoderTest extends BaseTestCase {
         String testString = SEPARATOR + NEWLINE;
         for (Map.Entry<String,String> en : props.entrySet()) {
             testString += en.getKey() + SEPARATOR + en.getValue() + NEWLINE;
-        }
-        geo = new DefaultGeocoder(new DefaultStreamSuccessOrFailureCallbackConsumer(new StringInputStream(testString)));
+        }        
+        final String testS = testString;
+        
+        geo = new AbstractGeocoder() {
+            public void initialize() {
+                try {
+                    setGeocodeInformation(new StringInputStream(testS));
+                } catch(IOException iox) {
+                    setInvalid(iox);
+                }
+            }
+        };
     }
     
     public void testSimple() throws InterruptedException {
@@ -59,13 +69,7 @@ public class GeocoderTest extends BaseTestCase {
         geo.initialize();
         assertTrue(geo.isReady());
         assertFalse(geo.hasFailed());
-        GeocodeInformation info = null;
-        
-        // Let the geo get ready
-        while (info == null || !geo.isReady()) {
-            info = geo.getGeocodeInformation();
-            if (info == null) Thread.sleep(1000);            
-        }
+        GeocodeInformation info = geo.getGeocodeInformation();
         
         // Make sure we have all the correct properties
         for (GeocodeInformation.Property p : GeocodeInformation.getStrings2Properties().values()) {
@@ -75,7 +79,7 @@ public class GeocoderTest extends BaseTestCase {
     
     public void testWantNull() {
         GeocodeInformation info = geo.getGeocodeInformation();
-        assertNull(String.valueOf(info), info);
+        assertNull(info);
         assertFalse("geo.isReady()", geo.isReady());
         assertFalse("geo.hasFailed()", geo.hasFailed());
     }

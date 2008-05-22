@@ -1,6 +1,5 @@
 package org.limewire.geocode;
 
-import java.io.InputStream;
 
 
 /**
@@ -32,7 +31,7 @@ import java.io.InputStream;
  *  AreaCode    212
  * </pre>
  */
-public interface Geocoder extends SuccessOrFailureCallback<InputStream> {
+public interface Geocoder {
 
     /**
      * Loads geo location information and saves it for access via

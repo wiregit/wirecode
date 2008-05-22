@@ -2,8 +2,11 @@ package org.limewire.geocode;
 
 import org.limewire.inject.AbstractModule;
 
+import com.limegroup.gnutella.geocode.CachedGeoLocation;
+import com.limegroup.gnutella.geocode.CachedGeoLocationImpl;
+
 /**
- * Main module for th geocoder component.
+ * Main module for the geocoder component.
  */
 public class LimewireGeocodeModule extends AbstractModule {
     
@@ -16,5 +19,6 @@ public class LimewireGeocodeModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(Geocoder.class).to(geocoderClass);
+        bind(CachedGeoLocation.class).to(CachedGeoLocationImpl.class);
     }
 }

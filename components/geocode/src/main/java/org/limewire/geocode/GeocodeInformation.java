@@ -2,6 +2,8 @@ package org.limewire.geocode;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Map.Entry;
 
 /**
  * Defines a class for geographic information created from a
@@ -145,6 +147,34 @@ public final class GeocodeInformation {
 
     public static Map<String, Property> getStrings2Properties() {
         return STRINGS2PROPERTIES;
+    }
+    
+    /**
+     * Flattens out the keys and values to an array of strings.
+     */
+    public Properties toProperties() {
+       Properties props = new Properties();
+       for (Entry<Property, String> entry : names2values.entrySet()) {
+           props.setProperty(entry.getKey().getValue(), entry.getValue());
+       }
+       return props;
+    }
+    
+    /**
+     * @return null if there is an error
+     */
+    public static GeocodeInformation fromProperties(Properties props) {
+        if (props.isEmpty()) {
+            return null;
+        }
+        GeocodeInformation info = new GeocodeInformation();
+        for (Property property : Property.values()) {
+            String value = props.getProperty(property.getValue());
+            if (value != null) {
+                info.setProperty(property, value);
+            }
+        }
+        return info;
     }
 }
 

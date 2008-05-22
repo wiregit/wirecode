@@ -3,8 +3,13 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 
 import org.limewire.lifecycle.Service;
+import org.limewire.listener.ListenerSupport;
 
-public interface NetworkManager extends Service {
+public interface NetworkManager extends Service, ListenerSupport<NetworkManagerEvent> {
+
+    public static enum EventType {
+        ADDRESS_CHANGE
+    }
 
     /** @return true if your IP and port information is valid.
      */
