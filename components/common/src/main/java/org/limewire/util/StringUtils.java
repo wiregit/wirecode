@@ -1,13 +1,17 @@
 package org.limewire.util;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 
@@ -471,6 +475,46 @@ public class StringUtils {
             return new String(bytes, "UTF-8");
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException("UTF-8 not supported?", ex);
+        }
+    }
+    
+    
+    private static ThreadLocal<IdentityHashMap<Object, Object>> threadLocal = new ThreadLocal<IdentityHashMap<Object, Object>>();
+    
+    public static String toString(Object thiz, Object...args) {
+        boolean cleanUp = false;
+        try {
+            IdentityHashMap<Object, Object> handledObjects = threadLocal.get();
+            if (handledObjects == null) {
+                cleanUp = true;
+                handledObjects = new IdentityHashMap<Object, Object>();
+                threadLocal.set(handledObjects);
+            }
+            if (handledObjects.containsKey(thiz)) {
+                return "circular structure";
+            }
+            handledObjects.put(thiz, thiz);
+            Map<String, String> fields = new LinkedHashMap<String, String>();
+            for (Field field : thiz.getClass().getDeclaredFields()) {
+                try {
+                    boolean accessible = field.isAccessible();
+                    field.setAccessible(true);
+                    Object value = field.get(thiz);
+                    field.setAccessible(accessible);
+                    if (args.length == 0 || Arrays.asList(args).contains(value)) {
+                        fields.put(field.getName(), String.valueOf(value));
+                    }
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+            return thiz.getClass().getSimpleName() + " " + fields.toString();
+        } finally {
+            if (cleanUp) {
+                threadLocal.set(null);
+            }
         }
     }
 }
