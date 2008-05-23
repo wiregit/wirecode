@@ -32,7 +32,7 @@ public class LimeMessageDispatcherFactoryImpl implements
     private final MessageFactory messageFactory;
     
     @InspectionPoint("dht sent messages")
-    private final Message.MessageCounter dhtMessageCounter = new Message.MessageCounter(50);
+    private final Message.MessageCounter sentDHTMessageCounter = new Message.MessageCounter(50);
 
     @InspectionPoint("dht received messages")
     private final Message.MessageCounter receivedDHTMessageCounter = new Message.MessageCounter(50);
@@ -60,7 +60,7 @@ public class LimeMessageDispatcherFactoryImpl implements
 
     public MessageDispatcher create(Context context) {
          LimeMessageDispatcherImpl messageDispatcherImpl = new LimeMessageDispatcherImpl(context, udpService,
-                secureMessageVerifier, messageRouter, messageDispatcher, messageFactory, dhtMessageCounter);
+                secureMessageVerifier, messageRouter, messageDispatcher, messageFactory);
          messageDispatcherImpl.addMessageDispatcherListener(dispatcherListener);
          return messageDispatcherImpl;
     }
@@ -74,6 +74,7 @@ public class LimeMessageDispatcherFactoryImpl implements
                 receivedMessagesHistogram.count(event.getMessage().getOpCode());
                 break;
             case MESSAGE_SENT:
+                sentDHTMessageCounter.countMessage((Message)event.getMessage());
                 sentMessagesHistogram.count(event.getMessage().getOpCode());
                 break;
             }
