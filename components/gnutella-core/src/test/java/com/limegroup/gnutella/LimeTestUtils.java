@@ -19,6 +19,7 @@ import java.util.concurrent.Future;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.limewire.inject.Modules;
 import org.limewire.io.IOUtils;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.util.AssertComparisons;
@@ -153,12 +154,10 @@ public class LimeTestUtils {
      * @return the injector
      */
     public static Injector createInjector(Class<? extends ActivityCallback> callbackClass, Module...modules) {
-        List<Module> list = new ArrayList<Module>();
-        list.addAll(Arrays.asList(modules));
-        list.add(new BlockingConnectionFactoryModule());
-        list.add(new LimeWireCoreModule(callbackClass));
-        Injector injector = Guice.createInjector(list);        
-        return injector;
+        Module combinedReplacements = Modules.combine(modules);
+        Module combinedOriginals = Modules.combine(new LimeWireCoreModule(callbackClass), new BlockingConnectionFactoryModule());
+        Module replaced = Guice.overrideModule(combinedOriginals, combinedReplacements);
+        return Guice.createInjector(replaced);
     }
 
     /**
