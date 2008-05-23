@@ -58,7 +58,7 @@ public class MulticastTest extends LimeTestCase {
     private LifecycleManager lifeCycleManager;
     
     private RemoteFileDescFactory remoteFileDescFactory;
-        
+    protected Injector injector;
 
     public MulticastTest(String name) {
         super(name);
@@ -105,8 +105,8 @@ public class MulticastTest extends LimeTestCase {
         
         M_HANDLER = new MulticastHandler();
         U_HANDLER = new UnicastedHandler();
-    
-        Injector injector = LimeTestUtils.createInjector();
+
+        injector = LimeTestUtils.createInjector();
         
         fileManager = injector.getInstance(FileManager.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
@@ -175,12 +175,23 @@ public class MulticastTest extends LimeTestCase {
         assertEquals("wrong hops", 1, qr.getHops());
     }
     
+    public void testQueryRepliesIsFirewalled() throws Exception {
+        testQueryReplies(false);
+    }
+    
+    public void testQueryRepliesNotFirewalled() throws Exception {
+        testQueryReplies(true);
+    }
+    
     /**
      * Tests that replies to multicast queries contain the MCAST GGEP header
      * and other appropriate info.
      */
-    public void testQueryReplies() throws Exception {
+    public void testQueryReplies(boolean acceptedIncoming) throws Exception {
         byte[] guid = searchServices.newQueryGUID();
+
+        //searchServices = getSearchServices(acceptedIncoming);
+        
         searchServices.query(guid, "metadata"); // search for the name
         
         // sleep to let the search process.
@@ -211,7 +222,7 @@ public class MulticastTest extends LimeTestCase {
         
         // wipe out the address so the first addr == my addr check isn't used
         wipeAddress(qr);
-        assertEquals("wrong qos", 4, qr.calculateQualityOfService());
+        PrivilegedAccessor.setValue(injector.getInstance(Acceptor.class), "_acceptedIncoming", acceptedIncoming);
         assertEquals("wrong qos", 4, qr.calculateQualityOfService());
 	}
     

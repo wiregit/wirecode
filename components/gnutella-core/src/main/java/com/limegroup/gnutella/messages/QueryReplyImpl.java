@@ -106,7 +106,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     
     private final boolean local;
     
-    private boolean badPacket;
+    private volatile boolean badPacket;
     
     
     QueryReplyImpl(byte[] guid, byte ttl, byte hops, byte[] payload,
@@ -978,6 +978,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
      * in the GUI. */
 	public int calculateQualityOfService() {
         boolean iFirewalled = !networkManager.acceptedIncomingConnection();
+        // TODO change to an enum
         final int YES=1;
         final int MAYBE=0;
         final int NO=-1;
