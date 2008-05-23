@@ -39,25 +39,6 @@ public class SharedSearchResultTest extends GUIBaseTestCase {
         super.tearDown();
     }
     
-    /*private SharedSearchResult getSearchResult(FileDesc fileDesc) {
-        HostData hostData = new HostDataImpl(GuiCoreMediator.getApplicationServices().getMyGUID(), GUID.makeGuid(),
-                ConnectionSettings.CONNECTION_SPEED.getValue(), !GuiCoreMediator
-                .getNetworkManager().acceptedIncomingConnection(), false,
-                ChatSettings.CHAT_ENABLED.getValue(), false, NetworkUtils
-                        .ip2string(GuiCoreMediator.getNetworkManager().getAddress()),
-                GuiCoreMediator.getNetworkManager().getPort(), 0, LimeWireUtils.QHD_VENDOR_NAME,
-                GuiCoreMediator.getConnectionManager().getPushProxies(), GuiCoreMediator.getNetworkManager()
-                        .supportsFWTVersion(), SSLSettings.isIncomingTLSEnabled());
-        Response response = GuiCoreMediator.getResponseFactory().createResponse(fileDesc);
-        List<LimeXMLDocument> docs = fileDesc.getLimeXMLDocuments();
-        if (docs.size() == 1) {
-            response.setDocument(docs.get(0));
-        }
-        
-        RemoteFileDesc rfd = response.toRemoteFileDesc(hostData, GuiCoreMediator.getRemoteFileDescFactory());
-        return new SharedSearchResult(fileDesc, rfd);
-    }*/
-    
     private SharedSearchResult getSearchResult(FileDesc fileDesc) {
         CreationTimeCache creationTimeCache = injector.getInstance(CreationTimeCache.class);
         NetworkManager networkManager = injector.getInstance(NetworkManager.class);
