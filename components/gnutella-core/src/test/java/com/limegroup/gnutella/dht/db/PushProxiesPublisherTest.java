@@ -202,10 +202,6 @@ public class PushProxiesPublisherTest extends LimeTestCase {
                     return future;
                 }
             });
-            allowing(dhtManager).getMojitoDHT();
-            will(returnValue(mojitoDHT));
-            allowing(mojitoDHT).isBootstrapped();
-            will(returnValue(true));
         }});
         
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
@@ -228,7 +224,7 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         
         // test publishing 
         context.checking(new Expectations() {{
-            one(mojitoDHT).put(with(any(KUID.class)), with(any(DHTValue.class)));
+            one(dhtManager).put(with(any(KUID.class)), with(any(DHTValue.class)));
         }});
 
         publishingRunnable.run();
