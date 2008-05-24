@@ -79,6 +79,7 @@ import com.limegroup.gnutella.version.UpdateHandler;
 @SuppressWarnings("all")
 public class ConnectionManagerTest extends LimeTestCase {
 
+    private Injector injector;
     private TestHostCatcher CATCHER;
     private ConnectionListener LISTENER;
     private ConnectionManager connectionManager;
@@ -99,22 +100,17 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
 
     public void setUp() throws Exception {
-        doSetUp();
-    }
-    
-    private void doSetUp(Module... modules) throws Exception {
         setSettings();
-        
-        List<Module> list = new ArrayList<Module>();
-        list.addAll(Arrays.asList(modules));
-        list.add(new AbstractModule() {
+        injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(HostCatcher.class).to(TestHostCatcher.class);
             } 
         });
-        Injector injector = LimeTestUtils.createInjector(list.toArray(new Module[0]));
-        
+        finishSetUp();
+    }
+    
+    private void finishSetUp() throws Exception {        
         CATCHER = (TestHostCatcher)injector.getInstance(HostCatcher.class);
         LISTENER = new ConnectionListener();
         
@@ -627,13 +623,14 @@ public class ConnectionManagerTest extends LimeTestCase {
     }
     
     public void testClassCFiltering() throws Exception {
-        
-        doSetUp(new AbstractModule() {
+        setSettings();
+        injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(HostCatcher.class).to(TestHostCatcher2.class);
-            }
+            } 
         });
+        finishSetUp();
         
         ServerSocket s = new ServerSocket(10000);
         try {

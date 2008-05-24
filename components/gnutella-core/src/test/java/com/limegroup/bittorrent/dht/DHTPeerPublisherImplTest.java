@@ -1,8 +1,6 @@
 package com.limegroup.bittorrent.dht;
 
-import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -24,15 +22,11 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
 import org.limewire.util.BaseTestCase;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.google.inject.Module;
-import com.limegroup.bittorrent.BTMetaInfo;
+import com.google.inject.util.Providers;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.ApplicationServices;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -65,13 +59,7 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
 
     private MojitoDHT dht;
 
-    private BTMetaInfo btMetaInfoOne;
-
-    private BTMetaInfo btMetaInfoTwo;
-
     private Contact contact;
-
-    private Module module;
 
     private DHTPeerPublisher dhtPeerPublisher;
 
@@ -107,36 +95,17 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
         applicationServices = context.mock(ApplicationServices.class);
         networkManager = context.mock(NetworkManager.class);
         dht = context.mock(MojitoDHT.class);
-        btMetaInfoOne = context.mock(BTMetaInfo.class);
-        btMetaInfoTwo = context.mock(BTMetaInfo.class);
         contact = context.mock(Contact.class);
         torrentManager = context.mock(TorrentManager.class);
 
-        try {
-            urnOne = URN.createSHA1Urn(HASH1);
-            urnTwo = URN.createSHA1Urn(HASH2);
-        } catch (IOException ie) {
-            fail(ie);
-        }
+        urnOne = URN.createSHA1Urn(HASH1);
+        urnTwo = URN.createSHA1Urn(HASH2);
 
-        module = new AbstractModule() {
-            @Override
-            public void configure() {
-                bind(ManagedTorrent.class).toInstance(managedTorrentOne);
-                bind(ManagedTorrent.class).toInstance(managedTorrentTwo);
-                bind(DHTManager.class).toInstance(dhtManager);
-                bind(ApplicationServices.class).toInstance(applicationServices);
-                bind(NetworkManager.class).toInstance(networkManager);
-                bind(MojitoDHT.class).toInstance(dht);
-                bind(BTMetaInfo.class).toInstance(btMetaInfoOne);
-                bind(BTMetaInfo.class).toInstance(btMetaInfoTwo);
-                bind(TorrentManager.class).toInstance(torrentManager);
-            }
-        };
-
-        Injector inj = LimeTestUtils.createInjector(module);
-
-        dhtPeerPublisher = inj.getInstance(DHTPeerPublisher.class);
+        dhtPeerPublisher = new DHTPeerPublisherImpl(
+                Providers.of(dhtManager),
+                Providers.of(applicationServices),
+                Providers.of(networkManager),
+                Providers.of(torrentManager));
         kuidOne = KUIDUtils.toKUID(urnOne);
         kuidTwo = KUIDUtils.toKUID(urnTwo);
         eKeyOne = EntityKey.createEntityKey(kuidOne, DHTPeerLocatorUtils.BT_PEER_TRIPLE);               
@@ -145,7 +114,7 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
     // Tests if publishYourself properly stores the torrents in waiting list if
     // a DHT was not available or did not support bootstrapping. It also test to
     // ensure duplicate torrents do not get stored in the waiting list.
-    public void testpublishYourselfWhichShouldPutTorrentsInWaitingList() {
+    public void testPublishYourselfWhichShouldPutTorrentsInWaitingList() {
 
         context.checking(new Expectations() {
             {
@@ -181,7 +150,7 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
     }
 
     // Tests if publishYourself properly publishes the local host in DHT.
-    public void testpublishYourselfWhichShouldPubilshAPeerInDHT() {
+    public void testPublishYourselfWhichShouldPubilshAPeerInDHT() throws Exception {
 
         context.checking(new Expectations() {
             {
@@ -202,16 +171,10 @@ public class DHTPeerPublisherImplTest extends BaseTestCase {
 
         byte[] msg = null;
 
-        try {
-            torLoc = new TorrentLocation(InetAddress.getByName(NetworkUtils
+        torLoc = new TorrentLocation(InetAddress.getByName(NetworkUtils
                     .ip2string((networkManager.getAddress()))), networkManager.getPort(),
                     applicationServices.getMyBTGUID());
-            msg = DHTPeerLocatorUtils.encode(torLoc);
-        } catch (UnknownHostException uhe) {
-            fail(uhe);
-        } catch (IllegalArgumentException iae) {
-            fail(iae);
-        }
+        msg = DHTPeerLocatorUtils.encode(torLoc);
 
         final DHTValue dhtValue = new DHTValueImpl(DHTPeerLocatorUtils.BT_PEER_TRIPLE,
                 Version.ZERO, msg);
