@@ -23,15 +23,13 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
 import org.limewire.util.BaseTestCase;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.util.Providers;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.TorrentManager;
 import com.limegroup.gnutella.ApplicationServices;
-import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -65,13 +63,7 @@ public class DHTPeerLocatorImplTest extends BaseTestCase {
 
     private MojitoDHT dht;
 
-    private BTMetaInfo btMetaInfoOne;
-
-    private BTMetaInfo btMetaInfoTwo;
-
     private Contact contact;
-
-    private Module module;
 
     private DHTPeerLocator dhtPeerLocator;
 
@@ -109,8 +101,6 @@ public class DHTPeerLocatorImplTest extends BaseTestCase {
         applicationServices = context.mock(ApplicationServices.class);
         networkManager = context.mock(NetworkManager.class);
         dht = context.mock(MojitoDHT.class);
-        btMetaInfoOne = context.mock(BTMetaInfo.class);
-        btMetaInfoTwo = context.mock(BTMetaInfo.class);
         torrentManager = context.mock(TorrentManager.class);
 
         contact = context.mock(Contact.class);
@@ -122,23 +112,8 @@ public class DHTPeerLocatorImplTest extends BaseTestCase {
             fail(ie);
         }
 
-        module = new AbstractModule() {
-            @Override
-            public void configure() {
-                bind(ManagedTorrent.class).toInstance(managedTorrentOne);
-                bind(ManagedTorrent.class).toInstance(managedTorrentTwo);
-                bind(DHTManager.class).toInstance(dhtManager);
-                bind(ApplicationServices.class).toInstance(applicationServices);
-                bind(NetworkManager.class).toInstance(networkManager);
-                bind(MojitoDHT.class).toInstance(dht);
-                bind(BTMetaInfo.class).toInstance(btMetaInfoOne);
-                bind(BTMetaInfo.class).toInstance(btMetaInfoTwo);
-                bind(TorrentManager.class).toInstance(torrentManager);
-            }
-        };
-
-        Injector inj = LimeTestUtils.createInjector(module);
-        dhtPeerLocator = inj.getInstance(DHTPeerLocator.class);
+        dhtPeerLocator = new DHTPeerLocatorImpl(Providers.of(dhtManager),
+                Providers.of(torrentManager));
 
         kuidOne = KUIDUtils.toKUID(urnOne);
         eKeyOne = EntityKey.createEntityKey(kuidOne, DHTPeerLocatorUtils.BT_PEER_TRIPLE);
