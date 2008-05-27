@@ -46,7 +46,6 @@
 				<path refid="tests.limewire.components.lwsserver.classpath"/>
 				<path refid="tests.limewire.components.promotion.classpath"/>
 				<path refid="tests.limewire.components.geocode.classpath"/>
-				<path refid="tests.limewire.components.filemanger.classpath"/>
 			    <!-- Add as components are added. -->
 		    </tests-classpath>
         </do.setup-properties>    
