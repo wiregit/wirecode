@@ -464,7 +464,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
             long startLong = ByteUtils.beb2long(start, 0, 4);
             return new Date(startLong * 1000);
         } catch (BadGGEPPropertyException ex) {
-            return new Date();
+            return new Date(0);
         }
     }
 
