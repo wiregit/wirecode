@@ -7,15 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: limewire\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2008-05-19 11:30-0400\n"
-"PO-Revision-Date: 2008-05-12 19:36+0000\n"
+"POT-Creation-Date: 2008-05-26 11:31-0400\n"
+"PO-Revision-Date: 2008-05-26 13:57+0000\n"
 "Last-Translator: Seanan <Unknown>\n"
 "Language-Team: Irish(Ireland) <ga_IE@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n==2 ? 1 : 2;\n"
-"X-Launchpad-Export-Date: 2008-05-20 04:08+0000\n"
+"X-Launchpad-Export-Date: 2008-05-27 03:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 "X-Poedit-Country: IRELAND\n"
 "X-Poedit-Language: Irish\n"
@@ -201,7 +201,7 @@ msgstr "Ag Luchtú Éisteoir Chomhghleacaithe..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:517
 msgid "Loading Stale Connection Management..."
-msgstr "Ag Luchtú Bainistíocht Nasc Dreoite..."
+msgstr "Ag Luchtú Bainistíocht Nasc Seanda..."
 
 #: core/com/limegroup/gnutella/LifecycleManagerImpl.java:522
 msgid "Loading Saved Files..."
@@ -742,7 +742,7 @@ msgstr "LimeWire"
 #. 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:104
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:79
-#: gui/com/limegroup/gnutella/gui/properties/ResultPropertiesDialog.java:105
+#: gui/com/limegroup/gnutella/gui/properties/ResultPropertiesDialog.java:104
 msgid "Close"
 msgstr "Dún"
 
@@ -801,7 +801,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:218
 msgid ""
 "LimeWire PRO questions are dutifully answered by LimeWire technical support:"
-msgstr "Freagraíonn na daoine seo na ceisteanna faoi LimeWire Pro:"
+msgstr ""
+"Freagraíonn foireann thacaíochta LimeWire ceisteanna um LimeWire PRO:"
 
 #. previous developers
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:228
@@ -2178,6 +2179,13 @@ msgid ""
 "to block. After a short training period, LimeWire automatically blocks most "
 "junk results."
 msgstr ""
+"An bhfuil tú ag smaoineamh conas ar féidir tuile torthaí cuardaigh "
+"seafóideacha a sheachaint? Roghnaigh an toradh cuardaigh agus ansin brúigh "
+"an cnaipe <font color=\"1E8E44\">Mangarae</font>. Mar a chomharthaíonn tú "
+"torthaí cuardaigh mar <font color=\"1E8E44\">Mangarae</font> nó <font "
+"color=\"1E8E44\">Ní Mangarae É</font>, foghlaimíonn LimeWire cad ar chóir dó "
+"bac a chuir ar agus cad nár chóir bac a chuir ar. Tar éis beagán oiliúna, "
+"cuireann LimeWire bac ar thorthaí gur mangarae iad go huathoibríoch."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:134
 msgid ""
@@ -2238,6 +2246,11 @@ msgid ""
 "Also, you can change what these boxes show. Click the circle in the upper "
 "left corner of a box and choose a new option from the menu."
 msgstr ""
+"Tar éis duit cuardach a thosú, is féidir na trí bhoscaí ar chlé a "
+"shaincheapadh le teidil ar nós Meáin, Ealaíontóir agus Albam chun torthaí "
+"cuardaigh níos shaincheaptha a fháil. Freisin is féidir cad a thaispeánann "
+"na boscaí seo a athrú. Brúigh an ciorcal sa chúinne ar bharr an taobh clé sa "
+"bhosca agus roghnaigh rogha nua ón roghchlár."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:157
 msgid ""
@@ -2249,6 +2262,14 @@ msgid ""
 "&gt; <font color=\"1E8E44\">Advanced</font> &gt; <font "
 "color=\"1E8E44\">Firewall</font> section."
 msgstr ""
+"Is féidir Leabharlann do chara a shiortú trí <font color=\"1E8E44\">Nasc "
+"Díreach</font>. Téigh chuig <font color=\"1E8E44\">Cuardach</font> &gt; "
+"<font color=\"1E8E44\">Nasc Díreach</font>, ansin cuir isteach an seoladh ip "
+"agus uimhir an phoirt de ríomhaire do chara ar an dóigh seo a leanas: "
+"'seoladh ip:port'. Is féidir leat luach an phoirt a aimsiú trí an rannóg "
+"<font color=\"1E8E44\">Roghanna</font> &gt; <font "
+"color=\"1E8E44\">Ardroghanna</font> &gt; <font color=\"1E8E44\">Balla "
+"Dóiteáin</font>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:167
 msgid ""
@@ -2265,6 +2286,12 @@ msgid ""
 "Incoming Searches</font> to see other people's search queries. Double-click "
 "an incoming query to perform a search for that keyword."
 msgstr ""
+"An bhfuil tú fiosrach faoi cad iad cuardaithe treorfhocail daoine eile?  "
+"Téigh chuig an cluaisín <font color=\"1E8E44\">Scáileán</font> agus "
+"roghnaigh <font color=\"1E8E44\">Taispeáin na Cuardaithe Ag Teacht "
+"Isteach</font> chun iarratais cuardaithe daoine eile a fheiceáil. Brúigh "
+"faoi dhó ar iarratas ag teacht isteach chun cuardach don treorfhocal sin a "
+"dhéanamh."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:174
 msgid ""
@@ -2355,6 +2382,13 @@ msgid ""
 "the <font color=\"1E8E44\">Library</font> tab even if all saved files are in "
 "one folder."
 msgstr ""
+"In ionad do chomhaid go léir a chuir in aon fhillteán amháin, is féidir le "
+"LimeWire íosluchtaithe a aicmiú de réir cineál meáin. Sa bhfuinneog <font "
+"color=\"1E8E44\">Roghanna</font> &gt; <font color=\"1E8E44\">Ag Cuir i "
+"dTaisce</font>, roghnaigh cineál meáin ar nós 'Fuaim', agus brúigh an cnaipe "
+"<font color=\"1E8E44\">Siortaigh</font>. Is féidir comhaid a thoghadh de "
+"réir cineál meáin i gcluaisín na <font color=\"1E8E44\">Leabharlainne</font> "
+"fiú má tá gach comhad i dtaisce in aon fillteán amháin."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:216
 msgid ""
@@ -2455,6 +2489,8 @@ msgid ""
 "Ultrapeers help the network by distributing only pertinent network traffic "
 "to the leaf nodes."
 msgstr ""
+"Cuidíonn ollchomhghleacaithe leis an líonra trí trácht líonra atá cuí amháin "
+"a dháileadh chuig na duillnóid."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:261
 msgid ""
@@ -2463,6 +2499,10 @@ msgid ""
 "color=\"1E8E44\">Shared</font> displays an icon to show shared (two arrows "
 "forming a circle) or not shared (an X mark)."
 msgstr ""
+"Conas a fheictear cén comhaid sna fillteáin comhroinnte atá comhroinnte? I "
+"gcluaisín na <font color=\"1E8E44\">Leabharlainne</font>, taispeánann an "
+"colún <font color=\"1E8E44\">Comhroinnte</font> deilbhín chun comhroinnte a "
+"thaispeáint (dhá shaighead ag déanamh cruinne) nó neamhchomhroinnte (le X)."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:266
 msgid ""
@@ -2544,6 +2584,11 @@ msgid ""
 "color=\"1E8E44\">Priority</font> column. Select the download you want to "
 "start next and click the up arrow until it's at the top."
 msgstr ""
+"Is féidir a rá le LimeWire cad iad na chéad íosluchtaithe eile le tosú trí "
+"deaschliceáil ar ceanntásc an cholúin sa limistéar íosluchtú agus ansin an "
+"colún <font color=\"1E8E44\">Tosaíocht</font> a roghnú. Roghnaigh an chéad "
+"íosluchtú eile a theastaíonn uait tosú agus brúigh an suas saighead go dtí "
+"go bhfuil sé ag an barr."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:281
 msgid ""
@@ -2621,6 +2666,10 @@ msgid ""
 "etc. LimeWire will warn you if you attempt to share a folder that people "
 "generally use to store sensitive data (such as Users, System, Desktop, etc). "
 msgstr ""
+"Bí cúramach gan faisnéis íogair ar nós cáipéisí cháin, slánaíochtaí, srl, a "
+"chomhroinnt. Tabharfaidh LimeWire rabhadh duit má dhéanann tú iarracht "
+"fillteán a bhaineann daoine feidhm as de ghnáth chun sonraí íogair a chuir i "
+"dtaisce ann (ar nós Úsáideoirí, Córas, Deasc, srl.) a chomhroinnt. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:327
 msgid ""
@@ -2638,6 +2687,9 @@ msgid ""
 "right-clicking (or control-clicking) the LimeWire status bar and deselecting "
 "<font color=\"1E8E44\">Show Media Player</font>. "
 msgstr ""
+"Is féidir ceol a sheinm i do sheinnteoir ceoil réamhshocraithe seachas i "
+"LimeWire trí deaschliceáil (nó brúigh ar control) ar treoshabh LimeWire agus "
+"<font color=\"1E8E44\">Taispeáin Seinnteoir Meáin</font> a díroghnú. "
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:343
 msgid ""
@@ -2645,6 +2697,10 @@ msgid ""
 "preferences such as your saved folder, shared folder, upload bandwidth, etc. "
 "These preferences (and more) are available at {0}."
 msgstr ""
+"Is féidir LimeWire a shaincheapadh chomh mór is ar mhaith leat trí "
+"sainroghanna éagsúil a athrú ar nós do thaiscfhillteán, fillteán "
+"comhroinnte, leithead an chreasa le haghaidh uasluchtú, srl. Tá na "
+"sainroghanna seo (agus tuilleadh) ar fáil ag {0}."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:344
 #, java-format
@@ -2661,6 +2717,10 @@ msgid ""
 "and uploads (transfers) are complete via {0} and looking at the <font "
 "color=\"1E8E44\">System Tray</font> options."
 msgstr ""
+"Bí i do rannpháirtí líonra maith, ná dún LimeWire má tá duine éigin ag "
+"uasluchtú uait. Is féidir a rá le LimeWire dúnadh go huathoibríoch tar éis "
+"do gach íosluchtú agus uaslucht (aistrithe) críochnú trí {0} agus trí "
+"breathnú ar na roghanna <font color=\"1E8E44\">Tráidire an Chórais</font>."
 
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMessages.java:346
 msgid ""
@@ -2996,7 +3056,7 @@ msgstr ""
 "íosluchtaigh an leagan feidhmiúil is déanaí de LimeWire.</html>"
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:34
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:104
 msgid "Lookup File with Bitzi"
 msgstr "Féach Ar an Comhad le Bitzi"
 
@@ -3095,7 +3155,7 @@ msgstr "Féach Ar Mo {0} Chomhaid Chomhroinnte"
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:785
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:585
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:579
 #, java-format
 msgid "Search for Keywords: {0}"
 msgstr "Cuardaigh Treoirfhocail: {0}"
@@ -3207,8 +3267,8 @@ msgstr "Níorbh fhéidir an teachtaireacht an comhrá a sheoladh"
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:241
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:950
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:43
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:96
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:102
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:44
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:53
 msgid "Browse Host"
@@ -3628,7 +3688,7 @@ msgid "Size"
 msgstr "Méid"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:379
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:358
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:360
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:73
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:251
 msgid "Chat"
@@ -3640,8 +3700,8 @@ msgid "Progress"
 msgstr "Dul Chun Cinn"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:395
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:329
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:386
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:331
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:393
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:68
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:81
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:267
@@ -3652,12 +3712,12 @@ msgstr "Luas"
 #. connectionsPane.add(new AutoConnectActivePaneItem("AUTO_CONNECT_ACTIVE"));
 #. bittorrent
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:923
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:344
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:346
 msgid "BitTorrent"
 msgstr "BitTorrent"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:206
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:331
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:333
 msgid "Downloads"
 msgstr "Íosluchtaithe"
 
@@ -4307,7 +4367,7 @@ msgstr "Cosán"
 
 #. upload options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:155
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:334
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:336
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:58
 msgid "Uploads"
 msgstr "Uasluchtaithe"
@@ -4346,19 +4406,19 @@ msgstr "Níl an fillteán seo comhroinnte."
 
 #. for sharing gnutella
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:233
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:321
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:370
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:372
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:19
 msgid "Sharing"
 msgstr "Ag Comhroinnt"
 
 #. advanced options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:283
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:318
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:346
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:396
-#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:201
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:320
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:325
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:348
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:403
+#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:206
 msgid "Advanced"
 msgstr "Ardroghanna"
 
@@ -4473,7 +4533,7 @@ msgid "Show Magnet Details"
 msgstr "Taispeán Sonraí an Magnet"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1484
-#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:170
+#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:171
 msgid "View License"
 msgstr "Féach ar an Ceadúnas"
 
@@ -4850,12 +4910,12 @@ msgstr "Cuir Arais na Réamhshocruithe"
 msgid "Revert All Settings to the Factory Defaults"
 msgstr "Fill Ar na Socruithe Uile chuig Réamhshocruithe na Monarchan"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:208
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:210
 #: gui/com/limegroup/gnutella/gui/search/FilterBox.java:76
 msgid "Options"
 msgstr "Roghanna"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:225
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:227
 msgid ""
 "You have made changes to some of LimeWire's settings. Would you like to save "
 "these changes?"
@@ -4864,151 +4924,152 @@ msgstr ""
 "seo a choimeád?"
 
 #. set text before adding the document listener
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:256
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:258
 msgid "Search here"
 msgstr "Cuardaigh anseo"
 
 #. for saving gnutella
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:316
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:318
 msgid "Saving"
 msgstr "Ag cuir i dtaisce"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:317
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:322
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:335
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:345
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:384
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:319
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:324
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:337
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:347
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:387
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:389
 msgid "Basic"
 msgstr "Bunúsach"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:324
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:326
 msgid "Types"
 msgstr "Cineálacha"
 
 #. store options
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:327
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:329
 msgid "LimeWire Store"
 msgstr "Díolbhoth LimeWire"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:336
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:338
 msgid "Slots"
 msgstr "Scoilteacha"
 
 #. uploadSlotsPane.add(new SoftMaximumUploadsPaneItem("UPLOAD_SOFT_MAX"));
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:339
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:341
 #: gui/com/limegroup/gnutella/gui/tabs/ConnectionsTab.java:26
 msgid "Connections"
 msgstr "Naisc"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:354
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:356
 msgid "System Tray"
 msgstr "Trádaire an Chórais"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:356
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:358
 msgid "Updates"
 msgstr "Nuashonraithe"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:360
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:362
 msgid "Player"
 msgstr "Seinnteoir"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:362
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:364
 msgid "Status Bar"
 msgstr "Treoshabh"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:366
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:368
 msgid "iTunes"
 msgstr "iTunes"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:368
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:370
 #: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:15
 msgid "Importing"
 msgstr "Ag Allmhuiriú"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:373
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:375
 msgid "Helper Apps"
 msgstr "Feidhmchláir"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:376
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:378
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:76
 msgid "Bug Reports"
 msgstr "Tuairiscí Fabhtaí"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:378
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:380
 msgid "View"
 msgstr "Amharc"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:379
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:381
 msgid "Popups"
 msgstr "Míreanna aníos"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:380
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:382
 msgid "Autocomplete"
 msgstr "Uathchríochnaigh"
 
 #. search options
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:383
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:385
 msgid "Searching"
 msgstr "Ag Cuardú"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:385
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:392
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:32
 msgid "Quality"
 msgstr "Cáil"
 
 #. filter options
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:389
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:396
 msgid "Filters"
 msgstr "Scagairí"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:390
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:397
 msgid "Content"
 msgstr "Inneachair"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:391
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:332
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:516
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:624
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:649
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:113
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:398
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:329
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:513
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:618
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:643
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:110
 msgid "Junk"
 msgstr "Mangarae"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:392
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:399
 msgid "Keywords"
 msgstr "Treoirfhocail"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:393
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:400
 msgid "Hosts"
 msgstr "Óstaigh"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:397
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:404
 msgid "Preferencing"
 msgstr "Sainroghnaíocht"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:398
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:405
 msgid "Firewall"
 msgstr "Balla Dóiteáin"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:399
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:406
 msgid "Proxy"
 msgstr "Seachfhreastalaí"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:400
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:407
 #: gui/com/limegroup/gnutella/gui/options/panes/NetworkInterfacePaneItem.java:33
 msgid "Network Interface"
 msgstr "Comhéadan an Líonra"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:402
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:409
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:58
 msgid "File Associations"
 msgstr "Comhthiomsaithe Comhad"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:404
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:411
 msgid "Performance"
 msgstr "Feidhmíocht"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:406
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:413
 msgid "System Boot"
 msgstr "Tosú an Chórais"
 
@@ -5780,6 +5841,23 @@ msgstr "Níl an port ar fáil. Roghnaigh port eile le do thoil."
 msgid "Please enter a port between 1 and 65535."
 msgstr "Cuir isteach port idir 1 agus 65535."
 
+#: gui/com/limegroup/gnutella/gui/options/panes/PromotionalSearchPaneItem.java:15
+msgid "LimeLinks"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/options/panes/PromotionalSearchPaneItem.java:17
+msgid "You can disable LimeLinks from appearing in search results."
+msgstr ""
+
+#. *
+#. * Constant for the key of the locale-specific <code>String</code> for the
+#. * label on the component that allows to user to change the setting for
+#. * this <tt>PaneItem</tt>.
+#. 
+#: gui/com/limegroup/gnutella/gui/options/panes/PromotionalSearchPaneItem.java:24
+msgid "Disable LimeLinks:"
+msgstr ""
+
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:24
 msgid "Login Details"
 msgstr "Sonraí Clárú"
@@ -6294,7 +6372,7 @@ msgstr "Seinmréim"
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:180
 msgid "Loading Playlist Window..."
-msgstr "Ag Luchtú Fuinneog na Seinnréime..."
+msgstr "Ag Luchtú Fuinneog na Seinmréim..."
 
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistMediator.java:545
 #, fuzzy
@@ -6343,7 +6421,7 @@ msgstr ""
 msgid "Kbps"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/properties/ResultPropertiesDialog.java:57
+#: gui/com/limegroup/gnutella/gui/properties/ResultPropertiesDialog.java:56
 msgid "General"
 msgstr ""
 
@@ -6367,7 +6445,7 @@ msgstr "Scag na Torthaí:"
 msgid "Back To Search"
 msgstr "Fill Ar An Cuardach"
 
-#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:168
+#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:169
 #, fuzzy
 msgid "Download As..."
 msgstr "Íosluchtaigh Mar..."
@@ -6432,49 +6510,49 @@ msgstr ""
 "Tacaíocht phearsantaithe\n"
 "Nuashonraithe in aisce ar feadh sé mhí"
 
-#: gui/com/limegroup/gnutella/gui/search/PromotionSearchResult.java:183
+#: gui/com/limegroup/gnutella/gui/search/PromotionSearchResult.java:189
 msgid "View in Browser..."
-msgstr "Féach ar sa Líonléitheoir..."
+msgstr "Féach Ar I Líonléitheoir..."
 
 #. mark 'em red
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:330
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:502
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:646
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:115
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:327
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:499
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:640
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:112
 msgid "Not Junk"
 msgstr "Ní Dramhaíl Í Seo"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:333
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:517
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:625
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:650
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:330
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:514
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:619
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:644
 msgid "Mark selected search results as Junk"
 msgstr "Cuir comhartha ar na torthaí cuardach roghnaithe mar Dramhaíl"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:503
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:647
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:500
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:641
 msgid "Mark selected search results as Not Junk"
 msgstr ""
 "Cuir comhartha ar na torthaí cuardach roghnaithe mar Ní Dramhaíl Iad Seo"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:569
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:563
 #, fuzzy
 msgid "Search More"
 msgstr "Cuardaigh Tuilleadh"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:733
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:727
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr ""
 "An dteastaíonn uait cosc a chur ar torthaí cuardach ón na réimeanna óstaigh "
 "seo a leanas?"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1080
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1074
 msgid "More Info..."
 msgstr "Tuilleadh Eolas..."
 
 #: gui/com/limegroup/gnutella/gui/search/SchemaBox.java:44
 msgid "Select Search Type:"
-msgstr "Roghnaigh Cineál Cuardach:"
+msgstr "Roghnaigh An Cineál Cuardach:"
 
 #: gui/com/limegroup/gnutella/gui/search/SchemaBox.java:184
 msgid "Search For Audio Files, Including mp3, wav, ogg, and More"
@@ -6500,23 +6578,23 @@ msgstr ""
 "Cuardaigh Comhaid Ríomhoideas, ina áirítear exe, zip, gz agus Tuilleadh"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:42
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:88
 #, fuzzy
 msgid "Download"
 msgstr "Íosluchtaigh"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:44
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:92
 msgid "Stop Search"
-msgstr "Stad an Cuardach"
+msgstr "Iaigh an Cuardach"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:47
 msgid "Download All Selected Files"
-msgstr "Íosluchtaigh Na Comhaid Roghnaithe Uile"
+msgstr "Íosluchtaigh na Comhaid Roghnaithe Uile"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:48
 msgid "View All Files on Selected Computer"
-msgstr "Féach Ar Na Comhaid Uile Ar An Ríomhaire Seo"
+msgstr "Féach Ar Gach Comhad Ar An Ríomhaire Seo"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:49
 msgid "Stop Collecting Search Results for Selected Tab"
@@ -6589,7 +6667,7 @@ msgstr "Folaigh Ábhar do Dhaoine Fásta"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:551
 msgid "Filename"
-msgstr "Ainm Comhaid"
+msgstr "Comhadainm"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:578
 msgid "Search the Network for the Given Words"
@@ -6599,48 +6677,48 @@ msgstr "Cuardaigh an Líonra do na Focail Tugtha"
 msgid "The address format is incorrect, please use host:port."
 msgstr "Tá formáid an seoladh mícheart, bain feidhm as óstach:port."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:90
 #, fuzzy
 msgid "Close Search"
 msgstr "Dún an Cuardach"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:94
 msgid "Launch Action"
 msgstr "Tosaigh Gníomh"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:98
 msgid "Chat With Host"
-msgstr "Déan Comhrá Leis An t-Óstach"
+msgstr "Déan Comhrá Leis An Ríomhaire Óstach"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:100
 #, fuzzy
 msgid "Repeat Search"
 msgstr "Déan an Cuardach Arís"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:106
 #, fuzzy
 msgid "Block Hosts"
 msgstr "Cuir Bac ar na hÓstaigh"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:108
 msgid "Mark As"
 msgstr "Comharthaigh Mar"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:117
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:114
 #, fuzzy
 msgid "Get More Results"
 msgstr "Faigh Tuilleadh Torthaí"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:147
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:142
 #, fuzzy
 msgid "Loading Search Window..."
 msgstr "Ag Luchtú Fuinneog an Chuardaigh..."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:345
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:340
 msgid "Firewalled Host"
 msgstr "Óstach a bhfuil Balla Dóiteáin acu"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:464
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:461
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
 "network."
@@ -6648,20 +6726,20 @@ msgstr ""
 "Caithfear ar a laghad trí litreacha bheith i do chuardach ionas nach "
 "cúngófar an líonra."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:469
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:466
 msgid ""
 "Your search is too long. Please make your search smaller and try again."
 msgstr ""
 "Tá do chuardach ró-fhada. Laghdaigh do chuardach agus déan iarracht arís."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:472
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:476
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:469
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:473
 msgid ""
 "Your search is too specific. Please make your search smaller and try again."
 msgstr ""
 "Tá do chuardach ró-shonrach. Laghdaigh do chuardach agus déan iarracht eile."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:481
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:478
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
@@ -6669,7 +6747,7 @@ msgstr ""
 "a thosú."
 
 #. if not connected or connecting, show one message.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:490
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:487
 msgid ""
 "You are not connected to the network. To connect, select \"Connect\" from "
 "the \"File\" menu. Your search may not return any results until you connect."
@@ -6678,7 +6756,7 @@ msgstr ""
 "\"Comhad\". B´fhéidir nach gheofar toradh ar bith go dtí go ceanglaíonn tú.."
 
 #. if attempting to connect, show another.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:493
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:490
 msgid ""
 "LimeWire is currently connecting to the network. Your search may not return "
 "many results until you are fully connected to the network."
@@ -6686,7 +6764,7 @@ msgstr ""
 "Tá LimeWire ag nascadh leis an líonra faoi láthair. B´fhéidir nach gheofar "
 "mórán torthaí go dtí go bhfuil tú nascadh go hiomlán leis an líonra."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:808
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:801
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
@@ -6695,7 +6773,7 @@ msgstr ""
 "aicídnimh a bheith ann. An bhfuil tú cinnte go dteastaíonn uait é a "
 "íosluchtú?"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:476
+#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:475
 #, java-format
 msgid "Could not browse host {0}."
 msgstr "Níorbh fhéidir an t-óstach {0} a shiortú."
@@ -6728,7 +6806,7 @@ msgstr "Meáin"
 msgid "... {0} more."
 msgstr "... {0} eile."
 
-#: gui/com/limegroup/gnutella/gui/search/TableLine.java:752
+#: gui/com/limegroup/gnutella/gui/search/TableLine.java:753
 msgid ""
 "This is a secure result. No information in this result has been tampered."
 msgstr "Seo toradh slán. Níor bhaineadh leis an fhaisnéis sa toradh seo."
@@ -6749,7 +6827,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:82
 msgid "My Extensions"
-msgstr "Mo Iarmhíreanna"
+msgstr "M'Iarmhíreanna"
 
 #: gui/com/limegroup/gnutella/gui/sharing/FileTypeSharingPanelManager.java:83
 msgid "Other"
@@ -6919,7 +6997,7 @@ msgstr "Eallóg"
 
 #: gui/com/limegroup/gnutella/gui/tabs/ConsoleTab.java:29
 msgid "View Console Messages"
-msgstr "Féach ar Teachtaireachtaí na hEallóige"
+msgstr "Féach ar Teachtaireachtaí ón Eallóg"
 
 #: gui/com/limegroup/gnutella/gui/tabs/LibraryPlayListTab.java:39
 msgid "View Repository of Saved Files"
@@ -6953,7 +7031,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:113
 msgid "To try your new skin, you must restart LimeWire."
-msgstr "Chun do chraiceann nua a fheiceáil, caithfear LimeWire a atosú."
+msgstr "Chun leas a bhaint as do chraiceann nua, caithfear LimeWire a atosú."
 
 #: gui/com/limegroup/gnutella/gui/themes/ThemeMediator.java:183
 msgid "Invalid Skin"
@@ -6993,7 +7071,7 @@ msgstr "Cuir Stad leis na hUasluchtaithe Roghnaithe"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:50
 msgid "Remove Inactive Uploads"
-msgstr "Bain Uasluchtaithe Neamhghníomhacha"
+msgstr "Bain na hUasluchtaithe Neamhghníomhacha"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:48
 #, fuzzy
@@ -7051,7 +7129,7 @@ msgstr "Saithigh do {0}"
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:137
 msgid "Loading Upload Window..."
-msgstr "Ag Luchtú Fuinneog na hUasluchtú..."
+msgstr "Ag Luchtú Fuinneog na hUasluchtaithe..."
 
 #: gui/com/limegroup/gnutella/gui/upload/UploadProgressBarRenderer.java:39
 msgid "Seeding"

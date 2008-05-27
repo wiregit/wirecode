@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-05-19 11:30-0400\n"
+"POT-Creation-Date: 2008-05-26 11:31-0400\n"
 "PO-Revision-Date: 2008-04-27 15:43+0000\n"
 "Last-Translator: Elias Julkunen <elias.julkunen@gmail.com>\n"
 "Language-Team: <fi@li.org>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Launchpad-Export-Date: 2008-05-20 04:08+0000\n"
+"X-Launchpad-Export-Date: 2008-05-27 03:57+0000\n"
 "X-Generator: Launchpad (build Unknown)\n"
 
 #~ msgid ""
@@ -1785,7 +1785,7 @@ msgstr "LimeWire"
 #. 
 #: gui/com/limegroup/gnutella/gui/AboutWindow.java:104
 #: gui/com/limegroup/gnutella/gui/TipOfTheDayMediator.java:79
-#: gui/com/limegroup/gnutella/gui/properties/ResultPropertiesDialog.java:105
+#: gui/com/limegroup/gnutella/gui/properties/ResultPropertiesDialog.java:104
 msgid "Close"
 msgstr "Sulje"
 
@@ -3741,7 +3741,7 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/BitziLookupAction.java:34
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:107
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:104
 msgid "Lookup File with Bitzi"
 msgstr "Bitzi web etsintä..."
 
@@ -3839,7 +3839,7 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:785
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:585
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:579
 #, java-format
 msgid "Search for Keywords: {0}"
 msgstr "Etsitään hakusanaa {0}"
@@ -3950,8 +3950,8 @@ msgstr "Pikaviestiä ei voitu lähettää"
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:241
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:950
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:43
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:99
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:105
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:96
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:102
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:44
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:53
 msgid "Browse Host"
@@ -4369,7 +4369,7 @@ msgid "Size"
 msgstr "Koko"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:379
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:358
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:360
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:73
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:251
 msgid "Chat"
@@ -4381,8 +4381,8 @@ msgid "Progress"
 msgstr "Eteneminen"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:395
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:329
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:386
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:331
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:393
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:68
 #: gui/com/limegroup/gnutella/gui/search/Selector.java:81
 #: gui/com/limegroup/gnutella/gui/upload/UploadDataLine.java:267
@@ -4393,12 +4393,12 @@ msgstr "Nopeus"
 #. connectionsPane.add(new AutoConnectActivePaneItem("AUTO_CONNECT_ACTIVE"));
 #. bittorrent
 #: gui/com/limegroup/gnutella/gui/download/DownloadDataLine.java:923
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:344
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:346
 msgid "BitTorrent"
 msgstr "BitTorrent"
 
 #: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:206
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:331
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:333
 msgid "Downloads"
 msgstr "Lataukset"
 
@@ -5034,7 +5034,7 @@ msgstr "Polku"
 
 #. upload options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableDataLine.java:155
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:334
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:336
 #: gui/com/limegroup/gnutella/gui/upload/UploadMediator.java:58
 msgid "Uploads"
 msgstr "Jaot"
@@ -5073,19 +5073,19 @@ msgstr ""
 
 #. for sharing gnutella
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:233
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:321
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:370
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:372
 #: gui/com/limegroup/gnutella/gui/options/panes/DaapSupportPaneItem.java:19
 msgid "Sharing"
 msgstr "Jaetaan"
 
 #. advanced options
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:283
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:318
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:323
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:346
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:396
-#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:201
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:320
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:325
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:348
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:403
+#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:206
 msgid "Advanced"
 msgstr "Asiantuntija"
 
@@ -5196,7 +5196,7 @@ msgid "Show Magnet Details"
 msgstr "Näytä magnet-yksityiskohdat"
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1484
-#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:170
+#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:171
 msgid "View License"
 msgstr "Näytä lisenssi"
 
@@ -5575,164 +5575,165 @@ msgstr "Palauta oletusasetukset"
 msgid "Revert All Settings to the Factory Defaults"
 msgstr "Palauta kaikki asetukset oletusasetuksiksi."
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:208
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:210
 #: gui/com/limegroup/gnutella/gui/search/FilterBox.java:76
 msgid "Options"
 msgstr "Asetukset"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:225
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:227
 msgid ""
 "You have made changes to some of LimeWire's settings. Would you like to save "
 "these changes?"
 msgstr ""
 
 #. set text before adding the document listener
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:256
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:258
 #, fuzzy
 msgid "Search here"
 msgstr "Etsi lisää"
 
 #. for saving gnutella
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:316
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:318
 msgid "Saving"
 msgstr "Tallennetaan"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:317
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:322
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:335
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:345
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:384
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:319
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:324
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:337
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:347
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:387
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:389
 msgid "Basic"
 msgstr "Perus"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:324
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:326
 msgid "Types"
 msgstr ""
 
 #. store options
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:327
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:329
 msgid "LimeWire Store"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:336
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:338
 msgid "Slots"
 msgstr "Slotteja"
 
 #. uploadSlotsPane.add(new SoftMaximumUploadsPaneItem("UPLOAD_SOFT_MAX"));
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:339
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:341
 #: gui/com/limegroup/gnutella/gui/tabs/ConnectionsTab.java:26
 msgid "Connections"
 msgstr "Yhteydet"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:354
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:356
 msgid "System Tray"
 msgstr "System tray"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:356
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:358
 msgid "Updates"
 msgstr "Päivitykset"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:360
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:362
 msgid "Player"
 msgstr "Soitin"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:362
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:364
 msgid "Status Bar"
 msgstr "Tilapalkki"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:366
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:368
 msgid "iTunes"
 msgstr "iTunes"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:368
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:370
 #: gui/com/limegroup/gnutella/gui/options/panes/iTunesPreferencePaneItem.java:15
 msgid "Importing"
 msgstr "Tuodaan"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:373
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:375
 msgid "Helper Apps"
 msgstr "Apuohjelmat"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:376
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:378
 #: gui/com/limegroup/gnutella/gui/options/panes/BugsPaneItem.java:76
 msgid "Bug Reports"
 msgstr "Virheraportit"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:378
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:380
 msgid "View"
 msgstr "Katso"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:379
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:381
 msgid "Popups"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:380
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:382
 msgid "Autocomplete"
 msgstr ""
 
 #. search options
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:383
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:385
 msgid "Searching"
 msgstr "Haku"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:385
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:392
 #: gui/com/limegroup/gnutella/gui/search/SearchTableColumns.java:32
 msgid "Quality"
 msgstr "Laatu"
 
 #. filter options
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:389
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:396
 msgid "Filters"
 msgstr "Suodattimet"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:390
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:397
 msgid "Content"
 msgstr "Sisältö"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:391
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:332
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:516
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:624
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:649
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:113
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:398
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:329
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:513
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:618
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:643
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:110
 msgid "Junk"
 msgstr "Roskaa"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:392
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:399
 msgid "Keywords"
 msgstr "Avainsanat"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:393
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:400
 msgid "Hosts"
 msgstr "Palvelimet"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:397
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:404
 msgid "Preferencing"
 msgstr "Asetukset"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:398
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:405
 msgid "Firewall"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:399
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:406
 msgid "Proxy"
 msgstr "Välityspalvelin"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:400
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:407
 #: gui/com/limegroup/gnutella/gui/options/panes/NetworkInterfacePaneItem.java:33
 msgid "Network Interface"
 msgstr "Verkkokortti"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:402
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:409
 #: gui/com/limegroup/gnutella/gui/shell/ShellAssociationManager.java:58
 msgid "File Associations"
 msgstr "Tiedostoliitynnät"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:404
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:411
 msgid "Performance"
 msgstr "Suorituskyky"
 
-#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:406
+#: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:413
 msgid "System Boot"
 msgstr ""
 
@@ -6530,6 +6531,23 @@ msgstr "Portti ei ole käytettävissä. Valitse toinen portti."
 msgid "Please enter a port between 1 and 65535."
 msgstr "Ole hyvä ja valitse portti numero väliltä 1 - 65535."
 
+#: gui/com/limegroup/gnutella/gui/options/panes/PromotionalSearchPaneItem.java:15
+msgid "LimeLinks"
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/options/panes/PromotionalSearchPaneItem.java:17
+msgid "You can disable LimeLinks from appearing in search results."
+msgstr ""
+
+#. *
+#. * Constant for the key of the locale-specific <code>String</code> for the
+#. * label on the component that allows to user to change the setting for
+#. * this <tt>PaneItem</tt>.
+#. 
+#: gui/com/limegroup/gnutella/gui/options/panes/PromotionalSearchPaneItem.java:24
+msgid "Disable LimeLinks:"
+msgstr ""
+
 #: gui/com/limegroup/gnutella/gui/options/panes/ProxyLoginPaneItem.java:24
 msgid "Login Details"
 msgstr "Kirjautumistiedot"
@@ -7059,7 +7077,7 @@ msgstr ""
 msgid "Kbps"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/properties/ResultPropertiesDialog.java:57
+#: gui/com/limegroup/gnutella/gui/properties/ResultPropertiesDialog.java:56
 msgid "General"
 msgstr "Yleinen"
 
@@ -7081,7 +7099,7 @@ msgstr "Suodata tulokset"
 msgid "Back To Search"
 msgstr "Takaisin hakuun"
 
-#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:168
+#: gui/com/limegroup/gnutella/gui/search/GnutellaSearchResult.java:169
 msgid "Download As..."
 msgstr "Lataa..."
 
@@ -7144,39 +7162,39 @@ msgstr ""
 "Henkilökohtaista tukipalvelua.\n"
 "Puoli vuotta ilmaisia päivityksiä."
 
-#: gui/com/limegroup/gnutella/gui/search/PromotionSearchResult.java:183
+#: gui/com/limegroup/gnutella/gui/search/PromotionSearchResult.java:189
 msgid "View in Browser..."
 msgstr ""
 
 #. mark 'em red
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:330
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:502
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:646
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:115
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:327
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:499
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:640
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:112
 msgid "Not Junk"
 msgstr "EI roskaa..."
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:333
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:517
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:625
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:650
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:330
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:514
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:619
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:644
 msgid "Mark selected search results as Junk"
 msgstr "Merkitse valitut tulokset roskaksi"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:503
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:647
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:500
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:641
 msgid "Mark selected search results as Not Junk"
 msgstr "Merkitse valitut tulokset: ei roskaa"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:569
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:563
 msgid "Search More"
 msgstr "Etsi lisää"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:733
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:727
 msgid "Do you want to block search results from the following list of hosts?"
 msgstr "Haluatko sulkea hakutulokset seuraavilta palvelimiltä:"
 
-#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1080
+#: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:1074
 msgid "More Info..."
 msgstr "Lisätietoja...."
 
@@ -7205,12 +7223,12 @@ msgid "Search for Program Files, Including exe, zip, gz, and More"
 msgstr "Etsi ohjelmatiedostoja, esim. exe, zip ja gz."
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:42
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:91
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:88
 msgid "Download"
 msgstr "Lataa"
 
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:44
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:92
 msgid "Stop Search"
 msgstr "Pysäytä haut"
 
@@ -7299,43 +7317,43 @@ msgstr "Etsi verkosta syötetyillä sanoilla."
 msgid "The address format is incorrect, please use host:port."
 msgstr "Osoite on virheellistä muotoa, käytä muotoa palvelin:portti."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:93
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:90
 msgid "Close Search"
 msgstr "Sulje haut"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:97
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:94
 msgid "Launch Action"
 msgstr "Käynnistä toiminto"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:98
 msgid "Chat With Host"
 msgstr "Pikaviesti palvelimen kanssa"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:103
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:100
 msgid "Repeat Search"
 msgstr "Toista haku"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:109
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:106
 msgid "Block Hosts"
 msgstr "Estä palvelin"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:111
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:108
 msgid "Mark As"
 msgstr "Merkitse"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:117
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:114
 msgid "Get More Results"
 msgstr "Hae lisää tuloksia"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:147
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:142
 msgid "Loading Search Window..."
 msgstr "Lataan haku ikkunaa..."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:345
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:340
 msgid "Firewalled Host"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:464
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:461
 msgid ""
 "Your search must be at least three characters to avoid congesting the "
 "network."
@@ -7343,19 +7361,19 @@ msgstr ""
 "Käytä vähintään kolmen merkin mittaista hakua välttääksesi verkon "
 "ruuhkautumisen."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:469
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:466
 msgid ""
 "Your search is too long. Please make your search smaller and try again."
 msgstr "Hakusi on liian pitkä. Lyhennä sitä ja kokeile uudelleen."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:472
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:476
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:469
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:473
 msgid ""
 "Your search is too specific. Please make your search smaller and try again."
 msgstr ""
 "Hakusi on liian tarkka. Ole hyvä ja lyhennä sitä ja kokeile uudelleen."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:481
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:478
 msgid ""
 "Please wait, LimeWire must finish loading before a search can be started."
 msgstr ""
@@ -7363,7 +7381,7 @@ msgstr ""
 "aloittamista."
 
 #. if not connected or connecting, show one message.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:490
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:487
 msgid ""
 "You are not connected to the network. To connect, select \"Connect\" from "
 "the \"File\" menu. Your search may not return any results until you connect."
@@ -7372,7 +7390,7 @@ msgstr ""
 "tiedosto valikosta. Hakusi eivät toimi ennen kuin olet yhteydessä verkkoon."
 
 #. if attempting to connect, show another.
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:493
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:490
 msgid ""
 "LimeWire is currently connecting to the network. Your search may not return "
 "many results until you are fully connected to the network."
@@ -7380,7 +7398,7 @@ msgstr ""
 "Limewire yhdistyy verkkoon. Hakusi eivät tuo tuloksia ennen kuin olet "
 "kokonaan yhdistynyt."
 
-#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:808
+#: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:801
 msgid ""
 "One of the selected files is an executable program and could contain a "
 "virus. Are you sure you want to download it?"
@@ -7388,7 +7406,7 @@ msgstr ""
 "Yksi valituista tiedostoista on ajettava tiedosto. Se voi sisältää viruksen. "
 "Oletko varma että haluat ladata sen?"
 
-#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:476
+#: gui/com/limegroup/gnutella/gui/search/SearchResultDisplayer.java:475
 #, java-format
 msgid "Could not browse host {0}."
 msgstr "Palvelinta ei voitu selata. {0} ."
@@ -7419,7 +7437,7 @@ msgstr "Media"
 msgid "... {0} more."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/search/TableLine.java:752
+#: gui/com/limegroup/gnutella/gui/search/TableLine.java:753
 msgid ""
 "This is a secure result. No information in this result has been tampered."
 msgstr ""
