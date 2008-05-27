@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
+import org.limewire.lifecycle.Service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -37,7 +38,7 @@ import com.limegroup.gnutella.util.Tagged;
 
 
 @Singleton
-public final class LWSIntegrationServicesImpl implements LWSIntegrationServices {
+public final class LWSIntegrationServicesImpl implements LWSIntegrationServices, Service {
     
     private static final Log LOG = LogFactory.getLog(LWSIntegrationServicesImpl.class);
     
@@ -351,7 +352,7 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
         return downloader.get();
     }
    
-    public void init() {
+    public void initialize() {
         // ====================================================================================================================================
         // Add a handler for the LimeWire Store Server so that
         // we can keep track of downloads that were made on the
@@ -550,6 +551,21 @@ public final class LWSIntegrationServicesImpl implements LWSIntegrationServices 
             }
            
         });        
+    }
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("LimeWire Store Integration");
+    }  
+    
+    public void start() {
+    }
+    
+    public void stop() {
     }
     
     /**

@@ -17,6 +17,7 @@ import org.limewire.rudp.messages.RUDPMessage;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
@@ -25,7 +26,6 @@ import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHandler;
 import com.limegroup.gnutella.rudp.messages.LimeRUDPMessageHelper;
 import com.limegroup.gnutella.rudp.messages.RUDPMessageHandlerHelper;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -72,7 +72,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
     @Override
     public void setUp() throws Exception {
         setSettings();
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         
         lifecycleManager = injector.getInstance(LifecycleManager.class);
         selectorProvider = injector.getInstance(UDPSelectorProvider.class);
@@ -93,7 +93,7 @@ public class RUDPIntegrationTest extends LimeTestCase {
     public void testLimeRUDPMessageHandlerIsInstalled() throws Exception {
         Class[] handledMessageClasses = RUDPMessageHandlerHelper.getMessageClasses();
         for (Class clazz : handledMessageClasses) {
-            assertEquals(LimeRUDPMessageHandler.class, messageRouter.getUDPMessageHandler(clazz).getClass());
+            assertEquals("LimeRUDPMessageHandler", messageRouter.getUDPMessageHandler(clazz).getClass().getSimpleName());
         }
     }
     

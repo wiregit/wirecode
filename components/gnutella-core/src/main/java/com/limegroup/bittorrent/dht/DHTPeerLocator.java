@@ -11,7 +11,7 @@ public interface DHTPeerLocator {
     /**
      * Registers the listeners used.
      */
-    public void init();
+    public void initialize();
 
     /**
      * Searches for peers sharing the given torrent. If no peers are found, then

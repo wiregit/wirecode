@@ -4,7 +4,7 @@ public class SimplePromotionServicesImpl implements PromotionServices {
 
     private boolean isRunning = false;
 
-    public void init() {
+    public void start() {
         isRunning = true;
     }
 
@@ -12,7 +12,7 @@ public class SimplePromotionServicesImpl implements PromotionServices {
         return isRunning;
     }
 
-    public void shutDown() {
+    public void stop() {
         isRunning = false;
     }
 }

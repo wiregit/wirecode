@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.IOUtils;
+import org.limewire.lifecycle.Service;
 import org.limewire.util.Base32;
 import org.limewire.util.CommonUtils;
 
@@ -22,7 +23,7 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.Data;
 
 @Singleton
-public final class StaticMessages {
+public final class StaticMessages implements Service {
     
     private static final Log LOG = LogFactory.getLog(StaticMessages.class);
 
@@ -37,8 +38,22 @@ public final class StaticMessages {
         this.queryReplyFactory = queryReplyFactory;
         this.simppManager = simppManager;
     }
-   
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Static Messages");
+    }
+    
     public void initialize() {
+    }
+    public void stop() {
+    }    
+   
+    public void start() {
         reloadMessages();
         simppManager.get().addListener(new SimppListener() {
             public void simppUpdated(int newVersion) {

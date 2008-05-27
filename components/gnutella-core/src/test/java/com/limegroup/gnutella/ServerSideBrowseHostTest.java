@@ -12,6 +12,7 @@ import org.limewire.util.FileUtils;
 import junit.framework.Test;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -82,7 +83,7 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         super.setUp(injector);
         fileManager = injector.getInstance(FileManager.class);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);

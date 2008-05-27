@@ -20,6 +20,7 @@ import org.limewire.util.TestUtils;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Stage;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ActivityCallback;
@@ -146,7 +147,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
         DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(10);
 
         activityCallback = new MyCallback();
-        injector = LimeTestUtils.createInjector(LocalSocketAddressProviderStub.STUB_MODULE, new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, LocalSocketAddressProviderStub.STUB_MODULE, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ActivityCallback.class).toInstance(activityCallback);
@@ -166,7 +167,7 @@ public abstract class DownloadTestCase extends LimeTestCase {
         connectionManager.setConnected(true);
 
         downloadManager = injector.getInstance(DownloadManager.class);
-        downloadManager.initialize();
+        downloadManager.start();
 
         Runnable click = new Runnable() {
             public void run() {

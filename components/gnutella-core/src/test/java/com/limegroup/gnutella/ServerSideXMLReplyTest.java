@@ -9,6 +9,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -90,7 +91,7 @@ public final class ServerSideXMLReplyTest extends ServerSideTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         super.setUp(injector);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
     }

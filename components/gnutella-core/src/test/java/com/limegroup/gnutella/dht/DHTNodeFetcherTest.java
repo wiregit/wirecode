@@ -22,6 +22,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.HostCatcher;
@@ -82,7 +83,7 @@ public class DHTNodeFetcherTest extends DHTTestCase {
         }
         
         // fake a connection to the network
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ConnectionManager.class).to(ConnectionManagerStub.class);

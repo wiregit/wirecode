@@ -143,7 +143,7 @@ public class PromotionSearcherImpl implements PromotionSearcher {
                 searcherDatabase.expungeExpired();
                 results = searcherDatabase.query(normalizedQuery);
             } catch (DatabaseExecutionException e) {
-                promotionServices.shutDown();
+                promotionServices.stop();
             }
 
             if (results == null) {

@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.i18n.I18nMarker;
 import org.limewire.lifecycle.Service;
 import org.limewire.security.SecurityToken;
 
@@ -61,6 +62,10 @@ public class LimeACKHandler implements MessageHandler, Service {
     }
     
     public void stop() {}
+    
+    public String getServiceName() {
+        return I18nMarker.marktr("OOB Query Handler");
+    }
     
     /**
      * Keeps track of QueryReplies to be sent after recieving LimeAcks (sent

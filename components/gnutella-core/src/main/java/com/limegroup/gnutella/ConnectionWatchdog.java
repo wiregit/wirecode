@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.lifecycle.Service;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -25,7 +26,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  * possible heuristics to use when examining connections.
  */
 @Singleton
-public final class ConnectionWatchdog {
+public final class ConnectionWatchdog implements Service {
     
     private static final Log LOG = LogFactory.getLog(ConnectionWatchdog.class);
 
@@ -54,7 +55,22 @@ public final class ConnectionWatchdog {
         this.connectionServices = connectionServices;
         this.pingRequestFactory = pingRequestFactory;
     }
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
 
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Stale Connection Management");
+    }
+    
+    public void initialize() {
+    }
+    
+    public void stop() {
+    }
+    
     /**
      * Starts the <tt>ConnectionWatchdog</tt>.
      */

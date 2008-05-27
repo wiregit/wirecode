@@ -10,5 +10,7 @@ public interface Service {
     void stop();
     
     void initialize();
+    
+    String getServiceName();
 
 }

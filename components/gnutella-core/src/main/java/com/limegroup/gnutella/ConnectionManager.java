@@ -73,7 +73,7 @@ public interface ConnectionManager extends ConnectionAcceptor,
      * Links the ConnectionManager up with the other back end pieces and
      * launches the ConnectionWatchdog and the initial ConnectionFetchers.
      */
-    public void initialize();
+    public void start();
     
     /**
      * Create a new connection, allowing it to initialize and loop for messages on a new thread.

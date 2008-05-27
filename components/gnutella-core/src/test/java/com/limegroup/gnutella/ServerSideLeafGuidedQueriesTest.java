@@ -7,6 +7,7 @@ import java.util.Random;
 import junit.framework.Test;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.messages.Message;
@@ -95,7 +96,7 @@ public final class ServerSideLeafGuidedQueriesTest extends ServerSideTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         super.setUp(injector);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         responseFactory = injector.getInstance(ResponseFactory.class);

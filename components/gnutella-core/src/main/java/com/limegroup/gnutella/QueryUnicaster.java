@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Buffer;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.io.NetworkUtils;
+import org.limewire.lifecycle.Service;
 import org.limewire.security.AddressSecurityToken;
 
 import com.google.inject.Inject;
@@ -42,7 +43,7 @@ import com.limegroup.gnutella.settings.SearchSettings;
  * individual queries by reply counts.
  */ 
 @Singleton
-public final class QueryUnicaster {
+public final class QueryUnicaster implements Service {
     
     private static final Log LOG = LogFactory.getLog(QueryUnicaster.class);
 
@@ -198,6 +199,11 @@ public final class QueryUnicaster {
                 return _queryHosts.getFirst();
 		}
 	}
+	
+	@Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
     
     /**
      * Starts the query unicaster thread.
@@ -212,6 +218,16 @@ public final class QueryUnicaster {
             _initialized = true;
         }
     }
+    
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Directed Querier");
+    }
+    
+    public void initialize() {
+    }
+    public void stop() {
+    }
+    
 
     /** 
      * The main work to be done.

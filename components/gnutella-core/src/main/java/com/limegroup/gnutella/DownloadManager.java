@@ -47,7 +47,7 @@ LWSIntegrationServicesDelegate, PushedSocketHandler, ListenerSupport<DownloadMan
      * Initializes this manager. <b>This method must be called before any other
      * methods are used.</b> 
      */
-    public void initialize();
+    public void start();
 
     /**
      * Performs the slow, low-priority initialization tasks: reading in

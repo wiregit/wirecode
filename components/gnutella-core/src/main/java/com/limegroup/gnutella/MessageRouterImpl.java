@@ -30,6 +30,7 @@ import org.limewire.collection.FixedsizeHashMap;
 import org.limewire.collection.NoMoreStorageException;
 import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ManagedThread;
+import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionHistogram;
@@ -37,6 +38,8 @@ import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IOUtils;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.lifecycle.ServiceRegistry;
+import org.limewire.lifecycle.ServiceStage;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.security.AddressSecurityToken;
@@ -526,7 +529,16 @@ public abstract class MessageRouterImpl implements MessageRouter {
         return multicastMessageHandlers.get(clazz);
     }
     
+    @Inject
+    void register(ServiceRegistry registry) {
+        registry.register(this).in(ServiceStage.EARLY);
+    }
+    
     public void initialize() {
+    }
+    
+    public String getServiceName() {
+        return I18nMarker.marktr("Message Routing");
     }
     
     /* (non-Javadoc)

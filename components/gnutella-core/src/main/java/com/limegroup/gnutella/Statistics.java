@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import org.limewire.lifecycle.Service;
+import org.limewire.lifecycle.ServiceStage;
 import org.limewire.util.Clock;
 
 import com.google.inject.Inject;
@@ -12,7 +14,7 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
  * Statistics.instance() to guarantee initialization.  
  */
 @Singleton
-public class Statistics {
+public class Statistics implements Service {
     
     private final Clock clock;
     
@@ -31,6 +33,20 @@ public class Statistics {
         this.clock = clock;
         startTime = clock.now();
     }
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this).in(ServiceStage.LATE);
+    }
+    
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Session Statistics");
+    }
+    public void initialize() {
+    }
+    
+    public void start() {
+    }   
 
     /** 
      * Returns the amount of time this has been running.
@@ -99,7 +115,7 @@ public class Statistics {
      * Notifies this that LimeWire is shutting down, updating permanent
      * statistics in limewire.props if necessary.  
      */
-    public void shutdown() {
+    public void stop() {
         //Order matters, as calculateFractionalUptime() depends on the
         //LAST_SHUTDOWN_TIME property.
         ApplicationSettings.FRACTIONAL_UPTIME.setValue(calculateFractionalUptime());

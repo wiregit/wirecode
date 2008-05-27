@@ -6,6 +6,7 @@ import java.util.Map;
 import junit.framework.Test;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
@@ -37,7 +38,7 @@ public class MessageListenerTest extends ClientSideTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         super.setUp(injector);
         pingReplyFactory = injector.getInstance(PingReplyFactory.class);
         messageRouter = (MessageRouterImpl) injector.getInstance(MessageRouter.class);

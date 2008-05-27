@@ -12,7 +12,9 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.i18n.I18nMarker;
 import org.limewire.lifecycle.Service;
+import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
@@ -78,7 +80,16 @@ public class ContentManager implements Service {
         this.ipPortContentAuthorityFactory = ipPortContentAuthorityFactory;
     }
     
+    @Inject
+    void register(ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
     public void initialize() {}
+    
+    public String getServiceName() {
+        return I18nMarker.marktr("Content Management");
+    }
     
     /**
      * Initializes this content manager.

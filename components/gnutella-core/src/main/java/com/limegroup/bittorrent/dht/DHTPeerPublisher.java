@@ -11,7 +11,7 @@ public interface DHTPeerPublisher {
     /**
      * Register the listeners used.
      */
-    public void init();
+    public void initialize();
 
     /**
      * Stores the network information of the local host as a seeder in DHT for

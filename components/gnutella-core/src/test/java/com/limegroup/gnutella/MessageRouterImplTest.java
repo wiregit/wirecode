@@ -573,7 +573,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         ManagedConnectionStubFactory managedConnectionStubFactory = injector.getInstance(ManagedConnectionStubFactory.class);
         
         
-        staticMessages.initialize();
+        staticMessages.start();
         
         QueryReply limeReply = staticMessages.getLimeReply();
         
@@ -608,7 +608,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         });
         
         ConnectionManager cm = injector.getInstance(ConnectionManager.class);
-        cm.initialize();
+        cm.start();
         ConnectionServices connectionServices = injector.getInstance(ConnectionServices.class);
         PingRequestFactory pingRequestFactory = injector.getInstance(PingRequestFactory.class);
         HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);
@@ -821,7 +821,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
         });
         
         ConnectionManager cm = injector.getInstance(ConnectionManager.class);
-        cm.initialize();
+        cm.start();
         PingRequestFactory pingRequestFactory = injector.getInstance(PingRequestFactory.class);
         HostCatcher hostCatcher = injector.getInstance(HostCatcher.class);
 

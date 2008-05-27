@@ -40,7 +40,7 @@ public class PromotionBinderRepositoryImpl implements PromotionBinderRepository 
         try {
             searcherDatabase.expungeExpired();
         } catch (DatabaseExecutionException e) {
-            promotionServices.shutDown();
+            promotionServices.stop();
             return null;
         }
         final PromotionBinder binder = searcherDatabase.getBinder(bucket);

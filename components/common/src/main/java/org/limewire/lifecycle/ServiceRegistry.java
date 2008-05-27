@@ -1,6 +1,6 @@
 package org.limewire.lifecycle;
 
-/* public */ interface ServiceRegistry {
+public interface ServiceRegistry {
     
     StagedRegisterBuilder register(Service service);
     
@@ -15,6 +15,8 @@ package org.limewire.lifecycle;
     
     /** Starts all services within the given stage. */
     void start(Object stage);
+    
+    void addListener(ServiceRegistryListener serviceRegistryListener);
     
 
 }

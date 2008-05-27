@@ -31,6 +31,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
@@ -84,7 +85,7 @@ public class FWTDetectionTest extends LimeTestCase {
     public void setUp() throws Exception {
         ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
            @Override
             protected void configure() {
                bind(ConnectionManager.class).to(CMStub.class);

@@ -26,6 +26,7 @@ import org.limewire.util.Base32;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
@@ -68,7 +69,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         networkManagerStub = new NetworkManagerStub();
         networkManagerStub.setAcceptedIncomingConnection(true);
         networkManagerStub.setPort(SERVER_PORT);
-        Injector injector = LimeTestUtils.createInjector(MyActivityCallback.class, new AbstractModule() {
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyActivityCallback.class, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(NetworkManager.class).toInstance(networkManagerStub);

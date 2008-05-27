@@ -910,6 +910,11 @@ public class OOBHandlerTest extends BaseTestCase {
         
         public void initialize() {
         }
+        
+        public String getServiceName() {
+            // TODO Auto-generated method stub
+            return null;
+        }
     }
     
     private static class MyReplyHandler extends ReplyHandlerStub {

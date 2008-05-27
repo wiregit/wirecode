@@ -68,7 +68,7 @@ public interface LWSIntegrationServices {
     /**
      * Initializes this in the start up of the {@link LifecycleManager}
      */
-    void init();
+    void initialize();
 
     /**
      * The prefix with which to start download URLS. For example, if we call the

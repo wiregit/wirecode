@@ -206,7 +206,7 @@ public class ConnectionManagerAdapter implements ConnectionManager {
         return false;
     }
 
-    public void initialize() {
+    public void start() {
 
     }
 

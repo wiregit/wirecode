@@ -24,7 +24,7 @@ public interface Acceptor {
      * tries to bind the serversocket and create UPnPMappings.
      * call before running.
      */
-    public void init();
+    public void bindAndStartUpnp();
 
     /**
      * Launches the port monitoring thread, MulticastService, and UDPService.

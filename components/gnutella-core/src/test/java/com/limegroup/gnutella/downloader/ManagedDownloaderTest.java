@@ -127,7 +127,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
         gnutellaDownloaderFactory = injector.getInstance(CoreDownloaderFactory.class);
         networkManager = (NetworkManagerStub)injector.getInstance(NetworkManager.class);
         
-        downloadManager.initialize();
+        downloadManager.start();
         downloadManager.scheduleWaitingPump();
         background = injector.getInstance(Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor")));
         RequeryManager.NO_DELAY = false;

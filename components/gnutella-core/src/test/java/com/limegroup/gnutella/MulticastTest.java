@@ -14,6 +14,7 @@ import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messagehandlers.MessageHandler;
@@ -106,7 +107,7 @@ public class MulticastTest extends LimeTestCase {
         M_HANDLER = new MulticastHandler();
         U_HANDLER = new UnicastedHandler();
 
-        injector = LimeTestUtils.createInjector();
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         
         fileManager = injector.getInstance(FileManager.class);
         connectionServices = injector.getInstance(ConnectionServices.class);

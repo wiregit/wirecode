@@ -28,6 +28,7 @@ import org.limewire.mojito.settings.KademliaSettings;
 import org.limewire.mojito.util.MojitoUtils;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
@@ -56,7 +57,7 @@ public class PassiveLeafTest extends DHTTestCase {
     protected void setUp() throws Exception {
         DHTTestUtils.setSettings(PORT);
         
-        injector = LimeTestUtils.createInjector(LocalSocketAddressProviderStub.STUB_MODULE);
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, LocalSocketAddressProviderStub.STUB_MODULE);
         
         bootstrapDHT = startBootstrapDHT(injector.getInstance(LifecycleManager.class));
     }

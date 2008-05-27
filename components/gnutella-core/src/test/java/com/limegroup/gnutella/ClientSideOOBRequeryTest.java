@@ -23,6 +23,7 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
@@ -124,7 +125,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
     @Override
     public void setUp() throws Exception {
         networkManagerStub = new NetworkManagerStub();
-        Injector injector = LimeTestUtils.createInjector(MyCallback.class, new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyCallback.class, new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
         super.setUp(injector);
         
         fileManager = injector.getInstance(FileManager.class);

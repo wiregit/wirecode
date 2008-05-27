@@ -44,6 +44,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -161,7 +162,7 @@ public class AltLocUploadTest extends LimeTestCase {
         assertGreaterThan("should have data", 0, sharedFile.length());
 
         // initialize services
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(UploadManager.class).to(TestUploadManager.class);

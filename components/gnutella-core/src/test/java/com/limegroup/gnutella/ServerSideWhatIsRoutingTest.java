@@ -11,6 +11,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
@@ -142,7 +143,7 @@ public final class ServerSideWhatIsRoutingTest extends LimeTestCase {
         setSettings();
         assertEquals("unexpected port", PORT, NetworkSettings.PORT.getValue());
 
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         lifecycleManager = injector.getInstance(LifecycleManager.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
         blockingConnectionFactory = injector.getInstance(BlockingConnectionFactory.class);

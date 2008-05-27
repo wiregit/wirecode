@@ -13,6 +13,7 @@ import org.limewire.net.SocketsManager.ConnectType;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
@@ -25,7 +26,7 @@ import com.limegroup.gnutella.messages.QueryReply;
  */
 public class Main {
     public static void main(String args[]) {
-        Injector injector = Guice.createInjector(new LimeWireCoreModule(MainCallback.class));
+        Injector injector = Guice.createInjector(Stage.PRODUCTION, new LimeWireCoreModule(MainCallback.class));
         LimeWireCore core = injector.getInstance(LimeWireCore.class);
         core.getLifecycleManager().start();        
         NetworkManager networkManager = core.getNetworkManager();
@@ -270,7 +271,7 @@ public class Main {
             return false;
         }
         
-        public void componentLoading(String component) {
+        public void componentLoading(String state, String component) {
             System.out.println("Loading component: " + component);
         }
         

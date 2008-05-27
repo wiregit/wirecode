@@ -30,6 +30,7 @@ import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.lifecycle.Service;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
@@ -104,7 +105,7 @@ import com.limegroup.gnutella.util.StrictIpPortSet;
  * doesn't quite fit the BandwidthTracker interface.
  */
 @Singleton
-public class ConnectionManagerImpl implements ConnectionManager {
+public class ConnectionManagerImpl implements ConnectionManager, Service {
     
     private static final Log LOG = LogFactory.getLog(ConnectionManagerImpl.class);
 
@@ -336,13 +337,18 @@ public class ConnectionManagerImpl implements ConnectionManager {
         } catch (VersionFormatException impossible){};
         lastGoodVersion = v;
     }
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
 
 
     /**
      * Links the ConnectionManager up with the other back end pieces and
      * launches the ConnectionWatchdog and the initial ConnectionFetchers.
      */
-    public void initialize() {
+    public void start() {
         connectionDispatcher.get().
         addConnectionAcceptor(this,
                 false,
@@ -384,6 +390,14 @@ public class ConnectionManagerImpl implements ConnectionManager {
                 }
             }
         });
+    }
+    
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Connection Management");
+    }
+    public void initialize() {}
+    public void stop() {
+        disconnect(false);
     }
 
     /**

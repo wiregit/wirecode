@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.limewire.i18n.I18nMarker;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.listener.EventListener;
@@ -58,6 +59,11 @@ public class NetworkManagerImpl implements NetworkManager {
         this.capabilitiesVMFactory = capabilitiesVMFactory;
     }
     
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
 
     public void start() {
         ConnectionSettings.LAST_FWT_STATE.addSettingListener(fwtListener);
@@ -65,10 +71,15 @@ public class NetworkManagerImpl implements NetworkManager {
 
 
     public void stop() {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(acceptedIncomingConnection());
         ConnectionSettings.LAST_FWT_STATE.removeSettingListener(fwtListener);
     }
     
     public void initialize() {
+    }
+    
+    public String getServiceName() {
+        return I18nMarker.marktr("Network Management");
     }
 
 

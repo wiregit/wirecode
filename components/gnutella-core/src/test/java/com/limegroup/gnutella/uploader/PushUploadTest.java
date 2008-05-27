@@ -36,6 +36,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.ActivityCallback;
@@ -165,7 +166,7 @@ public class PushUploadTest extends LimeTestCase {
         assertGreaterThan("should have data", 0, new File(_sharedDir, fileName)
                 .length());
 
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(NetworkManager.class).to(MyNetworkManager.class);

@@ -8,6 +8,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
@@ -143,7 +144,7 @@ public abstract class ServerSideTestCase extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        setUp(LimeTestUtils.createInjector());
+        setUp(LimeTestUtils.createInjector(Stage.PRODUCTION));
     }
     
     protected void setUp(Injector injector) throws Exception {

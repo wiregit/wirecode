@@ -32,6 +32,7 @@ import org.limewire.util.Base32;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PushRequestImpl;
@@ -97,7 +98,7 @@ public class ClientSidePushProxyTest extends ClientSideTestCase {
     public void setUp() throws Exception {
         networkManagerStub = new NetworkManagerStub();
         networkManagerStub.setPort(PORT);
-        Injector injector = LimeTestUtils.createInjector(MyActivityCallback.class, new AbstractModule() {
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyActivityCallback.class, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(NetworkManager.class).toInstance(networkManagerStub);

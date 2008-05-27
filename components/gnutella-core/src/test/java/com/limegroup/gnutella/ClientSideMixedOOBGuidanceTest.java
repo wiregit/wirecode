@@ -14,6 +14,7 @@ import org.limewire.service.ErrorService;
 
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
@@ -58,7 +59,7 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
     @Override
     protected void setUp() throws Exception {
         networkManagerStub = new NetworkManagerStub();
-        Injector injector = LimeTestUtils.createInjector(new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new LimeTestUtils.NetworkManagerStubModule(networkManagerStub));
         super.setUp(injector);
         
         responseFactory = injector.getInstance(ResponseFactory.class);

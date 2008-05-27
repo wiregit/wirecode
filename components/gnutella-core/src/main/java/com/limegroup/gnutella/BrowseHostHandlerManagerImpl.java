@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.lifecycle.Service;
 import org.limewire.net.SocketsManager;
 import org.limewire.service.ErrorService;
 import org.limewire.http.httpclient.SocketWrappingHttpClient;
@@ -30,7 +31,7 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.MessageFactory;
 
 @Singleton
-public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
+public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, Service {
 
     private static final Log LOG = LogFactory.getLog(BrowseHostHandlerManagerImpl.class);
 
@@ -70,7 +71,22 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager {
         this.networkInstanceUtils = networkInstanceUtils;
     }
     
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Browse Host Handler");
+    }
+    
     public void initialize() {
+    }
+    
+    public void stop() {
+    }
+    
+    public void start() {
         backgroundExecutor.scheduleWithFixedDelay(new Expirer(), 0, 5000, TimeUnit.MILLISECONDS);    
     }
 

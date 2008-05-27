@@ -76,7 +76,7 @@ public class RequeryBehaviorTest extends LimeTestCase {
         Injector injector = LimeTestUtils.createInjector(m);
         remoteFileDescFactory = injector.getInstance(RemoteFileDescFactory.class);
         downloadManager = injector.getInstance(DownloadManager.class);
-        downloadManager.initialize();
+        downloadManager.start();
         myAltFinder = (MyAltLocFinder) injector.getInstance(AltLocFinder.class);
         MyExecutor myExecutor = (MyExecutor) injector.getInstance(Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor")));
         myExecutor.latch.await();

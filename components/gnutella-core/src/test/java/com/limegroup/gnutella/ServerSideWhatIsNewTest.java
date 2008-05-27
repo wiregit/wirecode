@@ -16,6 +16,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.downloader.TestFile;
@@ -117,7 +118,7 @@ public class ServerSideWhatIsNewTest
     
     @Override
     public void setUp() throws Exception  {
-        injector = LimeTestUtils.createInjector();
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         super.setUp(injector);
         
         messagesSupportedVendorMessage = injector.getInstance(MessagesSupportedVendorMessage.class);

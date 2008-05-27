@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import org.limewire.lifecycle.Service;
 import org.limewire.promotion.InitializeException;
 import org.limewire.promotion.PromotionBinderRepository;
 import org.limewire.promotion.PromotionSearcher;
@@ -10,7 +11,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.settings.ThirdPartySearchResultsSettings;
 
 @Singleton
-final class PromotionServicesImpl implements PromotionServices {
+final class PromotionServicesImpl implements PromotionServices, Service {
 
     private final PromotionBinderRepository promotionBinderRepository;
 
@@ -24,8 +25,20 @@ final class PromotionServicesImpl implements PromotionServices {
         this.promotionBinderRepository = promotionBinderRepository;
         this.promotionSearcher = promotionSearcher;
     }
-
-    public void init() {
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Promotion System");
+    }
+    
+    public void initialize() {
+    }
+    
+    public void start() {
         try {
             promotionBinderRepository.init(
                         ThirdPartySearchResultsSettings.SEARCH_URL.getValue(),
@@ -38,7 +51,7 @@ final class PromotionServicesImpl implements PromotionServices {
 
             isRunning = true;
         } catch(InitializeException initializeException) {
-            shutDown();
+            stop();
         }
     }
 
@@ -46,7 +59,7 @@ final class PromotionServicesImpl implements PromotionServices {
         return isRunning;
     }
 
-    public void shutDown() {
+    public void stop() {
         promotionSearcher.shutDown();
         isRunning = false;
     }

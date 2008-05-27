@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.limewire.lifecycle.Service;
 import org.limewire.mojito.settings.MojitoProps;
 import org.limewire.util.CommonUtils;
 
@@ -21,7 +22,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * All various components are wired together here.
  */
 @Singleton
-public class LimeCoreGlue {
+public class LimeCoreGlue implements Service {
     
     private static AtomicBoolean preinstalled = new AtomicBoolean(false);
     private AtomicBoolean installed = new AtomicBoolean(false);
@@ -95,6 +96,25 @@ public class LimeCoreGlue {
                 throw new InstallFailedException("Settings Directory Failure", totalFailure);
             }
         }
+    }
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this).in("SuperEarly");
+    }
+    
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Core Glue");
+    }
+    
+    public void initialize() {
+    }
+    
+    public void start() {
+        install();
+    }
+    
+    public void stop() {
     }
 
     /** Wires all various components together. */

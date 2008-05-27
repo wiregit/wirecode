@@ -5,6 +5,7 @@ import java.net.Socket;
 import junit.framework.Test;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
@@ -31,7 +32,7 @@ public class FirewalledStatusTest extends ClientSideTestCase {
     
     @Override
     public void setUp() throws Exception {
-        injector = LimeTestUtils.createInjector();
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         super.setUp(injector);
         networkManager = injector.getInstance(NetworkManager.class);
     }

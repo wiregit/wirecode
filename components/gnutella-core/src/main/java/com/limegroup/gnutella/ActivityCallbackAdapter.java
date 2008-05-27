@@ -44,7 +44,7 @@ public class ActivityCallbackAdapter implements ActivityCallback {
         
     }
 
-    public void componentLoading(String component) {
+    public void componentLoading(String state, String component) {
         
     }
 

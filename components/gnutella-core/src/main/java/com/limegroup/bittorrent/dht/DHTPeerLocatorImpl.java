@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.InvalidDataException;
+import org.limewire.lifecycle.Service;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
@@ -34,7 +35,7 @@ import com.limegroup.gnutella.dht.util.KUIDUtils;
  * Also re-attempts to locate peers if DHT was not available.
  */
 @Singleton
-public class DHTPeerLocatorImpl implements DHTPeerLocator {
+public class DHTPeerLocatorImpl implements DHTPeerLocator, Service {
 
     private static final Log LOG = LogFactory.getLog(DHTPeerLocator.class);
 
@@ -54,16 +55,30 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator {
         this.torrentManager = torrentManager;
     }
 
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
     /**
      * Adds the required listeners to TorrentManager and DHTManager. This method
      * should only be called once.
      */
-    public void init() {
+    public void initialize() {
         // listens for the TorrentEvent TRACKER_FAILED to start locating a
         // peer
         torrentManager.get().addEventListener(new LocatorTorrentEventListener());
         // listens for the DHTEvent CONNECTED to re-attempt locating a peer
         dhtManager.get().addEventListener(new DHTEventListenerForLocator());
+    }
+    
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("DHT Peer Locator");
+    }
+     
+    public void start() {
+    }  
+     public void stop() {
     }
 
     /**

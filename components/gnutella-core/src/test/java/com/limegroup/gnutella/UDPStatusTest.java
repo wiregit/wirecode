@@ -12,6 +12,7 @@ import org.jmock.Mockery;
 import junit.framework.Test;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -41,7 +42,7 @@ public class UDPStatusTest extends ClientSideTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         super.setUp(injector);
         networkManager = injector.getInstance(NetworkManager.class);
         udpService = injector.getInstance(UDPService.class);

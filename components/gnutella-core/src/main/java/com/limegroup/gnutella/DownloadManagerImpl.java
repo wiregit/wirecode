@@ -21,6 +21,8 @@ import org.limewire.collection.MultiIterable;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
+import org.limewire.lifecycle.Service;
+import org.limewire.lifecycle.ServiceStage;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
 import org.limewire.service.MessageService;
@@ -61,7 +63,7 @@ import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.version.DownloadInformation;
 
 @Singleton
-public class DownloadManagerImpl implements DownloadManager {
+public class DownloadManagerImpl implements DownloadManager, Service {
     
     private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
     
@@ -160,7 +162,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#register(com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry)
+     * @see com.limegroup.gnutella.DownloadManager#register(com.limegroup.gnutella.downloader.PushedSocketHandlerRegistry)
      */
     // DO NOT REMOVE!  Guice calls this because of the @Inject
     @Inject
@@ -169,12 +171,41 @@ public class DownloadManagerImpl implements DownloadManager {
     }
 
     //////////////////////// Creation and Saving /////////////////////////
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+        registry.register(new Service() {
+            public String getServiceName() {
+                return org.limewire.i18n.I18nMarker.marktr("Old Downloads");
+            }
+
+            public void initialize() {
+            };
+
+            public void start() {
+                loadSavedDownloadsAndScheduleWriting();
+            }
+
+            public void stop() {
+            };
+        }).in(ServiceStage.LATE);
+    }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#initialize()
+     * @see com.limegroup.gnutella.DownloadManager#start()
      */
-    public void initialize() {
+    public void start() {
         scheduleWaitingPump();
+    }
+    
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Download Management");
+    }
+    public void initialize() {
+    }
+    public void stop() {
+        writeSnapshot();
     }
     
     /**
@@ -186,7 +217,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#postGuiInit()
+     * @see com.limegroup.gnutella.DownloadManager#loadSavedDownloadsAndScheduleWriting()
      */
     public void loadSavedDownloadsAndScheduleWriting() {
         loadSavedDownloads();
@@ -258,14 +289,14 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#isGUIInitd()
+     * @see com.limegroup.gnutella.DownloadManager#isGUIInitd()
      */
     public boolean isSavedDownloadsLoaded() {
         return downloadsReadFromDisk;
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#hasInNetworkDownload()
+     * @see com.limegroup.gnutella.DownloadManager#hasInNetworkDownload()
      */
     public synchronized boolean hasInNetworkDownload() {
         if(innetworkCount > 0)
@@ -278,7 +309,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#killDownloadersNotListed(java.util.Collection)
+     * @see com.limegroup.gnutella.DownloadManager#killDownloadersNotListed(java.util.Collection)
      */
     public synchronized void killDownloadersNotListed(Collection<? extends DownloadInformation> updates) {
         if (updates == null)
@@ -326,7 +357,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#acceptPushedSocket(java.lang.String, int, byte[], java.net.Socket)
+     * @see com.limegroup.gnutella.DownloadManager#acceptPushedSocket(java.lang.String, int, byte[], java.net.Socket)
      */
     public boolean acceptPushedSocket(String file, int index,
             byte[] clientGUID, Socket socket) {
@@ -384,14 +415,14 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#isIncomplete(com.limegroup.gnutella.URN)
+     * @see com.limegroup.gnutella.DownloadManager#isIncomplete(com.limegroup.gnutella.URN)
      */
     public boolean isIncomplete(URN urn) {
         return incompleteFileManager.getFileForUrn(urn) != null;
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#isActivelyDownloading(com.limegroup.gnutella.URN)
+     * @see com.limegroup.gnutella.DownloadManager#isActivelyDownloading(com.limegroup.gnutella.URN)
      */
     public boolean isActivelyDownloading(URN urn) {
         Downloader md = getDownloaderForURN(urn);
@@ -415,21 +446,21 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#getIncompleteFileManager()
+     * @see com.limegroup.gnutella.DownloadManager#getIncompleteFileManager()
      */
     public IncompleteFileManager getIncompleteFileManager() {
         return incompleteFileManager;
     }    
  
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#downloadsInProgress()
+     * @see com.limegroup.gnutella.DownloadManager#downloadsInProgress()
      */
     public synchronized int downloadsInProgress() {
         return active.size() + waiting.size();
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#getNumIndividualDownloaders()
+     * @see com.limegroup.gnutella.DownloadManager#getNumIndividualDownloaders()
      */
     public synchronized int getNumIndividualDownloaders() {
         int ret = 0;
@@ -444,21 +475,21 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#getNumActiveDownloads()
+     * @see com.limegroup.gnutella.DownloadManager#getNumActiveDownloads()
      */
     public synchronized int getNumActiveDownloads() {
         return active.size() - innetworkCount - storeDownloadCount;
     }
    
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#getNumWaitingDownloads()
+     * @see com.limegroup.gnutella.DownloadManager#getNumWaitingDownloads()
      */
     public synchronized int getNumWaitingDownloads() {
         return waiting.size();
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#getDownloaderForURN(com.limegroup.gnutella.URN)
+     * @see com.limegroup.gnutella.DownloadManager#getDownloaderForURN(com.limegroup.gnutella.URN)
      */
     public synchronized Downloader getDownloaderForURN(URN sha1) {
         for (CoreDownloader md : activeAndWaiting) {
@@ -469,7 +500,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#getDownloaderForURNString(java.lang.String)
+     * @see com.limegroup.gnutella.DownloadManager#getDownloaderForURNString(java.lang.String)
      */
     public synchronized Downloader getDownloaderForURNString(String urn) {
         for (CoreDownloader md : activeAndWaiting) {
@@ -480,7 +511,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }    
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#getDownloaderForIncompleteFile(java.io.File)
+     * @see com.limegroup.gnutella.DownloadManager#getDownloaderForIncompleteFile(java.io.File)
      */
     public synchronized Downloader getDownloaderForIncompleteFile(File file) {
         for (CoreDownloader dl : activeAndWaiting) {
@@ -492,7 +523,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#isGuidForQueryDownloading(com.limegroup.gnutella.GUID)
+     * @see com.limegroup.gnutella.DownloadManager#isGuidForQueryDownloading(com.limegroup.gnutella.GUID)
      */
     public synchronized boolean isGuidForQueryDownloading(GUID guid) {
         for (CoreDownloader md : activeAndWaiting) {
@@ -519,7 +550,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
            
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#download(com.limegroup.gnutella.RemoteFileDesc[], java.util.List, com.limegroup.gnutella.GUID, boolean, java.io.File, java.lang.String)
+     * @see com.limegroup.gnutella.DownloadManager#download(com.limegroup.gnutella.RemoteFileDesc[], java.util.List, com.limegroup.gnutella.GUID, boolean, java.io.File, java.lang.String)
      */
     public synchronized Downloader download(RemoteFileDesc[] files,
                                             List<? extends RemoteFileDesc> alts, GUID queryGUID, 
@@ -557,7 +588,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }   
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#download(com.limegroup.gnutella.browser.MagnetOptions, boolean, java.io.File, java.lang.String)
+     * @see com.limegroup.gnutella.DownloadManager#download(com.limegroup.gnutella.browser.MagnetOptions, boolean, java.io.File, java.lang.String)
      */
     public synchronized Downloader download(MagnetOptions magnet,
             boolean overwrite,
@@ -595,7 +626,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#downloadFromStore(com.limegroup.gnutella.RemoteFileDesc, boolean, java.io.File, java.lang.String)
+     * @see com.limegroup.gnutella.DownloadManager#downloadFromStore(com.limegroup.gnutella.RemoteFileDesc, boolean, java.io.File, java.lang.String)
      */
     public synchronized Downloader downloadFromStore( RemoteFileDesc rfd,
             boolean overwrite,
@@ -628,7 +659,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#download(java.io.File)
+     * @see com.limegroup.gnutella.DownloadManager#download(java.io.File)
      */ 
     public synchronized Downloader download(File incompleteFile)
             throws CantResumeException, SaveLocationException { 
@@ -720,7 +751,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#download(com.limegroup.gnutella.version.DownloadInformation, long)
+     * @see com.limegroup.gnutella.DownloadManager#download(com.limegroup.gnutella.version.DownloadInformation, long)
      */
     public synchronized Downloader download(DownloadInformation info, long now) 
     throws SaveLocationException {
@@ -738,7 +769,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#downloadTorrent(com.limegroup.bittorrent.BTMetaInfo, boolean)
+     * @see com.limegroup.gnutella.DownloadManager#downloadTorrent(com.limegroup.bittorrent.BTMetaInfo, boolean)
      */
     public synchronized Downloader downloadTorrent(BTMetaInfo info, boolean overwrite) 
     throws SaveLocationException {
@@ -823,7 +854,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#conflicts(com.limegroup.gnutella.URN, long, java.io.File)
+     * @see com.limegroup.gnutella.DownloadManager#conflicts(com.limegroup.gnutella.URN, long, java.io.File)
      */
     public boolean conflicts(URN urn, long fileSize, File... fileName) {
         
@@ -841,7 +872,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#isSaveLocationTaken(java.io.File)
+     * @see com.limegroup.gnutella.DownloadManager#isSaveLocationTaken(java.io.File)
      */
     public synchronized boolean isSaveLocationTaken(File candidateFile) {
         for (CoreDownloader md : activeAndWaiting) {
@@ -860,7 +891,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#handleQueryReply(com.limegroup.gnutella.messages.QueryReply)
+     * @see com.limegroup.gnutella.DownloadManager#handleQueryReply(com.limegroup.gnutella.messages.QueryReply)
      */
     public void handleQueryReply(QueryReply qr) {
         // first check if the qr is of 'sufficient quality', if not just
@@ -936,7 +967,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#remove(com.limegroup.gnutella.downloader.CoreDownloader, boolean)
+     * @see com.limegroup.gnutella.DownloadManager#remove(com.limegroup.gnutella.downloader.CoreDownloader, boolean)
      */
     public synchronized void remove(CoreDownloader downloader, 
                                     boolean completed) {
@@ -955,7 +986,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#bumpPriority(com.limegroup.gnutella.Downloader, boolean, int)
+     * @see com.limegroup.gnutella.DownloadManager#bumpPriority(com.limegroup.gnutella.Downloader, boolean, int)
      */
     public synchronized void bumpPriority(Downloader downl,
                                           boolean up, int amt) {
@@ -1008,14 +1039,14 @@ public class DownloadManagerImpl implements DownloadManager {
     }           
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#sendQuery(com.limegroup.gnutella.downloader.ManagedDownloader, com.limegroup.gnutella.messages.QueryRequest)
+     * @see com.limegroup.gnutella.DownloadManager#sendQuery(com.limegroup.gnutella.downloader.ManagedDownloader, com.limegroup.gnutella.messages.QueryRequest)
      */
     public void sendQuery(QueryRequest query) {
         messageRouter.get().sendDynamicQuery(query);
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#measureBandwidth()
+     * @see com.limegroup.gnutella.DownloadManager#measureBandwidth()
      */
     public void measureBandwidth() {
         List<CoreDownloader> activeCopy;
@@ -1043,7 +1074,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
 
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#getMeasuredBandwidth()
+     * @see com.limegroup.gnutella.DownloadManager#getMeasuredBandwidth()
      */
     public float getMeasuredBandwidth() {
         List<CoreDownloader> activeCopy;
@@ -1070,14 +1101,14 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#getAverageBandwidth()
+     * @see com.limegroup.gnutella.DownloadManager#getAverageBandwidth()
      */
     public synchronized float getAverageBandwidth() {
         return averageBandwidth;
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#getLastMeasuredBandwidth()
+     * @see com.limegroup.gnutella.DownloadManager#getLastMeasuredBandwidth()
      */
     public float getLastMeasuredBandwidth() {
         return lastMeasuredBandwidth;
@@ -1091,7 +1122,7 @@ public class DownloadManagerImpl implements DownloadManager {
     }
     
     /* (non-Javadoc)
-     * @see com.limegroup.gnutella.DownloadMI#getAllDownloaders()
+     * @see com.limegroup.gnutella.DownloadManager#getAllDownloaders()
      */
     public final Iterable<CoreDownloader> getAllDownloaders() {
         return activeAndWaiting;

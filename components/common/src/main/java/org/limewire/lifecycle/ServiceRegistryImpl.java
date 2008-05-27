@@ -19,6 +19,9 @@ class ServiceRegistryImpl implements ServiceRegistry {
     
     private final List<ServiceHolder> startedServices
         = new ArrayList<ServiceHolder>();
+    
+    private final List<ServiceRegistryListener> registryListeners
+        = new ArrayList<ServiceRegistryListener>();
         
     public void initialize() {
         // Remove builders & assign services.
@@ -94,12 +97,16 @@ class ServiceRegistryImpl implements ServiceRegistry {
         builders.add(builder);
         return builder;
     }
+    
+    public void addListener(ServiceRegistryListener serviceRegistryListener) {
+        registryListeners.add(serviceRegistryListener);
+    }
 
     ServiceStage[] getStagesInOrder() {
         return new ServiceStage[] { ServiceStage.EARLY, ServiceStage.NORMAL, ServiceStage.LATE };
     }
     
-    private static class ServiceHolder {
+    private class ServiceHolder {
         private final Service service;
         private boolean initted;
         private boolean started;
@@ -112,6 +119,9 @@ class ServiceRegistryImpl implements ServiceRegistry {
         void init() {
             if(!initted) {
                 initted = true;
+                for(ServiceRegistryListener listener : registryListeners) {
+                    listener.initializing(service);
+                }
                 service.initialize();
             }
         }
@@ -119,6 +129,9 @@ class ServiceRegistryImpl implements ServiceRegistry {
         void start() {
             if(!started) {
                 started = true;
+                for(ServiceRegistryListener listener : registryListeners) {
+                    listener.starting(service);
+                }
                 service.start();
             }
         }
@@ -126,6 +139,9 @@ class ServiceRegistryImpl implements ServiceRegistry {
         void stop() {
             if(!stopped) {
                 stopped = true;
+                for(ServiceRegistryListener listener : registryListeners) {
+                    listener.stopping(service);
+                }
                 service.stop();
             }
         }

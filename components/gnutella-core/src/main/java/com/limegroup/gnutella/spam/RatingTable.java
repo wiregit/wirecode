@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.inspection.Inspectable;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IOUtils;
+import org.limewire.lifecycle.Service;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.GenericsUtils;
 
@@ -31,7 +32,7 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.spam.Token.Rating;
 
 @Singleton
-public class RatingTable {
+public class RatingTable implements Service {
 	private static final Log LOG = LogFactory.getLog(Tokenizer.class);
 
 	/**
@@ -51,7 +52,7 @@ public class RatingTable {
      * the RatingTable to return the actual Token that should
      * be used inplace of that Token (one that has rating data).
 	 */
-	private final Map<Token, Token> _tokenMap;
+	private final Map<Token, Token> _tokenMap = new HashMap<Token, Token>();
 	
 	private final Tokenizer tokenizer;
 	
@@ -62,17 +63,30 @@ public class RatingTable {
 	@Inject
 	RatingTable(Tokenizer tokenizer) {
 	    this.tokenizer = tokenizer;
-	    
-		// deserialize
-		_tokenMap = readData();
-		
-		for(Token token : _tokenMap.values())
+	}
+	
+	@Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
+	
+	public String getServiceName() {
+	    return org.limewire.i18n.I18nMarker.marktr("Spam Management");
+	}
+	
+	public void initialize() {
+	}
+	
+	public synchronized void start() {
+        _tokenMap.putAll(readData());
+        
+        for(Token token : _tokenMap.values())
             tokenizer.initialize(token);
 
-		if (LOG.isDebugEnabled())
-			LOG.debug("size of tokenSet " + _tokenMap.size());
-	}
-
+        if (LOG.isDebugEnabled())
+            LOG.debug("size of tokenSet " + _tokenMap.size());
+    }
+	
 	/**
 	 * clears the filter data
 	 */
@@ -255,7 +269,7 @@ public class RatingTable {
      * Marks that the table will be serialized to disc and not accessed for a long time (i.e. LimeWire is about to get
      * shut down)
      */
-    public synchronized void ageAndSave() {
+    public synchronized void stop() {
         for(Token token : _tokenMap.values()) 
             token.incrementAge();
         save();

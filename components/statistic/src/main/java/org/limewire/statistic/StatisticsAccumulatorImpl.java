@@ -6,7 +6,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.limewire.i18n.I18nMarker;
 import org.limewire.lifecycle.Service;
+import org.limewire.lifecycle.ServiceRegistry;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -31,6 +33,10 @@ final class StatisticsAccumulatorImpl implements StatisticAccumulator, Service {
 	    this.backgroundExecutor = backgroundExecutor;
 	}
 	
+	@Inject void register(ServiceRegistry registry) {
+	    registry.register(this);
+	}
+	
 	public void initialize() {
 	}
 	
@@ -46,6 +52,10 @@ final class StatisticsAccumulatorImpl implements StatisticAccumulator, Service {
 	        f.cancel(false);
 	        scheduledFuture = null;
 	    }
+	}
+	
+	public String getServiceName() {
+	    return I18nMarker.marktr("Statistic Management");
 	}
 
 	/* (non-Javadoc)

@@ -23,6 +23,7 @@ import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.lifecycle.Service;
 import org.limewire.net.AsyncConnectionDispatcher;
 import org.limewire.net.BlockingConnectionDispatcher;
 import org.limewire.net.ConnectionAcceptor;
@@ -50,7 +51,7 @@ import com.limegroup.gnutella.settings.NetworkSettings;
  * info.
  */
 @Singleton
-public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Acceptor {
+public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Acceptor, Service {
 
     private static final Log LOG = LogFactory.getLog(AcceptorImpl.class);
 
@@ -217,7 +218,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.Acceptor#init()
      */
-	public void init() {
+	public void bindAndStartUpnp() {
         int tempPort;
         // try a random port if we have not received an incoming connection  
         // and have been running on the default port (6346) 
@@ -345,6 +346,26 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         }
 	}
 	
+	@Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+        registry.register(new Service() {
+            public String getServiceName() {
+                return "UPnP";
+            }
+            
+            public void initialize() {
+            }
+            
+            public void start() {
+                bindAndStartUpnp();
+            }
+            
+            public void stop() {
+            }
+        }).in("EarlyBackground");
+    }
+	
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.Acceptor#start()
      */
@@ -357,6 +378,20 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
                 TimeUnit.MILLISECONDS);
         _started = true;
     }
+	
+	public String getServiceName() {
+	    return org.limewire.i18n.I18nMarker.marktr("Connection Listener");
+	}
+	
+	public void initialize() {
+	}
+	
+	public void stop() {
+	    try {
+	        setListeningPort(0);
+	    } catch(IOException ignored) {}
+	    shutdown();
+	}
 	
 	/* (non-Javadoc)
      * @see com.limegroup.gnutella.Acceptor#isAddressExternal()

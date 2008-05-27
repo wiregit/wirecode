@@ -16,6 +16,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.I18NConvert;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HeaderNames;
@@ -128,7 +129,7 @@ public class I18NSendReceiveTest extends LimeTestCase {
         TEST_PORT++;
         doSettings();
         
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         headersFactory = injector.getInstance(HeadersFactory.class);
         connectionFactory = injector.getInstance(BlockingConnectionFactory.class);
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);

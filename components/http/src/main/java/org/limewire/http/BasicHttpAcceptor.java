@@ -39,6 +39,7 @@ import org.limewire.http.protocol.SynchronizedHttpProcessor;
 import org.limewire.http.protocol.SynchronizedNHttpRequestHandlerRegistry;
 import org.limewire.http.reactor.DispatchedIOReactor;
 import org.limewire.http.reactor.DefaultDispatchedIOReactor;
+import org.limewire.lifecycle.Service;
 import org.limewire.net.ConnectionAcceptor;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.nio.NIODispatcher;
@@ -52,7 +53,7 @@ import org.limewire.service.ErrorService;
  * handling. <code>BasicHttpAcceptor</code> needs to be started by invoking
  * {@link #start(ConnectionDispatcher)} in order to accept connection.
  */
-public class BasicHttpAcceptor implements ConnectionAcceptor {
+public class BasicHttpAcceptor implements ConnectionAcceptor, Service {
 
     private static final Log LOG = LogFactory.getLog(BasicHttpAcceptor.class);
 
@@ -283,6 +284,12 @@ public class BasicHttpAcceptor implements ConnectionAcceptor {
         if (!started.getAndSet(false)) {
             throw new IllegalStateException();
         }
+    }
+    
+    public void initialize() {}
+    
+    public String getServiceName() {
+        return null;
     }
 
     /**

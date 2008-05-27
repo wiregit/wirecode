@@ -156,7 +156,7 @@ public class RequeryDownloadTest extends LimeTestCase {
 
         initializeIncompleteFileManager();
         downloadManager = (DownloadManagerImpl)injector.getInstance(DownloadManager.class);
-        downloadManager.initialize();
+        downloadManager.start();
         downloadManager.scheduleWaitingPump();
         testUploader = injector.getInstance(TestUploader.class);
         testUploader.start("uploader 6666", 6666, false);

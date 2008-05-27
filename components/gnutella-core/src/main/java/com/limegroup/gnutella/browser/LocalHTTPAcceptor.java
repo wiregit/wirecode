@@ -64,7 +64,17 @@ public class LocalHTTPAcceptor extends BasicHttpAcceptor {
         // TODO figure out which files we want to serve from the local file system
         //registerHandler("*", new FileRequestHandler(new File("root"), new BasicMimeTypeProvider()));
     }
-
+   
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
+    @Override
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Magnet Processor");
+    }
+    
     private class MagnetCommandRequestHandler extends SimpleNHttpRequestHandler  {
         public ConsumingNHttpEntity entityRequest(HttpEntityEnclosingRequest request,
                 HttpContext context) throws HttpException, IOException {

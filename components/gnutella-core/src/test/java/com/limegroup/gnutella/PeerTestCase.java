@@ -13,6 +13,7 @@ import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
@@ -83,7 +84,7 @@ public abstract class PeerTestCase extends LimeTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        setUp(LimeTestUtils.createInjector());
+        setUp(LimeTestUtils.createInjector(Stage.PRODUCTION));
     }
     
     @Override

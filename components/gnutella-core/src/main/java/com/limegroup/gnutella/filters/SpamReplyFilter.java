@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 

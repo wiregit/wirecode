@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.lifecycle.Service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -12,7 +13,7 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 
 @Singleton
-public class OutOfBandThroughputMeasurer {
+public class OutOfBandThroughputMeasurer implements Service {
     
     private static final Log LOG = LogFactory.getLog(OutOfBandThroughputMeasurer.class);
     
@@ -25,8 +26,24 @@ public class OutOfBandThroughputMeasurer {
         this.backgroundExecutor = backgroundExecutor;
         this.outOfBandStatistics = outOfBandStatistics;
     }
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
+    public String getServiceName() {
+        return "OOB Throughput Measurer";
+    }
+    
+    public void initialize() {
+    }
+    
+    public void stop() {
+    }
+    
 
-    void initialize() {
+    public void start() {
         Runnable adjuster = new Runnable() {
             public void run() {
                 if (LOG.isDebugEnabled())

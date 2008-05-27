@@ -28,6 +28,7 @@ import org.limewire.inspection.InspectionHistogram;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
+import org.limewire.lifecycle.Service;
 import org.limewire.mojito.EntityKey;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
@@ -64,7 +65,7 @@ import com.limegroup.gnutella.util.ClassCNetworks;
  * so that it never blocks on critical threads such as MessageDispatcher.
  */
 @Singleton
-public class DHTManagerImpl implements DHTManager {
+public class DHTManagerImpl implements DHTManager, Service {
     
     private static final Log LOG = LogFactory.getLog(DHTManagerImpl.class);
     
@@ -128,6 +129,21 @@ public class DHTManagerImpl implements DHTManager {
         this.dhtControllerFactory = dhtControllerFactory;
         addEventListener(bootstrapTimer);
     }
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Mojito DHT");
+    }
+    
+    public void initialize() {
+    }
+    
+    public void start() {
+    }    
     
     /*
      * (non-Javadoc)

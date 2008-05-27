@@ -24,6 +24,8 @@ import org.apache.http.protocol.HttpRequestHandler;
 import org.limewire.collection.Buffer;
 import org.limewire.collection.FixedsizeForgetfulHashMap;
 import org.limewire.http.HttpAcceptorListener;
+import org.limewire.lifecycle.Service;
+import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.util.FileLocker;
 import org.limewire.util.FileUtils;
 import org.limewire.util.Objects;
@@ -94,7 +96,7 @@ import com.limegroup.gnutella.uploader.UploadType;
  */
 @Singleton
 public class HTTPUploadManager implements FileLocker, BandwidthTracker,
-        UploadManager, HTTPUploadSessionManager {
+        UploadManager, HTTPUploadSessionManager, Service {
 
     /** The key used to store the {@link HTTPUploadSession} object. */
     private final static String SESSION_KEY = "org.limewire.session";
@@ -210,6 +212,17 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
         this.fileManager = Objects.nonNull(fileManager, "fileManager");
         this.activityCallback = Objects.nonNull(activityCallback, "activityCallback");
         this.tcpBandwidthStatistics = Objects.nonNull(tcpBandwidthStatistics, "tcpBandwidthStatistics");
+    }
+    
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Upload Management");
+    }
+    public void initialize() {
+    }
+    
+    @Inject
+    void register(ServiceRegistry registry) {
+        registry.register(this);
     }
 
     /**

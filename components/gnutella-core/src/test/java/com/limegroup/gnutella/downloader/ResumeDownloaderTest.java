@@ -69,7 +69,7 @@ public class ResumeDownloaderTest extends LimeTestCase {
         RequeryManager.NO_DELAY = true;
 
         DownloadManagerImpl dm = (DownloadManagerImpl) injector.getInstance(DownloadManager.class);
-        dm.initialize();
+        dm.start();
     }
     
     /** Returns a new ResumeDownloader with stubbed-out DownloadManager, etc. */

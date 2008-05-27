@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Comparators;
 import org.limewire.concurrent.ExecutorsHelper;
+import org.limewire.lifecycle.Service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -26,7 +27,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
  * as read from the disk.
  */
 @Singleton
-public final class SavedFileManager implements Runnable {
+public final class SavedFileManager implements Runnable, Service {
     
     private static final Log LOG = LogFactory.getLog(SavedFileManager.class);
     
@@ -34,15 +35,33 @@ public final class SavedFileManager implements Runnable {
     private static final ExecutorService QUEUE = ExecutorsHelper.newProcessingQueue("SavedFileLoader");
        
     private final UrnCache urnCache;
+    private final ScheduledExecutorService backgroundExecutor;
     
     @Inject
     SavedFileManager(UrnCache urnCache,
                      @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
         this.urnCache = urnCache;
-        
-        // TODO: move to an initialize method!
+        this.backgroundExecutor = backgroundExecutor;
+    }
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Saved Files");
+    }
+    
+    public void initialize() {
+    }
+    
+    public void start() {
         // Run the task every three minutes, starting in 10 seconds.
         backgroundExecutor.scheduleWithFixedDelay(this, 10 * 1000, 3 * 60 * 1000, TimeUnit.MILLISECONDS);
+    }
+    
+    public void stop() {
     }
     
     /**

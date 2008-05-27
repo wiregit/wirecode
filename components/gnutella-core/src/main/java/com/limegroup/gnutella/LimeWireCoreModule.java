@@ -67,6 +67,7 @@ import com.limegroup.gnutella.auth.IpPortContentAuthorityFactory;
 import com.limegroup.gnutella.auth.IpPortContentAuthorityFactoryImpl;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactoryImpl;
+import com.limegroup.gnutella.browser.LocalAcceptor;
 import com.limegroup.gnutella.chat.InstantMessengerFactory;
 import com.limegroup.gnutella.chat.InstantMessengerFactoryImpl;
 import com.limegroup.gnutella.connection.ConnectionBandwidthStatistics;
@@ -100,6 +101,7 @@ import com.limegroup.gnutella.dht.db.PushProxiesValueFactoryImpl;
 import com.limegroup.gnutella.dht.io.LimeMessageDispatcherFactoryImpl;
 import com.limegroup.gnutella.downloader.LWSIntegrationServicesDelegate;
 import com.limegroup.gnutella.downloader.LimeWireDownloadModule;
+import com.limegroup.gnutella.downloader.serial.conversion.DownloadUpgradeTaskService;
 import com.limegroup.gnutella.filters.HostileFilter;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.LocalIPFilter;
@@ -158,6 +160,7 @@ import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
 import com.limegroup.gnutella.settings.SettingsBackedProxySettings;
 import com.limegroup.gnutella.settings.SettingsBackedSocketBindingSettings;
 import com.limegroup.gnutella.simpp.LimeWireSimppModule;
+import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.LimeWireGnutellaStatisticsModule;
 import com.limegroup.gnutella.tigertree.LimeWireHashTreeModule;
 import com.limegroup.gnutella.uploader.FileResponseEntityFactory;
@@ -217,8 +220,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireMojitoModule());
         binder().install(new LimeWireSecurityCertificateModule());
         binder().install(new LimeWireGeocodeGlueModule());        
-        binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, 
-                PromotionServicesImpl.class));
+        binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
         binder().install(new LimeWireSimppModule());
         
         bind(LimeWireCore.class);
@@ -348,8 +350,19 @@ public class LimeWireCoreModule extends AbstractModule {
         bindAll(Names.named("messageExecutor"), ExecutorService.class, MessageExecutorProvider.class, Executor.class);
         bindAll(Names.named("nioExecutor"), ScheduledExecutorService.class, NIOScheduledExecutorServiceProvider.class, ExecutorService.class, Executor.class);
                         
-        // TODO: This is odd -- move to initialize & LifecycleManager?
-        bind(Statistics.class).asEagerSingleton();
+        // These are bound because they are Singletons & Services, and must be started.
+        bind(Statistics.class);
+        bind(CoreRandomGlue.class);
+        bind(TlsTester.class);
+        bind(ConnectionAcceptorGlue.class);
+        bind(DownloadUpgradeTaskService.class);
+        bind(LocalAcceptor.class);
+        bind(Pinger.class);
+        bind(ConnectionWatchdog.class);
+        bind(SavedFileManager.class);
+        bind(RatingTable.class);
+        bind(OutOfBandThroughputMeasurer.class);
+        bind(HostCatcher.class);
         
         // TODO: Need to add interface to these classes
         //----------------------------------------------

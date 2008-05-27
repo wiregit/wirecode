@@ -33,7 +33,7 @@ public class MiscTests extends LimeTestCase {
     public void testSecureUpdateMessage() throws Exception {
         Injector injector = LimeTestUtils.createInjector();
         StaticMessages staticMessages = injector.getInstance(StaticMessages.class);
-        staticMessages.initialize();
+        staticMessages.start();
         QueryReply reply = staticMessages.getUpdateReply();
         QueryReply lime = staticMessages.getLimeReply();
         assertTrue(reply.hasSecureData());

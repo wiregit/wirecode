@@ -198,4 +198,9 @@ public class NetworkManagerStub implements NetworkManager {
     public void fireEvent(NetworkManagerEvent event) {
         listeners.broadcast(event);
     }
+    
+    public String getServiceName() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

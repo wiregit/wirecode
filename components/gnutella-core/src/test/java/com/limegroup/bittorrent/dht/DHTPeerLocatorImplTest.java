@@ -23,9 +23,7 @@ import org.limewire.mojito.routing.Contact;
 import org.limewire.mojito.routing.Version;
 import org.limewire.util.BaseTestCase;
 
-import com.google.inject.Module;
 import com.google.inject.util.Providers;
-import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.TorrentManager;

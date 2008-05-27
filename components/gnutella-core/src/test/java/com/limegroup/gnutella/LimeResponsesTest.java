@@ -7,6 +7,7 @@ import junit.framework.Test;
 import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -49,7 +50,7 @@ public class LimeResponsesTest extends ClientSideTestCase {
     
     @Override
     protected void setUp() throws Exception {
-		Injector injector = LimeTestUtils.createInjector();
+		Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         super.setUp(injector);
 		connectionManager = injector.getInstance(ConnectionManager.class);
 		queryRequestFactory = injector.getInstance(QueryRequestFactory.class);

@@ -8,6 +8,7 @@ import java.util.List;
 import junit.framework.Test;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HeadersFactory;
@@ -143,7 +144,7 @@ public final class PongCachingTest extends LimeTestCase {
         assertEquals("unexpected port", SERVER_PORT, 
 					 NetworkSettings.PORT.getValue());
 
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         connectionFactory = injector.getInstance(BlockingConnectionFactory.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
         headersFactory = injector.getInstance(HeadersFactory.class);

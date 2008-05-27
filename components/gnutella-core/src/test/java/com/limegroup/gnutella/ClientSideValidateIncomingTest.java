@@ -12,6 +12,8 @@ import java.util.Random;
 import junit.framework.Test;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
+
 import static com.limegroup.gnutella.ConnectionManagerImpl.MAX_TCP_CONNECT_BACK_ATTEMPTS;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.messages.Message;
@@ -63,7 +65,7 @@ public class ClientSideValidateIncomingTest extends ClientSideTestCase {
     
     @Override
     public void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector();
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         acceptor = (AcceptorImpl)injector.getInstance(Acceptor.class);
         
         // set values before everything is initialized

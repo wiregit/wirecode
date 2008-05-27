@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.lifecycle.Service;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.Inject;
@@ -36,7 +37,7 @@ import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
  */
 // TODO starts DHTManager, should also stop it
 @Singleton
-class NodeAssignerImpl implements NodeAssigner {
+class NodeAssignerImpl implements NodeAssigner, Service {
     
     private static final Log LOG = LogFactory.getLog(NodeAssignerImpl.class);
     
@@ -177,6 +178,18 @@ class NodeAssignerImpl implements NodeAssigner {
         if(timer != null) {
             timer.cancel(true);
         }
+    }
+    
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Ultrapeer/DHT Management");
+    }
+    
+    public void initialize() {
+    }
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
     }
     
     /**

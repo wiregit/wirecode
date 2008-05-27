@@ -21,6 +21,7 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
@@ -122,7 +123,7 @@ public class LeafRoutingTest extends LimeTestCase {
         networkManager.setPort(5454);
         networkManager.setAcceptedIncomingConnection(true);
         networkManager.setSolicitedGUID(new GUID());
-        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(NetworkManager.class).toInstance(networkManager);

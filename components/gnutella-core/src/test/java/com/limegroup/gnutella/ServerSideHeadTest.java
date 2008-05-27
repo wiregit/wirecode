@@ -12,6 +12,7 @@ import junit.framework.Test;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
@@ -71,7 +72,7 @@ public class ServerSideHeadTest extends LimeTestCase {
     	addr2 = new InetSocketAddress(InetAddress.getLocalHost(), port2);
 
     	
-    	Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+    	Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
     	    @Override
     	    protected void configure() {
     	        bind(FileManager.class).to(FileManagerStub.class);

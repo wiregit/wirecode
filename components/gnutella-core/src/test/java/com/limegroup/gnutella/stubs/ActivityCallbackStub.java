@@ -29,7 +29,7 @@ public class ActivityCallbackStub implements ActivityCallback {
     //if corruptness was queried
     public boolean corruptChecked = false;
 
-    public void componentLoading(String component) {}
+    public void componentLoading(String state, String component) {}
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {}
     public void knownHost(Endpoint e) { }
     public void handleNoInternetConnection() { }

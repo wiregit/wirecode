@@ -352,6 +352,11 @@ public class HttpPushRequestHandlerTest extends BaseTestCase {
             // TODO Auto-generated method stub
             
         }
+        
+        public String getServiceName() {
+            // TODO Auto-generated method stub
+            return null;
+        }
 
     }
 }

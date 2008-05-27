@@ -71,6 +71,16 @@ public class HTTPAcceptor extends BasicHttpAcceptor {
 
         inititalizeDefaultHandlers();
     }
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
+    @Override
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("HTTP Request Listening");
+    }
 
     private void inititalizeDefaultHandlers() {
         registerHandler("/browser-control", notFoundHandler);

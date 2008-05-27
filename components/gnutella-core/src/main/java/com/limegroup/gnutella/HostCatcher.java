@@ -44,6 +44,7 @@ import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.lifecycle.Service;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Inject;
@@ -89,7 +90,7 @@ import com.limegroup.gnutella.util.ClassCNetworks;
  * use those anymore.
  */
 @Singleton
-public class HostCatcher {
+public class HostCatcher implements Service {
     
     /**
      * Log for logging this class.
@@ -364,10 +365,26 @@ public class HostCatcher {
      * Initializes any components required for HostCatcher.
      * Currently, this schedules occasional services.
      */
-    public void initialize() {
+    public void start() {
         LOG.trace("START scheduling");
         
         scheduleServices();
+    }
+    
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Peer Locator");
+    }
+    public void initialize() {
+    }  
+    public void stop() {
+        try {
+            write();
+        } catch(IOException ignored) {}
+    }
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
     }
     
     protected void scheduleServices() {        

@@ -21,6 +21,7 @@ import org.limewire.mojito.settings.ContextSettings;
 import org.limewire.util.CommonUtils;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
@@ -53,7 +54,7 @@ public class ActiveDHTNodeControllerTest extends DHTTestCase {
         DHTTestUtils.setSettings(PORT);
         DHTSettings.FORCE_DHT_CONNECT.setValue(true);
         
-        injector = LimeTestUtils.createInjector();
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         
         dhtControllerFactory = injector.getInstance(DHTControllerFactory.class);
     }

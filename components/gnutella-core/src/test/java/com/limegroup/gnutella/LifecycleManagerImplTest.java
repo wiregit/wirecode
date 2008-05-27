@@ -50,8 +50,8 @@ public class LifecycleManagerImplTest extends BaseTestCase {
     public void testDoStartShouldInitializeDHTPeerPublisherAndDHTPeerLocator() {
         mockery.checking(new Expectations () {
             {
-                one(locator).init();
-                one(publisher).init();
+                one(locator).initialize();
+                one(publisher).initialize();
             }
         });
        ((LifecycleManagerImpl)lifecycleManager).doStart();

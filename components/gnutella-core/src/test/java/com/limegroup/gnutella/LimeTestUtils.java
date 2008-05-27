@@ -29,6 +29,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.BlockingConnectionFactoryImpl;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -154,10 +155,14 @@ public class LimeTestUtils {
      * @return the injector
      */
     public static Injector createInjector(Class<? extends ActivityCallback> callbackClass, Module...modules) {
+        return createInjector(Stage.DEVELOPMENT, callbackClass, modules);
+    }
+    
+    public static Injector createInjector(Stage stage, Class<? extends ActivityCallback> callbackClass, Module...modules) {
         Module combinedReplacements = Modules.combine(modules);
         Module combinedOriginals = Modules.combine(new LimeWireCoreModule(callbackClass), new BlockingConnectionFactoryModule());
         Module replaced = Guice.overrideModule(combinedOriginals, combinedReplacements);
-        return Guice.createInjector(replaced);
+        return Guice.createInjector(stage, replaced);
     }
 
     /**
@@ -165,6 +170,10 @@ public class LimeTestUtils {
      */
     public static Injector createInjector(Module... modules) {
         return createInjector(ActivityCallbackStub.class, modules);
+    }
+    
+    public static Injector createInjector(Stage stage, Module... modules) {
+        return createInjector(stage, ActivityCallbackStub.class, modules);
     }
 
     /**
@@ -178,7 +187,8 @@ public class LimeTestUtils {
      * @return the injector
      */
     public static Injector createInjectorAndStart(Class<? extends ActivityCallback> callbackClass, Module...modules) {
-        Injector injector = createInjector(callbackClass, modules);
+        // Use PRODUCTION to ensure all Services are created.
+        Injector injector = createInjector(Stage.PRODUCTION, callbackClass, modules);
         LifecycleManager lifecycleManager = injector.getInstance(LifecycleManager.class);
         lifecycleManager.start();
         return injector;

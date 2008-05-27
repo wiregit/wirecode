@@ -163,6 +163,11 @@ public class ServiceRegistryImplTest extends BaseTestCase {
         public void stop() {
             stopCount = count++;
         }
+        
+        public String getServiceName() {
+            // TODO Auto-generated method stub
+            return null;
+        }
     }
     
 }

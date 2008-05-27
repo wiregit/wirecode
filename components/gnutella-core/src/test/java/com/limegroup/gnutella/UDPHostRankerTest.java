@@ -20,6 +20,7 @@ import org.limewire.io.IpPort;
 
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -55,7 +56,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
     
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector(MyActivityCallback.class);
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyActivityCallback.class);
         super.setUp(injector);
         pingRequestFactory = injector.getInstance(PingRequestFactory.class);
         uniqueHostPinger = injector.getInstance(UniqueHostPinger.class);

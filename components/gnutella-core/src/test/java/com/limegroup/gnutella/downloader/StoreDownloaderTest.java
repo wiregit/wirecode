@@ -77,7 +77,7 @@ public class StoreDownloaderTest extends LimeTestCase{
         connectionManager.setConnected(true);
         
         downloadManager = (DownloadManagerImpl)injector.getInstance(DownloadManager.class);       
-        downloadManager.initialize();
+        downloadManager.start();
         RequeryManager.NO_DELAY = false;
     }
     

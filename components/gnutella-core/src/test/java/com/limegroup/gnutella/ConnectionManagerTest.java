@@ -36,6 +36,7 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.HostCatcher.EndpointObserver;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
@@ -101,7 +102,7 @@ public class ConnectionManagerTest extends LimeTestCase {
 
     public void setUp() throws Exception {
         setSettings();
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(HostCatcher.class).to(TestHostCatcher.class);
@@ -624,7 +625,7 @@ public class ConnectionManagerTest extends LimeTestCase {
     
     public void testClassCFiltering() throws Exception {
         setSettings();
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(HostCatcher.class).to(TestHostCatcher2.class);

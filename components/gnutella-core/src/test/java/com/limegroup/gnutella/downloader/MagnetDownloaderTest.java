@@ -74,7 +74,7 @@ public class MagnetDownloaderTest extends LimeTestCase {
         connectionManager.setConnected(true);
         
         downloadManager = injector.getInstance(DownloadManager.class);
-        downloadManager.initialize();
+        downloadManager.start();
     }
 
     public void testInvalidMagnetDownloads() throws Exception {

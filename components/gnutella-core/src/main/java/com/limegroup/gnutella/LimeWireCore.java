@@ -4,6 +4,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.NIODispatcher;
@@ -707,5 +708,9 @@ public class LimeWireCore {
 
     public CachedGeoLocation getCachedGeoLocation() {
         return injector.getInstance(CachedGeoLocation.class);
+    }
+    
+    public ServiceRegistry getServiceRegistry() {
+        return injector.getInstance(ServiceRegistry.class);
     }
 }

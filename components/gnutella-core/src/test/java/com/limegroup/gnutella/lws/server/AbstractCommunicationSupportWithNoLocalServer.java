@@ -11,6 +11,7 @@ import org.limewire.lws.server.LWSServerUtil;
 import org.limewire.net.SocketsManager;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.settings.LWSSettings;
@@ -136,7 +137,7 @@ abstract class AbstractCommunicationSupportWithNoLocalServer extends LimeTestCas
         LWSSettings.LWS_AUTHENTICATION_HOSTNAME.setValue("localhost");
         LWSSettings.LWS_AUTHENTICATION_PORT.setValue(8080);
         
-        inj = LimeTestUtils.createInjector();
+        inj = LimeTestUtils.createInjector(Stage.PRODUCTION);
         remoteServer = new RemoteServerImpl(inj.getInstance(SocketsManager.class), LOCAL_PORT);
         lifecycleManager = inj.getInstance(LifecycleManager.class);
         lifecycleManager.start();

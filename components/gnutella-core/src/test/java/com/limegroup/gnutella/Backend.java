@@ -20,6 +20,7 @@ import org.limewire.service.ErrorService;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Guice;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.NetworkSettings;
@@ -359,8 +360,9 @@ public class Backend extends com.limegroup.gnutella.util.LimeTestCase {
             preSetUp();
             setStandardSettings(port);
             populateSharedDirectory();
-            limeWireCore = Guice.createInjector(new LimeWireCoreModule(ActivityCallbackStub.class))
-                    .getInstance(LimeWireCore.class);
+            limeWireCore = Guice.createInjector(Stage.PRODUCTION,
+                                                new LimeWireCoreModule(ActivityCallbackStub.class))
+                                .getInstance(LimeWireCore.class);
             limeWireCore.getLifecycleManager().start();
             if (!reject)
                 limeWireCore.getConnectionServices().connect();

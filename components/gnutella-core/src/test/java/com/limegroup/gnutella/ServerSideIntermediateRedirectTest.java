@@ -9,6 +9,7 @@ import java.net.ServerSocket;
 import junit.framework.Test;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -81,7 +82,7 @@ public final class ServerSideIntermediateRedirectTest
 	
 	@Override
 	protected void setUp() throws Exception {
-	    Injector injector = LimeTestUtils.createInjector();
+	    Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
 	    super.setUp(injector);
 	    messageFactory = injector.getInstance(MessageFactory.class);
 	    messagesSupportedVendorMessage = injector.getInstance(MessagesSupportedVendorMessage.class);

@@ -18,6 +18,7 @@ import org.limewire.mojito.util.MojitoUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.BlockingConnectionUtils;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionServices;
@@ -83,7 +84,7 @@ public class PassiveLeafForwardContactsTest extends LimeTestCase {
         doSettings();
         
         final NodeAssigner na = new NodeAssignerStub();
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(CapabilitiesVMFactory.class).to(CapabilitiesVMFactoryImplStub.class);

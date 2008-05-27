@@ -38,6 +38,7 @@ import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
+import org.limewire.lifecycle.Service;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.statistic.StatsUtils;
 import org.limewire.util.ByteUtils;
@@ -73,7 +74,7 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * This class is thread-safe.
  */
 //@Singleton // abstract, so not a singleton -- subclasses are.
-public abstract class FileManagerImpl implements FileManager {
+public abstract class FileManagerImpl implements FileManager, Service {
 	
     private static final Log LOG = LogFactory.getLog(FileManagerImpl.class);
 
@@ -434,6 +435,18 @@ public abstract class FileManagerImpl implements FileManager {
         _storeDirectories = new HashSet<File>();
     }
 
+    public String getServiceName() {
+        return org.limewire.i18n.I18nMarker.marktr("Shared Files");
+    }
+    
+    public void initialize() {
+    }
+    
+    @Inject
+    void register(org.limewire.lifecycle.ServiceRegistry registry) {
+        registry.register(this);
+    }
+    
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#start()
      */

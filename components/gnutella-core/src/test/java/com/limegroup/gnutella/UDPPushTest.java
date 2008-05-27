@@ -21,6 +21,7 @@ import org.limewire.nio.NIOSocket;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
+import com.google.inject.Stage;
 import com.google.inject.name.Names;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -75,7 +76,7 @@ public class UDPPushTest extends LimeTestCase {
         ConnectionSettings.SOLICITED_GRACE_PERIOD.setValue(5000l);
 
         // initialize services
-        injector = LimeTestUtils.createInjector(new AbstractModule() {
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(Acceptor.class).to(AcceptorStub.class);
@@ -117,7 +118,7 @@ public class UDPPushTest extends LimeTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        injector.getInstance(LifecycleManager.class).start();
+        injector.getInstance(LifecycleManager.class).shutdown();
         
         serversocket.close();
         udpsocket.close();

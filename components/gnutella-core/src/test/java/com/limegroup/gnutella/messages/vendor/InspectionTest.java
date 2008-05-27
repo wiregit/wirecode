@@ -29,6 +29,7 @@ import org.limewire.util.ByteUtils;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import com.google.inject.Stage;
 import com.google.inject.name.Names;
 import com.limegroup.bittorrent.bencoding.Token;
 import com.limegroup.gnutella.BlockingConnectionUtils;
@@ -111,7 +112,7 @@ public class InspectionTest extends ServerSideTestCase {
         keyPair = keyGen.generateKeyPair();
         final SecureMessageVerifier smv = new SecureMessageVerifierImpl(keyPair.getPublic(), "testSMV");
         
-        Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, new AbstractModule() {
             @Override
             protected void configure() {
                 bind(SecureMessageVerifier.class).annotatedWith(Names.named("inspection")).toInstance(smv);

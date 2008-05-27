@@ -8,6 +8,7 @@ import org.limewire.net.SocketsManager.ConnectType;
 import junit.framework.Test;
 
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
@@ -64,7 +65,7 @@ public class TLSConnectionTest extends LimeTestCase {
    
     @Override
     public void setUp() throws Exception {
-        injector = LimeTestUtils.createInjector();
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION);
         
         PORT++; // TODO: Remove hack to override port
         

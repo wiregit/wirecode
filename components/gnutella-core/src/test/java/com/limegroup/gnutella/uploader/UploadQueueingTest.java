@@ -20,6 +20,7 @@ import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Stage;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -110,7 +111,7 @@ public class UploadQueueingTest extends LimeTestCase {
         savedNIOWatchdogDelay = (int) StalledUploadWatchdog.DELAY_TIME;
         StalledUploadWatchdog.DELAY_TIME = Integer.MAX_VALUE;
 
-        injector = LimeTestUtils.createInjector(MyActivitCallback.class,
+        injector = LimeTestUtils.createInjector(Stage.PRODUCTION, MyActivitCallback.class,
                 new AbstractModule() {
                     @Override
                     protected void configure() {
