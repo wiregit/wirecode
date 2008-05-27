@@ -452,8 +452,8 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
     }
 
     /**
-     * If not set or there is trouble parsing the field, returns today's date,
-     * which will be overridden by the parent container's start date.
+     * If not set or there is trouble parsing the field, returns the earliest
+     * possible date, which will be overridden by the parent container's start date.
      */
     public Date getValidStart() {
         // Date is stored as a 4 byte long, seconds since UNIX epoch.
@@ -464,7 +464,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
             long startLong = ByteUtils.beb2long(start, 0, 4);
             return new Date(startLong * 1000);
         } catch (BadGGEPPropertyException ex) {
-            return new Date();
+            return new Date(0);
         }
     }
 
@@ -482,7 +482,7 @@ public class PromotionMessageContainer implements MessageContainer, Serializable
             long endLong = ByteUtils.beb2long(end, 0, 4);
             return new Date(endLong * 1000);
         } catch (BadGGEPPropertyException ex) {
-            return new Date(MAX_DATE_IN_SECONDS * 1000);
+            return new Date(MAX_DATE_IN_SECONDS * 1000L);
         }
     }
 
