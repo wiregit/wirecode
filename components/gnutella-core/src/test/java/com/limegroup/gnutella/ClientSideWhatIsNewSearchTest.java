@@ -44,7 +44,7 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, toreRepliesActivityCallback.class);
+        Injector injector = LimeTestUtils.createInjector(Stage.PRODUCTION, StoreRepliesActivityCallback.class);
         super.setUp(injector);
         
         callback = (StoreRepliesActivityCallback) injector.getInstance(ActivityCallback.class);
