@@ -82,7 +82,6 @@ import com.limegroup.gnutella.messages.vendor.UDPCrawlerPongFactory;
 import com.limegroup.gnutella.messages.vendor.VendorMessageFactory;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaDataReader;
-import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
@@ -140,10 +139,6 @@ public class LimeWireCore {
 
     public SocketsManager getSocketsManager() {
         return injector.getInstance(SocketsManager.class);
-    }
-
-    public HostDataFactory getHostDataFactory() {
-        return injector.getInstance(HostDataFactory.class);
     }
 
     public RoutedConnectionFactory getManagedConnectionFactory() {

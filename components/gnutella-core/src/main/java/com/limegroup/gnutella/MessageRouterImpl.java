@@ -1171,12 +1171,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @see {@link #getQueryLocs(GUID)} for retrieval
      */
     public boolean addBypassedSource(QueryReply reply, ReplyHandler handler) {
-        try {
-            if (reply.getHostData().isFirewalled())
-                return false;
-        } catch (BadPacketException bpe){
+        if (reply.isFirewalled())
             return false;
-        }
         GUESSEndpoint ep = new GUESSEndpoint(handler.getInetAddress(), handler.getPort());
         return _bypassedResultsCache.addBypassedSource(new GUID(reply.getGUID()), ep);
     }

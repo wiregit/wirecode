@@ -216,24 +216,23 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
      *  otherwise <tt>false</tt> 
      */
     public void handleQueryReply(final QueryReply qr) {
-        HostData data;
         try {
-            data = qr.getHostData();
+            qr.validate();
         } catch(BadPacketException bpe) {
             LOG.debug("bad packet reading qr", bpe);
             return;
         }
 
         // always handle reply to multicast queries.
-        if( !data.isReplyToMulticastQuery() && !qr.isBrowseHostReply() ) {
+        if( !qr.isReplyToMulticastQuery() && !qr.isBrowseHostReply() ) {
             // note that the minimum search quality will always be greater
             // than -1, so -1 qualities (the impossible case) are never
             // displayed
-            if(data.getQuality() < SearchSettings.MINIMUM_SEARCH_QUALITY.getValue()) {
+            if(qr.calculateQualityOfService() < SearchSettings.MINIMUM_SEARCH_QUALITY.getValue()) {
                 LOG.debug("Ignoring because low quality");
                 return;
             }
-            if(data.getSpeed() < SearchSettings.MINIMUM_SEARCH_SPEED.getValue()) {
+            if(qr.getSpeed() < SearchSettings.MINIMUM_SEARCH_SPEED.getValue()) {
                 LOG.debug("Ignoring because low speed");
                 return;
             }
@@ -241,7 +240,7 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
             // we're not on close IPs AND
             // (we are firewalled OR we are a private IP) AND 
             // no chance for FW transfer then drop the reply.
-            if(data.isFirewalled() && 
+            if(qr.isFirewalled() && 
                !networkInstanceUtils.isVeryCloseIP(qr.getIPBytes()) &&               
                (!networkManager.acceptedIncomingConnection() ||
                        networkInstanceUtils.isPrivateAddress(networkManager.getAddress())) &&
@@ -273,17 +272,17 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
             
         for(Response response : results) {
             if (!qr.isBrowseHostReply() && secureStatus != SecureMessage.SECURE) {
-                if (!searchServices.matchesType(data.getMessageGUID(), response)) {
+                if (!searchServices.matchesType(qr.getGUID(), response)) {
                     continue;
                 }
 
-                if (!searchServices.matchesQuery(data.getMessageGUID(), response)) {
+                if (!searchServices.matchesQuery(qr.getGUID(), response)) {
                     continue;
                 }
             }
 
             // Throw away results from Mandragore Worm
-            if (searchServices.isMandragoreWorm(data.getMessageGUID(), response)) {
+            if (searchServices.isMandragoreWorm(qr.getGUID(), response)) {
                 continue;
             }
             
@@ -296,10 +295,10 @@ final class SearchResultHandlerImpl implements SearchResultHandler {
             
             // we'll be showing the result to the user, count it
             countClassC(qr,response);
-            RemoteFileDesc rfd = response.toRemoteFileDesc(data, remoteFileDescFactory);
+            RemoteFileDesc rfd = response.toRemoteFileDesc(qr, remoteFileDescFactory);
             rfd.setSecureStatus(secureStatus);
             Set<? extends IpPort> alts = response.getLocations();
-            activityCallback.get().handleQueryResult(rfd, data, alts);
+            activityCallback.get().handleQueryResult(rfd, qr, alts);
             
             if (skipSpam || !spamManager.get().isSpam(rfd))
                 numGoodSentToFrontEnd++;

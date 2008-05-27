@@ -12,10 +12,10 @@ import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
@@ -37,7 +37,7 @@ public class ActivityCallbackStub implements ActivityCallback {
     //public void handleQueryReply( QueryReply qr ) { }
 
 	public void handleQueryResult(RemoteFileDesc rfd, 
-	                              HostData data,
+	                              QueryReply queryReply,
 	                              Set alts) {}
     public void handleQueryString( String query ) { }    
     public void addDownload(Downloader d) { }    

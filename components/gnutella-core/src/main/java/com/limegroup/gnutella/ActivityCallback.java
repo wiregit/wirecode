@@ -9,8 +9,8 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.version.UpdateInformation;
+import com.limegroup.gnutella.messages.QueryReply;
 
 /**
  *  Defines the interface of a callback to notify about asynchronous backend 
@@ -39,10 +39,10 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, C
      * Notifies the UI that a new query result has come in to the backend.
      * 
      * @param rfd the descriptor for the remote file
-     * @param data the data for the host returning the result
+     * @param queryReply
      * @param locs the <tt>Set</tt> of alternate locations for the file
      */
-	public void handleQueryResult(RemoteFileDesc rfd, HostData data, Set<? extends IpPort> locs);
+	public void handleQueryResult(RemoteFileDesc rfd, QueryReply queryReply, Set<? extends IpPort> locs);
 
     /**
      * Add a query string to the monitor screen

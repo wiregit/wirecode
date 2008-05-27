@@ -49,8 +49,6 @@ public class MulticastTest extends LimeTestCase {
 
     private SearchServices searchServices;
 
-    private NetworkManager networkManager;
-
     private PushDownloadManager pushDownloadManager;
 
     private DownloadServices downloadServices;
@@ -60,7 +58,7 @@ public class MulticastTest extends LimeTestCase {
     private LifecycleManager lifeCycleManager;
     
     private RemoteFileDescFactory remoteFileDescFactory;
-        
+    protected Injector injector;
 
     public MulticastTest(String name) {
         super(name);
@@ -107,14 +105,13 @@ public class MulticastTest extends LimeTestCase {
         
         M_HANDLER = new MulticastHandler();
         U_HANDLER = new UnicastedHandler();
-    
-        Injector injector = LimeTestUtils.createInjector();
+
+        injector = LimeTestUtils.createInjector();
         
         fileManager = injector.getInstance(FileManager.class);
         connectionServices = injector.getInstance(ConnectionServices.class);
         messageRouter = (MessageRouterImpl) injector.getInstance(MessageRouter.class);
         searchServices = injector.getInstance(SearchServices.class);
-        networkManager = injector.getInstance(NetworkManager.class);
         pushDownloadManager = injector.getInstance(PushDownloadManager.class);
         downloadServices = injector.getInstance(DownloadServices.class);
         forMeReplyHandler = injector.getInstance(ForMeReplyHandler.class);
@@ -178,12 +175,23 @@ public class MulticastTest extends LimeTestCase {
         assertEquals("wrong hops", 1, qr.getHops());
     }
     
+    public void testQueryRepliesIsFirewalled() throws Exception {
+        testQueryReplies(false);
+    }
+    
+    public void testQueryRepliesNotFirewalled() throws Exception {
+        testQueryReplies(true);
+    }
+    
     /**
      * Tests that replies to multicast queries contain the MCAST GGEP header
      * and other appropriate info.
      */
-    public void testQueryReplies() throws Exception {
+    public void testQueryReplies(boolean acceptedIncoming) throws Exception {
         byte[] guid = searchServices.newQueryGUID();
+
+        //searchServices = getSearchServices(acceptedIncoming);
+        
         searchServices.query(guid, "metadata"); // search for the name
         
         // sleep to let the search process.
@@ -214,8 +222,8 @@ public class MulticastTest extends LimeTestCase {
         
         // wipe out the address so the first addr == my addr check isn't used
         wipeAddress(qr);
-        assertEquals("wrong qos", 4, qr.calculateQualityOfService(false, networkManager));
-        assertEquals("wrong qos", 4, qr.calculateQualityOfService(true, networkManager));
+        PrivilegedAccessor.setValue(injector.getInstance(Acceptor.class), "_acceptedIncoming", acceptedIncoming);
+        assertEquals("wrong qos", 4, qr.calculateQualityOfService());
 	}
     
     /**
@@ -250,7 +258,7 @@ public class MulticastTest extends LimeTestCase {
         List responses = qr.getResultsAsList();
         assertEquals("should only have 1 response", 1, responses.size());
         Response res = (Response)responses.get(0);
-        RemoteFileDesc rfd = res.toRemoteFileDesc(qr.getHostData(), remoteFileDescFactory);
+        RemoteFileDesc rfd = res.toRemoteFileDesc(qr, remoteFileDescFactory);
         
         assertTrue("rfd should be multicast", rfd.isReplyToMulticast());
         
@@ -316,7 +324,7 @@ public class MulticastTest extends LimeTestCase {
         List responses = qr.getResultsAsList();
         assertEquals("should only have 1 response", 1, responses.size());
         Response res = (Response)responses.get(0);
-        RemoteFileDesc rfd = res.toRemoteFileDesc(qr.getHostData(), remoteFileDescFactory);
+        RemoteFileDesc rfd = res.toRemoteFileDesc(qr, remoteFileDescFactory);
         
         assertTrue("rfd should be multicast", rfd.isReplyToMulticast());
         
@@ -381,7 +389,7 @@ public class MulticastTest extends LimeTestCase {
         List responses = qr.getResultsAsList();
         assertEquals("should only have 1 response", 1, responses.size());
         Response res = (Response)responses.get(0);
-        RemoteFileDesc rfd = res.toRemoteFileDesc(qr.getHostData(), remoteFileDescFactory);
+        RemoteFileDesc rfd = res.toRemoteFileDesc(qr, remoteFileDescFactory);
         
         // clear the data to make it easier to look at again...
         M_HANDLER.multicasted.clear();

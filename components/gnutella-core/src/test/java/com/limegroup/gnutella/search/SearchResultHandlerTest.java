@@ -148,7 +148,7 @@ public class SearchResultHandlerTest extends LimeTestCase {
         List<RemoteFileDesc> results = new LinkedList<RemoteFileDesc>();
 
         @Override
-        public void handleQueryResult(RemoteFileDesc rfd, HostData data, Set alts) {
+        public void handleQueryResult(RemoteFileDesc rfd, QueryReply queryReply, Set alts) {
             results.add(rfd);
         }
         

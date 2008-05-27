@@ -11,9 +11,7 @@ import org.limewire.io.IpPort;
 import org.limewire.security.SecureMessage;
 
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.search.HostData;
 
 public interface QueryReply extends Message, SecureMessage {
 
@@ -82,7 +80,7 @@ public interface QueryReply extends Message, SecureMessage {
      */
     public byte[] getIPBytes();
 
-    public long getSpeed();
+    public int getSpeed();
 
     /**
      * Returns the Response[].  Throws BadPacketException if this
@@ -100,12 +98,12 @@ public interface QueryReply extends Message, SecureMessage {
      *  this data couldn't be extracted.  */
     public List<Response> getResultsAsList() throws BadPacketException;
 
-    /** 
-     * Returns the name of this' vendor, all capitalized.  Throws
-     * BadPacketException if the data couldn't be extracted, either because it
-     * is missing or corrupted. 
+    /**
+     * Returns the name of this' vendor, all capitalized.  Returns
+     * the empty String if the data couldn't be extracted, either because it
+     * is missing or corrupted.
      */
-    public String getVendor() throws BadPacketException;
+    public String getVendor();
 
     /** 
      * Returns true if this's push flag is set, i.e., a push download is needed.
@@ -187,12 +185,6 @@ public interface QueryReply extends Message, SecureMessage {
     public byte[] getSecurityToken();
 
     /**
-     * Returns the HostData object describing information
-     * about this QueryReply.
-     */
-    public HostData getHostData() throws BadPacketException;
-
-    /**
      * Determines if this result has secure data.
      * This does NOT determine if the result has been verified
      * as secure.
@@ -214,13 +206,8 @@ public interface QueryReply extends Message, SecureMessage {
      *
      * @return a int from -1 to 3, with -1 for "never work" and 3 for "always
      * work".  Typically a return value of N means N+1 stars will be displayed
-     * in the GUI.
-     * @param iFirewalled switch to indicate if the client is firewalled or
-     * not.  See RouterService.acceptingIncomingConnection or Acceptor for
-     * details.  
-     */
-    public int calculateQualityOfService(boolean iFirewalled,
-            NetworkManager networkManager);
+     * in the GUI. */
+    public int calculateQualityOfService();
 
     public byte[] getPayload();
     
@@ -228,4 +215,13 @@ public interface QueryReply extends Message, SecureMessage {
      * @return if this reply is created locally. false means from network.
      */
     public boolean isLocal();
+
+    public boolean isFirewalled();
+
+    /**
+     * parses the message packet and throws a <code>BadPacketException</code> if the
+     * packet was invalid.
+     * @throws BadPacketException
+     */
+    void validate() throws BadPacketException;
 }

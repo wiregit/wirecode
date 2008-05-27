@@ -25,6 +25,7 @@ import org.limewire.io.GGEP;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
 import org.limewire.io.IpPortSet;
+import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.security.SecureMessage;
@@ -37,8 +38,6 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.ResponseFactory;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.search.HostDataFactory;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
@@ -94,31 +93,39 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     /** The parsed query reply data. */
     private volatile QueryReplyData _data;
     
+    // TODO move to QueryReply decorator?
     /** Whether or not this reply is allowed to have MCAST. */
     private volatile boolean _multicastAllowed = false;
     
     /** The cached clientGUID. */  
     private byte[] clientGUID = null;    
 
-    private final HostDataFactory hostDataFactory;
+    private final NetworkManager networkManager;
+    private final NetworkInstanceUtils networkInstanceUtils;
     private final ResponseFactory responseFactory;
     
     private final boolean local;
     
+    private volatile boolean badPacket;
+    
     
     QueryReplyImpl(byte[] guid, byte ttl, byte hops, byte[] payload,
-            Network network, HostDataFactory hostDataFactory,
+            Network network, NetworkInstanceUtils networkInstanceUtils, NetworkManager networkManager,
             ResponseFactory responseFactory) throws BadPacketException {
         super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length, network);
-        this.hostDataFactory = hostDataFactory;
+        this.networkManager = networkManager;
+        this.networkInstanceUtils = networkInstanceUtils;
         this.responseFactory = responseFactory;
         this._payload = payload;
+        this.badPacket = true;
         
-		if(!NetworkUtils.isValidPort(getPort())) {
+        if(!NetworkUtils.isValidPort(getPort())) {
 			throw new BadPacketException("invalid port");
 		}
-		if( (getSpeed() & 0xFFFFFFFF00000000L) != 0) {
-			throw new BadPacketException("invalid speed: " + getSpeed());
+        
+        // 0xFFFFFFFF00000000L = Integer.MIN_VALUE * 2
+        if( (getSpeedFromPayload() & 0xFFFFFFFF00000000L) != 0) {
+			throw new BadPacketException("invalid speed: " + getSpeedFromPayload());
 		} 		
 		
 		setAddress();
@@ -137,13 +144,16 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             boolean finishedUpload, boolean measuredSpeed,
             boolean supportsChat, boolean supportsBH, boolean isMulticastReply,
             boolean supportsFWTransfer, Set<? extends IpPort> proxies,
-            SecurityToken securityToken, HostDataFactory hostDataFactory,
+            SecurityToken securityToken, NetworkInstanceUtils networkInstanceUtils, NetworkManager networkManager,
             ResponseFactory responseFactory) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte) 0, 0, Network.UNKNOWN);
 
-        this.hostDataFactory = hostDataFactory;
+        this.networkManager = networkManager;
+        this.networkInstanceUtils = networkInstanceUtils;
         this.responseFactory = responseFactory;
         this.local = true;
+        this.badPacket = true;
+        
         if (xmlBytes.length > XML_MAX_SIZE)
             throw new IllegalArgumentException("xml too large: " + new String(xmlBytes));
 
@@ -266,6 +276,13 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 		setAddress();
     }
     
+    public void validate() throws BadPacketException {
+        parseResults();
+        if(badPacket) {
+            throw new BadPacketException();
+        }
+    }
+    
     /** Writes the 'secureGGEP' GGEP. */
     protected void writeSecureGGEP(ByteArrayOutputStream out, byte[] xml) {
         // writes the secure ggep portion.
@@ -368,8 +385,13 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         return _address;
     }
 
-    public long getSpeed() {
+    private long getSpeedFromPayload() {
         return ByteUtils.uint2long(ByteUtils.leb2int(_payload,7));
+    }
+    
+    public int getSpeed() {
+        // TODO move to QueryReply decorator?
+        return isReplyToMulticastQuery() ? Integer.MAX_VALUE : ByteUtils.long2int(getSpeedFromPayload()); //safe cast;
     }
     
     /**
@@ -398,19 +420,27 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     public List<Response> getResultsAsList() throws BadPacketException {
         return Arrays.asList(getResultsArray());
     }
-
-
+    
     /** 
      * Returns the name of this' vendor, all capitalized.  Throws
      * BadPacketException if the data couldn't be extracted, either because it
      * is missing or corrupted. 
      */
-    public String getVendor() throws BadPacketException {
+    private String getVendorFromPayload() throws BadPacketException {
         parseResults();
         String vendor = _data.getVendor();
         if (vendor==null)
             throw new BadPacketException();
         return vendor;        
+    }
+
+    public String getVendor() {
+        // TODO move to QueryReply decorator?
+        try {
+            return getVendorFromPayload();
+        } catch (BadPacketException e) {
+            return "";
+        }
     }
 
     /** 
@@ -539,12 +569,35 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
         return _data.isTLSCapable();
     }
 
-    /** 
+    private boolean getSupportsChatFromPayload() {
+        parseResults();
+        return _data.isSupportsChat();
+    }
+
+    /**
      * Returns true iff the client supports chat.
      */
     public boolean getSupportsChat() {
-        parseResults();
-        return _data.isSupportsChat();
+        // TODO move to QueryReply decorator?
+        boolean firewalled = isFirewalledHack();
+        return getSupportsChatFromPayload() && !firewalled;
+    }
+
+    private boolean isFirewalledHack() {
+        // In theory, this method should be removed,
+        // and callers should use isFirewalled().
+        // However, that code also takes into account whether
+        // the message was multicast, whereas the legacy piece of
+        // code that did the getSupportsChat logic did *not*
+        // use that information; need to verify with the team
+        // that replacing this with isFirewalled() is ok.
+        boolean firewalled;
+        try {
+            firewalled = getNeedsPush() || networkInstanceUtils.isPrivateAddress(getIP());
+        } catch (BadPacketException e) {
+            firewalled = true;
+        }
+        return firewalled;
     }
 
     /** @return true if the remote host can firewalled transfers.
@@ -609,18 +662,6 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
     public byte[] getSecurityToken() {
         parseResults();
         return _data.getSecurityToken();
-    }
-    
-    /**
-     * Returns the HostData object describing information
-     * about this QueryReply.
-     */
-    public HostData getHostData() throws BadPacketException {
-        parseResults();
-        HostData hd = _data.getHostData();
-        if( hd == null )
-            throw new BadPacketException();
-        return hd;
     }
     
     /**
@@ -887,8 +928,7 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
             _data.setSecurityToken(securityToken);
             _data.setTLSCapable(supportsTLST);
             
-            // MUST BE LAST -- This accesses everything set above
-            _data.setHostData(hostDataFactory.createHostData(this));
+            badPacket = false;
         } catch (BadPacketException e) {
             return;
         } catch (IndexOutOfBoundsException e) {
@@ -935,12 +975,10 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
      *
      * @return a int from -1 to 3, with -1 for "never work" and 3 for "always
      * work".  Typically a return value of N means N+1 stars will be displayed
-     * in the GUI.
-     * @param iFirewalled switch to indicate if the client is firewalled or
-     * not.  See RouterService.acceptingIncomingConnection or Acceptor for
-     * details.  
-     */
-	public int calculateQualityOfService(boolean iFirewalled, NetworkManager networkManager) {
+     * in the GUI. */
+	public int calculateQualityOfService() {
+        boolean iFirewalled = !networkManager.acceptedIncomingConnection();
+        // TODO change to an enum
         final int YES=1;
         final int MAYBE=0;
         final int NO=-1;
@@ -1021,6 +1059,17 @@ public class QueryReplyImpl extends AbstractMessage implements QueryReply {
 	public static boolean isFirewalledQuality(int quality) {
         return quality==0 || quality==2;
 	}
+
+    public boolean isFirewalled() {
+        // TODO move to QueryReply decorator?
+        boolean firewalled;
+        try {
+            firewalled = getNeedsPush() || networkInstanceUtils.isPrivateAddress(getIP());
+        } catch (BadPacketException e) {
+            firewalled = true;
+        }
+        return firewalled && !isReplyToMulticastQuery();
+    }
 
     /** Handles all our GGEP stuff.  Caches potential GGEP blocks for efficiency.
      */

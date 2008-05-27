@@ -17,8 +17,8 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.RoutedConnection;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.version.UpdateInformation;
+import com.limegroup.gnutella.messages.QueryReply;
 
 /**
  * The command-line UI for the Gnutella servent.
@@ -174,7 +174,7 @@ public class Main {
     //      }
     //     }
     
-        public void handleQueryResult(RemoteFileDesc rfd ,HostData data, Set<? extends IpPort> loc) {
+        public void handleQueryResult(RemoteFileDesc rfd , QueryReply queryReply, Set<? extends IpPort> loc) {
             synchronized(System.out) {
                 System.out.println("Query hit from "+rfd.getHost()+":"+rfd.getPort()+":");
                 System.out.println("   "+rfd.getFileName());

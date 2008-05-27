@@ -26,11 +26,7 @@ import org.limewire.util.Base32;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.QueryReplyFactory;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 
@@ -361,7 +357,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         
         @Override
         public void handleQueryResult(RemoteFileDesc rfd,
-                                      HostData data,
+                                      QueryReply queryReply,
                                       Set locs) {
             // make sure the browse is not attempted as a TLS connection
             rfd.setTLSCapable(false);

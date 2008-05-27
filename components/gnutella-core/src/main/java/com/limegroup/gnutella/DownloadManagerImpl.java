@@ -56,7 +56,6 @@ import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.version.DownloadInformation;
@@ -122,8 +121,7 @@ public class DownloadManagerImpl implements DownloadManager {
     
     private final EventListenerList<DownloadManagerEvent> listeners =
         new EventListenerList<DownloadManagerEvent>();
-    
-    private final NetworkManager networkManager;
+
     private final DownloadCallback innetworkCallback;
     private final Provider<DownloadCallback> downloadCallback;
     private final Provider<MessageRouter> messageRouter;
@@ -137,8 +135,7 @@ public class DownloadManagerImpl implements DownloadManager {
     private final BTMetaInfoFactory btMetaInfoFactory;
     
     @Inject
-    public DownloadManagerImpl(NetworkManager networkManager,
-            @Named("inNetwork") DownloadCallback innetworkCallback,
+    public DownloadManagerImpl(@Named("inNetwork") DownloadCallback innetworkCallback,
             Provider<DownloadCallback> downloadCallback,
             Provider<MessageRouter> messageRouter,
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
@@ -149,7 +146,6 @@ public class DownloadManagerImpl implements DownloadManager {
             IncompleteFileManager incompleteFileManager,
             RemoteFileDescFactory remoteFileDescFactory,
             BTMetaInfoFactory btMetaInfoFactory) {
-        this.networkManager = networkManager;
         this.innetworkCallback = innetworkCallback;
         this.downloadCallback = downloadCallback;
         this.messageRouter = messageRouter;
@@ -869,20 +865,18 @@ public class DownloadManagerImpl implements DownloadManager {
     public void handleQueryReply(QueryReply qr) {
         // first check if the qr is of 'sufficient quality', if not just
         // short-circuit.
-        if (qr.calculateQualityOfService(
-                !networkManager.acceptedIncomingConnection(), networkManager) < 1)
+        if (qr.calculateQualityOfService() < 1)
             return;
 
         List<Response> responses;
-        HostData data;
         try {
+            qr.validate();
             responses = qr.getResultsAsList();
-            data = qr.getHostData();
         } catch(BadPacketException bpe) {
             return; // bad packet, do nothing.
         }
         
-        addDownloadWithResponses(responses, data);
+        addDownloadWithResponses(responses, qr);
     }
 
     /**
@@ -890,11 +884,11 @@ public class DownloadManagerImpl implements DownloadManager {
      * up to any existing downloaders, adding them as possible
      * sources if they do.
      */
-    private void addDownloadWithResponses(List<? extends Response> responses, HostData data) {
+    private void addDownloadWithResponses(List<? extends Response> responses, QueryReply queryReply) {
         if(responses == null)
             throw new NullPointerException("null responses");
-        if(data == null)
-            throw new NullPointerException("null hostdata");
+        if(queryReply == null)
+            throw new NullPointerException("null queryReply");
 
         // need to synch because active and waiting are not thread safe
         List<CoreDownloader> downloaders = new ArrayList<CoreDownloader>(active.size() + waiting.size());
@@ -914,7 +908,7 @@ public class DownloadManagerImpl implements DownloadManager {
         //that would cause a conflict with downloader y.  Check for this.
         for(Response r : responses) {
             // Don't bother with making XML from the EQHD.
-            RemoteFileDesc rfd = r.toRemoteFileDesc(data, remoteFileDescFactory);
+            RemoteFileDesc rfd = r.toRemoteFileDesc(queryReply, remoteFileDescFactory);
             for(Downloader current : downloaders) {
                 if ( !(current instanceof ManagedDownloader))
                     continue; // can't add sources to torrents yet

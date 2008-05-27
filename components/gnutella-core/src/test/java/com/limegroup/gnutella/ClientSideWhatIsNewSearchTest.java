@@ -14,7 +14,6 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.DataUtils;
@@ -131,8 +130,8 @@ public class ClientSideWhatIsNewSearchTest extends ClientSideTestCase {
         byte[] guid = null;
         
         @Override
-        public synchronized void handleQueryResult(RemoteFileDesc rfd, HostData data, Set alts) {
-            if (Arrays.equals(data.getClientGUID(), guid)) {
+        public synchronized void handleQueryResult(RemoteFileDesc rfd, QueryReply queryReply, Set alts) {
+            if (Arrays.equals(queryReply.getClientGUID(), guid)) {
                 desc = rfd;
                 notify();
             }

@@ -20,14 +20,8 @@ import org.limewire.io.IpPort;
 
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.MessageFactory;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingReplyFactory;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.PingRequestFactory;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
@@ -175,7 +169,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
 
         @Override
         public void handleQueryResult(RemoteFileDesc rfd,
-                                      HostData data,
+                                      QueryReply queryReply,
                                       Set locs) {
             this.rfd = rfd;
         }
