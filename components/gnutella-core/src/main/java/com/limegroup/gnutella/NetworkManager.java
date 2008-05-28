@@ -42,7 +42,7 @@ public interface NetworkManager extends Service, ListenerSupport<NetworkManagerE
     /**
      * Returns the port used for downloads and messaging connections.
      * Used to fill out the My-Address header in ManagedConnection.
-     * @see AcceptorImpl#getPort
+     * @see Acceptor#getPort
      */
     public int getPort();
 

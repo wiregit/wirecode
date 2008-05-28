@@ -376,8 +376,6 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 *
 	 * @return a new <tt>URN</tt> instance from the specified request, or 
 	 *  <tt>null</tt> if no <tt>URN</tt> could be created
-	 *
-	 * @see com.limegroup.gnutella.AcceptorImpl
 	 */
 	public static URN createSHA1UrnFromHttpRequest(final String requestLine) 
 		throws IOException {

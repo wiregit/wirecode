@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 import java.io.IOException;
 import java.net.InetAddress;
 
-public interface Acceptor {
+public interface Acceptor extends SocketProcessor {
 
     /**
      * @modifes this

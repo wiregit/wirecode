@@ -48,7 +48,8 @@ public class LimeCoreGlueTest extends BaseTestCase {
                              "org.limewire.util.CommonUtils", 
                              "org.limewire.util.OSUtils",
                              "com.limegroup.gnutella.util.Portable",
-                             "com.limegroup.gnutella.util.PortableImpl"}));
+                             "com.limegroup.gnutella.util.PortableImpl",
+                             "org.limewire.lifecycle.Service"}));
         
         if(OSUtils.isWindows() || OSUtils.isMacOSX()) {
             expected.add("org.limewire.util.SystemUtils");

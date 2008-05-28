@@ -276,7 +276,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(UDPReplyHandlerFactory.class).to(UDPReplyHandlerFactoryImpl.class);
         bind(UDPReplyHandlerCache.class).to(UDPReplyHandlerCacheImpl.class);
         bind(BTConnectionFactory.class).to(BTConnectionFactoryImpl.class);
-        bind(SocketProcessor.class).to(AcceptorImpl.class);
+        bind(SocketProcessor.class).to(Acceptor.class);
         bind(DownloadManager.class).to(DownloadManagerImpl.class).asEagerSingleton();
         bind(BrowseHostHandlerManagerImpl.class).asEagerSingleton();
         bind(ReplyNumberVendorMessageFactory.class).to(ReplyNumberVendorMessageFactoryImpl.class);
@@ -363,6 +363,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(RatingTable.class);
         bind(OutOfBandThroughputMeasurer.class);
         bind(HostCatcher.class);
+        bind(LimeCoreGlue.class);
         
         // TODO: Need to add interface to these classes
         //----------------------------------------------
