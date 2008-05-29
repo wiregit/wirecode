@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleTransportProvider.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-05-27 19:39:55 $
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-05-29 18:46:38 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -19,10 +19,9 @@
  */
 package org.jivesoftware.smackx.provider;
 
-import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.provider.PacketExtensionProvider;
-import org.jivesoftware.smackx.jingle.nat.ICECandidate;
 import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
+import org.jivesoftware.smackx.jingle.nat.ICECandidate;
 import org.jivesoftware.smackx.packet.JingleTransport;
 import org.jivesoftware.smackx.packet.JingleTransport.JingleTransportCandidate;
 import org.xmlpull.v1.XmlPullParser;
@@ -32,14 +31,19 @@ import org.xmlpull.v1.XmlPullParser;
  *
  * @author Alvaro Saurin <alvaro.saurin@gmail.com>
  */
-public abstract class JingleTransportProvider implements PacketExtensionProvider {
+public class JingleTransportProvider implements PacketExtensionProvider {
+    
+    protected ICECandidateProvider iceCandidateProvider;
+    protected RawUDPProvider rawUDPProvider;
 
     /**
      * Creates a new provider. ProviderManager requires that every
      * PacketExtensionProvider has a public, no-argument constructor
      */
     public JingleTransportProvider() {
-        super();
+        super();    
+        iceCandidateProvider = new ICECandidateProvider();
+        rawUDPProvider = new RawUDPProvider();
     }
 
     /**
@@ -47,8 +51,15 @@ public abstract class JingleTransportProvider implements PacketExtensionProvider
      *
      * @return a new TransportNegotiator instance
      */
-    protected JingleTransport getInstance() {
-        return new JingleTransport();
+    protected JingleTransport getInstance(XmlPullParser parser) {
+        // TODO fix me
+        if(parser.getNamespace().equals(JingleTransport.RawUdp.NAMESPACE)) {
+            return new JingleTransport.RawUdp();
+        } else if(parser.getNamespace().equals(JingleTransport.Ice.NAMESPACE)) {
+            return new JingleTransport.Ice();
+        } else {
+            return new JingleTransport();
+        }
     }
 
     /**
@@ -58,18 +69,26 @@ public abstract class JingleTransportProvider implements PacketExtensionProvider
      * @return a transport element.
      * @throws Exception
      */
-    public PacketExtension parseExtension(final XmlPullParser parser) throws Exception {
+    public JingleTransport parseExtension(final XmlPullParser parser) throws Exception {
         boolean done = false;
-        JingleTransport trans = getInstance();
+        JingleTransport trans = getInstance(parser);
 
         while (!done) {
             int eventType = parser.next();
             String name = parser.getName();
+            String namespace = parser.getNamespace();
 
             if (eventType == XmlPullParser.START_TAG) {
                 if (name.equals(JingleTransportCandidate.NODENAME)) {
-                    JingleTransportCandidate jtc = parseCandidate(parser);
-                    if (jtc != null) trans.addCandidate(jtc);
+                    if(namespace.equals(JingleTransport.Ice.NAMESPACE)) {
+                        JingleTransportCandidate jtc = iceCandidateProvider.parseExtension(parser);
+                        trans.addCandidate(jtc);
+                    } else if(namespace.equals(JingleTransport.RawUdp.NAMESPACE)) {
+                        JingleTransportCandidate jtc = rawUDPProvider.parseExtension(parser);
+                        trans.addCandidate(jtc);
+                    } else {
+                        // TODO throw?
+                    }                    
                 }
                 else {
                     throw new Exception("Unknown tag \"" + name + "\" in transport element.");
@@ -85,28 +104,16 @@ public abstract class JingleTransportProvider implements PacketExtensionProvider
         return trans;
     }
 
-    protected abstract JingleTransportCandidate parseCandidate(final XmlPullParser parser)
-            throws Exception;
-
     /**
      * RTP-ICE profile
      */
-    public static class Ice extends JingleTransportProvider {
+    public static class ICECandidateProvider implements PacketExtensionProvider{
 
         /**
          * Defauls constructor.
          */
-        public Ice() {
+        public ICECandidateProvider() {
             super();
-        }
-
-        /**
-         * Obtain the corresponding TransportNegotiator.Ice instance.
-         *
-         * @return a new TransportNegotiator.Ice instance
-         */
-        protected JingleTransport getInstance() {
-            return new JingleTransport.Ice();
         }
 
         /**
@@ -116,7 +123,7 @@ public abstract class JingleTransportProvider implements PacketExtensionProvider
          * @return a candidate element
          * @throws Exception
          */
-        protected JingleTransportCandidate parseCandidate(XmlPullParser parser) throws Exception {
+        public JingleTransportCandidate parseExtension(XmlPullParser parser) throws Exception {
             ICECandidate mt = new ICECandidate();
 
             String channel = parser.getAttributeValue("", "channel");
@@ -201,23 +208,15 @@ public abstract class JingleTransportProvider implements PacketExtensionProvider
     /**
      * Raw UDP profile
      */
-    public static class RawUdp extends JingleTransportProvider {
+    public static class RawUDPProvider implements PacketExtensionProvider{
 
         /**
          * Defauls constructor.
          */
-        public RawUdp() {
+        public RawUDPProvider() {
             super();
         }
 
-        /**
-         * Obtain the corresponding TransportNegotiator.RawUdp instance.
-         *
-         * @return a new TransportNegotiator.RawUdp instance
-         */
-        protected JingleTransport getInstance() {
-            return new JingleTransport.RawUdp();
-        }
 
         /**
          * Parse a iq/jingle/transport/candidate element.
@@ -226,7 +225,7 @@ public abstract class JingleTransportProvider implements PacketExtensionProvider
          * @return a candidate element
          * @throws Exception
          */
-        protected JingleTransportCandidate parseCandidate(XmlPullParser parser) throws Exception {
+        public JingleTransportCandidate parseExtension(XmlPullParser parser) throws Exception {
             TransportCandidate.Fixed mt = new TransportCandidate.Fixed();
 
             String generation = parser.getAttributeValue("", "generation");

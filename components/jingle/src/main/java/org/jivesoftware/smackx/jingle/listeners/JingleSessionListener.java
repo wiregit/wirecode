@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleSessionListener.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-05-27 19:39:56 $11-07-2006
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-05-29 18:46:39 $11-07-2006
  *
  * Copyright 2003-2006 Jive Software.
  *
@@ -21,7 +21,6 @@ package org.jivesoftware.smackx.jingle.listeners;
 
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.jingle.JingleSession;
-import org.jivesoftware.smackx.jingle.media.PayloadType;
 import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
 
 /**
@@ -33,14 +32,13 @@ public interface JingleSessionListener extends JingleListener {
      * Notification that the session has been established. Arguments specify
      * the payload type and transport to use.
      *
-     * @param pt            the Payload tyep to use
      * @param remoteCandidate            the remote candidate to use for connecting to the remote
      *                      service.
      * @param localCandidate            the local candidate where we must listen for connections
      * @param jingleSession Session that called the method
      */
-    public void sessionEstablished(PayloadType pt, TransportCandidate remoteCandidate,
-                                   TransportCandidate localCandidate, JingleSession jingleSession);
+    public void sessionEstablished(TransportCandidate remoteCandidate,
+            TransportCandidate localCandidate, JingleSession jingleSession);
 
     /**
      * Notification that the session was declined.

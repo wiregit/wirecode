@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleContentInfo.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-05-27 19:39:56 $
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-05-29 18:46:38 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -20,7 +20,7 @@
 package org.jivesoftware.smackx.packet;
 
 import org.jivesoftware.smack.packet.PacketExtension;
-import org.jivesoftware.smackx.jingle.media.ContentInfo;
+import org.jivesoftware.smackx.jingle.audiortp.ContentInfo;
 
 /**
  * Jingle content info

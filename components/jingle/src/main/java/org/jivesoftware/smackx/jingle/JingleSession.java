@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleSession.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-05-27 19:39:56 $
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-05-29 18:46:39 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -64,11 +64,8 @@ import org.jivesoftware.smackx.jingle.listeners.*;
 import org.jivesoftware.smackx.jingle.media.*;
 import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
 import org.jivesoftware.smackx.jingle.nat.TransportNegotiator;
-import org.jivesoftware.smackx.packet.Jingle;
-import org.jivesoftware.smackx.packet.JingleContentDescription;
-import org.jivesoftware.smackx.packet.JingleContentDescription.JinglePayloadType;
-import org.jivesoftware.smackx.packet.JingleContentInfo;
-import org.jivesoftware.smackx.packet.JingleError;
+import org.jivesoftware.smackx.jingle.audiortp.ContentInfo;
+import org.jivesoftware.smackx.packet.*;
 import org.jivesoftware.smackx.packet.JingleTransport.JingleTransportCandidate;
 
 import java.util.*;
@@ -97,6 +94,8 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
     private String responder; // The other endpoint
 
     private String sid; // A unique id that identifies this session
+    
+    protected JingleContentHandler contentHandler;
 
     private MediaNegotiator mediaNeg; // The description...
 
@@ -105,8 +104,6 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
     PacketListener packetListener;
 
     PacketFilter packetFilter;
-
-    protected JingleMediaManager jingleMediaManager = null;
 
     protected JingleMediaSession jingleMediaSession = null;
 
@@ -121,10 +118,10 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
      * @param initiator          the initiator JID
      * @param responder          the responder JID
      * @param sessionid          the session ID
-     * @param jingleMediaManager the jingleMediaManager
+     * @param mediaSessionFactory the mediaSessionFactory
      */
     protected JingleSession(XMPPConnection conn, String initiator, String responder,
-            String sessionid, JingleMediaManager jingleMediaManager) {
+            String sessionid, JingleContentHandler contentHandler) {
         super(conn);
 
         this.mediaNeg = null;
@@ -133,8 +130,7 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
         this.initiator = initiator;
         this.responder = responder;
         this.sid = sessionid;
-
-        this.jingleMediaManager = jingleMediaManager;
+        this.contentHandler = contentHandler;
 
         // Add the session to the list and register the listeneres
         registerInstance();
@@ -148,20 +144,8 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
      * @param initiator the initiator JID
      * @param responder the responder JID
      */
-    protected JingleSession(XMPPConnection conn, String initiator, String responder) {
-        this(conn, initiator, responder, null, null);
-    }
-
-    /**
-     * JingleSession constructor
-     *
-     * @param conn               XMPPConnection
-     * @param initiator          the initiator JID
-     * @param responder          the responder JID
-     * @param jingleMediaManager the jingleMediaManager
-     */
-    protected JingleSession(XMPPConnection conn, String initiator, String responder, JingleMediaManager jingleMediaManager) {
-        this(conn, initiator, responder, null, jingleMediaManager);
+    protected JingleSession(XMPPConnection conn, String initiator, String responder, JingleContentHandler contentHandler) {
+        this(conn, initiator, responder, null, contentHandler);
     }
 
     /**
@@ -180,24 +164,6 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
      */
     public void setInitiator(String initiator) {
         this.initiator = initiator;
-    }
-
-    /**
-     * Get the Media Manager of this Jingle Session
-     *
-     * @return
-     */
-    public JingleMediaManager getMediaManager() {
-        return jingleMediaManager;
-    }
-
-    /**
-     * Set the Media Manager of this Jingle Session
-     *
-     * @param jingleMediaManager
-     */
-    public void setMediaManager(JingleMediaManager jingleMediaManager) {
-        this.jingleMediaManager = jingleMediaManager;
     }
 
     /**
@@ -395,7 +361,7 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
     public IQ dispatchIncomingPacket(IQ iq, String id) throws XMPPException {
         IQ jout = null;
 
-        if (invalidState()) {
+        if (nullState()) {
             throw new IllegalStateException(
                     "Illegal state in dispatch packet in Session manager.");
         }
@@ -434,9 +400,10 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
                             jout = getState().eventInitiate(jin);
 
                         }
-                        else if (action.equals(Jingle.Action.SESSIONREDIRECT)) {
-                            jout = getState().eventRedirect(jin);
-                        }
+                        // TODO ??
+                        /*else if (is-redirect-error) {
+                            triggerSessionRedirect()
+                        }*/
                         else if (action.equals(Jingle.Action.SESSIONTERMINATE)) {
                             jout = getState().eventTerminate(jin);
                         }
@@ -449,7 +416,7 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
 
             if (jout != null) {
                 // Save the packet id, for recognizing ACKs...
-                addExpectedId(jout.getPacketID());
+                setExpectedId(jout.getPacketID());
             }
         }
 
@@ -530,8 +497,8 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
         Jingle response = null;
 
         if (jSes != null) {
-            jSes.addDescriptions(jDesc.getDescriptionsList());
-            jSes.addTransports(jTrans.getTransportsList());
+            jSes.getContent().addDescriptions(jDesc.getContent().getDescriptions());
+            jSes.getContent().addTransports(jTrans.getContent().getTransports());
 
             response = sendFormattedJingle(iq, jSes);
         }
@@ -688,40 +655,6 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
     }
 
     /**
-     * Get the content description the other part has accepted.
-     *
-     * @param jin The Jingle packet where they have accepted the session.
-     * @return The audio PayloadType they have accepted.
-     * @throws XMPPException
-     */
-    protected PayloadType.Audio getAcceptedAudioPayloadType(Jingle jin)
-            throws XMPPException {
-        PayloadType.Audio acceptedPayloadType = null;
-        ArrayList jda = jin.getDescriptionsList();
-
-        if (jin.getAction().equals(Jingle.Action.SESSIONACCEPT)) {
-
-            if (jda.size() > 1) {
-                throw new XMPPException(
-                        "Unsupported feature: the number of accepted content descriptions is greater than 1.");
-            }
-            else if (jda.size() == 1) {
-                JingleContentDescription jd = (JingleContentDescription) jda.get(0);
-                if (jd.getJinglePayloadTypesCount() > 1) {
-                    throw new XMPPException(
-                            "Unsupported feature: the number of accepted payload types is greater than 1.");
-                }
-                if (jd.getJinglePayloadTypesCount() == 1) {
-                    JinglePayloadType jpt = (JinglePayloadType) jd
-                            .getJinglePayloadTypesList().get(0);
-                    acceptedPayloadType = (PayloadType.Audio) jpt.getPayloadType();
-                }
-            }
-        }
-        return acceptedPayloadType;
-    }
-
-    /**
      * Get the accepted local candidate we have previously offered.
      *
      * @param jin The jingle packet where they accept the session
@@ -730,7 +663,7 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
      */
     protected TransportCandidate getAcceptedLocalCandidate(Jingle jin)
             throws XMPPException {
-        ArrayList jta = jin.getTransportsList();
+        List<JingleTransport> jta = jin.getContent().getTransports();
         TransportCandidate acceptedLocalCandidate = null;
 
         if (jin.getAction().equals(Jingle.Action.SESSIONACCEPT)) {
@@ -1068,31 +1001,25 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
     /**
      * Trigger a session established event.
      */
-    protected void triggerSessionEstablished(PayloadType pt,
-            TransportCandidate rc, TransportCandidate lc) {
+    protected void triggerSessionEstablished() {        
+        jingleMediaSession = contentHandler.createMediaSession(this);
+        jingleMediaSession.getRemote().removeCandidateEcho();
+        jingleMediaSession.getLocal().removeCandidateEcho();
+        jingleMediaSession.addMediaReceivedListener(this);
+        jingleMediaSession.startTrasmit();
+        jingleMediaSession.startReceive();
+
+        for (TransportCandidate candidate : this.getTransportNeg().getOfferedCandidates())
+            candidate.removeCandidateEcho();
+        
+        // TODO this may need to go before creating the jingleMediaSession
         ArrayList listeners = getListenersList();
         Iterator iter = listeners.iterator();
         while (iter.hasNext()) {
             JingleListener li = (JingleListener) iter.next();
             if (li instanceof JingleSessionListener) {
                 JingleSessionListener sli = (JingleSessionListener) li;
-                sli.sessionEstablished(pt, rc, lc, this);
-            }
-        }
-        if (jingleMediaManager != null) {
-            rc.removeCandidateEcho();
-            lc.removeCandidateEcho();
-
-            jingleMediaSession = jingleMediaManager.createMediaSession(pt, rc, lc, this);
-            jingleMediaSession.addMediaReceivedListener(this);
-            if (jingleMediaSession != null) {
-
-                jingleMediaSession.startTrasmit();
-                jingleMediaSession.startReceive();
-
-                for (TransportCandidate candidate : this.getTransportNeg().getOfferedCandidates())
-                    candidate.removeCandidateEcho();
-
+                sli.sessionEstablished(jingleMediaSession.getRemote(), jingleMediaSession.getLocal(), this);
             }
         }
 
@@ -1169,7 +1096,7 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
      */
     public void terminate(String reason) throws XMPPException {
         if (isClosed()) return;
-        System.out.println("State: " + this.getState());
+        System.out.println("terminating session " + sid + ": "+ reason + "; " + "State: " + this.getState());
         Jingle jout = new Jingle(Jingle.Action.SESSIONTERMINATE);
         jout.setType(IQ.Type.SET);
         sendFormattedJingle(jout);

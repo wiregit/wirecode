@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleTransport.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-05-27 19:39:56 $
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-05-29 18:46:38 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -183,7 +183,7 @@ public class JingleTransport implements PacketExtension {
      * @author Alvaro Saurin
      * @see TransportCandidate
      */
-    public static abstract class JingleTransportCandidate {
+    public static abstract class JingleTransportCandidate implements PacketExtension {
 
         public static final String NODENAME = "candidate";
 
@@ -212,8 +212,12 @@ public class JingleTransport implements PacketExtension {
          *
          * @return the XML element name of the element.
          */
-        public static String getElementName() {
+        public String getElementName() {
             return NODENAME;
+        }
+
+        public String getNamespace() {
+            return "";
         }
 
         /**

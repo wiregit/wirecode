@@ -1,7 +1,7 @@
 /**
  * $RCSfile: TransportCandidate.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-05-27 19:39:56 $
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-05-29 18:46:38 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -58,9 +58,12 @@ import org.jivesoftware.smackx.jingle.JingleSession;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.*;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.Arrays;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 
 /**
  * Transport candidate.

@@ -1,7 +1,7 @@
 /**
  * $RCSfile: MediaNegotiator.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-05-27 19:39:56 $
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-05-29 18:46:38 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -25,10 +25,7 @@ import org.jivesoftware.smackx.jingle.JingleNegotiator;
 import org.jivesoftware.smackx.jingle.JingleSession;
 import org.jivesoftware.smackx.jingle.listeners.JingleListener;
 import org.jivesoftware.smackx.jingle.listeners.JingleMediaListener;
-import org.jivesoftware.smackx.packet.Jingle;
-import org.jivesoftware.smackx.packet.JingleContentDescription;
-import org.jivesoftware.smackx.packet.JingleContentDescription.JinglePayloadType;
-import org.jivesoftware.smackx.packet.JingleError;
+import org.jivesoftware.smackx.packet.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -44,27 +41,19 @@ import java.util.List;
  *
  * @author Thiago Camargo
  */
-public class MediaNegotiator extends JingleNegotiator {
+public abstract class MediaNegotiator extends JingleNegotiator {
 
-    private final JingleSession session; // The session this negotiation
-
-    // Local and remote payload types...
-
-    private final List<PayloadType> localAudioPts = new ArrayList<PayloadType>();
-
-    private final List<PayloadType> remoteAudioPts = new ArrayList<PayloadType>();
-
-    private PayloadType.Audio bestCommonAudioPt;
+    protected final JingleSession session;
 
     // states
 
-    private final Inviting inviting;
+    protected Inviting inviting;
 
-    private final Accepting accepting;
+    protected Accepting accepting;
 
-    private final Pending pending;
+    protected Pending pending;
 
-    private final Active active;
+    protected Active active;
 
     /**
      * Default constructor. The constructor establishes some basic parameters,
@@ -73,25 +62,15 @@ public class MediaNegotiator extends JingleNegotiator {
      *
      * @param js The jingle session.
      */
-    public MediaNegotiator(JingleSession js, List<PayloadType> pts) {
+    public MediaNegotiator(JingleSession js) {
         super(js.getConnection());
-
         session = js;
-
-        bestCommonAudioPt = null;
-
-        if (pts != null) {
-            if (pts.size() > 0) {
-                localAudioPts.addAll(pts);
-            }
-        }
-
-        // Create the states...
-        inviting = new Inviting(this);
-        accepting = new Accepting(this);
-        pending = new Pending(this);
-        active = new Active(this);
+        
     }
+    
+    public abstract void addDescriptionToSessionInitiate(Jingle jingle);
+    
+    public abstract void addDescriptionToContentAccept(Jingle jin, Jingle jout);
 
     /**
      * Dispatch an incomming packet. The medthod is responsible for recognizing
@@ -105,7 +84,7 @@ public class MediaNegotiator extends JingleNegotiator {
     public IQ dispatchIncomingPacket(IQ iq, String id) throws XMPPException {
         IQ jout = null;
 
-        if (invalidState()) {
+        if (nullState()) {
             if (iq == null) {
                 // With a null packet, we are just inviting the other end...
                 setState(inviting);
@@ -149,14 +128,15 @@ public class MediaNegotiator extends JingleNegotiator {
                         if (action.equals(Jingle.Action.CONTENTACCEPT)) {
                             jout = getState().eventAccept(jin);
                         }
-                        else if (action.equals(Jingle.Action.CONTENTDECLINE)) {
-                            jout = getState().eventDecline(jin);
-                        }
+                        // TODO ??
+                        /*else if (action.equals(Jingle.Action.SESSIONTERMINATE)) {
+                            MediaNegotiator.triggerMediaClosed()
+                        }*/
                         else if (action.equals(Jingle.Action.DESCRIPTIONINFO)) {
                             jout = getState().eventInfo(jin);
                         }
                         else if (action.equals(Jingle.Action.CONTENTMODIFY)) {
-                            jout = getState().eventModify(jin);
+                            // TODO jout = getState().eventModify(jin);
                         }
                         // Any unknown action will be ignored: it is not a msg
                         // to us...
@@ -167,11 +147,11 @@ public class MediaNegotiator extends JingleNegotiator {
 
         // Save the Id for any ACK
         if (id != null) {
-            addExpectedId(id);
+            setExpectedId(id);
         }
         else {
             if (jout != null) {
-                addExpectedId(jout.getPacketID());
+                setExpectedId(jout.getPacketID());
             }
         }
 
@@ -183,9 +163,7 @@ public class MediaNegotiator extends JingleNegotiator {
      *
      * @return true if the content is negotiated.
      */
-    public boolean isEstablished() {
-        return getBestCommonAudioPt() != null;
-    }
+    public abstract boolean isEstablished();
 
     /**
      * Return true if the content is fully negotiated.
@@ -196,147 +174,19 @@ public class MediaNegotiator extends JingleNegotiator {
         return isEstablished() && getState() == active;
     }
 
-    // Payload types
-
-    private PayloadType.Audio calculateBestCommonAudioPt(List remoteAudioPts) {
-        final ArrayList<PayloadType> commonAudioPtsHere = new ArrayList<PayloadType>();
-        final ArrayList<PayloadType> commonAudioPtsThere = new ArrayList<PayloadType>();
-        PayloadType.Audio result = null;
-
-        if (!remoteAudioPts.isEmpty()) {
-            commonAudioPtsHere.addAll(localAudioPts);
-            commonAudioPtsHere.retainAll(remoteAudioPts);
-
-            commonAudioPtsThere.addAll(remoteAudioPts);
-            commonAudioPtsThere.retainAll(localAudioPts);
-
-            if (!commonAudioPtsHere.isEmpty() && !commonAudioPtsThere.isEmpty()) {
-
-                if (session.getInitiator().equals(session.getConnection().getUser())) {
-                    PayloadType.Audio bestPtHere = null;
-
-                    PayloadType payload = this.session.getMediaManager().getPreferredPayloadType();
-
-                    if (payload != null && payload instanceof PayloadType.Audio)
-                        if (commonAudioPtsHere.contains(payload))
-                            bestPtHere = (PayloadType.Audio) payload;
-
-                    if (bestPtHere == null)
-                        for (PayloadType payloadType : commonAudioPtsHere)
-                            if (payloadType instanceof PayloadType.Audio) {
-                                bestPtHere = (PayloadType.Audio) payloadType;
-                                break;
-                            }
-
-                    result = bestPtHere;
-                }
-                else {
-                    PayloadType.Audio bestPtThere = null;
-                    for (PayloadType payloadType : commonAudioPtsThere)
-                        if (payloadType instanceof PayloadType.Audio) {
-                            bestPtThere = (PayloadType.Audio) payloadType;
-                            break;
-                        }
-
-                    result = bestPtThere;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    private List obtainPayloads(Jingle jin) {
-        List result = new ArrayList();
-        Iterator iDescr = jin.getDescriptions();
-
-        // Add the list of payloads: iterate over the descriptions...
-        while (iDescr.hasNext()) {
-            JingleContentDescription.Audio descr = (JingleContentDescription.Audio) iDescr
-                    .next();
-
-            if (descr != null) {
-                // ...and, then, over the payloads.
-                // Note: we use the last "description" in the packet...
-                result.clear();
-                result.addAll(descr.getAudioPayloadTypesList());
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Adds a payload type to the list of remote payloads.
-     *
-     * @param pt the remote payload type
-     */
-    public void addRemoteAudioPayloadType(PayloadType.Audio pt) {
-        if (pt != null) {
-            synchronized (remoteAudioPts) {
-                remoteAudioPts.add(pt);
-            }
-        }
-    }
-
-    /**
-     * Create an offer for the list of audio payload types.
-     *
-     * @return a new Jingle packet with the list of audio Payload Types
-     */
-    private Jingle getAudioPayloadTypesOffer() {
-        JingleContentDescription.Audio audioDescr = new JingleContentDescription.Audio();
-
-        // Add the list of payloads for audio and create a
-        // JingleContentDescription
-        // where we announce our payloads...
-        audioDescr.addAudioPayloadTypes(localAudioPts);
-
-        return new Jingle(audioDescr);
-    }
-
-    // Predefined messages and Errors
-
-    /**
-     * Create an IQ "accept" message.
-     */
-    private Jingle createAcceptMessage() {
-        Jingle jout = null;
-
-        // If we hava a common best codec, send an accept right now...
-        jout = new Jingle(Jingle.Action.CONTENTACCEPT);
-        jout.addDescription(new JingleContentDescription.Audio(
-                new JinglePayloadType.Audio(bestCommonAudioPt)));
-
-        return jout;
-    }
-
-    // Payloads
-
-    /**
-     * Get the best common codec between both parts.
-     *
-     * @return The best common PayloadType codec.
-     */
-    public PayloadType.Audio getBestCommonAudioPt() {
-        return bestCommonAudioPt;
-    }
-
-    // Events
-
     /**
      * Trigger a session established event.
      *
      * @param bestPt payload type that has been agreed.
      */
-    protected void triggerMediaEstablished(PayloadType bestPt) {
+    protected void triggerMediaEstablished(Description description) {
         ArrayList listeners = getListenersList();
         Iterator iter = listeners.iterator();
         while (iter.hasNext()) {
             JingleListener li = (JingleListener) iter.next();
             if (li instanceof JingleMediaListener) {
                 JingleMediaListener mli = (JingleMediaListener) li;
-                mli.mediaEstablished(bestPt);
+                mli.mediaEstablished(description);
             }
         }
     }
@@ -346,14 +196,14 @@ public class MediaNegotiator extends JingleNegotiator {
      *
      * @param currPt current payload type that is cancelled.
      */
-    protected void triggerMediaClosed(PayloadType currPt) {
+    protected void triggerMediaClosed(Description description) {
         ArrayList listeners = getListenersList();
         Iterator iter = listeners.iterator();
         while (iter.hasNext()) {
             JingleListener li = (JingleListener) iter.next();
             if (li instanceof JingleMediaListener) {
                 JingleMediaListener mli = (JingleMediaListener) li;
-                mli.mediaClosed(currPt);
+                mli.mediaClosed(description);
             }
         }
     }
@@ -365,23 +215,28 @@ public class MediaNegotiator extends JingleNegotiator {
         super.close();
     }
 
+    public void validate(Jingle jingle) throws XMPPException {
+        List<Description> descriptions = jingle.getContent().getDescriptions();
+
+        if (jingle.getAction().equals(Jingle.Action.SESSIONACCEPT)) {
+            if (descriptions.size() != 1) {
+                throw new XMPPException(
+                        "Unsupported feature: the number of accepted content descriptions is greater than 1.");
+            }
+        }
+    }
+
+    public abstract void addAcceptedDescription(Content content);
+
     // States
 
     /**
      * First stage when we send a session request.
      */
-    public class Inviting extends JingleNegotiator.State {
+    public abstract class Inviting extends JingleNegotiator.State {
 
         public Inviting(MediaNegotiator neg) {
             super(neg);
-        }
-
-        /**
-         * Create an initial Jingle packet, with the list of payload types that
-         * we support. The list is in order of preference.
-         */
-        public Jingle eventInvite() {
-            return getAudioPayloadTypesOffer();
         }
 
         /**
@@ -398,159 +253,22 @@ public class MediaNegotiator extends JingleNegotiator {
     /**
      * We are accepting connections.
      */
-    public class Accepting extends JingleNegotiator.State {
+    public abstract class Accepting extends JingleNegotiator.State {
 
         public Accepting(MediaNegotiator neg) {
             super(neg);
         }
 
-        /**
-         * We have received an invitation! Respond with a list of our payload
-         * types...
-         */
-        public Jingle eventInitiate(Jingle jin) {
-            synchronized (remoteAudioPts) {
-                remoteAudioPts.addAll(obtainPayloads(jin));
-            }
-
-            return getAudioPayloadTypesOffer();
-        }
-
-        /**
-         * Process the ACK of our list of codecs (our offer).
-         *
-         * @see org.jivesoftware.smackx.jingle.JingleNegotiator.State#eventAck(org.jivesoftware.smack.packet.IQ)
-         */
-        public Jingle eventAck(IQ iq) throws XMPPException {
-            Jingle response = null;
-
-            if (!remoteAudioPts.isEmpty()) {
-                // Calculate the best common codec
-                bestCommonAudioPt = calculateBestCommonAudioPt(remoteAudioPts);
-
-                // and send an accept if we havee an agreement...
-                if (bestCommonAudioPt != null) {
-                    response = createAcceptMessage();
-                }
-                else {
-                    throw new JingleException(JingleError.NO_COMMON_PAYLOAD);
-                }
-
-                setState(pending);
-            }
-
-            return response;
-        }
     }
 
     /**
      * Pending class: we are waiting for the other enpoint, that must say if it
      * accepts or not...
      */
-    public class Pending extends JingleNegotiator.State {
+    public abstract class Pending extends JingleNegotiator.State {
 
         public Pending(MediaNegotiator neg) {
             super(neg);
-        }
-
-        /**
-         * A content info has been received. This is done for publishing the
-         * list of payload types...
-         *
-         * @param jin The input packet
-         * @return a Jingle packet
-         * @throws JingleException
-         */
-        public Jingle eventInfo(Jingle jin) throws JingleException {
-            PayloadType.Audio oldBestCommonAudioPt = bestCommonAudioPt;
-            List offeredPayloads;
-            Jingle response = null;
-            boolean ptChange = false;
-
-            offeredPayloads = obtainPayloads(jin);
-            if (!offeredPayloads.isEmpty()) {
-
-                synchronized (remoteAudioPts) {
-                    remoteAudioPts.clear();
-                    remoteAudioPts.addAll(offeredPayloads);
-                }
-
-                // Calculate the best common codec
-                bestCommonAudioPt = calculateBestCommonAudioPt(remoteAudioPts);
-                if (bestCommonAudioPt != null) {
-                    // and send an accept if we have an agreement...
-                    ptChange = !bestCommonAudioPt.equals(oldBestCommonAudioPt);
-                    if (oldBestCommonAudioPt == null || ptChange) {
-                        response = createAcceptMessage();
-                    }
-                }
-                else {
-                    throw new JingleException(JingleError.NO_COMMON_PAYLOAD);
-                }
-            }
-
-            // Parse the Jingle and get the payload accepted
-            return response;
-        }
-
-        /**
-         * A jmf description has been accepted. In this case, we must save the
-         * accepted payload type and notify any listener...
-         *
-         * @param jin The input packet
-         * @return a Jingle packet
-         * @throws JingleException
-         */
-        public Jingle eventAccept(Jingle jin) throws JingleException {
-            PayloadType.Audio agreedCommonAudioPt;
-            List offeredPayloads = new ArrayList();
-            Jingle response = null;
-
-            if (bestCommonAudioPt == null) {
-                // Update the best common audio PT
-                bestCommonAudioPt = calculateBestCommonAudioPt(remoteAudioPts);
-                response = createAcceptMessage();
-            }
-
-            offeredPayloads = obtainPayloads(jin);
-            if (!offeredPayloads.isEmpty()) {
-                if (offeredPayloads.size() == 1) {
-                    agreedCommonAudioPt = (PayloadType.Audio) offeredPayloads.get(0);
-                    if (bestCommonAudioPt != null) {
-                        // If the accepted PT matches the best payload
-                        // everything is fine
-                        if (!agreedCommonAudioPt.equals(bestCommonAudioPt)) {
-                            throw new JingleException(JingleError.NEGOTIATION_ERROR);
-                        }
-                    }
-
-                }
-                else if (offeredPayloads.size() > 1) {
-                    throw new JingleException(JingleError.MALFORMED_STANZA);
-                }
-            }
-
-            return response;
-        }
-
-        /**
-         * The other part has declined the our codec...
-         *
-         * @throws JingleException
-         */
-        public Jingle eventDecline(Jingle inJingle) throws JingleException {
-            triggerMediaClosed(getBestCommonAudioPt());
-            throw new JingleException();
-        }
-
-        /*
-           * (non-Javadoc)
-           *
-           * @see org.jivesoftware.smackx.jingle.JingleNegotiator.State#eventError(org.jivesoftware.smack.packet.IQ)
-           */
-        public void eventError(IQ iq) throws XMPPException {
-            triggerMediaClosed(getBestCommonAudioPt());
-            super.eventError(iq);
         }
 
         /**
@@ -571,31 +289,11 @@ public class MediaNegotiator extends JingleNegotiator {
     /**
      * "Active" state: we have an agreement about the codec...
      */
-    public class Active extends JingleNegotiator.State {
+    public abstract class Active extends JingleNegotiator.State {
 
         public Active(MediaNegotiator neg) {
             super(neg);
         }
 
-        /**
-         * We have an agreement.
-         *
-         * @see org.jivesoftware.smackx.jingle.JingleNegotiator.State#eventEnter()
-         */
-        public void eventEnter() {
-            triggerMediaEstablished(getBestCommonAudioPt());
-            System.err.println("BS:"+getBestCommonAudioPt().getName());
-            super.eventEnter();
-        }
-
-        /**
-         * We are breaking the contract...
-         *
-         * @see org.jivesoftware.smackx.jingle.JingleNegotiator.State#eventExit()
-         */
-        public void eventExit() {
-            triggerMediaClosed(getBestCommonAudioPt());
-            super.eventExit();
-        }
     }
 }

@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleError.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-05-27 19:39:56 $
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-05-29 18:46:38 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -22,7 +22,7 @@ package org.jivesoftware.smackx.packet;
 
 import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.provider.PacketExtensionProvider;
-import org.jivesoftware.smackx.jingle.media.ContentInfo;
+import org.jivesoftware.smackx.jingle.audiortp.ContentInfo;
 import org.xmlpull.v1.XmlPullParser;
 
 public class JingleError implements PacketExtension {
@@ -134,7 +134,7 @@ public class JingleError implements PacketExtension {
            }
 
            /**
-            * Parse a JingleContentDescription.Audio extension.
+            * Parse a AudioRTPDescription.Audio extension.
             */
            public PacketExtension parseExtension(final XmlPullParser parser)
                    throws Exception {

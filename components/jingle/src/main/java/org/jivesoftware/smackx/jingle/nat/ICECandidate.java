@@ -1,7 +1,7 @@
 /**
  * $RCSfile: ICECandidate.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-05-27 19:39:56 $
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-05-29 18:46:38 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -50,6 +50,8 @@
  * ====================================================================
  */
 package org.jivesoftware.smackx.jingle.nat;
+
+import de.javawi.jstun.test.demo.ice.Candidate;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -299,7 +301,7 @@ public class ICECandidate extends TransportCandidate implements Comparable {
 
                 for (int i = 0; i < 10 && !result.isReachable(); i++)
                     try {
-                        System.err.println("ICE Candidate retry #" + i);
+                        System.err.println(i);
                         Thread.sleep(400);
                     }
                     catch (InterruptedException e) {

@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleNegotiator.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-05-27 19:39:56 $
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-05-29 18:46:39 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -91,7 +91,7 @@ public abstract class JingleNegotiator {
      *
      * @return true if current state is null
      */
-    public boolean invalidState() {
+    public boolean nullState() {
         return state == null;
     }
 
@@ -145,7 +145,7 @@ public abstract class JingleNegotiator {
      *
      * @param id
      */
-    public void addExpectedId(String id) {
+    public void setExpectedId(String id) {
         expectedAckId = id;
     }
 
@@ -170,7 +170,7 @@ public abstract class JingleNegotiator {
      * @param id
      */
     public void removeExpectedId(String id) {
-        addExpectedId((String) null);
+        setExpectedId((String) null);
     }
 
     // Listeners
@@ -289,6 +289,8 @@ public abstract class JingleNegotiator {
      * Describes the negotiation stage.
      */
     public static class State {
+        
+        // TODO add String name
 
         private JingleNegotiator neg; // The negotiator
 
@@ -343,24 +345,12 @@ public abstract class JingleNegotiator {
             return null;
         }
 
-        public Jingle eventRedirect(Jingle jin) throws XMPPException {
-            return null;
-        }
-
-        public Jingle eventModify(Jingle jin) throws XMPPException {
-            return null;
-        }
-
-        public Jingle eventDecline(Jingle jin) throws XMPPException {
-            return null;
-        }
-
         public Jingle eventInfo(Jingle jin) throws XMPPException {
             return null;
         }
 
         public Jingle eventTerminate(Jingle jin) throws XMPPException {
-            if (neg != null && !neg.invalidState()) {
+            if (neg != null && !neg.nullState()) {
                 neg.close();
             }
             return null;

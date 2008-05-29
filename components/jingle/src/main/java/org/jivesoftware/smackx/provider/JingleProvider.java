@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleProvider.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-05-27 19:39:55 $
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-05-29 18:46:38 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -20,13 +20,10 @@
 
 package org.jivesoftware.smackx.provider;
 
-import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
-import org.jivesoftware.smackx.packet.Jingle;
-import org.jivesoftware.smackx.packet.JingleContentDescription;
-import org.jivesoftware.smackx.packet.JingleContentInfo;
-import org.jivesoftware.smackx.packet.JingleTransport;
+import org.jivesoftware.smackx.packet.*;
+import org.jivesoftware.smackx.provider.audiortp.JingleContentInfoProvider;
 import org.xmlpull.v1.XmlPullParser;
 
 /**
@@ -35,6 +32,7 @@ import org.xmlpull.v1.XmlPullParser;
  * @author Alvaro Saurin
  */
 public class JingleProvider implements IQProvider {
+    protected ContentProvider contentProvider;
 
     /**
      * Creates a new provider. ProviderManager requires that every
@@ -42,6 +40,7 @@ public class JingleProvider implements IQProvider {
      */
     public JingleProvider() {
         super();
+        contentProvider = new ContentProvider();
     }
 
     /**
@@ -56,10 +55,6 @@ public class JingleProvider implements IQProvider {
         String responder = "";
         boolean done = false;
 
-        // Sub-elements providers
-        JingleContentDescriptionProvider jdpAudio = new JingleContentDescriptionProvider.Audio();
-        JingleTransportProvider jtpRawUdp = new JingleTransportProvider.RawUdp();
-        JingleTransportProvider jtpIce = new JingleTransportProvider.Ice();
         JingleContentInfoProvider jmipAudio = new JingleContentInfoProvider.Audio();
 
         int eventType;
@@ -84,38 +79,11 @@ public class JingleProvider implements IQProvider {
             namespace = parser.getNamespace();
 
             if (eventType == XmlPullParser.START_TAG) {
-
-                // Parse some well know subelements, depending on the namespaces
-                // and element names...
-
-                if (elementName.equals(JingleContentDescription.NODENAME)
-                        && namespace.equals(JingleContentDescription.Audio.NAMESPACE)) {
-                    jingle.addDescription((JingleContentDescription) jdpAudio
-                            .parseExtension(parser));
-                } else if (elementName.equals(JingleTransport.NODENAME)) {
-
-                    // Parse the possible transport namespaces
-                    if (namespace.equals(JingleTransport.RawUdp.NAMESPACE)) {
-                        jingle.addTransport((JingleTransport) jtpRawUdp
-                                .parseExtension(parser));
-                    } else if (namespace.equals(JingleTransport.Ice.NAMESPACE)) {
-                        jingle.addTransport((JingleTransport) jtpIce
-                                .parseExtension(parser));
-                    } else {
-                        throw new XMPPException("Unknown transport namespace \""
-                                + namespace + "\" in Jingle packet.");
-                    }
+                if(elementName.equals(Content.CONTENT)) {
+                    jingle.setContent(contentProvider.parseExtension(parser));
                 } else if (namespace.equals(JingleContentInfo.Audio.NAMESPACE)) {
-                    jingle.setContentInfo((JingleContentInfo) jmipAudio
-                            .parseExtension(parser));
-                } else if (elementName.equals("content")) {
-                    //TODO Separate Contents (XEP-0166)
-                } else {
-                    throw new XMPPException("Unknown combination of namespace \""
-                            + namespace + "\" and element name \"" + elementName
-                            + "\" in Jingle packet.");
+                    jingle.setContentInfo(jmipAudio.parseExtension(parser));
                 }
-
             } else if (eventType == XmlPullParser.END_TAG) {
                 if (parser.getName().equals(Jingle.getElementName())) {
                     done = true;

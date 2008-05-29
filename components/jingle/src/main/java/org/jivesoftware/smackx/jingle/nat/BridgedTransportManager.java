@@ -1,6 +1,6 @@
 /**
  * $RCSfile: BridgedTransportManager.java,v $
- * $Revision: 1.1.2.1 $
+ * $Revision: 1.1.2.2 $
  * $Date: 15/11/2006
  *
  * Copyright 2003-2006 Jive Software.
@@ -24,7 +24,6 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.jingle.JingleSession;
 import org.jivesoftware.smackx.jingle.listeners.CreatedJingleSessionListener;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionListener;
-import org.jivesoftware.smackx.jingle.media.PayloadType;
 
 /**
  * A Jingle Transport Manager implementation to be used for NAT Networks.
@@ -55,7 +54,7 @@ public class BridgedTransportManager extends JingleTransportManager implements J
 
     // Implement a Session Listener to relay candidates after establishment
 
-    public void sessionEstablished(PayloadType pt, TransportCandidate rc, TransportCandidate lc, JingleSession jingleSession) {
+    public void sessionEstablished(TransportCandidate rc, TransportCandidate lc, JingleSession jingleSession) {
         RTPBridge rtpBridge = RTPBridge.relaySession(lc.getConnection(), lc.getSessionId(), lc.getPassword(), rc, lc);
     }
 

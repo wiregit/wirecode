@@ -3,7 +3,7 @@ package org.jivesoftware.smackx.jingle;
 import java.util.ArrayList;
 
 import org.jivesoftware.smack.test.SmackTestCase;
-import org.jivesoftware.smackx.jingle.media.PayloadType;
+import org.jivesoftware.smackx.jingle.audiortp.PayloadType;
 
 public class PayloadTypeTest extends SmackTestCase {
 

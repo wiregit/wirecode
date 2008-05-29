@@ -6,13 +6,13 @@ import de.javawi.jstun.util.UtilityException;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.test.SmackTestCase;
 import org.jivesoftware.smackx.jingle.*;
+import org.jivesoftware.smackx.jingle.audiortp.PayloadType;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionListener;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
-import org.jivesoftware.smackx.jingle.media.PayloadType;
+import org.jivesoftware.smackx.jingle.audiortp.JMFAudioMediaSession;
+import org.jivesoftware.smackx.packet.Content;
 
 import java.net.UnknownHostException;
-import java.net.SocketException;
-import java.net.InetAddress;
 import java.util.ArrayList;
 
 /**
@@ -223,8 +223,8 @@ public class STUNResolverTest extends SmackTestCase {
      *
      * @return A testing list
      */
-    private ArrayList getTestPayloads1() {
-        ArrayList result = new ArrayList();
+    private ArrayList<PayloadType.Audio> getTestPayloads1() {
+        ArrayList<PayloadType.Audio> result = new ArrayList<PayloadType.Audio>();
 
         result.add(new PayloadType.Audio(34, "supercodec-1", 2, 14000));
         result.add(new PayloadType.Audio(56, "supercodec-2", 1, 44000));
@@ -234,8 +234,8 @@ public class STUNResolverTest extends SmackTestCase {
         return result;
     }
 
-    private ArrayList getTestPayloads2() {
-        ArrayList result = new ArrayList();
+    private ArrayList<PayloadType.Audio> getTestPayloads2() {
+        ArrayList<PayloadType.Audio> result = new ArrayList<PayloadType.Audio>();
 
         result.add(new PayloadType.Audio(27, "supercodec-3", 2, 28000));
         result.add(new PayloadType.Audio(56, "supercodec-2", 1, 44000));
@@ -245,25 +245,13 @@ public class STUNResolverTest extends SmackTestCase {
         return result;
     }
 
-    /**
-     * This is a simple test where the user_2 rejects the Jingle session.
-     */
     public void testSTUNJingleSession() {
 
         resetCounter();
 
         try {
-            TransportResolver tr1 = new STUNResolver() {
-            };
-            TransportResolver tr2 = new STUNResolver() {
-            };
-
-            // Explicit resolution
-            tr1.resolve(null);
-            tr2.resolve(null);
-
-            final JingleManager man0 = new JingleManager(getConnection(0), tr1);
-            final JingleManager man1 = new JingleManager(getConnection(1), tr2);
+            final JingleManager man0 = new JingleManager(getConnection(0));
+            final JingleManager man1 = new JingleManager(getConnection(1));
 
             man1.addJingleSessionRequestListener(new JingleSessionRequestListener() {
                 /**
@@ -276,9 +264,9 @@ public class STUNResolverTest extends SmackTestCase {
                     // We accept the request
                     IncomingJingleSession session1;
                     try {
-                        session1 = request.accept(getTestPayloads2());
+                        session1 = request.accept();
                         session1.addListener(new JingleSessionListener() {
-                            public void sessionClosed(String reason, JingleSession jingleSession) {
+                            public void sessionClosed(String reason, JingleSession jingleSession)    {
                             }
 
                             public void sessionClosedOnError(XMPPException e, JingleSession jingleSession) {
@@ -287,12 +275,12 @@ public class STUNResolverTest extends SmackTestCase {
                             public void sessionDeclined(String reason, JingleSession jingleSession) {
                             }
 
-                            public void sessionEstablished(PayloadType pt,
+                            public void sessionEstablished(
                                     TransportCandidate rc, TransportCandidate lc, JingleSession jingleSession) {
                                 incCounter();
                                 System.out
                                         .println("Responder: the session is fully established.");
-                                System.out.println("+ Payload Type: " + pt.getId());
+                                System.out.println("+ Payload Type: " + ((JMFAudioMediaSession)jingleSession.getJingleMediaSession()).getPayloadType().getId());
                                 System.out.println("+ Local IP/port: " + lc.getIp() + ":"
                                         + lc.getPort());
                                 System.out.println("+ Remote IP/port: " + rc.getIp() + ":"
@@ -317,7 +305,7 @@ public class STUNResolverTest extends SmackTestCase {
             // Session 0 starts a request
             System.out.println("Starting session request, to " + getFullJID(1) + "...");
             OutgoingJingleSession session0 = man0.createOutgoingJingleSession(
-                    getFullJID(1), getTestPayloads1());
+                    getFullJID(1), new MockAudioRTPContentHandler(getTestPayloads1(), new STUNTransportManager()));
 
             session0.addListener(new JingleSessionListener() {
                 public void sessionClosed(String reason, JingleSession jingleSession) {
@@ -329,11 +317,11 @@ public class STUNResolverTest extends SmackTestCase {
                 public void sessionDeclined(String reason, JingleSession jingleSession) {
                 }
 
-                public void sessionEstablished(PayloadType pt,
+                public void sessionEstablished(
                         TransportCandidate rc, TransportCandidate lc, JingleSession jingleSession) {
                     incCounter();
                     System.out.println("Initiator: the session is fully established.");
-                    System.out.println("+ Payload Type: " + pt.getId());
+                    System.out.println("+ Payload Type: " + ((JMFAudioMediaSession)jingleSession.getJingleMediaSession()).getPayloadType().getId());
                     System.out.println("+ Local IP/port: " + lc.getIp() + ":"
                             + lc.getPort());
                     System.out.println("+ Remote IP/port: " + rc.getIp() + ":"
@@ -363,4 +351,5 @@ public class STUNResolverTest extends SmackTestCase {
     protected int getMaxConnections() {
         return 2;
     }
+
 }

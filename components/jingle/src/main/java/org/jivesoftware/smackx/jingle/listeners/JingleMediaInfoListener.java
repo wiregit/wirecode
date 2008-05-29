@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleMediaInfoListener.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-05-27 19:39:56 $11-07-2006
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-05-29 18:46:39 $11-07-2006
  *
  * Copyright 2003-2006 Jive Software.
  *

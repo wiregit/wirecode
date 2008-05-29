@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleMediaSession.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-05-27 19:39:56 $11-07-2006
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-05-29 18:46:38 $11-07-2006
  *
  * Copyright 2003-2006 Jive Software.
  *
@@ -24,6 +24,8 @@ import org.jivesoftware.smackx.jingle.JingleSession;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.net.ServerSocket;
+import java.io.IOException;
 
 /**
  * Public Abstract Class provides a clear interface between Media Session and Jingle API.
@@ -38,15 +40,11 @@ import java.util.ArrayList;
  * @author Thiago Camargo
  */
 public abstract class JingleMediaSession {
-
-    // Payload Type of the Session
-    private PayloadType payloadType;
+    
     // Local Transport details
     private TransportCandidate local;
     // Remote Transport details
     private TransportCandidate remote;
-    // Media Locator
-    private String mediaLocator;
     // Media Received Listener
     private List<MediaReceivedListener> mediaReceivedListeners = new ArrayList<MediaReceivedListener>();
     // Jingle Session
@@ -60,22 +58,11 @@ public abstract class JingleMediaSession {
      * @param local        Local accepted Transport Candidate
      * @param mediaLocator Media Locator of the capture device
      */
-    public JingleMediaSession(PayloadType payloadType, TransportCandidate remote,
-            TransportCandidate local, String mediaLocator, JingleSession jingleSession) {
+    public JingleMediaSession(TransportCandidate remote,
+            TransportCandidate local, JingleSession jingleSession) {
         this.local = local;
         this.remote = remote;
-        this.payloadType = payloadType;
-        this.mediaLocator = mediaLocator;
         this.jingleSession = jingleSession;
-    }
-
-    /**
-     * Returns the PayloadType of the Media Session
-     *
-     * @return
-     */
-    public PayloadType getPayloadType() {
-        return payloadType;
     }
 
     /**
@@ -94,24 +81,6 @@ public abstract class JingleMediaSession {
      */
     public TransportCandidate getRemote() {
         return remote;
-    }
-
-    /**
-     * Return the media locator or null if not defined
-     *
-     * @return media locator
-     */
-    public String getMediaLocator() {
-        return mediaLocator;
-    }
-
-    /**
-     * Set the media locator
-     *
-     * @param mediaLocator media locator or null to use default
-     */
-    public void setMediaLocator(String mediaLocator) {
-        this.mediaLocator = mediaLocator;
     }
 
     /**
@@ -138,11 +107,37 @@ public abstract class JingleMediaSession {
     public void removeAllMediaReceivedListener() {
         mediaReceivedListeners.clear();
     }
+    
+    protected abstract void initialize(String ip, String localIp, int localPort, int remotePort);
 
     /**
-     * Initialize the RTP Channel preparing to transmit and receive.
+     * Initialize the Audio Channel to make it able to send and receive audio
      */
-    public abstract void initialize();
+    public void initialize() {
+
+        String ip;
+        String localIp;
+        int localPort;
+        int remotePort;
+
+        if (this.getLocal().getSymmetric() != null) {
+            ip = local.getIp();
+            localIp = local.getLocalIp();
+            localPort = getFreePort();
+            remotePort = local.getSymmetric().getPort();
+
+            System.out.println(local.getConnection() + " " + ip + ": " + localPort + "->" + remotePort);
+
+        }
+        else {
+            ip = remote.getIp();
+            localIp = remote.getLocalIp();
+            localPort = remote.getPort();
+            remotePort = remote.getPort();
+        }
+
+        initialize(ip, localIp, localPort, remotePort);
+    }
 
     /**
      * Starts a RTP / UDP / TCP Transmission to the remote Candidate
@@ -187,5 +182,38 @@ public abstract class JingleMediaSession {
      */
     public JingleSession getJingleSession() {
         return jingleSession;
+    }
+
+    /**
+     * Obtain a free port we can use.
+     *
+     * @return A free port number.
+     */
+    protected int getFreePort() {
+        ServerSocket ss;
+        int freePort = 0;
+
+        for (int i = 0; i < 10; i++) {
+            freePort = (int) (10000 + Math.round(Math.random() * 10000));
+            freePort = freePort % 2 == 0 ? freePort : freePort + 1;
+            try {
+                ss = new ServerSocket(freePort);
+                freePort = ss.getLocalPort();
+                ss.close();
+                return freePort;
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            ss = new ServerSocket(0);
+            freePort = ss.getLocalPort();
+            ss.close();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        return freePort;
     }
 }

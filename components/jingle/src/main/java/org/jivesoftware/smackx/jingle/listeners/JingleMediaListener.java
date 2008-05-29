@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleMediaListener.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-05-27 19:39:56 $11-07-2006
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-05-29 18:46:39 $11-07-2006
  *
  * Copyright 2003-2006 Jive Software.
  *
@@ -20,7 +20,7 @@
 
 package org.jivesoftware.smackx.jingle.listeners;
 
-import org.jivesoftware.smackx.jingle.media.PayloadType;
+import org.jivesoftware.smackx.packet.Description;
 
 /**
  * Interface for listening to jmf events.
@@ -30,14 +30,14 @@ public interface JingleMediaListener extends JingleListener {
     /**
      * Notification that the jmf has been negotiated and established.
      *
-     * @param pt The payload type agreed.
+     * @param description
      */
-    public void mediaEstablished(PayloadType pt);
+    public void mediaEstablished(Description description);
 
     /**
      * Notification that a payload type must be cancelled
      *
-     * @param cand The payload type that must be closed
+     * @param description
      */
-    public void mediaClosed(PayloadType cand);
+    public void mediaClosed(Description description);
 }

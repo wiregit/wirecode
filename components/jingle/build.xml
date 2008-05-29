@@ -7,15 +7,16 @@
 	    This component contains implementations of XMPP Jingle extensions, based on the smack API.
 	</description>
 	
-    <import file="../common/build-macros.xml" />
-    <import file="../common/build.xml"/>
-    
+        <import file="../common/build-macros.xml" />
+        <import file="../common/build.xml"/>
+        
     <property name="component" value="jingle"/>
     
     <target name="initialize" depends="lw-common.initialize" unless="initialized.jingle">
         <do.setup-properties component="${component}">
 			<src-classpath>
                 <pathelement location="${limewire.lib.jars}/commons-logging.jar"/>
+                <pathelement location="${limewire.lib.jars}/dom4j.jar"/>
                 <!--pathelement location="${limewire.lib.jars}/commons-logging-1.1.jar"/>
                 <pathelement location="${limewire.lib.jars}/commons-logging-adapters-1.1.jar"/>
                 <pathelement location="${limewire.lib.jars}/commons-logging-api-1.1.jar"/-->

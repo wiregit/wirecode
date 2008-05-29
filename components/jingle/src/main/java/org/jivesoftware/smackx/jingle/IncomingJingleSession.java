@@ -1,7 +1,7 @@
 /**
  * $RCSfile: IncomingJingleSession.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-05-27 19:39:56 $
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-05-29 18:46:39 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -57,21 +57,10 @@ import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smackx.jingle.listeners.JingleMediaListener;
 import org.jivesoftware.smackx.jingle.listeners.JingleTransportListener;
-import org.jivesoftware.smackx.jingle.listeners.JingleSessionStateListener;
-import org.jivesoftware.smackx.jingle.media.JingleMediaManager;
-import org.jivesoftware.smackx.jingle.media.MediaNegotiator;
-import org.jivesoftware.smackx.jingle.media.PayloadType;
 import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
-import org.jivesoftware.smackx.jingle.nat.TransportNegotiator;
-import org.jivesoftware.smackx.jingle.nat.TransportResolver;
-import org.jivesoftware.smackx.jingle.nat.JingleTransportManager;
+import org.jivesoftware.smackx.packet.Description;
 import org.jivesoftware.smackx.packet.Jingle;
-import org.jivesoftware.smackx.packet.JingleContentDescription;
-import org.jivesoftware.smackx.packet.JingleContentDescription.JinglePayloadType;
 import org.jivesoftware.smackx.packet.JingleError;
-
-import javax.swing.*;
-import java.util.List;
 
 /**
  * An incoming Jingle Session implementation.
@@ -102,12 +91,9 @@ public class IncomingJingleSession extends JingleSession {
      * @param transportManager            The transport manager
      * @param initialJingleSessionRequest the initial Jingle Session Request
      */
-    protected IncomingJingleSession(XMPPConnection conn, String responder,
-            List payloadTypes, JingleTransportManager transportManager, JingleSessionRequest initialJingleSessionRequest) throws XMPPException {
+    protected IncomingJingleSession(XMPPConnection conn, String responder, JingleSessionRequest initialJingleSessionRequest) throws XMPPException {
 
-        super(conn, responder, conn.getUser());
-
-        setSid(initialJingleSessionRequest.getSessionID());
+        super(conn, responder, conn.getUser(), initialJingleSessionRequest.getSessionID(), initialJingleSessionRequest.getJingle().getContent().getDescriptions().get(0).getContentHandler());
 
         // Create the states...
 
@@ -115,37 +101,10 @@ public class IncomingJingleSession extends JingleSession {
         pending = new Pending(this);
         active = new Active(this);
 
-        TransportResolver resolver = null;
-        try {
-            resolver = transportManager.getResolver(this);
-        }
-        catch (XMPPException e) {
-            e.printStackTrace();
-        }
+        // Create description and transport negotiatiors...
+        setMediaNeg(contentHandler.getMediaNegotiator(this));
+        setTransportNeg(contentHandler.getTransportNegotiator(this, conn));
 
-        setMediaNeg(new MediaNegotiator(this, payloadTypes));
-        if (resolver.getType().equals(TransportResolver.Type.rawupd)) {
-            setTransportNeg(new TransportNegotiator.RawUdp(this, resolver));
-        }
-        if (resolver.getType().equals(TransportResolver.Type.ice)) {
-            setTransportNeg(new TransportNegotiator.Ice(this, resolver));
-        }
-
-    }
-
-    /**
-     * Constructor for a Jingle Incoming session with a defined Media Manager
-     *
-     * @param conn                        the XMPP connection
-     * @param responder                   the responder
-     * @param transportManager            The transport manager
-     * @param jingleMediaManager          The Media Manager for this Session
-     * @param initialJingleSessionRequest the initial Jingle Session Request
-     */
-    protected IncomingJingleSession(XMPPConnection conn, String responder,
-            List payloadTypes, JingleTransportManager transportManager, JingleMediaManager jingleMediaManager, JingleSessionRequest initialJingleSessionRequest) throws XMPPException {
-        this(conn, responder, payloadTypes, transportManager, initialJingleSessionRequest);
-        this.jingleMediaManager = jingleMediaManager;
     }
 
     /**
@@ -264,10 +223,10 @@ public class IncomingJingleSession extends JingleSession {
             // Create the listeners that will send a "session-accept" when the
             // sub-negotiators are done.
             jingleMediaListener = new JingleMediaListener() {
-                public void mediaClosed(PayloadType cand) {
+                public void mediaClosed(Description description) {
                 }
 
-                public void mediaEstablished(PayloadType pt) {
+                public void mediaEstablished(Description description) {
                     checkFullyEstablished();
                 }
             };
@@ -316,27 +275,24 @@ public class IncomingJingleSession extends JingleSession {
         private void checkFullyEstablished() {
             if (isFullyEstablished()) {
 
-                PayloadType.Audio bestCommonAudioPt = getMediaNeg()
-                        .getBestCommonAudioPt();
                 TransportCandidate bestRemoteCandidate = getTransportNeg()
                         .getBestRemoteCandidate();
 
                 TransportCandidate acceptedLocalCandidate = getTransportNeg()
                         .getAcceptedLocalCandidate();
 
-                if (bestCommonAudioPt != null && bestRemoteCandidate != null
+                if (bestRemoteCandidate != null
                         && acceptedLocalCandidate != null) {
                     // Ok, send a packet saying that we accept this session
                     Jingle jout = new Jingle(Jingle.Action.SESSIONACCEPT);
 
                     // ... with the audio payload type and the transport
                     // candidate
-                    jout.addDescription(new JingleContentDescription.Audio(
-                            new JinglePayloadType(bestCommonAudioPt)));
-                    jout.addTransport(getTransportNeg().getJingleTransport(
+                    getMediaNeg().addAcceptedDescription(jout.getContent());
+                    jout.getContent().addTransport(getTransportNeg().getJingleTransport(
                             bestRemoteCandidate));
 
-                    addExpectedId(jout.getPacketID());
+                    setExpectedId(jout.getPacketID());
                     sendFormattedJingle(jout);
                 }
             }
@@ -347,7 +303,6 @@ public class IncomingJingleSession extends JingleSession {
          */
         public Jingle eventAccept(Jingle jin) throws XMPPException {
 
-            PayloadType acceptedPayloadType = null;
             TransportCandidate acceptedLocalCandidate = null;
 
             // We process the "accepted" if we have finished the
@@ -356,13 +311,12 @@ public class IncomingJingleSession extends JingleSession {
             // must cancel the negotiators...
             //
             if (isFullyEstablished()) {
-                acceptedPayloadType = getAcceptedAudioPayloadType(jin);
                 acceptedLocalCandidate = getAcceptedLocalCandidate(jin);
 
-                if (acceptedPayloadType != null && acceptedLocalCandidate != null) {
-                    if (acceptedPayloadType.equals(getMediaNeg().getBestCommonAudioPt())
-                            && acceptedLocalCandidate.equals(getTransportNeg()
+                if (acceptedLocalCandidate != null) {
+                    if (acceptedLocalCandidate.equals(getTransportNeg()
                             .getAcceptedLocalCandidate())) {
+                        getMediaNeg().validate(jin);
                         setState(active);
                     }
                 }
@@ -421,15 +375,7 @@ public class IncomingJingleSession extends JingleSession {
          * @see org.jivesoftware.smackx.jingle.JingleNegotiator.State#eventEnter()
          */
         public void eventEnter() {
-            PayloadType.Audio bestCommonAudioPt = getMediaNeg().getBestCommonAudioPt();
-            TransportCandidate bestRemoteCandidate = getTransportNeg()
-                    .getBestRemoteCandidate();
-            TransportCandidate acceptedLocalCandidate = getTransportNeg()
-                    .getAcceptedLocalCandidate();
-
-            // Trigger the session established flag
-            triggerSessionEstablished(bestCommonAudioPt, bestRemoteCandidate,
-                    acceptedLocalCandidate);
+            triggerSessionEstablished();
 
             super.eventEnter();
         }
