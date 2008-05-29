@@ -475,7 +475,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
 
         URN sha1 = fd.getSHA1Urn();
 
-        if (rqc.isDupe(sha1))
+        if (rqc.isDupe(sha1) && UploadSettings.CHECK_DUPES.getValue())
             return QueueStatus.REJECTED;
 
         // check the host limit unless this is a poll

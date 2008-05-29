@@ -175,14 +175,12 @@ public class AltLocUploadTest extends LimeTestCase {
         lifecycleManager.start();
         uploadManager = (TestUploadManager) injector.getInstance(UploadManager.class);
         
-//        startServices();
         FileManager fileManager = injector.getInstance(FileManager.class);
         fileManager.loadSettingsAndWait(2000);
         fd = fileManager.getFileDescForFile(sharedFile);
         assertNotNull(fd);
         
         altLocManager = injector.getInstance(AltLocManager.class);
-        //altLocManager.purge();
 
         alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
 
@@ -191,10 +189,8 @@ public class AltLocUploadTest extends LimeTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-//        stopServices();
         lifecycleManager.shutdown();
         Thread.sleep(1000);
-//        LimeTestUtils.waitForNIO();
     }
 
     private void doSettings() throws UnknownHostException {
@@ -209,6 +205,8 @@ public class AltLocUploadTest extends LimeTestCase {
         UploadSettings.HARD_MAX_UPLOADS.setValue(10);
         UploadSettings.UPLOADS_PER_PERSON.setValue(10);
         UploadSettings.MAX_PUSHES_PER_HOST.setValue(9999);
+        UploadSettings.CHECK_DUPES.setValue(false);
+        
 
         FilterSettings.FILTER_DUPLICATES.setValue(false);
 
@@ -307,7 +305,6 @@ public class AltLocUploadTest extends LimeTestCase {
     }
 
     public void testFWALTWhenRequested() throws Exception {
-        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         URN sha1 = URN.createSHA1Urn(hash);
         GUID clientGUID = new GUID(GUID.makeGuid());
         GUID clientGUID2 = new GUID(GUID.makeGuid());

@@ -106,4 +106,7 @@ public final class UploadSettings extends LimeProps {
     public static final IntSetting THEX_UPLOAD_SPEED =
         FACTORY.createRemoteIntSetting("THEX_UPLOAD_SPEED",512,
                 "THEXUploadState.ThexUploadSpeed",256,4*1024);
+    
+    public static final BooleanSetting CHECK_DUPES =
+        FACTORY.createBooleanSetting("CHECK_DUPE_UPLOADS", true);
 }
