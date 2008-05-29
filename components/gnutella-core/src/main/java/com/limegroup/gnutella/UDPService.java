@@ -208,7 +208,6 @@ public class UDPService implements ReadWriteObserver {
         OUTGOING_MSGS = new LinkedList<SendBundle>();
 	    byte[] backing = new byte[BUFFER_SIZE];
 	    BUFFER = ByteBuffer.wrap(backing);
-        scheduleServices();
     }
     
     /**
@@ -237,6 +236,9 @@ public class UDPService implements ReadWriteObserver {
      * Starts listening for UDP messages & allowing UDP messages to be written.
      */
     public void start() {
+        if(!_started)
+            scheduleServices();
+        
         DatagramChannel channel;
         synchronized(this) {
             _started = true;

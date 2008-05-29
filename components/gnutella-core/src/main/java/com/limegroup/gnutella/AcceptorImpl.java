@@ -128,6 +128,8 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
      */
     private volatile boolean _started;
     
+    private final Object ADDRESS_LOCK = new Object();
+    
     private final NetworkManager networkManager;
     private final Provider<UDPService> udpService;
     private final Provider<MulticastService> multicastService;
@@ -188,7 +190,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         }
 
         boolean addrChanged = false;
-		synchronized(AcceptorImpl.class) {
+		synchronized(ADDRESS_LOCK) {
 		    if( !Arrays.equals(_address, byteAddr) ) {
 			    _address = byteAddr;
 			    addrChanged = true;
@@ -210,7 +212,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             return;
         }
 
-		synchronized(AcceptorImpl.class) {
+		synchronized(ADDRESS_LOCK) {
 		    _externalAddress = byteAddr;
 		}
     }
@@ -399,7 +401,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
 	public boolean isAddressExternal() {
         if (!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
             return true;
-	    synchronized(AcceptorImpl.class) {
+	    synchronized(ADDRESS_LOCK) {
 	        return Arrays.equals(getAddress(true), _externalAddress);
 	    }
 	}
@@ -415,7 +417,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
      * @see com.limegroup.gnutella.Acceptor#getExternalAddress()
      */
 	public byte[] getExternalAddress() {
-	    synchronized(AcceptorImpl.class) {
+	    synchronized(ADDRESS_LOCK) {
 	        return _externalAddress;
         }
 	}
@@ -437,7 +439,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             }
         }
         
-        synchronized (AcceptorImpl.class) {
+        synchronized (ADDRESS_LOCK) {
             return _address;
         }
     }
@@ -605,7 +607,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         // the host already.
         boolean changed = false;
         if(isOutsideConnection(address)) {
-            synchronized (AcceptorImpl.class) {
+            synchronized (ADDRESS_LOCK) {
                 changed = setIncoming(true);
                 ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
             }
@@ -743,20 +745,24 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         private AtomicReference<Future<?>> futureRef = new AtomicReference<Future<?>>();
         
         public void run() {
-            if (validating.getAndSet(true))
+            if (validating.getAndSet(true)) {
+                LOG.debug("Attempt to validate while already validating, aborting check");
                 return;
+            }
             
             // clear and revalidate if we haven't done so in a while
             final long currTime = System.currentTimeMillis();
-            if (currTime - _lastConnectBackTime > incomingExpireTime){
+            if (currTime - _lastConnectBackTime > incomingExpireTime) {
+                LOG.debug("Time elapsed -- triggering TCP connectbacks");
                 // send a connectback request to a few peers and clear
                 // _acceptedIncoming IF some requests were sent.
                 if(connectionManager.get().sendTCPConnectBackRequests())  {
+                    LOG.debug("Sent TCP connectbacks, scheduling unset of accept-incoming");
                     _lastConnectBackTime = currTime;
                     Runnable resetter = new Runnable() {
                         public void run() {
                             boolean changed = false;
-                            synchronized (AcceptorImpl.class) {
+                            synchronized (ADDRESS_LOCK) {
                                 changed = setIncoming(false);
                             }
                             if(changed)
