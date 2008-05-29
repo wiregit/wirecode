@@ -99,5 +99,8 @@
 	<classpathentry kind="lib" path="lib/jars/httpcore-nio-4.0-beta2-20080510.140437-10.jar"/>
 	<classpathentry kind="lib" path="lib/jars/httpclient-4.0-alpha5-20080522.192134-5.jar"/>
 	<classpathentry kind="lib" path="lib/jars/guice-snapshot.jar" sourcepath="lib/sources/guice-snapshot-src.jar"/>
+	<classpathentry kind="lib" path="lib/jars/mozdom4java.jar"/>
+	<classpathentry kind="lib" path="lib/jars/MozillaInterfaces-1.8.1.4.jar"/>
+	<classpathentry kind="lib" path="lib/jars/mozswing.jar" sourcepath="lib/sources/mozswing-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
