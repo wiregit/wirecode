@@ -1,7 +1,5 @@
 package org.limewire.xmpp.client;
 
-import com.limegroup.gnutella.URN;
-
 public class RemoteFile {
     protected String id;
     protected String name;

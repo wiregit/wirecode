@@ -9,18 +9,15 @@
 	
     <import file="../common/build-macros.xml" />
     <import file="../common/build.xml"/>
+    <import file="../jingle/build.xml"/>
     
-    <target name="initialize" depends="lw-common.initialize" unless="initialized.http">
+    <target name="initialize" depends="lw-common.initialize, lw-jingle.initialize" unless="initialized.xmpp">
         <do.setup-properties component="xmpp">
 			<src-classpath>
-				<path>
-                    <fileset dir="lib" includes="**/*.jar"/> 
-                </path>
-                <path>
-                    <fileset dir="../../../../openfire/lib" includes="**/*.jar"/> 
-                </path>
+                <pathelement location="${limewire.lib.jars}/forms_rt.jar"/>
                 <path refid="build.limewire.components.common.buildpath"/>
-			</src-classpath>
+                <path refid="build.limewire.components.jingle.buildpath"/>
+            </src-classpath>
         </do.setup-properties>
     </target>
 	
@@ -33,7 +30,7 @@
     </target>
 	
 	<target name="compile-src" depends="lw-common.compile-src">
-	    <do.compile-src component="xmpp"/>
+	    <do.compile-src component="xmpp" excludes="**/server/**"/>
 	</target>
     
 	<target name="clean-src" depends="lw-common.clean-src">

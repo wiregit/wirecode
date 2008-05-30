@@ -1,7 +1,7 @@
 /**
  * $RCSfile: IncomingJingleSession.java,v $
- * $Revision: 1.1.2.2 $
- * $Date: 2008-05-29 18:46:39 $
+ * $Revision: 1.1.2.3 $
+ * $Date: 2008-05-30 22:36:44 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -61,6 +61,7 @@ import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
 import org.jivesoftware.smackx.packet.Description;
 import org.jivesoftware.smackx.packet.Jingle;
 import org.jivesoftware.smackx.packet.JingleError;
+import org.jivesoftware.smackx.packet.Content;
 
 /**
  * An incoming Jingle Session implementation.
@@ -285,6 +286,7 @@ public class IncomingJingleSession extends JingleSession {
                         && acceptedLocalCandidate != null) {
                     // Ok, send a packet saying that we accept this session
                     Jingle jout = new Jingle(Jingle.Action.SESSIONACCEPT);
+                    jout.setContent(new Content());
 
                     // ... with the audio payload type and the transport
                     // candidate

@@ -1,7 +1,7 @@
 /**
  * $RCSfile: MediaNegotiator.java,v $
- * $Revision: 1.1.2.2 $
- * $Date: 2008-05-29 18:46:38 $
+ * $Revision: 1.1.2.3 $
+ * $Date: 2008-05-30 22:36:44 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -126,6 +126,8 @@ public abstract class MediaNegotiator extends JingleNegotiator {
 
                     if (action != null) {
                         if (action.equals(Jingle.Action.CONTENTACCEPT)) {
+                            jout = getState().eventAccept(jin);
+                        } else if (action.equals(Jingle.Action.SESSIONACCEPT)) {
                             jout = getState().eventAccept(jin);
                         }
                         // TODO ??

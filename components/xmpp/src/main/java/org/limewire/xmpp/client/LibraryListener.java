@@ -4,12 +4,13 @@ import java.util.ArrayList;
 
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
-
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManager;
+import org.jivesoftware.smackx.jingle.JingleManager;
+import org.jivesoftware.smackx.jingle.OutgoingJingleSession;
+import org.jivesoftware.smackx.jingle.nat.ICETransportManager;
 
 public class LibraryListener implements PacketListener {
     private XMPPConnection connection;
@@ -46,6 +47,7 @@ public class LibraryListener implements PacketListener {
     private void handleResult(Library library) {
         for(RemoteFile file : library.getAllSharedFileDescriptors()){
             System.out.println("file " + file.getName());
+            
         }
     }
 
@@ -62,8 +64,32 @@ public class LibraryListener implements PacketListener {
         return new PacketFilter(){
             public boolean accept(Packet packet) {
                 return packet instanceof Library;
-                //return packet.getExtension("search", "jabber:iq:lw-search") != null;
             }
         };
+    }
+    
+    private void jingleOUT(String to) throws InterruptedException {
+        JingleManager manager = new JingleManager(connection);
+
+        try {
+//            MultiMediaManager mediaManager = new MultiMediaManager();
+//            mediaManager.addMediaManager(new JmfMediaManager());
+//            mediaManager.addMediaManager(new ScreenShareMediaManager());
+//            mediaManager.addMediaManager(new SpeexMediaManager());
+//
+//            manager.setMediaManager(mediaManager);
+            
+            OutgoingJingleSession out = manager.createOutgoingJingleSession(to, null);
+
+            out.start();
+
+            while (out.getJingleMediaSession() == null) {
+                Thread.sleep(500);
+            }
+
+            //out.terminate();
+        } catch (XMPPException e) {
+            e.printStackTrace();
+        }
     }
 }

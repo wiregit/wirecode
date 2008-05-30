@@ -1,7 +1,7 @@
 /**
  * $RCSfile: OutgoingJingleSession.java,v $
- * $Revision: 1.1.2.2 $
- * $Date: 2008-05-29 18:46:39 $
+ * $Revision: 1.1.2.3 $
+ * $Date: 2008-05-30 22:36:44 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -272,6 +272,7 @@ public class OutgoingJingleSession extends JingleSession {
                 // with the audio payload type and the transport
                 // candidate
                 Jingle jout = new Jingle(Jingle.Action.SESSIONACCEPT);
+                jout.setContent(new Content());
                 getMediaNeg().addAcceptedDescription(jout.getContent());
                 jout.getContent().addTransport(getTransportNeg().getJingleTransport(
                         bestRemoteCandidate));

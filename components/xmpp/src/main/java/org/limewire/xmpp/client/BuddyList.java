@@ -1,6 +1,7 @@
 package org.limewire.xmpp.client;
 
 import java.awt.Insets;
+import java.io.File;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -19,16 +20,12 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
+import org.jivesoftware.smackx.jingle.file.FileContentHandler;
 import org.jivesoftware.smackx.jingle.IncomingJingleSession;
 import org.jivesoftware.smackx.jingle.JingleManager;
 import org.jivesoftware.smackx.jingle.JingleSessionRequest;
 import org.jivesoftware.smackx.jingle.OutgoingJingleSession;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
-import org.jivesoftware.smackx.jingle.mediaimpl.jmf.JmfMediaManager;
-import org.jivesoftware.smackx.jingle.mediaimpl.jspeex.SpeexMediaManager;
-import org.jivesoftware.smackx.jingle.mediaimpl.multi.MultiMediaManager;
-import org.jivesoftware.smackx.jingle.mediaimpl.sshare.ScreenShareMediaManager;
-import org.jivesoftware.smackx.jingle.nat.ICETransportManager;
 import org.limewire.xmpp.client.commands.LibraryCommand;
 
 public class BuddyList {
@@ -94,7 +91,7 @@ public class BuddyList {
         libraryCommand.execute(null);
 
         //jingleIN();
-        //jingleOUT("tim.julien@gmail.com/limewire9F4264FA");
+        jingleOUT("tim.julien@gmail.com/limewire56AF93C1");
     }
 
     private void createUIComponents() {
@@ -180,8 +177,8 @@ public class BuddyList {
     }
 
     private void jingleIN() {
-        JingleManager manager = new JingleManager(connection, new ICETransportManager(connection, "jstun.javawi.de", 3478));
-        manager.setMediaManager(new JmfMediaManager());
+        //"jstun.javawi.de", 3478
+        JingleManager manager = new JingleManager(connection);
         manager.addJingleSessionRequestListener(new JingleSessionRequestListener() {
             public void sessionRequested(JingleSessionRequest request) {
 
@@ -198,16 +195,11 @@ public class BuddyList {
     }
 
     private void jingleOUT(String to) throws InterruptedException {
-        JingleManager manager = new JingleManager(connection, new ICETransportManager(connection, "jstun.javawi.de", 3478));
+        JingleManager manager = new JingleManager(connection);
 
         try {
-            MultiMediaManager mediaManager = new MultiMediaManager();
-            mediaManager.addMediaManager(new JmfMediaManager());
-            mediaManager.addMediaManager(new ScreenShareMediaManager());
-            mediaManager.addMediaManager(new SpeexMediaManager());
-
-            manager.setMediaManager(mediaManager);
-            OutgoingJingleSession out = manager.createOutgoingJingleSession(to);
+            FileContentHandler fileContentHandler = new FileContentHandler(new File("C:\\ChocolateEggThings\\IMG_0089.JPG"), true);
+            OutgoingJingleSession out = manager.createOutgoingJingleSession(to, fileContentHandler);
 
             out.start();
 
@@ -220,5 +212,4 @@ public class BuddyList {
             e.printStackTrace();
         }
     }
-
 }

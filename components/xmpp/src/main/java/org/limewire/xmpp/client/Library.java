@@ -8,8 +8,6 @@ import org.jivesoftware.smack.provider.IQProvider;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import com.limegroup.gnutella.URN;
-
 public class Library extends IQ {
     private RemoteFile[] allSharedFileDescriptors;
     

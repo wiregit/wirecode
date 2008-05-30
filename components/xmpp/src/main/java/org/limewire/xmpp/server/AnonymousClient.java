@@ -30,7 +30,7 @@ public class AnonymousClient {
         // TODO listen for pongs
 
         CommandDispatcher dispatcher = new CommandDispatcher();
-        dispatcher.add(new DownloadCommand(conn));
+        //dispatcher.add(new DownloadCommand(conn));
         dispatcher.add(new InitiateChatCommand(conn));
         dispatcher.add(new RosterCommand(conn));
         dispatcher.add(new SearchCommand(conn, null));
