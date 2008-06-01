@@ -3,7 +3,7 @@ package com.limegroup.gnutella.routing;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.util.QueryUtils;
 
 /** 
  * The official platform-independent hashing function for query-routing.  The
@@ -136,7 +136,7 @@ public class HashFunction {
             // also removes accents by converting first to NFKD and keeping
             // only PRIMARY differences
             I18NConvert.instance().getNorm(filePath),
-            FileManager.DELIMITERS);
+            QueryUtils.DELIMITERS);
     }
 
     /** 
@@ -149,7 +149,7 @@ public class HashFunction {
         //FileManager.DELIMITERS into a Set in this' static initializer.  But
         //then we have to allocate Strings here.  Can work around the problem,
         //but it's trouble.
-        final String DELIMITERS=FileManager.DELIMITERS;
+        final String DELIMITERS=QueryUtils.DELIMITERS;
         for ( ; i<query.length() ; i++) {
             char c=query.charAt(i);
             //If c not in DELIMITERS, declare success.
@@ -166,7 +166,7 @@ public class HashFunction {
     public static int keywordEnd(String query, int i) {
         //Search for the first character that is a delimiter.  
         //TODO3: see above
-        final String DELIMITERS=FileManager.DELIMITERS;
+        final String DELIMITERS=QueryUtils.DELIMITERS;
         for ( ; i<query.length() ; i++) {
             char c=query.charAt(i);
             //If c in DELIMITERS, declare success.

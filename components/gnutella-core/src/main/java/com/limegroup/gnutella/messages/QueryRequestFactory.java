@@ -345,14 +345,6 @@ public interface QueryRequestFactory {
             AddressSecurityToken key);
 
     /**
-     * Creates a new specialized <tt>QueryRequest</tt> instance for browse
-     * host queries so that <tt>FileManager</tt> can understand them.
-     * 
-     * @return a new <tt>QueryRequest</tt> for browse host queries
-     */
-    public QueryRequest createBrowseHostQuery();
-
-    /**
      * Specialized constructor used to create a query without the firewalled bit
      * set. This should primarily be used for testing.
      * 

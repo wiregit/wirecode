@@ -713,4 +713,8 @@ public class LimeWireCore {
     public ServiceRegistry getServiceRegistry() {
         return injector.getInstance(ServiceRegistry.class);
     }
+
+    public SharedFilesKeywordIndex getSharedFilesKeywordIndex() {
+        return injector.getInstance(SharedFilesKeywordIndex.class);
+    }
 }

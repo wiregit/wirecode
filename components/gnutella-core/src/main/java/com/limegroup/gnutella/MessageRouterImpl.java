@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,6 +69,7 @@ import com.limegroup.gnutella.messagehandlers.OOBHandler;
 import com.limegroup.gnutella.messagehandlers.UDPCrawlerPingHandler;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.OutgoingQueryReplyFactory;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingRequest;
@@ -336,6 +336,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
 
     private final ConnectionListener connectionListener = new ConnectionListener();
     
+    private final OutgoingQueryReplyFactory outgoingQueryReplyFactory;
+    
     /**
      * Creates a MessageRouter. Must call initialize before using.
      */
@@ -380,7 +382,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
             PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
             Provider<OOBHandler> oobHandlerFactory,
             Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager,
-            Provider<LimeACKHandler> limeACKHandler) {
+            Provider<LimeACKHandler> limeACKHandler, OutgoingQueryReplyFactory outgoingQueryReplyFactory) {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.queryHandlerFactory = queryHandlerFactory;
@@ -413,6 +415,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         this.udpCrawlerPingHandlerFactory = udpCrawlerPingHandlerFactory;
         this.pingRequestFactory = pingRequestFactory;
         this.messageHandlerBinder = messageHandlerBinder;
+        this.outgoingQueryReplyFactory = outgoingQueryReplyFactory;
         this.multicastGuidMap = guidMapManager.getMap();
         this.udpReplyHandlerCache = udpReplyHandlerCache;
         this.inspectionRequestHandlerFactory = inspectionRequestHandlerFactory;
@@ -2250,25 +2253,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     public Iterable<QueryReply> responsesToQueryReplies(Response[] responses,
                                              QueryRequest queryRequest,
                                              final int REPLY_LIMIT, SecurityToken securityToken) {
-
-        //List to store Query Replies
-        List<QueryReply> queryReplies = new LinkedList<QueryReply>();
-        
-        // get the appropriate queryReply information
-        byte[] guid = queryRequest.getGUID();
-        byte ttl = (byte)(queryRequest.getHops() + 1);
-
-        //Return measured speed if possible, or user's speed otherwise.
-        long speed = uploadManager.measuredUploadSpeed();
-        boolean measuredSpeed=true;
-        if (speed==-1) {
-            speed=ConnectionSettings.CONNECTION_SPEED.getValue();
-            measuredSpeed=false;
-        }
-
         int numResponses = responses.length;
-        int index = 0;
-
         int numHops = queryRequest.getHops();
 
         // limit the responses if we're not delivering this 
@@ -2288,92 +2273,10 @@ public abstract class MessageRouterImpl implements MessageRouter {
             responses = newResponses;
             numResponses = responses.length;
         }
-        while (numResponses > 0) {
-            int arraySize;
-            // if there are more than 255 responses,
-            // create an array of 255 to send in the queryReply
-            // otherwise, create an array of whatever size is left.
-            if (numResponses < REPLY_LIMIT) {
-                // break;
-                arraySize = numResponses;
-            }
-            else
-                arraySize = REPLY_LIMIT;
-
-            Response[] res;
-            // a special case.  in the common case where there
-            // are less than 256 responses being sent, there
-            // is no need to copy one array into another.
-            if ( (index == 0) && (arraySize < REPLY_LIMIT) ) {
-                res = responses;
-            }
-            else {
-                res = new Response[arraySize];
-                // copy the reponses into bite-size chunks
-                for(int i =0; i < arraySize; i++) {
-                    res[i] = responses[index];
-                    index++;
-                }
-            }
-
-            // decrement the number of responses we have left
-            numResponses-= arraySize;
-
-			// see if there are any open slots
-            // Note: if we are busy, non-metafile results would be filtered.
-            // by this point.
-			boolean busy = !uploadManager.mayBeServiceable();
-            boolean uploaded = uploadManager.hadSuccesfulUpload();
-			
-            // We only want to return a "reply to multicast query" QueryReply
-            // if the request travelled a single hop.
-			boolean mcast = queryRequest.isMulticast() && 
-                (queryRequest.getTTL() + queryRequest.getHops()) == 1;
-			
-            // We should mark our hits if the remote end can do a firewalled
-            // transfer AND so can we AND we don't accept tcp incoming AND our
-            // external address is valid (needed for input into the reply)
-            final boolean fwTransfer = 
-                queryRequest.canDoFirewalledTransfer() && 
-                networkManager.canDoFWT() &&
-                !networkManager.acceptedIncomingConnection();
-            
-			if ( mcast ) {
-                ttl = 1; // not strictly necessary, but nice.
-            }
-            
-            List<QueryReply> replies =
-                createQueryReply(guid, ttl, speed, res, 
-                                 _clientGUID, busy, uploaded, 
-                                 measuredSpeed, mcast,
-                                 fwTransfer, securityToken);
-
-            //add to the list
-            queryReplies.addAll(replies);
-
-        }//end of while
         
-        return queryReplies;
+        // decrement the number of responses we have left
+        return outgoingQueryReplyFactory.createReplies(responses, queryRequest, securityToken, REPLY_LIMIT);
     }
-
-    /**
-     * Abstract method for creating query hits.  Subclasses must specify
-     * how this list is created.
-     * 
-     * @param securityToken might be null, otherwise must be sent in GGEP
-     * of QHD with header "SO"
-     *
-     * @return a <tt>List</tt> of <tt>QueryReply</tt> instances
-     */
-    protected abstract List<QueryReply> createQueryReply(byte[] guid, byte ttl,
-                                            long speed, 
-                                             Response[] res, byte[] clientGUID, 
-                                             boolean busy, 
-                                             boolean uploaded, 
-                                             boolean measuredSpeed, 
-                                             boolean isFromMcast,
-                                             boolean shouldMarkForFWTransfer,
-                                             SecurityToken securityToken);
 
     /**
      * Handles a message to reset the query route table for the given

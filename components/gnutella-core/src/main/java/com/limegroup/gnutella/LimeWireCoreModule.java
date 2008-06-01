@@ -127,6 +127,8 @@ import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.MessageFactoryImpl;
 import com.limegroup.gnutella.messages.MessageParserBinder;
 import com.limegroup.gnutella.messages.MessageParserBinderImpl;
+import com.limegroup.gnutella.messages.OutgoingQueryReplyFactory;
+import com.limegroup.gnutella.messages.OutgoingQueryReplyFactoryImpl;
 import com.limegroup.gnutella.messages.PingReplyFactory;
 import com.limegroup.gnutella.messages.PingReplyFactoryImpl;
 import com.limegroup.gnutella.messages.PingRequestFactory;
@@ -343,6 +345,8 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(FECUtils.class).to(FECUtilsImpl.class);
         bind(NodeAssigner.class).to(NodeAssignerImpl.class);
         bind(BTMetaInfoFactory.class).to(BTMetaInfoFactoryImpl.class);
+        bind(SharedFilesKeywordIndex.class).to(SharedFilesKeywordIndexImpl.class);
+        bind(OutgoingQueryReplyFactory.class).to(OutgoingQueryReplyFactoryImpl.class);
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);

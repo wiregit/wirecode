@@ -141,4 +141,12 @@ public class QueryUtilsTest extends BaseTestCase {
         assertEquals(set.toString(), 0, set.size());
     }
     
+    public void testIsDelimiter() {
+        for (char c : QueryUtils.DELIMITERS.toCharArray()) {
+            assertTrue(QueryUtils.isDelimiter(c));
+        }
+        for (char c : "203fklj\t|03fklj?=".toCharArray()) {
+            assertFalse("considered a delimiter: " + c, QueryUtils.isDelimiter(c));
+        }
+    }
 }

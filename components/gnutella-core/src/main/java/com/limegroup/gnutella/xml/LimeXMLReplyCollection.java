@@ -447,7 +447,7 @@ public class LimeXMLReplyCollection {
      * 4) Returns an empty list if nothing matched or
      *    a list of the matching documents.
      */    
-    List<LimeXMLDocument> getMatchingReplies(LimeXMLDocument query) {
+    public List<LimeXMLDocument> getMatchingReplies(LimeXMLDocument query) {
         // First get a list of anything that could possibly match.
         // This uses a set so we don't add the same doc twice ...
         Set<LimeXMLDocument> matching = null;

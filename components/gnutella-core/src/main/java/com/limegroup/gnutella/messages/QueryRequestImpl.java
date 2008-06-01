@@ -23,7 +23,6 @@ import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;
 import org.xml.sax.SAXException;
 
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UrnSet;
@@ -597,7 +596,7 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
      * @return whether this is a browse host query
      */
     public boolean isBrowseHostQuery() {
-        return FileManager.INDEXING_QUERY.equals(getQuery());
+        return INDEXING_QUERY.equals(getQuery());
     }
 
     /**
@@ -753,6 +752,10 @@ public class QueryRequestImpl extends AbstractMessage implements QueryRequest {
     /** Determines if this is an originated query */
     public boolean isOriginated() {
         return originated;
+    }
+    
+    public boolean shouldIncludeXMLInResponse() {
+        return desiresXMLResponses() || desiresOutOfBandReplies();
     }
     
     @Override

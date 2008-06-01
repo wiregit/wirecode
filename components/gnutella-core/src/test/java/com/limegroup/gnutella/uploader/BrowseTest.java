@@ -23,6 +23,7 @@ import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.Injector;
+import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
@@ -139,11 +140,11 @@ public class BrowseTest extends LimeTestCase {
 
             assertEquals(fileManager.getNumFiles(), files.size());
 
-            for (Iterator<Response> it = fileManager.getIndexingIterator(false); it.hasNext();) {
-                Response result = it.next();
-                boolean contained = files.remove(result.getName());
+            for (Iterator<FileDesc> it = fileManager.getIndexingIterator(); it.hasNext();) {
+                FileDesc result = it.next();
+                boolean contained = files.remove(result.getFileName());
                 assertTrue("File is missing in browse response: "
-                        + result.getName(), contained);
+                        + result.getFileName(), contained);
             }
             assertTrue("Browse returned more results than shared: " + files,
                     files.isEmpty());

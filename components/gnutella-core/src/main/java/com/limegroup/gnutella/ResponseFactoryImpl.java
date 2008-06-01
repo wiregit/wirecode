@@ -45,6 +45,7 @@ import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLNames;
+import com.limegroup.gnutella.xml.LimeXMLProperties;
 
 @Singleton
 public class ResponseFactoryImpl implements ResponseFactory {
@@ -235,6 +236,12 @@ public class ResponseFactoryImpl implements ResponseFactory {
         return new ResponseImpl(index, size, name, incomingNameByteArraySize, urns, doc,
                 ggepData.locations, ggepData.createTime, extensions, ggepData.ranges, ggepData.verified);
     }
+    
+
+    public Response createPureMetadataResponse() {
+        return createResponse(LimeXMLProperties.DEFAULT_NONFILE_INDEX, 0, " ");
+    }
+
     
     private void checkFilename(String name) throws IOException {
         if (name.length() == 0) {

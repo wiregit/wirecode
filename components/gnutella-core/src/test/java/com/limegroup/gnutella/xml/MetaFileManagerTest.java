@@ -22,6 +22,7 @@ import com.limegroup.gnutella.FileManagerImpl;
 import com.limegroup.gnutella.FileManagerTest;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.SharedFilesKeywordIndex;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.routing.QueryRouteTable;
@@ -65,6 +66,8 @@ public class MetaFileManagerTest extends FileManagerTest {
         injector.getInstance(Acceptor.class).setAddress(InetAddress.getLocalHost());
 
         fman = (FileManagerImpl)injector.getInstance(FileManager.class);
+        keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
+        fman.addFileEventListener(keywordIndex);
 
         limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
         
@@ -106,15 +109,15 @@ public class MetaFileManagerTest extends FileManagerTest {
         // it is important to check the query at all bounds,
         // including tests for case.
         // IMPORTANT: the store files should never show up in any of these
-        responses=fman.query(queryRequestFactory.createQuery("unit",(byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("unit",(byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("FileManager", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("FileManager", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("test", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("test", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("file", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("file", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery(
+        responses=keywordIndex.query(queryRequestFactory.createQuery(
             "FileManager UNIT tEsT", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);        
                 
@@ -240,15 +243,15 @@ public class MetaFileManagerTest extends FileManagerTest {
 //        // it is important to check the query at all bounds,
 //        // including tests for case.
 //        // IMPORTANT: the store files should never show up in any of these
-//        responses=fman.query(queryRequestFactory.createQuery("unit",(byte)3));
+//        responses=keywordIndex.query(queryRequestFactory.createQuery("unit",(byte)3));
 //        assertEquals("Unexpected number of responses", 2, responses.length);
-//        responses=fman.query(queryRequestFactory.createQuery("FileManager", (byte)3));
+//        responses=keywordIndex.query(queryRequestFactory.createQuery("FileManager", (byte)3));
 //        assertEquals("Unexpected number of responses", 2, responses.length);
-//        responses=fman.query(queryRequestFactory.createQuery("test", (byte)3));
+//        responses=keywordIndex.query(queryRequestFactory.createQuery("test", (byte)3));
 //        assertEquals("Unexpected number of responses", 2, responses.length);
-//        responses=fman.query(queryRequestFactory.createQuery("file", (byte)3));
+//        responses=keywordIndex.query(queryRequestFactory.createQuery("file", (byte)3));
 //        assertEquals("Unexpected number of responses", 2, responses.length);
-//        responses=fman.query(queryRequestFactory.createQuery(
+//        responses=keywordIndex.query(queryRequestFactory.createQuery(
 //            "FileManager UNIT tEsT", (byte)3));
 //        assertEquals("Unexpected number of responses", 2, responses.length);        
 //                
@@ -586,15 +589,15 @@ public class MetaFileManagerTest extends FileManagerTest {
         // it is important to check the query at all bounds,
         // including tests for case.
         // IMPORTANT: the store files should never show up in any of these
-        responses=fman.query(queryRequestFactory.createQuery("unit",(byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("unit",(byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("FileManager", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("FileManager", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("test", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("test", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery("file", (byte)3));
+        responses=keywordIndex.query(queryRequestFactory.createQuery("file", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);
-        responses=fman.query(queryRequestFactory.createQuery(
+        responses=keywordIndex.query(queryRequestFactory.createQuery(
             "FileManager UNIT tEsT", (byte)3));
         assertEquals("Unexpected number of responses", 0, responses.length);  
     }
@@ -654,27 +657,27 @@ public class MetaFileManagerTest extends FileManagerTest {
 	    assertTrue(result.toString(), result.isAddEvent());
 	    assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
 	    
-	    Response[] r1 = fman.query(queryRequestFactory.createQuery("sam",
+	    Response[] r1 = keywordIndex.query(queryRequestFactory.createQuery("sam",
 	                                buildAudioXMLString("artist=\"sam\"")));
         assertNotNull(r1);
         assertEquals(1, r1.length);
         assertEquals(d1.getXMLString(), r1[0].getDocument().getXMLString());
         
         // test a match where 50% matches -- should get no matches.
-        Response[] r2 = fman.query(queryRequestFactory.createQuery("sam jazz in c",
+        Response[] r2 = keywordIndex.query(queryRequestFactory.createQuery("sam jazz in c",
                                    buildAudioXMLString("artist=\"sam\" album=\"jazz in c\"")));
         assertNotNull(r2);
         assertEquals(0, r2.length);
             
             
         // test where the keyword matches only.
-        Response[] r3 = fman.query(queryRequestFactory.createQuery("meaningles"));
+        Response[] r3 = keywordIndex.query(queryRequestFactory.createQuery("meaningles"));
         assertNotNull(r3);
         assertEquals(1, r3.length);
         assertEquals(d1.getXMLString(), r3[0].getDocument().getXMLString());
                                   
         // test where keyword matches, but xml doesn't.
-        Response[] r4 = fman.query(queryRequestFactory.createQuery("meaningles",
+        Response[] r4 = keywordIndex.query(queryRequestFactory.createQuery("meaningles",
                                    buildAudioXMLString("artist=\"bob\"")));
         assertNotNull(r4);
         assertEquals(0, r4.length);
@@ -691,13 +694,13 @@ public class MetaFileManagerTest extends FileManagerTest {
 	    assertEquals(d2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
         // pure keyword.
-        Response[] r5 = fman.query(queryRequestFactory.createQuery("jazz in d"));
+        Response[] r5 = keywordIndex.query(queryRequestFactory.createQuery("jazz in d"));
         assertNotNull(r5);
         assertEquals(1, r5.length);
         assertEquals(d2.getXMLString(), r5[0].getDocument().getXMLString());
         
         // keyword, but has XML to check more efficiently.
-        Response[] r6 = fman.query(queryRequestFactory.createQuery("jazz in d",
+        Response[] r6 = keywordIndex.query(queryRequestFactory.createQuery("jazz in d",
                                    buildAudioXMLString("album=\"jazz in d\"")));
         assertNotNull(r6);
         assertEquals(0, r6.length);
@@ -722,31 +725,31 @@ public class MetaFileManagerTest extends FileManagerTest {
 		assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
 		
 		//create a query with just a file name match, should get no responses
-        Response[] r0 = fman.query(queryRequestFactory.createQuery("small town hero"));
+        Response[] r0 = keywordIndex.query(queryRequestFactory.createQuery("small town hero"));
         assertNotNull(r0);
         assertEquals(0, r0.length);
 		
 		// create a query where keyword matches and partial xml matches, should get no
         // responses
-	    Response[] r1 = fman.query(queryRequestFactory.createQuery("small town hero",
+	    Response[] r1 = keywordIndex.query(queryRequestFactory.createQuery("small town hero",
                                     buildAudioXMLString("title=\"Alive\"")));    
         assertNotNull(r1);
         assertEquals(0, r1.length);
         
         // test 100% matches, should get no results
-        Response[] r2 = fman.query(queryRequestFactory.createQuery("small town hero",
+        Response[] r2 = keywordIndex.query(queryRequestFactory.createQuery("small town hero",
                                    buildAudioXMLString(storeAudio)));
         assertNotNull(r2);
         assertEquals(0, r2.length);
         
         // test xml matches 100% but keyword doesn't, should get no matches
-        Response[] r3 = fman.query(queryRequestFactory.createQuery("meaningless",
+        Response[] r3 = keywordIndex.query(queryRequestFactory.createQuery("meaningless",
                                    buildAudioXMLString(storeAudio)));
         assertNotNull(r3);
         assertEquals(0, r3.length);
         
         //test where nothing matches, should get no results
-        Response[] r4 = fman.query(queryRequestFactory.createQuery("meaningless",
+        Response[] r4 = keywordIndex.query(queryRequestFactory.createQuery("meaningless",
                                    buildAudioXMLString("title=\"some title\" artist=\"unknown artist\" album=\"this album name\" genre=\"Classical\"")));
         assertNotNull(r4);
         assertEquals(0, r4.length);
@@ -763,13 +766,13 @@ public class MetaFileManagerTest extends FileManagerTest {
 		assertTrue(result2.toString(), result2.isAddStoreEvent());
 			
 	      //create a query with just a file name match, should get no responses
-        Response[] r5 = fman.query(queryRequestFactory.createQuery("small town hero 2"));
+        Response[] r5 = keywordIndex.query(queryRequestFactory.createQuery("small town hero 2"));
         assertNotNull(r5);
         assertEquals(0, r5.length);
 		
         // query with videoxml matching. This SHOULDNT return results. The new Meta-data parsing
         //  is fixed to disallow adding new XML docs to files
-        Response[] r6 = fman.query(queryRequestFactory.createQuery("small town hero 2",
+        Response[] r6 = keywordIndex.query(queryRequestFactory.createQuery("small town hero 2",
                                     buildVideoXMLString("director=\"francis loopola\" title=\"Alive\"")));
         assertNotNull(r6);
         assertEquals(0, r6.length);
@@ -777,13 +780,13 @@ public class MetaFileManagerTest extends FileManagerTest {
         // query with videoxml partial matching. This in SHOULDNT return results. The new Meta-data parsing
         //  is fixed to disallow adding new XML docs to files, this in theory shouldn't be 
         //  possible
-        Response[] r7 = fman.query(queryRequestFactory.createQuery("small town hero 2",
+        Response[] r7 = keywordIndex.query(queryRequestFactory.createQuery("small town hero 2",
                                     buildVideoXMLString("title=\"Alive\"")));
         assertNotNull(r7);
         assertEquals(0, r7.length);
         
         // test 100% matches minus VideoXxml, should get no results
-        Response[] r8 = fman.query(queryRequestFactory.createQuery("small town hero 2",
+        Response[] r8 = keywordIndex.query(queryRequestFactory.createQuery("small town hero 2",
                                     buildAudioXMLString(storeAudio)));
         assertNotNull(r8);
         assertEquals(0, r8.length);
@@ -864,7 +867,7 @@ public class MetaFileManagerTest extends FileManagerTest {
         String dir1 = "director=\"loopola\"";
 
         //make sure there's nothing with this xml query
-        Response[] res = fman.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir1)));
+        Response[] res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir1)));
         
         assertEquals("there should be no matches", 0, res.length);
         
@@ -904,30 +907,30 @@ public class MetaFileManagerTest extends FileManagerTest {
         assertTrue(result.toString(), result.isAddEvent());
         assertEquals(newDoc3, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         Thread.sleep(100);
-        res = fman.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir1)));
+        res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir1)));
         assertEquals("there should be one match", 1, res.length);
 
-        res = fman.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir2)));
+        res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir2)));
         assertEquals("there should be two matches", 2, res.length);
         
         //remove a file
         fman.removeFileIfSharedOrStore(f1);
 
-        res = fman.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir1)));
+        res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir1)));
         assertEquals("there should be no matches", 0, res.length);
         
         //make sure the two other files are there
-        res = fman.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir2)));
+        res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir2)));
         assertEquals("there should be two matches", 2, res.length);
 
         //remove another and check we still have on left
         fman.removeFileIfSharedOrStore(f2);
-        res = fman.query(queryRequestFactory.createQuery("",buildVideoXMLString(dir3)));
+        res = keywordIndex.query(queryRequestFactory.createQuery("",buildVideoXMLString(dir3)));
         assertEquals("there should be one match", 1, res.length);
 
         //remove the last file and make sure we get no replies
         fman.removeFileIfSharedOrStore(f3);
-        res = fman.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir3)));
+        res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir3)));
         assertEquals("there should be no matches", 0, res.length);
     }
 

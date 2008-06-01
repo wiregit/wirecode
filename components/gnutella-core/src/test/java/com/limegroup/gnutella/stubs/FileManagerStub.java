@@ -12,10 +12,7 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManagerController;
 import com.limegroup.gnutella.FileManagerImpl;
-import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * A simple FileManager that shares one file of (near) infinite length.
@@ -85,21 +82,6 @@ public class FileManagerStub extends FileManagerImpl {
             return (FileDesc)_urns.get(urn);
         else
             return new FileDescStub("other.txt");
-    }
-    
-    @Override
-    public boolean shouldIncludeXMLInResponse(QueryRequest qr) {
-        return false;
-    }
-    
-    @Override
-    public void addXMLToResponse(Response r, FileDesc fd) {
-        ;
-    }
-    
-    @Override
-    public boolean isValidXMLMatch(Response r, LimeXMLDocument doc) {
-        return true;
     }
     
     public void setUrns(Map urns) {

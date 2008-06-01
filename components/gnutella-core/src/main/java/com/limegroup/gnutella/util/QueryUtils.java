@@ -9,7 +9,6 @@ import java.util.StringTokenizer;
 import org.limewire.util.I18NConvert;
 import org.limewire.util.StringUtils;
 
-import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.settings.SearchSettings;
 
 public class QueryUtils {
@@ -19,9 +18,19 @@ public class QueryUtils {
      */
     private static final List<String> TRIVIAL_WORDS;
     
+    /**
+     * Characters used to tokenize queries and file names.
+     */
+    public static final String DELIMITERS = " -._+/*()\\,";
+    
+    private static final char[] DELIMITERS_CHARACTERS; 
+    
     static {
         // must be lower-case
         TRIVIAL_WORDS = Arrays.asList("the", "an", "a", "and");
+        char[] characters = DELIMITERS.toCharArray();
+        Arrays.sort(characters);
+        DELIMITERS_CHARACTERS = characters;
     }
     
 
@@ -40,7 +49,7 @@ public class QueryUtils {
     	
         //Separate by whitespace and _, etc.
         Set<String> ret=new LinkedHashSet<String>();
-        String delim = FileManager.DELIMITERS;
+        String delim = QueryUtils.DELIMITERS;
         char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
         StringBuilder sb = new StringBuilder(delim.length() + illegal.length);
         sb.append(illegal).append(delim);
@@ -76,7 +85,7 @@ public class QueryUtils {
     public static final String removeIllegalChars(String name) {
         String ret = "";
         
-        String delim = FileManager.DELIMITERS;
+        String delim = QueryUtils.DELIMITERS;
         char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
         StringBuilder sb = new StringBuilder(delim.length() + illegal.length);
         sb.append(illegal).append(delim);
@@ -169,4 +178,8 @@ public class QueryUtils {
     	return createQueryString(name, false);
     }
 
+    public static final boolean isDelimiter(char c) {
+        return Arrays.binarySearch(DELIMITERS_CHARACTERS, c) >= 0;
+    }
+    
 }

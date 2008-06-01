@@ -78,6 +78,7 @@ public class MessageTestUtils {
             ignoring(qr).isWhatIsNewRequest();
             ignoring(qr).desiresXMLResponses();
             ignoring(qr).desiresOutOfBandReplies();
+            ignoring(qr).shouldIncludeXMLInResponse();
         }};
     }
     
