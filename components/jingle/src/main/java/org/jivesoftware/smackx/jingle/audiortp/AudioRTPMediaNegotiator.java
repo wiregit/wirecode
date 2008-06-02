@@ -6,12 +6,15 @@ import org.jivesoftware.smackx.packet.*;
 import org.jivesoftware.smackx.packet.audiortp.AudioRTPDescription;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.XMPPException;
+import org.apache.log4j.Logger;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 public class AudioRTPMediaNegotiator extends MediaNegotiator {
+
+    private static final Logger LOG = Logger.getLogger(AudioRTPMediaNegotiator.class);
 
     private final List<PayloadType.Audio> localAudioPts = new ArrayList<PayloadType.Audio>();
     private final List<PayloadType.Audio> remoteAudioPts = new ArrayList<PayloadType.Audio>();

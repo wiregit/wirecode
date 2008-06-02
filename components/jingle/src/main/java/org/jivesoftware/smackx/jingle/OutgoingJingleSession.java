@@ -1,7 +1,7 @@
 /**
  * $RCSfile: OutgoingJingleSession.java,v $
- * $Revision: 1.1.2.3 $
- * $Date: 2008-05-30 22:36:44 $
+ * $Revision: 1.1.2.4 $
+ * $Date: 2008-06-02 04:20:51 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -52,13 +52,17 @@
 
 package org.jivesoftware.smackx.jingle;
 
+import org.apache.log4j.Logger;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smackx.jingle.listeners.JingleMediaListener;
 import org.jivesoftware.smackx.jingle.listeners.JingleTransportListener;
 import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
-import org.jivesoftware.smackx.packet.*;
+import org.jivesoftware.smackx.packet.Content;
+import org.jivesoftware.smackx.packet.Description;
+import org.jivesoftware.smackx.packet.Jingle;
+import org.jivesoftware.smackx.packet.JingleError;
 
 /**
  * An outgoing Jingle session implementation.
@@ -71,6 +75,8 @@ import org.jivesoftware.smackx.packet.*;
  * @author Thiago Camargo
  */
 public class OutgoingJingleSession extends JingleSession {
+
+    private static final Logger LOG = Logger.getLogger(OutgoingJingleSession.class);
 
     // states
 

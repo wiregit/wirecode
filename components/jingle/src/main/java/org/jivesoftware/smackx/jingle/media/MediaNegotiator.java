@@ -1,7 +1,7 @@
 /**
  * $RCSfile: MediaNegotiator.java,v $
- * $Revision: 1.1.2.3 $
- * $Date: 2008-05-30 22:36:44 $
+ * $Revision: 1.1.2.4 $
+ * $Date: 2008-06-02 04:20:51 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -26,6 +26,7 @@ import org.jivesoftware.smackx.jingle.JingleSession;
 import org.jivesoftware.smackx.jingle.listeners.JingleListener;
 import org.jivesoftware.smackx.jingle.listeners.JingleMediaListener;
 import org.jivesoftware.smackx.packet.*;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -42,6 +43,8 @@ import java.util.List;
  * @author Thiago Camargo
  */
 public abstract class MediaNegotiator extends JingleNegotiator {
+
+    private static final Logger LOG = Logger.getLogger(MediaNegotiator.class);
 
     protected final JingleSession session;
 

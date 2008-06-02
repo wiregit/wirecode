@@ -24,7 +24,7 @@ public class FileDescription extends Description {
     }
 
     public JingleContentHandler createContentHandler() {
-        return new FileContentHandler(getFile(getFileContainer()), getFileContainer() instanceof Offer);
+        return new FileContentHandler(getFile(getFileContainer()), getFileContainer() instanceof Request);
     }
 
     private File getFile(FileContainer fileContainer) {

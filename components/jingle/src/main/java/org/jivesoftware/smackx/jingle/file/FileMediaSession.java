@@ -25,6 +25,11 @@ public class FileMediaSession extends JingleMediaSession {
     protected Socket socket;
     protected ServerSocket serverSocket;
 
+    private String remoteIP;
+    private String localIP;
+    private int remotePort;
+    private int localPort;
+
     public FileMediaSession(final StreamInitiation.File file, final boolean sending,
             final TransportCandidate remote, final TransportCandidate local,
             JingleSession jingleSession) {
@@ -37,11 +42,13 @@ public class FileMediaSession extends JingleMediaSession {
     protected void initialize(String ip, String localIp, int localPort, int remotePort) {
         // TODO delegate to transport negotiator?
         // TODO push up?
+        this.remoteIP = ip;
+        this.remotePort = remotePort;
+        this.localIP = localIp;
+        this.localPort = localPort;
         try {
             if(sending) {
                 serverSocket = new ServerSocket(localPort, 50, InetAddress.getByName(localIp));
-            } else {
-                socket = new Socket(ip, remotePort, InetAddress.getByName(localIp), localPort);
             }
         }
         catch (IOException e) {
@@ -66,6 +73,7 @@ public class FileMediaSession extends JingleMediaSession {
     public void startTrasmit() {
         try {
             if(sending) {
+                serverSocket = new ServerSocket(localPort, 50, InetAddress.getByName(localIP));
                 Socket client = serverSocket.accept();
                 File toSend = getLocalFile(file);
                 in = new BufferedInputStream(new FileInputStream(toSend));
@@ -99,7 +107,7 @@ public class FileMediaSession extends JingleMediaSession {
     public void startReceive() {
         try {
             if(!sending) {
-                socket = new Socket(ip, remotePort, InetAddress.getByName(localIp), localPort);
+                socket = new Socket(remoteIP, remotePort, InetAddress.getByName(localIP), localPort);
                 File toSave = getNewFileToSave(file);
                 in = new BufferedInputStream(socket.getInputStream());
                 out = new BufferedOutputStream(new FileOutputStream(toSave));

@@ -14,8 +14,11 @@ import org.jivesoftware.smackx.packet.Jingle;
 import org.jivesoftware.smackx.packet.JingleError;
 import org.jivesoftware.smackx.packet.StreamInitiation;
 import org.jivesoftware.smackx.packet.file.FileDescription;
+import org.apache.log4j.Logger;
 
-public class FileMediaNegotiator extends MediaNegotiator {
+public class FileMediaNegotiator extends MediaNegotiator {   
+
+    private static final Logger LOG = Logger.getLogger(FileMediaNegotiator.class);
 
     private StreamInitiation.File file;
     private boolean sending;

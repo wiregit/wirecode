@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleNegotiator.java,v $
- * $Revision: 1.1.2.2 $
- * $Date: 2008-05-29 18:46:39 $
+ * $Revision: 1.1.2.3 $
+ * $Date: 2008-06-02 04:20:51 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -19,6 +19,8 @@
  */
 package org.jivesoftware.smackx.jingle;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.IQ;
@@ -42,6 +44,8 @@ import java.util.ArrayList;
  * @author Alvaro Saurin
  */
 public abstract class JingleNegotiator {
+
+    private static final Logger LOG = Logger.getLogger(JingleNegotiator.class);
 
     private State state; // Current negotiation state
 
@@ -324,32 +328,39 @@ public abstract class JingleNegotiator {
         // State transition events
 
         public Jingle eventAck(IQ iq) throws XMPPException {
+            LOG.log(Level.DEBUG, getClass() + " eventAck()");
             // We have received an Ack
             return null;
         }
 
         public void eventError(IQ iq) throws XMPPException {
+            LOG.log(Level.DEBUG, getClass() + " eventError()");
             throw new JingleException(iq.getError().getMessage());
         }
 
         public Jingle eventInvite() throws XMPPException {
+            LOG.log(Level.DEBUG, getClass() + " eventInvite()");
             throw new IllegalStateException(
                     "Negotiation can not be started in this state.");
         }
 
         public Jingle eventInitiate(Jingle jin) throws XMPPException {
+            LOG.log(Level.DEBUG, getClass() + " eventInitiate()");
             return null;
         }
 
         public Jingle eventAccept(Jingle jin) throws XMPPException {
+            LOG.log(Level.DEBUG, getClass() + " eventAccept()");
             return null;
         }
 
         public Jingle eventInfo(Jingle jin) throws XMPPException {
+            LOG.log(Level.DEBUG, getClass() + " eventInfo()");
             return null;
         }
 
         public Jingle eventTerminate(Jingle jin) throws XMPPException {
+            LOG.log(Level.DEBUG, getClass() + " eventTerminate()");
             if (neg != null && !neg.nullState()) {
                 neg.close();
             }
@@ -357,9 +368,11 @@ public abstract class JingleNegotiator {
         }
 
         public void eventEnter() {
+            LOG.log(Level.DEBUG, getClass() + " eventEnter()");
         }
 
         public void eventExit() {
+            LOG.log(Level.DEBUG, getClass() + " eventExit()");
             if (neg != null) {
                 neg.removeExpectedId(null);
             }

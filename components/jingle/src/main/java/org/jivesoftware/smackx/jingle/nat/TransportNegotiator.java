@@ -1,6 +1,6 @@
 /**
  * $RCSfile: TransportNegotiator.java,v $
- * $Revision: 1.1.2.2 $
+ * $Revision: 1.1.2.3 $
  * $Date: 15/11/2006
  *
  * Copyright 2003-2006 Jive Software.
@@ -29,6 +29,7 @@ import org.jivesoftware.smackx.jingle.listeners.JingleTransportListener;
 import org.jivesoftware.smackx.packet.Content;
 import org.jivesoftware.smackx.packet.Jingle;
 import org.jivesoftware.smackx.packet.JingleTransport.JingleTransportCandidate;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,6 +46,8 @@ import java.util.List;
  * @author Alvaro Saurin <alvaro.saurin@gmail.com>
  */
 public abstract class TransportNegotiator extends JingleNegotiator {
+
+    private static final Logger LOG = Logger.getLogger(TransportNegotiator.class);
 
     // The time we give to the candidates check before we accept or decline the
     // transport (in milliseconds)
@@ -854,6 +857,8 @@ public abstract class TransportNegotiator extends JingleNegotiator {
      */
     public static final class RawUdp extends TransportNegotiator {
 
+        private static final Logger LOG = Logger.getLogger(RawUdp.class);
+
         /**
          * Default constructor, with a JingleSession and transport manager.
          *
@@ -906,6 +911,7 @@ public abstract class TransportNegotiator extends JingleNegotiator {
      * @author Alvaro Saurin <alvaro.saurin@gmail.com>
      */
     public static final class Ice extends TransportNegotiator {
+        private static final Logger LOG = Logger.getLogger(TransportNegotiator.Ice.class);
 
         /**
          * Default constructor, with a JingleSession and transport manager.
