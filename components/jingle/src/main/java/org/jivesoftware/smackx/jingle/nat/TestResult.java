@@ -1,7 +1,7 @@
 /**
  * $RCSfile: TestResult.java,v $
- * $Revision: 1.1.2.2 $
- * $Date: 2008-05-29 18:46:38 $
+ * $Revision: 1.1.2.3 $
+ * $Date: 2008-06-02 23:11:53 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -52,6 +52,8 @@
 
 package org.jivesoftware.smackx.jingle.nat;
 
+import java.util.concurrent.CopyOnWriteArrayList;
+
 /**
  * Result of an ECHO Test
  *
@@ -59,6 +61,7 @@ package org.jivesoftware.smackx.jingle.nat;
  */
 public class TestResult {
 
+    private CopyOnWriteArrayList<TransportCandidate> localCandidates = new CopyOnWriteArrayList<TransportCandidate>();
     private boolean result = false;
     private String ip = null;
     private int port = 0;
@@ -85,6 +88,14 @@ public class TestResult {
 
     public void setPort(int port) {
         this.port = port;
+    }
+    
+    public void addLocalTransportCandidate(TransportCandidate localCandidate) {
+        localCandidates.add(localCandidate);
+    }
+    
+    public CopyOnWriteArrayList<TransportCandidate> getLocalTransportCandidates() {
+        return localCandidates;
     }
 }
 

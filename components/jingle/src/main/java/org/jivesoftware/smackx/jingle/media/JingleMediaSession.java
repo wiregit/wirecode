@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleMediaSession.java,v $
- * $Revision: 1.1.2.2 $
- * $Date: 2008-05-29 18:46:38 $11-07-2006
+ * $Revision: 1.1.2.3 $
+ * $Date: 2008-06-02 23:11:53 $11-07-2006
  *
  * Copyright 2003-2006 Jive Software.
  *
@@ -131,8 +131,8 @@ public abstract class JingleMediaSession {
         }
         else {
             ip = remote.getIp();
-            localIp = remote.getLocalIp();
-            localPort = remote.getPort();
+            localIp = local.getLocalIp();
+            localPort = local.getPort();
             remotePort = remote.getPort();
         }
 

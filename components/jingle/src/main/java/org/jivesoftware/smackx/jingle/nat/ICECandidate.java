@@ -1,7 +1,7 @@
 /**
  * $RCSfile: ICECandidate.java,v $
- * $Revision: 1.1.2.2 $
- * $Date: 2008-05-29 18:46:38 $
+ * $Revision: 1.1.2.3 $
+ * $Date: 2008-06-02 23:11:53 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -50,8 +50,6 @@
  * ====================================================================
  */
 package org.jivesoftware.smackx.jingle.nat;
-
-import de.javawi.jstun.test.demo.ice.Candidate;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -272,9 +270,10 @@ public class ICECandidate extends TransportCandidate implements Comparable {
                 }
 
                 ResultListener resultListener = new ResultListener() {
-                    public void testFinished(TestResult testResult, TransportCandidate candidate) {
+                    public void testFinished(TestResult testResult, TransportCandidate candidate, TransportCandidate localCandidate) {
                         if (testResult.isReachable() && checkingCandidate.equals(candidate)) {
                             result.setResult(true);
+                            result.addLocalTransportCandidate(localCandidate);
                             System.out.println("RESULT>>>OK:" + candidate.getIp() + ":" + candidate.getPort());
                         }
                     }

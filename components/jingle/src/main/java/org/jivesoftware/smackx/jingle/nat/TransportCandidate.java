@@ -1,7 +1,7 @@
 /**
  * $RCSfile: TransportCandidate.java,v $
- * $Revision: 1.1.2.2 $
- * $Date: 2008-05-29 18:46:38 $
+ * $Revision: 1.1.2.3 $
+ * $Date: 2008-06-02 23:11:53 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -764,9 +764,9 @@ public abstract class TransportCandidate {
             socket.close();
         }
 
-        private void fireTestResult(TestResult testResult, TransportCandidate candidate) {
+        private void fireTestResult(TestResult testResult, TransportCandidate remoteCandidate) {
             for (ResultListener resultListener : resultListeners)
-                resultListener.testFinished(testResult, candidate);
+                resultListener.testFinished(testResult, remoteCandidate, this.candidate);
         }
 
         public void testASync(final TransportCandidate candidate, final String password) {

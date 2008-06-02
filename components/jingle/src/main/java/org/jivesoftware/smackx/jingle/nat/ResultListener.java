@@ -1,7 +1,7 @@
 /**
  * $RCSfile: ResultListener.java,v $
- * $Revision: 1.1.2.2 $
- * $Date: 2008-05-29 18:46:38 $
+ * $Revision: 1.1.2.3 $
+ * $Date: 2008-06-02 23:11:53 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -27,6 +27,6 @@ package org.jivesoftware.smackx.jingle.nat;
  */
 public interface ResultListener {
 
-    public void testFinished(TestResult result, TransportCandidate candidate);
+    public void testFinished(TestResult result, TransportCandidate candidate, TransportCandidate localCandidate);
 
 }
