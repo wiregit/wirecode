@@ -39,6 +39,7 @@ class CoreRandomGlue {
     private final SimppManager simppManager;
     private final HashTreeCache hashTreeCache;
     private final LicenseFactory licenseFactory;
+    private final SharedFilesKeywordIndex sharedFilesKeywordIndex;
     
     @Inject
     CoreRandomGlue(FileManager fileManager, ActivityCallback activityCallback,
@@ -50,7 +51,8 @@ class CoreRandomGlue {
             SpamServices spamServices,
             SimppManager simppManager,
             LicenseFactory licenseFactory,
-            HashTreeCache hashTreeCache) {
+            HashTreeCache hashTreeCache,
+            SharedFilesKeywordIndex sharedFilesKeywordIndex) {
         this.fileManager = fileManager;
         this.activityCallback = activityCallback;
         this.connectionManager = connectionManager;
@@ -63,6 +65,7 @@ class CoreRandomGlue {
         this.simppManager = simppManager;
         this.hashTreeCache = hashTreeCache;
         this.licenseFactory = licenseFactory;
+        this.sharedFilesKeywordIndex = sharedFilesKeywordIndex;
     }
     
     @SuppressWarnings("unused")
@@ -70,6 +73,7 @@ class CoreRandomGlue {
         registry.register(new Service() {            
             public void initialize() {
                 fileManager.addFileEventListener(activityCallback);
+                fileManager.addFileEventListener(sharedFilesKeywordIndex);
                 connectionManager.addEventListener(activityCallback);
                 connectionManager.addEventListener(dhtManager);
                 dhtManager.addEventListener(pushProxiesPublisher);
