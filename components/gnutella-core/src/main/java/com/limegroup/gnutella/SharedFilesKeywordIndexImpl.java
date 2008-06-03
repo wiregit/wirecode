@@ -368,29 +368,32 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
 
             synchronized (keywordTrie) {
                 synchronized (incompleteKeywordTrie) {
-                    if (!iter.hasNext()) {
+                    if(iter.hasNext()) {
+                        //Got match.  Union contents of the iterator and store in
+                        //matches.  As an optimization, if this is the only keyword and
+                        //there is only one set returned, return that set without 
+                        //copying.
+                        IntSet matches=null;
+                        while (iter.hasNext()) {                
+                            IntSet s= iter.next();
+                            if (matches == null) {
+                                if (i==0 && j==query.length() && !(iter.hasNext()))
+                                    return s;
+                                matches=new IntSet();
+                            }
+                            matches.addAll(s);
+                        }
+                        
+                        //Intersect matches with ret.  If ret isn't allocated,
+                        //initialize to matches.
+                        if (ret == null)   
+                            ret = matches;
+                        else
+                            ret.retainAll(matches);
+                    } else {
+                        //No match.  Optimization: no matches for keyword => failure
                         return null;
                     }
-                    
-                    //Got match.  Union contents of the iterator and store in
-                    //matches.  As an optimization, if this is the only keyword and
-                    //there is only one set returned, return that set without 
-                    //copying.
-                    IntSet matches=null;
-                    while (iter.hasNext()) {                
-                        IntSet s= iter.next();
-                        if (matches == null) {
-                            matches=new IntSet();
-                        }
-                        matches.addAll(s);
-                    }
-
-                    //Intersect matches with ret.  If ret isn't allocated,
-                    //initialize to matches.
-                    if (ret == null)   
-                        ret = matches;
-                    else
-                        ret.retainAll(matches);
                     
                     //Optimization: no matches after intersect => failure
                     if (ret.size() == 0)
