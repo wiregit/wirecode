@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 
+import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.collection.IntSet;
 import org.limewire.util.BaseTestCase;
@@ -28,9 +29,18 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
     
     public void testRenamedFilesEvent() throws Exception {
         URN urn = URN.createSHA1Urn("urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
-        FileDesc originalFile = new FileDesc(new File("hello world"), new UrnSet(urn), 1);
-        FileDesc newFile = new FileDesc(new File("goodbye world"), new UrnSet(urn), 2);
+        final FileDesc originalFile = new FileDesc(new File("hello world"), new UrnSet(urn), 1);
+        final FileDesc newFile = new FileDesc(new File("goodbye world"), new UrnSet(urn), 2);
         
+        
+        context.checking(new Expectations() {
+            {
+                atLeast(1).of(fileManager).isFileShared(originalFile.getFile()); 
+                will(returnValue(true));
+                atLeast(1).of(fileManager).isFileShared(newFile.getFile());
+                will(returnValue(true));
+            }
+        });
         keywordIndex.handleFileEvent(new FileManagerEvent(fileManager, Type.ADD_FILE, originalFile));
         
         IntSet result = keywordIndex.search("world hello", null, false);
@@ -40,7 +50,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         
         result = keywordIndex.search("goodbye world", null, false);
         assertNull(result);
-        
+
         keywordIndex.handleFileEvent(new FileManagerEvent(fileManager, Type.RENAME_FILE, originalFile, newFile));
         
         result = keywordIndex.search("world goodbye", null, false);
@@ -51,4 +61,5 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         result = keywordIndex.search("hello world", null, false);
         assertNull(result);
     }
+
 }
