@@ -10,8 +10,6 @@ import org.limewire.setting.ProbabilisticBooleanSetting;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 
-import com.limegroup.gnutella.util.LimeWireUtils;
-
 
 /**
  * Settings for searches.
@@ -411,7 +409,4 @@ public final class SearchSettings extends LimeProps {
     public static final BooleanSetting DISABLE_PROMOTIONAL_RESULTS = 
         FACTORY.createBooleanSetting("DISABLE_PROMOTIONAL_RESULTS", false);
 
-    public static final boolean isPromotionalResultsDisabled() {
-        return LimeWireUtils.isPro() && DISABLE_PROMOTIONAL_RESULTS.getValue();
-    }
 }
