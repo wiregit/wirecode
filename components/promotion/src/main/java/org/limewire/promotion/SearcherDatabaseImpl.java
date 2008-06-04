@@ -49,19 +49,19 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
         this.keyStoreProvider = keyStoreProvider;
         this.certificateVerifier = certificateVerifier;
     }
-    
+
     public void init() throws InitializeException {
         try {
-            new jdbcDriver();        
+            new jdbcDriver();
             connection = DriverManager.getConnection("jdbc:hsqldb:file:" + getDBLocation(), "sa", "");
             createDBIfNeeded();
-        } catch(SQLException sqlException) {
+        } catch (SQLException sqlException) {
             throw new InitializeException(sqlException);
         } catch (DatabaseExecutionException e) {
             throw new InitializeException(e);
         }
     }
-    
+
     public void shutDown() {
         if (connection != null) {
             try {
@@ -69,8 +69,8 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
                 org.hsqldb.DatabaseManager.closeDatabases(0);
             } catch (DatabaseExecutionException ignore) {
                 // ignore
-            } 
-        }        
+            }
+        }
     }
 
     /**
@@ -97,23 +97,27 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
             throw new DatabaseExecutionException(ex);
         }
     }
-    
+
     /**
      * This represents a single SQL statement and values to fill in the holes.
      */
     private final static class Stmt {
         private final static Object[] EMPTY_VALUES = new Object[0];
+
         final String sql;
+
         final Object[] values;
+
         Stmt(String sql, Object[] values) {
             this.sql = sql;
             this.values = values;
         }
+
         Stmt(String sql) {
             this(sql, EMPTY_VALUES);
         }
     }
-    
+
     /**
      * Shortcut for creating a {@link Stmt}.
      * 
@@ -121,14 +125,14 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
      */
     private static Stmt stmt(String sql) {
         return new Stmt(sql);
-    }    
-    
+    }
+
     /**
      * Returns the total number of affected rows and executing multiple updates synchronously.
      * 
      * @param stmts statements to execute
      * @return the total number of affected rows and executing multiple updates synchronously.
-     * @throws DatabaseExecutionException 
+     * @throws DatabaseExecutionException
      */
     private synchronized int executeUpdates(Stmt... stmts) throws DatabaseExecutionException {
         int numAffectedRows = 0;
@@ -141,7 +145,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
     /**
      * Creates a statement and runs the given SQL, then returns the results of a
      * call to "CALL IDENTITY()"
-     * @throws DatabaseExecutionException 
+     * @throws DatabaseExecutionException
      */
     private long executeInsert(final String sql, final Object... values) throws DatabaseExecutionException {
         try {
@@ -253,9 +257,9 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
         } catch (PromotionException ex) {
             //
             // LWC-1452: This is only thrown when the binder has an invalid date
-            //           or is corrupt.  In any case, do not show an exception
-            //           here, simply return null.  By returning null we signal
-            //           that this binder needs to be re-ingested from the network.
+            // or is corrupt. In any case, do not show an exception
+            // here, simply return null. By returning null we signal
+            // that this binder needs to be re-ingested from the network.
             //
             return null;
         } finally {
@@ -271,7 +275,7 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
     /**
      * Does the actual ingestion of the given promo entry, inserting it into the
      * db. Package-visible for testing.
-     * @throws DatabaseExecutionException 
+     * @throws DatabaseExecutionException
      */
     synchronized void ingest(final PromotionMessageContainer promo, final String binderUniqueName) throws DatabaseExecutionException {
         executeUpdate("DELETE FROM entries WHERE unique_id = ?", promo.getUniqueID());
@@ -296,19 +300,14 @@ public class SearcherDatabaseImpl implements SearcherDatabase {
     public List<QueryResult> query(final String query) {
         final List<QueryResult> results = new ArrayList<QueryResult>();
 
-        // We add '%' instead of spaces so we basically find all keyword sets
-        // that have all or more of the words we enter
-        final String normalizedQuery = "%" + keywordUtil.normalizeQuery(query).replace(' ', '%')
-                + "%";
-
         PreparedStatement statement = null;
         try {
             statement = connection
                     .prepareStatement("SELECT DISTINCT e.entry_id, k.binder_unique_name, e.probability_num FROM "
                             + "keywords k JOIN entries e ON e.entry_id = k.entry_id WHERE "
                             + "e.valid_start_dt <= CURRENT_TIMESTAMP AND e.valid_end_dt >= CURRENT_TIMESTAMP AND "
-                            + "k.phrase LIKE ? ORDER BY e.probability_num DESC, RAND()");
-            statement.setString(1, normalizedQuery);
+                            + "k.phrase = ? ORDER BY e.probability_num DESC, RAND()");
+            statement.setString(1, keywordUtil.normalizeQuery(query));
             final ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 String binderUniqueName = rs.getString("binder_unique_name");
