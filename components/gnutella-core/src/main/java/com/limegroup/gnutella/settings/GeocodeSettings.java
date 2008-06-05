@@ -23,7 +23,7 @@ public class GeocodeSettings extends LimeProps {
      * The URL used to geocode the client.
      */
     public static final StringSetting GEOCODE_URL =
-        FACTORY.createRemoteStringSetting("GEOCODE_URL", "", "GeocodeSettings.geocodeUrl");    
+        FACTORY.createRemoteStringSetting("GEOCODE_URL", "http://geo.links.limewire.com/geo/", "GeocodeSettings.geocodeUrlV2");    
     
     /** Last recorded geo location. */
     public static final PropertiesSetting GEO_LOCATION =
