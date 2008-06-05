@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.caas;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.limewire.io.IpPort;
 import org.restlet.Application;
@@ -27,6 +31,8 @@ import org.restlet.resource.Variant;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -46,6 +52,7 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.version.UpdateInformation;
@@ -84,6 +91,11 @@ public class RestRPCMain implements DataStore {
     private final Map<String,List<Map<String,String>>> _searches;
     
     /**
+     * 
+     */
+    private final RemoteFileDescFactory _rfdf;
+    
+    /**
      * Creates an instance of RestRPCMain and then starts up the lime wire core
      * and the rest rpc server thingy.
      */
@@ -105,6 +117,7 @@ public class RestRPCMain implements DataStore {
     public RestRPCMain() {
         _injector = Guice.createInjector(new LimeWireCoreModule(MainCallback.class));
         _lwcore = _injector.getInstance(LimeWireCore.class);
+        _rfdf = _injector.getInstance(RemoteFileDescFactory.class);
         _searches = new HashMap<String, List<Map<String,String>>>();
         _component = new Component();
         _component.getServers().add(Protocol.HTTP, 9090);
@@ -118,6 +131,12 @@ public class RestRPCMain implements DataStore {
         //
         _lwappl.getContext().getAttributes().put("lwcore", _lwcore);
         
+        //
+        //
+        _lwappl.getContext().getAttributes().put("rfdf", _rfdf);
+        
+        //
+        //
         _lwappl.getContext().getAttributes().put("dataStore", this);
     }
     
@@ -160,9 +179,44 @@ public class RestRPCMain implements DataStore {
         String guid = new GUID(data.getMessageGUID()).toString();
         Map<String,String> result = new HashMap<String,String>();
         
-        result.put("remote_host_addr", rfd.getHost());
-        result.put("remote_host_port", Integer.toString(rfd.getPort()));
-        result.put("file_name", rfd.getFileName());
+        // host, port, index, filename, 
+        // size, clientGUID, speed, chat, quality, browseHost, 
+        // xmlDoc, urns, replyToMulticast,
+        // firewalled, vender, proxies, createTime,
+        // FWTVersion, pe, tlsCapable, http11
+        // networkInstanceUtils
+        
+        result.put("host", rfd.getHost());
+        result.put("port", Integer.toString(rfd.getPort()));
+        result.put("index", Long.toString(rfd.getIndex()));
+        result.put("filename", rfd.getFileName());
+        
+        result.put("size", Long.toString(rfd.getSize()));
+        result.put("clientGUID", GUID.toHexString(rfd.getClientGUID()));
+        result.put("speed", Integer.toString(rfd.getSpeed()));
+        result.put("chat", Boolean.toString(rfd.isChatEnabled()));
+        result.put("quality", Integer.toString(rfd.getQuality()));
+        result.put("browseHost", Boolean.toString(rfd.isBrowseHostEnabled()));
+        
+//      result.put("xmlDoc", rfd.getXMLDocument().getXMLString());
+//      result.put("urns", serializeUrns(rfd.getUrns()));
+        result.put("replyToMulticast", Boolean.toString(rfd.isReplyToMulticast()));
+        
+        result.put("firewalled", Boolean.toString(rfd.isFirewalled()));
+        result.put("vendor", rfd.getVendor());
+//      result.put("proxies", );
+        result.put("createTime", Long.toString(rfd.getCreationTime()));
+        
+//      result.put("FWTVersion", );
+//      result.put("pe", rfd.getPushAddr().toString());
+        result.put("tlsCapable", Boolean.toString(rfd.isTLSCapable()));
+        result.put("http11", Boolean.toString(rfd.isHTTP11()));
+
+//      result.put("networkInstanceUtils", );
+
+//      result.put("remote_host_addr", rfd.getHost());
+//      result.put("remote_host_port", Integer.toString(rfd.getPort()));
+//      result.put("file_name", rfd.getFileName());
         
         synchronized (_searches) {
             List<Map<String,String>> results;
@@ -216,15 +270,24 @@ public class RestRPCMain implements DataStore {
             Router router = new Router(getContext());
             
             router.attachDefault(HelloWorldResource.class);
-            router.attach("/search/?{query}", SearchResource.class);
-            router.attach("/search/{queryid}", SearchResultsResource.class);
-//          router.attach("/search/{queryid}/cancel", ...);
+            router.attach("/search/?{query}", SearchResource.class);                // start a new search
+            router.attach("/search/{queryid}", SearchResultsResource.class);        // get search results
+//          router.attach("/search/{queryid}/cancel", ...);                         // stop a search
+            
+            router.attach("/download", DownloadResource.class);                     // start a download
+//          router.attach("/download/all", DownloadResultsResource.class);          // get status of all downloads
+//          router.attach("/download/{id}", DownloadResultsResource.class);         // get status of one download
+//          router.attach("/download/pause/{id}", DownloadPauseResource.class);     // pause a specific download
             
             return router;
         }
         
         public LimeWireCore getLimeWireCore() {
             return (LimeWireCore)getContext().getAttributes().get("lwcore");
+        }
+        
+        public RemoteFileDescFactory getRemoteFileDescFactory() {
+            return (RemoteFileDescFactory)getContext().getAttributes().get("rfdf");
         }
     }
     
@@ -362,6 +425,127 @@ public class RestRPCMain implements DataStore {
             return representation;
         }
     }
+    
+    /**
+     * 
+     *
+     */
+    public static class DownloadResource extends Resource {
+        
+//      private String _query;
+        private GUID _guid;
+        
+        public DownloadResource(Context context, Request request, Response response) {
+            super(context, request, response);
+            
+            Application lwapp = (Application)context.getAttributes().get(Application.KEY);
+            LimeWireCore lwcore = (LimeWireCore)lwapp.getContext().getAttributes().get("lwcore");
+            RemoteFileDescFactory rfdf = ((LimeWireApplication)lwapp).getRemoteFileDescFactory();
+//          DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DomRepresentation dom = getRequest().getEntityAsDom();
+
+            try {
+//              System.out.println("DownloadResource::DownloadResource().. text = '" + getRequest().getEntity().getText() + "'");
+                
+                Document doc = dom.getDocument();
+                Element root = doc.getDocumentElement();
+                
+                NodeList values = root.getChildNodes();
+                
+                
+                // read values from "values"
+                // create rfd
+                // start download
+                
+                
+                /*
+                byte[] bytes = getRequest().getEntity().getText().getBytes();
+                DocumentBuilder db = dbf.newDocumentBuilder();
+                Document doc = db.parse(new ByteArrayInputStream(bytes));
+                Node root = doc.getFirstChild();
+                */
+                
+                System.out.println("Leng = " + values.getLength());
+                
+            }
+            catch (Exception e) {
+                System.err.println("Error: " + e.getMessage());
+                e.printStackTrace();
+            }
+            
+            /*
+            RemoteFileDesc rfd = rfdf.createRemoteFileDesc (
+                host, 
+                port, 
+                index, 
+                filename, 
+                size, 
+                speed, 
+                chat, 
+                quality, 
+                browseHost, 
+                xmlDoc, 
+                urns, 
+                replyToMulticast, 
+                firewalled, 
+                vendor, 
+                createTime, 
+                pe
+            );
+            */
+            
+            /*
+            try {
+                System.out.println("DownloadResource::DownloadResource().. text = '" + getRequest().getEntity().getText() + "'");
+            }
+            catch (IOException e) { }
+            */
+            
+            /*
+            _query = (String)getRequest().getAttributes().get("query");
+            _guid  = new GUID(lwcore.getSearchServices().newQueryGUID());
+            
+            if (_query != null) {
+                try { _query = URLDecoder.decode(_query); }
+                catch (IOException e) {
+                    // Error service thingy
+                }
+            }
+            */
+            
+            getVariants().add(new Variant(MediaType.TEXT_XML));
+            
+//          lwcore.getSearchServices().query(_guid.bytes(), _query);
+        }
+        
+        public boolean allowPost () {
+            return true;
+        }
+        
+        @Override
+        public Representation represent(Variant variant) throws ResourceException {
+            DomRepresentation representation = null;
+            
+            try {
+                representation = new DomRepresentation(MediaType.TEXT_XML);
+                Document document = representation.getDocument();
+                Element searches = (Element)document.appendChild(document.createElement("searches"));
+                Element search = document.createElement("search");
+                
+//              document.appendChild(searches);
+                searches.appendChild(search);
+                
+                search.setAttribute("guid", "1234");
+            }
+            catch (IOException e) {
+                System.out.println("SearchResource::represent().. " + e.getMessage());
+                e.printStackTrace();
+            }
+            
+            return representation;
+        }
+    }
+    
     
     /**
      * 
