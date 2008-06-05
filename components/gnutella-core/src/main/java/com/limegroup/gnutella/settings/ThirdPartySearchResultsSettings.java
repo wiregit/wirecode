@@ -16,7 +16,7 @@ public final class ThirdPartySearchResultsSettings extends LimeProps {
      * Enables the promotion system when <code>true</code>.
      */    
     public static final BooleanSetting PROMOTION_SYSTEM_IS_ENABLED =
-        FACTORY.createRemoteBooleanSetting("PROMOTION_SYSTEM_IS_ENABLED", true, "Promo.promotionSystemIsEnabled");    
+        FACTORY.createRemoteBooleanSetting("PROMOTION_SYSTEM_IS_ENABLED", false, "Promo.promotionSystemIsEnabled");    
  
     /**
      * The url we use to search for {@link PromotionBinder}s.
