@@ -15,6 +15,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
     private SharedFilesKeywordIndexImpl keywordIndex;
     private Mockery context;
     private FileManager fileManager;
+    private FileList sharedFileList;
 
     public SharedFilesKeywordIndexImplTest(String name) {
         super(name);
@@ -24,6 +25,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
     protected void setUp() throws Exception {
         context = new Mockery();
         fileManager = context.mock(FileManager.class);
+        sharedFileList = context.mock(FileList.class);
         keywordIndex = new SharedFilesKeywordIndexImpl(fileManager, null, null, null, null);
     }
     
@@ -35,9 +37,14 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         
         context.checking(new Expectations() {
             {
-                atLeast(1).of(fileManager).isFileShared(originalFile.getFile()); 
+                atLeast(1).of(fileManager).getSharedFileList();
+                will(returnValue(sharedFileList));
+                atLeast(1).of(sharedFileList).contains(originalFile.getFile());
                 will(returnValue(true));
-                atLeast(1).of(fileManager).isFileShared(newFile.getFile());
+                
+                atLeast(1).of(fileManager).getSharedFileList();
+                will(returnValue(sharedFileList));
+                atLeast(1).of(sharedFileList).contains(newFile.getFile());
                 will(returnValue(true));
             }
         });

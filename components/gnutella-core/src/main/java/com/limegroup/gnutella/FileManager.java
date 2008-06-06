@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import org.limewire.collection.IntSet;
-
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -39,28 +37,14 @@ public interface FileManager {
     public abstract void stop();
 
     /**
-     * Returns the size of all files, in <b>bytes</b>.  Note that the largest
-     *  value that can be returned is Integer.MAX_VALUE, i.e., ~2GB.  If more
-     *  bytes are being shared, returns this value.
+     * Returns the FileList containing Shared files
      */
-    public abstract int getSize();
-
+    public FileList getSharedFileList();
+    
     /**
-     * Returns the number of files.
-     * This number does NOT include incomplete files or forcibly shared network files.
+     * Returns the FileList containing Store files
      */
-    public abstract int getNumFiles();
-
-    /**
-     * returns the number of store files
-     * This number does NOT include incomplete files
-     */
-    public abstract int getNumStoreFiles();
-
-    /**
-     * Returns the number of shared incomplete files.
-     */
-    public abstract int getNumIncompleteFiles();
+    public FileList getStoreFileList();
 
     /**
      * Returns the number of pending files.
@@ -68,61 +52,10 @@ public interface FileManager {
     public abstract int getNumPendingFiles();
 
     /**
-     * Returns the number of forcibly shared files.
-     */
-    public abstract int getNumForcedFiles();
-
-    /**
-     * Returns the file descriptor with the given index.  Throws
-     * IndexOutOfBoundsException if the index is out of range.  It is also
-     * possible for the index to be within range, but for this method to
-     * return <tt>null</tt>, such as the case where the file has been
-     * unshared.
-     *
-     * @param i the index of the <tt>FileDesc</tt> to access
-     * @throws <tt>IndexOutOfBoundsException</tt> if the index is out of 
-     *  range
-     * @return the <tt>FileDesc</tt> at the specified index, which may
-     *  be <tt>null</tt>
-     */
-    public abstract FileDesc get(int i);
-
-    /**
-     * Returns set of indices of {@link FileDesc file descs} that have URN <code>
-     * urn</code> or null if there are none.
-     */    
-    public IntSet getIndicesForUrn(URN urn);
-    
-    /**
-     * Determines whether or not the specified index is valid.  The index
-     * is valid if it is within range of the number of files shared, i.e.,
-     * if:<p>
-     *
-     * i >= 0 && i < _files.size() <p>
-     *
-     * @param i the index to check
-     * @return <tt>true</tt> if the index is within range of our shared
-     *  file data structure, otherwise <tt>false</tt>
-     */
-    public abstract boolean isValidSharedIndex(int i);
-
-    /**
      * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt>
      * or null if the file is not shared or not a store file.
      */
     public abstract FileDesc getFileDescForFile(File f);
-
-    /**
-     * Returns the shared <tt>FileDesc</tt> that is wrapping this <tt>File</tt>
-     * or null if the file is not shared.
-     */
-    public FileDesc getSharedFileDescForFile(File file);
-
-    /**
-     * Determines whether or not the specified URN is shared in the library
-     * as a complete file.
-     */
-    public abstract boolean isUrnShared(final URN urn);
 
     /**
      * Returns the <tt>FileDesc</tt> for the specified URN.  This only returns 
@@ -134,36 +67,6 @@ public interface FileManager {
      *  <tt>null</tt> if no matching <tt>FileDesc</tt> could be found
      */
     public abstract FileDesc getFileDescForUrn(final URN urn);
-    
-    /**
-     * Returns the shared <tt>FileDesc</tt> for the specified URN. This only returns 
-     * one <tt>FileDesc</tt>, even though multiple indices are possible with 
-     * HUGE v. 0.93.
-     *
-     * @param urn the urn for the file
-     * @return the <tt>FileDesc</tt> corresponding to the requested urn, or
-     *  <tt>null</tt> if no matching shared <tt>FileDesc</tt> could be found
-     */
-    public FileDesc getSharedFileDescForUrn(final URN urn);
-
-    /**
-     * Returns a list of all shared incomplete file descriptors.
-     */
-    public abstract FileDesc[] getIncompleteFileDescriptors();
-
-    /**
-     * Returns an array of all shared file descriptors.
-     */
-    public abstract FileDesc[] getAllSharedFileDescriptors();
-
-    /**
-     * Returns a list of all shared file descriptors in the given directory,
-     * in any order.
-     * Returns null if directory is not shared, or a zero-length array if it is
-     * shared but contains no files.  This method is not recursive; files in 
-     * any of the directory's children are not returned.
-     */
-    public abstract List<FileDesc> getSharedFilesInDirectory(File directory);
 
     /**
      * Starts a new revision of the library, ensuring that only items present
@@ -386,12 +289,6 @@ public interface FileManager {
      */
     public abstract boolean isIndividualShare(File f);
 
-    /**
-     * Returns true if the given file is shared by the FileManager.
-     * The provided file should be in canonical form. 
-     */
-    public abstract boolean isFileShared(File file);
-
     public abstract boolean isRareFile(FileDesc fd);
 
     /**
@@ -403,16 +300,6 @@ public interface FileManager {
      * Returns true if this dir is completely shared. 
      */
     public abstract boolean isFolderShared(File dir);
-
-    /**
-     * @return true if this file is a song purchased from the LWS, false otherwise
-     * 
-     * This does a simple lookup in the lists of store
-     * files and returns true if that file is found in a store list and false otherwise. This
-     * method assumes all files have already had there ID3 information examined and placed in
-     * one of these lists when appropriate
-     */
-    public abstract boolean isStoreFileLoaded(File file);
 
     /**
      * Returns true if this directory is the folder that is selected to download LWS songs into

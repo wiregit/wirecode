@@ -53,6 +53,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
+import com.limegroup.gnutella.stubs.FileListStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
@@ -172,7 +173,7 @@ public class HeadTest extends LimeTestCase {
         _rangesOnlyLarge.add(Range.createRange(0xFFFFFF00l, 0xFFFFFFFFFFl));
 		
 		_haveFull =    URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
-		_notHave =      FileManagerStub.NOT_HAVE;
+		_notHave =      FileListStub.NOT_HAVE;
 		_havePartial = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFD");
         _tlsURN =      URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYTLS");
         _largeURN =     URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYTLG");
@@ -198,8 +199,9 @@ public class HeadTest extends LimeTestCase {
         descs.add(_partialLarge);
         
         FileManagerStub fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
-        fileManager.setUrns(urns);
-        fileManager.setDescs(descs);
+        FileListStub sharedList = (FileListStub) fileManager.getSharedFileList();
+        sharedList.setUrns(urns);
+        sharedList.setDescs(descs);
         
         assertEquals(_partial,fileManager.getFileDescForUrn(_havePartial));
         assertEquals(_partialLarge,fileManager.getFileDescForUrn(_largeURN));

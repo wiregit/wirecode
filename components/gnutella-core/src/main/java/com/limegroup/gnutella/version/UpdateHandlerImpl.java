@@ -667,7 +667,7 @@ public class UpdateHandlerImpl implements UpdateHandler, Service {
             for(DownloadInformation data : toDownload)
                 urns.add(data.getUpdateURN());
             
-            List<FileDesc> shared = fileManager.get().getSharedFilesInDirectory(SharingUtils.PREFERENCE_SHARE);
+            List<FileDesc> shared = fileManager.get().getSharedFileList().getFilesInDirectory(SharingUtils.PREFERENCE_SHARE);
             for (FileDesc fd : shared) {
                 if (fd.getSHA1Urn() != null && !urns.contains(fd.getSHA1Urn())) {
                     fileManager.get().removeFileIfSharedOrStore(fd.getFile());

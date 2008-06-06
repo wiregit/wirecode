@@ -28,6 +28,7 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
+import com.limegroup.gnutella.stubs.FileListStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -81,8 +82,9 @@ public class FileRequestHandlerTest extends LimeTestCase {
                 9999, false)));
 
         fileManager = (FileManagerStub) injector.getInstance(FileManager.class);
-        fileManager.setUrns(urns);
-        fileManager.setDescs(descs);
+        FileListStub sharedList = (FileListStub)fileManager.getSharedFileList();
+        sharedList.setUrns(urns);
+        sharedList.setDescs(descs);
         fileRequestHandler = injector.getInstance(FileRequestHandler.class);
     }
 

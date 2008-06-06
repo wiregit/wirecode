@@ -75,7 +75,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         fileManager.addFileAlways(appTextFile, waiter);
         fileManager.addFileAlways(appTorrentFile, waiter);
         waiter.waitForLoad();
-    	assertEquals(5, fileManager.getNumFiles());
+    	assertEquals(5, fileManager.getSharedFileList().getNumFiles());
     }
     
     private UploadManagerStub uploadManagerStub;

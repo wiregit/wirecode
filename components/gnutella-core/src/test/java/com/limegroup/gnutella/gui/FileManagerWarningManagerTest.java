@@ -13,6 +13,7 @@ import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.setting.BooleanSetting;
 
+import com.limegroup.gnutella.FileList;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.gui.notify.Notification;
@@ -26,6 +27,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
     private FileManagerWarningManager fileManagerWarningManager;
     private NotifyUser notifier;
     private FileManager fileManager;
+    private FileList fileList;
     
     private FileManagerEvent addEvent;
     private FileManagerEvent removeEvent;
@@ -51,6 +53,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
         context      = new Mockery();
         notifier     = context.mock(NotifyUser.class);
         fileManager  = context.mock(FileManager.class);
+        fileList     = context.mock(FileList.class);
         
         numberSwitch = context.mock(BooleanSetting.class);
         depthSwitch  = context.mock(BooleanSetting.class);
@@ -71,7 +74,9 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             allowing(depthSwitch).getValue();
             will(returnValue(false));
             never(notifier);
-            exactly(4).of(fileManager).getNumFiles();
+            exactly(4).of(fileManager).getSharedFileList();
+            will(returnValue(fileList));
+            exactly(4).of(fileList).getNumFiles();
             will(returnValue(5));
         }});
             
@@ -110,7 +115,9 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             allowing(depthSwitch).getValue();
             will(returnValue(false));
-            one(fileManager).getNumFiles();
+            one(fileManager).getSharedFileList();
+            will(returnValue(fileList));
+            one(fileList).getNumFiles();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             one(notifier).showMessage(with(matcher));
         }});
@@ -130,9 +137,13 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             allowing(depthSwitch).getValue();
             will(returnValue(false));
-            one(fileManager).getNumFiles();
+            one(fileManager).getSharedFileList();
+            will(returnValue(fileList));
+            one(fileList).getNumFiles();
             will(returnValue(5));
-            one(fileManager).getNumFiles();
+            one(fileManager).getSharedFileList();
+            will(returnValue(fileList));
+            one(fileList).getNumFiles();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             exactly(1).of(notifier).showMessage(with(matcher));
         }});
@@ -154,7 +165,9 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             allowing(depthSwitch).getValue();
             will(returnValue(false));
-            exactly(2).of(fileManager).getNumFiles();
+            exactly(2).of(fileManager).getSharedFileList();
+            will(returnValue(fileList));
+            exactly(2).of(fileList).getNumFiles();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             exactly(2).of(notifier).showMessage(with(matcher));
         }});
@@ -173,7 +186,9 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(true));
             allowing(depthSwitch).getValue();
             will(returnValue(false));
-            exactly(2).of(fileManager).getNumFiles();
+            exactly(2).of(fileManager).getSharedFileList();
+            will(returnValue(fileList));
+            exactly(2).of(fileList).getNumFiles();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             never(notifier);
         }});
@@ -293,7 +308,9 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             allowing(depthSwitch).getValue();
             will(returnValue(false));
-            one(fileManager).getNumFiles();
+            one(fileManager).getSharedFileList();
+            will(returnValue(fileList));
+            one(fileList).getNumFiles();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             exactly(2).of(notifier).showMessage(with(matcher));
         }});

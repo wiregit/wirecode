@@ -19,6 +19,7 @@ import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.FileDescStub;
+import com.limegroup.gnutella.stubs.FileListStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -60,7 +61,7 @@ public class ServerSideHeadTest extends LimeTestCase {
     	socket2.setSoTimeout(300);
     	
 
-    	ping1 = new HeadPing(FileManagerStub.NOT_HAVE);
+    	ping1 = new HeadPing(FileListStub.NOT_HAVE);
     	ping2 = new HeadPing(URN.createSHA1Urn(FileDescStub.DEFAULT_URN));
 
     	ByteArrayOutputStream baos1 = new ByteArrayOutputStream();

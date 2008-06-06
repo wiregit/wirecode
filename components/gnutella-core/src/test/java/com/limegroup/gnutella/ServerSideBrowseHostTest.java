@@ -97,7 +97,7 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
         drainAll();
 
         // make sure leaf is sharing
-        assertEquals(2, fileManager.getNumFiles());
+        assertEquals(2, fileManager.getSharedFileList().getNumFiles());
 
         // send a query that should be answered
         QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte) 1,
@@ -129,7 +129,7 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
         
         FileManager fm = injector.getInstance(FileManager.class);
         fm.loadSettingsAndWait(2000);
-        assertEquals(2 * FilterSettings.MAX_RESPONSES_PER_REPLY.getValue() + 2, fm.getNumFiles());
+        assertEquals(2 * FilterSettings.MAX_RESPONSES_PER_REPLY.getValue() + 2, fm.getSharedFileList().getNumFiles());
         
         String result = null;
 

@@ -198,7 +198,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
         GGEP ggep = new GGEP();
         
         URN urn = ping.getUrn();
-        FileDesc desc = fileManager.get().getSharedFileDescForUrn(urn);
+        FileDesc desc = fileManager.get().getSharedFileList().getFileDesc(urn);
         // Easy case: no file, add code & exit
         if(desc == null) {
             ggep.put(HeadPong.CODE, HeadPong.FILE_NOT_FOUND);
@@ -286,7 +286,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     	DataOutputStream daos = new DataOutputStream(caos);
     	byte retCode=0;
     	URN urn = ping.getUrn();
-    	FileDesc desc = fileManager.get().getSharedFileDescForUrn(urn);
+    	FileDesc desc = fileManager.get().getSharedFileList().getFileDesc(urn);
     	boolean didNotSendAltLocs=false;
     	boolean didNotSendPushAltLocs = false;
     	boolean didNotSendRanges = false;

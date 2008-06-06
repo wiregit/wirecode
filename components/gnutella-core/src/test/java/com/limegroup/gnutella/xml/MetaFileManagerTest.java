@@ -103,7 +103,7 @@ public class MetaFileManagerTest extends FileManagerTest {
 
         // fman should only have loaded store1
         assertEquals("Unexpected number of store files", 
-            1, fman.getNumStoreFiles());
+            1, fman.getStoreFileList().getNumFiles());
             
         
         // it is important to check the query at all bounds,
@@ -131,24 +131,24 @@ public class MetaFileManagerTest extends FileManagerTest {
 
         // try sharing the store file
         fman.addFileIfShared(store1);
-        assertEquals("Unexpected number of shared files", 0, fman.getNumFiles());
-        assertEquals("Unexpected number of shared files", 0, fman.getNumForcedFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
         
         // try forcing the sharing
         fman.addFileAlways(store1);
-        assertEquals("Unexpected number of shared files", 0, fman.getNumFiles());
-        assertEquals("Unexpected number of shared files", 0, fman.getNumForcedFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
         
         // try adding sharing for temp session
         fman.addFileForSession(store1);
-        assertEquals("Unexpected number of shared files", 0, fman.getNumFiles());
-        assertEquals("Unexpected number of shared files", 0, fman.getNumForcedFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
 
 
         // no files should be shareable
-        List<FileDesc> files=fman.getSharedFilesInDirectory(_storeDir);
+        List<FileDesc> files=fman.getSharedFileList().getFilesInDirectory(_storeDir);
         assertEquals("unexpected length of shared files", 0, files.size());
-        files=fman.getSharedFilesInDirectory(_storeDir.getParentFile());
+        files=fman.getSharedFileList().getFilesInDirectory(_storeDir.getParentFile());
         assertEquals("file manager listed shared files in file's parent dir",
             0, files.size());
     }
@@ -159,7 +159,7 @@ public class MetaFileManagerTest extends FileManagerTest {
      * should be shared
      */
     public void testNonSharedStoreFolder() throws Exception { 
-        assertEquals("Unexpected number of store files", 0, fman.getNumStoreFiles());
+        assertEquals("Unexpected number of store files", 0, fman.getSharedFileList().getNumFiles());
 
         // load the files into the manager
         waitForLoad();
@@ -189,10 +189,10 @@ public class MetaFileManagerTest extends FileManagerTest {
         f2 = createNewNamedTestFile(4, "FileManager_unit_test", _storeDir);
         
         // fman should only have loaded the two store files into list
-        assertEquals("Unexpected number of store files", 2, fman.getNumStoreFiles());
+        assertEquals("Unexpected number of store files", 2, fman.getStoreFileList().getNumFiles());
         // fman should only have loaded two shared files
-        assertEquals("Unexpected number of shared files",0, fman.getNumFiles());
-        assertEquals("Unexpected number of shared files", 0, fman.getNumForcedFiles());
+        assertEquals("Unexpected number of shared files",0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
         
     }
     
@@ -508,7 +508,7 @@ public class MetaFileManagerTest extends FileManagerTest {
         
         waitForLoad();
         
-        assertEquals(0, fman.getNumStoreFiles()); 
+        assertEquals(0, fman.getStoreFileList().getNumFiles()); 
         String storeAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\"";
         String storeAudio2 = "title=\"Alive\" artist=\"small town hero\" album=\"some other album name\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2006\"";
         
@@ -531,9 +531,9 @@ public class MetaFileManagerTest extends FileManagerTest {
 
     
         //Remove file that's shared.  Back to 1 file.                   
-        assertEquals(2, fman.getNumStoreFiles());     
+        assertEquals(2, fman.getStoreFileList().getNumFiles());     
         assertNotNull("should have been able to remove shared file", fman.removeFileIfSharedOrStore(store2));
-        assertEquals("unexpected number of files", 1, fman.getNumStoreFiles());
+        assertEquals("unexpected number of files", 1, fman.getStoreFileList().getNumFiles());
         assertNull(fman.getFileDescForFile(store2));
     }
 
@@ -547,7 +547,7 @@ public class MetaFileManagerTest extends FileManagerTest {
         
         waitForLoad();
         
-        assertEquals(0, fman.getNumStoreFiles()); 
+        assertEquals(0, fman.getStoreFileList().getNumFiles()); 
         String storeAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\"";
         String storeAudio2 = "title=\"Alive\" artist=\"small town hero\" album=\"some other album name\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2006\"";
         
@@ -571,20 +571,20 @@ public class MetaFileManagerTest extends FileManagerTest {
         // try sharing the store file
         fman.addFileIfShared(store1);
         fman.addFileIfShared(store2);
-        assertEquals("Unexpected number of shared files", 0, fman.getNumFiles());
-        assertEquals("Unexpected number of shared files", 0, fman.getNumForcedFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
         
         // try forcing the sharing
         fman.addFileAlways(store1);
         fman.addFileAlways(store2);
-        assertEquals("Unexpected number of shared files", 0, fman.getNumFiles());
-        assertEquals("Unexpected number of shared files", 0, fman.getNumForcedFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
         
         // try adding sharing for temp session
         fman.addFileForSession(store1);
         fman.addFileForSession(store2);
-        assertEquals("Unexpected number of shared files", 0, fman.getNumFiles());
-        assertEquals("Unexpected number of shared files", 0, fman.getNumForcedFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
         
         // it is important to check the query at all bounds,
         // including tests for case.
@@ -630,15 +630,15 @@ public class MetaFileManagerTest extends FileManagerTest {
         // rename a valid store file
         result = renameFile(store1, store3);
         assertTrue(result.toString(), result.isRenameEvent());
-        assertEquals("Unexpected number of store files", 1, fman.getNumStoreFiles());
+        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
         assertEquals("Unexpected file renamed", store1, result.getFileDescs()[0].getFile());
         assertEquals("Unexpected file added", store3, result.getFileDescs()[1].getFile());
 
         // renamed file should not be found, new name file should be found
-        assertFalse(fman.isStoreFileLoaded(store1));
-        assertTrue(fman.isStoreFileLoaded(store3));
+        assertFalse(fman.getStoreFileList().contains(store1));
+        assertTrue(fman.getStoreFileList().contains(store3));
         // still only two store files
-        assertEquals("Unexpected number of store files", 1, fman.getNumStoreFiles());
+        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
     }
 
     

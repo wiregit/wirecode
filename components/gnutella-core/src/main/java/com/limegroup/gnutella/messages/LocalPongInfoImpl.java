@@ -35,11 +35,11 @@ public class LocalPongInfoImpl implements LocalPongInfo {
     }
 
     public long getNumSharedFiles() {
-        return fileManager.get().getNumFiles();
+        return fileManager.get().getSharedFileList().getNumFiles();
     }
 
     public int getSharedFileSize() {
-        return fileManager.get().getSize();
+        return fileManager.get().getSharedFileList().getNumBytes();
     }
 
     public boolean isSupernode() {

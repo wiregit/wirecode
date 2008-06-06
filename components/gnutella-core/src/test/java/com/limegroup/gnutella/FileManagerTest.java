@@ -133,7 +133,7 @@ public class FileManagerTest extends LimeTestCase {
     }
        
     public void testGetSharedFilesWithNoShared() throws Exception {
-        List<FileDesc> sharedFiles =  fman.getSharedFilesInDirectory(_sharedDir);
+        List<FileDesc> sharedFiles =  fman.getSharedFileList().getFilesInDirectory(_sharedDir);
         assertEquals(sharedFiles.toString(), 
 				0, sharedFiles.size());
     }
@@ -157,12 +157,12 @@ public class FileManagerTest extends LimeTestCase {
         cm.handleContentResponse(new ContentResponse(u1, false));
         
         waitForLoad();
-        assertEquals("unexpected # of shared files", 3, fman.getNumFiles());
-        assertEquals("unexpected size of shared files", 37, fman.getSize());
-        assertFalse("shouldn't be shared", fman.isFileShared(f1));
-        assertTrue("should be shared", fman.isFileShared(f2));
-        assertTrue("should be shared", fman.isFileShared(f3));
-        assertTrue("should be shared", fman.isFileShared(f4));
+        assertEquals("unexpected # of shared files", 3, fman.getSharedFileList().getNumFiles());
+        assertEquals("unexpected size of shared files", 37, fman.getSharedFileList().getNumBytes());
+        assertFalse("shouldn't be shared", fman.getSharedFileList().contains(f1));
+        assertTrue("should be shared", fman.getSharedFileList().contains(f2));
+        assertTrue("should be shared", fman.getSharedFileList().contains(f3));
+        assertTrue("should be shared", fman.getSharedFileList().contains(f4));
         
         FileDesc fd2 = fman.getFileDescForFile(f2);
         FileDesc fd3 = fman.getFileDescForFile(f3);
@@ -171,28 +171,28 @@ public class FileManagerTest extends LimeTestCase {
         // test invalid content response.
         fman.validate(fd2);
         cm.handleContentResponse(new ContentResponse(u2, false));
-        assertFalse("shouldn't be shared anymore", fman.isFileShared(f2));
-        assertEquals("wrong # shared files", 2, fman.getNumFiles());
-        assertEquals("wrong shared file size", 34, fman.getSize());
+        assertFalse("shouldn't be shared anymore", fman.getSharedFileList().contains(f2));
+        assertEquals("wrong # shared files", 2, fman.getSharedFileList().getNumFiles());
+        assertEquals("wrong shared file size", 34, fman.getSharedFileList().getNumBytes());
         
         // test valid content response.
         fman.validate(fd3);
         cm.handleContentResponse(new ContentResponse(u3, true));
-        assertTrue("should still be shared", fman.isFileShared(f3));
-        assertEquals("wrong # shared files", 2, fman.getNumFiles());
-        assertEquals("wrong shared file size", 34, fman.getSize());
+        assertTrue("should still be shared", fman.getSharedFileList().contains(f3));
+        assertEquals("wrong # shared files", 2, fman.getSharedFileList().getNumFiles());
+        assertEquals("wrong shared file size", 34, fman.getSharedFileList().getNumBytes());
 
         // test valid content response.
         fman.validate(fd4);
         Thread.sleep(10000);
-        assertTrue("should still be shared", fman.isFileShared(f4));
-        assertEquals("wrong # shared files", 2, fman.getNumFiles());
-        assertEquals("wrong shared file size", 34, fman.getSize());
+        assertTrue("should still be shared", fman.getSharedFileList().contains(f4));
+        assertEquals("wrong # shared files", 2, fman.getSharedFileList().getNumFiles());
+        assertEquals("wrong shared file size", 34, fman.getSharedFileList().getNumBytes());
         
         // Make sure adding a new file to be shared doesn't work if it
         // returned bad before.
         fman.addFileIfShared(f1);
-        assertFalse("shouldn't be shared", fman.isFileShared(f1));
+        assertFalse("shouldn't be shared", fman.getSharedFileList().contains(f1));
     }
     
     public void testOneSharedFile() throws Exception {
@@ -205,9 +205,9 @@ public class FileManagerTest extends LimeTestCase {
 
         // fman should only have loaded f1
         assertEquals("Unexpected number of shared files", 
-            1, fman.getNumFiles());
+            1, fman.getSharedFileList().getNumFiles());
         assertEquals("Unexpected size of filemanager",
-            1, fman.getSize());
+            1, fman.getSharedFileList().getNumBytes());
             
         // it is important to check the query at all bounds,
         // including tests for case.
@@ -228,12 +228,12 @@ public class FileManagerTest extends LimeTestCase {
         assertNull("should have not been able to remove f3", 
 				   fman.removeFileIfSharedOrStore(f3));
 				   
-        assertEquals("first file should be f1", f1, fman.get(0).getFile());
+        assertEquals("first file should be f1", f1, fman.getSharedFileList().get(0).getFile());
         
-        sharedFiles=fman.getSharedFilesInDirectory(_sharedDir);
+        sharedFiles=fman.getSharedFileList().getFilesInDirectory(_sharedDir);
         assertEquals("unexpected length of shared files", 1, sharedFiles.size());
         assertEquals("files should be the same", sharedFiles.get(0).getFile(), f1);
-        sharedFiles=fman.getSharedFilesInDirectory(_sharedDir.getParentFile());
+        sharedFiles=fman.getSharedFileList().getFilesInDirectory(_sharedDir.getParentFile());
         assertEquals("file manager listed shared files in file's parent dir",
             0, sharedFiles.size());
     }
@@ -253,8 +253,8 @@ public class FileManagerTest extends LimeTestCase {
         assertTrue(result.toString(), result.isAddEvent());
         assertNotNull(result.getFileDescs()[0]);
         
-        assertEquals("unexpected number of files", 2, fman.getNumFiles());
-        assertEquals("unexpected fman size", 4, fman.getSize());
+        assertEquals("unexpected number of files", 2, fman.getSharedFileList().getNumFiles());
+        assertEquals("unexpected fman size", 4, fman.getSharedFileList().getNumBytes());
         responses=keywordIndex.query(queryRequestFactory.createQuery("unit", (byte)3));
         assertNotEquals("responses gave same index",
             responses[0].getIndex(), responses[1].getIndex() );
@@ -262,7 +262,7 @@ public class FileManagerTest extends LimeTestCase {
             assertTrue("responses should be expected indexes", 
                 responses[i].getIndex()==0 || responses[i].getIndex()==1);
         }
-        sharedFiles=fman.getSharedFilesInDirectory(_sharedDir);
+        sharedFiles=fman.getSharedFileList().getFilesInDirectory(_sharedDir);
         assertEquals("unexpected files length", 2, sharedFiles.size());
         assertSharedFiles(sharedFiles, f1, f2);
     }
@@ -276,14 +276,14 @@ public class FileManagerTest extends LimeTestCase {
         f3 = createNewTestFile(11);
 
         //Remove file that's shared.  Back to 1 file.                   
-        assertEquals(2, fman.getNumFiles());     
+        assertEquals(2, fman.getSharedFileList().getNumFiles());     
         assertNull("shouldn't have been able to remove unshared file",  fman.removeFileIfSharedOrStore(f3));
         assertNotNull("should have been able to remove shared file", fman.removeFileIfSharedOrStore(f2));
-        assertEquals("unexpected fman size", 1, fman.getSize());
-        assertEquals("unexpected number of files", 1, fman.getNumFiles());
+        assertEquals("unexpected fman size", 1, fman.getSharedFileList().getNumBytes());
+        assertEquals("unexpected number of files", 1, fman.getSharedFileList().getNumFiles());
         responses=keywordIndex.query(queryRequestFactory.createQuery("unit", (byte)3));
         assertEquals("unexpected response length", 1, responses.length);
-        sharedFiles=fman.getSharedFilesInDirectory(_sharedDir);
+        sharedFiles=fman.getSharedFileList().getFilesInDirectory(_sharedDir);
         assertEquals("unexpected files length", 1, sharedFiles.size());
         assertEquals("files differ", sharedFiles.get(0).getFile(), f1);
     }
@@ -303,32 +303,32 @@ public class FileManagerTest extends LimeTestCase {
         FileManagerEvent result = addIfShared(f3);
         assertTrue(result.toString(), result.isAddEvent());
         assertNotNull(result.getFileDescs()[0]);
-        assertEquals("unexpected file size", 12, fman.getSize());
-        assertEquals("unexpedted number of files", 2, fman.getNumFiles());
+        assertEquals("unexpected file size", 12, fman.getSharedFileList().getNumBytes());
+        assertEquals("unexpedted number of files", 2, fman.getSharedFileList().getNumFiles());
         responses=keywordIndex.query(queryRequestFactory.createQuery("unit", (byte)3));
         assertEquals("unexpected response length", 2, responses.length);
         assertNotEquals("unexpected response[0] index", 1, responses[0].getIndex());
         assertNotEquals("unexpected response[1] index", 1, responses[1].getIndex());
-        fman.get(0);
-        fman.get(2);
-        assertNull("should be null (unshared)", fman.get(1));
+        fman.getSharedFileList().get(0);
+        fman.getSharedFileList().get(2);
+        assertNull("should be null (unshared)", fman.getSharedFileList().get(1));
         try {
-            fman.get(3);
+            fman.getSharedFileList().get(3);
             fail("should not have gotten anything");
         } catch (IndexOutOfBoundsException e) { }
         
-        assertFalse("should not be valid", fman.isValidSharedIndex(3));
-        assertTrue("should be valid", fman.isValidSharedIndex(0));
-        assertTrue("should be valid (was at one time)", fman.isValidSharedIndex(1));
+        assertFalse("should not be valid", fman.getSharedFileList().isValidSharedIndex(3));
+        assertTrue("should be valid", fman.getSharedFileList().isValidSharedIndex(0));
+        assertTrue("should be valid (was at one time)", fman.getSharedFileList().isValidSharedIndex(1));
 
         responses=keywordIndex.query(queryRequestFactory.createQuery("*unit*", (byte)3));
         assertEquals("unexpected responses length", 2, responses.length);
 
-        sharedFiles = fman.getSharedFilesInDirectory(_sharedDir);
+        sharedFiles = fman.getSharedFileList().getFilesInDirectory(_sharedDir);
         assertEquals("unexpected files length", 2, sharedFiles.size());
         assertSharedFiles(sharedFiles, f1, f3);
-        sharedFiles=Arrays.asList(fman.getAllSharedFileDescriptors());
-        assertEquals("unexpected files length", 2, sharedFiles.size());
+        sharedFiles= fman.getSharedFileList().getAllFileDescs();
+        assertEquals("unexpected files length", 2, fman.getSharedFileList().getNumFiles());
         assertSharedFiles(sharedFiles, f1, f3);            
     }
     
@@ -348,14 +348,14 @@ public class FileManagerTest extends LimeTestCase {
         assertTrue(result.toString(), result.isRenameEvent());
         assertEquals(f1, result.getFileDescs()[0].getFile());
         assertEquals(f2, result.getFileDescs()[1].getFile());
-        sharedFiles=fman.getSharedFilesInDirectory(_sharedDir);
+        sharedFiles=fman.getSharedFileList().getFilesInDirectory(_sharedDir);
         assertEquals("unexpected files length", 2, sharedFiles.size());
         assertSharedFiles(sharedFiles, f2, f3);
         
         result = renameFile(f2, new File("C\\garbage.XSADF"));
         assertTrue(result.toString(), result.isRemoveEvent());
         assertEquals(f2, result.getFileDescs()[0].getFile());
-        sharedFiles=fman.getSharedFilesInDirectory(_sharedDir);
+        sharedFiles=fman.getSharedFileList().getFilesInDirectory(_sharedDir);
         assertEquals("unexpected files length", 1, sharedFiles.size());
         assertEquals("files differ", sharedFiles.get(0).getFile(), f3);
     }
@@ -372,8 +372,8 @@ public class FileManagerTest extends LimeTestCase {
         FileManagerEvent result = addIfShared(f4);
         assertTrue(result.toString(), result.isFailedEvent());
         assertEquals(f4, result.getFiles()[0]);
-        assertEquals("unexpected number of files", 1, fman.getNumFiles());
-        assertEquals("unexpected fman size", 11, fman.getSize());
+        assertEquals("unexpected number of files", 1, fman.getSharedFileList().getNumFiles());
+        assertEquals("unexpected fman size", 11, fman.getSharedFileList().getNumBytes());
         //Add really big files.
         f5=createFakeTestFile(MAX_FILE_SIZE-1);
         f6=createFakeTestFile(MAX_FILE_SIZE);
@@ -383,8 +383,8 @@ public class FileManagerTest extends LimeTestCase {
         result = addIfShared(f6);
         assertTrue(result.toString(), result.isAddEvent());
         assertEquals(f6, result.getFileDescs()[0].getFile());
-        assertEquals("unexpected number of files", 3, fman.getNumFiles());
-        assertEquals("unexpected fman size", Integer.MAX_VALUE, fman.getSize());
+        assertEquals("unexpected number of files", 3, fman.getSharedFileList().getNumFiles());
+        assertEquals("unexpected fman size", Integer.MAX_VALUE, fman.getSharedFileList().getNumBytes());
     }
     
     /**
@@ -393,8 +393,8 @@ public class FileManagerTest extends LimeTestCase {
     public void testAddIncompleteFile() throws Exception {
         VerifyingFileFactory verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
         
-        assertEquals("unexected shared files", 0, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
+        assertEquals("unexected shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("unexpected shared incomplete", 0, fman.getSharedFileList().getNumIncompleteFiles());
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());    
         
         // add one incomplete file and make sure the numbers go up.
@@ -402,16 +402,16 @@ public class FileManagerTest extends LimeTestCase {
         urns.add( UrnHelper.URNS[0] );
         fman.addIncompleteFile(new File("a"), urns, "a", 0, verifyingFileFactory.createVerifyingFile(0));
 
-        assertEquals("unexected shared files", 0, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
+        assertEquals("unexected shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("unexpected shared incomplete", 1, fman.getSharedFileList().getNumIncompleteFiles());
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
         // add another incomplete file with the same hash and same
         // name and make sure it's not added.
         fman.addIncompleteFile(new File("a"), urns, "a", 0, verifyingFileFactory.createVerifyingFile(0));
 
-        assertEquals("unexected shared files", 0, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
+        assertEquals("unexected shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("unexpected shared incomplete", 1, fman.getSharedFileList().getNumIncompleteFiles());
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
         // add another incomplete file with another hash, it should be added.
@@ -419,16 +419,16 @@ public class FileManagerTest extends LimeTestCase {
         urns.add( UrnHelper.URNS[1] );
         fman.addIncompleteFile(new File("c"), urns, "c", 0, verifyingFileFactory.createVerifyingFile(0));
 
-        assertEquals("unexected shared files", 0, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete", 2, fman.getNumIncompleteFiles());
+        assertEquals("unexected shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("unexpected shared incomplete", 2, fman.getSharedFileList().getNumIncompleteFiles());
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
     }
     
     public void testShareIncompleteFile() throws Exception {
         VerifyingFileFactory verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
         
-        assertEquals("unexected shared files", 0, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
+        assertEquals("unexected shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("unexpected shared incomplete", 0, fman.getSharedFileList().getNumIncompleteFiles());
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
 
         File f;
@@ -584,8 +584,8 @@ public class FileManagerTest extends LimeTestCase {
     public void testRemovingIncompleteFiles() {
         VerifyingFileFactory verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
         
-        assertEquals("unexected shared files", 0, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
+        assertEquals("unexected shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("unexpected shared incomplete", 0, fman.getSharedFileList().getNumIncompleteFiles());
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
         Set<URN> urns = new UrnSet();
@@ -594,16 +594,16 @@ public class FileManagerTest extends LimeTestCase {
         urns = new UrnSet();
         urns.add( UrnHelper.URNS[1] );
         fman.addIncompleteFile(new File("b"), urns, "b", 0, verifyingFileFactory.createVerifyingFile(0));
-        assertEquals("unexpected shared incomplete", 2, fman.getNumIncompleteFiles());
+        assertEquals("unexpected shared incomplete", 2, fman.getSharedFileList().getNumIncompleteFiles());
             
         fman.removeFileIfSharedOrStore( new File("a") );
-        assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
+        assertEquals("unexpected shared incomplete", 1, fman.getSharedFileList().getNumIncompleteFiles());
         
         fman.removeFileIfSharedOrStore( new File("c") );
-        assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
+        assertEquals("unexpected shared incomplete", 1, fman.getSharedFileList().getNumIncompleteFiles());
         
         fman.removeFileIfSharedOrStore( new File("b") );
-        assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
+        assertEquals("unexpected shared incomplete", 0, fman.getSharedFileList().getNumIncompleteFiles());
     }
     
     /**
@@ -613,15 +613,15 @@ public class FileManagerTest extends LimeTestCase {
         VerifyingFileFactory verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         
-        assertEquals("unexected shared files", 0, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
+        assertEquals("unexected shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("unexpected shared incomplete", 0, fman.getSharedFileList().getNumIncompleteFiles());
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
             
         Set<URN> urns = new UrnSet();
         URN urn = UrnHelper.URNS[0];
         urns.add( urn );
         fman.addIncompleteFile(new File("sambe"), urns, "a", 0, verifyingFileFactory.createVerifyingFile(0));
-        assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());            
+        assertEquals("unexpected shared incomplete", 1, fman.getSharedFileList().getNumIncompleteFiles());            
             
         QueryRequest qr = queryRequestFactory.createQuery(urn, "sambe");
         assertTrue(qr.desiresPartialResults());
@@ -637,9 +637,9 @@ public class FileManagerTest extends LimeTestCase {
     public void testGetFileDescForUrn() throws Exception {
         VerifyingFileFactory verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
         
-		assertEquals("unexected shared files", 0, fman.getNumFiles());
+		assertEquals("unexected shared files", 0, fman.getSharedFileList().getNumFiles());
         assertEquals("unexpected shared incomplete",
-            0, fman.getNumIncompleteFiles());
+            0, fman.getSharedFileList().getNumIncompleteFiles());
         assertEquals("unexpected pending",
             0, fman.getNumPendingFiles());
             
@@ -647,7 +647,7 @@ public class FileManagerTest extends LimeTestCase {
         URN urn = UrnHelper.URNS[0];
         urns.add( urn );
         fman.addIncompleteFile(new File("sambe"), urns, "a", 0, verifyingFileFactory.createVerifyingFile(0));
-        assertEquals("unexpected shared incomplete", 1, fman.getNumIncompleteFiles());
+        assertEquals("unexpected shared incomplete", 1, fman.getSharedFileList().getNumIncompleteFiles());
             
         // First test that we DO get this IFD.
         FileDesc fd = fman.getFileDescForUrn(urn);
@@ -656,21 +656,21 @@ public class FileManagerTest extends LimeTestCase {
         // add a file to the library and load it up.
         f3 = createNewTestFile(11);   
         waitForLoad();
-        assertEquals("unexected shared files", 1, fman.getNumFiles());
-        assertEquals("unexpected shared incomplete", 0, fman.getNumIncompleteFiles());
+        assertEquals("unexected shared files", 1, fman.getSharedFileList().getNumFiles());
+        assertEquals("unexpected shared incomplete", 0, fman.getSharedFileList().getNumIncompleteFiles());
         assertEquals("unexpected pending", 0, fman.getNumPendingFiles());
         
         // ensure it got shared.
-        sharedFiles=fman.getSharedFilesInDirectory(_sharedDir);
+        sharedFiles=fman.getSharedFileList().getFilesInDirectory(_sharedDir);
         assertEquals( f3, sharedFiles.get(0).getFile() );
-        fd = fman.get(0);
+        fd = fman.getSharedFileList().get(0);
         urn = fd.getSHA1Urn();
         urns = fd.getUrns();
         
         // now add an ifd with those urns.
         fman.addIncompleteFile(new File("sam"), urns, "b", 0, verifyingFileFactory.createVerifyingFile(0));
         
-        FileDesc retFD = fman.getFileDescForUrn(urn);    
+        FileDesc retFD = fman.getSharedFileList().getFileDesc(urn);    
         assertNotNull(retFD);
         assertNotInstanceof(IncompleteFileDesc.class, retFD);
         assertEquals(retFD, fd);
@@ -686,8 +686,8 @@ public class FileManagerTest extends LimeTestCase {
         
 	    addFilesToLibrary();
 
-		for(int i = 0; i < fman.getNumFiles(); i++) {
-			FileDesc fd = fman.get(i);
+		for(int i = 0; i < fman.getSharedFileList().getNumFiles(); i++) {
+			FileDesc fd = fman.getSharedFileList().get(i);
 			Response testResponse = responseFactory.createResponse(fd);
 			URN urn = fd.getSHA1Urn();
 			assertEquals("FileDescs should match", fd, 
@@ -725,8 +725,8 @@ public class FileManagerTest extends LimeTestCase {
 	    addFilesToLibrary();
 	    
 	    boolean checked = false;
-		for(int i = 0; i < fman.getNumFiles(); i++) {
-			FileDesc fd = fman.get(i);
+		for(int i = 0; i < fman.getSharedFileList().getNumFiles(); i++) {
+			FileDesc fd = fman.getSharedFileList().get(i);
 			Response testResponse = responseFactory.createResponse(fd);
 			URN urn = fd.getSHA1Urn();
 			String name = I18NConvert.instance().getNorm(fd.getFileName());
@@ -766,17 +766,17 @@ public class FileManagerTest extends LimeTestCase {
         
 	    addFilesToLibrary();
 
-	    FileDesc[] fds = fman.getAllSharedFileDescriptors();
-	    for(int i = 0; i < fds.length; i++) {
-	        URN urn = fds[i].getSHA1Urn();
+	    List<FileDesc> fds = fman.getSharedFileList().getAllFileDescs();
+	    for(FileDesc fd : fds) {
+	        URN urn = fd.getSHA1Urn();
 	        for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
 	            altLocManager.add(alternateLocationFactory.create("1.2.3." + j, urn), null);
 	        }
 	    }
         
         boolean checked = false;
-		for(int i = 0; i < fman.getNumFiles(); i++) {
-			FileDesc fd = fman.get(i);
+		for(int i = 0; i < fman.getSharedFileList().getNumFiles(); i++) {
+			FileDesc fd = fman.getSharedFileList().get(i);
 			Response testResponse = responseFactory.createResponse(fd);
 			String name = I18NConvert.instance().getNorm(fd.getFileName());
             
@@ -897,10 +897,10 @@ public class FileManagerTest extends LimeTestCase {
         assertFalse(fman.isFileInCompletelySharedDirectory(sessionShared));
         
         //  assert that "shared" and "sessionShared" are shared
-        assertEquals(2,fman.getNumFiles());
-        assertTrue(fman.isFileShared(shared));
-        assertTrue(fman.isFileShared(sessionShared));
-        assertFalse(fman.isFileShared(notShared));
+        assertEquals(2,fman.getSharedFileList().getNumFiles());
+        assertTrue(fman.getSharedFileList().contains(shared));
+        assertTrue(fman.getSharedFileList().contains(sessionShared));
+        assertFalse(fman.getSharedFileList().contains(notShared));
         assertNotNull(fman.getFileDescForFile(shared));
         assertNotNull(fman.getFileDescForFile(sessionShared));
         assertNull(fman.getFileDescForFile(notShared));
@@ -910,13 +910,13 @@ public class FileManagerTest extends LimeTestCase {
         waitForLoad();
         
         //  assert that "shared" is shared
-        assertEquals(1,fman.getNumFiles());
-        assertTrue(fman.isFileShared(shared));
+        assertEquals(1,fman.getSharedFileList().getNumFiles());
+        assertTrue(fman.getSharedFileList().contains(shared));
         assertNotNull(fman.getFileDescForFile(shared));
         
         // but sessionShared is no more.
-        assertFalse(fman.isFileShared(sessionShared));
-        assertFalse(fman.isFileShared(notShared));
+        assertFalse(fman.getSharedFileList().contains(sessionShared));
+        assertFalse(fman.getSharedFileList().contains(notShared));
         assertNull(fman.getFileDescForFile(notShared));
         assertNull(fman.getFileDescForFile(notShared));
     }
@@ -941,7 +941,7 @@ public class FileManagerTest extends LimeTestCase {
         FileManagerEvent evt = addFileForSession(specialShare);
         assertTrue(evt.isAddEvent());
         //should have shared file
-        assertTrue(fman.isFileShared(specialShare));
+        assertTrue(fman.getSharedFileList().contains(specialShare));
         //should not be an individual share
         assertFalse(fman.isIndividualShare(specialShare));
     }
@@ -953,7 +953,7 @@ public class FileManagerTest extends LimeTestCase {
 	public void testAddFileAlways() throws Exception {
 	    assertFalse(fman.isLoadFinished());
 	    waitForLoad(); // ensure it's loaded with 0 files.
-	    assertEquals(0, fman.getNumFiles());
+	    assertEquals(0, fman.getSharedFileList().getNumFiles());
 	    assertTrue(fman.isLoadFinished());
 	    
 		// test if too large files are not shared
@@ -967,7 +967,7 @@ public class FileManagerTest extends LimeTestCase {
 		result = addAlways(test);
 		assertTrue(result.toString(), result.isAddEvent());
 		assertEquals(test, result.getFileDescs()[0].getFile());
-		assertEquals(1, fman.getNumFiles());
+		assertEquals(1, fman.getSharedFileList().getNumFiles());
 		
 		// try again, it will fail because it's already shared.
 		result = addAlways(test);
@@ -988,7 +988,7 @@ public class FileManagerTest extends LimeTestCase {
 		result = addAlways(test);
 		assertTrue(result.toString(), result.isAddEvent());
 		assertEquals(test, result.getFileDescs()[0].getFile());
-        assertEquals(2, fman.getNumFiles());
+        assertEquals(2, fman.getSharedFileList().getNumFiles());
         
         // try again, it will fail because it's already shared.
         result = addAlways(test);
@@ -1072,16 +1072,16 @@ public class FileManagerTest extends LimeTestCase {
 		result = addIfShared(shareable);
 		assertTrue(result.toString(), result.isAddEvent());
 		assertEquals(shareable, result.getFileDescs()[0].getFile());
-		assertEquals(1, fman.getNumFiles());
-		assertEquals(result.getFileDescs()[0], fman.get(0));
+		assertEquals(1, fman.getSharedFileList().getNumFiles());
+		assertEquals(result.getFileDescs()[0], fman.getSharedFileList().get(0));
 		
 		// files with shareable extension, specially shared
 		File speciallyShareable = createNewNamedTestFile(10, "specially shareable", _sharedDir.getParentFile());
 		result = addAlways(speciallyShareable);
 		assertTrue(result.toString(), result.isAddEvent());
 		assertEquals(speciallyShareable, result.getFileDescs()[0].getFile());
-		assertEquals(2, fman.getNumFiles());
-		assertEquals(result.getFileDescs()[0], fman.get(1));
+		assertEquals(2, fman.getSharedFileList().getNumFiles());
+		assertEquals(result.getFileDescs()[0], fman.getSharedFileList().get(1));
 		
 		// files with non shareable extension, specially shared
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("abc");
@@ -1089,8 +1089,8 @@ public class FileManagerTest extends LimeTestCase {
 		result = addAlways(speciallyShared);
 		assertTrue(result.toString(), result.isAddEvent());
 		assertEquals(speciallyShared, result.getFileDescs()[0].getFile());
-		assertEquals(3, fman.getNumFiles());
-		assertEquals(result.getFileDescs()[0], fman.get(2));
+		assertEquals(3, fman.getSharedFileList().getNumFiles());
+		assertEquals(result.getFileDescs()[0], fman.getSharedFileList().get(2));
 	}
 	
 	public void testAddSharedFoldersWithBlackList() throws Exception {
@@ -1113,12 +1113,12 @@ public class FileManagerTest extends LimeTestCase {
 		
 		// assert blacklist worked
 		for (File dir : blackList) {
-			assertEquals(0, fman.getSharedFilesInDirectory(dir).size());
+			assertEquals(0, fman.getSharedFileList().getFilesInDirectory(dir).size());
 		}
 		
 		// assert others were shared
 		for (File dir : whiteList) {
-			assertEquals(1, fman.getSharedFilesInDirectory(dir).size());
+			assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dir).size());
 		}
 	}
 	
@@ -1160,15 +1160,15 @@ public class FileManagerTest extends LimeTestCase {
         
         // assert blacklisted were not shared
         for (File excluded : blackListSet) {
-            assertEquals("excluded was shared: " + excluded, 0, fman.getSharedFilesInDirectory(excluded).size());
+            assertEquals("excluded was shared: " + excluded, 0, fman.getSharedFileList().getFilesInDirectory(excluded).size());
         }
         // same for pointed to
         for (File excluded : pointedTo) {
-            assertEquals(0, fman.getSharedFilesInDirectory(excluded).size());
+            assertEquals(0, fman.getSharedFileList().getFilesInDirectory(excluded).size());
         }
         // ensure other files were shared
         for (File shared: dirs) {
-            assertEquals(1, fman.getSharedFilesInDirectory(shared).size());
+            assertEquals(1, fman.getSharedFileList().getFilesInDirectory(shared).size());
         }
         
         // clean up
@@ -1209,18 +1209,18 @@ public class FileManagerTest extends LimeTestCase {
         
         waitForLoad();
         
-        assertEquals(1, fman.getSharedFilesInDirectory(dirs[0]).size());
-        assertEquals(1, fman.getSharedFilesInDirectory(dirs[1]).size());
+        assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[0]).size());
+        assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[1]).size());
         
         // Now unshare sub1
         fman.removeFolderIfShared(dirs[1]);
-        assertEquals(1, fman.getSharedFilesInDirectory(dirs[0]).size());
-        assertEquals(0, fman.getSharedFilesInDirectory(dirs[1]).size());
+        assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[0]).size());
+        assertEquals(0, fman.getSharedFileList().getFilesInDirectory(dirs[1]).size());
         
         // Now reload fman and make sure it's still not shared!
         fman.loadSettingsAndWait(10000);
-        assertEquals(1, fman.getSharedFilesInDirectory(dirs[0]).size());
-        assertEquals(0, fman.getSharedFilesInDirectory(dirs[1]).size());
+        assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[0]).size());
+        assertEquals(0, fman.getSharedFileList().getFilesInDirectory(dirs[1]).size());
     }
     
     public void testExplicitlySharedSubSubfolderUnsharedDoesntStayShared() throws Exception {
@@ -1243,22 +1243,22 @@ public class FileManagerTest extends LimeTestCase {
         
         waitForLoad();
         
-        assertEquals(1, fman.getSharedFilesInDirectory(dirs[0]).size());
-        assertEquals(1, fman.getSharedFilesInDirectory(dirs[1]).size());
-        assertEquals(1, fman.getSharedFilesInDirectory(dirs[2]).size());
+        assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[0]).size());
+        assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[1]).size());
+        assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[2]).size());
         
         // Now unshare sub2
         fman.removeFolderIfShared(dirs[2]);
-        assertEquals(1, fman.getSharedFilesInDirectory(dirs[0]).size());
-        assertEquals(1, fman.getSharedFilesInDirectory(dirs[1]).size());
-        assertEquals(0, fman.getSharedFilesInDirectory(dirs[2]).size());
+        assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[0]).size());
+        assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[1]).size());
+        assertEquals(0, fman.getSharedFileList().getFilesInDirectory(dirs[2]).size());
         assertFalse(fman.isFolderShared(dirs[2]));
         
         // Now reload fman and make sure it's still not shared!
         fman.loadSettingsAndWait(10000);
-        assertEquals(1, fman.getSharedFilesInDirectory(dirs[0]).size());
-        assertEquals(1, fman.getSharedFilesInDirectory(dirs[1]).size());
-        assertEquals(0, fman.getSharedFilesInDirectory(dirs[2]).size());
+        assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[0]).size());
+        assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[1]).size());
+        assertEquals(0, fman.getSharedFileList().getFilesInDirectory(dirs[2]).size());
     }
 
     
@@ -1394,11 +1394,11 @@ public class FileManagerTest extends LimeTestCase {
         f1 = createNewTestFile(1);
         f2 = createNewTestFile(3);
         waitForLoad();
-        fman.get(0).addLimeXMLDocument(document);
-        fman.get(1).addLimeXMLDocument(document);
+        fman.getSharedFileList().get(0).addLimeXMLDocument(document);
+        fman.getSharedFileList().get(1).addLimeXMLDocument(document);
         f3 = createNewTestFile(11);
 
-        assertEquals(2, fman.getNumFiles());
+        assertEquals(2, fman.getSharedFileList().getNumFiles());
         Iterator<FileDesc> it = fman.getIndexingIterator();
         FileDesc response = it.next();
         assertEquals(response.getFileName(), f1.getName());
@@ -1481,7 +1481,7 @@ public class FileManagerTest extends LimeTestCase {
         //                 fman.get(i).getFile().getName());
             
         assertEquals("unexpected number of shared files",
-            testFiles.length, fman.getNumFiles() );
+            testFiles.length, fman.getSharedFileList().getNumFiles() );
     }
     
 
@@ -1617,8 +1617,10 @@ public class FileManagerTest extends LimeTestCase {
     
     protected void assertSharedFiles(List<FileDesc> shared, File... expected) {
         List<File> files = new ArrayList<File>(shared.size());
-        for(FileDesc fd: shared) {
-            files.add(fd.getFile());
+        synchronized(shared) {
+            for(FileDesc fd: shared) {
+                files.add(fd.getFile());
+            }
         }
         assertEquals(files.size(), expected.length);
         for(File file : expected) {

@@ -3,6 +3,7 @@ package com.limegroup.gnutella.licenses;
 import java.io.File;
 import java.io.InterruptedIOException;
 import java.util.Iterator;
+import java.util.List;
 
 import junit.framework.Test;
 
@@ -100,14 +101,14 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	}
 	
 	public void testFileDescKnowsLicense() throws Exception {
-	    FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
-	    assertEquals(5, fds.length);
-	    for(int i = 0; i < fds.length; i++)
-	        assertTrue(fds[i].toString(), fds[i].isLicensed());
+	    List<FileDesc> fds = fileManager.getSharedFileList().getAllFileDescs();
+	    assertEquals(5, fds.size());
+	    for(FileDesc fd : fds )
+	        assertTrue(fd.toString(), fd.isLicensed());
     }
     
     public void testQRPExchange() throws Exception {
-        assertEquals(5, fileManager.getNumFiles());
+        assertEquals(5, fileManager.getSharedFileList().getNumFiles());
 
         for (int i = 0; i < testUP.length; i++) {
             assertTrue("should be open", testUP[i].isOpen());

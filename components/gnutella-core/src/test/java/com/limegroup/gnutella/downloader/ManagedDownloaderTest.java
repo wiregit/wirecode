@@ -65,6 +65,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
+import com.limegroup.gnutella.stubs.FileListStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
@@ -165,9 +166,10 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	Map<File, FileDesc> fileMap = new HashMap<File, FileDesc>();
     	fileMap.put(f,partialDesc);
     	
-    	fileManager.setUrns(urnMap);
-    	fileManager.setDescs(descList);
-    	fileManager.setFiles(fileMap);
+    	FileListStub sharedList = (FileListStub) fileManager.getSharedFileList();
+    	sharedList.setUrns(urnMap);
+    	sharedList.setDescs(descList);
+    	sharedList.setFiles(fileMap);
     	
     	// then create an rfd from a firewalled host
     	RemoteFileDesc rfd = newPushRFD("incomplete","urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE",GUID.makeGuid());

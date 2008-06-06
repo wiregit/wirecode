@@ -63,14 +63,14 @@ public class AltLocModel implements StorableModel {
             return Collections.emptySet();
         }
         
-        FileDesc[] fds = fileManager.get().getAllSharedFileDescriptors();
-        
         // List of Storables we're going to publish
         List<Storable> toRemove = new ArrayList<Storable>();
         List<Storable> toPublish = new ArrayList<Storable>();
         
+        List<FileDesc> fds = fileManager.get().getSharedFileList().getAllFileDescs();
+        
         synchronized (values) {
-            
+        
             // Step One: Add every new FileDesc to the Map
             for (FileDesc fd : fds) {
                 if (!(fd instanceof IncompleteFileDesc)) {
