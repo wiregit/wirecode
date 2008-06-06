@@ -39,6 +39,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
 //import com.limegroup.gnutella.ApplicationServices;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileManagerEvent;
@@ -52,6 +53,9 @@ import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.downloader.CoreDownloader;
+import com.limegroup.gnutella.downloader.CoreDownloaderFactory;
+import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.util.URLDecoder;
@@ -96,6 +100,16 @@ public class RestRPCMain implements DataStore {
     private final RemoteFileDescFactory _rfdf;
     
     /**
+     * 
+     */
+    private final CoreDownloaderFactory _cdf;
+    
+    /**
+     * 
+     */
+    private final DownloadManager _dm;
+    
+    /**
      * Creates an instance of RestRPCMain and then starts up the lime wire core
      * and the rest rpc server thingy.
      */
@@ -118,6 +132,8 @@ public class RestRPCMain implements DataStore {
         _injector = Guice.createInjector(new LimeWireCoreModule(MainCallback.class));
         _lwcore = _injector.getInstance(LimeWireCore.class);
         _rfdf = _injector.getInstance(RemoteFileDescFactory.class);
+        _cdf = _injector.getInstance(CoreDownloaderFactory.class);
+        _dm = _injector.getInstance(DownloadManager.class);
         _searches = new HashMap<String, List<Map<String,String>>>();
         _component = new Component();
         _component.getServers().add(Protocol.HTTP, 9090);
@@ -138,6 +154,14 @@ public class RestRPCMain implements DataStore {
         //
         //
         _lwappl.getContext().getAttributes().put("dataStore", this);
+        
+        //
+        //
+        _lwappl.getContext().getAttributes().put("cdf", _cdf);
+        
+        //
+        //
+        _lwappl.getContext().getAttributes().put("dm", _dm);
     }
     
     /**
@@ -253,6 +277,26 @@ public class RestRPCMain implements DataStore {
         return search;
     }
     
+    public static Element addCDATAElement(Document document, Element parent, String name, String value) {
+        Element child = (Element)parent.appendChild(document.createElement(name));
+        CDATASection cdata = document.createCDATASection(value);
+        child.appendChild(cdata);
+        
+        return child;
+    }
+    
+    public static Element addCDATAElement(Document document, Element parent, String name, int value) {
+        return addCDATAElement(document, parent, name, Integer.toString(value));
+    }
+    
+    public static Element addCDATAElement(Document document, Element parent, String name, long value) {
+        return addCDATAElement(document, parent, name, Long.toString(value));
+    }
+    
+    public static Element addCDATAElement(Document document, Element parent, String name, boolean value) {
+        return addCDATAElement(document, parent, name, Boolean.toString(value));
+    }
+    
     /**
      * 
      *
@@ -275,7 +319,7 @@ public class RestRPCMain implements DataStore {
 //          router.attach("/search/{queryid}/cancel", ...);                         // stop a search
             
             router.attach("/download", DownloadResource.class);                     // start a download
-//          router.attach("/download/all", DownloadResultsResource.class);          // get status of all downloads
+            router.attach("/download/all", DownloadResultsResource.class);          // get status of all downloads
 //          router.attach("/download/{id}", DownloadResultsResource.class);         // get status of one download
 //          router.attach("/download/pause/{id}", DownloadPauseResource.class);     // pause a specific download
             
@@ -288,6 +332,14 @@ public class RestRPCMain implements DataStore {
         
         public RemoteFileDescFactory getRemoteFileDescFactory() {
             return (RemoteFileDescFactory)getContext().getAttributes().get("rfdf");
+        }
+        
+        public CoreDownloaderFactory getCoreDownloaderFactory() {
+            return (CoreDownloaderFactory)getContext().getAttributes().get("cdf");
+        }
+        
+        public DownloadManager getDownloadManager() {
+            return (DownloadManager)getContext().getAttributes().get("dm");
         }
     }
     
@@ -432,8 +484,8 @@ public class RestRPCMain implements DataStore {
      */
     public static class DownloadResource extends Resource {
         
-//      private String _query;
         private GUID _guid;
+        private RemoteFileDesc _rfd;
         
         public DownloadResource(Context context, Request request, Response response) {
             super(context, request, response);
@@ -443,14 +495,15 @@ public class RestRPCMain implements DataStore {
             RemoteFileDescFactory rfdf = ((LimeWireApplication)lwapp).getRemoteFileDescFactory();
 //          DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DomRepresentation dom = getRequest().getEntityAsDom();
-
+            CoreDownloaderFactory cdf = ((LimeWireApplication)lwapp).getCoreDownloaderFactory();
+            DownloadManager dm = ((LimeWireApplication)lwapp).getDownloadManager();
+            
             try {
 //              System.out.println("DownloadResource::DownloadResource().. text = '" + getRequest().getEntity().getText() + "'");
                 
                 Document doc = dom.getDocument();
                 Element root = doc.getDocumentElement();
-                
-                NodeList values = root.getChildNodes();
+//              NodeList values = root.getChildNodes();
                 
                 
                 // read values from "values"
@@ -465,43 +518,41 @@ public class RestRPCMain implements DataStore {
                 Node root = doc.getFirstChild();
                 */
                 
-                System.out.println("Leng = " + values.getLength());
+                _rfd = rfdf.createRemoteFileDesc (
+                        root.getElementsByTagName("host").item(0).getTextContent(), 
+                        Integer.parseInt(root.getElementsByTagName("port").item(0).getTextContent()), 
+                        Long.parseLong(root.getElementsByTagName("index").item(0).getTextContent()), 
+                        root.getElementsByTagName("filename").item(0).getTextContent(),
+                        Long.parseLong(root.getElementsByTagName("size").item(0).getTextContent()),
+                        GUID.fromHexString(root.getElementsByTagName("clientGUID").item(0).getTextContent()),
+                        Integer.parseInt(root.getElementsByTagName("speed").item(0).getTextContent()), 
+                        Boolean.parseBoolean(root.getElementsByTagName("chat").item(0).getTextContent()), 
+                        Integer.parseInt(root.getElementsByTagName("quality").item(0).getTextContent()), 
+                        Boolean.parseBoolean(root.getElementsByTagName("browseHost").item(0).getTextContent()), 
+                        null, // xmlDoc 
+                        null, // urns 
+                        Boolean.parseBoolean(root.getElementsByTagName("replyToMulticast").item(0).getTextContent()), 
+                        Boolean.parseBoolean(root.getElementsByTagName("firewalled").item(0).getTextContent()), 
+                        root.getElementsByTagName("vendor").item(0).getTextContent(),
+                        null, // proxies
+                        Long.parseLong(root.getElementsByTagName("createTime").item(0).getTextContent()), 
+                        Boolean.parseBoolean(root.getElementsByTagName("tlsCapable").item(0).getTextContent())
+                );
                 
+                ManagedDownloader downloader = cdf.createManagedDownloader(new RemoteFileDesc[]{_rfd}, null, null, null, true);
+                
+                downloader.initialize();
+                dm.remove(downloader, true);
+                downloader.startDownload();
             }
             catch (Exception e) {
                 System.err.println("Error: " + e.getMessage());
                 e.printStackTrace();
             }
             
-            /*
-            RemoteFileDesc rfd = rfdf.createRemoteFileDesc (
-                host, 
-                port, 
-                index, 
-                filename, 
-                size, 
-                speed, 
-                chat, 
-                quality, 
-                browseHost, 
-                xmlDoc, 
-                urns, 
-                replyToMulticast, 
-                firewalled, 
-                vendor, 
-                createTime, 
-                pe
-            );
-            */
+            _guid  = new GUID(lwcore.getSearchServices().newQueryGUID());
             
-            /*
-            try {
-                System.out.println("DownloadResource::DownloadResource().. text = '" + getRequest().getEntity().getText() + "'");
-            }
-            catch (IOException e) { }
-            */
-            
-            /*
+           /*
             _query = (String)getRequest().getAttributes().get("query");
             _guid  = new GUID(lwcore.getSearchServices().newQueryGUID());
             
@@ -514,38 +565,83 @@ public class RestRPCMain implements DataStore {
             */
             
             getVariants().add(new Variant(MediaType.TEXT_XML));
-            
-//          lwcore.getSearchServices().query(_guid.bytes(), _query);
-        }
+       }
         
         public boolean allowPost () {
             return true;
         }
         
         @Override
-        public Representation represent(Variant variant) throws ResourceException {
+        public void acceptRepresentation(Representation entity) throws ResourceException {
             DomRepresentation representation = null;
             
             try {
                 representation = new DomRepresentation(MediaType.TEXT_XML);
                 Document document = representation.getDocument();
-                Element searches = (Element)document.appendChild(document.createElement("searches"));
-                Element search = document.createElement("search");
+                Element downloads = (Element)document.appendChild(document.createElement("downloads"));
+                Element download = document.createElement("download");
                 
-//              document.appendChild(searches);
-                searches.appendChild(search);
+                downloads.appendChild(download);
                 
-                search.setAttribute("guid", "1234");
+                download.setAttribute("guid", _guid.toString());
             }
             catch (IOException e) {
-                System.out.println("SearchResource::represent().. " + e.getMessage());
+                System.out.println("DownloadResource::represent().. " + e.getMessage());
+                e.printStackTrace();
+            }
+            
+            getResponse().setEntity(representation);
+        }
+    }
+    
+    /**
+     * 
+     *
+     */
+    public static class DownloadResultsResource extends Resource {
+       
+        private GUID _guid;
+        
+        public DownloadResultsResource(Context context, Request request, Response response) {
+            super(context, request, response);
+            
+            String guid = (String)getRequest().getAttributes().get("id");
+            
+            if (guid != null && guid.length() != 0)
+                _guid = new GUID(guid);
+            
+            getVariants().add(new Variant(MediaType.TEXT_XML));
+        }
+        
+        @Override
+        public Representation represent(Variant variant) throws ResourceException {
+            DomRepresentation representation = null;
+            Application lwapp = (Application)getContext().getAttributes().get(Application.KEY);
+            DownloadManager dm = ((LimeWireApplication)lwapp).getDownloadManager();
+            
+            try {
+                representation = new DomRepresentation(MediaType.TEXT_XML);
+                Document document = representation.getDocument();
+                Element downloads = (Element)document.appendChild(document.createElement("downloads"));
+                
+                for (CoreDownloader cd : dm.getAllDownloaders()) {
+                    Element download = (Element)downloads.appendChild(document.createElement("download"));
+                    
+                    RestRPCMain.addCDATAElement(document, download, "amount_read", cd.getAmountRead());
+                    RestRPCMain.addCDATAElement(document, download, "amount_pending", cd.getAmountPending());
+                    RestRPCMain.addCDATAElement(document, download, "amount_verified", cd.getAmountVerified());
+                    RestRPCMain.addCDATAElement(document, download, "is_complete", cd.isCompleted());
+                    RestRPCMain.addCDATAElement(document, download, "filename", cd.getSaveFile().getName());
+                }
+            }
+            catch (IOException e ) {
+                System.out.println("DownloadResultsResource::represent().. " + e.getMessage());
                 e.printStackTrace();
             }
             
             return representation;
         }
     }
-    
     
     /**
      * 
