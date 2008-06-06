@@ -37,6 +37,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
+import com.limegroup.gnutella.stubs.FileListStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.util.LimeTestCase;
@@ -96,8 +97,9 @@ public class HTTPUploaderTest extends LimeTestCase {
         });        
 
         fm = (FileManagerStub) injector.getInstance(FileManager.class);
-        fm.setUrns(urns);
-        fm.setDescs(descs);
+        FileListStub sharedList = (FileListStub)fm.getSharedFileList();
+        sharedList.setUrns(urns);
+        sharedList.setDescs(descs);
 
         cb = (MyActivityCallback) injector.getInstance(ActivityCallback.class);
 

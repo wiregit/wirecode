@@ -2,6 +2,7 @@ package com.limegroup.gnutella.stubs;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,7 @@ public class FileListStub extends SharedFileListImpl {
     
     private Map<URN,FileDesc> urnMap = new HashMap<URN,FileDesc>();
     
-//    private List<FileDesc> fd = new ArrayList<FileDesc>();
+    private List<FileDesc> fd = new ArrayList<FileDesc>();
     
     
     private FileDescStub fdStub = new FileDescStub();
@@ -155,7 +156,7 @@ public class FileListStub extends SharedFileListImpl {
     }
 
     public void setDescs(List<FileDesc> descs) {
-//        this.fd = descs;
+        this.fd = descs;
     }
     
     public void setFiles(Map<File, FileDesc> fileMap) {

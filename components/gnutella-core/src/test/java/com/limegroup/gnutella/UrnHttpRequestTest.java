@@ -85,7 +85,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         fileManager = injector.getInstance(FileManager.class);
         fileManager.loadSettingsAndWait(2000);
         
-        assertGreaterThanOrEquals("FileManager should have loaded files", 5, fileManager.getNumFiles());
+        assertGreaterThanOrEquals("FileManager should have loaded files", 5, fileManager.getSharedFileList().getNumFiles());
     }
 
     @Override
@@ -102,8 +102,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         UploadSettings.HARD_MAX_UPLOADS.setValue(0);
 
         try {
-            for (int i = 0; i < fileManager.getNumFiles(); i++) {
-                FileDesc fd = fileManager.get(i);
+            for (FileDesc fd: fileManager.getSharedFileList().getAllFileDescs()) {
                 String uri = "/get/" + fd.getIndex() + "/" + fd.getFileName();
 
                 BasicHttpRequest request = new BasicHttpRequest("GET", uri,
@@ -125,8 +124,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * Test requests by URN.
      */
     public void testHttpUrnRequest() throws Exception {
-        for (int i = 0; i < fileManager.getNumFiles(); i++) {
-            FileDesc fd = fileManager.get(i);
+        for (FileDesc fd : fileManager.getSharedFileList().getAllFileDescs() ) {
             String uri = "/uri-res/N2R?" + fd.getSHA1Urn().httpStringValue();
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
@@ -143,8 +141,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * /get/0//uri-res/N2R?urn:sha1:AZUCWY54D63______PHN7VSVTKZA3YYT HTTP/1.1
      */
     public void testMalformedHttpUrnRequest() throws Exception {
-        for (int i = 0; i < fileManager.getNumFiles(); i++) {
-            FileDesc fd = fileManager.get(i);
+        for (FileDesc fd : fileManager.getSharedFileList().getAllFileDescs() ) {
             String uri = "/get/0//uri-res/N2R?"
                     + fd.getSHA1Urn().httpStringValue();
 
@@ -162,8 +159,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * the X-Gnutella-Content-URN header is always returned.
      */
     public void testTraditionalGetForReturnedUrn() throws Exception {
-        for (int i = 0; i < fileManager.getNumFiles(); i++) {
-            FileDesc fd = fileManager.get(i);
+        for (FileDesc fd : fileManager.getSharedFileList().getAllFileDescs() ) {
             String uri = "/get/" + fd.getIndex() + "/" + fd.getFileName();
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
@@ -186,8 +182,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * expected.
      */
     public void testTraditionalGetWithContentUrn() throws Exception {
-        for (int i = 0; i < fileManager.getNumFiles(); i++) {
-            FileDesc fd = fileManager.get(i);
+        for (FileDesc fd : fileManager.getSharedFileList().getAllFileDescs() ) {
             String uri = "/get/" + fd.getIndex() + "/" + fd.getFileName();
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
@@ -205,8 +200,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * error code 404.
      */
     public void testTraditionalGetWithInvalidContentUrn() throws Exception {
-        for (int i = 0; i < fileManager.getNumFiles(); i++) {
-            FileDesc fd = fileManager.get(i);
+        for (FileDesc fd : fileManager.getSharedFileList().getAllFileDescs() ) {
             String uri = "/get/" + fd.getIndex() + "/" + fd.getFileName();
 
             BasicHttpRequest request = new BasicHttpRequest("GET", uri,
@@ -227,8 +221,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
      * matching X-Gnutella-Content-URN header values also fail with 404.
      */
     public void testInvalidTraditionalGetWithValidContentUrn() throws Exception {
-        for (int i = 0; i < fileManager.getNumFiles(); i++) {
-            FileDesc fd = fileManager.get(i);
+        for (FileDesc fd : fileManager.getSharedFileList().getAllFileDescs() ) {
             String uri = "/get/" + fd.getIndex() + "/" + fd.getFileName()
                     + "invalid";
 

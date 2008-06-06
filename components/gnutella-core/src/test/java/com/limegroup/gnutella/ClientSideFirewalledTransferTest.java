@@ -173,7 +173,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         drainUDP();
 
         // make sure leaf is sharing
-        assertEquals(2, fileManager.getNumFiles());
+        assertEquals(2, fileManager.getSharedFileList().getNumFiles());
 
         // send a query that should be answered
         QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte)2,

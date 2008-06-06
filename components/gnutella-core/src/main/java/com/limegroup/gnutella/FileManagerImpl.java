@@ -37,7 +37,6 @@ import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.setting.StringArraySetting;
 import org.limewire.statistic.StatsUtils;
-import org.limewire.util.ByteUtils;
 import org.limewire.util.FileUtils;
 import org.limewire.util.RPNParser;
 
@@ -91,36 +90,9 @@ public abstract class FileManagerImpl implements FileManager {
      * All of the data for FileManager.
      */
     private final LibraryData _data = new LibraryData();
-
-    /** 
-     * The list of complete and incomplete files.  An entry is null if it
-     *  is no longer shared.
-     * INVARIANT: for all i, _files[i]==null, or _files[i].index==i and either
-     *  _files[i]._path is in a shared directory with a shareable extension or
-     *  _files[i]._path is the incomplete directory if _files[i] is an IncompleteFileDesc.
-     */
-    private List<FileDesc> _files;
     
-    /**
-     * The list of store files. 
-     */
-    private List<FileDesc> _storeFiles;
-    
-    /**
-     * The total size of all complete files, in bytes.
-     * INVARIANT: _filesSize=sum of all size of the elements of _files,
-     *   except IncompleteFileDescs, whose size may change at any time.
-     */
-    @InspectablePrimitive("total size of shared files")
-    private long _filesSize;
-    
-    /**
-     * The number of complete files.
-     * INVARIANT: _numFiles==number of elements of _files that are not null
-     *  and not IncompleteFileDescs.
-     */
-    @InspectablePrimitive("number of shared files")
-    private int _numFiles;
+    private FileList sharedFileList = new SynchronizedFileList(new SharedFileListImpl());
+    private FileList storeFileList = new SynchronizedFileList(new FileListImpl());
     
     /** 
      * The total number of files that are pending sharing.
@@ -128,49 +100,6 @@ public abstract class FileManagerImpl implements FileManager {
      */
     @InspectablePrimitive("number of pending files")
     private int _numPendingFiles;
-    
-    /**
-     * The total number of incomplete files.
-     * INVARIANT: _numFiles + _numIncompleteFiles == the number of
-     *  elements of _files that are not null.
-     */
-    @InspectablePrimitive("number of incomplete files")
-    private int _numIncompleteFiles;
-    
-    /**
-     * The number of files that are forcibly shared over the network.
-     * INVARIANT: _numFiles >= _numForcedFiles.
-     */
-    @InspectablePrimitive("number force-shared files")
-    private int _numForcedFiles;
-    
-    /**
-     * An index that maps a <tt>File</tt> on disk to the 
-     *  <tt>FileDesc</tt> holding it.
-     *
-     * INVARIANT: For all keys k in _fileToFileDescMap, 
-     *  _files[_fileToFileDescMap.get(k).getIndex()].getFile().equals(k)
-     *
-     * Keys must be canonical <tt>File</tt> instances.
-     */
-    private Map<File, FileDesc> _fileToFileDescMap;
-
-    /**
-     * A map of appropriately case-normalized URN strings to the
-     * indices in _files.  Used to make query-by-hash faster.
-     * 
-     * INVARIANT: for all keys k in _urnMap, for all i in _urnMap.get(k),
-     * _files[i].containsUrn(k).  Likewise for all i, for all k in
-     * _files[i].getUrns(), _urnMap.get(k) contains i.
-     */
-    private Map<URN, IntSet> _urnMap;
-    
-    /**
-     * A map of appropriately case-normalized URN strings to the
-     * indices of _store files. Needed to allow store file modification
-     * to happen.
-     */
-    private Map<URN, IntSet> _urnStoreMap;
     
     /**
      * The set of file extensions to share, sorted by StringComparator. 
@@ -185,23 +114,6 @@ public abstract class FileManagerImpl implements FileManager {
 	 */
     @InspectableForSize("number completely shared directories")
 	private Set<File> _completelySharedDirectories;
-	
-    /**
-     * The IntSet for incomplete shared files.
-     * 
-     * INVARIANT: for all i in _incompletesShared,
-     *       _files[i]._path == the incomplete directory.
-     *       _files[i] instanceof IncompleteFileDesc
-     *  Likewise, for all i s.t.
-     *    _files[i] != null and _files[i] instanceof IncompleteFileDesc,
-     *       _incompletesShared.contains(i)
-     * 
-     * This structure is not strictly needed for correctness, but it allows
-     * others to retrieve all the incomplete shared files, which is
-     * relatively useful.                                                                                                       
-     */
-    @InspectableForSize("number incompletely shared files")
-    private IntSet _incompletesShared;
     
     /**
      * A Set of URNs that we're currently requesting validation for.
@@ -217,17 +129,6 @@ public abstract class FileManagerImpl implements FileManager {
      */
     @InspectableForSize("number of transiently shared files")
     private Set<File> _transientSharedFiles = new HashSet<File>();
-    
-    /**
-     * An index that maps a LWS <tt>File</tt> on disk to the 
-     *  <tt>FileDesc</tt> holding it.
-     *
-     * INVARIANT: For all keys k in _fileToFileDescMap, 
-     *  _files[_fileToFileDescMap.get(k).getIndex()].getFile().equals(k)
-     *
-     * Keys must be canonical <tt>File</tt> instances.
-     */
-    private Map<File, FileDesc> _storeToFileDescMap;
 
     /**
      *  The directory for downloading LWS songs to and any subdirectories
@@ -365,23 +266,14 @@ public abstract class FileManagerImpl implements FileManager {
      * files are reloaded.
      */
     private void resetVariables()  {
-        _filesSize = 0;
-        _numFiles = 0;
-        _numIncompleteFiles = 0;
+        sharedFileList.resetVariables();
+        storeFileList.resetVariables();
         _numPendingFiles = 0;
-        _numForcedFiles = 0;
-        _files = new ArrayList<FileDesc>();
-        _storeFiles = new ArrayList<FileDesc>();
-        _urnMap = new HashMap<URN, IntSet>();
-        _urnStoreMap = new HashMap<URN, IntSet>();
         _extensions = new HashSet<String>();
 		_completelySharedDirectories = new HashSet<File>();
-        _incompletesShared = new IntSet();
-        _fileToFileDescMap = new HashMap<File, FileDesc>();
         // the transient files and the special files.
         _individualSharedFiles = Collections.synchronizedCollection(
         		new MultiCollection<File>(_transientSharedFiles, _data.SPECIAL_FILES_TO_SHARE));
-        _storeToFileDescMap = new HashMap<File, FileDesc>();
         _storeDirectories = new HashSet<File>();
     }
 
@@ -431,69 +323,24 @@ public abstract class FileManagerImpl implements FileManager {
         _data.save();
         fileManagerController.save();
     }
+    
+    public FileList getSharedFileList() {
+        return sharedFileList;
+    }
+    
+    public FileList getStoreFileList() {
+        return storeFileList;
+    }
 	
     ///////////////////////////////////////////////////////////////////////////
     //  Accessors
     ///////////////////////////////////////////////////////////////////////////
-		
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#getSize()
-     */
-    public int getSize() {
-		return ByteUtils.long2int(_filesSize); 
-	}
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#getNumFiles()
-     */
-    public int getNumFiles() {
-		return _numFiles - _numForcedFiles;
-	}
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#getNumStoreFiles()
-     */
-    public int getNumStoreFiles() {
-        return _storeToFileDescMap.size();
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#getNumIncompleteFiles()
-     */
-    public int getNumIncompleteFiles() {
-        return _numIncompleteFiles;
-    }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#getNumPendingFiles()
      */
     public int getNumPendingFiles() {
         return _numPendingFiles;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#getNumForcedFiles()
-     */
-    public int getNumForcedFiles() {
-        return _numForcedFiles;
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#get(int)
-     */
-    public synchronized FileDesc get(int i) {
-        return _files.get(i);
-    }
-    
-    public synchronized IntSet getIndicesForUrn(URN urn) {
-        return _urnMap.get(urn);
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#isValidIndex(int)
-     */
-    public synchronized boolean isValidSharedIndex(int i) {
-        return (i >= 0 && i < _files.size());
     }
 
     /* (non-Javadoc)
@@ -505,22 +352,10 @@ public abstract class FileManagerImpl implements FileManager {
         } catch(IOException ioe) {
             return null;
         }
-        if(_fileToFileDescMap.containsKey(f))
-        	return _fileToFileDescMap.get(f);
+        if(sharedFileList.contains(f))
+        	return sharedFileList.getFileDesc(f);
         else
-            return _storeToFileDescMap.get(f);
-    }
-    
-    public synchronized FileDesc getSharedFileDescForFile(File file) {
-        return _fileToFileDescMap.get(file);
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#isUrnShared(com.limegroup.gnutella.URN)
-     */
-    public synchronized boolean isUrnShared(final URN urn) {
-        FileDesc fd = getSharedFileDescForUrn(urn);
-        return fd != null && !(fd instanceof IncompleteFileDesc);
+            return storeFileList.getFileDesc(f);
     }
 
 	/* (non-Javadoc)
@@ -530,115 +365,14 @@ public abstract class FileManagerImpl implements FileManager {
         if (!urn.isSHA1())
             throw new IllegalArgumentException();
         
-        if( _urnMap.get(urn) != null ) {
-            return getSharedFileDescForUrn(urn);
-        } else if ( _urnStoreMap.get(urn) != null ) {
-            return getStoreFileDescForUrn(urn);
+        if( sharedFileList.contains(urn)){
+            return sharedFileList.getFileDesc(urn);
+        } else if ( storeFileList.contains(urn)) { 
+            return storeFileList.getFileDesc(urn);
         } else {
             return null;
         }
 	}
-	
-	/**
-	 * Given a urn, attempts to locate a Shared FileDesc for that urn
-	 */
-	public synchronized FileDesc getSharedFileDescForUrn(final URN urn) {
-        if (!urn.isSHA1())
-            throw new IllegalArgumentException();
-        
-        if( _urnMap.get(urn) != null ) 
-        	return getFileDescForUrn(urn, _urnMap, _files);
-        else
-        	return null;
-	}
-	
-	/**
-	 * Given a urn, attempts to locate a Store FileDesc for that urn
-	 */
-	private synchronized FileDesc getStoreFileDescForUrn(final URN urn) {
-		return getFileDescForUrn(urn, _urnStoreMap, _storeFiles);
-	}
-	
-	/**
-	 * Given a URN returns the FileDesc associated with that URN.
-	 */
-	private synchronized FileDesc getFileDescForUrn(final URN urn, Map<URN, IntSet> map, List<FileDesc> files) {
-	    IntSet indices = map.get(urn);
-        if(indices == null) return null;
-	    
-        IntSet.IntSetIterator iter = indices.iterator();
-	        
-	    //Pick the first non-null non-Incomplete FileDesc.
-	    FileDesc ret = null;
-	    while ( iter.hasNext() 
-	               && ( ret == null || ret instanceof IncompleteFileDesc) ) {
-	        int index = iter.next();
-	        ret = files.get(index);
-	    }
-	    return ret;
-	}
-	
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#getIncompleteFileDescriptors()
-     */
-	public synchronized FileDesc[] getIncompleteFileDescriptors() {
-        if (_incompletesShared == null)
-            return null;
-        
-        FileDesc[] ret = new FileDesc[_incompletesShared.size()];
-        IntSet.IntSetIterator iter = _incompletesShared.iterator();
-        for (int i = 0; iter.hasNext(); i++) {
-            FileDesc fd = _files.get(iter.next());
-            assert fd != null : "Directory has null entry";
-            ret[i]=fd;
-        }
-        
-        return ret;
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#getAllSharedFileDescriptors()
-     */
-    public synchronized FileDesc[] getAllSharedFileDescriptors() {
-        // Instead of using _files.toArray, use
-        // _fileToFileDescMap.values().toArray.  This is because
-        // _files will still contain null values for removed
-        // shared files, but _fileToFileDescMap will not.
-        FileDesc[] fds = new FileDesc[_fileToFileDescMap.size()];        
-        fds = _fileToFileDescMap.values().toArray(fds);
-        return fds;
-    }
-
-    /**
-     * Returns a list of all shared file descriptors in the given directory,
-     * in any order.
-     * 
-     * Returns null if directory is not shared, or a zero-length array if it is
-     * shared but contains no files.  This method is not recursive; files in 
-     * any of the directory's children are not returned.
-     * 
-     * This operation is <b>not</b> efficient, and should not be done often.
-     */  
-    public synchronized List<FileDesc> getSharedFilesInDirectory(File directory) {
-        if (directory == null)
-            throw new NullPointerException("null directory");
-        
-        // a. Remove case, trailing separators, etc.
-        try {
-            directory = FileUtils.getCanonicalFile(directory);
-        } catch (IOException e) { // invalid directory ?
-            return Collections.emptyList();
-        }
-        
-        List<FileDesc> shared = new ArrayList<FileDesc>();
-        for(FileDesc fd : _fileToFileDescMap.values()) {
-            if(directory.equals(fd.getFile().getParentFile()))
-                shared.add(fd);
-        }
-        
-        return shared;
-    }
-
 
     ///////////////////////////////////////////////////////////////////////////
     //  Loading 
@@ -889,9 +623,6 @@ public abstract class FileManagerImpl implements FileManager {
      * @modifies this
      */
     private void updateSharedDirectories(File rootShare, File directory, File parent, int revision, int depth) {
-//        if(LOG.isDebugEnabled())
-//            LOG.debug("Attempting to share directory: " + directory);
-        
         //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
         //are the same on Windows but different on Unix.
         try {
@@ -1110,7 +841,7 @@ public abstract class FileManagerImpl implements FileManager {
                     else if(f.isFile() && !_individualSharedFiles.contains(f)) {
                         if(removeFileIfSharedOrStore(f) == null)
                             fileManagerController.clearPendingShare(f);
-                        if(isStoreFile(f)) 
+                        if(storeFileList.contains(f))
                             _data.SPECIAL_STORE_FILES.remove(f);	
                     }
                 }
@@ -1302,11 +1033,11 @@ public abstract class FileManagerImpl implements FileManager {
             return;
         }
         
-        if( isStoreFile(file)){
+        if(storeFileList.contains(file)){
                 return;
 		}
         
-        if(isFileShared(file)) {
+        if(sharedFileList.contains(file)){
             callback.handleFileEvent(new FileManagerEvent(FileManagerImpl.this, Type.ALREADY_SHARED_FILE, file));
             return;
         }
@@ -1346,7 +1077,7 @@ public abstract class FileManagerImpl implements FileManager {
                     // Only load the file if we were able to calculate URNs 
                     // assume the fd is being shared
                     if(!urns.isEmpty()) {
-                        int fileIndex = _files.size();
+                        int fileIndex = sharedFileList.getListLength();
                         fd = createFileDesc(file, urns, fileIndex);
                     }
                 }
@@ -1363,7 +1094,7 @@ public abstract class FileManagerImpl implements FileManager {
                 // check LimeXML to determine if is a store file or the sha1 is mapped to a store file 
                 //  (the sha1 check is needed if duplicate store files are loaded since the second file 
                 //  will not have a unique LimeXMLDoc associated with it)
-                if (isStoreXML(fd.getXMLDocument()) || _urnStoreMap.containsKey(fd.getSHA1Urn()) ) { 
+                if (isStoreXML(fd.getXMLDocument()) || storeFileList.contains(fd.getSHA1Urn()) ) {
                     addStoreFile(fd, file, urns, addFileType, notify, callback);
                 } else if (addFileType == AddType.ADD_SHARE) {
                     addSharedFile(file, fd, urns, addFileType, notify, callback);
@@ -1407,19 +1138,16 @@ public abstract class FileManagerImpl implements FileManager {
         if( addFileType == AddType.ADD_SHARE)
             _data.SPECIAL_STORE_FILES.add(file);
 
-        //store files are not part of the _files list so recreate fd with invalid index in _files
-        FileDesc fileDesc = createFileDesc(file, urns, _storeFiles.size());
+        //store files are not part of the _files list so recreate fd with an index into store file list
+        FileDesc fileDesc = createFileDesc(file, urns, storeFileList.getListLength());
         //add the xml doc to the new FileDesc
         if( fd.getXMLDocument() != null )
             fileDesc.addLimeXMLDocument(fd.getXMLDocument());
-    
-        _storeFiles.add(fileDesc); 
-        _storeToFileDescMap.put(file, fileDesc);
+
+        storeFileList.addFile(file, fileDesc);
         
         fileManagerController.fileAdded(file, fileDesc.getSHA1Urn());
         
-        // Ensure file can be found by URN lookups
-        this.updateStoreUrnIndex(fileDesc);
         _needRebuild = true;   
         
         FileManagerEvent evt = new FileManagerEvent(FileManagerImpl.this, Type.ADD_STORE_FILE, fileDesc);
@@ -1438,27 +1166,14 @@ public abstract class FileManagerImpl implements FileManager {
                
         // since we created the FD to test the XML for being an instance of LWS, check to make sure
         //  the FD is still valid before continuing
-        if( fileDesc.getIndex() != _files.size()) {
+        if( fileDesc.getIndex() != sharedFileList.getListLength()){
             LimeXMLDocument doc = fileDesc.getXMLDocument();
-            fileDesc = createFileDesc(file, urns, _files.size());
+            fileDesc = createFileDesc(file, urns, sharedFileList.getListLength());
             if( doc != null )
                 fileDesc.addLimeXMLDocument(doc);
         }
-        
 
-        long fileLength = file.length();
-        _filesSize += fileLength;        
-        _files.add(fileDesc);
-        _fileToFileDescMap.put(file, fileDesc);
-        _numFiles++;
-	
-        //Register this file with its parent directory.
-        File parent = file.getParentFile();
-        assert parent != null : "Null parent to \""+file+"\"";        
-        // files that are forcibly shared over the network
-        // aren't counted or shown.
-        if(SharingUtils.isForcedShareDirectory(parent))
-            _numForcedFiles++;
+        sharedFileList.addFile(file, fileDesc);
 	
         // Commit the time in the CreactionTimeCache, but don't share
         // the installer.  We populate free LimeWire's with free installers
@@ -1468,8 +1183,6 @@ public abstract class FileManagerImpl implements FileManager {
             fileManagerController.fileAdded(file, fileDesc.getSHA1Urn());
         }
 
-        // Ensure file can be found by URN lookups
-        this.updateSharedUrnIndex(fileDesc);
         _needRebuild = true;            
         
         FileManagerEvent evt = new FileManagerEvent(FileManagerImpl.this, addFileType.getSuccessType(), fileDesc);
@@ -1508,7 +1221,7 @@ public abstract class FileManagerImpl implements FileManager {
 		
 		// if its a store file it can't be shared thus it can't be unshared,
 		//    just return null
-		if( isStoreFile(file))
+		if( storeFileList.contains(file))
 		    return null;
 		
 		// remove file already here to heed against race conditions
@@ -1542,7 +1255,7 @@ public abstract class FileManagerImpl implements FileManager {
         if( toRemove == null )
             return null;
         
-        if( _storeFiles.contains(toRemove) )
+        if( storeFileList.contains(toRemove))
             return removeStoreFile(f, notify);
         else
             return removeFileIfShared(f, notify);
@@ -1560,15 +1273,12 @@ public abstract class FileManagerImpl implements FileManager {
         }        
 
 		// Look for matching file ...         
-        FileDesc fd = _fileToFileDescMap.get(f);
-        if (fd == null)
+        if (!sharedFileList.contains(f))
             return null;
+            
+        FileDesc fd = sharedFileList.getFileDesc(f);
+        sharedFileList.remove(fd);
 
-        int i = fd.getIndex();
-        assert _files.get(i).getFile().equals(f) : "invariant broken!";
-        
-        _files.set(i, null);
-        _fileToFileDescMap.remove(f);
         _needRebuild = true;
 
         // If it's an incomplete file, the only reference we 
@@ -1577,9 +1287,6 @@ public abstract class FileManagerImpl implements FileManager {
         // "shared" to begin with.
         if (fd instanceof IncompleteFileDesc) {
             removeSharedUrnIndex(fd, false);
-            _numIncompleteFiles--;
-            boolean removed = _incompletesShared.remove(i);
-            assert removed : "File "+i+" not found in " + _incompletesShared;
 
 			// Notify the GUI...
 	        if (notify) {
@@ -1590,14 +1297,10 @@ public abstract class FileManagerImpl implements FileManager {
             return fd;
         }
 
-        _numFiles--;
-        _filesSize -= fd.getFileSize();
-
         File parent = f.getParentFile();
         // files that are forcibly shared over the network aren't counted
         if(SharingUtils.isForcedShareDirectory(parent)) {
             notify = false;
-            _numForcedFiles--;
         }
 
 
@@ -1623,17 +1326,13 @@ public abstract class FileManagerImpl implements FileManager {
         }        
 
         // Look for matching file ...         
-        FileDesc fd = _storeToFileDescMap.get(f);
-        if (fd == null)
+        if (!storeFileList.contains(f))
             return null;
         
-        int i = fd.getIndex();
-        assert _storeFiles.get(i).getFile().equals(f) : "invariant broken!";
-        
-        _storeFiles.set(i, null);
+        FileDesc fd = storeFileList.getFileDesc(f);
+        storeFileList.remove(fd);
 
         _data.SPECIAL_STORE_FILES.remove(f);
-        _storeToFileDescMap.remove(f);
 
         //Remove hash information.
         removeStoreUrnIndex(fd, true);
@@ -1671,14 +1370,14 @@ public abstract class FileManagerImpl implements FileManager {
             if (!urn.isSHA1())
                 continue;
             // if there were indices for this URN, exit.
-            IntSet shared = _urnMap.get(urn);
             // nothing was shared for this URN, look at another
-            if (shared == null)
+            if (!sharedFileList.contains(urn))
                 continue;
                 
+            IntSet shared = sharedFileList.getIndicesForUrn(urn);
             for (IntSet.IntSetIterator isIter = shared.iterator(); isIter.hasNext(); ) {
                 int i = isIter.next();
-                FileDesc desc = _files.get(i);
+                FileDesc desc = sharedFileList.get(i);
                 // unshared, keep looking.
                 if (desc == null)
                     continue;
@@ -1692,14 +1391,13 @@ public abstract class FileManagerImpl implements FileManager {
         
         // no indices were found for any URN associated with this
         // IncompleteFileDesc... add it.
-        int fileIndex = _files.size();
-        _incompletesShared.add(fileIndex);
+        int fileIndex = sharedFileList.getListLength();
+
         IncompleteFileDesc ifd = new IncompleteFileDesc(
-            incompleteFile, urns, fileIndex, name, size, vf);            
-        _files.add(ifd);
-        _fileToFileDescMap.put(incompleteFile, ifd);
+            incompleteFile, urns, fileIndex, name, size, vf);
+        sharedFileList.addIncompleteFile(incompleteFile, ifd);
         fileURNSUpdated(ifd);
-        _numIncompleteFiles++;
+
         _needRebuild = true;
         dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FILE, ifd));
     }
@@ -1731,7 +1429,7 @@ public abstract class FileManagerImpl implements FileManager {
     public void fileURNSUpdated(FileDesc fd) {
         FileManagerEvent event = null; 
         synchronized (this) {
-            updateSharedUrnIndex(fd);
+            sharedFileList.updateUrnIndex(fd);
             if (fd instanceof IncompleteFileDesc) {
                 IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
                 if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
@@ -1747,45 +1445,12 @@ public abstract class FileManagerImpl implements FileManager {
         }
     }
     
-    /**
-     * @modifies this
-     * @effects enters the given FileDesc into the _urnMap under all its 
-     * reported URNs
-     */
-    private synchronized void updateSharedUrnIndex(FileDesc fileDesc) {
-        updateUrnIndex(fileDesc, _urnMap);
-    }
-    
-    /**
-     * @effects enters the given FileDesc into the _urnStoreMap under all its 
-     * reported URNs, store urns are not returned in queries
-     */
-    private synchronized void updateStoreUrnIndex(FileDesc fileDesc) {
-        updateUrnIndex(fileDesc, _urnStoreMap);
-    }
-    
-    /**
-	 * Generic method for adding a fileDesc's URNS to a map
-	 */
-    private synchronized void updateUrnIndex(FileDesc fileDesc, Map<URN, IntSet> map) {
-        for(URN urn : fileDesc.getUrns()) {
-            if (!urn.isSHA1())
-                continue;
-            IntSet indices=map.get(urn);
-            if (indices==null) {
-                indices=new IntSet();
-                map.put(urn, indices);
-            }
-            indices.add(fileDesc.getIndex());
-        }
-    }
-    
     /** 
      * Removes any URN index information for desc from shared files
      * @param purgeState true if any state should also be removed (creation time, altlocs) 
      */
     private synchronized void removeSharedUrnIndex(FileDesc fileDesc, boolean purgeState) {
-        removeUrnIndex(fileDesc, _urnMap, purgeState);
+        removeUrnIndex(fileDesc, sharedFileList, purgeState);
     }
     
     /** 
@@ -1793,16 +1458,16 @@ public abstract class FileManagerImpl implements FileManager {
      * @param purgeState true if any state should also be removed (creation time, altlocs) 
      */
     private synchronized void removeStoreUrnIndex(FileDesc fileDesc, boolean purgeState) {
-        removeUrnIndex(fileDesc, _urnStoreMap, purgeState);
+        removeUrnIndex(fileDesc, storeFileList, purgeState);
     }
     
-    private synchronized void removeUrnIndex(FileDesc fileDesc, Map<URN, IntSet> map, boolean purgeState) {
+    private synchronized void removeUrnIndex(FileDesc fileDesc, FileList fileList, boolean purgeState) {
         for(URN urn : fileDesc.getUrns()) {
             if (!urn.isSHA1())
                 continue;
             //Lookup each of desc's URN's ind _urnMap.  
             //(It better be there!)
-            IntSet indices=map.get(urn);
+            IntSet indices= fileList.getIndicesForUrn(urn);
             if (indices == null) {
                 assert fileDesc instanceof IncompleteFileDesc;
                 return;
@@ -1812,7 +1477,7 @@ public abstract class FileManagerImpl implements FileManager {
             indices.remove(fileDesc.getIndex());
             if (indices.size()==0 && purgeState) {
                 fileManagerController.lastUrnRemoved(urn);
-                map.remove(urn);
+                fileList.remove(urn);
             }
 		}
     }
@@ -1843,7 +1508,7 @@ public abstract class FileManagerImpl implements FileManager {
         List<LimeXMLDocument> xmlDocs = new LinkedList<LimeXMLDocument>(toRemove.getLimeXMLDocuments());
         
         // if its a shared file, store files all have the same index in their filedescriptor
-        if( !_storeFiles.contains(toRemove)) {
+        if( !storeFileList.contains(toRemove)) {
 		    final FileDesc removed = removeFileIfShared(oldName, false);
             assert removed == toRemove : "invariant broken.";
 		    if (_data.SPECIAL_FILES_TO_SHARE.remove(oldName) && !isFileInCompletelySharedDirectory(newName))
@@ -1897,9 +1562,6 @@ public abstract class FileManagerImpl implements FileManager {
             );
         }
     }
-
-
-    
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#validateSensitiveFile(java.io.File)
@@ -1943,7 +1605,7 @@ public abstract class FileManagerImpl implements FileManager {
     	// if at least one of the files in the application special
     	// share are currently shared, return true.
     	for (File f: files) {
-    		if (isFileShared(f))
+    		if (sharedFileList.contains(f))
     			return true;
     	}
     	
@@ -2017,17 +1679,6 @@ public abstract class FileManagerImpl implements FileManager {
             }
         }
     }
-
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#isFileShared(java.io.File)
-     */
-	public synchronized boolean isFileShared(File file) {
-		if (file == null)
-			return false;
-		if (_fileToFileDescMap.get(file) == null)
-			return false;
-		return true;
-	}
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#isRareFile(com.limegroup.gnutella.FileDesc)
@@ -2073,17 +1724,6 @@ public abstract class FileManagerImpl implements FileManager {
 			return _completelySharedDirectories.contains(dir);
 		}
 	}
-
-	/* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#isStoreFile(java.io.File)
-     */
-    public boolean isStoreFile(File file) {
-        if( _storeToFileDescMap.containsKey(file) || 
-                _storeDirectories.contains(file)) {
-                return true;
-        }
-        return false;
-    }
     
 	/**
 	 * Returns true if the given file is in a completely shared directory
@@ -2181,20 +1821,20 @@ public abstract class FileManagerImpl implements FileManager {
             for (String entry : SearchSettings.LIME_QRP_ENTRIES.getValue())
                 _queryRouteTable.addIndivisible(entry);
         }
-        FileDesc[] fds = getAllSharedFileDescriptors();
-        for(int i = 0; i < fds.length; i++) {
-            if (fds[i] instanceof IncompleteFileDesc) {
+        List<FileDesc> fds = sharedFileList.getAllFileDescs();
+        for(FileDesc fd : fds ){
+            if (fd instanceof IncompleteFileDesc) {
                 if (!SharingSettings.ALLOW_PARTIAL_SHARING.getValue())
                     continue;
                 if (!SharingSettings.PUBLISH_PARTIAL_QRP.getValue())
                     continue;
-                IncompleteFileDesc ifd = (IncompleteFileDesc)fds[i];
+                IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
                 if (!ifd.hasUrnsAndPartialData())
                     continue;
                 
                 _queryRouteTable.add(ifd.getFileName());
             } else
-                _queryRouteTable.add(fds[i].getPath());
+                _queryRouteTable.add(fd.getPath());
         }
     }
 
@@ -2210,7 +1850,7 @@ public abstract class FileManagerImpl implements FileManager {
     	} catch (IOException bad) {
     		return false;
     	}
-    	return isFileShared(file);
+    	return sharedFileList.contains(file);
     }
     
   
@@ -2260,9 +1900,9 @@ public abstract class FileManagerImpl implements FileManager {
                     return false;
                 }
 
-                synchronized (FileManagerImpl.this) {
-                    while (index < _files.size()) {
-                        FileDesc desc = _files.get(index);
+                synchronized (sharedFileList) {
+                    while (index < sharedFileList.getListLength()) {
+                        FileDesc desc = sharedFileList.get(index);
                         index++;
 
                         // skip, if the file was unshared or is an incomplete file,
@@ -2282,11 +1922,9 @@ public abstract class FileManagerImpl implements FileManager {
                 }
 
                 if (preview != null) {
-                    synchronized (FileManagerImpl.this) {
-                        if (_files.get(index - 1) == null) {
-                            // file was removed in the meantime
-                            preview = null;
-                        }
+                    if (sharedFileList.get(index-1) == null) {
+                        // file was removed in the meantime
+                        preview = null;
                     }
                 }
                 return preview != null || preview();
@@ -2399,12 +2037,10 @@ public abstract class FileManagerImpl implements FileManager {
                 int matched = 0;
                 try {
                     RPNParser parser = new RPNParser(MessageSettings.CUSTOM_FD_CRITERIA.getValue());
-                    synchronized(FileManagerImpl.this) {
-                        for (FileDesc fd : getAllSharedFileDescriptors()) {
-                            total++;
-                            if (parser.evaluate(fd))
-                                matched++;
-                        }
+                    for (FileDesc fd : sharedFileList.getAllFileDescs()){
+                        total++;
+                        if (parser.evaluate(fd))
+                            matched++;
                     }
                 } catch (IllegalArgumentException badSimpp) {
                     ret.put("error",badSimpp.toString());
@@ -2448,57 +2084,57 @@ public abstract class FileManagerImpl implements FileManager {
             Map<Integer, FileDesc> topUpsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
             Map<Integer, FileDesc> topAltsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
             Map<Integer, FileDesc> topCupsFDs = new TreeMap<Integer, FileDesc>(Comparators.inverseIntegerComparator());
-            synchronized(FileManagerImpl.this) {
-                FileDesc[] fds = getAllSharedFileDescriptors();
-                hits.ensureCapacity(fds.length);
-                uploads.ensureCapacity(fds.length);
-                int rare = 0;
-                int total = 0;
-                for(int i = 0; i < fds.length; i++) {
-                    if (fds[i] instanceof IncompleteFileDesc)
-                        continue;
-                    total++;
-                    if (isRareFile(fds[i]))
-                        rare++;
-                    // locking FM->ALM ok.
-                    int numAlts = fileManagerController.getAlternateLocationCount(fds[i].getSHA1Urn());
-                    if (!nonZero || numAlts > 0) {
-                        alts.add((double)numAlts);
-                        topAltsFDs.put(numAlts,fds[i]);
-                    }
-                    int hitCount = fds[i].getHitCount();
-                    if (!nonZero || hitCount > 0) {
-                        hits.add((double)hitCount);
-                        topHitsFDs.put(hitCount, fds[i]);
-                    }
-                    int upCount = fds[i].getAttemptedUploads();
-                    if (!nonZero || upCount > 0) {
-                        uploads.add((double)upCount);
-                        topUpsFDs.put(upCount, fds[i]);
-                    }
-                    int cupCount = fds[i].getCompletedUploads();
-                    if (!nonZero || cupCount > 0) {
-                        completeUploads.add((double)upCount);
-                        topCupsFDs.put(cupCount, fds[i]);
-                    }
-                    
-                    // keywords per fd
-                    double keywordsCount = 
-                        HashFunction.getPrefixes(HashFunction.keywords(fds[i].getPath())).length;
-                    keywords.add(keywordsCount);
-                    
-                    // populate differences
-                    if (!nonZero) {
-                        int index = hits.size() - 1;
-                        hitsUpload.add(hits.get(index) - uploads.get(index));
-                        altsHits.add(alts.get(index) - hits.get(index));
-                        altsUploads.add(alts.get(index)  - uploads.get(index));
-                        hitsKeywords.add(hits.get(index) - keywordsCount);
-                        uploadsToComplete.add(uploads.get(index) - completeUploads.get(index));
-                    }
+
+            List<FileDesc> fds = sharedFileList.getAllFileDescs();
+            hits.ensureCapacity(fds.size());
+            uploads.ensureCapacity(fds.size());
+            int rare = 0;
+            int total = 0;
+            for(FileDesc fd : fds ) {
+                if (fd instanceof IncompleteFileDesc)
+                    continue;
+                total++;
+                if (isRareFile(fd))
+                    rare++;
+                // locking FM->ALM ok.
+                int numAlts = fileManagerController.getAlternateLocationCount(fd.getSHA1Urn());
+                if (!nonZero || numAlts > 0) {
+                    alts.add((double)numAlts);
+                    topAltsFDs.put(numAlts,fd);
                 }
-                ret.put("rare",Double.doubleToLongBits((double)rare / total));
+                int hitCount = fd.getHitCount();
+                if (!nonZero || hitCount > 0) {
+                    hits.add((double)hitCount);
+                    topHitsFDs.put(hitCount, fd);
+                }
+                int upCount = fd.getAttemptedUploads();
+                if (!nonZero || upCount > 0) {
+                    uploads.add((double)upCount);
+                    topUpsFDs.put(upCount, fd);
+                }
+                int cupCount = fd.getCompletedUploads();
+                if (!nonZero || cupCount > 0) {
+                    completeUploads.add((double)upCount);
+                    topCupsFDs.put(cupCount, fd);
+                }
+                
+                // keywords per fd
+                double keywordsCount = 
+                    HashFunction.getPrefixes(HashFunction.keywords(fd.getPath())).length;
+                keywords.add(keywordsCount);
+                
+                // populate differences
+                if (!nonZero) {
+                    int index = hits.size() - 1;
+                    hitsUpload.add(hits.get(index) - uploads.get(index));
+                    altsHits.add(alts.get(index) - hits.get(index));
+                    altsUploads.add(alts.get(index)  - uploads.get(index));
+                    hitsKeywords.add(hits.get(index) - keywordsCount);
+                    uploadsToComplete.add(uploads.get(index) - completeUploads.get(index));
+                }
             }
+            ret.put("rare",Double.doubleToLongBits((double)rare / total));
+
             ret.put("hits",StatsUtils.quickStatsDouble(hits).getMap());
             ret.put("hitsh", StatsUtils.getHistogram(hits, 10)); // small, will compress
             ret.put("ups",StatsUtils.quickStatsDouble(uploads).getMap());

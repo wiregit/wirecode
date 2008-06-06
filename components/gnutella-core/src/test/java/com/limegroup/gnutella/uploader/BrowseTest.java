@@ -138,7 +138,7 @@ public class BrowseTest extends LimeTestCase {
                 }
             }
 
-            assertEquals(fileManager.getNumFiles(), files.size());
+            assertEquals(fileManager.getSharedFileList().getNumFiles(), files.size());
 
             for (Iterator<FileDesc> it = fileManager.getIndexingIterator(); it.hasNext();) {
                 FileDesc result = it.next();

@@ -382,7 +382,7 @@ public class LeafRoutingTest extends LimeTestCase {
         BlockingConnectionUtils.drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertTrue(fileManager.getNumFiles() == 2);
+        assertTrue(fileManager.getSharedFileList().getNumFiles() == 2);
 
         // send a query that should hit
         QueryRequest query = queryRequestFactory.createQueryRequest(GUID.makeGuid(), (byte) 1,
@@ -418,7 +418,7 @@ public class LeafRoutingTest extends LimeTestCase {
         BlockingConnectionUtils.drain(ultrapeer2);
 
         // make sure the set up succeeded
-        assertEquals(2, fileManager.getNumFiles());
+        assertEquals(2, fileManager.getSharedFileList().getNumFiles());
 
         // get the URNS for the files
         File berkeley = 

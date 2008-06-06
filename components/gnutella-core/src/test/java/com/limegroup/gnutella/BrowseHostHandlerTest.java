@@ -100,7 +100,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
         fileManager.loadSettingsAndWait(100000);
 
-        assertGreaterThan(0, fileManager.getNumFiles());
+        assertGreaterThan(0, fileManager.getSharedFileList().getNumFiles());
 
         browseHostHandler = injector.getInstance(BrowseHostHandlerManager.class).createBrowseHostHandler(new GUID(), new GUID());
         socketsManager = injector.getInstance(SocketsManager.class);
@@ -165,7 +165,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
             }
         }
 
-        assertEquals(fileManager.getNumFiles(), files.size());
+        assertEquals(fileManager.getSharedFileList().getNumFiles(), files.size());
 
         for (Iterator<FileDesc> it = fileManager.getIndexingIterator(); it.hasNext();) {
             FileDesc result = it.next();

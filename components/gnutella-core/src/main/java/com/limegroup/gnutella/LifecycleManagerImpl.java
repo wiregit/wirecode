@@ -819,7 +819,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         File tFile;
         for(int i = 0; i < file_list.length; i++) {
             tFile = file_list[i];
-            if(!fileManager.get().isFileShared(tFile) &&
+            if(!fileManager.get().getSharedFileList().contains(tFile) &&
                     tFile.lastModified() < purgeLimit) {
                 tFile.delete();
             }

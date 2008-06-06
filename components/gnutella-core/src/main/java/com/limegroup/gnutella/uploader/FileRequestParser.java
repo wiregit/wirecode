@@ -108,7 +108,7 @@ class FileRequestParser {
             return null;
         }
     
-        FileDesc desc = fileManager.getSharedFileDescForUrn(urn);
+        FileDesc desc = fileManager.getSharedFileList().getFileDesc(urn);
         if (desc == null) {
             return null;
         }

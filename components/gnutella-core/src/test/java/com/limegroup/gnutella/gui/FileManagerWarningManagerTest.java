@@ -71,7 +71,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             allowing(depthSwitch).getValue();
             will(returnValue(false));
             never(notifier);
-            exactly(4).of(fileManager).getNumFiles();
+            exactly(4).of(fileManager).getSharedFileList().getNumFiles();
             will(returnValue(5));
         }});
             
@@ -110,7 +110,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             allowing(depthSwitch).getValue();
             will(returnValue(false));
-            one(fileManager).getNumFiles();
+            one(fileManager).getSharedFileList().getNumFiles();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             one(notifier).showMessage(with(matcher));
         }});
@@ -130,9 +130,9 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             allowing(depthSwitch).getValue();
             will(returnValue(false));
-            one(fileManager).getNumFiles();
+            one(fileManager).getSharedFileList().getNumFiles();
             will(returnValue(5));
-            one(fileManager).getNumFiles();
+            one(fileManager).getSharedFileList().getNumFiles();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             exactly(1).of(notifier).showMessage(with(matcher));
         }});
@@ -154,7 +154,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             allowing(depthSwitch).getValue();
             will(returnValue(false));
-            exactly(2).of(fileManager).getNumFiles();
+            exactly(2).of(fileManager).getSharedFileList().getNumFiles();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             exactly(2).of(notifier).showMessage(with(matcher));
         }});
@@ -173,7 +173,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(true));
             allowing(depthSwitch).getValue();
             will(returnValue(false));
-            exactly(2).of(fileManager).getNumFiles();
+            exactly(2).of(fileManager).getSharedFileList().getNumFiles();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             never(notifier);
         }});
@@ -293,7 +293,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
             will(returnValue(false));
             allowing(depthSwitch).getValue();
             will(returnValue(false));
-            one(fileManager).getNumFiles();
+            one(fileManager).getSharedFileList().getNumFiles();
             will(returnValue(SharingSettings.FILES_FOR_WARNING.getValue()));
             exactly(2).of(notifier).showMessage(with(matcher));
         }});

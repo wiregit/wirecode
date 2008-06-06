@@ -1137,8 +1137,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         addAlternateLocationsToFiles();
         
         boolean checked = false;
-		for(int i = 0; i < fileManager.getNumFiles(); i++) {
-			FileDesc fd = fileManager.get(i);
+		for(int i = 0; i < fileManager.getSharedFileList().getNumFiles(); i++) {
+			FileDesc fd = fileManager.getSharedFileList().get(i);
 			Response testResponse = responseFactory.createResponse(fd);
 
             String name = fd.getFileName();
@@ -1202,8 +1202,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         addFilesToLibrary();
         addCreationTimeToFiles();
         boolean checked = false;
-		for(int i = 0; i < fileManager.getNumFiles(); i++) {
-			FileDesc fd = fileManager.get(i);
+		for(int i = 0; i < fileManager.getSharedFileList().getNumFiles(); i++) {
+			FileDesc fd = fileManager.getSharedFileList().get(i);
 			long expectTime = (fd.getIndex() + 1) * 10013;
 			Response testResponse = responseFactory.createResponse(fd);
 			assertEquals(fd.toString(), expectTime, testResponse.getCreateTime());
@@ -1453,16 +1453,16 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         }
 
         fileManager.loadSettingsAndWait(5000);
-        assertEquals("unexpected number of shared files", testFiles.length, fileManager.getNumFiles());
+        assertEquals("unexpected number of shared files", testFiles.length, fileManager.getSharedFileList().getNumFiles());
     }
     
     private void addAlternateLocationsToFiles() throws Exception {
         AltLocManager altLocManager = injector.getInstance(AltLocManager.class);
         AlternateLocationFactory alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
         FileManager fileManager = injector.getInstance(FileManager.class);
-        FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
-        for(int i = 0; i < fds.length; i++) {
-            URN urn = fds[i].getSHA1Urn();
+        List<FileDesc> fds = fileManager.getSharedFileList().getAllFileDescs();
+        for(FileDesc fd : fds ) {
+            URN urn = fd.getSHA1Urn();
             for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
                 altLocManager.add(alternateLocationFactory.create("1.2.3." + j, urn), null);
             }
@@ -1472,11 +1472,11 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
     private void addCreationTimeToFiles() throws Exception {
         CreationTimeCache creationTimeCache = injector.getInstance(CreationTimeCache.class);
         FileManager fileManager = injector.getInstance(FileManager.class);
-        FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
-        for(int i = 0; i < fds.length; i++) {
-            long time = (fds[i].getIndex() + 1) * 10013;
-            creationTimeCache.addTime(fds[i].getSHA1Urn(), time);
-            creationTimeCache.commitTime(fds[i].getSHA1Urn());
+        List<FileDesc> fds = fileManager.getSharedFileList().getAllFileDescs();
+        for(FileDesc fd : fds ) {
+            long time = (fd.getIndex() + 1) * 10013;
+            creationTimeCache.addTime(fd.getSHA1Urn(), time);
+            creationTimeCache.commitTime(fd.getSHA1Urn());
         }
     }        
     

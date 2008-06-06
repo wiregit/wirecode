@@ -47,6 +47,7 @@ import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
+import com.limegroup.gnutella.stubs.FileListStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IOStateObserverStub;
 import com.limegroup.gnutella.tigertree.HashTree;
@@ -181,9 +182,10 @@ public class UploadQueueingTest extends LimeTestCase {
                 new byte[16], 56, false, 3, false, null, descStub.getUrns(), false, false, "", null, -1,
                 false);
 
-        fm.setUrns(urns);
-        fm.setDescs(descs);
-        fm.get(0);
+        FileListStub sharedList = (FileListStub)fm.getSharedFileList();
+        sharedList.setUrns(urns);
+        sharedList.setDescs(descs);
+        sharedList.get(0);
     }
 
     @Override
@@ -406,7 +408,7 @@ public class UploadQueueingTest extends LimeTestCase {
         HashTreeCacheImpl tigerTreeCache = (HashTreeCacheImpl) injector
                 .getInstance(HashTreeCache.class);
         for (int i = 0; i < 5; i++) {
-            tigerTreeCache.getHashTreeAndWait(fm.get(i), 1000);
+            tigerTreeCache.getHashTreeAndWait(fm.getSharedFileList().get(i), 1000);
         }
 
         // first two uploads to get slots
@@ -1187,7 +1189,7 @@ public class UploadQueueingTest extends LimeTestCase {
     private void addThexHeader(HTTPDownloader dl) throws Exception {
         HashTreeCache tigerTreeCache = injector
                 .getInstance(HashTreeCache.class);
-        FileDesc fd = fm.get((int) dl.getIndex());
+        FileDesc fd = fm.getSharedFileList().get((int) dl.getIndex());
         PrivilegedAccessor.invokeMethod(dl, "parseTHEXHeader", tigerTreeCache
                 .getHashTree(fd).httpStringValue());
     }

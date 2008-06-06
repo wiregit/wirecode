@@ -303,7 +303,7 @@ public final class CreationTimeCache {
                         FileDesc fd = fileManager.getFileDescForUrn(currURN);
                         
                     	// don't remove store files from the urn cache list
-                    	if( fd != null && fileManager.isStoreFile(fd.getFile()))
+                    	if( fd != null && fileManager.getStoreFileList().contains(fd.getFile()))
                     		continue;
                         // unfortunately fds can turn into ifds so ignore
                         if ((fd == null) || (fd instanceof IncompleteFileDesc)) {

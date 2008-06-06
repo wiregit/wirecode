@@ -448,9 +448,9 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         int index = request.index;
 
         // first verify the file index
-        synchronized (fileManager) {
-            if (fileManager.isValidSharedIndex(index)) {
-                fd = fileManager.get(index);
+        synchronized (fileManager.getSharedFileList()) {
+            if (fileManager.getSharedFileList().isValidSharedIndex(index)) {
+                fd = fileManager.getSharedFileList().get(index);
             }
         }
 
