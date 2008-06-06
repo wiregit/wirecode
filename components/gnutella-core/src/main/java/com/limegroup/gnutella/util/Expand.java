@@ -126,6 +126,50 @@ public final class Expand {
 			FileUtils.setWriteable(source);
             zis = new ZipInputStream(
                 new BufferedInputStream(new FileInputStream(source)));
+            expandFile(zis, dest, overwrite, names);
+//            ZipEntry ze = null;
+//            
+//            while ((ze = zis.getNextEntry()) != null) {
+//                File f = new File(dest, ze.getName());
+//                // create intermediary directories - sometimes zip don't add them
+//                File dirF=new File(f.getParent());
+//                FileUtils.setWriteable(dirF);
+//                dirF.mkdirs();
+//                
+//                if (ze.isDirectory()) {
+//                    f.mkdirs(); 
+//                } else if ( ze.getTime() > f.lastModified() ||
+//                            overwrite || inNames(ze.getName(), names)) {
+//                    FileUtils.setWriteable(f);
+//                    byte[] buffer = new byte[1024];
+//                    int length = 0;
+//                    OutputStream fos = null;
+//                    try {
+//                        fos = new BufferedOutputStream(new FileOutputStream(f));
+//                    
+//                        while ((length = zis.read(buffer)) >= 0) {
+//                            fos.write(buffer, 0, length);
+//                        }
+//                    } finally {
+//                        IOUtils.close(fos);
+//                    }
+//                }
+//            }
+        } finally {
+            IOUtils.close(zis);
+        }
+    }
+    
+    /**
+     * Expands the source file to destination.  If overwrite is true, all files
+     * will be overwritten (regardless of modification time).  If 'names'
+     * is non-null, any file in 'names' will be expanded regardless of modification time.
+     * Does NOT close the ZipInputStream.
+     */
+    public static void expandFile(ZipInputStream zis, File dest, boolean overwrite, String[] names) 
+      throws IOException {
+                      
+//        try {            
             ZipEntry ze = null;
             
             while ((ze = zis.getNextEntry()) != null) {
@@ -154,9 +198,9 @@ public final class Expand {
                     }
                 }
             }
-        } finally {
-            IOUtils.close(zis);
-        }
+//        } finally {
+//            IOUtils.close(zis);
+//        }
     }
     
     private static boolean inNames(String name, String[] all) {
