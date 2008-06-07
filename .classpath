@@ -39,6 +39,8 @@
 	<classpathentry kind="src" path="core/examples/mojito"/>
 	<classpathentry kind="src" output="components/geocode/build/classes" path="components/geocode/src/main/java"/>
 	<classpathentry kind="src" output="components/geocode/build/tests" path="components/geocode/src/test/java"/>
+	<classpathentry excluding="windows/|windows/" kind="src" path="lib/resources"/>
+	<classpathentry kind="src" path="lib/resources/windows"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-net.jar"/>
@@ -101,6 +103,5 @@
 	<classpathentry kind="lib" path="lib/jars/mozdom4java.jar"/>
 	<classpathentry kind="lib" path="lib/jars/MozillaInterfaces-1.8.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/jars/mozswing.jar" sourcepath="lib/sources/mozswing-src.zip"/>
-	<classpathentry kind="lib" path="lib/resources/windows"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

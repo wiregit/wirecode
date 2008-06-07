@@ -60,6 +60,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -120,87 +121,54 @@ public final class Expand {
     public static void expandFile(File source, File dest, boolean overwrite, String[] names) 
       throws IOException {
             
-        ZipInputStream zis = null;
-        
+        InputStream in = null;
         try {
 			FileUtils.setWriteable(source);
-            zis = new ZipInputStream(
-                new BufferedInputStream(new FileInputStream(source)));
-            expandFile(zis, dest, overwrite, names);
-//            ZipEntry ze = null;
-//            
-//            while ((ze = zis.getNextEntry()) != null) {
-//                File f = new File(dest, ze.getName());
-//                // create intermediary directories - sometimes zip don't add them
-//                File dirF=new File(f.getParent());
-//                FileUtils.setWriteable(dirF);
-//                dirF.mkdirs();
-//                
-//                if (ze.isDirectory()) {
-//                    f.mkdirs(); 
-//                } else if ( ze.getTime() > f.lastModified() ||
-//                            overwrite || inNames(ze.getName(), names)) {
-//                    FileUtils.setWriteable(f);
-//                    byte[] buffer = new byte[1024];
-//                    int length = 0;
-//                    OutputStream fos = null;
-//                    try {
-//                        fos = new BufferedOutputStream(new FileOutputStream(f));
-//                    
-//                        while ((length = zis.read(buffer)) >= 0) {
-//                            fos.write(buffer, 0, length);
-//                        }
-//                    } finally {
-//                        IOUtils.close(fos);
-//                    }
-//                }
-//            }
+			in = new BufferedInputStream(new FileInputStream(source));
+            expandFile(in, dest, overwrite, names);
         } finally {
-            IOUtils.close(zis);
+            IOUtils.close(in);
         }
     }
     
     /**
-     * Expands the source file to destination.  If overwrite is true, all files
+     * Expands the input stream to destination.  If overwrite is true, all files
      * will be overwritten (regardless of modification time).  If 'names'
      * is non-null, any file in 'names' will be expanded regardless of modification time.
-     * Does NOT close the ZipInputStream.
+     * 
+     * Does NOT close the InputStream.
      */
-    public static void expandFile(ZipInputStream zis, File dest, boolean overwrite, String[] names) 
+    public static void expandFile(InputStream is, File dest, boolean overwrite, String[] names) 
       throws IOException {
-                      
-//        try {            
-            ZipEntry ze = null;
+        ZipInputStream zis = new ZipInputStream(is);
+        ZipEntry ze = null;
+        
+        while ((ze = zis.getNextEntry()) != null) {
+            File f = new File(dest, ze.getName());
+            // create intermediary directories - sometimes zip don't add them
+            File dirF=new File(f.getParent());
+            FileUtils.setWriteable(dirF);
+            dirF.mkdirs();
             
-            while ((ze = zis.getNextEntry()) != null) {
-                File f = new File(dest, ze.getName());
-                // create intermediary directories - sometimes zip don't add them
-                File dirF=new File(f.getParent());
-                FileUtils.setWriteable(dirF);
-                dirF.mkdirs();
+            if (ze.isDirectory()) {
+                f.mkdirs(); 
+            } else if ( ze.getTime() > f.lastModified() ||
+                        overwrite || inNames(ze.getName(), names)) {
+                FileUtils.setWriteable(f);
+                byte[] buffer = new byte[1024];
+                int length = 0;
+                OutputStream fos = null;
+                try {
+                    fos = new BufferedOutputStream(new FileOutputStream(f));
                 
-                if (ze.isDirectory()) {
-                    f.mkdirs(); 
-                } else if ( ze.getTime() > f.lastModified() ||
-                            overwrite || inNames(ze.getName(), names)) {
-                    FileUtils.setWriteable(f);
-                    byte[] buffer = new byte[1024];
-                    int length = 0;
-                    OutputStream fos = null;
-                    try {
-                        fos = new BufferedOutputStream(new FileOutputStream(f));
-                    
-                        while ((length = zis.read(buffer)) >= 0) {
-                            fos.write(buffer, 0, length);
-                        }
-                    } finally {
-                        IOUtils.close(fos);
+                    while ((length = zis.read(buffer)) >= 0) {
+                        fos.write(buffer, 0, length);
                     }
+                } finally {
+                    IOUtils.close(fos);
                 }
             }
-//        } finally {
-//            IOUtils.close(zis);
-//        }
+        }
     }
     
     private static boolean inNames(String name, String[] all) {
