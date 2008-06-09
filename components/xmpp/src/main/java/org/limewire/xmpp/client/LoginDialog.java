@@ -7,8 +7,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -48,14 +46,8 @@ public class LoginDialog extends JDialog {
         XMPPConnection.addConnectionCreationListener(new ConnectionCreationListener() {
             public void connectionCreated(final XMPPConnection connection) {
                 ServiceDiscoveryManager.getInstanceFor(connection).addFeature(LW_SERVICE_NS);
-                SearchListener searchListener = new SearchListener(connection, new File("C:\\data\\"));
-                SearchResultListener searcheResultListener = new SearchResultListener();
                 libraryListener.setConnection(connection);
-                connection.addPacketListener(searchListener, searchListener.getPacketFilter());
-                connection.addPacketListener(searcheResultListener, searcheResultListener.getPacketFilter());
                 connection.addPacketListener(libraryListener, libraryListener.getPacketFilter());
-                ProviderManager.getInstance().addIQProvider("search", "jabber:iq:lw-search", SearchResult.getIQProvider());
-                ProviderManager.getInstance().addIQProvider("search-results", "jabber:iq:lw-search-results", SearchResult.getIQProvider());
                 ProviderManager.getInstance().addIQProvider("library", "jabber:iq:lw-library", Library.getIQProvider());
             }
 

@@ -18,15 +18,15 @@ import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
-import org.jivesoftware.smackx.jingle.file.FileContentHandler;
 import org.jivesoftware.smackx.jingle.IncomingJingleSession;
 import org.jivesoftware.smackx.jingle.JingleManager;
 import org.jivesoftware.smackx.jingle.JingleSessionRequest;
 import org.jivesoftware.smackx.jingle.OutgoingJingleSession;
+import org.jivesoftware.smackx.jingle.file.FileContentHandler;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
-import org.limewire.xmpp.client.commands.LibraryCommand;
 
 public class BuddyList {
     private JPanel myPanel;
@@ -87,11 +87,17 @@ public class BuddyList {
             }
         }
 
-        LibraryCommand libraryCommand = new LibraryCommand(connection, limewireClients);
-        libraryCommand.execute(null);
+        for (String limewireClient : limewireClients) {
+            System.out.println("get library of " + limewireClient);
+            Library query = new Library();
+            query.setType(IQ.Type.GET);
+            query.setTo(limewireClient);
+            query.setPacketID(IQ.nextID());
+            connection.sendPacket(query);
+        }
 
         //jingleIN();
-        jingleOUT("tim.julien@gmail.com/limewire56AF93C1");
+        jingleOUT("tim.julien@gmail.com/limewireE0F5CE3D");
     }
 
     private void createUIComponents() {

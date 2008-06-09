@@ -67,29 +67,4 @@ public class LibraryListener implements PacketListener {
             }
         };
     }
-    
-    private void jingleOUT(String to) throws InterruptedException {
-        JingleManager manager = new JingleManager(connection);
-
-        try {
-//            MultiMediaManager mediaManager = new MultiMediaManager();
-//            mediaManager.addMediaManager(new JmfMediaManager());
-//            mediaManager.addMediaManager(new ScreenShareMediaManager());
-//            mediaManager.addMediaManager(new SpeexMediaManager());
-//
-//            manager.setMediaManager(mediaManager);
-            
-            OutgoingJingleSession out = manager.createOutgoingJingleSession(to, null);
-
-            out.start();
-
-            while (out.getJingleMediaSession() == null) {
-                Thread.sleep(500);
-            }
-
-            //out.terminate();
-        } catch (XMPPException e) {
-            e.printStackTrace();
-        }
-    }
 }
