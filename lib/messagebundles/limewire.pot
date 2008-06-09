@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-06-02 11:31-0400\n"
+"POT-Creation-Date: 2008-06-09 11:31-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -109,11 +109,11 @@ msgstr ""
 msgid "Stale Connection Management"
 msgstr ""
 
-#: core/com/limegroup/gnutella/CoreRandomGlue.java:93
+#: core/com/limegroup/gnutella/CoreRandomGlue.java:97
 msgid "Various Core Services"
 msgstr ""
 
-#: core/com/limegroup/gnutella/CoreRandomGlue.java:98
+#: core/com/limegroup/gnutella/CoreRandomGlue.java:102
 msgid "Gnutella Connections"
 msgstr ""
 
@@ -139,7 +139,7 @@ msgid ""
 "to 'Resume' your downloads."
 msgstr ""
 
-#: core/com/limegroup/gnutella/FileManagerImpl.java:390
+#: core/com/limegroup/gnutella/FileManagerImpl.java:282
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:785
 msgid "Shared Files"
 msgstr ""
@@ -181,7 +181,7 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/MediaType.java:49
 #: core/com/limegroup/gnutella/xml/LimeXMLNames.java:103
-#: gui/com/limegroup/gnutella/gui/DaapManager.java:123
+#: gui/com/limegroup/gnutella/gui/DaapManager.java:125
 #: gui/com/limegroup/gnutella/gui/xml/editor/MetaEditorUtil.java:54
 msgid "Video"
 msgstr ""
@@ -867,24 +867,24 @@ msgstr ""
 msgid "Save As"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/DaapManager.java:121
+#: gui/com/limegroup/gnutella/gui/DaapManager.java:123
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:98
 #: gui/com/limegroup/gnutella/gui/search/SearchInputPanel.java:186
 msgid "What's New"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/DaapManager.java:122
+#: gui/com/limegroup/gnutella/gui/DaapManager.java:124
 msgid "Creative Commons"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/DaapManager.java:182
+#: gui/com/limegroup/gnutella/gui/DaapManager.java:184
 msgid ""
 "LimeWire encountered an error in the Digital Audio Access Protocol (for "
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under iTunes -> Sharing."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/DaapManager.java:326
+#: gui/com/limegroup/gnutella/gui/DaapManager.java:328
 msgid ""
 "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
 "files in iTunes) because a Microsoft patch is required or a firewall is "
@@ -893,7 +893,7 @@ msgid ""
 "'No' to disable this feature, or 'Cancel' to decide later."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/DaapManager.java:339
+#: gui/com/limegroup/gnutella/gui/DaapManager.java:341
 msgid ""
 "LimeWire was unable to start the Digital Audio Access Protocol (for sharing "
 "files in iTunes) because a firewall is blocking access. To continue using "
@@ -1131,50 +1131,54 @@ msgstr ""
 msgid "KB/s"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:257
+#: gui/com/limegroup/gnutella/gui/Initializer.java:267
 #, java-format
 msgid "Starting {0}"
 msgstr ""
 
 #. Load up the HTML engine.
-#: gui/com/limegroup/gnutella/gui/Initializer.java:359
+#: gui/com/limegroup/gnutella/gui/Initializer.java:369
 msgid "Loading HTML Engine..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:407
+#: gui/com/limegroup/gnutella/gui/Initializer.java:392
+msgid "Loading Browser..."
+msgstr ""
+
+#: gui/com/limegroup/gnutella/gui/Initializer.java:429
 msgid "Loading User Interface..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:426
+#: gui/com/limegroup/gnutella/gui/Initializer.java:448
 msgid "Loading Core Components..."
 msgstr ""
 
 #. Initialize IconManager.
-#: gui/com/limegroup/gnutella/gui/Initializer.java:479
+#: gui/com/limegroup/gnutella/gui/Initializer.java:501
 msgid "Loading Icons..."
 msgstr ""
 
 #. Touch the I18N stuff to ensure it loads properly.
-#: gui/com/limegroup/gnutella/gui/Initializer.java:488
+#: gui/com/limegroup/gnutella/gui/Initializer.java:510
 msgid "Loading Internationalization Support..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:527
+#: gui/com/limegroup/gnutella/gui/Initializer.java:549
 msgid "Loading Digital Audio Access Protocol..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:533
+#: gui/com/limegroup/gnutella/gui/Initializer.java:555
 msgid ""
 "LimeWire was unable to start the Digital Audio Access Protocol Service (for "
 "sharing files in iTunes). This feature will be turned off. You can turn it "
 "back on in options, under iTunes -> Sharing."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:568
+#: gui/com/limegroup/gnutella/gui/Initializer.java:590
 msgid "This Alpha version has expired.  Press Ok to exit. "
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:574
+#: gui/com/limegroup/gnutella/gui/Initializer.java:596
 msgid ""
 "LimeWire was unable to initialize and start. This is usually due to a "
 "firewall program blocking LimeWire's access to the internet or loopback "
@@ -1182,7 +1186,7 @@ msgid ""
 "internet and restart LimeWire."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:580
+#: gui/com/limegroup/gnutella/gui/Initializer.java:602
 msgid ""
 "LimeWire could not create a temporary preferences folder.\n"
 "\n"
@@ -1194,7 +1198,7 @@ msgid ""
 "LimeWire will now exit.  Thank You."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/Initializer.java:590
+#: gui/com/limegroup/gnutella/gui/Initializer.java:612
 #: gui/com/limegroup/gnutella/gui/MessageService.java:80
 #: gui/com/limegroup/gnutella/gui/MessageService.java:96
 #: gui/com/limegroup/gnutella/gui/MessageService.java:212
@@ -4029,7 +4033,7 @@ msgid ""
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:814
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:374
+#: gui/com/limegroup/gnutella/gui/swingbrowser/SwingBrowser.java:119
 msgid "Store"
 msgstr ""
 
@@ -4322,7 +4326,7 @@ msgstr ""
 #. * Constant for the stop button.
 #.
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:101
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:370
+#: gui/com/limegroup/gnutella/gui/swingbrowser/SwingBrowser.java:115
 msgid "Stop"
 msgstr ""
 
@@ -6235,25 +6239,16 @@ msgstr ""
 msgid "Details"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:122
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:236
-msgid "Idle"
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:292
-msgid "Sorry, the browser could not be loaded."
-msgstr ""
-
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:320
+#: gui/com/limegroup/gnutella/gui/swingbrowser/SwingBrowser.java:82
 msgid "Go"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:366
+#: gui/com/limegroup/gnutella/gui/swingbrowser/SwingBrowser.java:111
 #: gui/com/limegroup/gnutella/gui/xml/editor/XmlTypeEditor.java:134
 msgid "Back"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/swtbrowser/SWTBrowserPanel.java:378
+#: gui/com/limegroup/gnutella/gui/swingbrowser/SwingBrowser.java:123
 msgid "Forward"
 msgstr ""
 
