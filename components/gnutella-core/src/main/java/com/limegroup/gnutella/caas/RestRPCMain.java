@@ -5,9 +5,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -46,6 +48,7 @@ import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeWireCore;
 import com.limegroup.gnutella.LimeWireCoreModule;
+import com.limegroup.gnutella.URN;
 //import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Uploader;
@@ -97,6 +100,11 @@ public class RestRPCMain implements DataStore {
     /**
      * 
      */
+    private final Map<String,ManagedDownloader> _downloads;
+    
+    /**
+     * 
+     */
     private final RemoteFileDescFactory _rfdf;
     
     /**
@@ -135,6 +143,7 @@ public class RestRPCMain implements DataStore {
         _cdf = _injector.getInstance(CoreDownloaderFactory.class);
         _dm = _injector.getInstance(DownloadManager.class);
         _searches = new HashMap<String, List<Map<String,String>>>();
+        _downloads = new HashMap<String,ManagedDownloader>();
         _component = new Component();
         _component.getServers().add(Protocol.HTTP, 9090);
         _component.getDefaultHost().attach((_lwappl = new LimeWireApplication(_component.getContext())));
@@ -146,21 +155,9 @@ public class RestRPCMain implements DataStore {
         // can do things like starting a search.
         //
         _lwappl.getContext().getAttributes().put("lwcore", _lwcore);
-        
-        //
-        //
         _lwappl.getContext().getAttributes().put("rfdf", _rfdf);
-        
-        //
-        //
         _lwappl.getContext().getAttributes().put("dataStore", this);
-        
-        //
-        //
         _lwappl.getContext().getAttributes().put("cdf", _cdf);
-        
-        //
-        //
         _lwappl.getContext().getAttributes().put("dm", _dm);
     }
     
@@ -203,44 +200,31 @@ public class RestRPCMain implements DataStore {
         String guid = new GUID(data.getMessageGUID()).toString();
         Map<String,String> result = new HashMap<String,String>();
         
-        // host, port, index, filename, 
-        // size, clientGUID, speed, chat, quality, browseHost, 
-        // xmlDoc, urns, replyToMulticast,
-        // firewalled, vender, proxies, createTime,
-        // FWTVersion, pe, tlsCapable, http11
-        // networkInstanceUtils
+        System.out.println("urns = " + RestRPCMain.urnsToString(rfd.getUrns()));
         
         result.put("host", rfd.getHost());
         result.put("port", Integer.toString(rfd.getPort()));
         result.put("index", Long.toString(rfd.getIndex()));
         result.put("filename", rfd.getFileName());
-        
         result.put("size", Long.toString(rfd.getSize()));
         result.put("clientGUID", GUID.toHexString(rfd.getClientGUID()));
         result.put("speed", Integer.toString(rfd.getSpeed()));
         result.put("chat", Boolean.toString(rfd.isChatEnabled()));
         result.put("quality", Integer.toString(rfd.getQuality()));
         result.put("browseHost", Boolean.toString(rfd.isBrowseHostEnabled()));
-        
 //      result.put("xmlDoc", rfd.getXMLDocument().getXMLString());
-//      result.put("urns", serializeUrns(rfd.getUrns()));
+        result.put("urns", RestRPCMain.urnsToString(rfd.getUrns()));
         result.put("replyToMulticast", Boolean.toString(rfd.isReplyToMulticast()));
-        
         result.put("firewalled", Boolean.toString(rfd.isFirewalled()));
         result.put("vendor", rfd.getVendor());
 //      result.put("proxies", );
         result.put("createTime", Long.toString(rfd.getCreationTime()));
-        
 //      result.put("FWTVersion", );
 //      result.put("pe", rfd.getPushAddr().toString());
         result.put("tlsCapable", Boolean.toString(rfd.isTLSCapable()));
         result.put("http11", Boolean.toString(rfd.isHTTP11()));
-
 //      result.put("networkInstanceUtils", );
-
-//      result.put("remote_host_addr", rfd.getHost());
-//      result.put("remote_host_port", Integer.toString(rfd.getPort()));
-//      result.put("file_name", rfd.getFileName());
+        result.put("sha1urn", rfd.getSHA1Urn().toString());
         
         synchronized (_searches) {
             List<Map<String,String>> results;
@@ -259,6 +243,67 @@ public class RestRPCMain implements DataStore {
         return _searches;
     }
     
+    /**
+     * Part of the DataStore interface.
+     */
+    public Map<String,ManagedDownloader> getAllDownloads() {
+        return _downloads;
+    }
+    
+    /**
+     * Part of the DataStore interface.
+     */
+    public ManagedDownloader getDownloadForId(String id) {
+        return _downloads.get(id);
+    }
+    
+    /**
+     * Part of the DataStore interface.
+     */
+    public void addDownload(ManagedDownloader cd, String id) {
+        _downloads.put(id, cd);
+    }
+
+    public static Set<URN> stringToURNs(String s) {
+        Set<URN> urns = new HashSet<URN>();
+        String[] urnStrings = s.split(";");
+        
+        System.out.println("s = " + s);
+        
+        try {
+            for (int i = 0; i < urnStrings.length; ++i) {
+                if (urnStrings[i].startsWith("SHA1:"))
+                    urns.add(URN.createSHA1Urn(urnStrings[i].substring(5)));
+                else if (urnStrings[i].startsWith("TTROOT:"))
+                    urns.add(URN.createSHA1Urn(urnStrings[i].substring(7)));
+            }
+        }
+        catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return urns;
+    }
+    
+    public static String urnsToString(Set<? extends URN> urns) {
+        StringBuilder sb = new StringBuilder();
+        
+        for (URN urn : urns) {
+            if (urn.isSHA1())
+                sb.append("SHA1:");
+            else if (urn.isTTRoot())
+                sb.append("TTROOT:");
+            else
+                continue;
+            
+            sb.append(urn.toString());
+            sb.append(";");
+        }
+        
+        return sb.toString();
+    }
+    
     public static Element makeSearchResultXml(List<Map<String,String>> results, String guid, Element parent, Document document) throws IOException {
         Element search = (Element)parent.appendChild(document.createElement("search"));
         
@@ -275,6 +320,21 @@ public class RestRPCMain implements DataStore {
         }
         
         return search;
+    }
+    
+    public static Element makeDownloadXml(Document document, Element parent, CoreDownloader cd, String id) throws IOException {
+        Element download = (Element)parent.appendChild(document.createElement("download"));
+        
+        RestRPCMain.addCDATAElement(document, download, "id", id);
+        RestRPCMain.addCDATAElement(document, download, "amount_read", cd.getAmountRead());
+        RestRPCMain.addCDATAElement(document, download, "amount_pending", cd.getAmountPending());
+        RestRPCMain.addCDATAElement(document, download, "amount_verified", cd.getAmountVerified());
+        RestRPCMain.addCDATAElement(document, download, "is_complete", cd.isCompleted());
+        RestRPCMain.addCDATAElement(document, download, "filename", cd.getSaveFile().getName());
+//      RestRPCMain.addCDATAElement(document, download, "sha1urn", cd.getSha1Urn().toString());
+        RestRPCMain.addCDATAElement(document, download, "state", RestRPCMain.stateToString(cd.getState()));
+        
+        return download;
     }
     
     public static Element addCDATAElement(Document document, Element parent, String name, String value) {
@@ -297,6 +357,85 @@ public class RestRPCMain implements DataStore {
         return addCDATAElement(document, parent, name, Boolean.toString(value));
     }
     
+    public static String stateToString(Downloader.DownloadStatus ds) {
+        switch (ds) {
+        case INITIALIZING:
+            return "Initializing";
+        case QUEUED:
+            return "Queued";
+        case CONNECTING:
+            return "Connecting";
+        case BUSY:
+            return "Busy";
+        case COMPLETE:
+            return "Complete";
+        case ABORTED:
+            return "Aborted";
+        case GAVE_UP:
+            return "Gave up";
+        case DISK_PROBLEM:
+            return "Disk problem";
+        case WAITING_FOR_GNET_RESULTS:
+            return "Waiting for gnet resuts";
+        case CORRUPT_FILE:
+            return "Corrupt file";
+        case REMOTE_QUEUED:
+            return "Remote queued";
+        case HASHING:
+            return "Hashing";
+        case SAVING:
+            return "Saving";
+        case WAITING_FOR_USER:
+            return "Waiting for user";
+        case WAITING_FOR_CONNECTIONS:
+            return "Waiting for connections";
+        case ITERATIVE_GUESSING:
+            return "Iterative guessing";
+        case QUERYING_DHT:
+            return "Querying dht";
+        case IDENTIFY_CORRUPTION:
+            return "Identify corruption";
+        case RECOVERY_FAILED:
+            return "Recovery failed";
+        case PAUSED:
+            return "Paused";
+        case INVALID:
+            return "Invalid";
+        case RESUMING:
+            return "Resuming";
+        case FETCHING:
+            return "Fetching";
+        default:
+            return "Unknown";
+        }
+    }
+    
+    public static RemoteFileDesc createRemoteFileDesc(RemoteFileDescFactory rfdf, Element root) {
+        RemoteFileDesc rfd;
+        
+        rfd = rfdf.createRemoteFileDesc (
+                root.getElementsByTagName("host").item(0).getTextContent(), 
+                Integer.parseInt(root.getElementsByTagName("port").item(0).getTextContent()), 
+                Long.parseLong(root.getElementsByTagName("index").item(0).getTextContent()), 
+                root.getElementsByTagName("filename").item(0).getTextContent(),
+                Long.parseLong(root.getElementsByTagName("size").item(0).getTextContent()),
+                GUID.fromHexString(root.getElementsByTagName("clientGUID").item(0).getTextContent()),
+                Integer.parseInt(root.getElementsByTagName("speed").item(0).getTextContent()), 
+                Boolean.parseBoolean(root.getElementsByTagName("chat").item(0).getTextContent()), 
+                Integer.parseInt(root.getElementsByTagName("quality").item(0).getTextContent()), 
+                Boolean.parseBoolean(root.getElementsByTagName("browseHost").item(0).getTextContent()), 
+                null, // xmlDoc 
+                RestRPCMain.stringToURNs(root.getElementsByTagName("urns").item(0).getTextContent()), 
+                Boolean.parseBoolean(root.getElementsByTagName("replyToMulticast").item(0).getTextContent()), 
+                Boolean.parseBoolean(root.getElementsByTagName("firewalled").item(0).getTextContent()), 
+                root.getElementsByTagName("vendor").item(0).getTextContent(),
+                null, // proxies
+                Long.parseLong(root.getElementsByTagName("createTime").item(0).getTextContent()), 
+                Boolean.parseBoolean(root.getElementsByTagName("tlsCapable").item(0).getTextContent())
+             );
+             
+        return rfd;
+    }
     /**
      * 
      *
@@ -320,8 +459,10 @@ public class RestRPCMain implements DataStore {
             
             router.attach("/download", DownloadResource.class);                     // start a download
             router.attach("/download/all", DownloadResultsResource.class);          // get status of all downloads
-//          router.attach("/download/{id}", DownloadResultsResource.class);         // get status of one download
+            router.attach("/download/{id}", DownloadResultsResource.class);         // get status of one download
 //          router.attach("/download/pause/{id}", DownloadPauseResource.class);     // pause a specific download
+            router.attach("/download/stop/{id}", DownloadStopResource.class);       // stops a specific download
+//          router.attach("/download/{id}/addsource", DownloadAddSourceResource.class);     // add a source to an existing download
             
             return router;
         }
@@ -340,6 +481,10 @@ public class RestRPCMain implements DataStore {
         
         public DownloadManager getDownloadManager() {
             return (DownloadManager)getContext().getAttributes().get("dm");
+        }
+        
+        public DataStore getDataStore() {
+            return (DataStore)getContext().getAttributes().get("dataStore");
         }
     }
     
@@ -497,6 +642,7 @@ public class RestRPCMain implements DataStore {
             DomRepresentation dom = getRequest().getEntityAsDom();
             CoreDownloaderFactory cdf = ((LimeWireApplication)lwapp).getCoreDownloaderFactory();
             DownloadManager dm = ((LimeWireApplication)lwapp).getDownloadManager();
+            DataStore ds = ((LimeWireApplication)lwapp).getDataStore();
             
             try {
 //              System.out.println("DownloadResource::DownloadResource().. text = '" + getRequest().getEntity().getText() + "'");
@@ -505,11 +651,7 @@ public class RestRPCMain implements DataStore {
                 Element root = doc.getDocumentElement();
 //              NodeList values = root.getChildNodes();
                 
-                
-                // read values from "values"
-                // create rfd
-                // start download
-                
+                _guid  = new GUID(lwcore.getSearchServices().newQueryGUID());
                 
                 /*
                 byte[] bytes = getRequest().getEntity().getText().getBytes();
@@ -518,28 +660,14 @@ public class RestRPCMain implements DataStore {
                 Node root = doc.getFirstChild();
                 */
                 
-                _rfd = rfdf.createRemoteFileDesc (
-                        root.getElementsByTagName("host").item(0).getTextContent(), 
-                        Integer.parseInt(root.getElementsByTagName("port").item(0).getTextContent()), 
-                        Long.parseLong(root.getElementsByTagName("index").item(0).getTextContent()), 
-                        root.getElementsByTagName("filename").item(0).getTextContent(),
-                        Long.parseLong(root.getElementsByTagName("size").item(0).getTextContent()),
-                        GUID.fromHexString(root.getElementsByTagName("clientGUID").item(0).getTextContent()),
-                        Integer.parseInt(root.getElementsByTagName("speed").item(0).getTextContent()), 
-                        Boolean.parseBoolean(root.getElementsByTagName("chat").item(0).getTextContent()), 
-                        Integer.parseInt(root.getElementsByTagName("quality").item(0).getTextContent()), 
-                        Boolean.parseBoolean(root.getElementsByTagName("browseHost").item(0).getTextContent()), 
-                        null, // xmlDoc 
-                        null, // urns 
-                        Boolean.parseBoolean(root.getElementsByTagName("replyToMulticast").item(0).getTextContent()), 
-                        Boolean.parseBoolean(root.getElementsByTagName("firewalled").item(0).getTextContent()), 
-                        root.getElementsByTagName("vendor").item(0).getTextContent(),
-                        null, // proxies
-                        Long.parseLong(root.getElementsByTagName("createTime").item(0).getTextContent()), 
-                        Boolean.parseBoolean(root.getElementsByTagName("tlsCapable").item(0).getTextContent())
-                );
+                _rfd = RestRPCMain.createRemoteFileDesc(rfdf, root);
                 
                 ManagedDownloader downloader = cdf.createManagedDownloader(new RemoteFileDesc[]{_rfd}, null, null, null, true);
+                
+                // add the download to the data store, so that we can keep
+                // track of all of the downloads.
+                //
+                ds.addDownload(downloader, _guid.toString());
                 
                 downloader.initialize();
                 dm.remove(downloader, true);
@@ -549,8 +677,6 @@ public class RestRPCMain implements DataStore {
                 System.err.println("Error: " + e.getMessage());
                 e.printStackTrace();
             }
-            
-            _guid  = new GUID(lwcore.getSearchServices().newQueryGUID());
             
            /*
             _query = (String)getRequest().getAttributes().get("query");
@@ -617,21 +743,40 @@ public class RestRPCMain implements DataStore {
         public Representation represent(Variant variant) throws ResourceException {
             DomRepresentation representation = null;
             Application lwapp = (Application)getContext().getAttributes().get(Application.KEY);
-            DownloadManager dm = ((LimeWireApplication)lwapp).getDownloadManager();
+//          DownloadManager dm = ((LimeWireApplication)lwapp).getDownloadManager();
+            DataStore ds = ((LimeWireApplication)lwapp).getDataStore();
             
             try {
                 representation = new DomRepresentation(MediaType.TEXT_XML);
                 Document document = representation.getDocument();
                 Element downloads = (Element)document.appendChild(document.createElement("downloads"));
                 
-                for (CoreDownloader cd : dm.getAllDownloaders()) {
-                    Element download = (Element)downloads.appendChild(document.createElement("download"));
+                // if the request specified a download id, then just give them 
+                // info for that download.
+                //
+                if (_guid != null) {
+                    CoreDownloader cd = ds.getDownloadForId(_guid.toString());
                     
-                    RestRPCMain.addCDATAElement(document, download, "amount_read", cd.getAmountRead());
-                    RestRPCMain.addCDATAElement(document, download, "amount_pending", cd.getAmountPending());
-                    RestRPCMain.addCDATAElement(document, download, "amount_verified", cd.getAmountVerified());
-                    RestRPCMain.addCDATAElement(document, download, "is_complete", cd.isCompleted());
-                    RestRPCMain.addCDATAElement(document, download, "filename", cd.getSaveFile().getName());
+                    if (cd != null) {
+                        RestRPCMain.makeDownloadXml(document, downloads, cd, _guid.toString());
+                    }
+                }
+                
+                // otherwise, give them the info for all of the downloads.
+                //
+                else {
+                    Map<String,ManagedDownloader> downloadList = ds.getAllDownloads();
+                    
+                    for (String did : downloadList.keySet()) {
+                        ManagedDownloader cd = downloadList.get(did);
+                        RestRPCMain.makeDownloadXml(document, downloads, cd, did);
+                    }
+                    
+                    /*
+                    for (CoreDownloader cd : dm.getAllDownloaders()) {
+                        RestRPCMain.makeDownloadXml(document, downloads, cd);
+                    }
+                    */
                 }
             }
             catch (IOException e ) {
@@ -643,6 +788,55 @@ public class RestRPCMain implements DataStore {
         }
     }
     
+    /**
+     * 
+     *
+     */
+    public static class DownloadStopResource extends Resource {
+       
+        private GUID _guid;
+        
+        public DownloadStopResource(Context context, Request request, Response response) {
+            super(context, request, response);
+            
+            String guid = (String)getRequest().getAttributes().get("id");
+            
+            if (guid != null && guid.length() != 0)
+                _guid = new GUID(guid);
+            
+            getVariants().add(new Variant(MediaType.TEXT_XML));
+        }
+        
+        @Override
+        public Representation represent(Variant variant) throws ResourceException {
+            DomRepresentation representation = null;
+            Application lwapp = (Application)getContext().getAttributes().get(Application.KEY);
+            DataStore ds = ((LimeWireApplication)lwapp).getDataStore();
+            
+            try {
+                representation = new DomRepresentation(MediaType.TEXT_XML);
+                Document document = representation.getDocument();
+                Element downloads = (Element)document.appendChild(document.createElement("downloads"));
+                
+                if (_guid != null) {
+                    ManagedDownloader md = ds.getDownloadForId(_guid.toString());
+                    
+                    if (md != null) {
+                        md.stop();
+                        md.finish();
+                        RestRPCMain.makeDownloadXml(document, downloads, md, _guid.toString());
+                    }
+                }
+            }
+            catch (IOException e ) {
+                System.out.println("DownloadStopResource::represent().. " + e.getMessage());
+                e.printStackTrace();
+            }
+            
+            return representation;
+        }
+    }
+     
     /**
      * 
      *
