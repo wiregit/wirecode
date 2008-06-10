@@ -89,15 +89,15 @@ public class SynchronizedFileList implements FileList {
         }
     }
 
-    public void remove(File file) {
-        synchronized (mutex) {
-            fileList.remove(file);
-        }
-    }
-
     public void remove(FileDesc fileDesc) {
         synchronized (mutex) {
             fileList.remove(fileDesc);
+        }
+    }
+    
+    public void removeIncomplete(IncompleteFileDesc fileDesc) {
+        synchronized(mutex) {
+            fileList.removeIncomplete(fileDesc);
         }
     }
 

@@ -92,7 +92,7 @@ public abstract class FileManagerImpl implements FileManager, Service {
      */
     private final LibraryData _data = new LibraryData();
     
-    private FileList sharedFileList = new SynchronizedFileList(new SharedFileListImpl());
+    protected FileList sharedFileList = new SynchronizedFileList(new SharedFileListImpl());
     private FileList storeFileList = new SynchronizedFileList(new FileListImpl());
     
     /** 
@@ -1290,7 +1290,6 @@ public abstract class FileManagerImpl implements FileManager, Service {
             return null;
             
         FileDesc fd = sharedFileList.getFileDesc(f);
-        sharedFileList.remove(fd);
 
         _needRebuild = true;
 
@@ -1299,6 +1298,7 @@ public abstract class FileManagerImpl implements FileManager, Service {
         // We also return false, because the file was never really
         // "shared" to begin with.
         if (fd instanceof IncompleteFileDesc) {
+            sharedFileList.removeIncomplete((IncompleteFileDesc)fd);
             removeSharedUrnIndex(fd, false);
 
             // Notify the GUI...
@@ -1310,6 +1310,7 @@ public abstract class FileManagerImpl implements FileManager, Service {
             return fd;
         }
 
+        sharedFileList.remove(fd);
         File parent = f.getParentFile();
         // files that are forcibly shared over the network aren't counted
         if(SharingUtils.isForcedShareDirectory(parent)) {

@@ -95,16 +95,16 @@ public interface FileList {
      * Adds this file and FileDesc to this FileList. 
      */
     public void addFile(File file, FileDesc fileDesc);
-    
-    /**
-     * Removes the file from this list if it exists
-     */
-    public void remove(File file);
-    
+       
     /**
      * Removes the FileDesc from the list if it exists
      */
     public void remove(FileDesc fileDesc);
+    
+    /**
+     * Removes the IncompleteFileDesc from the list if it exists
+     */
+    public void removeIncomplete(IncompleteFileDesc fileDesc);
     
     /**
      * Removes this URN from the list, NOTE: this does NOT 

@@ -9,8 +9,6 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManagerController;
 import com.limegroup.gnutella.FileManagerImpl;
-import com.limegroup.gnutella.SharedFileListImpl;
-import com.limegroup.gnutella.URN;
 
 /**
  * A simple FileManager that shares one file of (near) infinite length.
@@ -19,30 +17,17 @@ import com.limegroup.gnutella.URN;
 @Singleton
 public class FileManagerStub extends FileManagerImpl {
 
-    FileListStub sharedFileList = new FileListStub();
     
     @Inject
     public FileManagerStub(FileManagerController fileManagerController) {
         super(fileManagerController);
+        
+        sharedFileList = new FileListStub();
     }
     
     private List removeRequests = new LinkedList();
 
     
-    @Override
-    public SharedFileListImpl getSharedFileList() {
-        return sharedFileList;
-    }
-    
-    @Override
-    public FileDesc getFileDescForUrn(URN urn) {
-        return sharedFileList.getFileDesc(urn);
-    }
-    
-    @Override
-    public FileDesc getFileDescForFile(File f) {
-        return sharedFileList.getFileDesc(f);
-    }
     
     @Override
     public void fileChanged(File f) {

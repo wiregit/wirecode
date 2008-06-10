@@ -126,12 +126,6 @@ public class FileListImpl implements FileList, Inspectable {
     public int getListLength() {
         return files.size();
     }
-
-    public void remove(File file) {
-        FileDesc fd = fileToFileDescMap.get(file);
-        if( fd != null )
-            remove(fd);
-    }
     
     public void remove(FileDesc fileDesc) {
         int index = fileDesc.getIndex();
@@ -223,6 +217,9 @@ public class FileListImpl implements FileList, Inspectable {
     }
 
     public void addIncompleteFile(File incompleteFile, IncompleteFileDesc incompleteFileDesc) {
+    }
+    
+    public void removeIncomplete(IncompleteFileDesc fileDesc) {
     }
 
     public int getNumForcedFiles() {

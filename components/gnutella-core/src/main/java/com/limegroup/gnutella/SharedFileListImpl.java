@@ -71,20 +71,27 @@ public class SharedFileListImpl extends FileListImpl {
     
     @Override
     public void remove(FileDesc fd) {
-        super.remove(fd);
-        
-        if( fd instanceof IncompleteFileDesc) {
-            numIncompleteFiles--;
-            boolean removed = incompletesShared.remove(fd.getIndex());
-            assert removed : "File "+fd.getIndex()+" not found in " + incompletesShared;
+        if( fd instanceof IncompleteFileDesc)
             return;
-        }
+       
+        super.remove(fd);
         
         File parent = fd.getFile().getParentFile();
         // files that are forcibly shared over the network aren't counted
         if(SharingUtils.isForcedShareDirectory(parent)) {
             numForcedFiles--;
         }
+    }
+    
+    @Override
+    public void removeIncomplete(IncompleteFileDesc fileDesc) {
+        int index = fileDesc.getIndex();
+        assert files.get(index).getFile().equals(fileDesc.getFile()) : "invariant broken!";
+        files.set(index, null);
+        fileToFileDescMap.remove(fileDesc.getFile());
+        numIncompleteFiles--;
+        boolean removed = incompletesShared.remove(fileDesc.getIndex());
+        assert removed : "File "+fileDesc.getIndex()+" not found in " + incompletesShared;
     }
     
     /**

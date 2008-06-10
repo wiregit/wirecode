@@ -186,7 +186,6 @@ public class UploadQueueingTest extends LimeTestCase {
         FileListStub sharedList = (FileListStub)fm.getSharedFileList();
         sharedList.setUrns(urns);
         sharedList.setDescs(descs);
-        sharedList.get(0);
     }
 
     @Override
