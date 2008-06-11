@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.caas;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,14 +31,11 @@ import org.restlet.resource.Variant;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
-//import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
@@ -49,7 +44,6 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeWireCore;
 import com.limegroup.gnutella.LimeWireCoreModule;
 import com.limegroup.gnutella.URN;
-//import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -307,7 +301,7 @@ public class RestRPCMain implements DataStore {
     public static Element makeSearchResultXml(List<Map<String,String>> results, String guid, Element parent, Document document) throws IOException {
         Element search = (Element)parent.appendChild(document.createElement("search"));
         
-        search.setAttribute("guid", guid);
+        search.setAttribute("id", guid);
         
         for (Map<String,String> result : results) {
             Element search_result = (Element)search.appendChild(document.createElement("search_result"));
@@ -432,7 +426,7 @@ public class RestRPCMain implements DataStore {
                 null, // proxies
                 Long.parseLong(root.getElementsByTagName("createTime").item(0).getTextContent()), 
                 Boolean.parseBoolean(root.getElementsByTagName("tlsCapable").item(0).getTextContent())
-             );
+        );
              
         return rfd;
     }
@@ -555,7 +549,7 @@ public class RestRPCMain implements DataStore {
 //              document.appendChild(searches);
                 searches.appendChild(search);
                 
-                search.setAttribute("guid", _guid.toString());
+                search.setAttribute("id", _guid.toString());
             }
             catch (IOException e) {
                 System.out.println("SearchResource::represent().. " + e.getMessage());
@@ -577,7 +571,7 @@ public class RestRPCMain implements DataStore {
         public SearchResultsResource(Context context, Request request, Response response) {
             super(context, request, response);
             
-            String guid = (String)getRequest().getAttributes().get("querid");
+            String guid = (String)getRequest().getAttributes().get("queryid");
             
             if (guid != null && guid.length() != 0)
                 _guid = new GUID(guid);
@@ -601,7 +595,9 @@ public class RestRPCMain implements DataStore {
                     if (_guid != null) {
                         List<Map<String,String>> results = searchList.get(_guid.toString());
                         
-                        RestRPCMain.makeSearchResultXml(results, _guid.toString(), searches, document);
+                        if (results != null)
+                            RestRPCMain.makeSearchResultXml(results, _guid.toString(), searches, document);
+                        
                         searchList.remove(_guid.toString());
                     }
                     else {
@@ -709,7 +705,7 @@ public class RestRPCMain implements DataStore {
                 
                 downloads.appendChild(download);
                 
-                download.setAttribute("guid", _guid.toString());
+                download.setAttribute("id", _guid.toString());
             }
             catch (IOException e) {
                 System.out.println("DownloadResource::represent().. " + e.getMessage());
