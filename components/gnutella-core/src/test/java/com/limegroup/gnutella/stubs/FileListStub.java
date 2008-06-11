@@ -33,11 +33,12 @@ public class FileListStub extends SharedFileListImpl {
         numBytes = 0;
         numFiles = 0;
         fileToFileDescMap = new HashMap<File, FileDesc>();
+        
+        super.resetVariables();
     }
     
     @Override
     public void resetVariables() {
-        
     }
 
     @Override

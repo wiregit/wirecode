@@ -177,6 +177,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     	//test that currently we have no altlocs for the incomplete file
     	
     	FileDesc test = fileManager.getFileDescForUrn(partialURN);
+    	assertNotNull(test);
     	AltLocManager altLocManager = injector.getInstance(AltLocManager.class);    	
     	assertEquals(0, altLocManager.getNumLocs(test.getSHA1Urn()));
     	
