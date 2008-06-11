@@ -51,10 +51,10 @@ public class LoginDialog extends JDialog {
                 ProviderManager.getInstance().addIQProvider("library", "jabber:iq:lw-library", Library.getIQProvider());
             }
 
-            private RemoteFile[] getMockLibrary() {
-                return new RemoteFile[]{new RemoteFile("12345", "foo"),
-                        new RemoteFile("678910", "bar"),
-                        new RemoteFile("1112131415", "baz")};
+            private File[] getMockLibrary() {
+                return new File[]{new File("12345", "foo"),
+                        new File("678910", "bar"),
+                        new File("1112131415", "baz")};
 
             }
         });
@@ -143,7 +143,7 @@ public class LoginDialog extends JDialog {
         //System.exit(0);
     }
 
-    public static void run(RemoteFile[] files) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
+    public static void run(File[] files) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
         if (files != null) {
             libraryListener.setFiles(files);
         }

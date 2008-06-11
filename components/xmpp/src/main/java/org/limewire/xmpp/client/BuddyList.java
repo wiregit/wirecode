@@ -33,6 +33,8 @@ public class BuddyList {
     private JTree tree1;
     private DefaultMutableTreeNode root = new DefaultMutableTreeNode();
     private final XMPPConnection connection;
+    // TODO convert to TreeModel
+    protected HashSet<String> limewireClients;
 
     public static void create(XMPPConnection connection) {
         JFrame frame = new JFrame("BuddyList");
@@ -48,7 +50,10 @@ public class BuddyList {
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    getRoster(connection);
+                    limewireClients = getRoster(connection);
+                    getLibraries(limewireClients, connection);
+                    //jingleIN();
+                    jingleOUT("tim.julien@gmail.com/limewireE0F5CE3D");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -56,24 +61,35 @@ public class BuddyList {
         }).start();
     }
 
-    private void getRoster(XMPPConnection connection) throws Exception {
-        Thread.sleep(5 * 1000);
+    private void getLibraries(HashSet<String> limewireClients, XMPPConnection connection) {
+        for (String limewireClient : limewireClients) {
+            System.out.println("get library of " + limewireClient);
+            Library query = new Library();
+            query.setType(IQ.Type.GET);
+            query.setTo(limewireClient);
+            query.setPacketID(IQ.nextID());
+            connection.sendPacket(query);
+        }
+    }
+
+    private HashSet<String> getRoster(XMPPConnection connection) throws Exception {
+        // TODO hack to wait for roster to be loaded.
+        // replace with XMPPConnection level RosterListener
+        Thread.sleep(5 * 1000);        
 
         ServiceDiscoveryManager serviceDiscoveryManager = ServiceDiscoveryManager.getInstanceFor(connection);
 
-        Roster roster = connection.getRoster();
-        //roster.addRosterListener(new RosterListenerImpl(connection));
+        Roster roster = connection.getRoster();        
 
         HashSet<String> limewireClients = new HashSet<String>();
         for (RosterEntry rosterEntry : roster.getEntries()) {
-//            root.add(new DefaultMutableTreeNode(rosterEntry.getName()));
-//            tree1.updateUI();
             Iterator<Presence> presences = roster.getPresences(rosterEntry.getUser());
             while (presences.hasNext()) {
                 Presence presence = presences.next();
                 if (presence.getType() == Presence.Type.available) {
-                    System.out.println("found: " + rosterEntry.getName());
-                    root.add(new DefaultMutableTreeNode(rosterEntry.getName()));
+                    String name = rosterEntry.getName() != null ? rosterEntry.getName() : rosterEntry.getUser();
+                    System.out.println("found: " + name);
+                    root.add(new DefaultMutableTreeNode(name));
                     tree1.updateUI();
                     try {
                         if (serviceDiscoveryManager.discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/")) {
@@ -86,18 +102,9 @@ public class BuddyList {
                 }
             }
         }
-
-        for (String limewireClient : limewireClients) {
-            System.out.println("get library of " + limewireClient);
-            Library query = new Library();
-            query.setType(IQ.Type.GET);
-            query.setTo(limewireClient);
-            query.setPacketID(IQ.nextID());
-            connection.sendPacket(query);
-        }
-
-        //jingleIN();
-        jingleOUT("tim.julien@gmail.com/limewireE0F5CE3D");
+       
+        roster.addRosterListener(new RosterListenerImpl(connection));
+        return limewireClients;          
     }
 
     private void createUIComponents() {
@@ -159,6 +166,7 @@ public class BuddyList {
                 tree1.updateUI();
                 try {
                     if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/")) {
+                        limewireClients.add(presence.getFrom());
                         System.out.println("found lw client: " + presence.getFrom());
                     }
                 } catch (XMPPException exception) {
@@ -175,6 +183,7 @@ public class BuddyList {
                     DefaultMutableTreeNode mutableTreeNode = (DefaultMutableTreeNode) children.nextElement();
                     String treeNodeName = (String) mutableTreeNode.getUserObject();
                     if (name.equals(treeNodeName)) {
+                        limewireClients.remove(presence.getFrom());
                         root.remove(mutableTreeNode);
                     }
                 }

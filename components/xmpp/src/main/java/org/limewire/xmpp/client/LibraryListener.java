@@ -1,27 +1,21 @@
 package org.limewire.xmpp.client;
 
-import java.util.ArrayList;
-
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPConnection;
-import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
-import org.jivesoftware.smackx.jingle.JingleManager;
-import org.jivesoftware.smackx.jingle.OutgoingJingleSession;
-import org.jivesoftware.smackx.jingle.nat.ICETransportManager;
 
 public class LibraryListener implements PacketListener {
     private XMPPConnection connection;
-    private RemoteFile [] files;
+    private File[] files;
 
-    public LibraryListener(XMPPConnection connection, RemoteFile [] files) {
+    public LibraryListener(XMPPConnection connection, File[] files) {
         this.files = files;
         this.connection = connection;
     }
     
-    public void setFiles(RemoteFile [] files) {
+    public void setFiles(File[] files) {
         this.files = files;
     }
 
@@ -45,7 +39,7 @@ public class LibraryListener implements PacketListener {
     }
 
     private void handleResult(Library library) {
-        for(RemoteFile file : library.getAllSharedFileDescriptors()){
+        for(File file : library.getAllSharedFileDescriptors()){
             System.out.println("file " + file.getName());
             
         }

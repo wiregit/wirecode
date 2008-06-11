@@ -1,10 +1,10 @@
 package org.limewire.xmpp.client;
 
-public class RemoteFile {
+public class File {
     protected String id;
     protected String name;
     
-    public RemoteFile(String id, String name) {
+    public File(String id, String name) {
         this.id = id;
         this.name = name;
     }

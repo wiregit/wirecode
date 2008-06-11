@@ -1,11 +1,11 @@
 package com.limegroup.gnutella;
 
-import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,6 +30,7 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.SystemUtils;
 import org.limewire.xmpp.client.LoginDialog;
+import org.limewire.xmpp.client.File;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -486,7 +487,7 @@ public class LifecycleManagerImpl implements LifecycleManager {
         //ServerStarter.main(new String[]{});
 
         try {
-            LoginDialog.run(fileManager.get());
+            LoginDialog.run(toRemoteFiles(fileManager.get()));
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
@@ -503,6 +504,18 @@ public class LifecycleManagerImpl implements LifecycleManager {
         LOG.trace("STOP RouterService.");
         startDone.set(true);
         startFinishedTime = System.currentTimeMillis();
+    }
+    
+    private static File[] toRemoteFiles(FileManager fileManager) {
+        if (fileManager != null) {
+            ArrayList<File> array = new ArrayList<File>();
+            for (FileDesc desc : fileManager.getAllSharedFileDescriptors()) {
+                array.add(new File(desc.getSHA1Urn().toString(), desc.getFileName()));
+            }
+            return array.toArray(new File[]{});
+        } else {
+            return null;
+        }
     }
     
     private void initializeConnectionDispatcher() {
@@ -733,18 +746,18 @@ public class LifecycleManagerImpl implements LifecycleManager {
         }
         
         FileFilter filter = new FileFilter() {
-            public boolean accept(File f) {
+            public boolean accept(java.io.File f) {
                 return "torrent".equals(FileUtils.getFileExtension(f));
             }
         };
         
-        File[] file_list = SharingUtils.APPLICATION_SPECIAL_SHARE.listFiles(filter);
+        java.io.File[] file_list = SharingUtils.APPLICATION_SPECIAL_SHARE.listFiles(filter);
         if(file_list == null) {
             return;
         }
         long purgeLimit = System.currentTimeMillis() 
             - SharingSettings.TORRENT_METADATA_PURGE_TIME.getValue()*24L*60L*60L*1000L;
-        File tFile;
+        java.io.File tFile;
         for(int i = 0; i < file_list.length; i++) {
             tFile = file_list[i];
             if(!fileManager.get().isFileShared(tFile) &&
@@ -758,12 +771,12 @@ public class LifecycleManagerImpl implements LifecycleManager {
     private void cleanupPreviewFiles() {
         //Cleanup any preview files.  Note that these will not be deleted if
         //your previewer is still open.
-        File incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
+        java.io.File incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
         if (incompleteDir == null)
             return; // if we could not get the incomplete directory, simply return.
         
         
-        File[] files = incompleteDir.listFiles();
+        java.io.File[] files = incompleteDir.listFiles();
         if(files == null)
             return;
         

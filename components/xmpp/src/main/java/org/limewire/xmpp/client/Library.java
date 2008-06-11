@@ -9,10 +9,10 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 public class Library extends IQ {
-    private RemoteFile[] allSharedFileDescriptors;
+    private File[] allSharedFileDescriptors;
     
     public Library(XmlPullParser parser) {
-        ArrayList<RemoteFile> results = new ArrayList<RemoteFile>();
+        ArrayList<File> results = new ArrayList<File>();
         try {
             do {
                 int eventType = parser.getEventType();
@@ -20,12 +20,12 @@ public class Library extends IQ {
                     if(parser.getName().equals("file")) {
                         String urn = parser.getAttributeValue(null, "id");
                         String name = parser.getAttributeValue(null, "name");
-                        results.add(new RemoteFile(urn, name));
+                        results.add(new File(urn, name));
                         //System.out.println(results.size() - 1 + ": " + results.get(results.size() - 1));
                     }
                 } else if(eventType == XmlPullParser.END_TAG) {
                     if(parser.getName().equals("library")) {
-                        allSharedFileDescriptors = results.toArray(new RemoteFile[]{});
+                        allSharedFileDescriptors = results.toArray(new File[]{});
                         return;
                     }
                 }
@@ -38,7 +38,7 @@ public class Library extends IQ {
         
     }
 
-    public Library(RemoteFile[] allSharedFileDescriptors) {
+    public Library(File[] allSharedFileDescriptors) {
         this.allSharedFileDescriptors = allSharedFileDescriptors;
     }
     
@@ -46,7 +46,7 @@ public class Library extends IQ {
         
     }
 
-    public RemoteFile[] getAllSharedFileDescriptors() {
+    public File[] getAllSharedFileDescriptors() {
         return allSharedFileDescriptors;
     }
 
@@ -59,9 +59,9 @@ public class Library extends IQ {
         
     }
 
-    private String toXML(RemoteFile[] allSharedFileDescriptors) {
+    private String toXML(File[] allSharedFileDescriptors) {
         StringBuilder builder = new StringBuilder();
-        for(RemoteFile file : allSharedFileDescriptors) {
+        for(File file : allSharedFileDescriptors) {
             builder.append("<file name=\"" + file.getName() + "\" ");
             builder.append("id=\"" + file.getId() + "\" />\n");
         }
