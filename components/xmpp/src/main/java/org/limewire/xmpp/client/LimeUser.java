@@ -9,8 +9,8 @@ import org.jivesoftware.smackx.jingle.file.FileContentHandler;
 public class LimeUser extends User{
     private Library library;
 
-    public LimeUser(String jid, String name, XMPPConnection connection) {
-        super(jid, name, connection);
+    public LimeUser(String jid, String name, Presence presence, XMPPConnection connection) {
+        super(jid, name, presence, connection);
     }
     
     public Library getLibrary() {
@@ -26,7 +26,7 @@ public class LimeUser extends User{
 
         try {
             FileContentHandler fileContentHandler = new FileContentHandler(file, true);
-            OutgoingJingleSession out = manager.createOutgoingJingleSession(jid, fileContentHandler);
+            OutgoingJingleSession out = manager.createOutgoingJingleSession(id, fileContentHandler);
 
             out.start();
 

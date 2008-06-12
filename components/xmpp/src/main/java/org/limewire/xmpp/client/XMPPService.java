@@ -34,13 +34,13 @@ public class XMPPService implements Service {
     private static LibraryIQListener libraryIQListener = new LibraryIQListener(null, null);
     
     private final XMPPServiceConfiguration configuration;
-    private final RosterListener listeners;
+    private final org.limewire.xmpp.client.RosterListener listeners;
     protected HashSet<String> limewireClients;
     protected XMPPConnection connection;
 
     @Inject
     public XMPPService(XMPPServiceConfiguration configuration,
-                       RosterListener listeners) {
+                       org.limewire.xmpp.client.RosterListener listeners) {
         this.configuration = configuration;
         this.listeners = listeners;
     }
@@ -84,16 +84,18 @@ public class XMPPService implements Service {
 
         HashSet<String> limewireClients = new HashSet<String>();
         for (RosterEntry rosterEntry : roster.getEntries()) {
+            System.out.println("found: " + rosterEntry.getUser());
             Iterator<Presence> presences = roster.getPresences(rosterEntry.getUser());
             while (presences.hasNext()) {
                 Presence presence = presences.next();
                 if (presence.getType() == Presence.Type.available) {
-                    String name = rosterEntry.getName() != null ? rosterEntry.getName() : rosterEntry.getUser();
-                    System.out.println("found: " + name);
+                    String name = rosterEntry.getName() != null ? rosterEntry.getName() : rosterEntry.getUser();                    
                     try {
                         if (serviceDiscoveryManager.discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/")) {
                             limewireClients.add(presence.getFrom());
-                            System.out.println("found lw client: " + presence.getFrom());
+                            System.out.println("lw presence: " + presence.getFrom());
+                        } else {
+                            System.out.println("presence: " + presence.getFrom());
                         }
                     } catch (XMPPException exception) {
                         //exception.printStackTrace();

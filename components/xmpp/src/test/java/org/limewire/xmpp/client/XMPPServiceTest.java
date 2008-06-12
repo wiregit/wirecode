@@ -31,11 +31,11 @@ public class XMPPServiceTest extends ServiceTestCase {
                     }
 
                     public String getUsername() {
-                        return "limebuddy1@gmail.com";
+                        return "limebuddy2@gmail.com";
                     }
 
                     public String getPassword() {
-                        return "limebuddy123";
+                        return "limebuddy234";
                     }
 
                     public String getHost() {
@@ -73,7 +73,7 @@ public class XMPPServiceTest extends ServiceTestCase {
         return Arrays.asList(new LimeWireXMPPModule(), m);
     }
 
-    public void test() {
-        //            
+    public void test() throws InterruptedException {
+        Thread.sleep(5* 60 * 1000);            
     }
 }

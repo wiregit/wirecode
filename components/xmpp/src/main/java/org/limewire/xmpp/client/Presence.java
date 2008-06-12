@@ -1,6 +1,6 @@
 package org.limewire.xmpp.client;
 
-public class Presence {
+public interface Presence {
     
     enum Type {
         available, unavailable, subscribe, subscribed, unsubscribe, unsubscribed, error
@@ -10,49 +10,13 @@ public class Presence {
         chat, available, away, xa, dnd
     }
     
-    protected Type type;
-    protected java.lang.String status;
-    protected int priority;
-    protected Mode mode;
-    protected java.lang.String language;
+    public String getJID();
+    
+    public Type getType();
 
-    public Type getType() {
-        return type;
-    }
+    public String getStatus();
 
-    public void setType(Type type) {
-        this.type = type;
-    }
+    public int getPriority();
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public int getPriority() {
-        return priority;
-    }
-
-    public void setPriority(int priority) {
-        this.priority = priority;
-    }
-
-    public Mode getMode() {
-        return mode;
-    }
-
-    public void setMode(Mode mode) {
-        this.mode = mode;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
+    public Mode getMode();
 }
