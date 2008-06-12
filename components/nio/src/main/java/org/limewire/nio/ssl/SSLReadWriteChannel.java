@@ -158,8 +158,8 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                 engine.setNeedClientAuth(needClientAuth);
             }
             SSLSession session = engine.getSession();
-            readIncoming = byteBufferCache.getHeap(session.getPacketBufferSize());
-            writeOutgoing = byteBufferCache.getHeap(session.getPacketBufferSize());
+            readIncoming = byteBufferCache.get(session.getPacketBufferSize());
+            writeOutgoing = byteBufferCache.get(session.getPacketBufferSize());
             if(LOG.isTraceEnabled())
                 LOG.trace("Initialized engine: " + engine + ", session: " + session);
         }
@@ -231,7 +231,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                         if(shutdown)
                             throw new IOException("Shutdown while sizing");
                         
-                        readOutgoing = byteBufferCache.getHeap(engine.getSession().getApplicationBufferSize());
+                        readOutgoing = byteBufferCache.get(engine.getSession().getApplicationBufferSize());
                     }
                 }
                 result = engine.unwrap(readIncoming, readOutgoing);
@@ -250,7 +250,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                                 throw new IOException("Shutdown while resizing.");
                             
                             // Transfer data from old readIncoming to newIncoming.
-                            ByteBuffer newIncoming = byteBufferCache.getHeap(engine.getSession().getPacketBufferSize());
+                            ByteBuffer newIncoming = byteBufferCache.get(engine.getSession().getPacketBufferSize());
                             BufferUtils.transfer(readIncoming, newIncoming, false);
                             newIncoming.flip();
                             assert newIncoming.limit() == readIncoming.position();
@@ -261,7 +261,7 @@ class SSLReadWriteChannel implements InterestReadableByteChannel, InterestWritab
                             // Replace outgoing with upgraded version.
                             assert readOutgoing.position() == 0;
                             byteBufferCache.release(readOutgoing);
-                            readOutgoing = byteBufferCache.getHeap(engine.getSession().getApplicationBufferSize());
+                            readOutgoing = byteBufferCache.get(engine.getSession().getApplicationBufferSize());
                             
                             // ... and try again!
                             result = engine.unwrap(readIncoming, readOutgoing);

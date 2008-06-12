@@ -9,6 +9,7 @@ import junit.framework.Test;
 import org.limewire.concurrent.ManagedThread;
 import org.limewire.http.HttpTestUtils;
 import org.limewire.nio.ByteBufferCache;
+import org.limewire.nio.ByteBufferCacheImpl;
 import org.limewire.util.BaseTestCase;
 
 public class FilePieceReaderTest extends BaseTestCase {
@@ -50,7 +51,7 @@ public class FilePieceReaderTest extends BaseTestCase {
     public void testRead() throws Exception {
         createFile(50000);
 
-        reader = new FilePieceReader(new ByteBufferCache(), file, 0, (int) file
+        reader = new FilePieceReader(new ByteBufferCacheImpl(), file, 0, (int) file
                 .length(), listener);
         reader.start();
 
@@ -81,7 +82,7 @@ public class FilePieceReaderTest extends BaseTestCase {
         createFile(filesize);
 
         MockByteBufferCache cache = new MockByteBufferCache();
-        assertEquals(0, cache.getHeapCacheSize());
+        assertEquals(0, cache.getCacheSize());
 
         reader = new FilePieceReader(cache, file, 0, filesize, listener);
         assertEquals(0, cache.buffers);

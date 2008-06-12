@@ -11,6 +11,7 @@ import org.apache.http.nio.IOControl;
 import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
 import org.limewire.swarm.file.FileCoordinator;
+import org.limewire.swarm.file.WriteJob;
 import org.limewire.util.Objects;
 
 
@@ -19,8 +20,10 @@ class FileContentListener implements ResponseContentListener {
     private static final Log LOG = LogFactory.getLog(FileContentListener.class);
     
     private final FileCoordinator fileCoordinator;
+    private boolean finished;
     private Range expectedRange;
     private Range actualRange;
+    private WriteJob writeJob;
 
     public FileContentListener(FileCoordinator fileCoordinator, Range range) {
         this.fileCoordinator = Objects.nonNull(fileCoordinator, "fileCoordinator");
@@ -28,28 +31,45 @@ class FileContentListener implements ResponseContentListener {
     }
 
     public void contentAvailable(ContentDecoder decoder, IOControl ioctrl) throws IOException {
-        long amtRead = fileCoordinator.transferFrom(decoder, expectedRange.getLow());
-        if(amtRead == -1)
-            throw new IOException("No data available to read.");
+        if(finished)
+            throw new IOException("Already finished.");
         
-        if(amtRead > 0) {
-            long newLow = expectedRange.getLow() + amtRead;
-            long high = expectedRange.getHigh();
-            if(newLow > high)
-                expectedRange = null;
-            else
-                expectedRange = Range.createRange(newLow, high);
+        long low = expectedRange.getLow();
+        long high = expectedRange.getHigh();
+        
+        if(writeJob == null) {
+            writeJob = fileCoordinator.newWriteJob(low, ioctrl);
         }
+        
+        long consumed = writeJob.consumeContent(decoder);
+        
+        // Reposition expectedRange so that we can release ranges
+        // if we get cancelled.
+        if(consumed > 0) {
+            long newLow = low + consumed;
+            if (newLow > high) {
+                expectedRange = null;
+            } else {
+                expectedRange = Range.createRange(newLow, high);
+            }
+        }
+        
     }
 
     public void finished() {
-        if(expectedRange != null) {
-            fileCoordinator.release(expectedRange);
-            expectedRange = null;
+        if(!finished) {
+            finished = true;
+            if(expectedRange != null) {
+                fileCoordinator.unlease(expectedRange);
+                expectedRange = null;
+            }
         }
     }
 
     public void initialize(HttpResponse response) throws IOException {
+        if(finished)
+            throw new IOException("Already finished");
+        
         Header contentRange = response.getFirstHeader("Content-Range");
         Header contentLengthHeader = response.getFirstHeader("Content-Length");
         
@@ -89,13 +109,13 @@ class FileContentListener implements ResponseContentListener {
         
         if (!actualRange.equals(expectedRange)) {
             if (actualRange.getLow() > expectedRange.getLow()) {
-                fileCoordinator.release(Range.createRange(expectedRange.getLow(),
+                fileCoordinator.unlease(Range.createRange(expectedRange.getLow(),
                                                           actualRange.getLow()));
                 expectedRange = Range.createRange(actualRange.getLow(), expectedRange.getHigh());
             }
 
             if (actualRange.getHigh() < expectedRange.getHigh()) {
-                fileCoordinator.release(Range.createRange(actualRange.getHigh(),
+                fileCoordinator.unlease(Range.createRange(actualRange.getHigh(),
                                                           expectedRange.getHigh()));
                 expectedRange = Range.createRange(expectedRange.getLow(), actualRange.getHigh());
             }

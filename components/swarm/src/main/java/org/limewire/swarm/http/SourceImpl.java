@@ -2,7 +2,7 @@ package org.limewire.swarm.http;
 
 import java.net.SocketAddress;
 
-public class SourceImpl implements Source {
+public class SourceImpl implements SwarmSource {
     
     private final SocketAddress socketAddress;
     private final String uri;

@@ -2,19 +2,19 @@ package org.limewire.http.entity;
 
 import java.nio.ByteBuffer;
 
-import org.limewire.nio.ByteBufferCache;
+import org.limewire.nio.ByteBufferCacheImpl;
 
-public class MockByteBufferCache extends ByteBufferCache {
+public class MockByteBufferCache extends ByteBufferCacheImpl {
 
     public int bytes;
 
     public int buffers;
 
     @Override
-    public ByteBuffer getHeap(int size) {
+    public ByteBuffer get(int size) {
         bytes += size;
         buffers++;
-        return super.getHeap(size);
+        return super.get(size);
     }
 
     @Override

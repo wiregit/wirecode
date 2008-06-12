@@ -517,7 +517,7 @@ public class UDPService implements ReadWriteObserver {
         }
         
         int length = msg.getTotalLength();
-        ByteBuffer buffer = NIODispatcher.instance().getBufferCache().getHeap(length);
+        ByteBuffer buffer = NIODispatcher.instance().getBufferCache().get(length);
         if(buffer.remaining() != length)
             throw new IllegalStateException("retrieved a buffer with wrong remaining! " +
                                             "wanted: " + length +

@@ -20,20 +20,20 @@ public class ByteBufferCacheTest extends BaseTestCase {
     
     @Override
     public void setUp() {
-        CACHE = new ByteBufferCache();
+        CACHE = new ByteBufferCacheImpl();
     }
     /**
      * Tests that requesting a buffer, releasing it and then requesting
      * a buffer of the same size again will return the same object.
      */
     public void testGetSameBuffer() throws Exception {
-        ByteBuffer buf = CACHE.getHeap(100);
+        ByteBuffer buf = CACHE.get(100);
         int hashCode = System.identityHashCode(buf);
         CACHE.release(buf);
-        assertEquals(100, CACHE.getHeapCacheSize());
-        buf = CACHE.getHeap(100);
+        assertEquals(100, CACHE.getCacheSize());
+        buf = CACHE.get(100);
         assertEquals(hashCode, System.identityHashCode(buf));
-        assertEquals(0, CACHE.getHeapCacheSize());
+        assertEquals(0, CACHE.getCacheSize());
     }
     
     /**
@@ -41,11 +41,11 @@ public class ByteBufferCacheTest extends BaseTestCase {
      * different objects. 
      */
     public void testGetNoRelease() throws Exception {
-        ByteBuffer buf = CACHE.getHeap(100);
+        ByteBuffer buf = CACHE.get(100);
         int hashCode = System.identityHashCode(buf);
-        buf = CACHE.getHeap(100);
+        buf = CACHE.get(100);
         assertNotEquals(hashCode, System.identityHashCode(buf));
-        assertEquals(0, CACHE.getHeapCacheSize());
+        assertEquals(0, CACHE.getCacheSize());
     }
     
     
@@ -54,20 +54,20 @@ public class ByteBufferCacheTest extends BaseTestCase {
      * available will create a new object.
      */
     public void testNoSlicingIfLarger() throws Exception {
-        ByteBuffer buf = CACHE.getHeap(100);
-        buf = CACHE.getHeap(100);
+        ByteBuffer buf = CACHE.get(100);
+        buf = CACHE.get(100);
         int hashCode = System.identityHashCode(buf);
         CACHE.release(buf);
-        assertEquals(100, CACHE.getHeapCacheSize());
-        ByteBuffer larger = CACHE.getHeap(200);
-        assertEquals(100, CACHE.getHeapCacheSize());
+        assertEquals(100, CACHE.getCacheSize());
+        ByteBuffer larger = CACHE.get(200);
+        assertEquals(100, CACHE.getCacheSize());
         assertNotEquals(hashCode, System.identityHashCode(larger));
         
         // we haven't returned the larger buffer, and requesting a buffer
         // of the equal size will return the same object we had the first
         // time around.
-        buf = CACHE.getHeap(100);
-        assertEquals(0, CACHE.getHeapCacheSize());
+        buf = CACHE.get(100);
+        assertEquals(0, CACHE.getCacheSize());
         assertEquals(hashCode, System.identityHashCode(buf));
     }
     
@@ -76,18 +76,18 @@ public class ByteBufferCacheTest extends BaseTestCase {
      * available will create a new object.
      */
     public void testNoSlicingIfSmaller() throws Exception {
-        ByteBuffer buf = CACHE.getHeap(100);
-        buf = CACHE.getHeap(100);
+        ByteBuffer buf = CACHE.get(100);
+        buf = CACHE.get(100);
         int hashCode = System.identityHashCode(buf);
         CACHE.release(buf);
-        assertEquals(100, CACHE.getHeapCacheSize());
-        ByteBuffer smaller = CACHE.getHeap(50);
-        assertEquals(100, CACHE.getHeapCacheSize());
+        assertEquals(100, CACHE.getCacheSize());
+        ByteBuffer smaller = CACHE.get(50);
+        assertEquals(100, CACHE.getCacheSize());
         assertNotEquals(hashCode, System.identityHashCode(smaller));
         
         // smaller did not use up the larger size.
-        buf = CACHE.getHeap(100);
-        assertEquals(0, CACHE.getHeapCacheSize());
+        buf = CACHE.get(100);
+        assertEquals(0, CACHE.getCacheSize());
         assertEquals(hashCode, System.identityHashCode(buf));
     }
     
@@ -95,20 +95,20 @@ public class ByteBufferCacheTest extends BaseTestCase {
      * Test that clearing the cache will purge any cached buffers.
      */
     public void testClearing() throws Exception {
-        ByteBuffer buf = CACHE.getHeap(100);
-        buf = CACHE.getHeap(100);
+        ByteBuffer buf = CACHE.get(100);
+        buf = CACHE.get(100);
         int hashCode = System.identityHashCode(buf);
         CACHE.release(buf);
-        assertEquals(100, CACHE.getHeapCacheSize());
-        buf = CACHE.getHeap(100);
-        assertEquals(0, CACHE.getHeapCacheSize());
+        assertEquals(100, CACHE.getCacheSize());
+        buf = CACHE.get(100);
+        assertEquals(0, CACHE.getCacheSize());
         assertEquals(hashCode, System.identityHashCode(buf));
         CACHE.release(buf);
-        assertEquals(100, CACHE.getHeapCacheSize());
+        assertEquals(100, CACHE.getCacheSize());
         
         CACHE.clearCache();
-        assertEquals(0, CACHE.getHeapCacheSize());
-        buf = CACHE.getHeap(100);
+        assertEquals(0, CACHE.getCacheSize());
+        buf = CACHE.get(100);
         assertNotEquals(hashCode, System.identityHashCode(buf));
     }
 }

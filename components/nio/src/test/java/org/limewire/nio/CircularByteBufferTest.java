@@ -209,7 +209,7 @@ public class CircularByteBufferTest extends BaseTestCase {
     	assertEquals(0,buf.size());
     }
     
-    private static class StubCache extends ByteBufferCache {
+    private static class StubCache extends ByteBufferCacheImpl {
 
     	ByteBuffer checkedOut;
 		public StubCache() {}
@@ -218,25 +218,14 @@ public class CircularByteBufferTest extends BaseTestCase {
 		public void clearCache() {}
 
 		@Override
-		public ByteBuffer getDirect() {
-			return null;
-		}
-
-		@Override
-		public ByteBuffer getHeap() {
-			fail(" illegal method invocation");
-			return null;
-		}
-
-		@Override
-		public ByteBuffer getHeap(int size) {
+		public ByteBuffer get(int size) {
 			assertNull(checkedOut);
 			checkedOut = ByteBuffer.allocate(size);
 			return checkedOut;
 		}
 
 		@Override
-		public long getHeapCacheSize() {
+		public long getCacheSize() {
 			return 0;
 		}
 

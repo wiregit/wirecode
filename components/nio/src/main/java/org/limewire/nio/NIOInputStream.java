@@ -64,7 +64,7 @@ class NIOInputStream implements ChannelReadObserver, InterestScatteringByteChann
         if(shutdown)
             throw new IOException("Already closed!");
         
-        buffer = NIODispatcher.instance().getBufferCache().getHeap(); 
+        buffer = NIODispatcher.instance().getBufferCache().get(8192); 
         source = new BufferInputStream(buffer, this, shutdownHandler, channel, this);
         bufferLock = source.getBufferLock();
         

@@ -44,7 +44,7 @@ public class IOStateMachine implements ChannelReadObserver, ChannelWriter, Inter
     public IOStateMachine(IOStateObserver observer, List<IOState> states, int bufferSize) {
         this.observer = observer;
         this.states = states;
-        this.readBuffer = NIODispatcher.instance().getBufferCache().getHeap(bufferSize);
+        this.readBuffer = NIODispatcher.instance().getBufferCache().get(bufferSize);
         if(!states.isEmpty())
             this.currentState = states.remove(0);
     }

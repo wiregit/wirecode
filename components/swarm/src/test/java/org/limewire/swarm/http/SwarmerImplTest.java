@@ -11,6 +11,7 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpParams;
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.http.reactor.LimeConnectingIOReactor;
 import org.limewire.net.SocketsManagerImpl;
 import org.limewire.nio.NIODispatcher;
@@ -41,7 +42,7 @@ public class SwarmerImplTest extends BaseTestCase {
         ConnectingIOReactor ioReactor = new LimeConnectingIOReactor(params, NIODispatcher.instance().getScheduledExecutorService(), new SocketsManagerImpl());
       //  ConnectingIOReactor ioReactor = new DefaultConnectingIOReactor(1, params);
         SwarmFileWriter swarmFileWriter = new FileChannelSwarmFileWriter(new File("C:/TEST-LimeWireWin.exe"));
-        FileCoordinator fileCoordinator = new FileCoordinatorImpl(4898448L, swarmFileWriter);
+        FileCoordinator fileCoordinator = new FileCoordinatorImpl(4898448L, swarmFileWriter, ExecutorsHelper.newFixedSizeThreadPool(1, "Writer"));
         
         
         final Swarmer swarmer = new SwarmerImpl(fileCoordinator, ioReactor, params, new Listener(fileCoordinator));
@@ -50,7 +51,6 @@ public class SwarmerImplTest extends BaseTestCase {
                 swarmer.start();
             }
         }).start();
-        
         swarmer.addSource(new SourceImpl(new InetSocketAddress("www9.limewire.com", 80), "/download/LimeWireWin.exe", true), null);
         swarmer.addSource(new SourceImpl(new InetSocketAddress("www9.limewire.com", 80), "/download/LimeWireWin.exe", true), null);
         swarmer.addSource(new SourceImpl(new InetSocketAddress("www9.limewire.com", 80), "/download/LimeWireWin.exe", true), null);
@@ -58,7 +58,7 @@ public class SwarmerImplTest extends BaseTestCase {
         swarmer.addSource(new SourceImpl(new InetSocketAddress("www9.limewire.com", 80), "/download/LimeWireWin.exe", true), null);
         swarmer.addSource(new SourceImpl(new InetSocketAddress("www9.limewire.com", 80), "/download/LimeWireWin.exe", true), null);
         
-        Thread.sleep(5000);
+        Thread.sleep(8000);
         
         swarmFileWriter.finish();
     }
@@ -71,21 +71,21 @@ public class SwarmerImplTest extends BaseTestCase {
             this.fileCoordinator = fileCoordinator;
         }
 
-        public void connected(Swarmer swarmer, Source source) {
+        public void connected(Swarmer swarmer, SwarmSource source) {
             retry = false;
         }
         
-        public void connectFailed(Swarmer swarmer, Source source) {
+        public void connectFailed(Swarmer swarmer, SwarmSource source) {
             retry = false;
         }
         
-        public void connectionClosed(Swarmer swarmer, Source source) {
+        public void connectionClosed(Swarmer swarmer, SwarmSource source) {
             if(retry && fileCoordinator.isRangeAvailableForLease()) {
                 swarmer.addSource(source, null);
             }
         }
         
-        public void responseProcessed(Swarmer swarmer, Source source, int statusCode) {
+        public void responseProcessed(Swarmer swarmer, SwarmSource source, int statusCode) {
             if(statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_PARTIAL_CONTENT)
                 retry = true;
             else

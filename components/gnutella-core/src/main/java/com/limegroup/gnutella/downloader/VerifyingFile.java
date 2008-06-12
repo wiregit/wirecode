@@ -14,6 +14,7 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.MultiIterable;
 import org.limewire.collection.Range;
 import org.limewire.io.DiskException;
+import org.limewire.swarm.file.SelectionStrategy;
 import org.limewire.util.FileUtils;
 
 import com.google.inject.Provider;

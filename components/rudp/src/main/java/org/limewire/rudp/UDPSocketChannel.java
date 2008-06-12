@@ -238,7 +238,7 @@ class UDPSocketChannel extends AbstractNBSocketChannel implements InterestReadab
      *  Allocates a chunk for writing to.
      */
     private void allocateNewChunk() {
-        activeChunk = NIODispatcher.instance().getBufferCache().getHeap(UDPConnectionProcessor.DATA_CHUNK_SIZE);
+        activeChunk = NIODispatcher.instance().getBufferCache().get(UDPConnectionProcessor.DATA_CHUNK_SIZE);
     }
     
     /**

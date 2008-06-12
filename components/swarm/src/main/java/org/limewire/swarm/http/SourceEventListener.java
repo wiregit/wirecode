@@ -2,12 +2,12 @@ package org.limewire.swarm.http;
 
 public interface SourceEventListener {
 
-    void connectFailed(Swarmer swarmer, Source source);
+    void connectFailed(Swarmer swarmer, SwarmSource source);
 
-    void connected(Swarmer swarmer, Source source);
+    void connected(Swarmer swarmer, SwarmSource source);
 
-    void connectionClosed(Swarmer swarmer, Source source);
+    void connectionClosed(Swarmer swarmer, SwarmSource source);
 
-    void responseProcessed(Swarmer swarmer, Source source, int statusCode);
+    void responseProcessed(Swarmer swarmer, SwarmSource source, int statusCode);
 
 }

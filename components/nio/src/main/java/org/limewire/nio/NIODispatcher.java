@@ -168,7 +168,7 @@ public class NIODispatcher implements Runnable {
      * A common ByteBufferCache that classes can use.
      * TODO: Move somewhere else.
      */
-    private final ByteBufferCache BUFFER_CACHE = new ByteBufferCache();
+    private final ByteBufferCacheImpl BUFFER_CACHE = new ByteBufferCacheImpl();
     
     /** The selector this uses. */
     private Selector primarySelector = null;
@@ -193,7 +193,7 @@ public class NIODispatcher implements Runnable {
 	}
     
     /** Gets the common <code>ByteBufferCache</code>. */
-    public ByteBufferCache getBufferCache() {
+    public ByteBufferCacheImpl getBufferCache() {
         return BUFFER_CACHE;
     }
     

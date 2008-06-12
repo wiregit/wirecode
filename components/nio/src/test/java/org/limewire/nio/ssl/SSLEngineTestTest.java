@@ -2,7 +2,7 @@ package org.limewire.nio.ssl;
 
 import junit.framework.Test;
 
-import org.limewire.nio.ByteBufferCache;
+import org.limewire.nio.ByteBufferCacheImpl;
 import org.limewire.util.BaseTestCase;
 
 public class SSLEngineTestTest extends BaseTestCase {
@@ -16,12 +16,12 @@ public class SSLEngineTestTest extends BaseTestCase {
     }
     
     public void testGo() {
-        SSLEngineTest test = new SSLEngineTest(SSLUtils.getTLSContext(), new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, new ByteBufferCache());
+        SSLEngineTest test = new SSLEngineTest(SSLUtils.getTLSContext(), new String[] { "TLS_DH_anon_WITH_AES_128_CBC_SHA" }, new ByteBufferCacheImpl());
         assertTrue(test.go());
     }
     
     public void testGoFailsAndNotifiesErrorService() {
-        SSLEngineTest test = new SSLEngineTest(SSLUtils.getTLSContext(), new String[] { "la de da" }, new ByteBufferCache());
+        SSLEngineTest test = new SSLEngineTest(SSLUtils.getTLSContext(), new String[] { "la de da" }, new ByteBufferCacheImpl());
         assertFalse(test.go());
         Throwable cause = test.getLastFailureCause();
         assertNotNull(cause);

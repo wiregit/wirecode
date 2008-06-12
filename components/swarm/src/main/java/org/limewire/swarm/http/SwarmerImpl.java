@@ -2,6 +2,7 @@ package org.limewire.swarm.http;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,6 +32,8 @@ import org.limewire.swarm.file.FileCoordinator;
 class SwarmerImpl implements Swarmer, HttpSwarmHandler<SwarmerImpl.SourceInfo> {
     
     private static final Log LOG = LogFactory.getLog(SwarmerImpl.class);
+    
+    private final AtomicBoolean started = new AtomicBoolean(false);
     
     private final ConnectingIOReactor ioReactor;
     private final IOEventDispatch eventDispatch;
@@ -68,7 +71,10 @@ class SwarmerImpl implements Swarmer, HttpSwarmHandler<SwarmerImpl.SourceInfo> {
         eventDispatch = new DefaultClientIOEventDispatch(clientHandler, params);
     }
     
-    public void addSource(final Source source, SourceEventListener sourceEventListener) {
+    public void addSource(final SwarmSource source, SourceEventListener sourceEventListener) {
+        if(!started.get())
+            throw new IllegalStateException("Cannot add source before starting");
+        
         if(LOG.isDebugEnabled())
             LOG.debug("Adding source: " + source);
         
@@ -96,6 +102,7 @@ class SwarmerImpl implements Swarmer, HttpSwarmHandler<SwarmerImpl.SourceInfo> {
     
     public void start() {
         try {
+            started.set(true);
             ioReactor.execute(eventDispatch);
         } catch(IOException iox) {
             LOG.warn("Unable to execute event dispatch");
@@ -181,11 +188,11 @@ class SwarmerImpl implements Swarmer, HttpSwarmHandler<SwarmerImpl.SourceInfo> {
     }
     
     private static class SourceInfo {
-        private final Source source;
+        private final SwarmSource source;
         private final SourceEventListener sourceEventListener;
         private ResponseContentListener contentListener;
         
-        SourceInfo(Source source, SourceEventListener sourceEventListener) {
+        SourceInfo(SwarmSource source, SourceEventListener sourceEventListener) {
             this.source = source;
             this.sourceEventListener = sourceEventListener;
         }
@@ -206,7 +213,7 @@ class SwarmerImpl implements Swarmer, HttpSwarmHandler<SwarmerImpl.SourceInfo> {
             return sourceEventListener;
         }
         
-        public Source getSource() {
+        public SwarmSource getSource() {
             return source;
         }
 
@@ -217,10 +224,10 @@ class SwarmerImpl implements Swarmer, HttpSwarmHandler<SwarmerImpl.SourceInfo> {
     }
     
     private static final SourceEventListener NULL_LISTENER = new SourceEventListener() {
-        public void connected(Swarmer swarmer, Source source) {}
-        public void connectFailed(Swarmer swarmer, Source source) {}
-        public void connectionClosed(Swarmer swarmer, Source source) {}
-        public void responseProcessed(Swarmer swarmer, Source source, int statusCode) {}
+        public void connected(Swarmer swarmer, SwarmSource source) {}
+        public void connectFailed(Swarmer swarmer, SwarmSource source) {}
+        public void connectionClosed(Swarmer swarmer, SwarmSource source) {}
+        public void responseProcessed(Swarmer swarmer, SwarmSource source, int statusCode) {}
     };
 
 }

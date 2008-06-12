@@ -305,7 +305,7 @@ public class FilePieceReader implements PieceReader {
         }
         
         for (int i = 0; i < MAX_BUFFERS && (i == 0 || i * BUFFER_SIZE  + 1 <= remaining); i++) {
-            bufferPool.add(bufferCache.getHeap(BUFFER_SIZE));
+            bufferPool.add(bufferCache.get(BUFFER_SIZE));
         }
 
         spawnJobs();

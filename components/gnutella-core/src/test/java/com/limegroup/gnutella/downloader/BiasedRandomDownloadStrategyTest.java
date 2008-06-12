@@ -5,6 +5,8 @@ import java.util.Random;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.swarm.file.BiasedRandomDownloadStrategy;
+import org.limewire.swarm.file.SelectionStrategy;
 import org.limewire.util.PrivilegedAccessor;
 import org.limewire.util.SystemUtils;
 

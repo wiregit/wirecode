@@ -295,7 +295,7 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
             }
         }).get();
         assertNull(session1);
-        assertEquals(0, cache.getHeapCacheSize());
+        assertEquals(0, cache.getCacheSize());
         
         cache.clearCache();
         // And initializing before shutting down will create the buffers / session,
@@ -307,14 +307,14 @@ public class SSLReadWriteChannelTest extends BaseTestCase {
             }
         }).get();
         assertNotNull(session2);
-        assertEquals(0, cache.getHeapCacheSize()); // objects are still leased.
+        assertEquals(0, cache.getCacheSize()); // objects are still leased.
         // Now if we shutdown the channel, the buffers are returned.
         channel2.shutdown();
         // wait for the shutdown to process completely.
         NIODispatcher.instance().getScheduledExecutorService().submit(new Runnable() {public void run() {}}).get();
-        assertNotEquals(0, cache.getHeapCacheSize());
+        assertNotEquals(0, cache.getCacheSize());
         // A little stricter than necessary: check the correct size was taken.
-        assertEquals(session2.getPacketBufferSize() + session2.getPacketBufferSize(), cache.getHeapCacheSize());
+        assertEquals(session2.getPacketBufferSize() + session2.getPacketBufferSize(), cache.getCacheSize());
     }
     
     public void testParentInterestOffDoesntKillHandshake() throws Exception {

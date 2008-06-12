@@ -43,7 +43,7 @@ class NIOOutputStream implements WriteObserver {
         if(shutdown)
             throw new IOException("already closed!");
 
-        this.buffer = NIODispatcher.instance().getBufferCache().getHeap();
+        this.buffer = NIODispatcher.instance().getBufferCache().get(8192);
         sink = new BufferOutputStream(buffer, handler, this, channel);
         bufferLock = sink.getBufferLock();
         return this;

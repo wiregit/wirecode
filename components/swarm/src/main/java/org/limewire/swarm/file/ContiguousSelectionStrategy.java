@@ -5,7 +5,6 @@ import java.util.NoSuchElementException;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 
-import com.limegroup.gnutella.downloader.SelectionStrategy;
 
 public class ContiguousSelectionStrategy implements SelectionStrategy {
     

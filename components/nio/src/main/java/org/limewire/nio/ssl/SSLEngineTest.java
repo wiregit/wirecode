@@ -68,8 +68,8 @@ public class SSLEngineTest {
         server.setWantClientAuth(false);
         
         SSLSession session = server.getSession();        
-        ByteBuffer clientOut = cache.getHeap(session.getPacketBufferSize());
-        ByteBuffer serverOut = cache.getHeap(session.getPacketBufferSize());        
+        ByteBuffer clientOut = cache.get(session.getPacketBufferSize());
+        ByteBuffer serverOut = cache.get(session.getPacketBufferSize());        
 
         if(LOG.isDebugEnabled())
             LOG.debug("Starting handshake loop.\nServer: " + server + "\nClient: " + client);

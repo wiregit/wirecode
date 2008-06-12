@@ -2,6 +2,8 @@ package com.limegroup.gnutella.downloader;
 
 import java.util.Locale;
 
+import org.limewire.swarm.file.BiasedRandomDownloadStrategy;
+import org.limewire.swarm.file.SelectionStrategy;
 import org.limewire.util.BaseTestCase;
 
 import com.limegroup.gnutella.settings.DownloadSettings;

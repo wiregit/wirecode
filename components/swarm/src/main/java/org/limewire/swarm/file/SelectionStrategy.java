@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.downloader;
+package org.limewire.swarm.file;
 
 
 import java.util.NoSuchElementException;

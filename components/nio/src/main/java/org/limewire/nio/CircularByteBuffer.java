@@ -34,12 +34,13 @@ public class CircularByteBuffer {
     private void initBuffers() {
     	if (in == null) {
     		assert out == null;
-    		in = cache.getHeap(capacity);
+    		in = cache.get(capacity);
     		out = in.asReadOnlyBuffer();
     	} else 
     		assert out != null;
     }
 
+    /** Returns the amount of free space left that this buffer can store data in. */
     public final int remainingIn() {
     	if (in == null)
     		return capacity;
@@ -54,10 +55,12 @@ public class CircularByteBuffer {
         	return lastOut ? in.capacity() : 0;
     }
     
+    /** Returns the amount of data this buffer is storing that can be written out. */
     public final int remainingOut() {
         return capacity() - remainingIn();
     }
 
+    /** Stores data from src in this buffer. */
     public void put(ByteBuffer src) {
         if (src.remaining() > remainingIn())
             throw new BufferOverflowException();
@@ -79,6 +82,7 @@ public class CircularByteBuffer {
         in.put(src);
     }
     
+    /** Stores data from src in this buffer. */
     public void put(CircularByteBuffer src) {
         if (src.remainingOut() > remainingIn())
             throw new BufferOverflowException();
@@ -95,6 +99,7 @@ public class CircularByteBuffer {
         lastOut = false;
     }
     
+    /** Gets a single byte. */
     public byte get() {
         if (remainingOut() < 1)
             throw new BufferUnderflowException();
@@ -106,10 +111,12 @@ public class CircularByteBuffer {
         return ret;
     }
     
+    /** Stores data from this in dest. */
     public void get(byte [] dest) {
         get(dest,0,dest.length);
     }
     
+    /** Stores length bytes beginning at the offset in dest. */ 
     public void get(byte [] dest, int offset, int length) {
         if (remainingOut() < length)
             throw new BufferUnderflowException();
@@ -131,6 +138,7 @@ public class CircularByteBuffer {
         releaseIfEmpty();
     }
     
+    /** Stores data from this buffer in dest. */
     public void get(ByteBuffer dest) {
         if (remainingOut() < dest.remaining())
             throw new BufferUnderflowException();
@@ -158,17 +166,24 @@ public class CircularByteBuffer {
     	}
     }
     
-    public int write(WritableByteChannel sink, int len) throws IOException {
+    /** Writes len bytes from this into the sink. */
+    public int write(WritableByteChannel sink, long longLen) throws IOException {
+        if(longLen < 0)
+            throw new IllegalArgumentException("invalid length: " + longLen);
+        
+
+        int len = (int)Math.min(Integer.MAX_VALUE, longLen);
         int written = 0;
         int thisTime = 0;
         while (remainingOut() > 0 && written < len) {
             if (!out.hasRemaining())
                 out.rewind();
             if (in.position() > out.position()) {
-            	if (len == Integer.MAX_VALUE)
+            	if (len == Integer.MAX_VALUE) {
             		out.limit(in.position());
-            	else
+            	} else {
             		out.limit(Math.min(in.position(), len - written + out.position()));
+            	}
             }
             try {
             	thisTime = sink.write(out);
@@ -187,6 +202,7 @@ public class CircularByteBuffer {
         return written;
     }
     
+    /** Writes as many bytes as possible from this into the sink. */
     public int write(WritableByteChannel sink) throws IOException {
     	return write(sink, Integer.MAX_VALUE);
     }
@@ -229,10 +245,12 @@ public class CircularByteBuffer {
         return read;
     }
     
+    /** Returns the amount of data that can be written from this. */
     public int size() {
     	return remainingOut();
     }
     
+    /** Returns the total capacity this can store. */
     public int capacity() {
     	return capacity;
     }
@@ -260,6 +278,7 @@ public class CircularByteBuffer {
     	return get() & 0xFF;
     }
     
+    /** Discards num amount of bytes. */
     public void discard(int num) {
     	if (remainingOut() < num)
     		throw new BufferUnderflowException();

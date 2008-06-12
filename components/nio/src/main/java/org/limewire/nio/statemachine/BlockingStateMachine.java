@@ -44,7 +44,7 @@ public class BlockingStateMachine implements Closeable, Shutdownable {
 
     public BlockingStateMachine(List<IOState> states, int bufferSize, InputStream in, OutputStream out) {
         this.states = states;
-        this.readBuffer = NIODispatcher.instance().getBufferCache().getHeap(bufferSize);
+        this.readBuffer = NIODispatcher.instance().getBufferCache().get(bufferSize);
         this.readChannel = Channels.newChannel(in);
         this.writeChannel = Channels.newChannel(out);
     }

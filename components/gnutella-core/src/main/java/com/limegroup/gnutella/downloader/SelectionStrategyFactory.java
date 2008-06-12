@@ -2,6 +2,9 @@ package com.limegroup.gnutella.downloader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.swarm.file.BiasedRandomDownloadStrategy;
+import org.limewire.swarm.file.RandomDownloadStrategy;
+import org.limewire.swarm.file.SelectionStrategy;
 
 import com.limegroup.gnutella.settings.DownloadSettings;
 
