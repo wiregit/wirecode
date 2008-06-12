@@ -21,7 +21,6 @@ public class Library extends IQ {
                         String urn = parser.getAttributeValue(null, "id");
                         String name = parser.getAttributeValue(null, "name");
                         results.add(new File(urn, name));
-                        //System.out.println(results.size() - 1 + ": " + results.get(results.size() - 1));
                     }
                 } else if(eventType == XmlPullParser.END_TAG) {
                     if(parser.getName().equals("library")) {
@@ -31,9 +30,9 @@ public class Library extends IQ {
                 }
             } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace(); // TODO log, throw?
         } catch (XmlPullParserException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace(); // TODO log, throw?
         }
         
     }
@@ -65,7 +64,6 @@ public class Library extends IQ {
             builder.append("<file name=\"" + file.getName() + "\" ");
             builder.append("id=\"" + file.getId() + "\" />\n");
         }
-        System.out.println(builder.toString());
         return builder.toString();
     }
 

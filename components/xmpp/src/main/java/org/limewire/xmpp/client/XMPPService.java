@@ -34,13 +34,13 @@ public class XMPPService implements Service {
     private static LibraryIQListener libraryIQListener = new LibraryIQListener(null, null);
     
     private final XMPPServiceConfiguration configuration;
-    private final XMPPListeners listeners;
+    private final RosterListener listeners;
     protected HashSet<String> limewireClients;
     protected XMPPConnection connection;
 
     @Inject
     public XMPPService(XMPPServiceConfiguration configuration,
-                       XMPPListeners listeners) {
+                       RosterListener listeners) {
         this.configuration = configuration;
         this.listeners = listeners;
     }

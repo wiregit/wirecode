@@ -51,17 +51,21 @@ public class XMPPServiceTest extends ServiceTestCase {
                     }
                 });
                 
-                bind(XMPPListeners.class).toInstance(new XMPPListeners() {
-                    public RosterListener getRosterListener() {
-                        return new RosterListener(){};
+                bind(RosterListener.class).toInstance(new RosterListener() {
+                    public void userAdded(User user) {
+                        //To change body of implemented methods use File | Settings | File Templates.
                     }
 
-                    public PresenceListener getPresenceListener() {
-                        return new PresenceListener(){};
+                    public void userUpdated(User user) {
+                        //To change body of implemented methods use File | Settings | File Templates.
                     }
 
-                    public LibraryListener getLibraryListener() {
-                        return new LibraryListener(){};
+                    public void userDeleted(User user) {
+                        //To change body of implemented methods use File | Settings | File Templates.
+                    }
+
+                    public void presenceChanged(User user) {
+                        //To change body of implemented methods use File | Settings | File Templates.
                     }
                 });
             }
