@@ -9,6 +9,7 @@ import org.limewire.util.BaseTestCase;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.Stage;
 
 public abstract class ServiceTestCase extends BaseTestCase {
     protected Injector injector;
@@ -20,7 +21,7 @@ public abstract class ServiceTestCase extends BaseTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        injector = Guice.createInjector(getModules());
+        injector = Guice.createInjector(Stage.PRODUCTION, getModules());
         registry = injector.getInstance(ServiceRegistry.class);
         registry.initialize();
         registry.start();

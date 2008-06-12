@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.limewire.inject.AbstractModule;
-import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.lifecycle.ServiceTestCase;
 
 import com.google.inject.Module;
@@ -67,16 +66,10 @@ public class XMPPServiceTest extends ServiceTestCase {
                 });
             }
         };
-        return Arrays.asList(m);
+        return Arrays.asList(new LimeWireXMPPModule(), m);
     }
 
     public void test() {
-        ServiceRegistry registry = injector.getInstance(ServiceRegistry.class);
-        XMPPService xmppService = injector.getInstance(XMPPService.class);
-        
-        registry.initialize();
-        registry.start();
-        
-        
+        //            
     }
 }
