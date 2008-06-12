@@ -68,6 +68,13 @@ import com.limegroup.gnutella.auth.IpPortContentAuthorityFactory;
 import com.limegroup.gnutella.auth.IpPortContentAuthorityFactoryImpl;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactoryImpl;
+import com.limegroup.gnutella.caas.Download;
+import com.limegroup.gnutella.caas.Search;
+import com.limegroup.gnutella.caas.SearchResult;
+import com.limegroup.gnutella.caas.restlet.RestletDownload;
+import com.limegroup.gnutella.caas.restlet.RestletDownloadManager;
+import com.limegroup.gnutella.caas.restlet.RestletSearch;
+import com.limegroup.gnutella.caas.restlet.RestletSearchResult;
 import com.limegroup.gnutella.chat.InstantMessengerFactory;
 import com.limegroup.gnutella.chat.InstantMessengerFactoryImpl;
 import com.limegroup.gnutella.connection.ConnectionBandwidthStatistics;
@@ -345,6 +352,10 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(FECUtils.class).to(FECUtilsImpl.class);
         bind(NodeAssigner.class).to(NodeAssignerImpl.class);
         bind(BTMetaInfoFactory.class).to(BTMetaInfoFactoryImpl.class);
+        bind(Download.class).to(RestletDownload.class);
+        bind(com.limegroup.gnutella.caas.DownloadManager.class).to(RestletDownloadManager.class);
+        bind(Search.class).to(RestletSearch.class);
+        bind(SearchResult.class).to(RestletSearchResult.class);
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);

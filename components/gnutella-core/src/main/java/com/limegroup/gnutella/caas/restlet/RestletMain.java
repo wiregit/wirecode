@@ -4,6 +4,7 @@ import com.limegroup.gnutella.caas.Search;
 import com.limegroup.gnutella.caas.SearchParams;
 import com.limegroup.gnutella.caas.SearchResult;
 import com.limegroup.gnutella.caas.SearchResultHandler;
+import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 
 public class RestletMain {
 
@@ -12,6 +13,8 @@ public class RestletMain {
         SearchParams params = new SearchParams("limewire");
         SearchHandler handler = new SearchHandler();
         RestletSearch search = new RestletSearch(params, handler);
+        
+        // _rfdf = _injector.getInstance(RemoteFileDescFactory.class);
         
         search.start();
         

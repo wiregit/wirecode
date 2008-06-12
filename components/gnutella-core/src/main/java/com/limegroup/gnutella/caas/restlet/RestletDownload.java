@@ -13,14 +13,16 @@ public class RestletDownload implements Download {
     private String _downloadId;
     private Element _downloadItem;
     
-    public RestletDownload(RestletSearchResult rsr) {
-        _searchResult = rsr;
+    public RestletDownload(SearchResult sr) {
+        _searchResult = (RestletSearchResult)sr;
     }
     
     public void start() {
         Document document = RestletConnector.sendRequest("/download", _searchResult.getSearchItem());
         Element downloads = document.getDocumentElement();
         NodeList downloadList = downloads.getElementsByTagName("download");
+        
+        System.out.println("RestletDownload::start().. downloadList.getLength = " + downloadList.getLength());
         
         if (downloadList.getLength() == 0)
             return;
