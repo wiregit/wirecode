@@ -4,13 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.limewire.io.IpPort;
 import org.restlet.Application;
@@ -43,7 +39,6 @@ import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeWireCore;
 import com.limegroup.gnutella.LimeWireCoreModule;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -194,7 +189,7 @@ public class RestRPCMain implements DataStore {
         String guid = new GUID(data.getMessageGUID()).toString();
         Map<String,String> result = new HashMap<String,String>();
         
-        System.out.println("urns = " + RestRPCMain.urnsToString(rfd.getUrns()));
+        System.out.println("urns = " + Common.urnsToString(rfd.getUrns()));
         
         result.put("host", rfd.getHost());
         result.put("port", Integer.toString(rfd.getPort()));
@@ -207,7 +202,7 @@ public class RestRPCMain implements DataStore {
         result.put("quality", Integer.toString(rfd.getQuality()));
         result.put("browseHost", Boolean.toString(rfd.isBrowseHostEnabled()));
 //      result.put("xmlDoc", rfd.getXMLDocument().getXMLString());
-        result.put("urns", RestRPCMain.urnsToString(rfd.getUrns()));
+        result.put("urns", Common.urnsToString(rfd.getUrns()));
         result.put("replyToMulticast", Boolean.toString(rfd.isReplyToMulticast()));
         result.put("firewalled", Boolean.toString(rfd.isFirewalled()));
         result.put("vendor", rfd.getVendor());
@@ -258,46 +253,6 @@ public class RestRPCMain implements DataStore {
         _downloads.put(id, cd);
     }
 
-    public static Set<URN> stringToURNs(String s) {
-        Set<URN> urns = new HashSet<URN>();
-        String[] urnStrings = s.split(";");
-        
-        System.out.println("s = " + s);
-        
-        try {
-            for (int i = 0; i < urnStrings.length; ++i) {
-                if (urnStrings[i].startsWith("SHA1:"))
-                    urns.add(URN.createSHA1Urn(urnStrings[i].substring(5)));
-                else if (urnStrings[i].startsWith("TTROOT:"))
-                    urns.add(URN.createSHA1Urn(urnStrings[i].substring(7)));
-            }
-        }
-        catch (IOException e) {
-            System.err.println("Error: " + e.getMessage());
-            e.printStackTrace();
-        }
-        
-        return urns;
-    }
-    
-    public static String urnsToString(Set<? extends URN> urns) {
-        StringBuilder sb = new StringBuilder();
-        
-        for (URN urn : urns) {
-            if (urn.isSHA1())
-                sb.append("SHA1:");
-            else if (urn.isTTRoot())
-                sb.append("TTROOT:");
-            else
-                continue;
-            
-            sb.append(urn.toString());
-            sb.append(";");
-        }
-        
-        return sb.toString();
-    }
-    
     public static Element makeSearchResultXml(List<Map<String,String>> results, String guid, Element parent, Document document) throws IOException {
         Element search = (Element)parent.appendChild(document.createElement("search"));
         
@@ -318,6 +273,8 @@ public class RestRPCMain implements DataStore {
     
     public static Element makeDownloadXml(Document document, Element parent, CoreDownloader cd, String id) throws IOException {
         Element download = (Element)parent.appendChild(document.createElement("download"));
+        
+        download.setAttribute("id", id);
         
         RestRPCMain.addCDATAElement(document, download, "id", id);
         RestRPCMain.addCDATAElement(document, download, "amount_read", cd.getAmountRead());
@@ -419,7 +376,7 @@ public class RestRPCMain implements DataStore {
                 Integer.parseInt(root.getElementsByTagName("quality").item(0).getTextContent()), 
                 Boolean.parseBoolean(root.getElementsByTagName("browseHost").item(0).getTextContent()), 
                 null, // xmlDoc 
-                RestRPCMain.stringToURNs(root.getElementsByTagName("urns").item(0).getTextContent()), 
+                Common.stringToURNs(root.getElementsByTagName("urns").item(0).getTextContent()), 
                 Boolean.parseBoolean(root.getElementsByTagName("replyToMulticast").item(0).getTextContent()), 
                 Boolean.parseBoolean(root.getElementsByTagName("firewalled").item(0).getTextContent()), 
                 root.getElementsByTagName("vendor").item(0).getTextContent(),
