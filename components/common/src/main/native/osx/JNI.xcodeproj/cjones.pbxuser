@@ -4,7 +4,8 @@
 		activeBuildConfigurationName = Release;
 		activeTarget = F9B18D9E0DB3EFE400F89148 /* BuildAll */;
 		addToTargets = (
-			F9B18DAE0DB3F14400F89148 /* SystemUtilities Tiger */,
+			F9980CB90DAD38FB005E88C9 /* Growl Tiger */,
+			F96C68BE0DCEAECA006A4F2B /* Growl Leopard */,
 		);
 		codeSenseManager = F9657FAB0DA1452300F02016 /* Code sense */;
 		perUserDictionary = {
@@ -52,8 +53,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 234897484;
-			PBXWorkspaceStateSaveDate = 234897484;
+			PBXPerProjectTemplateStateSaveDate = 234975811;
+			PBXWorkspaceStateSaveDate = 234975811;
 		};
 		perUserProjectItems = {
 			F95A29BD0DCBB59400468CF3 /* PBXTextBookmark */ = F95A29BD0DCBB59400468CF3 /* PBXTextBookmark */;
@@ -65,10 +66,10 @@
 			F9980F1D0DAFF922005E88C9 /* PBXTextBookmark */ = F9980F1D0DAFF922005E88C9 /* PBXTextBookmark */;
 			F9980F720DB01076005E88C9 /* PBXTextBookmark */ = F9980F720DB01076005E88C9 /* PBXTextBookmark */;
 			F9980F780DB01076005E88C9 /* PBXTextBookmark */ = F9980F780DB01076005E88C9 /* PBXTextBookmark */;
-			F9980F7A0DB01076005E88C9 /* PBXTextBookmark */ = F9980F7A0DB01076005E88C9 /* PBXTextBookmark */;
 			F9AE51750DA5807B00122CBF /* PBXTextBookmark */ = F9AE51750DA5807B00122CBF /* PBXTextBookmark */;
 			F9AE51790DA5807B00122CBF /* PBXTextBookmark */ = F9AE51790DA5807B00122CBF /* PBXTextBookmark */;
 			F9C0A9430E00597A00DFE913 /* PBXTextBookmark */ = F9C0A9430E00597A00DFE913 /* PBXTextBookmark */;
+			F9C0A9830E0178F600DFE913 /* PBXTextBookmark */ = F9C0A9830E0178F600DFE913 /* PBXTextBookmark */;
 		};
 		sourceControlManager = F9657FAA0DA1452300F02016 /* Source Control */;
 		userBuildSettings = {
@@ -144,9 +145,9 @@
 	};
 	F9980CCA0DAD3A8E005E88C9 /* Growl.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {902, 700}}";
-			sepNavSelRange = "{394, 0}";
-			sepNavVisRange = "{0, 1725}";
+			sepNavIntBoundsRect = "{{0, 0}, {902, 610}}";
+			sepNavSelRange = "{201, 0}";
+			sepNavVisRange = "{0, 1352}";
 			sepNavWindowFrame = "{{19, -5}, {1275, 778}}";
 		};
 	};
@@ -228,13 +229,6 @@
 		vrLen = 3081;
 		vrLoc = 19973;
 	};
-	F9980F710DB00F90005E88C9 /* Scratch.txt */ = {
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {902, 480}}";
-			sepNavSelRange = "{60, 85}";
-			sepNavVisRange = "{0, 289}";
-		};
-	};
 	F9980F720DB01076005E88C9 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = F9980F730DB01076005E88C9 /* MachineExceptions.h */;
@@ -268,16 +262,6 @@
 		name = MachineExceptions.h;
 		path = /Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Headers/MachineExceptions.h;
 		sourceTree = "<absolute>";
-	};
-	F9980F7A0DB01076005E88C9 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = F9980CCA0DAD3A8E005E88C9 /* Growl.m */;
-		name = "Growl.m: 26";
-		rLen = 0;
-		rLoc = 763;
-		rType = 0;
-		vrLen = 1725;
-		vrLoc = 0;
 	};
 	F9AE51750DA5807B00122CBF /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
@@ -345,6 +329,16 @@
 		rLoc = 394;
 		rType = 0;
 		vrLen = 1725;
+		vrLoc = 0;
+	};
+	F9C0A9830E0178F600DFE913 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = F9980CCA0DAD3A8E005E88C9 /* Growl.m */;
+		name = "Growl.m: 11";
+		rLen = 0;
+		rLoc = 201;
+		rType = 0;
+		vrLen = 1352;
 		vrLoc = 0;
 	};
 }

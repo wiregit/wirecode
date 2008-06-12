@@ -306,7 +306,7 @@
 							<array>
 								<real>22</real>
 								<real>22</real>
-								<real>179</real>
+								<real>178.83740234375</real>
 								<real>48</real>
 								<real>20</real>
 							</array>
@@ -334,8 +334,8 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>35</integer>
-									<integer>27</integer>
+									<integer>29</integer>
+									<integer>26</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
@@ -359,7 +359,7 @@
 							<string>SCMStatusColumn</string>
 							<real>22</real>
 							<string>MainColumn</string>
-							<real>179</real>
+							<real>178.83740234375</real>
 							<string>ObjectSizeColumn</string>
 							<real>48</real>
 							<string>FileBuiltColumn</string>
@@ -396,7 +396,7 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>F9C0A9430E00597A00DFE913</string>
+										<string>F9C0A9830E0178F600DFE913</string>
 										<key>history</key>
 										<array>
 											<string>F9AE51750DA5807B00122CBF</string>
@@ -405,7 +405,7 @@
 											<string>F9980F1D0DAFF922005E88C9</string>
 											<string>F9980F720DB01076005E88C9</string>
 											<string>F95A29BD0DCBB59400468CF3</string>
-											<string>F9980F7A0DB01076005E88C9</string>
+											<string>F9C0A9430E00597A00DFE913</string>
 										</array>
 										<key>prevStack</key>
 										<array>
@@ -425,14 +425,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 0}, {963, 732}}</string>
+								<string>{{0, 0}, {963, 512}}</string>
 								<key>RubberWindowFrame</key>
 								<string>4 0 1276 778 0 0 1280 778 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
 							<key>Proportion</key>
-							<string>732pt</string>
+							<string>512pt</string>
 						</dict>
 						<dict>
 							<key>ContentConfiguration</key>
@@ -445,14 +445,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 737}, {963, 0}}</string>
+								<string>{{0, 517}, {963, 220}}</string>
 								<key>RubberWindowFrame</key>
 								<string>4 0 1276 778 0 0 1280 778 </string>
 							</dict>
 							<key>Module</key>
 							<string>XCDetailModule</string>
 							<key>Proportion</key>
-							<string>0pt</string>
+							<string>220pt</string>
 						</dict>
 					</array>
 					<key>Proportion</key>
@@ -471,9 +471,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>F9C0A9440E00597A00DFE913</string>
+				<string>F9C0A9690E01740F00DFE913</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>F9C0A9450E00597A00DFE913</string>
+				<string>F9C0A96A0E01740F00DFE913</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -592,7 +592,7 @@
 	<key>StatusbarIsVisible</key>
 	<true/>
 	<key>TimeStamp</key>
-	<real>234897484.85552299</real>
+	<real>234977526.28408599</real>
 	<key>ToolbarDisplayMode</key>
 	<integer>1</integer>
 	<key>ToolbarIsVisible</key>
@@ -607,7 +607,8 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>/Users/cjones/Projects/limewire-head/gui/native/osx/JNI.xcodeproj</string>
+		<string>F9657FB20DA1455D00F02016</string>
+		<string>/Users/cjones/Projects/limewire-head/components/common/src/main/native/osx/JNI.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
 	<string>4 0 1276 778 0 0 1280 778 </string>
@@ -648,10 +649,12 @@
 							<string>0pt</string>
 						</dict>
 						<dict>
+							<key>BecomeActive</key>
+							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXBuildLogShowsTranscriptDefaultKey</key>
-								<string>{{0, 126}, {1276, 559}}</string>
+								<string>{{0, 216}, {1276, 469}}</string>
 								<key>PBXProjectModuleGUID</key>
 								<string>XCMainBuildResultsModuleGUID</string>
 								<key>PBXProjectModuleLabel</key>
@@ -689,7 +692,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>F9657FB20DA1455D00F02016</string>
-				<string>F96C68BD0DCEAE72006A4F2B</string>
+				<string>F9C0A9620E01737200DFE913</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
