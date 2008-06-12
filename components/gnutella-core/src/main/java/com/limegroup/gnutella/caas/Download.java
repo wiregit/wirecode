@@ -5,7 +5,7 @@ public interface Download {
     /**
      * 
      */
-    public void start();
+    public boolean start();
     
     /**
      * 

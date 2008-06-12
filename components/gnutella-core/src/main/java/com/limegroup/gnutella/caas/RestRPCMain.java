@@ -584,6 +584,7 @@ public class RestRPCMain implements DataStore {
         
         private GUID _guid;
         private RemoteFileDesc _rfd;
+        private String _error;
         
         public DownloadResource(Context context, Request request, Response response) {
             super(context, request, response);
@@ -627,6 +628,7 @@ public class RestRPCMain implements DataStore {
                 downloader.startDownload();
             }
             catch (Exception e) {
+                _error = e.getMessage();
                 System.err.println("Error: " + e.getMessage());
                 e.printStackTrace();
             }
@@ -663,6 +665,7 @@ public class RestRPCMain implements DataStore {
                 downloads.appendChild(download);
                 
                 download.setAttribute("id", _guid.toString());
+                download.setAttribute("error", _error);
             }
             catch (IOException e) {
                 System.out.println("DownloadResource::represent().. " + e.getMessage());

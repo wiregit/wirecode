@@ -4,7 +4,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import com.google.inject.Inject;
 import com.limegroup.gnutella.caas.Download;
 import com.limegroup.gnutella.caas.SearchResult;
 
@@ -13,12 +12,13 @@ public class RestletDownload implements Download {
     private final RestletSearchResult _searchResult;
     private String _downloadId;
     private Element _downloadItem;
+    private String _error;
     
     public RestletDownload(SearchResult sr) {
         _searchResult = (RestletSearchResult)sr;
     }
     
-    public void start() {
+    public boolean start() {
         Document document = RestletConnector.sendRequest("/download", _searchResult.getSearchItem());
         Element downloads = document.getDocumentElement();
         NodeList downloadList = downloads.getElementsByTagName("download");
@@ -26,9 +26,17 @@ public class RestletDownload implements Download {
         System.out.println("RestletDownload::start().. downloadList.getLength = " + downloadList.getLength());
         
         if (downloadList.getLength() == 0)
-            return;
+            return false;
         
+        _error = downloadList.item(0).getAttributes().getNamedItem("error").getTextContent();
         _downloadId = downloadList.item(0).getAttributes().getNamedItem("id").getTextContent();
+        
+        if (_error != null && _error.length() == 0) {
+            System.err.println("RestletDownload::start().. error: " + _error);
+            return false;
+        }
+        
+        return true;
     }
     
     public void stop() {
