@@ -1,4 +1,4 @@
-package org.limewire.swarm.http;
+package org.limewire.swarm.http.listener;
 
 import java.io.IOException;
 
@@ -15,7 +15,7 @@ import org.limewire.swarm.file.WriteJob;
 import org.limewire.util.Objects;
 
 
-class FileContentListener implements ResponseContentListener {
+public class FileContentListener implements ResponseContentListener {
     
     private static final Log LOG = LogFactory.getLog(FileContentListener.class);
     

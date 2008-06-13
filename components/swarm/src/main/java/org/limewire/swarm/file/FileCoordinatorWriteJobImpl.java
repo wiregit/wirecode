@@ -55,6 +55,7 @@ class FileCoordinatorWriteJobImpl implements WriteJob {
             if(hasPendingData()) {
                 fileCoordinator.unpending(Range.createRange(startPosition, startPosition + buffer.remaining() - 1));
                 byteBufferCache.release(buffer);
+                buffer = null;
                 startPosition = -1;
             }
         }
@@ -77,12 +78,7 @@ class FileCoordinatorWriteJobImpl implements WriteJob {
             
             if(read > 0) {
                 assert buffer.position() > 0;
-                long low;
-                if(priorLength == 0) {
-                    low = startPosition;
-                } else {
-                    low = startPosition + priorLength;
-                }
+                long low = startPosition + priorLength;
                 if(LOG.isTraceEnabled())
                     LOG.trace("Marking: [" + low + ", " + (low+read-1) + "] as pending");
                 fileCoordinator.pending(Range.createRange(low, low + read - 1));

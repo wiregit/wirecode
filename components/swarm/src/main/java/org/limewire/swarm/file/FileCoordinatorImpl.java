@@ -19,19 +19,19 @@ public class FileCoordinatorImpl implements FileCoordinator {
     private final long completeSize;
     
     /** All ranges that are out on lease. */
-    private IntervalSet leasedBlocks;
+    private final IntervalSet leasedBlocks;
     
     /** The blocks that were written to disk. */
-    private IntervalSet writtenBlocks; 
+    private final IntervalSet writtenBlocks; 
     
     /** Blocks that are pending to be written to disk. */
-    private IntervalSet pendingBlocks;
+    private final IntervalSet pendingBlocks;
     
     /** The strategy for selecting new leased ranges. */
-    private SelectionStrategy blockChooser;
+    private final SelectionStrategy blockChooser;
     
     /** The file writer. */
-    private SwarmFileWriter fileWriter;
+    private final SwarmFileWriter fileWriter;
     
     /** The ExecutorService to use for writing. */
     private final ExecutorService writeService;

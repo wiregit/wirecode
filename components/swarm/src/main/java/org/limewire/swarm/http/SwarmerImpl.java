@@ -1,7 +1,6 @@
 package org.limewire.swarm.http;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
@@ -10,26 +9,24 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.nio.DefaultClientIOEventDispatch;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicHttpRequest;
-import org.apache.http.nio.entity.ContentListener;
+import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.nio.protocol.AsyncNHttpClientHandler;
+import org.apache.http.nio.protocol.NHttpRequestExecutionHandler;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.nio.reactor.SessionRequest;
 import org.apache.http.nio.reactor.SessionRequestCallback;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.BasicHttpProcessor;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.RequestConnControl;
 import org.apache.http.protocol.RequestContent;
 import org.apache.http.protocol.RequestExpectContinue;
 import org.apache.http.protocol.RequestTargetHost;
 import org.apache.http.protocol.RequestUserAgent;
-import org.limewire.collection.IntervalSet;
-import org.limewire.collection.Range;
-import org.limewire.swarm.file.FileCoordinator;
+import org.limewire.swarm.http.handler.ExecutionHandler;
 
-class SwarmerImpl implements Swarmer, HttpSwarmHandler<SwarmerImpl.SourceInfo> {
+class SwarmerImpl implements Swarmer {
     
     private static final Log LOG = LogFactory.getLog(SwarmerImpl.class);
     
@@ -38,23 +35,21 @@ class SwarmerImpl implements Swarmer, HttpSwarmHandler<SwarmerImpl.SourceInfo> {
     private final ConnectingIOReactor ioReactor;
     private final IOEventDispatch eventDispatch;
     private final AsyncNHttpClientHandler clientHandler;
-    private final SwarmNHttpRequestExecutionHandlerImpl<SourceInfo> executionHandler;
-    private final FileCoordinator fileCoordinator;
+    private final ExecutionHandler executionHandler;
     private final SourceEventListener globalSourceEventListener;
     
     SwarmerImpl(
-            FileCoordinator fileCoordinator,
+            ExecutionHandler executionHandler,
             ConnectingIOReactor ioReactor,
             HttpParams params,
             SourceEventListener sourceEventListener) {
         
-        this.fileCoordinator = fileCoordinator;
+        this.executionHandler = executionHandler;
         this.ioReactor = ioReactor;
         if(sourceEventListener == null)
             this.globalSourceEventListener = NULL_LISTENER;
         else
             this.globalSourceEventListener = sourceEventListener;
-        executionHandler = new SwarmNHttpRequestExecutionHandlerImpl<SourceInfo>();
         
         BasicHttpProcessor httpproc = new BasicHttpProcessor();
         httpproc.addInterceptor(new RequestContent());
@@ -65,7 +60,7 @@ class SwarmerImpl implements Swarmer, HttpSwarmHandler<SwarmerImpl.SourceInfo> {
         
         clientHandler = new AsyncNHttpClientHandler(
                 httpproc,
-                executionHandler,
+                new SwarmExecutionHandler(),
                 new DefaultConnectionReuseStrategy(),
                 params);
         eventDispatch = new DefaultClientIOEventDispatch(clientHandler, params);
@@ -84,7 +79,7 @@ class SwarmerImpl implements Swarmer, HttpSwarmHandler<SwarmerImpl.SourceInfo> {
         else
             listener = new DualSourceEventListener(sourceEventListener, globalSourceEventListener);
         
-        ioReactor.connect(source.getAddress(), null, executionHandler.createAttachment(this, new SourceInfo(source, listener)), new SessionRequestCallback() {
+        ioReactor.connect(source.getAddress(), null, new SourceInfo(source, listener), new SessionRequestCallback() {
             public void cancelled(SessionRequest request) {
                 listener.connectFailed(SwarmerImpl.this, source);
             };
@@ -108,105 +103,18 @@ class SwarmerImpl implements Swarmer, HttpSwarmHandler<SwarmerImpl.SourceInfo> {
             LOG.warn("Unable to execute event dispatch");
         }
     }
-    
-    public HttpRequest getHttpRequest(SourceInfo sourceInfo) throws IOException {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Getting HTTP Request for: " + sourceInfo);
-        
-        if(!isActive()) {
-            throw new IOException("swarm not active");
-        }
-        
-        // TODO: Do nothing if queued?
-        
-        // TODO: Try THEX.
-        
-        HttpRequest request = createFileRequest(sourceInfo);
-        
-        if(LOG.isDebugEnabled())
-            LOG.debug("Sending request: " + request.getRequestLine() + ", headers: " + Arrays.asList(request.getAllHeaders()));
-        
-        return request;
-    }
-        
-    private HttpRequest createFileRequest(SourceInfo sourceInfo) throws IOException {
-        Range range;
-        
-        if(sourceInfo.getSource().isRangeRequestSupported()) {
-            range = fileCoordinator.leasePortion(sourceInfo.getAvailableRanges());
-        } else {
-            range = fileCoordinator.lease();
-        }
-        
-        if(range == null) {
-            throw new IOException("No range available to lease");
-        }
-        
-        HttpRequest request = new BasicHttpRequest("GET", sourceInfo.getSource().getUri());
-        request.addHeader(new BasicHeader("Range", "bytes=" + range.getLow() + "-" + (range.getHigh())));
-        sourceInfo.setContentListener(new FileContentListener(fileCoordinator, range));
-        return request;
-    }
 
     private boolean isActive() {
         return true;
-    }
-
-    public ContentListener getContentListener(HttpResponse response, SourceInfo sourceInfo) throws IOException {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Retrieving new content listener for: " + sourceInfo);
-        
-        ResponseContentListener contentListener = sourceInfo.getContentListener();
-        if(contentListener != null) {
-            contentListener.initialize(response);
-            sourceInfo.setContentListener(null);
-            return contentListener;
-        }
-        
-        throw new IllegalStateException("No listener created!");
-    }
-    
-    public void cleanup(SourceInfo sourceInfo) {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Cleaning up: " + sourceInfo);
-        
-        ContentListener contentListener = sourceInfo.getContentListener();
-        if(contentListener != null)
-            contentListener.finished();
-        sourceInfo.setContentListener(null);
-        
-        sourceInfo.getEventListener().connectionClosed(this, sourceInfo.getSource());
-    }
-    
-    public void connectionEstablished(SourceInfo sourceInfo) {
-        // Do nothing -- use the SessionRequestCallback's notification to notify the 
-        // source we're connected.
-    }
-    
-    public void responseProcessed(HttpResponse response, SourceInfo sourceInfo) {
-        sourceInfo.getEventListener().responseProcessed(this, sourceInfo.getSource(), response.getStatusLine().getStatusCode());
     }
     
     private static class SourceInfo {
         private final SwarmSource source;
         private final SourceEventListener sourceEventListener;
-        private ResponseContentListener contentListener;
         
         SourceInfo(SwarmSource source, SourceEventListener sourceEventListener) {
             this.source = source;
             this.sourceEventListener = sourceEventListener;
-        }
-        
-        public ResponseContentListener getContentListener() {
-            return contentListener;
-        }
-
-        public void setContentListener(ResponseContentListener responseContentListener) {
-            this.contentListener = responseContentListener;
-        }
-
-        public IntervalSet getAvailableRanges() {
-            return null;
         }
         
         public SourceEventListener getEventListener() {
@@ -220,6 +128,58 @@ class SwarmerImpl implements Swarmer, HttpSwarmHandler<SwarmerImpl.SourceInfo> {
         @Override
         public String toString() {
             return "Attachment for: " + source;
+        }
+    }
+    
+    private class SwarmExecutionHandler implements NHttpRequestExecutionHandler {
+        private static final String LISTENER = "swarm.http.internal.eventlistener";
+        
+        public void initalizeContext(HttpContext context, Object attachment) {
+            if(isActive()) {
+                SourceInfo info = (SourceInfo)attachment;
+                context.setAttribute(SwarmExecutionContext.HTTP_SWARM_SOURCE, info.getSource());
+                context.setAttribute(LISTENER, info.getEventListener());
+            } else {
+                SwarmHttpUtils.closeConnectionFromContext(context);
+            }
+        }
+        
+        public void finalizeContext(HttpContext context) {
+            SourceEventListener listener = (SourceEventListener)context.getAttribute(LISTENER);
+            SwarmSource source = (SwarmSource)context.getAttribute(SwarmExecutionContext.HTTP_SWARM_SOURCE);
+            listener.connectionClosed(SwarmerImpl.this, source);
+            
+            executionHandler.finalizeContext(context);
+        }
+        
+        public void handleResponse(HttpResponse response, HttpContext context) throws IOException {
+            if(isActive()) {
+                SourceEventListener listener = (SourceEventListener)context.getAttribute(LISTENER);
+                SwarmSource source = (SwarmSource)context.getAttribute(SwarmExecutionContext.HTTP_SWARM_SOURCE);
+                listener.responseProcessed(SwarmerImpl.this, source, response.getStatusLine().getStatusCode());
+                
+                executionHandler.handleResponse(response, context);
+            } else {
+                throw new IOException("Not active!");
+            }
+        }
+        
+        public ConsumingNHttpEntity responseEntity(HttpResponse response, HttpContext context)
+                throws IOException {
+            if(isActive()) {
+                return executionHandler.responseEntity(response, context);
+            } else {
+                throw new IOException("Not active!");
+            }
+        }
+        
+        public HttpRequest submitRequest(HttpContext context) {
+            if(isActive()) {
+                return executionHandler.submitRequest(context);
+            } else {
+                SwarmHttpUtils.closeConnectionFromContext(context);
+                return null;
+            }
         }
     }
     

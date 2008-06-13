@@ -19,6 +19,8 @@ import org.limewire.swarm.file.FileChannelSwarmFileWriter;
 import org.limewire.swarm.file.FileCoordinator;
 import org.limewire.swarm.file.FileCoordinatorImpl;
 import org.limewire.swarm.file.SwarmFileWriter;
+import org.limewire.swarm.http.handler.ExecutionHandler;
+import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
 import org.limewire.util.BaseTestCase;
 
 public class SwarmerImplTest extends BaseTestCase {
@@ -43,9 +45,10 @@ public class SwarmerImplTest extends BaseTestCase {
       //  ConnectingIOReactor ioReactor = new DefaultConnectingIOReactor(1, params);
         SwarmFileWriter swarmFileWriter = new FileChannelSwarmFileWriter(new File("C:/TEST-LimeWireWin.exe"));
         FileCoordinator fileCoordinator = new FileCoordinatorImpl(4898448L, swarmFileWriter, ExecutorsHelper.newFixedSizeThreadPool(1, "Writer"));
+        ExecutionHandler executionHandler = new SwarmFileExecutionHandler(fileCoordinator);
         
         
-        final Swarmer swarmer = new SwarmerImpl(fileCoordinator, ioReactor, params, new Listener(fileCoordinator));
+        final Swarmer swarmer = new SwarmerImpl(executionHandler, ioReactor, params, new Listener(fileCoordinator));
         new Thread(new Runnable() {
             public void run() {
                 swarmer.start();
