@@ -31,11 +31,11 @@ public class XMPPServiceTest extends ServiceTestCase {
                     }
 
                     public String getUsername() {
-                        return "limebuddy2@gmail.com";
+                        return "limebuddy1@gmail.com";
                     }
 
                     public String getPassword() {
-                        return "limebuddy234";
+                        return "limebuddy123";
                     }
 
                     public String getHost() {
@@ -53,18 +53,31 @@ public class XMPPServiceTest extends ServiceTestCase {
                 
                 bind(RosterListener.class).toInstance(new RosterListener() {
                     public void userAdded(User user) {
-                        //To change body of implemented methods use File | Settings | File Templates.
+                        final String name = user.getName();
+                        user.addPresenceListener(new PresenceListener() {
+                            public void presenceChanged(Presence presence) {
+                                if(presence.getType().equals(Presence.Type.available)) {
+                                    if(presence instanceof LimePresence) {
+                                        System.out.println("lime user " + presence.getJID() + " (" + name + ") available");
+                                    } else {
+                                        System.out.println("user " + presence.getJID() + " (" + name + ") available");
+                                    }
+                                } else if(presence.getType().equals(Presence.Type.unavailable)) {
+                                    if(presence instanceof LimePresence) {
+                                        System.out.println("lime user " + presence.getJID() + " (" + name + ") unavailable");
+                                    } else {
+                                        System.out.println("user " + presence.getJID() + " (" + name + ") unavailable");
+                                    }
+                                }
+                            }
+                        });
                     }
 
                     public void userUpdated(User user) {
                         //To change body of implemented methods use File | Settings | File Templates.
                     }
 
-                    public void userDeleted(User user) {
-                        //To change body of implemented methods use File | Settings | File Templates.
-                    }
-
-                    public void presenceChanged(User user) {
+                    public void userDeleted(String id) {
                         //To change body of implemented methods use File | Settings | File Templates.
                     }
                 });

@@ -33,7 +33,7 @@ public class XMPPService implements Service {
     
     private final XMPPServiceConfiguration configuration;
     private final CopyOnWriteArrayList<org.limewire.xmpp.client.RosterListener> rosterListeners;
-    private final HashMap<String, User> users;
+    private final HashMap<String, UserImpl> users;
     protected XMPPConnection connection;
 
     @Inject
@@ -42,7 +42,7 @@ public class XMPPService implements Service {
         this.configuration = configuration;
         this.rosterListeners = new CopyOnWriteArrayList<org.limewire.xmpp.client.RosterListener>();
         this.rosterListeners.add(rosterListener);
-        this.users = new HashMap<String, User>();
+        this.users = new HashMap<String, UserImpl>();
         this.rosterListeners.add(new org.limewire.xmpp.client.RosterListener() {
             public void userAdded(User user) {
                 user.addPresenceListener(new LibraryGetter());
@@ -113,7 +113,7 @@ public class XMPPService implements Service {
             for(String id : addedIds) {
                 Roster roster = connection.getRoster();
                 RosterEntry rosterEntry = roster.getEntry(id);
-                User user = new User(id, rosterEntry.getName(), connection);
+                UserImpl user = new UserImpl(id, rosterEntry.getName(), connection);
                 users.put(id, user);
                 fireUserAdded(user);
             }
@@ -143,7 +143,7 @@ public class XMPPService implements Service {
         }
 
         public void presenceChanged(Presence presence) {
-            User user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
+            UserImpl user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
             if (presence.getType() == Presence.Type.available) {                
                 try {
                     if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/")) {
