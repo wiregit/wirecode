@@ -49,6 +49,7 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.StaticMessages;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
+import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
@@ -93,8 +94,9 @@ public class MessageRouterStub extends StandardMessageRouter {
             Provider<OOBHandler> oobHandlerFactory,
             Provider<MACCalculatorRepositoryManager> macManager,
             Provider<LimeACKHandler> limeACKHandler, OutgoingQueryReplyFactory outgoingQueryReplyFactory,
-            SharedFilesKeywordIndex sharedFilesKeywordIndex) {
-        super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder,oobHandlerFactory,macManager,limeACKHandler, outgoingQueryReplyFactory, sharedFilesKeywordIndex);
+            SharedFilesKeywordIndex sharedFilesKeywordIndex, 
+            QRPUpdater qrpUpdater) {
+        super(networkManager, queryRequestFactory, queryHandlerFactory, onDemandUnicaster, headPongFactory, pingReplyFactory, connectionManager, forMeReplyHandler, queryUnicaster, fileManager, contentManager, dhtManager, uploadManager, downloadManager, udpService, searchResultHandler, socketsManager, hostCatcher, queryReplyFactory, staticMessages, messageDispatcher, multicastService, queryDispatcher, activityCallback, connectionServices, applicationServices, backgroundExecutor, pongCacher, simppManager, updateHandler, guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, udpCrawlerPingHandlerFactory, statistics, replyNumberVendorMessageFactory, pingRequestFactory, messageHandlerBinder,oobHandlerFactory,macManager,limeACKHandler, outgoingQueryReplyFactory, sharedFilesKeywordIndex, qrpUpdater);
     }
     
     @Override

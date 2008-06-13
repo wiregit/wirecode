@@ -49,6 +49,7 @@ import com.limegroup.gnutella.messages.Message.MessageCounter;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessageFactory;
+import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.SearchResultHandler;
@@ -112,7 +113,7 @@ public class StandardMessageRouter extends MessageRouterImpl {
             Provider<OOBHandler> oobHandlerFactory,
             Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager,
             Provider<LimeACKHandler> limeACKHandler, OutgoingQueryReplyFactory outgoingQueryReplyFactory,
-            SharedFilesKeywordIndex sharedFilesKeywordIndex) {
+            SharedFilesKeywordIndex sharedFilesKeywordIndex, QRPUpdater qrpUpdater) {
         super(networkManager, queryRequestFactory, queryHandlerFactory,
                 onDemandUnicaster, headPongFactory, pingReplyFactory,
                 connectionManager, forMeReplyHandler, queryUnicaster,
@@ -125,7 +126,8 @@ public class StandardMessageRouter extends MessageRouterImpl {
                 guidMapManager, udpReplyHandlerCache, inspectionRequestHandlerFactory, 
                 udpCrawlerPingHandlerFactory, 
                 pingRequestFactory, messageHandlerBinder, oobHandlerFactory, 
-                MACCalculatorRepositoryManager, limeACKHandler, outgoingQueryReplyFactory);
+                MACCalculatorRepositoryManager, limeACKHandler, outgoingQueryReplyFactory,
+                qrpUpdater);
         this.statistics = statistics;
         this.replyNumberVendorMessageFactory = replyNumberVendorMessageFactory;
         this.sharedFilesKeywordIndex = sharedFilesKeywordIndex;

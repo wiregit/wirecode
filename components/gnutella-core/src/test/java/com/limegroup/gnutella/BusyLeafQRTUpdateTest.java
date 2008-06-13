@@ -13,10 +13,9 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.limegroup.gnutella.connection.ConnectionRoutingStatistics;
 import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
-import com.limegroup.gnutella.stubs.FileManagerControllerAdapter;
-import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class BusyLeafQRTUpdateTest extends LimeTestCase {
@@ -32,13 +31,13 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
         leaf = mockery.mock(RoutedConnection.class);
         
         final MyConnectionManagerStub mcms = new MyConnectionManagerStub();
-        final MyFileManagerStub mfms = new MyFileManagerStub();
+        final QRPUpdaterStub qrtStub = new QRPUpdaterStub();
         Module module = new AbstractModule() {
 
             @Override
             protected void configure() {
                 bind(ConnectionManager.class).toInstance(mcms);
-                bind(FileManager.class).toInstance(mfms);
+                bind(QRPUpdater.class).toInstance(qrtStub);
             }
             
         };
@@ -106,12 +105,12 @@ public class BusyLeafQRTUpdateTest extends LimeTestCase {
         }
     }
     
-    private class MyFileManagerStub extends FileManagerStub {
+    private class QRPUpdaterStub extends QRPUpdater {
 
-        public MyFileManagerStub() {
-            super(new FileManagerControllerAdapter());
+        public QRPUpdaterStub() {
+            super(null, null, null, null);
         }
-        
+
         @Override
         public synchronized QueryRouteTable getQRT() {
             return new QueryRouteTable();

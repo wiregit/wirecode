@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
 import junit.framework.Test;
@@ -45,6 +46,9 @@ import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.connection.GnutellaConnection;
@@ -74,6 +78,7 @@ import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -89,7 +94,11 @@ import com.limegroup.gnutella.util.TestConnection;
 import com.limegroup.gnutella.util.TestConnectionFactory;
 import com.limegroup.gnutella.util.TestConnectionManager;
 import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
+import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 import com.limegroup.gnutella.xml.MetaFileManager;
+import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 // TODO write test for storing bypassed results
 public final class MessageRouterImplTest extends LimeTestCase {
@@ -1041,23 +1050,27 @@ public final class MessageRouterImplTest extends LimeTestCase {
             Arrays.asList(MY_KEYWORDS);
 
         @Inject
-        TestFileManager(FileManagerController fileManagerController) {
-            super(fileManagerController);
+        TestFileManager(Provider<SimppManager> simppManager,
+                Provider<UrnCache> urnCache,
+                Provider<DownloadManager> downloadManager,
+                Provider<CreationTimeCache> creationTimeCache,
+                Provider<ContentManager> contentManager,
+                Provider<AltLocManager> altLocManager,
+                Provider<SavedFileManager> savedFileManager,
+                Provider<UpdateHandler> updateHandler,
+                Provider<ActivityCallback> activityCallback,
+                @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+                LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory,
+                LimeXMLDocumentFactory limeXMLDocumentFactory,
+                MetaDataReader metaDataReader,
+                Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
+                Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
+            super(simppManager, urnCache, downloadManager, creationTimeCache, contentManager, altLocManager, savedFileManager, updateHandler, activityCallback, backgroundExecutor, limeXMLReplyCollectionFactory, limeXMLDocumentFactory, metaDataReader, schemaReplyCollectionMapper, limeXMLSchemaRepository);
         }
         
 
         public List getKeyWords() {
             return KEYWORDS;
-        }
-
-        //added due to changes in FileManager
-        @Override
-        protected void buildQRT() {
-            super.buildQRT();
-            Iterator iter = getKeyWords().iterator();
-            while(iter.hasNext()) {
-                _queryRouteTable.add((String)iter.next());
-            }
         }
     }
     

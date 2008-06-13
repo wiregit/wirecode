@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
 
@@ -20,10 +21,21 @@ import org.limewire.util.TestUtils;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.helpers.UrnHelper;
+import com.limegroup.gnutella.metadata.MetaDataReader;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.version.UpdateHandler;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
+import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 import com.limegroup.gnutella.xml.MetaFileManager;
+import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 public class CreationTimeCacheTest extends LimeTestCase {
     
@@ -395,8 +407,22 @@ public class CreationTimeCacheTest extends LimeTestCase {
         private Set<URN> validUrns;
         
         @Inject
-        public MyFileManager(FileManagerController fileManagerController) {
-            super(fileManagerController);
+        public MyFileManager(Provider<SimppManager> simppManager,
+                Provider<UrnCache> urnCache,
+                Provider<DownloadManager> downloadManager,
+                Provider<CreationTimeCache> creationTimeCache,
+                Provider<ContentManager> contentManager,
+                Provider<AltLocManager> altLocManager,
+                Provider<SavedFileManager> savedFileManager,
+                Provider<UpdateHandler> updateHandler,
+                Provider<ActivityCallback> activityCallback,
+                @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+                LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory,
+                LimeXMLDocumentFactory limeXMLDocumentFactory,
+                MetaDataReader metaDataReader,
+                Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
+                Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
+            super(simppManager, urnCache, downloadManager, creationTimeCache, contentManager, altLocManager, savedFileManager, updateHandler, activityCallback, backgroundExecutor, limeXMLReplyCollectionFactory, limeXMLDocumentFactory, metaDataReader, schemaReplyCollectionMapper, limeXMLSchemaRepository);
         }
         
         public void setDefaultUrn(URN urn) {

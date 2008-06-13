@@ -294,7 +294,7 @@ public class LimeXMLReplyCollection {
      * <p>
      * delegates to the individual documents and collates the list
      */
-    protected List<String> getKeyWords(){
+    public List<String> getKeyWords(){
         List<String> retList = new ArrayList<String>();
         synchronized(mainMap){
             for(LimeXMLDocument d : mainMap.values()) {
@@ -311,7 +311,7 @@ public class LimeXMLReplyCollection {
      * <p>
      * Delegates to the individual documents and collates the list
      */
-    protected List<String> getKeyWordsIndivisible(){
+    public List<String> getKeyWordsIndivisible(){
         List<String> retList = new ArrayList<String>();
         synchronized(mainMap){
             for(LimeXMLDocument d : mainMap.values()) {

@@ -354,10 +354,6 @@ public class LimeWireCore {
         return injector.getInstance(UrnCache.class);
     }
 
-    public FileManagerController getFileManagerController() {
-        return injector.getInstance(FileManagerController.class);
-    }
-
     public ResponseFactory getResponseFactory() {
         return injector.getInstance(ResponseFactory.class);
     }

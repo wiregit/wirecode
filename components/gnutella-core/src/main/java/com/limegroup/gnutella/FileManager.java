@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import com.limegroup.gnutella.downloader.VerifyingFile;
-import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
@@ -23,16 +22,6 @@ public interface FileManager {
      *      @modifies this
      *      @see loadSettings */
     public abstract void start();
-
-    /**
-     * Invokes {@link #start()} and waits for <code>timeout</code>
-     * milliseconds for the initialization to finish.
-     * 
-     * @param timeout timeout in milliseconds
-     * @throws InterruptedException if interrupted while waiting
-     * @throws TimeoutException if timeout elapsed before initialization completed 
-     */
-    public abstract void startAndWait(long timeout) throws InterruptedException, TimeoutException;
 
     public abstract void stop();
 
@@ -330,13 +319,6 @@ public interface FileManager {
      * @return true if the folder can be shared
      */
     public abstract boolean isFolderShareable(File folder, boolean includeExcludedDirectories);
-
-    /**
-     * Returns the QRTable. If the shared files have changed, then it will
-     * rebuild the QRT. A copy is returned so that FileManager does not expose
-     * its internal data structure.
-     */
-    public abstract QueryRouteTable getQRT();
 
     /**
      * @return true if there exists an application-shared file with the

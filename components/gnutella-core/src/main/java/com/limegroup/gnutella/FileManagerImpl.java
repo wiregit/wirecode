@@ -21,6 +21,7 @@ import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -42,22 +43,31 @@ import org.limewire.util.FileUtils;
 import org.limewire.util.RPNParser;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.name.Named;
 import com.limegroup.gnutella.FileManagerEvent.Type;
+import com.limegroup.gnutella.altlocs.AltLocManager;
+import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.auth.ContentResponseData;
 import com.limegroup.gnutella.auth.ContentResponseObserver;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.library.LibraryData;
 import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.licenses.LicenseType;
+import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.routing.HashFunction;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.settings.MessageSettings;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
-import com.limegroup.gnutella.util.LimeWireUtils;
+import com.limegroup.gnutella.simpp.SimppManager;
+import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
+import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
+import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -72,12 +82,6 @@ public abstract class FileManagerImpl implements FileManager, Service {
     private static final Log LOG = LogFactory.getLog(FileManagerImpl.class);
 
     private static final ExecutorService LOADER = ExecutorsHelper.newProcessingQueue("FileManagerLoader");
-    
-    /**
-     * delay between qrp updates should the simpp words change.
-     * Not final for testing.  Betas update faster for experiments.
-     */
-    private static long QRP_DELAY = (LimeWireUtils.isBetaRelease() ? 1 : 60) * 60 * 1000;
      
     /** List of event listeners for FileManagerEvents. */
     private volatile CopyOnWriteArrayList<FileEventListener> eventListeners 
@@ -228,30 +232,60 @@ public abstract class FileManagerImpl implements FileManager, Service {
         public void handleFileEvent(FileManagerEvent evt) {}
     };
          
-    /**
-     * The QueryRouteTable kept by this.  The QueryRouteTable will be 
-     * lazily rebuilt when necessary.
-     */
-    protected static QueryRouteTable _queryRouteTable;
-    
-    /**
-     * Boolean for checking if the QRT needs to be rebuilt.
-     */
-    protected static volatile boolean _needRebuild = true;
-
-    private final QRPUpdater qrpUpdater = new QRPUpdater();
-
     /** Contains the definition of a rare file */
     private final RareFileDefinition rareDefinition;
     
-    protected final FileManagerController fileManagerController;
+    private final Provider<SimppManager> simppManager;
+    private final Provider<UrnCache> urnCache;
+    private final Provider<DownloadManager> downloadManager;
+    private final Provider<ContentManager> contentManager;
+    private final Provider<AltLocManager> altLocManager;
+    private final Provider<SavedFileManager> savedFileManager;
+    private final Provider<UpdateHandler> updateHandler;
+    protected final Provider<CreationTimeCache> creationTimeCache;
+    protected final Provider<ActivityCallback> activityCallback;
+    protected final ScheduledExecutorService backgroundExecutor;
+    protected final LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory;
+    protected final LimeXMLDocumentFactory limeXMLDocumentFactory;
+    protected final MetaDataReader metaDataReader;
+    protected final Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper;
+    protected final Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository;
     
 	/**
 	 * Creates a new <tt>FileManager</tt> instance.
 	 */
     @Inject
-    public FileManagerImpl(FileManagerController fileManagerController) {
-        this.fileManagerController = fileManagerController;
+    public FileManagerImpl(Provider<SimppManager> simppManager,
+            Provider<UrnCache> urnCache,
+            Provider<DownloadManager> downloadManager,
+            Provider<CreationTimeCache> creationTimeCache,
+            Provider<ContentManager> contentManager,
+            Provider<AltLocManager> altLocManager,
+            Provider<SavedFileManager> savedFileManager,
+            Provider<UpdateHandler> updateHandler,
+            Provider<ActivityCallback> activityCallback,
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
+            LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory,
+            LimeXMLDocumentFactory limeXMLDocumentFactory,
+            MetaDataReader metaDataReader,
+            Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
+            Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
+        this.simppManager = simppManager;
+        this.urnCache = urnCache;
+        this.downloadManager = downloadManager;
+        this.creationTimeCache = creationTimeCache;
+        this.contentManager = contentManager;
+        this.altLocManager = altLocManager;
+        this.savedFileManager = savedFileManager;
+        this.updateHandler = updateHandler;
+        this.activityCallback = activityCallback;
+        this.backgroundExecutor = backgroundExecutor;
+        this.limeXMLReplyCollectionFactory = limeXMLReplyCollectionFactory;
+        this.limeXMLDocumentFactory = limeXMLDocumentFactory;
+        this.metaDataReader = metaDataReader;
+        this.schemaReplyCollectionMapper = schemaReplyCollectionMapper;
+        this.limeXMLSchemaRepository = limeXMLSchemaRepository;
+        
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
         // thread launched at the end of the constructor will immediately
@@ -297,44 +331,20 @@ public abstract class FileManagerImpl implements FileManager, Service {
         _data.clean();
         cleanIndividualFiles();
 		loadSettings();
-		fileManagerController.addSimppListener(qrpUpdater);
     }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#startAndWait(long)
-     */
-    public void startAndWait(long timeout) throws InterruptedException, TimeoutException {
-        final CountDownLatch startedLatch = new CountDownLatch(1);
-        FileEventListener listener = new FileEventListener() {
-            public void handleFileEvent(FileManagerEvent evt) {
-                if (evt.getType() == Type.FILEMANAGER_LOADED) {
-                    startedLatch.countDown();
-                }
-            }            
-        };
-        try {
-            addFileEventListener(listener);
-            start();
-            if (!startedLatch.await(timeout, TimeUnit.MILLISECONDS)) {
-                throw new TimeoutException("Initialization of FileManager did not complete within " + timeout + " ms");
-            }
-        } finally {
-            removeFileEventListener(listener);
-        }
-    }
-    
+       
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#stop()
      */
     public void stop() {
         save();
-        fileManagerController.removeSimppListener(qrpUpdater);
         shutdown = true;
     }
 
     protected void save(){
         _data.save();
-        fileManagerController.save();
+        urnCache.get().persistCache();
+        creationTimeCache.get().persistCache();
     }
     
     public FileList getSharedFileList() {
@@ -448,7 +458,7 @@ public abstract class FileManagerImpl implements FileManager, Service {
      * Kicks off necessary stuff for a load being started.
      */
     protected void loadStarted(int revision) {
-        fileManagerController.loadStarted();
+        urnCache.get().clearPendingHashes(this);
     }
     
     /**
@@ -474,9 +484,12 @@ public abstract class FileManagerImpl implements FileManager, Service {
     protected void loadFinished(int revision) {
         if(LOG.isDebugEnabled())
             LOG.debug("Finished loading revision: " + revision);
-        fileManagerController.loadFinished();
+        creationTimeCache.get().pruneTimes();
+        downloadManager.get().getIncompleteFileManager().registerAllIncompleteFiles();
         save();
-        fileManagerController.loadFinishedPostSave();
+        savedFileManager.get().run();
+        updateHandler.get().tryToDownloadUpdates();
+        activityCallback.get().fileManagerLoaded();
         dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOADED));
     }
     
@@ -557,7 +570,7 @@ public abstract class FileManagerImpl implements FileManager, Service {
         }
 
         //clear this, list of directories retrieved
-        fileManagerController.fileManagerLoading();
+        activityCallback.get().fileManagerLoading();
         dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOADING));
         
         // Update the FORCED_SHARE directory.
@@ -662,7 +675,7 @@ public abstract class FileManagerImpl implements FileManager, Service {
             if (!_data.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
                 //  ask the user whether the sensitive directory should be shared
                 // THIS CALL CAN BLOCK.
-                if (!fileManagerController.warnAboutSharingSensitiveDirectory(directory))
+                if (!activityCallback.get().warnAboutSharingSensitiveDirectory(directory))
                     return;
             }
         }
@@ -853,7 +866,7 @@ public abstract class FileManagerImpl implements FileManager, Service {
                         removeFolderIfShared(f, folder);
                     else if(f.isFile() && !_individualSharedFiles.contains(f)) {
                         if(removeFileIfSharedOrStore(f) == null)
-                            fileManagerController.clearPendingShare(f);
+                            urnCache.get().clearPendingHashesFor(f, this);
                         if(storeFileList.contains(f)) 
                             _data.SPECIAL_STORE_FILES.remove(f);	
                     }
@@ -1066,8 +1079,8 @@ public abstract class FileManagerImpl implements FileManager, Service {
             // while we're still adding files
             _pendingFinished = -1;
         }
-        fileManagerController.calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback, 
-                addFileType));
+        urnCache.get().calculateAndCacheUrns(file, getNewUrnCallback(file, metadata, notify, revision, callback, 
+              addFileType));
     }
     
     /**
@@ -1127,7 +1140,7 @@ public abstract class FileManagerImpl implements FileManager, Service {
             }
             
             public boolean isOwner(Object o) {
-                return o == fileManagerController;
+                return o == this;
             }
         };
     }
@@ -1159,9 +1172,7 @@ public abstract class FileManagerImpl implements FileManager, Service {
 
         storeFileList.addFile(file, fileDesc);
         
-        fileManagerController.fileAdded(file, fileDesc.getSHA1Urn());
-        
-        _needRebuild = true;   
+        fileAdded(file, fileDesc.getSHA1Urn());
         
         FileManagerEvent evt = new FileManagerEvent(FileManagerImpl.this, Type.ADD_STORE_FILE, fileDesc);
         if(notify) // sometimes notify the GUI
@@ -1193,10 +1204,8 @@ public abstract class FileManagerImpl implements FileManager, Service {
         // so we have to make sure we don't influence the what is new
         // result set.
         if (!SharingUtils.isForcedShare(file)) {
-            fileManagerController.fileAdded(file, fileDesc.getSHA1Urn());
+            fileAdded(file, fileDesc.getSHA1Urn());
         }
-
-        _needRebuild = true;            
         
         FileManagerEvent evt = new FileManagerEvent(FileManagerImpl.this, addFileType.getSuccessType(), fileDesc);
         if(notify) // sometimes notify the GUI
@@ -1204,6 +1213,24 @@ public abstract class FileManagerImpl implements FileManager, Service {
         callback.handleFileEvent(evt); // always notify the individual callback.
     }
     
+    private void fileAdded(File file, URN urn) {
+        CreationTimeCache cache = creationTimeCache.get();
+        synchronized (cache) {
+            Long cTime = cache.getCreationTime(urn);
+            if (cTime == null)
+                cTime = new Long(file.lastModified());
+            // if cTime is non-null but 0, then the IO subsystem is
+            // letting us know that the file was FNF or an IOException
+            // occurred - the best course of action is to
+            // ignore the issue and not add it to the CTC, hopefully
+            // we'll get a correct reading the next time around...
+            if (cTime.longValue() > 0) {
+                // these calls may be superfluous but are quite fast....
+                cache.addTime(urn, cTime.longValue());
+                cache.commitTime(urn);
+            }
+        }
+    }
     
     /**
      * Creates a file descriptor for a given file and a set of urns
@@ -1214,7 +1241,7 @@ public abstract class FileManagerImpl implements FileManager, Service {
      */
     private FileDesc createFileDesc(File file, Set<? extends URN> urns, int index){
         FileDesc fileDesc = new FileDesc(file, urns, index);
-        ContentResponseData r = fileManagerController.getResponseDataFor(fileDesc.getSHA1Urn());
+        ContentResponseData r = contentManager.get().getResponse(fileDesc.getSHA1Urn());
         // if we had a response & it wasn't good, don't add this FD.
         if(r != null && !r.isOK())
             return null;
@@ -1242,7 +1269,7 @@ public abstract class FileManagerImpl implements FileManager, Service {
 		boolean removed = _individualSharedFiles.remove(file); 
 		FileDesc fd = removeFileIfSharedOrStore(file);
 		if (fd == null) {
-            fileManagerController.clearPendingShare(file);
+		    urnCache.get().clearPendingHashesFor(file, this);
         } else {
 			file = fd.getFile();
 			// if file was not specially shared, add it to files_not_to_share
@@ -1290,8 +1317,6 @@ public abstract class FileManagerImpl implements FileManager, Service {
             return null;
             
         FileDesc fd = sharedFileList.getFileDesc(f);
-
-        _needRebuild = true;
 
         // If it's an incomplete file, the only reference we 
         // have is the URN, so remove that and be done.
@@ -1412,7 +1437,6 @@ public abstract class FileManagerImpl implements FileManager, Service {
         sharedFileList.addIncompleteFile(incompleteFile, ifd);
         fileURNSUpdated(ifd);
         
-        _needRebuild = true;
         dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FILE, ifd));
     }
 
@@ -1426,13 +1450,13 @@ public abstract class FileManagerImpl implements FileManager, Service {
      */
     public void validate(final FileDesc fd) {
         if(_requestingValidation.add(fd.getSHA1Urn())) {
-            fileManagerController.requestValidation(fd.getSHA1Urn(), new ContentResponseObserver() {
+            contentManager.get().request(fd.getSHA1Urn(), new ContentResponseObserver() {
                public void handleResponse(URN urn, ContentResponseData r) {
                    _requestingValidation.remove(fd.getSHA1Urn());
                    if(r != null && !r.isOK())
                        removeFileIfSharedOrStore(fd.getFile());
                }
-            });
+            }, 5000);
         }
     }
 
@@ -1450,7 +1474,6 @@ public abstract class FileManagerImpl implements FileManager, Service {
                         SharingSettings.LOAD_PARTIAL_KEYWORDS.getValue() &&
                         ifd.hasUrnsAndPartialData()) {
                     event = new FileManagerEvent(this, Type.CHANGE_FILE, fd);
-                    _needRebuild = true;
                 }
             }
         }
@@ -1491,7 +1514,8 @@ public abstract class FileManagerImpl implements FileManager, Service {
             //Delete index from set.  Remove set if empty.
             indices.remove(fileDesc.getIndex());
             if (indices.size()==0 && purgeState) {
-                fileManagerController.lastUrnRemoved(urn);
+                altLocManager.get().purge(urn);
+                creationTimeCache.get().removeTime(urn);
                 fileList.remove(urn);
             }
         }
@@ -1530,7 +1554,7 @@ public abstract class FileManagerImpl implements FileManager, Service {
 			    _data.SPECIAL_FILES_TO_SHARE.add(newName);
 			
             // Prepopulate the cache with new URNs.
-            fileManagerController.addUrns(newName, removed.getUrns());
+            urnCache.get().addUrns(newName, removed.getUrns());
 
             addFileIfSharedOrStore( newName, xmlDocs, false, _revision, new FileEventListener(){
             public void handleFileEvent(FileManagerEvent evt) {
@@ -1558,7 +1582,7 @@ public abstract class FileManagerImpl implements FileManager, Service {
             if (_data.SPECIAL_STORE_FILES.remove(oldName)) 
                 _data.SPECIAL_STORE_FILES.add(newName);
             // Prepopulate the cache with new URNs.
-            fileManagerController.addUrns(newName, removed.getUrns());
+            urnCache.get().addUrns(newName, removed.getUrns());
     
             addFileIfSharedOrStore(newName, xmlDocs, false, _revision, new FileEventListener() {
                 public void handleFileEvent(FileManagerEvent evt) {
@@ -1807,52 +1831,6 @@ public abstract class FileManagerImpl implements FileManager, Service {
         
         return true;
     }
-	
- 
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#getQRT()
-     */
-    public synchronized QueryRouteTable getQRT() {
-        if(_needRebuild) {
-            qrpUpdater.cancelRebuild();
-            buildQRT();
-            _needRebuild = false;
-        }
-        
-        QueryRouteTable qrt = new QueryRouteTable(_queryRouteTable.getSize());
-        qrt.addAll(_queryRouteTable);
-        return qrt;
-    }
-
-    /**
-     * build the qrt.  Subclasses can add other Strings to the
-     * QRT by calling buildQRT and then adding directly to the 
-     * _queryRouteTable variable. (see xml/MetaFileManager.java)
-     */
-    protected synchronized void buildQRT() {
-        _queryRouteTable = new QueryRouteTable();
-        if (SearchSettings.PUBLISH_LIME_KEYWORDS.getBoolean()) {
-            for (String entry : SearchSettings.LIME_QRP_ENTRIES.getValue())
-                _queryRouteTable.addIndivisible(entry);
-        }
-        List<FileDesc> fds = sharedFileList.getAllFileDescs();
-        for(FileDesc fd : fds ){
-            if (fd instanceof IncompleteFileDesc) {
-                if (!SharingSettings.ALLOW_PARTIAL_SHARING.getValue())
-                    continue;
-                if (!SharingSettings.PUBLISH_PARTIAL_QRP.getValue())
-                    continue;
-                IncompleteFileDesc ifd = (IncompleteFileDesc)fd;
-                if (!ifd.hasUrnsAndPartialData())
-                    continue;
-                
-                _queryRouteTable.add(ifd.getFileName());
-            } else
-                _queryRouteTable.add(fd.getPath());
-        }
-    }
-
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#isFileApplicationShared(java.lang.String)
@@ -1959,51 +1937,6 @@ public abstract class FileManagerImpl implements FileManager, Service {
 
         };
     }
-        
-    private class QRPUpdater implements SimppListener {
-        private boolean buildInProgress;
-        private final Set<String> qrpWords = new HashSet<String>();
-        public QRPUpdater() {
-            synchronized(this) {
-                for (String entry : SearchSettings.LIME_QRP_ENTRIES.getValue())
-                    qrpWords.add(entry);
-            }
-        }
-        
-        public synchronized void simppUpdated(int newVersion) {
-            if (buildInProgress)
-                return;
-            
-            Set<String> newWords = new HashSet<String>();
-            for (String entry : SearchSettings.LIME_QRP_ENTRIES.getValue())
-                newWords.add(entry);
-            
-            // any change in words?
-            if (newWords.containsAll(qrpWords) && qrpWords.containsAll(newWords)) 
-                return;
-            
-            qrpWords.clear();
-            qrpWords.addAll(newWords);
-
-            buildInProgress = true;
-            
-            // schedule a rebuild sometime in the next hour
-            fileManagerController.scheduleWithFixedDelay(new Runnable() {
-                public void run() {
-                    synchronized(QRPUpdater.this) {
-                        if (!buildInProgress)
-                            return;
-                        buildInProgress = false;
-                        _needRebuild = true;
-                    }
-                }
-            }, (int)(Math.random() * QRP_DELAY), 0, TimeUnit.MILLISECONDS);
-        }
-        
-        public synchronized void cancelRebuild() {
-            buildInProgress = false;
-        }
-    }
 
     /** A bunch of inspectables for FileManager */
     @InspectableContainer
@@ -2013,24 +1946,6 @@ public abstract class FileManagerImpl implements FileManager, Service {
          * 2 - just sends the current table
          */
         private static final int VERSION = 2;
-        private void addVersion(Map<String, Object> m) {
-            m.put("ver", VERSION);
-        }
-
-        /** An inspectable that returns some info about the QRP */
-        @InspectionPoint("FileManager QRP info")
-        public final Inspectable QRP = new Inspectable() {
-            public Object inspect() {
-                Map<String, Object> ret = new HashMap<String, Object>();
-                addVersion(ret);
-
-                synchronized(FileManagerImpl.this) {
-                    ret.put("qrt",getQRT().getRawDump());
-                }
-
-                return ret;
-            }
-        };
 
         /** An inspectable that returns stats about hits, uploads & alts */
         @InspectionPoint("FileManager h/u/a stats")
@@ -2110,7 +2025,7 @@ public abstract class FileManagerImpl implements FileManager, Service {
                 if (isRareFile(fd))
                     rare++;
                 // locking FM->ALM ok.
-                int numAlts = fileManagerController.getAlternateLocationCount(fd.getSHA1Urn());
+                int numAlts = altLocManager.get().getNumLocs(fd.getSHA1Urn());
                 if (!nonZero || numAlts > 0) {
                     alts.add((double)numAlts);
                     topAltsFDs.put(numAlts,fd);
@@ -2202,7 +2117,7 @@ public abstract class FileManagerImpl implements FileManager, Service {
         RareFileDefinition() {
             simppUpdated(0);
             // TODO cleanup listener leaking
-            fileManagerController.addSimppListener(this);
+            simppManager.get().addListener(this);
         }
         
         public synchronized void simppUpdated(int ignored) {

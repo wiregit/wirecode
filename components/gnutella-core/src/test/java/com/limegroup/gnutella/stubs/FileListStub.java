@@ -29,12 +29,15 @@ public class FileListStub extends SharedFileListImpl {
     }
     
     public FileListStub() {
+		clear();
+    }
+    
+    public void clear() {
+        super.resetVariables();
         files = new ArrayList<FileDesc>();
         numBytes = 0;
         numFiles = 0;
         fileToFileDescMap = new HashMap<File, FileDesc>();
-        
-        super.resetVariables();
     }
     
     @Override

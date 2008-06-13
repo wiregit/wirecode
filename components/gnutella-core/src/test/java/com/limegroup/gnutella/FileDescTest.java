@@ -27,7 +27,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
     
     private static final long MAX_FILE_SIZE = 3L * 1024L * 1024;
     private UrnCache urnCache;
-    private FileManagerController fileManagerController;
+    private FileManager fm;
     
 	public FileDescTest(String name) {
 		super(name);
@@ -45,7 +45,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
 	protected void setUp() throws Exception {
 	    Injector injector = LimeTestUtils.createInjector();
 		urnCache = injector.getInstance(UrnCache.class);
-		fileManagerController = injector.getInstance(FileManagerController.class);
+		fm = injector.getInstance(MetaFileManager.class);
 	}
 	
 	/**
@@ -101,7 +101,6 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
     }
     
     public void testIsRareFile() throws Exception {
-        FileManager fm = new MetaFileManager(fileManagerController);
         File file = TestUtils.getResourceFile("build.xml");
         Set urns = UrnHelper.calculateAndCacheURN(file, urnCache);
         

@@ -153,6 +153,7 @@ import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinder;
 import com.limegroup.gnutella.messages.vendor.VendorMessageParserBinderImpl;
 import com.limegroup.gnutella.metadata.MetaDataFactory;
 import com.limegroup.gnutella.metadata.MetaDataFactoryImpl;
+import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.rudp.LimeWireGnutellaRudpModule;
 import com.limegroup.gnutella.search.LimeWireSearchModule;
 import com.limegroup.gnutella.search.QueryDispatcher;
@@ -254,7 +255,6 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(LocalFileDetailsFactory.class).to(LocalFileDetailsFactoryImpl.class);
         bind(HttpExecutor.class).to(DefaultHttpExecutor.class);
         bind(HttpRequestHandlerFactory.class).to(HttpRequestHandlerFactoryImpl.class);
-        bind(FileManagerController.class).to(FileManagerControllerImpl.class);
         bind(ResponseFactory.class).to(ResponseFactoryImpl.class);
         bind(QueryReplyFactory.class).to(QueryReplyFactoryImpl.class);
         bind(MessageDispatcherFactory.class).to(LimeMessageDispatcherFactoryImpl.class);
@@ -368,6 +368,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(OutOfBandThroughputMeasurer.class);
         bind(HostCatcher.class);
         bind(LimeCoreGlue.class);
+        bind(QRPUpdater.class);
         
         // TODO: Need to add interface to these classes
         //----------------------------------------------

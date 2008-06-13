@@ -42,6 +42,7 @@ import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
+import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ContentSettings;
@@ -75,6 +76,7 @@ public class FileManagerTest extends LimeTestCase {
     //changed to protected so that MetaFileManagerTest can
     //use these variables as well.
     protected volatile FileManagerImpl fman = null;
+    protected QRPUpdater qrpUpdater = null;
     protected Object loaded = new Object();
     protected Response[] responses;
     protected List<FileDesc> sharedFiles;
@@ -108,7 +110,10 @@ public class FileManagerTest extends LimeTestCase {
         });
         fman = (FileManagerImpl)injector.getInstance(FileManager.class);
         keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
+        qrpUpdater = injector.getInstance(QRPUpdater.class);
+        
         fman.addFileEventListener(keywordIndex);
+        fman.addFileEventListener(qrpUpdater);
     }
 	
     @Override
@@ -467,7 +472,7 @@ public class FileManagerTest extends LimeTestCase {
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
         assertFalse(ifd.hasUrnsAndPartialData());
         assertEquals(0,keywordIndex.query(qrDesiring).length);
-        assertFalse(fman.getQRT().contains(qrDesiring));
+        assertFalse(qrpUpdater.getQRT().contains(qrDesiring));
         
         // b) single urn, enough data written -> not shared
         fman.removeFileIfSharedOrStore(f);
@@ -482,7 +487,7 @@ public class FileManagerTest extends LimeTestCase {
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
         assertFalse(ifd.hasUrnsAndPartialData());
         assertEquals(0,keywordIndex.query(qrDesiring).length);
-        assertFalse(fman.getQRT().contains(qrDesiring));
+        assertFalse(qrpUpdater.getQRT().contains(qrDesiring));
         
         // c) two urns, not enough data written -> not shared
         fman.removeFileIfSharedOrStore(f);
@@ -498,7 +503,7 @@ public class FileManagerTest extends LimeTestCase {
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
         assertFalse(ifd.hasUrnsAndPartialData());
         assertEquals(0,keywordIndex.query(qrDesiring).length);
-        assertFalse(fman.getQRT().contains(qrDesiring));
+        assertFalse(qrpUpdater.getQRT().contains(qrDesiring));
 
         // d) two urns, enough data written -> shared
         fman.removeFileIfSharedOrStore(f);
@@ -516,16 +521,16 @@ public class FileManagerTest extends LimeTestCase {
         assertTrue(ifd.hasUrnsAndPartialData());
         assertGreaterThan(0,keywordIndex.query(qrDesiring).length);
         assertEquals(0,keywordIndex.query(notDesiring).length);
-        assertTrue(fman.getQRT().contains(qrDesiring));
-        double qrpFull = fman.getQRT().getPercentFull();
+        assertTrue(qrpUpdater.getQRT().contains(qrDesiring));
+        double qrpFull = qrpUpdater.getQRT().getPercentFull();
         assertGreaterThan(0,qrpFull);
         
         // now remove the file and qrt should get updated
         fman.removeFileIfSharedOrStore(f);
         assertEquals(0,keywordIndex.query(qrDesiring).length);
         assertEquals(0,keywordIndex.query(notDesiring).length);
-        assertFalse(fman.getQRT().contains(qrDesiring));
-        assertLessThan(qrpFull,fman.getQRT().getPercentFull());
+        assertFalse(qrpUpdater.getQRT().contains(qrDesiring));
+        assertLessThan(qrpFull,qrpUpdater.getQRT().getPercentFull());
         
         // e) two urns, enough data written, sharing disabled -> not shared
         SharingSettings.ALLOW_PARTIAL_SHARING.setValue(false);
@@ -544,7 +549,7 @@ public class FileManagerTest extends LimeTestCase {
         assertTrue(ifd.hasUrnsAndPartialData());
         assertEquals(0,keywordIndex.query(qrDesiring).length);
         assertEquals(0,keywordIndex.query(notDesiring).length);
-        assertFalse(fman.getQRT().contains(qrDesiring));
+        assertFalse(qrpUpdater.getQRT().contains(qrDesiring));
         SharingSettings.ALLOW_PARTIAL_SHARING.setValue(true);
         
         // f) start with one urn, add a second one -> becomes shared
@@ -560,14 +565,14 @@ public class FileManagerTest extends LimeTestCase {
         ifd = (IncompleteFileDesc) fman.getFileDescForUrn(UrnHelper.URNS[0]);
         assertFalse(ifd.hasUrnsAndPartialData());
         assertEquals(0,keywordIndex.query(qrDesiring).length);
-        assertFalse(fman.getQRT().contains(qrDesiring));
+        assertFalse(qrpUpdater.getQRT().contains(qrDesiring));
         
         ifd.setTTRoot(UrnHelper.TTROOT);
         assertTrue(ifd.hasUrnsAndPartialData());
         fman.fileURNSUpdated(ifd);
         assertGreaterThan(0,keywordIndex.query(qrDesiring).length);
         assertEquals(0,keywordIndex.query(notDesiring).length);
-        assertTrue(fman.getQRT().contains(qrDesiring));
+        assertTrue(qrpUpdater.getQRT().contains(qrDesiring));
         
         // g) start with two urns, add data -> becomes shared
         // actually this is on the one scenario that won't work
@@ -818,8 +823,8 @@ public class FileManagerTest extends LimeTestCase {
         f3 = createNewNamedTestFile(10, "\u00e2cc\u00e8nts");
         waitForLoad(); 
 
-        //get the QRT from the filemanager
-        QueryRouteTable qrt = fman.getQRT();
+        //get the QRT from QRTUpdater
+        QueryRouteTable qrt = qrpUpdater.getQRT();
 
         //test that QRT doesn't contain random keyword
         QueryRequest qr = queryRequestFactory.createQuery("asdfasdf");
@@ -840,7 +845,7 @@ public class FileManagerTest extends LimeTestCase {
         //now remove one of the files
         fman.removeFileIfSharedOrStore(f3);
         
-        qrt = fman.getQRT();
+        qrt = qrpUpdater.getQRT();
         
         //make sure the removed file is no longer in qrt
         assertFalse("query should not be in qrt", qrt.contains(qr));
@@ -863,7 +868,7 @@ public class FileManagerTest extends LimeTestCase {
         FileManagerEvent result = renameFile(f2, f4);
         assertTrue(result.toString(), result.isRenameEvent());
         fman.renameFileIfSharedOrStore(f2, f4);
-        qrt = fman.getQRT();
+        qrt = qrpUpdater.getQRT();
         
         //check hit with new name
         qr = get_qr(f4);

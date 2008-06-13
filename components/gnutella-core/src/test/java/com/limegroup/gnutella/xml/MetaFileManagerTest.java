@@ -25,6 +25,7 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.SharedFilesKeywordIndex;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
+import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -67,7 +68,10 @@ public class MetaFileManagerTest extends FileManagerTest {
 
         fman = (FileManagerImpl)injector.getInstance(FileManager.class);
         keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
+        qrpUpdater = injector.getInstance(QRPUpdater.class);
+        
         fman.addFileEventListener(keywordIndex);
+        fman.addFileEventListener(qrpUpdater);
 
         limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
         
@@ -798,12 +802,12 @@ public class MetaFileManagerTest extends FileManagerTest {
         String dir2 = "director=\"francis loopola\"";
 
         File f1 = createNewNamedTestFile(10, "hello");
-        QueryRouteTable qrt = fman.getQRT();
+        QueryRouteTable qrt = qrpUpdater.getQRT();
         assertFalse("should not be in QRT", qrt.contains(get_qr(f1)));
         waitForLoad();
         
         //make sure QRP contains the file f1
-        qrt = fman.getQRT();
+        qrt = qrpUpdater.getQRT();
         assertTrue("expected in QRT", qrt.contains(get_qr(f1)));
 
         //now test xml metadata in the QRT
@@ -815,14 +819,14 @@ public class MetaFileManagerTest extends FileManagerTest {
 	    FileManagerEvent result = addIfShared(f2, l2);
 	    assertTrue(result.toString(), result.isAddEvent());
 	    assertEquals(newDoc2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
-        qrt = fman.getQRT();
+        qrt = qrpUpdater.getQRT();
         
         assertTrue("expected in QRT", qrt.contains (get_qr(buildVideoXMLString(dir2))));
         assertFalse("should not be in QRT", qrt.contains(get_qr(buildVideoXMLString("director=\"sasami juzo\""))));
         
         //now remove the file and make sure the xml gets deleted.
         fman.removeFileIfSharedOrStore(f2);
-        qrt = fman.getQRT();
+        qrt = qrpUpdater.getQRT();
        
         assertFalse("should not be in QRT", qrt.contains(get_qr(buildVideoXMLString(dir2))));
     }
@@ -833,12 +837,12 @@ public class MetaFileManagerTest extends FileManagerTest {
         
         // share a file
         File f1 = createNewNamedTestFile(10, "hello");
-        QueryRouteTable qrt = fman.getQRT();
+        QueryRouteTable qrt = qrpUpdater.getQRT();
         assertFalse("should not be in QRT", qrt.contains(get_qr(f1)));
         waitForLoad();
         
         //make sure QRP contains the file f1
-        qrt = fman.getQRT();
+        qrt = qrpUpdater.getQRT();
         assertTrue("expected in QRT", qrt.contains(get_qr(f1)));
         
         // create a store audio file with xml preventing sharing
@@ -850,14 +854,14 @@ public class MetaFileManagerTest extends FileManagerTest {
         FileManagerEvent result = addIfShared(f2, l1);
         assertTrue(result.toString(), result.isAddStoreEvent());
         assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
-        qrt = fman.getQRT();
+        qrt = qrpUpdater.getQRT();
         
         assertFalse("should not be in QRT", qrt.contains (get_qr(buildAudioXMLString(storeAudio))));
    
         waitForLoad();
    
         //store file should not be in QRT table
-        qrt = fman.getQRT();
+        qrt = qrpUpdater.getQRT();
         assertFalse("should not be in QRT", qrt.contains (get_qr(buildAudioXMLString(storeAudio))));
         assertTrue("expected in QRT", qrt.contains(get_qr(f1)));
     }

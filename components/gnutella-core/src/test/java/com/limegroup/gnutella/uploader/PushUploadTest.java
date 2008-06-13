@@ -13,7 +13,10 @@ import java.net.Socket;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import junit.framework.Test;
 
@@ -43,7 +46,9 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionManagerImpl;
 import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LifecycleManager;
@@ -54,6 +59,7 @@ import com.limegroup.gnutella.NetworkManagerImpl;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.QueryUnicaster;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.FileManagerEvent.Type;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
@@ -176,7 +182,7 @@ public class PushUploadTest extends LimeTestCase {
 
         // start services
         fm = injector.getInstance(FileManager.class);
-        fm.startAndWait(4000);
+        startAndWait(4000);
         
         lifeCycleManager = injector.getInstance(LifecycleManager.class);
         lifeCycleManager.start();
@@ -185,6 +191,27 @@ public class PushUploadTest extends LimeTestCase {
         
         connectionManager = (MyConnectionManager) injector.getInstance(ConnectionManager.class);
     }
+    
+    private void startAndWait(long timeout) throws InterruptedException, TimeoutException {
+        final CountDownLatch startedLatch = new CountDownLatch(1);
+        FileEventListener listener = new FileEventListener() {
+            public void handleFileEvent(FileManagerEvent evt) {
+                if (evt.getType() == Type.FILEMANAGER_LOADED) {
+                    startedLatch.countDown();
+                }
+            }            
+        };
+        try {
+            fm.addFileEventListener(listener);
+            fm.start();
+            if (!startedLatch.await(timeout, TimeUnit.MILLISECONDS)) {
+                throw new TimeoutException("Initialization of FileManager did not complete within " + timeout + " ms");
+            }
+        } finally {
+            fm.removeFileEventListener(listener);
+        }
+    }
+        
 
     @Override
     public void tearDown() throws Exception {

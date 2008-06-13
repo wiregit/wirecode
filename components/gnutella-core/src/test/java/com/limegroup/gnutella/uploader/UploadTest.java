@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import junit.framework.Test;
 
@@ -60,6 +61,7 @@ import com.limegroup.gnutella.HTTPAcceptor;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.FileManagerEvent.Type;
 import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.VerifyingFile;
@@ -241,7 +243,7 @@ public class UploadTest extends LimeTestCase {
         
         // make sure the FileDesc objects in file manager are up-to-date
         fileManager = injector.getInstance(FileManager.class);
-        fileManager.startAndWait(2000);
+        startAndWait(4000);
         
         ConnectionDispatcher connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
         connectionDispatcher.addConnectionAcceptor(httpAcceptor, false, httpAcceptor.getHttpMethods());
@@ -252,6 +254,27 @@ public class UploadTest extends LimeTestCase {
         
         LimeTestUtils.waitForNIO();
     }
+    
+    private void startAndWait(long timeout) throws InterruptedException, TimeoutException {
+        final CountDownLatch startedLatch = new CountDownLatch(1);
+        FileEventListener listener = new FileEventListener() {
+            public void handleFileEvent(FileManagerEvent evt) {
+                if (evt.getType() == Type.FILEMANAGER_LOADED) {
+                    startedLatch.countDown();
+                }
+            }            
+        };
+        try {
+            fileManager.addFileEventListener(listener);
+            fileManager.start();
+            if (!startedLatch.await(timeout, TimeUnit.MILLISECONDS)) {
+                throw new TimeoutException("Initialization of FileManager did not complete within " + timeout + " ms");
+            }
+        } finally {
+            fileManager.removeFileEventListener(listener);
+        }
+    }
+        
 
     private void stopServices() throws Exception {
         Acceptor acceptor = injector.getInstance(Acceptor.class);

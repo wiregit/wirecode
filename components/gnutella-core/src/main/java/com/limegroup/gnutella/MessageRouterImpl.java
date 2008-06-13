@@ -102,6 +102,7 @@ import com.limegroup.gnutella.messages.vendor.UDPCrawlerPing;
 import com.limegroup.gnutella.messages.vendor.UpdateRequest;
 import com.limegroup.gnutella.messages.vendor.UpdateResponse;
 import com.limegroup.gnutella.messages.vendor.VendorMessage;
+import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
@@ -329,6 +330,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
     private final Provider<OOBHandler> oobHandlerFactory;
     private final Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager;
     protected final Provider<LimeACKHandler> limeAckHandler;
+    protected final QRPUpdater qrpUpdater;
     
     private final PingRequestFactory pingRequestFactory;
 
@@ -382,7 +384,8 @@ public abstract class MessageRouterImpl implements MessageRouter {
             PingRequestFactory pingRequestFactory, MessageHandlerBinder messageHandlerBinder,
             Provider<OOBHandler> oobHandlerFactory,
             Provider<MACCalculatorRepositoryManager> MACCalculatorRepositoryManager,
-            Provider<LimeACKHandler> limeACKHandler, OutgoingQueryReplyFactory outgoingQueryReplyFactory) {
+            Provider<LimeACKHandler> limeACKHandler, OutgoingQueryReplyFactory outgoingQueryReplyFactory,
+            QRPUpdater qrpUpdater) {
         this.networkManager = networkManager;
         this.queryRequestFactory = queryRequestFactory;
         this.queryHandlerFactory = queryHandlerFactory;
@@ -422,6 +425,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
         this.oobHandlerFactory = oobHandlerFactory;
         this.MACCalculatorRepositoryManager = MACCalculatorRepositoryManager;
         this.limeAckHandler = limeACKHandler;
+        this.qrpUpdater = qrpUpdater;
 
         _clientGUID = applicationServices.getMyGUID();
         _bypassedResultsCache = new BypassedResultsCache(activityCallback, downloadManager);
@@ -2502,7 +2506,7 @@ public abstract class MessageRouterImpl implements MessageRouter {
      */
     //default access for testing
     QueryRouteTable createRouteTable() {
-        QueryRouteTable ret = fileManager.getQRT();
+        QueryRouteTable ret = qrpUpdater.getQRT();
         
         // Add leaves' files if we're an Ultrapeer.
         if(connectionServices.isSupernode()) {
