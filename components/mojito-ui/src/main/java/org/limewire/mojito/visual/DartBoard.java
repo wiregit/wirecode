@@ -181,8 +181,8 @@ class DartBoard extends Painter {
             assert angle <= 360;
             double x1 = localhost.x;
             double y1 = localhost.y;
-            double x2 = x1 + Math.cos(angle) * distance;
-            double y2 = y1 + Math.sin(angle) * distance;
+            double x2 = x1 + Math.cos(Math.toRadians(angle)) * distance;
+            double y2 = y1 - Math.sin(Math.toRadians(angle)) * distance;
             
             int red = 0;
             int green = 0;
