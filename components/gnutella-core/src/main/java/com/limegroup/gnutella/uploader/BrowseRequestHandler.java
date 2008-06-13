@@ -35,6 +35,7 @@ import com.limegroup.gnutella.connection.BasicQueue;
 import com.limegroup.gnutella.connection.ConnectionStats;
 import com.limegroup.gnutella.connection.MessageWriter;
 import com.limegroup.gnutella.connection.SentMessageHandler;
+import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.OutgoingQueryReplyFactory;
 import com.limegroup.gnutella.messages.QueryReply;
@@ -52,6 +53,11 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
     private final FileManager fileManager;
     private final Provider<ResponseFactory> responseFactory;
     private final OutgoingQueryReplyFactory outgoingQueryReplyFactory;
+    /**
+     * This is set to true as default while old clients still don't send 
+     * the request header correctly. Will be set to false in the future.
+     */
+    private boolean requestorCanDoFWT = true;
 
     @Inject
     BrowseRequestHandler(HTTPUploadSessionManager sessionManager,
@@ -75,6 +81,10 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
         HTTPUploader uploader = sessionManager.getOrCreateUploader(request,
                 context, UploadType.BROWSE_HOST, "Browse-File");
         uploader.setState(UploadStatus.BROWSE_HOST);
+        
+        if (request.getHeaders(HTTPHeaderName.FW_NODE_INFO.name()).length > 0) {
+            requestorCanDoFWT = true;
+        }
         
         if (!HttpCoreUtils.hasHeaderListValue(request, "Accept",
                 Constants.QUERYREPLY_MIME_TYPE)) {
@@ -161,7 +171,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
             }
             
             Iterable<QueryReply> it = outgoingQueryReplyFactory.createReplies(responses.toArray(new Response[0]),
-                    10, null, sessionGUID.bytes(), (byte)1, false, false);
+                    10, null, sessionGUID.bytes(), (byte)1, false, requestorCanDoFWT);
             
             for (QueryReply queryReply : it) {
                 sender.send(queryReply);

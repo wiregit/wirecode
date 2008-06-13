@@ -49,6 +49,10 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, S
     private Provider<SocketWrappingHttpClient> clientProvider;
     private final NetworkInstanceUtils networkInstanceUtils;
 
+    private final NetworkManager networkManager;
+
+    private final PushEndpointFactory pushEndpointFactory;
+
     @Inject
     public BrowseHostHandlerManagerImpl(@Named("backgroundExecutor")
                                         ScheduledExecutorService backgroundExecutor,
@@ -59,7 +63,9 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, S
                                         MessageFactory messageFactory,
                                         RemoteFileDescFactory remoteFileDescFactory,
                                         Provider<SocketWrappingHttpClient> clientProvider,
-                                        NetworkInstanceUtils networkInstanceUtils) {
+                                        NetworkInstanceUtils networkInstanceUtils, 
+                                        NetworkManager networkManager,
+                                        PushEndpointFactory pushEndpointFactory) {
         this.activityCallback = activityCallback;
         this.socketsManager = socketsManager;
         this.pushDownloadManager = pushDownloadManager;
@@ -69,6 +75,8 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, S
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.clientProvider = clientProvider;
         this.networkInstanceUtils = networkInstanceUtils;
+        this.networkManager = networkManager;
+        this.pushEndpointFactory = pushEndpointFactory;
     }
     
     @Inject
@@ -113,7 +121,8 @@ public class BrowseHostHandlerManagerImpl implements BrowseHostHandlerManager, S
                         }
                     },
                 activityCallback.get(), socketsManager, pushDownloadManager,
-                forMeReplyHandler, messageFactory, remoteFileDescFactory, clientProvider, networkInstanceUtils);
+                forMeReplyHandler, messageFactory, remoteFileDescFactory, clientProvider, networkInstanceUtils,
+                networkManager, pushEndpointFactory);
     }
 
     /** @return true if the Push was handled by me. */

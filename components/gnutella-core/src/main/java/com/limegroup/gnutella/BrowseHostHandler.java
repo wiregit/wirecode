@@ -35,6 +35,7 @@ import com.google.inject.Provider;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.downloader.PushDownloadManager;
 import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
+import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.MessageFactory;
@@ -92,6 +93,10 @@ public class BrowseHostHandler {
     private final RemoteFileDescFactory remoteFileDescFactory;
     private final Provider<SocketWrappingHttpClient> clientProvider;
     private final NetworkInstanceUtils networkInstanceUtils;
+    private final NetworkManager networkManager;
+
+    private final PushEndpointFactory pushEndpointFactory;
+
 
 
     /**
@@ -108,7 +113,9 @@ public class BrowseHostHandler {
                       MessageFactory messageFactory,
                       RemoteFileDescFactory remoteFileDescFactory,
                       Provider<SocketWrappingHttpClient> clientProvider, 
-                      NetworkInstanceUtils networkInstanceUtils) {
+                      NetworkInstanceUtils networkInstanceUtils,
+                      NetworkManager networkManager,
+                      PushEndpointFactory pushEndpointFactory) {
         _guid = guid;
         _serventID = serventID;
         this.browseHostCallback = browseHostCallback;
@@ -120,6 +127,8 @@ public class BrowseHostHandler {
         this.remoteFileDescFactory = remoteFileDescFactory;
         this.clientProvider = clientProvider;
         this.networkInstanceUtils = networkInstanceUtils;
+        this.networkManager = networkManager;
+        this.pushEndpointFactory = pushEndpointFactory;
     }
 
     /** 
@@ -305,10 +314,14 @@ public class BrowseHostHandler {
         HttpGet get = new HttpGet("http://" + NetworkUtils.ip2string(socket.getInetAddress().getAddress()) + ":" + socket.getPort() + "/");
         HttpProtocolParams.setVersion(client.getParams(), HttpVersion.HTTP_1_1);
         
-        get.addHeader("Host", NetworkUtils.ip2string(socket.getInetAddress().getAddress()) + ":" + socket.getPort());
-        get.addHeader("User-Agent", LimeWireUtils.getVendor());
-        get.addHeader("Accept", Constants.QUERYREPLY_MIME_TYPE);
-        get.addHeader("Connection", "close");
+        get.addHeader(HTTPHeaderName.HOST.create(NetworkUtils.ip2string(socket.getInetAddress().getAddress()) + ":" + socket.getPort()));
+        get.addHeader(HTTPHeaderName.USER_AGENT.create(LimeWireUtils.getVendor()));
+        get.addHeader(HTTPHeaderName.ACCEPT.create(Constants.QUERYREPLY_MIME_TYPE));
+        get.addHeader(HTTPHeaderName.CONNECTION.create("close"));
+        
+        if (!networkManager.acceptedIncomingConnection() && networkManager.canDoFWT()) {
+            get.addHeader(HTTPHeaderName.FW_NODE_INFO.create(pushEndpointFactory.createForSelf()));
+        }
         
         return client.execute(get);
     }
