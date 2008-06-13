@@ -176,13 +176,14 @@ class DartBoard extends Painter {
             
             BigInteger twoPower = BigInteger.ZERO.setBit(power + 160 - RESOLUTION);
             BigDecimal angleBD = new BigDecimal(nodeId.toBigInteger().subtract(twoPower));
+            
             angleBD = angleBD.divide(new BigDecimal(twoPower));
             double angle = angleBD.doubleValue() * 360;
             assert angle <= 360;
             double x1 = localhost.x;
             double y1 = localhost.y;
-            double x2 = x1 + Math.cos(angle) * distance;
-            double y2 = y1 + Math.sin(angle) * distance;
+            double x2 = x1 + Math.cos(Math.toRadians(angle)) * distance;
+            double y2 = y1 - Math.sin(Math.toRadians(angle)) * distance;
             
             int red = 0;
             int green = 0;
