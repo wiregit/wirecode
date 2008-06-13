@@ -1,25 +1,23 @@
 package org.limewire.xmpp.client;
 
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionCreationListener;
-import org.jivesoftware.smack.XMPPConnection;
-import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterListener;
+import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.ProviderManager;
+import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
+import org.jivesoftware.smackx.jingle.IncomingJingleSession;
 import org.jivesoftware.smackx.jingle.JingleManager;
 import org.jivesoftware.smackx.jingle.JingleSessionRequest;
-import org.jivesoftware.smackx.jingle.IncomingJingleSession;
-import org.jivesoftware.smackx.jingle.OutgoingJingleSession;
-import org.jivesoftware.smackx.jingle.file.FileContentHandler;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
 import org.limewire.lifecycle.Service;
 
@@ -34,15 +32,27 @@ public class XMPPService implements Service {
     private static LibraryIQListener libraryIQListener = new LibraryIQListener(null, null);
     
     private final XMPPServiceConfiguration configuration;
-    private final org.limewire.xmpp.client.RosterListener listeners;
-    protected HashSet<String> limewireClients;
+    private final CopyOnWriteArrayList<org.limewire.xmpp.client.RosterListener> rosterListeners;
+    private final HashMap<String, User> users;
     protected XMPPConnection connection;
 
     @Inject
     public XMPPService(XMPPServiceConfiguration configuration,
-                       org.limewire.xmpp.client.RosterListener listeners) {
+                       org.limewire.xmpp.client.RosterListener rosterListener) {
         this.configuration = configuration;
-        this.listeners = listeners;
+        this.rosterListeners = new CopyOnWriteArrayList<org.limewire.xmpp.client.RosterListener>();
+        this.rosterListeners.add(rosterListener);
+        this.users = new HashMap<String, User>();
+        this.rosterListeners.add(new org.limewire.xmpp.client.RosterListener() {
+            public void userAdded(User user) {
+                user.addPresenceListener(new LibraryGetter());
+            }
+
+            public void userUpdated(User user) {}
+
+            public void userDeleted(String id) {}
+        });
+        
     }
     
     @Inject
@@ -54,15 +64,10 @@ public class XMPPService implements Service {
         try {
             XMPPConnection.DEBUG_ENABLED = configuration.isDebugEnabled();
             connection = new XMPPConnection(getConnectionConfig(configuration));
+            connection.addRosterListener(new RosterListenerImpl(connection));
             connection.connect();
             connection.login(configuration.getUsername(), configuration.getPassword(), "limewire");
-
-            limewireClients = getRoster(connection);
-            getLibraries(limewireClients, connection);
-
         } catch (XMPPException e) {
-            throw new IllegalStateException(e);
-        } catch (InterruptedException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -71,52 +76,6 @@ public class XMPPService implements Service {
         return new ConnectionConfiguration(configuration.getHost(),
                                            configuration.getPort(),
                                            configuration.getServiceName());
-    }
-    
-    private HashSet<String> getRoster(XMPPConnection connection) throws InterruptedException {
-        // TODO hack to wait for roster to be loaded.
-        // replace with XMPPConnection level RosterListener
-        Thread.sleep(5 * 1000);        
-
-        ServiceDiscoveryManager serviceDiscoveryManager = ServiceDiscoveryManager.getInstanceFor(connection);
-
-        Roster roster = connection.getRoster();        
-
-        HashSet<String> limewireClients = new HashSet<String>();
-        for (RosterEntry rosterEntry : roster.getEntries()) {
-            System.out.println("found: " + rosterEntry.getUser());
-            Iterator<Presence> presences = roster.getPresences(rosterEntry.getUser());
-            while (presences.hasNext()) {
-                Presence presence = presences.next();
-                if (presence.getType() == Presence.Type.available) {
-                    String name = rosterEntry.getName() != null ? rosterEntry.getName() : rosterEntry.getUser();                    
-                    try {
-                        if (serviceDiscoveryManager.discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/")) {
-                            limewireClients.add(presence.getFrom());
-                            System.out.println("lw presence: " + presence.getFrom());
-                        } else {
-                            System.out.println("presence: " + presence.getFrom());
-                        }
-                    } catch (XMPPException exception) {
-                        //exception.printStackTrace();
-                    }
-                }
-            }
-        }
-       
-        roster.addRosterListener(new RosterListenerImpl(connection));
-        return limewireClients;          
-    }
-    
-    private void getLibraries(HashSet<String> limewireClients, XMPPConnection connection) {
-        for (String limewireClient : limewireClients) {
-            System.out.println("get library of " + limewireClient);
-            Library query = new Library();
-            query.setType(IQ.Type.GET);
-            query.setTo(limewireClient);
-            query.setPacketID(IQ.nextID());
-            connection.sendPacket(query);
-        }
     }
 
     public void stop() {
@@ -150,37 +109,53 @@ public class XMPPService implements Service {
             this.connection = connection;
         }
 
-        public void entriesAdded(Collection<String> strings) {
-            //To change body of implemented methods use File | Settings | File Templates.
+        public void entriesAdded(Collection<String> addedIds) {
+            for(String id : addedIds) {
+                Roster roster = connection.getRoster();
+                RosterEntry rosterEntry = roster.getEntry(id);
+                User user = new User(id, rosterEntry.getName(), connection);
+                users.put(id, user);
+                fireUserAdded(user);
+            }
+        }
+
+        private void fireUserAdded(User user) {
+            for(org.limewire.xmpp.client.RosterListener rosterListener : rosterListeners) {
+                rosterListener.userAdded(user);
+            }
         }
 
         public void entriesUpdated(Collection<String> strings) {
-            //To change body of implemented methods use File | Settings | File Templates.
+            // TODO
         }
 
-        public void entriesDeleted(Collection<String> strings) {
-            //To change body of implemented methods use File | Settings | File Templates.
+        public void entriesDeleted(Collection<String> removedIds) {
+            for(String id : removedIds) {
+                users.remove(id);
+                fireUserDeleted(id);
+            }
+        }
+        
+        private void fireUserDeleted(String id) {
+            for(org.limewire.xmpp.client.RosterListener rosterListener : rosterListeners) {
+                rosterListener.userDeleted(id);
+            }
         }
 
         public void presenceChanged(Presence presence) {
-            Roster roster = connection.getRoster();
-            if (presence.getType() == Presence.Type.available) {
-                RosterEntry entry = roster.getEntry(presence.getFrom());
-                String name = entry.getName();
-                if (name == null || name.trim().length() == 0) {
-                    name = presence.getFrom();
-                }
-                System.out.println("found: " + name);
+            User user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
+            if (presence.getType() == Presence.Type.available) {                
                 try {
                     if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/")) {
-                        limewireClients.add(presence.getFrom());
-                        System.out.println("found lw client: " + presence.getFrom());
+                        user.addPresense(new LimePresenceImpl(presence, connection));
+                    } else {
+                        user.addPresense(new PresenceImpl(presence, connection));
                     }
                 } catch (XMPPException exception) {
                     //exception.printStackTrace();
                 }
             } else if (presence.getType() == Presence.Type.unavailable) {
-                limewireClients.remove(presence.getFrom());
+                user.removePresense(new PresenceImpl(presence, connection));
             }
         }
     }
@@ -203,22 +178,11 @@ public class XMPPService implements Service {
         });
     }
 
-    private void jingleOUT(String to, XMPPConnection connection) throws InterruptedException {
-        JingleManager manager = new JingleManager(connection);
-
-        try {
-            FileContentHandler fileContentHandler = new FileContentHandler(new java.io.File("C:\\ChocolateEggThings\\IMG_0089.JPG"), true);
-            OutgoingJingleSession out = manager.createOutgoingJingleSession(to, fileContentHandler);
-
-            out.start();
-
-            while (out.getJingleMediaSession() == null) {
-                Thread.sleep(500);
+    private class LibraryGetter implements PresenceListener {
+        public void presenceChanged(org.limewire.xmpp.client.Presence presence) {
+            if(presence instanceof LimePresence) {
+                ((LimePresenceImpl) presence).sendGetLibrary();
             }
-
-            //out.terminate();
-        } catch (XMPPException e) {
-            e.printStackTrace();
         }
     }
 }

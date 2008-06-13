@@ -1,0 +1,5 @@
+package org.limewire.xmpp.client;
+
+public interface LibraryListener {
+    public void libraryAdded(Library library);
+}

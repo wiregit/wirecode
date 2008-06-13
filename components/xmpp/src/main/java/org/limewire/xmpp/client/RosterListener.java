@@ -5,7 +5,5 @@ public interface RosterListener {
     
     void userUpdated(User user);
     
-    void userDeleted(User user);
-    
-    void presenceChanged(User user);
+    void userDeleted(String id);
 }

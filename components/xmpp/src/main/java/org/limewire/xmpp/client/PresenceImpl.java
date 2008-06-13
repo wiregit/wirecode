@@ -1,14 +1,18 @@
 package org.limewire.xmpp.client;
 
-public class PresenceImpl implements Presence {
-    private final org.jivesoftware.smack.packet.Presence presence;
+import org.jivesoftware.smack.XMPPConnection;
 
-    PresenceImpl(org.jivesoftware.smack.packet.Presence presence) {
+public class PresenceImpl implements Presence {
+    protected final org.jivesoftware.smack.packet.Presence presence;
+    protected final XMPPConnection connection;
+
+    PresenceImpl(org.jivesoftware.smack.packet.Presence presence, XMPPConnection connection) {
         this.presence = presence;
+        this.connection = connection;
     }
 
     public String getJID() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return presence.getFrom();
     }
 
     public Type getType() {
