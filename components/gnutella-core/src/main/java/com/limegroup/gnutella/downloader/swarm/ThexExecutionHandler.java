@@ -9,6 +9,7 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.HttpStatus;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.nio.entity.ConsumingNHttpEntityTemplate;
@@ -17,6 +18,8 @@ import org.limewire.swarm.file.FileCoordinator;
 import org.limewire.swarm.http.handler.ExecutionHandler;
 import org.limewire.swarm.http.listener.ResponseContentListener;
 
+import com.limegroup.gnutella.downloader.swarm.HashTreeSwarmVerifier.TreeUpgradeResponse;
+import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.HashTreeFactory;
 
 public class ThexExecutionHandler implements ExecutionHandler, HttpResponseInterceptor {
@@ -70,9 +73,27 @@ public class ThexExecutionHandler implements ExecutionHandler, HttpResponseInter
     }
     
     public void handleResponse(HttpResponse response, HttpContext context) throws IOException {
-        ThexContentListener listener = (ThexContentListener)context.getAttribute(RESPONSE_LISTENER);
-        LOG.debug("OMG WE GOT A RESPONSE WITH A REAL TREE!");
-        hashTreeSwarmVerifier.setHashTree(listener.getHashTree());
+        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            ThexContentListener listener = (ThexContentListener)context.getAttribute(RESPONSE_LISTENER);
+            HashTree newTree = listener.getHashTree();
+            TreeUpgradeResponse treeCode = hashTreeSwarmVerifier.setHashTree(newTree, 
+                    fileCoordinator.getCompleteFileSize(), fileCoordinator.getAmountVerified());
+            if(LOG.isDebugEnabled())
+                LOG.debug("Received & set tree: " + newTree + ", with response: " + treeCode);
+            switch(treeCode) {
+            case NOT_ACCEPTED:
+            case UPGRADE:
+                break;
+            case NEW_TREE:
+                fileCoordinator.verify();
+                break;
+            case REVERIFY:
+                fileCoordinator.reverify();
+                break;
+            default:
+                throw new IllegalStateException("Invalid code: " + treeCode);
+            }
+        }
         clearThex(context);
     }
     
@@ -90,9 +111,14 @@ public class ThexExecutionHandler implements ExecutionHandler, HttpResponseInter
     
     public ConsumingNHttpEntity responseEntity(HttpResponse response, HttpContext context)
             throws IOException {
-        ResponseContentListener listener =  (ResponseContentListener)context.getAttribute(RESPONSE_LISTENER);
-        listener.initialize(response);
-        return new ConsumingNHttpEntityTemplate(response.getEntity(), listener);
+        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            ResponseContentListener listener =  (ResponseContentListener)context.getAttribute(RESPONSE_LISTENER);
+            listener.initialize(response);
+            return new ConsumingNHttpEntityTemplate(response.getEntity(), listener);
+        } else {
+            clearThex(context);
+            return null;
+        }
     }
     
     public HttpRequest submitRequest(HttpContext context) {
@@ -125,7 +151,8 @@ public class ThexExecutionHandler implements ExecutionHandler, HttpResponseInter
         
         requestingThex = true;
         context.setAttribute(THEX_TRIED, Boolean.TRUE);
-        context.setAttribute(RESPONSE_LISTENER, new ThexContentListener(sha1, fileCoordinator.getSize(), root32, hashTreeFactory));
+        context.setAttribute(RESPONSE_LISTENER,
+                             new ThexContentListener(sha1, fileCoordinator.getCompleteFileSize(), root32, hashTreeFactory));
         return new BasicHttpRequest("GET", thexUri);
     }
     

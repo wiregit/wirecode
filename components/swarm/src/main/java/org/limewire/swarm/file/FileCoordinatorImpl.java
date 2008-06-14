@@ -12,7 +12,15 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.nio.ByteBufferCacheImpl;
 
-
+/**
+ * A {@link FileCoordinator} that verifies files using the given
+ * {@link SwarmFileVerifier} and reads/writes the files using the
+ * given {@link SwarmFile}.
+ * 
+ * This implementation expects the writeService to use either in-place
+ * execution or a single thread.  If multiple threads are used,
+ * verifying may incorrectly reverify multiple times.
+ */
 public class FileCoordinatorImpl implements FileCoordinator {
     
     private static final Log LOG = LogFactory.getLog(FileCoordinatorImpl.class);
@@ -67,7 +75,7 @@ public class FileCoordinatorImpl implements FileCoordinator {
         this.swarmFileVerifier = swarmFileVerifier;
     }
 
-    public long getSize() {
+    public long getCompleteFileSize() {
         return completeSize;
     }
 
@@ -102,12 +110,20 @@ public class FileCoordinatorImpl implements FileCoordinator {
     }
     
     public void wrote(Range writtenRange) {
-        List<Range> verifiableRanges = Collections.emptyList();
+        List<Range> verifiableRanges;
         synchronized(LOCK) {
             assert pendingBlocks.contains(writtenRange);
             pendingBlocks.delete(writtenRange);
             writtenBlocks.add(writtenRange);
             verifiableRanges = swarmFileVerifier.scanForVerifiableRanges(writtenBlocks, completeSize);
+        }
+        
+        verifyRanges(verifiableRanges);
+    }
+    
+    private void verifyRanges(List<Range> verifiableRanges) {
+        if(LOG.isDebugEnabled() && !verifiableRanges.isEmpty()) {
+            LOG.debug("Verifying ranges: " + verifiableRanges);
         }
         
         for(Range rangeToVerify : verifiableRanges) {
@@ -118,10 +134,68 @@ public class FileCoordinatorImpl implements FileCoordinator {
                 if(verified) {
                     verifiedBlocks.add(rangeToVerify);
                 } else {
-                    // TODO: Add a toggle for keeping lost ranges.
+                    // TODO: Add a toggle for keeping lost ranges, and do not
+                    //       count if doing a 'full scan'.
                     amountLost += rangeToVerify.getHigh() - rangeToVerify.getLow() + 1;
+                    
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("Lost range: " + rangeToVerify + ", total lost: " + amountLost);
                 }
             }
+        }
+    }
+    
+    public long getAmountVerified() {
+        synchronized(LOCK) {
+            return verifiedBlocks.getSize();
+        }
+    }
+    
+    // TODO: enable support for scanning the existing ranges on disk
+    public void reverify() {
+        final List<Range> verifiableRanges;
+        synchronized(LOCK) {
+            writtenBlocks.add(verifiedBlocks);
+            verifiedBlocks.clear();
+            // As an optimization, only scan for ranges if we have no pending blocks.
+            // (This works because a pending range implies wrote will be called,
+            //  and wrote will trigger a verification.)
+            if(pendingBlocks.getNumberOfIntervals() == 0) {
+                verifiableRanges = swarmFileVerifier.scanForVerifiableRanges(writtenBlocks, completeSize);
+            } else {
+                verifiableRanges = Collections.emptyList();
+            }
+        }
+        
+        if(!verifiableRanges.isEmpty()) {
+            writeService.execute(new Runnable() {
+                public void run() {
+                    verifyRanges(verifiableRanges);
+                }
+            });
+        }
+    }
+    
+    // TODO: enable support for scanning the existing ranges on disk
+    public void verify() {
+        final List<Range> verifiableRanges;
+        synchronized(LOCK) {
+            // As an optimization, only scan for ranges if we have no pending blocks.
+            // (This works because a pending range implies wrote will be called,
+            //  and wrote will trigger a verification.)
+            if(pendingBlocks.getNumberOfIntervals() == 0) {
+                verifiableRanges = swarmFileVerifier.scanForVerifiableRanges(writtenBlocks, completeSize);
+            } else {
+                verifiableRanges = Collections.emptyList();
+            }
+        }
+        
+        if(!verifiableRanges.isEmpty()) {
+            writeService.execute(new Runnable() {
+                public void run() {
+                    verifyRanges(verifiableRanges);
+                }
+            });
         }
     }
     

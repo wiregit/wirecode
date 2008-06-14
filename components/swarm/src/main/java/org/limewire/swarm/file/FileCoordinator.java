@@ -10,11 +10,16 @@ import org.limewire.collection.Range;
  * In order to cooperate about which ranges are required, a source
  * must first lease a range with either {@link #lease()} or {@link #leasePortion(IntervalSet)}.
  * Once leased, the source can mark the range as retrieved and pending a write
- * with {@link #pending(Range)}.  Once pending, a source can write the data
- * with {@link #write(ContentDecoder, long)}.
+ * with {@link #pending(Range)}.  Once pending, a source can mark the data
+ * as written with {@link #wrote(Range)}.
  * 
  * At any step, if the rules are not followed, an assertion error will
  * be thrown.
+ * 
+ * It is possible that an implementation of FileCoordinator can verify ranges
+ * after they are written, using a {@link SwarmFileVerifier}.  If verification
+ * is being performed, it is possible that written ranges may subsequently
+ * be erased (if they fail verification) and become re-available for leasing.
  */
 public interface FileCoordinator {
 
@@ -31,7 +36,7 @@ public interface FileCoordinator {
     Range leasePortion(IntervalSet availableRanges);
 
     /** Returns the size of the expected file. */
-    long getSize();
+    long getCompleteFileSize();
 
     /** 
      * Returns a previously leased range.
@@ -53,7 +58,8 @@ public interface FileCoordinator {
      * can begin consuming data again, it will resume I/O.
      * 
      * It is expected that the job will call {@link #pending(Range)} when
-     * it consumed content, and will eventually call {@link #write(ContentDecoder, long)}.
+     * it consumed content, and will eventually call {@link #wrote(Range)}
+     * after data has successfully been written to disk.
      */
     WriteJob newWriteJob(long position, IOControl ioctrl);
 
@@ -73,6 +79,25 @@ public interface FileCoordinator {
     /**
      * Signals a range as being written.
      * It is removed from pending and unavailable for future leases.
+     * If verification is active, this can trigger a verification,
+     * leading to {@link #getAmountVerified()} returning &gt; 0.
      */
     void wrote(Range range);
+    
+    /**
+     * Returns the total amount of data that has been verified thus far.
+     */
+    long getAmountVerified();
+
+    /**
+     * Triggers a verification on all written data.
+     */
+    void verify();
+
+    /**
+     * Triggers a verification of all written data and previously verified data.
+     */
+    void reverify();
+    
+    
 }

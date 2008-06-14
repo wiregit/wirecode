@@ -2,6 +2,8 @@ package org.limewire.swarm.http;
 
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import junit.framework.Test;
 
@@ -65,11 +67,15 @@ public class SwarmerImplTest extends BaseTestCase {
         final Swarmer swarmer = new SwarmerImpl(executionHandler, ioReactor, params, new Listener(fileCoordinator));
         swarmer.addHeaderInterceptor(thexExecutionHandler);
         
+        final CountDownLatch latch = new CountDownLatch(1);
         new Thread(new Runnable() {
             public void run() {
                 swarmer.start();
+                latch.countDown();
             }
         }).start();
+        
+        latch.await(1, TimeUnit.SECONDS);
         
         // Sources: 74.13.59.177:37394, 72.133.44.248:30670, 70.113.88.170:45045, 71.234.25.182:6384, 68.146.114.161:51676, 24.184.117.129:3838, 76.26.89.172:38889, 96.225.153.61:49052, 10.254.0.243:38143, 70.49.213.96:19645, 24.63.139.197:17501, 75.167.162.137:43092
         swarmer.addSource(new SourceImpl(new InetSocketAddress("74.13.59.177", 37394), "/uri-res/n2r?urn:sha1:PLPRTPBOARBOSAKPAMGVS2SL57S3GDLQ", true), null);
@@ -77,7 +83,7 @@ public class SwarmerImplTest extends BaseTestCase {
         swarmer.addSource(new SourceImpl(new InetSocketAddress("70.113.88.170", 45045), "/uri-res/n2r?urn:sha1:PLPRTPBOARBOSAKPAMGVS2SL57S3GDLQ", true), null);
         swarmer.addSource(new SourceImpl(new InetSocketAddress("71.234.25.182", 6384), "/uri-res/n2r?urn:sha1:PLPRTPBOARBOSAKPAMGVS2SL57S3GDLQ", true), null);        
         swarmer.addSource(new SourceImpl(new InetSocketAddress("68.146.114.161", 51676), "/uri-res/n2r?urn:sha1:PLPRTPBOARBOSAKPAMGVS2SL57S3GDLQ", true), null);
-        swarmer.addSource(new SourceImpl(new InetSocketAddress("www9.limewire.com", 80), "/download/LimeWireWin.exe", true), null);
+//        swarmer.addSource(new SourceImpl(new InetSocketAddress("www9.limewire.com", 80), "/download/LimeWireWin.exe", true), null);
 //        swarmer.addSource(new SourceImpl(new InetSocketAddress("www9.limewire.com", 80), "/download/LimeWireWin.exe", true), null);
 //        swarmer.addSource(new SourceImpl(new InetSocketAddress("www9.limewire.com", 80), "/download/LimeWireWin.exe", true), null);
 //        swarmer.addSource(new SourceImpl(new InetSocketAddress("www9.limewire.com", 80), "/download/LimeWireWin.exe", true), null);

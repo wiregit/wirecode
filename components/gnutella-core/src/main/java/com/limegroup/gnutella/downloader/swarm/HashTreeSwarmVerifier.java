@@ -55,8 +55,9 @@ public class HashTreeSwarmVerifier implements SwarmFileVerifier {
         for(Range range : writtenBlocks) {
             // find the beginning of the first chunk offset
             long lowChunkOffset = range.getLow() - range.getLow() % blockSize;
-            if (range.getLow() % blockSize != 0)
+            if (range.getLow() % blockSize != 0) {
                 lowChunkOffset += blockSize;
+            }
             while (range.getHigh() >= lowChunkOffset + blockSize - 1) {
                 Range complete = Range.createRange(lowChunkOffset, lowChunkOffset + blockSize - 1);
                 verifiable.add(complete);
@@ -67,18 +68,15 @@ public class HashTreeSwarmVerifier implements SwarmFileVerifier {
         // special case for the last chunk
         if(!writtenBlocks.isEmpty()) {
             long lastChunkOffset = completeSize - (completeSize % blockSize);
-            if (lastChunkOffset == completeSize)
+            if (lastChunkOffset == completeSize) {
                 lastChunkOffset -= blockSize;
+            }
             Range last = writtenBlocks.getLast();
             if (last.getHigh() == completeSize - 1 && last.getLow() <= lastChunkOffset) {
-                if (LOG.isDebugEnabled())
-                    LOG.debug("adding the last chunk for verification");
-
+                LOG.debug("adding the last chunk for verification");
                 verifiable.add(Range.createRange(lastChunkOffset, last.getHigh()));
             }
         }
-        
-        LOG.debug("Scanned and found verifiable: " + verifiable);
         
         return verifiable;
     }
@@ -108,9 +106,42 @@ public class HashTreeSwarmVerifier implements SwarmFileVerifier {
         return hashTree;
     }
     
-    public void setHashTree(HashTree tree) {
-        LOG.debug("Setting tree to: " + tree);
-        this.hashTree = tree;
+    /** Returns true if the tree was accepted, false otherwise. */
+    public TreeUpgradeResponse setHashTree(HashTree tree, long fileSize, long verifiedSoFar) {
+        if(tree.getFileSize() == fileSize) {
+            HashTree oldTree = hashTree;
+            if(oldTree == null) {
+                this.hashTree = tree;
+                return TreeUpgradeResponse.NEW_TREE;
+            } else if(!oldTree.getRootHash().equals(hashTree.getRootHash())) {
+                if(verifiedSoFar > 2 * DEFAULT_BLOCK_SIZE) {
+                    // If we've already verified too much, don't accept the new tree.
+                    return TreeUpgradeResponse.NOT_ACCEPTED;
+                } else if(verifiedSoFar == 0) {
+                    this.hashTree = tree;
+                    return TreeUpgradeResponse.UPGRADE;
+                } else {
+                    this.hashTree = tree;
+                    return TreeUpgradeResponse.REVERIFY;
+                }
+            } else {
+                this.hashTree = tree;
+                return TreeUpgradeResponse.UPGRADE;
+            }
+        } else {
+            return TreeUpgradeResponse.NOT_ACCEPTED;
+        }
+    }
+    
+    public static enum TreeUpgradeResponse {
+        /** The tree wasn't accepted. */
+        NOT_ACCEPTED,
+        /** A brand new tree was set -> try to verify as much as possible. */
+        NEW_TREE,
+        /** The new tree doesn't match the old one -> reverify all verified data */
+        REVERIFY,
+        /** The new tree has no impact on verified data. */
+        UPGRADE;
     }
 
 }

@@ -31,6 +31,7 @@ public class AsyncDimeParser {
     /** The AsyncDimeRecordReader we're using to read the current record. */
     private AsyncDimeRecordReader reader;
 
+    /** Returns true if more data should be read, false otherwise. */
     public boolean read(ContentDecoder decoder) throws IOException {
         while(true) {
             if(lastRead) 

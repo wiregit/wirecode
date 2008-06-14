@@ -87,7 +87,7 @@ public class FileContentListener implements ResponseContentListener {
             }
         } else if(contentRange == null) {
             // If no range exists nor content length, assume whole file
-            actualRange = Range.createRange(0, fileCoordinator.getSize()-1);
+            actualRange = Range.createRange(0, fileCoordinator.getCompleteFileSize()-1);
         } else {
             // Fail miserably.
             throw new IOException("No content length, though content range existed.");

@@ -364,6 +364,11 @@ public class IntervalSet implements Iterable<Range>, Serializable{
         return new ArrayList<Range>(intervals);
     }
 
+    /**
+     * Returns the sum of data within all ranges.
+     * For example, if this had [0-5, 10-15], this would return 12
+     * (because ranges are inclusive)
+     */
     public long getSize() {
         long sum=0;
         for(Range block : intervals) {
