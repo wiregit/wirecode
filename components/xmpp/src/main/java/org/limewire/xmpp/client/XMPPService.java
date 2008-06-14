@@ -113,6 +113,7 @@ public class XMPPService implements Service {
             for(String id : addedIds) {
                 Roster roster = connection.getRoster();
                 RosterEntry rosterEntry = roster.getEntry(id);
+                System.out.println("user : " + id + " added");
                 UserImpl user = new UserImpl(id, rosterEntry.getName(), connection);
                 users.put(id, user);
                 fireUserAdded(user);
@@ -125,12 +126,26 @@ public class XMPPService implements Service {
             }
         }
 
-        public void entriesUpdated(Collection<String> strings) {
-            // TODO
+        public void entriesUpdated(Collection<String> updatedIds) {
+            for(String id : updatedIds) {
+                Roster roster = connection.getRoster();
+                RosterEntry rosterEntry = roster.getEntry(id);
+                System.out.println("user : " + id + " updated");
+                UserImpl user = new UserImpl(id, rosterEntry.getName(), connection);
+                users.put(id, user);
+                fireUserUpdated(user);
+            }
+        }
+
+        private void fireUserUpdated(UserImpl user) {
+            for(org.limewire.xmpp.client.RosterListener rosterListener : rosterListeners) {
+                rosterListener.userUpdated(user);
+            }
         }
 
         public void entriesDeleted(Collection<String> removedIds) {
             for(String id : removedIds) {
+                System.out.println("user : " + id + " deleted");
                 users.remove(id);
                 fireUserDeleted(id);
             }
@@ -142,21 +157,30 @@ public class XMPPService implements Service {
             }
         }
 
-        public void presenceChanged(Presence presence) {
-            UserImpl user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
-            if (presence.getType() == Presence.Type.available) {                
-                try {
-                    if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/")) {
-                        user.addPresense(new LimePresenceImpl(presence, connection));
+        public void presenceChanged(final Presence presence) {
+            Thread t = new Thread(new Runnable() {
+                public void run() {
+
+                    UserImpl user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
+                    System.out.println("presence changed for user: " + user.getId() + " with jid " + presence.getFrom() + ": " + presence.getType());
+                    if (presence.getType().equals(Presence.Type.available)) {                
+                        try {
+                            if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/")) {
+                                user.addPresense(new LimePresenceImpl(presence, connection));
+                            } else {
+                                user.addPresense(new PresenceImpl(presence, connection));
+                            }
+                        } catch (XMPPException exception) {
+                            exception.printStackTrace();
+                        }
+                    } else if (presence.getType().equals(Presence.Type.unavailable)) {
+                        user.removePresense(new PresenceImpl(presence, connection));
                     } else {
-                        user.addPresense(new PresenceImpl(presence, connection));
-                    }
-                } catch (XMPPException exception) {
-                    //exception.printStackTrace();
+                        System.out.println("weird presence type");  
+                    }  
                 }
-            } else if (presence.getType() == Presence.Type.unavailable) {
-                user.removePresense(new PresenceImpl(presence, connection));
-            }
+            });
+            t.start();
         }
     }
     
@@ -179,9 +203,11 @@ public class XMPPService implements Service {
     }
 
     private class LibraryGetter implements PresenceListener {
-        public void presenceChanged(org.limewire.xmpp.client.Presence presence) {
-            if(presence instanceof LimePresence) {
-                ((LimePresenceImpl) presence).sendGetLibrary();
+        public synchronized void presenceChanged(org.limewire.xmpp.client.Presence presence) {
+            if(presence.getType().equals(org.limewire.xmpp.client.Presence.Type.available)) {
+                if(presence instanceof LimePresence) {
+                    ((LimePresenceImpl) presence).sendGetLibrary();
+                }
             }
         }
     }

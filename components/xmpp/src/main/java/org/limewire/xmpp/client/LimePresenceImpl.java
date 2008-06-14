@@ -1,6 +1,8 @@
 package org.limewire.xmpp.client;
 
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.io.*;
+import java.io.File;
 
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
@@ -27,6 +29,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     }
     
     void setLibrary(Library library) {
+        System.out.println("got library");
         this.library = library;
         fireLibraryListeners();
     }
@@ -42,7 +45,6 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         libraryIQ.setType(IQ.Type.GET);
         libraryIQ.setTo(getJID());
         libraryIQ.setPacketID(IQ.nextID());
-        connection.sendPacket(libraryIQ);
         final PacketCollector collector = connection.createPacketCollector(
             new PacketIDFilter(libraryIQ.getPacketID()));
         connection.sendPacket(libraryIQ);
@@ -61,7 +63,28 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         libraryListeners.add(libraryListener);
         // TODO fire exiting library
     }
-    
+
+    public void requestFile(File file) {
+        JingleManager manager = new JingleManager(connection);
+
+        try {
+            FileContentHandler fileContentHandler = new FileContentHandler(file, false);
+            OutgoingJingleSession out = manager.createOutgoingJingleSession(getJID(), fileContentHandler);
+
+            out.start();
+
+            while (out.getJingleMediaSession() == null) {
+                Thread.sleep(500);
+            }
+
+            //out.terminate();
+        } catch (XMPPException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void sendFile(java.io.File file) {
         JingleManager manager = new JingleManager(connection);
 

@@ -31,11 +31,11 @@ public class XMPPServiceTest extends ServiceTestCase {
                     }
 
                     public String getUsername() {
-                        return "limebuddy1@gmail.com";
+                        return "limebuddy2@gmail.com";
                     }
 
                     public String getPassword() {
-                        return "limebuddy123";
+                        return "limebuddy234";
                     }
 
                     public String getHost() {
@@ -53,32 +53,40 @@ public class XMPPServiceTest extends ServiceTestCase {
                 
                 bind(RosterListener.class).toInstance(new RosterListener() {
                     public void userAdded(User user) {
+                        System.out.println("WATCHER: user added: " +user.getId());
                         final String name = user.getName();
                         user.addPresenceListener(new PresenceListener() {
                             public void presenceChanged(Presence presence) {
                                 if(presence.getType().equals(Presence.Type.available)) {
                                     if(presence instanceof LimePresence) {
-                                        System.out.println("lime user " + presence.getJID() + " (" + name + ") available");
+                                        System.out.println("WATCHER: lime user " + presence.getJID() + " (" + name + ") available");
+                                        ((LimePresence)presence).addLibraryListener(new LibraryListener() {
+                                            public void libraryAdded(Library library) {
+                                                System.out.println("WATCHER: got library: " + library);
+                                            }
+                                        });
                                     } else {
-                                        System.out.println("user " + presence.getJID() + " (" + name + ") available");
+                                        System.out.println("WATCHER: user " + presence.getJID() + " (" + name + ") available");
                                     }
                                 } else if(presence.getType().equals(Presence.Type.unavailable)) {
                                     if(presence instanceof LimePresence) {
-                                        System.out.println("lime user " + presence.getJID() + " (" + name + ") unavailable");
+                                        System.out.println("WATCHER: lime user " + presence.getJID() + " (" + name + ") unavailable");
                                     } else {
-                                        System.out.println("user " + presence.getJID() + " (" + name + ") unavailable");
+                                        System.out.println("WATCHER: user " + presence.getJID() + " (" + name + ") unavailable");
                                     }
+                                } else {
+                                    System.out.println("WATCHER: user presence changed: " + presence.getType());
                                 }
                             }
                         });
                     }
 
                     public void userUpdated(User user) {
-                        //To change body of implemented methods use File | Settings | File Templates.
+                        System.out.println("WATCHER: user updated: " + user.getId());
                     }
 
                     public void userDeleted(String id) {
-                        //To change body of implemented methods use File | Settings | File Templates.
+                        System.out.println("WATCHER: user deleted: " +id);
                     }
                 });
             }
