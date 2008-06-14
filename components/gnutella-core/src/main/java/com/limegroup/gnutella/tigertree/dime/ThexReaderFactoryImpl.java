@@ -17,7 +17,8 @@ class ThexReaderFactoryImpl implements ThexReaderFactory {
     }
     
     public ThexReader createHashTreeReader(String sha1, String root32, long fileSize) {
-        return new AsyncTigerTreeReader(sha1, fileSize, root32, tigerTreeFactory);
+        throw new IllegalStateException("remove me!");
+        //return new AsyncTigerTreeReader(sha1, fileSize, root32, tigerTreeFactory);
     }
 
 }

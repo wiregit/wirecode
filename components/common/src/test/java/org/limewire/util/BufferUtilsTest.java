@@ -63,34 +63,6 @@ public class BufferUtilsTest extends BaseTestCase {
         assertEquals(srcData, dst.array());
     }
     
-    public void testReadAll() throws Exception {
-        byte[] bufferData = data(100);
-        ByteBuffer bufferSrc = (ByteBuffer)buffer(bufferData).compact();
-        
-        byte[] channelData = data(100);
-        ByteBuffer channelBuf = buffer(channelData);
-        ReadBufferChannel channelSrc = new ReadBufferChannel(channelBuf);
-        
-        ByteBuffer dst = ByteBuffer.allocate(500);
-        
-        assertEquals(100, bufferSrc.position());
-        assertEquals(0, BufferUtils.readAll(bufferSrc, channelSrc, dst));
-        assertEquals(0, bufferSrc.position());
-        assertFalse(channelBuf.hasRemaining());
-        assertEquals(bufferData, dst.array(), 0, 100);
-        assertEquals(channelData, dst.array(), 100, 100);
-        assertEquals(0, BufferUtils.readAll(bufferSrc, channelSrc, dst));
-        assertEquals(0, bufferSrc.position());
-        assertFalse(channelBuf.hasRemaining());
-        assertEquals(bufferData, dst.array(), 0, 100);
-        assertEquals(channelData, dst.array(), 100, 100);
-        
-        channelData = data(100);
-        channelSrc = new ReadBufferChannel(buffer(channelData), true);
-        assertEquals(-1, BufferUtils.readAll(bufferSrc, channelSrc, dst));
-        assertEquals(channelData, dst.array(), 200, 100);
-    }
-    
     private ByteBuffer buffer(byte[] b) {
         byte[] copy = new byte[b.length];
         System.arraycopy(b, 0, copy, 0, copy.length);

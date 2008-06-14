@@ -3,11 +3,14 @@ package com.limegroup.gnutella.dime;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 import java.util.List;
 
-import com.limegroup.gnutella.stubs.ReadBufferChannel;
-
 import junit.framework.Test;
+
+import org.apache.http.nio.ContentDecoder;
+
+import com.limegroup.gnutella.stubs.ReadBufferChannel;
 
 
 
@@ -23,7 +26,6 @@ public final class AsyncDimeParserTest extends com.limegroup.gnutella.util.LimeT
     private AsyncDimeParser parser;
     private DIMERecord one, two;
     private DIMERecord readOne;
-    private ByteBuffer zero = ByteBuffer.allocate(0);
 
     /**
      * Constructs a new test instance for responses.
@@ -54,7 +56,7 @@ public final class AsyncDimeParserTest extends com.limegroup.gnutella.util.LimeT
         buffer = ByteBuffer.wrap(out.toByteArray());
         channel = new ReadBufferChannel(buffer);
         try {
-            parser.process(channel, zero);
+            parser.read(new MockDecoder(channel));
             fail("expected exception");
         } catch(IOException ex) {
             assertEquals("middle of stream.", ex.getMessage());
@@ -73,7 +75,7 @@ public final class AsyncDimeParserTest extends com.limegroup.gnutella.util.LimeT
         parser = new AsyncDimeParser();
         buffer = ByteBuffer.wrap(out.toByteArray());
         channel = new ReadBufferChannel(buffer);
-        assertTrue(parser.process(channel, zero));
+        assertTrue(parser.read(new MockDecoder(channel)));
         
         List list = parser.getRecords();
         assertNotNull(list);
@@ -98,7 +100,7 @@ public final class AsyncDimeParserTest extends com.limegroup.gnutella.util.LimeT
         parser = new AsyncDimeParser();
         buffer = ByteBuffer.wrap(out.toByteArray());
         channel = new ReadBufferChannel(buffer);
-        assertFalse(parser.process(channel, zero));
+        assertFalse(parser.read(new MockDecoder(channel)));
         
         List list = parser.getRecords();
         assertNotNull(list);
@@ -126,10 +128,34 @@ public final class AsyncDimeParserTest extends com.limegroup.gnutella.util.LimeT
         channel = new ReadBufferChannel(buffer);
         
         try {
-            parser.process(channel, zero);
+            parser.read(new MockDecoder(channel));
             fail("exception expected");
         } catch(IOException ex) {
             assertEquals("two first records.", ex.getMessage());
+        }
+    }
+    
+    private static class MockDecoder implements ContentDecoder {
+        private final ReadableByteChannel channel;
+        private boolean completed;
+        
+        public MockDecoder(final ReadableByteChannel channel) {
+            this.channel = channel;
+        }
+
+        public int read(final ByteBuffer dst) throws IOException {
+            if (this.completed)
+                return -1;
+            
+            int bytesRead = this.channel.read(dst);
+            if (bytesRead == -1)
+                this.completed = true;
+            
+            return bytesRead;
+        }
+
+        public boolean isCompleted() {
+            return this.completed;
         }
     }
 }

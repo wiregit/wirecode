@@ -1,14 +1,17 @@
 package com.limegroup.gnutella.dime;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 import java.util.HashMap;
 
+import junit.framework.Test;
+
+import org.apache.http.nio.ContentDecoder;
 import org.limewire.util.ByteUtils;
 
 import com.limegroup.gnutella.stubs.ReadBufferChannel;
-
-import junit.framework.Test;
 
 
 /**
@@ -35,16 +38,14 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
     }
     
     public void testCreateAsync() throws Exception {
-        byte[] data1 = new byte[] { 0x08, 0, 0, 0 }; // version + mb, me, cf, no type + resreved, option length: 0.
-        byte[] data2 = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 }; // id, type, data length == 0.
-        ByteBuffer buffer1 = (ByteBuffer)ByteBuffer.wrap(data1).position(data1.length);
+        byte[] data2 = new byte[] {0x08, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; // // version + mb, me, cf, no type + resreved, option length: 0, id, type, data length == 0.
         ByteBuffer buffer2 = ByteBuffer.wrap(data2);
         ReadBufferChannel channel = new ReadBufferChannel(buffer2, true);
         AsyncDimeRecordReader reader = new AsyncDimeRecordReader();
         assertEquals(0, reader.getAmountProcessed());
         assertTrue(buffer2.hasRemaining());
-        assertFalse(reader.process(channel, buffer1));
-        assertEquals(data1.length + data2.length, reader.getAmountProcessed());
+        assertFalse(reader.read(new MockDecoder(channel)));
+        assertEquals(data2.length, reader.getAmountProcessed());
         assertFalse(buffer2.hasRemaining());
         
         DIMERecord record = reader.getRecord();
@@ -63,16 +64,14 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
     }
     
     public void testCreateAsyncLeaveData() throws Exception {
-        byte[] data1 = new byte[] { 0x08, 0, 0, 0 }; // version + mb, me, cf, no type + resreved, option length: 0.
-        byte[] data2 = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0x1, 0x2, 0x3 }; // id, type, data length == 0, extra data
-        ByteBuffer buffer1 = (ByteBuffer)ByteBuffer.wrap(data1).position(data1.length);
+        byte[] data2 = new byte[] { 0x08, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x1, 0x2, 0x3 }; // // version + mb, me, cf, no type + resreved, option length: 0, id, type, data length == 0, extra data
         ByteBuffer buffer2 = ByteBuffer.wrap(data2);
         ReadBufferChannel channel = new ReadBufferChannel(buffer2, true);
         AsyncDimeRecordReader reader = new AsyncDimeRecordReader();
         assertEquals(0, reader.getAmountProcessed());
         assertTrue(buffer2.hasRemaining());
-        assertFalse(reader.process(channel, buffer1));
-        assertEquals(data1.length + data2.length - 3, reader.getAmountProcessed());
+        assertFalse(reader.read(new MockDecoder(channel)));
+        assertEquals(data2.length - 3, reader.getAmountProcessed());
         assertTrue(buffer2.hasRemaining());
         assertEquals(3, buffer2.remaining());
         assertEquals(0x1, buffer2.get());
@@ -111,7 +110,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         ReadBufferChannel channel = new ReadBufferChannel(data);
         
         AsyncDimeRecordReader reader = new AsyncDimeRecordReader();
-        assertFalse(reader.process(channel, ByteBuffer.allocate(0)));
+        assertFalse(reader.read(new MockDecoder(channel)));
         assertEquals(data.capacity(), reader.getAmountProcessed());
         
         DIMERecord record = reader.getRecord();
@@ -140,36 +139,35 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         
         ByteBuffer data = ByteBuffer.wrap(out.toByteArray());
         ReadBufferChannel channel = new ReadBufferChannel(data);
-        ByteBuffer zero = ByteBuffer.allocate(0);
         
         AsyncDimeRecordReader reader = new AsyncDimeRecordReader();
         
         data.limit(5);
-        assertTrue(reader.process(channel, zero));
+        assertTrue(reader.read(new MockDecoder(channel)));
         assertEquals(5, reader.getAmountProcessed());
         assertEquals(5, data.position());
         assertNull(reader.getRecord());
         
         data.limit(14); // finish header, a bit into options
-        assertTrue(reader.process(channel, zero));
+        assertTrue(reader.read(new MockDecoder(channel)));
         assertEquals(14, reader.getAmountProcessed());
         assertEquals(14, data.position());
         assertNull(reader.getRecord());
         
         data.limit(19); // a bit into padding of options
-        assertTrue(reader.process(channel, zero));
+        assertTrue(reader.read(new MockDecoder(channel)));
         assertEquals(19, reader.getAmountProcessed());
         assertEquals(19, data.position());
         assertNull(reader.getRecord());
         
         data.limit(43); // just before the end of data.
-        assertTrue(reader.process(channel, zero));
+        assertTrue(reader.read(new MockDecoder(channel)));
         assertEquals(43, reader.getAmountProcessed());
         assertEquals(43, data.position());
         assertNull(reader.getRecord());
         
         data.limit(46);
-        assertFalse(reader.process(channel, zero));
+        assertFalse(reader.read(new MockDecoder(channel)));
         assertEquals(44, data.position());
         assertEquals(44, reader.getAmountProcessed());        
         
@@ -203,7 +201,6 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         ByteBuffer buffer;
         AsyncDimeRecordReader reader;
         ReadBufferChannel channel;
-        ByteBuffer zero = ByteBuffer.allocate(0);
         
         out = new ByteArrayOutputStream();
         out.write( 0x08 ); // version + mb, me, cf (all clear)
@@ -217,7 +214,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         reader = new AsyncDimeRecordReader();
         channel = new ReadBufferChannel(buffer);
         
-        assertFalse(reader.process(channel, zero));
+        assertFalse(reader.read(new MockDecoder(channel)));
         assertEquals(buffer.capacity(), reader.getAmountProcessed());
         
         try {
@@ -241,7 +238,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         reader = new AsyncDimeRecordReader();
         channel = new ReadBufferChannel(buffer);
         
-        assertFalse(reader.process(channel, zero));
+        assertFalse(reader.read(new MockDecoder(channel)));
         assertEquals(buffer.capacity(), reader.getAmountProcessed());
         
         try {
@@ -263,7 +260,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         reader = new AsyncDimeRecordReader();
         channel = new ReadBufferChannel(buffer);
         
-        assertFalse(reader.process(channel, zero));
+        assertFalse(reader.read(new MockDecoder(channel)));
         assertEquals(buffer.capacity(), reader.getAmountProcessed());       
         
         try {
@@ -286,7 +283,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         reader = new AsyncDimeRecordReader();
         channel = new ReadBufferChannel(buffer);
         
-        assertFalse(reader.process(channel, zero));
+        assertFalse(reader.read(new MockDecoder(channel)));
         assertEquals(buffer.capacity(), reader.getAmountProcessed());       
         
         try {
@@ -312,7 +309,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
             ByteBuffer buffer = ByteBuffer.wrap(out.toByteArray());
             ReadBufferChannel channel = new ReadBufferChannel(buffer);
             AsyncDimeRecordReader reader = new AsyncDimeRecordReader();
-            assertFalse(reader.process(channel, ByteBuffer.allocate(0)));
+            assertFalse(reader.read(new MockDecoder(channel)));
             try {
                 reader.getRecord();
                 fail("expected exception, i: " + i);
@@ -340,7 +337,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
             ReadBufferChannel channel = new ReadBufferChannel(buffer);
             AsyncDimeRecordReader reader = new AsyncDimeRecordReader();
             try {
-                reader.process(channel, ByteBuffer.allocate(0));
+                reader.read(new MockDecoder(channel));
                 fail("expected exception");
             } catch(DIMEException expected) {
                 assertEquals("invalid version: " + i, expected.getMessage());
@@ -368,7 +365,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
             ReadBufferChannel channel = new ReadBufferChannel(buffer);
             AsyncDimeRecordReader reader = new AsyncDimeRecordReader();
             try {
-                reader.process(channel, ByteBuffer.allocate(0));
+                reader.read(new MockDecoder(channel));
                 fail("expected exception");
             } catch(DIMEException expected) {
                 assertEquals("invalid reserved: " + i, expected.getMessage());
@@ -397,7 +394,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         channel = new ReadBufferChannel(buffer);
         reader = new AsyncDimeRecordReader();
         try {
-            reader.process(channel, ByteBuffer.allocate(0));
+            reader.read(new MockDecoder(channel));
             fail("expected exception");
         } catch(DIMEException expected) {
             assertEquals("data too big.", expected.getMessage());
@@ -417,7 +414,7 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         channel = new ReadBufferChannel(buffer);
         reader = new AsyncDimeRecordReader();
         try {
-            reader.process(channel, ByteBuffer.allocate(0));
+            reader.read(new MockDecoder(channel));
             fail("expected exception");
         } catch(DIMEException expected) {
             assertEquals("data too big.", expected.getMessage());
@@ -426,4 +423,28 @@ public final class AsyncDimeRecordReaderTest extends com.limegroup.gnutella.util
         // can't really test Integer.MAX_VALUE 'cause it's too big to
         // store.
     }    
+    
+    private static class MockDecoder implements ContentDecoder {
+        private final ReadableByteChannel channel;
+        private boolean completed;
+        
+        public MockDecoder(final ReadableByteChannel channel) {
+            this.channel = channel;
+        }
+
+        public int read(final ByteBuffer dst) throws IOException {
+            if (this.completed)
+                return -1;
+            
+            int bytesRead = this.channel.read(dst);
+            if (bytesRead == -1)
+                this.completed = true;
+            
+            return bytesRead;
+        }
+
+        public boolean isCompleted() {
+            return this.completed;
+        }
+    }
 }

@@ -415,7 +415,7 @@ public class TigerDimeReadUtils {
      * @return
      * @throws IOException
      */
-    static List<List<byte[]>> nodesFromRecords(Iterator<DIMERecord> iterator, long fileSize, String root32) throws IOException {
+    public static List<List<byte[]>> nodesFromRecords(Iterator<DIMERecord> iterator, long fileSize, String root32) throws IOException {
         if(!iterator.hasNext())
             throw new IOException("no xml record");
         DIMERecord xmlRecord = iterator.next();

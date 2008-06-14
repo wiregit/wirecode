@@ -1,5 +1,7 @@
 package org.limewire.swarm.file;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutorService;
 
@@ -15,6 +17,9 @@ public class FileCoordinatorImpl implements FileCoordinator {
     
     private static final Log LOG = LogFactory.getLog(FileCoordinatorImpl.class);
     
+    /** The minimum blocksize to lease. */
+    private static final long MIN_BLOCK_SIZE = 16 * 1024;
+    
     /** The complete size of the file. */
     private final long completeSize;
     
@@ -22,7 +27,10 @@ public class FileCoordinatorImpl implements FileCoordinator {
     private final IntervalSet leasedBlocks;
     
     /** The blocks that were written to disk. */
-    private final IntervalSet writtenBlocks; 
+    private final IntervalSet writtenBlocks;
+    
+    /** The blocks that were verified after being written to disk. */
+    private final IntervalSet verifiedBlocks;
     
     /** Blocks that are pending to be written to disk. */
     private final IntervalSet pendingBlocks;
@@ -31,21 +39,32 @@ public class FileCoordinatorImpl implements FileCoordinator {
     private final SelectionStrategy blockChooser;
     
     /** The file writer. */
-    private final SwarmFileWriter fileWriter;
+    private final SwarmFile swarmFile;
     
     /** The ExecutorService to use for writing. */
     private final ExecutorService writeService;
     
+    /** The file verifier. */
+    private final SwarmFileVerifier swarmFileVerifier;
+    
+    /** The amount of data that was lost to corruption. */
+    private long amountLost;
+    
+    /** A simple lock. */
     private final Object LOCK = new Object();
 
-    public FileCoordinatorImpl(long size, SwarmFileWriter fileWriter, ExecutorService writeService) {
+
+    public FileCoordinatorImpl(long size, SwarmFile swarmFile, SwarmFileVerifier swarmFileVerifier,
+            ExecutorService writeService) {
         this.completeSize = size;
         this.leasedBlocks = new IntervalSet();
         this.writtenBlocks = new IntervalSet();
         this.pendingBlocks = new IntervalSet();
+        this.verifiedBlocks = new IntervalSet();
         this.blockChooser = new ContiguousSelectionStrategy(size);
-        this.fileWriter = fileWriter;
+        this.swarmFile = swarmFile;
         this.writeService = writeService;
+        this.swarmFileVerifier = swarmFileVerifier;
     }
 
     public long getSize() {
@@ -57,7 +76,7 @@ public class FileCoordinatorImpl implements FileCoordinator {
     }
 
     public Range leasePortion(IntervalSet availableRanges) {
-        return lease(availableRanges, getBlockSize());
+        return lease(availableRanges, Math.max(MIN_BLOCK_SIZE, swarmFileVerifier.getBlockSize()));
     }
 
     public void unlease(Range range) {
@@ -82,16 +101,28 @@ public class FileCoordinatorImpl implements FileCoordinator {
         }
     }
     
-    public void wrote(Range range) {
+    public void wrote(Range writtenRange) {
+        List<Range> verifiableRanges = Collections.emptyList();
         synchronized(LOCK) {
-            assert pendingBlocks.contains(range);
-            pendingBlocks.delete(range);
-            writtenBlocks.add(range);
+            assert pendingBlocks.contains(writtenRange);
+            pendingBlocks.delete(writtenRange);
+            writtenBlocks.add(writtenRange);
+            verifiableRanges = swarmFileVerifier.scanForVerifiableRanges(writtenBlocks, completeSize);
         }
-    }
-    
-    protected long getBlockSize() {
-        return 10240;
+        
+        for(Range rangeToVerify : verifiableRanges) {
+            boolean verified = swarmFileVerifier.verify(rangeToVerify, swarmFile);
+            synchronized(LOCK) {
+                assert writtenBlocks.contains(rangeToVerify);
+                writtenBlocks.delete(rangeToVerify);
+                if(verified) {
+                    verifiedBlocks.add(rangeToVerify);
+                } else {
+                    // TODO: Add a toggle for keeping lost ranges.
+                    amountLost += rangeToVerify.getHigh() - rangeToVerify.getLow() + 1;
+                }
+            }
+        }
     }
     
     protected Range lease(IntervalSet availableRanges, long blockSize) {
@@ -144,6 +175,7 @@ public class FileCoordinatorImpl implements FileCoordinator {
             neededBytes.delete(leasedBlocks);
             neededBytes.delete(writtenBlocks);
             neededBytes.delete(pendingBlocks);
+            neededBytes.delete(verifiedBlocks);
         }    
         
         // Calculate the intersection of neededBytes and availableBytes
@@ -152,7 +184,7 @@ public class FileCoordinatorImpl implements FileCoordinator {
     }
     
     public WriteJob newWriteJob(long position, IOControl ioctrl) {
-        return new FileCoordinatorWriteJobImpl(position, ioctrl, writeService, this, new ByteBufferCacheImpl(), fileWriter);
+        return new FileCoordinatorWriteJobImpl(position, ioctrl, writeService, this, new ByteBufferCacheImpl(), swarmFile);
     }
 
 }

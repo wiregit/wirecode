@@ -11,6 +11,9 @@ public class SwarmHttpUtils {
     private SwarmHttpUtils() {
     }
 
+    /**
+     * Closes the connection associated with this HttpContext.
+     */
     public static void closeConnectionFromContext(HttpContext context) {
         IOControl ioctrl = (IOControl) context.getAttribute(ExecutionContext.HTTP_CONNECTION);
         try {

@@ -1,8 +1,6 @@
 package org.limewire.util;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
 
 /**
  * Provides static methods for reading, transferring and compacting a
@@ -40,25 +38,6 @@ public class BufferUtils {
             amountToDelete = 0;
         }
         return amountToDelete;
-    }
-    
-    /**
-     * Transfers all data from 'bufferSrc' to 'dst', then reads as much data
-     * as possible from 'channelSrc' to 'dst'.
-     * This returns the last amount of data that could be read from the channel.
-     * It does NOT return the total amount of data transferred.
-     * 
-     * @param bufferSrc
-     * @param channelSrc
-     * @param dst
-     * @return The last amount of data that could be read from the channel.
-     * @throws IOException
-     */
-    public static int readAll(ByteBuffer bufferSrc, ReadableByteChannel channelSrc, ByteBuffer dst) throws IOException {
-        transfer(bufferSrc, dst, true);
-        int read = 0;
-        while(dst.hasRemaining() && (read = channelSrc.read(dst)) > 0);
-        return read;
     }
     
     /**

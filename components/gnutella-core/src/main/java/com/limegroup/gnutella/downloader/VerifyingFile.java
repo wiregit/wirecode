@@ -4,6 +4,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -772,7 +773,7 @@ public class VerifyingFile {
         if(tree != null) {
             for(Range i : findVerifyableBlocks(existingFileSize)) {
                 byte[] tmp = diskController.get().getPowerOf2Chunk(Math.min(VERIFYABLE_CHUNK,tree.getNodeSize()));
-                boolean good = !tree.isCorrupt(i, fos, tmp);
+                boolean good = !tree.isCorrupt(i, new RandomAccessFileStream(fos), ByteBuffer.wrap(tmp));
                 synchronized (this) {
                     partialBlocks.delete(i);
                     if (good)

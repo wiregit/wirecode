@@ -1,12 +1,15 @@
 package org.limewire.swarm.http;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.nio.DefaultClientIOEventDispatch;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
@@ -37,6 +40,7 @@ class SwarmerImpl implements Swarmer {
     private final AsyncNHttpClientHandler clientHandler;
     private final ExecutionHandler executionHandler;
     private final SourceEventListener globalSourceEventListener;
+    private final BasicHttpProcessor httpProcessor;
     
     SwarmerImpl(
             ExecutionHandler executionHandler,
@@ -51,15 +55,15 @@ class SwarmerImpl implements Swarmer {
         else
             this.globalSourceEventListener = sourceEventListener;
         
-        BasicHttpProcessor httpproc = new BasicHttpProcessor();
-        httpproc.addInterceptor(new RequestContent());
-        httpproc.addInterceptor(new RequestTargetHost());
-        httpproc.addInterceptor(new RequestConnControl());
-        httpproc.addInterceptor(new RequestUserAgent());
-        httpproc.addInterceptor(new RequestExpectContinue());
+        httpProcessor = new BasicHttpProcessor();
+        httpProcessor.addInterceptor(new RequestContent());
+        httpProcessor.addInterceptor(new RequestTargetHost());
+        httpProcessor.addInterceptor(new RequestConnControl());
+        httpProcessor.addInterceptor(new RequestUserAgent());
+        httpProcessor.addInterceptor(new RequestExpectContinue());
         
         clientHandler = new AsyncNHttpClientHandler(
-                httpproc,
+                httpProcessor,
                 new SwarmExecutionHandler(),
                 new DefaultConnectionReuseStrategy(),
                 params);
@@ -93,6 +97,14 @@ class SwarmerImpl implements Swarmer {
                 listener.connectFailed(SwarmerImpl.this, source);
             };
         });        
+    }
+    
+    public void addHeaderInterceptor(HttpRequestInterceptor requestInterceptor) {
+        httpProcessor.addInterceptor(requestInterceptor);
+    }
+    
+    public void addHeaderInterceptor(HttpResponseInterceptor responseInterceptor) {
+        httpProcessor.addInterceptor(responseInterceptor);
     }
     
     public void start() {
@@ -167,6 +179,8 @@ class SwarmerImpl implements Swarmer {
         public ConsumingNHttpEntity responseEntity(HttpResponse response, HttpContext context)
                 throws IOException {
             if(isActive()) {
+                if(LOG.isTraceEnabled())
+                    LOG.trace("Handling response: " + response.getStatusLine() + ", headers: " + Arrays.asList(response.getAllHeaders()));
                 return executionHandler.responseEntity(response, context);
             } else {
                 throw new IOException("Not active!");
@@ -175,7 +189,10 @@ class SwarmerImpl implements Swarmer {
         
         public HttpRequest submitRequest(HttpContext context) {
             if(isActive()) {
-                return executionHandler.submitRequest(context);
+                HttpRequest request = executionHandler.submitRequest(context);
+                if(LOG.isTraceEnabled() && request != null)
+                    LOG.trace("Submitting request: " + request.getRequestLine());
+                return request;
             } else {
                 SwarmHttpUtils.closeConnectionFromContext(context);
                 return null;

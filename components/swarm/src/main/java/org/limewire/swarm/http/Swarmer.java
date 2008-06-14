@@ -1,5 +1,9 @@
 package org.limewire.swarm.http;
 
+import org.apache.http.HttpRequestInterceptor;
+import org.apache.http.HttpResponseInterceptor;
+
+
 
 public interface Swarmer {
     
@@ -7,5 +11,8 @@ public interface Swarmer {
     
     void start();
     
+    public void addHeaderInterceptor(HttpRequestInterceptor requestInterceptor);
+    
+    public void addHeaderInterceptor(HttpResponseInterceptor responseInterceptor);    
 
 }

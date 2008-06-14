@@ -1,14 +1,12 @@
 package com.limegroup.gnutella.dime;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.nio.statemachine.ReadState;
+import org.apache.http.nio.ContentDecoder;
 
 
 /**
@@ -18,7 +16,7 @@ import org.limewire.nio.statemachine.ReadState;
  * (or http://www.perfectxml.com/DIME.asp )
  * for information about DIME.
  */
-public class AsyncDimeParser extends ReadState {
+public class AsyncDimeParser {
     
     private static final Log LOG = LogFactory.getLog(AsyncDimeParser.class);
     
@@ -33,8 +31,7 @@ public class AsyncDimeParser extends ReadState {
     /** The AsyncDimeRecordReader we're using to read the current record. */
     private AsyncDimeRecordReader reader;
 
-    @Override
-    protected boolean processRead(ReadableByteChannel channel, ByteBuffer buffer) throws IOException {
+    public boolean read(ContentDecoder decoder) throws IOException {
         while(true) {
             if(lastRead) 
                 throw new IOException("already read last message.");
@@ -44,7 +41,7 @@ public class AsyncDimeParser extends ReadState {
             
             // Reader still needs more info.
             try {
-                if(reader.process(channel, buffer))
+                if(reader.read(decoder))
                     return true;
             } catch(DIMEException de) {
                 LOG.warn("Error processing DIME", de);

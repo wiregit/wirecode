@@ -13,7 +13,7 @@ import org.limewire.collection.Range;
  * with {@link #pending(Range)}.  Once pending, a source can write the data
  * with {@link #write(ContentDecoder, long)}.
  * 
- * At any step, if the following rules are not followed, an assertion error will
+ * At any step, if the rules are not followed, an assertion error will
  * be thrown.
  */
 public interface FileCoordinator {

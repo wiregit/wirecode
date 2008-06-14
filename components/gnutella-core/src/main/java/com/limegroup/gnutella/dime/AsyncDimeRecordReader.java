@@ -2,16 +2,15 @@ package com.limegroup.gnutella.dime;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.nio.statemachine.ReadState;
+import org.apache.http.nio.ContentDecoder;
 import org.limewire.util.BufferUtils;
 import org.limewire.util.ByteUtils;
 
 
-public class AsyncDimeRecordReader extends ReadState {
+public class AsyncDimeRecordReader {
     
     private static final Log LOG = LogFactory.getLog(AsyncDimeRecordReader.class);
     
@@ -52,10 +51,9 @@ public class AsyncDimeRecordReader extends ReadState {
         }
     }
 
-    @Override
-    protected boolean processRead(ReadableByteChannel rc, ByteBuffer buffer) throws IOException {
+    protected boolean read(ContentDecoder decoder) throws IOException {
         // Header must be completely read before continuing...
-        if(fill(header, rc, buffer)) {
+        if(fill(header, decoder)) {
             LOG.debug("Header not full, leaving.");
             return true;
         }
@@ -66,7 +64,7 @@ public class AsyncDimeRecordReader extends ReadState {
 
         for(int i = 0; i < TOTAL; i++) {
             if(i == 0 || !parts[i-1].hasRemaining()) {
-                if(fill(parts[i], rc, buffer))
+                if(fill(parts[i], decoder))
                     return true;
             }
         }
@@ -88,9 +86,11 @@ public class AsyncDimeRecordReader extends ReadState {
      * @throws IOException
      * @return true if current still has space to read
      */
-    private boolean fill(ByteBuffer current, ReadableByteChannel rc, ByteBuffer buffer) throws IOException {        
-        int read = BufferUtils.readAll(buffer, rc, current);
-        LOG.debug("Filling current.  Left: " + current.remaining());
+    private boolean fill(ByteBuffer current, ContentDecoder decoder) throws IOException {    
+        int read = 0;
+        while(current.hasRemaining() && (read = decoder.read(current)) > 0);
+        if(LOG.isDebugEnabled())
+            LOG.debug("Filling current.  Left: " + current.remaining());
         if(current.hasRemaining()) {
             if(read == -1)
                 throw new IOException("EOF");

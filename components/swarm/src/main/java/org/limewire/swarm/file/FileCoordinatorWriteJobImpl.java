@@ -26,7 +26,7 @@ class FileCoordinatorWriteJobImpl implements WriteJob {
     private final ExecutorService jobScheduler;
     private final FileCoordinator fileCoordinator;
     private final ByteBufferCache byteBufferCache;
-    private final SwarmFileWriter fileWriter;
+    private final SwarmFile fileWriter;
     private final Object scheduleLock = new Object();
     
     private long startPosition;
@@ -35,7 +35,7 @@ class FileCoordinatorWriteJobImpl implements WriteJob {
     
     public FileCoordinatorWriteJobImpl(long position, IOControl ioctrl,
             ExecutorService jobScheduler, FileCoordinator fileCoordinator,
-            ByteBufferCache byteBufferCache, SwarmFileWriter fileWriter) {
+            ByteBufferCache byteBufferCache, SwarmFile fileWriter) {
         this.startPosition = position;
         this.ioctrl = ioctrl;
         this.byteBufferCache = byteBufferCache;

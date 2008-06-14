@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.tigertree;
 
-import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.limewire.collection.Range;
@@ -31,7 +31,7 @@ public interface HashTree extends HTTPHeaderValue {
      * @param tmp a byte [] to use as temp buffer
      * @return true if the data in the range is corrupt.
      */
-    public boolean isCorrupt(Range in, RandomAccessFile raf, byte[] tmp);
+    public boolean isCorrupt(Range in, FileStream fileStream, ByteBuffer byteBuffer);
 
     /**
      * @return Thex URI for this HashTree

@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicHttpRequest;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
@@ -45,9 +46,18 @@ public class SwarmFileExecutionHandler implements ExecutionHandler {
     
     public ConsumingNHttpEntity responseEntity(HttpResponse response, HttpContext context)
             throws IOException {
-        ResponseContentListener listener =  (ResponseContentListener)context.getAttribute(RESPONSE_LISTENER);
-        listener.initialize(response);
-        return new ConsumingNHttpEntityTemplate(response.getEntity(), listener);
+        int code = response.getStatusLine().getStatusCode();
+        if(code == HttpStatus.SC_OK || code == HttpStatus.SC_PARTIAL_CONTENT) {
+            ResponseContentListener listener =  (ResponseContentListener)context.getAttribute(RESPONSE_LISTENER);
+            listener.initialize(response);
+            context.setAttribute(RESPONSE_LISTENER, null);
+            return new ConsumingNHttpEntityTemplate(response.getEntity(), listener);
+        } else {
+            ResponseContentListener listener = (ResponseContentListener)context.getAttribute(RESPONSE_LISTENER);
+            listener.finished();
+            context.setAttribute(RESPONSE_LISTENER, null);
+            return null;
+        }
     }
     
     public HttpRequest submitRequest(HttpContext context) {
