@@ -33,20 +33,17 @@ public class UserImpl implements User {
     }
     
     void addPresense(Presence presence) {
-        System.out.println("adding presence " + presence.getJID() + " for " + getId());
         presences.put(presence.getJID(), presence);
         firePresenceListeners(presence);        
     }
 
     private void firePresenceListeners(Presence presence) {
         for(PresenceListener listener : presenceListeners) {
-            System.out.println("firing listener: " + listener);
             listener.presenceChanged(presence);
         }
     }
 
     void removePresense(Presence presence) {
-        System.out.println("removing presence " + presence.getJID() + " for " + getId());
         presences.remove(presence);
         firePresenceListeners(presence);
     }

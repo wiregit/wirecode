@@ -1,18 +1,23 @@
 package org.limewire.xmpp.client;
 
-import java.util.ArrayList;
-import java.io.IOException;
-
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-public class Library extends IQ {
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class LibraryIQ extends IQ {
     private File[] allSharedFileDescriptors;
+    private XmlPullParser parser;
     
-    public Library(XmlPullParser parser) {
-        ArrayList<File> results = new ArrayList<File>();
+    public LibraryIQ(XmlPullParser parser) {
+        this.parser = parser;
+    }
+
+    void parseFiles(LibraryListener listener) {
         try {
             do {
                 int eventType = parser.getEventType();
@@ -20,11 +25,10 @@ public class Library extends IQ {
                     if(parser.getName().equals("file")) {
                         String urn = parser.getAttributeValue(null, "id");
                         String name = parser.getAttributeValue(null, "name");
-                        results.add(new File(urn, name));
+                        listener.fileAdded(new File(urn, name));
                     }
                 } else if(eventType == XmlPullParser.END_TAG) {
                     if(parser.getName().equals("library")) {
-                        allSharedFileDescriptors = results.toArray(new File[]{});
                         return;
                     }
                 }
@@ -34,14 +38,13 @@ public class Library extends IQ {
         } catch (XmlPullParserException e) {
             e.printStackTrace(); // TODO log, throw?
         }
-        
     }
 
-    public Library(File[] allSharedFileDescriptors) {
+    public LibraryIQ(File[] allSharedFileDescriptors) {
         this.allSharedFileDescriptors = allSharedFileDescriptors;
     }
     
-    public Library() {
+    public LibraryIQ() {
         
     }
 
@@ -73,7 +76,7 @@ public class Library extends IQ {
 
     private static class LibraryIQProvider implements IQProvider {
         public IQ parseIQ(XmlPullParser parser) throws Exception {                     
-            return new Library(parser);
+            return new LibraryIQ(parser);
         }
     }
 }

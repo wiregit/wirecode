@@ -93,7 +93,7 @@ public class XMPPService implements Service {
                 ServiceDiscoveryManager.getInstanceFor(connection).addFeature(LW_SERVICE_NS);
                 libraryIQListener.setConnection(connection);
                 connection.addPacketListener(libraryIQListener, libraryIQListener.getPacketFilter());
-                ProviderManager.getInstance().addIQProvider("library", "jabber:iq:lw-library", Library.getIQProvider());
+                ProviderManager.getInstance().addIQProvider("library", "jabber:iq:lw-library", LibraryIQ.getIQProvider());
             }
         });
     }
@@ -113,7 +113,6 @@ public class XMPPService implements Service {
             for(String id : addedIds) {
                 Roster roster = connection.getRoster();
                 RosterEntry rosterEntry = roster.getEntry(id);
-                System.out.println("user : " + id + " added");
                 UserImpl user = new UserImpl(id, rosterEntry.getName(), connection);
                 users.put(id, user);
                 fireUserAdded(user);
@@ -130,7 +129,6 @@ public class XMPPService implements Service {
             for(String id : updatedIds) {
                 Roster roster = connection.getRoster();
                 RosterEntry rosterEntry = roster.getEntry(id);
-                System.out.println("user : " + id + " updated");
                 UserImpl user = new UserImpl(id, rosterEntry.getName(), connection);
                 users.put(id, user);
                 fireUserUpdated(user);
@@ -145,7 +143,6 @@ public class XMPPService implements Service {
 
         public void entriesDeleted(Collection<String> removedIds) {
             for(String id : removedIds) {
-                System.out.println("user : " + id + " deleted");
                 users.remove(id);
                 fireUserDeleted(id);
             }
@@ -160,10 +157,8 @@ public class XMPPService implements Service {
         public void presenceChanged(final Presence presence) {
             Thread t = new Thread(new Runnable() {
                 public void run() {
-
                     UserImpl user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
-                    System.out.println("presence changed for user: " + user.getId() + " with jid " + presence.getFrom() + ": " + presence.getType());
-                    if (presence.getType().equals(Presence.Type.available)) {                
+                    if (presence.getType().equals(Presence.Type.available)) {
                         try {
                             if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/")) {
                                 user.addPresense(new LimePresenceImpl(presence, connection));
@@ -175,9 +170,7 @@ public class XMPPService implements Service {
                         }
                     } else if (presence.getType().equals(Presence.Type.unavailable)) {
                         user.removePresense(new PresenceImpl(presence, connection));
-                    } else {
-                        System.out.println("weird presence type");  
-                    }  
+                    }
                 }
             });
             t.start();

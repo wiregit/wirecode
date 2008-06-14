@@ -60,9 +60,9 @@ public class XMPPServiceTest extends ServiceTestCase {
                                 if(presence.getType().equals(Presence.Type.available)) {
                                     if(presence instanceof LimePresence) {
                                         System.out.println("WATCHER: lime user " + presence.getJID() + " (" + name + ") available");
-                                        ((LimePresence)presence).addLibraryListener(new LibraryListener() {
-                                            public void libraryAdded(Library library) {
-                                                System.out.println("WATCHER: got library: " + library);
+                                        ((LimePresence)presence).setLibraryListener(new LibraryListener() {
+                                             public void fileAdded(File f){
+                                                System.out.println(f.getName() + ": " + f.getId());
                                             }
                                         });
                                     } else {

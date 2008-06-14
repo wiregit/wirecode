@@ -24,7 +24,7 @@ public class LibraryIQListener implements PacketListener {
     }
 
     public void processPacket(Packet packet) {
-        Library iq = (Library)packet;
+        LibraryIQ iq = (LibraryIQ)packet;
         if(iq.getType().equals(IQ.Type.GET)) {
             handleGet(iq);
         } else if(iq.getType().equals(IQ.Type.RESULT)) {
@@ -38,15 +38,12 @@ public class LibraryIQListener implements PacketListener {
         }
     }
 
-    private void handleResult(Library library) {
-        for(File file : library.getAllSharedFileDescriptors()){
-            System.out.println("file " + file.getName());
-            
-        }
+    private void handleResult(LibraryIQ libraryIQ) {
+
     }
 
-    private void handleGet(Library packet) {
-        IQ queryResult = new Library(files);
+    private void handleGet(LibraryIQ packet) {
+        LibraryIQ queryResult = new LibraryIQ(files);
         queryResult.setTo(packet.getFrom());
         queryResult.setFrom(packet.getTo());
         queryResult.setPacketID(packet.getPacketID());
@@ -57,7 +54,7 @@ public class LibraryIQListener implements PacketListener {
     public PacketFilter getPacketFilter() {
         return new PacketFilter(){
             public boolean accept(Packet packet) {
-                return packet instanceof Library;
+                return packet instanceof LibraryIQ;
             }
         };
     }

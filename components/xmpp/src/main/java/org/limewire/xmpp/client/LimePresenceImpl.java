@@ -1,13 +1,10 @@
 package org.limewire.xmpp.client;
 
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.io.*;
-import java.io.File;
 
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.PacketCollector;
-import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.filter.PacketIDFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smackx.jingle.JingleManager;
@@ -16,32 +13,14 @@ import org.jivesoftware.smackx.jingle.file.FileContentHandler;
 
 public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     
-    private CopyOnWriteArrayList<LibraryListener> libraryListeners;
-    private Library library;
+    private LibraryListener libraryListener;
 
     LimePresenceImpl(org.jivesoftware.smack.packet.Presence presence, XMPPConnection connection) {
         super(presence, connection);
-        this.libraryListeners = new CopyOnWriteArrayList<LibraryListener>();
     }
     
-    public Library getLibrary() {
-        return library;
-    }
-    
-    void setLibrary(Library library) {
-        System.out.println("got library");
-        this.library = library;
-        fireLibraryListeners();
-    }
-
-    private void fireLibraryListeners() {
-        for(LibraryListener libraryListener : libraryListeners) {
-            libraryListener.libraryAdded(library);
-        }
-    }
-
     void sendGetLibrary() {
-        Library libraryIQ = new Library();
+        LibraryIQ libraryIQ = new LibraryIQ();
         libraryIQ.setType(IQ.Type.GET);
         libraryIQ.setTo(getJID());
         libraryIQ.setPacketID(IQ.nextID());
@@ -50,17 +29,17 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         connection.sendPacket(libraryIQ);
         Thread responseThread = new Thread(new Runnable() {
             public void run() {
-                Library response = (Library) collector.nextResult(SmackConfiguration.getPacketReplyTimeout());
+                LibraryIQ response = (LibraryIQ) collector.nextResult();
                 collector.cancel();
-                setLibrary(response);
+                response.parseFiles(libraryListener);
             }
         });
         responseThread.setDaemon(true);
         responseThread.start();
     }
     
-    public void addLibraryListener(LibraryListener libraryListener) {
-        libraryListeners.add(libraryListener);
+    public void setLibraryListener(LibraryListener libraryListener) {
+        this.libraryListener = libraryListener;
         // TODO fire exiting library
     }
 
@@ -68,7 +47,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         JingleManager manager = new JingleManager(connection);
 
         try {
-            FileContentHandler fileContentHandler = new FileContentHandler(file, false);
+            FileContentHandler fileContentHandler = new FileContentHandler(new java.io.File(""), false);
             OutgoingJingleSession out = manager.createOutgoingJingleSession(getJID(), fileContentHandler);
 
             out.start();
