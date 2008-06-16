@@ -2,7 +2,7 @@ package org.limewire.swarm.http.gnutella;
 
 public interface QueueInfo {
 
-    /** Returns true if the connection is queued with respect to the current time. */
+    /** Returns true if the connection is currently queued. */
     boolean isQueued();
     
     /** Enqueues this queue object. */

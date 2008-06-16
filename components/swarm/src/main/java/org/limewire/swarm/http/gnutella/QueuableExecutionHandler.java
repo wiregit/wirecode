@@ -21,9 +21,7 @@ import org.limewire.swarm.http.handler.ExecutionHandler;
  * the queue time has elapsed.
  */
 public class QueuableExecutionHandler implements ExecutionHandler {
-    
-    private static final String QUEUE_INFO = "swarm.http.qeh.queueInfo";
-    
+        
     private final ExecutionHandler delegateHandler;
     private final QueueController queueController;
     
@@ -36,18 +34,18 @@ public class QueuableExecutionHandler implements ExecutionHandler {
     public void finalizeContext(HttpContext context) {
         delegateHandler.finalizeContext(context);
         
-        QueueInfo qInfo = (QueueInfo)context.getAttribute(QUEUE_INFO);
+        QueueInfo qInfo = (QueueInfo)context.getAttribute(GnutellaExecutionContext.QUEUE_INFO);
         if(qInfo != null) {
             queueController.removeFromQueue(qInfo);
-            context.setAttribute(QUEUE_INFO, null);
+            context.setAttribute(GnutellaExecutionContext.QUEUE_INFO, null);
         }
     }
 
     public void handleResponse(HttpResponse response, HttpContext context) throws IOException {
         delegateHandler.handleResponse(response, context);
 
-        QueueInfo oldQueueInfo = (QueueInfo)context.getAttribute(QUEUE_INFO);
-        context.setAttribute(QUEUE_INFO, null);
+        QueueInfo oldQueueInfo = (QueueInfo)context.getAttribute(GnutellaExecutionContext.QUEUE_INFO);
+        context.setAttribute(GnutellaExecutionContext.QUEUE_INFO, null);
         
         String qHeader = null;
         if(response.getStatusLine().getStatusCode() == 503) {
@@ -62,7 +60,7 @@ public class QueuableExecutionHandler implements ExecutionHandler {
             try {
                 qInfo = queueController.addToQueue(qHeader, (IOControl)context.getAttribute(ExecutionContext.HTTP_CONNECTION));
                 if(qInfo != null) {
-                    context.setAttribute(QUEUE_INFO, qInfo);
+                    context.setAttribute(GnutellaExecutionContext.QUEUE_INFO, qInfo);
                 }
             } catch(ProtocolException ignored) {
                 // Just pretend we got a normal busy response.
@@ -82,7 +80,7 @@ public class QueuableExecutionHandler implements ExecutionHandler {
     }
 
     public HttpRequest submitRequest(HttpContext context) {
-        QueueInfo qInfo = (QueueInfo)context.getAttribute(QUEUE_INFO);
+        QueueInfo qInfo = (QueueInfo)context.getAttribute(GnutellaExecutionContext.QUEUE_INFO);
         if(qInfo != null && qInfo.isQueued()) {
             qInfo.enqueue();
             return null;
