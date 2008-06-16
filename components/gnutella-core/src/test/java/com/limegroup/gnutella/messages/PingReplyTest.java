@@ -37,7 +37,6 @@ import com.limegroup.gnutella.ExtendedEndpoint;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.QueryUnicaster;
@@ -1088,7 +1087,6 @@ public class PingReplyTest extends LimeTestCase {
                 Provider<SimppManager> simppManager,
                 CapabilitiesVMFactory capabilitiesVMFactory,
                 RoutedConnectionFactory managedConnectionFactory,
-                Provider<MessageRouter> messageRouter,
                 Provider<QueryUnicaster> queryUnicaster,
                 SocketsManager socketsManager,
                 ConnectionServices connectionServices,
@@ -1099,7 +1097,7 @@ public class PingReplyTest extends LimeTestCase {
                 NetworkInstanceUtils networkInstanceUtils) {
             super(networkManager, hostCatcher, connectionDispatcher, 
                     backgroundExecutor, simppManager, capabilitiesVMFactory,
-                    managedConnectionFactory, messageRouter, queryUnicaster, 
+                    managedConnectionFactory, queryUnicaster, 
                     socketsManager, connectionServices, nodeAssigner, 
                     ipFilter, connectionCheckerManager, pingRequestFactory, networkInstanceUtils);
         }

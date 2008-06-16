@@ -22,7 +22,6 @@ import com.limegroup.gnutella.ConnectionManagerImpl;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.QueryUnicaster;
@@ -77,7 +76,7 @@ public class ConnectionCheckerManagerImplTest extends BaseTestCase {
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor, Provider<SimppManager> simppManager,
                 CapabilitiesVMFactory capabilitiesVMFactory,
                 RoutedConnectionFactory managedConnectionFactory,
-                Provider<MessageRouter> messageRouter, Provider<QueryUnicaster> queryUnicaster,
+                Provider<QueryUnicaster> queryUnicaster,
                 SocketsManager socketsManager, ConnectionServices connectionServices,
                 Provider<NodeAssigner> nodeAssigner, 
                  Provider<IPFilter> ipFilter,
@@ -85,7 +84,7 @@ public class ConnectionCheckerManagerImplTest extends BaseTestCase {
                 PingRequestFactory pingRequestFactory,
                 NetworkInstanceUtils networkInstanceUtils) {
             super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor, simppManager,
-                    capabilitiesVMFactory, managedConnectionFactory, messageRouter, queryUnicaster,
+                    capabilitiesVMFactory, managedConnectionFactory, queryUnicaster,
                     socketsManager, connectionServices, nodeAssigner, ipFilter, connectionCheckerManager,
                     pingRequestFactory, networkInstanceUtils);
         }

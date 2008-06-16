@@ -306,7 +306,6 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
             Provider<SimppManager> simppManager,
             CapabilitiesVMFactory capabilitiesVMFactory,
             RoutedConnectionFactory managedConnectionFactory,
-            Provider<MessageRouter> messageRouter,
             Provider<QueryUnicaster> queryUnicaster,
             SocketsManager socketsManager,
             ConnectionServices connectionServices,

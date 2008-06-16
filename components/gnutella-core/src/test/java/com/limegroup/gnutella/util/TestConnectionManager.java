@@ -17,13 +17,12 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.ConnectionManagerImpl;
 import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.HostCatcher;
-import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.QueryUnicaster;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
-import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.PingRequestFactory;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -132,7 +131,6 @@ public class TestConnectionManager extends ConnectionManagerImpl {
             Provider<SimppManager> simppManager,
             CapabilitiesVMFactory capabilitiesVMFactory,
             RoutedConnectionFactory managedConnectionFactory,
-            Provider<MessageRouter> messageRouter,
             Provider<QueryUnicaster> queryUnicaster,
             SocketsManager socketsManager,
             ConnectionServices connectionServices,
@@ -143,7 +141,7 @@ public class TestConnectionManager extends ConnectionManagerImpl {
             TestConnectionFactory testConnectionFactory,
             NetworkInstanceUtils networkInstanceUtils) {
         super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor, simppManager,
-                capabilitiesVMFactory, managedConnectionFactory, messageRouter, queryUnicaster,
+                capabilitiesVMFactory, managedConnectionFactory, queryUnicaster,
                 socketsManager, connectionServices, nodeAssigner, ipFilter,
                 connectionCheckerManager, pingRequestFactory, networkInstanceUtils);
         this.queryRequestFactory = queryRequestFactory;

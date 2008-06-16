@@ -34,8 +34,8 @@ import com.google.inject.Singleton;
 import com.google.inject.Stage;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
-import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.MessageFactory;
 import com.limegroup.gnutella.messages.PingReply;
@@ -547,13 +547,13 @@ public class FWTDetectionTest extends LimeTestCase {
                 ScheduledExecutorService backgroundExecutor, Provider<SimppManager> simppManager,
                 CapabilitiesVMFactory capabilitiesVMFactory,
                 RoutedConnectionFactory managedConnectionFactory,
-                Provider<MessageRouter> messageRouter, Provider<QueryUnicaster> queryUnicaster,
+                Provider<QueryUnicaster> queryUnicaster,
                 SocketsManager socketsManager, ConnectionServices connectionServices,
                 Provider<NodeAssigner> nodeAssigner, Provider<IPFilter> ipFilter,
                 ConnectionCheckerManager connectionCheckerManager,
                 PingRequestFactory pingRequestFactory, NetworkInstanceUtils networkInstanceUtils) {
             super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor,
-                    simppManager, capabilitiesVMFactory, managedConnectionFactory, messageRouter,
+                    simppManager, capabilitiesVMFactory, managedConnectionFactory,
                     queryUnicaster, socketsManager, connectionServices, nodeAssigner, ipFilter,
                     connectionCheckerManager, pingRequestFactory, networkInstanceUtils);
         }

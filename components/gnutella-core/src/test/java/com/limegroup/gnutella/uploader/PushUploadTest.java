@@ -53,7 +53,6 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LifecycleManager;
 import com.limegroup.gnutella.LimeTestUtils;
-import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NetworkManagerImpl;
 import com.limegroup.gnutella.NodeAssigner;
@@ -608,7 +607,6 @@ public class PushUploadTest extends LimeTestCase {
                 Provider<SimppManager> simppManager,
                 CapabilitiesVMFactory capabilitiesVMFactory,
                 RoutedConnectionFactory managedConnectionFactory,
-                Provider<MessageRouter> messageRouter,
                 Provider<QueryUnicaster> queryUnicaster,
                 SocketsManager socketsManager,
                 ConnectionServices connectionServices,
@@ -619,7 +617,7 @@ public class PushUploadTest extends LimeTestCase {
                 NetworkInstanceUtils networkInstanceUtils) {
             super(networkManager, hostCatcher, connectionDispatcher, backgroundExecutor,
                     simppManager, capabilitiesVMFactory, managedConnectionFactory,
-                    messageRouter, queryUnicaster, socketsManager, connectionServices,
+                    queryUnicaster, socketsManager, connectionServices,
                     nodeAssigner, ipFilter, connectionCheckerManager, pingRequestFactory, networkInstanceUtils);
         }
         
