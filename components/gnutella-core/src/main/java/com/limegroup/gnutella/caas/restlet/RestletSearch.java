@@ -12,6 +12,7 @@ public class RestletSearch implements com.limegroup.gnutella.caas.Search {
     private SearchParams _params;
     private SearchResultHandler _handler;
     private String _searchId;
+    private String _error;
     
     /**
      * 
@@ -38,8 +39,20 @@ public class RestletSearch implements com.limegroup.gnutella.caas.Search {
     /**
      * 
      */
-    public void stop() {
+    public boolean stop() {
+        Document document = RestletConnector.sendRequest("/search/cancel/" + _searchId);
+        Element searches = document.getDocumentElement();
+        NodeList searchList = searches.getElementsByTagName("search");
         
+        if (searchList.getLength() == 0)
+            return false;
+        
+        _error = searchList.item(0).getAttributes().getNamedItem("error").getTextContent();
+        
+        if (_error == null || _error.length() == 0)
+            return false;
+        
+        return true;
     }
     
     /**

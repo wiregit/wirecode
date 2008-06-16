@@ -20,4 +20,56 @@ public class SearchParams {
         return _queryString;
     }
     
+    // IMAGES
+    //
+    // title
+    // description
+    // artist
+    // license type
+    // license
+    
+    // DOCUMENTS
+    //
+    // title
+    // topic
+    // author
+    // license type
+    // license
+    
+    // AUDIO
+    //
+    // title
+    // artist
+    // album
+    // genre
+    // license type
+    // track
+    // type
+    // year
+    // length
+    // language
+    // bitrate
+    // comments
+    // copyright
+    
+    // VIDEO
+    //
+    // title
+    // type
+    // year
+    // rating
+    // length
+    // comments
+    // license type
+    // copyright
+    // height
+    // width
+    // bitrate
+    // director
+    // studio
+    // language
+    // stars
+    // producer
+    // subtitles
+    
 }

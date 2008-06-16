@@ -4,7 +4,7 @@ public interface Search {
 
     public void start();
     
-    public void stop();
+    public boolean stop();
     
     public void getMoreResults();
     

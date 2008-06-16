@@ -10,7 +10,17 @@ public interface Download {
     /**
      * 
      */
-    public void stop();
+    public boolean stop();
+    
+    /**
+     * 
+     */
+    public boolean pause();
+    
+    /**
+     * 
+     */
+    public boolean resume();
     
     /**
      * 

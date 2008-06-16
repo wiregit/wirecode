@@ -39,8 +39,64 @@ public class RestletDownload implements Download {
         return true;
     }
     
-    public void stop() {
+    public boolean stop() {
+        Document document = RestletConnector.sendRequest("/download/stop/" + _downloadId);
+        Element downloads = document.getDocumentElement();
+        NodeList downloadList = downloads.getElementsByTagName("download");
         
+        System.out.println("RestletDownload::stop().. downloadList.getLength = " + downloadList.getLength());
+        
+        if (downloadList.getLength() == 0)
+            return false;
+        
+        _error = downloadList.item(0).getAttributes().getNamedItem("error").getTextContent();
+        
+        if (_error != null && _error.length() == 0) {
+            System.err.println("RestletDownload::stop().. error: " + _error);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    public boolean pause() {
+        Document document = RestletConnector.sendRequest("/download/pause/" + _downloadId);
+        Element downloads = document.getDocumentElement();
+        NodeList downloadList = downloads.getElementsByTagName("download");
+        
+        System.out.println("RestletDownload::pause().. downloadList.getLength = " + downloadList.getLength());
+        
+        if (downloadList.getLength() == 0)
+            return false;
+        
+        _error = downloadList.item(0).getAttributes().getNamedItem("error").getTextContent();
+        
+        if (_error != null && _error.length() == 0) {
+            System.err.println("RestletDownload::pause().. error: " + _error);
+            return false;
+        }
+        
+        return true;
+    }
+    
+    public boolean resume() {
+        Document document = RestletConnector.sendRequest("/download/resume/" + _downloadId);
+        Element downloads = document.getDocumentElement();
+        NodeList downloadList = downloads.getElementsByTagName("download");
+        
+        System.out.println("RestletDownload::resume().. downloadList.getLength = " + downloadList.getLength());
+        
+        if (downloadList.getLength() == 0)
+            return false;
+        
+        _error = downloadList.item(0).getAttributes().getNamedItem("error").getTextContent();
+        
+        if (_error != null && _error.length() == 0) {
+            System.err.println("RestletDownload::resume().. error: " + _error);
+            return false;
+        }
+        
+        return true;
     }
     
     public void update() {
