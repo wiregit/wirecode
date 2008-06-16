@@ -13,6 +13,7 @@ import org.limewire.mojito.KUID;
 import org.limewire.mojito.concurrent.DHTFuture;
 import org.limewire.mojito.concurrent.DHTFutureListener;
 import org.limewire.mojito.result.StoreResult;
+import org.limewire.mojito.settings.DatabaseSettings;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -45,6 +46,8 @@ public class PushProxiesPublisher implements DHTEventListener {
     private volatile PushProxiesValue lastSeenValue;
     
     private volatile PushProxiesValue lastPublishedValue;
+    
+    private volatile long lastPublishTime;
     
     private final PushProxiesValueFactory pushProxiesValueFactory;
 
@@ -111,18 +114,23 @@ public class PushProxiesPublisher implements DHTEventListener {
     /**
      * Returns value to publish or null if there is nothing to publish.
      * <p>
-     * Has the side effect of storing the updating the last published value.
+     * Has the side effect of storing and updating the last published value.
      * </p>
      */
     PushProxiesValue getValueToPublish() {
         // order is important to compare newest last seen value with last published value
-        if (pushProxiesAreStable() && valueToPublishChangedSignificantly()) {
+        if (pushProxiesAreStable() && (valueToPublishChangedSignificantly() || needsToBeRepublished())) {
             lastPublishedValue = lastSeenValue;
+            lastPublishTime = System.currentTimeMillis();
             return lastPublishedValue;
         }
         return null;
     }
     
+    private boolean needsToBeRepublished() {
+        return System.currentTimeMillis() - lastPublishTime >= DatabaseSettings.VALUE_REPUBLISH_INTERVAL.getValue();
+    }
+
     /**
      * Returns true if there is a valid last seen value and it differs from
      * the last published value significantly in the set of push proxies.
@@ -179,7 +187,6 @@ public class PushProxiesPublisher implements DHTEventListener {
             }
             long interval = DHTSettings.PUSH_PROXY_STABLE_PUBLISHING_INTERVAL.getValue();
             long initialDelay = (long)(Math.random() * interval);
-            // TODO instead of a polling approach, an event when push proxies have changed and should be updated might be nice
             publishingFuture = backgroundExecutor.scheduleAtFixedRate(new PublishingRunnable(), initialDelay, interval, TimeUnit.MILLISECONDS);
         } else if (event.getType() == Type.STOPPED) {
             LOG.debug("stopping push proxy publishing");

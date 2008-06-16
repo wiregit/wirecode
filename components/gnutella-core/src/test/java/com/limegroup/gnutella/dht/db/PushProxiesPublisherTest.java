@@ -19,6 +19,8 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoDHT;
 import org.limewire.mojito.db.DHTValue;
+import org.limewire.mojito.settings.DatabaseSettings;
+import org.limewire.util.PrivilegedAccessor;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
@@ -159,6 +161,39 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         
         value = pushProxiesPublisher.getValueToPublish();
         assertNull("no changes, should be null", value);
+    }
+    
+    public void testValueIsPublishedAfterValuesExpire() throws Exception {
+        final IpPort proxy1 = new IpPortImpl("199.49.4.4", 4545);
+        final IpPort proxy2 = new IpPortImpl("205.2.1.1", 1000);
+        final IpPort proxy3 = new IpPortImpl("111.34.4.4", 1010);
+        
+        final IpPortSet proxies = new IpPortSet(proxy1, proxy2, proxy3);
+        
+        context.checking(new Expectations() {{
+            allowing(connectionManager).getPushProxies();
+            will(returnValue(proxies));
+        }});
+       
+        PrivilegedAccessor.setValue(DatabaseSettings.VALUE_REPUBLISH_INTERVAL, "value", 100);
+        
+        PushProxiesValue value = pushProxiesPublisher.getValueToPublish();
+        assertNull("First value should be null, since not stable", value);
+        
+        value = pushProxiesPublisher.getValueToPublish();
+        assertEquals(new IpPortSet(proxy1, proxy2, proxy3), value.getPushProxies());
+        
+        value = pushProxiesPublisher.getValueToPublish();
+        assertNull("Value should be null, since just published and not changed", value);
+        
+        Thread.sleep(200);
+        
+        value = pushProxiesPublisher.getValueToPublish();
+        assertEquals("should not be null, should have been republished due to timeout",
+                new IpPortSet(proxy1, proxy2, proxy3), value.getPushProxies());
+        
+        value = pushProxiesPublisher.getValueToPublish();
+        assertNull("Value should be null, since just published and not changed", value);
     }
     
     public void testValueChangingInBetweenConsecutiveCallsToGetValueToPublish() {
