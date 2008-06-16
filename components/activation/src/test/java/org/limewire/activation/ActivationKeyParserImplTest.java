@@ -17,6 +17,9 @@ import java.util.Date;
 
 import junit.framework.Test;
 
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.api.Expectation;
 import org.limewire.activation.exception.ActivationException;
 import org.limewire.collection.Tuple;
 import org.limewire.security.certificate.CertificateProvider;
@@ -70,8 +73,9 @@ public class ActivationKeyParserImplTest extends BaseTestCase {
         KeyPair keyPair = generator.generateKeyPair();
         ActivationKey activationKey = new ActivationKey();
         activationKey.setValidFrom(new Date());
+        activationKey.setUserEmail("benno@limewire.com");
 
-        akp.generate("person=Beano Smith", activationKey, keyPair.getPrivate());
+        akp.generate("user="+activationKey.getUserEmail(), activationKey, keyPair.getPrivate());
         // We're encoded... See if it parses...
     }
     
@@ -80,8 +84,22 @@ public class ActivationKeyParserImplTest extends BaseTestCase {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
         generator.initialize(1024);
         KeyPair keyPair = generator.generateKeyPair();
-
-        KeyStore keyStore = KeyStore.getInstance("jks");
+        
+        final KeyStore keyStore = KeyStore.getInstance("jks");
+        
+        //Mockery context = new Mockery();
+        
+        //final KeyStoreProvider keyStoreProvider2 = context.mock(KeyStoreProvider.class);
+        
+        //context.checking(new Expectations() {
+        //    {
+        //        never(keyStoreProvider2).isCached();
+        //        will(returnValue(true));
+        //        allowing(keyStoreProvider2).getKeyStore();
+        //        will(returnValue(keyStore));
+        //    }
+        //});
+        
         keyStore.load(null);
         keyStore.setCertificateEntry(
           ActivationConstants.ACTIVATION_CERTIFICATE_ALIAS, new MockCertificate(keyPair.getPublic()));
@@ -95,11 +113,13 @@ public class ActivationKeyParserImplTest extends BaseTestCase {
         ActivationKeyParserImpl akp = new ActivationKeyParserImpl(new CipherProviderImpl(), certificateProvider);
         ActivationKey activationKey = new ActivationKey();
         activationKey.setValidFrom(new Date());
+        activationKey.setUserEmail("benno@limewire.com");
 
-        String encodedKey = akp.generate("person=Beano Smith", activationKey, keyPair.getPrivate());
+        String encodedKey = akp.generate("user="+activationKey.getUserEmail(), activationKey, keyPair.getPrivate());
+        System.out.println("encoded:"+encodedKey);
         // We're encoded... See if it parses...
         ActivationKey parseResult = akp.parse(encodedKey);
-        // Damn I'm good!
+        
     }
     
     /** Fake certificate, just holds the public key. */

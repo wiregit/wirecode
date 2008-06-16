@@ -17,7 +17,9 @@ import org.limewire.security.certificate.CipherProvider.SignatureType;
 import org.limewire.util.StringUtils;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class ActivationKeyParserImpl implements ActivationKeyParser {
     private CipherProvider cipherProvider;
 

@@ -7,12 +7,14 @@ import org.limewire.io.GGEP;
 
 public class ActivationKey {
     private static final String KEY_VALID_FROM = "d";
+    private static final String KEY_USER_EMAIL = "e";
 
     private final GGEP ggep;
 
     public ActivationKey() {
         this(new GGEP());
         setValidFrom(new Date(Long.MAX_VALUE));
+        setUserEmail("");
     }
 
     ActivationKey(GGEP ggep) {
@@ -22,7 +24,23 @@ public class ActivationKey {
     public void setValidFrom(Date date) {
         ggep.put(KEY_VALID_FROM, date.getTime());
     }
+    
+    public void setUserEmail(String email_address) {
+        ggep.put(KEY_USER_EMAIL, email_address);
+    }
 
+    /**
+     * @return the email address of the purchaser.
+     */
+    public String getUserEmail() {
+        try {
+            if (ggep.hasKey(KEY_USER_EMAIL))
+                return ggep.getString(KEY_USER_EMAIL);
+        } catch (BadGGEPPropertyException ignored) {
+        }
+        return "";
+    }
+    
     /**
      * @return the date after which this key is valid, or a date far in the
      *         future if this field is missing or corrupt.
