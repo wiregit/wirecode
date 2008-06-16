@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-06-09 11:31-0400\n"
+"POT-Creation-Date: 2008-06-16 11:31-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -93,7 +93,7 @@ msgstr ""
 msgid "Connection Listener"
 msgstr ""
 
-#: core/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:80
+#: core/com/limegroup/gnutella/BrowseHostHandlerManagerImpl.java:88
 msgid "Browse Host Handler"
 msgstr ""
 
@@ -139,7 +139,7 @@ msgid ""
 "to 'Resume' your downloads."
 msgstr ""
 
-#: core/com/limegroup/gnutella/FileManagerImpl.java:282
+#: core/com/limegroup/gnutella/FileManagerImpl.java:316
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:785
 msgid "Shared Files"
 msgstr ""
@@ -190,7 +190,7 @@ msgstr ""
 msgid "Images"
 msgstr ""
 
-#: core/com/limegroup/gnutella/MessageRouterImpl.java:544
+#: core/com/limegroup/gnutella/MessageRouterImpl.java:548
 msgid "Message Routing"
 msgstr ""
 
@@ -282,6 +282,10 @@ msgstr ""
 
 #: core/com/limegroup/gnutella/messages/StaticMessages.java:48
 msgid "Static Messages"
+msgstr ""
+
+#: core/com/limegroup/gnutella/routing/QRPUpdater.java:211
+msgid "QRP Updater"
 msgstr ""
 
 #: core/com/limegroup/gnutella/rudp/messages/LimeRUDPMessageHandler.java:52
@@ -848,7 +852,7 @@ msgid "Apply"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/Console.java:172
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:828
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:861
 #: gui/com/limegroup/gnutella/gui/playlist/PlaylistButtons.java:50
 msgid "Clear"
 msgstr ""
@@ -934,8 +938,8 @@ msgstr ""
 #: gui/com/limegroup/gnutella/gui/LanguageWindow.java:188
 #: gui/com/limegroup/gnutella/gui/actions/FileMenuActions.java:265
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:348
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:842
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:903
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:875
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:936
 #: gui/com/limegroup/gnutella/gui/download/DownloaderDialog.java:377
 #: gui/com/limegroup/gnutella/gui/download/DownloaderUtils.java:240
 #: gui/com/limegroup/gnutella/gui/init/SetupManager.java:477
@@ -2668,7 +2672,7 @@ msgid "Close the Program"
 msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/LaunchAction.java:27
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:834
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:867
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1237
 msgid "Launch"
 msgstr ""
@@ -2689,7 +2693,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/actions/SearchAction.java:35
 #: gui/com/limegroup/gnutella/gui/actions/SearchForKeywordsAction.java:36
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:785
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:818
 #: gui/com/limegroup/gnutella/gui/search/ResultPanel.java:579
 #, java-format
 msgid "Search for Keywords: {0}"
@@ -2799,7 +2803,7 @@ msgstr ""
 
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionButtons.java:45
 #: gui/com/limegroup/gnutella/gui/connection/ConnectionMediator.java:241
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:950
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:983
 #: gui/com/limegroup/gnutella/gui/search/SearchButtons.java:43
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:95
 #: gui/com/limegroup/gnutella/gui/search/SearchMediator.java:101
@@ -3242,50 +3246,50 @@ msgstr ""
 msgid "BitTorrent"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:206
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:225
 #: gui/com/limegroup/gnutella/gui/options/OptionsConstructor.java:333
 msgid "Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:248
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:267
 msgid "Loading Download Window..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:284
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:810
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:303
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:843
 msgid "Find More Sources for Download"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:286
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:812
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:305
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:845
 msgid "Find Sources"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:288
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:814
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:307
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:847
 msgid "Try to Find Additional Sources for Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:292
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:817
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:982
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:311
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:850
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1015
 msgid "Resume Download"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:294
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:819
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:984
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:313
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:852
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1017
 #: gui/com/limegroup/gnutella/gui/library/LibraryTableMediator.java:1332
 msgid "Resume"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:296
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:821
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:986
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:315
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:854
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1019
 msgid "Reattempt Selected Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:430
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:463
 #, java-format
 msgid ""
 "You have downloaded a skin titled \"{0}\", you can activate the new skin by "
@@ -3293,22 +3297,22 @@ msgid ""
 "list of available skins."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:432
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:465
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:180
 msgid "&Refresh Skins"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:433
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:466
 #: gui/com/limegroup/gnutella/gui/menu/ViewMenu.java:27
 msgid "&View"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:434
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:467
 #: gui/com/limegroup/gnutella/gui/menu/ThemeMenu.java:62
 msgid "&Apply Skins"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:438
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:471
 #, java-format
 msgid ""
 "You have downloaded a new skin titled {0}. Would you like to use this new "
@@ -3316,119 +3320,119 @@ msgid ""
 msgstr ""
 
 #. could not read torrent file or bad torrent file.
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:493
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:526
 #, java-format
 msgid ""
 "LimeWire was unable to load the torrent file \"{0}\", - it may be malformed "
 "or LimeWire does not have permission to access this file."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:652
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:685
 msgid "Choose Save Location"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:754
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:787
 msgid "Search..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:826
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:859
 msgid "Clear Download"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:830
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:863
 msgid "Clear Selected Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:832
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:865
 msgid "Launch Download"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:836
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:869
 msgid "Launch Selected Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:840
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:901
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:873
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:934
 msgid "Cancel Download"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:844
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:905
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:877
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:938
 msgid "Cancel Selected Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:846
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:963
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:879
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:996
 msgid "Preview Download"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:848
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:965
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:881
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:998
 msgid "Preview"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:850
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:967
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:883
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1000
 msgid "Preview Selected Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:919
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:952
 #: gui/com/limegroup/gnutella/gui/upload/UploadPopupMenu.java:46
 msgid "Chat with Host"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:932
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:965
 msgid "Clear All Inactive Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:934
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:967
 #: gui/com/limegroup/gnutella/gui/upload/UploadButtons.java:45
 msgid "Clear Inactive"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:936
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:969
 msgid "Remove Inactive Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1000
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1033
 msgid "Pause Download"
 msgstr ""
 
 #. *
 #. * Constant for the pause button.
 #.
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1002
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1035
 #: gui/com/limegroup/gnutella/gui/mp3/MediaPlayerComponent.java:95
 msgid "Pause"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1004
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1037
 msgid "Pause Selected Downloads"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1017
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1019
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1050
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1052
 #: gui/com/limegroup/gnutella/gui/library/LibraryTree.java:922
 msgid "Explore"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1021
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1054
 msgid "Open Folder Containing the File"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1035
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1068
 msgid "Move the Selected Download Closer to Becoming Active"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1055
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1088
 msgid "Move the Selected Download Further from Becoming Active"
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1075
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1108
 msgid "Change File Location..."
 msgstr ""
 
-#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1078
+#: gui/com/limegroup/gnutella/gui/download/DownloadMediator.java:1111
 msgid "Edit the Final Filename of the Download"
 msgstr ""
 
