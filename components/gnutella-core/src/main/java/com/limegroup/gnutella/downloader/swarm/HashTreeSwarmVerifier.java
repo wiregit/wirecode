@@ -83,7 +83,9 @@ public class HashTreeSwarmVerifier implements SwarmFileVerifier {
 
     public boolean verify(Range range, SwarmFile swarmFile) {
         ByteBuffer buffer = byteBufferCache.get(VERIFY_BUFFER_SIZE);
-        return !hashTree.isCorrupt(range, new SwarmFileStream(swarmFile), buffer);
+        boolean verified = !hashTree.isCorrupt(range, new SwarmFileStream(swarmFile), buffer);
+        byteBufferCache.release(buffer);
+        return verified;
     }
     
     private static class SwarmFileStream implements FileStream {
