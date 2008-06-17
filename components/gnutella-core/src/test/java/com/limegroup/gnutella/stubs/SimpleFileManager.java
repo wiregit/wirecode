@@ -41,8 +41,7 @@ public class SimpleFileManager extends FileManagerImpl {
     LimeXMLDocumentFactory factory;
     
     @Inject
-     public SimpleFileManager(LimeXMLDocumentFactory factory,
-            Provider<SimppManager> simppManager,
+     public SimpleFileManager( Provider<SimppManager> simppManager,
             Provider<UrnCache> urnCache,
             Provider<DownloadManager> downloadManager,
             Provider<CreationTimeCache> creationTimeCache,
@@ -58,7 +57,7 @@ public class SimpleFileManager extends FileManagerImpl {
             Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
             Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
         super(simppManager, urnCache, downloadManager, creationTimeCache, contentManager, altLocManager, savedFileManager, updateHandler, activityCallback, backgroundExecutor, limeXMLReplyCollectionFactory, limeXMLDocumentFactory, metaDataReader, schemaReplyCollectionMapper, limeXMLSchemaRepository);
-        this.factory = factory;
+        this.factory = limeXMLDocumentFactory;
     }
     
     public SimpleFileManager() {

@@ -42,18 +42,24 @@ import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.vendor.ContentResponse;
+import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.ContentSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.MessageTestUtils;
+import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
+import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
+import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 
 public class FileManagerTest extends LimeTestCase {
@@ -911,7 +917,22 @@ public class FileManagerTest extends LimeTestCase {
         assertNull(fman.getFileDescForFile(notShared));
         
         // simulate restart
-        fman = new SimpleFileManager();
+        fman = new SimpleFileManager(
+                injector.getProvider(SimppManager.class),
+                injector.getProvider(UrnCache.class),
+                injector.getProvider(DownloadManager.class),
+                injector.getProvider(CreationTimeCache.class),
+                injector.getProvider(ContentManager.class),
+                injector.getProvider(AltLocManager.class),
+                injector.getProvider(SavedFileManager.class),
+                injector.getProvider(UpdateHandler.class),
+                injector.getProvider(ActivityCallback.class), 
+                null,
+                injector.getInstance(LimeXMLReplyCollectionFactory.class),
+                injector.getInstance(LimeXMLDocumentFactory.class),
+                injector.getInstance(MetaDataReader.class),
+                injector.getProvider(SchemaReplyCollectionMapper.class),
+                injector.getProvider(LimeXMLSchemaRepository.class));
         waitForLoad();
         
         //  assert that "shared" is shared
