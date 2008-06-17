@@ -68,17 +68,12 @@ import com.limegroup.gnutella.auth.IpPortContentAuthorityFactory;
 import com.limegroup.gnutella.auth.IpPortContentAuthorityFactoryImpl;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactory;
 import com.limegroup.gnutella.bootstrap.UDPHostCacheFactoryImpl;
-import com.limegroup.gnutella.caas.Download;
 import com.limegroup.gnutella.caas.DownloadFactory;
-import com.limegroup.gnutella.caas.Search;
 import com.limegroup.gnutella.caas.SearchFactory;
-import com.limegroup.gnutella.caas.SearchResult;
-import com.limegroup.gnutella.caas.restlet.RestletDownload;
+import com.limegroup.gnutella.caas.SearchParams;
 import com.limegroup.gnutella.caas.restlet.RestletDownloadFactory;
-import com.limegroup.gnutella.caas.restlet.RestletDownloadManager;
-import com.limegroup.gnutella.caas.restlet.RestletSearch;
 import com.limegroup.gnutella.caas.restlet.RestletSearchFactory;
-import com.limegroup.gnutella.caas.restlet.RestletSearchResult;
+import com.limegroup.gnutella.caas.restlet.RestletSearchParams;
 import com.limegroup.gnutella.chat.InstantMessengerFactory;
 import com.limegroup.gnutella.chat.InstantMessengerFactoryImpl;
 import com.limegroup.gnutella.connection.ConnectionBandwidthStatistics;
@@ -359,6 +354,7 @@ public class LimeWireCoreModule extends AbstractModule {
         
         bind(SearchFactory.class).to(RestletSearchFactory.class);
         bind(DownloadFactory.class).to(RestletDownloadFactory.class);
+        bind(SearchParams.class).to(RestletSearchParams.class);
         /*
         bind(Download.class).to(RestletDownload.class);
         bind(com.limegroup.gnutella.caas.DownloadManager.class).to(RestletDownloadManager.class);

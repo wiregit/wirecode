@@ -9,7 +9,7 @@ import com.limegroup.gnutella.caas.SearchResultHandler;
 
 public class RestletSearch implements com.limegroup.gnutella.caas.Search {
 
-    private SearchParams _params;
+    private RestletSearchParams _params;
     private SearchResultHandler _handler;
     private String _searchId;
     private String _error;
@@ -18,7 +18,7 @@ public class RestletSearch implements com.limegroup.gnutella.caas.Search {
      * 
      */
     public RestletSearch(SearchParams sp, SearchResultHandler srh) {
-        _params = sp;
+        _params = (RestletSearchParams)sp;
         _handler = srh;
     }
     
@@ -26,7 +26,14 @@ public class RestletSearch implements com.limegroup.gnutella.caas.Search {
      * 
      */
     public void start() {
-        Document document = RestletConnector.sendRequest("/search/?" + _params.getQueryString());
+        Element xml = _params.toXml();
+        Document document = null;
+        
+        if (xml == null)
+            document = RestletConnector.sendRequest("/search/?" + _params.getQueryString());
+        else
+            document = RestletConnector.sendRequest("/search/?" + _params.getQueryString(), xml);
+        
         Element searches = document.getDocumentElement();
         NodeList searchList = searches.getElementsByTagName("search");
         

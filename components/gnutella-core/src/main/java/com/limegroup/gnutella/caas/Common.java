@@ -1,8 +1,13 @@
 package com.limegroup.gnutella.caas;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.XMLSerializer;
+import org.w3c.dom.Element;
 
 import com.limegroup.gnutella.URN;
 
@@ -55,5 +60,26 @@ public class Common {
         return sb.toString();
     }
     
-
+    /**
+     * 
+     */
+    public static final String xmlToString(Element element) {
+        String xml = null;
+        
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            OutputFormat format = new OutputFormat();
+            format.setIndenting(false);
+            XMLSerializer serializer = new XMLSerializer(baos, format);
+            serializer.serialize(element);
+            
+            xml = new String(baos.toByteArray());
+        }
+        catch (Exception e) {
+            System.out.println("Common::xmlToString().. " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return xml;
+    }
 }

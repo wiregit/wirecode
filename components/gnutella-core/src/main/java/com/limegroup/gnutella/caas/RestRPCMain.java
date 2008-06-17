@@ -476,12 +476,22 @@ public class RestRPCMain implements DataStore {
         
         private String _query;
         private GUID _guid;
+        private Document _document;
         
         public SearchResource(Context context, Request request, Response response) {
             super(context, request, response);
             
             Application lwapp = (Application)context.getAttributes().get(Application.KEY);
             LimeWireCore lwcore = (LimeWireCore)lwapp.getContext().getAttributes().get("lwcore");
+            
+            try {
+                if (getRequest().isEntityAvailable())
+                    _document = getRequest().getEntityAsDom().getDocument();
+            }
+            catch (IOException ioe) {
+                System.err.println("SearchResource::SearchResource().. " + ioe.getMessage());
+                ioe.printStackTrace();
+            }
             
             _query = (String)getRequest().getAttributes().get("query");
             _guid  = new GUID(lwcore.getSearchServices().newQueryGUID());
@@ -495,7 +505,28 @@ public class RestRPCMain implements DataStore {
             
             getVariants().add(new Variant(MediaType.TEXT_XML));
             
-            lwcore.getSearchServices().query(_guid.bytes(), _query);
+            if (_document == null)
+                lwcore.getSearchServices().query(_guid.bytes(), _query);
+            else {
+                Element root = _document.getDocumentElement();
+                String typestr = root.getTagName();
+                com.limegroup.gnutella.MediaType mediaType = null;
+                
+                if (typestr.equals("videos"))
+                    mediaType = com.limegroup.gnutella.MediaType.getVideoMediaType();
+                else if (typestr.equals("audios"))
+                    mediaType = com.limegroup.gnutella.MediaType.getAudioMediaType();
+                else if (typestr.equals("images"))
+                    mediaType = com.limegroup.gnutella.MediaType.getImageMediaType();
+                else if (typestr.equals("documents"))
+                    mediaType = com.limegroup.gnutella.MediaType.getDocumentMediaType();
+                else if (typestr.equals("applications"))
+                    mediaType = com.limegroup.gnutella.MediaType.getProgramMediaType();
+                else
+                    mediaType = com.limegroup.gnutella.MediaType.getAnyTypeMediaType();
+                
+                lwcore.getSearchServices().query(_guid.bytes(), _query, Common.xmlToString(root), mediaType);
+            }
         }
         
         @Override
@@ -519,6 +550,30 @@ public class RestRPCMain implements DataStore {
             }
             
             return representation;
+        }
+        
+        public boolean allowPost () {
+            return true;
+        }
+         
+        @Override
+        public void acceptRepresentation(Representation entity) throws ResourceException {
+            DomRepresentation representation = null;
+             
+            try {
+                representation = new DomRepresentation(MediaType.TEXT_XML);
+                Document document = representation.getDocument();
+                Element searches = (Element)document.appendChild(document.createElement("searches"));
+                Element search = (Element)searches.appendChild(document.createElement("search"));
+                
+                search.setAttribute("id", _guid.toString());
+            }
+            catch (IOException e) {
+                System.out.println("SearchResource::acceptRepresentation().. " + e.getMessage());
+                e.printStackTrace();
+            }
+             
+            getResponse().setEntity(representation);
         }
     }
     
@@ -695,33 +750,33 @@ public class RestRPCMain implements DataStore {
             
             getVariants().add(new Variant(MediaType.TEXT_XML));
        }
-        
-        public boolean allowPost () {
-            return true;
-        }
-        
-        @Override
-        public void acceptRepresentation(Representation entity) throws ResourceException {
-            DomRepresentation representation = null;
+       
+       public boolean allowPost () {
+           return true;
+       }
+       
+       @Override
+       public void acceptRepresentation(Representation entity) throws ResourceException {
+           DomRepresentation representation = null;
             
-            try {
-                representation = new DomRepresentation(MediaType.TEXT_XML);
-                Document document = representation.getDocument();
-                Element downloads = (Element)document.appendChild(document.createElement("downloads"));
-                Element download = document.createElement("download");
+           try {
+               representation = new DomRepresentation(MediaType.TEXT_XML);
+               Document document = representation.getDocument();
+               Element downloads = (Element)document.appendChild(document.createElement("downloads"));
+               Element download = document.createElement("download");
                 
-                downloads.appendChild(download);
+               downloads.appendChild(download);
                 
-                download.setAttribute("id", _guid.toString());
-                download.setAttribute("error", _error);
-            }
-            catch (IOException e) {
-                System.out.println("DownloadResource::represent().. " + e.getMessage());
-                e.printStackTrace();
-            }
+               download.setAttribute("id", _guid.toString());
+               download.setAttribute("error", _error);
+           }
+           catch (IOException e) {
+               System.out.println("DownloadResource::represent().. " + e.getMessage());
+               e.printStackTrace();
+           }
             
-            getResponse().setEntity(representation);
-        }
+           getResponse().setEntity(representation);
+       }
     }
     
     /**
