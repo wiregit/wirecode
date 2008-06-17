@@ -66,7 +66,6 @@ public class CommandHandler {
             "help",
             "info",
             "ping .+ \\d{1,5}",
-            "reqstats .+ \\d{1,5} (stats|rt|db)",
             "bootstrap .+ \\d{1,5}",
             "put (key|kuid) (\\w|\\d)+ (value|file) .+",
             "remove (key|kuid) (\\w|\\d)+",
@@ -166,24 +165,6 @@ public class CommandHandler {
         SocketAddress addr = new InetSocketAddress(host, port);
         
         out.println("Pinging... " + addr);
-        /*dht.ping(addr, new PingListener() {
-            public void handleResult(Contact result) {
-                out.println("Ping to " + result + " succeeded: " + result.getRoundTripTime() + "ms");
-                out.flush();
-            }
-            
-            public void handleException(Exception ex) {
-                if (ex instanceof DHTException) {
-                    DHTException dhtEx = (DHTException)ex;
-                    KUID nodeId = dhtEx.getNodeID();
-                    SocketAddress address = dhtEx.getSocketAddress();
-                    out.println("Ping to " + ContactUtils.toString(nodeId, address) + " failed");
-                } else {
-                    ex.printStackTrace(out);
-                }
-                out.flush();
-            }
-        });*/
         
         Future<PingResult> future = dht.ping(addr);
         try {
@@ -195,10 +176,7 @@ public class CommandHandler {
         out.flush();
         
         return future;
-    }
-    
-    public static void reqstats(MojitoDHT dht, String[] args, PrintWriter out) {
-    }
+    }    
     
     public static void bootstrap(MojitoDHT dht, String[] args, final PrintWriter out) {
         String host = args[1];
@@ -244,20 +222,6 @@ public class CommandHandler {
             md.reset();
             
             out.println("Storing... " + key);
-            /*dht.put(key, value, new StoreListener() {
-                public void store(KeyValue keyValue, Collection nodes) {
-                    StringBuilder buffer = new StringBuilder();
-                    buffer.append("STORED KEY_VALUES: ").append(keyValue).append("\n");
-                    int i = 0;
-                    for (Iterator iter = nodes.iterator(); iter.hasNext();) {
-                        Contact node = (Contact) iter.next();
-                        buffer.append(i).append(": ").append(node).append("\n");
-                        i++;
-                    }
-                    out.println(buffer.toString());
-                    out.flush();
-                }
-            });*/
             
             StoreResult evt = dht.put(key, new DHTValueImpl(DHTValueType.TEST, Version.ZERO, value)).get();
             StringBuilder buffer = new StringBuilder();
@@ -282,20 +246,6 @@ public class CommandHandler {
             md.reset();
             
             out.println("Removing... " + key);
-            /*dht.remove(key, new StoreListener() {
-                public void handleResult(Entry<KeyValue, List<Contact>> result) {
-                    StringBuffer buffer = new StringBuffer();
-                    buffer.append("REMOVED KEY_VALUES: ").append(result.getKey()).append("\n");
-                    buffer.append(CollectionUtils.toString(result.getValue()));
-                    out.println(buffer.toString());
-                    out.flush();
-                }
-                
-                public void handleException(Exception ex) {
-                    ex.printStackTrace(out);
-                    out.flush();
-                }
-            });*/
             
             StoreResult evt = dht.remove(key).get();
             StringBuilder buffer = new StringBuilder();
@@ -455,6 +405,6 @@ public class CommandHandler {
     	
     	boolean bootstrapped = context.isBootstrapped();
     	context.setBootstrapped(!bootstrapped);
-    	System.out.println(bootstrapped + " -> " + (!bootstrapped));
+        out.println(bootstrapped + " -> " + (!bootstrapped));
     }
 }

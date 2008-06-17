@@ -5,8 +5,6 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFrame;
-
 import org.limewire.mojito.Context;
 import org.limewire.mojito.KUID;
 import org.limewire.mojito.MojitoFactory;
@@ -20,7 +18,12 @@ import org.limewire.mojito.routing.Version;
 import org.limewire.mojito.routing.impl.RouteTableImpl;
 import org.limewire.mojito.visual.RouteTableVisualizer;
 
-
+/**
+ * Displays the a sample route table visually, where all the 500 node IDs are 
+ * statically created. localhost is used, along with ports 3001-3499 for the 
+ * source address and ports 30001-30499 for the address where to send requests 
+ * and responses.
+ */
 public class RouteTableVisualizerDemo {
     
     public static final String[] NODE_IDS = {
@@ -201,14 +204,7 @@ public class RouteTableVisualizerDemo {
         Context dht = (Context)MojitoFactory.createDHT();
         RouteTableImpl rt = (RouteTableImpl)dht.getRouteTable();
         populateRouteTable(rt);
-        RouteTableVisualizer viz = new RouteTableVisualizer(dht);
-        
-        JFrame jf = new JFrame();
-        jf.getContentPane().add ( viz.getComponent());
-        jf.pack();
-        jf.setVisible(true);
-        jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        System.out.println("local node2: "+ dht.getLocalNodeID());
+        RouteTableVisualizer.show(dht);        
     }
 
     public void populateRouteTable(RouteTableImpl rt) {
