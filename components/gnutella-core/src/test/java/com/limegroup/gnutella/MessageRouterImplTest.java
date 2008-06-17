@@ -47,13 +47,11 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
-import com.limegroup.gnutella.altlocs.AltLocManager;
-import com.limegroup.gnutella.auth.ContentManager;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
 import com.limegroup.gnutella.connection.GnutellaConnection;
-import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.connection.MessageReaderFactory;
+import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.dht.DHTEvent;
 import com.limegroup.gnutella.dht.DHTEventListener;
 import com.limegroup.gnutella.dht.DHTManager;
@@ -78,7 +76,7 @@ import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
 import com.limegroup.gnutella.messages.vendor.HeadPongFactory;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
-import com.limegroup.gnutella.metadata.MetaDataReader;
+import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -94,10 +92,7 @@ import com.limegroup.gnutella.util.TestConnection;
 import com.limegroup.gnutella.util.TestConnectionFactory;
 import com.limegroup.gnutella.util.TestConnectionManager;
 import com.limegroup.gnutella.version.UpdateHandler;
-import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
-import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
-import com.limegroup.gnutella.xml.MetaFileManager;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 // TODO write test for storing bypassed results
@@ -279,7 +274,7 @@ public final class MessageRouterImplTest extends LimeTestCase {
             @Override
             protected void configure() {
                 bind(ConnectionManager.class).to(TestConnectionManager.class);
-                bind(FileManager.class).to(TestFileManager.class);
+                bind(QRPUpdater.class).to(TestQRPUpdater.class);
             }
         });
         
@@ -334,7 +329,6 @@ public final class MessageRouterImplTest extends LimeTestCase {
             @Override
             protected void configure() {
                 bind(ConnectionManager.class).to(TestConnectionManager.class);
-                bind(FileManager.class).to(TestFileManager.class);
             }
         });
         
@@ -1038,42 +1032,31 @@ public final class MessageRouterImplTest extends LimeTestCase {
         Map set = (Map)PrivilegedAccessor.getValue(hostCatcher, "FREE_ULTRAPEER_SLOTS_SET");
         set.clear();
     }        
-        
     
-    /**
-     * Test file manager that returns specialized keywords for QRP testing.
-     */
     @Singleton
-    private static final class TestFileManager extends MetaFileManager {
-        
-        private final List KEYWORDS = 
-            Arrays.asList(MY_KEYWORDS);
+    private static class TestQRPUpdater extends QRPUpdater {
 
+        private final List<String> KEYWORDS = 
+            Arrays.asList(MY_KEYWORDS);
+        
         @Inject
-        TestFileManager(Provider<SimppManager> simppManager,
-                Provider<UrnCache> urnCache,
-                Provider<DownloadManager> downloadManager,
-                Provider<CreationTimeCache> creationTimeCache,
-                Provider<ContentManager> contentManager,
-                Provider<AltLocManager> altLocManager,
-                Provider<SavedFileManager> savedFileManager,
-                Provider<UpdateHandler> updateHandler,
-                Provider<ActivityCallback> activityCallback,
+        public TestQRPUpdater(FileManager fileManager, 
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-                LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory,
-                LimeXMLDocumentFactory limeXMLDocumentFactory,
-                MetaDataReader metaDataReader,
                 Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
                 Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
-            super(simppManager, urnCache, downloadManager, creationTimeCache, contentManager, altLocManager, savedFileManager, updateHandler, activityCallback, backgroundExecutor, limeXMLReplyCollectionFactory, limeXMLDocumentFactory, metaDataReader, schemaReplyCollectionMapper, limeXMLSchemaRepository);
+            super(fileManager, backgroundExecutor, schemaReplyCollectionMapper, limeXMLSchemaRepository);
         }
         
-
-        public List getKeyWords() {
-            return KEYWORDS;
+        @Override
+        public synchronized QueryRouteTable getQRT() {
+            QueryRouteTable qrt = super.getQRT();
+            for(String s : KEYWORDS ) {
+                qrt.add(s);
+            }
+            return qrt;
         }
     }
-    
+     
     private static class HeadListener extends ReplyHandlerStub {
     	Message _lastSent;
     	@Override
