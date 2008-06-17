@@ -160,4 +160,19 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, C
 	
 	/** Try to download the torrent file */
 	public void handleTorrent(File torrentFile);
+
+    /**
+     * Display an error if initial DAAP setup fails
+     * @param t The exception that occurred while attempting to create a daap connection
+     * @return true if this Throwable was a relevant connection error and was able to be handled in a
+     * special way
+     */
+    public boolean handleDAAPConnectionError(Throwable t);
+
+    /**
+     * Translate a String taking into account Locale
+     * @param s The String to translate
+     * @return the translated String
+     */
+    public String translate(String s);
 }

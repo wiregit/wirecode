@@ -36,6 +36,7 @@ public class LimeWireNetModule extends AbstractModule {
         bind(SocketsManager.class).to(SocketsManagerImpl.class);
         bind(ProxyManager.class).to(ProxyManagerImpl.class);
         bind(WhoIsRequestFactory.class).to(WhoIsRequestFactoryImpl.class);
+        bind(FirewallService.class).to(FirewallServiceImpl.class);
         
         if(OSUtils.isSocketChallengedWindows())
             bind(SocketController.class).to(LimitedSocketController.class);

@@ -82,6 +82,7 @@ import com.limegroup.gnutella.connection.RoutedConnectionFactory;
 import com.limegroup.gnutella.connection.RoutedConnectionFactoryImpl;
 import com.limegroup.gnutella.connection.UDPConnectionChecker;
 import com.limegroup.gnutella.connection.UDPConnectionCheckerImpl;
+import com.limegroup.gnutella.daap.DaapManager;
 import com.limegroup.gnutella.dht.DHTBootstrapperFactory;
 import com.limegroup.gnutella.dht.DHTBootstrapperFactoryImpl;
 import com.limegroup.gnutella.dht.DHTControllerFacade;
@@ -347,6 +348,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(BTMetaInfoFactory.class).to(BTMetaInfoFactoryImpl.class);
         bind(SharedFilesKeywordIndex.class).to(SharedFilesKeywordIndexImpl.class);
         bind(OutgoingQueryReplyFactory.class).to(OutgoingQueryReplyFactoryImpl.class);
+        bind(UPnPManagerConfiguration.class).to(UPnPManagerConfigurationImpl.class);
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);
@@ -369,6 +371,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(HostCatcher.class);
         bind(LimeCoreGlue.class);
         bind(QRPUpdater.class);
+        bind(DaapManager.class);
         
         // TODO: Need to add interface to these classes
         //----------------------------------------------

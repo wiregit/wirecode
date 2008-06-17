@@ -1,10 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,8 +45,6 @@ public class LifecycleManagerImpl implements LifecycleManager {
     
     private static enum State { NONE, STARTING, STARTED, STOPPED };
     
-    /** A list of items that require running prior to shutting down LW. */
-    private final List<Thread> SHUTDOWN_ITEMS =  Collections.synchronizedList(new LinkedList<Thread>());
     /** The time when this finished starting. */
     @InspectablePrimitive("time lifecycle finished starting") 
     private long startFinishedTime;
@@ -209,8 +204,6 @@ public class LifecycleManagerImpl implements LifecycleManager {
         // save limewire.props & other settings
         SettingsGroupManager.instance().save();
         
-        runShutdownItems();
-        
         shutdownDone.set(true);
     }
 
@@ -260,34 +253,6 @@ public class LifecycleManagerImpl implements LifecycleManager {
         return startFinishedTime;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.LifecycleManager#addShutdownItem(java.lang.Thread)
-     */
-    public boolean addShutdownItem(Thread t) {
-        if(shutdownBegin.get())
-            return false;
-    
-        SHUTDOWN_ITEMS.add(t);
-        return true;
-    }
-
-    /** Runs all shutdown items. */
-    private void runShutdownItems() {
-        if(!shutdownBegin.get())
-            return;
-        
-        // Start each shutdown item.
-        for(Thread t : SHUTDOWN_ITEMS)
-            t.start();
-        
-        // Now that we started them all, iterate back and wait for each one to finish.
-        for(Thread t : SHUTDOWN_ITEMS) {
-            try {
-                t.join();
-            } catch(InterruptedException ie) {}
-        }
-    }
-    
     /** Runs all tasks that can be done in the background while the gui inits. */
     private void doBackgroundTasks() {
         serviceRegistry.start("SuperEarly");

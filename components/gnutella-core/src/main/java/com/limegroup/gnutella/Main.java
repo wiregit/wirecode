@@ -291,5 +291,7 @@ public class Main {
         public void installationCorrupted() {
             
         }
+        public boolean handleDAAPConnectionError(Throwable t) { return false; }
+        public String translate(String s) { return s;}
     }
 }

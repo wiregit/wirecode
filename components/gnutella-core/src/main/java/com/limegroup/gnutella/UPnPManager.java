@@ -30,10 +30,7 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.service.ErrorService;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 
 
 /**
@@ -82,6 +79,8 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
  */
 @Singleton
 public class UPnPManager  {
+    // TODO convert to Service
+    // TODO move to net
     private static final Log LOG = LogFactory.getLog(UPnPManager.class);
 	
 	/** some schemas */
@@ -117,17 +116,16 @@ public class UPnPManager  {
 	 * Lock that everything uses.
 	 */
 	private final Object DEVICE_LOCK = new Object();
-
-	private final LifecycleManager lifecycleManager;
-	private final Provider<Acceptor> acceptor;
 	
 	private final AtomicBoolean started = new AtomicBoolean(false);
 	
 	private final ControlPoint controlPoint;
 	
 	private final CopyOnWriteArrayList<UPnPListener> listeners = new CopyOnWriteArrayList<UPnPListener>();
+    
+    private final UPnPManagerConfiguration configuration;
 	
-	@InspectablePrimitive("upnp manager creation time")
+    @InspectablePrimitive("upnp manager creation time")
 	@SuppressWarnings("unused")
 	private final long creationTime = System.currentTimeMillis();
 	@InspectablePrimitive("upnp manager start time")
@@ -138,10 +136,9 @@ public class UPnPManager  {
 	private volatile long deviceFoundTime;
 	
 	@Inject
-	UPnPManager(LifecycleManager lifecycleManager, Provider<Acceptor> acceptor) {
-	    this.lifecycleManager = lifecycleManager;	
-	    this.acceptor = acceptor;
-	    this.controlPoint = new ControlPoint();
+	UPnPManager(UPnPManagerConfiguration configuration) {
+        this.configuration = configuration;
+        this.controlPoint = new ControlPoint();
     }
 	
 	public void addListener(UPnPListener uPnPListener) {
@@ -154,6 +151,7 @@ public class UPnPManager  {
 	}
     
     public void start() {
+        // TODO Service.start()
         if (!started.getAndSet(true)) {
             startTime = System.currentTimeMillis();
             LOG.debug("Starting UPnP Manager.");
@@ -163,7 +161,7 @@ public class UPnPManager  {
                 try {
                     controlPoint.start();
                 } catch (Exception bad) {
-                    ConnectionSettings.DISABLE_UPNP.setValue(true);
+                    configuration.setEnabled(false);
                     ErrorService.error(bad);
                 }
             }
@@ -171,6 +169,7 @@ public class UPnPManager  {
     }
     
     public void stop() {
+        // TODO Service.stop()
         controlPoint.stop();
     }
 	
@@ -247,13 +246,13 @@ public class UPnPManager  {
 	 * adds a mapping on the router to the specified port
 	 * @return the external port that was actually mapped. 0 if failed
 	 */
-	public int mapPort(int port) {
+	public int mapPort(int port, byte[] address) {
 	    if(LOG.isTraceEnabled())
 	        LOG.trace("Attempting to map port: " + port);
 		
 		Random gen=null;
 		
-		String localAddress = NetworkUtils.ip2string(acceptor.get().getAddress(false));
+		String localAddress = NetworkUtils.ip2string(address);
 		int localPort = port;
 	
 		// try adding new mappings with the same port
@@ -381,49 +380,26 @@ public class UPnPManager  {
 	 * schedules a shutdown hook which will clear the mappings created
 	 * this session. 
 	 */
-	public void clearMappingsOnShutdown() {
-		final Mapping tcp, udp;
-		synchronized(DEVICE_LOCK) {
-			tcp = _tcp;
-			udp = _udp;
-		}
-		
-		Thread waiter = new Thread("UPnP Waiter") {
-		    @Override
-            public void run() {
-                Thread cleaner = new Thread("UPnP Cleaner") {
-        			@Override
-                    public void run() {
-        				LOG.debug("start cleaning");
-        				if (tcp != null) removeMapping(tcp);
-        				if (udp != null) removeMapping(udp);
-        				LOG.debug("done cleaning");
-        			}
-        		};
-        		cleaner.setDaemon(true);
-        		cleaner.start();
-        		Thread.yield();
-		        
-		        try {
-		            LOG.debug("waiting for UPnP cleaners to finish");
-		            cleaner.join(30000); // wait at most 30 seconds.
-		        } catch(InterruptedException ignored){}
-		        LOG.debug("UPnP cleaners done");
-		    }
-		};
-		
-        lifecycleManager.addShutdownItem(waiter); 
+	public void clearMappings() {
+        // TODO Service.stop()
+        synchronized(DEVICE_LOCK) {
+            LOG.debug("start cleaning");
+            if (_tcp != null) removeMapping(_tcp);
+            if (_udp != null) removeMapping(_udp);
+            LOG.debug("done cleaning");
+        }
 	}
 	
 	@Override
     public void finalize() {
-		stop();
+        // TODO Service.stop()
+        stop();
 	}
 
 	private String getGUIDSuffix() {
 	    synchronized(DEVICE_LOCK) {
     	    if (_guidSuffix == null)
-    			_guidSuffix = ApplicationSettings.CLIENT_ID.getValue().substring(0,10);
+    			_guidSuffix = configuration.getClientID();
     	    return _guidSuffix;
         }
 	}

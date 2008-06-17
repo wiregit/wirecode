@@ -23,6 +23,7 @@ import org.limewire.i18n.I18nMarker;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.io.IOUtils;
 import org.limewire.io.NetworkUtils;
+import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.net.AsyncConnectionDispatcher;
 import org.limewire.net.BlockingConnectionDispatcher;
@@ -319,14 +320,12 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         	    LOG.debug("Natted: " + natted + ", validPort: " + validPort + ", forcedIP: " + forcedIP);
         	
         	if(natted && validPort && !forcedIP) {
-        		int mappedPort = upnpManager.get().mapPort(_port);
+        		int mappedPort = upnpManager.get().mapPort(_port, getAddress(false));
         		if(LOG.isDebugEnabled())
         		    LOG.debug("UPNP port mapped: " + mappedPort);
         		
 			    //if we created a mapping successfully, update the forced port
-			    if (mappedPort != 0 ) {
-			        upnpManager.get().clearMappingsOnShutdown();
-			        
+			    if (mappedPort != 0 ) {			        
 			        //  mark UPNP as being on so that if LimeWire shuts
 			        //  down prematurely, we know the FORCE_IP was from UPnP
 			        //  and that we can continue trying to use UPnP
@@ -363,7 +362,9 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
                 bindAndStartUpnp();
             }
             
+            @Asynchronous (timeout = 30, daemon = true)
             public void stop() {
+                upnpManager.get().clearMappings();
             }
         }).in("EarlyBackground");
     }

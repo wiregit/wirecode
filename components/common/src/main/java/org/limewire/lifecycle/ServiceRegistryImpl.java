@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.concurrent.ThreadExecutor;
+
 import com.google.inject.Singleton;
 
 @Singleton
@@ -82,12 +84,26 @@ class ServiceRegistryImpl implements ServiceRegistry {
                 startedServices.add(service);
                 iter.remove();
             }
+            for (ServiceHolder startedService : startedServices) {
+                try {
+                    startedService.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();  // TODO log, throw?
+                }
+            }
         }
     }
     
     public void stop() {
         for(int i = startedServices.size()-1; i >= 0; i--) {
             startedServices.get(i).stop();
+        }
+        for(int i = startedServices.size()-1; i >= 0; i--) {
+            try {
+                startedServices.get(i).join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();  // TODO log, throw?
+            }
             startedServices.remove(i);
         }
     }
@@ -107,13 +123,13 @@ class ServiceRegistryImpl implements ServiceRegistry {
     }
     
     private class ServiceHolder {
-        private final Service service;
+        private final AnnotatedService service;
         private boolean initted;
         private boolean started;
         private boolean stopped;
         
         public ServiceHolder(Service service) {
-            this.service = service;
+            this.service = new AnnotatedService(service);
         }
         
         void init() {
@@ -143,6 +159,125 @@ class ServiceRegistryImpl implements ServiceRegistry {
                     listener.stopping(service);
                 }
                 service.stop();
+            }
+        }
+        
+        void join() throws InterruptedException {
+            service.join();    
+        }
+
+        private class AnnotatedService implements Service {
+            private final Service service;
+            private Thread serviceExecutor;
+            
+            AnnotatedService(Service service) {
+                this.service = service;
+            }
+            
+            void join() throws InterruptedException {
+                if(serviceExecutor != null) {
+                    serviceExecutor.join();
+                    serviceExecutor = null;
+                }
+            }
+
+            public void initialize() {
+                service.initialize();
+            }
+
+            public String getServiceName() {
+                return service.getServiceName();
+            }
+
+            public void start() {
+                if(isAsyncStart()) {
+                    serviceExecutor = asyncStart();
+                } else {
+                    service.start();
+                }
+            }
+            
+            private Thread asyncStart() {
+                Asynchronous asynchronous = getStartAsynchronous();
+                Thread startThread = ThreadExecutor.newManagedThread(new Runnable() {
+                    public void run() {
+                        // TODO LOG
+                        service.start();
+                        // TODO LOG
+                    }
+                }, "ServiceRegistry-start-" + service.getServiceName());
+                startThread.setDaemon(asynchronous.daemon());
+                startThread = wrapWithWaitingThreadIfNeeded(startThread, asynchronous);
+                startThread.start();
+                return startThread;
+            }
+
+            public void stop() {
+                if(isAsyncStop()) {
+                    serviceExecutor = asyncStop();
+                } else {
+                    service.stop();
+                }
+            }
+            
+            private Thread asyncStop() {
+                Asynchronous asynchronous = getStopAsynchronous();
+                Thread stopThread = ThreadExecutor.newManagedThread(new Runnable() {
+                    public void run() {
+                        // TODO LOG
+                        service.stop();
+                        // TODO LOG
+                    }
+                }, "ServiceRegistry-stop-" + service.getServiceName());
+                stopThread.setDaemon(asynchronous.daemon());
+                stopThread = wrapWithWaitingThreadIfNeeded(stopThread, asynchronous);
+                stopThread.start(); 
+                return stopThread;
+            }
+            
+            private boolean isAsyncStop() {
+                return getAsynchronousAnnotation("stop") != null;                
+            }
+            
+            private boolean isAsyncStart() {
+                return getAsynchronousAnnotation("start") != null;                
+            }
+            
+            private Asynchronous getStopAsynchronous() {
+                return getAsynchronousAnnotation("stop");
+            }
+            
+            private Asynchronous getStartAsynchronous() {
+                return getAsynchronousAnnotation("start");
+            }
+            
+            private Asynchronous getAsynchronousAnnotation(String methodName){
+                try {
+                    return service.getClass().getMethod(methodName).getAnnotation(Asynchronous.class);
+                } catch (NoSuchMethodException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+            
+            private Thread wrapWithWaitingThreadIfNeeded(final Thread methodThread, final Asynchronous asynchronous) {
+                Thread toReturn;
+                if(asynchronous.timeout() > 0) {
+                    Thread waitingThread = ThreadExecutor.newManagedThread(new Runnable() {
+                        public void run() {
+                            // TODO LOG
+                            methodThread.start();
+                            try {
+                                methodThread.join(asynchronous.timeout() * 1000);
+                            } catch (InterruptedException e) {}
+                            // TODO LOG
+                        }
+                    }, "ServiceRegistry-waiting-thread-" + service.getServiceName());
+                    waitingThread.setDaemon(false); // TODO is this necessary?
+                    toReturn = waitingThread;
+                } else {
+                    toReturn = methodThread;
+                }
+                return toReturn;
             }
         }
     }

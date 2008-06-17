@@ -78,7 +78,9 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "DHT Peer Publisher", "DHTPeerPublisherImpl", 
         "Local Socket Listener", "LocalAcceptor", 
         "Various Core Services", "",
-        "Gnutella Connections", ""};
+        "Gnutella Connections", "",
+        "Firewall Manager", "FireWallServiceImpl",
+        "DAAP", ""};
         
         List<String> missing = new ArrayList<String>();
         

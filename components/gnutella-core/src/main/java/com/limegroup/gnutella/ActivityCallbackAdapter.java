@@ -148,5 +148,8 @@ public class ActivityCallbackAdapter implements ActivityCallback {
     public void showDownloads() {
         
     }
+    
+    public boolean handleDAAPConnectionError(Throwable t) { return false; }
+    public String translate(String s) { return s;}
 
 }

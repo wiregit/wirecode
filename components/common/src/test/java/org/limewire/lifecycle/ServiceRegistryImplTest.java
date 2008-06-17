@@ -116,6 +116,19 @@ public class ServiceRegistryImplTest extends BaseTestCase {
         
     }
     
+    public void testAsyncStop() {
+        ASynchStopServiceStub a1 = new ASynchStopServiceStub(1, 5000);
+        
+        ServiceRegistry registry = new ServiceRegistryImpl();        
+        registry.register(a1);        
+        registry.initialize();        
+        registry.start();
+        
+        long beforeStop = System.currentTimeMillis();
+        registry.stop();
+        assertGreaterThanOrEquals(5000, System.currentTimeMillis() - beforeStop);  
+    }
+    
     private void checkInit(int expected, int increment, ServiceStub... services) {
         for(ServiceStub stub : services) {
             assertEquals(stub.toString(), expected, stub.initCount);
@@ -167,6 +180,26 @@ public class ServiceRegistryImplTest extends BaseTestCase {
         public String getServiceName() {
             // TODO Auto-generated method stub
             return null;
+        }
+    }
+    
+    private class ASynchStopServiceStub extends ServiceStub {
+        private final long timeToSleep;
+
+        ASynchStopServiceStub(int id, long timeToSleep) {
+            super(id);
+            this.timeToSleep = timeToSleep;
+        }
+        
+        @Asynchronous 
+        public void stop() {
+            super.stop();
+            try {
+                // simulate long running task
+                Thread.sleep(timeToSleep);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
     

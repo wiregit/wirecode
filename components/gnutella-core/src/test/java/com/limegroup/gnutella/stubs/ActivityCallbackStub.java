@@ -82,4 +82,6 @@ public class ActivityCallbackStub implements ActivityCallback {
 	public void acceptedIncomingChanged(boolean status) { }
 	public void handleTorrent(File torrentFile) {
 	}
+    public boolean handleDAAPConnectionError(Throwable t) { return false; }
+    public String translate(String s) { return s;}
 }

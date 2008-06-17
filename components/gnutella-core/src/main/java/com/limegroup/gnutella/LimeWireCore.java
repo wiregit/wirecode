@@ -6,6 +6,7 @@ import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.net.ConnectionDispatcher;
+import org.limewire.net.FirewallService;
 import org.limewire.net.SocketsManager;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.promotion.PromotionSearcher;
@@ -103,6 +104,7 @@ import com.limegroup.gnutella.xml.LimeXMLProperties;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
+import com.limegroup.gnutella.daap.DaapManager;
 
 /**
  * Contains mostly all references to singletons within LimeWire.
@@ -712,5 +714,13 @@ public class LimeWireCore {
 
     public SharedFilesKeywordIndex getSharedFilesKeywordIndex() {
         return injector.getInstance(SharedFilesKeywordIndex.class);
+    }
+    
+    public FirewallService getFirewallService() {
+        return injector.getInstance(FirewallService.class);
+    }
+
+    public DaapManager getDaapManager() {
+        return injector.getInstance(DaapManager.class);
     }
 }
