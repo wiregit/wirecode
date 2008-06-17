@@ -119,7 +119,7 @@ public enum HTTPHeaderName {
     CONTENT_DISPOSITION("Content-Disposition"),
     
     /** The current host. */
-    HOST("HOST"),
+    HOST("Host"),
     
     /** The user agent. */
     USER_AGENT("User-Agent"),
