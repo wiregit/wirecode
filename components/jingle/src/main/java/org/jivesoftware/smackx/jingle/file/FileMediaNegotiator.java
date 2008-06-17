@@ -23,9 +23,11 @@ public class FileMediaNegotiator extends MediaNegotiator {
     private StreamInitiation.File file;
     private boolean sending;
     private boolean userAccepted;
+    private UserAcceptor userAcceptor;
 
-    public FileMediaNegotiator(JingleSession js, File file, boolean sending) {
+    public FileMediaNegotiator(JingleSession js, File file, boolean sending, UserAcceptor userAcceptor) {
         super(js);
+        this.userAcceptor = userAcceptor;
         this.file = getFile(file);
         this.sending = sending;
         userAccepted = false;
@@ -87,8 +89,7 @@ public class FileMediaNegotiator extends MediaNegotiator {
         }
 
         private boolean userAccepts(Jingle jin) {
-            // TODO ask user if they want to accept the offer/request
-            return true;
+            return userAcceptor.userAccepts(((FileDescription)jin.getContent().getDescriptions().get(0)).getFileContainer());
         }
     }
     

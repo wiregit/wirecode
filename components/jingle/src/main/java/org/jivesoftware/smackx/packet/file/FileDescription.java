@@ -3,13 +3,16 @@ package org.jivesoftware.smackx.packet.file;
 import java.io.File;
 
 import org.jivesoftware.smack.packet.PacketExtension;
-import org.jivesoftware.smackx.jingle.file.FileContentHandler;
 import org.jivesoftware.smackx.jingle.JingleContentHandler;
+import org.jivesoftware.smackx.jingle.file.FileContentHandler;
+import org.jivesoftware.smackx.jingle.file.UserAcceptor;
 import org.jivesoftware.smackx.packet.Description;
 import org.jivesoftware.smackx.packet.StreamInitiation;
 
 public class FileDescription extends Description {
     public static final String NAMESPACE = "urn:xmpp:tmp:jingle:apps:file-transfer";
+    
+    private static UserAcceptor userAcceptor;
     
     public String getNamespace() {
         return NAMESPACE;
@@ -24,12 +27,16 @@ public class FileDescription extends Description {
     }
 
     public JingleContentHandler createContentHandler() {
-        return new FileContentHandler(getFile(getFileContainer()), getFileContainer() instanceof Request);
+        return new FileContentHandler(getFile(getFileContainer()), getFileContainer() instanceof Request, userAcceptor);
     }
 
     private File getFile(FileContainer fileContainer) {
         StreamInitiation.File siFile = fileContainer.getFile();
         return new File(siFile.getName());
+    }
+    
+    public static void setUserAccptor(UserAcceptor userAccptor) {
+        FileDescription.userAcceptor = userAccptor;
     }
 
     public abstract static class FileContainer implements PacketExtension  {

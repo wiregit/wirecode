@@ -1,11 +1,8 @@
 package org.limewire.xmpp.client;
 
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.PacketCollector;
-import org.jivesoftware.smack.filter.PacketIDFilter;
+import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smackx.jingle.JingleManager;
 import org.jivesoftware.smackx.jingle.OutgoingJingleSession;
@@ -14,28 +11,31 @@ import org.jivesoftware.smackx.jingle.file.FileContentHandler;
 public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     
     private LibraryListener libraryListener;
+    protected LibraryIQListener IQListener;
 
-    LimePresenceImpl(org.jivesoftware.smack.packet.Presence presence, XMPPConnection connection) {
+    LimePresenceImpl(org.jivesoftware.smack.packet.Presence presence, XMPPConnection connection, LibraryIQListener libraryIQListener) {
         super(presence, connection);
+        this.IQListener = libraryIQListener;
     }
     
     void sendGetLibrary() {
-        LibraryIQ libraryIQ = new LibraryIQ();
+        final LibraryIQ libraryIQ = new LibraryIQ();
         libraryIQ.setType(IQ.Type.GET);
         libraryIQ.setTo(getJID());
         libraryIQ.setPacketID(IQ.nextID());
-        final PacketCollector collector = connection.createPacketCollector(
-            new PacketIDFilter(libraryIQ.getPacketID()));
-        connection.sendPacket(libraryIQ);
-        Thread responseThread = new Thread(new Runnable() {
-            public void run() {
-                LibraryIQ response = (LibraryIQ) collector.nextResult();
-                collector.cancel();
-                response.parseFiles(libraryListener);
-            }
-        });
-        responseThread.setDaemon(true);
-        responseThread.start();
+        IQListener.addLibraryListener(libraryIQ, libraryListener);
+        //final PacketCollector collector = connection.createPacketCollector(
+        //    new PacketIDFilter(libraryIQ.getPacketID()));         
+        //Thread responseThread = new Thread(new Runnable() {
+        //    public void run() {
+                connection.sendPacket(libraryIQ);
+                //LibraryIQ response = (LibraryIQ) collector.nextResult();
+                //collector.cancel();
+                //response.parseFiles(libraryListener);
+        //    }
+        //});
+        //responseThread.setDaemon(true);
+        //responseThread.start();
     }
     
     public void setLibraryListener(LibraryListener libraryListener) {
@@ -56,7 +56,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
                 Thread.sleep(500);
             }
 
-            //out.terminate();
+            out.terminate();
         } catch (XMPPException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -77,7 +77,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
                 Thread.sleep(500);
             }
 
-            //out.terminate();
+            out.terminate();
         } catch (XMPPException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

@@ -33,8 +33,10 @@ public class UserImpl implements User {
     }
     
     void addPresense(Presence presence) {
-        presences.put(presence.getJID(), presence);
-        firePresenceListeners(presence);        
+        synchronized (presences) {
+            presences.put(presence.getJID(), presence);
+            firePresenceListeners(presence);        
+        }
     }
 
     private void firePresenceListeners(Presence presence) {
@@ -44,12 +46,18 @@ public class UserImpl implements User {
     }
 
     void removePresense(Presence presence) {
-        presences.remove(presence);
-        firePresenceListeners(presence);
+        synchronized (presences) {
+            presences.remove(presence);
+            firePresenceListeners(presence);
+        }
     }
     
     public void addPresenceListener(PresenceListener presenceListener) {
-        presenceListeners.add(presenceListener);
-        // TODO fire existing presences
+        synchronized (presences) {
+            presenceListeners.add(presenceListener);
+            for(Presence presence : presences.values()) {
+                presenceListener.presenceChanged(presence);    
+            }
+        }
     }
 }

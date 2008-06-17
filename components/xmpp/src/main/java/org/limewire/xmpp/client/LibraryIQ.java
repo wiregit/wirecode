@@ -1,23 +1,26 @@
 package org.limewire.xmpp.client;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 public class LibraryIQ extends IQ {
-    private File[] allSharedFileDescriptors;
     private XmlPullParser parser;
-    
+    private LibrarySource librarySource;
+    private File [] files;
+
     public LibraryIQ(XmlPullParser parser) {
         this.parser = parser;
+        files = parseFiles();
     }
 
-    void parseFiles(LibraryListener listener) {
+    File [] parseFiles() {
+        ArrayList<File> files = new ArrayList<File>();
         try {
             do {
                 int eventType = parser.getEventType();
@@ -25,11 +28,11 @@ public class LibraryIQ extends IQ {
                     if(parser.getName().equals("file")) {
                         String urn = parser.getAttributeValue(null, "id");
                         String name = parser.getAttributeValue(null, "name");
-                        listener.fileAdded(new File(urn, name));
+                        files.add(new File(urn, name));
                     }
                 } else if(eventType == XmlPullParser.END_TAG) {
                     if(parser.getName().equals("library")) {
-                        return;
+                        return files.toArray(new File[]{});
                     }
                 }
             } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
@@ -38,32 +41,35 @@ public class LibraryIQ extends IQ {
         } catch (XmlPullParserException e) {
             e.printStackTrace(); // TODO log, throw?
         }
+        return files.toArray(new File[]{});
     }
 
-    public LibraryIQ(File[] allSharedFileDescriptors) {
-        this.allSharedFileDescriptors = allSharedFileDescriptors;
+    public LibraryIQ(LibrarySource librarySource) {
+        this.librarySource = librarySource;
+    }
+    
+    public File [] getFiles() {
+        return files;
     }
     
     public LibraryIQ() {
         
     }
 
-    public File[] getAllSharedFileDescriptors() {
-        return allSharedFileDescriptors;
-    }
-
     public String getChildElementXML() {
-        if(allSharedFileDescriptors != null) {
-            return "<library xmlns=\"jabber:iq:lw-library\">" + toXML(allSharedFileDescriptors) + "</library>";
+        if(librarySource != null) {
+            return "<library xmlns=\"jabber:iq:lw-library\">" + toXML(librarySource) + "</library>";
         } else {
             return "<library xmlns=\"jabber:iq:lw-library\"/>";
         }
         
     }
 
-    private String toXML(File[] allSharedFileDescriptors) {
+    private String toXML(LibrarySource librarySource) {
         StringBuilder builder = new StringBuilder();
-        for(File file : allSharedFileDescriptors) {
+        Iterator<File> files = librarySource.getFiles();
+        while(files.hasNext()) {
+            File file = files.next();
             builder.append("<file name=\"" + file.getName() + "\" ");
             builder.append("id=\"" + file.getId() + "\" />\n");
         }
@@ -75,6 +81,7 @@ public class LibraryIQ extends IQ {
     }
 
     private static class LibraryIQProvider implements IQProvider {
+
         public IQ parseIQ(XmlPullParser parser) throws Exception {                     
             return new LibraryIQ(parser);
         }

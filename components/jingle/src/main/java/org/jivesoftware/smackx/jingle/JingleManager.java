@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleManager.java,v $
- * $Revision: 1.1.4.1 $
- * $Date: 2008-06-12 15:20:33 $
+ * $Revision: 1.1.4.2 $
+ * $Date: 2008-06-17 22:34:38 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -245,7 +245,7 @@ public class JingleManager implements JingleSessionListener {
     public JingleManager(XMPPConnection connection) {
         this.connection = connection;
 
-        connection.getRoster().addRosterListener(new RosterListener() {
+        connection.addRosterListener(new RosterListener() {
 
             public void entriesAdded(Collection addresses) {
             }

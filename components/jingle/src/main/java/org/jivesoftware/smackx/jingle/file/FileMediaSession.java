@@ -75,14 +75,11 @@ public class FileMediaSession extends JingleMediaSession {
             Thread sender = new Thread(new Runnable() {
                 public void run() {                    
                     try {
-                        System.out.println("ACCEPTING on " + localIP + ":" + localPort);
                         Socket client = serverSocket.accept();
                         File toSend = getLocalFile(file);
-                        System.out.println("Sending " + toSend.getAbsolutePath() + " ...");
                         in = new BufferedInputStream(new FileInputStream(toSend));
                         out = new BufferedOutputStream(client.getOutputStream());
                         pipe(in, out);
-                        System.out.println("... complete");
                     } catch (Exception e) {
                         // TODO throw
                         e.printStackTrace();
@@ -116,14 +113,12 @@ public class FileMediaSession extends JingleMediaSession {
                 public void run() {                    
                     try {
                         Thread.sleep(5000);
-                        System.out.println("CONNECTING to " + remoteIP + ":" + remotePort + " locally bound on " + localIP + ":" + localPort);
                         //socket = new Socket(ip, remotePort, InetAddress.getByName(localIp), localPort);
                         socket = new Socket(remoteIP, remotePort, InetAddress.getByName(localIP), localPort);
                         File toSave = getNewFileToSave(file);
                         in = new BufferedInputStream(socket.getInputStream());
                         out = new BufferedOutputStream(new FileOutputStream(toSave));
                         pipe(in, out);
-                        System.out.println("... complete");
                     } catch (Exception e) {
                         // TODO throw
                         e.printStackTrace();
@@ -136,7 +131,6 @@ public class FileMediaSession extends JingleMediaSession {
 
     private File getNewFileToSave(StreamInitiation.File file) {        
         File saveFile =  new File(new File(""), file.getName());
-        System.out.println("saving: " + saveFile.getAbsolutePath() + " ...");
         return saveFile;
     }
 

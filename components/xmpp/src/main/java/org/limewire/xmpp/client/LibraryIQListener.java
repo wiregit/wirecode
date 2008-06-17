@@ -1,5 +1,7 @@
 package org.limewire.xmpp.client;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.filter.PacketFilter;
@@ -8,15 +10,12 @@ import org.jivesoftware.smack.packet.Packet;
 
 public class LibraryIQListener implements PacketListener {
     private XMPPConnection connection;
-    private File[] files;
+    private final LibrarySource librarySource;
+    private ConcurrentHashMap <String, LibraryListener> libraryHandlers = new ConcurrentHashMap<String, LibraryListener>();
 
-    public LibraryIQListener(XMPPConnection connection, File[] files) {
-        this.files = files;
+    public LibraryIQListener(XMPPConnection connection, LibrarySource librarySource) {
+        this.librarySource = librarySource;
         this.connection = connection;
-    }
-    
-    public void setFiles(File[] files) {
-        this.files = files;
     }
 
     public void setConnection(XMPPConnection connection) {
@@ -39,11 +38,23 @@ public class LibraryIQListener implements PacketListener {
     }
 
     private void handleResult(LibraryIQ libraryIQ) {
-
+        System.out.println("handling library result..." + libraryIQ.getPacketID());
+        LibraryListener listener = libraryHandlers.get(libraryIQ.getPacketID());
+        if(listener != null) {
+            System.out.println("notifying listener: " + listener);
+            for(File f : libraryIQ.getFiles()) {
+                listener.fileAdded(f);
+            }
+            libraryHandlers.remove(libraryIQ.getPacketID());
+        }
+    }
+    
+    public void addLibraryListener(LibraryIQ request, LibraryListener listener) {
+        libraryHandlers.put(request.getPacketID(), listener);
     }
 
     private void handleGet(LibraryIQ packet) {
-        LibraryIQ queryResult = new LibraryIQ(files);
+        LibraryIQ queryResult = new LibraryIQ(librarySource);
         queryResult.setTo(packet.getFrom());
         queryResult.setFrom(packet.getTo());
         queryResult.setPacketID(packet.getPacketID());

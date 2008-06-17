@@ -13,6 +13,7 @@ import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
 import org.jivesoftware.smackx.jingle.JingleContentHandler;
 import org.jivesoftware.smackx.jingle.JingleSession;
 import org.jivesoftware.smackx.packet.StreamInitiation;
+import org.jivesoftware.smackx.packet.file.FileDescription;
 
 
 public class FileContentHandler extends JingleContentHandler {
@@ -21,10 +22,24 @@ public class FileContentHandler extends JingleContentHandler {
     
     private File file;
     private boolean sending;
+    private UserAcceptor userAcceptor;
     
     public FileContentHandler(File file, boolean sending) {
+        this(file, sending, getAllwaysAcceptor());
+    }
+
+    private static UserAcceptor getAllwaysAcceptor() {
+        return new UserAcceptor() {
+            public boolean userAccepts(FileDescription.FileContainer file) {
+                return true;
+            }
+        };
+    }
+
+    public FileContentHandler(File file, boolean sending, UserAcceptor userAcceptor) {
         this.file = file;
         this.sending = sending;
+        this.userAcceptor = userAcceptor;
     }
     
     
@@ -41,6 +56,6 @@ public class FileContentHandler extends JingleContentHandler {
     }
 
     protected MediaNegotiator createMediaNegotiator(JingleSession session) {
-        return new FileMediaNegotiator(session, file, sending);
+        return new FileMediaNegotiator(session, file, sending, userAcceptor);
     }
 }
