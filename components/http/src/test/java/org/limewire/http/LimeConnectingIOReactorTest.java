@@ -37,6 +37,7 @@ import org.apache.http.protocol.RequestExpectContinue;
 import org.apache.http.protocol.RequestTargetHost;
 import org.apache.http.protocol.RequestUserAgent;
 import org.apache.http.util.EntityUtils;
+import org.limewire.common.LimeWireCommonModule;
 import org.limewire.http.reactor.LimeConnectingIOReactor;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
@@ -71,7 +72,7 @@ public class LimeConnectingIOReactorTest extends BaseTestCase {
     
     @Override
     protected void setUp() throws Exception {        
-        Injector injector = Guice.createInjector(new LimeWireNetModule(), new AbstractModule() {
+        Injector injector = Guice.createInjector(new LimeWireCommonModule(), new LimeWireNetModule(), new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ProxySettings.class).to(EmptyProxySettings.class);

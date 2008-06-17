@@ -11,6 +11,7 @@ import junit.framework.Test;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.limewire.common.LimeWireCommonModule;
 import org.limewire.concurrent.SimpleTimer;
 import org.limewire.http.httpclient.LimeHttpClient;
 import org.limewire.io.IOUtils;
@@ -19,9 +20,9 @@ import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.net.EmptySocketBindingSettings;
 import org.limewire.net.LimeWireNetModule;
 import org.limewire.net.ProxySettings;
+import org.limewire.net.ProxySettings.ProxyType;
 import org.limewire.net.SocketBindingSettings;
 import org.limewire.net.SocketsManager;
-import org.limewire.net.ProxySettings.ProxyType;
 import org.limewire.util.BaseTestCase;
 
 import com.google.inject.AbstractModule;
@@ -60,7 +61,7 @@ public class ProxyTest extends BaseTestCase {
         fps = new FakeProxyServer(PROXY_PORT, DEST_PORT);
         fps.setMakeError(false);
         
-        Injector injector = Guice.createInjector(new LimeWireNetModule(), new LimeWireHttpModule(), new AbstractModule() {
+        Injector injector = Guice.createInjector(new LimeWireCommonModule(), new LimeWireNetModule(), new LimeWireHttpModule(), new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ProxySettings.class).toInstance(proxySettings);

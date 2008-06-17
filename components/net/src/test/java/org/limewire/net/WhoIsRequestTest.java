@@ -5,6 +5,7 @@ import junit.framework.Test;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.util.BaseTestCase;
+import org.limewire.common.LimeWireCommonModule;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -28,7 +29,7 @@ public class WhoIsRequestTest extends BaseTestCase {
         
     @Override
     protected void setUp() throws Exception {
-        Injector injector = Guice.createInjector(new LimeWireNetModule(), new AbstractModule() {
+        Injector injector = Guice.createInjector(new LimeWireCommonModule(), new LimeWireNetModule(), new AbstractModule() {
             @Override
             protected void configure() {
                 bind(ProxySettings.class).to(EmptyProxySettings.class);
