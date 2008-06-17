@@ -17,9 +17,9 @@ import java.util.Date;
 
 import junit.framework.Test;
 
-import org.jmock.Expectations;
-import org.jmock.Mockery;
-import org.jmock.api.Expectation;
+//import org.jmock.Expectations;
+//import org.jmock.Mockery;
+//import org.jmock.api.Expectation;
 import org.limewire.activation.exception.ActivationException;
 import org.limewire.collection.Tuple;
 import org.limewire.security.certificate.CertificateProvider;

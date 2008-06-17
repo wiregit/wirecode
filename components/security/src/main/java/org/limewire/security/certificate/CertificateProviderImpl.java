@@ -7,7 +7,9 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+@Singleton
 public class CertificateProviderImpl implements CertificateProvider {
     private KeyStoreProvider keyStoreProvider;
 

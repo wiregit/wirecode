@@ -12,6 +12,7 @@ public class LimeWireSecurityCertificateModule extends AbstractModule {
         bind(HashCalculator.class).to(HashCalculatorSHA1Impl.class);
         bind(CipherProvider.class).to(CipherProviderImpl.class);
         bind(CertificateVerifier.class).to(CertificateVerifierImpl.class);
+        bind(CertificateProvider.class).to(CertificateProviderImpl.class);
     }
 
 }

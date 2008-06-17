@@ -29,12 +29,12 @@ public class PROActivationSettings extends LimeProps {
      */
     public static final StringSetting PRO_ACTIVATION_START_URL = 
         FACTORY.createRemoteStringSetting
-        ("PRO_ACTIVATION_START_URL","http://www.limewire.com/cgi-bin/proUpgrade.cgi","proActivationStartURL");
+        ("PRO_ACTIVATION_START_URL","http://stage.limewire.com/cgi-bin/proUpgrade.cgi","proActivationStartURL");
     
     /**
      * The lookup URL for testing if an activation key is good.
      */
     public static final StringSetting PRO_ACTIVATION_LOOKUP_URL = 
         FACTORY.createRemoteStringSetting
-        ("PRO_ACTIVATION_LOOKUP_URL","http://www.limewire.com/cgi-bin/proLookup.cgi","proActivationLookupURL");
+        ("PRO_ACTIVATION_LOOKUP_URL","http://stage.limewire.com/cgi-bin/proLookup.cgi","proActivationLookupURL");
 }

@@ -7,6 +7,7 @@ import org.limewire.io.GGEP;
 
 public class ActivationKey {
     private static final String KEY_VALID_FROM = "d";
+    private static final String KEY_DURATION   = "u";
     private static final String KEY_USER_EMAIL = "e";
 
     private final GGEP ggep;
@@ -15,6 +16,7 @@ public class ActivationKey {
         this(new GGEP());
         setValidFrom(new Date(Long.MAX_VALUE));
         setUserEmail("");
+        setDuration(0);
     }
 
     ActivationKey(GGEP ggep) {
@@ -28,7 +30,27 @@ public class ActivationKey {
     public void setUserEmail(String email_address) {
         ggep.put(KEY_USER_EMAIL, email_address);
     }
+    
+    public void setDuration(long days) {
+        ggep.put(KEY_DURATION, days);
+    }
 
+
+
+    
+    /**
+     * @return the date after which this key is valid, or a date far in the
+     *         future if this field is missing or corrupt.
+     */
+    public Date getValidFrom() {
+        try {
+            if (ggep.hasKey(KEY_VALID_FROM))
+                return new Date(ggep.getLong(KEY_VALID_FROM));
+        } catch (BadGGEPPropertyException ignored) {
+        }
+        return new Date(Long.MAX_VALUE);
+    }
+    
     /**
      * @return the email address of the purchaser.
      */
@@ -42,16 +64,15 @@ public class ActivationKey {
     }
     
     /**
-     * @return the date after which this key is valid, or a date far in the
-     *         future if this field is missing or corrupt.
+     * @return the number of days that the key is good for.
      */
-    public Date getValidFrom() {
+    public long getDuration() {
         try {
-            if (ggep.hasKey(KEY_VALID_FROM))
-                return new Date(ggep.getLong(KEY_VALID_FROM));
+            if (ggep.hasKey(KEY_DURATION))
+                return ggep.getLong(KEY_USER_EMAIL);
         } catch (BadGGEPPropertyException ignored) {
         }
-        return new Date(Long.MAX_VALUE);
+        return 0;
     }
 
     /**
