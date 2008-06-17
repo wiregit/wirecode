@@ -6,11 +6,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.nio.DefaultClientIOEventDispatch;
 import org.apache.http.nio.entity.ConsumingNHttpEntity;
 import org.apache.http.nio.protocol.AsyncNHttpClientHandler;
@@ -20,13 +20,13 @@ import org.apache.http.nio.reactor.IOEventDispatch;
 import org.apache.http.nio.reactor.SessionRequest;
 import org.apache.http.nio.reactor.SessionRequestCallback;
 import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.BasicHttpProcessor;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.RequestConnControl;
 import org.apache.http.protocol.RequestContent;
 import org.apache.http.protocol.RequestExpectContinue;
 import org.apache.http.protocol.RequestTargetHost;
 import org.apache.http.protocol.RequestUserAgent;
+import org.limewire.http.protocol.SynchronizedHttpProcessor;
 import org.limewire.swarm.http.handler.ExecutionHandler;
 
 class SwarmerImpl implements Swarmer {
@@ -40,10 +40,11 @@ class SwarmerImpl implements Swarmer {
     private final AsyncNHttpClientHandler clientHandler;
     private final ExecutionHandler executionHandler;
     private final SourceEventListener globalSourceEventListener;
-    private final BasicHttpProcessor httpProcessor;
+    private final SynchronizedHttpProcessor httpProcessor;
     
     SwarmerImpl(
             ExecutionHandler executionHandler,
+            ConnectionReuseStrategy connectionReuseStrategy,
             ConnectingIOReactor ioReactor,
             HttpParams params,
             SourceEventListener sourceEventListener) {
@@ -55,7 +56,7 @@ class SwarmerImpl implements Swarmer {
         else
             this.globalSourceEventListener = sourceEventListener;
         
-        httpProcessor = new BasicHttpProcessor();
+        httpProcessor = new SynchronizedHttpProcessor();
         httpProcessor.addInterceptor(new RequestContent());
         httpProcessor.addInterceptor(new RequestTargetHost());
         httpProcessor.addInterceptor(new RequestConnControl());
@@ -65,8 +66,27 @@ class SwarmerImpl implements Swarmer {
         clientHandler = new AsyncNHttpClientHandler(
                 httpProcessor,
                 new SwarmExecutionHandler(),
-                new DefaultConnectionReuseStrategy(),
+                connectionReuseStrategy,
                 params);
+//        clientHandler.setEventListener(new EventListener() {
+//           public void connectionClosed(NHttpConnection conn) {
+//               Thread.dumpStack();
+//            }
+//           public void connectionOpen(NHttpConnection conn) {
+//               Thread.dumpStack();
+//           }
+//           public void connectionTimeout(NHttpConnection conn) {
+//               Thread.dumpStack();
+//           }
+//           
+//           public void fatalIOException(IOException ex, NHttpConnection conn) {
+//               ex.printStackTrace();
+//           }
+//           
+//           public void fatalProtocolException(HttpException ex, NHttpConnection conn) {
+//               ex.printStackTrace();
+//           }
+//        });
         eventDispatch = new DefaultClientIOEventDispatch(clientHandler, params);
     }
     

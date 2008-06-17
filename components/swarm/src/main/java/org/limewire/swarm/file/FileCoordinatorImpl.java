@@ -3,6 +3,7 @@ package org.limewire.swarm.file;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.logging.Log;
@@ -26,7 +27,10 @@ public class FileCoordinatorImpl implements FileCoordinator {
     private static final Log LOG = LogFactory.getLog(FileCoordinatorImpl.class);
     
     /** The minimum blocksize to lease. */
-    private static final long MIN_BLOCK_SIZE = 16 * 1024;
+    private static final long DEFAULT_MIN_BLOCK_SIZE = 16 * 1024;
+    
+    /** The minimum block size to use. */
+    private final long minBlockSize;
     
     /** The complete size of the file. */
     private final long completeSize;
@@ -60,19 +64,33 @@ public class FileCoordinatorImpl implements FileCoordinator {
     
     /** A simple lock. */
     private final Object LOCK = new Object();
-
+    
+    /** List of listeners. */
+    private final CopyOnWriteArrayList<SwarmFileCompletionListener> listeners =
+        new CopyOnWriteArrayList<SwarmFileCompletionListener>();
 
     public FileCoordinatorImpl(long size, SwarmFile swarmFile, SwarmFileVerifier swarmFileVerifier,
-            ExecutorService writeService) {
+            ExecutorService writeService, SelectionStrategy selectionStrategy) {
+        this(size, swarmFile, swarmFileVerifier, writeService, selectionStrategy, DEFAULT_MIN_BLOCK_SIZE);
+    }
+    
+
+    public FileCoordinatorImpl(long size, SwarmFile swarmFile, SwarmFileVerifier swarmFileVerifier,
+            ExecutorService writeService, SelectionStrategy selectionStrategy, long minBlockSize) {
         this.completeSize = size;
         this.leasedBlocks = new IntervalSet();
         this.writtenBlocks = new IntervalSet();
         this.pendingBlocks = new IntervalSet();
         this.verifiedBlocks = new IntervalSet();
-        this.blockChooser = new ContiguousSelectionStrategy(size);
+        this.blockChooser = selectionStrategy;
         this.swarmFile = swarmFile;
         this.writeService = writeService;
         this.swarmFileVerifier = swarmFileVerifier;
+        this.minBlockSize = minBlockSize;
+    }
+    
+    public void addCompletionListener(SwarmFileCompletionListener swarmFileCompletionListener) {
+        listeners.add(swarmFileCompletionListener);
     }
 
     public long getCompleteFileSize() {
@@ -84,7 +102,7 @@ public class FileCoordinatorImpl implements FileCoordinator {
     }
 
     public Range leasePortion(IntervalSet availableRanges) {
-        return lease(availableRanges, Math.max(MIN_BLOCK_SIZE, swarmFileVerifier.getBlockSize()));
+        return lease(availableRanges, Math.max(minBlockSize, swarmFileVerifier.getBlockSize()));
     }
 
     public void unlease(Range range) {
@@ -111,13 +129,20 @@ public class FileCoordinatorImpl implements FileCoordinator {
     
     public void wrote(Range writtenRange) {
         List<Range> verifiableRanges;
+        boolean complete;
         synchronized(LOCK) {
             assert pendingBlocks.contains(writtenRange);
             pendingBlocks.delete(writtenRange);
             writtenBlocks.add(writtenRange);
             verifiableRanges = swarmFileVerifier.scanForVerifiableRanges(writtenBlocks, completeSize);
+            complete = verifiableRanges.isEmpty() && verifiedBlocks.isEmpty() && writtenBlocks.getNumberOfIntervals() == 1 && writtenBlocks.getSize() == completeSize;
         }
         
+        if(complete) {
+            for(SwarmFileCompletionListener listener : listeners) {
+                listener.fileCompleted(this, swarmFile);
+            }
+        }
         verifyRanges(verifiableRanges);
     }
     

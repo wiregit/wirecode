@@ -98,6 +98,16 @@ public interface FileCoordinator {
      * Triggers a verification of all written data and previously verified data.
      */
     void reverify();
+
+    /**
+     * Adds a listener for swarm completion.
+     * 
+     * The listener will be notified when the file has completely been downloaded.
+     * If verification is not active, the listener will be notified once all ranges
+     * are written.  If verification is active, the listener will be notified
+     * once all ranges are verified.
+     */
+    void addCompletionListener(SwarmFileCompletionListener swarmFileCompletionListener);
     
     
 }

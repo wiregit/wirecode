@@ -110,7 +110,7 @@ public class LimeConnectingIOReactor implements ConnectingIOReactor {
         session.setAttribute(IOSession.ATTACHMENT_KEY, attachment);
         session.setSocketTimeout(HttpConnectionParams.getSoTimeout(this.params));
         
-        HttpChannel channel = new HttpChannel(session, eventDispatch, null);
+        HttpChannel channel = new HttpChannel(session, eventDispatch);
         session.setHttpChannel(channel);
         
         eventDispatch.connected(session);

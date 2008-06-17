@@ -34,11 +34,8 @@ public class FileContentListener implements ResponseContentListener {
         if(finished)
             throw new IOException("Already finished.");
         
-        long low = expectedRange.getLow();
-        long high = expectedRange.getHigh();
-        
         if(writeJob == null) {
-            writeJob = fileCoordinator.newWriteJob(low, ioctrl);
+            writeJob = fileCoordinator.newWriteJob(expectedRange.getLow(), ioctrl);
         }
         
         long consumed = writeJob.consumeContent(decoder);
@@ -46,6 +43,8 @@ public class FileContentListener implements ResponseContentListener {
         // Reposition expectedRange so that we can release ranges
         // if we get cancelled.
         if(consumed > 0) {
+            long low = expectedRange.getLow();
+            long high = expectedRange.getHigh();
             long newLow = low + consumed;
             if (newLow > high) {
                 expectedRange = null;

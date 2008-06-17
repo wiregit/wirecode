@@ -1,4 +1,4 @@
-package org.limewire.swarm.http.gnutella;
+package org.limewire.swarm.http.gnutella.interceptor;
 
 import java.io.IOException;
 import java.util.Locale;

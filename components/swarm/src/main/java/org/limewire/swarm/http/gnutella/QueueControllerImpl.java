@@ -17,7 +17,7 @@ public class QueueControllerImpl implements QueueController {
     
     private final ScheduledExecutorService queueService;
     private final List<QInfo> queueList = new ArrayList<QInfo>();
-    private int maxQueueCapacity;
+    private int maxQueueCapacity = 10;
     
     private final Object LOCK = new Object();
     

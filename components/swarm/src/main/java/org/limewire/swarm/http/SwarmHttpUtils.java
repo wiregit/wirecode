@@ -28,7 +28,7 @@ public class SwarmHttpUtils {
      * The data should have 'bytes=X-Y'.
      */
     public static Range rangeForRequest(String value) {
-        if(!value.startsWith("bytes=") || value.length() <= 6) {
+        if(!value.startsWith("bytes") || value.length() <= 6) {
             return null;
         }
         
@@ -39,13 +39,14 @@ public class SwarmHttpUtils {
         
         try {
             long low = Long.parseLong(value.substring(6, dash).trim());
-            long high = Long.parseLong(value.substring(dash).trim());
+            long high = Long.parseLong(value.substring(dash+1).trim());
             if(low > high) {
                 return null;
             } else {
                 return Range.createRange(low, high);
             }
         } catch(NumberFormatException nfe) {
+            nfe.printStackTrace();
             return null;
         }
     }
