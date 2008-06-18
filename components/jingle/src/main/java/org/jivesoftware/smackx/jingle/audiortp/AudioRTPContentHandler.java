@@ -34,7 +34,7 @@ public class AudioRTPContentHandler extends JingleContentHandler {
     }
 
     protected JingleTransportManager createTransportManager(XMPPConnection connection) {
-        return new ICETransportManager(connection, "stun.xten.net", 3478);
+        return new ICETransportManager(connection, "jstun.javawi.de", 3478);
     }
 
     protected MediaNegotiator createMediaNegotiator(JingleSession session) {

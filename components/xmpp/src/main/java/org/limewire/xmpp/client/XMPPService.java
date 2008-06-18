@@ -16,8 +16,12 @@ import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.jingle.IncomingJingleSession;
 import org.jivesoftware.smackx.jingle.JingleManager;
 import org.jivesoftware.smackx.jingle.JingleSessionRequest;
-import org.jivesoftware.smackx.jingle.file.UserAcceptor;
+import org.jivesoftware.smackx.jingle.file.*;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
+import org.jivesoftware.smackx.packet.Content;
+import org.jivesoftware.smackx.packet.Description;
+import org.jivesoftware.smackx.packet.Jingle;
+import org.jivesoftware.smackx.packet.StreamInitiation;
 import org.jivesoftware.smackx.packet.file.FileDescription;
 import org.limewire.lifecycle.Service;
 
@@ -32,6 +36,7 @@ public class XMPPService implements Service {
     private final XMPPServiceConfiguration configuration;
     private final LibrarySource librarySource;
     private final IncomingFileAcceptor incomingFileAcceptor;
+    private final FileTransferProgressListener progressListener;
     private final CopyOnWriteArrayList<RosterListener> rosterListeners;
     private final HashMap<String, UserImpl> users;
     protected XMPPConnection connection;
@@ -41,10 +46,12 @@ public class XMPPService implements Service {
     public XMPPService(XMPPServiceConfiguration configuration,
                        RosterListener rosterListener,
                        LibrarySource librarySource,
-                       IncomingFileAcceptor incomingFileAcceptor) {
+                       IncomingFileAcceptor incomingFileAcceptor,
+                       FileTransferProgressListener progressListener) {
         this.configuration = configuration;
         this.librarySource = librarySource;
         this.incomingFileAcceptor = incomingFileAcceptor;
+        this.progressListener = progressListener;
         this.rosterListeners = new CopyOnWriteArrayList<RosterListener>();
         this.rosterListeners.add(rosterListener);
         this.users = new HashMap<String, UserImpl>();
@@ -95,32 +102,51 @@ public class XMPPService implements Service {
         }
         XMPPConnection.addConnectionCreationListener(new ConnectionCreationListener() {
             public void connectionCreated(final XMPPConnection connection) {
-                ServiceDiscoveryManager.getInstanceFor(connection).addFeature(LW_SERVICE_NS);
-                libraryIQListener = new LibraryIQListener(connection,  librarySource);
-                libraryIQListener.setConnection(connection);
-                connection.addPacketListener(libraryIQListener, libraryIQListener.getPacketFilter());
-                ProviderManager.getInstance().addIQProvider("library", "jabber:iq:lw-library", LibraryIQ.getIQProvider());
-                FileDescription.setUserAccptor(new UserAcceptor() {
-                    public boolean userAccepts(FileDescription.FileContainer file) {
-                        return incomingFileAcceptor.accept(new File(file.getFile().getHash(), file.getFile().getName()));
+                if(XMPPService.this.connection == connection) {
+                    if(!ServiceDiscoveryManager.getInstanceFor(connection).includesFeature(LW_SERVICE_NS)) {
+                        ServiceDiscoveryManager.getInstanceFor(connection).addFeature(LW_SERVICE_NS);
                     }
-                });
-                
-                JingleManager manager = new JingleManager(connection);
-                manager.addJingleSessionRequestListener(new JingleSessionRequestListener() {
-                    public void sessionRequested(JingleSessionRequest request) {
-                        try {
-                            // Accept the call
-                            IncomingJingleSession session = request.accept();
-                            // Start the call
-                            session.start();
-                        } catch (XMPPException e) {
-                            e.printStackTrace();
+                    libraryIQListener = new LibraryIQListener(connection,  librarySource);
+                    libraryIQListener.setConnection(connection);
+                    connection.addPacketListener(libraryIQListener, libraryIQListener.getPacketFilter());
+                    ProviderManager.getInstance().addIQProvider("library", "jabber:iq:lw-library", LibraryIQ.getIQProvider());
+                    FileDescription.setUserAccptor(new UserAcceptor() {
+                        public boolean userAccepts(FileDescription.FileContainer file) {
+                            return incomingFileAcceptor.accept(new File(file.getFile().getHash(), file.getFile().getName()));
                         }
-                    }
-                });
+                    });
+                    
+                    JingleManager manager = new JingleManager(connection);
+                    manager.addJingleSessionRequestListener(new JingleSessionRequestListener() {
+                        public void sessionRequested(JingleSessionRequest request) {
+                            try {
+                                // Accept the call
+                                IncomingJingleSession session = request.accept();
+                                Jingle jingle = session.getInitialSessionRequest().getJingle();
+                                if(jingle != null) {
+                                    Content content = jingle.getContent();
+                                    if(content != null) {
+                                        Description description = content.getDescriptions().get(0);
+                                        if(description != null) {
+                                            if(description instanceof FileDescription) {
+                                                ((FileContentHandler)session.getContentHandler()).setSaveDir(librarySource.getSaveDirectory(""));
+                                                ((FileContentHandler)session.getContentHandler()).setProgressListener(new FileTransferProgressListenerAdapter(progressListener));
+                                                // TODO set UserAcceptor
+                                                session.start();
+                                                return;
+                                            }
+                                        }
+                                    }
+                                }
+                                //session.terminate();
+                            } catch (XMPPException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                }
             }
-        });              
+        });
     }
 
     public String getServiceName() {
@@ -186,7 +212,7 @@ public class XMPPService implements Service {
                     if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.available)) {
                         try {
                             if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/")) {
-                                user.addPresense(new LimePresenceImpl(presence, connection, libraryIQListener));
+                                user.addPresense(new LimePresenceImpl(presence, connection, libraryIQListener, librarySource.getSaveDirectory("")));
                             } else {
                                 user.addPresense(new PresenceImpl(presence, connection));
                             }
@@ -206,6 +232,7 @@ public class XMPPService implements Service {
         public void presenceChanged(org.limewire.xmpp.client.Presence presence) {
             if(presence.getType().equals(Presence.Type.available)) {
                 if(presence instanceof LimePresence) {
+                    System.out.println("new lime presence: " + presence.getJID());
                     ((LimePresenceImpl) presence).sendGetLibrary();
                 }
             }

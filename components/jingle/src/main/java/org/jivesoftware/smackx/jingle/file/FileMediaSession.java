@@ -11,7 +11,6 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Random;
 
 import org.jivesoftware.smackx.jingle.JingleSession;
 import org.jivesoftware.smackx.jingle.media.JingleMediaSession;
@@ -19,7 +18,8 @@ import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
 import org.jivesoftware.smackx.packet.StreamInitiation;
 
 public class FileMediaSession extends JingleMediaSession {
-    private StreamInitiation.File file;
+    
+    private FileMediaNegotiator.JingleFile file;
     private final boolean sending;
     private OutputStream out;
     private InputStream in;
@@ -29,13 +29,17 @@ public class FileMediaSession extends JingleMediaSession {
     protected int localPort;
     protected String remoteIP;
     protected int remotePort;
+    protected File saveDir;
+    private final FileTransferProgressListener progressListener;
 
-    public FileMediaSession(final StreamInitiation.File file, final boolean sending,
+    public FileMediaSession(final FileMediaNegotiator.JingleFile file, final boolean sending,
             final TransportCandidate remote, final TransportCandidate local,
-            JingleSession jingleSession) {
+            JingleSession jingleSession, File saveDir, FileTransferProgressListener progressListener) {
         super(remote, local, jingleSession);
         this.file = file;
         this.sending = sending;
+        this.saveDir = saveDir;
+        this.progressListener = progressListener;
         initialize();
     }
 
@@ -57,12 +61,17 @@ public class FileMediaSession extends JingleMediaSession {
         }
     }
 
-    private void pipe(InputStream in, OutputStream out) throws IOException {
+    private void pipe(InputStream in, OutputStream out, FileMediaNegotiator.JingleFile beingTransferred, long size) throws IOException {
+        progressListener.started(beingTransferred);
         byte [] buffer = new byte[1024];
         int read;
+        long readSoFar = 0;
         while((read = in.read(buffer)) != -1) {
-            out.write(buffer, 0, read);    
+            out.write(buffer, 0, read);
+            readSoFar += read;
+            progressListener.updated(beingTransferred, (int)(readSoFar / size)); // TODO in another Thread?
         }
+        progressListener.completed(beingTransferred);
         in.close();
         out.close();
     }
@@ -71,15 +80,17 @@ public class FileMediaSession extends JingleMediaSession {
      * Starts transmission and for NAT Traversal reasons start receiving also.
      */
     public void startTrasmit() {
+        System.out.println("transmitting...");
         if(sending) {
             Thread sender = new Thread(new Runnable() {
                 public void run() {                    
                     try {
+                        System.out.println("accepting on " + serverSocket.getLocalPort());
                         Socket client = serverSocket.accept();
-                        File toSend = getLocalFile(file);
+                        File toSend = file.getLocalFile();
                         in = new BufferedInputStream(new FileInputStream(toSend));
                         out = new BufferedOutputStream(client.getOutputStream());
-                        pipe(in, out);
+                        pipe(in, out, file, file.getSize());
                     } catch (Exception e) {
                         // TODO throw
                         e.printStackTrace();
@@ -88,10 +99,6 @@ public class FileMediaSession extends JingleMediaSession {
             });
             sender.start();
         }     
-    }
-
-    private File getLocalFile(StreamInitiation.File file) {
-        return new File(file.getName());
     }
 
     /**
@@ -107,18 +114,20 @@ public class FileMediaSession extends JingleMediaSession {
     /**
      * For NAT Reasons this method does nothing. Use startTransmit() to start transmit and receive jmf
      */
-    public void startReceive() {        
+    public void startReceive() {      
+        System.out.println("receiving...");
         if(!sending) {
             Thread receiver = new Thread(new Runnable() {
                 public void run() {                    
                     try {
-                        Thread.sleep(5000);
+                        Thread.sleep(2000);
                         //socket = new Socket(ip, remotePort, InetAddress.getByName(localIp), localPort);
+                        System.out.println("connecting to " + remotePort);
                         socket = new Socket(remoteIP, remotePort, InetAddress.getByName(localIP), localPort);
                         File toSave = getNewFileToSave(file);
                         in = new BufferedInputStream(socket.getInputStream());
                         out = new BufferedOutputStream(new FileOutputStream(toSave));
-                        pipe(in, out);
+                        pipe(in, out, file, file.getSize());
                     } catch (Exception e) {
                         // TODO throw
                         e.printStackTrace();
@@ -129,9 +138,14 @@ public class FileMediaSession extends JingleMediaSession {
         }        
     }
 
-    private File getNewFileToSave(StreamInitiation.File file) {        
-        File saveFile =  new File(new File(""), file.getName());
-        return saveFile;
+    private File getNewFileToSave(StreamInitiation.File file) throws IOException {        
+        File toSave = new File(saveDir, file.getName());
+        toSave.getParentFile().mkdirs();         
+        int i = 1;
+        while(!toSave.createNewFile()) {
+            toSave = new File(saveDir, toSave.getName() + i++);   
+        }
+        return toSave;
     }
 
     /**

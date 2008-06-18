@@ -12,13 +12,16 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     
     private LibraryListener libraryListener;
     protected LibraryIQListener IQListener;
+    private final java.io.File saveDir;
 
-    LimePresenceImpl(org.jivesoftware.smack.packet.Presence presence, XMPPConnection connection, LibraryIQListener libraryIQListener) {
+    LimePresenceImpl(org.jivesoftware.smack.packet.Presence presence, XMPPConnection connection, LibraryIQListener libraryIQListener, java.io.File saveDir) {
         super(presence, connection);
         this.IQListener = libraryIQListener;
+        this.saveDir = saveDir;
     }
     
     void sendGetLibrary() {
+        System.out.println("send get library to " + getJID());
         final LibraryIQ libraryIQ = new LibraryIQ();
         libraryIQ.setType(IQ.Type.GET);
         libraryIQ.setTo(getJID());
@@ -43,11 +46,12 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         // TODO fire exiting library
     }
 
-    public void requestFile(File file) {
+    public void requestFile(File file, FileTransferProgressListener progressListener) {
         JingleManager manager = new JingleManager(connection);
 
         try {
-            FileContentHandler fileContentHandler = new FileContentHandler(new java.io.File(""), false);
+            FileContentHandler fileContentHandler = new FileContentHandler(new java.io.File(""), false, saveDir);
+            fileContentHandler.setProgressListener(new FileTransferProgressListenerAdapter(progressListener));
             OutgoingJingleSession out = manager.createOutgoingJingleSession(getJID(), fileContentHandler);
 
             out.start();
@@ -56,7 +60,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
                 Thread.sleep(500);
             }
 
-            out.terminate();
+            //out.terminate();
         } catch (XMPPException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -64,11 +68,12 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         }
     }
 
-    public void sendFile(java.io.File file) {
+    public void sendFile(java.io.File file, FileTransferProgressListener progressListener) {
         JingleManager manager = new JingleManager(connection);
 
         try {
-            FileContentHandler fileContentHandler = new FileContentHandler(file, true);
+            FileContentHandler fileContentHandler = new FileContentHandler(file, true, saveDir);
+            fileContentHandler.setProgressListener(new FileTransferProgressListenerAdapter(progressListener));
             OutgoingJingleSession out = manager.createOutgoingJingleSession(getJID(), fileContentHandler);
 
             out.start();
@@ -77,7 +82,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
                 Thread.sleep(500);
             }
 
-            out.terminate();
+            //out.terminate();
         } catch (XMPPException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

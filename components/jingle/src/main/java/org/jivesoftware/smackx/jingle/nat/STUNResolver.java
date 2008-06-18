@@ -1,6 +1,6 @@
 /**
  * $RCSfile: STUNResolver.java,v $
- * $Revision: 1.1.4.1 $
+ * $Revision: 1.1.4.2 $
  * $Date: 15/11/2006
  *
  * Copyright 2003-2006 Jive Software.
@@ -49,7 +49,7 @@ public class STUNResolver extends TransportResolver {
     public final static String STUNSERVERS_FILENAME = "META-INF/stun-config.xml";
 
     // Fallback values when we don't have any STUN server to use...
-    private final static String FALLBACKHOSTNAME = "stun.xten.net";
+    private final static String FALLBACKHOSTNAME = "jstun.javawi.de";
 
     private final static int FALLBACKHOSTPORT = 3478;
 

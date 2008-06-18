@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleSession.java,v $
- * $Revision: 1.1.4.1 $
- * $Date: 2008-06-12 15:20:34 $
+ * $Revision: 1.1.4.2 $
+ * $Date: 2008-06-18 23:10:27 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -146,6 +146,10 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
      */
     protected JingleSession(XMPPConnection conn, String initiator, String responder, JingleContentHandler contentHandler) {
         this(conn, initiator, responder, null, contentHandler);
+    }
+    
+    public JingleContentHandler getContentHandler() {
+        return contentHandler;
     }
 
     /**

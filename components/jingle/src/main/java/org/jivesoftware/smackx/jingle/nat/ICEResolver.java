@@ -1,7 +1,7 @@
 /**
  * $RCSfile: ICEResolver.java,v $
- * $Revision: 1.1.4.1 $
- * $Date: 2008-06-12 15:20:33 $
+ * $Revision: 1.1.4.2 $
+ * $Date: 2008-06-18 23:10:27 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -46,7 +46,7 @@ public class ICEResolver extends TransportResolver {
     XMPPConnection connection;
     Random random = new Random();
     long sid;
-    String server = "stun.xten.net";
+    String server = "jstun.javawi.de";
     int port = 3478;
     ICENegociator iceNegociator = null;
 

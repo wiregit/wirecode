@@ -13,6 +13,7 @@ public class FileDescription extends Description {
     public static final String NAMESPACE = "urn:xmpp:tmp:jingle:apps:file-transfer";
     
     private static UserAcceptor userAcceptor;
+    private File saveDir;
     
     public String getNamespace() {
         return NAMESPACE;
@@ -27,7 +28,7 @@ public class FileDescription extends Description {
     }
 
     public JingleContentHandler createContentHandler() {
-        return new FileContentHandler(getFile(getFileContainer()), getFileContainer() instanceof Request, userAcceptor);
+        return new FileContentHandler(getFile(getFileContainer()), getFileContainer() instanceof Request, userAcceptor, saveDir);
     }
 
     private File getFile(FileContainer fileContainer) {
@@ -37,6 +38,10 @@ public class FileDescription extends Description {
     
     public static void setUserAccptor(UserAcceptor userAccptor) {
         FileDescription.userAcceptor = userAccptor;
+    }
+    
+    public void setSaveDir(File saveDir) {
+        this.saveDir = saveDir;
     }
 
     public abstract static class FileContainer implements PacketExtension  {

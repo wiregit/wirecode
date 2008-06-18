@@ -6,4 +6,5 @@ public interface User {
     String getName();
 
     void addPresenceListener(PresenceListener presenceListener);
+
 }

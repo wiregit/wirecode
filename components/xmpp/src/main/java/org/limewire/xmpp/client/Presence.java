@@ -19,4 +19,8 @@ public interface Presence {
     public int getPriority();
 
     public Mode getMode();
+    
+    public MessageWriter newChat(MessageReader reader);
+    
+    public void setIncomingChatListener(IncomingChatListener listener);
 }
