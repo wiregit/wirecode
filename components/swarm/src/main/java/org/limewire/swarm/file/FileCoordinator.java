@@ -88,6 +88,12 @@ public interface FileCoordinator {
      * Returns the total amount of data that has been verified thus far.
      */
     long getAmountVerified();
+    
+    /**
+     * Returns the total amount of data that was discarded because
+     * it could not be verified.
+     */
+    long getAmountLost();
 
     /**
      * Triggers a verification on all written data.

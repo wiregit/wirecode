@@ -22,7 +22,6 @@ public class FileContentListener implements ResponseContentListener {
     private final FileCoordinator fileCoordinator;
     private boolean finished;
     private Range expectedRange;
-    private Range actualRange;
     private WriteJob writeJob;
 
     public FileContentListener(FileCoordinator fileCoordinator, Range range) {
@@ -71,6 +70,7 @@ public class FileContentListener implements ResponseContentListener {
         
         Header contentRange = response.getFirstHeader("Content-Range");
         Header contentLengthHeader = response.getFirstHeader("Content-Length");
+        Range actualRange;
         
         if(contentLengthHeader != null) {
             long contentLength = numberFor(contentLengthHeader.getValue());
@@ -92,10 +92,10 @@ public class FileContentListener implements ResponseContentListener {
             throw new IOException("No content length, though content range existed.");
         }
         
-        validateActualRangeAndShrinkExpectedRange();
+        validateActualRangeAndShrinkExpectedRange(actualRange);
     }
     
-    private void validateActualRangeAndShrinkExpectedRange() throws IOException {
+    private void validateActualRangeAndShrinkExpectedRange(Range actualRange) throws IOException {
         if (actualRange == null || expectedRange == null) {
             throw new IOException("No actual or expected range?");
         }
@@ -109,12 +109,12 @@ public class FileContentListener implements ResponseContentListener {
         if (!actualRange.equals(expectedRange)) {
             if (actualRange.getLow() > expectedRange.getLow()) {
                 fileCoordinator.unlease(Range.createRange(expectedRange.getLow(),
-                                                          actualRange.getLow()));
+                                                          actualRange.getLow()-1));
                 expectedRange = Range.createRange(actualRange.getLow(), expectedRange.getHigh());
             }
 
             if (actualRange.getHigh() < expectedRange.getHigh()) {
-                fileCoordinator.unlease(Range.createRange(actualRange.getHigh(),
+                fileCoordinator.unlease(Range.createRange(actualRange.getHigh()+1,
                                                           expectedRange.getHigh()));
                 expectedRange = Range.createRange(expectedRange.getLow(), actualRange.getHigh());
             }

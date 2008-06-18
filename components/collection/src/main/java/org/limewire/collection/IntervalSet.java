@@ -197,8 +197,11 @@ public class IntervalSet implements Iterable<Range>, Serializable{
      * from this set.
      */
     public void delete(IntervalSet set) {
-        for(Range interval : set)
+        for(Range interval : set) {
+            if(isEmpty()) // optimization
+                break;
             delete(interval);
+        }
     }
     
     /**

@@ -102,6 +102,9 @@ public class FileCoordinatorImpl implements FileCoordinator {
     }
 
     public Range leasePortion(IntervalSet availableRanges) {
+        // Lease modifies, so clone.
+        if(availableRanges != null)
+            availableRanges = availableRanges.clone();
         return lease(availableRanges, Math.max(minBlockSize, swarmFileVerifier.getBlockSize()));
     }
 
@@ -135,7 +138,7 @@ public class FileCoordinatorImpl implements FileCoordinator {
             pendingBlocks.delete(writtenRange);
             writtenBlocks.add(writtenRange);
             verifiableRanges = swarmFileVerifier.scanForVerifiableRanges(writtenBlocks, completeSize);
-            complete = verifiableRanges.isEmpty() && verifiedBlocks.isEmpty() && writtenBlocks.getNumberOfIntervals() == 1 && writtenBlocks.getSize() == completeSize;
+            complete = verifiableRanges.isEmpty() && isComplete();
         }
         
         if(complete) {
@@ -143,7 +146,27 @@ public class FileCoordinatorImpl implements FileCoordinator {
                 listener.fileCompleted(this, swarmFile);
             }
         }
+        
         verifyRanges(verifiableRanges);
+    }
+    
+    /**
+     * Returns true if this is complete either because all data is in writtenBlocks,
+     * or all data is in verifiedBlocks.
+     * 
+     * LOCK must be held while calling this.
+     */
+    private boolean isComplete() {
+        IntervalSet blocksToCheck = null;
+        if(verifiedBlocks.isEmpty()) {
+            blocksToCheck = writtenBlocks;
+        } else if(writtenBlocks.isEmpty()) {
+            blocksToCheck = verifiedBlocks;
+        }
+        
+        return blocksToCheck != null
+                && blocksToCheck.getNumberOfIntervals() == 1
+                && blocksToCheck.getSize() == completeSize;
     }
     
     private void verifyRanges(List<Range> verifiableRanges) {
@@ -151,6 +174,7 @@ public class FileCoordinatorImpl implements FileCoordinator {
             LOG.debug("Verifying ranges: " + verifiableRanges);
         }
         
+        boolean complete = false;
         for(Range rangeToVerify : verifiableRanges) {
             boolean verified = swarmFileVerifier.verify(rangeToVerify, swarmFile);
             synchronized(LOCK) {
@@ -158,6 +182,7 @@ public class FileCoordinatorImpl implements FileCoordinator {
                 writtenBlocks.delete(rangeToVerify);
                 if(verified) {
                     verifiedBlocks.add(rangeToVerify);
+                    complete = isComplete();
                 } else {
                     // TODO: Add a toggle for keeping lost ranges, and do not
                     //       count if doing a 'full scan'.
@@ -168,11 +193,23 @@ public class FileCoordinatorImpl implements FileCoordinator {
                 }
             }
         }
+        
+        if(complete) {
+            for(SwarmFileCompletionListener listener : listeners) {
+                listener.fileCompleted(this, swarmFile);
+            }
+        }
     }
     
     public long getAmountVerified() {
         synchronized(LOCK) {
             return verifiedBlocks.getSize();
+        }
+    }
+    
+    public long getAmountLost() {
+        synchronized(LOCK) {
+            return amountLost;
         }
     }
     
@@ -185,7 +222,7 @@ public class FileCoordinatorImpl implements FileCoordinator {
             // As an optimization, only scan for ranges if we have no pending blocks.
             // (This works because a pending range implies wrote will be called,
             //  and wrote will trigger a verification.)
-            if(pendingBlocks.getNumberOfIntervals() == 0) {
+            if(pendingBlocks.getNumberOfIntervals() == 0 && !writtenBlocks.isEmpty()) {
                 verifiableRanges = swarmFileVerifier.scanForVerifiableRanges(writtenBlocks, completeSize);
             } else {
                 verifiableRanges = Collections.emptyList();
@@ -208,7 +245,7 @@ public class FileCoordinatorImpl implements FileCoordinator {
             // As an optimization, only scan for ranges if we have no pending blocks.
             // (This works because a pending range implies wrote will be called,
             //  and wrote will trigger a verification.)
-            if(pendingBlocks.getNumberOfIntervals() == 0) {
+            if(pendingBlocks.getNumberOfIntervals() == 0 && !writtenBlocks.isEmpty()) {
                 verifiableRanges = swarmFileVerifier.scanForVerifiableRanges(writtenBlocks, completeSize);
             } else {
                 verifiableRanges = Collections.emptyList();
@@ -227,6 +264,10 @@ public class FileCoordinatorImpl implements FileCoordinator {
     protected Range lease(IntervalSet availableRanges, long blockSize) {
         IntervalSet neededBytes = new IntervalSet();
         availableRanges = getAvailableRangesForLease(availableRanges, neededBytes);
+        
+        if(availableRanges.isEmpty()) {
+            return null;
+        }
         
         // Pick a range, add it to leased, and exit.
         Range chosen;
