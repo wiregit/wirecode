@@ -6,12 +6,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.limewire.concurrent.ThreadExecutor;
 
 import com.google.inject.Singleton;
 
 @Singleton
 class ServiceRegistryImpl implements ServiceRegistry {
+    
+    private static final Log LOG = LogFactory.getLog(ServiceRegistryImpl.class);
     
     private final List<StagedRegisterBuilderImpl> builders
         = new ArrayList<StagedRegisterBuilderImpl>();
@@ -80,6 +84,9 @@ class ServiceRegistryImpl implements ServiceRegistry {
         if(servicedStages != null) {
             for(Iterator<ServiceHolder> iter = servicedStages.iterator(); iter.hasNext(); ) {
                 ServiceHolder service = iter.next();
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("starting service: " + service.service.getClass().getSimpleName());
+                }
                 service.start();
                 startedServices.add(service);
                 iter.remove();
@@ -96,6 +103,9 @@ class ServiceRegistryImpl implements ServiceRegistry {
     
     public void stop() {
         for(int i = startedServices.size()-1; i >= 0; i--) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("stopping service: " + startedServices.get(i).service.getClass().getSimpleName());
+            }
             startedServices.get(i).stop();
         }
         for(int i = startedServices.size()-1; i >= 0; i--) {
