@@ -80,7 +80,7 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "Various Core Services", "",
         "QRP Updater", "QRPUpdater",
         "Gnutella Connections", "",
-        "Firewall Manager", "FireWallServiceImpl",
+        "Firewall Manager", "FirewallServiceImpl",
         "DAAP", ""};
         
         List<String> missing = new ArrayList<String>();
