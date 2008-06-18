@@ -1073,16 +1073,10 @@ public class AltLocUploadTest extends LimeTestCase {
                 will(returnValue(true));
                 allowing(handler).getConnectionCapabilities();
                 will(returnValue(capabilities));
-                allowing(capabilities).isOldLimeWire();
-                will(returnValue(false));
-                allowing(handler).isPersonalSpam(request);
-                will(returnValue(false));
                 allowing(handler).isSupernodeClientConnection();
                 will(returnValue(false));
                 allowing(handler).isGoodUltrapeer();
                 will(returnValue(false));
-                allowing(request).getNetwork();
-                will(returnValue(Network.TCP));
                 
                 // some request-specific conditions
                 one(request).hop();
@@ -1096,8 +1090,12 @@ public class AltLocUploadTest extends LimeTestCase {
                 will(returnValue((new GUID()).bytes())); // every iteration
                 atLeast(1).of(request).desiresAll();
                 will(returnValue(true));
-
-                // stubbed out with default return values
+                allowing(request).getNetwork();
+                will(returnValue(Network.TCP));
+                allowing(handler).isPersonalSpam(request);
+                will(returnValue(false));
+                
+                ignoring(request).shouldIncludeXMLInResponse();
                 ignoring(request).getTotalLength();
                 ignoring(request).isFirewalledSource();
                 ignoring(request).canDoFirewalledTransfer();
