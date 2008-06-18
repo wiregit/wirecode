@@ -419,6 +419,22 @@ public class RestRPCMain implements DataStore {
             router.attach("/download/stop/{id}", DownloadStopResource.class);       // stops a specific download
             router.attach("/download/addsource/{id}", DownloadAddSourceResource.class);     // add a source to an existing download
             
+            // TODO - search - /search/
+            //
+            //   if we add "streaming comet" support, then this would 
+            //   immediately return results to the relevant gui instead of
+            //   piling them up waiting for the gui to ask for the results.
+            //
+            //
+            // TODO - download - /download/
+            //
+            //   if we add "streaming comet" support, then updates to the on-
+            //   going downloads would be returned to the gui immediately. we
+            //   don't want to swap the gui with an update every time a single
+            //   byte of data is received - so, this would need to be throttled
+            //   in some fashion.
+            //
+            //
             // TODO - authentication - /auth/
             //
             //   presently this interface is one big security hole. some form 
@@ -437,6 +453,7 @@ public class RestRPCMain implements DataStore {
             //   gui when sending future requests.
             //
             // TODO - file manager stuff - /file/
+            //
             //
             //   if we assume that the gui can be run from a machaine other 
             //   than the machine on which the core is running, then we must 
@@ -470,29 +487,30 @@ public class RestRPCMain implements DataStore {
             //     share
             //     unshare
             // 
-            // Apache Commons VFS & VFSJFileChooser
+            //   Apache Commons VFS & VFSJFileChooser
             //
-            //   creating a vfs plugin for our rest-based "file system" looks
-            //   to be a pain. certainly not impossible though. I don't see it
-            //   as making life that much easier for Turkel, however, so it
-            //   probably really isn't worth the effort.
+            //     creating a vfs plugin for our rest-based "file system" looks
+            //     to be a pain. certainly not impossible though. I don't see it
+            //     as making life that much easier for Turkel, however, so it
+            //     probably really isn't worth the effort.
             //
-            // FileDesc
+            //   FileDesc
             //
-            //   Semes like a good idea to implement FileDesc for representing
-            //   files via REST.
+            //     Semes like a good idea to implement FileDesc for 
+            //     representing files via REST.
             //
-            //   We'll need to also add a "refresh" of some sort, so that it
-            //   can synchronize with the remote file system
+            //     We'll need to also add a "refresh" of some sort, so that it
+            //     can synchronize with the remote file system
             //
-            // File Event Callbacks
+            //   File Event Callbacks
             //
-            //   We need to be able to register file event listeners that will
-            //   fire when an event occurs on a file / directory on the remote
-            //   file system. Unless we go with the streaming variety of a 
-            //   comet-style server, we will not be able to promptly inform the
-            //   gui that a file event has occured. But can restlet support
-            //   this? I don't know.
+            //     We need to be able to register file event listeners that 
+            //     will fire when an event occurs on a file / directory on the 
+            //     remote file system. Unless we go with the streaming variety 
+            //     of a comet-style server, we will not be able to promptly 
+            //     inform the gui that a file event has occured. But can 
+            //     restlet support this? I don't know.
+            //
             //
             // TODO - streaming comet
             //
@@ -514,6 +532,41 @@ public class RestRPCMain implements DataStore {
             //   rolled system would likely provide the best performance.
             //
             //
+            // TODO - connections
+            //
+            //   connections tab in the existing client.
+            //
+            //
+            // TODO - logging
+            //
+            //   logging tab in the existing client.
+            //
+            //
+            // TODO - monitor
+            //
+            //   monitor tab in the existing client.
+            //
+            //
+            // TODO - console
+            //
+            //   console tab in the existing client.
+            //
+            //
+            // TODO - preferences
+            //
+            //   all of the preferences that pertain to the operation of the 
+            //   core will need a restlet interface for retrieving and setting.
+            //
+            //   we must either force there to be only a single gui controlling
+            //   a given core at a time, or we must add preference event 
+            //   listeners such that a gui can be notified when a preference 
+            //   changes - as the preference may have been modified by another
+            //   gui.
+            //
+            //   with the dream of having light-weight web and smartphone guis,
+            //   it seems prudent to be able to support multiple, simultaneous
+            //   guis on a core. it's a little more work, possibly, but it
+            //   seems worth while.
             //
             
             
