@@ -491,6 +491,8 @@ public class StringUtils {
      * Note: Should synchronize calling method if the fields of the instance
      * can be modified by other threads.
      * 
+     * Note: Creates a temporary copy of arrays of primitive elements.
+     * 
      * Calls {@link Object#toString()} on fields.
      */
     public static String toString(Object thiz, Object...args) {
