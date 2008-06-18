@@ -419,6 +419,104 @@ public class RestRPCMain implements DataStore {
             router.attach("/download/stop/{id}", DownloadStopResource.class);       // stops a specific download
             router.attach("/download/addsource/{id}", DownloadAddSourceResource.class);     // add a source to an existing download
             
+            // TODO - authentication - /auth/
+            //
+            //   presently this interface is one big security hole. some form 
+            //   of authentication must be implemented. given the non-
+            //   persistent-socket nature of this REST protocol, authentication 
+            //   must provide a token which is handed back to the core for all 
+            //   subsequent requests. this token should be bound to a 
+            //   particular ip address. the entirety of the communication 
+            //   between the gui and the core *should* be encrypted.
+            //
+            //   an interesting alternative to having to encrypt all of the 
+            //   data going between the gui and the core (so as to prevent 
+            //   someone from obtaining the session token) is that of a set of 
+            //   "challenges" sent by the core to the gui in its various 
+            //   responses to requests - which challenges could be used by the 
+            //   gui when sending future requests.
+            //
+            // TODO - file manager stuff - /file/
+            //
+            //   if we assume that the gui can be run from a machaine other 
+            //   than the machine on which the core is running, then we must 
+            //   provide an interface that allows the gui to "browse" the file 
+            //   system in its entirety - just as one can, presently, with Lime
+            //   Wire in the Sharing preferences when selecting which 
+            //   directories to share.
+            //
+            //   get list of files (including various stats - size, path, uploads, hits, locations, shared, etc.)
+            //   delete a file
+            //   rename a file
+            //   set file/directory as shared/not shared
+            //   list all shared files
+            //   list all store files (?)
+            //   list all saved files
+            //   list all incomplete files
+            //
+            //   should the core send the icon?
+            //   we must provide full file system access
+            // 
+            //   image, audio and video previews will each require that we can send files to the GUI
+            //
+            //   /file/{command}/?{path} => /file/delete/?/path/to/file
+            //
+            //     list | info | stat
+            //     download | get (read offset)
+            //     upload | put (write offset; or just append?)
+            //     get preview (generate a preview on the core side. helpful?)
+            //     stream (if this is effectively any different than download/get)
+            //     move | rename (same thing on one level)
+            //     share
+            //     unshare
+            // 
+            // Apache Commons VFS & VFSJFileChooser
+            //
+            //   creating a vfs plugin for our rest-based "file system" looks
+            //   to be a pain. certainly not impossible though. I don't see it
+            //   as making life that much easier for Turkel, however, so it
+            //   probably really isn't worth the effort.
+            //
+            // FileDesc
+            //
+            //   Semes like a good idea to implement FileDesc for representing
+            //   files via REST.
+            //
+            //   We'll need to also add a "refresh" of some sort, so that it
+            //   can synchronize with the remote file system
+            //
+            // File Event Callbacks
+            //
+            //   We need to be able to register file event listeners that will
+            //   fire when an event occurs on a file / directory on the remote
+            //   file system. Unless we go with the streaming variety of a 
+            //   comet-style server, we will not be able to promptly inform the
+            //   gui that a file event has occured. But can restlet support
+            //   this? I don't know.
+            //
+            // TODO - streaming comet
+            //
+            //   It seems necessary for the server to support the "streaming 
+            //   comet" approach to supporting low-latency, non-polling responses
+            //   to asynchronous events. Anything less than supporting streaming
+            //   comet will amount to hackery that will provide a sub-optimal
+            //   user experience.
+            //
+            //   If Restlet's threading model (in particular) won't freak out
+            //   at being made to persistently hold open sockets, then that's
+            //   the path of least resistance. Otherwise, either another xmlrpc
+            //   implementation will need to be found that is suitable, or one
+            //   will have to be rolled in-house.
+            //
+            //   It's not a significant amount of work to write an http server,
+            //   and support basic get, post, multi-part, etc; although it is
+            //   error prone and requires a quite a bit of testing. such a home
+            //   rolled system would likely provide the best performance.
+            //
+            //
+            //
+            
+            
             return router;
         }
         
