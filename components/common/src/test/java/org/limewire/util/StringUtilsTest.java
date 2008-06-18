@@ -307,6 +307,11 @@ public class StringUtilsTest extends BaseTestCase {
     }
     
     
+    public void testToStringWithArrayFields() {
+        ArrayFields fields = new ArrayFields();
+        assertEquals("ArrayFields {objs=[null, hello], ints=[4, 4]}", fields.toString());
+    }
+    
     private static class AllFields {
         String a = "a";
         int i = Integer.MAX_VALUE;
@@ -328,6 +333,16 @@ public class StringUtilsTest extends BaseTestCase {
         @Override
         public String toString() {
             return StringUtils.toString(this, a, n);
+        }
+    }
+    
+    private static class ArrayFields {
+        Object[] objs = new Object[] { null, "hello" };
+        int[] ints = new int[] { 4 , 4 };
+        
+        @Override
+        public String toString() {
+            return StringUtils.toString(this);
         }
     }
 }

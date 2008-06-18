@@ -1,6 +1,7 @@
 package org.limewire.util;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -481,6 +482,17 @@ public class StringUtils {
     
     private static ThreadLocal<IdentityHashMap<Object, Object>> threadLocal = new ThreadLocal<IdentityHashMap<Object, Object>>();
     
+    /**
+     * Creates a string representation of the object <code>thiz</code>.
+     * 
+     * Can optionally be given a whitelist of fields that should be part of the string
+     * output.
+     * 
+     * Note: Should synchronize calling method if the fields of the instance
+     * can be modified by other threads.
+     * 
+     * Calls {@link Object#toString()} on fields.
+     */
     public static String toString(Object thiz, Object...args) {
         boolean cleanUp = false;
         try {
@@ -502,7 +514,25 @@ public class StringUtils {
                     Object value = field.get(thiz);
                     field.setAccessible(accessible);
                     if (args.length == 0 || Arrays.asList(args).contains(value)) {
-                        fields.put(field.getName(), String.valueOf(value));
+                        if (value == null) {
+                            fields.put(field.getName(), String.valueOf(value));
+                        } else {
+                            Class clazz = value.getClass();
+                            if (clazz.isArray()) {
+                                if (!clazz.getComponentType().isPrimitive()) {
+                                    fields.put(field.getName(), String.valueOf(Arrays.asList((Object[])value)));
+                                } else {
+                                    int length = Array.getLength(value);
+                                    List<Object> copy = new ArrayList<Object>(length);
+                                    for (int i = 0; i < length; i++) {
+                                        copy.add(Array.get(value, i));
+                                    }
+                                    fields.put(field.getName(), String.valueOf(copy));
+                                }
+                            } else {
+                                fields.put(field.getName(), String.valueOf(value));
+                            }
+                        }
                     }
                 } catch (IllegalArgumentException e) {
                     e.printStackTrace();
