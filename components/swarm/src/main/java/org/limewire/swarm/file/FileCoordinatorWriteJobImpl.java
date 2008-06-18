@@ -53,7 +53,7 @@ class FileCoordinatorWriteJobImpl implements WriteJob {
             }
             
             if(hasPendingData()) {
-                fileCoordinator.unpending(Range.createRange(startPosition, startPosition + buffer.remaining() - 1));
+                fileCoordinator.unpending(Range.createRange(startPosition, startPosition + buffer.position() - 1));
                 byteBufferCache.release(buffer);
                 buffer = null;
                 startPosition = -1;
@@ -63,6 +63,9 @@ class FileCoordinatorWriteJobImpl implements WriteJob {
     
     public long consumeContent(ContentDecoder decoder) throws IOException {
         synchronized(scheduleLock) {
+            if(startPosition == -1)
+                throw new IOException("Cancelled");
+            
             if(buffer == null) {
                 buffer = byteBufferCache.get(BUFFER_SIZE);
                 assert buffer.position() == 0;
@@ -162,6 +165,12 @@ class FileCoordinatorWriteJobImpl implements WriteJob {
                 if(LOG.isTraceEnabled())
                     LOG.trace("Writing from: " + dataBuffer + ", starting at: " + position);
                 long wrote = fileWriter.transferFrom(new BufferDecoder(dataBuffer), position);
+                // We assume that the file can always write > 0 bytes.  If it wrote less,
+                // we're completely screwed here.
+                // (This is because there's no feedback from the filesystem on when more could
+                //  be written.)
+                // Fortunately, it's all-but-guaranteed that fileChannel.write will write
+                // all the data we want.
                 fileCoordinator.wrote(Range.createRange(position, position + wrote -1 ));
                 position += wrote;
                 totalWrote += wrote;
