@@ -15,9 +15,11 @@ import org.apache.http.nio.IOControl;
 
 public class QueueControllerImpl implements QueueController {
     
+    private static final int DEFAULT_QUEUE_CAPACITY = 10;
+    
     private final ScheduledExecutorService queueService;
     private final List<QInfo> queueList = new ArrayList<QInfo>();
-    private int maxQueueCapacity = 10;
+    private int maxQueueCapacity = DEFAULT_QUEUE_CAPACITY;
     
     private final Object LOCK = new Object();
     
@@ -25,11 +27,22 @@ public class QueueControllerImpl implements QueueController {
         this.queueService = queueService;
     }
     
+    // TODO: Somehow add in other existing downloads
+    //       to the current count.
+    // TODO: Kill queued items if current limit is over
+    //       capacity.
+    public void setMaxQueueCapacity(int maxCapacity) {
+        synchronized(LOCK) {
+            this.maxQueueCapacity = maxCapacity;
+        }
+    }
+    
     public void removeFromQueue(QueueInfo queueInfo) {
         if(!(queueInfo instanceof QInfo))
             throw new IllegalArgumentException(queueInfo + " not created from this controller");
         
         synchronized(LOCK) {
+            ((QInfo)queueInfo).cancel();
             queueList.remove(queueInfo);
         }
     }
@@ -70,6 +83,7 @@ public class QueueControllerImpl implements QueueController {
                 }
             }, Math.min(max, min+1), TimeUnit.SECONDS);
             qInfo.setFuture(future);
+            qInfo.enqueue();
             return qInfo;
         } else {
             try {
@@ -95,6 +109,7 @@ public class QueueControllerImpl implements QueueController {
                 QInfo queuee = qIter.next();
                 // If we're just updating an existing queue slot, leave it this way.
                 if(queuee.isForSamePerson(qInfo)) {
+                    assert queuee.future.isDone();
                     qIter.set(qInfo);
                     return true;
                 }
@@ -108,6 +123,7 @@ public class QueueControllerImpl implements QueueController {
                 if(lastQueued == qInfo) {
                     return false;
                 } else {
+                    queueList.remove(lastQueued);
                     lastQueued.kill();
                 }
             }
@@ -141,8 +157,12 @@ public class QueueControllerImpl implements QueueController {
             this.future = future;
         }
         
-        void kill() {
+        void cancel() {
             future.cancel(false);
+        }
+        
+        void kill() {
+            cancel();
             try {
                 ioctrl.shutdown();
             } catch(IOException ignored) {}

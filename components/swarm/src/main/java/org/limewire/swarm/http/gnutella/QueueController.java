@@ -36,5 +36,10 @@ public interface QueueController {
      * @param queueInfo A {@link QueueInfo} that was previously returned by {@link #addToQueue(String, IOControl)}.
      */
     void removeFromQueue(QueueInfo queueInfo);
+    
+    /**
+     * Sets the maximum capacity.
+     */
+    void setMaxQueueCapacity(int maxCapacity);
 
 }
