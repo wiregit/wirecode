@@ -4,7 +4,8 @@ import java.io.File;
 
 import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smackx.jingle.JingleContentHandler;
-import org.jivesoftware.smackx.jingle.file.FileContentHandler;
+import org.jivesoftware.smackx.jingle.file.FileMediaNegotiator;
+import org.jivesoftware.smackx.jingle.file.ReceiverFileContentHandler;
 import org.jivesoftware.smackx.jingle.file.UserAcceptor;
 import org.jivesoftware.smackx.packet.Description;
 import org.jivesoftware.smackx.packet.StreamInitiation;
@@ -28,12 +29,7 @@ public class FileDescription extends Description {
     }
 
     public JingleContentHandler createContentHandler() {
-        return new FileContentHandler(getFile(getFileContainer()), getFileContainer() instanceof Request, userAcceptor, saveDir);
-    }
-
-    private File getFile(FileContainer fileContainer) {
-        StreamInitiation.File siFile = fileContainer.getFile();
-        return new File(siFile.getName());
+        return new ReceiverFileContentHandler(getFileContainer(),  userAcceptor, saveDir);
     }
     
     public static void setUserAccptor(UserAcceptor userAccptor) {
@@ -45,8 +41,13 @@ public class FileDescription extends Description {
     }
 
     public abstract static class FileContainer implements PacketExtension  {
-        StreamInitiation.File file;
+        FileMediaNegotiator.JingleFile file;
+        
         public FileContainer(StreamInitiation.File file) {
+            this.file = new FileMediaNegotiator.JingleFile(file);
+        }
+        
+        public FileContainer(FileMediaNegotiator.JingleFile file) {
             this.file = file;
         }
 
@@ -54,7 +55,7 @@ public class FileDescription extends Description {
             return "";
         }
 
-        public StreamInitiation.File getFile() {
+        public FileMediaNegotiator.JingleFile getFile() {
             return file;
         }
 
@@ -77,6 +78,10 @@ public class FileDescription extends Description {
         public Offer(StreamInitiation.File file) {
             super(file);
         }
+        
+        public Offer(FileMediaNegotiator.JingleFile file) {
+            super(file);
+        }
 
         public String getElementName() {
             return NODENAME;
@@ -88,6 +93,10 @@ public class FileDescription extends Description {
         public static String NODENAME = "request";
 
         public Request(StreamInitiation.File file) {
+            super(file);
+        }
+        
+        public Request(FileMediaNegotiator.JingleFile file) {
             super(file);
         }
 

@@ -13,18 +13,19 @@ import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
 import org.jivesoftware.smackx.packet.file.FileDescription;
 
 
-public class FileContentHandler extends JingleContentHandler {
+public abstract class FileContentHandler extends JingleContentHandler {
     
-    public enum ExchangeType { Request, Offer }
-    
-    private File file;
-    private boolean sending;
+    private FileDescription.FileContainer file;
     private UserAcceptor userAcceptor;
     private File saveDir;
     private FileTransferProgressListener progressListener;
 
-    public FileContentHandler(File file, boolean sending, File saveDir) {
-        this(file, sending, getAlwaysAcceptor(), saveDir);
+    protected FileContentHandler(File file, boolean sending, File saveDir) {
+        this(getFileContainer(file, sending), getAlwaysAcceptor(), saveDir);
+    }
+
+    private static FileDescription.FileContainer getFileContainer(File file, boolean sending) {
+        return sending ? new FileDescription.Offer(new FileMediaNegotiator.JingleFile(file)) : new FileDescription.Request(new FileMediaNegotiator.JingleFile(file));
     }
 
     private static UserAcceptor getAlwaysAcceptor() {
@@ -35,12 +36,13 @@ public class FileContentHandler extends JingleContentHandler {
         };
     }
 
-    public FileContentHandler(File file, boolean sending, UserAcceptor userAcceptor, File saveDir) {
+    protected FileContentHandler(FileDescription.FileContainer file, UserAcceptor userAcceptor, File saveDir) {
         this.file = file;
-        this.sending = sending;
         this.userAcceptor = userAcceptor;
         this.saveDir = saveDir;
     }
+    
+    protected abstract boolean isInitiator();
     
     public void setSaveDir(File saveDir) {
         this.saveDir = saveDir;
@@ -52,11 +54,10 @@ public class FileContentHandler extends JingleContentHandler {
     
     
     public JingleMediaSession createMediaSession(JingleSession jingleSession) {
-        FileMediaNegotiator.JingleFile file = ((FileMediaNegotiator)mediaNegotiator).getFile();
-        boolean sending = ((FileMediaNegotiator)mediaNegotiator).isSending();
+        FileDescription.FileContainer file = ((FileMediaNegotiator)mediaNegotiator).getFile();
         TransportCandidate bestRemoteCandidate = transportNegotiator.getBestRemoteCandidate();
         TransportCandidate acceptedLocalCandidate = transportNegotiator.getAcceptedLocalCandidate();        
-        return new FileMediaSession(file, sending, bestRemoteCandidate, acceptedLocalCandidate, jingleSession, saveDir, progressListener);
+        return new FileMediaSession(file, isInitiator(), bestRemoteCandidate, acceptedLocalCandidate, jingleSession, saveDir, progressListener);
     }
 
     protected JingleTransportManager createTransportManager(XMPPConnection connection) {
@@ -64,6 +65,6 @@ public class FileContentHandler extends JingleContentHandler {
     }
 
     protected MediaNegotiator createMediaNegotiator(JingleSession session) {
-        return new FileMediaNegotiator(session, file, sending, userAcceptor);
+        return new FileMediaNegotiator(session, file, userAcceptor);
     }
 }

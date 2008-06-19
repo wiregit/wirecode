@@ -3,6 +3,7 @@ package org.jivesoftware.smackx.jingle.file;
 import java.io.File;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smackx.jingle.JingleSession;
@@ -11,22 +12,19 @@ import org.jivesoftware.smackx.packet.Content;
 import org.jivesoftware.smackx.packet.Jingle;
 import org.jivesoftware.smackx.packet.StreamInitiation;
 import org.jivesoftware.smackx.packet.file.FileDescription;
-import org.apache.log4j.Logger;
 
 public class FileMediaNegotiator extends MediaNegotiator {   
 
     private static final Logger LOG = Logger.getLogger(FileMediaNegotiator.class);
 
-    private JingleFile file;
-    private boolean sending;
+    private FileDescription.FileContainer file;
     private boolean userAccepted;
     private UserAcceptor userAcceptor;
 
-    public FileMediaNegotiator(JingleSession js, File file, boolean sending, UserAcceptor userAcceptor) {
+    public FileMediaNegotiator(JingleSession js, FileDescription.FileContainer file, UserAcceptor userAcceptor) {
         super(js);
         this.userAcceptor = userAcceptor;
-        this.file = new JingleFile(file);
-        this.sending = sending;
+        this.file = file;
         userAccepted = false;
         inviting = new InvitingImpl(this);
         accepting = new AcceptingImpl(this);
@@ -41,14 +39,8 @@ public class FileMediaNegotiator extends MediaNegotiator {
 
         public Jingle eventInvite() {
             // SEND SESSION-INITIATE
-            FileDescription description = new FileDescription();
-            FileDescription.FileContainer container;
-            if(sending) {
-                container = new FileDescription.Offer(file);
-            } else {
-                container = new FileDescription.Request(file);
-            }
-            description.setFileContainer(container);
+            FileDescription description = new FileDescription();            
+            description.setFileContainer(file);
             userAccepted = true;
             return new Jingle(new Content(description));
         }
@@ -115,28 +107,14 @@ public class FileMediaNegotiator extends MediaNegotiator {
 
         private FileDescription getFileDescription() {
             FileDescription description = new FileDescription();
-            FileDescription.FileContainer container;
-            if(sending) {
-                // TODO this is incorrect - need to take into account if we
-                // TODO are initiator or receiver
-                container = new FileDescription.Offer(file);
-            } else {
-                container = new FileDescription.Request(file);
-            }
-            description.setFileContainer(container);
+            description.setFileContainer(file);
             return description;
         }
     }
 
     public void addDescriptionToSessionInitiate(Jingle jingle) {
         FileDescription description = new FileDescription();
-        FileDescription.FileContainer container;
-        if(sending) {
-            container = new FileDescription.Offer(file);
-        } else {
-            container = new FileDescription.Request(file);
-        }
-        description.setFileContainer(container);
+        description.setFileContainer(file);
         jingle.getContent().addDescription(description);
     }
 
@@ -150,26 +128,15 @@ public class FileMediaNegotiator extends MediaNegotiator {
 
     public void addAcceptedDescription(Content content) {
         FileDescription description = new FileDescription();
-        FileDescription.FileContainer container;
-        if(sending) {
-            // TODO this is wrong
-            container = new FileDescription.Offer(file);
-        } else {
-            container = new FileDescription.Request(file);
-        }
-        description.setFileContainer(container);
+        description.setFileContainer(file);
         content.addDescription(description);
     }
 
-    public JingleFile getFile() {
+    public FileDescription.FileContainer getFile() {
         return file;
     }
-
-    public boolean isSending() {
-        return sending;
-    }
     
-    public class JingleFile extends StreamInitiation.File {
+    public static class JingleFile extends StreamInitiation.File {
         File localFile;
 
         public JingleFile(File localFile) {
@@ -179,6 +146,14 @@ public class FileMediaNegotiator extends MediaNegotiator {
             setHash(null); // TODO
             setRanged(false); // TODO add range support to StreamInitiation.File
             this.localFile = localFile;
+        }
+        
+        public JingleFile(StreamInitiation.File file) {
+            super(file.getName(), file.getSize());
+            setDate(file.getDate());
+            setDesc(file.getDesc());
+            setHash(file.getHash());
+            setRanged(file.isRanged());
         }
         
         public File getLocalFile() {

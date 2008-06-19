@@ -16,11 +16,11 @@ import org.jivesoftware.smackx.jingle.JingleSession;
 import org.jivesoftware.smackx.jingle.media.JingleMediaSession;
 import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
 import org.jivesoftware.smackx.packet.StreamInitiation;
+import org.jivesoftware.smackx.packet.file.FileDescription;
 
 public class FileMediaSession extends JingleMediaSession {
     
-    private FileMediaNegotiator.JingleFile file;
-    private final boolean sending;
+    private FileDescription.FileContainer file;
     private OutputStream out;
     private InputStream in;
     protected Socket socket;
@@ -29,15 +29,16 @@ public class FileMediaSession extends JingleMediaSession {
     protected int localPort;
     protected String remoteIP;
     protected int remotePort;
+    private final boolean initiator;
     protected File saveDir;
     private final FileTransferProgressListener progressListener;
 
-    public FileMediaSession(final FileMediaNegotiator.JingleFile file, final boolean sending,
+    public FileMediaSession(final FileDescription.FileContainer file, boolean isInitiator,
             final TransportCandidate remote, final TransportCandidate local,
             JingleSession jingleSession, File saveDir, FileTransferProgressListener progressListener) {
         super(remote, local, jingleSession);
         this.file = file;
-        this.sending = sending;
+        initiator = isInitiator;
         this.saveDir = saveDir;
         this.progressListener = progressListener;
         initialize();
@@ -51,7 +52,7 @@ public class FileMediaSession extends JingleMediaSession {
         this.remoteIP = ip;
         this.remotePort = remotePort;
         try {
-            if(sending) {
+            if(isSending()) {
                 serverSocket = new ServerSocket(localPort, 50, InetAddress.getByName(localIp));
             }
         }
@@ -59,6 +60,10 @@ public class FileMediaSession extends JingleMediaSession {
             // TODO throw
             e.printStackTrace();
         }
+    }
+
+    private boolean isSending() {
+        return (file instanceof FileDescription.Offer && initiator) || (file instanceof FileDescription.Request && !initiator);
     }
 
     private void pipe(InputStream in, OutputStream out, FileMediaNegotiator.JingleFile beingTransferred, long size) throws IOException {
@@ -81,16 +86,16 @@ public class FileMediaSession extends JingleMediaSession {
      */
     public void startTrasmit() {
         System.out.println("transmitting...");
-        if(sending) {
+        if(isSending()) {
             Thread sender = new Thread(new Runnable() {
                 public void run() {                    
                     try {
                         System.out.println("accepting on " + serverSocket.getLocalPort());
                         Socket client = serverSocket.accept();
-                        File toSend = file.getLocalFile();
+                        File toSend = file.getFile().getLocalFile();
                         in = new BufferedInputStream(new FileInputStream(toSend));
                         out = new BufferedOutputStream(client.getOutputStream());
-                        pipe(in, out, file, file.getSize());
+                        pipe(in, out, file.getFile(), file.getFile().getSize());
                     } catch (Exception e) {
                         // TODO throw
                         e.printStackTrace();
@@ -116,7 +121,7 @@ public class FileMediaSession extends JingleMediaSession {
      */
     public void startReceive() {      
         System.out.println("receiving...");
-        if(!sending) {
+        if(!isSending()) {
             Thread receiver = new Thread(new Runnable() {
                 public void run() {                    
                     try {
@@ -124,10 +129,10 @@ public class FileMediaSession extends JingleMediaSession {
                         //socket = new Socket(ip, remotePort, InetAddress.getByName(localIp), localPort);
                         System.out.println("connecting to " + remotePort);
                         socket = new Socket(remoteIP, remotePort, InetAddress.getByName(localIP), localPort);
-                        File toSave = getNewFileToSave(file);
+                        File toSave = getNewFileToSave(file.getFile());
                         in = new BufferedInputStream(socket.getInputStream());
                         out = new BufferedOutputStream(new FileOutputStream(toSave));
-                        pipe(in, out, file, file.getSize());
+                        pipe(in, out, file.getFile(), file.getFile().getSize());
                     } catch (Exception e) {
                         // TODO throw
                         e.printStackTrace();
