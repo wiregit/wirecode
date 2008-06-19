@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -741,12 +742,12 @@ public class UpdateHandlerImpl implements UpdateHandler, Service {
         
         if(LOG.isInfoEnabled()) {
             LOG.info("Delaying Update." +
-                     "\nNow    : " + now + 
-                     "\nStamp  : " + timestamp +
-                     "\nDelay  : " + delay + 
-                     "\nRandom : " + random + 
-                     "\nThen   : " + then +
-                     "\nDiff   : " + (then-now));
+                     "\nNow    : " + now + " (" + new Date(now) + ")" + 
+                     "\nStamp  : " + timestamp + " (" + new Date(timestamp) + ")" +  
+                     "\nDelay  : " + delay + " (" + CommonUtils.seconds2time(delay/1000) + ")" + 
+                     "\nRandom : " + random + " (" + CommonUtils.seconds2time(random/1000) + ")" +  
+                     "\nThen   : " + then + " (" + new Date(then) + ")" + 
+                     "\nDiff   : " + (then-now) + " (" + CommonUtils.seconds2time((then-now)/1000) + ")"); 
         }
 
         return Math.max(0,then - now);
