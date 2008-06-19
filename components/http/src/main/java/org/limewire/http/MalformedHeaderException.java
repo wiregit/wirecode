@@ -18,5 +18,9 @@ public class MalformedHeaderException extends ProtocolException {
     public MalformedHeaderException(String message) {
         super(message);
     }
+    
+    public MalformedHeaderException(Throwable cause) {
+        initCause(cause);
+    }
 
 }

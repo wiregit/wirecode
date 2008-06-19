@@ -10,15 +10,14 @@ import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.http.MalformedHeaderException;
 import org.limewire.swarm.http.SwarmExecutionContext;
-
-import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 
 public class AvailableRangesInterceptor implements HttpResponseInterceptor {
     
     public void process(HttpResponse response, HttpContext context) throws HttpException,
             IOException {
-        Header header = response.getFirstHeader("X-Available-Ranges");
+        Header header = response.getFirstHeader(GHttp.AVAILABLE_RANGES);
         if(header != null && header.getValue() != null) {
             IntervalSet availableRanges = new IntervalSet();
             String line = header.getValue().toLowerCase(Locale.US);
@@ -74,7 +73,7 @@ public class AvailableRangesInterceptor implements HttpResponseInterceptor {
                     interval = Range.createRange( low, high );
                     
                 } catch (NumberFormatException e) {
-                    throw new ProblemReadingHeaderException(e);
+                    throw new MalformedHeaderException(e);
                 }
                 availableRanges.add(interval);
             }

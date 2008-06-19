@@ -5,12 +5,14 @@ package org.limewire.swarm.http.gnutella.interceptor;
  */
 public class GHttp {
     
-    public static String QUEUE = "X-Queue";
+    public static final String AVAILABLE_RANGES = "X-Available-Ranges";
+
+    public static final String QUEUE = "X-Queue";
     
-    public static String FEATURES = "X-Features";
+    public static final String FEATURES = "X-Features";
     
     
-    public static String FEATURE_QUEUE = "queue";
+    public static final String FEATURE_QUEUE = "queue";
     
     
     
