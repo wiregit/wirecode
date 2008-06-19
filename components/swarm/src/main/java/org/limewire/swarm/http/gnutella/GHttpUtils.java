@@ -1,4 +1,4 @@
-package org.limewire.swarm.http.gnutella.interceptor;
+package org.limewire.swarm.http.gnutella;
 
 import org.apache.http.Header;
 import org.apache.http.HttpRequest;

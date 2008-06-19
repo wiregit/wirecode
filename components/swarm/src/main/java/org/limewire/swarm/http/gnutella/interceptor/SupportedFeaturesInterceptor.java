@@ -7,6 +7,8 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
+import org.limewire.swarm.http.gnutella.GHttp;
+import org.limewire.swarm.http.gnutella.GHttpUtils;
 
 public class SupportedFeaturesInterceptor implements HttpRequestInterceptor {
     

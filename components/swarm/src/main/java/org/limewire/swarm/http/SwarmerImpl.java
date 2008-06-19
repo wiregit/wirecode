@@ -29,7 +29,7 @@ import org.apache.http.protocol.RequestUserAgent;
 import org.limewire.http.protocol.SynchronizedHttpProcessor;
 import org.limewire.swarm.http.handler.ExecutionHandler;
 
-class SwarmerImpl implements Swarmer {
+public class SwarmerImpl implements Swarmer {
     
     private static final Log LOG = LogFactory.getLog(SwarmerImpl.class);
     
@@ -42,7 +42,7 @@ class SwarmerImpl implements Swarmer {
     private final SourceEventListener globalSourceEventListener;
     private final SynchronizedHttpProcessor httpProcessor;
     
-    SwarmerImpl(
+    public SwarmerImpl(
             ExecutionHandler executionHandler,
             ConnectionReuseStrategy connectionReuseStrategy,
             ConnectingIOReactor ioReactor,

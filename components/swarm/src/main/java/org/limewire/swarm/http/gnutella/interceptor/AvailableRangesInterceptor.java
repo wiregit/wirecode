@@ -12,6 +12,7 @@ import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.http.MalformedHeaderException;
 import org.limewire.swarm.http.SwarmExecutionContext;
+import org.limewire.swarm.http.gnutella.GHttp;
 
 public class AvailableRangesInterceptor implements HttpResponseInterceptor {
     

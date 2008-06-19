@@ -1,4 +1,4 @@
-package org.limewire.swarm.http.gnutella.interceptor;
+package org.limewire.swarm.http.gnutella;
 
 /**
  * Contains Gnutella-extensions to HTTP headers.
