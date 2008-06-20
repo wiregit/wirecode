@@ -111,15 +111,27 @@ public class ActivationKeyParserImplTest extends BaseTestCase {
         
         
         ActivationKeyParserImpl akp = new ActivationKeyParserImpl(new CipherProviderImpl(), certificateProvider);
+        Date   date         = new Date();
+        String userEmail    = "benno@limewire.com";
+        long   duration     = 50l;
+        String activationID = "0123456789"+"123456"+"abcdefghij";
+        
         ActivationKey activationKey = new ActivationKey();
-        activationKey.setValidFrom(new Date());
-        activationKey.setUserEmail("benno@limewire.com");
+        activationKey.setValidFrom(date);
+        activationKey.setUserEmail(userEmail);
+        activationKey.setDuration(duration);
+        activationKey.setActivationID(activationID);
 
         String encodedKey = akp.generate("user="+activationKey.getUserEmail(), activationKey, keyPair.getPrivate());
-        System.out.println("encoded:"+encodedKey);
+        
         // We're encoded... See if it parses...
         ActivationKey parseResult = akp.parse(encodedKey);
         
+        // Make sure our values are still present.
+        assertEquals(date, parseResult.getValidFrom());
+        assertEquals(userEmail, parseResult.getUserEmail());
+        assertEquals(duration, parseResult.getDuration());
+        assertEquals(activationID, parseResult.getActivationID());
     }
     
     /** Fake certificate, just holds the public key. */

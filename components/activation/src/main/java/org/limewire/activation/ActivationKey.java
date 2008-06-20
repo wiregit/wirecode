@@ -9,6 +9,7 @@ public class ActivationKey {
     private static final String KEY_VALID_FROM = "d";
     private static final String KEY_DURATION   = "u";
     private static final String KEY_USER_EMAIL = "e";
+    private static final String KEY_ACTIVATION_ID = "i";
 
     private final GGEP ggep;
 
@@ -35,7 +36,9 @@ public class ActivationKey {
         ggep.put(KEY_DURATION, days);
     }
 
-
+    public void setActivationID(String activationID) {
+        ggep.put(KEY_ACTIVATION_ID, activationID);
+    }
 
     
     /**
@@ -69,10 +72,22 @@ public class ActivationKey {
     public long getDuration() {
         try {
             if (ggep.hasKey(KEY_DURATION))
-                return ggep.getLong(KEY_USER_EMAIL);
+                return ggep.getLong(KEY_DURATION);
         } catch (BadGGEPPropertyException ignored) {
         }
         return 0;
+    }
+    
+    /**
+     * @return the activation ID of the purchaser.
+     */
+    public String getActivationID() {
+        try {
+            if (ggep.hasKey(KEY_ACTIVATION_ID))
+                return ggep.getString(KEY_ACTIVATION_ID);
+        } catch (BadGGEPPropertyException ignored) {
+        }
+        return "";
     }
 
     /**
@@ -88,4 +103,6 @@ public class ActivationKey {
             throw new RuntimeException("No keys set on GGEP!");
         return PemCodec.encode(ggepBytes);
     }
+    
+    
 }
