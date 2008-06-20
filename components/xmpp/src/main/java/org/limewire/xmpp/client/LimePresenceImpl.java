@@ -1,5 +1,7 @@
 package org.limewire.xmpp.client;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.IQ;
@@ -9,6 +11,8 @@ import org.jivesoftware.smackx.jingle.file.FileContentHandler;
 import org.jivesoftware.smackx.jingle.file.InitiatorFileContentHandler;
 
 public class LimePresenceImpl extends PresenceImpl implements LimePresence {
+
+    private static final Log LOG = LogFactory.getLog(LimePresenceImpl.class);
     
     private LibraryListener libraryListener;
     protected LibraryIQListener IQListener;
@@ -21,7 +25,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     }
     
     void sendGetLibrary() {
-        System.out.println("send get library to " + getJID());
+        LOG.info("getting library from " + getJID() + "...");
         final LibraryIQ libraryIQ = new LibraryIQ();
         libraryIQ.setType(IQ.Type.GET);
         libraryIQ.setTo(getJID());
@@ -47,6 +51,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     }
 
     public void requestFile(File file, FileTransferProgressListener progressListener) {
+        LOG.info("requesting file " + file.toString() + " from " + getJID());
         JingleManager manager = new JingleManager(connection);
 
         try {
@@ -62,13 +67,14 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
             //out.terminate();
         } catch (XMPPException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
     }
 
     public void sendFile(java.io.File file, FileTransferProgressListener progressListener) {
+        LOG.info("sending file " + file.toString() + " to " + getJID());
         JingleManager manager = new JingleManager(connection);
 
         try {
@@ -84,9 +90,9 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
             //out.terminate();
         } catch (XMPPException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
     }
     

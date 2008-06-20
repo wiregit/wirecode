@@ -1,9 +1,10 @@
 package org.limewire.xmpp.client;
 
+import org.jivesoftware.smack.XMPPConnection;
+import org.limewire.util.StringUtils;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import org.jivesoftware.smack.XMPPConnection;
 
 public class UserImpl implements User {
     protected String id;
@@ -59,5 +60,9 @@ public class UserImpl implements User {
                 presenceListener.presenceChanged(presence);    
             }
         }
+    }
+
+    public String toString() {
+        return StringUtils.toString(this, id, name);
     }
 }

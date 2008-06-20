@@ -8,8 +8,13 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class LibraryIQ extends IQ {
+
+    private static final Log LOG = LogFactory.getLog(LibraryIQ.class);
+
     private XmlPullParser parser;
     private LibrarySource librarySource;
     private File [] files;
@@ -37,9 +42,9 @@ public class LibraryIQ extends IQ {
                 }
             } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
         } catch (IOException e) {
-            e.printStackTrace(); // TODO log, throw?
+            LOG.error(e.getMessage(), e);   // TODO throw?
         } catch (XmlPullParserException e) {
-            e.printStackTrace(); // TODO log, throw?
+            LOG.error(e.getMessage(), e);   // TODO throw?
         }
         return files.toArray(new File[]{});
     }

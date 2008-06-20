@@ -24,12 +24,16 @@ import org.jivesoftware.smackx.packet.Jingle;
 import org.jivesoftware.smackx.packet.StreamInitiation;
 import org.jivesoftware.smackx.packet.file.FileDescription;
 import org.limewire.lifecycle.Service;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
 public class XMPPService implements Service {
+
+    private static final Log LOG = LogFactory.getLog(XMPPService.class);
     
     private static final String LW_SERVICE_NS = "http://www.limewire.org/";
     
@@ -77,10 +81,15 @@ public class XMPPService implements Service {
             XMPPConnection.DEBUG_ENABLED = configuration.isDebugEnabled();
             connection = new XMPPConnection(getConnectionConfig(configuration));
             connection.addRosterListener(new RosterListenerImpl(connection));
+            LOG.info("connecting to " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + "...");
             connection.connect();
+            LOG.info("connected.");
+            LOG.info("logging in " + configuration.getUsername() + "...");
             connection.login(configuration.getUsername(), configuration.getPassword(), "limewire");
+            LOG.info("logged in.");
         } catch (XMPPException e) {
-            throw new IllegalStateException(e); // TODO don't throw?
+            LOG.error(e.getMessage(), e);
+            // TODO fireListenerMethod
         }
     }
 
@@ -91,6 +100,7 @@ public class XMPPService implements Service {
     }
 
     public void stop() {
+        LOG.info("disconnecting from " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + ".");
         connection.disconnect();
     }
 
@@ -103,7 +113,9 @@ public class XMPPService implements Service {
         XMPPConnection.addConnectionCreationListener(new ConnectionCreationListener() {
             public void connectionCreated(final XMPPConnection connection) {
                 if(XMPPService.this.connection == connection) {
+                    LOG.debug("adding connection listener for "+ connection.toString());
                     if(!ServiceDiscoveryManager.getInstanceFor(connection).includesFeature(LW_SERVICE_NS)) {
+                        // TODO conncurrency control
                         ServiceDiscoveryManager.getInstanceFor(connection).addFeature(LW_SERVICE_NS);
                     }
                     libraryIQListener = new LibraryIQListener(connection,  librarySource);
@@ -121,6 +133,7 @@ public class XMPPService implements Service {
                         public void sessionRequested(JingleSessionRequest request) {
                             try {
                                 // Accept the call
+                                LOG.info("incoming jingle request from " + request.getFrom());
                                 IncomingJingleSession session = request.accept();
                                 Jingle jingle = session.getInitialSessionRequest().getJingle();
                                 if(jingle != null) {
@@ -132,15 +145,17 @@ public class XMPPService implements Service {
                                                 ((FileContentHandler)session.getContentHandler()).setSaveDir(librarySource.getSaveDirectory(""));
                                                 ((FileContentHandler)session.getContentHandler()).setProgressListener(new FileTransferProgressListenerAdapter(progressListener));
                                                 // TODO set UserAcceptor
+                                                LOG.info("starting jingle session");
                                                 session.start();
                                                 return;
                                             }
                                         }
                                     }
                                 }
-                                //session.terminate();
+                                LOG.info("rejecting jingle session");
+                                session.terminate();
                             } catch (XMPPException e) {
-                                e.printStackTrace();
+                                LOG.error(e.getMessage(), e);
                             }
                         }
                     });
@@ -165,6 +180,7 @@ public class XMPPService implements Service {
                 Roster roster = connection.getRoster();
                 RosterEntry rosterEntry = roster.getEntry(id);
                 UserImpl user = new UserImpl(id, rosterEntry.getName(), connection);
+                LOG.debug("user " + user + " added");
                 users.put(id, user);
                 fireUserAdded(user);
             }
@@ -181,6 +197,7 @@ public class XMPPService implements Service {
                 Roster roster = connection.getRoster();
                 RosterEntry rosterEntry = roster.getEntry(id);
                 UserImpl user = new UserImpl(id, rosterEntry.getName(), connection);
+                LOG.debug("user " + user + " updated");
                 users.put(id, user);
                 fireUserUpdated(user);
             }
@@ -194,7 +211,8 @@ public class XMPPService implements Service {
 
         public void entriesDeleted(Collection<String> removedIds) {
             for(String id : removedIds) {
-                users.remove(id);
+                User user = users.remove(id);
+                LOG.debug("user " + user + " removed");
                 fireUserDeleted(id);
             }
         }
@@ -209,15 +227,17 @@ public class XMPPService implements Service {
             Thread t = new Thread(new Runnable() {
                 public void run() {
                     UserImpl user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
+                    LOG.debug("user " + user + " presence changed to " + presence.getType());
                     if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.available)) {
                         try {
                             if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/")) {
+                                LOG.debug("limwire user " + user + ", presence " + presence.getFrom() + " detected");
                                 user.addPresense(new LimePresenceImpl(presence, connection, libraryIQListener, librarySource.getSaveDirectory("")));
                             } else {
                                 user.addPresense(new PresenceImpl(presence, connection));
                             }
                         } catch (XMPPException exception) {
-                            exception.printStackTrace();
+                            LOG.error(exception.getMessage(), exception);
                         }
                     } else if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.unavailable)) {
                         user.removePresense(new PresenceImpl(presence, connection));
@@ -232,7 +252,6 @@ public class XMPPService implements Service {
         public void presenceChanged(org.limewire.xmpp.client.Presence presence) {
             if(presence.getType().equals(Presence.Type.available)) {
                 if(presence instanceof LimePresence) {
-                    System.out.println("new lime presence: " + presence.getJID());
                     ((LimePresenceImpl) presence).sendGetLibrary();
                 }
             }

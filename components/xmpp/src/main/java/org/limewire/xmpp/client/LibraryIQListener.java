@@ -7,8 +7,13 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class LibraryIQListener implements PacketListener {
+
+    private static final Log LOG = LogFactory.getLog(LibraryIQListener.class);
+
     private XMPPConnection connection;
     private final LibrarySource librarySource;
     private ConcurrentHashMap <String, LibraryListener> libraryHandlers = new ConcurrentHashMap<String, LibraryListener>();
@@ -38,10 +43,9 @@ public class LibraryIQListener implements PacketListener {
     }
 
     private void handleResult(LibraryIQ libraryIQ) {
-        System.out.println("handling library result..." + libraryIQ.getPacketID());
+        LOG.debug("handling library result " + libraryIQ.getPacketID());
         LibraryListener listener = libraryHandlers.get(libraryIQ.getPacketID());
         if(listener != null) {
-            System.out.println("notifying listener: " + listener);
             for(File f : libraryIQ.getFiles()) {
                 listener.fileAdded(f);
             }
@@ -54,6 +58,7 @@ public class LibraryIQListener implements PacketListener {
     }
 
     private void handleGet(LibraryIQ packet) {
+        LOG.debug("handling library get " + packet.getPacketID());
         LibraryIQ queryResult = new LibraryIQ(librarySource);
         queryResult.setTo(packet.getFrom());
         queryResult.setFrom(packet.getTo());
