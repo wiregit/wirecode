@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.io.NetworkInstanceUtils;
+import org.limewire.io.NetworkUtils;
 import org.limewire.lifecycle.Service;
 import org.limewire.util.OSUtils;
 
@@ -251,6 +252,27 @@ class NodeAssignerImpl implements NodeAssigner, Service {
         
         if(LOG.isDebugEnabled()) {
             LOG.debug("Hardcore capable: "+_isHardcoreCapable);
+        }
+        
+        if (!_isHardcoreCapable && LOG.isTraceEnabled()) {
+            if (_maxUpstreamBytesPerSec < UltrapeerSettings.MIN_UPSTREAM_REQUIRED.getValue()) {
+                LOG.trace("not enough upstream: " + _maxUpstreamBytesPerSec);
+            }
+            if (_maxDownstreamBytesPerSec < UltrapeerSettings.MIN_DOWNSTREAM_REQUIRED.getValue()) {
+                LOG.trace("not enough downstream: " + _maxDownstreamBytesPerSec);
+            }
+            if (ConnectionSettings.CONNECTION_SPEED.getValue() <= SpeedConstants.MODEM_SPEED_INT) {
+                LOG.trace("Not enoug speed: " + ConnectionSettings.CONNECTION_SPEED.getValue());
+            }
+            if (!ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue()) {
+                LOG.trace("not accepted incoming ever");
+            }
+            if (!ULTRAPEER_OS) {
+                LOG.trace("not an ultrapeer os");
+            }
+            if (networkInstanceUtils.isPrivate()) {
+                LOG.trace("private address: " + NetworkUtils.ip2string(networkManager.getAddress()));
+            }
         }
     }
     
