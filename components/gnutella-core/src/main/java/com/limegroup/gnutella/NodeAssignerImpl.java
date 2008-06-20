@@ -554,10 +554,27 @@ class NodeAssignerImpl implements NodeAssigner, Service {
     private boolean isActiveDHTCapable() {
         long averageTime = getAverageTime();
         
-        return _isHardcoreCapable
-                && (averageTime >= DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()
-                && _currentUptime >= (DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()/1000L))
-                && networkManager.isGUESSCapable();
+        if (!_isHardcoreCapable) {
+            LOG.trace("not hardcore capable");
+            return false;
+        }
+        if (averageTime < DHTSettings.MIN_ACTIVE_DHT_AVERAGE_UPTIME.getValue()) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("not long enough average uptime: " + averageTime);
+            }
+            return false;
+        }
+        if (_currentUptime < (DHTSettings.MIN_ACTIVE_DHT_INITIAL_UPTIME.getValue()/1000L)) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("not long enough current uptime: " + _currentUptime);
+            }
+            return false;
+        }
+        if (!networkManager.isGUESSCapable()) {
+            LOG.trace("not guess capable: can't receive both unsolicted and solicted udp");
+            return false;
+        }
+        return true;
     }
     
     private long getAverageTime() {
