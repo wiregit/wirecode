@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.util.Set;
 
+import org.limewire.i18n.I18nMarker;
 import org.limewire.io.IpPort;
 
 import com.limegroup.gnutella.browser.MagnetOptions;
@@ -170,7 +171,11 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, C
     public boolean handleDAAPConnectionError(Throwable t);
 
     /**
-     * Translate a String taking into account Locale
+     * Translate a String taking into account Locale.
+     * 
+     * String literals that should be translated must still be marked for
+     * translation using {@link I18nMarker#marktr(String)}.
+     * 
      * @param s The String to translate
      * @return the translated String
      */
