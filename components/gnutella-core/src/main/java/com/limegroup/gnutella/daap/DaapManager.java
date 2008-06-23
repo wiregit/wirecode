@@ -164,9 +164,9 @@ public final class DaapManager {
                 autoCommitTxn = new AutoCommitTransaction(library);
                 
                 database = new Database(name);
-                whatsNew = new Playlist(activityCallback.get().translate("What\'s New"));
-                creativecommons = new Playlist(activityCallback.get().translate("Creative Commons"));
-                videos = new Playlist(activityCallback.get().translate("Video"));
+                whatsNew = new Playlist(activityCallback.get().translate(I18nMarker.marktr("What's New")));
+                creativecommons = new Playlist(activityCallback.get().translate(I18nMarker.marktr("Creative Commons")));
+                videos = new Playlist(activityCallback.get().translate(I18nMarker.marktr("Video")));
                 
                 library.addDatabase(null, database);
                 database.addPlaylist(null, creativecommons);
