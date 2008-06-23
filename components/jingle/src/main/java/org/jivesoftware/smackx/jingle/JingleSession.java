@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleSession.java,v $
- * $Revision: 1.1.4.2 $
- * $Date: 2008-06-18 23:10:27 $
+ * $Revision: 1.1.4.3 $
+ * $Date: 2008-06-23 20:31:57 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -67,6 +67,8 @@ import org.jivesoftware.smackx.jingle.nat.TransportNegotiator;
 import org.jivesoftware.smackx.jingle.audiortp.ContentInfo;
 import org.jivesoftware.smackx.packet.*;
 import org.jivesoftware.smackx.packet.JingleTransport.JingleTransportCandidate;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 
@@ -81,6 +83,8 @@ import java.util.*;
  * @see OutgoingJingleSession
  */
 public abstract class JingleSession extends JingleNegotiator implements MediaReceivedListener {
+    
+    private static final Log LOG = LogFactory.getLog(JingleSession.class);
 
     // static
     private static final HashMap sessions = new HashMap();
@@ -829,8 +833,6 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
     protected void removePacketListener() {
         if (packetListener != null) {
             getConnection().removePacketListener(packetListener);
-
-            System.out.println("REMOVE PACKET LISTENER");
         }
     }
 
@@ -840,8 +842,6 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
      */
     protected void updatePacketListener() {
         removePacketListener();
-
-        System.out.println("UpdatePacketListener");
 
         packetListener = new PacketListener() {
             public void processPacket(Packet packet) {
@@ -876,27 +876,23 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
                     if (iq instanceof Jingle) {
                         Jingle jin = (Jingle) iq;
 
-                        System.out.println("Jingle: " + iq.toXML());
+                        LOG.debug("Jingle: " + iq.toXML());
 
                         String sid = jin.getSid();
                         if (sid == null || !sid.equals(getSid())) {
-                            System.out.println("Ignored Jingle(SID) " + sid + "|" + getSid() + " :" + iq.toXML());
                             return false;
                         }
                         String ini = jin.getInitiator();
                         if (!ini.equals(getInitiator())) {
-                            System.out.println("Ignored Jingle(INI): " + iq.toXML());
                             return false;
                         }
                     }
                     else {
                         // We accept some non-Jingle IQ packets: ERRORs and ACKs
                         if (iq.getType().equals(IQ.Type.SET)) {
-                            System.out.println("Ignored Jingle(TYPE): " + iq.toXML());
                             return false;
                         }
                         else if (iq.getType().equals(IQ.Type.GET)) {
-                            System.out.println("Ignored Jingle(TYPE): " + iq.toXML());
                             return false;
                         }
                     }
@@ -1100,7 +1096,7 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
      */
     public void terminate(String reason) throws XMPPException {
         if (isClosed()) return;
-        System.out.println("terminating session " + sid + ": "+ reason + "; " + "State: " + this.getState());
+        LOG.info("terminating session " + sid + ": "+ reason + "; " + "State: " + this.getState());
         Jingle jout = new Jingle(Jingle.Action.SESSIONTERMINATE);
         jout.setType(IQ.Type.SET);
         sendFormattedJingle(jout);
@@ -1115,7 +1111,7 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
         destroyMediaNeg();
         destroyTransportNeg();
         removePacketListener();
-        System.out.println("Negotiation Closed: " + getConnection().getUser() + " " + sid);
+        LOG.info("Negotiation Closed: " + getConnection().getUser() + " " + sid);
         closed = true;
         super.close();
     }
@@ -1167,8 +1163,6 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
         IQ iqError = createIQ(ID, to, from, IQ.Type.ERROR);
         XMPPError error = new XMPPError(new XMPPError.Condition(errStr));
         iqError.setError(error);
-
-        System.out.println("Created Error Packet:" + iqError.toXML());
 
         return iqError;
     }

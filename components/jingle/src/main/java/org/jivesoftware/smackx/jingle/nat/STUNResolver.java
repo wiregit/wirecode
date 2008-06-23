@@ -1,6 +1,6 @@
 /**
  * $RCSfile: STUNResolver.java,v $
- * $Revision: 1.1.4.2 $
+ * $Revision: 1.1.4.3 $
  * $Date: 15/11/2006
  *
  * Copyright 2003-2006 Jive Software.
@@ -27,6 +27,8 @@ import org.jivesoftware.smackx.jingle.JingleSession;
 import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -44,6 +46,8 @@ import java.util.Enumeration;
  * @author Thiago Camargo
  */
 public class STUNResolver extends TransportResolver {
+    
+    private static final Log LOG = LogFactory.getLog(STUNResolver.class);
 
     // The filename where the STUN servers are stored.
     public final static String STUNSERVERS_FILENAME = "META-INF/stun-config.xml";
@@ -282,7 +286,7 @@ public class STUNResolver extends TransportResolver {
                 resolvedPublicIP, getFreePort());
         candidate.setLocalIp(resolvedLocalIP);
 
-        System.out.println("RESOLVING : " + resolvedPublicIP + ":" + candidate.getPort());
+        LOG.debug("RESOLVING : " + resolvedPublicIP + ":" + candidate.getPort());
 
         addCandidate(candidate);
 
@@ -296,7 +300,6 @@ public class STUNResolver extends TransportResolver {
      * @throws XMPPException
      */
     public void initialize() throws XMPPException {
-        System.out.println("Initialized");
         if (!isResolving()&&!isResolved()) {
             // Get the best STUN server available
             if (currentServer.isNull()) {

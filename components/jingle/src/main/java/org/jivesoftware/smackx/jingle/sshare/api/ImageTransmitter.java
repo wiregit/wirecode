@@ -80,7 +80,6 @@ public class ImageTransmitter implements Runnable {
                 if (++keyframe > KEYFRAME) {
                     keyframe = 0;
                 }
-                System.out.println("KEYFRAME:" + keyframe);
 
                 for (int i = 0; i < maxI; i++) {
                     for (int j = 0; j < maxJ; j++) {
@@ -142,7 +141,6 @@ public class ImageTransmitter implements Runnable {
                 }
 
                 trace = (System.currentTimeMillis() - trace);
-                System.out.println("Loop Time:" + trace);
 
                 if (trace < 500) {
                     try {

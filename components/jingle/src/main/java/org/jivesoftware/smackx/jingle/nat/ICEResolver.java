@@ -1,7 +1,7 @@
 /**
  * $RCSfile: ICEResolver.java,v $
- * $Revision: 1.1.4.2 $
- * $Date: 2008-06-18 23:10:27 $
+ * $Revision: 1.1.4.3 $
+ * $Date: 2008-06-23 20:31:57 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -26,6 +26,8 @@ import de.javawi.jstun.util.UtilityException;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.jingle.JingleSession;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -42,6 +44,8 @@ import java.util.Random;
  * @author Thiago Camargo
  */
 public class ICEResolver extends TransportResolver {
+    
+    private static final Log LOG = LogFactory.getLog(ICEResolver.class);
 
     XMPPConnection connection;
     Random random = new Random();
@@ -60,8 +64,6 @@ public class ICEResolver extends TransportResolver {
 
     public void initialize() throws XMPPException {
         if (!isResolving() && !isResolved()) {
-            System.out.println("Initialized");
-
             iceNegociator = new ICENegociator((short) 1, server, port);
             // gather candidates
             iceNegociator.gatherCandidateAddresses();
@@ -115,7 +117,7 @@ public class ICEResolver extends TransportResolver {
                 }
                 this.addCandidate(transportCandidate);
 
-                System.out.println("C: " + candidate.getAddress().getInetAddress() + "|" + candidate.getBase().getAddress().getInetAddress() + " p:" + candidate.getPriority());
+                LOG.debug("C: " + candidate.getAddress().getInetAddress() + "|" + candidate.getBase().getAddress().getInetAddress() + " p:" + candidate.getPriority());
 
             }
             catch (UtilityException e) {

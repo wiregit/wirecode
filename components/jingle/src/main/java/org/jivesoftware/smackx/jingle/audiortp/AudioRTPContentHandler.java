@@ -81,7 +81,6 @@ public class AudioRTPContentHandler extends JingleContentHandler {
                 jmfProperties.createNewFile();
             }
             catch (IOException ex) {
-                System.out.println("Failed to create jmf.properties");
                 ex.printStackTrace();
             }
         }

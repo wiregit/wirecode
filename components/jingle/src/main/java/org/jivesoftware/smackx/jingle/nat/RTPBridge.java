@@ -1,7 +1,7 @@
 /**
  * $RCSfile: RTPBridge.java,v $
- * $Revision: 1.1.4.1 $
- * $Date: 2008-06-12 15:20:33 $
+ * $Revision: 1.1.4.2 $
+ * $Date: 2008-06-23 20:31:57 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -423,8 +423,6 @@ public class RTPBridge extends IQ {
         if (!xmppConnection.isConnected()) {
             return false;
         }
-
-        System.out.println("Service listing");
 
         ServiceDiscoveryManager disco = ServiceDiscoveryManager
                 .getInstanceFor(xmppConnection);

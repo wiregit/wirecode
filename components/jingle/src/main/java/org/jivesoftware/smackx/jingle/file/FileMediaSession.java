@@ -12,6 +12,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smackx.jingle.JingleSession;
 import org.jivesoftware.smackx.jingle.media.JingleMediaSession;
 import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
@@ -19,6 +21,8 @@ import org.jivesoftware.smackx.packet.StreamInitiation;
 import org.jivesoftware.smackx.packet.file.FileDescription;
 
 public class FileMediaSession extends JingleMediaSession {
+    
+    private static final Log LOG = LogFactory.getLog(FileMediaSession.class);
     
     private FileDescription.FileContainer file;
     private OutputStream out;
@@ -85,12 +89,12 @@ public class FileMediaSession extends JingleMediaSession {
      * Starts transmission and for NAT Traversal reasons start receiving also.
      */
     public void startTrasmit() {
-        System.out.println("transmitting...");
+        LOG.info("transmitting...");
         if(isSending()) {
             Thread sender = new Thread(new Runnable() {
                 public void run() {                    
                     try {
-                        System.out.println("accepting on " + serverSocket.getLocalPort());
+                        LOG.debug("accepting on " + serverSocket.getLocalPort());
                         Socket client = serverSocket.accept();
                         File toSend = file.getFile().getLocalFile();
                         in = new BufferedInputStream(new FileInputStream(toSend));
@@ -120,14 +124,14 @@ public class FileMediaSession extends JingleMediaSession {
      * For NAT Reasons this method does nothing. Use startTransmit() to start transmit and receive jmf
      */
     public void startReceive() {      
-        System.out.println("receiving...");
+        LOG.info("receiving...");
         if(!isSending()) {
             Thread receiver = new Thread(new Runnable() {
                 public void run() {                    
                     try {
                         Thread.sleep(2000);
                         //socket = new Socket(ip, remotePort, InetAddress.getByName(localIp), localPort);
-                        System.out.println("connecting to " + remotePort);
+                        LOG.debug("connecting to " + remotePort);
                         socket = new Socket(remoteIP, remotePort, InetAddress.getByName(localIP), localPort);
                         File toSave = getNewFileToSave(file.getFile());
                         in = new BufferedInputStream(socket.getInputStream());

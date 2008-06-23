@@ -1,7 +1,7 @@
 /**
  * $RCSfile: TcpUdpBridgeClient.java,v $
- * $Revision: 1.1.4.1 $
- * $Date: 2008-06-12 15:20:33 $
+ * $Revision: 1.1.4.2 $
+ * $Date: 2008-06-23 20:31:57 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -85,7 +85,6 @@ public class TcpUdpBridgeClient {
             localTcpSocket = new Socket(remoteTcpHost, remoteTcpPort);
             localUdpSocket = new DatagramSocket(0);
             localUdpPort = localUdpSocket.getLocalPort();
-            System.out.println("UDP: " + localUdpSocket.getLocalPort());
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -109,13 +108,9 @@ public class TcpUdpBridgeClient {
 
                         localUdpSocket.receive(p);
                         if (p.getLength() == 0) continue;
-
-                        System.out.println("UDP Client Received and Sending to TCP Server:"+new String(p.getData(),0,p.getLength(),"UTF-8"));
-
+                        
                         out.write(p.getData(), 0, p.getLength());
                         out.flush();
-                        System.out.println("Client Flush");
-
                     }
 
                 }
@@ -140,8 +135,6 @@ public class TcpUdpBridgeClient {
 
                         int s = in.read(b);
                         //if (s == -1) continue;
-
-                        System.out.println("TCP Client:" +new String(b,0,s,"UTF-8"));
 
                         DatagramPacket udpPacket = new DatagramPacket(b, s);
 

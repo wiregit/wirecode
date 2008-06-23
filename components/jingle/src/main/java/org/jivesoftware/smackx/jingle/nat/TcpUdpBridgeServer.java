@@ -32,7 +32,6 @@ public class TcpUdpBridgeServer {
             serverTcpSocket = new ServerSocket(remoteTcpPort);
             localUdpSocket = new DatagramSocket(0);
             localUdpPort = localUdpSocket.getLocalPort();
-            System.out.println("UDP: " + localUdpSocket.getLocalPort());
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -56,11 +55,8 @@ public class TcpUdpBridgeServer {
                         localUdpSocket.receive(p);
                         if (p.getLength() == 0) continue;
 
-                        System.out.println("UDP Server Received and Sending to TCP Client:" + new String(p.getData(), 0, p.getLength(), "UTF-8"));
-
                         out.write(p.getData(), 0, p.getLength());
                         out.flush();
-                        System.out.println("Server Flush");
                     }
 
                 }
@@ -86,8 +82,6 @@ public class TcpUdpBridgeServer {
 
                         int s = in.read(b);
                         //if (s == -1) continue;
-
-                        System.out.println("TCP Server:" + new String(b, 0, s, "UTF-8"));
 
                         DatagramPacket udpPacket = new DatagramPacket(b, s);
 

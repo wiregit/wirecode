@@ -19,14 +19,19 @@ package org.jivesoftware.smackx.jingle.sshare.api;
 import java.io.PrintStream;
 import java.util.Vector;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * An image Quantizer based on the Octree algorithm. This is a very basic implementation
  * at present and could be much improved by picking the nodes to reduce more carefully 
  * (i.e. not completely at random) when I get the time.
  */
 public class OctTreeQuantizer implements Quantizer {
+    
+    private static final Log LOG = LogFactory.getLog(OctTreeQuantizer.class);
 
-	/**
+    /**
 	 * The greatest depth the tree is allowed to reach
 	 */
 	final static int MAX_LEVEL = 5;
@@ -51,11 +56,11 @@ public class OctTreeQuantizer implements Quantizer {
 		 */
 		public void list(PrintStream s, int level) {
 			for (int i = 0; i < level; i++)
-				System.out.print(' ');
+				LOG.debug(' ');
 			if (count == 0)
-				System.out.println(index+": count="+count);
+				LOG.debug(index+": count="+count);
 			else
-				System.out.println(index+": count="+count+" red="+(totalRed/count)+" green="+(totalGreen/count)+" blue="+(totalBlue/count));
+				LOG.debug(index+": count="+count+" red="+(totalRed/count)+" green="+(totalGreen/count)+" blue="+(totalBlue/count));
 			for (int i = 0; i < 8; i++)
 				if (leaf[i] != null)
 					leaf[i].list(s, level+2);
@@ -133,7 +138,7 @@ public class OctTreeQuantizer implements Quantizer {
 			else
 				node = child;
 		}
-		System.out.println("getIndexForColor failed");
+		LOG.debug("getIndexForColor failed");
 		return 0;
 	}
 
@@ -190,7 +195,7 @@ public class OctTreeQuantizer implements Quantizer {
 			} else
 				node = child;
 		}
-		System.out.println("insertColor failed");
+		LOG.debug("insertColor failed");
 	}
 
 	private void reduceTree(int numColors) {
@@ -204,7 +209,7 @@ public class OctTreeQuantizer implements Quantizer {
 							OctTreeNode child = node.leaf[i];
 							if (child != null) {
 								if (!child.isLeaf)
-									System.out.println("not a leaf!");
+									LOG.debug("not a leaf!");
 								node.count += child.count;
 								node.totalRed += child.totalRed;
 								node.totalGreen += child.totalGreen;
@@ -225,7 +230,7 @@ public class OctTreeQuantizer implements Quantizer {
 			}
 		}
 
-		System.out.println("Unable to reduce the OctTree");
+		LOG.debug("Unable to reduce the OctTree");
 	}
 
     /**

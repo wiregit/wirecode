@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleMediaSession.java,v $
- * $Revision: 1.1.4.1 $
- * $Date: 2008-06-12 15:20:35 $11-07-2006
+ * $Revision: 1.1.4.2 $
+ * $Date: 2008-06-23 20:31:57 $11-07-2006
  *
  * Copyright 2003-2006 Jive Software.
  *
@@ -19,13 +19,15 @@
  */
 package org.jivesoftware.smackx.jingle.media;
 
-import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
-import org.jivesoftware.smackx.jingle.JingleSession;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.net.ServerSocket;
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jivesoftware.smackx.jingle.JingleSession;
+import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
 
 /**
  * Public Abstract Class provides a clear interface between Media Session and Jingle API.
@@ -40,6 +42,8 @@ import java.io.IOException;
  * @author Thiago Camargo
  */
 public abstract class JingleMediaSession {
+    
+    private static final Log LOG = LogFactory.getLog(JingleSession.class);
     
     // Local Transport details
     private TransportCandidate local;
@@ -126,7 +130,7 @@ public abstract class JingleMediaSession {
             localPort = getFreePort();
             remotePort = local.getSymmetric().getPort();
 
-            System.out.println(local.getConnection() + " " + ip + ": " + localPort + "->" + remotePort);
+            LOG.info(local.getConnection() + " " + ip + ": " + localPort + "->" + remotePort);
 
         }
         else {

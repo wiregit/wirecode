@@ -1,6 +1,6 @@
 /**
  * $RCSfile: ScreenShareSession.java,v $
- * $Revision: 1.1.4.1 $
+ * $Revision: 1.1.4.2 $
  * $Date: 08/11/2006
  * <p/>
  * Copyright 2003-2006 Jive Software.
@@ -86,7 +86,6 @@ public class ScreenShareSession extends JingleMediaSession {
 
             try {
                 receiver = new ImageReceiver(InetAddress.getByName("0.0.0.0"), remotePort, localPort, width, height);
-                System.out.println("Receiving on:" + localPort);
             }
             catch (UnknownHostException e) {
                 e.printStackTrace();

@@ -1,7 +1,7 @@
 /**
  * $RCSfile: TransportCandidate.java,v $
- * $Revision: 1.1.4.1 $
- * $Date: 2008-06-12 15:20:33 $
+ * $Revision: 1.1.4.2 $
+ * $Date: 2008-06-23 20:31:57 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -54,6 +54,8 @@ package org.jivesoftware.smackx.jingle.nat;
 
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smackx.jingle.JingleSession;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -75,6 +77,8 @@ import java.nio.CharBuffer;
  * @author Alvaro Saurin
  */
 public abstract class TransportCandidate {
+    
+    private static final Log LOG = LogFactory.getLog(TransportCandidate.class);
 
     private String name;
 
@@ -683,7 +687,7 @@ public abstract class TransportCandidate {
 
         public void run() {
             try {
-                System.out.println("Listening for ECHO: " + socket.getLocalAddress().getHostAddress() + ":" + socket.getLocalPort());
+                LOG.debug("Listening for ECHO: " + socket.getLocalAddress().getHostAddress() + ":" + socket.getLocalPort());
                 while (true) {
 
                     DatagramPacket packet = new DatagramPacket(new byte[150], 150);
@@ -779,7 +783,7 @@ public abstract class TransportCandidate {
                         public boolean datagramReceived(DatagramPacket datagramPacket) {
 
                             try {
-                                System.out.println("Content Received: " + new String(datagramPacket.getData(), "UTF-8"));
+                                LOG.debug("Content Received: " + new String(datagramPacket.getData(), "UTF-8"));
                                 String str[] = new String(datagramPacket.getData(), "UTF-8").split(";");
                                 String pass = str[0];
                                 String addr[] = str[1].split(":");
@@ -787,7 +791,7 @@ public abstract class TransportCandidate {
                                 String pt = addr[1];
 
                                 if (pass.equals(password) && candidate.getIp().indexOf(ip) != -1 && candidate.getPort() == Integer.parseInt(pt)) {
-                                    System.out.println("Result OK:" + candidate.getIp() + ":" + candidate.getPort());
+                                    LOG.debug("Result OK:" + candidate.getIp() + ":" + candidate.getPort());
                                     TestResult testResult = new TestResult();
                                     testResult.setResult(true);
                                     ended = true;
@@ -800,7 +804,7 @@ public abstract class TransportCandidate {
                                 e.printStackTrace();
                             }
 
-                            System.out.println("Result Wrong Data:" + datagramPacket.getAddress().getHostAddress() + ":" + datagramPacket.getPort());
+                            LOG.debug("Result Wrong Data:" + datagramPacket.getAddress().getHostAddress() + ":" + datagramPacket.getPort());
                             return false;
                         }
                     };

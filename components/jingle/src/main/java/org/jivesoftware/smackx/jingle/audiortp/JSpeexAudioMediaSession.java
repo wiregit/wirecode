@@ -1,6 +1,6 @@
 /**
  * $RCSfile: JSpeexAudioMediaSession.java,v $
- * $Revision: 1.1.4.1 $
+ * $Revision: 1.1.4.2 $
  * $Date: 25/12/2006
  * <p/>
  * Copyright 2003-2006 Jive Software.
@@ -128,7 +128,6 @@ public class JSpeexAudioMediaSession extends JingleMediaSession implements Media
      */
     public void startTrasmit() {
         try {
-            System.out.println("start");
             mediaSession.start(true);
             this.mediaReceived("");
         }

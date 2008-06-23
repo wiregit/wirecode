@@ -1,7 +1,7 @@
 /**
  * $RCSfile: ICECandidate.java,v $
- * $Revision: 1.1.4.1 $
- * $Date: 2008-06-12 15:20:33 $
+ * $Revision: 1.1.4.2 $
+ * $Date: 2008-06-23 20:31:57 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -55,6 +55,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * ICE Transport candidate.
  * <p/>
@@ -64,6 +67,8 @@ import java.util.List;
  * @author Thiago Camargo
  */
 public class ICECandidate extends TransportCandidate implements Comparable {
+    
+    private static final Log LOG = LogFactory.getLog(ICECandidate.class);
 
     private String id; // An identification
 
@@ -274,7 +279,7 @@ public class ICECandidate extends TransportCandidate implements Comparable {
                         if (testResult.isReachable() && checkingCandidate.equals(candidate)) {
                             result.setResult(true);
                             result.addLocalTransportCandidate(localCandidate);
-                            System.out.println("RESULT>>>OK:" + candidate.getIp() + ":" + candidate.getPort());
+                            LOG.debug("RESULT>>>OK:" + candidate.getIp() + ":" + candidate.getPort());
                         }
                     }
                 };

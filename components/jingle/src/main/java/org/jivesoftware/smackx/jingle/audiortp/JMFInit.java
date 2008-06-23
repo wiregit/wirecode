@@ -1,16 +1,23 @@
 package org.jivesoftware.smackx.jingle.audiortp;
 
-import com.sun.media.util.Registry;
-import com.sun.media.ExclusiveUse;
-
-import javax.media.format.AudioFormat;
-import javax.media.Renderer;
-import javax.media.PlugInManager;
-import javax.media.Format;
-import java.awt.*;
+import java.awt.Frame;
+import java.awt.TextArea;
+import java.awt.Toolkit;
 import java.util.Vector;
+import javax.media.Format;
+import javax.media.PlugInManager;
+import javax.media.Renderer;
+import javax.media.format.AudioFormat;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.sun.media.ExclusiveUse;
+import com.sun.media.util.Registry;
 
 public class JMFInit extends Frame implements Runnable {
+    
+    private static final Log LOG = LogFactory.getLog(JMFInit.class);
 
     private String tempDir = "/tmp";
 
@@ -248,7 +255,7 @@ public class JMFInit extends Frame implements Runnable {
     }
 
     private void message(String mesg) {
-        System.out.println(mesg);
+        LOG.debug(mesg);
     }
 
     private void createGUI() {

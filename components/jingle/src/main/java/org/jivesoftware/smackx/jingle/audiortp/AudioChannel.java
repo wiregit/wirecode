@@ -1,6 +1,6 @@
 /**
  * $RCSfile: AudioChannel.java,v $
- * $Revision: 1.1.4.1 $
+ * $Revision: 1.1.4.2 $
  * $Date: 08/11/2006
  * <p/>
  * Copyright 2003-2006 Jive Software.
@@ -404,11 +404,9 @@ public class AudioChannel {
             try {
                 if (active) {
                     sendStream.start();
-                    System.out.println("START");
                 }
                 else {
                     sendStream.stop();
-                    System.out.println("STOP");
                 }
             }
             catch (IOException e) {

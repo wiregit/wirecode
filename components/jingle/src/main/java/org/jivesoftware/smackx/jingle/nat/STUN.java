@@ -1,6 +1,6 @@
 /**
  * $RCSfile: STUN.java,v $
- * $Revision: 1.1.4.1 $
+ * $Revision: 1.1.4.2 $
  * $Date: 15/11/2006
  *
  * Copyright 2003-2006 Jive Software.
@@ -224,8 +224,6 @@ public class STUN extends IQ {
             return false;
         }
 
-        System.out.println("Service listing");
-
         ServiceDiscoveryManager disco = ServiceDiscoveryManager
                 .getInstanceFor(xmppConnection);
         try {
@@ -243,9 +241,6 @@ public class STUN extends IQ {
                         if (info.containsFeature(NAMESPACE))
                             return true;
                 }
-
-                System.out.println(item.getName()+"-"+info.getType());
-
             }
         }
         catch (XMPPException e) {
