@@ -1,8 +1,13 @@
 package org.limewire.xmpp.client;
 
+import java.util.Date;
+
 public class File {
     protected String id;
     protected String name;
+    private long size;
+    private Date date;
+    private String description;
     
     public File(String id, String name) {
         this.id = id;

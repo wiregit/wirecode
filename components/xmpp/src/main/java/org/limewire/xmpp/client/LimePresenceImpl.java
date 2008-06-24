@@ -9,6 +9,7 @@ import org.jivesoftware.smackx.jingle.JingleManager;
 import org.jivesoftware.smackx.jingle.OutgoingJingleSession;
 import org.jivesoftware.smackx.jingle.file.FileContentHandler;
 import org.jivesoftware.smackx.jingle.file.InitiatorFileContentHandler;
+import org.jivesoftware.smackx.packet.StreamInitiation;
 
 public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
@@ -55,7 +56,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         JingleManager manager = new JingleManager(connection);
 
         try {
-            FileContentHandler fileContentHandler = new InitiatorFileContentHandler(new java.io.File(""), false, saveDir);
+            FileContentHandler fileContentHandler = new InitiatorFileContentHandler(getFile(file), false, saveDir);
             fileContentHandler.setProgressListener(new FileTransferProgressListenerAdapter(progressListener));
             OutgoingJingleSession out = manager.createOutgoingJingleSession(getJID(), fileContentHandler);
 
@@ -71,6 +72,11 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         } catch (InterruptedException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    private StreamInitiation.File getFile(File file) {
+        StreamInitiation.File siFile = new StreamInitiation.File(file.getName(), 0);
+        return siFile;
     }
 
     public void sendFile(java.io.File file, FileTransferProgressListener progressListener) {

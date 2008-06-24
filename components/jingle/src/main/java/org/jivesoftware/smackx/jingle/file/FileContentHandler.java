@@ -24,22 +24,22 @@ public abstract class FileContentHandler extends JingleContentHandler {
         this(getFileContainer(file, sending), getAlwaysAcceptor(), saveDir);
     }
 
+    protected FileContentHandler(FileDescription.FileContainer file, UserAcceptor userAcceptor, File saveDir) {
+        this.file = file;
+        this.userAcceptor = userAcceptor;
+        this.saveDir = saveDir;
+    }
+    
     private static FileDescription.FileContainer getFileContainer(File file, boolean sending) {
         return sending ? new FileDescription.Offer(new FileMediaNegotiator.JingleFile(file)) : new FileDescription.Request(new FileMediaNegotiator.JingleFile(file));
     }
 
-    private static UserAcceptor getAlwaysAcceptor() {
+    protected static UserAcceptor getAlwaysAcceptor() {
         return new UserAcceptor() {
             public boolean userAccepts(FileDescription.FileContainer file) {
                 return true;
             }
         };
-    }
-
-    protected FileContentHandler(FileDescription.FileContainer file, UserAcceptor userAcceptor, File saveDir) {
-        this.file = file;
-        this.userAcceptor = userAcceptor;
-        this.saveDir = saveDir;
     }
     
     protected abstract boolean isInitiator();
