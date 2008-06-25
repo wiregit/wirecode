@@ -17,15 +17,15 @@ public class LibraryIQ extends IQ {
 
     private XmlPullParser parser;
     private LibrarySource librarySource;
-    private File [] files;
+    private FileMetaData[] files;
 
     public LibraryIQ(XmlPullParser parser) {
         this.parser = parser;
         files = parseFiles();
     }
 
-    File [] parseFiles() {
-        ArrayList<File> files = new ArrayList<File>();
+    FileMetaData[] parseFiles() {
+        ArrayList<FileMetaData> files = new ArrayList<FileMetaData>();
         try {
             do {
                 int eventType = parser.getEventType();
@@ -33,11 +33,12 @@ public class LibraryIQ extends IQ {
                     if(parser.getName().equals("file")) {
                         String urn = parser.getAttributeValue(null, "id");
                         String name = parser.getAttributeValue(null, "name");
-                        files.add(new File(urn, name));
+                        // TODO size, date, description
+                        files.add(new FileMetaDataImpl(urn, name));
                     }
                 } else if(eventType == XmlPullParser.END_TAG) {
                     if(parser.getName().equals("library")) {
-                        return files.toArray(new File[]{});
+                        return files.toArray(new FileMetaDataImpl[]{});
                     }
                 }
             } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
@@ -46,14 +47,14 @@ public class LibraryIQ extends IQ {
         } catch (XmlPullParserException e) {
             LOG.error(e.getMessage(), e);   // TODO throw?
         }
-        return files.toArray(new File[]{});
+        return files.toArray(new FileMetaDataImpl[]{});
     }
 
     public LibraryIQ(LibrarySource librarySource) {
         this.librarySource = librarySource;
     }
     
-    public File [] getFiles() {
+    public FileMetaData[] getFiles() {
         return files;
     }
     
@@ -72,11 +73,12 @@ public class LibraryIQ extends IQ {
 
     private String toXML(LibrarySource librarySource) {
         StringBuilder builder = new StringBuilder();
-        Iterator<File> files = librarySource.getFiles();
+        Iterator<FileMetaData> files = librarySource.getFiles();
         while(files.hasNext()) {
-            File file = files.next();
+            FileMetaData file = files.next();
             builder.append("<file name=\"" + file.getName() + "\" ");
             builder.append("id=\"" + file.getId() + "\" />\n");
+            // TODO size, date, description
         }
         return builder.toString();
     }

@@ -8,8 +8,8 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smackx.jingle.JingleManager;
 import org.jivesoftware.smackx.jingle.OutgoingJingleSession;
 import org.jivesoftware.smackx.jingle.file.FileContentHandler;
+import org.jivesoftware.smackx.jingle.file.FileLocator;
 import org.jivesoftware.smackx.jingle.file.InitiatorFileContentHandler;
-import org.jivesoftware.smackx.packet.StreamInitiation;
 
 public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
@@ -17,12 +17,12 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     
     private LibraryListener libraryListener;
     protected LibraryIQListener IQListener;
-    private final java.io.File saveDir;
+    private final FileLocator fileLocator;
 
-    LimePresenceImpl(org.jivesoftware.smack.packet.Presence presence, XMPPConnection connection, LibraryIQListener libraryIQListener, java.io.File saveDir) {
+    LimePresenceImpl(org.jivesoftware.smack.packet.Presence presence, XMPPConnection connection, LibraryIQListener libraryIQListener, FileLocator fileLocator) {
         super(presence, connection);
         this.IQListener = libraryIQListener;
-        this.saveDir = saveDir;
+        this.fileLocator = fileLocator;
     }
     
     void sendGetLibrary() {
@@ -51,13 +51,13 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         // TODO fire exiting library
     }
 
-    public void requestFile(File file, FileTransferProgressListener progressListener) {
+    public void requestFile(FileMetaData file, FileTransferProgressListener progressListener) {
         LOG.info("requesting file " + file.toString() + " from " + getJID());
         JingleManager manager = new JingleManager(connection);
 
         try {
-            FileContentHandler fileContentHandler = new InitiatorFileContentHandler(getFile(file), false, saveDir);
-            fileContentHandler.setProgressListener(new FileTransferProgressListenerAdapter(progressListener));
+            FileContentHandler fileContentHandler = new InitiatorFileContentHandler(new FileMetaDataAdapter(file), false, fileLocator);
+            fileContentHandler.setProgressListener(new ProgressListenerAdapter(progressListener));
             OutgoingJingleSession out = manager.createOutgoingJingleSession(getJID(), fileContentHandler);
 
             out.start();
@@ -74,18 +74,13 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
         }
     }
 
-    private StreamInitiation.File getFile(File file) {
-        StreamInitiation.File siFile = new StreamInitiation.File(file.getName(), 0);
-        return siFile;
-    }
-
-    public void sendFile(java.io.File file, FileTransferProgressListener progressListener) {
+    public void sendFile(FileMetaData file, FileTransferProgressListener progressListener) {
         LOG.info("sending file " + file.toString() + " to " + getJID());
         JingleManager manager = new JingleManager(connection);
 
         try {
-            FileContentHandler fileContentHandler = new InitiatorFileContentHandler(file, true, saveDir);
-            fileContentHandler.setProgressListener(new FileTransferProgressListenerAdapter(progressListener));
+            FileContentHandler fileContentHandler = new InitiatorFileContentHandler(new FileMetaDataAdapter(file), true, fileLocator);
+            fileContentHandler.setProgressListener(new ProgressListenerAdapter(progressListener));
             OutgoingJingleSession out = manager.createOutgoingJingleSession(getJID(), fileContentHandler);
 
             out.start();

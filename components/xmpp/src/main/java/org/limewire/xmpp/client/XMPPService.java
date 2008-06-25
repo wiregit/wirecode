@@ -3,6 +3,10 @@ package org.limewire.xmpp.client;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionCreationListener;
@@ -124,7 +128,7 @@ public class XMPPService implements Service {
                     ProviderManager.getInstance().addIQProvider("library", "jabber:iq:lw-library", LibraryIQ.getIQProvider());
                     FileDescription.setUserAccptor(new UserAcceptor() {
                         public boolean userAccepts(FileDescription.FileContainer file) {
-                            return incomingFileAcceptor.accept(new File(file.getFile().getHash(), file.getFile().getName()));
+                            return incomingFileAcceptor.accept(new FileMetaDataAdapter(file.getFile()));
                         }
                     });
                     
@@ -142,8 +146,8 @@ public class XMPPService implements Service {
                                         Description description = content.getDescriptions().get(0);
                                         if(description != null) {
                                             if(description instanceof FileDescription) {
-                                                ((FileContentHandler)session.getContentHandler()).setSaveDir(librarySource.getSaveDirectory(""));
-                                                ((FileContentHandler)session.getContentHandler()).setProgressListener(new FileTransferProgressListenerAdapter(progressListener));
+                                                ((FileContentHandler)session.getContentHandler()).setFileLocator(new FileLocatorAdapter());
+                                                ((FileContentHandler)session.getContentHandler()).setProgressListener(new ProgressListenerAdapter(progressListener));
                                                 // TODO set UserAcceptor
                                                 LOG.info("starting jingle session");
                                                 session.start();
@@ -232,7 +236,7 @@ public class XMPPService implements Service {
                         try {
                             if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/")) {
                                 LOG.debug("limwire user " + user + ", presence " + presence.getFrom() + " detected");
-                                user.addPresense(new LimePresenceImpl(presence, connection, libraryIQListener, librarySource.getSaveDirectory("")));
+                                user.addPresense(new LimePresenceImpl(presence, connection, libraryIQListener, new FileLocatorAdapter()));
                             } else {
                                 user.addPresense(new PresenceImpl(presence, connection));
                             }
@@ -256,5 +260,15 @@ public class XMPPService implements Service {
                 }
             }
         }
+    }
+    
+    private class FileLocatorAdapter implements FileLocator {
+        public InputStream readFile(StreamInitiation.File file) throws FileNotFoundException {
+            return librarySource.readFile(new FileMetaDataAdapter(file));
+        }
+
+        public OutputStream writeFile(StreamInitiation.File file) throws IOException {
+            return librarySource.writeFile(new FileMetaDataAdapter(file));
+        }    
     }
 }

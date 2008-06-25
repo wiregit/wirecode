@@ -46,7 +46,7 @@ public class LibraryIQListener implements PacketListener {
         LOG.debug("handling library result " + libraryIQ.getPacketID());
         LibraryListener listener = libraryHandlers.get(libraryIQ.getPacketID());
         if(listener != null) {
-            for(File f : libraryIQ.getFiles()) {
+            for(FileMetaData f : libraryIQ.getFiles()) {
                 listener.fileAdded(f);
             }
             libraryHandlers.remove(libraryIQ.getPacketID());

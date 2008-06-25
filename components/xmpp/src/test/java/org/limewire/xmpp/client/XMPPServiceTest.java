@@ -2,10 +2,15 @@ package org.limewire.xmpp.client;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -57,65 +62,13 @@ public class XMPPServiceTest extends ServiceTestCase {
         return Arrays.asList(new LimeWireXMPPModule(), m);
     }
 
-    private org.limewire.xmpp.client.File toFile(File f) {
-        return new org.limewire.xmpp.client.File(new Random().nextInt() + "", f.getName());
+    private FileMetaDataImpl toFile(File f) {
+        return new FileMetaDataImpl(new Random().nextInt() + "", f.getName());
     }
 
-    public void xxxtest() throws InterruptedException, XMPPException, IOException {
-        RosterListenerImpl rosterListener2 = new RosterListenerImpl();
-        ProgressListener progressListener = new ProgressListener();
-        XMPPService service2 = new XMPPService(new XMPPServiceConfigurationImpl("limebuddy2@gmail.com", 
-                        "limebuddy234", "talk.google.com", 5222, "gmail.com"),
-               rosterListener2, new LibrarySourceImpl(createMockLibrary()), new IncomingFileAcceptorImpl(), progressListener);
-        service2.initialize();
-        service2.start();
-        XMPPService service = injector.getInstance(XMPPService.class);
-        
-        Thread.sleep(3 * 1000);          
-        
-        assertEquals(1, rosterListener2.roster.size());
-        assertEquals(1, rosterListener2.roster.get("limebuddy1@gmail.com").size());
-        assertTrue(rosterListener2.roster.get("limebuddy1@gmail.com").get(0) instanceof LimePresence);
-        assertEquals(Presence.Type.available, rosterListener2.roster.get("limebuddy1@gmail.com").get(0).getType());
-        assertGreaterThan(0, rosterListener2.files.size());
-        
-        assertEquals(1, rosterListener.roster.size());
-        assertEquals(1, rosterListener.roster.get("limebuddy2@gmail.com").size());
-        assertTrue(rosterListener.roster.get("limebuddy2@gmail.com").get(0) instanceof LimePresence);
-        assertEquals(Presence.Type.available, rosterListener.roster.get("limebuddy2@gmail.com").get(0).getType());
-        assertGreaterThan(0, rosterListener.files.size());
-
-        MessageReaderImpl reader = new MessageReaderImpl();
-        MessageWriter writer = rosterListener.roster.get("limebuddy2@gmail.com").get(0).newChat(reader);
-        writer.writeMessage("hello world");
-       
-        Thread.sleep(2 * 1000);
-        
-        MessageWriter writer2 = rosterListener2.listener.writer;
-        writer2.writeMessage("goodbye world");
-        
-        Thread.sleep(2 * 1000);
-        
-        assertEquals(1, rosterListener2.listener.reader.messages.size());
-        assertEquals("hello world", rosterListener2.listener.reader.messages.get(0));
-        
-        assertEquals(1, reader.messages.size());
-        assertEquals("goodbye world", reader.messages.get(0));
-        
-        assertFalse(progressListener.started);
-        
-        ((LimePresence)rosterListener.roster.get("limebuddy2@gmail.com").get(0)).sendFile(new File("C://limewire.iws"), progressListener);        
-        
-        Thread.sleep(3 * 1000);
-        
-        assertTrue(progressListener.started);
-        assertTrue(progressListener.completed);
-        
-        Thread.sleep(5* 60 * 1000);            
-    }
-    
     public void testStart() throws InterruptedException {
         assertEquals(1, rosterListener.roster.size());
+        assertEquals("limebuddy2@gmail.com", rosterListener.roster.keySet().iterator().next());
         assertEquals(0, rosterListener.roster.get("limebuddy2@gmail.com").size());       
     }
     
@@ -132,8 +85,8 @@ public class XMPPServiceTest extends ServiceTestCase {
         
         HashMap<String, ArrayList<Presence>> roster1 = rosterListener.roster;
         HashMap<String, ArrayList<Presence>> roster2 = rosterListener2.roster;
-        ArrayList<org.limewire.xmpp.client.File> remoteLibraries1 = rosterListener.files;
-        ArrayList<org.limewire.xmpp.client.File> remoteLibraries2 = rosterListener2.files;
+        ArrayList<FileMetaData> remoteLibraries1 = rosterListener.files;
+        ArrayList<FileMetaData> remoteLibraries2 = rosterListener2.files;
         
         assertEquals(1, roster2.size());
         assertEquals(1, roster2.get("limebuddy1@gmail.com").size());
@@ -197,9 +150,15 @@ public class XMPPServiceTest extends ServiceTestCase {
         
         assertFalse(progressListener.started);
         
-        LimePresence limebuddy2 = ((LimePresence)rosterListener.roster.get("limebuddy2@gmail.com").get(0));
+        HashMap<String, ArrayList<Presence>> roster1 = rosterListener.roster;
+        
+        LimePresence limebuddy2 = ((LimePresence)roster1.get("limebuddy2@gmail.com").get(0));
         File toSend = librarySource.lib.listFiles()[0];
-        limebuddy2.sendFile(toSend, progressListener);        
+        FileMetaDataImpl metaData = new FileMetaDataImpl(new Random().nextInt() + "", toSend.getName());
+        metaData.setSize(toSend.length());
+        metaData.setDate(new Date(toSend.lastModified()));
+        metaData.setDescription("cool file");
+        limebuddy2.sendFile(metaData, progressListener);        
         
         Thread.sleep(3 * 1000);
         
@@ -207,7 +166,7 @@ public class XMPPServiceTest extends ServiceTestCase {
         assertTrue(progressListener.completed);
         
         File receivedFile = null;
-        File [] savedFiles2 = librarySource2.getSaveDirectory(toSend.getName()).listFiles();
+        File [] savedFiles2 = librarySource2.saveDir.listFiles();
         for(File saved : savedFiles2) {
             if(saved.getName().equals(toSend.getName())) {
                 receivedFile = saved;
@@ -235,19 +194,21 @@ public class XMPPServiceTest extends ServiceTestCase {
         
         assertFalse(progressListener.started);
         
-        LimePresence limebuddy2 = ((LimePresence)rosterListener.roster.get("limebuddy2@gmail.com").get(0));
-        org.limewire.xmpp.client.File toRequest = rosterListener.files.get(0);
+        HashMap<String, ArrayList<Presence>> roster1 = rosterListener.roster;
+        
+        LimePresence limebuddy2 = ((LimePresence)roster1.get("limebuddy2@gmail.com").get(0));
+        FileMetaData toRequest = rosterListener.files.get(0);
         limebuddy2.requestFile(toRequest, progressListener);        
         
         Thread.sleep(3 * 1000);
         
-        Thread.sleep(5 * 60 * 1000);
+        //Thread.sleep(5 * 60 * 1000);
         
         assertTrue(progressListener.started);
         assertTrue(progressListener.completed);
         
         File receivedFile = null;
-        File [] savedFiles = librarySource.getSaveDirectory(toRequest.getName()).listFiles();
+        File [] savedFiles = librarySource.saveDir.listFiles();
         for(File saved : savedFiles) {
             if(saved.getName().equals(toRequest.getName())) {
                 receivedFile = saved;
@@ -256,9 +217,7 @@ public class XMPPServiceTest extends ServiceTestCase {
         }
         
         assertNotNull(receivedFile);
-        // TODO compare contents
-        
-        
+        // TODO compare contents              
         
         service2.stop();
     }
@@ -326,7 +285,7 @@ public class XMPPServiceTest extends ServiceTestCase {
     
     class RosterListenerImpl implements RosterListener {
         HashMap<String, ArrayList<Presence>> roster = new HashMap<String, ArrayList<Presence>>();
-        ArrayList<org.limewire.xmpp.client.File> files = new ArrayList<org.limewire.xmpp.client.File>();
+        ArrayList<FileMetaData> files = new ArrayList<FileMetaData>();
         IncomingChatListenerImpl listener = new IncomingChatListenerImpl();
         
         public void userAdded(User user) {
@@ -347,7 +306,7 @@ public class XMPPServiceTest extends ServiceTestCase {
                         if(presence instanceof LimePresence) {
                             System.out.println("lime user " + presence.getJID() + " (" + name + ") available");
                             ((LimePresence)presence).setLibraryListener(new LibraryListener() {
-                                 public void fileAdded(org.limewire.xmpp.client.File f){
+                                 public void fileAdded(FileMetaData f){
                                     System.out.println(f.getName() + ": " + f.getId());
                                     files.add(f);
                                 }
@@ -398,10 +357,11 @@ public class XMPPServiceTest extends ServiceTestCase {
             this.lib = lib;
             saveDir = new File(System.getProperty("java.io.tmpdir"), "saveDir" + new Random().nextInt());
             saveDir.mkdirs();
+            saveDir.deleteOnExit();
         }
         
-        public Iterator<org.limewire.xmpp.client.File> getFiles() {
-            ArrayList<org.limewire.xmpp.client.File> files = new ArrayList<org.limewire.xmpp.client.File>();
+        public Iterator<FileMetaData> getFiles() {
+            ArrayList<FileMetaData> files = new ArrayList<FileMetaData>();
             File [] toAdd = lib.listFiles(new FileFilter() {
                 public boolean accept(File pathname) {
                     return pathname.isFile();
@@ -413,13 +373,21 @@ public class XMPPServiceTest extends ServiceTestCase {
             return files.iterator();
         }
 
-        public File getSaveDirectory(String fileName) {
-            return saveDir;
+        public InputStream readFile(FileMetaData file) throws FileNotFoundException {
+            File toRead = new File(lib, file.getName());
+            return new FileInputStream(toRead);
+        }
+
+        public OutputStream writeFile(FileMetaData file) throws IOException {
+            File toWrite = new File(saveDir, file.getName());
+            toWrite.createNewFile();
+            toWrite.deleteOnExit();
+            return new FileOutputStream(toWrite);
         }
     }
     
     class IncomingFileAcceptorImpl implements IncomingFileAcceptor {
-        public boolean accept(org.limewire.xmpp.client.File f) {
+        public boolean accept(FileMetaData f) {
             return true;
         }    
     }
@@ -448,19 +416,19 @@ public class XMPPServiceTest extends ServiceTestCase {
         boolean completed;
         boolean errored;
         
-        public void started(org.limewire.xmpp.client.File file) {
+        public void started(FileMetaData file) {
             started = true;
         }
 
-        public void completed(org.limewire.xmpp.client.File file) {
+        public void completed(FileMetaData file) {
             completed = true;
         }
 
-        public void updated(org.limewire.xmpp.client.File file, int percentComplete) {
+        public void updated(FileMetaData file, int percentComplete) {
             //To change body of implemented methods use File | Settings | File Templates.
         }
 
-        public void errored(org.limewire.xmpp.client.File file) {
+        public void errored(FileMetaData file) {
             errored = true;
         }
     }
