@@ -2,7 +2,11 @@ package org.limewire.xmpp.client;
 
 import org.jivesoftware.smackx.packet.StreamInitiation;
 
-public class ProgressListenerAdapter implements org.jivesoftware.smackx.jingle.file.FileTransferProgressListener {
+/**
+ * An adapter between the xmpp component class <code>FileTransferProgressListener</code> and the
+ * smack class <code>FileTransferProgressListener</code>
+ */
+class ProgressListenerAdapter implements org.jivesoftware.smackx.jingle.file.FileTransferProgressListener {
     private final org.limewire.xmpp.client.FileTransferProgressListener progressListener;
 
     public ProgressListenerAdapter(org.limewire.xmpp.client.FileTransferProgressListener progressListener) {

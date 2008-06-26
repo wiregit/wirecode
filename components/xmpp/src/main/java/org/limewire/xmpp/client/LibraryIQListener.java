@@ -10,6 +10,11 @@ import org.jivesoftware.smack.packet.Packet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Handles <code><library></code> messages.  Sends <code>result</code> messages when <code>get</code>
+ * messages are received.  Notifies the proper <code>LibraryListener</code> when <code>result</code>
+ * messages are received.
+ */
 public class LibraryIQListener implements PacketListener {
 
     private static final Log LOG = LogFactory.getLog(LibraryIQListener.class);

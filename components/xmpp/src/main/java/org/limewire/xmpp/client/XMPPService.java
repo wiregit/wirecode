@@ -79,7 +79,10 @@ public class XMPPService implements Service {
     void register(org.limewire.lifecycle.ServiceRegistry registry) {
         registry.register(this);
     }
-    
+
+    /**
+     * Logs into the xmpp service specified in the <code>XMPPConfiguration</code>
+     */
     public void start() {
         try {
             XMPPConnection.DEBUG_ENABLED = configuration.isDebugEnabled();
@@ -103,6 +106,9 @@ public class XMPPService implements Service {
                                            configuration.getServiceName());
     }
 
+    /**
+     * Disconnects from the xmpp server
+     */
     public void stop() {
         LOG.info("disconnecting from " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + ".");
         connection.disconnect();
@@ -136,7 +142,6 @@ public class XMPPService implements Service {
                     manager.addJingleSessionRequestListener(new JingleSessionRequestListener() {
                         public void sessionRequested(JingleSessionRequest request) {
                             try {
-                                // Accept the call
                                 LOG.info("incoming jingle request from " + request.getFrom());
                                 IncomingJingleSession session = request.accept();
                                 Jingle jingle = session.getInitialSessionRequest().getJingle();
@@ -234,7 +239,7 @@ public class XMPPService implements Service {
                     LOG.debug("user " + user + " presence changed to " + presence.getType());
                     if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.available)) {
                         try {
-                            if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature("http://www.limewire.org/")) {
+                            if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature(LW_SERVICE_NS)) {
                                 LOG.debug("limwire user " + user + ", presence " + presence.getFrom() + " detected");
                                 user.addPresense(new LimePresenceImpl(presence, connection, libraryIQListener, new FileLocatorAdapter()));
                             } else {
