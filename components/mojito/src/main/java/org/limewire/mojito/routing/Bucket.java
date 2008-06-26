@@ -138,6 +138,11 @@ public interface Bucket extends Serializable {
     public boolean isTooDeep();
 
     /**
+     * Returns whether or not this Bucket is in the smallest subtree
+     */
+    public boolean isInSmallestSubtree();
+
+    /**
      * Returns all active Contacts as List
      */
     public Collection<Contact> getActiveContacts();

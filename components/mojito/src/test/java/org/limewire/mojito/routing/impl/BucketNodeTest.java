@@ -2,6 +2,7 @@ package org.limewire.mojito.routing.impl;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.Arrays;
 
 import junit.framework.TestSuite;
 
@@ -215,5 +216,124 @@ public class BucketNodeTest extends MojitoTestCase {
         bucket.addCachedContact(leastRecentlySeen);
         assertSame(leastRecentlySeen, bucket.getMostRecentlySeenCachedContact());
         assertNotSame(mostRecentlySeen, bucket.getMostRecentlySeenCachedContact());
+    }
+    
+    public void testIsTooDeep() {
+        try {
+            RouteTableSettings.DEPTH_LIMIT.setValue(4);
+            RouteTableImpl routeTable = new RouteTableImpl();
+            KUID localNodeId = routeTable.getLocalNode().getNodeID();
+            byte firstByte = 0;
+            byte bytes[] = new byte[20];
+            for(int i = 0; i < 256; i++){           
+                SocketAddress src = new InetSocketAddress("localhost", 3000+i);
+                bytes[0] = firstByte;
+                KUID nodeId = KUID.createWithBytes(bytes);
+                firstByte++;
+                
+                Vendor vendor = Vendor.UNKNOWN;
+                Version version = Version.ZERO;
+                SocketAddress con = new InetSocketAddress("localhost", 30000+i);
+                int instanceId = 0;
+                int flags = Contact.DEFAULT_FLAG;
+                
+                Contact node = ContactFactory.createLiveContact(
+                        src, vendor, version, nodeId, con, instanceId, flags);
+                routeTable.add(node);
+            }
+            // + 1 for local node
+            assertEquals("All contacts should have been added", 256 + 1, routeTable.getContacts().size());
+            
+            // all buckets except for local one should split, since depth is one
+            for (Bucket bucket : routeTable.getBuckets()) {
+                int commonPrefixLength = bucket.getBucketID().getCommonPrefixLength(localNodeId);
+                if (bucket.getDepth() - commonPrefixLength >= RouteTableSettings.DEPTH_LIMIT.getValue()) {
+                    assertTrue(bucket.isTooDeep());
+                } else {
+                    assertFalse(bucket.isTooDeep());
+                }
+            }
+        } finally {
+            RouteTableSettings.DEPTH_LIMIT.revertToDefault();
+        }
+    }
+    
+    /**
+     * Tests that all buckets are too deep except for local node.
+     */
+    public void testBucketsAreTooDeep() {
+        try {
+            RouteTableSettings.DEPTH_LIMIT.setValue(1);
+            byte[] localNodeId = new byte[KUID.LENGTH];
+            Arrays.fill(localNodeId, (byte)0xFF);
+            RouteTableImpl routeTable = new RouteTableImpl(localNodeId);
+            byte firstByte = (byte)255;
+            byte bytes[] = new byte[20];
+            for(int i = 0; i < 256; i++){           
+                SocketAddress src = new InetSocketAddress("localhost", 3000+i);
+                bytes[0] = firstByte;
+                KUID nodeId = KUID.createWithBytes(bytes);
+                firstByte--;
+                
+                Vendor vendor = Vendor.UNKNOWN;
+                Version version = Version.ZERO;
+                SocketAddress con = new InetSocketAddress("localhost", 30000+i);
+                int instanceId = 0;
+                int flags = Contact.DEFAULT_FLAG;
+                
+                Contact node = ContactFactory.createLiveContact(
+                        src, vendor, version, nodeId, con, instanceId, flags);
+                routeTable.add(node);
+            }
+            // all buckets except for local one should split, since depth is one
+            for (Bucket bucket : routeTable.getBuckets()) {
+                if (bucket.contains(KUID.createWithBytes(localNodeId))) {
+                    assertFalse(bucket.isTooDeep());
+                } else {
+                    assertTrue(bucket.isTooDeep());
+                }
+            }
+        } finally {
+            RouteTableSettings.DEPTH_LIMIT.revertToDefault();
+        }
+    }
+    
+    
+    
+    public void testInSmallestSubtree() {
+        RouteTableImpl routeTable = new RouteTableImpl();
+        Contact localNode = routeTable.getLocalNode(); 
+        int firstBit;
+        if (localNode.getNodeID().isBitSet(0)) {
+            firstBit = 0;
+        } else {
+            firstBit = 128;
+        }
+        byte bytes[] = new byte[20];
+
+        for (int i = firstBit; i < 128 + firstBit; i++) {
+            SocketAddress src = new InetSocketAddress("localhost", 3000 + i);
+            bytes[0] = (byte) i;
+            KUID nodeId = KUID.createWithBytes(bytes);
+
+            Vendor vendor = Vendor.UNKNOWN;
+            Version version = Version.ZERO;
+            SocketAddress con = new InetSocketAddress("localhost", 30000 + i);
+            int instanceId = 0;
+            int flags = Contact.DEFAULT_FLAG;
+
+            Contact node = ContactFactory.createLiveContact(src, vendor, version, nodeId, con,
+                    instanceId, flags);
+            routeTable.add(node);
+            System.out.println(node);
+        }
+        
+        for (Bucket bucket : routeTable.getBuckets()) {
+            if (bucket.contains(localNode.getNodeID())) {
+                assertFalse(bucket.isInSmallestSubtree());
+            } else {
+                assertTrue(bucket.isInSmallestSubtree());
+            }
+        }
     }
 }

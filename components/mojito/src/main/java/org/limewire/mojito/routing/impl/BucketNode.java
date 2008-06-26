@@ -262,10 +262,17 @@ class BucketNode implements Bucket {
         return !cache.isEmpty() && ((FixedSizeHashMap<KUID, Contact>)cache).isFull();
     }
     
-    public boolean isTooDeep() {
-        return depth % RouteTableSettings.DEPTH_LIMIT.getValue() == 0;
+    public boolean isInSmallestSubtree() {
+        int commonPrefixLength = routeTable.getLocalNode().getNodeID().getCommonPrefixLength(bucketId);
+        int localNodeDepth = routeTable.getBucket(routeTable.getLocalNode().getNodeID()).getDepth();
+        return (localNodeDepth - 1) == commonPrefixLength;
     }
     
+    public boolean isTooDeep() {
+        int commonPrefixLength = routeTable.getLocalNode().getNodeID().getCommonPrefixLength(bucketId);        
+        return (depth - commonPrefixLength) >= RouteTableSettings.DEPTH_LIMIT.getValue();
+    }
+
     public Collection<Contact> getActiveContacts() {
         return nodeTrie.values();
     }

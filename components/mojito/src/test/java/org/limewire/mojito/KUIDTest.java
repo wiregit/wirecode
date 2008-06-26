@@ -105,4 +105,16 @@ public class KUIDTest extends MojitoTestCase {
         
         assertEquals(c, a.xor(b));
     }
+    
+    public void testGetCommonPrefixLength() {
+        KUID a = KUID.createWithHexString("E3ED9650238A6C576C987793C01440A0EA91A1FB");
+        KUID b = KUID.createWithHexString("F26530F8EF3D8BD47285A9B0D2130CC6DCF21868");
+        KUID c = KUID.createWithHexString("F26830F8EF3D8BD47285A9B0D2130CC6DCF21868");
+        KUID d = KUID.createWithHexString("126830F8EF3D8BD47285A9B0D2130CC6DCF21868");
+        
+        assertEquals(3, a.getCommonPrefixLength(b));
+        assertEquals(160, a.getCommonPrefixLength(a));
+        assertEquals(12, b.getCommonPrefixLength(c));
+        assertEquals(0, d.getCommonPrefixLength(c));
+    }
 }

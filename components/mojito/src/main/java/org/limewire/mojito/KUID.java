@@ -368,6 +368,28 @@ public class KUID implements Comparable<KUID>, Serializable {
     }
     
     /**
+     * Compute common prefix length of two KUIDs.
+     */   
+    public int getCommonPrefixLength(KUID other) {
+        int commonPrefixLength = 0;
+        for (int i = 0; i < id.length; i++) {
+            byte xorValue = (byte)(id[i] ^ other.id[i]);
+            if (xorValue == 0) {
+                commonPrefixLength += BITS.length;
+            } else {
+                for (int j = 0; j < BITS.length; j++) {
+                    if ((xorValue & BITS[j]) == 0) {
+                        commonPrefixLength++;
+                    } else {
+                        return commonPrefixLength;
+                    }
+                }
+            }
+        }   
+        return commonPrefixLength;
+    }
+    
+    /**
      * Creates and returns a random ID that is hopefully
      * globally unique.
      */

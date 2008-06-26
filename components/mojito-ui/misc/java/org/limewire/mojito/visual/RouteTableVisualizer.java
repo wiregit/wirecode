@@ -64,18 +64,29 @@ public class RouteTableVisualizer implements RouteTableGraphCallback,
     
     RouteTable routeTable;
     
+    public static RouteTableVisualizer show(final RouteTable routeTable) {
+        RouteTableVisualizer viz = new RouteTableVisualizer(routeTable);
+        createAndShowFrame(viz, "RouteTable");
+        return viz;
+    }
+    
     public static RouteTableVisualizer show(final Context context) {
-        final RouteTableVisualizer viz = new RouteTableVisualizer(context);
+        RouteTableVisualizer viz = new RouteTableVisualizer(context);
+        createAndShowFrame(viz, context.getName());
+        return viz;
+    }
+    
+    private static void createAndShowFrame(final RouteTableVisualizer visualizer, final String name) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                final JFrame jf = new JFrame(context.getName());
-                jf.getContentPane().add (viz.getComponent());
+                final JFrame jf = new JFrame(name);
+                jf.getContentPane().add (visualizer.getComponent());
                 jf.pack();
                 jf.addWindowListener(new WindowListener() {
                     public void windowActivated(WindowEvent e) {}
                     public void windowClosed(WindowEvent e) {}
                     public void windowClosing(WindowEvent e) {
-                        viz.stop();
+                        visualizer.stop();
                     }
                     public void windowDeactivated(WindowEvent e) {}
                     public void windowDeiconified(WindowEvent e) {}
@@ -85,12 +96,14 @@ public class RouteTableVisualizer implements RouteTableGraphCallback,
                 jf.setVisible(true);
             }
         });
-        return viz;
     }
     
     public RouteTableVisualizer(Context dht) {
-        //TODO: change constructor
-        routeTable = dht.getRouteTable();
+        this(dht.getRouteTable());
+    }
+    
+    public RouteTableVisualizer(RouteTable routetTable) {
+        routeTable = routetTable;
         routeTableGraph = new BucketGraph(routeTable, this);
         init();
     }

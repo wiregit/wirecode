@@ -76,11 +76,6 @@ public class RouteTableImpl implements RouteTable {
     private int consecutiveFailures = 0;
     
     /**
-     * The smallest subtree Bucket
-     */
-    private Bucket smallestSubtreeBucket = null;
-   
-    /**
      * A reference to the ContactPinger
      */
     private transient ContactPinger pinger;
@@ -146,7 +141,6 @@ public class RouteTableImpl implements RouteTable {
         addContactToBucket(bucket, localNode);
         
         consecutiveFailures = 0;
-        smallestSubtreeBucket = null;
     }
     
     private void readObject(ObjectInputStream in) 
@@ -460,7 +454,7 @@ public class RouteTableImpl implements RouteTable {
         boolean containsLocalNode = bucket.contains(getLocalNode().getNodeID());
         
         if (containsLocalNode
-                || bucket.equals(smallestSubtreeBucket)
+                || bucket.isInSmallestSubtree()
                 || !bucket.isTooDeep()) {
             
             if (LOG.isTraceEnabled()) {
@@ -472,16 +466,6 @@ public class RouteTableImpl implements RouteTable {
             
             Bucket left = buckets.get(0);
             Bucket right = buckets.get(1);
-            
-            if (containsLocalNode) {
-                if (left.contains(getLocalNode().getNodeID())) {
-                    smallestSubtreeBucket = right;
-                } else if (right.contains(getLocalNode().getNodeID())) {
-                    smallestSubtreeBucket = left;
-                } else {
-                    throw new IllegalStateException("Neither left nor right Bucket contains the local Node");
-                }
-            }
             
             // The left one replaces the current bucket in the Trie!
             Bucket oldLeft = bucketTrie.put(left.getBucketID(), left);
