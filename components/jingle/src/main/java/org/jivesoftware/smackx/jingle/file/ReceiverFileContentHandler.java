@@ -6,8 +6,8 @@ import org.jivesoftware.smackx.packet.file.FileDescription;
 
 public class ReceiverFileContentHandler extends FileContentHandler {
     
-    public ReceiverFileContentHandler(FileDescription.FileContainer file, UserAcceptor userAcceptor, File saveDir) {
-        super(file, userAcceptor, saveDir);
+    public ReceiverFileContentHandler(FileDescription.FileContainer file, UserAcceptor userAcceptor, FileLocator fileLocator) {
+        super(file, userAcceptor, fileLocator);
     }
 
     protected boolean isInitiator() {

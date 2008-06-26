@@ -135,29 +135,4 @@ public class FileMediaNegotiator extends MediaNegotiator {
     public FileDescription.FileContainer getFile() {
         return file;
     }
-    
-    public static class JingleFile extends StreamInitiation.File {
-        File localFile;
-
-        public JingleFile(File localFile) {
-            super(localFile.getName(), localFile.length());
-            setDate(new Date(localFile.lastModified()));
-            setDesc(null); // TODO
-            setHash(null); // TODO
-            setRanged(false); // TODO add range support to StreamInitiation.File
-            this.localFile = localFile;
-        }
-        
-        public JingleFile(StreamInitiation.File file) {
-            super(file.getName(), file.getSize());
-            setDate(file.getDate());
-            setDesc(file.getDesc());
-            setHash(file.getHash());
-            setRanged(file.isRanged());
-        }
-        
-        public File getLocalFile() {
-            return localFile;
-        }
-    }
 }

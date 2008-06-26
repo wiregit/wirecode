@@ -1,7 +1,5 @@
 package org.jivesoftware.smackx.jingle.file;
 
-import java.io.File;
-
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smackx.jingle.JingleContentHandler;
 import org.jivesoftware.smackx.jingle.JingleSession;
@@ -17,21 +15,14 @@ public abstract class FileContentHandler extends JingleContentHandler {
     
     private FileDescription.FileContainer file;
     private UserAcceptor userAcceptor;
-    private File saveDir;
+    private FileLocator fileLocator;
     private FileTransferProgressListener progressListener;
 
-    protected FileContentHandler(File file, boolean sending, File saveDir) {
-        this(getFileContainer(file, sending), getAlwaysAcceptor(), saveDir);
-    }
 
-    protected FileContentHandler(FileDescription.FileContainer file, UserAcceptor userAcceptor, File saveDir) {
+    protected FileContentHandler(FileDescription.FileContainer file, UserAcceptor userAcceptor, FileLocator fileLocator) {
         this.file = file;
         this.userAcceptor = userAcceptor;
-        this.saveDir = saveDir;
-    }
-    
-    private static FileDescription.FileContainer getFileContainer(File file, boolean sending) {
-        return sending ? new FileDescription.Offer(new FileMediaNegotiator.JingleFile(file)) : new FileDescription.Request(new FileMediaNegotiator.JingleFile(file));
+        this.fileLocator = fileLocator;
     }
 
     protected static UserAcceptor getAlwaysAcceptor() {
@@ -44,8 +35,8 @@ public abstract class FileContentHandler extends JingleContentHandler {
     
     protected abstract boolean isInitiator();
     
-    public void setSaveDir(File saveDir) {
-        this.saveDir = saveDir;
+    public void setFileLocator(FileLocator fileLocator) {
+        this.fileLocator = fileLocator;
     }
     
     public void setProgressListener(FileTransferProgressListener progressListener) {
@@ -57,7 +48,7 @@ public abstract class FileContentHandler extends JingleContentHandler {
         FileDescription.FileContainer file = ((FileMediaNegotiator)mediaNegotiator).getFile();
         TransportCandidate bestRemoteCandidate = transportNegotiator.getBestRemoteCandidate();
         TransportCandidate acceptedLocalCandidate = transportNegotiator.getAcceptedLocalCandidate();        
-        return new FileMediaSession(file, isInitiator(), bestRemoteCandidate, acceptedLocalCandidate, jingleSession, saveDir, progressListener);
+        return new FileMediaSession(file, isInitiator(), bestRemoteCandidate, acceptedLocalCandidate, jingleSession, fileLocator, progressListener);
     }
 
     protected JingleTransportManager createTransportManager(XMPPConnection connection) {

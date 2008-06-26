@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smackx.jingle.JingleContentHandler;
-import org.jivesoftware.smackx.jingle.file.FileMediaNegotiator;
+import org.jivesoftware.smackx.jingle.file.FileLocator;
 import org.jivesoftware.smackx.jingle.file.ReceiverFileContentHandler;
 import org.jivesoftware.smackx.jingle.file.UserAcceptor;
 import org.jivesoftware.smackx.packet.Description;
@@ -14,7 +14,7 @@ public class FileDescription extends Description {
     public static final String NAMESPACE = "urn:xmpp:tmp:jingle:apps:file-transfer";
     
     private static UserAcceptor userAcceptor;
-    private File saveDir;
+    private static FileLocator fileLocator;
     
     public String getNamespace() {
         return NAMESPACE;
@@ -29,25 +29,21 @@ public class FileDescription extends Description {
     }
 
     public JingleContentHandler createContentHandler() {
-        return new ReceiverFileContentHandler(getFileContainer(),  userAcceptor, saveDir);
+        return new ReceiverFileContentHandler(getFileContainer(),  userAcceptor, fileLocator);
     }
     
     public static void setUserAccptor(UserAcceptor userAccptor) {
         FileDescription.userAcceptor = userAccptor;
     }
     
-    public void setSaveDir(File saveDir) {
-        this.saveDir = saveDir;
+    public static void setFileLocator(FileLocator fileLocator) {
+        FileDescription.fileLocator = fileLocator;
     }
 
     public abstract static class FileContainer implements PacketExtension  {
-        FileMediaNegotiator.JingleFile file;
+        StreamInitiation.File file;
         
         public FileContainer(StreamInitiation.File file) {
-            this.file = new FileMediaNegotiator.JingleFile(file);
-        }
-        
-        public FileContainer(FileMediaNegotiator.JingleFile file) {
             this.file = file;
         }
 
@@ -55,7 +51,7 @@ public class FileDescription extends Description {
             return "";
         }
 
-        public FileMediaNegotiator.JingleFile getFile() {
+        public StreamInitiation.File getFile() {
             return file;
         }
 
@@ -78,10 +74,6 @@ public class FileDescription extends Description {
         public Offer(StreamInitiation.File file) {
             super(file);
         }
-        
-        public Offer(FileMediaNegotiator.JingleFile file) {
-            super(file);
-        }
 
         public String getElementName() {
             return NODENAME;
@@ -93,10 +85,6 @@ public class FileDescription extends Description {
         public static String NODENAME = "request";
 
         public Request(StreamInitiation.File file) {
-            super(file);
-        }
-        
-        public Request(FileMediaNegotiator.JingleFile file) {
             super(file);
         }
 
