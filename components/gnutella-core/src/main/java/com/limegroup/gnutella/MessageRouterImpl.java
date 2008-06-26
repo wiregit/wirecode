@@ -726,6 +726,10 @@ public abstract class MessageRouterImpl implements MessageRouter {
      * @see com.limegroup.gnutella.MessageRouter#handleUDPMessage(com.limegroup.gnutella.messages.Message, java.net.InetSocketAddress)
      */	
 	public void handleUDPMessage(Message msg, InetSocketAddress addr) {
+	    if (LOG.isTraceEnabled()) {
+	        LOG.debug("handling udp message: " + msg + " from: " + addr);
+	    }
+	    
 	    // Increment hops and decrement TTL.
 	    msg.hop();
 
