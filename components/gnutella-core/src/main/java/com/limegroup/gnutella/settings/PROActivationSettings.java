@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.settings;
 
+import org.limewire.setting.BooleanSetting;
 import org.limewire.setting.StringSetting;
 
 public class PROActivationSettings extends LimeProps {
@@ -22,7 +23,7 @@ public class PROActivationSettings extends LimeProps {
     public static StringSetting PRO_ACTIVATION_KEY = 
         FACTORY.createStringSetting("PRO_ACTIVATION_KEY", "");
 
-    // TODO:  These URLS should probably don't need to be remote.  Should be based off a subdomain.
+    // TODO:  These URLS probably don't need to be remote.  Should be based off a subdomain.
     //        Need a third one for expiry.
     /**
      * The URL to send a user to when wishing to activate PRO.
@@ -37,4 +38,18 @@ public class PROActivationSettings extends LimeProps {
     public static final StringSetting PRO_ACTIVATION_LOOKUP_URL = 
         FACTORY.createRemoteStringSetting
         ("PRO_ACTIVATION_LOOKUP_URL","http://stage.limewire.com/cgi-bin/proLookup.cgi","proActivationLookupURL");
-}
+    
+    /**
+     * The expiry URL for testing if an activation key has expired.
+     */
+    public static final StringSetting PRO_ACTIVATION_EXPIRY_URL = 
+        FACTORY.createRemoteStringSetting
+        ("PRO_ACTIVATION_EXPIRY_URL","http://stage.limewire.com/cgi-bin/proExpiry.cgi","proActivationExpiryURL");
+    
+    /**
+     * Indicates whether this was a basic version of LimeWire that was activated to PRO. 
+     */
+    public static final BooleanSetting PRO_ACTIVATION_OF_BASIC =
+        FACTORY.createBooleanSetting("PRO_ACTIVATION_OF_BASIC", false);          
+      
+ }
