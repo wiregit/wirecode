@@ -1007,7 +1007,7 @@ public class FileManagerImpl implements FileManager, Service {
                 // check LimeXML to determine if is a store file or the sha1 is mapped to a store file 
                 //  (the sha1 check is needed if duplicate store files are loaded since the second file 
                 //  will not have a unique LimeXMLDoc associated with it)
-                if (isStoreXML(fd.getXMLDocument()) || storeFileList.contains(fd.getSHA1Urn()) ) { 
+                if (isStoreXML(fd.getXMLDocument()) || storeFileList.contains(fd.getSHA1Urn()) || successType == Type.ADD_STORE_FILE) { 
                     addStoreFile(fd, file, urns, successType, oldFileDesc);
                 } else {
                     addSharedFile(file, fd, urns, successType, oldFileDesc);
@@ -1081,7 +1081,7 @@ public class FileManagerImpl implements FileManager, Service {
         }
 
         sharedFileList.addFile(file, fileDesc);
-        
+
         //If the event is a addFile event, just pass along the newly added FileDesc
         //else it was an UpdateEvent so pass along the oldFileDesc and newly added one
         if(successType == Type.ADD_FILE)

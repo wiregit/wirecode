@@ -1132,9 +1132,11 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
      * Listens for events from FileManager
      */
     public void handleFileEvent(FileManagerEvent evt) {
-        if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_FINISHING) {
-            getIncompleteFileManager().registerAllIncompleteFiles();
-        }
+    	switch(evt.getType()){
+    		case FILEMANAGER_LOAD_FINISHING:
+    			getIncompleteFileManager().registerAllIncompleteFiles();
+    			break;
+    	}
     }
     
     // ---------------------------------------------------------------
