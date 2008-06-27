@@ -21,7 +21,7 @@ public class LibraryIQListener implements PacketListener {
 
     private XMPPConnection connection;
     private final LibrarySource librarySource;
-    private ConcurrentHashMap <String, LibraryListener> libraryHandlers = new ConcurrentHashMap<String, LibraryListener>();
+    private final ConcurrentHashMap <String, LibraryListener> libraryHandlers = new ConcurrentHashMap<String, LibraryListener>();
 
     public LibraryIQListener(XMPPConnection connection, LibrarySource librarySource) {
         this.librarySource = librarySource;

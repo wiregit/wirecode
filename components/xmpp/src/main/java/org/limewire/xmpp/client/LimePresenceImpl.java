@@ -61,15 +61,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
             OutgoingJingleSession out = manager.createOutgoingJingleSession(getJID(), fileContentHandler);
 
             out.start();
-
-            while (out.getJingleMediaSession() == null) {
-                Thread.sleep(500);
-            }
-
-            //out.terminate();
         } catch (XMPPException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (InterruptedException e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -84,15 +76,7 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
             OutgoingJingleSession out = manager.createOutgoingJingleSession(getJID(), fileContentHandler);
 
             out.start();
-
-            while (out.getJingleMediaSession() == null) {
-                Thread.sleep(500);
-            }
-
-            //out.terminate();
         } catch (XMPPException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (InterruptedException e) {
             LOG.error(e.getMessage(), e);
         }
     }

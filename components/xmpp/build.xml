@@ -62,14 +62,6 @@
     
     <target name="jar" depends="initialize, compile-src">
         <do.jar component="xmpp"/>
-        <mkdir dir="server-plugin"/>
-        <mkdir dir="server-plugin/classes"/>
-        <copy file="server-plugin.xml" tofile="server-plugin/plugin.xml"/>
-        <copy todir="server-plugin/classes">
-            <fileset dir="build/classes" includes="**/*.class"/>
-        </copy>
-        <jar basedir="server-plugin" includes="**/**" jarfile="server-plugin.jar"/>
-        <copy file="server-plugin.jar" todir="../../../../openfire/plugins"/>
     </target>
     
 	<target name="javadoc" depends="initialize, compile-src">

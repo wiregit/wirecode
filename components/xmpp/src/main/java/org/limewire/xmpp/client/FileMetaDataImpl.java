@@ -3,8 +3,8 @@ package org.limewire.xmpp.client;
 import java.util.Date;
 
 public class FileMetaDataImpl implements FileMetaData {
-    protected String id;
-    protected String name;
+    private String id;
+    private String name;
     private long size;
     private Date date;
     private String description;

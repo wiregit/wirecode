@@ -1,7 +1,7 @@
 /**
  * $RCSfile: RTPBridge.java,v $
- * $Revision: 1.1.4.2 $
- * $Date: 2008-06-23 20:31:57 $
+ * $Revision: 1.1.4.3 $
+ * $Date: 2008-06-27 22:20:47 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -437,7 +437,9 @@ public class RTPBridge extends IQ {
             }
         }
         catch (XMPPException e) {
-            e.printStackTrace();
+            if(e.getXMPPError() == null || e.getXMPPError().getCode() != 501) {
+                e.printStackTrace();
+            }
         }
 
         return false;

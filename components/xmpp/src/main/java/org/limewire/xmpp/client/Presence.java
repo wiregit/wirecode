@@ -45,7 +45,7 @@ public interface Presence {
      * messages
      * @return the <code>MessageWriter</code> used to send outgoing messages
      */
-    public MessageWriter newChat(MessageReader reader);
+    public MessageWriter createChat(MessageReader reader);
 
     /**
      * Used by the xmpp service user to register a listener for new incoming chats

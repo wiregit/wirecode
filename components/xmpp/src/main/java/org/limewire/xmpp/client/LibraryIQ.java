@@ -14,16 +14,16 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Used to (de)serialize <code>library</code> IQ messages.  These messages look like this on the wire:<BR>
  *
- * <iq id="8743kp" from="limebuddy1@gmail.com" to="limebuddy2@gmail.com/limewire12345" type="get">
+ * <pre><iq id="8743kp" from="limebuddy1@gmail.com/limewire12345" to="limebuddy2@gmail.com/limewire678910" type="get">
  *      <library xmlns="jabber:iq:lw-library"/>
  * </iq>
  *
- * <iq id="8743kp" from="limebuddy1@gmail.com" to="limebuddy2@gmail.com/limewire12345" type="result">
+ * <iq id="8743kp" from="limebuddy2@gmail.com/limewire678910" to="limebuddy1@gmail.com/limewire12345" type="result">
  *      <library xmlns="jabber:iq:lw-library">
  *          <file name="foo.txt" id="yhd7w9whh773a0"/>
  *          <file name="bar.txt" id="dhcehfr940ekfj"/>
  *      </library>
- * </iq>
+ * </iq></pre>
  */
 public class LibraryIQ extends IQ {
 

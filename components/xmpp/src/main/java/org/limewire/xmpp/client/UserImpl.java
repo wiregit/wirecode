@@ -7,11 +7,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class UserImpl implements User {
-    protected String id;
-    protected String name;
-    protected ConcurrentHashMap<String, Presence> presences;
-    protected CopyOnWriteArrayList<PresenceListener> presenceListeners; 
-    protected XMPPConnection connection;
+    private final String id;
+    private final String name;
+    private final ConcurrentHashMap<String, Presence> presences;
+    private final CopyOnWriteArrayList<PresenceListener> presenceListeners; 
+    private final XMPPConnection connection;
 
     public UserImpl(String id, String name, XMPPConnection connection) {
         this.id = id;

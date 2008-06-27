@@ -10,14 +10,14 @@ public class PresenceImpl implements Presence {
     private static final Log LOG = LogFactory.getLog(PresenceImpl.class);
 
     protected final org.jivesoftware.smack.packet.Presence presence;
-    protected final XMPPConnection connection;
+    protected final org.jivesoftware.smack.XMPPConnection connection;
 
-    PresenceImpl(org.jivesoftware.smack.packet.Presence presence, XMPPConnection connection) {
+    PresenceImpl(org.jivesoftware.smack.packet.Presence presence, org.jivesoftware.smack.XMPPConnection connection) {
         this.presence = presence;
         this.connection = connection;        
     }
 
-    public MessageWriter newChat(final MessageReader reader) {
+    public MessageWriter createChat(final MessageReader reader) {
         LOG.info("new chat with " + getJID());
         final Chat chat = connection.getChatManager().createChat(getJID(), new MessageListener() {
             public void processMessage(Chat chat, Message message) {
