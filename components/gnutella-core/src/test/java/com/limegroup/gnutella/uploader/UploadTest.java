@@ -243,6 +243,8 @@ public class UploadTest extends LimeTestCase {
         
         // make sure the FileDesc objects in file manager are up-to-date
         fileManager = injector.getInstance(FileManager.class);
+        CreationTimeCache cache = injector.getInstance(CreationTimeCache.class);
+        fileManager.addFileEventListener(cache);
         startAndWait(4000);
         
         ConnectionDispatcher connectionDispatcher = injector.getInstance(Key.get(ConnectionDispatcher.class, Names.named("global")));
@@ -259,7 +261,7 @@ public class UploadTest extends LimeTestCase {
         final CountDownLatch startedLatch = new CountDownLatch(1);
         FileEventListener listener = new FileEventListener() {
             public void handleFileEvent(FileManagerEvent evt) {
-                if (evt.getType() == Type.FILEMANAGER_LOADED) {
+                if (evt.getType() == Type.FILEMANAGER_LOAD_COMPLETE) {
                     startedLatch.countDown();
                 }
             }            

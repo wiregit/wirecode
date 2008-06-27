@@ -51,7 +51,9 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.NetworkUpdateSanityChecker;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ReplyHandler;
@@ -79,7 +81,7 @@ import com.limegroup.gnutella.util.LimeWireUtils;
  * version is stored in memory & on disk.
  */
 @Singleton
-public class UpdateHandlerImpl implements UpdateHandler, Service {
+public class UpdateHandlerImpl implements UpdateHandler, FileEventListener, Service {
     
     private static final Log LOG = LogFactory.getLog(UpdateHandlerImpl.class);
     
@@ -994,5 +996,13 @@ public class UpdateHandlerImpl implements UpdateHandler, Service {
     void register(ServiceRegistry registry) {
         registry.register(this);
     }
-    
+
+    /**
+     * Listens for events from FileManager
+     */
+    public void handleFileEvent(FileManagerEvent evt) {
+        if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_COMPLETE) {
+            tryToDownloadUpdates();
+        }
+    }
 }

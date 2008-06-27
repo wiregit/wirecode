@@ -13,11 +13,13 @@ import org.limewire.inspection.InspectableContainer;
 import org.limewire.inspection.InspectionPoint;
 
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.FileEventListener;
+import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.ClassCNetworks;
 
 @Singleton
-public class AltLocManager {
+public class AltLocManager implements FileEventListener {
 
     private static final Log LOG = LogFactory.getLog(AltLocManager.class);
     
@@ -229,6 +231,17 @@ public class AltLocManager {
             return;
         data.removeListener(listener);
         removeIfEmpty(sha1,data);
+    }
+    
+    /**
+     * Listens for events from FileManager
+     */
+    public void handleFileEvent(FileManagerEvent evt) {
+    	switch(evt.getType()){
+    		case REMOVE_URN:
+    			purge(evt.getURN());
+    			break;
+    	}
     }
 
     private static class URNData {

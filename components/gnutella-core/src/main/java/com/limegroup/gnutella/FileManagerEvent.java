@@ -2,6 +2,9 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.util.EventObject;
+import java.util.List;
+
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * This class implements a FileManagerEvent which is
@@ -17,12 +20,18 @@ public class FileManagerEvent extends EventObject {
         REMOVE_FILE,
         RENAME_FILE,
         CHANGE_FILE,
+        REMOVE_URN,
+        REMOVE_FD,
         ADD_FAILED_FILE,
         ALREADY_SHARED_FILE,
         ADD_FOLDER,
         REMOVE_FOLDER,
+        LOAD_FILE,
+        FILEMANAGER_LOAD_STARTED,
         FILEMANAGER_LOADING,
-        FILEMANAGER_LOADED,
+        FILEMANAGER_LOAD_FINISHING,
+        FILEMANAGER_SAVE,
+        FILEMANAGER_LOAD_COMPLETE,
         ADD_STORE_FILE,
         ADD_STORE_FAILED_FILE,
         REMOVE_STORE_FILE,
@@ -33,9 +42,11 @@ public class FileManagerEvent extends EventObject {
     private final Type type;
     private final FileDesc[] fds;
     private final File[] files;
+    private final URN urn;
     
     private final int relativeDepth;
     private final File rootShare;
+    private final List<? extends LimeXMLDocument> metaData;
 
     /**
      * Constructs a FileManagerEvent
@@ -45,8 +56,10 @@ public class FileManagerEvent extends EventObject {
         this.type = type;
         this.fds = null;
         this.files = null;
+        this.urn = null;
         this.relativeDepth = -1;
         this.rootShare = null;
+        this.metaData = null;
     }
     
     /**
@@ -58,6 +71,8 @@ public class FileManagerEvent extends EventObject {
         this.fds = fds;
         this.relativeDepth = -1;
         this.rootShare = null;
+        this.metaData = null;
+        this.urn = null;
         
         this.files = new File[fds != null ? fds.length : 0];
         for (int i = 0; fds != null && i < fds.length; i++) {
@@ -73,8 +88,10 @@ public class FileManagerEvent extends EventObject {
         this.type = type;
         this.files = files;
         this.fds = null;
+        this.urn = null;
         this.relativeDepth = 0;
         this.rootShare = null;
+        this.metaData = null;
     }
 
     public FileManagerEvent(FileManager manager, Type type, File rootShare, int relativeDepth, File... files) {
@@ -82,9 +99,39 @@ public class FileManagerEvent extends EventObject {
         this.type = type;
         this.files = files;
         this.fds = null;
+        this.urn = null;
         
         this.relativeDepth = relativeDepth;
         this.rootShare = rootShare;
+        this.metaData = null;
+    }
+    
+    public FileManagerEvent(FileManager manager, Type type, List<? extends LimeXMLDocument> md, FileDesc... fds) {
+        super(manager);
+        this.type = type;
+        this.fds = fds;
+        this.metaData = md;
+        
+        this.relativeDepth = -1;
+        this.rootShare = null;
+        this.urn = null;
+        
+        this.files = new File[fds != null ? fds.length : 0];
+        for (int i = 0; fds != null && i < fds.length; i++) {
+            files[i] = fds[i].getFile();
+        }
+    }
+    
+    public FileManagerEvent(FileManager manager, Type type, URN urn) {
+        super(manager);
+        this.type = type;
+        this.urn = urn;
+        
+        this.fds = null;
+        this.files = null;
+        this.relativeDepth = -1;
+        this.rootShare = null;
+        this.metaData = null;
     }
     
     /**
@@ -116,6 +163,13 @@ public class FileManagerEvent extends EventObject {
     public File[] getFiles() {
         return files;
     }
+    
+    /**
+     * Gets the URN
+     */
+    public URN getURN() {
+        return urn;
+    }
 
     /** 
      * Gets the the relative depth of the folder from where the sharing was initiated from
@@ -131,6 +185,13 @@ public class FileManagerEvent extends EventObject {
      */
     public File getRootShare() {
         return rootShare;
+    }
+    
+    /**
+     * Gets any XML docs associated with this
+     */
+    public List<? extends LimeXMLDocument> getMetaData() {
+        return metaData;
     }
     
     /**
@@ -210,30 +271,9 @@ public class FileManagerEvent extends EventObject {
      * Returns true if this is a FILEMANAGER_LOADED event
      */
     public boolean isFileManagerLoaded() {
-        return type.equals(Type.FILEMANAGER_LOADED);
+        return type.equals(Type.FILEMANAGER_LOAD_COMPLETE);
     }
-    
-    /**
-     * Returns true of this is a FILE event
-     */
-    public boolean isFileEvent() {
-        return !isFolderEvent() && !isFileManagerEvent();
-    }
-    
-    /**
-     * Returns true if the is a FOLDER event
-     */
-    public boolean isFolderEvent() {
-        return isAddFolderEvent() || isRemoveFolderEvent();
-    }
-    
-    /**
-     * Returns true if this is a FileManager (state change) event
-     */
-    public boolean isFileManagerEvent() {
-        return isFileManagerLoading() || isFileManagerLoaded();
-    }
-    
+       
     @Override
     public String toString() {
         StringBuilder buffer = new StringBuilder("FileManagerEvent: [event=").append(type);

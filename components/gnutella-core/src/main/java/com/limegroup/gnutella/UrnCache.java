@@ -42,7 +42,7 @@ import com.google.inject.Singleton;
  * @see URN
  */
 @Singleton
-public final class UrnCache {
+public final class UrnCache implements FileEventListener {
     
     private static final Log LOG = LogFactory.getLog(UrnCache.class);
     
@@ -498,9 +498,15 @@ public final class UrnCache {
 			_hashCode = calculateHashCode();
 		}
 	}
+
+	/**
+	 * Handles events from the FileManager
+	 */
+    public void handleFileEvent(FileManagerEvent evt) {
+        if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_STARTED) {
+            clearPendingHashes(FileManagerImpl.class);
+        } else if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_SAVE) {
+            persistCache();
+        } 
+    }
 }
-
-
-
-
-

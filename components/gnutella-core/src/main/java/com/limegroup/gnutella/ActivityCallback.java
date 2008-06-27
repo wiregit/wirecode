@@ -27,7 +27,7 @@ import com.limegroup.gnutella.messages.QueryReply;
  *  <li>Error messages</li>
  *  </ul>
  */
-public interface ActivityCallback extends DownloadCallback, FileEventListener, ConnectionLifecycleListener
+public interface ActivityCallback extends DownloadCallback, ConnectionLifecycleListener
 {
     
     /**
@@ -76,29 +76,12 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, C
      *  @param guid The GUID of the browse host.
      */    
     public void browseHostFailed(GUID guid);
-        
-	/**
-	 * Notification that the <code>FileManager</code> is beginning loading.
-	 */
-	public void fileManagerLoading();
-
-    /**
-     * Notifies a user that the file manager has completely loaded.
-     */
-    public void fileManagerLoaded();
     
     /**
      * Notifies that the user is attempting to share a sensitive
      * directory.  Returns true if the sensitive directory should be shared. 
      */
     public boolean warnAboutSharingSensitiveDirectory(File dir);
-    
-    /**
-     * Notifies when a FileDesc was either added, removed, 
-     * changed or renamed. This event is triggered by FileManager
-     * or MetaFileManager.
-     */
-    public void handleFileEvent(FileManagerEvent evt);
     
     /** 
      * Notifies about connection life cycle related events.
@@ -118,11 +101,6 @@ public interface ActivityCallback extends DownloadCallback, FileEventListener, C
 	 * Notification that an update became available.
 	 */
 	public void updateAvailable(UpdateInformation info);
-
-	/**
-	 * Sets the enabled/disabled state of file annotation.
-	 */
-	public void setAnnotateEnabled(boolean enabled);
     
     /** 
      * Notifies that all active uploads have been completed.

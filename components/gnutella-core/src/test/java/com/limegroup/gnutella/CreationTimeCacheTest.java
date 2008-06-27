@@ -30,12 +30,8 @@ import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.LimeTestCase;
-import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
-import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
-import com.limegroup.gnutella.xml.MetaFileManager;
-import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 public class CreationTimeCacheTest extends LimeTestCase {
     
@@ -76,7 +72,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
            @Override
             protected void configure() {
                 bind(FileManager.class).to(MyFileManager.class);
-                bind(MetaFileManager.class).to(MyFileManager.class);
+//                bind(MetaFileManager.class).to(MyFileManager.class);
             } 
         });
         
@@ -400,7 +396,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
 
 
 	@Singleton
-    private static class MyFileManager extends MetaFileManager {
+    private static class MyFileManager extends FileManagerImpl {
         private FileDesc fd = null;
         private URN toExclude = null;
         private URN defaultURN;
@@ -409,20 +405,14 @@ public class CreationTimeCacheTest extends LimeTestCase {
         @Inject
         public MyFileManager(Provider<SimppManager> simppManager,
                 Provider<UrnCache> urnCache,
-                Provider<DownloadManager> downloadManager,
-                Provider<CreationTimeCache> creationTimeCache,
                 Provider<ContentManager> contentManager,
                 Provider<AltLocManager> altLocManager,
-                Provider<SavedFileManager> savedFileManager,
-                Provider<UpdateHandler> updateHandler,
                 Provider<ActivityCallback> activityCallback,
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
-                LimeXMLReplyCollectionFactory limeXMLReplyCollectionFactory,
                 LimeXMLDocumentFactory limeXMLDocumentFactory,
                 MetaDataReader metaDataReader,
-                Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
                 Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
-            super(simppManager, urnCache, downloadManager, creationTimeCache, contentManager, altLocManager, savedFileManager, updateHandler, activityCallback, backgroundExecutor, limeXMLReplyCollectionFactory, limeXMLDocumentFactory, metaDataReader, schemaReplyCollectionMapper, limeXMLSchemaRepository);
+            super(simppManager, urnCache, contentManager, altLocManager, activityCallback, backgroundExecutor, limeXMLDocumentFactory, metaDataReader, limeXMLSchemaRepository);
         }
         
         public void setDefaultUrn(URN urn) {

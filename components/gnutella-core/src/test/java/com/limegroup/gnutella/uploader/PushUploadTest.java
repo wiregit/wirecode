@@ -46,6 +46,8 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.ConnectionManagerImpl;
 import com.limegroup.gnutella.ConnectionServices;
+import com.limegroup.gnutella.CreationTimeCache;
+import com.limegroup.gnutella.DownloadManagerImpl;
 import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
@@ -57,12 +59,17 @@ import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NetworkManagerImpl;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.QueryUnicaster;
+import com.limegroup.gnutella.SavedFileManager;
+import com.limegroup.gnutella.SharedFilesKeywordIndex;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.UrnCache;
 import com.limegroup.gnutella.FileManagerEvent.Type;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
+import com.limegroup.gnutella.daap.DaapManager;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
@@ -77,6 +84,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
+import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.NetworkSettings;
@@ -86,6 +94,8 @@ import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandStatistics;
 import com.limegroup.gnutella.util.LimeTestCase;
+import com.limegroup.gnutella.version.UpdateHandlerImpl;
+import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 //ITEST
 public class PushUploadTest extends LimeTestCase {
@@ -181,6 +191,16 @@ public class PushUploadTest extends LimeTestCase {
 
         // start services
         fm = injector.getInstance(FileManager.class);
+        fm.addFileEventListener(injector.getInstance(SharedFilesKeywordIndex.class));
+        fm.addFileEventListener(injector.getInstance(QRPUpdater.class));
+        fm.addFileEventListener(injector.getInstance(DownloadManagerImpl.class));
+        fm.addFileEventListener(injector.getInstance(CreationTimeCache.class));
+        fm.addFileEventListener(injector.getInstance(SavedFileManager.class));
+        fm.addFileEventListener(injector.getInstance(UpdateHandlerImpl.class));
+        fm.addFileEventListener(injector.getInstance(DaapManager.class));
+        fm.addFileEventListener(injector.getInstance(UrnCache.class));
+        fm.addFileEventListener(injector.getInstance(SchemaReplyCollectionMapper.class));
+        fm.addFileEventListener(injector.getInstance(AltLocManager.class));
         startAndWait(4000);
         
         lifeCycleManager = injector.getInstance(LifecycleManager.class);
@@ -195,7 +215,7 @@ public class PushUploadTest extends LimeTestCase {
         final CountDownLatch startedLatch = new CountDownLatch(1);
         FileEventListener listener = new FileEventListener() {
             public void handleFileEvent(FileManagerEvent evt) {
-                if (evt.getType() == Type.FILEMANAGER_LOADED) {
+                if (evt.getType() == Type.FILEMANAGER_LOAD_COMPLETE) {
                     startedLatch.countDown();
                 }
             }            

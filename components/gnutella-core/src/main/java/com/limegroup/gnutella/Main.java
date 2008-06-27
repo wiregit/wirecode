@@ -223,11 +223,7 @@ public class Main {
     
         public boolean warnAboutSharingSensitiveDirectory(final File dir) { return false; }
         
-        public void handleFileEvent(FileManagerEvent evt) {}
-        
         public void handleSharedFileUpdate(File file) {}
-    
-        public void fileManagerLoading() {}
     
         public void acceptChat(InstantMessenger chat) {}
     
@@ -238,8 +234,6 @@ public class Main {
         public void chatErrorMessage(InstantMessenger chatter, String st) {}
             
         public void downloadsComplete() {}    
-        
-        public void fileManagerLoaded() {}    
         
         public void uploadsComplete() {}
     
@@ -255,8 +249,6 @@ public class Main {
             return null;
         }
         public void browseHostFailed(GUID guid) {}
-    
-        public void setAnnotateEnabled(boolean enabled) {}
         
         public void updateAvailable(UpdateInformation update) {
             if (update.getUpdateCommand() != null)

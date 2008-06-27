@@ -32,12 +32,14 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileList;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.gui.util.BackgroundExecutorService;
 import com.limegroup.gnutella.settings.DaapSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -64,7 +66,7 @@ import de.kapsi.net.daap.Transaction;
  * interface between LimeWire and DAAP.
  */
 @Singleton
-public final class DaapManager {
+public final class DaapManager implements FileEventListener {
     
     private static final Log LOG = LogFactory.getLog(DaapManager.class);
     
@@ -472,37 +474,6 @@ public final class DaapManager {
             
             // auto commit
         }
-    }
-
-    /**
-     * Called by VisualConnectionCallback
-     */
-    public synchronized void handleFileManagerEvent(FileManagerEvent evt) {
-        if (!enabled || !isServerRunning())
-            return;
-
-        if (evt.isChangeEvent())
-            handleChangeEvent(evt);
-        else if (evt.isAddEvent() || evt.isAddStoreEvent())
-            handleAddEvent(evt);
-        else if (evt.isRenameEvent())
-            handleRenameEvent(evt);
-        else if (evt.isRemoveEvent())
-            handleRemoveEvent(evt);
-    }
-
-    /**
-     * Called by VisualConnectionCallback/MetaFileManager.
-     */
-    public void fileManagerLoading() {
-        setEnabled(false);
-    }
-    
-    /**
-     * Called by VisualConnectionCallback/MetaFileManager.
-     */
-    public void fileManagerLoaded() {
-        setEnabled(true);        
     }
     
     public synchronized boolean isEnabled() {
@@ -1135,5 +1106,80 @@ public final class DaapManager {
             unregisterService();
             zeroConf.close();
         }
+    }
+
+    private void handleFileManagerEvent(final FileManagerEvent evt) {
+        // if daap isn't running, ignore it
+        if (!enabled || !isServerRunning())
+            return;
+        
+        Runnable r = null;
+        
+        switch(evt.getType()) {
+            case CHANGE_FILE:
+                r = new Runnable() {
+                    public void run() {
+                        handleChangeEvent(evt);
+                    }};
+                break;
+            case ADD_FILE:
+            case ADD_STORE_FILE:
+                r = new Runnable() {
+                    public void run() {
+                        handleAddEvent(evt);
+                    }};
+                break;
+            case RENAME_FILE:
+                r = new Runnable() {
+                    public void run() {
+                        handleRenameEvent(evt);
+                    }};
+                break;
+            case REMOVE_FILE:
+                r = new Runnable() {
+                    public void run() {
+                        handleRemoveEvent(evt);
+                    }};
+                break;
+        }
+        
+        if( r != null )
+            BackgroundExecutorService.schedule(r);
+    }
+    
+    /**
+     * Listens for events from FileManager
+     */
+    public void handleFileEvent(final FileManagerEvent evt) {
+        
+        // if Daap isn't enabled ignore events
+        if(!DaapSettings.DAAP_ENABLED.getValue())
+            return;
+        
+        Runnable r = null;
+        
+        switch(evt.getType()) {
+            case FILEMANAGER_LOADING:
+                r = new Runnable() {
+                    public void run() {
+                        setEnabled(false);
+                    }};
+                break;
+            case FILEMANAGER_LOAD_COMPLETE:
+                r = new Runnable() {
+                    public void run() {
+                        setEnabled(true); 
+                    }};
+                break;
+        }
+        
+        if( r != null ) {
+            BackgroundExecutorService.schedule(r);
+            return;
+        } else {
+            handleFileManagerEvent(evt);
+        }
+        
+
     }
 }

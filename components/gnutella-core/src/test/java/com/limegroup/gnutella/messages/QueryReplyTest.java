@@ -26,8 +26,8 @@ import java.util.TreeSet;
 
 import junit.framework.Test;
 
-import org.jmock.Mockery;
 import org.jmock.Expectations;
+import org.jmock.Mockery;
 import org.limewire.collection.BitNumbers;
 import org.limewire.io.BadGGEPBlockException;
 import org.limewire.io.Connectable;
@@ -70,7 +70,7 @@ import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
-import com.limegroup.gnutella.stubs.SimpleFileManager;
+import com.limegroup.gnutella.util.FileManagerUtils;
 
 /**
  * This class tests the QueryReply class.
@@ -124,7 +124,6 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 	    injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(FileManager.class).to(SimpleFileManager.class);
                 NetworkManagerStub networkManagerStub = new NetworkManagerStub();
                 networkManagerStub.setAcceptedIncomingConnection(true);
                 bind(NetworkManager.class).toInstance(networkManagerStub);
@@ -792,7 +791,6 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(FileManager.class).to(SimpleFileManager.class);
                 bind(NetworkManager.class).toInstance(mockNetworkManager);
             }
 	    });
@@ -823,10 +821,6 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(FileManager.class).to(SimpleFileManager.class);
-                //NetworkManagerStub networkManagerStub = new NetworkManagerStub();
-                //networkManagerStub.setAcceptedIncomingConnection(true);
-                //bind(NetworkManager.class).toInstance(networkManagerStub);
                 bind(NetworkManager.class).toInstance(mockNetworkManager);
             }
 	    });
@@ -1522,7 +1516,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             assertTrue("unable to get file", FileUtils.copy(testFiles[i], shared));
         }
 
-        fileManager.loadSettingsAndWait(5000);
+        FileManagerUtils.waitForLoad(fileManager, 5000);
+
         assertEquals("unexpected number of shared files", testFiles.length, fileManager.getSharedFileList().getNumFiles());
     }
     
@@ -2100,7 +2095,6 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         Injector injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(FileManager.class).to(SimpleFileManager.class);
                 NetworkManagerStub networkManagerStub = new NetworkManagerStub();
                 networkManagerStub.setAcceptedIncomingConnection(true);
                 bind(NetworkManager.class).toInstance(networkManagerStub);

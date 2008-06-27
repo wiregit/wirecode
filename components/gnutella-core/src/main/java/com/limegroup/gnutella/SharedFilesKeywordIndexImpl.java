@@ -252,7 +252,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         case CHANGE_FILE:
             addFileDescs(fileDescs);
             break;
-        case FILEMANAGER_LOADED:
+        case FILEMANAGER_LOAD_COMPLETE:
             trim();
             break;
         case FILEMANAGER_LOADING:

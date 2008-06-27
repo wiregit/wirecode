@@ -24,6 +24,7 @@ import com.limegroup.gnutella.http.HttpTestUtils;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.util.FileManagerUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 /**
@@ -84,7 +85,7 @@ public final class UrnHttpRequestTest extends LimeTestCase {
         
         // make sure the FileDesc objects in file manager are up-to-date
         fileManager = injector.getInstance(FileManager.class);
-        fileManager.loadSettingsAndWait(2000);
+        FileManagerUtils.waitForLoad(fileManager,2000);
         
         assertGreaterThanOrEquals("FileManager should have loaded files", 5, fileManager.getSharedFileList().getNumFiles());
     }

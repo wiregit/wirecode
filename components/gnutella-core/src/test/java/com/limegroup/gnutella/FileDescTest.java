@@ -16,7 +16,6 @@ import com.google.inject.Injector;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.settings.DHTSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
-import com.limegroup.gnutella.xml.MetaFileManager;
 
 
 /**
@@ -45,7 +44,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
 	protected void setUp() throws Exception {
 	    Injector injector = LimeTestUtils.createInjector();
 		urnCache = injector.getInstance(UrnCache.class);
-		fm = injector.getInstance(MetaFileManager.class);
+		fm = injector.getInstance(FileManagerImpl.class);
 	}
 	
 	/**

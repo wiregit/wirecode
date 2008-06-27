@@ -187,7 +187,6 @@ import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactoryImpl;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactoryImpl;
-import com.limegroup.gnutella.xml.MetaFileManager;
 
 /**
  * The module that defines what implementations are used within
@@ -373,9 +372,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(QRPUpdater.class);
         bind(DaapManager.class);
         
-        // TODO: Need to add interface to these classes
-        //----------------------------------------------
-        bind(FileManager.class).to(MetaFileManager.class);
+        bind(FileManager.class).to(FileManagerImpl.class);
     }
     
     @Singleton

@@ -8,14 +8,13 @@ import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.Uploader;
-import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.chat.InstantMessenger;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
@@ -64,18 +63,14 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void browseHostFailed(GUID guid) {}
 	public void restoreApplication() {}
 	public void showDownloads() {}
-    public void setAnnotateEnabled(boolean enabled) {}
     public String getHostValue(String key) { return null;}
     public void handleSharedFileUpdate(File file) { }
-    public void handleFileEvent(FileManagerEvent evt) {}
-    public void fileManagerLoaded() {}
     public void updateAvailable(UpdateInformation uc) {}
     public void showError(String message, String messageKey) {}
     public boolean isQueryAlive(GUID guid) {
         return false;
     }
     public void handleAddressStateChanged() {}
-    public void fileManagerLoading() {}
 	public boolean handleMagnets(final MagnetOptions[] magnets) {
 		return false;
 	}

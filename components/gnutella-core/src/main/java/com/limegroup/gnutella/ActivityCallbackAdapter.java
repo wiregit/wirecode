@@ -48,23 +48,11 @@ public class ActivityCallbackAdapter implements ActivityCallback {
         
     }
 
-    public void fileManagerLoaded() {
-        
-    }
-
-    public void fileManagerLoading() {
-        
-    }
-
     public void handleAddressStateChanged() {
         
     }
 
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
-        
-    }
-
-    public void handleFileEvent(FileManagerEvent evt) {
         
     }
 
@@ -106,10 +94,6 @@ public class ActivityCallbackAdapter implements ActivityCallback {
     }
 
     public void restoreApplication() {
-        
-    }
-
-    public void setAnnotateEnabled(boolean enabled) {
         
     }
 

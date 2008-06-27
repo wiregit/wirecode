@@ -63,7 +63,7 @@ import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.version.DownloadInformation;
 
 @Singleton
-public class DownloadManagerImpl implements DownloadManager, Service {
+public class DownloadManagerImpl implements DownloadManager, Service, FileEventListener {
     
     private static final Log LOG = LogFactory.getLog(DownloadManagerImpl.class);
     
@@ -1126,6 +1126,15 @@ public class DownloadManagerImpl implements DownloadManager, Service {
      */
     public final Iterable<CoreDownloader> getAllDownloaders() {
         return activeAndWaiting;
+    }
+    
+    /**
+     * Listens for events from FileManager
+     */
+    public void handleFileEvent(FileManagerEvent evt) {
+        if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_FINISHING) {
+            getIncompleteFileManager().registerAllIncompleteFiles();
+        }
     }
     
     // ---------------------------------------------------------------

@@ -11,17 +11,22 @@ import org.limewire.util.FileUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.DownloaderGuidAlternateLocationFinder;
+import com.limegroup.gnutella.daap.DaapManager;
 import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.db.PushProxiesPublisher;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.licenses.LicenseFactory;
+import com.limegroup.gnutella.routing.QRPUpdater;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
+import com.limegroup.gnutella.version.UpdateHandlerImpl;
+import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 /** Some glue that installs listeners & things. TODO: Figure out a better way to do this. */
 @Singleton
@@ -33,26 +38,42 @@ class CoreRandomGlue {
     private final DHTManager dhtManager;
     private final PushProxiesPublisher pushProxiesPublisher;
     private final ConnectionServices connectionServices;
-    private final DownloadManager downloadManager;
+    private final DownloadManagerImpl downloadManager;
     private final DownloaderGuidAlternateLocationFinder downloaderGuidAlternateLocationFinder;
     private final SpamServices spamServices;
     private final SimppManager simppManager;
     private final HashTreeCache hashTreeCache;
     private final LicenseFactory licenseFactory;
     private final SharedFilesKeywordIndex sharedFilesKeywordIndex;
+    private final QRPUpdater qrpUpdater;
+    private final CreationTimeCache creationTimeCache;
+    private final SavedFileManager savedFileManager;
+    private final UpdateHandlerImpl updateHandler;
+    private final DaapManager daapManager;
+    private final UrnCache urnCache;
+    private final SchemaReplyCollectionMapper schemaMapper;
+    private final AltLocManager altLocManager;
     
     @Inject
     CoreRandomGlue(FileManager fileManager, ActivityCallback activityCallback,
             ConnectionManager connectionManager, DHTManager dhtManager,
             PushProxiesPublisher pushProxiesPublisher,
             ConnectionServices connectionServices,
-            DownloadManager downloadManager, 
+            DownloadManagerImpl downloadManager, 
             DownloaderGuidAlternateLocationFinder downloaderGuidAlternateLocationFinder,
             SpamServices spamServices,
             SimppManager simppManager,
             LicenseFactory licenseFactory,
             HashTreeCache hashTreeCache,
-            SharedFilesKeywordIndex sharedFilesKeywordIndex) {
+            SharedFilesKeywordIndex sharedFilesKeywordIndex,
+            QRPUpdater qrpUpdater,
+            CreationTimeCache creationTimeCache,
+            SavedFileManager savedFileManager,
+            UpdateHandlerImpl updateHandler,
+            DaapManager daapManager,
+            UrnCache urnCache,
+            SchemaReplyCollectionMapper schemaMapper,
+            AltLocManager altLocManager) {
         this.fileManager = fileManager;
         this.activityCallback = activityCallback;
         this.connectionManager = connectionManager;
@@ -66,14 +87,32 @@ class CoreRandomGlue {
         this.hashTreeCache = hashTreeCache;
         this.licenseFactory = licenseFactory;
         this.sharedFilesKeywordIndex = sharedFilesKeywordIndex;
+        this.qrpUpdater = qrpUpdater;
+        this.creationTimeCache = creationTimeCache;
+        this.savedFileManager = savedFileManager;
+        this.updateHandler = updateHandler;
+        this.daapManager = daapManager;
+        this.urnCache = urnCache;
+        this.schemaMapper = schemaMapper;
+        this.altLocManager = altLocManager;
     }
     
     @SuppressWarnings("unused")
     @Inject private void register(ServiceRegistry registry) {
         registry.register(new Service() {            
             public void initialize() {
-                fileManager.addFileEventListener(activityCallback);
+                //TODO: find a better way to do this
                 fileManager.addFileEventListener(sharedFilesKeywordIndex);
+                fileManager.addFileEventListener(qrpUpdater);
+                fileManager.addFileEventListener(downloadManager);
+                fileManager.addFileEventListener(creationTimeCache);
+                fileManager.addFileEventListener(savedFileManager);
+                fileManager.addFileEventListener(updateHandler);
+                fileManager.addFileEventListener(daapManager);
+                fileManager.addFileEventListener(urnCache);
+                fileManager.addFileEventListener(schemaMapper);
+                fileManager.addFileEventListener(altLocManager);
+                
                 connectionManager.addEventListener(activityCallback);
                 connectionManager.addEventListener(dhtManager);
                 dhtManager.addEventListener(pushProxiesPublisher);

@@ -214,7 +214,6 @@ public class QRPUpdater implements FileEventListener, SettingListener, Service, 
     public void initialize() {
         SearchSettings.PUBLISH_LIME_KEYWORDS.addSettingListener(this);
         SearchSettings.LIME_QRP_ENTRIES.addSettingListener(this);
-        fileManager.addFileEventListener(this);
     }
     
     public void start() {}
@@ -228,12 +227,15 @@ public class QRPUpdater implements FileEventListener, SettingListener, Service, 
      * Listens to events from FileManager
      */
     public void handleFileEvent(FileManagerEvent evt) {
-        if (evt.getType() == FileManagerEvent.Type.ADD_FILE ||
-                evt.getType() == FileManagerEvent.Type.CHANGE_FILE ||
-                evt.getType() == FileManagerEvent.Type.REMOVE_FILE ||
-                evt.getType() == FileManagerEvent.Type.RENAME_FILE) { 
-            needRebuild = true;
-        } 
+        switch(evt.getType()) {
+            case ADD_FILE:
+            case CHANGE_FILE:
+            case REMOVE_FILE:
+            case RENAME_FILE:
+            case LOAD_FILE:
+            case REMOVE_FD:
+                needRebuild = true;
+        }
     }
 
     public Object inspect() {

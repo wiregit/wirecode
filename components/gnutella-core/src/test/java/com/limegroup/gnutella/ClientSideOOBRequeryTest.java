@@ -49,6 +49,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
+import com.limegroup.gnutella.util.FileManagerUtils;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -151,9 +152,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         networkManagerStub.setOOBCapable(true);
         networkManagerStub.setPort(SERVER_PORT);
         
-        fileManager.loadSettingsAndWait(2000);
-        
-        
+        FileManagerUtils.waitForLoad(fileManager,2000);
+                
         UDP_ACCESS = new DatagramSocket[10];
         for (int i = 0; i < UDP_ACCESS.length; i++)
             UDP_ACCESS[i] = new DatagramSocket();
