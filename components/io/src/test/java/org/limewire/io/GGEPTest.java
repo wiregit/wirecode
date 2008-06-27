@@ -86,6 +86,37 @@ public class GGEPTest extends BaseTestCase {
         assertTrue(temp.hasKey("STRING"));
         assertEquals("", temp.getString("STRING"));
     }
+    /**
+     * Test that GGEPs which are treated as Strings (put or get as String) 
+     * by default get encoded as UTF-8, regardless of the
+     * platform's default encoding settings.
+     *  
+     * @throws Exception test fails
+     */
+    public void testStringKeysDifferingStringEncodings() throws Exception {
+        GGEP temp = new GGEP();
+        
+        String encodingPropertyName = "file.encoding";
+        String defaultPlatformEncoding = "US-ASCII";
+        String ggepKeyName = "ggepKey";
+        String ggepValueString = String.valueOf('\u00e4');;   // encoding differs in US-ASCII and UTF-8
+        
+
+        String origEncodingProp = System.getProperty(encodingPropertyName);
+        System.setProperty(encodingPropertyName, defaultPlatformEncoding);
+        
+        try {
+            temp.put(ggepKeyName, ggepValueString);
+            
+            byte[] valueBytesInGgep = temp.get(ggepKeyName);
+            assertEquals(ggepValueString.getBytes("UTF-8"), valueBytesInGgep);
+            
+            String valueInGgep = temp.getString(ggepKeyName);
+            assertEquals(ggepValueString, valueInGgep);             
+        } finally {
+            System.setProperty(encodingPropertyName, origEncodingProp);
+        }
+    }
 
     public void testByteKeys() throws Exception {
         GGEP temp = new GGEP();
