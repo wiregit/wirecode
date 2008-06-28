@@ -11,19 +11,19 @@ public interface LimePresence extends Presence {
      * @param file
      * @param progressListener
      */
-    void requestFile(FileMetaData file, FileTransferProgressListener progressListener);
+    public void requestFile(FileMetaData file, FileTransferProgressListener progressListener);
 
     /**
      * send a file to this user
      * @param file
      * @param progressListener
      */
-    void sendFile(FileMetaData file, FileTransferProgressListener progressListener);
+    public void sendFile(FileMetaData file, FileTransferProgressListener progressListener);
 
     /**
      * Register a <code>LibraryListener</code> on this user, so as to be
      * notified about the files that user is sharing
      * @param libraryListener
      */
-    void setLibraryListener(LibraryListener libraryListener);
+    public void setLibraryListener(LibraryListener libraryListener);
 }

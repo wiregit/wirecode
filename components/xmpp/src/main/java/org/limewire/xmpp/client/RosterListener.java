@@ -9,9 +9,9 @@ package org.limewire.xmpp.client;
  * during <code>XMPPService.start()</code>
  */
 public interface RosterListener {
-    void userAdded(User user);
+    public void userAdded(User user);
     
-    void userUpdated(User user);
+    public void userUpdated(User user);
     
-    void userDeleted(String id);
+    public void userDeleted(String id);
 }

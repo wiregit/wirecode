@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
  *      </library>
  * </iq></pre>
  */
-public class LibraryIQ extends IQ {
+class LibraryIQ extends IQ {
 
     private static final Log LOG = LogFactory.getLog(LibraryIQ.class);
 
@@ -33,7 +33,7 @@ public class LibraryIQ extends IQ {
     private LibrarySource librarySource;
     private FileMetaData[] files;
 
-    public LibraryIQ(XmlPullParser parser) {
+    LibraryIQ(XmlPullParser parser) {
         this.parser = parser;
         files = parseFiles();
     }
@@ -64,15 +64,15 @@ public class LibraryIQ extends IQ {
         return files.toArray(new FileMetaDataImpl[]{});
     }
 
-    public LibraryIQ(LibrarySource librarySource) {
+    LibraryIQ(LibrarySource librarySource) {
         this.librarySource = librarySource;
     }
     
-    public FileMetaData[] getFiles() {
+    FileMetaData[] getFiles() {
         return files;
     }
     
-    public LibraryIQ() {
+    LibraryIQ() {
         
     }
 
@@ -97,7 +97,7 @@ public class LibraryIQ extends IQ {
         return builder.toString();
     }
 
-    public static IQProvider getIQProvider() {
+    static IQProvider getIQProvider() {
         return new LibraryIQProvider();
     }
 

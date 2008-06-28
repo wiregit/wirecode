@@ -57,7 +57,7 @@ public class XMPPServiceImpl implements Service, XMPPService {
                     connection.login();
                 } catch (XMPPException e) {
                     LOG.error(e.getMessage(), e);
-                    // TODO fireListenerMethod
+                    connection.getConfiguration().getErrorListener().error(e);
                 }
             }
         }        

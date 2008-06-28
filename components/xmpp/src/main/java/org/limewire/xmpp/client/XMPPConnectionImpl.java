@@ -28,7 +28,7 @@ import org.jivesoftware.smackx.jingle.IncomingJingleSession;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
 import org.limewire.concurrent.ThreadExecutor;
 
-public class XMPPConnectionImpl implements XMPPConnection {
+class XMPPConnectionImpl implements XMPPConnection {
     
     private static final Log LOG = LogFactory.getLog(XMPPConnectionImpl.class);
     

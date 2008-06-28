@@ -15,7 +15,7 @@ import org.apache.commons.logging.LogFactory;
  * messages are received.  Notifies the proper <code>LibraryListener</code> when <code>result</code>
  * messages are received.
  */
-public class LibraryIQListener implements PacketListener {
+class LibraryIQListener implements PacketListener {
 
     private static final Log LOG = LogFactory.getLog(LibraryIQListener.class);
 
@@ -23,12 +23,12 @@ public class LibraryIQListener implements PacketListener {
     private final LibrarySource librarySource;
     private final ConcurrentHashMap <String, LibraryListener> libraryHandlers = new ConcurrentHashMap<String, LibraryListener>();
 
-    public LibraryIQListener(XMPPConnection connection, LibrarySource librarySource) {
+    LibraryIQListener(XMPPConnection connection, LibrarySource librarySource) {
         this.librarySource = librarySource;
         this.connection = connection;
     }
 
-    public void setConnection(XMPPConnection connection) {
+    void setConnection(XMPPConnection connection) {
         this.connection = connection;
     }
 
@@ -58,7 +58,7 @@ public class LibraryIQListener implements PacketListener {
         }
     }
     
-    public void addLibraryListener(LibraryIQ request, LibraryListener listener) {
+    void addLibraryListener(LibraryIQ request, LibraryListener listener) {
         libraryHandlers.put(request.getPacketID(), listener);
     }
 
@@ -72,7 +72,7 @@ public class LibraryIQListener implements PacketListener {
         connection.sendPacket(queryResult);
     }
 
-    public PacketFilter getPacketFilter() {
+    PacketFilter getPacketFilter() {
         return new PacketFilter(){
             public boolean accept(Packet packet) {
                 return packet instanceof LibraryIQ;

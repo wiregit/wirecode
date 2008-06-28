@@ -6,14 +6,14 @@ import org.limewire.util.StringUtils;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class UserImpl implements User {
+class UserImpl implements User {
     private final String id;
     private final String name;
     private final ConcurrentHashMap<String, Presence> presences;
     private final CopyOnWriteArrayList<PresenceListener> presenceListeners; 
     private final XMPPConnection connection;
 
-    public UserImpl(String id, String name, XMPPConnection connection) {
+    UserImpl(String id, String name, XMPPConnection connection) {
         this.id = id;
         this.name = name;
         this.connection = connection;

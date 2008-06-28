@@ -10,26 +10,26 @@ public interface FileMetaData {
     /**
      * @return the unique id of the file, i.e., its sha1
      */
-    String getId();
+    public String getId();
 
     /**
      * @return  the file name
      */
-    String getName();
+    public String getName();
 
     /**
      * the size of the file in bytes
      * @return
      */
-    long getSize();
+    public long getSize();
 
     /**
      * @return the last modified time of the file
      */
-    Date getDate();
+    public Date getDate();
 
     /**
      * @return the description of the file, as input by the user
      */
-    String getDescription();
+    public String getDescription();
 }

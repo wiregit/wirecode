@@ -16,7 +16,7 @@ class ProgressListenerAdapter implements org.jivesoftware.smackx.jingle.file.Fil
     private final org.limewire.xmpp.client.FileTransferProgressListener progressListener;
     private final JingleSession session;
 
-    public ProgressListenerAdapter(org.limewire.xmpp.client.FileTransferProgressListener progressListener, JingleSession session) {
+    ProgressListenerAdapter(org.limewire.xmpp.client.FileTransferProgressListener progressListener, JingleSession session) {
         this.progressListener = progressListener;
         this.session = session;
     }

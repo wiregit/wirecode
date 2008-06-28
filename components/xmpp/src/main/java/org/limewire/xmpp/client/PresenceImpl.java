@@ -5,7 +5,7 @@ import org.jivesoftware.smack.packet.Message;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class PresenceImpl implements Presence {
+class PresenceImpl implements Presence {
 
     private static final Log LOG = LogFactory.getLog(PresenceImpl.class);
 

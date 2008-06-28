@@ -255,6 +255,14 @@ public class XMPPServiceTest extends ServiceTestCase {
         public RosterListener getRosterListener() {
             return rosterListener;
         }
+
+        public XMPPErrorListener getErrorListener() {
+            return new XMPPErrorListener() {
+                public void error(XMPPException exception) {
+                    exception.printStackTrace();
+                }
+            };
+        }
     }
     
     class RosterListenerImpl implements RosterListener {
