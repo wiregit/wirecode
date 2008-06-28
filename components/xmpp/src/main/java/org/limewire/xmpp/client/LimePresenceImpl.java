@@ -57,8 +57,8 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
         try {
             FileContentHandler fileContentHandler = new InitiatorFileContentHandler(new FileMetaDataAdapter(file), false, fileLocator);
-            fileContentHandler.setProgressListener(new ProgressListenerAdapter(progressListener));
             OutgoingJingleSession out = manager.createOutgoingJingleSession(getJID(), fileContentHandler);
+            fileContentHandler.setProgressListener(new ProgressListenerAdapter(progressListener, out));
 
             out.start();
         } catch (XMPPException e) {
@@ -72,8 +72,8 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 
         try {
             FileContentHandler fileContentHandler = new InitiatorFileContentHandler(new FileMetaDataAdapter(file), true, fileLocator);
-            fileContentHandler.setProgressListener(new ProgressListenerAdapter(progressListener));
             OutgoingJingleSession out = manager.createOutgoingJingleSession(getJID(), fileContentHandler);
+            fileContentHandler.setProgressListener(new ProgressListenerAdapter(progressListener, out));
 
             out.start();
         } catch (XMPPException e) {

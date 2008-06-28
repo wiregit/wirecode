@@ -4,6 +4,6 @@ import com.google.inject.AbstractModule;
 
 public class LimeWireXMPPModule extends AbstractModule {
     protected void configure() {
-        bind(XMPPService.class);
+        bind(XMPPService.class).to(XMPPServiceImpl.class);
     }
 }

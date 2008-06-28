@@ -1,40 +1,25 @@
 package org.limewire.xmpp.client;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-
+import com.google.inject.Module;
+import com.google.inject.Provider;
+import com.google.inject.TypeLiteral;
+import org.apache.log4j.BasicConfigurator;
 import org.jivesoftware.smack.util.StringUtils;
 import org.limewire.inject.AbstractModule;
 import org.limewire.io.IOUtils;
 import org.limewire.lifecycle.ServiceTestCase;
 
-import com.google.inject.Module;
-import com.google.inject.Provider;
-import com.google.inject.TypeLiteral;
+import java.io.*;
+import java.util.*;
 
 public class XMPPServiceTest extends ServiceTestCase {
     protected RosterListenerImpl rosterListener;
     protected LibrarySourceImpl librarySource;
     protected RosterListenerImpl rosterListener2;
-    protected XMPPServiceTest.ProgressListener progressListener;
 
     public XMPPServiceTest(String name) {
         super(name);
-        //BasicConfigurator.configure();
+        BasicConfigurator.configure();
     }
 
     protected void setUp() throws Exception {
@@ -68,7 +53,7 @@ public class XMPPServiceTest extends ServiceTestCase {
                     throw new RuntimeException(e);
                 }
                 bind(IncomingFileAcceptor.class).toInstance(new IncomingFileAcceptorImpl());
-                progressListener = new ProgressListener();
+                ProgressListener progressListener = new ProgressListener();
                 bind(FileTransferProgressListener.class).toInstance(progressListener);
             }
         };
@@ -82,20 +67,22 @@ public class XMPPServiceTest extends ServiceTestCase {
     public void testStart() throws InterruptedException {
         assertEquals(1, rosterListener.roster.size());
         assertEquals("limebuddy2@gmail.com", rosterListener.roster.keySet().iterator().next());
-        assertEquals(1, rosterListener.roster.get("limebuddy2@gmail.com").size());       
+        assertEquals(1, rosterListener.roster.get("limebuddy2@gmail.com").size());
+
+        assertEquals(1, rosterListener2.roster.size());
+        assertEquals("limebuddy1@gmail.com", rosterListener2.roster.keySet().iterator().next());
+        assertEquals(1, rosterListener2.roster.get("limebuddy1@gmail.com").size());
+    }
+    
+    public void testUserLogout() throws InterruptedException {
+        XMPPService service = injector.getInstance(XMPPService.class);
+        List<XMPPConnection> connections = service.getConnections();
+        assertTrue(connections.get(0).isLoggedIn());
+        connections.get(0).logout();
+        assertFalse(connections.get(0).isLoggedIn());
     }
     
     public void testDetectLimePresences() throws InterruptedException, IOException {
-//        RosterListenerImpl rosterListener2 = new RosterListenerImpl();
-//        ProgressListener progressListener = new ProgressListener();
-//        XMPPService service2 = new XMPPService(new XMPPConnectionConfigurationImpl("limebuddy2@gmail.com", 
-//                        "limebuddy234", "talk.google.com", 5222, "gmail.com", rosterListener2),
-//               new LibrarySourceImpl(createMockLibrary()), new IncomingFileAcceptorImpl(), progressListener);
-//        service2.initialize();
-//        service2.start(); 
-//        
-//        Thread.sleep(3 * 1000);     
-        
         HashMap<String, ArrayList<Presence>> roster1 = rosterListener.roster;
         HashMap<String, ArrayList<Presence>> roster2 = rosterListener2.roster;
         ArrayList<FileMetaData> remoteLibraries1 = rosterListener.files;
@@ -112,21 +99,10 @@ public class XMPPServiceTest extends ServiceTestCase {
         assertTrue(roster1.get("limebuddy2@gmail.com").get(0) instanceof LimePresence);
         assertEquals(Presence.Type.available, roster1.get("limebuddy2@gmail.com").get(0).getType());
         assertGreaterThan(0, remoteLibraries1.size());
-        
-//        service2.stop();
+
     }
     
     public void testChat() throws InterruptedException, XMPPException, IOException {
-//        RosterListenerImpl rosterListener2 = new RosterListenerImpl();
-//        ProgressListener progressListener = new ProgressListener();
-//        XMPPService service2 = new XMPPService(new XMPPConnectionConfigurationImpl("limebuddy2@gmail.com", 
-//                        "limebuddy234", "talk.google.com", 5222, "gmail.com", rosterListener2),
-//               new LibrarySourceImpl(createMockLibrary()), new IncomingFileAcceptorImpl(), progressListener);
-//        service2.initialize();
-//        service2.start(); 
-//        
-//        Thread.sleep(3 * 1000); 
-        
         MessageReaderImpl reader = new MessageReaderImpl();
         Presence limeBuddy2 = rosterListener.roster.get("limebuddy2@gmail.com").get(0);
         MessageWriter writer = limeBuddy2.createChat(reader);
@@ -146,21 +122,10 @@ public class XMPPServiceTest extends ServiceTestCase {
         assertEquals(1, reader.messages.size());
         assertEquals("goodbye world", reader.messages.get(0)); 
         
-//        service2.stop();
     }
     
     public void testSendFile() throws InterruptedException, IOException {
-//        RosterListenerImpl rosterListener2 = new RosterListenerImpl();
-//        ProgressListener progressListener = new ProgressListener();
-//        LibrarySourceImpl librarySource2 = new LibrarySourceImpl(createMockLibrary());
-//        XMPPService service2 = new XMPPService(new XMPPConnectionConfigurationImpl("limebuddy2@gmail.com", 
-//                        "limebuddy234", "talk.google.com", 5222, "gmail.com", rosterListener2),
-//               librarySource2, new IncomingFileAcceptorImpl(), progressListener);
-//        service2.initialize();
-//        service2.start(); 
-//        
-//        Thread.sleep(3 * 1000); 
-        
+        ProgressListener progressListener = new ProgressListener();
         assertFalse(progressListener.started);
         
         HashMap<String, ArrayList<Presence>> roster1 = rosterListener.roster;
@@ -173,8 +138,8 @@ public class XMPPServiceTest extends ServiceTestCase {
         metaData.setDescription("cool file");
         limebuddy2.sendFile(metaData, progressListener);        
         
-        Thread.sleep(3 * 1000);
-        
+        Thread.sleep(4 * 1000);
+
         assertTrue(progressListener.started);
         assertTrue(progressListener.completed);
         
@@ -189,22 +154,11 @@ public class XMPPServiceTest extends ServiceTestCase {
         
         assertNotNull(receivedFile);
         // TODO compare contents
-        
-//        service2.stop();
+
     }
     
     public void testRequestFile() throws InterruptedException, IOException {
-//        RosterListenerImpl rosterListener2 = new RosterListenerImpl();
-//        ProgressListener progressListener = new ProgressListener();
-//        LibrarySourceImpl librarySource2 = new LibrarySourceImpl(createMockLibrary());
-//        XMPPService service2 = new XMPPService(new XMPPConnectionConfigurationImpl("limebuddy2@gmail.com", 
-//                        "limebuddy234", "talk.google.com", 5222, "gmail.com", rosterListener2),
-//                librarySource2, new IncomingFileAcceptorImpl(), progressListener);
-//        service2.initialize();
-//        service2.start(); 
-//        
-//        Thread.sleep(3 * 1000); 
-        
+        ProgressListener progressListener = new ProgressListener();
         assertFalse(progressListener.started);
         
         HashMap<String, ArrayList<Presence>> roster1 = rosterListener.roster;
@@ -213,9 +167,7 @@ public class XMPPServiceTest extends ServiceTestCase {
         FileMetaData toRequest = rosterListener.files.get(0);
         limebuddy2.requestFile(toRequest, progressListener);        
         
-        Thread.sleep(3 * 1000);
-        
-        //Thread.sleep(5 * 60 * 1000);
+        Thread.sleep(4 * 1000);
         
         assertTrue(progressListener.started);
         assertTrue(progressListener.completed);
@@ -231,8 +183,7 @@ public class XMPPServiceTest extends ServiceTestCase {
         
         assertNotNull(receivedFile);
         // TODO compare contents              
-        
-//        service2.stop();
+
     }
     
     private File createMockLibrary() throws IOException {

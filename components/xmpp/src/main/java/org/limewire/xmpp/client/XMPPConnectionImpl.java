@@ -79,6 +79,10 @@ public class XMPPConnectionImpl implements XMPPConnection {
         LOG.info("disconnecting from " + configuration.getServiceName() + " at " + configuration.getHost() + ":" + configuration.getPort() + ".");
         connection.disconnect();
     }
+
+    public boolean isLoggedIn() {
+        return connection != null && connection.isAuthenticated();
+    }
     
     private ConnectionConfiguration getConnectionConfig(XMPPConnectionConfiguration configuration) {
         return new ConnectionConfiguration(configuration.getHost(),
@@ -91,9 +95,7 @@ public class XMPPConnectionImpl implements XMPPConnection {
             public void userAdded(User user) {
                 user.addPresenceListener(new LibraryGetter());
             }
-
             public void userUpdated(User user) {}
-
             public void userDeleted(String id) {}
         });
         try {
@@ -105,9 +107,9 @@ public class XMPPConnectionImpl implements XMPPConnection {
             public void connectionCreated(final org.jivesoftware.smack.XMPPConnection connection) {
                 if(XMPPConnectionImpl.this.connection == connection) {
                     LOG.debug("adding connection listener for "+ connection.toString());
-                    if(!ServiceDiscoveryManager.getInstanceFor(connection).includesFeature(XMPPService.LW_SERVICE_NS)) {
+                    if(!ServiceDiscoveryManager.getInstanceFor(connection).includesFeature(XMPPServiceImpl.LW_SERVICE_NS)) {
                         // TODO conncurrency control
-                        ServiceDiscoveryManager.getInstanceFor(connection).addFeature(XMPPService.LW_SERVICE_NS);
+                        ServiceDiscoveryManager.getInstanceFor(connection).addFeature(XMPPServiceImpl.LW_SERVICE_NS);
                     }
                     libraryIQListener = new LibraryIQListener(connection,  librarySource);
                     libraryIQListener.setConnection(connection);
@@ -133,7 +135,7 @@ public class XMPPConnectionImpl implements XMPPConnection {
                                         if(description != null) {
                                             if(description instanceof FileDescription) {
                                                 ((FileContentHandler)session.getContentHandler()).setFileLocator(new FileLocatorAdapter());
-                                                ((FileContentHandler)session.getContentHandler()).setProgressListener(new ProgressListenerAdapter(progressListener));
+                                                ((FileContentHandler)session.getContentHandler()).setProgressListener(new ProgressListenerAdapter(progressListener, session));
                                                 // TODO set UserAcceptor
                                                 LOG.info("starting jingle session");
                                                 session.start();
@@ -216,7 +218,7 @@ public class XMPPConnectionImpl implements XMPPConnection {
                     LOG.debug("user " + user + " presence changed to " + presence.getType());
                     if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.available)) {
                         try {
-                            if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature(XMPPService.LW_SERVICE_NS)) {
+                            if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature(XMPPServiceImpl.LW_SERVICE_NS)) {
                                 LOG.debug("limwire user " + user + ", presence " + presence.getFrom() + " detected");
                                 user.addPresense(new LimePresenceImpl(presence, connection, libraryIQListener, new FileLocatorAdapter()));
                             } else {
