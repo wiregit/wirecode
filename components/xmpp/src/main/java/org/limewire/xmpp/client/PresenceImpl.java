@@ -18,7 +18,9 @@ class PresenceImpl implements Presence {
     }
 
     public MessageWriter createChat(final MessageReader reader) {
-        LOG.info("new chat with " + getJID());
+        if(LOG.isInfoEnabled()) {
+            LOG.info("new chat with " + getJID());
+        }
         final Chat chat = connection.getChatManager().createChat(getJID(), new MessageListener() {
             public void processMessage(Chat chat, Message message) {
                 reader.readMessage(message.getBody());
@@ -39,7 +41,9 @@ class PresenceImpl implements Presence {
         connection.getChatManager().addChatListener(new ChatManagerListener() {
             public void chatCreated(final Chat chat, boolean createdLocally) {
                 if(!createdLocally) {
-                    LOG.info("new incoming chat with " + getJID());
+                    if(LOG.isInfoEnabled()) {
+                        LOG.info("new incoming chat with " + getJID());
+                    }
                     final MessageWriter writer = new MessageWriter() {
                         public void writeMessage(String message) throws XMPPException {
                             try {

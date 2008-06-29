@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Singleton
-public class XMPPServiceImpl implements Service, XMPPService {
+class XMPPServiceImpl implements Service, XMPPService {
 
     private static final Log LOG = LogFactory.getLog(XMPPServiceImpl.class);
     
@@ -25,7 +25,7 @@ public class XMPPServiceImpl implements Service, XMPPService {
     private final FileTransferProgressListener progressListener;
 
     @Inject
-    public XMPPServiceImpl(Provider<List<XMPPConnectionConfiguration>> configurations,
+    XMPPServiceImpl(Provider<List<XMPPConnectionConfiguration>> configurations,
                        LibrarySource librarySource,
                        IncomingFileAcceptor incomingFileAcceptor,
                        FileTransferProgressListener progressListener) {
@@ -53,14 +53,19 @@ public class XMPPServiceImpl implements Service, XMPPService {
     public void start() {
         for(XMPPConnection connection : connections) {
             if(connection.getConfiguration().isAutoLogin()) {
-                try {
-                    connection.login();
-                } catch (XMPPException e) {
-                    LOG.error(e.getMessage(), e);
-                    connection.getConfiguration().getErrorListener().error(e);
-                }
+                login(connection);
             }
         }        
+    }
+
+    private void login(XMPPConnection connection) {
+        try {
+            // TODO async
+            connection.login();
+        } catch (XMPPException e) {
+            LOG.error(e.getMessage(), e);
+            connection.getConfiguration().getErrorListener().error(e);
+        }
     }
 
     /**

@@ -26,7 +26,9 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     }
     
     void sendGetLibrary() {
-        LOG.info("getting library from " + getJID() + "...");
+        if(LOG.isInfoEnabled()) {
+            LOG.info("getting library from " + getJID() + "...");
+        }
         final LibraryIQ libraryIQ = new LibraryIQ();
         libraryIQ.setType(IQ.Type.GET);
         libraryIQ.setTo(getJID());
@@ -52,7 +54,9 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     }
 
     public void requestFile(FileMetaData file, FileTransferProgressListener progressListener) {
-        LOG.info("requesting file " + file.toString() + " from " + getJID());
+        if(LOG.isInfoEnabled()) {
+            LOG.info("requesting file " + file.toString() + " from " + getJID());
+        }
         JingleManager manager = new JingleManager(connection);
 
         try {
@@ -67,7 +71,9 @@ public class LimePresenceImpl extends PresenceImpl implements LimePresence {
     }
 
     public void sendFile(FileMetaData file, FileTransferProgressListener progressListener) {
-        LOG.info("sending file " + file.toString() + " to " + getJID());
+        if(LOG.isInfoEnabled()) {
+            LOG.info("sending file " + file.toString() + " to " + getJID());
+        }
         JingleManager manager = new JingleManager(connection);
 
         try {

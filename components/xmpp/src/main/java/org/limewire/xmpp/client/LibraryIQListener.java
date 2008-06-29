@@ -48,7 +48,9 @@ class LibraryIQListener implements PacketListener {
     }
 
     private void handleResult(LibraryIQ libraryIQ) {
-        LOG.debug("handling library result " + libraryIQ.getPacketID());
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("handling library result " + libraryIQ.getPacketID());
+        }
         LibraryListener listener = libraryHandlers.get(libraryIQ.getPacketID());
         if(listener != null) {
             for(FileMetaData f : libraryIQ.getFiles()) {
@@ -63,7 +65,9 @@ class LibraryIQListener implements PacketListener {
     }
 
     private void handleGet(LibraryIQ packet) {
-        LOG.debug("handling library get " + packet.getPacketID());
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("handling library get " + packet.getPacketID());
+        }
         LibraryIQ queryResult = new LibraryIQ(librarySource);
         queryResult.setTo(packet.getFrom());
         queryResult.setFrom(packet.getTo());
