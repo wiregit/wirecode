@@ -20,9 +20,9 @@ interface DiskController<F extends File> {
 	/**
 	 * 
 	 * @param files the files this will be controlling
-	 * @param isVerifying if the file should force verification.
 	 * @param complete true if the torrent is complete
-	 * @return List of files> that should be verified,
+     * @param isVerifying if the file should force verification.
+	 * @return List of files that should be verified,
 	 * null if none, always a subset of the provided list 
 	 * @throws IOException if a problem occurs.
 	 */
@@ -49,7 +49,7 @@ interface DiskController<F extends File> {
 	 *            the offset in the array where to start storing the bytes read
 	 * @param length
 	 *            the number of bytes to read to the array
-	 * @return
+	 * @return the number of bytes read
 	 * @throws IOException
 	 */
 	public int read(long position, byte[] buf, int offset, int length) throws IOException;

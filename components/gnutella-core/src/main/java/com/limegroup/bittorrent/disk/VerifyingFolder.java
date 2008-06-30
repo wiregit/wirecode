@@ -45,7 +45,8 @@ import com.limegroup.gnutella.downloader.serial.BTDiskManagerMementoImpl;
 import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
- * A default implementation of <tt>TorrentDiskManager</tt>
+ * Verifies the Pieces of the torrent to the .torrent meta information 
+ * and writes the files to disk.
  */
 class VerifyingFolder implements TorrentDiskManager {
 	
@@ -147,7 +148,6 @@ class VerifyingFolder implements TorrentDiskManager {
 	/**
 	 * constructs instance of this
 	 * 
-	 * @param info a BTMetaInfo for which to create this Folder.
 	 * @param complete if the download is completed
 	 */
 	VerifyingFolder(TorrentContext context, 
@@ -549,10 +549,10 @@ class VerifyingFolder implements TorrentDiskManager {
 	}
 	
 	/**
-	 * returns a random available range that has preferrably not yet been
+	 * returns a random available range that has preferably not yet been
 	 * requested
 	 * 
-	 * @param bs the BitBasedIntervalSet of available ranges
+	 * @param bs the BitField of available ranges
 	 * @param exclude the set of ranges that the connection is already about to
 	 * request
 	 * @return a BTInterval that should be requested next.
@@ -622,7 +622,7 @@ class VerifyingFolder implements TorrentDiskManager {
 	
 	/**
 	 * Picks an interval that is already requested by another connection.  This is
-	 * referered to as "Endgame mode" and is done when there are no other pieces to 
+	 * referred to as "Endgame mode" and is done when there are no other pieces to 
 	 * request. 
 	 */
 	private BTInterval assignEndgame(BitField bs, Set<BTInterval>exclude, boolean endgame) {
@@ -709,8 +709,8 @@ class VerifyingFolder implements TorrentDiskManager {
 	}
 
 	/**
-	 * @return whether the specified BlockRangeMap contains an Interval that 
-	 * represents a complete piece.
+	 * @return whether the specified <code>BlockRangeMap</code> contains an 
+	 * interval that represents a complete piece.
 	 */	
 	private boolean isCompleteBlock(int pieceNum, BlockRangeMap toCheck) {
 		IntervalSet set = toCheck.get(pieceNum);
@@ -739,10 +739,10 @@ class VerifyingFolder implements TorrentDiskManager {
 	
 	/**
 	 * Removes an interval from the internal list of already requested intervals.
-	 * 
+	 * <p>
 	 * Note that during endgame several connections may be requesting the same interval
 	 * and as one of them fails that interval will no longer be considered requested.
-	 * That's ok as it will only result in that interval requested again.
+	 * That's OK as it will only result in that interval requested again.
 	 */
 	public synchronized void releaseInterval(BTInterval in) {
 		if (LOG.isDebugEnabled())
@@ -751,12 +751,9 @@ class VerifyingFolder implements TorrentDiskManager {
 	}
 
 	/**
-	 * Creates a bitfield
-	 * 
 	 * @return returns an array of byte where the i'th byte is 1 if we have
 	 *         written and verified the i'th piece of the torrent and 0
 	 *         otherwise
-	 *         
 	 */
 	public synchronized byte[] createBitField() {
 		if (bitField == null) 

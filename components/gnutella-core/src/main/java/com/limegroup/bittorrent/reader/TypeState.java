@@ -7,7 +7,8 @@ import com.limegroup.bittorrent.messages.BTMessage;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 
 /**
- * State that parses the type of a BT message. 
+ * State that parses the type of a BitTorrent message (either a <code>BITFIELD</code>,
+ * <code>PIECE</code> or <code>MessageState</code>).
  */
 class TypeState extends BTReadMessageState {
 

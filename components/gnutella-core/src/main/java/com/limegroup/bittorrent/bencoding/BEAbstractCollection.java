@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 
 /**
- * A BE element that can be used for Lists & Maps.
- * This works for reading Maps because they're read
+ * A Bencode element (http://en.wikipedia.org/wiki/Bencoding) that can be 
+ * used for Lists and Maps. This works for reading Maps because they're read
  * as a list of key/value pairs.
  */
 public abstract class BEAbstractCollection<T> extends Token<T> {

@@ -9,15 +9,14 @@ import org.limewire.util.BEncoder;
 
 /**
  * A bencoding Token that represents a string element of bencoded data.
- * 
+ * <p>
  * In BitTorrent's bencoding, a string data on the wire looks like "5:hello".
  * The length comes first, then a colon, then that number of characters.
  * Bencoded strings hold ASCII text, or data of any format.
- * 
+ * <p>
  * If bencoded data starts "0" through "9", it's a string.
- * A BEString object can read the rest of it.
- * Calling beString.getToken() returns a Java String with the payload text.
- * 
+ * A BEString object can read the rest of it. Calling 
+ * <code>beString.getToken()</code> returns a Java String with the payload text.
  */
 class BEString extends Token<byte[]> {
 
@@ -27,8 +26,9 @@ class BEString extends Token<byte[]> {
 	 * .torrent files don't have a maximum size, so for now this limit is 
 	 * set to 1 MB.
 	 * 
-	 * TODO: Find a proper way to deal with this limit.
 	 */
+//TODO: Find a proper way to deal with this limit.
+    
 	private static final int MAX_STRING_SIZE = 1024 * 1024;
 
     /** 
@@ -55,9 +55,9 @@ class BEString extends Token<byte[]> {
      * Makes a new BEString Token ready to parse bencoded string data 
      * from a given ReadableByteChannel.
      * 
-     * @param firstChar The first byte we already read from the channel, 
+     * @param firstChar the first byte we already read from the channel, 
      * it was "0" through "9" indicating this is a string
-     * @param chan      The ReadableByteChannel the caller read the first 
+     * @param chan the ReadableByteChannel the caller read the first 
      * character from, and we can read the remaining characters from
      */
     BEString(byte firstChar, ReadableByteChannel chan) {
@@ -144,7 +144,7 @@ class BEString extends Token<byte[]> {
      * Determines if this is finished reading bencoded data from its channel 
      * and parsing it into a String object.
      * 
-     * @return true if it is, false if it needs more read notifications to 
+     * @return true if it is done, false if it needs more read notifications to 
      * finish
      */
     @Override

@@ -1,7 +1,11 @@
 package com.limegroup.bittorrent.tracking;
 
 /**
- * Defines an interface for keeping track of a torrent Tracker information.
+ * Defines an interface for a torrent Tracker.
+ * <p>
+ * A <a href="http://en.wikipedia.org/wiki/BitTorrent_tracker">Tracker</a>
+ * coordinates communication between peers attempting to download the 
+ * payload of the torrents.
  */
 public interface Tracker {
     /**

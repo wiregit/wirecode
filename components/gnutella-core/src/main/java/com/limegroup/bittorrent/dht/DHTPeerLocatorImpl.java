@@ -31,8 +31,8 @@ import com.limegroup.gnutella.dht.DHTManager;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 
 /**
- * Given an instance of torrent, locates peers in DHT seeding that file.</br>
- * Also re-attempts to locate peers if DHT was not available.
+ * Given an instance of torrent, locates peers in the Mojito DHT seeding that 
+ * file. Also re-attempts to locate peers if DHT was not available.
  */
 @Singleton
 public class DHTPeerLocatorImpl implements DHTPeerLocator, Service {
@@ -119,8 +119,9 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator, Service {
     /**
      * Gets the torrent's location and adds it as an endPoint.
      * 
-     * @param managedTorrent The torrent we are dealing with.
-     * @param entity DHTValueEntity containing the DHTValue we are looking for.
+     * @param managedTorrent the routed torrent
+     * @param entity <code>DHTValueEntity</code> containing the 
+     * <code>DHTValue</code> that is sought.
      */
     private void dispatch(ManagedTorrent managedTorrent, DHTValueEntity entity) {
         DHTValue value = entity.getValue();
@@ -140,8 +141,8 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator, Service {
     }
 
     /**
-     * Listens for a TRACKER_FAILED event and launches search for alternate
-     * location.
+     * Listens for a <code>TRACKER_FAILED</code> event and launches search for 
+     * alternate location.
      */
     private class LocatorTorrentEventListener implements TorrentEventListener {
         public void handleTorrentEvent(TorrentEvent evt) {
@@ -153,8 +154,7 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator, Service {
     }
 
     /**
-     * Implements the DHTEventListener to perform future attempts at locating a
-     * peer based on DHTEvent.
+     * Performs future attempts at locating a peer based on <code>DHTEvent</code>.
      */
     private class DHTEventListenerForLocator implements DHTEventListener {
         /**
@@ -179,7 +179,7 @@ public class DHTPeerLocatorImpl implements DHTPeerLocator, Service {
     }
 
     /**
-     * This class listens to see a result was successfully retrieved.
+     * Listens to see a result was successfully retrieved.
      */
     private class LocatePeerResultHandler extends DHTFutureAdapter<FindValueResult> {
         private final URN urn;

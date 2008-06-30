@@ -3,7 +3,8 @@ package com.limegroup.bittorrent.messages;
 import java.nio.ByteBuffer;
 
 /**
- * indicates that the sender is interested in downloading from the remote host
+ * Indicates that the sender is not interested in downloading from the 
+ * remote host.
  */
 public class BTNotInterested extends BTMessage {
 	private static final BTNotInterested INSTANCE = new BTNotInterested();

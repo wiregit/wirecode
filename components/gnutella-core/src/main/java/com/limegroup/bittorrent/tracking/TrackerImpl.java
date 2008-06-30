@@ -31,7 +31,6 @@ import com.limegroup.gnutella.util.LimeWireUtils;
 /**
  * Keeps track of a torrent tracker's information.
  * Also connects to the tracker to retrieve information.
- *
  */
 public class TrackerImpl implements Tracker {
 	private static final Log LOG = LogFactory.getLog(Tracker.class);
@@ -109,10 +108,6 @@ public class TrackerImpl implements Tracker {
 	/**
 	 * helper method creating the query string for a HTTP tracker request
 	 * 
-	 * @param info
-	 *            BTMetaInfo for the torrent
-	 * @param torrent
-	 *            ManagedTorrent for the torrent
 	 * @param event
 	 *            the event code to send
 	 * @return string, the HTTP GET query string we send to the tracker
@@ -161,11 +156,11 @@ public class TrackerImpl implements Tracker {
 	/**
 	 * connects to a tracker via HTTP
 	 * 
-	 * @param url
+	 * @param uri
 	 *            the URL for the tracker
 	 * @param query
 	 *            the HTTP GET query string, sent to the tracker
-	 * @return InputStream
+	 * @return TrackerResponse or null if there was a problem connecting
 	 */
 	private TrackerResponse connectHTTP(URI uri, String query) {
         HttpResponse response = null;

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.limegroup.bittorrent.handshaking;
 
 
@@ -24,6 +21,14 @@ import com.limegroup.bittorrent.BTConnectionFactory;
 import com.limegroup.bittorrent.ManagedTorrent;
 import com.limegroup.bittorrent.TorrentLocation;
 
+/**
+ * Includes both a read and write channels, along with an observer for 
+ * BitTorrent connection handshaking.
+ * <p>
+ * The abstract method <code>startHandshaking</code> should initialize
+ * <code>incomingHandshake</code>, while <code>verifyIncoming</code> should 
+ * validate the contents of that array.
+ */
 abstract class BTHandshaker implements  
 ChannelWriter, ChannelReadObserver, IpPort {
 

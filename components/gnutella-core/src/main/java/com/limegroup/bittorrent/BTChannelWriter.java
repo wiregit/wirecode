@@ -8,7 +8,8 @@ import com.limegroup.bittorrent.messages.BTMessage;
 import com.limegroup.gnutella.BandwidthManager;
 
 /**
- * A <tt>ChannelWriter</tt> with some BT-specific functionality
+ * Defines an interface of a <tt>ChannelWriter</tt> with some BitTorrent (BT) 
+ * specific functionality.
  */
 public interface BTChannelWriter extends ChannelWriter {
 
@@ -22,12 +23,12 @@ public interface BTChannelWriter extends ChannelWriter {
 	public void enqueue(BTMessage m);
 	
 	/**
-	 * Initializes this writer (optional)
+	 * Initializes this writer (optional).
 	 * @param scheduler the <tt>SchedulingThreadPool</tt> to use when performing
 	 * time-related tasks
 	 * @param keepAliveInterval how often to send keepalives if there is no
 	 * other traffic
-	 * @param bwManager 
+	 * @param bwManager controls upload and download rate
 	 */
 	public void init(ScheduledExecutorService scheduler, int keepAliveInterval, BandwidthManager bwManager);
 

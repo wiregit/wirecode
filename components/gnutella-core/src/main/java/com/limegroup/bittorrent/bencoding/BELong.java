@@ -6,7 +6,7 @@ import java.nio.channels.ReadableByteChannel;
 
 /**
  * A token used for the parsing of a Long value.
- * Values outside Long.MIN_VALUE and Long.MAX_VALUE throw an IOX.
+ * Values over Long.MAX_VALUE throw an <code>IOException</code>.
  */
 class BELong extends NumberToken<Long> {
     

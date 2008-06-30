@@ -10,6 +10,9 @@ import org.limewire.nio.observer.Shutdownable;
 import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
+/**
+ * Manages BitTorrent links since torrents have hundreds of connections.
+ */
 public class BTLinkManager implements Shutdownable,
         NECallable<List<? extends Chokable>> {
     /**

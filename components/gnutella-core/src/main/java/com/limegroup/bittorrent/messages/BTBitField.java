@@ -5,7 +5,9 @@ import java.nio.ByteBuffer;
 import com.limegroup.bittorrent.TorrentContext;
 
 /**
- * A BitField message.  
+ * Represents the pieces that the sender has successfully downloaded.A peer must 
+ * send this message immediately after the handshake operation. This message 
+ * must not be sent at any other time during the communication.
  */
 public class BTBitField extends BTMessage {
 	
@@ -21,9 +23,6 @@ public class BTBitField extends BTMessage {
 	/**
 	 * factory method, creates a new BitField message
 	 * 
-	 * @param info
-	 *            the <tt>BTMetaInfo</tt> from which to request the actual
-	 *            bitfield
 	 * @return new instance of BTBitField
 	 */
 	public static BTBitField createMessage(TorrentContext context) {

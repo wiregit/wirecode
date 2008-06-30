@@ -19,6 +19,10 @@ import org.limewire.util.BufferUtils;
 import com.limegroup.bittorrent.messages.BTMessage;
 import com.limegroup.gnutella.BandwidthManager;
 
+/**
+ * Listens for messages to write. Piece messages are watched to ensure
+ * they don't stall.
+ */
 public class BTMessageWriter implements BTChannelWriter {
 
 	private static final Log LOG = LogFactory.getLog(BTMessageWriter.class);
@@ -84,9 +88,6 @@ public class BTMessageWriter implements BTChannelWriter {
     /** scheduler to use */
     private volatile ScheduledExecutorService scheduler;
 	
-	/**
-	 * Constructor
-	 */
 	public BTMessageWriter(IOErrorObserver ioxObserver, PieceSendListener pieceListener) {
 		_queue = new LinkedList<BTMessage>();
 		this.ioxObserver = ioxObserver;
@@ -257,7 +258,7 @@ public class BTMessageWriter implements BTChannelWriter {
 	}
 
 	/**
-	 * count written bytes for banwdidth tracking
+	 * count written bytes for bandwidth tracking
 	 */
 	private void count(int written) {
 		pieceListener.wroteBytes(written);

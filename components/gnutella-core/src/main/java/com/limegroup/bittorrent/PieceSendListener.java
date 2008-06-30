@@ -1,7 +1,7 @@
 package com.limegroup.bittorrent;
 
 /**
- * Listener that follows the sending of a piece message
+ * Listener that follows the sending of a Piece message.
  */
 interface PieceSendListener {
 	/** 
@@ -11,7 +11,7 @@ interface PieceSendListener {
 	public void wroteBytes(int written);
 	
 	/**
-	 * notification that a piece has been sent.
+	 * Notification that a Piece has been sent.
 	 */
 	public void pieceSent();
 }

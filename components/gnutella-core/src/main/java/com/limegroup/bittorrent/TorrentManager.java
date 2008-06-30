@@ -8,9 +8,9 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.EventDispatcher;
 
 /**
- * Defines an interface which manages active torrents and dispatching of incoming BT
- * connections.
- * 
+ * Defines an interface which manages active torrents and dispatching of 
+ * incoming BitTorrent connections.
+ * <p>
  * Also stores information common to all the torrents.
  */
 public interface TorrentManager extends FileLocker, ConnectionAcceptor, TorrentEventListener,

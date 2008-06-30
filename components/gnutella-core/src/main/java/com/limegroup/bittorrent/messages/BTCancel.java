@@ -6,7 +6,7 @@ import java.nio.ByteOrder;
 import com.limegroup.bittorrent.BTInterval;
 
 /**
- * cancels a request we may have sent to the remote host
+ * Cancels a request we may have sent to the remote host.
  */
 public class BTCancel extends BTMessage {
 	private ByteBuffer _payload = null;

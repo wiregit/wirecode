@@ -6,14 +6,15 @@ import org.limewire.collection.NECallable;
 import com.limegroup.bittorrent.messages.BTMessage;
 
 /**
- * A handler for received BTMessages.  Since Piece messages
- * are large, they are handled in a three step process:
- * 1. startReceivingPiece() is called when the piece header is parsed
- * 2. handlePiece() is called whenever there is data received that belongs
- * to the piece
- * 3. readBytes() is called whenver data that belongs to the piece is about
+ * A handler for received BTMessages. Since Piece messages
+ * are large, they are handled in a four step process:
+ * <ol>
+ * <li> startReceivingPiece() is called when the Piece header is parsed
+ * <li> handlePiece() is called whenever there is data received that belongs
+ * to the Piece
+ * <li> readBytes() is called whenever data that belongs to the Piece is about
  * to be written to disk
- * 4. finishReceivingPiece() is called when the entire message is received.
+ * <li> finishReceivingPiece() is called when the entire message is received.
  */
 public interface BTMessageHandler {
 	
@@ -23,14 +24,14 @@ public interface BTMessageHandler {
 	public void processMessage(BTMessage message);
 
 	/**
-	 * handles a piece message and sends its payload to disk
+	 * Handles a Piece message and sends its payload to disk.
 	 * @param factory the<tt>BTPieceFactory</tt> that will
-	 * create the piece.
+	 * create the Piece.
 	 */
 	public void handlePiece(NECallable<BTPiece> factory);
 	
 	/**
-	 * notification that some bytes belonging to a Piece message 
+	 * Notification that some bytes belonging to a Piece message 
 	 * are about to be written to disk.
 	 */
 	public void readBytes(int read);
@@ -43,7 +44,7 @@ public interface BTMessageHandler {
 	public boolean startReceivingPiece(BTInterval piece);
 	
 	/**
-	 * Notification to finish receiving a piece message.
+	 * Notification to finish receiving a Piece message.
 	 */
 	public void finishReceivingPiece();
 }

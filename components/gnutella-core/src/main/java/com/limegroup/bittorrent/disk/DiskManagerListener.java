@@ -3,7 +3,7 @@ package com.limegroup.bittorrent.disk;
 import org.limewire.io.DiskException;
 
 /**
- * Listener for callbacks from a <tt>TorrentDiskManager</tt>
+ * Listener for callbacks from a <tt>TorrentDiskManager</tt>.
  */
 public interface DiskManagerListener {
 
@@ -20,7 +20,7 @@ public interface DiskManagerListener {
 
 	/**
 	 * notification that a chunk has been completed and verified
-	 * @param in the # of the verified chunk
+	 * @param id the id of the verified chunk
 	 */
 	public void chunkVerified(int id);
 

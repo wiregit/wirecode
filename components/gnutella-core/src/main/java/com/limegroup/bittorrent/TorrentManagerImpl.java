@@ -30,19 +30,17 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 
 /**
- * Class which manages active torrents and dispatching of 
- * incoming BT connections.
- *   
- * Active torrents are torrents either in downloading or 
- * seeding state.
- * 
- * There number of active torrents cannot exceed certain limit.
- * 
+ * Manages active torrents and dispatching of incoming BitTorrent connections. 
+ * Active torrents are torrents either in downloading or seeding state.
+ * <p>
+ * The number of active torrents cannot exceed a certain limit, 
+ * <code>BittorrentSettings.TORRENT_MAX_UPLOADS</code>.
+ * <p>
  * After a torrent finishes its download, it stays in seeding state
  * indefinitely.  If the user wishes to start a new torrent download 
  * and the limit for active torrents is reached, the seeding torrent
  * with the best upload:download ratio gets terminated.
- * 
+ * <p>
  * If active torrent limit is reached and none of the torrents are seeding,
  * the new torrent is queued.
  */

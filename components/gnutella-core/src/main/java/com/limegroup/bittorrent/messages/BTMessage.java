@@ -2,6 +2,11 @@ package com.limegroup.bittorrent.messages;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Defines BitTorrent messages as defined in the specification,
+ * http://www.bittorrent.org/beps/bep_0003.html#all-non-keepalive-messages-start-with-a-single-byte-which-gives-their-type.
+ * Additionally, <code>BTMessage</code> parses data from the network.
+ */
 public abstract class BTMessage {
 	// private static final Log LOG = LogFactory.getLog(BTMessage.class);
 
@@ -83,9 +88,7 @@ public abstract class BTMessage {
 	 * 
 	 * @param in
 	 *            the <tt>ByteBuffer</tt> to read from
-	 * @param length
-	 *            an int specifying the message length. The 4 bytes at the
-	 *            beginning of the buffer contain just this number
+	 * @param type the BitTorrent message type
 	 * @return new BTMessages of unknown type
 	 * @throws BadBTMessageException
 	 */

@@ -6,6 +6,9 @@ import com.limegroup.bittorrent.TorrentFile;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 import com.limegroup.gnutella.downloader.serial.BTDiskManagerMemento;
 
+/**
+ * Returns either a memory map or a random access file disk manager.
+ */
 @Singleton
 public class DiskManagerFactory {
 	

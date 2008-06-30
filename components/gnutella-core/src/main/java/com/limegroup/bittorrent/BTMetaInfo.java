@@ -33,10 +33,10 @@ public interface BTMetaInfo {
     public float getRatio();
 
     /**
-     * Verifies whether the given hash matches the expect hash of a piece
+     * Verifies whether the given hash matches the expect hash of a Piece
      * 
      * @param sha1 the hash that was computed
-     * @param pieceNum the piece for which the hash was computed
+     * @param pieceNum the Piece for which the hash was computed
      * @return true if they match.
      */
     public abstract boolean verify(byte[] sha1, int pieceNum);

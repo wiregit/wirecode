@@ -20,10 +20,10 @@ import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.security.SHA1;
 
 /**
- * A struct-like class which contains typesafe representations
- * of everything we understand in in a .torrent file.
- * 
- * This will throw a ValueException if the data is malformed or
+ * Contains type safe representations of all understand information
+ * in in a .torrent file.
+ * <p>
+ * This will throw a <code>ValueException</code> if the data is malformed or
  * not what we expect it to be.  UTF-8 versions of Strings are
  * preferred over ASCII versions, wherever possible.
  */
@@ -58,6 +58,8 @@ public class BTDataImpl implements BTData {
     private final boolean isPrivate;
     
     /** Constructs a new BTData out of the map of properties. */
+    //See http://wiki.theory.org/BitTorrentSpecification#Info_Dictionary
+    //for more information
     public BTDataImpl(Map<?, ?> torrentFileMap) throws ValueException {
         Object tmp;
         
@@ -136,17 +138,17 @@ public class BTDataImpl implements BTData {
                 
                 //Don't try ASCII if UTF-8 succeeds.
                 try {
-                    parseFiles(fileMap, ln, files, folders, true);
+                    parseFiles(fileMap, ln, files, folders, true);                       
                     doASCII = false;
                 } catch(ValueException ignored) {}
                 
                 if(doASCII)
-                    parseFiles(fileMap, ln, files, folders, false);
+                    parseFiles(fileMap, ln, files, folders, false);                
             }
         } else if(tmp != null) {
             throw new ValueException("info->files is non-null, but not a list!");
         } else {
-            files = null;
+            files = null;            
             folders = null;
         }
     }
@@ -226,7 +228,6 @@ public class BTDataImpl implements BTData {
      * it is guaranteed that any two maps with identical keys & values
      * will have the same info hash when decoded & recoded.
      * 
-     * @param infoMap
      * @return the infoHash of the infoMap
      */
     private byte[] calculateInfoHash(Map<?, ?> infoMap) {

@@ -6,7 +6,7 @@ import com.limegroup.bittorrent.messages.BTHave;
 import com.limegroup.gnutella.BandwidthTracker;
 
 /**
- * An interface describing a link between two BT hosts
+ * An interface describing a link between two BitTorrent hosts.
  */
 interface BTLink extends Chokable, IOErrorObserver, BandwidthTracker {
 	

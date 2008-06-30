@@ -42,7 +42,7 @@ public interface TorrentDiskManager {
 
 	/**
 	 * Requests that a piece be read from disk
-	 * @param in the <tt>BTInterval</tt> representing the piece
+	 * @param in the <tt>BTInterval</tt> representing the Piece
 	 * @param listener the <tt>PieceReadListener</tt> to notify once the read
 	 * completes
 	 * @throws IOException if something goes wrong
@@ -65,7 +65,7 @@ public interface TorrentDiskManager {
 	public boolean isComplete();
 
 	/**
-	 * returns a random available range that has preferrably not yet been
+	 * returns a random available range that has preferably not yet been
 	 * requested
 	 * 
 	 * @param bs the <tt>BitField</tt> of available ranges to choose from
@@ -77,20 +77,18 @@ public interface TorrentDiskManager {
 
 	/**
 	 * Removes an interval from the internal list of already requested intervals.
-	 * 
-	 * Note that during endgame several connections may be requesting the same interval
+	 * <p>
+	 * Note that during end game, several connections may be requesting the same interval
 	 * and as one of them fails that interval will no longer be considered requested.
-	 * That's ok as it will only result in that interval requested again.
+	 * That's ok as it will only result in that interval requested again. (See
+	 * http://wiki.theory.org/BitTorrentSpecification#End_Game)
 	 */
 	public void releaseInterval(BTInterval in);
 
 	/**
-	 * Creates a bitfield
-	 * 
 	 * @return returns an array of byte where the i'th byte is 1 if we have
 	 *         written and verified the i'th piece of the torrent and 0
 	 *         otherwise
-	 *         
 	 */
 	public byte[] createBitField();
 
@@ -131,8 +129,8 @@ public interface TorrentDiskManager {
 	public BTDiskManagerMemento toMemento();
     
     /**
-     * @return the last offset inside the torrent filesystem that has been 
-     * succesfully verified.
+     * @return the last offset inside the torrent file system that has been 
+     * successfully verified.
      */
     public long getLastVerifiedOffset();
 

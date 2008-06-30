@@ -15,9 +15,9 @@ import org.limewire.mojito.db.DHTValueType;
 import com.limegroup.bittorrent.TorrentLocation;
 
 /**
- * An utility class for encoding and decoding network information. Also contains
- * constants used by both <code>DHTPeerLocator</code> and
- * <code>DHTPeerPublisher</code>.
+ * Encodes and decodes Mojito DHT network information for torrent alternative
+ * location tracking. Also contains constants used by both <code>DHTPeerLocator</code> 
+ * and <code>DHTPeerPublisher</code>.
  */
 public class DHTPeerLocatorUtils {
 
@@ -32,12 +32,10 @@ public class DHTPeerLocatorUtils {
     static final String BT_PEER_ID_KEY = "ID";
 
     /**
-     * Given an instance of TorrentLocation, it encodes the network information
-     * in GGEP format.
+     * Encodes the network information in GGEP format.
      * 
-     * @param torLoc an instance of TorrentLocation we want to encode.
-     * @return an instance of GGEP as an array of bytes, an empty array if GGEP
-     *         is empty.
+     * @param torLoc <code>TorrentLocation</code> to encode
+     * @return array of bytes, an empty array if GGEP is empty
      * @throws IllegalArgumentException if any of the network information were
      *         invalid.
      */
@@ -60,10 +58,10 @@ public class DHTPeerLocatorUtils {
 
     /**
      * Decodes a given GGEP encoded network information and creates an instance
-     * of TorrentLocation from it.
+     * of <code>TorrentLocation</code> from it.
      * 
-     * @param payload GGEP Encoded network information.
-     * @throws IOException Thrown when network information are invalid.
+     * @param payload GGEP Encoded network information
+     * @throws IOException for invalid network information
      */
     public static TorrentLocation decode(byte[] payload) throws IllegalArgumentException,
             InvalidDataException {

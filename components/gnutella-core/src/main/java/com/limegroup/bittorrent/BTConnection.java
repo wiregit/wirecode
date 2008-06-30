@@ -39,7 +39,7 @@ import com.limegroup.gnutella.uploader.UploadSlotListener;
 import com.limegroup.gnutella.uploader.UploadSlotManager;
 
 /**
- * Class wrapping a Bittorrent connection.
+ * Class wrapping a BitTorrent connection.
  */
 public class BTConnection 
 implements UploadSlotListener, BTMessageHandler, BTLink,
@@ -172,16 +172,7 @@ PieceSendListener, PieceReadListener {
 	private ScheduledExecutorService invoker;
 	
 	/**
-	 * Constructs instance of this
-	 * 
-	 * @param sock
-	 *            the Socket to the remote host. We assume that the Bittorrent
-	 *            connection is already initialized and the headers were
-	 *            exchanged successfully
-	 * @param info
-	 *            the BTMetaInfo holding all information for this torrent
-	 * @param torrent
-	 * 			  the ManagedTorrent to whom this connection belongs.
+	 * Constructs instance of this.
 	 */
 	public BTConnection(TorrentContext context, TorrentLocation ep, 
             BandwidthManager bwManager, UploadSlotManager usManager) {
@@ -776,7 +767,7 @@ PieceSendListener, PieceReadListener {
         }
         
 		if (_available.get(pieceNum))
-			return; // dublicate Have, ignore.
+			return; // duplicate Have, ignore.
 		
 		TorrentDiskManager v = context.getDiskManager();
 		_availableRanges.set(pieceNum);

@@ -8,7 +8,7 @@ import com.limegroup.gnutella.InsufficientDataException;
 /**
  * Defines an interface for the logic of managing BT uploads and HTTP Uploads.
  * More information available see  
- * http://wiki.limewire.org/index.php?title=UploadSlotsAndBT
+ * http://wiki.limewire.org/index.php?title=Upload_Slots_And_BT
  */
 public interface UploadSlotManager extends BandwidthTracker {
 

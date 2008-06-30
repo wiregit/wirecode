@@ -7,7 +7,8 @@ import com.limegroup.bittorrent.BTPiece;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 
 /**
- * State that parses the Piece message. 
+ * State that parses the Piece message. The torrent is broken up into equal 
+ * sized pieces (a range of data) which are later transferred.
  */
 class PieceState extends BTReadMessageState implements NECallable<BTPiece> {
 

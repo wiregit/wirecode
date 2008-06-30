@@ -12,7 +12,7 @@ import com.limegroup.bittorrent.Chokable;
 import com.limegroup.gnutella.UploadServices;
 
 /**
- * Choker that implements the choking logic during seeding
+ * Choker that implements the choking logic during seeding.
  */
 class SeedChoker extends Choker {
 
@@ -26,7 +26,7 @@ class SeedChoker extends Choker {
 		new UnchokeComparator();
 	
 	/**
-	 * # of unchoked chokables since the last scheduled invokation of this
+	 * # of unchoked chokables since the last scheduled invocation of this
 	 */
 	private int unchokesSinceLast;
 	

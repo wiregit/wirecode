@@ -8,7 +8,7 @@ import org.limewire.setting.ProbabilisticBooleanSetting;
 import com.limegroup.gnutella.settings.LimeProps;
 
 /**
- * Bittorrent settings
+ * BitTorrent settings.
  */
 public class BittorrentSettings extends LimeProps {
 	private BittorrentSettings() {

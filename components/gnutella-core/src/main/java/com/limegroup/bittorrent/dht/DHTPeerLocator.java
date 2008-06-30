@@ -3,7 +3,7 @@ package com.limegroup.bittorrent.dht;
 import com.limegroup.gnutella.URN;
 
 /**
- * <code>DHTPeerLocator</code> defines an interface for looking up a peer in
+ * Defines an interface for looking up a peer in the Mojito
  * DHT given the <code>ManagedTorrent</code> instance of the torrent.
  */
 public interface DHTPeerLocator {
@@ -15,7 +15,7 @@ public interface DHTPeerLocator {
 
     /**
      * Searches for peers sharing the given torrent. If no peers are found, then
-     * the search stop.
+     * the search stops.
      * 
      * @param urn SHA1 hash of the torrent file.
      */

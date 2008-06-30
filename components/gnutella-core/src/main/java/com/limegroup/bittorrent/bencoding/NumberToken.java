@@ -47,9 +47,9 @@ public abstract class NumberToken<T extends Number> extends Token<T> {
     /**
      * Make a new BELong object that can get the number from bencoded data like "i23e" or "5:".
      * 
-     * @param chan       A ReadableByteChannel the new BELong can read from to get more data.
-     * @param terminator The character we'll look for to mark the end of the numerals, like "e" or ":".
-     * @param firstByte  If you already ready the first digit from the channel, pass it here.
+     * @param chan       a ReadableByteChannel the new BELong can read from to get more data.
+     * @param terminator the character we'll look for to mark the end of the numerals, like "e" or ":".
+     * @param firstByte  if you already ready the first digit from the channel, pass it here.
      *                   If not, pass 0 for firstByte.
      */
     NumberToken(ReadableByteChannel chan, byte terminator, byte firstByte) {

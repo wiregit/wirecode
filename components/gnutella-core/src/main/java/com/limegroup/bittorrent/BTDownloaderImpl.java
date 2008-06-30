@@ -28,7 +28,7 @@ import com.limegroup.gnutella.downloader.serial.BTDownloadMementoImpl;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 
 /**
- * This class enables the rest of LW to treat this as a regular download.
+ * This class enables the rest of LimeWire to treat a BitTorrent as a regular download.
  */
 public class BTDownloaderImpl extends AbstractCoreDownloader 
                           implements TorrentEventListener, BTDownloader {

@@ -6,7 +6,11 @@ import java.nio.ByteOrder;
 import com.limegroup.bittorrent.BTInterval;
 
 /**
- * indicates that we will not upload anything to the remote host
+ * Indicates a block within a 
+ * <a href="http://jonas.nitro.dk/bittorrent/bittorrent-rfc.html#anchor3">Piece</a> 
+ * that the sender is interested in downloading 
+ * from the recipient. The recipient must only send Piece messages to a sender 
+ * that has already requested it. 
  */
 public class BTRequest extends BTMessage {
 	/*

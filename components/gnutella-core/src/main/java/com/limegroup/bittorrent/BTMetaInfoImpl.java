@@ -42,7 +42,7 @@ public class BTMetaInfoImpl implements BTMetaInfo {
 	private final TorrentFileSystem fileSystem;
 	
 	/**
-	 * the sha1-hash of te beencoded _infoMap Object
+	 * the sha1-hash of the beencoded _infoMap Object
 	 */
 	private final byte[] _infoHash;
 	

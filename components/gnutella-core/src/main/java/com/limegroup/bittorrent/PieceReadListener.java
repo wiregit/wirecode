@@ -1,7 +1,7 @@
 package com.limegroup.bittorrent;
 
 /**
- * Listener for a disk read event for a piece 
+ * Listener for a disk read event for a Piece. 
  */
 public interface PieceReadListener {
 
@@ -13,7 +13,7 @@ public interface PieceReadListener {
 	public void pieceRead(BTInterval interval, byte [] data);
 	
 	/**
-	 * Notification that reading of the piece failed.
+	 * Notification that reading of the Piece failed.
 	 */
 	public void pieceReadFailed(BTInterval interval);
 }

@@ -17,6 +17,15 @@ import com.limegroup.bittorrent.TorrentContext;
 import com.limegroup.bittorrent.TorrentLocation;
 import com.limegroup.bittorrent.settings.BittorrentSettings;
 
+/**
+ * Manages tracker announcements. 
+ * <p>
+ * Announcements are communications between the client and the tracking server. They
+ * are used to request to the tracking server for information
+ * about the statistics of the torrent. Also the client announces that it wants to 
+ * join the swarm and that the server should add it to the peers in that swarm.
+ */
+
 public class TrackerManager {
 	
 	private static final Log LOG = LogFactory.getLog(TrackerManager.class);
@@ -61,10 +70,9 @@ public class TrackerManager {
 	}
 	
 	/**
-	 * Announce ourselve to a tracker
+	 * Announce ourselves to a tracker
 	 * 
-	 * @param url
-	 *            the <tt>URL</tt> for the tracker
+	 * @param t the Tracker to announce to
 	 * @param event
 	 *            the event to send to the tracker, see TrackerRequester class
 	 */
@@ -108,7 +116,7 @@ public class TrackerManager {
 	/**
 	 * Announces ourselves to a tracker
 	 * 
-	 * @param url the URL of the tracker
+	 * @param t the tracker to announce to
 	 */
 	private void announce(final Tracker t) {
 		if (LOG.isDebugEnabled())

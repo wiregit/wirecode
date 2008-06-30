@@ -9,7 +9,7 @@ import com.limegroup.gnutella.downloader.serial.BTMetaInfoMemento;
 public interface BTMetaInfoFactory {
 
     /**
-     * Creates an instance of BTMetaInfo from the BTMEtaInfoMemento passed in
+     * Creates an instance of BTMetaInfo from the BTMetaInfoMemento passed.
      * @param memento BTMetaInfoMemento we want to use to create a BTMetaInfo
      * @return a new instance of BTMetaInfo
      * @throws InvalidDataException thrown if the memento contained invalid data
@@ -17,7 +17,7 @@ public interface BTMetaInfoFactory {
     BTMetaInfo createBTMetaInfoFromMemento(BTMetaInfoMemento memento) throws InvalidDataException;       
     
     /**
-     * Creates a BTMetaInfo from byte []
+     * Creates a BTMetaInfo from byte [].
      * 
      * @param torrent byte array with the contents of .torrent
      * @return new instance of BTMetaInfo if all went well

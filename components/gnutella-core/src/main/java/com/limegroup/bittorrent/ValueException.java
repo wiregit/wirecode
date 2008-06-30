@@ -4,7 +4,7 @@ import java.io.IOException;
 
 /**
  * Exception to throw in case received bencoded data does not 
- * match the structure we expect.
+ * match the expected structure.
  */
 public class ValueException extends IOException {
 	private static final long serialVersionUID = 3990038438042291913L;

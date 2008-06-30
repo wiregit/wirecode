@@ -15,7 +15,7 @@ import com.limegroup.bittorrent.messages.BTBitField;
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 
 /**
- * State that parses the Bitfield message. 
+ * State that parses the <code>BTBitField</code> message. 
  */
 class BitFieldState extends BTReadMessageState {
 	

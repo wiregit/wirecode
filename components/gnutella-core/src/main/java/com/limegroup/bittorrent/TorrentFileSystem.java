@@ -80,10 +80,11 @@ public class TorrentFileSystem {
      * Constructs the file system using the given BTData & hash information.
      * If any of the information is malformed, throws a ValueException.
      * 
-     * @param data
-     * @param numHashes
-     * @param pieceLength
-     * @param infoHash
+     * @param data contains all the data about a .torrent file
+     * @param numHashes number of pieces the torrent was divided into
+     * @param pieceLength size of divided up torrent file
+     * @param infoHash a string of alphanumeric characters in the .torrent file 
+     * that the client uses to verify the data that is being transferred
      * @throws ValueException
      */
 	TorrentFileSystem(BTData data, int numHashes, long pieceLength, byte [] infoHash) 
@@ -248,7 +249,7 @@ public class TorrentFileSystem {
 	 * new base path.
 	 * The files must already be absolute and be children of _completeFile.
 	 * 
-	 * @param completeBase the new base path.
+	 * @param completeBase the new base path
 	 *
 	 */
 	private void updateReferences(File completeBase, List<TorrentFile> l) {

@@ -3,7 +3,7 @@ package com.limegroup.bittorrent.messages;
 import java.nio.ByteBuffer;
 
 /**
- * indicates that we will not upload anything to the remote host
+ * Indicates that we will are no longer being chocked.
  */
 public class BTUnchoke extends BTMessage {
 	private static final BTUnchoke INSTANCE = new BTUnchoke();

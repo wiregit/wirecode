@@ -4,7 +4,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * indicates that we will not upload anything to the remote host
+ * Indicates the index of a Piece that the peer has 
+ * successfully downloaded and validated. A peer receiving this message must 
+ * validate the index and drop the connection if this index is not within the 
+ * expected bounds. Also, a peer receiving this message MUST send an interested 
+ * message to the sender if indeed it lacks the Piece announced.
  */
 public class BTHave extends BTMessage {
 	private ByteBuffer _payload = null;
@@ -20,11 +24,10 @@ public class BTHave extends BTMessage {
 	}
 
 	/**
-	 * read BTHave from network
+	 * Reads <code>BTHave</code> from the network.
 	 * 
-	 * @param payload
-	 *            the data from the network
-	 *          @return new BTHave message
+	 * @param payload the data from the network
+	 * @return a new BTHave message
 	 * @throws BadBTMessageException
 	 */
 	public static BTHave readMessage(ByteBuffer payload) throws BadBTMessageException {

@@ -5,6 +5,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.limegroup.bittorrent.messages.BadBTMessageException;
 
+/**
+ * State to set the length of the BitTorrent data source.
+ */
 class LengthState extends BTReadMessageState {
 	
 	private static final Log LOG = LogFactory.getLog(LengthState.class);

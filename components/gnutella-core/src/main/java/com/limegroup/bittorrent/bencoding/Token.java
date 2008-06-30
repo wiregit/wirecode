@@ -12,17 +12,18 @@ import org.limewire.util.BufferUtils;
 
 /**
  * Provides common functionality for objects that represent pieces of bencoded data.
- * 
- * Reads bencoded data and parses it into objects that extend Token, like BEString and BEList.
- * Use the factory method Token.getNextToken(ReadableByteChannel) to get a parsed Token object.
- * 
- * TODO: Write the steps to parse bencoded data.
- * 
+ * <p>
+ * Reads bencoded data and parses it into objects that extend <code>Token</code>, 
+ * like <code>BEString</code> and <code>BEList</code>.
+ * Use the factory method <code>Token.getNextToken(ReadableByteChannel)</code> 
+ * to get a parsed <code>Token</code> object.
+ * <p>
  * BitTorrent uses a simple and extensible data format called bencoding.
  * More information about bencoding is on the Web at:
- * http://en.wikipedia.org/wiki/Bencoding
- * http://www.bittorrent.org/protocol.html in the section titled "The connectivity is as follows".
+ * http://en.wikipedia.org/wiki/Bencoding and
+ * http://www.bittorrent.org/beps/bep_0003.html#the-connectivity-is-as-follows.
  */
+//TODO: Write the steps to parse bencoded data.
 public abstract class Token<T> {
 
 	/** An undefined Token. */
@@ -45,7 +46,8 @@ public abstract class Token<T> {
 
 
 
-    // When parsing ASCII charcters, ZERO and NINE are used to see if a character like '5' is between them, and thus a number
+    // When parsing ASCII characters, ZERO and NINE are used to see if a character 
+    //like '5' is between them, and thus a number
     protected static final byte ZERO, NINE;
 
     static {
@@ -75,7 +77,7 @@ public abstract class Token<T> {
     /**
      * Makes a new object to represent a bencoded token to be read and parsed.
      * 
-     * @param chan The ReadableByteChannel this can read bencoded data from
+     * @param chan the <code>ReadableByteChannel</code> this can read bencoded data from
      */
     public Token(ReadableByteChannel chan) {
         this.chan = chan;
@@ -89,17 +91,17 @@ public abstract class Token<T> {
     /**
      * Determines if this has read a complete bencoded sentence.
      * 
-     * @return True if we've read enough bencoded data to parse it into a complete object.
-     *         False if we're still waiting to read more bencoded data to finish our object.
+     * @return true if we've read enough bencoded data to parse it into a complete object.
+     *         false if we're still waiting to read more bencoded data to finish our object.
      */
     protected abstract boolean isDone();
 
     /**
      * Finds out what kind of bencoded element this is.
-     * TODO: We could make this abstract, and eliminate Token.INTERNAL.
      * 
      * @return Token.INTERNAL, the type code for the Token base class
      */
+//TODO: We could make this abstract, and eliminate Token.INTERNAL.
     public int getType() {
         return INTERNAL;
     }
@@ -107,7 +109,7 @@ public abstract class Token<T> {
     /**
      * Gets the object we made from the bencoded data we read and parsed.
      * 
-     * @return The Object we parsed.
+     * @return the Object we parsed.
      *         null if we haven't read enough bencoded data from our channel to make it yet.
      */
     public T getResult() {
@@ -138,8 +140,8 @@ public abstract class Token<T> {
      * Call handleRead() to finish parsing an incomplete Token object.
      * Use isDone() to determine if it's complete, and getResult() to get the parsed Token object.
      * 
-     * @param  chan        The ReadableByteChannel to read bencoded data from
-     * @return             A possibly incomplete Token object, or null
+     * @param  chan        the ReadableByteChannel to read bencoded data from
+     * @return             a possibly incomplete Token object, or null
      * @throws IOException if a read from the channel throws
      */
     public static Token<?> getNextToken(ReadableByteChannel chan) throws IOException {
@@ -181,8 +183,8 @@ public abstract class Token<T> {
     /**
      * Parses bencoded data in a byte array into an object that extends Token.
      * 
-     * @param data A byte array with a complete bencoded object.
-     * @return     An object that extends Token like BEList.
+     * @param data a byte array with a complete bencoded object.
+     * @return     an object that extends Token like BEList.
      *             null if the byte array didn't contain a complete bencoded object.
      */
     public static Object parse(byte[] data) throws IOException {
@@ -194,7 +196,7 @@ public abstract class Token<T> {
     }
 
     /**
-     * A BufferChannel wraps a byte array, putting a ReadableByteChannel interface on it.
+     * Wraps a byte array, putting a <code>ReadableByteChannel</code> interface on it.
      */
     private static class BufferChannel implements ReadableByteChannel {
 
@@ -202,9 +204,10 @@ public abstract class Token<T> {
     	private final ByteBuffer src;
 
         /**
-         * Makes a new BufferChannel, wrapping a byte array of data in a ReadableByteChannel interface.
+         * Makes a new <code>BufferChannel</code>, wrapping a byte array of 
+         * data in a <code>ReadableByteChannel</code> interface.
          * 
-         * @param data A byte array with the data
+         * @param data a byte array with the data
          */
         BufferChannel(byte[] data) {
             src = ByteBuffer.wrap(data);

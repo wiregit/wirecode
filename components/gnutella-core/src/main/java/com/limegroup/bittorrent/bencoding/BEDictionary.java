@@ -75,7 +75,7 @@ class BEDictionary extends BEAbstractCollection<Map<String, Object>> {
             if (key == null) {
                 keyToken.handleRead();
                 if (keyToken.getResult() != null) {
-                	// technically keys don't necesssarily need to be String objects
+                	// technically keys don't necessarily need to be String objects
                 	// but in practice they are
                     key = new String(keyToken.getResult(),Token.ASCII);
                     keyToken = null; 

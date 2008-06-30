@@ -4,6 +4,9 @@ import java.net.Socket;
 
 import org.limewire.nio.Throttle;
 
+/**
+ * Defines the interface to control the upload and download rate.
+ */
 public interface BandwidthManager {
 
 	public void applyRate();

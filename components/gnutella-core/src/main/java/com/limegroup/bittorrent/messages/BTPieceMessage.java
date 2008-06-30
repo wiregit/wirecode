@@ -7,7 +7,10 @@ import com.limegroup.bittorrent.BTInterval;
 import com.limegroup.bittorrent.BTPiece;
 
 /**
- * indicates that we will not upload anything to the remote host
+ * Pieces of a BitTorrent are equal sized chunks of a file.
+ * <p>
+ * The recipient must only send <code>BTPieceMessage</code> to a sender that 
+ * has already requested it.
  */
 public class BTPieceMessage extends BTMessage implements BTPiece {
 	private BTInterval in;

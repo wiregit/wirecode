@@ -11,10 +11,11 @@ import org.limewire.util.Base32;
 
 
 /**
- * A TorrentLocation object represents a remote computer on the Internet running BitTorrent software.
- * It's downloading files with BitTorrent, so we can use it as a location to get parts of files from.
- * 
- * The TorrentLocation class extends Endpoint to have an IP address and port number.
+ * Represents a remote computer on the Internet running BitTorrent software.
+ * It's downloading files with BitTorrent, so we can use it as a location to 
+ * get parts of files from.
+ * <p>
+ * The TorrentLocation class extends IpPortImpl to have an IP address and port number.
  */
 public class TorrentLocation extends IpPortImpl {
 	private static final long serialVersionUID = 7953314787152210101L;
@@ -26,7 +27,7 @@ public class TorrentLocation extends IpPortImpl {
 
 	/**
 	 * The extention bytes that we support.
-	 * Since we don't support any extentions atm, they're all 0.
+	 * Since we don't support any extentions at the moment, they're all 0.
 	 */
 	private static final byte[] EXTENTION_BYTES = new byte[8];
 

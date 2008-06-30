@@ -30,6 +30,10 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
+/**
+ * Reacts to the start and completion of a BitTorrent connection handshake.
+ * Additionally, <code>BTConnectionFetcher</code> returns an outgoing handshake.
+ */
 public class BTConnectionFetcher implements BTHandshakeObserver, Runnable, Shutdownable  {
 	
 	private static final Log LOG = LogFactory.getLog(BTConnectionFetcher.class);

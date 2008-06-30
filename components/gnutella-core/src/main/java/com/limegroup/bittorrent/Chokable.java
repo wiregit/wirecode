@@ -25,7 +25,7 @@ public interface Chokable {
 	 * @param read whether to return download bandwidth
 	 * @param shortTerm whether to return short-term average or long-term
 	 * @return the measured bandwidth on this connection for
-	 * downloadining or uploading
+	 * downloading or uploading
 	 */
 	public float getMeasuredBandwidth(boolean read, boolean shortTerm);
 

@@ -2,8 +2,8 @@ package com.limegroup.bittorrent;
 
 import java.io.File;
 
-/*
- * simple class holding the length and the path of a file
+/**
+ * Holds the length and the path of a file.
  */
 public class TorrentFile extends File {
 	private static final long serialVersionUID = 4051327846800962608L;

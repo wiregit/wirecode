@@ -79,8 +79,8 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher, Service {
     
     /**
      * Adds a <code>TorrentEventListener</code> to <code>TorrentManager</code>
-     * and a DHTEventListener to DHTManager.This method should only be called
-     * once.
+     * and a <code>DHTEventListener</code> to <code>DHTManager</code>. This 
+     * method should only be called once.
      */
     public void initialize() {
         // listens for the TorrentEvent FIRST_CHUNK_VERIFIED to start publishing
@@ -99,7 +99,7 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher, Service {
     }
 
     /**
-     * Publishes the local host in DHT as a peer sharing the given torrent .
+     * Publishes the local host in DHT as a peer sharing the given torrent.
      * Torrent's infoHash is used as the key.
      * 
      * @param urn SHA1 hash of the torrent file.
@@ -221,8 +221,8 @@ public class DHTPeerPublisherImpl implements DHTPeerPublisher, Service {
     }
 
     /**
-     * This class listens to see if the peer was published successfully. If
-     * publishing was unsuccessful, then ....
+     * This class listens to see if the peer was published successfully and 
+     * ignores unsuccessful publish attempts.
      */
     private class PublishYourselfResultHandler extends DHTFutureAdapter<StoreResult> {
 
