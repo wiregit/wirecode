@@ -21,12 +21,19 @@ public class DebugRunnable implements Runnable {
     }
     
     public final void run() {
+        boolean setStackTrace = true;
         try {
             delegate.run();
         } catch(Throwable t) {
             if(t.getCause() == null) {
-                t.initCause(creationTime);
-            } else {
+                try { 
+                    t.initCause(creationTime);
+                    setStackTrace = false;
+                } catch (IllegalStateException ise) {
+                    // thrown if throwable was initialized with null cause for some reason
+                }
+            }
+            if (setStackTrace) {
                 // If it already had a cause, all we can do is manipulate the StackTraceElement[]
                 StackTraceElement[] trace = t.getStackTrace();
                 StackTraceElement[] createdTrace = creationTime.getStackTrace();
