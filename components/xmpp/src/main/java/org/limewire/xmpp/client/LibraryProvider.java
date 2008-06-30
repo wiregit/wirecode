@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * Provides library interactions for users of the xmpp service.
  */
-public interface LibrarySource {
+public interface LibraryProvider {
 
     /**
      * @return an <code>Iterator</code> of all of the local shared files

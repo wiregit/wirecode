@@ -14,7 +14,7 @@ import java.util.*;
 
 public class XMPPServiceTest extends ServiceTestCase {
     protected RosterListenerImpl rosterListener;
-    protected LibrarySourceImpl librarySource;
+    protected LibraryProviderImpl librarySource;
     protected RosterListenerImpl rosterListener2;
 
     public XMPPServiceTest(String name) {
@@ -47,8 +47,8 @@ public class XMPPServiceTest extends ServiceTestCase {
                 //        "limebuddy123", "talk.google.com", 5222, "gmail.com", rosterListener));
                 //bind(RosterListener.class).toInstance(rosterListener);
                 try {
-                    librarySource = new LibrarySourceImpl(createMockLibrary());
-                    bind(LibrarySource.class).toInstance(librarySource);
+                    librarySource = new LibraryProviderImpl(createMockLibrary());
+                    bind(LibraryProvider.class).toInstance(librarySource);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -331,11 +331,11 @@ public class XMPPServiceTest extends ServiceTestCase {
         }    
     }
     
-    class LibrarySourceImpl implements LibrarySource {
+    class LibraryProviderImpl implements LibraryProvider {
         File lib;
         File saveDir;
         
-        LibrarySourceImpl(File lib) {
+        LibraryProviderImpl(File lib) {
             this.lib = lib;
             saveDir = new File(System.getProperty("java.io.tmpdir"), "saveDir" + new Random().nextInt());
             saveDir.mkdirs();

@@ -20,11 +20,11 @@ class LibraryIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(LibraryIQListener.class);
 
     private XMPPConnection connection;
-    private final LibrarySource librarySource;
+    private final LibraryProvider libraryProvider;
     private final ConcurrentHashMap <String, LibraryListener> libraryHandlers = new ConcurrentHashMap<String, LibraryListener>();
 
-    LibraryIQListener(XMPPConnection connection, LibrarySource librarySource) {
-        this.librarySource = librarySource;
+    LibraryIQListener(XMPPConnection connection, LibraryProvider libraryProvider) {
+        this.libraryProvider = libraryProvider;
         this.connection = connection;
     }
 
@@ -68,7 +68,7 @@ class LibraryIQListener implements PacketListener {
         if(LOG.isDebugEnabled()) {
             LOG.debug("handling library get " + packet.getPacketID());
         }
-        LibraryIQ queryResult = new LibraryIQ(librarySource);
+        LibraryIQ queryResult = new LibraryIQ(libraryProvider);
         queryResult.setTo(packet.getFrom());
         queryResult.setFrom(packet.getTo());
         queryResult.setPacketID(packet.getPacketID());

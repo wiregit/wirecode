@@ -20,17 +20,17 @@ class XMPPServiceImpl implements Service, XMPPService {
     
     private CopyOnWriteArrayList<XMPPConnection> connections;
     private final Provider<List<XMPPConnectionConfiguration>> configurations;
-    private final LibrarySource librarySource;
+    private final LibraryProvider libraryProvider;
     private final IncomingFileAcceptor incomingFileAcceptor;
     private final FileTransferProgressListener progressListener;
 
     @Inject
     XMPPServiceImpl(Provider<List<XMPPConnectionConfiguration>> configurations,
-                       LibrarySource librarySource,
+                       LibraryProvider libraryProvider,
                        IncomingFileAcceptor incomingFileAcceptor,
                        FileTransferProgressListener progressListener) {
         this.configurations = configurations;
-        this.librarySource = librarySource;
+        this.libraryProvider = libraryProvider;
         this.incomingFileAcceptor = incomingFileAcceptor;
         this.progressListener = progressListener;
         this.connections = new CopyOnWriteArrayList<XMPPConnection>();
@@ -86,7 +86,7 @@ class XMPPServiceImpl implements Service, XMPPService {
     }
 
     public void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
-        XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, librarySource, incomingFileAcceptor, progressListener);
+        XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, libraryProvider, incomingFileAcceptor, progressListener);
         connection.initialize();
         connections.add(connection);
     }

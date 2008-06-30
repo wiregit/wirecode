@@ -33,7 +33,7 @@ class XMPPConnectionImpl implements XMPPConnection {
     private static final Log LOG = LogFactory.getLog(XMPPConnectionImpl.class);
     
     private final XMPPConnectionConfiguration configuration;
-    private final LibrarySource librarySource;
+    private final LibraryProvider libraryProvider;
     private final IncomingFileAcceptor incomingFileAcceptor;
     private final FileTransferProgressListener progressListener;
     private org.jivesoftware.smack.XMPPConnection connection;
@@ -43,11 +43,11 @@ class XMPPConnectionImpl implements XMPPConnection {
     protected LibraryIQListener libraryIQListener;
     
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration, 
-                       LibrarySource librarySource,
+                       LibraryProvider libraryProvider,
                        IncomingFileAcceptor incomingFileAcceptor,
                        FileTransferProgressListener progressListener) {
         this.configuration = configuration;
-        this.librarySource = librarySource;
+        this.libraryProvider = libraryProvider;
         this.incomingFileAcceptor = incomingFileAcceptor;
         this.progressListener = progressListener;
         this.rosterListeners = new CopyOnWriteArrayList<RosterListener>();
@@ -114,7 +114,7 @@ class XMPPConnectionImpl implements XMPPConnection {
                         // TODO conncurrency control
                         ServiceDiscoveryManager.getInstanceFor(connection).addFeature(XMPPServiceImpl.LW_SERVICE_NS);
                     }
-                    libraryIQListener = new LibraryIQListener(connection,  librarySource);
+                    libraryIQListener = new LibraryIQListener(connection, libraryProvider);
                     libraryIQListener.setConnection(connection);
                     connection.addPacketListener(libraryIQListener, libraryIQListener.getPacketFilter());
                     ProviderManager.getInstance().addIQProvider("library", "jabber:iq:lw-library", LibraryIQ.getIQProvider());
@@ -176,7 +176,7 @@ class XMPPConnectionImpl implements XMPPConnection {
             for(String id : addedIds) {
                 Roster roster = connection.getRoster();
                 RosterEntry rosterEntry = roster.getEntry(id);
-                UserImpl user = new UserImpl(id, rosterEntry.getName(), connection);
+                UserImpl user = new UserImpl(id, rosterEntry.getName());
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("user " + user + " added");
                 }
@@ -195,7 +195,7 @@ class XMPPConnectionImpl implements XMPPConnection {
             for(String id : updatedIds) {
                 Roster roster = connection.getRoster();
                 RosterEntry rosterEntry = roster.getEntry(id);
-                UserImpl user = new UserImpl(id, rosterEntry.getName(), connection);
+                UserImpl user = new UserImpl(id, rosterEntry.getName());
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("user " + user + " updated");
                 }
@@ -267,11 +267,11 @@ class XMPPConnectionImpl implements XMPPConnection {
     
     private class FileLocatorAdapter implements FileLocator {
         public InputStream readFile(StreamInitiation.File file) throws FileNotFoundException {
-            return librarySource.readFile(new FileMetaDataAdapter(file));
+            return libraryProvider.readFile(new FileMetaDataAdapter(file));
         }
 
         public OutputStream writeFile(StreamInitiation.File file) throws IOException {
-            return librarySource.writeFile(new FileMetaDataAdapter(file));
+            return libraryProvider.writeFile(new FileMetaDataAdapter(file));
         }    
     }
 }

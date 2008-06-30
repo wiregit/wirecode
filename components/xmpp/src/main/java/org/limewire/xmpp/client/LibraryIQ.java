@@ -30,7 +30,7 @@ class LibraryIQ extends IQ {
     private static final Log LOG = LogFactory.getLog(LibraryIQ.class);
 
     private XmlPullParser parser;
-    private LibrarySource librarySource;
+    private LibraryProvider libraryProvider;
     private FileMetaData[] files;
 
     LibraryIQ(XmlPullParser parser) {
@@ -64,8 +64,8 @@ class LibraryIQ extends IQ {
         return files.toArray(new FileMetaDataImpl[]{});
     }
 
-    LibraryIQ(LibrarySource librarySource) {
-        this.librarySource = librarySource;
+    LibraryIQ(LibraryProvider libraryProvider) {
+        this.libraryProvider = libraryProvider;
     }
     
     FileMetaData[] getFiles() {
@@ -77,17 +77,17 @@ class LibraryIQ extends IQ {
     }
 
     public String getChildElementXML() {
-        if(librarySource != null) {
-            return "<library xmlns=\"jabber:iq:lw-library\">" + toXML(librarySource) + "</library>";
+        if(libraryProvider != null) {
+            return "<library xmlns=\"jabber:iq:lw-library\">" + toXML(libraryProvider) + "</library>";
         } else {
             return "<library xmlns=\"jabber:iq:lw-library\"/>";
         }
         
     }
 
-    private String toXML(LibrarySource librarySource) {
+    private String toXML(LibraryProvider libraryProvider) {
         StringBuilder builder = new StringBuilder();
-        Iterator<FileMetaData> files = librarySource.getFiles();
+        Iterator<FileMetaData> files = libraryProvider.getFiles();
         while(files.hasNext()) {
             FileMetaData file = files.next();
             builder.append("<file name=\"" + file.getName() + "\" ");

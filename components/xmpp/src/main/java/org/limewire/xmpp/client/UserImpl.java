@@ -1,6 +1,5 @@
 package org.limewire.xmpp.client;
 
-import org.jivesoftware.smack.XMPPConnection;
 import org.limewire.util.StringUtils;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,13 +9,11 @@ class UserImpl implements User {
     private final String id;
     private final String name;
     private final ConcurrentHashMap<String, Presence> presences;
-    private final CopyOnWriteArrayList<PresenceListener> presenceListeners; 
-    private final XMPPConnection connection;
+    private final CopyOnWriteArrayList<PresenceListener> presenceListeners;
 
-    UserImpl(String id, String name, XMPPConnection connection) {
+    UserImpl(String id, String name) {
         this.id = id;
         this.name = name;
-        this.connection = connection;
         this.presences = new ConcurrentHashMap<String, Presence>(); 
         this.presenceListeners = new CopyOnWriteArrayList<PresenceListener>();
     }
@@ -48,7 +45,7 @@ class UserImpl implements User {
 
     void removePresense(Presence presence) {
         synchronized (presences) {
-            presences.remove(presence);
+            presences.remove(presence.getJID());
             firePresenceListeners(presence);
         }
     }
