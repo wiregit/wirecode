@@ -12,13 +12,14 @@ import java.util.Map;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkUtils;
 import org.limewire.util.ByteUtils;
+import org.limewire.util.StringUtils;
 
 /**
  * Utility class keeps track of masked ip ranges and an associated count.
  */
 // TODO rename class to reflect that it is more flexible than class c networks
 public class ClassCNetworks {
-    private Map<Integer, Integer> counts = new HashMap<Integer,Integer>();
+    private final Map<Integer, Integer> counts = new HashMap<Integer,Integer>();
     
     /** Utility comparator to use for sorting class C networks */
     static final Comparator<Map.Entry<Integer,Integer>> CLASS_C_COMPARATOR =
@@ -86,6 +87,11 @@ public class ClassCNetworks {
      */
     public Map<Integer,Integer> getMap() {
         return counts;
+    }
+    
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
     }
     
     /**
