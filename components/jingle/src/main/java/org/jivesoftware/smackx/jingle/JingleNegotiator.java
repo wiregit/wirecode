@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleNegotiator.java,v $
- * $Revision: 1.2 $
- * $Date: 2008-07-01 20:44:39 $
+ * $Revision: 1.3 $
+ * $Date: 2008-07-01 21:15:17 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -51,7 +51,7 @@ public abstract class JingleNegotiator {
 
     private XMPPConnection connection; // The connection associated
 
-    private final ArrayList listeners = new ArrayList();
+    private final ArrayList<JingleListener> listeners = new ArrayList<JingleListener>();
 
     private String expectedAckId;
 
@@ -212,7 +212,7 @@ public abstract class JingleNegotiator {
         ArrayList result;
 
         synchronized (listeners) {
-            result = new ArrayList(listeners);
+            result = new ArrayList<JingleListener>(listeners);
         }
 
         return result;

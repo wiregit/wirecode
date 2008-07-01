@@ -1,7 +1,7 @@
 /**
  * $RCSfile: TransportCandidate.java,v $
- * $Revision: 1.2 $
- * $Date: 2008-07-01 20:44:39 $
+ * $Revision: 1.3 $
+ * $Date: 2008-07-01 21:15:17 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -62,10 +62,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-import java.util.Arrays;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 
 /**
  * Transport candidate.
@@ -103,7 +100,7 @@ public abstract class TransportCandidate {
     private Thread echoThread = null;
 
     // Listeners for events
-    private final List<TransportResolverListener.Checker> listeners = new ArrayList();
+    private final List<TransportResolverListener.Checker> listeners = new ArrayList<TransportResolverListener.Checker>();
 
     public void addCandidateEcho(JingleSession session) throws SocketException, UnknownHostException {
         candidateEcho = new CandidateEcho(this, session);
@@ -425,7 +422,7 @@ public abstract class TransportCandidate {
      */
     public List<TransportResolverListener.Checker> getListenersList() {
         synchronized (listeners) {
-            return new ArrayList(listeners);
+            return new ArrayList<TransportResolverListener.Checker>(listeners);
         }
     }
 

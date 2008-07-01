@@ -1,6 +1,6 @@
 /**
  * $RCSfile: TransportNegotiator.java,v $
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * $Date: 15/11/2006
  *
  * Copyright 2003-2006 Jive Software.
@@ -201,7 +201,7 @@ public abstract class TransportNegotiator extends JingleNegotiator {
      *
      * @return the remoteCandidates
      */
-    private List getRemoteCandidates() {
+    private List<TransportCandidate> getRemoteCandidates() {
         return remoteCandidates;
     }
 
@@ -444,9 +444,9 @@ public abstract class TransportNegotiator extends JingleNegotiator {
      *
      * @return The list of valid (ie, already checked) remote candidates.
      */
-    final ArrayList getValidRemoteCandidatesList() {
+    final ArrayList<TransportCandidate> getValidRemoteCandidatesList() {
         synchronized (validRemoteCandidates) {
-            return new ArrayList(validRemoteCandidates);
+            return new ArrayList<TransportCandidate>(validRemoteCandidates);
         }
     }
 
@@ -481,8 +481,8 @@ public abstract class TransportNegotiator extends JingleNegotiator {
      *
      * @param jin The input jingle packet
      */
-    private static ArrayList obtainCandidatesList(Jingle jin) {
-        ArrayList result = new ArrayList();
+    private static ArrayList<TransportCandidate> obtainCandidatesList(Jingle jin) {
+        ArrayList<TransportCandidate> result = new ArrayList<TransportCandidate>();
 
         if (jin != null) {
             // Get the list of candidates from the packet
@@ -778,13 +778,13 @@ public abstract class TransportNegotiator extends JingleNegotiator {
             Jingle response = null;
 
             // Parse the Jingle and get the accepted candidate
-            ArrayList accepted = obtainCandidatesList(jin);
+            ArrayList<TransportCandidate> accepted = obtainCandidatesList(jin);
             if (!accepted.isEmpty()) {
 
-                for (TransportCandidate cand : (List<TransportCandidate>) accepted) {
+                for (TransportCandidate cand : accepted) {
                 }
 
-                TransportCandidate cand = (TransportCandidate) accepted.get(0);
+                TransportCandidate cand = accepted.get(0);
                 setAcceptedLocalCandidate(cand);
 
                 if (isEstablished()) {
@@ -941,14 +941,17 @@ public abstract class TransportNegotiator extends JingleNegotiator {
         public TransportCandidate getBestRemoteCandidate() {
             ICECandidate result = null;
 
-            ArrayList<ICECandidate> cands = getValidRemoteCandidatesList();
+            ArrayList<TransportCandidate> cands = getValidRemoteCandidatesList();
             if (!cands.isEmpty()) {
                 int highest = -1;
                 ICECandidate chose = null;
-                for (ICECandidate transportCandidate : cands) {
-                    if (transportCandidate.getPreference() > highest) {
-                        chose = transportCandidate;
-                        highest = transportCandidate.getPreference();
+                for (TransportCandidate transportCandidate : cands) {
+                    if(transportCandidate instanceof ICECandidate) {
+                        ICECandidate iceCandidate = (ICECandidate)transportCandidate;
+                        if (iceCandidate.getPreference() > highest) {
+                            chose = iceCandidate;
+                            highest = iceCandidate.getPreference();
+                        }
                     }
                 }
                 result = chose;

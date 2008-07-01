@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleSession.java,v $
- * $Revision: 1.2 $
- * $Date: 2008-07-01 20:44:39 $
+ * $Revision: 1.3 $
+ * $Date: 2008-07-01 21:15:17 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -87,7 +87,7 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
     private static final Log LOG = LogFactory.getLog(JingleSession.class);
 
     // static
-    private static final HashMap sessions = new HashMap();
+    private static final HashMap<XMPPConnection, JingleSession> sessions = new HashMap<XMPPConnection, JingleSession>();
 
     private static final Random randomGenerator = new Random();
 

@@ -1,6 +1,6 @@
 /**
  * $RCSfile: STUNResolver.java,v $
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * $Date: 15/11/2006
  *
  * Copyright 2003-2006 Jive Software.
@@ -139,8 +139,8 @@ public class STUNResolver extends TransportResolver {
      * @param stunConfigStream An InputStream with the configuration file.
      * @return A list of loaded servers
      */
-    public ArrayList loadSTUNServers(java.io.InputStream stunConfigStream) {
-        ArrayList serversList = new ArrayList();
+    public ArrayList<STUNService> loadSTUNServers(java.io.InputStream stunConfigStream) {
+        ArrayList<STUNService> serversList = new ArrayList<STUNService>();
         String serverName;
         int serverPort;
 
@@ -222,7 +222,7 @@ public class STUNResolver extends TransportResolver {
      * @return a list of services
      */
     public ArrayList loadSTUNServers() {
-        ArrayList serversList = new ArrayList();
+        ArrayList<STUNService> serversList = new ArrayList<STUNService>();
 
         // Load the STUN configuration
         try {
