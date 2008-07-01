@@ -10,8 +10,9 @@
     <import file="../common/build-macros.xml" />
     <import file="../common/build.xml"/>
     <import file="../jingle/build.xml"/>
+    <import file="../io/build.xml"/>
     
-    <target name="initialize" depends="lw-common.initialize, lw-jingle.initialize" unless="initialized.xmpp">
+    <target name="initialize" depends="lw-common.initialize, lw-jingle.initialize, lw-io.initialize" unless="initialized.xmpp">
         <do.setup-properties component="xmpp">
 			<src-classpath>
                 <pathelement location="${limewire.lib.jars}/forms_rt.jar"/>
@@ -20,6 +21,7 @@
             </src-classpath>
             <build-tests-classpath>
                 <path refid="tests.limewire.components.common.classpath"/>
+                <path refid="tests.limewire.components.io.classpath"/>
             </build-tests-classpath>
         </do.setup-properties>
     </target>

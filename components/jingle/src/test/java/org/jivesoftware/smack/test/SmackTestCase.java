@@ -1,7 +1,7 @@
 /**
  * $RCSfile: SmackTestCase.java,v $
- * $Revision: 1.1.2.1 $
- * $Date: 2008-06-12 15:20:34 $
+ * $Revision: 1.1.2.2 $
+ * $Date: 2008-07-01 19:46:02 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -267,7 +267,6 @@ public abstract class SmackTestCase extends TestCase {
                 getConnection(i).disconnect();
             }
         }
-        try {Thread.sleep(60 * 1000 * 5);}catch (Throwable t) {t.printStackTrace();}
     }
 
     protected boolean sendInitialPresence() {
