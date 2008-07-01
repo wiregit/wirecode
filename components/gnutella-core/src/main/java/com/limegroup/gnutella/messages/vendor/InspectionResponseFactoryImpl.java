@@ -30,19 +30,7 @@ public class InspectionResponseFactoryImpl implements InspectionResponseFactory 
     private static final int OLD_VERSION = 1;
     private static final int GGEP_VERSION = 2;
     
-    
-    /** a bunch of ggep keys */
-    private static final String DATA_KEY = "D";
-    private static final String CHUNK_ID_KEY = "I";
-    private static final String TOTAL_CHUNKS_KEY = "T";
-    private static final String LENGTH_KEY = "L";
-    
-    /** 
-     * How much data to put in each packet.  Must be less than the MTU.
-     */
-    private static final int PACKET_SIZE = 1300; // give some room for GGEP & headers
-    
-    private static final float REDUNDANCY = 1.2f;
+    public static final float REDUNDANCY = 1.2f;
     
     private final Inspector inspector;
     
@@ -57,22 +45,22 @@ public class InspectionResponseFactoryImpl implements InspectionResponseFactory 
     
     public InspectionResponse[] createResponses(InspectionRequest request) {
         byte [] payload = derivePayload(request);
-        if (payload.length < PACKET_SIZE || !request.supportsEncoding())
+        if (payload.length < InspectionResponse.PACKET_SIZE || !request.supportsEncoding())
             return new InspectionResponse[]{new InspectionResponse(OLD_VERSION, request.getGUID(), payload)};
         
         
         // package responses
-        List<byte []> chunks = fecUtils.encode(payload, PACKET_SIZE, REDUNDANCY); 
+        List<byte []> chunks = fecUtils.encode(payload, InspectionResponse.PACKET_SIZE, REDUNDANCY); 
         List<InspectionResponse> ret = new ArrayList<InspectionResponse>(chunks.size());
         for (int i = 0; i < chunks.size() ; i++ ) {
             
             GGEP g = new GGEP();
-            g.put(DATA_KEY,chunks.get(i));
-            g.put(CHUNK_ID_KEY,i);
+            g.put(InspectionResponse.DATA_KEY,chunks.get(i));
+            g.put(InspectionResponse.CHUNK_ID_KEY,i);
             
             // need to be in every packet
-            g.put(TOTAL_CHUNKS_KEY,chunks.size());
-            g.put(LENGTH_KEY, payload.length);
+            g.put(InspectionResponse.TOTAL_CHUNKS_KEY,chunks.size());
+            g.put(InspectionResponse.LENGTH_KEY, payload.length);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             try {
                 g.write(baos);
