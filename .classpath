@@ -39,7 +39,11 @@
 	<classpathentry kind="src" path="core/examples/mojito"/>
 	<classpathentry kind="src" output="components/geocode/build/classes" path="components/geocode/src/main/java"/>
 	<classpathentry kind="src" output="components/geocode/build/tests" path="components/geocode/src/test/java"/>
-	<classpathentry excluding="windows/|windows/" kind="src" path="lib/resources"/>
+    <classpathentry kind="src" output="components/jingle/build/classes" path="components/jingle/src/main/java"/>
+	<classpathentry kind="src" output="components/jingle/build/tests" path="components/jingle/src/test/java"/>
+    <classpathentry kind="src" output="components/xmpp/build/classes" path="components/xmpp/src/main/java"/>
+	<classpathentry kind="src" output="components/xmpp/build/tests" path="components/xmpp/src/test/java"/>
+    <classpathentry excluding="windows/|windows/" kind="src" path="lib/resources"/>
 	<classpathentry kind="src" path="lib/resources/windows"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>

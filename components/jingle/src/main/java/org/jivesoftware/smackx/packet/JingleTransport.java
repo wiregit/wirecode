@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleTransport.java,v $
- * $Revision: 1.2 $
- * $Date: 2008-07-01 20:44:40 $
+ * $Revision: 1.3 $
+ * $Date: 2008-07-01 21:15:17 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -43,7 +43,7 @@ public class JingleTransport implements PacketExtension {
 
     protected String namespace;
 
-    protected final List candidates = new ArrayList();
+    protected final List<JingleTransportCandidate> candidates = new ArrayList<JingleTransportCandidate>();
 
     /**
      * Default constructor.
@@ -104,10 +104,10 @@ public class JingleTransport implements PacketExtension {
      *
      * @return The candidates list.
      */
-    public ArrayList getCandidatesList() {
-        ArrayList res = null;
+    public ArrayList<JingleTransportCandidate> getCandidatesList() {
+        ArrayList<JingleTransportCandidate> res = null;
         synchronized (candidates) {
-            res = new ArrayList(candidates);
+            res = new ArrayList<JingleTransportCandidate>(candidates);
         }
         return res;
     }
@@ -296,9 +296,9 @@ public class JingleTransport implements PacketExtension {
          *
          * @see org.jivesoftware.smackx.packet.JingleTransport#getCandidates()
          */
-        public ArrayList getCandidatesList() {
-            ArrayList copy = new ArrayList();
-            ArrayList superCandidatesList = super.getCandidatesList();
+        public ArrayList<JingleTransportCandidate> getCandidatesList() {
+            ArrayList<JingleTransportCandidate> copy = new ArrayList<JingleTransportCandidate>();
+            ArrayList<JingleTransportCandidate> superCandidatesList = super.getCandidatesList();
             for (int i = 0; i < superCandidatesList.size(); i++) {
                 copy.add(superCandidatesList.get(i));
             }
@@ -379,9 +379,9 @@ public class JingleTransport implements PacketExtension {
          *
          * @see org.jivesoftware.smackx.packet.JingleTransport#getCandidates()
          */
-        public ArrayList getCandidatesList() {
-            ArrayList copy = new ArrayList();
-            ArrayList superCandidatesList = super.getCandidatesList();
+        public ArrayList<JingleTransportCandidate> getCandidatesList() {
+            ArrayList<JingleTransportCandidate> copy = new ArrayList<JingleTransportCandidate>();
+            ArrayList<JingleTransportCandidate> superCandidatesList = super.getCandidatesList();
             if (superCandidatesList.size() > 0) {
                 copy.add(superCandidatesList.get(0));
             }

@@ -1,6 +1,6 @@
 /**
  * $RCSfile: TransportNegotiator.java,v $
- * $Revision: 1.3 $
+ * $Revision: 1.4 $
  * $Date: 15/11/2006
  *
  * Copyright 2003-2006 Jive Software.
@@ -526,7 +526,7 @@ public abstract class TransportNegotiator extends JingleNegotiator {
      * @throws XMPPException
      */
     private void sendTransportCandidatesOffer() throws XMPPException {
-        List notOffered = resolver.getCandidatesList();
+        List<TransportCandidate> notOffered = resolver.getCandidatesList();
 
         notOffered.removeAll(offeredCandidates);
 

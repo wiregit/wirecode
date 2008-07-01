@@ -1,7 +1,7 @@
 /**
  * $RCSfile: AudioRTPDescription.java,v $
- * $Revision: 1.2 $
- * $Date: 2008-07-01 20:44:40 $
+ * $Revision: 1.3 $
+ * $Date: 2008-07-01 21:15:17 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -105,8 +105,8 @@ public class AudioRTPDescription extends Description {
      *
      * @return a list for the audio payloads in the packet.
      */
-    public ArrayList getJinglePayloadTypesList() {
-        return (ArrayList)children;
+    public ArrayList<PacketExtension> getJinglePayloadTypesList() {
+        return (ArrayList<PacketExtension>)children;
     }
 
     /**

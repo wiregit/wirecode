@@ -1,7 +1,7 @@
 /**
  * $RCSfile: TransportResolver.java,v $
- * $Revision: 1.2 $
- * $Date: 2008-07-01 20:44:39 $
+ * $Revision: 1.3 $
+ * $Date: 2008-07-01 21:15:17 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -236,7 +236,7 @@ public abstract class TransportResolver {
      */
     public ArrayList getListenersList() {
         synchronized (listeners) {
-            return new ArrayList(listeners);
+            return new ArrayList<TransportResolverListener>(listeners);
         }
     }
 
@@ -318,7 +318,7 @@ public abstract class TransportResolver {
      */
     public Iterator getCandidates() {
         synchronized (candidates) {
-            return Collections.unmodifiableList(new ArrayList(candidates)).iterator();
+            return Collections.unmodifiableList(new ArrayList<TransportCandidate>(candidates)).iterator();
         }
     }
 
@@ -357,10 +357,10 @@ public abstract class TransportResolver {
      * @return the list of transport candidates
      */
     public List<TransportCandidate> getCandidatesList() {
-        ArrayList result = null;
+        ArrayList<TransportCandidate> result = null;
 
         synchronized (candidates) {
-            result = new ArrayList(candidates);
+            result = new ArrayList<TransportCandidate>(candidates);
         }
 
         return result;

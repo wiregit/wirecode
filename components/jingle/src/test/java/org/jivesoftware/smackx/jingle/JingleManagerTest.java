@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleManagerTest.java,v $
- * $Revision: 1.2 $
- * $Date: 2008-07-01 20:44:39 $
+ * $Revision: 1.3 $
+ * $Date: 2008-07-01 21:15:17 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
