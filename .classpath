@@ -105,5 +105,12 @@
 	<classpathentry kind="lib" path="lib/jars/MozillaGlue-1.9.jar"/>
 	<classpathentry kind="lib" path="lib/jars/mozswing.jar"/>
 	<classpathentry kind="lib" path="lib/jars/jna.jar"/>
-	<classpathentry kind="output" path="bin"/>
+    <classpathentry kind="lib" path="lib/jars/smack.jar"/>
+    <classpathentry kind="lib" path="lib/jars/smackx-debug.jar"/>
+    <classpathentry kind="lib" path="lib/jars/smackx.jar"/>
+    <classpathentry kind="lib" path="lib/jars/Speex.jar"/>
+    <classpathentry kind="lib" path="lib/jars/jspeex-0.9.7-jfcom.jar"/>
+    <classpathentry kind="lib" path="lib/jars/jstun.jar"/>
+    <classpathentry kind="lib" path="lib/jars/jmf.jar"/>
+    <classpathentry kind="output" path="bin"/>
 </classpath>
