@@ -72,7 +72,6 @@ public class CreationTimeCacheTest extends LimeTestCase {
            @Override
             protected void configure() {
                 bind(FileManager.class).to(MyFileManager.class);
-//                bind(MetaFileManager.class).to(MyFileManager.class);
             } 
         });
         

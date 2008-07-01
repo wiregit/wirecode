@@ -11,12 +11,14 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.NetworkInstanceUtils;
@@ -39,7 +41,6 @@ import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.gui.util.BackgroundExecutorService;
 import com.limegroup.gnutella.settings.DaapSettings;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -76,12 +77,18 @@ public final class DaapManager implements FileEventListener {
     
     private static final boolean USE_LIME_NIO = true;
     
-    private final Provider<ScheduledExecutorService> executorService;
+    private final ScheduledExecutorService backgroundExecutor;
     private final Provider<FileManager> fileManager;
     private final Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper;
     private final Provider<IPFilter> ipFilter;
     private final Provider<NetworkInstanceUtils> networkInstanceUtils;
     private final Provider<ActivityCallback> activityCallback;
+    
+    /**
+     * A shared processing queue for disk-related tasks.
+     */
+    private static final ExecutorService DAAP_EVENT_QUEUE = 
+                         ExecutorsHelper.newProcessingQueue("DAAPQUEUE");
 
     private Library library;
     private Database database;
@@ -101,13 +108,13 @@ public final class DaapManager implements FileEventListener {
     private Map<URN, Song> urnToSong;  
     
     @Inject
-    public DaapManager(@Named("backgroundExecutor") Provider<ScheduledExecutorService> executorService,
+    public DaapManager( @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                         Provider<FileManager> fileManager,
                         Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
                         Provider<IPFilter> ipFilter,
                         Provider<NetworkInstanceUtils> networkInstanceUtils,
                         Provider<ActivityCallback> activityCallback) {
-        this.executorService = executorService;
+        this.backgroundExecutor = backgroundExecutor;
         this.fileManager = fileManager;
         this.schemaReplyCollectionMapper = schemaReplyCollectionMapper;
         this.ipFilter = ipFilter;
@@ -193,7 +200,7 @@ public final class DaapManager implements FileEventListener {
                 }
                 
                 if(USE_LIME_NIO)
-                    server = new LimeDaapServerNIO(library, config, executorService);
+                    server = new LimeDaapServerNIO(library, config, backgroundExecutor);
                 else
                     server = DaapServerFactory.createServer(library, config, true);
 
@@ -379,7 +386,7 @@ public final class DaapManager implements FileEventListener {
     /**
      * Handles a change event.
      */
-    private void handleChangeEvent(FileManagerEvent evt) {
+    private synchronized void handleChangeEvent(FileManagerEvent evt) {
         FileDesc oldDesc = evt.getFileDescs()[0];
         Song song = urnToSong.remove(oldDesc.getSHA1Urn());
 
@@ -404,7 +411,7 @@ public final class DaapManager implements FileEventListener {
     /**
      * Handles an add event.
      */
-    private void handleAddEvent(FileManagerEvent evt) {
+    private synchronized void handleAddEvent(FileManagerEvent evt) {
         // Transactions synchronize on the Library. So if there's
         // an ongoing commit we may get a ConcurrentModificationException
         // because Database has to iterate through all Playlists and
@@ -450,7 +457,7 @@ public final class DaapManager implements FileEventListener {
     /**
      * Handles a rename event.
      */
-    private void handleRenameEvent(FileManagerEvent evt) {
+    private synchronized void handleRenameEvent(FileManagerEvent evt) {
         FileDesc oldDesc = evt.getFileDescs()[0];
         Song song = urnToSong.remove(oldDesc.getSHA1Urn());
 
@@ -464,7 +471,7 @@ public final class DaapManager implements FileEventListener {
     /**
      * Handles a remove event.
      */
-    private void handleRemoveEvent(FileManagerEvent evt) {
+    private synchronized void handleRemoveEvent(FileManagerEvent evt) {
         FileDesc file = evt.getFileDescs()[0];
         Song song = urnToSong.remove(file.getSHA1Urn());
 
@@ -1107,45 +1114,6 @@ public final class DaapManager implements FileEventListener {
             zeroConf.close();
         }
     }
-
-    private void handleFileManagerEvent(final FileManagerEvent evt) {
-        // if daap isn't running, ignore it
-        if (!enabled || !isServerRunning())
-            return;
-        
-        Runnable r = null;
-        
-        switch(evt.getType()) {
-            case CHANGE_FILE:
-                r = new Runnable() {
-                    public void run() {
-                        handleChangeEvent(evt);
-                    }};
-                break;
-            case ADD_FILE:
-            case ADD_STORE_FILE:
-                r = new Runnable() {
-                    public void run() {
-                        handleAddEvent(evt);
-                    }};
-                break;
-            case RENAME_FILE:
-                r = new Runnable() {
-                    public void run() {
-                        handleRenameEvent(evt);
-                    }};
-                break;
-            case REMOVE_FILE:
-                r = new Runnable() {
-                    public void run() {
-                        handleRemoveEvent(evt);
-                    }};
-                break;
-        }
-        
-        if( r != null )
-            BackgroundExecutorService.schedule(r);
-    }
     
     /**
      * Listens for events from FileManager
@@ -1156,30 +1124,36 @@ public final class DaapManager implements FileEventListener {
         if(!DaapSettings.DAAP_ENABLED.getValue())
             return;
         
-        Runnable r = null;
-        
-        switch(evt.getType()) {
-            case FILEMANAGER_LOADING:
-                r = new Runnable() {
-                    public void run() {
+        DAAP_EVENT_QUEUE.execute(new Runnable(){
+            public void run(){
+                switch(evt.getType()) {
+                    case FILEMANAGER_LOAD_DIRECTORIES:
                         setEnabled(false);
-                    }};
-                break;
-            case FILEMANAGER_LOAD_COMPLETE:
-                r = new Runnable() {
-                    public void run() {
-                        setEnabled(true); 
-                    }};
-                break;
-        }
-        
-        if( r != null ) {
-            BackgroundExecutorService.schedule(r);
-            return;
-        } else {
-            handleFileManagerEvent(evt);
-        }
-        
-
+                        return;
+                    case FILEMANAGER_LOAD_COMPLETE:
+                        setEnabled(true);
+                        return;
+                }
+                
+                if (!isEnabled()|| !isServerRunning())
+                    return;
+              
+                switch(evt.getType()) {
+                    case CHANGE_FILE:
+                        handleChangeEvent(evt);
+                        break;
+                    case ADD_FILE:
+                    case ADD_STORE_FILE:
+                        handleAddEvent(evt);
+                        break;
+                    case RENAME_FILE:
+                        handleRenameEvent(evt);
+                        break;
+                    case REMOVE_FILE:
+                        handleRemoveEvent(evt);
+                        break;                    
+                }
+            }
+        });
     }
 }

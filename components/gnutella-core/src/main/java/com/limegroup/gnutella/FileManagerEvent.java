@@ -16,27 +16,129 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 public class FileManagerEvent extends EventObject {
     
     public static enum Type {
+        /**
+         * Called when a shared file has been added to FileManager
+         */
         ADD_FILE,
-        REMOVE_FILE,
-        RENAME_FILE,
-        CHANGE_FILE,
-        REMOVE_URN,
-        REMOVE_FD,
-        ADD_FAILED_FILE,
-        ALREADY_SHARED_FILE,
-        ADD_FOLDER,
-        REMOVE_FOLDER,
-        LOAD_FILE,
-        FILEMANAGER_LOAD_STARTED,
-        FILEMANAGER_LOADING,
-        FILEMANAGER_LOAD_FINISHING,
-        FILEMANAGER_SAVE,
-        FILEMANAGER_LOAD_COMPLETE,
+        
+        /**
+         * Called when a store file has been added to FileManager
+         */
         ADD_STORE_FILE,
-        ADD_STORE_FAILED_FILE,
+        
+        /**
+         * Called when a shared file is no longer shared, Note that this
+         * may not explicitely remove it from the view. It may still be in 
+         * a shared folder just no longer editable or shared.
+         */
+        REMOVE_FILE,
+        
+        /**
+         * Called when a store file is no longer managed by FileManager
+         */
         REMOVE_STORE_FILE,
+        
+        /**
+         * Called when the filename on disk for a shared or store file is renamed 
+         */
+        RENAME_FILE,
+        
+        /**
+         * Called when information stored in the file is changed such as editing
+         * ID3 tag information. This will cause disk IO to write the changes and 
+         * result in a new SHA-1 being generated for this file
+         */
+        CHANGE_FILE,
+        
+        /**
+         * Called when the FileDesc and URN have been calculated for a file. This allows
+         * other processes to act on this FileDesc and prepare it for displaying
+         * and sharing
+         */
+        LOAD_FILE,
+        
+        /**
+         * Called whenever a FileDesc is removed from FileManager. This behaves much like
+         * REMOVE_FD in that it is always called as long as its not a incomplete file.
+         */
+        REMOVE_URN,
+        
+        /**
+         * Called when a FileDesc has been removed from FileManager. Unlike REMOVE_FILE and
+         * REMOVE_STORE_FILE, this gets fired any time a file managed by FileManager is 
+         * modified. This event will be called any time one of the following events are
+         * generated: REMOVE_FILE, REMOVE_STORE_FILE, RENAME_FILE, CHANGE_FILE
+         */
+        REMOVE_FD,
+        
+        /**
+         * Called when a ADD_FILE fails to load a file into FileManager 
+         */
+        ADD_FAILED_FILE,
+        
+        /**
+         * Called when ADD_STORE_FILE fails to load a file into FileManager
+         */
+        ADD_STORE_FAILED_FILE,
+        
+        /**
+         * Called when ADD_FILE attempts to load a file that already exists in FileManager
+         */
+        ALREADY_SHARED_FILE,
+        
+        /**
+         * Called when a shared folder and all of its contents has been added to FileManager
+         */
+        ADD_FOLDER,
+        
+        /**
+         * Called when a store folder and all of its contents has been added to FileManager
+         */
         ADD_STORE_FOLDER,
-        REMOVE_STORE_FOLDER;
+        
+        /**
+         * Called when a shared folder and all of its contents has been removed from FileManager
+         */
+        REMOVE_FOLDER,
+        
+        /**
+         * Called when a store folder and all of its contents has been removed from FileManager
+         */
+        REMOVE_STORE_FOLDER,
+        
+        /**
+         * Called once FileManager has begun a new load process of loading all files in all shared
+         * and store directories
+         */
+        FILEMANAGER_LOAD_STARTED,
+        
+        /**
+         * Called prior to FileManager loading all the shared and store directories and the files
+         * contained within. This will completely trash all the previously loaded directories and
+         * files.
+         */
+        FILEMANAGER_LOAD_DIRECTORIES,
+        
+        /**
+         * Called once FileManager is preparing to finish the loading process. 
+         * 
+         * Loading is completed as follows:
+         *  1)Load_finishing
+         *  2)save
+         *  3)load_complete
+         */
+        FILEMANAGER_LOAD_FINISHING,
+        
+        /**
+         * Called after load_finishing and prior to load_complete. Allows 
+         * anything to write to disk
+         */
+        FILEMANAGER_SAVE,
+        
+        /**
+         * Called after FileManager has completely finished loading
+         */
+        FILEMANAGER_LOAD_COMPLETE;
     }
     
     private final Type type;
@@ -264,7 +366,7 @@ public class FileManagerEvent extends EventObject {
      * Returns true if this is a FILEMANAGER_LOADING event
      */
     public boolean isFileManagerLoading() {
-        return type.equals(Type.FILEMANAGER_LOADING);
+        return type.equals(Type.FILEMANAGER_LOAD_DIRECTORIES);
     }
     
     /**

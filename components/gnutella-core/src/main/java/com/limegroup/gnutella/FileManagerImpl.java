@@ -272,6 +272,10 @@ public class FileManagerImpl implements FileManager, Service {
     public void initialize() {
     }
     
+    void testMe(){
+        
+    }
+    
     @Inject
     void register(org.limewire.lifecycle.ServiceRegistry registry) {
         registry.register(this);
@@ -494,7 +498,7 @@ public class FileManagerImpl implements FileManager, Service {
         }
 
         //clear this, list of directories retrieved
-        dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOADING));
+        dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOAD_DIRECTORIES));
         
         // Update the FORCED_SHARE directory.
         updateSharedDirectories(SharingUtils.PROGRAM_SHARE, null, revision);
@@ -921,11 +925,9 @@ public class FileManagerImpl implements FileManager, Service {
      * 
      * @param file - the file to be added
      * @param metadata - any LimeXMLDocs associated with this file
-     * @param notify - if true signals the front-end via 
-     *        ActivityCallback.handleFileManagerEvent() about the Event
      * @param revision - current  version of LimeXMLDocs being used
-     * @param callback - the listener to notify about the event
-     * @param addType - type of add that for this file
+     * @param successType - event type to return if add succeeds
+     * @param failureType - event type to return if add fails
      */
     protected void addFileIfSharedOrStore(File file, List<? extends LimeXMLDocument> metadata, int revision, 
             Type successType, Type failureType, FileDesc oldFileDesc) {
@@ -1008,9 +1010,9 @@ public class FileManagerImpl implements FileManager, Service {
                 //  (the sha1 check is needed if duplicate store files are loaded since the second file 
                 //  will not have a unique LimeXMLDoc associated with it)
                 if (isStoreXML(fd.getXMLDocument()) || storeFileList.contains(fd.getSHA1Urn()) || successType == Type.ADD_STORE_FILE) { 
-                    addStoreFile(fd, file, urns, successType, oldFileDesc);
+                    addStoreFile(fd, file, urns, successType, oldFileDesc); 
                 } else {
-                    addSharedFile(file, fd, urns, successType, oldFileDesc);
+                    addSharedFile(file, fd, urns, successType, oldFileDesc); 
                 }
                 
                 boolean finished = false;
@@ -1040,6 +1042,11 @@ public class FileManagerImpl implements FileManager, Service {
         if(LOG.isDebugEnabled())
             LOG.debug("Store file: " + file);
 
+        if( fd.getLimeXMLDocuments().size() == 0 || !isStoreXML(fd.getLimeXMLDocuments().get(0))) {
+            System.out.println("not a store file!!! " + fd.getFileName());
+            return;
+        }
+        
         // if this file is in a shared folder, add to individual store files 
         if( successType == Type.ADD_FILE) {
             _data.SPECIAL_STORE_FILES.add(file);
@@ -1052,7 +1059,7 @@ public class FileManagerImpl implements FileManager, Service {
         //add the xml doc to the new FileDesc
         if( fd.getXMLDocument() != null )
             fileDesc.addLimeXMLDocument(fd.getXMLDocument());
-
+        
         storeFileList.addFile(file, fileDesc);
 
         //If the event is a addStoreFile event, just pass along the newly added FileDesc

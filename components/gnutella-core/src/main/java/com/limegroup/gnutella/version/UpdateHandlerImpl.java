@@ -268,9 +268,9 @@ public class UpdateHandlerImpl implements UpdateHandler, FileEventListener, Serv
     }
     
     /**
-     * Sparks off an attempt to download any pending updates.
+     * Sparks off an attempt to down load any pending updates.
      */
-    public void tryToDownloadUpdates() {
+    private void tryToDownloadUpdates() {
         backgroundExecutor.execute(new Runnable() {
             public void run() {
                 UpdateInformation updateInfo = _updateInfo;

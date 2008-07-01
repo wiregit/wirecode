@@ -44,7 +44,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.LimeTestCase
 	protected void setUp() throws Exception {
 	    Injector injector = LimeTestUtils.createInjector();
 		urnCache = injector.getInstance(UrnCache.class);
-		fm = injector.getInstance(FileManagerImpl.class);
+		fm = injector.getInstance(FileManager.class);
 	}
 	
 	/**

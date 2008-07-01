@@ -193,7 +193,7 @@ public class AltLocManager implements FileEventListener {
         urnMap.clear();
     }
     
-    public void purge(URN sha1) {
+    private void purge(URN sha1) {
         urnMap.remove(sha1);
     }
     

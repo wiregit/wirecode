@@ -125,7 +125,7 @@ public final class UrnCache implements FileEventListener {
     /**
      * Clears all callbacks that are owned by the given owner.
      */
-    public synchronized void clearPendingHashes(Object owner) {
+    private synchronized void clearPendingHashes(Object owner) {
         if(LOG.isDebugEnabled())
             LOG.debug("Clearing all pending hashes owned by: " + owner);
         
@@ -504,7 +504,7 @@ public final class UrnCache implements FileEventListener {
 	 */
     public void handleFileEvent(FileManagerEvent evt) {
         if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_STARTED) {
-            clearPendingHashes(FileManagerImpl.class);
+            clearPendingHashes(evt.getFileManager());
         } else if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_SAVE) {
             persistCache();
         } 

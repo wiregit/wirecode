@@ -36,7 +36,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
-import com.limegroup.gnutella.util.FileManagerUtils;
+import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class BrowseHostHandlerTest extends LimeTestCase {
@@ -99,7 +99,7 @@ public class BrowseHostHandlerTest extends LimeTestCase {
 
         fileManager = injector.getInstance(FileManager.class);
 
-        FileManagerUtils.waitForLoad(fileManager,100000);
+        FileManagerTestUtils.waitForLoad(fileManager,100000);
 
         assertGreaterThan(0, fileManager.getSharedFileList().getNumFiles());
 

@@ -35,7 +35,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.FileManagerUtils;
+import com.limegroup.gnutella.util.FileManagerTestUtils;
 
 /**
  * Tests that What is new support is fully functional.  We use a leaf here - we
@@ -129,7 +129,7 @@ public class ServerSideWhatIsNewTest
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         downloadServices = injector.getInstance(DownloadServices.class);
 
-        FileManagerUtils.waitForLoad(fileManager,500);
+        FileManagerTestUtils.waitForLoad(fileManager,500);
         
         exchangeCapabilitiesMessage();
     }
@@ -345,7 +345,7 @@ public class ServerSideWhatIsNewTest
         assertTrue(tempFile1.exists());
         assertTrue(tempFile2.exists());
 
-        FileManagerUtils.waitForLoad(fileManager, 1000);
+        FileManagerTestUtils.waitForLoad(fileManager, 1000);
         assertEquals("Files were not loaded by filemanager", 4, fileManager.getSharedFileList().getNumFiles());
 
         URN tempFile1URN = fm.getFileDescForFile(tempFile1).getSHA1Urn();

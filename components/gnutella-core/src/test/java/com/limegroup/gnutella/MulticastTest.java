@@ -29,7 +29,7 @@ import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
-import com.limegroup.gnutella.util.FileManagerUtils;
+import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class MulticastTest extends LimeTestCase {
@@ -133,7 +133,7 @@ public class MulticastTest extends LimeTestCase {
         messageRouter.addUDPMessageHandler(QueryReply.class, U_HANDLER);
         messageRouter.addUDPMessageHandler(PushRequest.class, U_HANDLER);
         
-        FileManagerUtils.waitForLoad(fileManager,3000);
+        FileManagerTestUtils.waitForLoad(fileManager,3000);
         
         assertEquals("unexpected number of shared files", 1, fileManager.getSharedFileList().getNumFiles() );
     }

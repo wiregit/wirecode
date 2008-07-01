@@ -22,7 +22,7 @@ import com.limegroup.gnutella.messages.QueryRequestFactory;
 import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.FileManagerUtils;
+import com.limegroup.gnutella.util.FileManagerTestUtils;
 
 /**
  * Checks whether Meta-Queries are correctly answered, etc.
@@ -88,7 +88,7 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         super.setUp(injector);
         
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-        FileManagerUtils.waitForLoad(injector.getInstance(FileManager.class), 500);
+        FileManagerTestUtils.waitForLoad(injector.getInstance(FileManager.class), 500);
     }
     
     @Singleton

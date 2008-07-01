@@ -76,6 +76,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         fileManager.addFileAlways(appTextFile);
         fileManager.addFileAlways(appTorrentFile);
         waiter.waitForLoad();
+        fileManager.removeFileEventListener(waiter);
     	assertEquals(5, fileManager.getSharedFileList().getNumFiles());
     }
     
@@ -237,7 +238,8 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         }
 
         public void handleFileEvent(FileManagerEvent evt) {
-            latch.countDown();            
+            if(evt.isAddEvent())
+                latch.countDown();            
         }
         
         public void waitForLoad() throws Exception {

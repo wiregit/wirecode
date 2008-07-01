@@ -11,11 +11,6 @@ public interface UpdateHandler {
     public void initialize();
 
     /**
-     * Sparks off an attempt to download any pending updates.
-     */
-    public void tryToDownloadUpdates();
-
-    /**
      * Notification that a ReplyHandler has received a VM containing an update.
      */
     public void handleUpdateAvailable(final ReplyHandler rh, final int version);

@@ -100,7 +100,7 @@ class CoreRandomGlue {
     @SuppressWarnings("unused")
     @Inject private void register(ServiceRegistry registry) {
         registry.register(new Service() {            
-            public void initialize() {
+            public void initialize() { System.out.println("registering");
                 //TODO: find a better way to do this
                 fileManager.addFileEventListener(sharedFilesKeywordIndex);
                 fileManager.addFileEventListener(qrpUpdater);

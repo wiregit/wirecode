@@ -93,7 +93,7 @@ public class SchemaReplyCollectionMapper implements FileEventListener {
     }
     
     private synchronized void removeFileDesc(FileDesc fd) {
-        if(fd == null || fd instanceof IncompleteFileDesc)
+        if(fd instanceof IncompleteFileDesc)
             return;
         // Get the schema URI of each document and remove from the collection
         // We must remember the schemas and then remove the doc, or we will

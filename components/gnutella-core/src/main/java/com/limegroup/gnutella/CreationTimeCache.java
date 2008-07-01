@@ -156,7 +156,7 @@ public final class CreationTimeCache implements FileEventListener {
     /**
      * Removes the CreationTime that is associated with the specified URN.
      */
-    public synchronized void removeTime(URN urn) {
+    synchronized void removeTime(URN urn) {
         Long time = getUrnToTime().remove(urn);
         removeURNFromURNSet(urn, time);
         if(time != null)
@@ -199,7 +199,7 @@ public final class CreationTimeCache implements FileEventListener {
     /**
      * Clears away any URNs for files that do not exist anymore.
      */
-    public void pruneTimes() {
+    private void pruneTimes() {
         pruneTimes(true);
     }
 
@@ -344,7 +344,7 @@ public final class CreationTimeCache implements FileEventListener {
     /**
      * Write cache so that we only have to calculate them once.
      */
-    public synchronized void persistCache() {
+    synchronized void persistCache() {
         if(!dirty)
             return;
         

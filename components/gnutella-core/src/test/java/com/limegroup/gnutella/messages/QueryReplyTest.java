@@ -70,7 +70,7 @@ import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
-import com.limegroup.gnutella.util.FileManagerUtils;
+import com.limegroup.gnutella.util.FileManagerTestUtils;
 
 /**
  * This class tests the QueryReply class.
@@ -1516,7 +1516,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
             assertTrue("unable to get file", FileUtils.copy(testFiles[i], shared));
         }
 
-        FileManagerUtils.waitForLoad(fileManager, 5000);
+        FileManagerTestUtils.waitForLoad(fileManager, 5000);
 
         assertEquals("unexpected number of shared files", testFiles.length, fileManager.getSharedFileList().getNumFiles());
     }

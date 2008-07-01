@@ -26,7 +26,7 @@ import org.limewire.nio.channel.InterestWritableByteChannel;
 import org.limewire.nio.channel.NIOMultiplexor;
 import org.limewire.nio.observer.AcceptObserver;
 
-import com.google.inject.Provider;
+import com.google.inject.name.Named;
 
 import de.kapsi.net.daap.DaapConfig;
 import de.kapsi.net.daap.Library;
@@ -43,12 +43,12 @@ public class LimeDaapServerNIO extends DaapServerNIO {
     private final Map<DaapConnectionNIO, DaapController> allConnections =
         new HashMap<DaapConnectionNIO, DaapController>();
     private ServerSocket serverSocket;
-    private final Provider<ScheduledExecutorService> executorService;
+    private final ScheduledExecutorService backgroundExecutor;
 
     public LimeDaapServerNIO(Library library, DaapConfig config,
-                             Provider<ScheduledExecutorService> executorService) {
+            @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor) {
         super(library, config);
-        this.executorService = executorService;
+        this.backgroundExecutor = backgroundExecutor;
         scheduleServices();
     }
     
@@ -57,7 +57,7 @@ public class LimeDaapServerNIO extends DaapServerNIO {
      * that should be timed out.
      */
     private void scheduleServices() {
-        executorService.get().scheduleWithFixedDelay(new Runnable() {
+        backgroundExecutor.scheduleWithFixedDelay(new Runnable() {
             public void run() {
                 NIODispatcher.instance().getScheduledExecutorService().execute(new Runnable() {
                     public void run() {

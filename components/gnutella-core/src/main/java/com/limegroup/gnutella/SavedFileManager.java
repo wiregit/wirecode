@@ -102,6 +102,13 @@ public final class SavedFileManager implements Runnable, FileEventListener, Serv
      * Attempts to load the saved files.
      */
     public void run() {
+        scheduleLoad();
+    }
+    
+    /**
+     * Puts a load event onto the Queue for executing 
+     */
+    private void scheduleLoad(){
         QUEUE.execute(new Runnable() {
             public void run() {
                 load();
@@ -167,7 +174,7 @@ public final class SavedFileManager implements Runnable, FileEventListener, Serv
      */
     public void handleFileEvent(FileManagerEvent evt) {
         if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_COMPLETE) {
-            run();
+            scheduleLoad();
         }
     }
 }

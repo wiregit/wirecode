@@ -49,7 +49,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
-import com.limegroup.gnutella.util.FileManagerUtils;
+import com.limegroup.gnutella.util.FileManagerTestUtils;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
@@ -152,7 +152,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         networkManagerStub.setOOBCapable(true);
         networkManagerStub.setPort(SERVER_PORT);
         
-        FileManagerUtils.waitForLoad(fileManager,2000);
+        FileManagerTestUtils.waitForLoad(fileManager,2000);
                 
         UDP_ACCESS = new DatagramSocket[10];
         for (int i = 0; i < UDP_ACCESS.length; i++)
@@ -597,26 +597,21 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         searchServices.stopQuery(new GUID(guid));
         callback.clearGUID();
 
-        {
-            // download still in progress, don't purge
-            assertByPassedResultsCacheHasSize(guid, 1);
-        }
+        // download still in progress, don't purge
+        assertByPassedResultsCacheHasSize(guid, 1);
 
         UploadSettings.UPLOAD_SPEED.setValue(100);
 
         // sleep to make sure the download starts 
-        Thread.sleep(10000);
+        Thread.sleep(20000);
         
         assertTrue("file should saved", 
             new File( _savedDir, "metadata.mp3").exists());
         assertTrue("file should be shared",
             new File(_sharedDir, "metadata.mp3").exists());
 
-        {
-            // now we should make sure MessageRouter clears the cache
-            assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
-        }
-
+        // now we should make sure MessageRouter clears the cache
+        assertByPassedResultsCacheHasSize(qr.getGUID(), 0);
     }
 
 

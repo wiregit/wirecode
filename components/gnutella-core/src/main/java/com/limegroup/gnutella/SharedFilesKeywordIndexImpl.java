@@ -255,7 +255,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         case FILEMANAGER_LOAD_COMPLETE:
             trim();
             break;
-        case FILEMANAGER_LOADING:
+        case FILEMANAGER_LOAD_DIRECTORIES:
             clear();
             break;
         }

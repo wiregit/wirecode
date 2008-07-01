@@ -34,7 +34,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.FileManagerUtils;
+import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 import junit.framework.Test;
@@ -103,7 +103,7 @@ public class BrowseTest extends LimeTestCase {
         messageFactory = injector.getInstance(MessageFactory.class);
         client = injector.getInstance(LimeHttpClient.class);
         
-        FileManagerUtils.waitForLoad(fileManager,100000);
+        FileManagerTestUtils.waitForLoad(fileManager,100000);
         
         host = protocol + "://localhost:" + PORT;
     }

@@ -9,7 +9,7 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.FileManagerEvent.Type;
 
-public class FileManagerUtils {
+public class FileManagerTestUtils {
 
     public static void waitForLoad(FileManager fileManager, int timeout) throws InterruptedException, TimeoutException {
         final CountDownLatch loadedLatch = new CountDownLatch(1);
