@@ -221,7 +221,7 @@
 	           	<fileset dir="${build.limewire.components.lwsserver.tests}" includes="**/*Test.class"/>
 	           	<fileset dir="${build.limewire.components.promotion.tests}" includes="**/*Test.class"/>
 	           	<fileset dir="${build.limewire.components.geocode.tests}" includes="**/*Test.class"/>
-                <fileset dir="${build.limewire.components.jingle.tests}" includes="**/*Test.class"/>
+                <!--fileset dir="${build.limewire.components.jingle.tests}" includes="**/*Test.class"/-->
                 <fileset dir="${build.limewire.components.xmpp.tests}" includes="**/*Test.class"/>
                 <!-- Add as tests are added. -->
 	         </testLocations>
