@@ -26,7 +26,15 @@ public class GUIUtilsTest extends GUIBaseTestCase {
     
     public void testUnitBytesBoundaries() {
         setLocaleSettings(Locale.US);
-        assertEquals("0.0 KB", GUIUtils.toUnitbytes(1));
+        assertEquals("0 B", GUIUtils.toUnitbytes(0));
+        assertEquals("1 B", GUIUtils.toUnitbytes(1));
+        assertEquals("10 B", GUIUtils.toUnitbytes(10));
+        assertEquals("51 B", GUIUtils.toUnitbytes(51));
+        assertEquals("52 B", GUIUtils.toUnitbytes(52));
+        assertEquals("53 B", GUIUtils.toUnitbytes(53));
+        assertEquals("99 B", GUIUtils.toUnitbytes(99));
+        assertEquals("0.1 KB", GUIUtils.toUnitbytes(100));
+        assertEquals("0.2 KB", GUIUtils.toUnitbytes(232));
         
         int TEN_MBS = 10 * 1024 * 1024;
         int TENTH_OF_A_MB = 1024 * 1024 / 10;        
