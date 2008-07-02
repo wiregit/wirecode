@@ -226,7 +226,7 @@ public class DHTSizeEstimatorTest extends MojitoTestCase {
                     addr, Vendor.UNKNOWN, Version.ZERO, nodeId, addr, 0, Contact.DEFAULT_FLAG));
     	}
     	
-    	assertEquals(490, routeTable.size());
+    	assertEquals(494, routeTable.size());
     	
     	DHTSizeEstimator estimator = new DHTSizeEstimator();
     	
