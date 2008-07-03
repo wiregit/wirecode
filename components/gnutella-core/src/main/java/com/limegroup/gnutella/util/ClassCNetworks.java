@@ -19,6 +19,7 @@ import org.limewire.util.StringUtils;
  */
 // TODO rename class to reflect that it is more flexible than class c networks
 public class ClassCNetworks {
+    
     private final Map<Integer, Integer> counts = new HashMap<Integer,Integer>();
     
     /** Utility comparator to use for sorting class C networks */
@@ -91,7 +92,7 @@ public class ClassCNetworks {
     
     @Override
     public String toString() {
-        return StringUtils.toString(this);
+        return StringUtils.toString(this, mask, counts);
     }
     
     /**
