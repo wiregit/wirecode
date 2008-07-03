@@ -21,10 +21,15 @@ public class FileManagerEvent extends EventObject {
          */
         ADD_FILE,
         
-        /**
-         * Called when a store file has been added to FileManager
-         */
-        ADD_STORE_FILE,
+//        /**
+//         * Called when a store file has been added to FileManager
+//         */
+//        ADD_STORE_FILE,
+//        
+//        /**
+//         * Called when an incomplete file has been added to FileManager
+//         */
+//        ADD_INCOMPLETE_FILE,
         
         /**
          * Called when a shared file is no longer shared, Note that this
@@ -44,11 +49,21 @@ public class FileManagerEvent extends EventObject {
         RENAME_FILE,
         
         /**
+         * Called if a rename event has failed
+         */
+        RENAME_FILE_FAILED,
+        
+        /**
          * Called when information stored in the file is changed such as editing
          * ID3 tag information. This will cause disk IO to write the changes and 
          * result in a new SHA-1 being generated for this file
          */
         CHANGE_FILE,
+        
+        /**
+         * Called if a change event has failed
+         */
+        CHANGE_FILE_FAILED,
         
         /**
          * Called when the FileDesc and URN have been calculated for a file. This allows
@@ -302,13 +317,13 @@ public class FileManagerEvent extends EventObject {
     public boolean isAddEvent() {
         return (type.equals(Type.ADD_FILE));
     }
-    
-    /**
-	 * Returns true if this event is an ADD_STORE_FILE event
-	 */
-    public boolean isAddStoreEvent() {
-        return (type.equals(Type.ADD_STORE_FILE));
-    }
+//    
+//    /**
+//	 * Returns true if this event is an ADD_STORE_FILE event
+//	 */
+//    public boolean isAddStoreEvent() {
+//        return (type.equals(Type.ADD_STORE_FILE));
+//    }
     
     /**
      * Returns true if this event is a REMOVE event
@@ -336,7 +351,7 @@ public class FileManagerEvent extends EventObject {
     /**
      * Returns true if this is a FAILED add event (ie, addFile failed).
      */
-    public boolean isFailedEvent() {
+    public boolean isFailedAddEvent() {
         return (type.equals(Type.ADD_FAILED_FILE));
     }
 

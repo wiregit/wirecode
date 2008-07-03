@@ -25,7 +25,6 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.tigertree.HashTreeCache;
-import com.limegroup.gnutella.version.UpdateHandlerImpl;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 /** Some glue that installs listeners & things. TODO: Figure out a better way to do this. */
@@ -38,7 +37,7 @@ class CoreRandomGlue {
     private final DHTManager dhtManager;
     private final PushProxiesPublisher pushProxiesPublisher;
     private final ConnectionServices connectionServices;
-    private final DownloadManagerImpl downloadManager;
+    private final DownloadManager downloadManager;
     private final DownloaderGuidAlternateLocationFinder downloaderGuidAlternateLocationFinder;
     private final SpamServices spamServices;
     private final SimppManager simppManager;
@@ -48,7 +47,6 @@ class CoreRandomGlue {
     private final QRPUpdater qrpUpdater;
     private final CreationTimeCache creationTimeCache;
     private final SavedFileManager savedFileManager;
-    private final UpdateHandlerImpl updateHandler;
     private final DaapManager daapManager;
     private final UrnCache urnCache;
     private final SchemaReplyCollectionMapper schemaMapper;
@@ -59,7 +57,7 @@ class CoreRandomGlue {
             ConnectionManager connectionManager, DHTManager dhtManager,
             PushProxiesPublisher pushProxiesPublisher,
             ConnectionServices connectionServices,
-            DownloadManagerImpl downloadManager, 
+            DownloadManager downloadManager, 
             DownloaderGuidAlternateLocationFinder downloaderGuidAlternateLocationFinder,
             SpamServices spamServices,
             SimppManager simppManager,
@@ -69,7 +67,6 @@ class CoreRandomGlue {
             QRPUpdater qrpUpdater,
             CreationTimeCache creationTimeCache,
             SavedFileManager savedFileManager,
-            UpdateHandlerImpl updateHandler,
             DaapManager daapManager,
             UrnCache urnCache,
             SchemaReplyCollectionMapper schemaMapper,
@@ -90,7 +87,6 @@ class CoreRandomGlue {
         this.qrpUpdater = qrpUpdater;
         this.creationTimeCache = creationTimeCache;
         this.savedFileManager = savedFileManager;
-        this.updateHandler = updateHandler;
         this.daapManager = daapManager;
         this.urnCache = urnCache;
         this.schemaMapper = schemaMapper;
@@ -100,14 +96,12 @@ class CoreRandomGlue {
     @SuppressWarnings("unused")
     @Inject private void register(ServiceRegistry registry) {
         registry.register(new Service() {            
-            public void initialize() { System.out.println("registering");
+            public void initialize() {
                 //TODO: find a better way to do this
                 fileManager.addFileEventListener(sharedFilesKeywordIndex);
                 fileManager.addFileEventListener(qrpUpdater);
-                fileManager.addFileEventListener(downloadManager);
                 fileManager.addFileEventListener(creationTimeCache);
                 fileManager.addFileEventListener(savedFileManager);
-                fileManager.addFileEventListener(updateHandler);
                 fileManager.addFileEventListener(daapManager);
                 fileManager.addFileEventListener(urnCache);
                 fileManager.addFileEventListener(schemaMapper);

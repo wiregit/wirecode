@@ -309,7 +309,7 @@ public final class UrnCache implements FileEventListener {
     /**
      * Write cache so that we only have to calculate them once.
      */
-    public synchronized void persistCache() {
+    synchronized void persistCache() {
         getUrnMap(); // make sure it's finished constructing.
         
         if(!dirty)

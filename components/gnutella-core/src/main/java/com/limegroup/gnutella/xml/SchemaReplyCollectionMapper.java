@@ -12,7 +12,6 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManagerEvent;
-import com.limegroup.gnutella.IncompleteFileDesc;
 
 
 /** 
@@ -93,8 +92,6 @@ public class SchemaReplyCollectionMapper implements FileEventListener {
     }
     
     private synchronized void removeFileDesc(FileDesc fd) {
-        if(fd instanceof IncompleteFileDesc)
-            return;
         // Get the schema URI of each document and remove from the collection
         // We must remember the schemas and then remove the doc, or we will
         // get a concurrent mod exception because removing the doc also

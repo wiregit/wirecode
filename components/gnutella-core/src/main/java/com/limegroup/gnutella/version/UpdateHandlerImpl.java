@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -209,6 +210,11 @@ public class UpdateHandlerImpl implements UpdateHandler, FileEventListener, Serv
         this.clock = clock;
         this.updateMessageVerifier = updateMessageVerifier;
         this.remoteFileDescFactory = remoteFileDescFactory;
+    }
+    
+    @Inject
+    void register(CopyOnWriteArrayList<FileEventListener> listener) {
+        listener.add(this);
     }
         
     String getTimeoutUrl() {

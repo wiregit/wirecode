@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -31,6 +32,8 @@ import org.limewire.statistic.LimeWireStatisticsModule;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.ProviderMethods;
+import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
@@ -226,12 +229,15 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
         binder().install(new LimeWireSimppModule());
         
+        binder().install(ProviderMethods.from(new FileEventListenerProvider()));
+        
         bind(LimeWireCore.class);
         
         if(activityCallbackClass != null) {
             bind(ActivityCallback.class).to(activityCallbackClass);
         }        
 
+//        bind(new TypeLiteral<CopyOnWriteArrayList<FileEventListener>>(){}).toInstance(new CopyOnWriteArrayList<FileEventListener>());
         bind(DownloadCallback.class).to(ActivityCallback.class);
         bind(NetworkManager.class).to(NetworkManagerImpl.class);
         bind(DHTManager.class).to(DHTManagerImpl.class);
@@ -424,6 +430,14 @@ public class LimeWireCoreModule extends AbstractModule {
             return ExecutorsHelper.newProcessingQueue("DHT-Executor");
         }
     }    
+    
+    @Singleton
+    public static class FileEventListenerProvider {
+        @Provides
+        public CopyOnWriteArrayList<FileEventListener> fileEventListener() {
+            return new CopyOnWriteArrayList<FileEventListener>();
+        }
+    }
     
     ///////////////////////////////////////////////////////////////////////////
     /// BELOW ARE ALL HACK PROVIDERS THAT NEED TO BE UPDATED TO CONSTRUCT OBJECTS!

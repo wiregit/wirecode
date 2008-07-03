@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.limewire.util.FileUtils;
@@ -15,6 +16,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManagerEvent;
 import com.limegroup.gnutella.FileManagerImpl;
 import com.limegroup.gnutella.IncompleteFileDesc;
@@ -46,8 +48,9 @@ public class FileManagerStub extends FileManagerImpl {
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             LimeXMLDocumentFactory limeXMLDocumentFactory,
             MetaDataReader metaDataReader,
-            Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
-        super(simppManager, urnCache, contentManager, altLocManager, activityCallback, backgroundExecutor, limeXMLDocumentFactory, metaDataReader, limeXMLSchemaRepository);
+            Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository,
+            CopyOnWriteArrayList<FileEventListener> listeners) {
+        super(simppManager, urnCache, contentManager, altLocManager, activityCallback, backgroundExecutor, limeXMLDocumentFactory, metaDataReader, listeners);
         
         sharedFileList = new FileListStub();
     }
@@ -100,9 +103,9 @@ public class FileManagerStub extends FileManagerImpl {
     }
 
     @Override
-    public synchronized FileDesc removeFileIfShared(File f, boolean notify) {
+    protected synchronized FileDesc removeSharedFileDesc(File f) {
         removeRequests.add(f);
-        return super.removeFileIfShared(f, notify);
+        return super.removeSharedFileDesc(f);
     }
         
     public void dispatchEvent(FileManagerEvent.Type type, FileDesc fileDesc) {

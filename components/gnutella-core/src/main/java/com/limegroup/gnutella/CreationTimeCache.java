@@ -481,9 +481,9 @@ public final class CreationTimeCache implements FileEventListener {
     
     private void fileChanged(URN oldUrn, URN newUrn ) {
         // re-populate the ctCache
-        synchronized (this) {
+        synchronized (this) { System.out.println("old " + oldUrn);
             long time = getCreationTime(oldUrn);
-            removeTime(newUrn);// addFile() put lastModified
+            removeTime(newUrn);
             addTime(newUrn, time);
             commitTime(newUrn);
         }   
@@ -500,9 +500,9 @@ public final class CreationTimeCache implements FileEventListener {
             case FILEMANAGER_SAVE:
                 persistCache();
                 break;
-            case ADD_STORE_FILE:
-                fileAdded(evt.getFiles()[0], evt.getFileDescs()[0].getSHA1Urn());
-                break;
+//            case ADD_STORE_FILE:
+//                fileAdded(evt.getFiles()[0], evt.getFileDescs()[0].getSHA1Urn());
+//                break;
             case ADD_FILE:
                 // Commit the time in the CreactionTimeCache, but don't share
                 // the installer.  We populate free LimeWire's with free installers
@@ -511,8 +511,9 @@ public final class CreationTimeCache implements FileEventListener {
                 if (!SharingUtils.isForcedShare(evt.getFiles()[0])) {     
                     fileAdded(evt.getFiles()[0], evt.getFileDescs()[0].getSHA1Urn());
                 }
-                break;
-            case CHANGE_FILE:
+                 break;
+            case CHANGE_FILE: for(FileDesc fd : evt.getFileDescs())
+                System.out.println(fd.getSHA1Urn());
                 if(! (evt.getFileDescs()[0] instanceof IncompleteFileDesc))
                     fileChanged(evt.getFileDescs()[0].getSHA1Urn(), evt.getFileDescs()[1].getSHA1Urn());
                 break;

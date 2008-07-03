@@ -429,7 +429,7 @@ public class ServerSideWhatIsNewTest
         
         final CountDownLatch fileChangedLatch = new CountDownLatch(1);
         fm.addFileEventListener(new FileEventListener() {
-            public void handleFileEvent(FileManagerEvent evt) {
+            public void handleFileEvent(FileManagerEvent evt) { System.out.println("event " + evt.getType());
                 if (evt.getType() != FileManagerEvent.Type.CHANGE_FILE)
                     return;
                 if (evt.getFileDescs() == null || evt.getFileDescs().length != 2)
@@ -439,7 +439,7 @@ public class ServerSideWhatIsNewTest
             }
         });
         fm.fileChanged(tempFile1);
-        assertTrue(fileChangedLatch.await(3, TimeUnit.SECONDS));
+        assertTrue(fileChangedLatch.await(40, TimeUnit.SECONDS));
         FileDesc afterChanged = fm.getFileDescForFile(tempFile1);
         assertNotNull(afterChanged);
         assertNotSame(beforeChanged, afterChanged);
@@ -518,8 +518,8 @@ public class ServerSideWhatIsNewTest
         final CountDownLatch latch = new CountDownLatch(1);
         fm.addFileEventListener(new FileEventListener() {
             public void handleFileEvent(FileManagerEvent evt) {
-                assertEquals(FileManagerEvent.Type.CHANGE_FILE, evt.getType());
-                latch.countDown();
+                if(FileManagerEvent.Type.CHANGE_FILE == evt.getType())
+                    latch.countDown();
             }
         });
         fm.fileChanged(tempFile1);

@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -31,7 +32,6 @@ import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
-import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 
 public class CreationTimeCacheTest extends LimeTestCase {
     
@@ -410,8 +410,8 @@ public class CreationTimeCacheTest extends LimeTestCase {
                 @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                 LimeXMLDocumentFactory limeXMLDocumentFactory,
                 MetaDataReader metaDataReader,
-                Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
-            super(simppManager, urnCache, contentManager, altLocManager, activityCallback, backgroundExecutor, limeXMLDocumentFactory, metaDataReader, limeXMLSchemaRepository);
+                CopyOnWriteArrayList<FileEventListener> eventListeners) {
+            super(simppManager, urnCache, contentManager, altLocManager, activityCallback, backgroundExecutor, limeXMLDocumentFactory, metaDataReader, eventListeners);
         }
         
         public void setDefaultUrn(URN urn) {

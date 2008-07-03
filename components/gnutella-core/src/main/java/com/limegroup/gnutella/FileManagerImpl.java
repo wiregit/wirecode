@@ -22,6 +22,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,8 +67,6 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLNames;
-import com.limegroup.gnutella.xml.LimeXMLSchema;
-import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
@@ -85,8 +84,7 @@ public class FileManagerImpl implements FileManager, Service {
     private static final ExecutorService LOADER = ExecutorsHelper.newProcessingQueue("FileManagerLoader");
      
     /** List of event listeners for FileManagerEvents. */
-    private volatile CopyOnWriteArrayList<FileEventListener> eventListeners 
-        = new CopyOnWriteArrayList<FileEventListener>();
+    private final CopyOnWriteArrayList<FileEventListener> eventListeners;
     
     /**********************************************************************
      * LOCKING: obtain this's monitor before modifying this.
@@ -210,11 +208,10 @@ public class FileManagerImpl implements FileManager, Service {
     private final Provider<UrnCache> urnCache;
     private final Provider<ContentManager> contentManager;
     private final Provider<AltLocManager> altLocManager;
-    protected final Provider<ActivityCallback> activityCallback;
-    protected final ScheduledExecutorService backgroundExecutor;
-    protected final LimeXMLDocumentFactory limeXMLDocumentFactory;
-    protected final MetaDataReader metaDataReader;
-    protected final Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository;
+    private final Provider<ActivityCallback> activityCallback;
+    private final ScheduledExecutorService backgroundExecutor;
+    private final LimeXMLDocumentFactory limeXMLDocumentFactory;
+    private final MetaDataReader metaDataReader;
     
 	/**
 	 * Creates a new <tt>FileManager</tt> instance.
@@ -228,7 +225,7 @@ public class FileManagerImpl implements FileManager, Service {
             @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
             LimeXMLDocumentFactory limeXMLDocumentFactory,
             MetaDataReader metaDataReader,
-            Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository) {
+            CopyOnWriteArrayList<FileEventListener> eventListeners) {
         this.simppManager = simppManager;
         this.urnCache = urnCache;
         this.contentManager = contentManager;
@@ -237,7 +234,7 @@ public class FileManagerImpl implements FileManager, Service {
         this.backgroundExecutor = backgroundExecutor;
         this.limeXMLDocumentFactory = limeXMLDocumentFactory;
         this.metaDataReader = metaDataReader;
-        this.limeXMLSchemaRepository = limeXMLSchemaRepository;
+        this.eventListeners = eventListeners;
         
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
@@ -272,10 +269,6 @@ public class FileManagerImpl implements FileManager, Service {
     public void initialize() {
     }
     
-    void testMe(){
-        
-    }
-    
     @Inject
     void register(org.limewire.lifecycle.ServiceRegistry registry) {
         registry.register(this);
@@ -298,7 +291,7 @@ public class FileManagerImpl implements FileManager, Service {
         shutdown = true;
     }
 
-    protected void save(){
+    private void save(){
         dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_SAVE));
         _data.save();
     }
@@ -407,12 +400,15 @@ public class FileManagerImpl implements FileManager, Service {
     /**
      * Kicks off necessary stuff for loading being done.
      */
-    protected void loadFinished(int revision) {
+    private void loadFinished(int revision) {
         // save ourselves to disk every minute
-        if (saver == null) {
-            saver = new Saver();
-            backgroundExecutor.scheduleWithFixedDelay(saver, 60 * 1000, 60 * 1000, 
-                    TimeUnit.MILLISECONDS);
+        synchronized(this) {
+            if (saver == null) {
+                saver = new Saver();
+                this.addFileEventListener(saver);
+                backgroundExecutor.scheduleWithFixedDelay(saver, 60 * 1000, 60 * 1000, 
+                        TimeUnit.MILLISECONDS);
+            }
         }
         if(LOG.isDebugEnabled())
             LOG.debug("Finished loading revision: " + revision);
@@ -441,7 +437,7 @@ public class FileManagerImpl implements FileManager, Service {
      * If the current revision ever changed from the expected revision, this returns
      * immediately.
      */
-    protected void loadSettingsInternal(int revision) {
+    private void loadSettingsInternal(int revision) {
         if(LOG.isDebugEnabled())
             LOG.debug("Loading Library Revision: " + revision);
         
@@ -522,7 +518,7 @@ public class FileManagerImpl implements FileManager, Service {
         for(File file : list) {
             if(_revision != revision)
                 break;
-            addFileIfSharedOrStore(file, LimeXMLDocument.EMPTY_LIST, _revision, Type.ADD_FILE, Type.ADD_FAILED_FILE);
+            addFileIfShared(file, LimeXMLDocument.EMPTY_LIST, _revision);
         }
         
         // Update the store directory and add only files from the LWS
@@ -541,7 +537,7 @@ public class FileManagerImpl implements FileManager, Service {
         for(File file: storeList) {
             if(_revision != revision)
                 break;
-            addFileIfSharedOrStore(file, LimeXMLDocument.EMPTY_LIST, _revision, Type.ADD_STORE_FILE, Type.ADD_STORE_FAILED_FILE);
+            addFileIfStore(file, LimeXMLDocument.EMPTY_LIST, _revision);
         }
         
         _isUpdating = false;
@@ -633,7 +629,7 @@ public class FileManagerImpl implements FileManager, Service {
         if (file_list == null)
             return;
         for(int i = 0; i < file_list.length && _revision == revision; i++)
-            addFileIfSharedOrStore(file_list[i], LimeXMLDocument.EMPTY_LIST, _revision, Type.ADD_FILE, Type.ADD_FAILED_FILE);
+            addFileIfShared(file_list[i], LimeXMLDocument.EMPTY_LIST, _revision);
             
         // Exit quickly (without doing the dir lookup) if revisions changed.
         if(_revision != revision)
@@ -700,7 +696,7 @@ public class FileManagerImpl implements FileManager, Service {
         if (file_list == null)
             return;
         for(int i = 0; i < file_list.length && _revision == revision; i++)
-            addFileIfSharedOrStore(file_list[i], LimeXMLDocument.EMPTY_LIST, _revision, Type.ADD_STORE_FILE, Type.ADD_STORE_FAILED_FILE);
+            addFileIfStore(file_list[i], LimeXMLDocument.EMPTY_LIST, _revision);
             
         // Exit quickly (without doing the dir lookup) if revisions changed.
         if(_revision != revision)
@@ -742,7 +738,7 @@ public class FileManagerImpl implements FileManager, Service {
 	 * it works correctly.  Otherwise, we'll end up adding tons of stuff
 	 * to the DIRECTORIES_NOT_TO_SHARE.
 	 */
-	protected void removeFolderIfShared(File folder, File parent) {
+	private void removeFolderIfShared(File folder, File parent) {
 		if (!folder.isDirectory() && folder.exists())
 			throw new IllegalArgumentException("Expected a directory, but given: "+folder);
 		
@@ -886,7 +882,7 @@ public class FileManagerImpl implements FileManager, Service {
 		if (!isFileShareable(file))
 			_data.SPECIAL_FILES_TO_SHARE.add(file);
 			
-		addFileIfSharedOrStore(file,list,_revision, Type.ADD_FILE, Type.ADD_FAILED_FILE);
+		addFileIfShared(file,list,_revision);
 	}
 
      /* (non-Javadoc)
@@ -896,26 +892,35 @@ public class FileManagerImpl implements FileManager, Service {
          _data.FILES_NOT_TO_SHARE.remove(file);
          if (!isFileShareable(file))
              _transientSharedFiles.add(file);
-         addFileIfSharedOrStore(file, LimeXMLDocument.EMPTY_LIST, _revision, Type.ADD_FILE, Type.ADD_FAILED_FILE);
+         addFileIfShared(file, LimeXMLDocument.EMPTY_LIST, _revision);
      }
 	
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#addFileIfShared(java.io.File)
      */
    public void addFileIfShared(File file) {
-       addFileIfSharedOrStore(file, LimeXMLDocument.EMPTY_LIST, _revision, Type.ADD_FILE, Type.ADD_FAILED_FILE);
+       addFileIfShared(file, LimeXMLDocument.EMPTY_LIST, _revision);
    }
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#addFileIfShared(java.io.File, java.util.List)
      */
     public void addFileIfShared(File file, List<? extends LimeXMLDocument> list) {
-        addFileIfSharedOrStore(file, list, _revision, Type.ADD_FILE, Type.ADD_FAILED_FILE);
+        addFileIfShared(file, list, _revision);
     }
     
-    protected void addFileIfSharedOrStore(File file, List<? extends LimeXMLDocument> metadata, int revision,
-            Type successType, Type failureType) {
-        addFileIfSharedOrStore(file, metadata, revision, successType, failureType, null);
+    /**
+     * Adds a shared file
+     */
+    private void addFileIfShared(File file, List<? extends LimeXMLDocument> list, int revision) {
+        addFileIfSharedOrStore(file, list, revision, Type.ADD_FILE, Type.ADD_FAILED_FILE, null);
+    }
+    
+    /**
+     * Adds a store file
+     */
+    private void addFileIfStore(File file, List<? extends LimeXMLDocument> list, int revision) {
+        addFileIfSharedOrStore(file, list, revision, Type.ADD_FILE, Type.ADD_STORE_FAILED_FILE, null);
     }
     
     /**
@@ -929,7 +934,7 @@ public class FileManagerImpl implements FileManager, Service {
      * @param successType - event type to return if add succeeds
      * @param failureType - event type to return if add fails
      */
-    protected void addFileIfSharedOrStore(File file, List<? extends LimeXMLDocument> metadata, int revision, 
+    private void addFileIfSharedOrStore(File file, List<? extends LimeXMLDocument> metadata, int revision, 
             Type successType, Type failureType, FileDesc oldFileDesc) {
         if(LOG.isDebugEnabled())
             LOG.debug("Attempting to load store or shared file: " + file);
@@ -975,7 +980,7 @@ public class FileManagerImpl implements FileManager, Service {
     /**
      * Constructs a new UrnCallback that will possibly load the file with the given URNs.
      */
-    protected UrnCallback getNewUrnCallback(final File file, final List<? extends LimeXMLDocument> metadata, final int revision, 
+    private UrnCallback getNewUrnCallback(final File file, final List<? extends LimeXMLDocument> metadata, final int revision, 
                                     final Type successType, final Type failureType, final FileDesc oldFileDesc) {
         return new UrnCallback() {
 		    public void urnsCalculated(File f, Set<? extends URN> urns) {
@@ -1009,7 +1014,7 @@ public class FileManagerImpl implements FileManager, Service {
                 // check LimeXML to determine if is a store file or the sha1 is mapped to a store file 
                 //  (the sha1 check is needed if duplicate store files are loaded since the second file 
                 //  will not have a unique LimeXMLDoc associated with it)
-                if (isStoreXML(fd.getXMLDocument()) || storeFileList.contains(fd.getSHA1Urn()) || successType == Type.ADD_STORE_FILE) { 
+                if (isStoreXML(fd.getXMLDocument()) || storeFileList.contains(fd.getSHA1Urn())){// || successType == Type.ADD_STORE_FILE) { 
                     addStoreFile(fd, file, urns, successType, oldFileDesc); 
                 } else {
                     addSharedFile(file, fd, urns, successType, oldFileDesc); 
@@ -1040,19 +1045,16 @@ public class FileManagerImpl implements FileManager, Service {
      */
     private synchronized void addStoreFile(FileDesc fd, File file, Set<? extends URN> urns, Type successType, FileDesc oldFileDesc) {
         if(LOG.isDebugEnabled())
-            LOG.debug("Store file: " + file);
+            LOG.debug("Adding Store file: " + file);
 
         if( fd.getLimeXMLDocuments().size() == 0 || !isStoreXML(fd.getLimeXMLDocuments().get(0))) {
-            System.out.println("not a store file!!! " + fd.getFileName());
             return;
         }
         
-        // if this file is in a shared folder, add to individual store files 
-        if( successType == Type.ADD_FILE) {
+        // if this file isn't in the store folder, add to individual store files 
+        if(!FileUtils.isAncestor(SharingSettings.getSaveLWSDirectory(), file)) { 
             _data.SPECIAL_STORE_FILES.add(file);
-            // recast event to addStoreFile type
-            successType = Type.ADD_STORE_FILE;
-        }
+        } 
 
         //store files are not part of the _files list so recreate fd with an index into store file list
         FileDesc fileDesc = createFileDesc(file, urns, storeFileList.getListLength());
@@ -1064,11 +1066,14 @@ public class FileManagerImpl implements FileManager, Service {
 
         //If the event is a addStoreFile event, just pass along the newly added FileDesc
         //else it was an UpdateEvent so pass along the oldFileDesc and newly added one
-        if(successType == Type.ADD_STORE_FILE)
-            dispatchFileEvent(new FileManagerEvent(this, successType, fileDesc));
-        else
+        if(//successType == Type.ADD_STORE_FILE || 
+                successType == Type.ADD_FILE)
+            dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FILE, fileDesc));
+        else if( successType == Type.CHANGE_FILE ||
+                 successType == Type.RENAME_FILE)
             dispatchFileEvent(new FileManagerEvent(this,successType, oldFileDesc, fileDesc));
-
+//        else
+            //TODO: handle exception here
     }
     
     /**
@@ -1076,7 +1081,7 @@ public class FileManagerImpl implements FileManager, Service {
      */
     private synchronized void addSharedFile(File file, FileDesc fileDesc, Set<? extends URN> urns, Type successType, FileDesc oldFileDesc) {
         if(LOG.isDebugEnabled())
-            LOG.debug("Sharing file: " + file);
+            LOG.debug("Adding Shared file: " + file);
                
         // since we created the FD to test the XML for being an instance of LWS, check to make sure
         //  the FD is still valid before continuing
@@ -1093,8 +1098,11 @@ public class FileManagerImpl implements FileManager, Service {
         //else it was an UpdateEvent so pass along the oldFileDesc and newly added one
         if(successType == Type.ADD_FILE)
             dispatchFileEvent(new FileManagerEvent(this, successType, fileDesc));
-        else
+        else if( successType == Type.CHANGE_FILE ||
+                 successType == Type.RENAME_FILE)
             dispatchFileEvent(new FileManagerEvent(this,successType, oldFileDesc, fileDesc));
+//        else
+            //TODO: handle exception here
     }
     
     /**
@@ -1148,39 +1156,33 @@ public class FileManagerImpl implements FileManager, Service {
      * @see com.limegroup.gnutella.FileManager#removeFileIfShared(java.io.File)
      */
     public synchronized FileDesc removeFileIfSharedOrStore(File f) {
-        return removeFileIfSharedOrStore(f, true);
-    }
-    
-    /**
-     * removes a file desc from the map if it exists and is shared or is a store
-     * file
-     */
-    protected synchronized FileDesc removeFileIfSharedOrStore(File f, boolean notify) {
-        FileDesc toRemove = getFileDescForFile(f);
-        if( toRemove == null )
-            return null;
-        
-        if( storeFileList.contains(toRemove) )
-            return removeStoreFile(f, notify);
-        else
-            return removeFileIfShared(f, notify);
-    }
-    
-    /**
-     * The actual implementation of removeFileIfShared(File)
-     */
-    protected synchronized FileDesc removeFileIfShared(File f, boolean notify) {
-        //Take care of case, etc.
+        if(LOG.isDebugEnabled())
+            LOG.debug("Removing file " + f);                
+                
         try {
             f = FileUtils.getCanonicalFile(f);
         } catch (IOException e) {
             return null;
-        }        
-
-        // Look for matching file ...         
-        if (!sharedFileList.contains(f))
+        }   
+        
+        FileDesc fd = null;
+        if( sharedFileList.contains(f))
+            fd = removeSharedFileDesc(f);
+        else if( storeFileList.contains(f))
+            fd = removeStoreFileDesc(f);
+        else
             return null;
-            
+        
+        // if the FileDesc is not null and the file is not forceably shared
+        if( fd != null && !SharingUtils.isForcedShareDirectory(f.getParentFile()))
+            dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FILE, fd));
+        return fd;
+    }
+    
+    /**
+     * Removes the shared FileDesc reference
+     */
+    protected synchronized FileDesc removeSharedFileDesc(File f) {           
         FileDesc fd = sharedFileList.getFileDesc(f);
 
         // If it's an incomplete file, the only reference we 
@@ -1190,56 +1192,26 @@ public class FileManagerImpl implements FileManager, Service {
         if (fd instanceof IncompleteFileDesc) {
             sharedFileList.removeIncomplete((IncompleteFileDesc)fd);
             removeSharedUrnIndex(fd, false);
-
-            // Notify the GUI...                                              
-            if(notify)
-                dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FILE, fd));
-
-            return fd;
+        } else {
+            sharedFileList.remove(fd);
+            //Remove hash information.
+            removeSharedUrnIndex(fd, true);
         }
-
-        sharedFileList.remove(fd);
-        File parent = f.getParentFile();
-        // files that are forcibly shared over the network aren't counted
-        if(SharingUtils.isForcedShareDirectory(parent)) {
-            notify = false;
-        }
-
-
-        //Remove hash information.
-        removeSharedUrnIndex(fd, true);
-  
-        // Notify the GUI...        
-        if(notify)
-            dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FILE, fd));
         dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FD, fd));
-      
-        return fd;
+        return fd;   
     }
     
-    protected synchronized FileDesc removeStoreFile(File f, boolean notify){
-        //Take care of case, etc.
-        try {
-            f = FileUtils.getCanonicalFile(f);
-        } catch (IOException e) {
-            return null;
-        }        
-
-        // Look for matching file ...         
-        if (!storeFileList.contains(f))
-            return null;
-        
+    /**
+     * Removes the store FileDesc reference
+     */
+    private synchronized FileDesc removeStoreFileDesc(File f){
         FileDesc fd = storeFileList.getFileDesc(f);
         storeFileList.remove(fd);
 
         _data.SPECIAL_STORE_FILES.remove(f);
 
         //Remove hash information.
-        removeStoreUrnIndex(fd, true);
- 
-        // Notify the GUI...              
-        if(notify)
-            dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_STORE_FILE, fd));
+        removeStoreUrnIndex(fd);
         dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FD, fd));
 
         return fd;
@@ -1297,7 +1269,7 @@ public class FileManagerImpl implements FileManager, Service {
         incompleteFile, urns, fileIndex, name, size, vf);
         sharedFileList.addIncompleteFile(incompleteFile, ifd);
         fileURNSUpdated(ifd);
-        
+        //TODO: check incomplete file
         dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FILE, ifd));
     }
     
@@ -1351,8 +1323,8 @@ public class FileManagerImpl implements FileManager, Service {
      * Removes any URN index information for desc from store files
      * @param purgeState true if any state should also be removed (creation time, altlocs) 
      */
-    private synchronized void removeStoreUrnIndex(FileDesc fileDesc, boolean purgeState) {
-        removeUrnIndex(fileDesc, storeFileList, purgeState);
+    private synchronized void removeStoreUrnIndex(FileDesc fileDesc) {
+        removeUrnIndex(fileDesc, storeFileList, true);
     }
     
     private synchronized void removeUrnIndex(FileDesc fileDesc, FileList fileList, boolean purgeState) {
@@ -1370,50 +1342,71 @@ public class FileManagerImpl implements FileManager, Service {
             //Delete index from set.  Remove set if empty.
             indices.remove(fileDesc.getIndex());
             if (indices.size()==0 && purgeState) {
-                fileList.remove(urn);
                 dispatchFileEvent(new FileManagerEvent(this,Type.REMOVE_URN, urn));
+                fileList.remove(urn);
             }
-        }
+        }            
     }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#renameFileIfSharedOrStore(java.io.File, java.io.File, com.limegroup.gnutella.FileEventListener)
      */
-    public synchronized void renameFileIfSharedOrStore(final File oldName, final File newName) {
-        FileDesc toRemove = getFileDescForFile(oldName);
-        if (toRemove == null ) {
-            dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FAILED_FILE, oldName));
-            return;
-        }
-        
+    public synchronized void renameFileIfSharedOrStore(File oldName, final File newName) {
         if(LOG.isDebugEnabled())
-            LOG.debug("Attempting to rename: " + oldName + " to: "  + newName);
-            
-        List<LimeXMLDocument> xmlDocs = new LinkedList<LimeXMLDocument>(toRemove.getLimeXMLDocuments());
+            LOG.debug("Attempting to rename: " + oldName + " to: "  + newName);      
         
-        // if its a shared file, store files all have the same index in their filedescriptor
-        if( !storeFileList.contains(toRemove)) {
-		    final FileDesc removed = removeFileIfShared(oldName, false);
-            assert removed == toRemove : "invariant broken.";
-		    if (_data.SPECIAL_FILES_TO_SHARE.remove(oldName) && !isFileInCompletelySharedDirectory(newName))
-			    _data.SPECIAL_FILES_TO_SHARE.add(newName);
-			
-            // Prepopulate the cache with new URNs.
-            urnCache.get().addUrns(newName, removed.getUrns());
-
-            addFileIfSharedOrStore(newName, xmlDocs, _revision, Type.RENAME_FILE, Type.REMOVE_FILE, removed);
-        }   
-        // its a store files
-        else  {
-            final FileDesc removed = removeStoreFile(oldName, false);
-            assert removed == toRemove : "invariant broken.";
-            if (_data.SPECIAL_STORE_FILES.remove(oldName)) 
-                _data.SPECIAL_STORE_FILES.add(newName);
-            // Prepopulate the cache with new URNs.
-            urnCache.get().addUrns(newName, removed.getUrns());
-    
-            addFileIfSharedOrStore(newName, xmlDocs, _revision, Type.RENAME_FILE, Type.REMOVE_STORE_FILE, removed);
+        try {
+            oldName = FileUtils.getCanonicalFile(oldName);
+        } catch (IOException e) {
+            return;
+        }      
+        
+        // if its a shared file
+        if( sharedFileList.contains(oldName)) {
+            renameSharedFile(oldName, newName);
+        } else if(storeFileList.contains(oldName)) {
+            renameStoreFile(oldName, newName);
+        } else {
+            // couldn't find a FileDesc for this file
+            dispatchFileEvent(new FileManagerEvent(this, Type.RENAME_FILE_FAILED, oldName));
         }
+    }
+    
+    /**
+     * Renames a shared file
+     * @param oldName - old file name
+     * @param newName - new name of the file
+     */
+    private void renameSharedFile(final File oldName, final File newName) {       
+        final FileDesc removed = removeSharedFileDesc(oldName);
+
+        if (_data.SPECIAL_FILES_TO_SHARE.remove(oldName) && !isFileInCompletelySharedDirectory(newName))
+            _data.SPECIAL_FILES_TO_SHARE.add(newName);
+        
+        // Prepopulate the cache with new URNs.
+        urnCache.get().addUrns(newName, removed.getUrns());
+
+        List<LimeXMLDocument> xmlDocs = new LinkedList<LimeXMLDocument>(removed.getLimeXMLDocuments());
+        
+        addFileIfSharedOrStore(newName, xmlDocs, _revision, Type.RENAME_FILE, Type.REMOVE_FILE, removed);
+    }
+    
+    /**
+     * Renames a store file
+     * @param oldName - old file name
+     * @param newName - new name of the file
+     */
+    private void renameStoreFile(final File oldName, final File newName) {       
+        final FileDesc removed = removeStoreFileDesc(oldName);
+
+        if (_data.SPECIAL_STORE_FILES.remove(oldName)) 
+            _data.SPECIAL_STORE_FILES.add(newName);
+        // Prepopulate the cache with new URNs.
+        urnCache.get().addUrns(newName, removed.getUrns());
+
+        List<LimeXMLDocument> xmlDocs = new LinkedList<LimeXMLDocument>(removed.getLimeXMLDocuments());
+        
+        addFileIfSharedOrStore(newName, xmlDocs, _revision, Type.RENAME_FILE, Type.REMOVE_STORE_FILE, removed);
     }
     
 
@@ -1421,12 +1414,14 @@ public class FileManagerImpl implements FileManager, Service {
      * @see com.limegroup.gnutella.FileManager#fileChanged(java.io.File)
      */
     public void fileChanged(File f) {
-        if (LOG.isTraceEnabled())
+        if (LOG.isDebugEnabled())
             LOG.debug("File Changed: " + f);
 
         FileDesc fd = getFileDescForFile(f);
-        if (fd == null)
-            return;
+        if (fd == null) {
+            dispatchFileEvent(new FileManagerEvent(this, Type.CHANGE_FILE_FAILED, f));
+            return;            
+        }
 
         List<LimeXMLDocument> xmlDocs = fd.getLimeXMLDocuments();
         if (LimeXMLUtils.isEditableFormat(f)) {
@@ -1440,10 +1435,20 @@ public class FileManagerImpl implements FileManager, Service {
             }
         }
 
-        final FileDesc removed = removeFileIfSharedOrStore(f, false);
-        assert fd == removed : "wanted to remove: " + fd + "\ndid remove: " + removed;
+        if( sharedFileList.contains(f)) {
+            final FileDesc removed = removeSharedFileDesc(f);
+            assert fd == removed : "wanted to remove: " + fd + "\ndid remove: " + removed;
 
-        addFileIfSharedOrStore(f, xmlDocs, _revision, Type.CHANGE_FILE, Type.REMOVE_FILE, removed);
+            addFileIfSharedOrStore(f, xmlDocs, _revision, Type.CHANGE_FILE, Type.REMOVE_FILE, removed);
+        } else if( storeFileList.contains(f)){
+            final FileDesc removed = removeStoreFileDesc(f);
+            assert fd == removed : "wanted to remove: " + fd + "\ndid remove: " + removed;
+
+            addFileIfSharedOrStore(f, xmlDocs, _revision, Type.CHANGE_FILE, Type.REMOVE_FILE, removed);
+        } else {
+            // couldn't find a FileDesc for this file
+            dispatchFileEvent(new FileManagerEvent(this, Type.CHANGE_FILE_FAILED, f));
+        }
     }
     
     /* (non-Javadoc)
@@ -1718,7 +1723,7 @@ public class FileManagerImpl implements FileManager, Service {
      * Update actions do. If a FD exists, will dispatch an event with that, if not
      * the file is used during dispatching
      */
-    protected void resolveAndDispatchFileEvent(Type eventType, FileDesc fd, File file) {
+    private void resolveAndDispatchFileEvent(Type eventType, FileDesc fd, File file) {
         if(fd != null) 
             dispatchFileEvent(new FileManagerEvent(this,eventType,fd));
         else
@@ -1804,17 +1809,15 @@ public class FileManagerImpl implements FileManager, Service {
     private List<LimeXMLDocument> resolveWriteableDocs(List<LimeXMLDocument> allDocs,
             LimeXMLDocument id3Doc) {
         LimeXMLDocument audioDoc = null;
-        LimeXMLSchema audioSchema = limeXMLSchemaRepository.get().getSchema(LimeXMLNames.AUDIO_SCHEMA);
         
         for (LimeXMLDocument doc : allDocs) {
-            if (doc.getSchema() == audioSchema) {
+            if (doc.getSchema().getSchemaURI().equals(LimeXMLNames.AUDIO_SCHEMA)) {
                 audioDoc = doc;
                 break;
             }
         }
 
-        if (id3Doc.equals(audioDoc)) // No issue -- both documents are the
-                                        // same
+        if (id3Doc.equals(audioDoc)) // No issue -- both documents are the same
             return allDocs; // did not modify list, keep using it
 
         List<LimeXMLDocument> retList = new ArrayList<LimeXMLDocument>();
@@ -2036,10 +2039,34 @@ public class FileManagerImpl implements FileManager, Service {
         }
     }
     
-    private class Saver implements Runnable {
+    private class Saver implements Runnable, FileEventListener {
+        
+        private AtomicBoolean isDirty = new AtomicBoolean(false);
+        
         public void run() {
-            if (!shutdown && isLoadFinished())
+            if (!shutdown && isDirty.get()) {
+                isDirty.getAndSet(false);
                 save();
+            }
+        }
+
+        /**
+         * If a change occurs, write changes to disk
+         */
+        public void handleFileEvent(FileManagerEvent evt) {
+            switch(evt.getType()) {
+                case ADD_FILE:
+                case ADD_FOLDER:
+//                case ADD_STORE_FILE:
+                case ADD_STORE_FOLDER:
+                case CHANGE_FILE:
+                case REMOVE_FILE:
+                case REMOVE_FOLDER:
+                case REMOVE_STORE_FILE:
+                case REMOVE_STORE_FOLDER:
+                case RENAME_FILE:
+                    isDirty.getAndSet(true);
+            }
         }
     }
 }

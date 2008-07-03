@@ -33,6 +33,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
+import com.limegroup.gnutella.LimeWireCoreModule.FileEventListenerProvider;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
@@ -59,7 +60,6 @@ import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.MessageTestUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
-import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 
@@ -119,8 +119,6 @@ public class FileManagerTest extends LimeTestCase {
                 bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
             }
         });
-        
-//        injector.getInstance(Acceptor.class).setAddress(InetAddress.getLocalHost());
         
         fman = (FileManagerImpl)injector.getInstance(FileManager.class);
         keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
@@ -272,7 +270,7 @@ public class FileManagerTest extends LimeTestCase {
         f3 = createNewTestFile(11);
 
         FileManagerEvent result = addIfShared(new File("C:\\bad.ABCDEF"));
-        assertTrue(result.toString(), result.isFailedEvent());
+        assertTrue(result.toString(), result.isFailedAddEvent());
         
         result = addIfShared(f2);
         assertTrue(result.toString(), result.isAddEvent());
@@ -366,7 +364,7 @@ public class FileManagerTest extends LimeTestCase {
         addIfShared(f3);
 
         FileManagerEvent result = renameFile(f2, new File("c:\\asdfoih"));
-        assertTrue(result.toString(), result.isFailedEvent());
+        assertTrue(result.toString(), result.getType() == FileManagerEvent.Type.RENAME_FILE_FAILED);
         assertEquals(f2, result.getFiles()[0]);
         
         result = renameFile(f1, f2);
@@ -395,7 +393,7 @@ public class FileManagerTest extends LimeTestCase {
         //Try to add a huge file.  (It will be ignored.)
         f4 = createFakeTestFile(MAX_FILE_SIZE+1l);
         FileManagerEvent result = addIfShared(f4);
-        assertTrue(result.toString(), result.isFailedEvent());
+        assertTrue(result.toString(), result.isFailedAddEvent());
         assertEquals(f4, result.getFiles()[0]);
         assertEquals("unexpected number of files", 1, fman.getSharedFileList().getNumFiles());
         assertEquals("unexpected fman size", 11, fman.getSharedFileList().getNumBytes());
@@ -941,7 +939,7 @@ public class FileManagerTest extends LimeTestCase {
                         Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor"))),
                 injector.getInstance(LimeXMLDocumentFactory.class),
                 injector.getInstance(MetaDataReader.class),
-                injector.getProvider(LimeXMLSchemaRepository.class));
+                injector.getInstance(FileEventListenerProvider.class).fileEventListener());
         waitForLoad();
         
         //  assert that "shared" is shared
@@ -994,7 +992,7 @@ public class FileManagerTest extends LimeTestCase {
 		// test if too large files are not shared
 		File tooLarge = createFakeTestFile(MAX_FILE_SIZE+1l);
 		FileManagerEvent result = addAlways(tooLarge);
-		assertTrue(result.toString(), result.isFailedEvent());
+		assertTrue(result.toString(), result.isFailedAddEvent());
 		assertEquals(tooLarge, result.getFiles()[0]);
 		
 		// test if files in shared directories are still shared
@@ -1012,7 +1010,7 @@ public class FileManagerTest extends LimeTestCase {
 		// test that non-existent files are not shared
 		test = new File("non existent file").getCanonicalFile();
 		result = addAlways(test);
-		assertTrue(result.toString(), result.isFailedEvent());
+		assertTrue(result.toString(), result.isFailedAddEvent());
 		assertEquals(test, result.getFiles()[0]);
 		
 		// test that file in non shared directory is shared
@@ -1071,7 +1069,7 @@ public class FileManagerTest extends LimeTestCase {
 		waitForLoad(); // set the extensions correctly.
 		File nonshareable = createNewNamedTestFile(10, "nonshareable extension");
 		FileManagerEvent result = addIfShared(nonshareable);
-		assertTrue(result.toString(), result.isFailedEvent());
+		assertTrue(result.toString(), result.isFailedAddEvent());
 		assertEquals(nonshareable, result.getFiles()[0]);
 		nonshareable.delete();
 		
@@ -1080,24 +1078,24 @@ public class FileManagerTest extends LimeTestCase {
 		waitForLoad(); // set the new extensions
 		File validExt = createNewNamedTestFile(10, "valid extension", _sharedDir.getParentFile());
 		result = addIfShared(validExt);
-		assertTrue(result.toString(), result.isFailedEvent());
+		assertTrue(result.toString(), result.isFailedAddEvent());
 		assertEquals(validExt, result.getFiles()[0]);
 
 		// nonexistent in shared directory
 		File nonexistent = new File(_sharedDir, "test." + SHARE_EXTENSION);
 		result = addIfShared(nonexistent);
-		assertTrue(result.toString(), result.isFailedEvent());
+		assertTrue(result.toString(), result.isFailedAddEvent());
 		assertEquals(nonexistent, result.getFiles()[0]);
 		
 		// nonexistent in non shared directory
 		nonexistent = new File("nonexistent." + SHARE_EXTENSION).getCanonicalFile();
 		result = addIfShared(nonexistent);
-		assertTrue(result.toString(), result.isFailedEvent());
+		assertTrue(result.toString(), result.isFailedAddEvent());
 		assertEquals(nonexistent, result.getFiles()[0]);
 		
 		// nonexistent, but specially shared
 		result = addAlways(nonexistent);
-		assertTrue(result.toString(), result.isFailedEvent());
+		assertTrue(result.toString(), result.isFailedAddEvent());
 		assertEquals(nonexistent, result.getFiles()[0]);
 		
 		// shareable files:
@@ -1480,7 +1478,7 @@ public class FileManagerTest extends LimeTestCase {
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(d1);
         FileManagerEvent result = addIfShared(store1, l1);
-        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertTrue(result.toString(), result.isAddEvent());
         assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
         //create a file after the load
@@ -1559,7 +1557,7 @@ public class FileManagerTest extends LimeTestCase {
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(d1);
         FileManagerEvent result = addIfShared(store1, l1);
-        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertTrue(result.toString(), result.isAddEvent());
         assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
         store2 = createNewTestStoreFile();
@@ -1567,7 +1565,7 @@ public class FileManagerTest extends LimeTestCase {
         List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
         l2.add(d2);
         result = addIfShared(store2, l2);
-        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertTrue(result.toString(), result.isAddEvent());
         assertEquals(d2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
         // create normal files in LWS directory (these are not in a shared directory)
@@ -1607,14 +1605,14 @@ public class FileManagerTest extends LimeTestCase {
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(d1);
         FileManagerEvent result = addIfShared(store1, l1);
-        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertTrue(result.toString(), result.isAddEvent());
         assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
         LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio2));
         List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
         l2.add(d2);
         result = addIfShared(store2, l2);
-        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertTrue(result.toString(), result.isAddEvent());
         assertEquals(d2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
 
@@ -1721,14 +1719,14 @@ public class FileManagerTest extends LimeTestCase {
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(d1);
         FileManagerEvent result = addIfShared(store1, l1);
-        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertTrue(result.toString(), result.isAddEvent());
         assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
         LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio2));
         List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
         l2.add(d2);
         result = addIfShared(store2, l2);
-        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertTrue(result.toString(), result.isAddEvent());
         assertEquals(d2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
 //        LimeXMLDocument d3 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(sharedAudio));
@@ -1781,7 +1779,7 @@ public class FileManagerTest extends LimeTestCase {
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(d1);
         FileManagerEvent result = addIfShared(store1, l1);
-        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertTrue(result.toString(), result.isAddEvent());
         assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
         // should only be sharing one file
@@ -1869,7 +1867,7 @@ public class FileManagerTest extends LimeTestCase {
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(d1);
         FileManagerEvent result = addIfShared(store1, l1);
-        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertTrue(result.toString(), result.isAddEvent());
         assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
         store2 = createNewTestStoreFile();
@@ -1877,7 +1875,7 @@ public class FileManagerTest extends LimeTestCase {
         List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
         l2.add(d2);
         result = addIfShared(store2, l2);
-        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertTrue(result.toString(), result.isAddEvent());
         assertEquals(d2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
 
     
@@ -1908,7 +1906,7 @@ public class FileManagerTest extends LimeTestCase {
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(d1);
         FileManagerEvent result = addIfShared(store1, l1);
-        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertTrue(result.toString(), result.isAddEvent());
         assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
         store2 = createNewTestStoreFile();
@@ -1916,7 +1914,7 @@ public class FileManagerTest extends LimeTestCase {
         List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
         l2.add(d2);
         result = addIfShared(store2, l2);
-        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertTrue(result.toString(), result.isAddEvent());
         assertEquals(d2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
 
         // try sharing the store file
@@ -1968,19 +1966,23 @@ public class FileManagerTest extends LimeTestCase {
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(d1);
         FileManagerEvent result = addIfShared(store1, l1);
-        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertTrue(result.toString(), result.isAddEvent());
         assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
 
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
+        
         // create a third store file but it not added anywhere
         store3 = createNewTestStoreFile();
     
         // try renaming unadded file, should fail
         result = renameFile(store3, new File("c:\\asdfoih.mp3"));
-        assertTrue(result.toString(), result.isFailedEvent());
+        assertTrue(result.toString(), result.getType() == FileManagerEvent.Type.RENAME_FILE_FAILED);
 
         // rename a valid store file
         result = renameFile(store1, store3);
         assertTrue(result.toString(), result.isRenameEvent());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
         assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
         assertEquals("Unexpected file renamed", store1, result.getFileDescs()[0].getFile());
         assertEquals("Unexpected file added", store3, result.getFileDescs()[1].getFile());
@@ -2071,7 +2073,7 @@ public class FileManagerTest extends LimeTestCase {
         List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
         l1.add(d1);
         FileManagerEvent result = addIfShared(f1, l1);
-        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertTrue(result.toString(), result.isAddEvent());
         assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
         //create a query with just a file name match, should get no responses
@@ -2113,7 +2115,7 @@ public class FileManagerTest extends LimeTestCase {
         l2.add(d3);
         l2.add(d2);
         FileManagerEvent result2 = addIfShared(f2, l2);
-        assertTrue(result2.toString(), result2.isAddStoreEvent());
+        assertTrue(result2.toString(), result2.isAddEvent());
             
           //create a query with just a file name match, should get no responses
         Response[] r5 = keywordIndex.query(queryRequestFactory.createQuery("small town hero 2"));
@@ -2198,7 +2200,7 @@ public class FileManagerTest extends LimeTestCase {
         l1.add(d1);
         
         FileManagerEvent result = addIfShared(f2, l1);
-        assertTrue(result.toString(), result.isAddStoreEvent());
+        assertTrue(result.toString(), result.isAddEvent());
         assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         qrt = qrpUpdater.getQRT();
         

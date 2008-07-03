@@ -1016,7 +1016,7 @@ public class UploadTest extends LimeTestCase {
             } else {
                 result = null;
             }
-            assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZ\n", result);
+            assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZ" + System.getProperty("line.separator"), result);
         } finally {
             HttpClientUtils.releaseConnection(response);
         }
