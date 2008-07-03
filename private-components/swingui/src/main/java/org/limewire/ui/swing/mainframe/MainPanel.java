@@ -9,7 +9,7 @@ public class MainPanel extends JPanel {
 
     public MainPanel() {
         add(new JLabel("main"));
-        setBackground(Color.WHITE);
+        setBackground(Color.YELLOW);
     }
 
 }
