@@ -40,11 +40,11 @@
 	<classpathentry kind="src" path="core/examples/mojito"/>
 	<classpathentry kind="src" output="components/geocode/build/classes" path="components/geocode/src/main/java"/>
 	<classpathentry kind="src" output="components/geocode/build/tests" path="components/geocode/src/test/java"/>
-    <classpathentry kind="src" output="components/jingle/build/classes" path="components/jingle/src/main/java"/>
+	<classpathentry kind="src" output="components/jingle/build/classes" path="components/jingle/src/main/java"/>
 	<classpathentry kind="src" output="components/jingle/build/tests" path="components/jingle/src/test/java"/>
-    <classpathentry kind="src" output="components/xmpp/build/classes" path="components/xmpp/src/main/java"/>
+	<classpathentry kind="src" output="components/xmpp/build/classes" path="components/xmpp/src/main/java"/>
 	<classpathentry kind="src" output="components/xmpp/build/tests" path="components/xmpp/src/test/java"/>
-    <classpathentry excluding="windows/|windows/" kind="src" path="lib/resources"/>
+	<classpathentry excluding="windows/|windows/" kind="src" path="lib/resources"/>
 	<classpathentry kind="src" path="lib/resources/windows"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
@@ -108,14 +108,14 @@
 	<classpathentry kind="lib" path="lib/jars/mozdom4java.jar" sourcepath="lib/sources/mozdom4java-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/MozillaInterfaces-1.9.jar" sourcepath="lib/sources/MozillaInterfaces-1.9-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/MozillaGlue-1.9.jar" sourcepath="lib/sources/MozillaGlue-1.9-src.zip"/>
-	<classpathentry kind="lib" path="lib/jars/mozswing.jar" sourcepath="lib/sources/MozSwing-src.zip"/>
+	<classpathentry kind="lib" path="lib/jars/mozswing.jar" sourcepath="lib/sources/mozswing-src.zip"/>
 	<classpathentry kind="lib" path="lib/jars/jna.jar"/>
-    <classpathentry kind="lib" path="lib/jars/smack.jar"/>
-    <classpathentry kind="lib" path="lib/jars/smackx-debug.jar"/>
-    <classpathentry kind="lib" path="lib/jars/smackx.jar"/>
-    <classpathentry kind="lib" path="lib/jars/Speex.jar"/>
-    <classpathentry kind="lib" path="lib/jars/jspeex-0.9.7-jfcom.jar"/>
-    <classpathentry kind="lib" path="lib/jars/jstun.jar"/>
-    <classpathentry kind="lib" path="lib/jars/jmf.jar"/>
-    <classpathentry kind="output" path="bin"/>
+	<classpathentry kind="lib" path="lib/jars/smack.jar"/>
+	<classpathentry kind="lib" path="lib/jars/smackx-debug.jar"/>
+	<classpathentry kind="lib" path="lib/jars/smackx.jar"/>
+	<classpathentry kind="lib" path="lib/jars/Speex.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jspeex-0.9.7-jfcom.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jstun.jar"/>
+	<classpathentry kind="lib" path="lib/jars/jmf.jar"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>
