@@ -1,17 +1,16 @@
 package org.limewire.ui.swing.mainframe;
 
 import java.awt.CardLayout;
-import java.awt.Color;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.limewire.ui.swing.library.DocumentPanel;
 import org.limewire.ui.swing.library.ImagePanel;
 import org.limewire.ui.swing.library.MusicPanel;
 import org.limewire.ui.swing.library.VideoPanel;
+import org.limewire.ui.swing.nav.NavigableTarget;
 
-public class MainPanel extends JPanel {
+public class MainPanel extends JPanel implements NavigableTarget {
 
     private final CardLayout cardLayout;
 
@@ -28,7 +27,7 @@ public class MainPanel extends JPanel {
         // setBackground(Color.YELLOW);
     }
 
-    public void showPanel(String key) {
+    public void showNavigablePanel(String key) {
         cardLayout.show(this, key);
     }
 }

@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import org.limewire.ui.swing.nav.DownloadSummaryPanel;
 import org.limewire.ui.swing.nav.FilesSharingSummaryPanel;
 import org.limewire.ui.swing.nav.NavTree;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.SearchBar;
 import org.limewire.ui.swing.util.Line;
 
@@ -22,9 +23,9 @@ public class LeftPanel extends JPanel {
     private final FilesSharingSummaryPanel filesPanel;
     
     
-    public LeftPanel() {
+    public LeftPanel(Navigator navigator) {
         this.searchBar = new SearchBar();
-        this.navTree = new NavTree();
+        this.navTree = new NavTree(navigator);
         this.downloadPanel = new DownloadSummaryPanel();
         this.filesPanel = new FilesSharingSummaryPanel();
         

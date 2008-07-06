@@ -14,8 +14,11 @@ public class NavTree extends JPanel {
     
     private final LimeWireNavList limewire;
     private final LibraryNavList library;
+    private final Navigator navigator;
 
-    public NavTree() {
+    public NavTree(Navigator navigator) {
+        this.navigator = navigator;
+        
         setOpaque(false);
         
         limewire = new LimeWireNavList();
@@ -52,7 +55,7 @@ public class NavTree extends JPanel {
                 } else { // if(library.isListSourceFrom(list)) {
                     limewire.clearSelection();
                 }
-                Navigator.getInstance().showMainPanel(list.getSelectedValue().toString());
+                navigator.showNavigablePanel(list.getSelectedValue().toString());
             }
         }
     }

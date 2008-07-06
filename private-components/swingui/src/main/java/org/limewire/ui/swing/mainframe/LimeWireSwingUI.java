@@ -15,14 +15,15 @@ public class LimeWireSwingUI extends JPanel {
     private final LeftPanel leftPanel;
     private final MainPanel mainPanel;
     private final StatusPanel statusPanel;
+    private final Navigator navigator;
     
     public LimeWireSwingUI() {
-        this.topPanel = new TopPanel();
-        this.leftPanel = new LeftPanel();
         this.mainPanel = new MainPanel();
+        this.navigator = new Navigator(mainPanel);
+        this.topPanel = new TopPanel();
+        this.leftPanel = new LeftPanel(navigator);
         this.statusPanel = new StatusPanel();
         
-        Navigator.getInstance().setMainPanel(mainPanel);
         
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);

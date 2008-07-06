@@ -5,41 +5,27 @@ package org.limewire.ui.swing.nav;
 
 import javax.swing.JPanel;
 
-import org.limewire.ui.swing.mainframe.MainPanel;
-
-/**
- * 
- */
 public class Navigator {
 
-    public static enum TREE {
+    public static enum NavItem {
         LIBRARY, LIMEWIRE
     };
 
-    private static final Navigator INSTANCE = new Navigator();
+    private final NavigableTarget navTarget;
     
-    private MainPanel mainPanel;
+    public Navigator(NavigableTarget navTarget) {
+        this.navTarget = navTarget;
+    } 
 
-    private Navigator() {
-
-    }
-    
-    public static Navigator getInstance(){
-        return INSTANCE;
-    }
-
-    public void setMainPanel(MainPanel mainPanel){
-        this.mainPanel = mainPanel;
-    }
-    public void addMainPanel(TREE target, String key, JPanel panel) {
+    public void addNavigablePanel(NavItem target, String key, JPanel panel) {
 
     }
 
-    public void removeMainPanel(TREE target, String key) {
+    public void removeNavigablePanel(NavItem target, String key) {
 
     }
 
-    public void showMainPanel(String key) {
-         mainPanel.showPanel(key);
+    public void showNavigablePanel(String key) {
+        navTarget.showNavigablePanel(key);
     }
 }
