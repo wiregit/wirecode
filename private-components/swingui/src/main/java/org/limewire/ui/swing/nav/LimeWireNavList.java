@@ -1,12 +1,15 @@
 package org.limewire.ui.swing.nav;
 
+import org.limewire.ui.swing.mainframe.HomePanel;
+import org.limewire.ui.swing.mainframe.StorePanel;
+
 public class LimeWireNavList extends NavList {
     
     public LimeWireNavList() {
         super("LimeWire");
         
-        addListItem("Home");
-        addListItem("LimeWire Store");
+        addListItem(HomePanel.NAME);
+        addListItem(StorePanel.NAME);
     }
 
 }

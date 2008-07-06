@@ -52,6 +52,7 @@ public class NavTree extends JPanel {
                 } else { // if(library.isListSourceFrom(list)) {
                     limewire.clearSelection();
                 }
+                Navigator.getInstance().showMainPanel(list.getSelectedValue().toString());
             }
         }
     }

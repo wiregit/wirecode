@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 
 import javax.swing.JPanel;
 
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.util.Line;
 
 public class LimeWireSwingUI extends JPanel {
@@ -20,6 +21,8 @@ public class LimeWireSwingUI extends JPanel {
         this.leftPanel = new LeftPanel();
         this.mainPanel = new MainPanel();
         this.statusPanel = new StatusPanel();
+        
+        Navigator.getInstance().setMainPanel(mainPanel);
         
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
