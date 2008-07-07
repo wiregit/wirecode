@@ -69,6 +69,12 @@ public interface BTMetaInfo {
      * @return array of <tt>URL</tt> storing the addresses of the trackers
      */
     public abstract URI[] getTrackers();
+    
+    /**
+     * 
+     * @return array of <tt>URL</tt> storing the addresses of the webseeds, null if no such addresses exist.
+     */
+    public abstract URI[] getWebSeeds();
 
     /**
      * Returns which message digest was used to create _hashes.

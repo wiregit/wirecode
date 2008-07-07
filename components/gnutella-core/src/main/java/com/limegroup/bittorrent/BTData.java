@@ -1,5 +1,6 @@
 package com.limegroup.bittorrent;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +33,8 @@ public interface BTData {
      * The URL of the tracker.
      */
     public String getAnnounce();
+    
+    public URI[] getWebSeeds();
 
     /**
      * @return a list of subfiles of this torrent if multiple files, or null 

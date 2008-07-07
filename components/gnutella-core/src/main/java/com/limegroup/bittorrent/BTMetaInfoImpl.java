@@ -57,7 +57,12 @@ public class BTMetaInfoImpl implements BTMetaInfo {
 	 * torrent
 	 */
     private final URI[] _trackers;
-
+    
+    /**
+     * An array for URL[] containing all webseeds of this torrent.
+     */
+    private final URI[] _webSeeds;
+    
 	/**
 	 * FileDesc for the GUI
 	 */
@@ -217,8 +222,15 @@ public class BTMetaInfoImpl implements BTMetaInfo {
      * @see com.limegroup.bittorrent.BTMetaInfo#getTrackers()
      */
 	public URI[] getTrackers() {
-		return _trackers;
-	}
+        return _trackers;
+    }
+
+	/* (non-Javadoc)
+     * @see com.limegroup.bittorrent.BTMetaInfo#getWebSeeds()
+     */
+    public URI[] getWebSeeds() {
+        return _webSeeds;
+    }
 
 	/* (non-Javadoc)
      * @see com.limegroup.bittorrent.BTMetaInfo#getMessageDigest()
@@ -244,7 +256,8 @@ public class BTMetaInfoImpl implements BTMetaInfo {
             throw new InvalidDataException(e);
         }
         _trackers = memento.getTrackers();
-		Float ratio = memento.getRatio();
+        _webSeeds = memento.getWebSeeds();
+        Float ratio = memento.getRatio();
         diskManagerData = memento.getFolderData();
 		
 		if (_hashes == null || pieceLength == null || fileSystem == null ||
@@ -279,7 +292,9 @@ public class BTMetaInfoImpl implements BTMetaInfo {
 		} catch (URISyntaxException e) {
             //URIUtils.error(e);
             throw new ValueException("bad tracker: " + data.getAnnounce());
-		}
+        }
+        
+        _webSeeds = data.getWebSeeds();        
 
         isPrivate = data.isPrivate();
         
@@ -330,6 +345,7 @@ public class BTMetaInfoImpl implements BTMetaInfo {
         memento.setPrivate(isPrivate);
         memento.setRatio(getRatio());
         memento.setTrackers(_trackers);
+        memento.setWebSeeds(_webSeeds);
         return memento;
     }
 
