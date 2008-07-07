@@ -49,7 +49,7 @@ public class ServiceRegistryIntegrationTest extends LimeTestCase {
         "Statistic Management", "StatisticsAccumulatorImpl", 
         "Upload Management", "HTTPUploadManager", 
         "Promotion System", "PromotionServicesImpl", 
-        "Shared Files", "MetaFileManager", 
+        "Shared Files", "FileManagerImpl", 
         "Ultrapeer/DHT Management", "NodeAssignerImpl", 
         "Connection Listener", "AcceptorImpl", 
         "UPnP", "", 
