@@ -55,6 +55,7 @@ public class LeftPanel extends JPanel {
         scrollableNav.getViewport().setOpaque(false);
         scrollableNav.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollableNav.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollableNav.setBorder(null);
         add(scrollableNav, gbc);
         
         gbc.fill = GridBagConstraints.HORIZONTAL;
