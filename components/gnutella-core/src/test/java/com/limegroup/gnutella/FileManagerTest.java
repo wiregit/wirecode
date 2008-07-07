@@ -385,14 +385,14 @@ public class FileManagerTest extends LimeTestCase {
     
     public void testFileChangedNoFD() throws Exception {
         waitForLoad();
-        f1 = createNewNameStoreTestFile("name", _sharedDir);
+        f1 = createNewNamedTestFile(100, "name", _sharedDir);
         
         FileManagerEvent result = fileChanged(f1);
         assertEquals(result.getType(), FileManagerEvent.Type.CHANGE_FILE_FAILED);
     }
     
     public void testChangeSharedFile() throws Exception {
-        f1 = createNewNameStoreTestFile("name", _sharedDir);
+        f1 = createNewNamedTestFile(100, "name", _sharedDir);
         waitForLoad();
         
         assertEquals(1, fman.getSharedFileList().getNumFiles());
@@ -416,17 +416,10 @@ public class FileManagerTest extends LimeTestCase {
     
     public void testChangeStoreFile() throws Exception {
 
-        waitForLoad();
-        
         f1 = createNewTestStoreFile();
-        String storeAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\"";
         
-        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
-        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
-        l1.add(d1);
-        FileManagerEvent result = addIfShared(f1, l1);
-        
-        assertEquals(result.getType(), FileManagerEvent.Type.ADD_FILE);
+        waitForLoad();
+
         assertEquals(1, fman.getStoreFileList().getNumFiles());
         
         FileDesc fd = fman.getFileDescForFile(f1);
@@ -434,7 +427,7 @@ public class FileManagerTest extends LimeTestCase {
         LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString("title=\"Alive 2\""));
         fd.addLimeXMLDocument(d2);
         
-        result = fileChanged(f1);
+        FileManagerEvent result = fileChanged(f1);
         assertEquals(result.getType(), FileManagerEvent.Type.CHANGE_FILE); 
     }
     
@@ -1524,18 +1517,10 @@ public class FileManagerTest extends LimeTestCase {
      */
     public void testAddOneStoreFile() throws Exception {
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
-        String storeAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\"";
+
+        store1 = createNewTestStoreFile();
         
         waitForLoad();
-        
-        // create a store audio file with limexmldocument preventing sharing
-        store1 = createNewTestStoreFile();
-        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
-        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
-        l1.add(d1);
-        FileManagerEvent result = addIfShared(store1, l1);
-        assertTrue(result.toString(), result.isAddEvent());
-        assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
         
         //create a file after the load
         store2 = createNewTestFile(5); 
@@ -1601,32 +1586,16 @@ public class FileManagerTest extends LimeTestCase {
     public void testNonSharedStoreFolder() throws Exception { 
         assertEquals("Unexpected number of store files", 0, fman.getSharedFileList().getNumFiles());
 
+        store1 = createNewNameStoreTestFile("FileManager_unit_test_Store", _storeDir);
+        store2 = createNewNameStoreTestFile2("FileManager_unit_test_Store", _storeDir);
+        f1 = createNewNamedTestFile(4, "FileManager_unit_test1", _storeDir);
+
         // load the files into the manager
         waitForLoad();
         
-        String storeAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\"";
-        String storeAudio2 = "title=\"Alive\" artist=\"small town hero\" album=\"some other album name\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2006\"";
-        
-        // create a file from LWS
-        store1 = createNewTestStoreFile();
-        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
-        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
-        l1.add(d1);
-        FileManagerEvent result = addIfShared(store1, l1);
-        assertTrue(result.toString(), result.isAddEvent());
-        assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
-        
-        store2 = createNewTestStoreFile();
-        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio2));
-        List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
-        l2.add(d2);
-        result = addIfShared(store2, l2);
-        assertTrue(result.toString(), result.isAddEvent());
-        assertEquals(d2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
-        
         // create normal files in LWS directory (these are not in a shared directory)
-        f1 = createNewNamedTestFile(4, "FileManager_unit_test", _storeDir);
-        f2 = createNewNamedTestFile(4, "FileManager_unit_test", _storeDir);
+
+        f2 = createNewNamedTestFile(4, "FileManager_unit_test2", _storeDir);
         
         // fman should only have loaded the two store files into list
         assertEquals("Unexpected number of store files", 2, fman.getStoreFileList().getNumFiles());
@@ -1647,30 +1616,12 @@ public class FileManagerTest extends LimeTestCase {
         // create normal share files
         f1 = createNewTestFile(4);
         f2 = createNewTestFile(5);
-        // load the files into the manager
-        waitForLoad();
         
-        // create a file from LWS
         store1 = createNewNameStoreTestFile("FileManager_unit_store_test", _sharedDir);
-        store2 = createNewNameStoreTestFile("FileManager_unit_store_test", _sharedDir);
+        store2 = createNewNameStoreTestFile2("FileManager_unit_store_test", _sharedDir);
         
-        String storeAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\"";
-        String storeAudio2 = "title=\"Alive\" artist=\"small town hero\" album=\"some other album name\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2006\"";
-
-        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
-        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
-        l1.add(d1);
-        FileManagerEvent result = addIfShared(store1, l1);
-        assertTrue(result.toString(), result.isAddEvent());
-        assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
-        
-        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio2));
-        List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
-        l2.add(d2);
-        result = addIfShared(store2, l2);
-        assertTrue(result.toString(), result.isAddEvent());
-        assertEquals(d2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
-        
+        // load the files into the manager
+        waitForLoad();       
 
         // fman should only have loaded two shared files
         assertEquals("Unexpected number of shared files",2, fman.getSharedFileList().getNumFiles());
@@ -1740,201 +1691,147 @@ public class FileManagerTest extends LimeTestCase {
             0, sharedFiles.size());
     }
     
-    //TODO: not sure how to run these now without mocking out FM
-//    /**
-//     * Creates store files in both the store folder and the shared folder, creates non store files
-//     * in both the store folder and the shared folder. Initially only non-LWS files in the shared folder
-//     * are shared and all LWS files are displayed. After sharing the store folder, all non-LWS files are
-//     * shared and all store files remain unshared and displayed
-//     */
-//    public void testSharedFolderAlsoStoreFolder() throws Exception {
-//        
-//        assertEquals("Unexpected number of store files", 0, fman.getStoreFileList().getNumFiles());
-//       
-//        // create normal files in LWS directory (these are not in a shared directory)
-//        f1 = createNewNamedTestFile(4, "FileManager_unit_test", _storeDir);
-//        
-//        // create normal share files
-//        f2 = createNewTestFile(4);
-//        f3 = createNewTestFile(5);
-//
-//        // load the files into the manager
-//        waitForLoad();
-//        
-//        // create files in the store folder
-//        store1 = createNewTestStoreFile();
-//        // create a file from LWS in shared directory
-//        store2 = createNewNameStoreTestFile("FileManager_unit_store_test", _sharedDir);
-//        
-//
-//        
-//        String storeAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\"";
-//        String storeAudio2 = "title=\"Alive\" artist=\"small town hero\" album=\"some other album name\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2006\"";
-////        String sharedAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\"";
-//
-//        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
-//        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
-//        l1.add(d1);
-//        FileManagerEvent result = addIfShared(store1, l1);
-//        assertTrue(result.toString(), result.isAddEvent());
-//        assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
-//        
-//        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio2));
-//        List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
-//        l2.add(d2);
-//        result = addIfShared(store2, l2);
-//        assertTrue(result.toString(), result.isAddEvent());
-//        assertEquals(d2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
-//        
-////        LimeXMLDocument d3 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(sharedAudio));
-////        List<LimeXMLDocument> l3 = new ArrayList<LimeXMLDocument>();
-////        l3.add(d3);
-////        result = addIfShared(f1, l3);
-////        assertTrue(result.toString(), result.isAddEvent());
-////        assertEquals(d3, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
-//        
-//        // all three store files should be displayed
-//        assertEquals("Unexpected number of store files", 2, fman.getStoreFileList().getNumFiles());
-//        // fman should only have loaded two shared files
-//        assertEquals("Unexpected number of shared files",2, fman.getSharedFileList().getNumFiles());
-//        // one of the store files is in a shared directory so it is also individual store
-//        assertEquals("Unexpected number of individual store files", 2, fman.getIndividualStoreFiles().length);
-//        assertEquals("Unexpected number of inidividual share files", 0, fman.getIndividualFiles().length);
-//        System.out.println("adding store directory to share");
-//        // start sharing the store directory
-//        fman.addSharedFolder(_storeDir);
-//        
-//        // all LWS files are displayed
-//        assertEquals("Unexpected number of store files", 2, fman.getStoreFileList().getNumFiles());
-//        // all non LWS files are shared
-//        assertEquals("Unexpected number of shared files",3, fman.getSharedFileList().getNumFiles());
-//        assertEquals("Unexpected number of individual store files", 2, fman.getIndividualStoreFiles().length);
-//        assertEquals("Unexpected number of inidividual share files", 0, fman.getIndividualFiles().length);
-//        
-//        fman.removeFolderIfShared(_storeDir);
-//        
-//    }
-//    
-//    /**
-//     * Tests what happens when LWS songs are located in a shared directory that is not
-//     * the store directory. After unsharing that shared directory the store files are no
-//     * longer visible
-//     */
-//    public void testUnshareFolderContainingStoreFiles() throws Exception {
-//
-//        // create a file from LWS in shared directory
-//        f1 = createNewTestFile(4);
-//        
-//        // create a file from the LWS in the store directory
-//        store2 = createNewNameStoreTestFile("FileManager_unit_store_test", _storeDir);
-//        // load the files into the manager
-//        waitForLoad();
-//        
-//        store1 = createNewNameStoreTestFile("FileManager_unit_store_test", _sharedDir);
-//        String storeAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\"";
-//        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
-//        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
-//        l1.add(d1);
-//        FileManagerEvent result = addIfShared(store1, l1);
-//        assertTrue(result.toString(), result.isAddEvent());
-//        assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
-//        
-//        // should only be sharing one file
-//        assertEquals("Unexpected number of shared files", 1, fman.getSharedFileList().getNumFiles());
-//        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
-//       
-//        // check lws files, individual store files
-//        assertEquals("Unexpected number of store files", 2, fman.getStoreFileList().getNumFiles());
-//        assertEquals("Unexpeected number of individual store files", 1, fman.getIndividualStoreFiles().length);
-//        
-//        // unshare the shared directory
-//        fman.removeFolderIfShared(_sharedDir);       
-//        
-//        // should not share any files
-//        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
-//        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
-//        
-//        // check lws files, individual store files
-//        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
-//        assertEquals("Unexpected number of individual store files", 0, fman.getIndividualStoreFiles().length);
-//        
-//        fman.addSharedFolder(_sharedDir);
-//    }
-//    
-//    /**
-//     * Tests what files are displayed from the LWS when you switch to a new directory to save
-//     * LWS downloads to. Previously displayed files in the old directory are no longer
-//     * displayed, just LWS files in the new directory are displayed
-//     */
-//    public void testChangeStoreFolder() throws Exception {assertEquals("Unexpected number of store files", 0, fman.getStoreFileList().getNumFiles());
-//        
-//        // create alternative store directory to switch saving files to
-//        File newStoreFolder = new File(_baseDir, "store2");
-//        newStoreFolder.deleteOnExit();        
-//        newStoreFolder.mkdirs();
-//        
-//        // create a file from LWS
-//        store1 = createNewTestStoreFile();
-//        store2 = createNewTestStoreFile();
-//        
-//        //create a file after the load
-//        store3 = createNewNameStoreTestFile("FileManager_unit_store_test", newStoreFolder);
-//        // load the files into the manager
-//        waitForLoad();
-//
-//
-//        // fman should only have loaded the two store files into list
-//        assertEquals("Unexpected number of store files", 2, fman.getStoreFileList().getNumFiles());
-//        // fman should only have loaded no shared files
-//        assertEquals("Unexpected number of shared files",0, fman.getSharedFileList().getNumFiles());
-//                
-//        
-//        // change the store save directory
-//        SharingSettings.setSaveLWSDirectory(newStoreFolder);
-//        // load the files into the manager
-//        waitForLoad();
-//
-//       // fman should only have loaded the two store files into list
-//        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
-//        // fman should only have loaded two shared files
-//        assertEquals("Unexpected number of shared files",0, fman.getSharedFileList().getNumFiles());
-// 
-//        // check the list of individual store files (only the two store files should be displayed)
-//        //  any LWS files loaded into a shared directory will be returned here
-//        File[] storeFiles = fman.getIndividualStoreFiles();
-//        assertEquals("Unexpected number of store files", 0, storeFiles.length);
-//        
-//        SharingSettings.setSaveLWSDirectory(_storeDir);
-//        newStoreFolder.delete();
-//    }
+    /**
+     * Creates store files in both the store folder and the shared folder, creates non store files
+     * in both the store folder and the shared folder. Initially only non-LWS files in the shared folder
+     * are shared and all LWS files are displayed. After sharing the store folder, all non-LWS files are
+     * shared and all store files remain unshared and displayed
+     */
+    public void testSharedFolderAlsoStoreFolder() throws Exception {
+        
+        assertEquals("Unexpected number of store files", 0, fman.getStoreFileList().getNumFiles());
+       
+        // create normal files in LWS directory (these are not in a shared directory)
+        f1 = createNewNamedTestFile(4, "FileManager_unit_test", _storeDir);
+        
+        // create normal share files
+        f2 = createNewTestFile(4);
+        f3 = createNewTestFile(5);
+        
+        // create files in the store folder
+        store1 = createNewNameStoreTestFile("FileManager_unit_store_test", _storeDir);
+        // create a file from LWS in shared directory
+        store2 = createNewNameStoreTestFile2("FileManager_unit_store_test", _sharedDir);
+
+        // load the files into the manager
+        waitForLoad();
+        
+        // all three store files should be displayed
+        assertEquals("Unexpected number of store files", 2, fman.getStoreFileList().getNumFiles());
+        // fman should only have loaded two shared files
+        assertEquals("Unexpected number of shared files",2, fman.getSharedFileList().getNumFiles());
+        // one of the store files is in a shared directory so it is also individual store
+        assertEquals("Unexpected number of individual store files", 1, fman.getIndividualStoreFiles().length);
+        assertEquals("Unexpected number of inidividual share files", 0, fman.getIndividualFiles().length);
+        System.out.println("adding store directory to share");
+        // start sharing the store directory
+        fman.addSharedFolder(_storeDir);
+        
+        // all LWS files are displayed
+        assertEquals("Unexpected number of store files", 2, fman.getStoreFileList().getNumFiles());
+        // all non LWS files are shared
+        assertEquals("Unexpected number of shared files",3, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of individual store files", 1, fman.getIndividualStoreFiles().length);
+        assertEquals("Unexpected number of inidividual share files", 0, fman.getIndividualFiles().length);
+        
+        fman.removeFolderIfShared(_storeDir);
+        
+    }
+    
+    /**
+     * Tests what happens when LWS songs are located in a shared directory that is not
+     * the store directory. After unsharing that shared directory the store files are no
+     * longer visible
+     */
+    public void testUnshareFolderContainingStoreFiles() throws Exception {
+
+        // create a file from LWS in shared directory
+        f1 = createNewTestFile(4);
+        
+        // create a file from the LWS in the store directory
+        store2 = createNewNameStoreTestFile("FileManager_unit_store_test", _storeDir);
+        
+        store1 = createNewNameStoreTestFile2("FileManager_unit_store_test", _sharedDir);
+        
+        // load the files into the manager
+        waitForLoad();
+        
+        // should only be sharing one file
+        assertEquals("Unexpected number of shared files", 1, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
+       
+        // check lws files, individual store files
+        assertEquals("Unexpected number of store files", 2, fman.getStoreFileList().getNumFiles());
+        assertEquals("Unexpeected number of individual store files", 1, fman.getIndividualStoreFiles().length);
+        
+        // unshare the shared directory
+        fman.removeFolderIfShared(_sharedDir);       
+        
+        // should not share any files
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
+        
+        // check lws files, individual store files
+        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
+        assertEquals("Unexpected number of individual store files", 0, fman.getIndividualStoreFiles().length);
+        
+        fman.addSharedFolder(_sharedDir);
+    }
+    
+    /**
+     * Tests what files are displayed from the LWS when you switch to a new directory to save
+     * LWS downloads to. Previously displayed files in the old directory are no longer
+     * displayed, just LWS files in the new directory are displayed
+     */
+    public void testChangeStoreFolder() throws Exception {assertEquals("Unexpected number of store files", 0, fman.getStoreFileList().getNumFiles());
+        
+        // create alternative store directory to switch saving files to
+        File newStoreFolder = new File(_baseDir, "store2");
+        newStoreFolder.deleteOnExit();        
+        newStoreFolder.mkdirs();
+        
+        // create a file from LWS
+        store1 = createNewTestStoreFile();
+        
+        //create a file after the load
+        store3 = createNewNameStoreTestFile2("FileManager_unit_store_test", newStoreFolder);
+        // load the files into the manager
+        waitForLoad();
+
+
+        // fman should only have loaded the two store files into list
+        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
+        // fman should only have loaded no shared files
+        assertEquals("Unexpected number of shared files",0, fman.getSharedFileList().getNumFiles());
+                
+        
+        // change the store save directory
+        SharingSettings.setSaveLWSDirectory(newStoreFolder);
+        // load the files into the manager
+        waitForLoad();
+
+       // fman should only have loaded the two store files into list
+        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
+        // fman should only have loaded two shared files
+        assertEquals("Unexpected number of shared files",0, fman.getSharedFileList().getNumFiles());
+ 
+        // check the list of individual store files (only the two store files should be displayed)
+        //  any LWS files loaded into a shared directory will be returned here
+        File[] storeFiles = fman.getIndividualStoreFiles();
+        assertEquals("Unexpected number of store files", 0, storeFiles.length);
+        
+        SharingSettings.setSaveLWSDirectory(_storeDir);
+        newStoreFolder.delete();
+    }
     /**
      * Checks that removing a store file really removes the store file from the view
      */
     public void testRemoveOneStoreFile() throws Exception {
         
-        waitForLoad();
-        
-        assertEquals(0, fman.getStoreFileList().getNumFiles()); 
-        String storeAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\"";
-        String storeAudio2 = "title=\"Alive\" artist=\"small town hero\" album=\"some other album name\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2006\"";
-        
-        // create a file from LWS
         store1 = createNewTestStoreFile();
-        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
-        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
-        l1.add(d1);
-        FileManagerEvent result = addIfShared(store1, l1);
-        assertTrue(result.toString(), result.isAddEvent());
-        assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+        store2 = createNewTestStoreFile2();
         
-        store2 = createNewTestStoreFile();
-        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio2));
-        List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
-        l2.add(d2);
-        result = addIfShared(store2, l2);
-        assertTrue(result.toString(), result.isAddEvent());
-        assertEquals(d2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
-
+        waitForLoad();
     
         //Remove file that's shared.  Back to 1 file.                   
         assertEquals(2, fman.getStoreFileList().getNumFiles());     
@@ -1951,28 +1848,10 @@ public class FileManagerTest extends LimeTestCase {
     public void testAddFileAlwaysStoreFile() throws Exception {
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         
-        waitForLoad();
-        
-        assertEquals(0, fman.getStoreFileList().getNumFiles()); 
-        String storeAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\"";
-        String storeAudio2 = "title=\"Alive\" artist=\"small town hero\" album=\"some other album name\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2006\"";
-        
-        // create a file from LWS
         store1 = createNewTestStoreFile();
-        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
-        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
-        l1.add(d1);
-        FileManagerEvent result = addIfShared(store1, l1);
-        assertTrue(result.toString(), result.isAddEvent());
-        assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
-        
         store2 = createNewTestStoreFile();
-        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio2));
-        List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
-        l2.add(d2);
-        result = addIfShared(store2, l2);
-        assertTrue(result.toString(), result.isAddEvent());
-        assertEquals(d2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+        
+        waitForLoad();
 
         // try sharing the store file
         fman.addFileIfShared(store1);
@@ -2008,49 +1887,39 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals("Unexpected number of responses", 0, responses.length);  
     }
 
-    //TODO: Not sure how to test this now without mocking out parts of FM
-//    /**
-//     * Try renaming a file in the store
-//     */
-//    public void testRenameStoreFile() throws Exception {
-//        
-//        waitForLoad();
-//        
-//        String storeAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\"";
-//
-//        // create a file from LWS
-//        store1 = createNewTestStoreFile();
-//        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
-//        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
-//        l1.add(d1);
-//        FileManagerEvent result = addIfShared(store1, l1);
-//        assertTrue(result.toString(), result.isAddEvent());
-//        assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
-//
-//        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
-//        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
-//        
-//        // create a third store file but it not added anywhere
-//        store3 = createNewTestStoreFile();
-//    
-//        // try renaming unadded file, should fail
-//        result = renameFile(store3, new File("c:\\asdfoih.mp3"));
-//        assertTrue(result.toString(), result.getType() == FileManagerEvent.Type.RENAME_FILE_FAILED);
-//
-//        // rename a valid store file
-//        result = renameFile(store1, store3);
-//        assertTrue(result.toString(), result.isRenameEvent());
-//        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
-//        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
-//        assertEquals("Unexpected file renamed", store1, result.getFileDescs()[0].getFile());
-//        assertEquals("Unexpected file added", store3, result.getFileDescs()[1].getFile());
-//
-//        // renamed file should not be found, new name file should be found
-//        assertFalse(fman.getStoreFileList().contains(store1));
-//        assertTrue(fman.getStoreFileList().contains(store3));
-//        // still only two store files
-//        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
-//    }
+    /**
+     * Try renaming a file in the store
+     */
+    public void testRenameStoreFile() throws Exception {
+        
+        store1 = createNewTestStoreFile();
+        
+        waitForLoad();
+
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
+        
+        // create a third store file but it not added anywhere
+        store3 = createNewTestStoreFile2();
+    
+        // try renaming unadded file, should fail
+        FileManagerEvent result = renameFile(store3, new File("c:\\asdfoih.mp3"));
+        assertTrue(result.toString(), result.getType() == FileManagerEvent.Type.RENAME_FILE_FAILED);
+
+        // rename a valid store file
+        result = renameFile(store1, store3);
+        assertTrue(result.toString(), result.isRenameEvent());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
+        assertEquals("Unexpected file renamed", store1, result.getFileDescs()[0].getFile());
+        assertEquals("Unexpected file added", store3, result.getFileDescs()[1].getFile());
+
+        // renamed file should not be found, new name file should be found
+        assertFalse(fman.getStoreFileList().contains(store1));
+        assertTrue(fman.getStoreFileList().contains(store3));
+        // still only two store files
+        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
+    }
     
     // end Store Files Test
     
@@ -2591,14 +2460,35 @@ public class FileManagerTest extends LimeTestCase {
         return createNewNameStoreTestFile("FileManager_unit_store_test", _storeDir);
     }
     
+    private File createNewTestStoreFile2() throws Exception {
+        return createNewNameStoreTestFile2("FileManager_unit_store_test", _storeDir);
+    }
+    
     protected File createNewNameStoreTestFile(String name, File directory) throws Exception { 
+        
+        String dir = "com/limegroup/gnutella/";
+        
+        File f = TestUtils.getResourceFile(dir + "StoreTestFile.mp3");
+        assertTrue(f.exists());
         File file = File.createTempFile(name, ".mp3", directory);
+        
+        FileUtils.copy(f, file);
+        assertTrue(file.exists());
         file.deleteOnExit();
 
-        OutputStream out = new FileOutputStream(file);
-        out.write(new byte[5]);
-        out.flush();
-        out.close();
+        return FileUtils.getCanonicalFile(file);
+    }
+    
+    protected File createNewNameStoreTestFile2(String name, File directory) throws Exception {
+        String dir = "com/limegroup/gnutella/";
+        
+        File f = TestUtils.getResourceFile(dir + "StoreTestFile2.mp3");
+        assertTrue(f.exists());
+        File file = File.createTempFile(name, ".mp3", directory);
+        
+        FileUtils.copy(f, file);
+        assertTrue(file.exists());
+        file.deleteOnExit();
 
         return FileUtils.getCanonicalFile(file);
     }
