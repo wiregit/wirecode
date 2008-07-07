@@ -9,16 +9,16 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class RecentActivityPanel extends JPanel {
+public class NewAtLimePanel extends JPanel {
     
-    public RecentActivityPanel() {
+    public NewAtLimePanel() {
         setOpaque(false);
         setLayout(new GridBagLayout());
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
-        JLabel title = new JLabel("Recent Activity");
+        JLabel title = new JLabel("New @ Lime");
         title.setFont(title.getFont().deriveFont(Font.BOLD));
         add(title, gbc);
         
@@ -26,9 +26,9 @@ public class RecentActivityPanel extends JPanel {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        RecentActivityBox raBox = new RecentActivityBox();
-        raBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        add(raBox, gbc);
+        NewAtLimeBox naBox = new NewAtLimeBox();
+        naBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        add(naBox, gbc);
     }
 
 }

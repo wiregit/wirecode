@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.Line;
 
 public class HomeSearchPanel extends JPanel {
@@ -36,16 +37,25 @@ public class HomeSearchPanel extends JPanel {
         this.searchFriends = new JButton("Search Friends");
         
         setOpaque(false);
-        
         setLayout(new GridBagLayout());
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
+        gbc.anchor = GridBagConstraints.CENTER;
         
+        // A little glue to offset the 'Advanced Search' on the right.
+        gbc.gridheight = 3;
+        gbc.ipadx = 75;
+        add(Box.createGlue(), gbc);
+        
+        gbc.ipadx = 0;
+        gbc.gridheight = 1;
+        
+        // To push in the 'All | Audio | Video...'
         gbc.weightx = 1;
         add(Box.createGlue(), gbc);
-        gbc.weightx = 0;
         
+        gbc.weightx = 0;
         gbc.insets = new Insets(0, 0, 5, 10);
         add(all, gbc);
         add(new Line(Color.BLACK), gbc);
@@ -57,28 +67,54 @@ public class HomeSearchPanel extends JPanel {
         add(new Line(Color.BLACK), gbc);
         add(documents, gbc);
 
+        // To push in the 'All | Audio | Video...'
         gbc.weightx = 1;
+        gbc.insets = new Insets(0, 0, 5, 0);
+        gbc.gridwidth = GridBagConstraints.RELATIVE;
+        add(Box.createGlue(), gbc);
+        
+        // To be ontop of the 'Advanced Search'
+        gbc.weightx = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         add(Box.createGlue(), gbc);
-        gbc.weightx = 0;
         
         gbc.weightx = 1;
+        gbc.gridwidth = GridBagConstraints.RELATIVE;
         add(textField, gbc);
         
         gbc.weightx = 0;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.anchor = GridBagConstraints.SOUTHWEST;
+        gbc.insets = new Insets(0, 5, 5, 0);
+        JLabel advancedSearch = new JLabel("Advanced Search");
+        FontUtils.changeFontSize(advancedSearch, -1);
+        add(advancedSearch, gbc);
+        
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridwidth = GridBagConstraints.RELATIVE;
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.insets = new Insets(5, 0, 0, 0);
         JPanel buttonPanel = new JPanel();
         buttonPanel.setOpaque(false);
         buttonPanel.setLayout(new GridBagLayout());
         add(buttonPanel, gbc);
         
-        gbc.insets = new Insets(0, 0, 0, 20);
+        // To be ontop of the 'Advanced Search'
+        gbc.weightx = 0;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        add(Box.createGlue(), gbc);
+        
+        gbc.weightx = 1;
+        gbc.insets = new Insets(0, 25, 0, 0);
         gbc.gridwidth = GridBagConstraints.RELATIVE;
-        buttonPanel.add(search, gbc);    
+        buttonPanel.add(search, gbc);
+        gbc.insets = new Insets(0, 50, 0, 25);
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         buttonPanel.add(searchFriends, gbc);
              
-        setPreferredSize(new Dimension(300, 80));
-        
+        setMinimumSize(new Dimension(500, 100));
+        setPreferredSize(new Dimension(500, 100));
     }    
     
     @Override
