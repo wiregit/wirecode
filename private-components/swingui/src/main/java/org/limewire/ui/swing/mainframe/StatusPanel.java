@@ -6,7 +6,7 @@ import java.awt.Dimension;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class StatusPanel extends JPanel {
+class StatusPanel extends JPanel {
     
     public StatusPanel() {
         add(new JLabel("status"));

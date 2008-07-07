@@ -11,21 +11,23 @@ import javax.swing.JScrollPane;
 
 import org.limewire.ui.swing.nav.DownloadSummaryPanel;
 import org.limewire.ui.swing.nav.FilesSharingSummaryPanel;
+import org.limewire.ui.swing.nav.NavSelectionListener;
 import org.limewire.ui.swing.nav.NavTree;
+import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.SearchBar;
 import org.limewire.ui.swing.util.Line;
 
-public class LeftPanel extends JPanel {
+class LeftPanel extends JPanel implements NavigableTree {
 
     private final SearchBar searchBar;
     private final NavTree navTree;
     private final DownloadSummaryPanel downloadPanel;
     private final FilesSharingSummaryPanel filesPanel;
     
-    public LeftPanel(Navigator navigator) {
+    public LeftPanel() {
         this.searchBar = new SearchBar();
-        this.navTree = new NavTree(navigator);
+        this.navTree = new NavTree();
         this.downloadPanel = new DownloadSummaryPanel();
         this.filesPanel = new FilesSharingSummaryPanel();
         
@@ -80,6 +82,21 @@ public class LeftPanel extends JPanel {
         gbc.weighty = 0;
         gbc.gridx = GridBagConstraints.REMAINDER;
         add(filesPanel, gbc);
+    }
+    
+    @Override
+    public void addNavigableItem(Navigator.NavItem navItem, String name) {
+        navTree.addNavigableItem(navItem, name);
+    }
+    
+    @Override
+    public void removeNavigableItem(Navigator.NavItem navItem, String name) {
+        navTree.removeNavigableItem(navItem, name);
+    }
+    
+    @Override
+    public void addNavSelectionListener(NavSelectionListener listener) {
+        navTree.addNavSelectionListener(listener);
     }
     
     public void goHome() {

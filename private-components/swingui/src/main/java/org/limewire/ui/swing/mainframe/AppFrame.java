@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.mainframe;
 
+import java.awt.Dimension;
+
 import org.jdesktop.application.SingleFrameApplication;
 
 public class AppFrame extends SingleFrameApplication {
@@ -12,6 +14,10 @@ public class AppFrame extends SingleFrameApplication {
         LimeWireSwingUI ui = new LimeWireSwingUI();
         show(ui);
         ui.goHome();
+        
+        // Keep this here while building UI - ensures we test 
+        // with proper sizes.
+        getMainFrame().setSize(new Dimension(1024, 768));
     }
     
 

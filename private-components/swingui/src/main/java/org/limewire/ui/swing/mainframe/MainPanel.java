@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 
 import org.limewire.ui.swing.nav.NavigableTarget;
 
-public class MainPanel extends JPanel implements NavigableTarget {
+class MainPanel extends JPanel implements NavigableTarget {
 
     private final Map<String, JComponent> keyToComponents = new HashMap<String, JComponent>();
     private final CardLayout cardLayout;

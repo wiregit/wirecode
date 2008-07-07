@@ -12,17 +12,20 @@ import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-public class NavTree extends JPanel {
+import org.limewire.ui.swing.home.HomePanel;
+
+public class NavTree extends JPanel implements NavigableTree {
     
-    private final LimeWireNavList limewire;
-    private final LibraryNavList library;
+    private final NavList limewire;
+    private final NavList library;
     
+    private final List<NavSelectionListener> navSelectionListeners = new ArrayList<NavSelectionListener>();
     private final List<NavList> navigableLists;
 
-    public NavTree(Navigator navigator) {
+    public NavTree() {
         this.navigableLists = new ArrayList<NavList>();
-        this.limewire = new LimeWireNavList(navigator);
-        this.library = new LibraryNavList(navigator);
+        this.limewire = new NavList("LimeWire", Navigator.NavItem.LIMEWIRE);
+        this.library = new NavList("Library", Navigator.NavItem.LIBRARY);
         
         navigableLists.add(limewire);
         navigableLists.add(library);
@@ -46,8 +49,31 @@ public class NavTree extends JPanel {
         add(Box.createGlue(), gbc);
     }
     
+    @Override
+    public void addNavigableItem(Navigator.NavItem navItem, String name) {
+        switch(navItem) {
+        case LIBRARY:
+            library.addNavItem(name);
+            break;
+        case LIMEWIRE:
+            limewire.addNavItem(name);
+            break;
+        }
+    }
+    
+    @Override
+    public void removeNavigableItem(Navigator.NavItem navItem, String name) {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    @Override
+    public void addNavSelectionListener(NavSelectionListener listener) {
+        navSelectionListeners.add(listener);
+    }
+    
     public void goHome() {
-        limewire.goHome();
+        limewire.selectItem(HomePanel.NAME);
     }
     
     private class Listener implements ListSelectionListener {
@@ -63,7 +89,9 @@ public class NavTree extends JPanel {
                     if(!navList.isListSourceFrom(list)) {
                         navList.clearSelection();
                     } else {
-                        navList.navigateToSelection();
+                        for(NavSelectionListener listener : navSelectionListeners) {
+                            listener.navItemSelected(navList.getTarget(), list.getSelectedValue().toString());
+                        }
                     }
                 }
             }

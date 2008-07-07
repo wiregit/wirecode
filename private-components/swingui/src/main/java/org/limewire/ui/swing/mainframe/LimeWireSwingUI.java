@@ -6,7 +6,9 @@ import java.awt.GridBagLayout;
 
 import javax.swing.JPanel;
 
+import org.limewire.ui.swing.nav.NavSelectionListener;
 import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.nav.NavigatorImpl;
 import org.limewire.ui.swing.util.Line;
 
 public class LimeWireSwingUI extends JPanel {
@@ -15,14 +17,22 @@ public class LimeWireSwingUI extends JPanel {
     private final LeftPanel leftPanel;
     private final MainPanel mainPanel;
     private final StatusPanel statusPanel;
-    private final Navigator navigator;
+    private final NavigatorImpl navigator;
     
     public LimeWireSwingUI() {
         this.mainPanel = new MainPanel();
-        this.navigator = new Navigator(mainPanel);
+        this.leftPanel = new LeftPanel();
+        this.navigator = new NavigatorImpl(mainPanel, leftPanel);
         this.topPanel = new TopPanel();
-        this.leftPanel = new LeftPanel(navigator);
         this.statusPanel = new StatusPanel();
+        
+        leftPanel.addNavSelectionListener(new NavSelectionListener() {
+            @Override
+            public void navItemSelected(Navigator.NavItem target, String name) {
+                navigator.showNavigablePanel(target, name);
+            }
+        });
+        navigator.addDefaultNavigableItems();
         
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);

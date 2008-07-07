@@ -5,13 +5,20 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 
+import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.nav.Navigator.NavItem;
+import org.limewire.ui.swing.search.DefaultSearchInfo;
+import org.limewire.ui.swing.search.SearchInfo;
+import org.limewire.ui.swing.search.SearchResultsPanel;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.Line;
 
@@ -25,8 +32,10 @@ public class HomeSearchPanel extends JPanel {
     private final JLabel documents;
     private final JButton search;
     private final JButton searchFriends;
+    private final Navigator navigator;
     
-    public HomeSearchPanel() {
+    public HomeSearchPanel(Navigator navigator) {
+        this.navigator = navigator;
         this.textField = new JTextField();
         this.all = new JLabel("All");
         this.audio = new JLabel("Audio");
@@ -36,8 +45,15 @@ public class HomeSearchPanel extends JPanel {
         this.search = new JButton("Search");
         this.searchFriends = new JButton("Search Friends");
         
+        SearchAction action = new SearchAction();
+        search.addActionListener(action);
+        searchFriends.addActionListener(action);
+        textField.addActionListener(action);
+        
         setOpaque(false);
         setLayout(new GridBagLayout());
+        search.setOpaque(false);
+        searchFriends.setOpaque(false);
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
@@ -120,6 +136,20 @@ public class HomeSearchPanel extends JPanel {
     @Override
     public boolean requestFocusInWindow() {
         return textField.requestFocusInWindow();
+    }
+    
+    SearchInfo getSearchInfo() {
+        return new DefaultSearchInfo(textField.getText());
+    }
+    
+    private class SearchAction extends AbstractAction { 
+        
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            SearchInfo info = getSearchInfo();
+            SearchResultsPanel panel = new SearchResultsPanel(info);
+            navigator.addNavigablePanel(NavItem.LIMEWIRE, "Results of \""+ info.getTitle() + "\"", panel);
+        }
     }
 
 }
