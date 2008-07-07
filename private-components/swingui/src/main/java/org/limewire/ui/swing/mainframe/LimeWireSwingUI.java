@@ -75,7 +75,9 @@ public class LimeWireSwingUI extends JPanel {
         gbc.weighty = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         add(statusPanel, gbc);
-        
+    }
+    
+    public void goHome() {        
         leftPanel.goHome();
     }
     

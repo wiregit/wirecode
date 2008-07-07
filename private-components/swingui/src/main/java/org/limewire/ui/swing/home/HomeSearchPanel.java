@@ -26,15 +26,14 @@ public class HomeSearchPanel extends JPanel {
     private final JButton searchFriends;
     
     public HomeSearchPanel() {
-        
-        textField = new JTextField();
-        all = new JLabel("All");
-        audio = new JLabel("Audio");
-        video = new JLabel("Video");
-        images = new JLabel("Images");
-        documents = new JLabel("Documents");
-        search = new JButton("Search");
-        searchFriends = new JButton("Search Friends");
+        this.textField = new JTextField();
+        this.all = new JLabel("All");
+        this.audio = new JLabel("Audio");
+        this.video = new JLabel("Video");
+        this.images = new JLabel("Images");
+        this.documents = new JLabel("Documents");
+        this.search = new JButton("Search");
+        this.searchFriends = new JButton("Search Friends");
         
         setOpaque(false);
         
@@ -80,7 +79,11 @@ public class HomeSearchPanel extends JPanel {
              
         setPreferredSize(new Dimension(300, 80));
         
-    }
+    }    
     
+    @Override
+    public boolean requestFocusInWindow() {
+        return textField.requestFocusInWindow();
+    }
 
 }

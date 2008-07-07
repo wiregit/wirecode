@@ -18,8 +18,11 @@ import javax.swing.JPanel;
 public class HomePanel extends JPanel{
     
     public static final String NAME = "Home";
+    private final HomeSearchPanel hsPanel;
 
     public HomePanel(){
+        this.hsPanel = new HomeSearchPanel();
+        
         setBackground(Color.WHITE);
         setPreferredSize(new Dimension(500, 500));
         
@@ -29,11 +32,14 @@ public class HomePanel extends JPanel{
         gbc.fill = GridBagConstraints.NONE;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.insets = new Insets(0, 0, 50, 0);
-        add(new HomeSearchPanel(), gbc);
+        add(hsPanel, gbc);
         
         gbc.fill = GridBagConstraints.BOTH;
         add(new RecentActivityPanel(), gbc);
-        
-        
+    }
+    
+    @Override
+    public boolean requestFocusInWindow() {
+        return hsPanel.requestFocusInWindow();
     }
 }

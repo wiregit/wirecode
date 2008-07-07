@@ -21,6 +21,7 @@ public class MainPanel extends JPanel implements NavigableTarget {
 
     public void showNavigablePanel(String key) {
         cardLayout.show(this, key);
+        keyToComponents.get(key).requestFocusInWindow();
     }
     
     @Override
