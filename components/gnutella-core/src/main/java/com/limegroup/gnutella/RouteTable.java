@@ -302,6 +302,8 @@ public final class RouteTable implements Inspectable {
      *
      * @param classCNetwork integer representing the classC network the replies 
      * came from.  0 if it should not be counted (as 0 is not a valid classC network).
+     * @param classCNetwork the class c network the reply came from, 0 if the class c
+     * networ should not be counted
      * @requires guid.length==16
      * @effects if no mapping for guid, or guid maps to null (i.e., to a removed
      *  ReplyHandler) returns null.  Otherwise returns a tuple containing the
@@ -590,7 +592,7 @@ public final class RouteTable implements Inspectable {
      * its a good idea to first inspect the stats to see how many
      * entries there are.
      */
-    public Object inspect() {
+    public synchronized Object inspect() {
         Map<String, Object> ret = new HashMap<String, Object>();
         Iterable<Map.Entry<byte[], RouteTableEntry>> bothMaps = 
             new MultiIterable<Map.Entry<byte[],RouteTableEntry>>(_newMap.entrySet(),_oldMap.entrySet());
