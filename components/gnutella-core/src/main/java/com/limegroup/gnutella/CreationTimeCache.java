@@ -471,7 +471,7 @@ public final class CreationTimeCache implements FileEventListener {
             // occurred - the best course of action is to
             // ignore the issue and not add it to the CTC, hopefully
             // we'll get a correct reading the next time around...
-            if (cTime.longValue() > 0) {
+            if (cTime.longValue() > 0) { 
                 // these calls may be superfluous but are quite fast....
                 addTime(urn, cTime.longValue());
                 commitTime(urn);
@@ -479,12 +479,11 @@ public final class CreationTimeCache implements FileEventListener {
         }
     }
     
-    private void fileChanged(URN oldUrn, URN newUrn ) {
+    private void fileChanged(long creationTime, URN newUrn ) {
         // re-populate the ctCache
-        synchronized (this) { System.out.println("old " + oldUrn);
-            long time = getCreationTime(oldUrn);
+        synchronized (this) { 
             removeTime(newUrn);
-            addTime(newUrn, time);
+            addTime(newUrn, creationTime);
             commitTime(newUrn);
         }   
     }
@@ -500,22 +499,19 @@ public final class CreationTimeCache implements FileEventListener {
             case FILEMANAGER_SAVE:
                 persistCache();
                 break;
-//            case ADD_STORE_FILE:
-//                fileAdded(evt.getFiles()[0], evt.getFileDescs()[0].getSHA1Urn());
-//                break;
             case ADD_FILE:
                 // Commit the time in the CreactionTimeCache, but don't share
                 // the installer.  We populate free LimeWire's with free installers
                 // so we have to make sure we don't influence the what is new
                 // result set.
-                if (!SharingUtils.isForcedShare(evt.getFiles()[0])) {     
+                if (!SharingUtils.isForcedShare(evt.getFiles()[0]) && 
+                        !(evt.getFileDescs()[0] instanceof IncompleteFileDesc)) {     
                     fileAdded(evt.getFiles()[0], evt.getFileDescs()[0].getSHA1Urn());
                 }
                  break;
-            case CHANGE_FILE: for(FileDesc fd : evt.getFileDescs())
-                System.out.println(fd.getSHA1Urn());
+            case CHANGE_FILE: 
                 if(! (evt.getFileDescs()[0] instanceof IncompleteFileDesc))
-                    fileChanged(evt.getFileDescs()[0].getSHA1Urn(), evt.getFileDescs()[1].getSHA1Urn());
+                    fileChanged(evt.getFileDescs()[0].getCreationTime(), evt.getFileDescs()[1].getSHA1Urn());
                 break;
             case REMOVE_URN:
                 removeTime(evt.getURN());

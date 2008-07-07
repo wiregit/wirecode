@@ -1143,7 +1143,6 @@ public final class DaapManager implements FileEventListener {
                         handleChangeEvent(evt);
                         break;
                     case ADD_FILE:
-//                    case ADD_STORE_FILE:
                         handleAddEvent(evt);
                         break;
                     case RENAME_FILE:

@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -172,7 +171,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
     }
     
     @Inject
-    void register(CopyOnWriteArrayList<FileEventListener> listeners) {
+    void register(List<FileEventListener> listeners) {
         listeners.add(this);
     }
 

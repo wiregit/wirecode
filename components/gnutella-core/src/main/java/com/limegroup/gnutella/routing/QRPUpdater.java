@@ -229,7 +229,6 @@ public class QRPUpdater implements FileEventListener, SettingListener, Service, 
     public void handleFileEvent(FileManagerEvent evt) {
         switch(evt.getType()) {
             case ADD_FILE:
-//            case ADD_INCOMPLETE_FILE:
             case CHANGE_FILE:
             case REMOVE_FILE:
             case RENAME_FILE:

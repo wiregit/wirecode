@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -213,7 +212,7 @@ public class UpdateHandlerImpl implements UpdateHandler, FileEventListener, Serv
     }
     
     @Inject
-    void register(CopyOnWriteArrayList<FileEventListener> listener) {
+    void register(List<FileEventListener> listener) {
         listener.add(this);
     }
         

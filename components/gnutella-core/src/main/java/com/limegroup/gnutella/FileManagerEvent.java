@@ -17,34 +17,24 @@ public class FileManagerEvent extends EventObject {
     
     public static enum Type {
         /**
-         * Called when a shared file has been added to FileManager
+         * Called when a file has been added to FileManager
          */
         ADD_FILE,
         
-//        /**
-//         * Called when a store file has been added to FileManager
-//         */
-//        ADD_STORE_FILE,
-//        
-//        /**
-//         * Called when an incomplete file has been added to FileManager
-//         */
-//        ADD_INCOMPLETE_FILE,
+        /**
+         * Called when a ADD_FILE fails to load a file into FileManager 
+         */
+        ADD_FAILED_FILE,
         
         /**
-         * Called when a shared file is no longer shared, Note that this
+         * Called when a file is removed from a list, Note that this
          * may not explicitely remove it from the view. It may still be in 
          * a shared folder just no longer editable or shared.
          */
         REMOVE_FILE,
         
         /**
-         * Called when a store file is no longer managed by FileManager
-         */
-        REMOVE_STORE_FILE,
-        
-        /**
-         * Called when the filename on disk for a shared or store file is renamed 
+         * Called when the filename on disk is renamed from within the UI
          */
         RENAME_FILE,
         
@@ -73,29 +63,18 @@ public class FileManagerEvent extends EventObject {
         LOAD_FILE,
         
         /**
-         * Called whenever a FileDesc is removed from FileManager. This behaves much like
-         * REMOVE_FD in that it is always called as long as its not a incomplete file.
+         * Called whenever a URN is removed from FileManager. 
          */
         REMOVE_URN,
         
         /**
-         * Called when a FileDesc has been removed from FileManager. Unlike REMOVE_FILE and
-         * REMOVE_STORE_FILE, this gets fired any time a file managed by FileManager is 
+         * Called when a FileDesc has been removed from FileManager. Unlike REMOVE_FILE, 
+         * this gets fired any time a file managed by FileManager is 
          * modified. This event will be called any time one of the following events are
-         * generated: REMOVE_FILE, REMOVE_STORE_FILE, RENAME_FILE, CHANGE_FILE
+         * generated: REMOVE_FILE, RENAME_FILE, CHANGE_FILE
          */
         REMOVE_FD,
-        
-        /**
-         * Called when a ADD_FILE fails to load a file into FileManager 
-         */
-        ADD_FAILED_FILE,
-        
-        /**
-         * Called when ADD_STORE_FILE fails to load a file into FileManager
-         */
-        ADD_STORE_FAILED_FILE,
-        
+                
         /**
          * Called when ADD_FILE attempts to load a file that already exists in FileManager
          */
@@ -316,20 +295,6 @@ public class FileManagerEvent extends EventObject {
      */
     public boolean isAddEvent() {
         return (type.equals(Type.ADD_FILE));
-    }
-//    
-//    /**
-//	 * Returns true if this event is an ADD_STORE_FILE event
-//	 */
-//    public boolean isAddStoreEvent() {
-//        return (type.equals(Type.ADD_STORE_FILE));
-//    }
-    
-    /**
-     * Returns true if this event is a REMOVE event
-     */
-    public boolean isRemoveEvent() {
-        return (type.equals(Type.REMOVE_FILE));
     }
     
     /**

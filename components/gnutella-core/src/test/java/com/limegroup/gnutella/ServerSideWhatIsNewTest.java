@@ -642,11 +642,12 @@ public class ServerSideWhatIsNewTest
     public void testDownloadCapturesCreationTime() throws Exception {
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
+        Map longToUrns = ctCache.getTimeToUrn();
         for (FileDesc fd : fileManager.getSharedFileList().getAllFileDescs()) {
             fileManager.removeFileIfSharedOrStore(fd.getFile());
             fd.getFile().delete();
         }
-        
+        longToUrns = ctCache.getTimeToUrn();
         final int UPLOADER_PORT = 10000;
         byte[] guid = GUID.makeGuid();
         TestUploader uploader = injector.getInstance(TestUploader.class);
@@ -680,7 +681,7 @@ public class ServerSideWhatIsNewTest
 
         Map urnToLong = ctCache.getUrnToTime();
         assertEquals(""+urnToLong, sharedBefore + 1, urnToLong.size());
-        Map longToUrns = ctCache.getTimeToUrn();
+        longToUrns = ctCache.getTimeToUrn();
         assertEquals(""+longToUrns+"  vs "+urnToLong, sharedBefore + 1, longToUrns.size());
 
     }

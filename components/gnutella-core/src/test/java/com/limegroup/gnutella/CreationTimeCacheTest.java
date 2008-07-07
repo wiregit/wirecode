@@ -404,6 +404,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
         @Inject
         public MyFileManager(Provider<SimppManager> simppManager,
                 Provider<UrnCache> urnCache,
+                Provider<CreationTimeCache> creationTimeCache,
                 Provider<ContentManager> contentManager,
                 Provider<AltLocManager> altLocManager,
                 Provider<ActivityCallback> activityCallback,
@@ -411,7 +412,7 @@ public class CreationTimeCacheTest extends LimeTestCase {
                 LimeXMLDocumentFactory limeXMLDocumentFactory,
                 MetaDataReader metaDataReader,
                 CopyOnWriteArrayList<FileEventListener> eventListeners) {
-            super(simppManager, urnCache, contentManager, altLocManager, activityCallback, backgroundExecutor, limeXMLDocumentFactory, metaDataReader, eventListeners);
+            super(simppManager, urnCache, creationTimeCache, contentManager, altLocManager, activityCallback, backgroundExecutor, limeXMLDocumentFactory, metaDataReader, eventListeners);
         }
         
         public void setDefaultUrn(URN urn) {

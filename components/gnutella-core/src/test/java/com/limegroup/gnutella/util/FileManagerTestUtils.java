@@ -11,6 +11,11 @@ import com.limegroup.gnutella.FileManagerEvent.Type;
 
 public class FileManagerTestUtils {
 
+    /**
+     * Begins a load on FileManager and waits for the FileManager to finishing loading before 
+     * continueing. Also can specify a timeout which will throw an exception if FileManager hasn't 
+     * completed in a certain amount of time.
+     */
     public static void waitForLoad(FileManager fileManager, int timeout) throws InterruptedException, TimeoutException {
         final CountDownLatch loadedLatch = new CountDownLatch(1);
         FileEventListener listener = new FileEventListener() {

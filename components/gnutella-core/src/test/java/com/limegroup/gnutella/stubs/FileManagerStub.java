@@ -15,6 +15,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManagerEvent;
@@ -42,6 +43,7 @@ public class FileManagerStub extends FileManagerImpl {
     @Inject
     public FileManagerStub(Provider<SimppManager> simppManager,
             Provider<UrnCache> urnCache,
+            Provider<CreationTimeCache> creationTimeCache,
             Provider<ContentManager> contentManager,
             Provider<AltLocManager> altLocManager,
             Provider<ActivityCallback> activityCallback,
@@ -50,7 +52,7 @@ public class FileManagerStub extends FileManagerImpl {
             MetaDataReader metaDataReader,
             Provider<LimeXMLSchemaRepository> limeXMLSchemaRepository,
             CopyOnWriteArrayList<FileEventListener> listeners) {
-        super(simppManager, urnCache, contentManager, altLocManager, activityCallback, backgroundExecutor, limeXMLDocumentFactory, metaDataReader, listeners);
+        super(simppManager, urnCache, creationTimeCache, contentManager, altLocManager, activityCallback, backgroundExecutor, limeXMLDocumentFactory, metaDataReader, listeners);
         
         sharedFileList = new FileListStub();
     }

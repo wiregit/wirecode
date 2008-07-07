@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
@@ -237,7 +238,6 @@ public class LimeWireCoreModule extends AbstractModule {
             bind(ActivityCallback.class).to(activityCallbackClass);
         }        
 
-//        bind(new TypeLiteral<CopyOnWriteArrayList<FileEventListener>>(){}).toInstance(new CopyOnWriteArrayList<FileEventListener>());
         bind(DownloadCallback.class).to(ActivityCallback.class);
         bind(NetworkManager.class).to(NetworkManagerImpl.class);
         bind(DHTManager.class).to(DHTManagerImpl.class);
@@ -433,9 +433,16 @@ public class LimeWireCoreModule extends AbstractModule {
     
     @Singleton
     public static class FileEventListenerProvider {
+        @Singleton
         @Provides
         public CopyOnWriteArrayList<FileEventListener> fileEventListener() {
             return new CopyOnWriteArrayList<FileEventListener>();
+        }
+        
+        @Singleton
+        @Provides
+        public List<FileEventListener> fileEventListener(CopyOnWriteArrayList<FileEventListener> listener) {
+            return listener;
         }
     }
     
