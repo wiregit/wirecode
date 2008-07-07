@@ -14,6 +14,8 @@ public class AppFrame extends SingleFrameApplication {
         getMainFrame().setJMenuBar(new LimeMenuBar());
         show(new LimeWireSwingUI());
     }
+    
+    
 
     public static void main(String[] args) {
         launch(AppFrame.class, args);

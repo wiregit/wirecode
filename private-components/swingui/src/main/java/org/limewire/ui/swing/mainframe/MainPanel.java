@@ -4,6 +4,7 @@ import java.awt.CardLayout;
 
 import javax.swing.JPanel;
 
+import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.library.DocumentPanel;
 import org.limewire.ui.swing.library.ImagePanel;
 import org.limewire.ui.swing.library.MusicPanel;
