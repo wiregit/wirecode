@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.nav;
 
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -20,21 +19,16 @@ public class FilesSharingSummaryPanel extends JPanel {
     
     public FilesSharingSummaryPanel() {
         setOpaque(false);
+        title.setName("FilesSharingSummaryPanel.title");
         title.setText("Files I'm Sharing");
-        title.setFont(title.getFont().deriveFont(Font.BOLD));
         
-        all.setVerticalTextPosition(JLabel.BOTTOM);
-        all.setIcon(new NumberIcon(1));
-        all.setFont(all.getFont().deriveFont(all.getFont().getSize() - 5f));
-        all.setText("with everyone");
-        buddies.setVerticalTextPosition(JLabel.BOTTOM);
-        buddies.setIcon(new NumberIcon(1));
-        buddies.setText("with all friends");
-        buddies.setFont(all.getFont());
-        some.setIcon(new NumberIcon(1));
-        some.setVerticalTextPosition(JLabel.BOTTOM);
-        some.setText("with some friends");
-        some.setFont(all.getFont());
+        //TODO: NumberIcons
+        all.setName("FilesSharingSummaryPanel.all");
+		//all.setIcon(new NumberIcon(1));
+		buddies.setName("FilesSharingSummaryPanel.buddies");
+		//buddies.setIcon(new NumberIcon(1));
+		some.setName("FilesSharingSummaryPanel.some");
+		//some.setIcon(new NumberIcon(1));
                 
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
