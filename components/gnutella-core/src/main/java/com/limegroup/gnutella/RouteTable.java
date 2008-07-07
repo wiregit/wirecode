@@ -554,7 +554,7 @@ public final class RouteTable implements Inspectable {
      */
     private static class ExperimentalGUIDMap extends TreeMap<byte [], RouteTableEntry> {
         ExperimentalGUIDMap() {
-            super(new GUID.GUIDByteComparator());
+            super(GUID.GUID_BYTE_COMPARATOR);
         }
 
         @Override
