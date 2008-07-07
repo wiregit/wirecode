@@ -1,6 +1,7 @@
-package org.limewire.xmpp.client;
+package org.limewire.xmpp.client.impl;
 
 import org.jivesoftware.smackx.packet.StreamInitiation;
+import org.limewire.xmpp.client.service.FileMetaData;
 
 /**
  * An adapter between the xmpp component class <code>FileMetaData</code> and the

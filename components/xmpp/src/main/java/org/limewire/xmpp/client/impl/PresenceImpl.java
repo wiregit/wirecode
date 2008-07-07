@@ -1,9 +1,13 @@
-package org.limewire.xmpp.client;
+package org.limewire.xmpp.client.impl;
 
 import org.jivesoftware.smack.*;
 import org.jivesoftware.smack.packet.Message;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.xmpp.client.service.IncomingChatListener;
+import org.limewire.xmpp.client.service.MessageReader;
+import org.limewire.xmpp.client.service.MessageWriter;
+import org.limewire.xmpp.client.service.Presence;
 
 class PresenceImpl implements Presence {
 

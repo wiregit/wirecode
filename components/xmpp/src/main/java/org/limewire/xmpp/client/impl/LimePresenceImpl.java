@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client;
+package org.limewire.xmpp.client.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,6 +10,12 @@ import org.jivesoftware.smackx.jingle.OutgoingJingleSession;
 import org.jivesoftware.smackx.jingle.file.FileContentHandler;
 import org.jivesoftware.smackx.jingle.file.FileLocator;
 import org.jivesoftware.smackx.jingle.file.InitiatorFileContentHandler;
+import org.limewire.xmpp.client.service.FileMetaData;
+import org.limewire.xmpp.client.service.FileTransferProgressListener;
+import org.limewire.xmpp.client.service.LibraryListener;
+import org.limewire.xmpp.client.service.LimePresence;
+import org.limewire.xmpp.client.impl.messages.library.LibraryIQ;
+import org.limewire.xmpp.client.impl.messages.library.LibraryIQListener;
 
 public class LimePresenceImpl extends PresenceImpl implements LimePresence {
 

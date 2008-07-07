@@ -1,6 +1,8 @@
-package org.limewire.xmpp.client;
+package org.limewire.xmpp.client.impl.messages.library;
 
 import java.util.Date;
+
+import org.limewire.xmpp.client.service.FileMetaData;
 
 class FileMetaDataImpl implements FileMetaData {
     private String id;

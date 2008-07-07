@@ -1,6 +1,9 @@
-package org.limewire.xmpp.client;
+package org.limewire.xmpp.client.impl;
 
 import org.limewire.util.StringUtils;
+import org.limewire.xmpp.client.service.Presence;
+import org.limewire.xmpp.client.service.PresenceListener;
+import org.limewire.xmpp.client.service.User;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;

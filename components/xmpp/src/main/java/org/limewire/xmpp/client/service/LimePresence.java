@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client;
+package org.limewire.xmpp.client.service;
 
 /**
  * Marks a presence as running in limewire.  Allows for additional limewire

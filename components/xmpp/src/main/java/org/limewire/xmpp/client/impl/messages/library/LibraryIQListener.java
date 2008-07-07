@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client;
+package org.limewire.xmpp.client.impl.messages.library;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -9,13 +9,16 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.xmpp.client.service.FileMetaData;
+import org.limewire.xmpp.client.service.LibraryListener;
+import org.limewire.xmpp.client.service.LibraryProvider;
 
 /**
  * Handles <code><library></code> messages.  Sends <code>result</code> messages when <code>get</code>
  * messages are received.  Notifies the proper <code>LibraryListener</code> when <code>result</code>
  * messages are received.
  */
-class LibraryIQListener implements PacketListener {
+public class LibraryIQListener implements PacketListener {
 
     private static final Log LOG = LogFactory.getLog(LibraryIQListener.class);
 
@@ -23,12 +26,12 @@ class LibraryIQListener implements PacketListener {
     private final LibraryProvider libraryProvider;
     private final ConcurrentHashMap <String, LibraryListener> libraryHandlers = new ConcurrentHashMap<String, LibraryListener>();
 
-    LibraryIQListener(XMPPConnection connection, LibraryProvider libraryProvider) {
+    public LibraryIQListener(XMPPConnection connection, LibraryProvider libraryProvider) {
         this.libraryProvider = libraryProvider;
         this.connection = connection;
     }
 
-    void setConnection(XMPPConnection connection) {
+    public void setConnection(XMPPConnection connection) {
         this.connection = connection;
     }
 
@@ -60,7 +63,7 @@ class LibraryIQListener implements PacketListener {
         }
     }
     
-    void addLibraryListener(LibraryIQ request, LibraryListener listener) {
+    public void addLibraryListener(LibraryIQ request, LibraryListener listener) {
         libraryHandlers.put(request.getPacketID(), listener);
     }
 
@@ -76,7 +79,7 @@ class LibraryIQListener implements PacketListener {
         connection.sendPacket(queryResult);
     }
 
-    PacketFilter getPacketFilter() {
+    public PacketFilter getPacketFilter() {
         return new PacketFilter(){
             public boolean accept(Packet packet) {
                 return packet instanceof LibraryIQ;

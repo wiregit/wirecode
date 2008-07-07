@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client;
+package org.limewire.xmpp.client.impl;
 
 import java.util.Collections;
 import java.util.List;
@@ -8,13 +8,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
+import org.limewire.xmpp.client.service.FileTransferProgressListener;
+import org.limewire.xmpp.client.service.IncomingFileAcceptor;
+import org.limewire.xmpp.client.service.LibraryProvider;
+import org.limewire.xmpp.client.service.XMPPConnection;
+import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
+import org.limewire.xmpp.client.service.XMPPService;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 @Singleton
-class XMPPServiceImpl implements Service, XMPPService {
+public class XMPPServiceImpl implements Service, XMPPService {
 
     private static final Log LOG = LogFactory.getLog(XMPPServiceImpl.class);
     

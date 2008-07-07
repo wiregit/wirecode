@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client;
+package org.limewire.xmpp.client.impl;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,8 +27,11 @@ import org.jivesoftware.smackx.jingle.JingleSessionRequest;
 import org.jivesoftware.smackx.jingle.IncomingJingleSession;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
 import org.limewire.concurrent.ThreadExecutor;
+import org.limewire.xmpp.client.service.*;
+import org.limewire.xmpp.client.impl.messages.library.LibraryIQ;
+import org.limewire.xmpp.client.impl.messages.library.LibraryIQListener;
 
-class XMPPConnectionImpl implements XMPPConnection {
+class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnection {
     
     private static final Log LOG = LogFactory.getLog(XMPPConnectionImpl.class);
     
@@ -38,7 +41,7 @@ class XMPPConnectionImpl implements XMPPConnection {
     private final FileTransferProgressListener progressListener;
     private org.jivesoftware.smack.XMPPConnection connection;
     
-    private final CopyOnWriteArrayList<RosterListener> rosterListeners;
+    private final CopyOnWriteArrayList<org.limewire.xmpp.client.service.RosterListener> rosterListeners;
     private final HashMap<String, UserImpl> users;
     protected LibraryIQListener libraryIQListener;
     
@@ -50,7 +53,7 @@ class XMPPConnectionImpl implements XMPPConnection {
         this.libraryProvider = libraryProvider;
         this.incomingFileAcceptor = incomingFileAcceptor;
         this.progressListener = progressListener;
-        this.rosterListeners = new CopyOnWriteArrayList<RosterListener>();
+        this.rosterListeners = new CopyOnWriteArrayList<org.limewire.xmpp.client.service.RosterListener>();
         this.rosterListeners.add(configuration.getRosterListener());
         this.users = new HashMap<String, UserImpl>();        
     }
@@ -92,7 +95,7 @@ class XMPPConnectionImpl implements XMPPConnection {
     }
     
     public void initialize() {
-        this.rosterListeners.add(new org.limewire.xmpp.client.RosterListener() {
+        this.rosterListeners.add(new org.limewire.xmpp.client.service.RosterListener() {
             public void userAdded(User user) {
                 user.addPresenceListener(new LibraryGetter());
             }
@@ -186,7 +189,7 @@ class XMPPConnectionImpl implements XMPPConnection {
         }
 
         private void fireUserAdded(User user) {
-            for(RosterListener rosterListener : rosterListeners) {
+            for(org.limewire.xmpp.client.service.RosterListener rosterListener : rosterListeners) {
                 rosterListener.userAdded(user);
             }
         }
@@ -205,7 +208,7 @@ class XMPPConnectionImpl implements XMPPConnection {
         }
 
         private void fireUserUpdated(UserImpl user) {
-            for(RosterListener rosterListener : rosterListeners) {
+            for(org.limewire.xmpp.client.service.RosterListener rosterListener : rosterListeners) {
                 rosterListener.userUpdated(user);
             }
         }
@@ -221,7 +224,7 @@ class XMPPConnectionImpl implements XMPPConnection {
         }
         
         private void fireUserDeleted(String id) {
-            for(RosterListener rosterListener : rosterListeners) {
+            for(org.limewire.xmpp.client.service.RosterListener rosterListener : rosterListeners) {
                 rosterListener.userDeleted(id);
             }
         }

@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client;
+package org.limewire.xmpp.client.service;
 
 /**
  * Used to track progress in a jingle file exchange

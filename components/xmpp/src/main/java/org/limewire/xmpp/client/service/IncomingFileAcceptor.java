@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client;
+package org.limewire.xmpp.client.service;
 
 /**
  * Allows the user of the xmpp service to approve / deny file offers

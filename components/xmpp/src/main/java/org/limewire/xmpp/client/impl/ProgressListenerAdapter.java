@@ -1,9 +1,10 @@
-package org.limewire.xmpp.client;
+package org.limewire.xmpp.client.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smackx.jingle.JingleSession;
 import org.jivesoftware.smackx.packet.StreamInitiation;
+import org.limewire.xmpp.client.service.FileTransferProgressListener;
 
 /**
  * An adapter between the xmpp component class <code>FileTransferProgressListener</code> and the
@@ -13,10 +14,10 @@ class ProgressListenerAdapter implements org.jivesoftware.smackx.jingle.file.Fil
 
     private final Log LOG = LogFactory.getLog(ProgressListenerAdapter.class);
 
-    private final org.limewire.xmpp.client.FileTransferProgressListener progressListener;
+    private final FileTransferProgressListener progressListener;
     private final JingleSession session;
 
-    ProgressListenerAdapter(org.limewire.xmpp.client.FileTransferProgressListener progressListener, JingleSession session) {
+    ProgressListenerAdapter(FileTransferProgressListener progressListener, JingleSession session) {
         this.progressListener = progressListener;
         this.session = session;
     }

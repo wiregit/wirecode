@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client;
+package org.limewire.xmpp.client.impl.messages.library;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,6 +10,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.xmpp.client.service.FileMetaData;
+import org.limewire.xmpp.client.service.LibraryProvider;
 
 /**
  * Used to (de)serialize <code>library</code> IQ messages.  These messages look like this on the wire:<BR>
@@ -25,20 +27,18 @@ import org.apache.commons.logging.LogFactory;
  *      </library>
  * </iq></pre>
  */
-class LibraryIQ extends IQ {
+public class LibraryIQ extends IQ {
 
     private static final Log LOG = LogFactory.getLog(LibraryIQ.class);
-
-    private XmlPullParser parser;
+    
     private LibraryProvider libraryProvider;
     private FileMetaData[] files;
 
-    LibraryIQ(XmlPullParser parser) {
-        this.parser = parser;
-        files = parseFiles();
+    public LibraryIQ(XmlPullParser parser) {
+        files = parseFiles(parser);
     }
 
-    FileMetaData[] parseFiles() {
+    private FileMetaData[] parseFiles(XmlPullParser parser) {
         ArrayList<FileMetaData> files = new ArrayList<FileMetaData>();
         try {
             do {
@@ -52,7 +52,7 @@ class LibraryIQ extends IQ {
                     }
                 } else if(eventType == XmlPullParser.END_TAG) {
                     if(parser.getName().equals("library")) {
-                        return files.toArray(new FileMetaDataImpl[]{});
+                        return files.toArray(new FileMetaData[]{});
                     }
                 }
             } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
@@ -61,18 +61,18 @@ class LibraryIQ extends IQ {
         } catch (XmlPullParserException e) {
             LOG.error(e.getMessage(), e);   // TODO throw?
         }
-        return files.toArray(new FileMetaDataImpl[]{});
+        return files.toArray(new FileMetaData[]{});
     }
 
-    LibraryIQ(LibraryProvider libraryProvider) {
+    public LibraryIQ(LibraryProvider libraryProvider) {
         this.libraryProvider = libraryProvider;
     }
     
-    FileMetaData[] getFiles() {
+    public FileMetaData[] getFiles() {
         return files;
     }
     
-    LibraryIQ() {
+    public LibraryIQ() {
         
     }
 
@@ -97,7 +97,7 @@ class LibraryIQ extends IQ {
         return builder.toString();
     }
 
-    static IQProvider getIQProvider() {
+    public static IQProvider getIQProvider() {
         return new LibraryIQProvider();
     }
 
