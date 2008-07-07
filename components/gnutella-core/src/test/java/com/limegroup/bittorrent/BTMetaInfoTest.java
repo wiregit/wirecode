@@ -27,10 +27,10 @@ public class BTMetaInfoTest extends BaseTestCase {
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
 
-        Assert.assertEquals(44425, metaInfo.getFileDesc().getFileSize());
+        Assert.assertEquals(44425, metaInfo.getFileSystem().getTotalSize());
         Assert.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
         Assert.assertEquals(262144, metaInfo.getPieceLength());
-        Assert.assertEquals((int)Math.ceil((double)metaInfo.getFileDesc().getFileSize()/metaInfo.getPieceLength()), metaInfo.getNumBlocks());
+        Assert.assertEquals((int)Math.ceil((double)metaInfo.getFileSystem().getTotalSize()/metaInfo.getPieceLength()), metaInfo.getNumBlocks());
         Assert.assertEquals("http://localhost:8080/tracker/announce", metaInfo.getTrackers()[0]
                 .toString());
         Assert.assertEquals(false, metaInfo.isPrivate());
