@@ -7,6 +7,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import org.limewire.ui.swing.nav.DownloadSummaryPanel;
 import org.limewire.ui.swing.nav.FilesSharingSummaryPanel;
@@ -49,7 +50,12 @@ public class LeftPanel extends JPanel {
         gbc.weighty = 1;
         gbc.gridx = GridBagConstraints.REMAINDER;
         gbc.insets = new Insets(0, 0, 0, 0);
-        add(navTree, gbc);
+        JScrollPane scrollableNav = new JScrollPane(navTree);
+        scrollableNav.setOpaque(false);
+        scrollableNav.getViewport().setOpaque(false);
+        scrollableNav.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollableNav.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        add(scrollableNav, gbc);
         
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weighty = 0;

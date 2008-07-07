@@ -36,6 +36,7 @@ class NavList extends JPanel {
         this.titleLabel = new JLabel(title);
         this.listModel = new DefaultListModel();
         this.itemList = new JList(listModel);
+        itemList.setFocusable(false);
         itemList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD).deriveFont(titleLabel.getFont().getSize() + 2f));
