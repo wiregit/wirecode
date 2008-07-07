@@ -2008,6 +2008,12 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
             return DownloadStatus.DISK_PROBLEM;
         }
         File saveFile = getSaveFile();
+        try {
+            saveFile = getSuggestedSaveLocation(saveFile, incompleteFile);
+            setSaveFile(saveFile.getParentFile(), saveFile.getName(), true);
+        } catch (IOException e) {
+            return DownloadStatus.DISK_PROBLEM;
+        }
         //Delete target.  If target doesn't exist, this will fail silently.
         saveFile.delete();
 
@@ -2018,11 +2024,6 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
         //from the IncompleteFileManager, though this is not strictly necessary
         //because IFM.purge() is called frequently in DownloadManager.
         
-        try {
-            saveFile = getSuggestedSaveLocation(saveFile, incompleteFile);
-        } catch (IOException e) {
-            return DownloadStatus.DISK_PROBLEM;
-        }
         
         // First attempt to rename it.
         boolean success = FileUtils.forceRename(incompleteFile,saveFile);
@@ -2046,7 +2047,7 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
 
         // determine where and how to share the file
         shareSavedFile(saveFile);
-
+        
 		return DownloadStatus.COMPLETE;
     }
     
