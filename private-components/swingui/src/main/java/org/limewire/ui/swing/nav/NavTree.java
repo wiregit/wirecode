@@ -3,6 +3,8 @@ package org.limewire.ui.swing.nav;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.JList;
@@ -14,15 +16,18 @@ public class NavTree extends JPanel {
     
     private final LimeWireNavList limewire;
     private final LibraryNavList library;
-    private final Navigator navigator;
+    
+    private final List<NavList> navigableLists;
 
     public NavTree(Navigator navigator) {
-        this.navigator = navigator;
+        this.navigableLists = new ArrayList<NavList>();
+        this.limewire = new LimeWireNavList(navigator);
+        this.library = new LibraryNavList(navigator);
+        
+        navigableLists.add(limewire);
+        navigableLists.add(library);
         
         setOpaque(false);
-        
-        limewire = new LimeWireNavList();
-        library = new LibraryNavList();
         
         Listener listener = new Listener();
         limewire.addListSelectionListener(listener);
@@ -41,6 +46,10 @@ public class NavTree extends JPanel {
         add(Box.createGlue(), gbc);
     }
     
+    public void goHome() {
+        limewire.goHome();
+    }
+    
     private class Listener implements ListSelectionListener {
         
         @Override
@@ -50,12 +59,13 @@ public class NavTree extends JPanel {
             
             JList list = (JList)e.getSource();
             if(list.getSelectedIndex() != -1) { // Something is selected!
-                if(limewire.isListSourceFrom(list)) {
-                    library.clearSelection();
-                } else { // if(library.isListSourceFrom(list)) {
-                    limewire.clearSelection();
+                for(NavList navList : navigableLists) {
+                    if(!navList.isListSourceFrom(list)) {
+                        navList.clearSelection();
+                    } else {
+                        navList.navigateToSelection();
+                    }
                 }
-                navigator.showNavigablePanel(list.getSelectedValue().toString());
             }
         }
     }

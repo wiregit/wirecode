@@ -1,34 +1,36 @@
 package org.limewire.ui.swing.mainframe;
 
 import java.awt.CardLayout;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import org.limewire.ui.swing.home.HomePanel;
-import org.limewire.ui.swing.library.DocumentPanel;
-import org.limewire.ui.swing.library.ImagePanel;
-import org.limewire.ui.swing.library.MusicPanel;
-import org.limewire.ui.swing.library.VideoPanel;
 import org.limewire.ui.swing.nav.NavigableTarget;
 
 public class MainPanel extends JPanel implements NavigableTarget {
 
+    private final Map<String, JComponent> keyToComponents = new HashMap<String, JComponent>();
     private final CardLayout cardLayout;
 
     public MainPanel() {
         cardLayout = new CardLayout();
         setLayout(cardLayout);
-        add(new HomePanel(), HomePanel.NAME);
-        add(new StorePanel(), StorePanel.NAME);
-        add(new DocumentPanel(), DocumentPanel.NAME);
-        add(new ImagePanel(), ImagePanel.NAME);
-        add(new MusicPanel(), MusicPanel.NAME);
-        add(new VideoPanel(), VideoPanel.NAME);
-        // add(new JLabel("main"));
-        // setBackground(Color.YELLOW);
     }
 
     public void showNavigablePanel(String key) {
         cardLayout.show(this, key);
+    }
+    
+    @Override
+    public void addNavigablePanel(String key, JComponent panel) {
+        keyToComponents.put(key, panel);
+        add(panel, key);
+    }
+    
+    @Override
+    public void removeNavigablePanel(String key) {
+        remove(keyToComponents.remove(key));
     }
 }

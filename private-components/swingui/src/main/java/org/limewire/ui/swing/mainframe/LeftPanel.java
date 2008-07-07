@@ -22,7 +22,6 @@ public class LeftPanel extends JPanel {
     private final DownloadSummaryPanel downloadPanel;
     private final FilesSharingSummaryPanel filesPanel;
     
-    
     public LeftPanel(Navigator navigator) {
         this.searchBar = new SearchBar();
         this.navTree = new NavTree(navigator);
@@ -74,6 +73,10 @@ public class LeftPanel extends JPanel {
         gbc.weighty = 0;
         gbc.gridx = GridBagConstraints.REMAINDER;
         add(filesPanel, gbc);
+    }
+    
+    public void goHome() {
+        navTree.goHome();
     }
 
 }

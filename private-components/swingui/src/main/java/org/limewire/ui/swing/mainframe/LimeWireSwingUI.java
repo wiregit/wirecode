@@ -24,7 +24,6 @@ public class LimeWireSwingUI extends JPanel {
         this.leftPanel = new LeftPanel(navigator);
         this.statusPanel = new StatusPanel();
         
-        
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
 
@@ -76,6 +75,8 @@ public class LimeWireSwingUI extends JPanel {
         gbc.weighty = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         add(statusPanel, gbc);
+        
+        leftPanel.goHome();
     }
     
     

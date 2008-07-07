@@ -18,15 +18,21 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionListener;
 
+import org.limewire.ui.swing.nav.Navigator.NavItem;
+
 class NavList extends JPanel {
     
     private final JLabel titleLabel;
     private final JList itemList;
     private final DefaultListModel listModel;
+    private final NavItem navTarget;
+    private final Navigator navigator;
     
-    NavList(String title) {
+    NavList(String title, NavItem target, Navigator navigator) {
         setOpaque(false);
         
+        this.navigator = navigator;
+        this.navTarget = target;
         this.titleLabel = new JLabel(title);
         this.listModel = new DefaultListModel();
         this.itemList = new JList(listModel);
@@ -56,11 +62,17 @@ class NavList extends JPanel {
         add(itemList, gbc);
     }
     
-    public void addListItem(String name) {
+    public NavItem getTarget() {
+        return navTarget;
+    }
+    
+    public void addNavItem(JPanel component, String name) {
+        navigator.addNavigablePanel(getTarget(), name, component);
         listModel.addElement(name);
     }
     
-    public void removeListItem(String name) {
+    public void removeNavItem(String name) {
+        navigator.removeNavigablePanel(getTarget(), name);
         listModel.removeElement(name);
     }
     
@@ -116,5 +128,12 @@ class NavList extends JPanel {
         
     }
     
+    public void navigateToItem(String name) {
+        itemList.setSelectedValue(name, true);
+    }
+
+    public void navigateToSelection() {
+        navigator.showNavigablePanel(getTarget(), itemList.getSelectedValue().toString());
+    }
 
 }
