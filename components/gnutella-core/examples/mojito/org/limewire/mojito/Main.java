@@ -11,45 +11,22 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.limewire.io.SimpleNetworkInstanceUtils;
+import org.limewire.io.LocalSocketAddressProvider;
+import org.limewire.io.LocalSocketAddressService;
 import org.limewire.mojito.db.Database;
 import org.limewire.mojito.result.BootstrapResult;
 import org.limewire.mojito.result.BootstrapResult.ResultType;
 import org.limewire.mojito.settings.BucketRefresherSettings;
 import org.limewire.mojito.settings.NetworkSettings;
 import org.limewire.mojito.settings.RouteTableSettings;
-import org.limewire.mojito.util.ContactUtils;
 import org.limewire.mojito.util.MojitoUtils;
 
-public class Main {    
-    /**
-     * Creates a localhost Mojito DHT. Once the localhost Mojito DHT's 
-     * nodes are bootstrapped, you can execute various Mojito commands, 
-     * like adding values to the DHT using a key, looking up keys, getting 
-     * values using the key, etc.
-     * 
-     * @param args 'count port [host port]' either two or four arguments to 
-     * setup a localhost Mojito DHT.
-     * <ul>
-     * <li>count: number of nodes in the example DHT; excludes the bootstrapped 
-     * node.
-     * <li>port: the base port for nodes added to the DHT. Each additional node (if 
-     * count is greater than one) uses a port number which is an increment of the 
-     * base port. * <li>host: host name/host number for the bootstrapped node.
-     * <li>port: the port for the bootstrap node's port. 
-     * </ul>
-     * @throws Exception
-     * <p>
-     * See <a href="http://wiki.limewire.org/index.php?title=Mojito_Main">
-     * Mojito Main</a> for more information on using this example code. 
-     */
+public class Main {
+    
     public static void main(String[] args) throws Exception {
         
         int count = 0;
         int port = 0;
-        
-        //Allows for running locally       
-        ContactUtils.setNetworkInstanceUtils(new SimpleNetworkInstanceUtils(false));        
         
         InetSocketAddress bootstrapHost = null;
         
@@ -61,10 +38,28 @@ public class Main {
             count = Integer.parseInt(args[0]);
             port = Integer.parseInt(args[1]);
             
-            if (args.length >= 4) {                
+            if (args.length >= 4) {
                 bootstrapHost = new InetSocketAddress(args[2], Integer.parseInt(args[3]));
             }
         }
+        
+        LocalSocketAddressService.setSocketAddressProvider(new LocalSocketAddressProvider() {
+            public byte[] getLocalAddress() {
+                throw new UnsupportedOperationException("Mojito does not use this method and if it does implement it!");
+            }
+
+            public int getLocalPort() {
+                throw new UnsupportedOperationException("Mojito does not use this method and if it does implement it!");
+            }
+
+            public boolean isLocalAddressPrivate() {
+                return NetworkSettings.LOCAL_IS_PRIVATE.getValue();
+            }
+
+            public boolean isTLSCapable() {
+                throw new UnsupportedOperationException("Mojito does not use this method and if it does implement it!");
+            }
+        });
         
         RouteTableSettings.MAX_CONTACTS_PER_NETWORK_CLASS_RATIO.setValue(1.0f);
         NetworkSettings.LOCAL_IS_PRIVATE.setValue(false);
@@ -101,6 +96,7 @@ public class Main {
         
         for(int i = 0; i < count; i++) {
             try {
+                //MojitoDHT dht = new MojitoDHT("DHT" + i, false);
                 MojitoDHT dht = MojitoFactory.createDHT("DHT" + i);
                 
                 if (addr != null) {
@@ -109,6 +105,8 @@ public class Main {
                     dht.bind(new InetSocketAddress(port+i));
                 }
                 
+                //dht.start();
+
                 dhts.add(dht);
                 System.out.println(i + ": " + ((Context)dhts.get(dhts.size()-1)).getLocalNode());
             } catch (IOException err) {
@@ -119,24 +117,51 @@ public class Main {
         
         return dhts;
     }
-
+    
     private static void run(int port, List<MojitoDHT> dhts, SocketAddress bootstrapHost) throws Exception {
         long time = 0L;
-                
+        
+        /*Set<SocketAddress> bootstrapHostSet = new LIFOSet<SocketAddress>();
+        
+        SocketAddress[] hosts = { 
+            new InetSocketAddress("www.apple.com", 80), 
+            new InetSocketAddress("www.microsoft.com", 80), 
+            new InetSocketAddress("www.google.com", 80),
+            new InetSocketAddress("www.t-mobile.com", 80),
+            new InetSocketAddress("www.verizon.com", 80),
+            new InetSocketAddress("www.limewire.org", 80),
+            new InetSocketAddress("www.cnn.com", 80), 
+            new InetSocketAddress("www.scifi.com", 80), 
+            new InetSocketAddress("192.168.1.5", 80),
+            new InetSocketAddress("www.gnutella.com", 80),
+            new InetSocketAddress("www.limewire.org", 80), 
+            new InetSocketAddress("slashdot.org", 80), 
+            new InetSocketAddress("www.altavista.com", 80), 
+            new InetSocketAddress("www.ask.com", 80),
+            new InetSocketAddress("www.vodafone.co.uk", 80),
+            new InetSocketAddress("www.n-tv.de", 80),
+            new InetSocketAddress("www.n24.de", 80), 
+            host
+        };
+        
+        future = dhts.get(i).bootstrap(new LinkedHashSet<SocketAddress>(Arrays.asList(hosts)));*/
+        
         int start = 0;
         if (bootstrapHost == null) {
             dhts.get(0).start();
-            
             start = 1;
+            
+            // 1...n bootstraps from 0
+            //bootstrapHost = new InetSocketAddress("localhost", port);
             bootstrapHost = new InetSocketAddress("localhost", port);
-
-        } 
-
+        }
+        
         for(int i = start; i < dhts.size(); i++) {
             try {
                 MojitoDHT dht = dhts.get(i);
                 dht.start();
                 
+                //BootstrapResult result = MojitoUtils.bootstrap(dht, bootstrapHost).get();
                 BootstrapResult result = dht.bootstrap(bootstrapHost).get();
                 
                 time += result.getTime();
@@ -153,7 +178,7 @@ public class Main {
                 err.printStackTrace();
             }
         }
-
+        
         if (dhts.size() > 1) {
             BootstrapResult result = MojitoUtils.bootstrap(
                     dhts.get(0), dhts.get(1).getContactAddress()).get();
@@ -169,6 +194,16 @@ public class Main {
         }
         
         System.out.println("All Nodes finished bootstrapping in " + time + "ms");
+        
+        /*future.addDHTEventListener(new BootstrapListener() {
+            public void handleException(Exception ex) {
+                System.out.println(ex);
+            }
+
+            public void handleResult(BootstrapEvent result) {
+                System.out.println(result);
+            }
+        });*/
         
         int current = 0;
         MojitoDHT dht = dhts.get(current);
@@ -203,7 +238,7 @@ public class Main {
                     CommandHandler.info(dht, null, out);
                 } else if (line.indexOf("help") >= 0) {
                     out.println("quit");
-                    out.println("switch <index>");
+                    out.println("switch \\d");
                     CommandHandler.handle(dht, line, out);
                 } else if (line.indexOf("load") >= 0) {
                     MojitoDHT d = CommandHandler.load(dht, line.split(" "), out);
@@ -211,6 +246,8 @@ public class Main {
                     dhts.set(current, d);
                     d.getDHTExecutorService().setThreadFactory(
                             dht.getDHTExecutorService().getThreadFactory());
+                    //System.out.println(dht.getLocalAddress());
+                    //System.out.println(d.getLocalAddress());
                     d.bind(dht.getLocalAddress());
                     d.start();
                     dht = d;
@@ -223,8 +260,7 @@ public class Main {
                     }
                     System.out.println("Key count: " + keycount);
                 } else {
-                    if(!CommandHandler.handle(dht, line, out))
-                        System.out.println("Could not execute command: " + line);
+                    CommandHandler.handle(dht, line, out);
                 }
             } catch (Throwable t) {
                 t.printStackTrace();
