@@ -85,7 +85,7 @@ public class BTMetaInfoTest extends BaseTestCase {
         Assert.assertEquals(true, metaInfo.isPrivate());
         Assert.assertNotNull(metaInfo.getWebSeeds());
         Assert.assertEquals(1, metaInfo.getWebSeeds().length);
-        Assert.assertEquals("http://mirror.com/test/", metaInfo.getWebSeeds()[0].toString());
+        Assert.assertEquals("http://mirror.com/pub/", metaInfo.getWebSeeds()[0].toString());
     }
     
     public void testMultipleWebSeedMultipleFile() throws Exception {
@@ -101,9 +101,9 @@ public class BTMetaInfoTest extends BaseTestCase {
         Assert.assertEquals(true, metaInfo.isPrivate());
         Assert.assertNotNull(metaInfo.getWebSeeds());
         Assert.assertEquals(3, metaInfo.getWebSeeds().length);
-        Assert.assertEquals("http://mirror.com/test/", metaInfo.getWebSeeds()[0].toString());
-        Assert.assertEquals("http://mirror1.com/test/", metaInfo.getWebSeeds()[1].toString());
-        Assert.assertEquals("http://mirror2.com/test/", metaInfo.getWebSeeds()[2].toString());
+        Assert.assertEquals("http://mirror.com/pub/", metaInfo.getWebSeeds()[0].toString());
+        Assert.assertEquals("http://mirror1.com/pub/", metaInfo.getWebSeeds()[1].toString());
+        Assert.assertEquals("http://mirror2.com/pub/", metaInfo.getWebSeeds()[2].toString());
     }
 
     /**
