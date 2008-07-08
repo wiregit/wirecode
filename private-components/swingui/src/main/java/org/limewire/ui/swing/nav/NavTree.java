@@ -13,6 +13,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.limewire.ui.swing.home.HomePanel;
+import org.limewire.ui.swing.nav.Navigator.NavItem;
 
 public class NavTree extends JPanel implements NavigableTree {
     
@@ -57,6 +58,18 @@ public class NavTree extends JPanel implements NavigableTree {
             break;
         case LIMEWIRE:
             limewire.addNavItem(name);
+            break;
+        }
+    }
+    
+    @Override
+    public void selectNavigableItem(NavItem navItem, String name) {
+        switch(navItem) {
+        case LIBRARY:
+            library.selectItem(name);
+            break;
+        case LIMEWIRE:
+            limewire.selectItem(name);
             break;
         }
     }

@@ -11,7 +11,7 @@ import java.awt.Insets;
 import javax.swing.Box;
 import javax.swing.JPanel;
 
-import org.limewire.ui.swing.nav.Navigator;
+import org.limewire.ui.swing.search.SearchHandler;
 
 /**
  * The main home page.
@@ -21,8 +21,8 @@ public class HomePanel extends JPanel {
     public static final String NAME = "Home";
     private final HomeSearchPanel hsPanel;
 
-    public HomePanel(Navigator navigator) {
-        this.hsPanel = new HomeSearchPanel(navigator);
+    public HomePanel(SearchHandler searchHandler) {
+        this.hsPanel = new HomeSearchPanel(searchHandler);
 
         setPreferredSize(new Dimension(500, 500));
 

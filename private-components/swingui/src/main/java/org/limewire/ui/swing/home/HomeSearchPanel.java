@@ -14,11 +14,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.nav.Navigator.NavItem;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
+import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchInfo;
-import org.limewire.ui.swing.search.SearchResultsPanel;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.Line;
 
@@ -32,10 +30,10 @@ public class HomeSearchPanel extends JPanel {
     private final JLabel documents;
     private final JButton search;
     private final JButton searchFriends;
-    private final Navigator navigator;
+    private final SearchHandler searchHandler;
     
-    public HomeSearchPanel(Navigator navigator) {
-        this.navigator = navigator;
+    public HomeSearchPanel(SearchHandler searchHandler) {
+        this.searchHandler = searchHandler;
         this.textField = new JTextField();
         this.all = new JLabel("All");
         this.audio = new JLabel("Audio");
@@ -147,9 +145,7 @@ public class HomeSearchPanel extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             SearchInfo info = getSearchInfo();
-            SearchResultsPanel panel = new SearchResultsPanel(info);
-            navigator.addNavigablePanel(NavItem.LIMEWIRE, "Results of \""+ info.getTitle() + "\"", panel);
-            navigator.showNavigablePanel(NavItem.LIMEWIRE, info.getTitle());
+            searchHandler.doSearch(info);
         }
     }
 

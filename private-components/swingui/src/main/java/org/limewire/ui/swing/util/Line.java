@@ -19,6 +19,9 @@ public class Line extends JComponent {
      * Creates a line that uses a <tt>color</tt>.
      */
     public Line(Color color) {
+        if(color == null)
+            throw new IllegalArgumentException("color must not be null");
+        
         setColor(color);
         initSize();
     }

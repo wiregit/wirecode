@@ -11,6 +11,7 @@ import org.limewire.ui.swing.library.ImagePanel;
 import org.limewire.ui.swing.library.MusicPanel;
 import org.limewire.ui.swing.library.VideoPanel;
 import org.limewire.ui.swing.mainframe.StorePanel;
+import org.limewire.ui.swing.search.SearchHandler;
 
 public class NavigatorImpl implements Navigator {
 
@@ -19,7 +20,14 @@ public class NavigatorImpl implements Navigator {
 
     public NavigatorImpl(NavigableTarget navTarget, NavigableTree navTree) {
         this.navTarget = navTarget;
-        this.navTree = navTree;
+        this.navTree = navTree;        
+        
+        navTree.addNavSelectionListener(new NavSelectionListener() {
+            @Override
+            public void navItemSelected(Navigator.NavItem target, String name) {
+                showNavigablePanel(target, name);
+            }
+        });
     }
 
     /* (non-Javadoc)
@@ -37,16 +45,21 @@ public class NavigatorImpl implements Navigator {
         navTree.addNavigableItem(target, name);
         navTarget.removeNavigablePanel(target + name);
     }
+    
+    @Override
+    public void selectNavigablePanel(NavItem target, String name) {
+        navTree.selectNavigableItem(target, name);
+    }
 
     /* (non-Javadoc)
      * @see org.limewire.ui.swing.nav.Navigator#showNavigablePanel(org.limewire.ui.swing.nav.NavigatorImpl.NavItem, java.lang.String)
      */
-    public void showNavigablePanel(Navigator.NavItem target, String name) {
+    private void showNavigablePanel(Navigator.NavItem target, String name) {
         navTarget.showNavigablePanel(target + name);
     }
 
-    public void addDefaultNavigableItems() {
-        addNavigablePanel(Navigator.NavItem.LIMEWIRE, HomePanel.NAME, new HomePanel(this));
+    public void addDefaultNavigableItems(SearchHandler searchHandler) {
+        addNavigablePanel(Navigator.NavItem.LIMEWIRE, HomePanel.NAME, new HomePanel(searchHandler));
         addNavigablePanel(Navigator.NavItem.LIMEWIRE, StorePanel.NAME, new StorePanel());
 
         addNavigablePanel(Navigator.NavItem.LIBRARY, MusicPanel.NAME, new MusicPanel());

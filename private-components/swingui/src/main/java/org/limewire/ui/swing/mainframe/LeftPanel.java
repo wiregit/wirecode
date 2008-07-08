@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -17,6 +19,10 @@ import org.limewire.ui.swing.nav.NavTree;
 import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.SearchBar;
+import org.limewire.ui.swing.nav.Navigator.NavItem;
+import org.limewire.ui.swing.search.DefaultSearchInfo;
+import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.Line;
 
@@ -26,12 +32,12 @@ class LeftPanel extends JPanel implements NavigableTree {
     private final NavTree navTree;
     private final DownloadSummaryPanel downloadPanel;
     private final FilesSharingSummaryPanel filesPanel;
-    /**
-	 * The color of the lines separating the GUI panels
-	 * 
-	 */
-	@Resource
+    private SearchHandler searchHandler;
+    
+    /** The color of the lines separating the GUI panels */
+    @Resource
     private Color lineColor;
+
     public LeftPanel() {
     	GuiUtils.injectFields(this);
         this.searchBar = new SearchBar();
@@ -42,6 +48,13 @@ class LeftPanel extends JPanel implements NavigableTree {
         setMinimumSize(new Dimension(150, 0));
         setMaximumSize(new Dimension(150, Integer.MAX_VALUE));
         setPreferredSize(new Dimension(150, 700));
+        
+        searchBar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                searchHandler.doSearch(new DefaultSearchInfo(searchBar.getText()));
+            }
+        });
         
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
@@ -106,8 +119,17 @@ class LeftPanel extends JPanel implements NavigableTree {
         navTree.addNavSelectionListener(listener);
     }
     
+    @Override
+    public void selectNavigableItem(NavItem target, String name) {
+        navTree.selectNavigableItem(target, name);
+    }
+    
     public void goHome() {
         navTree.goHome();
+    }
+
+    public void setSearchHandler(SearchHandler searchHandler) {
+        this.searchHandler = searchHandler;
     }
 
 }

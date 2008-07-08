@@ -7,9 +7,9 @@ import java.awt.GridBagLayout;
 import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
-import org.limewire.ui.swing.nav.NavSelectionListener;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.NavigatorImpl;
+import org.limewire.ui.swing.search.SearchHandler;
+import org.limewire.ui.swing.search.SearchHandlerImpl;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.Line;
 
@@ -20,9 +20,10 @@ public class LimeWireSwingUI extends JPanel {
     private final MainPanel mainPanel;
     private final StatusPanel statusPanel;
     private final NavigatorImpl navigator;
+    private final SearchHandler searchHandler;
+    
     /**
 	 * The color of the lines separating the GUI panels
-	 * 
 	 */
 	@Resource
     private Color lineColor;
@@ -34,14 +35,9 @@ public class LimeWireSwingUI extends JPanel {
         this.navigator = new NavigatorImpl(mainPanel, leftPanel);
         this.topPanel = new TopPanel();
         this.statusPanel = new StatusPanel();
-        
-        leftPanel.addNavSelectionListener(new NavSelectionListener() {
-            @Override
-            public void navItemSelected(Navigator.NavItem target, String name) {
-                navigator.showNavigablePanel(target, name);
-            }
-        });
-        navigator.addDefaultNavigableItems();
+        this.searchHandler = new SearchHandlerImpl(navigator);
+        leftPanel.setSearchHandler(searchHandler);
+        navigator.addDefaultNavigableItems(searchHandler);
         
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);

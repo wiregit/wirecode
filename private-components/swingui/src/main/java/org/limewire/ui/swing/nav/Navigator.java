@@ -13,6 +13,6 @@ public interface Navigator {
 
     public void removeNavigablePanel(Navigator.NavItem target, String name);
 
-    public void showNavigablePanel(Navigator.NavItem target, String name);
+    public void selectNavigablePanel(Navigator.NavItem target, String name);
 
 }
