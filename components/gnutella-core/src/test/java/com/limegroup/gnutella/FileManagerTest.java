@@ -424,7 +424,7 @@ public class FileManagerTest extends LimeTestCase {
         
         FileDesc fd = fman.getFileDescForFile(f1);
 
-        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString("title=\"Alive 2\""));
+        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString("title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\""));
         fd.addLimeXMLDocument(d2);
         
         FileManagerEvent result = fileChanged(f1);
@@ -1726,6 +1726,8 @@ public class FileManagerTest extends LimeTestCase {
         System.out.println("adding store directory to share");
         // start sharing the store directory
         fman.addSharedFolder(_storeDir);
+        
+        waitForLoad();
         
         // all LWS files are displayed
         assertEquals("Unexpected number of store files", 2, fman.getStoreFileList().getNumFiles());

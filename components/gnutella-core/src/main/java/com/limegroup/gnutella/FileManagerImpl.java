@@ -1012,7 +1012,10 @@ public class FileManagerImpl implements FileManager, Service {
                 //  will not have a unique LimeXMLDoc associated with it)
                 if (isStoreXML(fd.getXMLDocument()) || storeFileList.contains(fd.getSHA1Urn())){
                     addStoreFile(fd, file, urns, successType, oldFileDesc); 
-                } else {
+                } else if (isFileLocatedStoreDirectory(file) && !isFileInCompletelySharedDirectory(file)
+                        && !isFileShareable(file)) {
+                    resolveAndDispatchFileEvent(failureType, oldFileDesc, file);
+                }else {
                     addSharedFile(file, fd, urns, successType, oldFileDesc); 
                 }
                 
