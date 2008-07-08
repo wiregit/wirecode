@@ -2,6 +2,12 @@ package org.limewire.xmpp.client.impl;
 
 import org.jivesoftware.smackx.packet.StreamInitiation;
 import org.limewire.xmpp.client.service.FileMetaData;
+import org.limewire.xmpp.client.service.HostMetaData;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.Date;
+import java.net.URI;
 
 /**
  * An adapter between the xmpp component class <code>FileMetaData</code> and the
@@ -29,5 +35,25 @@ class FileMetaDataAdapter extends StreamInitiation.File implements FileMetaData 
 
     public String getDescription() {
         return getDesc();
+    }
+
+    public int getIndex() {
+        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public Map<String, String> getMetaData() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public Set<URI> getURIs() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public Date getCreateTime() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public HostMetaData getHostMetaData() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

@@ -8,13 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.net.URI;
 
 import org.apache.log4j.BasicConfigurator;
 import org.jivesoftware.smack.util.StringUtils;
@@ -22,23 +17,7 @@ import org.limewire.inject.AbstractModule;
 import org.limewire.io.IOUtils;
 import org.limewire.lifecycle.ServiceTestCase;
 import org.limewire.xmpp.client.impl.XMPPException;
-import org.limewire.xmpp.client.service.FileMetaData;
-import org.limewire.xmpp.client.service.FileTransferProgressListener;
-import org.limewire.xmpp.client.service.IncomingChatListener;
-import org.limewire.xmpp.client.service.IncomingFileAcceptor;
-import org.limewire.xmpp.client.service.LibraryListener;
-import org.limewire.xmpp.client.service.LibraryProvider;
-import org.limewire.xmpp.client.service.LimePresence;
-import org.limewire.xmpp.client.service.MessageReader;
-import org.limewire.xmpp.client.service.MessageWriter;
-import org.limewire.xmpp.client.service.Presence;
-import org.limewire.xmpp.client.service.PresenceListener;
-import org.limewire.xmpp.client.service.RosterListener;
-import org.limewire.xmpp.client.service.User;
-import org.limewire.xmpp.client.service.XMPPConnection;
-import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
-import org.limewire.xmpp.client.service.XMPPErrorListener;
-import org.limewire.xmpp.client.service.XMPPService;
+import org.limewire.xmpp.client.service.*;
 
 import com.google.inject.Module;
 import com.google.inject.Provider;
@@ -512,6 +491,26 @@ public class XMPPServiceTest extends ServiceTestCase {
 
         void setDescription(String description) {
             this.description = description;
+        }
+
+        public int getIndex() {
+            return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public Map<String, String> getMetaData() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public Set<URI> getURIs() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public Date getCreateTime() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public HostMetaData getHostMetaData() {
+            return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
     }
     
