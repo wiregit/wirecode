@@ -96,6 +96,8 @@ class NavList extends JPanel {
             
             setFont(getFont().deriveFont(Font.BOLD));
             setIcon(new SpaceIcon(10));
+            //maintains background color of panel
+            setOpaque(isSelected);
             
             return renderer;
         }
