@@ -3,7 +3,6 @@
  */
 package org.limewire.ui.swing.home;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -25,7 +24,6 @@ public class HomePanel extends JPanel {
     public HomePanel(Navigator navigator) {
         this.hsPanel = new HomeSearchPanel(navigator);
 
-        setBackground(Color.WHITE);
         setPreferredSize(new Dimension(500, 500));
 
         setLayout(new GridBagLayout());

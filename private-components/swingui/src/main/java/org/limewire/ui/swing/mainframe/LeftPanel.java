@@ -31,7 +31,6 @@ class LeftPanel extends JPanel implements NavigableTree {
         this.downloadPanel = new DownloadSummaryPanel();
         this.filesPanel = new FilesSharingSummaryPanel();
         
-        setBackground(Color.WHITE);
         setMinimumSize(new Dimension(150, 0));
         setMaximumSize(new Dimension(150, Integer.MAX_VALUE));
         setPreferredSize(new Dimension(150, 700));

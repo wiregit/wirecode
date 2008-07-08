@@ -1,13 +1,29 @@
 package org.limewire.ui.swing.mainframe;
 
+import java.awt.Color;
 import java.awt.Dimension;
 
+import javax.swing.UIManager;
+import javax.swing.plaf.ColorUIResource;
+
+import org.jdesktop.application.Resource;
 import org.jdesktop.application.SingleFrameApplication;
+import org.limewire.ui.swing.util.GuiUtils;
 
 public class AppFrame extends SingleFrameApplication {
-    
+	  
+	/**
+	 * Default background color for panels
+	 */
+	@Resource
+	private Color bgColor;
     @Override
     protected void startup() {
+    	GuiUtils.injectFields(this);
+    	//Panel.background=javax.swing.plaf.ColorUIResource[r=236,g=233,b=216]
+    	ColorUIResource bgColorResource = new ColorUIResource(bgColor);
+    	UIManager.getDefaults().put("Panel.background", bgColorResource);
+		System.out.println(UIManager.getDefaults());
         getMainFrame().setJMenuBar(new LimeMenuBar());        
         LimeWireSwingUI ui = new LimeWireSwingUI();
         show(ui);
