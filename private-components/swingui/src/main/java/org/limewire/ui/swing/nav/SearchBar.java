@@ -6,16 +6,26 @@ import java.awt.event.FocusListener;
 
 import javax.swing.JTextField;
 
+import org.jdesktop.application.Resource;
+import org.limewire.ui.swing.util.GuiUtils;
+
 
 
 public class SearchBar extends JTextField {
 
 	private final String defaultText = "Search...";
 	
+	/**
+	 * the color of the search box text when defaultText is displayed
+	 */
+	@Resource
+	private Color defaultTextColor;
+	
 	public SearchBar() {
 	    super();
+	    GuiUtils.injectFields(this);
 	    setText(defaultText);
-		setForeground(Color.GRAY);
+		setForeground(defaultTextColor);
 		addFocusListener(new SearchFocusListener());
 	}
 
@@ -35,7 +45,7 @@ public class SearchBar extends JTextField {
 			String text = getText();
 			if (text == null || "".equals(text)) {
 				setText(defaultText);
-				setForeground(Color.GRAY);
+				setForeground(defaultTextColor);
 			}
 		}
 	}

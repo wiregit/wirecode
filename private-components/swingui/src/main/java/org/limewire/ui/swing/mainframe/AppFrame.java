@@ -17,13 +17,13 @@ public class AppFrame extends SingleFrameApplication {
 	 */
 	@Resource
 	private Color bgColor;
+	
     @Override
     protected void startup() {
     	GuiUtils.injectFields(this);
-    	//Panel.background=javax.swing.plaf.ColorUIResource[r=236,g=233,b=216]
     	ColorUIResource bgColorResource = new ColorUIResource(bgColor);
     	UIManager.getDefaults().put("Panel.background", bgColorResource);
-		System.out.println(UIManager.getDefaults());
+    	
         getMainFrame().setJMenuBar(new LimeMenuBar());        
         LimeWireSwingUI ui = new LimeWireSwingUI();
         show(ui);

@@ -9,6 +9,7 @@ import java.awt.Insets;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.nav.DownloadSummaryPanel;
 import org.limewire.ui.swing.nav.FilesSharingSummaryPanel;
 import org.limewire.ui.swing.nav.NavSelectionListener;
@@ -16,6 +17,7 @@ import org.limewire.ui.swing.nav.NavTree;
 import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.SearchBar;
+import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.Line;
 
 class LeftPanel extends JPanel implements NavigableTree {
@@ -24,8 +26,14 @@ class LeftPanel extends JPanel implements NavigableTree {
     private final NavTree navTree;
     private final DownloadSummaryPanel downloadPanel;
     private final FilesSharingSummaryPanel filesPanel;
-    
+    /**
+	 * The color of the lines separating the GUI panels
+	 * 
+	 */
+	@Resource
+    private Color lineColor;
     public LeftPanel() {
+    	GuiUtils.injectFields(this);
         this.searchBar = new SearchBar();
         this.navTree = new NavTree();
         this.downloadPanel = new DownloadSummaryPanel();
@@ -62,7 +70,7 @@ class LeftPanel extends JPanel implements NavigableTree {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weighty = 0;
         gbc.gridx = GridBagConstraints.REMAINDER;
-        add(new Line(Color.BLACK), gbc);
+        add(new Line(lineColor), gbc);
         
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(0, 5, 0, 0);
@@ -74,7 +82,7 @@ class LeftPanel extends JPanel implements NavigableTree {
         gbc.insets = new Insets(0, 0, 0, 0);
         gbc.weighty = 0;
         gbc.gridx = GridBagConstraints.REMAINDER;
-        add(new Line(Color.BLACK), gbc);
+        add(new Line(lineColor), gbc);
         
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(2, 5, 2, 0);

@@ -1,6 +1,5 @@
 package org.limewire.ui.swing.nav;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -35,8 +34,8 @@ class NavList extends JPanel {
         itemList.setFocusable(false);
         itemList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
+        titleLabel.setName("NavList.titleLabel");
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD).deriveFont(titleLabel.getFont().getSize() + 2f));
-        titleLabel.setForeground(Color.GRAY);
         titleLabel.setOpaque(false);
         
         itemList.setCellRenderer(new NavListCellRenderer());
