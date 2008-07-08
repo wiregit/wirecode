@@ -108,7 +108,7 @@ public class InspectionResponseFactoryImpl implements InspectionResponseFactory 
                 // a BEInspectable returned invalid object - report the error.
                 String msg = bencoding.toString();
                 String ret = "d5:error"+msg.length()+":"+msg+"e";
-                dos.write(ret.getBytes());
+                dos.write(ret.getBytes("UTF-8"));
             }
             dos.flush();
         } catch (IOException impossible) {
