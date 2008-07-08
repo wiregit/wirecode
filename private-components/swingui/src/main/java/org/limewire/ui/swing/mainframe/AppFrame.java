@@ -2,7 +2,9 @@ package org.limewire.ui.swing.mainframe;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.Enumeration;
 
+import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.ColorUIResource;
 
@@ -21,8 +23,7 @@ public class AppFrame extends SingleFrameApplication {
     @Override
     protected void startup() {
     	GuiUtils.injectFields(this);
-    	ColorUIResource bgColorResource = new ColorUIResource(bgColor);
-    	UIManager.getDefaults().put("Panel.background", bgColorResource);
+    	initColors();
     	
         getMainFrame().setJMenuBar(new LimeMenuBar());        
         LimeWireSwingUI ui = new LimeWireSwingUI();
@@ -39,4 +40,23 @@ public class AppFrame extends SingleFrameApplication {
         launch(AppFrame.class, args);
     }
     
+    /**
+	 * Changes all default background colors equal to Panel.background to the
+	 * bgColor set in properties.
+	 */
+	private void initColors() {
+		ColorUIResource bgColorResource = new ColorUIResource(bgColor);
+		Color oldBgColor = UIManager.getDefaults().getColor(
+				"Panel.background");
+		UIDefaults uiDefaults = UIManager.getDefaults();
+		Enumeration<?> enumeration = uiDefaults.keys();
+		while (enumeration.hasMoreElements()) {
+			Object key = enumeration.nextElement();
+			if (key.toString().indexOf("background") != -1) {
+				if (uiDefaults.get(key).equals(oldBgColor)) {
+					UIManager.getDefaults().put(key, bgColorResource);
+				}
+			}
+		}
+	}
 }
