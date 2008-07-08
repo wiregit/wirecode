@@ -149,6 +149,7 @@ public class HomeSearchPanel extends JPanel {
             SearchInfo info = getSearchInfo();
             SearchResultsPanel panel = new SearchResultsPanel(info);
             navigator.addNavigablePanel(NavItem.LIMEWIRE, "Results of \""+ info.getTitle() + "\"", panel);
+            navigator.showNavigablePanel(NavItem.LIMEWIRE, info.getTitle());
         }
     }
 
