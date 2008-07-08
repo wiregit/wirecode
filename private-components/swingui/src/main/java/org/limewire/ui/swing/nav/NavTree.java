@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Box;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -51,13 +50,13 @@ public class NavTree extends JPanel implements NavigableTree {
     }
     
     @Override
-    public void addNavigableItem(Navigator.NavItem navItem, String name) {
+    public void addNavigableItem(Navigator.NavItem navItem, String name, boolean userRemovable) {
         switch(navItem) {
         case LIBRARY:
-            library.addNavItem(name);
+            library.addNavItem(name, userRemovable);
             break;
         case LIMEWIRE:
-            limewire.addNavItem(name);
+            limewire.addNavItem(name, userRemovable);
             break;
         }
     }
@@ -96,14 +95,14 @@ public class NavTree extends JPanel implements NavigableTree {
             if(e.getValueIsAdjusting()) // Ignore.
                 return; 
             
-            JList list = (JList)e.getSource();
+            NavList list = (NavList)e.getSource();
             if(list.getSelectedIndex() != -1) { // Something is selected!
                 for(NavList navList : navigableLists) {
-                    if(!navList.isListSourceFrom(list)) {
+                    if(navList != list) {
                         navList.clearSelection();
                     } else {
                         for(NavSelectionListener listener : navSelectionListeners) {
-                            listener.navItemSelected(navList.getTarget(), list.getSelectedValue().toString());
+                            listener.navItemSelected(navList.getTarget(), list.getSelectionKey());
                         }
                     }
                 }

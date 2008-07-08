@@ -2,45 +2,70 @@ package org.limewire.ui.swing.nav;
 
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+
+import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.RolloverProducer;
+import org.jdesktop.swingx.RolloverRenderer;
+import org.limewire.ui.swing.util.GuiUtils;
 
 class NavList extends JPanel {
     
     private final JLabel titleLabel;
-    private final JList itemList;
-    private final DefaultListModel listModel;
+    private final JXTable itemList;
+    private final DefaultTableModel listModel;
     private final Navigator.NavItem navTarget;
+    private final List<ListSelectionListener> listeners = new ArrayList<ListSelectionListener>();
+    
+    @Resource
+    private Icon killIcon;
+    
+    @Resource
+    private Icon rolloverKillIcon;
     
     NavList(String title, Navigator.NavItem target) {
+        GuiUtils.injectFields(this);
         setOpaque(false);
         
         this.navTarget = target;
         this.titleLabel = new JLabel(title);
-        this.listModel = new DefaultListModel();
-        this.itemList = new JList(listModel);
+        this.listModel = new DefaultTableModel();
+        this.itemList = new JXTable(listModel);
+        itemList.setRolloverEnabled(true);
         itemList.setFocusable(false);
+        itemList.setEditable(false);
+        itemList.getSelectionModel().addListSelectionListener(new DelegateListener());
+        itemList.setShowGrid(false, false);
+        listModel.setColumnCount(3);
+        itemList.getColumnExt(0).setPreferredWidth(10);
+        itemList.getColumnExt(1).setPreferredWidth(115);
+        itemList.getColumnExt(2).setPreferredWidth(20);
+        itemList.getColumnExt(1).setCellRenderer(new NavListCellRenderer());
+        itemList.getColumnExt(2).setCellRenderer(new KillerRenderer());
         itemList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
         titleLabel.setName("NavList.titleLabel");
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD).deriveFont(titleLabel.getFont().getSize() + 2f));
         titleLabel.setOpaque(false);
         
-        itemList.setCellRenderer(new NavListCellRenderer());
         itemList.setOpaque(false);
-        itemList.setFixedCellWidth(500);
         
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -62,70 +87,115 @@ class NavList extends JPanel {
         return navTarget;
     }
     
-    public void addNavItem(String name) {
-        listModel.addElement(name);
+    public void addNavItem(String name, boolean userRemovable) {
+        listModel.addRow(new Object[] { null, name, userRemovable });
     }
     
     public void removeNavItem(String name) {
-        listModel.removeElement(name);
+        listModel.removeRow(getRowForName(name));
     }
     
     public void addListSelectionListener(ListSelectionListener listener) {
-        itemList.addListSelectionListener(listener);
+        listeners.add(listener);
     }
     
     public void removeListSelectionListener(ListSelectionListener listener) {
-        itemList.removeListSelectionListener(listener);
-    }
-    
-    public boolean isListSourceFrom(Object source) {
-        return source == itemList;
+        listeners.remove(listener);
     }
     
     public void clearSelection() {
         itemList.clearSelection();
     }
     
-    private class NavListCellRenderer extends DefaultListCellRenderer {
-        public Component getListCellRendererComponent(JList list, Object value,
-                int index, boolean isSelected, boolean cellHasFocus) {
+    private class NavListCellRenderer extends DefaultTableCellRenderer {
 
+        @Override
+        public Component getTableCellRendererComponent(JTable table,
+                Object value, boolean isSelected, boolean hasFocus, int row,
+                int column) {
             JComponent renderer = (JComponent) super
-                    .getListCellRendererComponent(list, value, index,
-                            isSelected, cellHasFocus);
-            
-            setFont(getFont().deriveFont(Font.BOLD));
-            setIcon(new SpaceIcon(10));
-            //maintains background color of panel
-            setOpaque(isSelected);
+                    .getTableCellRendererComponent(table, value, isSelected,
+                            hasFocus, row, column);
+            renderer.setFont(getFont().deriveFont(Font.BOLD));
             
             return renderer;
         }
     }
     
-    private static class SpaceIcon implements Icon {
-        private final int width;
-        SpaceIcon(int width) {
-            this.width = width;
+    private class KillerRenderer extends DefaultTableCellRenderer implements RolloverRenderer {
+        
+        private int lastRow = -1;
+        
+        @Override
+        public void doClick() {
+            listModel.removeRow(lastRow);
         }
         
         @Override
-        public int getIconHeight() {
-            return 0;
-        }
-        @Override
-        public int getIconWidth() {
-            return width;
+        public boolean isEnabled() {
+            return getIcon() != null;
         }
         
         @Override
-        public void paintIcon(Component c, Graphics g, int x, int y) {
+        public Component getTableCellRendererComponent(JTable table,
+                Object value, boolean isSelected, boolean hasFocus, int row,
+                int column) {
+            lastRow = row;
+            Point p = (Point) table
+                    .getClientProperty(RolloverProducer.ROLLOVER_KEY);
+
+            JComponent renderer = (JComponent) super
+                    .getTableCellRendererComponent(table, value, isSelected,
+                            hasFocus, row, column);
+            setText(null);
+            if (value == Boolean.TRUE) {
+                if(p != null && p.x == column && p.y == row ) {
+                    setIcon(rolloverKillIcon);
+                } else {
+                    setIcon(killIcon);
+                }
+            } else {
+                setIcon(null);
+            }
+
+            return renderer;
         }
-        
+    }
+    
+    private int getRowForName(String name) {
+        for(int i = 0; i < listModel.getRowCount(); i++) {
+            if(itemList.getValueAt(i, 1).equals(name)) {
+                return i;
+            }
+        }
+        return -1;
     }
     
     public void selectItem(String name) {
-        itemList.setSelectedValue(name, true);
+        int row = getRowForName(name);
+        itemList.getSelectionModel().setSelectionInterval(row, row);
+    }
+
+    public int getSelectedIndex() {
+        return itemList.getSelectedRow();
+    }
+
+    public String getSelectionKey() {
+        return listModel.getValueAt(itemList.getSelectedRow(), 1).toString();
+    }
+    
+    private class DelegateListener implements ListSelectionListener {
+        
+        public DelegateListener() {
+        }
+        
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+            ListSelectionEvent newEvent = new ListSelectionEvent(NavList.this, e.getFirstIndex(), e.getLastIndex(), e.getValueIsAdjusting());
+            for(ListSelectionListener listener : listeners) {
+                listener.valueChanged(newEvent);
+            }
+        }
     }
 
 }

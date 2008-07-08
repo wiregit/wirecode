@@ -14,7 +14,7 @@ public class SearchHandlerImpl implements SearchHandler {
     @Override
     public void doSearch(SearchInfo info) {
         String panelTitle = "Results for \"" + info.getTitle() + "\"";
-        navigator.addNavigablePanel(NavItem.LIMEWIRE, panelTitle, new SearchResultsPanel(info));
+        navigator.addNavigablePanel(NavItem.LIMEWIRE, panelTitle, new SearchResultsPanel(info), true);
         navigator.selectNavigablePanel(NavItem.LIMEWIRE, panelTitle);
     }
 

@@ -33,8 +33,8 @@ public class NavigatorImpl implements Navigator {
     /* (non-Javadoc)
      * @see org.limewire.ui.swing.nav.Navigator#addNavigablePanel(org.limewire.ui.swing.nav.NavigatorImpl.NavItem, java.lang.String, javax.swing.JPanel)
      */
-    public void addNavigablePanel(Navigator.NavItem target, String name, JPanel panel) {
-        navTree.addNavigableItem(target, name);
+    public void addNavigablePanel(Navigator.NavItem target, String name, JPanel panel, boolean userRemovable) {
+        navTree.addNavigableItem(target, name, userRemovable);
         navTarget.addNavigablePanel(target + name, panel);
     }
 
@@ -42,7 +42,7 @@ public class NavigatorImpl implements Navigator {
      * @see org.limewire.ui.swing.nav.Navigator#removeNavigablePanel(org.limewire.ui.swing.nav.NavigatorImpl.NavItem, java.lang.String)
      */
     public void removeNavigablePanel(Navigator.NavItem target, String name) {
-        navTree.addNavigableItem(target, name);
+        navTree.removeNavigableItem(target, name);
         navTarget.removeNavigablePanel(target + name);
     }
     
@@ -59,12 +59,12 @@ public class NavigatorImpl implements Navigator {
     }
 
     public void addDefaultNavigableItems(SearchHandler searchHandler) {
-        addNavigablePanel(Navigator.NavItem.LIMEWIRE, HomePanel.NAME, new HomePanel(searchHandler));
-        addNavigablePanel(Navigator.NavItem.LIMEWIRE, StorePanel.NAME, new StorePanel());
+        addNavigablePanel(Navigator.NavItem.LIMEWIRE, HomePanel.NAME, new HomePanel(searchHandler), false);
+        addNavigablePanel(Navigator.NavItem.LIMEWIRE, StorePanel.NAME, new StorePanel(), false);
 
-        addNavigablePanel(Navigator.NavItem.LIBRARY, MusicPanel.NAME, new MusicPanel());
-        addNavigablePanel(Navigator.NavItem.LIBRARY, VideoPanel.NAME, new VideoPanel());
-        addNavigablePanel(Navigator.NavItem.LIBRARY, ImagePanel.NAME, new ImagePanel());
-        addNavigablePanel(Navigator.NavItem.LIBRARY, DocumentPanel.NAME, new DocumentPanel());
+        addNavigablePanel(Navigator.NavItem.LIBRARY, MusicPanel.NAME, new MusicPanel(), false);
+        addNavigablePanel(Navigator.NavItem.LIBRARY, VideoPanel.NAME, new VideoPanel(), false);
+        addNavigablePanel(Navigator.NavItem.LIBRARY, ImagePanel.NAME, new ImagePanel(), false);
+        addNavigablePanel(Navigator.NavItem.LIBRARY, DocumentPanel.NAME, new DocumentPanel(), false);
     }
 }

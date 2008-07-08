@@ -9,7 +9,7 @@ public interface Navigator {
         LIBRARY, LIMEWIRE
     }
 
-    public void addNavigablePanel(Navigator.NavItem target, String name, JPanel panel);
+    public void addNavigablePanel(Navigator.NavItem target, String name, JPanel panel, boolean userRemovable);
 
     public void removeNavigablePanel(Navigator.NavItem target, String name);
 

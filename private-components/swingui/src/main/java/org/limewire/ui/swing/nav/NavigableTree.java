@@ -6,7 +6,7 @@ public interface NavigableTree {
    
     void removeNavigableItem(Navigator.NavItem navItem, String name);
     
-    void addNavigableItem(Navigator.NavItem navItem, String name);
+    void addNavigableItem(Navigator.NavItem navItem, String name, boolean userRemovable);
     
     void addNavSelectionListener(NavSelectionListener listener);
 
