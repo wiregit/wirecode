@@ -1998,22 +1998,21 @@ class ManagedDownloaderImpl extends AbstractCoreDownloader implements AltLocList
      */
     protected DownloadStatus saveFile(URN fileHash){
         // let the user know we're saving the file...
-        setState( DownloadStatus.SAVING );
-        
-        //4. Move to library.
-        // Make sure we can write into the complete file's directory.
-        if (!FileUtils.setWriteable(getSaveFile().getParentFile())) {
-            reportDiskProblem("could not set file writeable " + 
-                    getSaveFile().getParentFile());
-            return DownloadStatus.DISK_PROBLEM;
-        }
+        setState(DownloadStatus.SAVING);
         File saveFile = getSaveFile();
         try {
             saveFile = getSuggestedSaveLocation(saveFile, incompleteFile);
-            setSaveFile(saveFile.getParentFile(), saveFile.getName(), true);
+            // Make sure we can write into the complete file's directory.
+            if (!FileUtils.setWriteable(saveFile.getParentFile())) {
+                reportDiskProblem("could not set file writeable " + getSaveFile().getParentFile());
+                return DownloadStatus.DISK_PROBLEM;
+            }
+            if (!saveFile.equals(getSaveFile()))
+                setSaveFile(saveFile.getParentFile(), saveFile.getName(), true);
         } catch (IOException e) {
             return DownloadStatus.DISK_PROBLEM;
         }
+
         //Delete target.  If target doesn't exist, this will fail silently.
         saveFile.delete();
 
