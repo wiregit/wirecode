@@ -42,7 +42,7 @@ public class AppFrame extends SingleFrameApplication {
     
     /**
 	 * Changes all default background colors equal to Panel.background to the
-	 * bgColor set in properties.
+	 * bgColor set in properties.  Also sets Table.background.
 	 */
 	private void initColors() {
 		ColorUIResource bgColorResource = new ColorUIResource(bgColor);
@@ -58,5 +58,7 @@ public class AppFrame extends SingleFrameApplication {
 				}
 			}
 		}
+		
+		uiDefaults.put("Table.background", bgColorResource);
 	}
 }
