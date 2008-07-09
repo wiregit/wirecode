@@ -6,13 +6,19 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Box;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
@@ -23,25 +29,29 @@ import org.limewire.ui.swing.util.Line;
 public class HomeSearchPanel extends JPanel {
     
     private final JTextField textField;
-    private final JLabel all;
-    private final JLabel audio;
-    private final JLabel video;
-    private final JLabel images;
-    private final JLabel documents;
+    private final ButtonGroup buttonGroup;
+    private final HomeButtonBed all;
+    private final HomeButtonBed audio;
+    private final HomeButtonBed video;
+    private final HomeButtonBed images;
+    private final HomeButtonBed documents;
     private final JButton search;
     private final JButton searchFriends;
     private final SearchHandler searchHandler;
     
     public HomeSearchPanel(SearchHandler searchHandler) {
         this.searchHandler = searchHandler;
+        this.buttonGroup = new ButtonGroup();
         this.textField = new JTextField();
-        this.all = new JLabel("All");
-        this.audio = new JLabel("Audio");
-        this.video = new JLabel("Video");
-        this.images = new JLabel("Images");
-        this.documents = new JLabel("Documents");
+        this.all = new HomeButtonBed("All", buttonGroup);
+        this.audio = new HomeButtonBed("Audio", buttonGroup);
+        this.video = new HomeButtonBed("Video", buttonGroup);
+        this.images = new HomeButtonBed("Images", buttonGroup);
+        this.documents = new HomeButtonBed("Documents", buttonGroup);
         this.search = new JButton("Search");
         this.searchFriends = new JButton("Search Friends");
+        
+        all.setSelected(true);
         
         SearchAction action = new SearchAction();
         search.addActionListener(action);
@@ -70,7 +80,7 @@ public class HomeSearchPanel extends JPanel {
         add(Box.createGlue(), gbc);
         
         gbc.weightx = 0;
-        gbc.insets = new Insets(0, 0, 5, 10);
+        gbc.insets = new Insets(0, 1, 5, 1);
         add(all, gbc);
         add(new Line(Color.BLACK), gbc);
         add(audio, gbc);
@@ -146,6 +156,59 @@ public class HomeSearchPanel extends JPanel {
         public void actionPerformed(ActionEvent e) {
             SearchInfo info = getSearchInfo();
             searchHandler.doSearch(info);
+        }
+    }
+    
+    private static class HomeButtonBed extends JPanel {
+        private final HomeButton button;
+        
+        public HomeButtonBed(String name, ButtonGroup group) {
+            this.button = new HomeButton(name, group);
+            
+            setLayout(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            add(button, gbc);
+        }
+        
+        void setSelected(boolean selected) {
+            button.setSelected(selected);
+        }
+    }
+    
+    private static class HomeButton extends JToggleButton {
+        public HomeButton(String name, ButtonGroup group) {
+            super(name);
+            group.add(this);
+            setFocusPainted(false);
+            setContentAreaFilled(false);
+            setMargin(new Insets(0, 5, 0, 5));
+            addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    if(e.getStateChange() == ItemEvent.SELECTED) {
+                        HomeButton.this.getParent().setBackground(Color.LIGHT_GRAY);
+                    } else {
+                        HomeButton.this.getParent().setBackground(null);
+                    }
+                    
+                }
+            });
+            
+            addMouseListener(new MouseAdapter() {
+               @Override
+                public void mouseEntered(MouseEvent e) {
+                   if(!isSelected()) {
+                       HomeButton.this.getParent().setBackground(Color.CYAN);
+                   }
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    if(!isSelected()) {
+                        HomeButton.this.getParent().setBackground(null);
+                    }
+                }
+            });
         }
     }
 

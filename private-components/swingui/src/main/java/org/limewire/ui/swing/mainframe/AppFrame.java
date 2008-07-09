@@ -15,14 +15,12 @@ import org.limewire.ui.swing.util.GuiUtils;
 
 public class AppFrame extends SingleFrameApplication {
 	  
-	/**
-	 * Default background color for panels
-	 */
+	/** Default background color for panels */
 	@Resource
 	private Color bgColor;
         
-        @Resource
-        private Image limeImage;
+    @Resource
+    private Image limeImage;
 	
     @Override
     protected void startup() {
@@ -51,8 +49,7 @@ public class AppFrame extends SingleFrameApplication {
 	 */
 	private void initColors() {
 		ColorUIResource bgColorResource = new ColorUIResource(bgColor);
-		Color oldBgColor = UIManager.getDefaults().getColor(
-				"Panel.background");
+		Color oldBgColor = UIManager.getDefaults().getColor("Panel.background");
 		UIDefaults uiDefaults = UIManager.getDefaults();
 		Enumeration<?> enumeration = uiDefaults.keys();
 		while (enumeration.hasMoreElements()) {
