@@ -309,7 +309,7 @@ public final class NetworkUtils {
      * 
      * @param address the address to check
      */
-    static boolean isPrivateAddress(byte[] address) {
+    public static boolean isPrivateAddress(byte[] address) {
         if (isAnyLocalAddress(address) 
                 || isInvalidAddress(address)
                 || isLoopbackAddress(address) 
@@ -466,6 +466,17 @@ public final class NetworkUtils {
     public static int getMaskedIP(InetAddress addr, int netmask) {
         byte[] address = addr.getAddress();
         return ByteUtils.beb2int(address, /* 0 */ address.length - 4) & netmask;
+    }
+    
+    /**
+     * Converts integer <code>ip</code> into byt array.
+     * 
+     * This method is not IPv6 compliant.
+     */
+    public static byte[] toByteAddress(int ip) {
+        byte[] address = new byte[4];
+        ByteUtils.int2beb(ip, address, 0);
+        return address;
     }
     
     /**
