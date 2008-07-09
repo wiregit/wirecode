@@ -7,11 +7,14 @@ import java.awt.GridBagLayout;
 import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.search.SearchFactory;
 import org.limewire.ui.swing.nav.NavigatorImpl;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchHandlerImpl;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.Line;
+
+import com.google.inject.Injector;
 
 public class LimeWireSwingUI extends JPanel {
     
@@ -28,14 +31,14 @@ public class LimeWireSwingUI extends JPanel {
 	@Resource
     private Color lineColor;
     
-    public LimeWireSwingUI() {
+    public LimeWireSwingUI(Injector coreInjector) {
     	GuiUtils.injectFields(this);
         this.mainPanel = new MainPanel();
         this.leftPanel = new LeftPanel();
         this.navigator = new NavigatorImpl(mainPanel, leftPanel);
         this.topPanel = new TopPanel();
         this.statusPanel = new StatusPanel();
-        this.searchHandler = new SearchHandlerImpl(navigator);
+        this.searchHandler = new SearchHandlerImpl(navigator, coreInjector.getInstance(SearchFactory.class));
         leftPanel.setSearchHandler(searchHandler);
         navigator.addDefaultNavigableItems(searchHandler);
         

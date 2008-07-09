@@ -11,7 +11,11 @@ import javax.swing.plaf.ColorUIResource;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.application.SingleFrameApplication;
+import org.limewire.core.impl.search.MockSearchModule;
 import org.limewire.ui.swing.util.GuiUtils;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class AppFrame extends SingleFrameApplication {
 	  
@@ -27,10 +31,12 @@ public class AppFrame extends SingleFrameApplication {
     protected void startup() {
     	GuiUtils.injectFields(this);
     	initColors();
+    	
+    	Injector injector = Guice.createInjector(new MockSearchModule());
         
     	getMainFrame().setIconImage(frameIcon);
         getMainFrame().setJMenuBar(new LimeMenuBar());        
-        LimeWireSwingUI ui = new LimeWireSwingUI();
+        LimeWireSwingUI ui = new LimeWireSwingUI(injector);
         show(ui);
         ui.goHome();
         
