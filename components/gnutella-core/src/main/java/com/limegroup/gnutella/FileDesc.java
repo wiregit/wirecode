@@ -49,6 +49,12 @@ public class FileDesc implements StringLookup {
 	 * The modification time of the file.
 	 */
     private final long _modTime;
+    
+    /**
+     * Time file was first shared on gnutella or -1 if not time
+     * exists for this
+     */
+    private long creationTime = -1;
 
 	/**
 	 * Constant <tt>Set</tt> of <tt>URN</tt> instances for the file.  This
@@ -95,6 +101,7 @@ public class FileDesc implements StringLookup {
 	 * The number of times this file has had completed uploads
 	 */
 	private int _completedUploads;
+	
 	    
     /**
 	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
@@ -173,6 +180,21 @@ public class FileDesc implements StringLookup {
 	 */
 	public long lastModified() {
 		return _modTime;
+	}
+	
+	/**
+	 * Returns the time this file was first shared on gnutella or -1
+	 * if no value has been set
+	 */
+	public long getCreationTime() {
+	    return creationTime;
+	}
+	
+	/**
+	 * Sets the creation time for this file
+	 */
+	public void setCreationTime(long time) {
+	    this.creationTime = time;
 	}
 
 	/**

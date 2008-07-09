@@ -35,6 +35,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.FileManagerTestUtils;
 
 /**
  * Tests that What is new support is fully functional.  We use a leaf here - we
@@ -128,7 +129,7 @@ public class ServerSideWhatIsNewTest
         queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         downloadServices = injector.getInstance(DownloadServices.class);
 
-        fileManager.loadSettingsAndWait(500);
+        FileManagerTestUtils.waitForLoad(fileManager,500);
         
         exchangeCapabilitiesMessage();
     }
@@ -344,7 +345,7 @@ public class ServerSideWhatIsNewTest
         assertTrue(tempFile1.exists());
         assertTrue(tempFile2.exists());
 
-        fileManager.loadSettingsAndWait(1000);
+        FileManagerTestUtils.waitForLoad(fileManager, 1000);
         assertEquals("Files were not loaded by filemanager", 4, fileManager.getSharedFileList().getNumFiles());
 
         URN tempFile1URN = fm.getFileDescForFile(tempFile1).getSHA1Urn();
@@ -438,7 +439,7 @@ public class ServerSideWhatIsNewTest
             }
         });
         fm.fileChanged(tempFile1);
-        assertTrue(fileChangedLatch.await(3, TimeUnit.SECONDS));
+        assertTrue(fileChangedLatch.await(40, TimeUnit.SECONDS));
         FileDesc afterChanged = fm.getFileDescForFile(tempFile1);
         assertNotNull(afterChanged);
         assertNotSame(beforeChanged, afterChanged);
@@ -517,8 +518,8 @@ public class ServerSideWhatIsNewTest
         final CountDownLatch latch = new CountDownLatch(1);
         fm.addFileEventListener(new FileEventListener() {
             public void handleFileEvent(FileManagerEvent evt) {
-                assertEquals(FileManagerEvent.Type.CHANGE_FILE, evt.getType());
-                latch.countDown();
+                if(FileManagerEvent.Type.CHANGE_FILE == evt.getType())
+                    latch.countDown();
             }
         });
         fm.fileChanged(tempFile1);
@@ -641,11 +642,12 @@ public class ServerSideWhatIsNewTest
     public void testDownloadCapturesCreationTime() throws Exception {
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
+        Map longToUrns = ctCache.getTimeToUrn();
         for (FileDesc fd : fileManager.getSharedFileList().getAllFileDescs()) {
             fileManager.removeFileIfSharedOrStore(fd.getFile());
             fd.getFile().delete();
         }
-        
+        longToUrns = ctCache.getTimeToUrn();
         final int UPLOADER_PORT = 10000;
         byte[] guid = GUID.makeGuid();
         TestUploader uploader = injector.getInstance(TestUploader.class);
@@ -679,7 +681,7 @@ public class ServerSideWhatIsNewTest
 
         Map urnToLong = ctCache.getUrnToTime();
         assertEquals(""+urnToLong, sharedBefore + 1, urnToLong.size());
-        Map longToUrns = ctCache.getTimeToUrn();
+        longToUrns = ctCache.getTimeToUrn();
         assertEquals(""+longToUrns+"  vs "+urnToLong, sharedBefore + 1, longToUrns.size());
 
     }

@@ -1,4 +1,4 @@
- package com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
 import static com.limegroup.gnutella.Constants.MAX_FILE_SIZE;
 
@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 
 import junit.framework.Test;
 
@@ -30,6 +31,9 @@ import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
+import com.limegroup.gnutella.LimeWireCoreModule.FileEventListenerProvider;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocationFactory;
 import com.limegroup.gnutella.auth.ContentManager;
@@ -51,21 +55,18 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.stubs.LocalSocketAddressProviderStub;
-import com.limegroup.gnutella.stubs.SimpleFileManager;
+import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 import com.limegroup.gnutella.util.MessageTestUtils;
-import com.limegroup.gnutella.version.UpdateHandler;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
-import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
-import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
 import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
 
 
 public class FileManagerTest extends LimeTestCase {
 
     protected static final String SHARE_EXTENSION = "XYZ";
-    protected static final String EXTENSION = SHARE_EXTENSION;
+    protected static final String EXTENSION = SHARE_EXTENSION + ";mp3";
     private static final int MAX_LOCATIONS = 10;
     
     protected File f1 = null;
@@ -88,6 +89,11 @@ public class FileManagerTest extends LimeTestCase {
     protected List<FileDesc> sharedFiles;
     protected Injector injector;
     protected SharedFilesKeywordIndex keywordIndex;
+    private LimeXMLDocumentFactory limeXMLDocumentFactory;
+    
+    private QueryRequestFactory queryRequestFactory;
+    
+    private SchemaReplyCollectionMapper schemaMapper;
 
     public FileManagerTest(String name) {
         super(name);
@@ -110,26 +116,32 @@ public class FileManagerTest extends LimeTestCase {
         injector = LimeTestUtils.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                bind(FileManager.class).to(SimpleFileManager.class);
                 bind(LocalSocketAddressProvider.class).to(LocalSocketAddressProviderStub.class);
             }
         });
+        
         fman = (FileManagerImpl)injector.getInstance(FileManager.class);
         keywordIndex = injector.getInstance(SharedFilesKeywordIndex.class);
         qrpUpdater = injector.getInstance(QRPUpdater.class);
+        schemaMapper = injector.getInstance(SchemaReplyCollectionMapper.class);
         
         fman.addFileEventListener(keywordIndex);
         fman.addFileEventListener(qrpUpdater);
+        fman.addFileEventListener(schemaMapper);
+              
+        limeXMLDocumentFactory = injector.getInstance(LimeXMLDocumentFactory.class);
+        
+        queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
     }
-	
+    
     @Override
-	protected void tearDown() {
+    protected void tearDown() {
         if (f1!=null) f1.delete();
         if (f2!=null) f2.delete();
         if (f3!=null) f3.delete();
         if (f4!=null) f4.delete();
         if (f5!=null) f5.delete();
-        if (f6!=null) f6.delete();	    
+        if (f6!=null) f6.delete();      
         
         if(store1!=null) store1.delete();
         if(store2!=null) store2.delete();
@@ -146,7 +158,7 @@ public class FileManagerTest extends LimeTestCase {
     public void testGetSharedFilesWithNoShared() throws Exception {
         List<FileDesc> sharedFiles =  fman.getSharedFileList().getFilesInDirectory(_sharedDir);
         assertEquals(sharedFiles.toString(), 
-				0, sharedFiles.size());
+                0, sharedFiles.size());
     }
     
     public void testSharingWithContentManager() throws Exception {
@@ -237,8 +249,8 @@ public class FileManagerTest extends LimeTestCase {
         
         // should not be able to remove unshared file
         assertNull("should have not been able to remove f3", 
-				   fman.removeFileIfSharedOrStore(f3));
-				   
+                   fman.removeFileIfSharedOrStore(f3));
+                   
         assertEquals("first file should be f1", f1, fman.getSharedFileList().get(0).getFile());
         
         sharedFiles=fman.getSharedFileList().getFilesInDirectory(_sharedDir);
@@ -258,7 +270,7 @@ public class FileManagerTest extends LimeTestCase {
         f3 = createNewTestFile(11);
 
         FileManagerEvent result = addIfShared(new File("C:\\bad.ABCDEF"));
-        assertTrue(result.toString(), result.isFailedEvent());
+        assertTrue(result.toString(), result.isFailedAddEvent());
         
         result = addIfShared(f2);
         assertTrue(result.toString(), result.isAddEvent());
@@ -352,7 +364,7 @@ public class FileManagerTest extends LimeTestCase {
         addIfShared(f3);
 
         FileManagerEvent result = renameFile(f2, new File("c:\\asdfoih"));
-        assertTrue(result.toString(), result.isFailedEvent());
+        assertTrue(result.toString(), result.getType() == FileManagerEvent.Type.RENAME_FILE_FAILED);
         assertEquals(f2, result.getFiles()[0]);
         
         result = renameFile(f1, f2);
@@ -364,11 +376,59 @@ public class FileManagerTest extends LimeTestCase {
         assertSharedFiles(sharedFiles, f2, f3);
         
         result = renameFile(f2, new File("C\\garbage.XSADF"));
-        assertTrue(result.toString(), result.isRemoveEvent());
+        assertTrue(result.toString(), result.getType() == FileManagerEvent.Type.REMOVE_FILE);
         assertEquals(f2, result.getFileDescs()[0].getFile());
         sharedFiles=fman.getSharedFileList().getFilesInDirectory(_sharedDir);
         assertEquals("unexpected files length", 1, sharedFiles.size());
         assertEquals("files differ", sharedFiles.get(0).getFile(), f3);
+    }
+    
+    public void testFileChangedNoFD() throws Exception {
+        waitForLoad();
+        f1 = createNewNamedTestFile(100, "name", _sharedDir);
+        
+        FileManagerEvent result = fileChanged(f1);
+        assertEquals(result.getType(), FileManagerEvent.Type.CHANGE_FILE_FAILED);
+    }
+    
+    public void testChangeSharedFile() throws Exception {
+        f1 = createNewNamedTestFile(100, "name", _sharedDir);
+        waitForLoad();
+        
+        assertEquals(1, fman.getSharedFileList().getNumFiles());
+        
+        FileDesc fd = fman.getFileDescForFile(f1);
+
+        CreationTimeCache cache = injector.getInstance(CreationTimeCache.class);
+
+        cache.addTime(fd.getSHA1Urn(), 1234);
+        long time = cache.getCreationTimeAsLong(fd.getSHA1Urn()); 
+
+        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString("title=\"Alive\""));
+        fd.addLimeXMLDocument(d1);
+        
+        FileManagerEvent result = fileChanged(f1);
+        assertEquals(result.getType(), FileManagerEvent.Type.CHANGE_FILE);    
+        fd = fman.getFileDescForFile(f1);
+
+        assertEquals(time, cache.getCreationTimeAsLong(fd.getSHA1Urn()));
+    }
+    
+    public void testChangeStoreFile() throws Exception {
+
+        f1 = createNewTestStoreFile();
+        
+        waitForLoad();
+
+        assertEquals(1, fman.getStoreFileList().getNumFiles());
+        
+        FileDesc fd = fman.getFileDescForFile(f1);
+
+        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString("title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\""));
+        fd.addLimeXMLDocument(d2);
+        
+        FileManagerEvent result = fileChanged(f1);
+        assertEquals(result.getType(), FileManagerEvent.Type.CHANGE_FILE); 
     }
     
     public void testIgnoreHugeFiles() throws Exception {
@@ -381,7 +441,7 @@ public class FileManagerTest extends LimeTestCase {
         //Try to add a huge file.  (It will be ignored.)
         f4 = createFakeTestFile(MAX_FILE_SIZE+1l);
         FileManagerEvent result = addIfShared(f4);
-        assertTrue(result.toString(), result.isFailedEvent());
+        assertTrue(result.toString(), result.isFailedAddEvent());
         assertEquals(f4, result.getFiles()[0]);
         assertEquals("unexpected number of files", 1, fman.getSharedFileList().getNumFiles());
         assertEquals("unexpected fman size", 11, fman.getSharedFileList().getNumBytes());
@@ -648,7 +708,7 @@ public class FileManagerTest extends LimeTestCase {
     public void testGetFileDescForUrn() throws Exception {
         VerifyingFileFactory verifyingFileFactory = injector.getInstance(VerifyingFileFactory.class);
         
-		assertEquals("unexected shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("unexected shared files", 0, fman.getSharedFileList().getNumFiles());
         assertEquals("unexpected shared incomplete",
             0, fman.getSharedFileList().getNumIncompleteFiles());
         assertEquals("unexpected pending",
@@ -688,59 +748,59 @@ public class FileManagerTest extends LimeTestCase {
     }
         
         
-	/**
-	 * Tests URN requests on the FileManager.
-	 */
-	public void testUrnRequests() throws Exception {
+    /**
+     * Tests URN requests on the FileManager.
+     */
+    public void testUrnRequests() throws Exception {
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         ResponseFactory responseFactory = injector.getInstance(ResponseFactory.class);
         
-	    addFilesToLibrary();
+        addFilesToLibrary();
 
-		for(int i = 0; i < fman.getSharedFileList().getNumFiles(); i++) {
-			FileDesc fd = fman.getSharedFileList().get(i);
-			Response testResponse = responseFactory.createResponse(fd);
-			URN urn = fd.getSHA1Urn();
-			assertEquals("FileDescs should match", fd, 
-						 fman.getFileDescForUrn(urn));
-			// first set does not include any requested types
-			// third includes both
-			Set<URN.Type> requestedUrnSet1 = new HashSet<URN.Type>();
-			Set<URN.Type> requestedUrnSet2 = new HashSet<URN.Type>();
-			Set<URN.Type> requestedUrnSet3 = new HashSet<URN.Type>();
-			requestedUrnSet1.add(URN.Type.ANY_TYPE);
-			requestedUrnSet2.add(URN.Type.SHA1);
-			requestedUrnSet3.add(URN.Type.ANY_TYPE);
-			requestedUrnSet3.add(URN.Type.SHA1);
-			Set[] requestedUrnSets = {URN.Type.NO_TYPE_SET, requestedUrnSet1, 
-									  requestedUrnSet2, requestedUrnSet3};
-			Set<URN> queryUrnSet = new UrnSet();
-			queryUrnSet.add(urn);
-			for(int j = 0; j < requestedUrnSets.length; j++) { 
-				QueryRequest qr = queryRequestFactory.createQuery(queryUrnSet);
-				Response[] hits = keywordIndex.query(qr);
-				assertEquals("there should only be one response", 1, hits.length);
-				assertEquals("responses should be equal", testResponse, hits[0]);		
-			}
-		}
-	}
+        for(int i = 0; i < fman.getSharedFileList().getNumFiles(); i++) {
+            FileDesc fd = fman.getSharedFileList().get(i);
+            Response testResponse = responseFactory.createResponse(fd);
+            URN urn = fd.getSHA1Urn();
+            assertEquals("FileDescs should match", fd, 
+                         fman.getFileDescForUrn(urn));
+            // first set does not include any requested types
+            // third includes both
+            Set<URN.Type> requestedUrnSet1 = new HashSet<URN.Type>();
+            Set<URN.Type> requestedUrnSet2 = new HashSet<URN.Type>();
+            Set<URN.Type> requestedUrnSet3 = new HashSet<URN.Type>();
+            requestedUrnSet1.add(URN.Type.ANY_TYPE);
+            requestedUrnSet2.add(URN.Type.SHA1);
+            requestedUrnSet3.add(URN.Type.ANY_TYPE);
+            requestedUrnSet3.add(URN.Type.SHA1);
+            Set[] requestedUrnSets = {URN.Type.NO_TYPE_SET, requestedUrnSet1, 
+                                      requestedUrnSet2, requestedUrnSet3};
+            Set<URN> queryUrnSet = new UrnSet();
+            queryUrnSet.add(urn);
+            for(int j = 0; j < requestedUrnSets.length; j++) { 
+                QueryRequest qr = queryRequestFactory.createQuery(queryUrnSet);
+                Response[] hits = keywordIndex.query(qr);
+                assertEquals("there should only be one response", 1, hits.length);
+                assertEquals("responses should be equal", testResponse, hits[0]);       
+            }
+        }
+    }
 
-	/**
-	 * Tests sending request that do not explicitly request any URNs -- traditional
-	 * requests -- to make sure that they do return URNs in their responses.
-	 */
-	public void testThatUrnsAreReturnedWhenNotRequested() throws Exception {
+    /**
+     * Tests sending request that do not explicitly request any URNs -- traditional
+     * requests -- to make sure that they do return URNs in their responses.
+     */
+    public void testThatUrnsAreReturnedWhenNotRequested() throws Exception {
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         ResponseFactory responseFactory = injector.getInstance(ResponseFactory.class);
         
-	    addFilesToLibrary();
-	    
-	    boolean checked = false;
-		for(int i = 0; i < fman.getSharedFileList().getNumFiles(); i++) {
-			FileDesc fd = fman.getSharedFileList().get(i);
-			Response testResponse = responseFactory.createResponse(fd);
-			URN urn = fd.getSHA1Urn();
-			String name = I18NConvert.instance().getNorm(fd.getFileName());
+        addFilesToLibrary();
+        
+        boolean checked = false;
+        for(int i = 0; i < fman.getSharedFileList().getNumFiles(); i++) {
+            FileDesc fd = fman.getSharedFileList().get(i);
+            Response testResponse = responseFactory.createResponse(fd);
+            URN urn = fd.getSHA1Urn();
+            String name = I18NConvert.instance().getNorm(fd.getFileName());
             
             char[] illegalChars = SearchSettings.ILLEGAL_CHARS.getValue();
             Arrays.sort(illegalChars);
@@ -750,46 +810,46 @@ public class FileManagerTest extends LimeTestCase {
                 continue;
             }
             
-			QueryRequest qr = queryRequestFactory.createQuery(name);
-			Response[] hits = keywordIndex.query(qr);
-			assertNotNull("didn't get a response for query " + qr, hits);
-			// we can only do this test on 'unique' names, so if we get more than
-			// one response, don't test.
-			if ( hits.length != 1 ) continue;
-			checked = true;
-			assertEquals("responses should be equal", testResponse, hits[0]);
-			Set<URN> urnSet = hits[0].getUrns();
-			URN[] responseUrns = urnSet.toArray(new URN[0]);
-			// this is just a sanity check
-			assertEquals("urns should be equal for " + fd, urn, responseUrns[0]);		
-		}
-		assertTrue("wasn't able to find any unique classes to check against.", checked);
-	}
-	
-	/**
-	 * Tests that alternate locations are returned in responses.
-	 */
-	public void testThatAlternateLocationsAreReturned() throws Exception {
+            QueryRequest qr = queryRequestFactory.createQuery(name);
+            Response[] hits = keywordIndex.query(qr);
+            assertNotNull("didn't get a response for query " + qr, hits);
+            // we can only do this test on 'unique' names, so if we get more than
+            // one response, don't test.
+            if ( hits.length != 1 ) continue;
+            checked = true;
+            assertEquals("responses should be equal", testResponse, hits[0]);
+            Set<URN> urnSet = hits[0].getUrns();
+            URN[] responseUrns = urnSet.toArray(new URN[0]);
+            // this is just a sanity check
+            assertEquals("urns should be equal for " + fd, urn, responseUrns[0]);       
+        }
+        assertTrue("wasn't able to find any unique classes to check against.", checked);
+    }
+    
+    /**
+     * Tests that alternate locations are returned in responses.
+     */
+    public void testThatAlternateLocationsAreReturned() throws Exception {
         QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
         ResponseFactory responseFactory = injector.getInstance(ResponseFactory.class);
         AlternateLocationFactory alternateLocationFactory = injector.getInstance(AlternateLocationFactory.class);
         AltLocManager altLocManager = injector.getInstance(AltLocManager.class);
         
-	    addFilesToLibrary();
+        addFilesToLibrary();
 
-	    List<FileDesc> fds = fman.getSharedFileList().getAllFileDescs();
-	    for(FileDesc fd : fds) {
-	        URN urn = fd.getSHA1Urn();
-	        for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
-	            altLocManager.add(alternateLocationFactory.create("1.2.3." + j, urn), null);
-	        }
-	    }
+        List<FileDesc> fds = fman.getSharedFileList().getAllFileDescs();
+        for(FileDesc fd : fds) {
+            URN urn = fd.getSHA1Urn();
+            for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
+                altLocManager.add(alternateLocationFactory.create("1.2.3." + j, urn), null);
+            }
+        }
         
         boolean checked = false;
-		for(int i = 0; i < fman.getSharedFileList().getNumFiles(); i++) {
-			FileDesc fd = fman.getSharedFileList().get(i);
-			Response testResponse = responseFactory.createResponse(fd);
-			String name = I18NConvert.instance().getNorm(fd.getFileName());
+        for(int i = 0; i < fman.getSharedFileList().getNumFiles(); i++) {
+            FileDesc fd = fman.getSharedFileList().get(i);
+            Response testResponse = responseFactory.createResponse(fd);
+            String name = I18NConvert.instance().getNorm(fd.getFileName());
             
             char[] illegalChars = SearchSettings.ILLEGAL_CHARS.getValue();
             Arrays.sort(illegalChars);
@@ -799,21 +859,21 @@ public class FileManagerTest extends LimeTestCase {
                 continue;
             }
             
-			QueryRequest qr = queryRequestFactory.createQuery(name);
-			Response[] hits = keywordIndex.query(qr);
-			assertNotNull("didn't get a response for query " + qr, hits);
-			// we can only do this test on 'unique' names, so if we get more than
-			// one response, don't test.
-			if ( hits.length != 1 ) continue;
-			checked = true;
-			assertEquals("responses should be equal", testResponse, hits[0]);
-			assertEquals("should have 10 other alts", 10, testResponse.getLocations().size());
-			assertEquals("should have equal alts",
-			    testResponse.getLocations(), hits[0].getLocations());
-		}
-		assertTrue("wasn't able to find any unique classes to check against.", checked);
+            QueryRequest qr = queryRequestFactory.createQuery(name);
+            Response[] hits = keywordIndex.query(qr);
+            assertNotNull("didn't get a response for query " + qr, hits);
+            // we can only do this test on 'unique' names, so if we get more than
+            // one response, don't test.
+            if ( hits.length != 1 ) continue;
+            checked = true;
+            assertEquals("responses should be equal", testResponse, hits[0]);
+            assertEquals("should have 10 other alts", 10, testResponse.getLocations().size());
+            assertEquals("should have equal alts",
+                testResponse.getLocations(), hits[0].getLocations());
+        }
+        assertTrue("wasn't able to find any unique classes to check against.", checked);
         altLocManager.purge();
-    }	
+    }   
     
     /**
      * tests for the QRP thats kept by the FileManager 
@@ -917,22 +977,18 @@ public class FileManagerTest extends LimeTestCase {
         assertNull(fman.getFileDescForFile(notShared));
         
         // simulate restart
-        fman = new SimpleFileManager(
+        fman = new FileManagerImpl(
                 injector.getProvider(SimppManager.class),
                 injector.getProvider(UrnCache.class),
-                injector.getProvider(DownloadManager.class),
                 injector.getProvider(CreationTimeCache.class),
                 injector.getProvider(ContentManager.class),
                 injector.getProvider(AltLocManager.class),
-                injector.getProvider(SavedFileManager.class),
-                injector.getProvider(UpdateHandler.class),
                 injector.getProvider(ActivityCallback.class), 
-                null,
-                injector.getInstance(LimeXMLReplyCollectionFactory.class),
+                injector.getInstance(
+                        Key.get(ScheduledExecutorService.class, Names.named("backgroundExecutor"))),
                 injector.getInstance(LimeXMLDocumentFactory.class),
                 injector.getInstance(MetaDataReader.class),
-                injector.getProvider(SchemaReplyCollectionMapper.class),
-                injector.getProvider(LimeXMLSchemaRepository.class));
+                injector.getInstance(FileEventListenerProvider.class).fileEventListener());
         waitForLoad();
         
         //  assert that "shared" is shared
@@ -971,183 +1027,183 @@ public class FileManagerTest extends LimeTestCase {
         //should not be an individual share
         assertFalse(fman.isIndividualShare(specialShare));
     }
-	
-	/**
-	 * Tests {@link FileManager#addFileAlways(File)}.
-	 * @throws Exception
-	 */
-	public void testAddFileAlways() throws Exception {
-	    assertFalse(fman.isLoadFinished());
-	    waitForLoad(); // ensure it's loaded with 0 files.
-	    assertEquals(0, fman.getSharedFileList().getNumFiles());
-	    assertTrue(fman.isLoadFinished());
-	    
-		// test if too large files are not shared
-		File tooLarge = createFakeTestFile(MAX_FILE_SIZE+1l);
-		FileManagerEvent result = addAlways(tooLarge);
-		assertTrue(result.toString(), result.isFailedEvent());
-		assertEquals(tooLarge, result.getFiles()[0]);
-		
-		// test if files in shared directories are still shared
-		File test = createNewTestFile(5);
-		result = addAlways(test);
-		assertTrue(result.toString(), result.isAddEvent());
-		assertEquals(test, result.getFileDescs()[0].getFile());
-		assertEquals(1, fman.getSharedFileList().getNumFiles());
-		
-		// try again, it will fail because it's already shared.
-		result = addAlways(test);
-		assertTrue(result.toString(), result.isAlreadySharedEvent());
-		assertEquals(test, result.getFiles()[0]);
-		
-		// test that non-existent files are not shared
-		test = new File("non existent file").getCanonicalFile();
-		result = addAlways(test);
-		assertTrue(result.toString(), result.isFailedEvent());
-		assertEquals(test, result.getFiles()[0]);
-		
-		// test that file in non shared directory is shared
-		File dir = createNewBaseDirectory("notshared");
-		dir.mkdir();
-		dir.deleteOnExit();
-		test = createNewNamedTestFile(500, "specially shared", dir);
-		result = addAlways(test);
-		assertTrue(result.toString(), result.isAddEvent());
-		assertEquals(test, result.getFileDescs()[0].getFile());
+    
+    /**
+     * Tests {@link FileManager#addFileAlways(File)}.
+     * @throws Exception
+     */
+    public void testAddFileAlways() throws Exception {
+        assertFalse(fman.isLoadFinished());
+        waitForLoad(); // ensure it's loaded with 0 files.
+        assertEquals(0, fman.getSharedFileList().getNumFiles());
+        assertTrue(fman.isLoadFinished());
+        
+        // test if too large files are not shared
+        File tooLarge = createFakeTestFile(MAX_FILE_SIZE+1l);
+        FileManagerEvent result = addAlways(tooLarge);
+        assertTrue(result.toString(), result.isFailedAddEvent());
+        assertEquals(tooLarge, result.getFiles()[0]);
+        
+        // test if files in shared directories are still shared
+        File test = createNewTestFile(5);
+        result = addAlways(test);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(test, result.getFileDescs()[0].getFile());
+        assertEquals(1, fman.getSharedFileList().getNumFiles());
+        
+        // try again, it will fail because it's already shared.
+        result = addAlways(test);
+        assertTrue(result.toString(), result.isAlreadySharedEvent());
+        assertEquals(test, result.getFiles()[0]);
+        
+        // test that non-existent files are not shared
+        test = new File("non existent file").getCanonicalFile();
+        result = addAlways(test);
+        assertTrue(result.toString(), result.isFailedAddEvent());
+        assertEquals(test, result.getFiles()[0]);
+        
+        // test that file in non shared directory is shared
+        File dir = createNewBaseDirectory("notshared");
+        dir.mkdir();
+        dir.deleteOnExit();
+        test = createNewNamedTestFile(500, "specially shared", dir);
+        result = addAlways(test);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(test, result.getFileDescs()[0].getFile());
         assertEquals(2, fman.getSharedFileList().getNumFiles());
         
         // try again, it will fail because it's already shared.
         result = addAlways(test);
         assertTrue(result.toString(), result.isAlreadySharedEvent());
         assertEquals(test, result.getFiles()[0]);
-	}
+    }
 
-	public void testIsFileInCompletelySharedDirectory() throws Exception {
-		// non existent file should not be in a shared directory
-		File nonexistent = new File("nonexistent");
-		assertFalse("File should not be in a shared directory", fman.isFileInCompletelySharedDirectory(nonexistent));
-		
-		File dir = createNewBaseDirectory("notshared");
-		dir.mkdir();
-		dir.deleteOnExit();
-		File test = createNewNamedTestFile(10, "noshared", dir);
-		assertFalse("File should not be in a shared directory",fman.isFileInCompletelySharedDirectory(test));
-		
-		// test for files in subdirs
-		File subDir = new File(_sharedDir, "newSubDir");
-		subDir.mkdir();
-		subDir.deleteOnExit();
-		waitForLoad();
-		assertTrue("Subdir should be in shared directory", fman.isFileInCompletelySharedDirectory(subDir));
-		
-		test = createNewNamedTestFile(50, "subdirfile", subDir);
-		waitForLoad();
-		// test if subdir is shared
-		assertTrue("File in subdir should be in shared directory now", fman.isFileInCompletelySharedDirectory(test));
-	}
-	
-	/**
-	 * Tests {@link FileManager#addFileIfShared(File)}.
-	 * <p>
-	 * Basically files should be added when they are shareable.
-	 * @throws Exception
-	 */
-	public void testAddFileIfShared() throws Exception {
-		// non shareable files:
-		
-		// too large tested above
-		
-		// non shareable extension in shared directory
-		SharingSettings.EXTENSIONS_TO_SHARE.setValue("abc");
-		waitForLoad(); // set the extensions correctly.
-		File nonshareable = createNewNamedTestFile(10, "nonshareable extension");
-		FileManagerEvent result = addIfShared(nonshareable);
-		assertTrue(result.toString(), result.isFailedEvent());
-		assertEquals(nonshareable, result.getFiles()[0]);
-		nonshareable.delete();
-		
-		// not in shared directory and not specially shared, but valid extension
-		SharingSettings.EXTENSIONS_TO_SHARE.setValue(SHARE_EXTENSION);
-		waitForLoad(); // set the new extensions
-		File validExt = createNewNamedTestFile(10, "valid extension", _sharedDir.getParentFile());
-		result = addIfShared(validExt);
-		assertTrue(result.toString(), result.isFailedEvent());
-		assertEquals(validExt, result.getFiles()[0]);
+    public void testIsFileInCompletelySharedDirectory() throws Exception {
+        // non existent file should not be in a shared directory
+        File nonexistent = new File("nonexistent");
+        assertFalse("File should not be in a shared directory", fman.isFileInCompletelySharedDirectory(nonexistent));
+        
+        File dir = createNewBaseDirectory("notshared");
+        dir.mkdir();
+        dir.deleteOnExit();
+        File test = createNewNamedTestFile(10, "noshared", dir);
+        assertFalse("File should not be in a shared directory",fman.isFileInCompletelySharedDirectory(test));
+        
+        // test for files in subdirs
+        File subDir = new File(_sharedDir, "newSubDir");
+        subDir.mkdir();
+        subDir.deleteOnExit();
+        waitForLoad();
+        assertTrue("Subdir should be in shared directory", fman.isFileInCompletelySharedDirectory(subDir));
+        
+        test = createNewNamedTestFile(50, "subdirfile", subDir);
+        waitForLoad();
+        // test if subdir is shared
+        assertTrue("File in subdir should be in shared directory now", fman.isFileInCompletelySharedDirectory(test));
+    }
+    
+    /**
+     * Tests {@link FileManager#addFileIfShared(File)}.
+     * <p>
+     * Basically files should be added when they are shareable.
+     * @throws Exception
+     */
+    public void testAddFileIfShared() throws Exception {
+        // non shareable files:
+        
+        // too large tested above
+        
+        // non shareable extension in shared directory
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue("abc");
+        waitForLoad(); // set the extensions correctly.
+        File nonshareable = createNewNamedTestFile(10, "nonshareable extension");
+        FileManagerEvent result = addIfShared(nonshareable);
+        assertTrue(result.toString(), result.isFailedAddEvent());
+        assertEquals(nonshareable, result.getFiles()[0]);
+        nonshareable.delete();
+        
+        // not in shared directory and not specially shared, but valid extension
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue(SHARE_EXTENSION);
+        waitForLoad(); // set the new extensions
+        File validExt = createNewNamedTestFile(10, "valid extension", _sharedDir.getParentFile());
+        result = addIfShared(validExt);
+        assertTrue(result.toString(), result.isFailedAddEvent());
+        assertEquals(validExt, result.getFiles()[0]);
 
-		// nonexistent in shared directory
-		File nonexistent = new File(_sharedDir, "test." + SHARE_EXTENSION);
-		result = addIfShared(nonexistent);
-		assertTrue(result.toString(), result.isFailedEvent());
-		assertEquals(nonexistent, result.getFiles()[0]);
-		
-		// nonexistent in non shared directory
-		nonexistent = new File("nonexistent." + SHARE_EXTENSION).getCanonicalFile();
-		result = addIfShared(nonexistent);
-		assertTrue(result.toString(), result.isFailedEvent());
-		assertEquals(nonexistent, result.getFiles()[0]);
-		
-		// nonexistent, but specially shared
-		result = addAlways(nonexistent);
-		assertTrue(result.toString(), result.isFailedEvent());
-		assertEquals(nonexistent, result.getFiles()[0]);
-		
-		// shareable files:
-		
-		// files with shareable extension in shared directory
-		File shareable = createNewNamedTestFile(10, "shareable");
-		result = addIfShared(shareable);
-		assertTrue(result.toString(), result.isAddEvent());
-		assertEquals(shareable, result.getFileDescs()[0].getFile());
-		assertEquals(1, fman.getSharedFileList().getNumFiles());
-		assertEquals(result.getFileDescs()[0], fman.getSharedFileList().get(0));
-		
-		// files with shareable extension, specially shared
-		File speciallyShareable = createNewNamedTestFile(10, "specially shareable", _sharedDir.getParentFile());
-		result = addAlways(speciallyShareable);
-		assertTrue(result.toString(), result.isAddEvent());
-		assertEquals(speciallyShareable, result.getFileDescs()[0].getFile());
-		assertEquals(2, fman.getSharedFileList().getNumFiles());
-		assertEquals(result.getFileDescs()[0], fman.getSharedFileList().get(1));
-		
-		// files with non shareable extension, specially shared
-		SharingSettings.EXTENSIONS_TO_SHARE.setValue("abc");
-		File speciallyShared = createNewNamedTestFile(10, "speciall shared", _sharedDir.getParentFile());
-		result = addAlways(speciallyShared);
-		assertTrue(result.toString(), result.isAddEvent());
-		assertEquals(speciallyShared, result.getFileDescs()[0].getFile());
-		assertEquals(3, fman.getSharedFileList().getNumFiles());
-		assertEquals(result.getFileDescs()[0], fman.getSharedFileList().get(2));
-	}
-	
-	public void testAddSharedFoldersWithBlackList() throws Exception {
-		File[] dirs = LimeTestUtils.createDirs(_sharedDir, 
-				"recursive1",
-				"recursive1/sub1",
-				"recursive1/sub1/subsub",
-				"recursive1/sub2",
-				"recursive2");
-		
-		// create files in all folders, so we can see if they were shared
-		for (int i = 0; i < dirs.length; i++) {
-			createNewNamedTestFile(i + 1, "recshared" + i, dirs[i]);
-		}
-		
-		List<File> whiteList = Arrays.asList(dirs[0], dirs[1], dirs[4]);
-		List<File> blackList = Arrays.asList(dirs[2], dirs[3]);
-		fman.addSharedFolders(new HashSet<File>(whiteList), new HashSet<File>(blackList));
-		waitForLoad();
-		
-		// assert blacklist worked
-		for (File dir : blackList) {
-			assertEquals(0, fman.getSharedFileList().getFilesInDirectory(dir).size());
-		}
-		
-		// assert others were shared
-		for (File dir : whiteList) {
-			assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dir).size());
-		}
-	}
-	
+        // nonexistent in shared directory
+        File nonexistent = new File(_sharedDir, "test." + SHARE_EXTENSION);
+        result = addIfShared(nonexistent);
+        assertTrue(result.toString(), result.isFailedAddEvent());
+        assertEquals(nonexistent, result.getFiles()[0]);
+        
+        // nonexistent in non shared directory
+        nonexistent = new File("nonexistent." + SHARE_EXTENSION).getCanonicalFile();
+        result = addIfShared(nonexistent);
+        assertTrue(result.toString(), result.isFailedAddEvent());
+        assertEquals(nonexistent, result.getFiles()[0]);
+        
+        // nonexistent, but specially shared
+        result = addAlways(nonexistent);
+        assertTrue(result.toString(), result.isFailedAddEvent());
+        assertEquals(nonexistent, result.getFiles()[0]);
+        
+        // shareable files:
+        
+        // files with shareable extension in shared directory
+        File shareable = createNewNamedTestFile(10, "shareable");
+        result = addIfShared(shareable);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(shareable, result.getFileDescs()[0].getFile());
+        assertEquals(1, fman.getSharedFileList().getNumFiles());
+        assertEquals(result.getFileDescs()[0], fman.getSharedFileList().get(0));
+        
+        // files with shareable extension, specially shared
+        File speciallyShareable = createNewNamedTestFile(10, "specially shareable", _sharedDir.getParentFile());
+        result = addAlways(speciallyShareable);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(speciallyShareable, result.getFileDescs()[0].getFile());
+        assertEquals(2, fman.getSharedFileList().getNumFiles());
+        assertEquals(result.getFileDescs()[0], fman.getSharedFileList().get(1));
+        
+        // files with non shareable extension, specially shared
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue("abc");
+        File speciallyShared = createNewNamedTestFile(10, "speciall shared", _sharedDir.getParentFile());
+        result = addAlways(speciallyShared);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(speciallyShared, result.getFileDescs()[0].getFile());
+        assertEquals(3, fman.getSharedFileList().getNumFiles());
+        assertEquals(result.getFileDescs()[0], fman.getSharedFileList().get(2));
+    }
+    
+    public void testAddSharedFoldersWithBlackList() throws Exception {
+        File[] dirs = LimeTestUtils.createDirs(_sharedDir, 
+                "recursive1",
+                "recursive1/sub1",
+                "recursive1/sub1/subsub",
+                "recursive1/sub2",
+                "recursive2");
+        
+        // create files in all folders, so we can see if they were shared
+        for (int i = 0; i < dirs.length; i++) {
+            createNewNamedTestFile(i + 1, "recshared" + i, dirs[i]);
+        }
+        
+        List<File> whiteList = Arrays.asList(dirs[0], dirs[1], dirs[4]);
+        List<File> blackList = Arrays.asList(dirs[2], dirs[3]);
+        fman.addSharedFolders(new HashSet<File>(whiteList), new HashSet<File>(blackList));
+        waitForLoad();
+        
+        // assert blacklist worked
+        for (File dir : blackList) {
+            assertEquals(0, fman.getSharedFileList().getFilesInDirectory(dir).size());
+        }
+        
+        // assert others were shared
+        for (File dir : whiteList) {
+            assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dir).size());
+        }
+    }
+    
 
     public void testSymlinksAreResolvedInBlacklist() throws Exception {
         if (OSUtils.isWindows()) {
@@ -1215,7 +1271,7 @@ public class FileManagerTest extends LimeTestCase {
                         parentDir.getAbsolutePath() + File.separator + name
                 }).waitFor());
     }
-    	
+        
     public void testExplicitlySharedSubfolderUnsharedDoesntStayShared() throws Exception {
         File[] dirs = LimeTestUtils.createDirs(_sharedDir, 
                 "recursive1",
@@ -1244,7 +1300,8 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals(0, fman.getSharedFileList().getFilesInDirectory(dirs[1]).size());
         
         // Now reload fman and make sure it's still not shared!
-        fman.loadSettingsAndWait(10000);
+        FileManagerTestUtils.waitForLoad(fman,10000);
+
         assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[0]).size());
         assertEquals(0, fman.getSharedFileList().getFilesInDirectory(dirs[1]).size());
     }
@@ -1281,7 +1338,8 @@ public class FileManagerTest extends LimeTestCase {
         assertFalse(fman.isFolderShared(dirs[2]));
         
         // Now reload fman and make sure it's still not shared!
-        fman.loadSettingsAndWait(10000);
+        FileManagerTestUtils.waitForLoad(fman, 10000);
+
         assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[0]).size());
         assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[1]).size());
         assertEquals(0, fman.getSharedFileList().getFilesInDirectory(dirs[2]).size());
@@ -1454,6 +1512,710 @@ public class FileManagerTest extends LimeTestCase {
     }
     
     /**
+     * Tests adding a single store file to the store directory which is not a shared directory.
+     * Attempts various sharing of the store files
+     */
+    public void testAddOneStoreFile() throws Exception {
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+
+        store1 = createNewTestStoreFile();
+        
+        waitForLoad();
+        
+        //create a file after the load
+        store2 = createNewTestFile(5); 
+
+        // fman should only have loaded store1
+        assertEquals("Unexpected number of store files", 
+            1, fman.getStoreFileList().getNumFiles());
+            
+        
+        // it is important to check the query at all bounds,
+        // including tests for case.
+        // IMPORTANT: the store files should never show up in any of these
+        responses=keywordIndex.query(queryRequestFactory.createQuery("unit",(byte)3));
+        assertEquals("Unexpected number of responses", 0, responses.length);
+        responses=keywordIndex.query(queryRequestFactory.createQuery("FileManager", (byte)3));
+        assertEquals("Unexpected number of responses", 0, responses.length);
+        responses=keywordIndex.query(queryRequestFactory.createQuery("test", (byte)3));
+        assertEquals("Unexpected number of responses", 0, responses.length);
+        responses=keywordIndex.query(queryRequestFactory.createQuery("file", (byte)3));
+        assertEquals("Unexpected number of responses", 0, responses.length);
+        responses=keywordIndex.query(queryRequestFactory.createQuery(
+            "FileManager UNIT tEsT", (byte)3));
+        assertEquals("Unexpected number of responses", 0, responses.length);        
+                
+        
+        // should not be able to unshared a store file thats not shared
+        assertNull("Unexpected unsharing action", fman.stopSharingFile(store1));
+        
+        // should not be able to remove unadded file
+        assertNull("should have not been able to remove f3", 
+                   fman.removeFileIfSharedOrStore(store2));
+
+        // try sharing the store file
+        fman.addFileIfShared(store1);
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
+        
+        // try forcing the sharing
+        fman.addFileAlways(store1);
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
+        
+        // try adding sharing for temp session
+        fman.addFileForSession(store1);
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
+
+
+        // no files should be shareable
+        List<FileDesc> files=fman.getSharedFileList().getFilesInDirectory(_storeDir);
+        assertEquals("unexpected length of shared files", 0, files.size());
+        files=fman.getSharedFileList().getFilesInDirectory(_storeDir.getParentFile());
+        assertEquals("file manager listed shared files in file's parent dir",
+            0, files.size());
+    }
+    
+       
+    /**
+     * Creates a store folder with both store files and non store files. Since it is the selected download
+     * directory of LWS and is not shared, only the LWS store songs should be displayed and none of the files
+     * should be shared
+     */
+    public void testNonSharedStoreFolder() throws Exception { 
+        assertEquals("Unexpected number of store files", 0, fman.getSharedFileList().getNumFiles());
+
+        store1 = createNewNameStoreTestFile("FileManager_unit_test_Store", _storeDir);
+        store2 = createNewNameStoreTestFile2("FileManager_unit_test_Store", _storeDir);
+        f1 = createNewNamedTestFile(4, "FileManager_unit_test1", _storeDir);
+
+        // load the files into the manager
+        waitForLoad();
+        
+        // create normal files in LWS directory (these are not in a shared directory)
+
+        f2 = createNewNamedTestFile(4, "FileManager_unit_test2", _storeDir);
+        
+        // fman should only have loaded the two store files into list
+        assertEquals("Unexpected number of store files", 2, fman.getStoreFileList().getNumFiles());
+        // fman should only have loaded two shared files
+        assertEquals("Unexpected number of shared files",0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
+        
+    }
+    
+    /**
+     * Tests store files that are placed in a shared directory. They should NOT be shared
+     * but should rather be extracted to the specialStoreFiles list instead
+     */
+    public void testSharedFolderWithStoreFiles() throws Exception { 
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        assertEquals("Unexpected number of store files", 0, fman.getStoreFileList().getNumFiles());
+
+        // create normal share files
+        f1 = createNewTestFile(4);
+        f2 = createNewTestFile(5);
+        
+        store1 = createNewNameStoreTestFile("FileManager_unit_store_test", _sharedDir);
+        store2 = createNewNameStoreTestFile2("FileManager_unit_store_test", _sharedDir);
+        
+        // load the files into the manager
+        waitForLoad();       
+
+        // fman should only have loaded two shared files
+        assertEquals("Unexpected number of shared files",2, fman.getSharedFileList().getNumFiles());
+        // fman should only have loaded the two store files into list
+        assertEquals("Unexpected number of individual store files",2,fman.getIndividualStoreFiles().length);
+        assertEquals("Unexpected number of store files", 2, fman.getStoreFileList().getNumFiles());
+            
+        
+        // it is important to check the query at all bounds,
+        // including tests for case.
+        // IMPORTANT: the store files should never show up in any of these
+        responses=keywordIndex.query(queryRequestFactory.createQuery("unit",(byte)3));
+        assertEquals("Unexpected number of responses", 2, responses.length);
+        responses=keywordIndex.query(queryRequestFactory.createQuery("FileManager", (byte)3));
+        assertEquals("Unexpected number of responses", 2, responses.length);
+        responses=keywordIndex.query(queryRequestFactory.createQuery("test", (byte)3));
+        assertEquals("Unexpected number of responses", 2, responses.length);
+        responses=keywordIndex.query(queryRequestFactory.createQuery("file", (byte)3));
+        assertEquals("Unexpected number of responses", 2, responses.length);
+        responses=keywordIndex.query(queryRequestFactory.createQuery(
+            "FileManager UNIT tEsT", (byte)3));
+        assertEquals("Unexpected number of responses", 2, responses.length);        
+                
+        
+        // should not be able to unshared a store file thats not shared
+        assertNull("Unexpected unsharing action", fman.stopSharingFile(store1));
+
+        // try sharing the store file
+        fman.addFileIfShared(store1);
+        fman.addFileIfShared(store2);
+        assertEquals("Unexpected number of shared files", 2, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
+        
+        // try forcing the sharing
+        fman.addFileAlways(store1);
+        fman.addFileAlways(store2);
+        assertEquals("Unexpected number of shared files", 2, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
+        
+        // try adding sharing for temp session
+        fman.addFileForSession(store1);
+        fman.addFileForSession(store2);
+        assertEquals("Unexpected number of shared files", 2, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
+
+        fman.addFileAlways(f1);
+        fman.addFileAlways(f2);
+        
+
+        // no store files should be shareable in the file descriptors
+        sharedFiles=fman.getSharedFileList().getFilesInDirectory(_sharedDir);
+        assertEquals("Unexpected length of shared files", 2, sharedFiles.size());
+        assertNotEquals("Unexpected store file in share", sharedFiles.get(0).getFile(), store1);
+        assertNotEquals("Unexpected store file in share", sharedFiles.get(0).getFile(), store2);
+        assertNotEquals("Unexpected store file in share", sharedFiles.get(1).getFile(), store1);
+        assertNotEquals("Unexpected store file in share", sharedFiles.get(1).getFile(), store2);
+        
+        // check the list of individual store files (only the two store files should be displayed)
+        //  any LWS files loaded into a shared directory will be returned here
+        File[] storeFiles = fman.getIndividualStoreFiles();
+        assertEquals("Unexpected number of store files", 2, storeFiles.length);
+        assertTrue("Unexpected store file", storeFiles[0].equals(store2) || storeFiles[0].equals(store1) );
+        assertTrue("Unexpected store file", storeFiles[1].equals(store2) || storeFiles[1].equals(store1));
+
+        sharedFiles=fman.getSharedFileList().getFilesInDirectory(_storeDir.getParentFile());
+        assertEquals("file manager listed shared files in file's parent dir",
+            0, sharedFiles.size());
+    }
+    
+    /**
+     * Creates store files in both the store folder and the shared folder, creates non store files
+     * in both the store folder and the shared folder. Initially only non-LWS files in the shared folder
+     * are shared and all LWS files are displayed. After sharing the store folder, all non-LWS files are
+     * shared and all store files remain unshared and displayed
+     */
+    public void testSharedFolderAlsoStoreFolder() throws Exception {
+        
+        assertEquals("Unexpected number of store files", 0, fman.getStoreFileList().getNumFiles());
+       
+        // create normal files in LWS directory (these are not in a shared directory)
+        f1 = createNewNamedTestFile(4, "FileManager_unit_test", _storeDir);
+        
+        // create normal share files
+        f2 = createNewTestFile(4);
+        f3 = createNewTestFile(5);
+        
+        // create files in the store folder
+        store1 = createNewNameStoreTestFile("FileManager_unit_store_test", _storeDir);
+        // create a file from LWS in shared directory
+        store2 = createNewNameStoreTestFile2("FileManager_unit_store_test", _sharedDir);
+
+        // load the files into the manager
+        waitForLoad();
+        
+        // all three store files should be displayed
+        assertEquals("Unexpected number of store files", 2, fman.getStoreFileList().getNumFiles());
+        // fman should only have loaded two shared files
+        assertEquals("Unexpected number of shared files",2, fman.getSharedFileList().getNumFiles());
+        // one of the store files is in a shared directory so it is also individual store
+        assertEquals("Unexpected number of individual store files", 1, fman.getIndividualStoreFiles().length);
+        assertEquals("Unexpected number of inidividual share files", 0, fman.getIndividualFiles().length);
+        System.out.println("adding store directory to share");
+        // start sharing the store directory
+        fman.addSharedFolder(_storeDir);
+        
+        waitForLoad();
+        
+        // all LWS files are displayed
+        assertEquals("Unexpected number of store files", 2, fman.getStoreFileList().getNumFiles());
+        // all non LWS files are shared
+        assertEquals("Unexpected number of shared files",3, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of individual store files", 1, fman.getIndividualStoreFiles().length);
+        assertEquals("Unexpected number of inidividual share files", 0, fman.getIndividualFiles().length);
+        
+        fman.removeFolderIfShared(_storeDir);
+        
+    }
+    
+    /**
+     * Tests what happens when LWS songs are located in a shared directory that is not
+     * the store directory. After unsharing that shared directory the store files are no
+     * longer visible
+     */
+    public void testUnshareFolderContainingStoreFiles() throws Exception {
+
+        // create a file from LWS in shared directory
+        f1 = createNewTestFile(4);
+        
+        // create a file from the LWS in the store directory
+        store2 = createNewNameStoreTestFile("FileManager_unit_store_test", _storeDir);
+        
+        store1 = createNewNameStoreTestFile2("FileManager_unit_store_test", _sharedDir);
+        
+        // load the files into the manager
+        waitForLoad();
+        
+        // should only be sharing one file
+        assertEquals("Unexpected number of shared files", 1, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
+       
+        // check lws files, individual store files
+        assertEquals("Unexpected number of store files", 2, fman.getStoreFileList().getNumFiles());
+        assertEquals("Unexpeected number of individual store files", 1, fman.getIndividualStoreFiles().length);
+        
+        // unshare the shared directory
+        fman.removeFolderIfShared(_sharedDir);       
+        
+        // should not share any files
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
+        
+        // check lws files, individual store files
+        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
+        assertEquals("Unexpected number of individual store files", 0, fman.getIndividualStoreFiles().length);
+        
+        fman.addSharedFolder(_sharedDir);
+    }
+    
+    /**
+     * Tests what files are displayed from the LWS when you switch to a new directory to save
+     * LWS downloads to. Previously displayed files in the old directory are no longer
+     * displayed, just LWS files in the new directory are displayed
+     */
+    public void testChangeStoreFolder() throws Exception {assertEquals("Unexpected number of store files", 0, fman.getStoreFileList().getNumFiles());
+        
+        // create alternative store directory to switch saving files to
+        File newStoreFolder = new File(_baseDir, "store2");
+        newStoreFolder.deleteOnExit();        
+        newStoreFolder.mkdirs();
+        
+        // create a file from LWS
+        store1 = createNewTestStoreFile();
+        
+        //create a file after the load
+        store3 = createNewNameStoreTestFile2("FileManager_unit_store_test", newStoreFolder);
+        // load the files into the manager
+        waitForLoad();
+
+
+        // fman should only have loaded the two store files into list
+        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
+        // fman should only have loaded no shared files
+        assertEquals("Unexpected number of shared files",0, fman.getSharedFileList().getNumFiles());
+                
+        
+        // change the store save directory
+        SharingSettings.setSaveLWSDirectory(newStoreFolder);
+        // load the files into the manager
+        waitForLoad();
+
+       // fman should only have loaded the two store files into list
+        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
+        // fman should only have loaded two shared files
+        assertEquals("Unexpected number of shared files",0, fman.getSharedFileList().getNumFiles());
+ 
+        // check the list of individual store files (only the two store files should be displayed)
+        //  any LWS files loaded into a shared directory will be returned here
+        File[] storeFiles = fman.getIndividualStoreFiles();
+        assertEquals("Unexpected number of store files", 0, storeFiles.length);
+        
+        SharingSettings.setSaveLWSDirectory(_storeDir);
+        newStoreFolder.delete();
+    }
+    /**
+     * Checks that removing a store file really removes the store file from the view
+     */
+    public void testRemoveOneStoreFile() throws Exception {
+        
+        store1 = createNewTestStoreFile();
+        store2 = createNewTestStoreFile2();
+        
+        waitForLoad();
+    
+        //Remove file that's shared.  Back to 1 file.                   
+        assertEquals(2, fman.getStoreFileList().getNumFiles());     
+        assertNotNull("should have been able to remove shared file", fman.removeFileIfSharedOrStore(store2));
+        assertEquals("unexpected number of files", 1, fman.getStoreFileList().getNumFiles());
+        assertNull(fman.getFileDescForFile(store2));
+    }
+
+    
+    /**
+     * Creates store files in both a shared directory and the store directory
+     * and tries to explicitly share them
+     */
+    public void testAddFileAlwaysStoreFile() throws Exception {
+        QueryRequestFactory queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
+        
+        store1 = createNewTestStoreFile();
+        store2 = createNewTestStoreFile();
+        
+        waitForLoad();
+
+        // try sharing the store file
+        fman.addFileIfShared(store1);
+        fman.addFileIfShared(store2);
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
+        
+        // try forcing the sharing
+        fman.addFileAlways(store1);
+        fman.addFileAlways(store2);
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
+        
+        // try adding sharing for temp session
+        fman.addFileForSession(store1);
+        fman.addFileForSession(store2);
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumForcedFiles());
+        
+        // it is important to check the query at all bounds,
+        // including tests for case.
+        // IMPORTANT: the store files should never show up in any of these
+        responses=keywordIndex.query(queryRequestFactory.createQuery("unit",(byte)3));
+        assertEquals("Unexpected number of responses", 0, responses.length);
+        responses=keywordIndex.query(queryRequestFactory.createQuery("FileManager", (byte)3));
+        assertEquals("Unexpected number of responses", 0, responses.length);
+        responses=keywordIndex.query(queryRequestFactory.createQuery("test", (byte)3));
+        assertEquals("Unexpected number of responses", 0, responses.length);
+        responses=keywordIndex.query(queryRequestFactory.createQuery("file", (byte)3));
+        assertEquals("Unexpected number of responses", 0, responses.length);
+        responses=keywordIndex.query(queryRequestFactory.createQuery(
+            "FileManager UNIT tEsT", (byte)3));
+        assertEquals("Unexpected number of responses", 0, responses.length);  
+    }
+
+    /**
+     * Try renaming a file in the store
+     */
+    public void testRenameStoreFile() throws Exception {
+        
+        store1 = createNewTestStoreFile();
+        
+        waitForLoad();
+
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
+        
+        // create a third store file but it not added anywhere
+        store3 = createNewTestStoreFile2();
+    
+        // try renaming unadded file, should fail
+        FileManagerEvent result = renameFile(store3, new File("c:\\asdfoih.mp3"));
+        assertTrue(result.toString(), result.getType() == FileManagerEvent.Type.RENAME_FILE_FAILED);
+
+        // rename a valid store file
+        result = renameFile(store1, store3);
+        assertTrue(result.toString(), result.isRenameEvent());
+        assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().getNumFiles());
+        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
+        assertEquals("Unexpected file renamed", store1, result.getFileDescs()[0].getFile());
+        assertEquals("Unexpected file added", store3, result.getFileDescs()[1].getFile());
+
+        // renamed file should not be found, new name file should be found
+        assertFalse(fman.getStoreFileList().contains(store1));
+        assertTrue(fman.getStoreFileList().contains(store3));
+        // still only two store files
+        assertEquals("Unexpected number of store files", 1, fman.getStoreFileList().getNumFiles());
+    }
+    
+    // end Store Files Test
+    
+    public void testMetaQueriesWithConflictingMatches() throws Exception {
+        waitForLoad();
+        
+        // test a query where the filename is meaningless but XML matches.
+        File f1 = createNewNamedTestFile(10, "meaningless");
+        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(
+            "artist=\"Sammy B\" album=\"Jazz in G\""));
+        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>(); 
+        l1.add(d1);
+        FileManagerEvent result = addIfShared(f1, l1);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+        
+        Response[] r1 = keywordIndex.query(queryRequestFactory.createQuery("sam",
+                                    buildAudioXMLString("artist=\"sam\"")));
+        assertNotNull(r1);
+        assertEquals(1, r1.length);
+        assertEquals(d1.getXMLString(), r1[0].getDocument().getXMLString());
+        
+        // test a match where 50% matches -- should get no matches.
+        Response[] r2 = keywordIndex.query(queryRequestFactory.createQuery("sam jazz in c",
+                                   buildAudioXMLString("artist=\"sam\" album=\"jazz in c\"")));
+        assertNotNull(r2);
+        assertEquals(0, r2.length);
+            
+            
+        // test where the keyword matches only.
+        Response[] r3 = keywordIndex.query(queryRequestFactory.createQuery("meaningles"));
+        assertNotNull(r3);
+        assertEquals(1, r3.length);
+        assertEquals(d1.getXMLString(), r3[0].getDocument().getXMLString());
+                                  
+        // test where keyword matches, but xml doesn't.
+        Response[] r4 = keywordIndex.query(queryRequestFactory.createQuery("meaningles",
+                                   buildAudioXMLString("artist=\"bob\"")));
+        assertNotNull(r4);
+        assertEquals(0, r4.length);
+            
+        // more ambiguous tests -- a pure keyword search for "jazz in d"
+        // will work, but a keyword search that included XML will fail for
+        // the same.
+        File f2 = createNewNamedTestFile(10, "jazz in d");
+        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(
+            "album=\"jazz in e\""));
+        List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>(); l2.add(d2);
+        result = addIfShared(f2, l2);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(d2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+        
+        // pure keyword.
+        Response[] r5 = keywordIndex.query(queryRequestFactory.createQuery("jazz in d"));
+        assertNotNull(r5);
+        assertEquals(1, r5.length);
+        assertEquals(d2.getXMLString(), r5[0].getDocument().getXMLString());
+        
+        // keyword, but has XML to check more efficiently.
+        Response[] r6 = keywordIndex.query(queryRequestFactory.createQuery("jazz in d",
+                                   buildAudioXMLString("album=\"jazz in d\"")));
+        assertNotNull(r6);
+        assertEquals(0, r6.length);
+                            
+        
+                                   
+    }
+    
+    public void testMetaQueriesStoreFiles() throws Exception{
+    
+        String storeAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\"";
+        
+        waitForLoad();
+        
+        // create a store audio file with limexmldocument preventing sharing
+        File f1 = createNewNamedTestFile(12, "small town hero");
+        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
+        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
+        l1.add(d1);
+        FileManagerEvent result = addIfShared(f1, l1);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+        
+        //create a query with just a file name match, should get no responses
+        Response[] r0 = keywordIndex.query(queryRequestFactory.createQuery("small town hero"));
+        assertNotNull(r0);
+        assertEquals(0, r0.length);
+        
+        // create a query where keyword matches and partial xml matches, should get no
+        // responses
+        Response[] r1 = keywordIndex.query(queryRequestFactory.createQuery("small town hero",
+                                    buildAudioXMLString("title=\"Alive\"")));    
+        assertNotNull(r1);
+        assertEquals(0, r1.length);
+        
+        // test 100% matches, should get no results
+        Response[] r2 = keywordIndex.query(queryRequestFactory.createQuery("small town hero",
+                                   buildAudioXMLString(storeAudio)));
+        assertNotNull(r2);
+        assertEquals(0, r2.length);
+        
+        // test xml matches 100% but keyword doesn't, should get no matches
+        Response[] r3 = keywordIndex.query(queryRequestFactory.createQuery("meaningless",
+                                   buildAudioXMLString(storeAudio)));
+        assertNotNull(r3);
+        assertEquals(0, r3.length);
+        
+        //test where nothing matches, should get no results
+        Response[] r4 = keywordIndex.query(queryRequestFactory.createQuery("meaningless",
+                                   buildAudioXMLString("title=\"some title\" artist=\"unknown artist\" album=\"this album name\" genre=\"Classical\"")));
+        assertNotNull(r4);
+        assertEquals(0, r4.length);
+        
+        
+        // create a store audio file with xmldocument preventing sharing with video xml attached also
+        File f2 = createNewNamedTestFile(12, "small town hero 2");
+        LimeXMLDocument d2 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
+        LimeXMLDocument d3 = limeXMLDocumentFactory.createLimeXMLDocument(buildVideoXMLString("director=\"francis loopola\" title=\"Alive\""));
+        List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
+        l2.add(d3);
+        l2.add(d2);
+        FileManagerEvent result2 = addIfShared(f2, l2);
+        assertTrue(result2.toString(), result2.isAddEvent());
+            
+          //create a query with just a file name match, should get no responses
+        Response[] r5 = keywordIndex.query(queryRequestFactory.createQuery("small town hero 2"));
+        assertNotNull(r5);
+        assertEquals(0, r5.length);
+        
+        // query with videoxml matching. This SHOULDNT return results. The new Meta-data parsing
+        //  is fixed to disallow adding new XML docs to files
+        Response[] r6 = keywordIndex.query(queryRequestFactory.createQuery("small town hero 2",
+                                    buildVideoXMLString("director=\"francis loopola\" title=\"Alive\"")));
+        assertNotNull(r6);
+        assertEquals(0, r6.length);
+        
+        // query with videoxml partial matching. This in SHOULDNT return results. The new Meta-data parsing
+        //  is fixed to disallow adding new XML docs to files, this in theory shouldn't be 
+        //  possible
+        Response[] r7 = keywordIndex.query(queryRequestFactory.createQuery("small town hero 2",
+                                    buildVideoXMLString("title=\"Alive\"")));
+        assertNotNull(r7);
+        assertEquals(0, r7.length);
+        
+        // test 100% matches minus VideoXxml, should get no results
+        Response[] r8 = keywordIndex.query(queryRequestFactory.createQuery("small town hero 2",
+                                    buildAudioXMLString(storeAudio)));
+        assertNotNull(r8);
+        assertEquals(0, r8.length);
+        
+        fman.removeFileIfSharedOrStore(f2);
+    }
+
+    public void testMetaQRT() throws Exception {
+        String dir2 = "director=\"francis loopola\"";
+
+        File f1 = createNewNamedTestFile(10, "hello");
+        QueryRouteTable qrt = qrpUpdater.getQRT();
+        assertFalse("should not be in QRT", qrt.contains(get_qr(f1)));
+        waitForLoad();
+        
+        //make sure QRP contains the file f1
+        qrt = qrpUpdater.getQRT();
+        assertTrue("expected in QRT", qrt.contains(get_qr(f1)));
+
+        //now test xml metadata in the QRT
+        File f2 = createNewNamedTestFile(11, "metadatafile2");
+        LimeXMLDocument newDoc2 = limeXMLDocumentFactory.createLimeXMLDocument(buildVideoXMLString(dir2));
+        List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
+        l2.add(newDoc2);
+        
+        FileManagerEvent result = addIfShared(f2, l2);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(newDoc2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+        qrt = qrpUpdater.getQRT();
+        
+        assertTrue("expected in QRT", qrt.contains (get_qr(buildVideoXMLString(dir2))));
+        assertFalse("should not be in QRT", qrt.contains(get_qr(buildVideoXMLString("director=\"sasami juzo\""))));
+        
+        //now remove the file and make sure the xml gets deleted.
+        fman.removeFileIfSharedOrStore(f2);
+        qrt = qrpUpdater.getQRT();
+       
+        assertFalse("should not be in QRT", qrt.contains(get_qr(buildVideoXMLString(dir2))));
+    }
+    
+    public void testMetaQRTStoreFiles() throws Exception {
+        
+        String storeAudio = "title=\"Alive\" artist=\"small town hero\" album=\"some album name\" genre=\"Rock\" licensetype=\"LIMEWIRE_STORE_PURCHASE\" year=\"2007\"";
+        
+        // share a file
+        File f1 = createNewNamedTestFile(10, "hello");
+        QueryRouteTable qrt = qrpUpdater.getQRT();
+        assertFalse("should not be in QRT", qrt.contains(get_qr(f1)));
+        waitForLoad();
+        
+        //make sure QRP contains the file f1
+        qrt = qrpUpdater.getQRT();
+        assertTrue("expected in QRT", qrt.contains(get_qr(f1)));
+        
+        // create a store audio file with xml preventing sharing
+        File f2 = createNewNamedTestFile(12, "small town hero");
+        LimeXMLDocument d1 = limeXMLDocumentFactory.createLimeXMLDocument(buildAudioXMLString(storeAudio));
+        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
+        l1.add(d1);
+        
+        FileManagerEvent result = addIfShared(f2, l1);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(d1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+        qrt = qrpUpdater.getQRT();
+        
+        assertFalse("should not be in QRT", qrt.contains (get_qr(buildAudioXMLString(storeAudio))));
+   
+        waitForLoad();
+   
+        //store file should not be in QRT table
+        qrt = qrpUpdater.getQRT();
+        assertFalse("should not be in QRT", qrt.contains (get_qr(buildAudioXMLString(storeAudio))));
+        assertTrue("expected in QRT", qrt.contains(get_qr(f1)));
+    }
+
+    public void testMetaQueries() throws Exception {
+        waitForLoad();
+        String dir1 = "director=\"loopola\"";
+
+        //make sure there's nothing with this xml query
+        Response[] res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir1)));
+        
+        assertEquals("there should be no matches", 0, res.length);
+        
+        File f1 = createNewNamedTestFile(10, "test_this");
+        
+        LimeXMLDocument newDoc1 = limeXMLDocumentFactory.createLimeXMLDocument(buildVideoXMLString(dir1));
+        List<LimeXMLDocument> l1 = new ArrayList<LimeXMLDocument>();
+        l1.add(newDoc1);
+
+
+        String dir2 = "director=\"\u5bae\u672c\u6b66\u8535\u69d8\"";
+        File f2 = createNewNamedTestFile(11, "hmm");
+
+        LimeXMLDocument newDoc2 = limeXMLDocumentFactory.createLimeXMLDocument(buildVideoXMLString(dir2));
+        List<LimeXMLDocument> l2 = new ArrayList<LimeXMLDocument>();
+        l2.add(newDoc2);
+
+        
+        String dir3 = "director=\"\u5bae\u672c\u6b66\u8535\u69d8\"";
+        File f3 = createNewNamedTestFile(12, "testtesttest");
+        
+        LimeXMLDocument newDoc3 = 
+            limeXMLDocumentFactory.createLimeXMLDocument(buildVideoXMLString(dir3));
+        List<LimeXMLDocument> l3 = new ArrayList<LimeXMLDocument>();
+        l3.add(newDoc3);
+        
+        //add files and check they are returned as responses
+        FileManagerEvent result = addIfShared(f1, l1);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(newDoc1, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+        
+        result = addIfShared(f2, l2);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(newDoc2, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+        
+        result = addIfShared(f3, l3);
+        assertTrue(result.toString(), result.isAddEvent());
+        assertEquals(newDoc3, result.getFileDescs()[0].getLimeXMLDocuments().get(0));
+        Thread.sleep(100);
+        res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir1)));
+        assertEquals("there should be one match", 1, res.length);
+
+        res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir2)));
+        assertEquals("there should be two matches", 2, res.length);
+        
+        //remove a file
+        fman.removeFileIfSharedOrStore(f1);
+
+        res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir1)));
+        assertEquals("there should be no matches", 0, res.length);
+        
+        //make sure the two other files are there
+        res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir2)));
+        assertEquals("there should be two matches", 2, res.length);
+
+        //remove another and check we still have on left
+        fman.removeFileIfSharedOrStore(f2);
+        res = keywordIndex.query(queryRequestFactory.createQuery("",buildVideoXMLString(dir3)));
+        assertEquals("there should be one match", 1, res.length);
+
+        //remove the last file and make sure we get no replies
+        fman.removeFileIfSharedOrStore(f3);
+        res = keywordIndex.query(queryRequestFactory.createQuery("", buildVideoXMLString(dir3)));
+        assertEquals("there should be no matches", 0, res.length);
+    }
+    
+    /**
      * Helper function to set the operating system so that multiple OSs can be partially-checked
      * by testing on one platform.
      */
@@ -1469,14 +2231,14 @@ public class FileManagerTest extends LimeTestCase {
         norm = StringUtils.replace(norm, "_", " ");
         return queryRequestFactory.createQuery(norm);
     }
-	
-	protected void addFilesToLibrary() throws Exception {
-		String dirString = "com/limegroup/gnutella";
-		File testDir = TestUtils.getResourceFile(dirString);
-		testDir = testDir.getCanonicalFile();
-		assertTrue("could not find the gnutella directory",
-		    testDir.isDirectory());
-		
+    
+    protected void addFilesToLibrary() throws Exception {
+        String dirString = "com/limegroup/gnutella";
+        File testDir = TestUtils.getResourceFile(dirString);
+        testDir = testDir.getCanonicalFile();
+        assertTrue("could not find the gnutella directory",
+            testDir.isDirectory());
+        
         File[] testFiles = testDir.listFiles(new FileFilter() { 
             public boolean accept(File file) {
                 // use files with a $ because they'll generally
@@ -1485,15 +2247,15 @@ public class FileManagerTest extends LimeTestCase {
                 return !file.isDirectory() && file.getName().indexOf("$")!=-1;
             }
         });
-		assertNotNull("no files to test against", testFiles);
-		assertNotEquals("no files to test against", 0, testFiles.length);
+        assertNotNull("no files to test against", testFiles);
+        assertNotEquals("no files to test against", 0, testFiles.length);
 
-   		for(int i=0; i<testFiles.length; i++) {
-			if(!testFiles[i].isFile()) continue;
-			File shared = new File(
-			    _sharedDir, testFiles[i].getName() + "." + SHARE_EXTENSION);
-			assertTrue("unable to get file", FileUtils.copy( testFiles[i], shared));
-		}
+        for(int i=0; i<testFiles.length; i++) {
+            if(!testFiles[i].isFile()) continue;
+            File shared = new File(
+                _sharedDir, testFiles[i].getName() + "." + SHARE_EXTENSION);
+            assertTrue("unable to get file", FileUtils.copy( testFiles[i], shared));
+        }
 
         waitForLoad();
 
@@ -1533,7 +2295,7 @@ public class FileManagerTest extends LimeTestCase {
      * with the given name, in the given directory.
      */
     protected File createNewNamedTestFile(int size, String name, File directory) throws Exception {
-		File file = File.createTempFile(name, "." + SHARE_EXTENSION, directory);
+        File file = File.createTempFile(name, "." + SHARE_EXTENSION, directory);
         file.deleteOnExit();
         OutputStream out = new FileOutputStream(file);
         out.write(new byte[size]);
@@ -1574,14 +2336,22 @@ public class FileManagerTest extends LimeTestCase {
     }
 
     protected void waitForLoad() throws Exception {
-        fman.loadSettingsAndWait(10000);
+        FileManagerTestUtils.waitForLoad(fman, 10000);
     }    
     
     public static class Listener implements FileEventListener {
         public FileManagerEvent evt;
         public synchronized void handleFileEvent(FileManagerEvent fme) {
+            switch(fme.getType()) {
+                case LOAD_FILE:
+                case REMOVE_URN:
+                case REMOVE_FD:
+                    return;
+            }
+
             evt = fme;
             notify();
+            fme.getFileManager().removeFileEventListener(this);
         }
     }
     
@@ -1598,8 +2368,9 @@ public class FileManagerTest extends LimeTestCase {
     
     protected FileManagerEvent addIfShared(File f) throws Exception {
         Listener fel = new Listener();
+        fman.addFileEventListener(fel);
         synchronized(fel) {
-            fman.addFileIfShared(f, fel);
+            fman.addFileIfShared(f, LimeXMLDocument.EMPTY_LIST);
             fel.wait(5000);
         }
         return fel.evt;
@@ -1607,8 +2378,9 @@ public class FileManagerTest extends LimeTestCase {
     
     protected FileManagerEvent addIfShared(File f, List<LimeXMLDocument> l) throws Exception {
         Listener fel = new Listener();
+        fman.addFileEventListener(fel);
         synchronized(fel) {
-            fman.addFileIfShared(f, l, fel);
+            fman.addFileIfShared(f, l);
             fel.wait(5000);
         }
         return fel.evt;
@@ -1616,8 +2388,9 @@ public class FileManagerTest extends LimeTestCase {
     
     protected FileManagerEvent addAlways(File f) throws Exception {
         Listener fel = new Listener();
+        fman.addFileEventListener(fel);
         synchronized(fel) {
-            fman.addFileAlways(f, fel);
+            fman.addFileAlways(f);
             fel.wait(5000);
         }
         return fel.evt;
@@ -1625,8 +2398,9 @@ public class FileManagerTest extends LimeTestCase {
     
     protected FileManagerEvent renameFile(File f1, File f2) throws Exception {
         Listener fel = new Listener();
+        fman.addFileEventListener(fel);
         synchronized(fel) {
-            fman.renameFileIfSharedOrStore(f1, f2, fel);
+            fman.renameFileIfSharedOrStore(f1, f2);
             fel.wait(5000);
         }
         return fel.evt;
@@ -1634,8 +2408,19 @@ public class FileManagerTest extends LimeTestCase {
     
     protected FileManagerEvent addFileForSession(File f1) throws Exception {
         Listener fel = new Listener();
+        fman.addFileEventListener(fel);
         synchronized(fel) {
-            fman.addFileForSession(f1, fel);
+            fman.addFileForSession(f1);
+            fel.wait(5000);
+        }
+        return fel.evt;
+    }
+    
+    protected FileManagerEvent fileChanged(File f1) throws Exception {
+        Listener fel = new Listener();
+        fman.addFileEventListener(fel);
+        synchronized (fel) {
+            fman.fileChanged(f1);
             fel.wait(5000);
         }
         return fel.evt;
@@ -1655,6 +2440,58 @@ public class FileManagerTest extends LimeTestCase {
         }
         assertTrue(files.toString(), files.isEmpty());
     }
+    
+    private QueryRequest get_qr(String xml) {
+        return queryRequestFactory.createQuery("", xml);
+    }
+
+    // build xml string for video
+    private String buildVideoXMLString(String keyname) {
+        return "<?xml version=\"1.0\"?><videos xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/video.xsd\"><video " 
+            + keyname 
+            + "></video></videos>";
+    }
+    
+    private String buildAudioXMLString(String keyname) {
+        return "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio " 
+            + keyname 
+            + "></audio></audios>";
+    }    
+    
+    protected File createNewTestStoreFile() throws Exception{
+        return createNewNameStoreTestFile("FileManager_unit_store_test", _storeDir);
+    }
+    
+    private File createNewTestStoreFile2() throws Exception {
+        return createNewNameStoreTestFile2("FileManager_unit_store_test", _storeDir);
+    }
+    
+    protected File createNewNameStoreTestFile(String name, File directory) throws Exception { 
+        
+        String dir = "com/limegroup/gnutella/";
+        
+        File f = TestUtils.getResourceFile(dir + "StoreTestFile.mp3");
+        assertTrue(f.exists());
+        File file = File.createTempFile(name, ".mp3", directory);
+        
+        FileUtils.copy(f, file);
+        assertTrue(file.exists());
+        file.deleteOnExit();
+
+        return FileUtils.getCanonicalFile(file);
+    }
+    
+    protected File createNewNameStoreTestFile2(String name, File directory) throws Exception {
+        String dir = "com/limegroup/gnutella/";
+        
+        File f = TestUtils.getResourceFile(dir + "StoreTestFile2.mp3");
+        assertTrue(f.exists());
+        File file = File.createTempFile(name, ".mp3", directory);
+        
+        FileUtils.copy(f, file);
+        assertTrue(file.exists());
+        file.deleteOnExit();
+
+        return FileUtils.getCanonicalFile(file);
+    }
 }
-
-

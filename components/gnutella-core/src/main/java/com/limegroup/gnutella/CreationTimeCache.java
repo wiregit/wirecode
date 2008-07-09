@@ -33,6 +33,7 @@ import org.limewire.util.GenericsUtils;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.limegroup.gnutella.library.SharingUtils;
 import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
@@ -58,7 +59,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
  * lock before grabbing my lock.  Please keep doing that as you add code.
  */
 @Singleton
-public final class CreationTimeCache {
+public final class CreationTimeCache implements FileEventListener {
     
     private static final Log LOG = LogFactory.getLog(CreationTimeCache.class);
     
@@ -155,7 +156,7 @@ public final class CreationTimeCache {
     /**
      * Removes the CreationTime that is associated with the specified URN.
      */
-    public synchronized void removeTime(URN urn) {
+    synchronized void removeTime(URN urn) {
         Long time = getUrnToTime().remove(urn);
         removeURNFromURNSet(urn, time);
         if(time != null)
@@ -198,7 +199,7 @@ public final class CreationTimeCache {
     /**
      * Clears away any URNs for files that do not exist anymore.
      */
-    public void pruneTimes() {
+    private void pruneTimes() {
         pruneTimes(true);
     }
 
@@ -343,7 +344,7 @@ public final class CreationTimeCache {
     /**
      * Write cache so that we only have to calculate them once.
      */
-    public synchronized void persistCache() {
+    synchronized void persistCache() {
         if(!dirty)
             return;
         
@@ -457,6 +458,66 @@ public final class CreationTimeCache {
     
         public Map<URN, Long> getUrnToTime() {
             return urnToTime;
+        }
+    }
+    
+    private void fileAdded(File file, URN urn) {
+        synchronized (this) {
+            Long cTime = getCreationTime(urn);
+            if (cTime == null)
+                cTime = new Long(file.lastModified());
+            // if cTime is non-null but 0, then the IO subsystem is
+            // letting us know that the file was FNF or an IOException
+            // occurred - the best course of action is to
+            // ignore the issue and not add it to the CTC, hopefully
+            // we'll get a correct reading the next time around...
+            if (cTime.longValue() > 0) {
+                // these calls may be superfluous but are quite fast....
+                addTime(urn, cTime.longValue());
+                commitTime(urn);
+            }
+        }
+    }
+    
+    //TODO: check this, this seems either completely wrong or
+    //		completely pointless
+    private void fileChanged(long creationTime, URN newUrn ) {
+        // re-populate the ctCache
+        synchronized (this) { 
+            removeTime(newUrn);
+            addTime(newUrn, creationTime);
+            commitTime(newUrn);
+        }   
+    }
+
+    /**
+     * Listens for events from the FileManager
+     */
+    public void handleFileEvent(FileManagerEvent evt) {
+        switch(evt.getType()) {
+            case FILEMANAGER_LOAD_FINISHING:
+                pruneTimes();          
+                break;
+            case FILEMANAGER_SAVE:
+                persistCache();
+                break;
+            case ADD_FILE:
+                // Commit the time in the CreactionTimeCache, but don't share
+                // the installer.  We populate free LimeWire's with free installers
+                // so we have to make sure we don't influence the what is new
+                // result set.
+                if (!SharingUtils.isForcedShare(evt.getFiles()[0]) && 
+                        !(evt.getFileDescs()[0] instanceof IncompleteFileDesc)) {     
+                    fileAdded(evt.getFiles()[0], evt.getFileDescs()[0].getSHA1Urn());
+                }
+                 break;
+            case CHANGE_FILE: 
+                if(! (evt.getFileDescs()[0] instanceof IncompleteFileDesc))
+                    fileChanged(evt.getFileDescs()[0].getCreationTime(), evt.getFileDescs()[1].getSHA1Urn());
+                break;
+            case REMOVE_URN:
+                removeTime(evt.getURN());
+                break;
         }
     }
 }

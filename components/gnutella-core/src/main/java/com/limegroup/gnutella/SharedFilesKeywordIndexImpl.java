@@ -229,7 +229,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         return resps;
     }
 
-    public void clear() {
+    private void clear() {
         keywordTrie.clear();
         incompleteKeywordTrie.clear();
     }
@@ -240,7 +240,8 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
         FileDesc[] fileDescs = evt.getFileDescs();
         switch (evt.getType()) {
         case ADD_FILE:
-            addFileDescs(fileDescs);
+            if(evt.getFileManager().getSharedFileList().contains(evt.getFiles()[0])) 
+                addFileDescs(fileDescs);
             break;
         case REMOVE_FILE:
             removeFileDescs(fileDescs);
@@ -250,13 +251,18 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             addFileDescs(fileDescs[1]);
             break;
         case CHANGE_FILE:
-            addFileDescs(fileDescs);
+            if(fileDescs[0] instanceof IncompleteFileDesc) {
+                addFileDescs(fileDescs[0]);
+                return;
+            }
+            removeFileDescs(fileDescs[0]);
+            addFileDescs(fileDescs[1]);
             break;
-        case FILEMANAGER_LOADED:
-            trim();
-            break;
-        case FILEMANAGER_LOADING:
+        case FILEMANAGER_LOAD_DIRECTORIES:
             clear();
+            break;
+        case FILEMANAGER_LOAD_COMPLETE:
+            trim();
             break;
         }
     }

@@ -11,12 +11,15 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
+
 import javax.jmdns.JmDNS;
 import javax.jmdns.ServiceInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.NetworkInstanceUtils;
@@ -32,6 +35,7 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileList;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
@@ -64,7 +68,7 @@ import de.kapsi.net.daap.Transaction;
  * interface between LimeWire and DAAP.
  */
 @Singleton
-public final class DaapManager {
+public final class DaapManager implements FileEventListener {
     
     private static final Log LOG = LogFactory.getLog(DaapManager.class);
     
@@ -74,12 +78,18 @@ public final class DaapManager {
     
     private static final boolean USE_LIME_NIO = true;
     
-    private final Provider<ScheduledExecutorService> executorService;
+    private final ScheduledExecutorService backgroundExecutor;
     private final Provider<FileManager> fileManager;
     private final Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper;
     private final Provider<IPFilter> ipFilter;
     private final Provider<NetworkInstanceUtils> networkInstanceUtils;
     private final Provider<ActivityCallback> activityCallback;
+    
+    /**
+     * A shared processing queue for disk-related tasks.
+     */
+    private static final ExecutorService DAAP_EVENT_QUEUE = 
+                         ExecutorsHelper.newProcessingQueue("DAAPQUEUE");
 
     private Library library;
     private Database database;
@@ -99,13 +109,13 @@ public final class DaapManager {
     private Map<URN, Song> urnToSong;  
     
     @Inject
-    public DaapManager(@Named("backgroundExecutor") Provider<ScheduledExecutorService> executorService,
+    public DaapManager( @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor,
                         Provider<FileManager> fileManager,
                         Provider<SchemaReplyCollectionMapper> schemaReplyCollectionMapper,
                         Provider<IPFilter> ipFilter,
                         Provider<NetworkInstanceUtils> networkInstanceUtils,
                         Provider<ActivityCallback> activityCallback) {
-        this.executorService = executorService;
+        this.backgroundExecutor = backgroundExecutor;
         this.fileManager = fileManager;
         this.schemaReplyCollectionMapper = schemaReplyCollectionMapper;
         this.ipFilter = ipFilter;
@@ -191,7 +201,7 @@ public final class DaapManager {
                 }
                 
                 if(USE_LIME_NIO)
-                    server = new LimeDaapServerNIO(library, config, executorService);
+                    server = new LimeDaapServerNIO(library, config, backgroundExecutor);
                 else
                     server = DaapServerFactory.createServer(library, config, true);
 
@@ -377,7 +387,7 @@ public final class DaapManager {
     /**
      * Handles a change event.
      */
-    private void handleChangeEvent(FileManagerEvent evt) {
+    private synchronized void handleChangeEvent(FileManagerEvent evt) {
         FileDesc oldDesc = evt.getFileDescs()[0];
         Song song = urnToSong.remove(oldDesc.getSHA1Urn());
 
@@ -402,7 +412,7 @@ public final class DaapManager {
     /**
      * Handles an add event.
      */
-    private void handleAddEvent(FileManagerEvent evt) {
+    private synchronized void handleAddEvent(FileManagerEvent evt) {
         // Transactions synchronize on the Library. So if there's
         // an ongoing commit we may get a ConcurrentModificationException
         // because Database has to iterate through all Playlists and
@@ -448,7 +458,7 @@ public final class DaapManager {
     /**
      * Handles a rename event.
      */
-    private void handleRenameEvent(FileManagerEvent evt) {
+    private synchronized void handleRenameEvent(FileManagerEvent evt) {
         FileDesc oldDesc = evt.getFileDescs()[0];
         Song song = urnToSong.remove(oldDesc.getSHA1Urn());
 
@@ -462,7 +472,7 @@ public final class DaapManager {
     /**
      * Handles a remove event.
      */
-    private void handleRemoveEvent(FileManagerEvent evt) {
+    private synchronized void handleRemoveEvent(FileManagerEvent evt) {
         FileDesc file = evt.getFileDescs()[0];
         Song song = urnToSong.remove(file.getSHA1Urn());
 
@@ -472,37 +482,6 @@ public final class DaapManager {
             
             // auto commit
         }
-    }
-
-    /**
-     * Called by VisualConnectionCallback
-     */
-    public synchronized void handleFileManagerEvent(FileManagerEvent evt) {
-        if (!enabled || !isServerRunning())
-            return;
-
-        if (evt.isChangeEvent())
-            handleChangeEvent(evt);
-        else if (evt.isAddEvent() || evt.isAddStoreEvent())
-            handleAddEvent(evt);
-        else if (evt.isRenameEvent())
-            handleRenameEvent(evt);
-        else if (evt.isRemoveEvent())
-            handleRemoveEvent(evt);
-    }
-
-    /**
-     * Called by VisualConnectionCallback/MetaFileManager.
-     */
-    public void fileManagerLoading() {
-        setEnabled(false);
-    }
-    
-    /**
-     * Called by VisualConnectionCallback/MetaFileManager.
-     */
-    public void fileManagerLoaded() {
-        setEnabled(true);        
     }
     
     public synchronized boolean isEnabled() {
@@ -1135,5 +1114,46 @@ public final class DaapManager {
             unregisterService();
             zeroConf.close();
         }
+    }
+
+    /**
+     * Listens for events from FileManager
+     */
+    public void handleFileEvent(final FileManagerEvent evt) {
+        
+        // if Daap isn't enabled ignore events
+        if(!DaapSettings.DAAP_ENABLED.getValue())
+            return;
+        
+        DAAP_EVENT_QUEUE.execute(new Runnable(){
+            public void run(){
+                switch(evt.getType()) {
+                    case FILEMANAGER_LOAD_DIRECTORIES:
+                        setEnabled(false);
+                        return;
+                    case FILEMANAGER_LOAD_COMPLETE:
+                        setEnabled(true);
+                        return;
+                }
+                
+                if (!isEnabled()|| !isServerRunning())
+                    return;
+              
+                switch(evt.getType()) {
+                    case CHANGE_FILE:
+                        handleChangeEvent(evt);
+                        break;
+                    case ADD_FILE:
+                        handleAddEvent(evt);
+                        break;
+                    case RENAME_FILE:
+                        handleRenameEvent(evt);
+                        break;
+                    case REMOVE_FILE:
+                        handleRemoveEvent(evt);
+                        break;                    
+                }
+            }
+        });
     }
 }

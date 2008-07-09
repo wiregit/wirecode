@@ -30,6 +30,7 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
+import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
@@ -97,7 +98,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
 	    queryRequestFactory = injector.getInstance(QueryRequestFactory.class);
 	    limeXMLDocumentHelper = injector.getInstance(LimeXMLDocumentHelper.class);
 
-	    fileManager.loadSettingsAndWait(4000);
+	    FileManagerTestUtils.waitForLoad(fileManager, 4000);
 	}
 	
 	public void testFileDescKnowsLicense() throws Exception {

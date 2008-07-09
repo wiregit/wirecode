@@ -4,23 +4,20 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeoutException;
 
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
 /**
- * Provides operations to add and remove
- * individual files, directory, or sets of directories.  Provides a method to
- * efficiently query for files whose names contain certain keywords.<p>
+ * Provides operations to add and remove individual files, directory, or sets
+ * of directories.
  */
 public interface FileManager {
 
-    /** Asynchronously loads all files by calling loadSettings.  Sets this's
-     *  callback to be "callback", and notifies "callback" of all file loads.
-     *      @modifies this
-     *      @see loadSettings */
+    /**   
+     * Asynchronously loads all files by calling loadSettings.
+     */
     public abstract void start();
 
     public abstract void stop();
@@ -67,9 +64,6 @@ public interface FileManager {
      */
     public abstract void loadSettings();
 
-    public abstract void loadSettingsAndWait(long timeout) throws InterruptedException,
-            TimeoutException;
-
     /**
      * Loads the FileManager with a new list of directories.
      */
@@ -113,25 +107,9 @@ public interface FileManager {
     public abstract void addFileAlways(File file);
 
     /**
-     * Always shares a file, notifying the given callback when shared.
-     */
-    public abstract void addFileAlways(File file, FileEventListener callback);
-
-    /**
      * Always shares the given file, using the given list of metadata.
      */
     public abstract void addFileAlways(File file, List<? extends LimeXMLDocument> list);
-
-    /**
-     * Adds the given file to share, with the given list of metadata,
-     * even if it exists outside of what is currently accepted to be shared.
-     * <p>
-     * Too large files are still not shareable this way.
-     *
-     * The listener is notified if this file could or couldn't be shared.
-     */
-    public abstract void addFileAlways(File file, List<? extends LimeXMLDocument> list,
-            FileEventListener callback);
 
     /**
      * adds a file that will be shared during this session of limewire
@@ -140,34 +118,14 @@ public interface FileManager {
     public abstract void addFileForSession(File file);
 
     /**
-     * adds a file that will be shared during this session of limewire
-     * only.
-     * 
-     * The listener is notified if this file could or couldn't be shared.
-     */
-    public abstract void addFileForSession(File file, FileEventListener callback);
-
-    /**
      * Adds the given file if it's shared.
      */
     public abstract void addFileIfShared(File file);
 
     /**
-     * Adds the given file if it's shared, notifying the given callback.
-     */
-    public abstract void addFileIfShared(File file, FileEventListener callback);
-
-    /**
      * Adds the file if it's shared, using the given list of metadata.
      */
     public abstract void addFileIfShared(File file, List<? extends LimeXMLDocument> list);
-
-    /**
-     * Adds the file if it's shared, using the given list of metadata,
-     * informing the specified listener about the status of the sharing.
-     */
-    public abstract void addFileIfShared(File file, List<? extends LimeXMLDocument> list,
-            FileEventListener callback);
 
     /**
      * Removes the file if it is being shared, and then removes the file from
@@ -210,20 +168,11 @@ public interface FileManager {
     public abstract void validate(final FileDesc fd);
 
     /**
-     * Renames a from from 'oldName' to 'newName'.
-     */
-    public abstract void renameFileIfSharedOrStore(File oldName, File newName);
-
-    /** 
      * If oldName isn't shared, returns false.  Otherwise removes "oldName",
      * adds "newName", and returns true iff newName is actually shared.  The new
      * file may or may not have the same index as the original.
-     *
-     * This assumes that oldName has been deleted & newName exists now.
-     * @modifies this 
      */
-    public abstract void renameFileIfSharedOrStore(final File oldName, final File newName,
-            final FileEventListener callback);
+    public abstract void renameFileIfSharedOrStore(File oldName, File newName);
 
     /**
      * Validates a file, moving it from 'SENSITIVE_DIRECTORIES_NOT_TO_SHARE'

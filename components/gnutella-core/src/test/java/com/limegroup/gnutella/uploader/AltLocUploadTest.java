@@ -84,6 +84,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.TcpBandwidthStatistics;
+import com.limegroup.gnutella.util.FileManagerTestUtils;
 import com.limegroup.gnutella.util.LimeTestCase;
 
 public class AltLocUploadTest extends LimeTestCase {
@@ -176,7 +177,8 @@ public class AltLocUploadTest extends LimeTestCase {
         uploadManager = (TestUploadManager) injector.getInstance(UploadManager.class);
         
         FileManager fileManager = injector.getInstance(FileManager.class);
-        fileManager.loadSettingsAndWait(2000);
+        FileManagerTestUtils.waitForLoad(fileManager, 2000);
+        
         fd = fileManager.getFileDescForFile(sharedFile);
         assertNotNull(fd);
         

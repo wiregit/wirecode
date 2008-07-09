@@ -27,7 +27,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
  * as read from the disk.
  */
 @Singleton
-public final class SavedFileManager implements Runnable, Service {
+public final class SavedFileManager implements Runnable, FileEventListener, Service {
     
     private static final Log LOG = LogFactory.getLog(SavedFileManager.class);
     
@@ -102,6 +102,13 @@ public final class SavedFileManager implements Runnable, Service {
      * Attempts to load the saved files.
      */
     public void run() {
+        scheduleLoad();
+    }
+    
+    /**
+     * Puts a load event onto the Queue for executing 
+     */
+    private void scheduleLoad(){
         QUEUE.execute(new Runnable() {
             public void run() {
                 load();
@@ -159,6 +166,12 @@ public final class SavedFileManager implements Runnable, Service {
                 urnCache.calculateAndCacheUrns(file, callback);
             else // otherwise, add without waiting.
                 ((Collection<? super URN>)tempUrns).addAll(urns);
+        }
+    }
+
+    public void handleFileEvent(FileManagerEvent evt) {
+        if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_COMPLETE) {
+            scheduleLoad();
         }
     }
 }

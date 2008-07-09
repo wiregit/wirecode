@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -31,6 +33,8 @@ import org.limewire.statistic.LimeWireStatisticsModule;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.ProviderMethods;
+import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
@@ -187,7 +191,6 @@ import com.limegroup.gnutella.xml.LimeXMLDocumentFactory;
 import com.limegroup.gnutella.xml.LimeXMLDocumentFactoryImpl;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactoryImpl;
-import com.limegroup.gnutella.xml.MetaFileManager;
 
 /**
  * The module that defines what implementations are used within
@@ -226,6 +229,8 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireGeocodeGlueModule());        
         binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
         binder().install(new LimeWireSimppModule());
+        
+        binder().install(ProviderMethods.from(new FileEventListenerProvider()));
         
         bind(LimeWireCore.class);
         
@@ -373,9 +378,7 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(QRPUpdater.class);
         bind(DaapManager.class);
         
-        // TODO: Need to add interface to these classes
-        //----------------------------------------------
-        bind(FileManager.class).to(MetaFileManager.class);
+        bind(FileManager.class).to(FileManagerImpl.class);
     }
     
     @Singleton
@@ -427,6 +430,21 @@ public class LimeWireCoreModule extends AbstractModule {
             return ExecutorsHelper.newProcessingQueue("DHT-Executor");
         }
     }    
+    
+    @Singleton
+    public static class FileEventListenerProvider {
+        @Singleton
+        @Provides
+        public CopyOnWriteArrayList<FileEventListener> fileEventListener() {
+            return new CopyOnWriteArrayList<FileEventListener>();
+        }
+        
+        @Singleton
+        @Provides
+        public List<FileEventListener> fileEventListener(CopyOnWriteArrayList<FileEventListener> listener) {
+            return listener;
+        }
+    }
     
     ///////////////////////////////////////////////////////////////////////////
     /// BELOW ARE ALL HACK PROVIDERS THAT NEED TO BE UPDATED TO CONSTRUCT OBJECTS!

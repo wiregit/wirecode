@@ -22,6 +22,7 @@ import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.util.FileManagerTestUtils;
 
 /**
  *  Tests that an Ultrapeer correctly handles all aspects of PushProxy.  For
@@ -128,7 +129,8 @@ public final class ServerSideBrowseHostTest extends ServerSideTestCase {
         }
         
         FileManager fm = injector.getInstance(FileManager.class);
-        fm.loadSettingsAndWait(2000);
+        FileManagerTestUtils.waitForLoad(fm,2000);
+
         assertEquals(2 * FilterSettings.MAX_RESPONSES_PER_REPLY.getValue() + 2, fm.getSharedFileList().getNumFiles());
         
         String result = null;

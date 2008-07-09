@@ -42,7 +42,7 @@ import com.google.inject.Singleton;
  * @see URN
  */
 @Singleton
-public final class UrnCache {
+public final class UrnCache implements FileEventListener {
     
     private static final Log LOG = LogFactory.getLog(UrnCache.class);
     
@@ -125,7 +125,7 @@ public final class UrnCache {
     /**
      * Clears all callbacks that are owned by the given owner.
      */
-    public synchronized void clearPendingHashes(Object owner) {
+    private synchronized void clearPendingHashes(Object owner) {
         if(LOG.isDebugEnabled())
             LOG.debug("Clearing all pending hashes owned by: " + owner);
         
@@ -309,7 +309,7 @@ public final class UrnCache {
     /**
      * Write cache so that we only have to calculate them once.
      */
-    public synchronized void persistCache() {
+    synchronized void persistCache() {
         getUrnMap(); // make sure it's finished constructing.
         
         if(!dirty)
@@ -498,9 +498,15 @@ public final class UrnCache {
 			_hashCode = calculateHashCode();
 		}
 	}
+
+	/**
+	 * Handles events from the FileManager
+	 */
+    public void handleFileEvent(FileManagerEvent evt) {
+        if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_LOAD_STARTED) {
+            clearPendingHashes(evt.getFileManager());
+        } else if(evt.getType() == FileManagerEvent.Type.FILEMANAGER_SAVE) {
+            persistCache();
+        } 
+    }
 }
-
-
-
-
-
