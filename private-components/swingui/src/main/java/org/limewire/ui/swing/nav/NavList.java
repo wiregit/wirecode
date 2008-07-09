@@ -122,7 +122,6 @@ class NavList extends JXPanel {
     }
     
     private class NavListCellRenderer extends DefaultTableCellRenderer {
-
         @Override
         public Component getTableCellRendererComponent(JTable table,
                 Object value, boolean isSelected, boolean hasFocus, int row,
@@ -143,10 +142,8 @@ class NavList extends JXPanel {
         
         @Override
         public void doClick() {
-            listModel.removeRow(lastRow);
-            if(listModel.getRowCount() == 0) {
-                NavList.this.setVisible(false);
-            }
+            NavItem item = (NavItem)listModel.getValueAt(lastRow, 1);
+            item.remove(); // This will ultimately remove it properly from all places.
         }
         
         @Override
@@ -168,6 +165,7 @@ class NavList extends JXPanel {
             setText(null);
             if (value == Boolean.TRUE) {
                 if(p != null && p.x == column && p.y == row ) {
+                    System.out.println("rolled over");
                     setIcon(rolloverKillIcon);
                 } else {
                     setIcon(killIcon);
@@ -221,10 +219,6 @@ class NavList extends JXPanel {
     }
     
     private class DelegateListener implements ListSelectionListener {
-        
-        public DelegateListener() {
-        }
-        
         @Override
         public void valueChanged(ListSelectionEvent e) {
             ListSelectionEvent newEvent = new ListSelectionEvent(NavList.this, e.getFirstIndex(), e.getLastIndex(), e.getValueIsAdjusting());

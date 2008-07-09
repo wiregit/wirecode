@@ -1,5 +1,8 @@
 package org.limewire.ui.swing.nav;
 
+/**
+ * A token representing a navigable item.
+ */
 public interface NavItem {
 
     /** Selects the nav item. */
