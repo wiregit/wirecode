@@ -2,6 +2,7 @@ package org.limewire.ui.swing.mainframe;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.util.Enumeration;
 
 import javax.swing.UIDefaults;
@@ -19,12 +20,16 @@ public class AppFrame extends SingleFrameApplication {
 	 */
 	@Resource
 	private Color bgColor;
+        
+        @Resource
+        private Image limeImage;
 	
     @Override
     protected void startup() {
     	GuiUtils.injectFields(this);
     	initColors();
-    	
+        
+    	getMainFrame().setIconImage(limeImage);
         getMainFrame().setJMenuBar(new LimeMenuBar());        
         LimeWireSwingUI ui = new LimeWireSwingUI();
         show(ui);
