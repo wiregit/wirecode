@@ -19,19 +19,23 @@ class MainPanel extends JPanel implements NavigableTarget {
         setLayout(cardLayout);
     }
 
-    public void showNavigablePanel(String key) {
-        cardLayout.show(this, key);
-        keyToComponents.get(key).requestFocusInWindow();
+    public void showNavigablePanel(Object key) {
+        cardLayout.show(this, asString(key));
+        keyToComponents.get(asString(key)).requestFocusInWindow();
     }
     
     @Override
-    public void addNavigablePanel(String key, JComponent panel) {
-        keyToComponents.put(key, panel);
-        add(panel, key);
+    public void addNavigablePanel(Object key, JComponent panel) {
+        keyToComponents.put(asString(key), panel);
+        add(panel, asString(key));
     }
     
     @Override
-    public void removeNavigablePanel(String key) {
-        remove(keyToComponents.remove(key));
+    public void removeNavigablePanel(Object key) {
+        remove(keyToComponents.remove(asString(key)));
+    }
+    
+    private String asString(Object key) {
+        return System.identityHashCode(key) + "";
     }
 }

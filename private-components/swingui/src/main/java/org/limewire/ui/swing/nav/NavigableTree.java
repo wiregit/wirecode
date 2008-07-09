@@ -1,15 +1,17 @@
 package org.limewire.ui.swing.nav;
 
+import org.limewire.ui.swing.nav.Navigator.NavCategory;
+
 
 
 public interface NavigableTree {
    
-    void removeNavigableItem(Navigator.NavItem navItem, String name);
+    void removeNavigableItem(NavCategory category, NavItem navItem);
     
-    void addNavigableItem(Navigator.NavItem navItem, String name, boolean userRemovable);
+    void addNavigableItem(NavCategory category, NavItem navItem, boolean userRemovable);
     
     void addNavSelectionListener(NavSelectionListener listener);
 
-    void selectNavigableItem(Navigator.NavItem target, String name);
+    void selectNavigableItem(NavCategory category, NavItem navItem);
 
 }

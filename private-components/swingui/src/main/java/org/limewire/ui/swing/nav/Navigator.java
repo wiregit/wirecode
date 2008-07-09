@@ -5,14 +5,14 @@ import javax.swing.JPanel;
 
 public interface Navigator {
 
-    public static enum NavItem {
+    public static enum NavCategory {
         LIBRARY, LIMEWIRE, SEARCH
     }
 
-    public void addNavigablePanel(Navigator.NavItem target, String name, JPanel panel, boolean userRemovable);
+    public NavItem addNavigablePanel(NavCategory category, String name, JPanel panel, boolean userRemovable);
 
-    public void removeNavigablePanel(Navigator.NavItem target, String name);
+    public void removeNavigablePanel(NavCategory category, NavItem navItem);
 
-    public void selectNavigablePanel(Navigator.NavItem target, String name);
+    public void selectNavigablePanel(NavCategory category, NavItem navItem);
 
 }

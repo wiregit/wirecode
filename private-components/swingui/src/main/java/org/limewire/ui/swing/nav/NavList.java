@@ -27,6 +27,7 @@ import org.jdesktop.swingx.RolloverProducer;
 import org.jdesktop.swingx.RolloverRenderer;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
+import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.util.GuiUtils;
 
 class NavList extends JXPanel {
@@ -34,7 +35,7 @@ class NavList extends JXPanel {
     private final JLabel titleLabel;
     private final JXTable itemList;
     private final DefaultTableModel listModel;
-    private final Navigator.NavItem navTarget;
+    private final Navigator.NavCategory navCategory;
     private final List<ListSelectionListener> listeners = new ArrayList<ListSelectionListener>();
     
     @Resource
@@ -43,10 +44,10 @@ class NavList extends JXPanel {
     @Resource
     private Icon rolloverKillIcon;
     
-    NavList(String title, Navigator.NavItem target) {
+    NavList(String title, Navigator.NavCategory target) {
         GuiUtils.injectFields(this);
         
-        this.navTarget = target;
+        this.navCategory = target;
         this.titleLabel = new JLabel(title);
         this.listModel = new DefaultTableModel();
         this.itemList = new JXTable(listModel);
@@ -90,19 +91,19 @@ class NavList extends JXPanel {
         setVisible(false);
     }
     
-    public Navigator.NavItem getTarget() {
-        return navTarget;
+    public NavCategory getCategory() {
+        return navCategory;
     }
     
-    public void addNavItem(String name, boolean userRemovable) {
-        listModel.addRow(new Object[] { null, name, userRemovable });
+    public void addNavItem(NavItem navItem, boolean userRemovable) {
+        listModel.addRow(new Object[] { null, navItem, userRemovable });
         if(listModel.getRowCount() == 1) {
             setVisible(true);
         }
     }
     
-    public void removeNavItem(String name) {
-        listModel.removeRow(getRowForName(name));
+    public void removeNavItem(NavItem navItem) {
+        listModel.removeRow(getRowForNavItem(navItem));
         if(listModel.getRowCount() == 0) {
             setVisible(false);
         }
@@ -126,8 +127,9 @@ class NavList extends JXPanel {
         public Component getTableCellRendererComponent(JTable table,
                 Object value, boolean isSelected, boolean hasFocus, int row,
                 int column) {
+            NavItem navItem = (NavItem)value;
             JComponent renderer = (JComponent) super
-                    .getTableCellRendererComponent(table, value, isSelected,
+                    .getTableCellRendererComponent(table, navItem.getName(), isSelected,
                             hasFocus, row, column);
             renderer.setFont(getFont().deriveFont(Font.BOLD));
             
@@ -178,22 +180,40 @@ class NavList extends JXPanel {
         }
     }
     
-    private int getRowForName(String name) {
+    private int getRowForNavItem(NavItem navItem) {
         for(int i = 0; i < listModel.getRowCount(); i++) {
-            if(itemList.getValueAt(i, 1).equals(name)) {
+            if(itemList.getValueAt(i, 1).equals(navItem)) {
                 return i;
             }
         }
         return -1;
     }
     
-    public void selectItem(String name) {
+    private int getRowForName(String name) {
+        for(int i = 0; i < listModel.getRowCount(); i++) {
+            if(((NavItem)itemList.getValueAt(i, 1)).getName().equals(name)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
+    public void selectItem(NavItem navItem) {
+        int row = getRowForNavItem(navItem);
+        itemList.getSelectionModel().setSelectionInterval(row, row);
+    }
+
+    public void selectItemByName(String name) {
         int row = getRowForName(name);
         itemList.getSelectionModel().setSelectionInterval(row, row);
     }
 
     public int getSelectedIndex() {
         return itemList.getSelectedRow();
+    }
+    
+    public NavItem getNavItem() {
+        return (NavItem)listModel.getValueAt(itemList.getSelectedRow(), 1);
     }
 
     public String getSelectionKey() {

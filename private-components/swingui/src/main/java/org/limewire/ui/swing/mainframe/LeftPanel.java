@@ -14,12 +14,12 @@ import javax.swing.JScrollPane;
 import org.jdesktop.application.Resource;
 import org.limewire.ui.swing.nav.DownloadSummaryPanel;
 import org.limewire.ui.swing.nav.FilesSharingSummaryPanel;
+import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavSelectionListener;
 import org.limewire.ui.swing.nav.NavTree;
 import org.limewire.ui.swing.nav.NavigableTree;
-import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.SearchBar;
-import org.limewire.ui.swing.nav.Navigator.NavItem;
+import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -102,33 +102,35 @@ class LeftPanel extends JPanel implements NavigableTree {
         gbc.gridx = GridBagConstraints.REMAINDER;
         add(filesPanel, gbc);
     }
-    
-    @Override
-    public void addNavigableItem(Navigator.NavItem navItem, String name, boolean userRemovable) {
-        navTree.addNavigableItem(navItem, name, userRemovable);
+
+    public void setSearchHandler(SearchHandler searchHandler) {
+        this.searchHandler = searchHandler;
     }
-    
+
     @Override
-    public void removeNavigableItem(Navigator.NavItem navItem, String name) {
-        navTree.removeNavigableItem(navItem, name);
+    public void addNavigableItem(NavCategory category, NavItem navItem,
+            boolean userRemovable) {
+        navTree.addNavigableItem(category, navItem, userRemovable);
     }
-    
+
     @Override
     public void addNavSelectionListener(NavSelectionListener listener) {
         navTree.addNavSelectionListener(listener);
     }
     
     @Override
-    public void selectNavigableItem(NavItem target, String name) {
-        navTree.selectNavigableItem(target, name);
+    public void removeNavigableItem(NavCategory category, NavItem navItem) {
+        navTree.removeNavigableItem(category, navItem);
+    }
+    
+    @Override
+    public void selectNavigableItem(NavCategory category, NavItem navItem) {
+        navTree.selectNavigableItem(category, navItem);
     }
     
     public void goHome() {
         navTree.goHome();
     }
-
-    public void setSearchHandler(SearchHandler searchHandler) {
-        this.searchHandler = searchHandler;
-    }
+    
 
 }

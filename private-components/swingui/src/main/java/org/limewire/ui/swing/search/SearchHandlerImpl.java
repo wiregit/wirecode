@@ -1,7 +1,8 @@
 package org.limewire.ui.swing.search;
 
+import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.nav.Navigator.NavItem;
+import org.limewire.ui.swing.nav.Navigator.NavCategory;
 
 public class SearchHandlerImpl implements SearchHandler {
     
@@ -14,8 +15,8 @@ public class SearchHandlerImpl implements SearchHandler {
     @Override
     public void doSearch(SearchInfo info) {
         String panelTitle = info.getTitle();
-        navigator.addNavigablePanel(NavItem.SEARCH, panelTitle, new SearchResultsPanel(info), true);
-        navigator.selectNavigablePanel(NavItem.SEARCH, panelTitle);
+        NavItem item = navigator.addNavigablePanel(NavCategory.SEARCH, panelTitle, new SearchResultsPanel(info), true);
+        item.select();
     }
 
 }

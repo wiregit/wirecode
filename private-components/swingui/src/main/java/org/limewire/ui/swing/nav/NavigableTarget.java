@@ -4,10 +4,10 @@ import javax.swing.JComponent;
 
 public interface NavigableTarget {
     
-    void showNavigablePanel(String targetKey);
+    void showNavigablePanel(Object targetKey);
     
-    void addNavigablePanel(String key, JComponent panel);
+    void addNavigablePanel(Object key, JComponent panel);
     
-    void removeNavigablePanel(String key);
+    void removeNavigablePanel(Object key);
 
 }

@@ -24,8 +24,8 @@ public class NavigatorImpl implements Navigator {
         
         navTree.addNavSelectionListener(new NavSelectionListener() {
             @Override
-            public void navItemSelected(Navigator.NavItem target, String name) {
-                showNavigablePanel(target, name);
+            public void navItemSelected(Navigator.NavCategory category, NavItem navItem) {
+                showNavigablePanel(category, navItem);
             }
         });
     }
@@ -33,38 +33,55 @@ public class NavigatorImpl implements Navigator {
     /* (non-Javadoc)
      * @see org.limewire.ui.swing.nav.Navigator#addNavigablePanel(org.limewire.ui.swing.nav.NavigatorImpl.NavItem, java.lang.String, javax.swing.JPanel)
      */
-    public void addNavigablePanel(Navigator.NavItem target, String name, JPanel panel, boolean userRemovable) {
-        navTree.addNavigableItem(target, name, userRemovable);
-        navTarget.addNavigablePanel(target + name, panel);
+    public NavItem addNavigablePanel(final NavCategory category, final String name, JPanel panel, boolean userRemovable) {
+        NavItem item = new NavItem() {
+            @Override
+            public String getName() {
+                return name;
+            }
+            
+            @Override
+            public void remove() {
+                removeNavigablePanel(category, this);
+            }
+            
+            @Override
+            public void select() {
+                selectNavigablePanel(category, this);
+            }
+        };
+        navTree.addNavigableItem(category, item, userRemovable);
+        navTarget.addNavigablePanel(item, panel);
+        return item;
     }
 
     /* (non-Javadoc)
      * @see org.limewire.ui.swing.nav.Navigator#removeNavigablePanel(org.limewire.ui.swing.nav.NavigatorImpl.NavItem, java.lang.String)
      */
-    public void removeNavigablePanel(Navigator.NavItem target, String name) {
-        navTree.removeNavigableItem(target, name);
-        navTarget.removeNavigablePanel(target + name);
+    public void removeNavigablePanel(NavCategory category, NavItem navItem) {
+        navTree.removeNavigableItem(category, navItem);
+        navTarget.removeNavigablePanel(navItem);
     }
     
     @Override
-    public void selectNavigablePanel(NavItem target, String name) {
-        navTree.selectNavigableItem(target, name);
+    public void selectNavigablePanel(NavCategory category, NavItem navItem) {
+        navTree.selectNavigableItem(category, navItem);
     }
 
     /* (non-Javadoc)
      * @see org.limewire.ui.swing.nav.Navigator#showNavigablePanel(org.limewire.ui.swing.nav.NavigatorImpl.NavItem, java.lang.String)
      */
-    private void showNavigablePanel(Navigator.NavItem target, String name) {
-        navTarget.showNavigablePanel(target + name);
+    private void showNavigablePanel(NavCategory category, NavItem navItem) {
+        navTarget.showNavigablePanel(navItem);
     }
 
     public void addDefaultNavigableItems(SearchHandler searchHandler) {
-        addNavigablePanel(Navigator.NavItem.LIMEWIRE, HomePanel.NAME, new HomePanel(searchHandler), false);
-        addNavigablePanel(Navigator.NavItem.LIMEWIRE, StorePanel.NAME, new StorePanel(), false);
+        addNavigablePanel(NavCategory.LIMEWIRE, HomePanel.NAME, new HomePanel(searchHandler), false);
+        addNavigablePanel(NavCategory.LIMEWIRE, StorePanel.NAME, new StorePanel(), false);
 
-        addNavigablePanel(Navigator.NavItem.LIBRARY, MusicPanel.NAME, new MusicPanel(), false);
-        addNavigablePanel(Navigator.NavItem.LIBRARY, VideoPanel.NAME, new VideoPanel(), false);
-        addNavigablePanel(Navigator.NavItem.LIBRARY, ImagePanel.NAME, new ImagePanel(), false);
-        addNavigablePanel(Navigator.NavItem.LIBRARY, DocumentPanel.NAME, new DocumentPanel(), false);
+        addNavigablePanel(NavCategory.LIBRARY, MusicPanel.NAME, new MusicPanel(), false);
+        addNavigablePanel(NavCategory.LIBRARY, VideoPanel.NAME, new VideoPanel(), false);
+        addNavigablePanel(NavCategory.LIBRARY, ImagePanel.NAME, new ImagePanel(), false);
+        addNavigablePanel(NavCategory.LIBRARY, DocumentPanel.NAME, new DocumentPanel(), false);
     }
 }

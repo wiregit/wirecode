@@ -12,7 +12,7 @@ import javax.swing.event.ListSelectionListener;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.home.HomePanel;
-import org.limewire.ui.swing.nav.Navigator.NavItem;
+import org.limewire.ui.swing.nav.Navigator.NavCategory;
 
 public class NavTree extends JXPanel implements NavigableTree {
         
@@ -23,9 +23,9 @@ public class NavTree extends JXPanel implements NavigableTree {
         this.navigableLists = new ArrayList<NavList>();
         setLayout(new GridBagLayout());
         
-        addNavList(new NavList("LimeWire", Navigator.NavItem.LIMEWIRE));
-        addNavList(new NavList("Search", Navigator.NavItem.SEARCH));
-        addNavList(new NavList("Library", Navigator.NavItem.LIBRARY));
+        addNavList(new NavList("LimeWire", Navigator.NavCategory.LIMEWIRE));
+        addNavList(new NavList("Search", Navigator.NavCategory.SEARCH));
+        addNavList(new NavList("Library", Navigator.NavCategory.LIBRARY));
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
@@ -49,28 +49,36 @@ public class NavTree extends JXPanel implements NavigableTree {
     }
     
     @Override
-    public void addNavigableItem(Navigator.NavItem navItem, String name, boolean userRemovable) {
+    public void addNavigableItem(NavCategory category, NavItem navItem, boolean userRemovable) {
         for(NavList list : navigableLists) {
-            if(list.getTarget() == navItem) {
-                list.addNavItem(name, userRemovable);
+            if(list.getCategory() == category) {
+                list.addNavItem(navItem, userRemovable);
             }
         }
     }
     
     @Override
-    public void selectNavigableItem(NavItem navItem, String name) {
+    public void selectNavigableItem(NavCategory category, NavItem navItem) {
         for(NavList list : navigableLists) {
-            if(list.getTarget() == navItem) {
-                list.selectItem(name);
+            if(list.getCategory() == category) {
+                list.selectItem(navItem);
+            }
+        }
+    }
+    
+    public void selectNavigableItemByName(NavCategory category, String name) {
+        for(NavList list : navigableLists) {
+            if(list.getCategory() == category) {
+                list.selectItemByName(name);
             }
         }
     }
     
     @Override
-    public void removeNavigableItem(Navigator.NavItem navItem, String name) {
+    public void removeNavigableItem(NavCategory category, NavItem navItem) {
         for(NavList list : navigableLists) {
-            if(list.getTarget() == navItem) {
-                list.removeNavItem(name);
+            if(list.getCategory() == category) {
+                list.removeNavItem(navItem);
             }
         }
     }
@@ -81,7 +89,7 @@ public class NavTree extends JXPanel implements NavigableTree {
     }
     
     public void goHome() {
-        selectNavigableItem(NavItem.LIMEWIRE, HomePanel.NAME);
+        selectNavigableItemByName(NavCategory.LIMEWIRE, HomePanel.NAME);
     }
     
     private class Listener implements ListSelectionListener {
@@ -98,7 +106,7 @@ public class NavTree extends JXPanel implements NavigableTree {
                         navList.clearSelection();
                     } else {
                         for(NavSelectionListener listener : navSelectionListeners) {
-                            listener.navItemSelected(navList.getTarget(), list.getSelectionKey());
+                            listener.navItemSelected(navList.getCategory(), list.getNavItem());
                         }
                     }
                 }
