@@ -1,5 +1,6 @@
 package org.limewire.ui.swing.nav;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -24,6 +25,8 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.RolloverProducer;
 import org.jdesktop.swingx.RolloverRenderer;
+import org.jdesktop.swingx.decorator.ColorHighlighter;
+import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.ui.swing.util.GuiUtils;
 
 class NavList extends JPanel {
@@ -60,6 +63,7 @@ class NavList extends JPanel {
         itemList.getColumnExt(1).setCellRenderer(new NavListCellRenderer());
         itemList.getColumnExt(2).setCellRenderer(new KillerRenderer());
         itemList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        itemList.addHighlighter(new ColorHighlighter(HighlightPredicate.ROLLOVER_ROW, Color.CYAN, Color.BLACK));
         
         titleLabel.setName("NavList.titleLabel");
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD).deriveFont(titleLabel.getFont().getSize() + 2f));

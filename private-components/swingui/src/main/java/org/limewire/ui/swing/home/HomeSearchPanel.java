@@ -2,6 +2,7 @@ package org.limewire.ui.swing.home;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -20,13 +21,16 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 
+import org.jdesktop.swingx.JXButton;
+import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.painter.RectanglePainter;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.Line;
 
-public class HomeSearchPanel extends JPanel {
+public class HomeSearchPanel extends JXPanel {
     
     private final JTextField textField;
     private final ButtonGroup buttonGroup;
@@ -35,8 +39,8 @@ public class HomeSearchPanel extends JPanel {
     private final HomeButtonBed video;
     private final HomeButtonBed images;
     private final HomeButtonBed documents;
-    private final JButton search;
-    private final JButton searchFriends;
+    private final JXButton search;
+    private final JXButton searchFriends;
     private final SearchHandler searchHandler;
     
     public HomeSearchPanel(SearchHandler searchHandler) {
@@ -48,8 +52,8 @@ public class HomeSearchPanel extends JPanel {
         this.video = new HomeButtonBed("Video", buttonGroup);
         this.images = new HomeButtonBed("Images", buttonGroup);
         this.documents = new HomeButtonBed("Documents", buttonGroup);
-        this.search = new JButton("Search");
-        this.searchFriends = new JButton("Search Friends");
+        this.search = new JXButton("Search");
+        this.searchFriends = new JXButton("Search Friends");
         
         all.setSelected(true);
         
@@ -58,7 +62,8 @@ public class HomeSearchPanel extends JPanel {
         searchFriends.addActionListener(action);
         textField.addActionListener(action);
         
-        setOpaque(false);
+        RectanglePainter<JXPanel> painter = new RectanglePainter<JXPanel>(5, 5, 5, 5, 50, 50, true, Color.LIGHT_GRAY, 0f, Color.GRAY);
+        setBackgroundPainter(painter);
         setLayout(new GridBagLayout());
         search.setOpaque(false);
         searchFriends.setOpaque(false);
@@ -82,13 +87,9 @@ public class HomeSearchPanel extends JPanel {
         gbc.weightx = 0;
         gbc.insets = new Insets(0, 1, 5, 1);
         add(all, gbc);
-        add(new Line(Color.BLACK), gbc);
         add(audio, gbc);
-        add(new Line(Color.BLACK), gbc);
         add(video, gbc);
-        add(new Line(Color.BLACK), gbc);
         add(images, gbc);
-        add(new Line(Color.BLACK), gbc);
         add(documents, gbc);
 
         // To push in the 'All | Audio | Video...'
@@ -109,7 +110,7 @@ public class HomeSearchPanel extends JPanel {
         gbc.weightx = 0;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.anchor = GridBagConstraints.SOUTHWEST;
-        gbc.insets = new Insets(0, 5, 5, 0);
+        gbc.insets = new Insets(0, 5, 5, 15);
         JLabel advancedSearch = new JLabel("Advanced Search");
         FontUtils.changeFontSize(advancedSearch, -1);
         add(advancedSearch, gbc);
@@ -159,12 +160,13 @@ public class HomeSearchPanel extends JPanel {
         }
     }
     
-    private static class HomeButtonBed extends JPanel {
+    private static class HomeButtonBed extends JXPanel {
         private final HomeButton button;
         
         public HomeButtonBed(String name, ButtonGroup group) {
-            this.button = new HomeButton(name, group);
+            this.button = new HomeButton(name, group, this);
             
+            setOpaque(false);
             setLayout(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
             add(button, gbc);
@@ -176,19 +178,29 @@ public class HomeSearchPanel extends JPanel {
     }
     
     private static class HomeButton extends JToggleButton {
-        public HomeButton(String name, ButtonGroup group) {
+        private final JXPanel parent;
+        
+        public HomeButton(String name, ButtonGroup group, JXPanel parentPanel) {
             super(name);
+            this.parent = parentPanel;
             group.add(this);
             setFocusPainted(false);
             setContentAreaFilled(false);
-            setMargin(new Insets(0, 5, 0, 5));
+            setMargin(new Insets(2, 5, 2, 5));
+            FontUtils.changeStyle(this, Font.BOLD);
+            FontUtils.changeFontSize(this, 2);
             addItemListener(new ItemListener() {
+                private Color oldForeground;
+                
                 @Override
                 public void itemStateChanged(ItemEvent e) {
                     if(e.getStateChange() == ItemEvent.SELECTED) {
-                        HomeButton.this.getParent().setBackground(Color.LIGHT_GRAY);
+                        oldForeground = getForeground();
+                        setForeground(new Color(0, 100, 0));
+                        parent.setBackgroundPainter(null);
                     } else {
-                        HomeButton.this.getParent().setBackground(null);
+                        setForeground(oldForeground);
+                        oldForeground = null;
                     }
                     
                 }
@@ -198,14 +210,14 @@ public class HomeSearchPanel extends JPanel {
                @Override
                 public void mouseEntered(MouseEvent e) {
                    if(!isSelected()) {
-                       HomeButton.this.getParent().setBackground(Color.CYAN);
+                       parent.setBackgroundPainter(new RectanglePainter<JXPanel>(2, 2, 2, 2, 5, 5, true, Color.WHITE, 0f, Color.LIGHT_GRAY));
                    }
                 }
 
                 @Override
                 public void mouseExited(MouseEvent e) {
                     if(!isSelected()) {
-                        HomeButton.this.getParent().setBackground(null);
+                        parent.setBackgroundPainter(null);
                     }
                 }
             });
