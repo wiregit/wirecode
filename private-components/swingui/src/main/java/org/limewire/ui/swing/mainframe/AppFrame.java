@@ -18,16 +18,17 @@ public class AppFrame extends SingleFrameApplication {
 	/** Default background color for panels */
 	@Resource
 	private Color bgColor;
-        
-    @Resource
-    private Image limeImage;
+
+	
+	@Resource
+	private Image frameIcon;
 	
     @Override
     protected void startup() {
     	GuiUtils.injectFields(this);
     	initColors();
         
-    	getMainFrame().setIconImage(limeImage);
+    	getMainFrame().setIconImage(frameIcon);
         getMainFrame().setJMenuBar(new LimeMenuBar());        
         LimeWireSwingUI ui = new LimeWireSwingUI();
         show(ui);
