@@ -6,7 +6,7 @@ import javax.swing.JPanel;
 public interface Navigator {
 
     public static enum NavItem {
-        LIBRARY, LIMEWIRE
+        LIBRARY, LIMEWIRE, SEARCH
     }
 
     public void addNavigablePanel(Navigator.NavItem target, String name, JPanel panel, boolean userRemovable);

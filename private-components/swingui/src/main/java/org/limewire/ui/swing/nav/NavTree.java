@@ -7,76 +7,72 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Box;
-import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.nav.Navigator.NavItem;
 
-public class NavTree extends JPanel implements NavigableTree {
-    
-    private final NavList limewire;
-    private final NavList library;
-    
+public class NavTree extends JXPanel implements NavigableTree {
+        
     private final List<NavSelectionListener> navSelectionListeners = new ArrayList<NavSelectionListener>();
     private final List<NavList> navigableLists;
 
     public NavTree() {
         this.navigableLists = new ArrayList<NavList>();
-        this.limewire = new NavList("LimeWire", Navigator.NavItem.LIMEWIRE);
-        this.library = new NavList("Library", Navigator.NavItem.LIBRARY);
-        
-        navigableLists.add(limewire);
-        navigableLists.add(library);
-        
-        setOpaque(false);
-        
-        Listener listener = new Listener();
-        limewire.addListSelectionListener(listener);
-        library.addListSelectionListener(listener);
-        
         setLayout(new GridBagLayout());
+        
+        addNavList(new NavList("LimeWire", Navigator.NavItem.LIMEWIRE));
+        addNavList(new NavList("Search", Navigator.NavItem.SEARCH));
+        addNavList(new NavList("Library", Navigator.NavItem.LIBRARY));
+        
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.weightx = 1;
         gbc.insets = new Insets(0, 0, 20, 0);
-        add(limewire, gbc);
-        add(library, gbc);
-        
         gbc.weighty = 1;
         add(Box.createGlue(), gbc);
     }
     
+    private void addNavList(NavList navList) {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.weightx = 1;
+        gbc.insets = new Insets(0, 0, 20, 0);
+        
+        add(navList, gbc);
+        navigableLists.add(navList);
+        navList.addListSelectionListener(new Listener());
+    }
+    
     @Override
     public void addNavigableItem(Navigator.NavItem navItem, String name, boolean userRemovable) {
-        switch(navItem) {
-        case LIBRARY:
-            library.addNavItem(name, userRemovable);
-            break;
-        case LIMEWIRE:
-            limewire.addNavItem(name, userRemovable);
-            break;
+        for(NavList list : navigableLists) {
+            if(list.getTarget() == navItem) {
+                list.addNavItem(name, userRemovable);
+            }
         }
     }
     
     @Override
     public void selectNavigableItem(NavItem navItem, String name) {
-        switch(navItem) {
-        case LIBRARY:
-            library.selectItem(name);
-            break;
-        case LIMEWIRE:
-            limewire.selectItem(name);
-            break;
+        for(NavList list : navigableLists) {
+            if(list.getTarget() == navItem) {
+                list.selectItem(name);
+            }
         }
     }
     
     @Override
     public void removeNavigableItem(Navigator.NavItem navItem, String name) {
-        // TODO Auto-generated method stub
-        
+        for(NavList list : navigableLists) {
+            if(list.getTarget() == navItem) {
+                list.removeNavItem(name);
+            }
+        }
     }
     
     @Override
@@ -85,7 +81,7 @@ public class NavTree extends JPanel implements NavigableTree {
     }
     
     public void goHome() {
-        limewire.selectItem(HomePanel.NAME);
+        selectNavigableItem(NavItem.LIMEWIRE, HomePanel.NAME);
     }
     
     private class Listener implements ListSelectionListener {

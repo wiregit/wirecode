@@ -15,7 +15,6 @@ import java.awt.event.MouseEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -28,7 +27,6 @@ import org.limewire.ui.swing.search.DefaultSearchInfo;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchInfo;
 import org.limewire.ui.swing.util.FontUtils;
-import org.limewire.ui.swing.util.Line;
 
 public class HomeSearchPanel extends JXPanel {
     

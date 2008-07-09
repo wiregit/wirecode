@@ -13,7 +13,6 @@ import java.util.List;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -22,6 +21,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import org.jdesktop.application.Resource;
+import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.RolloverProducer;
 import org.jdesktop.swingx.RolloverRenderer;
@@ -29,7 +29,7 @@ import org.jdesktop.swingx.decorator.ColorHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.limewire.ui.swing.util.GuiUtils;
 
-class NavList extends JPanel {
+class NavList extends JXPanel {
     
     private final JLabel titleLabel;
     private final JXTable itemList;
@@ -45,7 +45,6 @@ class NavList extends JPanel {
     
     NavList(String title, Navigator.NavItem target) {
         GuiUtils.injectFields(this);
-        setOpaque(false);
         
         this.navTarget = target;
         this.titleLabel = new JLabel(title);
@@ -85,6 +84,10 @@ class NavList extends JPanel {
         gbc.gridheight = GridBagConstraints.REMAINDER;
         gbc.insets = new Insets(0, 0, 0, 0);
         add(itemList, gbc);
+        
+        // Start out invisible - will become visible
+        // when an item is added.
+        setVisible(false);
     }
     
     public Navigator.NavItem getTarget() {
@@ -93,10 +96,16 @@ class NavList extends JPanel {
     
     public void addNavItem(String name, boolean userRemovable) {
         listModel.addRow(new Object[] { null, name, userRemovable });
+        if(listModel.getRowCount() == 1) {
+            setVisible(true);
+        }
     }
     
     public void removeNavItem(String name) {
         listModel.removeRow(getRowForName(name));
+        if(listModel.getRowCount() == 0) {
+            setVisible(false);
+        }
     }
     
     public void addListSelectionListener(ListSelectionListener listener) {
@@ -133,6 +142,9 @@ class NavList extends JPanel {
         @Override
         public void doClick() {
             listModel.removeRow(lastRow);
+            if(listModel.getRowCount() == 0) {
+                NavList.this.setVisible(false);
+            }
         }
         
         @Override
