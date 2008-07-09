@@ -160,12 +160,10 @@ class NavList extends JXPanel {
                     .getClientProperty(RolloverProducer.ROLLOVER_KEY);
 
             JComponent renderer = (JComponent) super
-                    .getTableCellRendererComponent(table, value, isSelected,
+                    .getTableCellRendererComponent(table, null, isSelected,
                             hasFocus, row, column);
-            setText(null);
             if (value == Boolean.TRUE) {
                 if(p != null && p.x == column && p.y == row ) {
-                    System.out.println("rolled over");
                     setIcon(rolloverKillIcon);
                 } else {
                     setIcon(killIcon);
