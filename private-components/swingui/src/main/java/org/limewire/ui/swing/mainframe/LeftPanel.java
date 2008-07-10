@@ -21,6 +21,7 @@ import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.nav.SearchBar;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
+import org.limewire.ui.swing.search.SearchCategory;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.Line;
@@ -51,7 +52,7 @@ class LeftPanel extends JPanel implements NavigableTree {
         searchBar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                searchHandler.doSearch(new DefaultSearchInfo(searchBar.getText()));
+                searchHandler.doSearch(new DefaultSearchInfo(searchBar.getText(), SearchCategory.ALL));
             }
         });
         

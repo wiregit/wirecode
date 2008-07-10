@@ -4,5 +4,6 @@ public interface SearchInfo {
 
     String getTitle();
     String getQuery();
+    SearchCategory getSearchCategory();
     
 }

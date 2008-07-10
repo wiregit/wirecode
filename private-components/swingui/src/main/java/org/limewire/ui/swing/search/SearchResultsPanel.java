@@ -1,6 +1,8 @@
 package org.limewire.ui.swing.search;
 
-import javax.swing.JLabel;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+
 import javax.swing.JPanel;
 
 import org.limewire.core.api.search.SearchResult;
@@ -8,10 +10,38 @@ import org.limewire.core.api.search.SearchResult;
 public class SearchResultsPanel extends JPanel {
 
     private final SearchInfo searchInfo;
+    
+    private final SearchTabItems searchTab;
+    private final ResultsContainer resultsContainer;
+    private final SortAndFilterPanel sortAndFilterPanel;
 
     public SearchResultsPanel(SearchInfo searchInfo) {
         this.searchInfo = searchInfo;
-        add(new JLabel(searchInfo.getTitle()));
+        this.resultsContainer = new ResultsContainer();
+        this.searchTab = new SearchTabItems(searchInfo.getSearchCategory(), new SearchTabItems.SearchTabListener() {
+            @Override
+            public void categorySelected(SearchCategory searchCategory) {
+                resultsContainer.showCategory(searchCategory);
+            }
+        });
+        this.sortAndFilterPanel = new SortAndFilterPanel();
+        
+        setLayout(new GridBagLayout());
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1;
+        
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        add(searchTab, gbc);
+        
+        gbc.weighty = 1;
+        add(resultsContainer, gbc);
+        
+        gbc.weighty = 0;
+        add(sortAndFilterPanel, gbc);
+        
+        
     }
 
     public void addSearchResult(SearchResult searchResult) {
