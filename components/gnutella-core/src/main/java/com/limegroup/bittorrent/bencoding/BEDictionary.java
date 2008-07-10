@@ -10,8 +10,15 @@ import java.util.Map;
  */
 class BEDictionary extends BEAbstractCollection<Map<String, Object>> {
     
+    private final String charsetName;
+
+    public BEDictionary(ReadableByteChannel channel, String charsetName) {
+        super(channel);
+        this.charsetName = charsetName;
+    }
+    
     BEDictionary(ReadableByteChannel chan) {
-        super(chan);
+        this(chan, Token.ASCII);
     }
     
     @Override
@@ -32,7 +39,7 @@ class BEDictionary extends BEAbstractCollection<Map<String, Object>> {
     
     @Override
     protected Token<?> getNewElement() {
-        return new BEEntry(chan);
+        return new BEEntry(chan, charsetName);
     }
     
     /**
@@ -50,9 +57,11 @@ class BEDictionary extends BEAbstractCollection<Map<String, Object>> {
         private Object value;
         /** Whether this is the last entry in the map */
         private boolean lastEntry;
+        private final String charsetName;
         
-        BEEntry (ReadableByteChannel chan) {
+        BEEntry (ReadableByteChannel chan, String charsetName) {
             super(chan);
+            this.charsetName = charsetName;
             result = this;
         }
         
@@ -77,7 +86,7 @@ class BEDictionary extends BEAbstractCollection<Map<String, Object>> {
                 if (keyToken.getResult() != null) {
                 	// technically keys don't necessarily need to be String objects
                 	// but in practice they are
-                    key = new String(keyToken.getResult(),Token.ASCII);
+                    key = new String(keyToken.getResult(), charsetName);
                     keyToken = null; 
                 }
                 else

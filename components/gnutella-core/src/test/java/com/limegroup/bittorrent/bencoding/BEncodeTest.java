@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -547,6 +548,21 @@ public class BEncodeTest extends LimeTestCase {
         assertEquals(2, parsed.size());
         System.out.println(parsed);
         assertTrue(s.containsAll(parsed));
+    }
+    
+    /**
+     * Tests that dictionary keys can be encoded in UTF-8 and decoded properly.
+     */
+    public void testEncodeDecodeDictonaryWithUTF8Keys() throws Exception {
+        String key = String.valueOf('\u00e4');
+        Map<String, String> toEncode = Collections.singletonMap(key, key);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        BEncoder.getEncoder(baos, false, true, "UTF-8").encodeDict(toEncode);
+        Map<String, Object> result = (Map<String, Object>) Token.parse(baos.toByteArray(), "UTF-8");
+        String decodedKey = result.keySet().iterator().next();
+        assertEquals(key, decodedKey);
+        byte[] value = (byte[]) result.values().iterator().next();
+        assertEquals(key, new String(value, "UTF-8"));
     }
     
     private static class StringByte  {

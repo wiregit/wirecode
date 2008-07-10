@@ -141,10 +141,11 @@ public abstract class Token<T> {
      * Use isDone() to determine if it's complete, and getResult() to get the parsed Token object.
      * 
      * @param  chan        the ReadableByteChannel to read bencoded data from
+     * @param charsetName  the charset used for decoding dictionary keys
      * @return             a possibly incomplete Token object, or null
      * @throws IOException if a read from the channel throws
      */
-    public static Token<?> getNextToken(ReadableByteChannel chan) throws IOException {
+    public static Token<?> getNextToken(ReadableByteChannel chan, String charsetName) throws IOException {
         // There's some bencoded data in the given chanel for us to read and parse.
         // It might be a string like "5:hello", or a list that starts "l", has other elements, and ends "e".
         // 
@@ -167,7 +168,7 @@ public abstract class Token<T> {
         if (b[0] == BEncoder.R)
             return new BERational(chan);
         else if (b[0] == BEncoder.D)
-            return new BEDictionary(chan);
+            return new BEDictionary(chan, charsetName);
         else if (b[0] == BEncoder.L)
             return new BEList(chan);
         else if (b[0] == BEncoder.E)
@@ -179,20 +180,50 @@ public abstract class Token<T> {
         else
             throw new IOException("unrecognized token type " + (char)b[0]);
     }
-
+    
+    /**
+     * Reads the next bencoded object from the channel, returning a Token object that matches its type.
+     * The Token this returns may be incomplete.
+     *
+     * The charset that is used for decoding dictionary keys is {@link #ASCII}.
+     * 
+     * Call handleRead() to finish parsing an incomplete Token object.
+     * Use isDone() to determine if it's complete, and getResult() to get the parsed Token object.
+     * 
+     * @param  chan        the ReadableByteChannel to read bencoded data from
+     * @return             a possibly incomplete Token object, or null
+     * @throws IOException if a read from the channel throws
+     */
+    public static Token<?> getNextToken(ReadableByteChannel chan) throws IOException {
+        return getNextToken(chan, ASCII);
+    }
+    
     /**
      * Parses bencoded data in a byte array into an object that extends Token.
+     * 
+     * @param data a byte array with a complete bencoded object.
+     * @param charsetName name of the charset used for decoding dictionary keys
+     * @return     an object that extends Token like BEList.
+     *             null if the byte array didn't contain a complete bencoded object.
+     */
+    public static Object parse(byte[] data, String charsetName) throws IOException {
+        Token<?> t = getNextToken(new BufferChannel(data), charsetName); // Reads the first letter like "l" to see what's next
+        if (t == null)
+        	return null; // The channel couldn't even give 1 byte
+        t.handleRead(); // Tell t to read from its channel and parse the data it reads
+        return t.getResult();
+    }
+    
+    /**
+     * Parses bencoded data in a byte array into an object that extends Token. Charset used
+     * for decoding dictionary keys is {@link #ASCII}.
      * 
      * @param data a byte array with a complete bencoded object.
      * @return     an object that extends Token like BEList.
      *             null if the byte array didn't contain a complete bencoded object.
      */
     public static Object parse(byte[] data) throws IOException {
-        Token<?> t = getNextToken(new BufferChannel(data)); // Reads the first letter like "l" to see what's next
-        if (t == null)
-        	return null; // The channel couldn't even give 1 byte
-        t.handleRead(); // Tell t to read from its channel and parse the data it reads
-        return t.getResult();
+        return parse(data, ASCII);
     }
 
     /**
