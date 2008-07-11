@@ -13,7 +13,7 @@ import org.limewire.ui.swing.util.GuiUtils;
 
 public class SearchBar extends JTextField {
 
-	private final String defaultText = "Search...";
+	private String defaultText = "Search...";
 	
 	/**
 	 * the color of the search box text when defaultText is displayed
@@ -27,6 +27,11 @@ public class SearchBar extends JTextField {
 	    setText(defaultText);
 		setForeground(defaultTextColor);
 		addFocusListener(new SearchFocusListener());
+	}
+	
+	public void setDefaultText(String defaultText){
+		this.defaultText = defaultText;
+	    setText(defaultText);
 	}
 
 	private class SearchFocusListener implements FocusListener {

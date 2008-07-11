@@ -11,6 +11,7 @@ import javax.swing.plaf.ColorUIResource;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.application.SingleFrameApplication;
+import org.limewire.core.impl.download.MockDownloadModule;
 import org.limewire.core.impl.search.MockSearchModule;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -32,7 +33,7 @@ public class AppFrame extends SingleFrameApplication {
     	GuiUtils.injectFields(this);
     	initColors();
     	
-    	Injector injector = Guice.createInjector(new MockSearchModule());
+    	Injector injector = Guice.createInjector(new MockSearchModule(), new MockDownloadModule());
         
     	getMainFrame().setIconImage(frameIcon);
         getMainFrame().setJMenuBar(new LimeMenuBar());        
