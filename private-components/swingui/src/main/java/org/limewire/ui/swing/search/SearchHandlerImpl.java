@@ -10,6 +10,7 @@ import org.limewire.core.api.search.SearchResult;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
+import org.limewire.ui.swing.search.model.BasicSearchResultsModel;
 
 public class SearchHandlerImpl implements SearchHandler {
     
@@ -24,7 +25,8 @@ public class SearchHandlerImpl implements SearchHandler {
     @Override
     public void doSearch(SearchInfo info) {
         String panelTitle = info.getTitle();
-        final SearchResultsPanel searchPanel = new SearchResultsPanel(info);
+        final BasicSearchResultsModel model = new BasicSearchResultsModel();
+        SearchResultsPanel searchPanel = new SearchResultsPanel(info, model.getVisualSearchResults());
         NavItem item = navigator.addNavigablePanel(NavCategory.SEARCH, panelTitle, searchPanel, true);
         item.select();
      
@@ -38,7 +40,7 @@ public class SearchHandlerImpl implements SearchHandler {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        searchPanel.addSearchResult(searchResult);
+                        model.addSearchResult(searchResult);
                     }
                 });
             }

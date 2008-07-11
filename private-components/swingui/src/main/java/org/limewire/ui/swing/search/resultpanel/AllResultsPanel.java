@@ -6,13 +6,19 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 
 import javax.swing.JLabel;
+import javax.swing.JList;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.FontUtils;
+
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.swing.EventListModel;
 
 public class AllResultsPanel extends JXPanel {
     
-    public AllResultsPanel() {
+    
+    public AllResultsPanel(EventList<VisualSearchResult> visualSearchResults) {
         setLayout(new GridBagLayout());
         
         GridBagConstraints gbc = new GridBagConstraints();
@@ -29,7 +35,7 @@ public class AllResultsPanel extends JXPanel {
         gbc.weighty = 1;
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.insets = new Insets(0, 5, 5, 0);
-        add(new JLabel("listing of each all result."), gbc);
+        add(new JList(new EventListModel<VisualSearchResult>(visualSearchResults)), gbc);
         
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.weightx = 0;
