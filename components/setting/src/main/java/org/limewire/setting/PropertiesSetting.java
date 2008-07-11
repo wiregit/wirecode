@@ -32,7 +32,7 @@ public class PropertiesSetting extends AbstractSetting {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try {
             props.store(out, "props");
-            return new String(out.toByteArray(), "UTF8");
+            return new String(out.toByteArray(), "UTF-8");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -41,7 +41,7 @@ public class PropertiesSetting extends AbstractSetting {
     static Properties fromString(String value) {
         Properties props = new Properties();
         try {
-            ByteArrayInputStream in = new ByteArrayInputStream(value.getBytes("UTF8"));
+            ByteArrayInputStream in = new ByteArrayInputStream(value.getBytes("UTF-8"));
             props.load(in);
             return props;
         } catch (IOException e) {
