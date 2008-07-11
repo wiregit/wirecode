@@ -29,6 +29,8 @@
 	<classpathentry kind="src" output="components/statistic/build/classes" path="components/statistic/src/main/java"/>
 	<classpathentry kind="src" output="components/http/build/classes" path="components/http/src/main/java"/>
 	<classpathentry kind="src" output="components/http/build/tests" path="components/http/src/test/java"/>
+	<classpathentry kind="src" output="components/swarm/build/classes" path="components/swarm/src/main/java"/>
+	<classpathentry kind="src" output="components/swarm/build/tests" path="components/swarm/src/test/java"/>
 	<classpathentry kind="src" output="components/mojito/build/classes" path="components/mojito/src/main/java"/>
 	<classpathentry kind="src" output="components/mojito/build/tests" path="components/mojito/src/test/java"/>
 	<classpathentry kind="src" output="components/mojito-ui/build/classes" path="components/mojito-ui/src/main/java"/>
