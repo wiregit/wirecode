@@ -20,7 +20,7 @@ public class NavigatorImpl implements Navigator {
 
     public NavigatorImpl(NavigableTarget navTarget, NavigableTree navTree) {
         this.navTarget = navTarget;
-        this.navTree = navTree;        
+        this.navTree = navTree;
         
         navTree.addNavSelectionListener(new NavSelectionListener() {
             @Override

@@ -7,6 +7,7 @@ import org.limewire.ui.swing.search.resultpanel.AllResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.AudioResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.DocumentsResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.ImagesResultsPanel;
+import org.limewire.ui.swing.search.resultpanel.SearchScrollPane;
 import org.limewire.ui.swing.search.resultpanel.VideoResultsPanel;
 
 class ResultsContainer extends JXPanel {
@@ -17,11 +18,11 @@ class ResultsContainer extends JXPanel {
         this.cardLayout = new CardLayout();
         setLayout(cardLayout);
         
-        add(new AllResultsPanel(), SearchCategory.ALL.name());
-        add(new AudioResultsPanel(), SearchCategory.AUDIO.name());
-        add(new VideoResultsPanel(), SearchCategory.VIDEO.name());
-        add(new ImagesResultsPanel(), SearchCategory.IMAGES.name());
-        add(new DocumentsResultsPanel(), SearchCategory.DOCUMENTS.name());
+        add(new SearchScrollPane(new AllResultsPanel()), SearchCategory.ALL.name());
+        add(new SearchScrollPane(new AudioResultsPanel()), SearchCategory.AUDIO.name());
+        add(new SearchScrollPane(new VideoResultsPanel()), SearchCategory.VIDEO.name());
+        add(new SearchScrollPane(new ImagesResultsPanel()), SearchCategory.IMAGES.name());
+        add(new SearchScrollPane(new DocumentsResultsPanel()), SearchCategory.DOCUMENTS.name());
     }
     
     void showCategory(SearchCategory category) {
