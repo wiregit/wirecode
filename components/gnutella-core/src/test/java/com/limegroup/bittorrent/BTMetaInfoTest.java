@@ -9,12 +9,13 @@ import java.nio.channels.FileChannel;
 import junit.framework.Assert;
 
 import org.limewire.util.BaseTestCase;
+import org.limewire.util.FileUtils;
 
 public class BTMetaInfoTest extends BaseTestCase {
     /**
      * A directory containing the test data for this unit test.
      */
-    private static final String TEST_DATA_DIR = System.getProperty("user.dir")
+    public static final String TEST_DATA_DIR = System.getProperty("user.dir")
             + "/../tests/test-data";
 
     public BTMetaInfoTest(String name) {
@@ -23,7 +24,7 @@ public class BTMetaInfoTest extends BaseTestCase {
 
     public void testBasics() throws Exception {
         File file = getFile("test-basics.torrent");
-        byte[] bytes = getBytes(file);
+        byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
 
@@ -39,23 +40,23 @@ public class BTMetaInfoTest extends BaseTestCase {
     
     public void testSingleWebSeedSingleFile() throws Exception {
         File file = getFile("test-single-webseed-single-file.torrent");
-        byte[] bytes = getBytes(file);
+        byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
         Assert.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
-        Assert.assertEquals(2, metaInfo.getNumBlocks());
-        Assert.assertEquals(32768, metaInfo.getPieceLength());
-        Assert.assertEquals("http://localhost:8080/tracker/announce", metaInfo.getTrackers()[0]
+        Assert.assertEquals(1, metaInfo.getNumBlocks());
+        Assert.assertEquals(262144, metaInfo.getPieceLength());
+        Assert.assertEquals("http://localhost/~pvertenten/tracker/announce.php", metaInfo.getTrackers()[0]
                 .toString());
-        Assert.assertEquals(true, metaInfo.isPrivate());
+        Assert.assertEquals(false, metaInfo.isPrivate());
         Assert.assertNotNull(metaInfo.getWebSeeds());
         Assert.assertEquals(1, metaInfo.getWebSeeds().length);
-        Assert.assertEquals("http://mirror.com/file.exe", metaInfo.getWebSeeds()[0].toString());
+        Assert.assertEquals("http://pvertenten-pc.limewire.com/~pvertenten/pub/gnutella_protocol_0.4.pdf", metaInfo.getWebSeeds()[0].toString());
     }
     
     public void testMultipleWebSeedSingleFile() throws Exception {
         File file = getFile("test-multiple-webseed-single-file.torrent");
-        byte[] bytes = getBytes(file);
+        byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
         Assert.assertEquals("gnutella_protocol_0.4.pdf", metaInfo.getName());
@@ -73,7 +74,7 @@ public class BTMetaInfoTest extends BaseTestCase {
     
     public void testSingleWebSeedMultipleFile() throws Exception {
         File file = getFile("test-single-webseed-multiple-file.torrent");
-        byte[] bytes = getBytes(file);
+        byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
         Assert.assertEquals("test", metaInfo.getName());
@@ -85,12 +86,12 @@ public class BTMetaInfoTest extends BaseTestCase {
         Assert.assertEquals(true, metaInfo.isPrivate());
         Assert.assertNotNull(metaInfo.getWebSeeds());
         Assert.assertEquals(1, metaInfo.getWebSeeds().length);
-        Assert.assertEquals("http://mirror.com/pub/", metaInfo.getWebSeeds()[0].toString());
+        Assert.assertEquals("http://pvertenten-pc.limewire.com/~pvertenten/pub/", metaInfo.getWebSeeds()[0].toString());
     }
     
     public void testMultipleWebSeedMultipleFile() throws Exception {
         File file = getFile("test-multiple-webseed-multiple-file.torrent");
-        byte[] bytes = getBytes(file);
+        byte[] bytes = FileUtils.readFileFully(file);
         BTMetaInfoFactory btm = new BTMetaInfoFactoryImpl();
         BTMetaInfo metaInfo = btm.createBTMetaInfoFromBytes(bytes);
         Assert.assertEquals("test", metaInfo.getName());
@@ -114,29 +115,5 @@ public class BTMetaInfoTest extends BaseTestCase {
     private File getFile(String fileName) {
         File file = new File(TEST_DATA_DIR + "/" + fileName);
         return file;
-    }
-
-    /**
-     * Returns the bytes of a file in a byte array. This method is assuming
-     * smaller file sizes. It can only return up to Integer.MAXIMUM bytes.
-     * 
-     * @param file
-     * @return
-     * @throws IOException
-     */
-    private byte[] getBytes(File file) throws IOException {
-        FileInputStream fis = null;
-        ByteBuffer byteBuffer = null;
-        try {
-            fis = new FileInputStream(file);
-            FileChannel fileChannel = fis.getChannel();
-            byteBuffer = ByteBuffer.allocate((int) file.length());
-            fileChannel.read(byteBuffer);
-        } finally {
-            if (fis != null) {
-                fis.close();
-            }
-        }
-        return byteBuffer.array();
     }
 }
