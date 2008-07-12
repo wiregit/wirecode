@@ -16,9 +16,13 @@ import org.limewire.core.impl.search.MockSearchModule;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 public class AppFrame extends SingleFrameApplication {
+    
+    @Inject
+    private static volatile Injector injector;    
 	  
 	/** Default background color for panels */
 	@Resource
@@ -33,7 +37,7 @@ public class AppFrame extends SingleFrameApplication {
     	GuiUtils.injectFields(this);
     	initColors();
     	
-    	Injector injector = Guice.createInjector(new MockSearchModule(), new MockDownloadModule());
+    	Injector injector = createInjector();
         
     	getMainFrame().setIconImage(frameIcon);
         getMainFrame().setJMenuBar(new LimeMenuBar());        
@@ -44,6 +48,13 @@ public class AppFrame extends SingleFrameApplication {
         // Keep this here while building UI - ensures we test 
         // with proper sizes.
         getMainFrame().setSize(new Dimension(1024, 768));
+    }
+    
+    public Injector createInjector() {
+        if(injector == null) {
+            injector = Guice.createInjector(new MockSearchModule(), new MockDownloadModule());
+        }
+        return injector;
     }
     
 

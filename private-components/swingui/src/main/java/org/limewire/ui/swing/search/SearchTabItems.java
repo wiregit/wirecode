@@ -14,6 +14,7 @@ import javax.swing.Box;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.RectanglePainter;
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.util.TextTabPanel;
 
 class SearchTabItems extends JXPanel {

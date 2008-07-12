@@ -1,4 +1,4 @@
-package org.limewire.ui.swing.search;
+package org.limewire.core.api.search;
 
 public enum SearchCategory {
     

@@ -4,6 +4,7 @@ import java.awt.CardLayout;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.core.api.search.ResultType;
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.AllResultsPanel;
 import org.limewire.ui.swing.search.resultpanel.AudioResultsPanel;

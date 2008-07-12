@@ -6,5 +6,7 @@ package org.limewire.core.api.search;
 public interface Search {
     
     void start(SearchListener searchListener);
+    
+    void stop();
 
 }

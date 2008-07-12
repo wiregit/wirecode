@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.nav.DownloadSummaryPanel;
 import org.limewire.ui.swing.nav.FilesSharingSummaryPanel;
 import org.limewire.ui.swing.nav.NavItem;
@@ -21,7 +22,6 @@ import org.limewire.ui.swing.nav.NavigableTree;
 import org.limewire.ui.swing.nav.SearchBar;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.search.DefaultSearchInfo;
-import org.limewire.ui.swing.search.SearchCategory;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.Line;

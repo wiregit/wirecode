@@ -3,6 +3,7 @@ package org.limewire.ui.swing.search;
 import javax.swing.SwingUtilities;
 
 import org.limewire.core.api.search.Search;
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchFactory;
 import org.limewire.core.api.search.SearchListener;
@@ -23,7 +24,7 @@ public class SearchHandlerImpl implements SearchHandler {
     }
 
     @Override
-    public void doSearch(SearchInfo info) {
+    public void doSearch(final SearchInfo info) {
         String panelTitle = info.getTitle();
         final BasicSearchResultsModel model = new BasicSearchResultsModel();
         SearchResultsPanel searchPanel = new SearchResultsPanel(info, model.getVisualSearchResults());
@@ -31,7 +32,15 @@ public class SearchHandlerImpl implements SearchHandler {
         item.select();
      
         Search search = searchFactory.createSearch(new SearchDetails() {
+            @Override
+            public SearchCategory getSearchCategory() {
+                return info.getSearchCategory();
+            }
             
+            @Override
+            public String getSearchQuery() {
+                return info.getQuery();
+            }
         });
         
         search.start(new SearchListener() {

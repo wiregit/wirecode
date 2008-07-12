@@ -1,5 +1,7 @@
 package org.limewire.ui.swing.search;
 
+import org.limewire.core.api.search.SearchCategory;
+
 public class DefaultSearchInfo implements SearchInfo {
 
     private final String query;

@@ -14,6 +14,12 @@ public class MockSearch implements Search {
     public MockSearch(SearchDetails searchDetails) {
         // TODO Auto-generated constructor stub
     }
+    
+    @Override
+    public void stop() {
+        // TODO Auto-generated method stub
+        
+    }
 
     @Override
     public void start(final SearchListener searchListener) {
