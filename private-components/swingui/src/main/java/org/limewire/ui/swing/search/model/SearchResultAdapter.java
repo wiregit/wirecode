@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.limewire.core.api.search.ResultType;
 import org.limewire.core.api.search.SearchResult;
 
 class SearchResultAdapter implements VisualSearchResult {
@@ -14,7 +15,6 @@ class SearchResultAdapter implements VisualSearchResult {
     public SearchResultAdapter(List<SearchResult> sourceValue) {
         this.coreResults = sourceValue;
     }
-
     
     @Override
     public List<SearchResult> getCoreSearchResults() {
@@ -42,8 +42,27 @@ class SearchResultAdapter implements VisualSearchResult {
     
     @Override
     public String toString() {
-        return "list of "  + coreResults;
+        return getDescription() + " with " + coreResults.size() + " sources, in category: " + getCategory() + ", with size: " + getSize() + ", and extension: " + getFileExtension();
     }
     
+    @Override
+    public ResultType getCategory() {
+        return coreResults.get(0).getResultType();
+    }
+    
+    @Override
+    public String getDescription() {
+        return coreResults.get(0).getDescription();
+    }
+    
+    @Override
+    public String getFileExtension() {
+        return coreResults.get(0).getFileExtension();
+    }
+    
+    @Override
+    public long getSize() {
+        return coreResults.get(0).getSize();
+    }
 
 }

@@ -3,6 +3,7 @@ package org.limewire.core.impl.search;
 import java.util.Collections;
 import java.util.Map;
 
+import org.limewire.core.api.search.ResultType;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
@@ -28,6 +29,26 @@ public class MockSearch implements Search {
                     public String getUrn() {
                         return "test";
                     }
+                    
+                    @Override
+                    public ResultType getResultType() {
+                        return ResultType.AUDIO;
+                    }
+                    
+                    @Override
+                    public String getDescription() {
+                        return "5.0 Blues";
+                    }
+                    
+                    @Override
+                    public String getFileExtension() {
+                        return "ogg";
+                    }
+                    
+                    @Override
+                    public long getSize() {
+                        return 123456789L;
+                    }
                 });
                 searchListener.handleSearchResult(new SearchResult() {
                     @Override
@@ -37,6 +58,26 @@ public class MockSearch implements Search {
                     @Override
                     public String getUrn() {
                         return "test";
+                    }
+                    
+                    @Override
+                    public String getDescription() {
+                        return "5.0 Blues Source 2";
+                    }
+                    
+                    @Override
+                    public ResultType getResultType() {
+                        return ResultType.AUDIO;
+                    }
+
+                    @Override
+                    public String getFileExtension() {
+                        return "ogg";
+                    }
+                    
+                    @Override
+                    public long getSize() {
+                        return 123456789L;
                     }
                 });
                 searchListener.handleSearchResult(new SearchResult() {
@@ -48,6 +89,26 @@ public class MockSearch implements Search {
                     public String getUrn() {
                         return "test1";
                     }
+                    
+                    @Override
+                    public String getDescription() {
+                        return "Standdown Situps";
+                    }
+                    
+                    @Override
+                    public ResultType getResultType() {
+                        return ResultType.VIDEO;
+                    }
+                    
+                    @Override
+                    public String getFileExtension() {
+                        return "ogv";
+                    }
+                    
+                    @Override
+                    public long getSize() {
+                        return 123456L;
+                    }
                 });
                 searchListener.handleSearchResult(new SearchResult() {
                     @Override
@@ -57,6 +118,26 @@ public class MockSearch implements Search {
                     @Override
                     public String getUrn() {
                         return "test2";
+                    }
+                    
+                    @Override
+                    public String getDescription() {
+                        return "Craziness";
+                    }
+                    
+                    @Override
+                    public ResultType getResultType() {
+                        return ResultType.UNKNOWN;
+                    }
+                    
+                    @Override
+                    public String getFileExtension() {
+                        return "tmp";
+                    }
+                    
+                    @Override
+                    public long getSize() {
+                        return 1L;
                     }
                 });
             }
