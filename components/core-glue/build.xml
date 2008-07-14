@@ -25,7 +25,7 @@
 	</target>
     
     <target name="compile" depends="initialize, lw-core.compile">
-        <!-- Currently no tests -- using compile-src in the meantime.-->
+        <!-- Currently no tests - using compile-src in the meantime.-->
     	<!--<do.compile component="core-glue"/>-->
     	<do.compile-src component="core-glue"/>
     	<mkdir dir="${build.limewire.components.core-glue.tests}"/>

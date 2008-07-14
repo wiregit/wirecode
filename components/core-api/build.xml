@@ -23,7 +23,7 @@
 	</target>
     
     <target name="compile">
-        <!-- Currently no tests -- using compile-src in the meantime -->
+        <!-- Currently no tests - using compile-src in the meantime -->
     	<!--<do.compile component="core-api"/>-->
     	<do.compile-src component="core-api"/>
         <mkdir dir="${build.limewire.components.core-api.tests}"/>
