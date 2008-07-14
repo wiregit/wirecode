@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleManager.java,v $
- * $Revision: 1.2 $
- * $Date: 2008-07-01 20:44:39 $
+ * $Revision: 1.3 $
+ * $Date: 2008-07-14 19:23:00 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -20,7 +20,15 @@
 
 package org.jivesoftware.smackx.jingle;
 
-import org.jivesoftware.smack.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.jivesoftware.smack.ConnectionCreationListener;
+import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.RosterListener;
+import org.jivesoftware.smack.XMPPConnection;
+import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
@@ -32,20 +40,13 @@ import org.jivesoftware.smackx.jingle.listeners.CreatedJingleSessionListener;
 import org.jivesoftware.smackx.jingle.listeners.JingleListener;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionListener;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
-import org.jivesoftware.smackx.jingle.audiortp.PayloadType;
 import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
 import org.jivesoftware.smackx.jingle.nat.TransportResolver;
-import org.jivesoftware.smackx.packet.audiortp.AudioRTPDescription;
-import org.jivesoftware.smackx.packet.Content;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.jivesoftware.smackx.packet.Jingle;
 import org.jivesoftware.smackx.provider.JingleTransportProvider;
-import org.jivesoftware.smackx.provider.audiortp.JingleContentInfoProvider;
 import org.jivesoftware.smackx.provider.audiortp.JingleContentDescriptionProvider;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import org.jivesoftware.smackx.provider.audiortp.JingleContentInfoProvider;
 
 /**
  * Jingle is a session establishment protocol defined in (XEP-0166).
@@ -522,11 +523,11 @@ public class JingleManager implements JingleSessionListener {
             return createOutgoingJingleSession(responder, getContent(payloadTypes));
     }*/
 
-    private Content getContent(List<PayloadType.Audio> payloadTypes) {
-        AudioRTPDescription audioRTPDescription = new AudioRTPDescription();
-        audioRTPDescription.addAudioPayloadTypes(payloadTypes);
-        return new Content(audioRTPDescription);
-    }
+//    private Content getContent(List<PayloadType.Audio> payloadTypes) {
+//        AudioRTPDescription audioRTPDescription = new AudioRTPDescription();
+//        audioRTPDescription.addAudioPayloadTypes(payloadTypes);
+//        return new Content(audioRTPDescription);
+//    }
 
     /**
      * Creates an Jingle session to start a communication with another user.

@@ -1,7 +1,7 @@
 /**
  * $RCSfile: TcpUdpBridgeClient.java,v $
- * $Revision: 1.2 $
- * $Date: 2008-07-01 20:44:39 $
+ * $Revision: 1.3 $
+ * $Date: 2008-07-14 19:23:00 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -66,25 +66,25 @@ import java.io.OutputStream;
  */
 public class TcpUdpBridgeClient {
 
-    private String remoteTcpHost = null;
+//    private String remoteTcpHost = null;
     private String remoteUdpHost = null;
-    private int remoteTcpPort = -1;
+//    private int remoteTcpPort = -1;
     private int remoteUdpPort = -1;
-    private int localUdpPort = -1;
+//    private int localUdpPort = -1;
 
     private DatagramSocket localUdpSocket;
     private Socket localTcpSocket;
 
     public TcpUdpBridgeClient(String remoteTcpHost, String remoteUdpHost, int remoteTcpPort, int remoteUdpPort) {
-        this.remoteTcpHost = remoteTcpHost;
+//        this.remoteTcpHost = remoteTcpHost;
         this.remoteUdpHost = remoteUdpHost;
-        this.remoteTcpPort = remoteTcpPort;
+//        this.remoteTcpPort = remoteTcpPort;
         this.remoteUdpPort = remoteUdpPort;
 
         try {
             localTcpSocket = new Socket(remoteTcpHost, remoteTcpPort);
             localUdpSocket = new DatagramSocket(0);
-            localUdpPort = localUdpSocket.getLocalPort();
+//            localUdpPort = localUdpSocket.getLocalPort();
         }
         catch (IOException e) {
             e.printStackTrace();

@@ -602,7 +602,7 @@ public final class Initializer {
     /**
      * Adds absolute xulrunner path to java.library.path. This is necessary for MozSwing.
      */
-    private void setupXulLibraryPath() {
+//    private void setupXulLibraryPath() {
 //        if (OSUtils.isWindows()) {
 //            File xulInstallPath = new File(CommonUtils.getUserSettingsDir(), "/browser");
 //            File xulFile = new File(xulInstallPath + "/xulrunner/xulrunner.exe");
@@ -635,7 +635,7 @@ public final class Initializer {
 //            if(LOG.isDebugEnabled())
 //                LOG.debug("Moz Summary: " + MozillaConfig.getConfigSummary());
 //        }
-    }
+//    }
     
 }
 

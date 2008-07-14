@@ -49,11 +49,9 @@ public class BridgedResolverTest extends SmackTestCase {
 
         System.out.println(rtpBridge.getIp() + " portA:" + rtpBridge.getPortA() + " portB:" + rtpBridge.getPortB());
 
-        if (rtpBridge != null) {
-            if (rtpBridge.getIp() != null) incCounter();
-            if (rtpBridge.getPortA() != -1) incCounter();
-            if (rtpBridge.getPortB() != -1) incCounter();
-        }
+        if (rtpBridge.getIp() != null) incCounter();
+        if (rtpBridge.getPortA() != -1) incCounter();
+        if (rtpBridge.getPortB() != -1) incCounter();
 
         assertTrue(valCounter() == 3);
     }

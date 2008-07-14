@@ -1,7 +1,7 @@
 /**
  * $RCSfile: RTPBridge.java,v $
- * $Revision: 1.2 $
- * $Date: 2008-07-01 20:44:39 $
+ * $Revision: 1.3 $
+ * $Date: 2008-07-14 19:23:00 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -329,7 +329,7 @@ public class RTPBridge extends IQ {
 
             int eventType;
             String elementName;
-            String namespace;
+//            String namespace;
 
             if (!parser.getNamespace().equals(RTPBridge.NAMESPACE))
                 throw new Exception("Not a RTP Bridge packet");
@@ -345,7 +345,7 @@ public class RTPBridge extends IQ {
             while (!done) {
                 eventType = parser.next();
                 elementName = parser.getName();
-                namespace = parser.getNamespace();
+//                namespace = parser.getNamespace();
 
                 if (eventType == XmlPullParser.START_TAG) {
                     if (elementName.equals("candidate")) {
@@ -364,7 +364,7 @@ public class RTPBridge extends IQ {
                     }
                     else if (elementName.equals("publicip")) {
                         //String p = parser.getAttributeName(0);
-                        int x = parser.getAttributeCount();
+//                        int x = parser.getAttributeCount();
                         for (int i = 0; i < parser.getAttributeCount(); i++) {
                             if (parser.getAttributeName(i).equals("ip"))
                                 iq.setIp(parser.getAttributeValue(i));

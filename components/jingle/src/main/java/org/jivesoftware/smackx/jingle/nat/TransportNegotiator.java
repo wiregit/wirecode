@@ -1,6 +1,6 @@
 /**
  * $RCSfile: TransportNegotiator.java,v $
- * $Revision: 1.4 $
+ * $Revision: 1.5 $
  * $Date: 15/11/2006
  *
  * Copyright 2003-2006 Jive Software.
@@ -27,7 +27,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.Logger;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smackx.jingle.JingleNegotiator;
@@ -503,9 +502,9 @@ public abstract class TransportNegotiator extends JingleNegotiator {
         return result;
     }
 
-    private boolean isOfferStarted() {
-        return resolver.isResolving() || resolver.isResolved();
-    }
+//    private boolean isOfferStarted() {
+//        return resolver.isResolving() || resolver.isResolved();
+//    }
 
     /**
      * Send an offer for a transport candidate
@@ -781,8 +780,8 @@ public abstract class TransportNegotiator extends JingleNegotiator {
             ArrayList<TransportCandidate> accepted = obtainCandidatesList(jin);
             if (!accepted.isEmpty()) {
 
-                for (TransportCandidate cand : accepted) {
-                }
+//                for (TransportCandidate cand : accepted) {
+//                }
 
                 TransportCandidate cand = accepted.get(0);
                 setAcceptedLocalCandidate(cand);
@@ -854,7 +853,7 @@ public abstract class TransportNegotiator extends JingleNegotiator {
      */
     public static final class RawUdp extends TransportNegotiator {
 
-        private static final Logger LOG = Logger.getLogger(RawUdp.class);
+//        private static final Logger LOG = Logger.getLogger(RawUdp.class);
 
         /**
          * Default constructor, with a JingleSession and transport manager.
@@ -906,7 +905,7 @@ public abstract class TransportNegotiator extends JingleNegotiator {
      * @author Alvaro Saurin <alvaro.saurin@gmail.com>
      */
     public static final class Ice extends TransportNegotiator {
-        private static final Logger LOG = Logger.getLogger(TransportNegotiator.Ice.class);
+//        private static final Logger LOG = Logger.getLogger(TransportNegotiator.Ice.class);
 
         /**
          * Default constructor, with a JingleSession and transport manager.

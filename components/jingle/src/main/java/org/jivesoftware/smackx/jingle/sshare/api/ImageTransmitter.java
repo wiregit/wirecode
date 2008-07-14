@@ -19,9 +19,9 @@ import java.util.Arrays;
 public class ImageTransmitter implements Runnable {
 
     private Robot robot;
-    private InetAddress localHost;
+//    private InetAddress localHost;
     private InetAddress remoteHost;
-    private int localPort;
+//    private int localPort;
     private int remotePort;
     public static final int tileWidth = 25;
     private boolean on = true;
@@ -46,8 +46,8 @@ public class ImageTransmitter implements Runnable {
 
             this.area = area;
             this.socket = socket;
-            localHost = socket.getLocalAddress();
-            localPort = socket.getLocalPort();
+//            localHost = socket.getLocalAddress();
+//            localPort = socket.getLocalPort();
             this.remoteHost = remoteHost;
             this.remotePort = remotePort;
             this.encoder = new DefaultEncoder();

@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleSession.java,v $
- * $Revision: 1.3 $
- * $Date: 2008-07-01 21:15:17 $
+ * $Revision: 1.4 $
+ * $Date: 2008-07-14 19:23:00 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -680,15 +680,14 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
                         "Unsupported feature: the number of accepted transports is greater than 1.");
             }
             else if (jta.size() == 1) {
-                org.jivesoftware.smackx.packet.JingleTransport jt = (org.jivesoftware.smackx.packet.JingleTransport) jta.get(0);
+                org.jivesoftware.smackx.packet.JingleTransport jt = jta.get(0);
 
                 if (jt.getCandidatesCount() > 1) {
                     throw new XMPPException(
                             "Unsupported feature: the number of accepted transport candidates is greater than 1.");
                 }
                 else if (jt.getCandidatesCount() == 1) {
-                    JingleTransportCandidate jtc = (JingleTransportCandidate) jt
-                            .getCandidatesList().get(0);
+                    JingleTransportCandidate jtc = jt.getCandidatesList().get(0);
                     acceptedLocalCandidate = jtc.getMediaTransport();
                 }
             }
@@ -791,7 +790,7 @@ public abstract class JingleSession extends JingleNegotiator implements MediaRec
         JingleSession result = null;
         synchronized (sessions) {
             if (sessions.containsKey(con)) {
-                result = (JingleSession) sessions.get(con);
+                result = sessions.get(con);
             }
         }
 

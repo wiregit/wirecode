@@ -2,7 +2,7 @@ package org.jivesoftware.smackx.jingle;
 
 /**
  * $RCSfile: JingleMediaTest.java,v $
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * $Date: 09/11/2006
  * <p/>
  * Copyright 2003-2006 Jive Software.
@@ -23,6 +23,7 @@ package org.jivesoftware.smackx.jingle;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.media.MediaLocator;
 import javax.media.format.AudioFormat;
 
@@ -37,8 +38,6 @@ import org.jivesoftware.smackx.jingle.listeners.JingleSessionStateListener;
 import org.jivesoftware.smackx.jingle.nat.BridgedTransportManager;
 import org.jivesoftware.smackx.jingle.nat.ICETransportManager;
 import org.jivesoftware.smackx.jingle.nat.MockAudioRTPContentHandler;
-import org.jivesoftware.smackx.jingle.nat.MockAudioRTPDescription;
-import org.jivesoftware.smackx.packet.Content;
 import org.jivesoftware.smackx.packet.JingleError;
 
 /**
@@ -98,7 +97,7 @@ public class JingleMediaTest extends SmackTestCase {
 
                 jm1.addJingleSessionRequestListener(jingleSessionRequestListener);
 
-                Content content = new Content();
+//                Content content = new Content();
                 OutgoingJingleSession js0 = jm0.createOutgoingJingleSession(x1.getUser(), null );
 
                 js0.start();

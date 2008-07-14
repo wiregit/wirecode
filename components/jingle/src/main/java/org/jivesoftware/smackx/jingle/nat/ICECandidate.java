@@ -1,7 +1,7 @@
 /**
  * $RCSfile: ICECandidate.java,v $
- * $Revision: 1.2 $
- * $Date: 2008-07-01 20:44:39 $
+ * $Revision: 1.3 $
+ * $Date: 2008-07-14 19:23:00 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -292,7 +292,7 @@ public class ICECandidate extends TransportCandidate implements Comparable {
                             if (iceCandidate.getType().equals(getType())) {
                                 try {
                                     echo.addResultListener(resultListener);
-                                    InetAddress address = InetAddress.getByName(getIp());
+                                    InetAddress.getByName(getIp());
                                     echo.testASync(checkingCandidate, getPassword());
                                 }
                                 catch (UnknownHostException e) {

@@ -1,6 +1,6 @@
 /**
  * $RCSfile: Demo.java,v $
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * $Date: 28/12/2006
  * <p/>
  * Copyright 2003-2006 Jive Software.
@@ -19,17 +19,22 @@
  */
 package org.jivesoftware.smackx.jingle.demo;
 
+import java.awt.event.ActionEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smackx.jingle.*;
+import org.jivesoftware.smackx.jingle.IncomingJingleSession;
+import org.jivesoftware.smackx.jingle.JingleManager;
+import org.jivesoftware.smackx.jingle.JingleSessionRequest;
+import org.jivesoftware.smackx.jingle.OutgoingJingleSession;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
 import org.jivesoftware.smackx.jingle.nat.ICETransportManager;
-import org.jivesoftware.smackx.jingle.nat.JingleTransportManager;
-import org.jivesoftware.smackx.packet.Content;
-
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.util.Arrays;
 
 /**
  * Jingle Demo Application. It register in a XMPP Server and let users place calls using a full JID and auto-receive calls.
@@ -37,12 +42,12 @@ import java.util.Arrays;
  */
 public class Demo extends JFrame {
 
-    private JingleTransportManager transportManager = null;
+//    private JingleTransportManager transportManager = null;
     private XMPPConnection xmppConnection = null;
 
-    private String server = null;
-    private String user = null;
-    private String pass = null;
+//    private String server = null;
+//    private String user = null;
+//    private String pass = null;
 
     private JingleManager jm = null;
     private IncomingJingleSession incoming = null;
@@ -52,9 +57,9 @@ public class Demo extends JFrame {
 
     public Demo(String server, String user, String pass) {
 
-        this.server = server;
-        this.user = user;
-        this.pass = pass;
+//        this.server = server;
+//        this.user = user;
+//        this.pass = pass;
 
         xmppConnection = new XMPPConnection(server);
         try {

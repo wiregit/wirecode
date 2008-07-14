@@ -1,12 +1,9 @@
 package org.limewire.ui.swing.nav;
 
-import java.awt.Component;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
-import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -53,25 +50,25 @@ public class FilesSharingSummaryPanel extends JPanel {
      
     }
     
-    private static class NumberIcon implements Icon {
-        private final int number;
-        public NumberIcon(int number) {
-            this.number = number;
-        }
-        
-        @Override
-        public int getIconHeight() {
-            return 16;
-        }
-        @Override
-        public int getIconWidth() {
-            return 16;
-        }
-        @Override
-        public void paintIcon(Component c, Graphics g, int x, int y) {
-//            Graphics2D g2 = (Graphics2D)g;
-//            g2.drawString(number + "", x, y);
-        }
-    }
+//    private static class NumberIcon implements Icon {
+//        private final int number;
+//        public NumberIcon(int number) {
+//            this.number = number;
+//        }
+//        
+//        @Override
+//        public int getIconHeight() {
+//            return 16;
+//        }
+//        @Override
+//        public int getIconWidth() {
+//            return 16;
+//        }
+//        @Override
+//        public void paintIcon(Component c, Graphics g, int x, int y) {
+////            Graphics2D g2 = (Graphics2D)g;
+////            g2.drawString(number + "", x, y);
+//        }
+//    }
 
 }

@@ -1,20 +1,22 @@
 package org.jivesoftware.smackx.jingle.audiortp;
 
-import org.jivesoftware.smackx.jingle.JingleSession;
-import org.jivesoftware.smackx.jingle.media.MediaNegotiator;
-import org.jivesoftware.smackx.packet.*;
-import org.jivesoftware.smackx.packet.audiortp.AudioRTPDescription;
-import org.jivesoftware.smack.packet.IQ;
-import org.jivesoftware.smack.XMPPException;
-import org.apache.log4j.Logger;
-
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smackx.jingle.JingleSession;
+import org.jivesoftware.smackx.jingle.media.MediaNegotiator;
+import org.jivesoftware.smackx.packet.Content;
+import org.jivesoftware.smackx.packet.Description;
+import org.jivesoftware.smackx.packet.Jingle;
+import org.jivesoftware.smackx.packet.JingleError;
+import org.jivesoftware.smackx.packet.audiortp.AudioRTPDescription;
 
 public class AudioRTPMediaNegotiator extends MediaNegotiator {
 
-    private static final Logger LOG = Logger.getLogger(AudioRTPMediaNegotiator.class);
+//    private static final Logger LOG = Logger.getLogger(AudioRTPMediaNegotiator.class);
 
     private final List<PayloadType.Audio> localAudioPts = new ArrayList<PayloadType.Audio>();
     private final List<PayloadType.Audio> remoteAudioPts = new ArrayList<PayloadType.Audio>();
@@ -116,6 +118,7 @@ public class AudioRTPMediaNegotiator extends MediaNegotiator {
         return bestCommonAudioPt;
     }
 
+    @SuppressWarnings("unchecked")
     private List obtainPayloads(Jingle jin) {
         List result = new ArrayList();
         Iterator iDescr = jin.getContent().getDescriptions().iterator();
@@ -170,6 +173,7 @@ public class AudioRTPMediaNegotiator extends MediaNegotiator {
         }
     }
     
+    @SuppressWarnings("unchecked")
     public void addDescriptionToContentAccept(Jingle jin, Jingle jout) {
         synchronized (remoteAudioPts) {
             remoteAudioPts.addAll(obtainPayloads(jin));
@@ -189,6 +193,7 @@ public class AudioRTPMediaNegotiator extends MediaNegotiator {
          * We have received an invitation! Respond with a list of our payload
          * types...
          */
+        @SuppressWarnings("unchecked")
         public Jingle eventInitiate(Jingle jin) {
             synchronized (remoteAudioPts) {
                 remoteAudioPts.addAll(obtainPayloads(jin));
@@ -238,6 +243,7 @@ public class AudioRTPMediaNegotiator extends MediaNegotiator {
          * @return a Jingle packet
          * @throws org.jivesoftware.smackx.jingle.JingleNegotiator.JingleException
          */
+        @SuppressWarnings("unchecked")
         public Jingle eventInfo(Jingle jin) throws JingleException {
             PayloadType.Audio oldBestCommonAudioPt = bestCommonAudioPt;
             List offeredPayloads;

@@ -1,6 +1,6 @@
 /**
  * $RCSfile: STUN.java,v $
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * $Date: 15/11/2006
  *
  * Copyright 2003-2006 Jive Software.
@@ -19,6 +19,10 @@
  */
 package org.jivesoftware.smackx.jingle.nat;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.jivesoftware.smack.PacketCollector;
 import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
@@ -31,14 +35,6 @@ import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.jivesoftware.smackx.packet.DiscoverItems;
 import org.xmlpull.v1.XmlPullParser;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.InetAddress;
 
 /**
  * STUN IQ Packet used to request and retrieve a STUN server and port to make p2p connections easier. STUN is usually used by Jingle Media Transmission between two parties that are behind NAT.
@@ -136,7 +132,7 @@ public class STUN extends IQ {
 
             int eventType;
             String elementName;
-            String namespace;
+//            String namespace;
 
             if (!parser.getNamespace().equals(NAMESPACE))
                 throw new Exception("Not a STUN packet");
@@ -147,7 +143,7 @@ public class STUN extends IQ {
             while (!done) {
                 eventType = parser.next();
                 elementName = parser.getName();
-                namespace = parser.getNamespace();
+//                namespace = parser.getNamespace();
 
                 if (eventType == XmlPullParser.START_TAG) {
                     if (elementName.equals("server")) {

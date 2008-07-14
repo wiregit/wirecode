@@ -1,6 +1,6 @@
 /**
  * $RCSfile: BridgedTransportManager.java,v $
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * $Date: 15/11/2006
  *
  * Copyright 2003-2006 Jive Software.
@@ -55,7 +55,7 @@ public class BridgedTransportManager extends JingleTransportManager implements J
     // Implement a Session Listener to relay candidates after establishment
 
     public void sessionEstablished(TransportCandidate rc, TransportCandidate lc, JingleSession jingleSession) {
-        RTPBridge rtpBridge = RTPBridge.relaySession(lc.getConnection(), lc.getSessionId(), lc.getPassword(), rc, lc);
+        RTPBridge.relaySession(lc.getConnection(), lc.getSessionId(), lc.getPassword(), rc, lc);
     }
 
     public void sessionDeclined(String reason, JingleSession jingleSession) {

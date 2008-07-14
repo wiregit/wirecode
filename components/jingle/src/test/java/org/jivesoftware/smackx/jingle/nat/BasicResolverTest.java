@@ -38,7 +38,7 @@ public class BasicResolverTest extends SmackTestCase {
 
 	public void testCheckValidHostname() {
 		String validHostname = new String("slashdot.org");
-		BasicResolver br = new BasicResolver();
+//		BasicResolver br = new BasicResolver();
 		TransportCandidate tc = new TransportCandidate.Fixed(validHostname, 0);
 
 		resetCounter();
@@ -68,7 +68,7 @@ public class BasicResolverTest extends SmackTestCase {
 
 	public void testCheckInvalidHostname() {
 		String invalidHostname = new String("camupilosupino.org");
-		BasicResolver br = new BasicResolver();
+//		BasicResolver br = new BasicResolver();
 		TransportCandidate tc = new TransportCandidate.Fixed(invalidHostname, 0);
 
 		resetCounter();

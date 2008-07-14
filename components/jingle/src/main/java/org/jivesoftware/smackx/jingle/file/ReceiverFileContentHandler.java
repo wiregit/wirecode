@@ -1,7 +1,5 @@
 package org.jivesoftware.smackx.jingle.file;
 
-import java.io.File;
-
 import org.jivesoftware.smackx.packet.file.FileDescription;
 
 public class ReceiverFileContentHandler extends FileContentHandler {

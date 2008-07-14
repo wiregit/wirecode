@@ -4,17 +4,17 @@ import org.jivesoftware.smackx.packet.Jingle;
 
 public class ActiveState implements State {
 
-    private final EndedState endedState;
+//    private final EndedState endedState;
 
     public ActiveState(EndedState endedState){
-        this.endedState = endedState;
+//        this.endedState = endedState;
     }
 
     public State dispatch(Jingle jin) {
-        Jingle jout;
+//        Jingle jout;
         State nextState = this;
         if(Jingle.Action.CONTENTACCEPT.equals(jin.getAction())) {
-            jout = handleContentAccept(jin);
+            handleContentAccept(jin);
         } /*else if(Jingle.Action.CONTENTADD.equals(jin.getAction())) {
             jout = handleContentAdd(jin);
         } else if(Jingle.Action.CONTENTMODIFY.equals(jin.getAction())) {

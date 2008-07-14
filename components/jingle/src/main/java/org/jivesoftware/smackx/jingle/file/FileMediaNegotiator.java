@@ -1,21 +1,16 @@
 package org.jivesoftware.smackx.jingle.file;
 
-import java.io.File;
-import java.util.Date;
-
-import org.apache.log4j.Logger;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smackx.jingle.JingleSession;
 import org.jivesoftware.smackx.jingle.media.MediaNegotiator;
 import org.jivesoftware.smackx.packet.Content;
 import org.jivesoftware.smackx.packet.Jingle;
-import org.jivesoftware.smackx.packet.StreamInitiation;
 import org.jivesoftware.smackx.packet.file.FileDescription;
 
 public class FileMediaNegotiator extends MediaNegotiator {   
 
-    private static final Logger LOG = Logger.getLogger(FileMediaNegotiator.class);
+//    private static final Logger LOG = Logger.getLogger(FileMediaNegotiator.class);
 
     private FileDescription.FileContainer file;
     private boolean userAccepted;

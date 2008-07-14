@@ -1,7 +1,7 @@
 /**
  * $RCSfile: TransportCandidate.java,v $
- * $Revision: 1.3 $
- * $Date: 2008-07-01 21:15:17 $
+ * $Revision: 1.4 $
+ * $Date: 2008-07-14 19:23:00 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -384,9 +384,9 @@ public abstract class TransportCandidate {
             public void run() {
                 boolean isUsable;
 
-                InetAddress candAddress;
+//                InetAddress candAddress;
                 try {
-                    candAddress = InetAddress.getByName(getIp());
+                    InetAddress.getByName(getIp());
                     isUsable = true;//candAddress.isReachable(TransportResolver.CHECK_TIMEOUT);
                 }
                 catch (Exception e) {

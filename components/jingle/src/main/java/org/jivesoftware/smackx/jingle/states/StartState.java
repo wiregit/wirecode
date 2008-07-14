@@ -20,11 +20,11 @@ public class StartState implements State {
     }
     
     public State dispatch(Jingle jin) throws XMPPException {
-        Jingle jout;
+//        Jingle jout;
         if(jin == null) {
-            jout = sendSessionInitiate();
+            sendSessionInitiate();
         } else if(Jingle.Action.SESSIONINITIATE.equals(jin.getAction())) {
-            jout = handleSessionInitiate(jin);
+            handleSessionInitiate(jin);
         }
         return pendingState;
     }

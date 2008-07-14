@@ -1,9 +1,7 @@
 package org.jivesoftware.smackx.jingle;
 
-import org.jivesoftware.smack.test.SmackTestCase;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smackx.jingle.nat.BasicResolver;
-import org.jivesoftware.smackx.jingle.nat.BasicTransportManager;
+import org.jivesoftware.smack.test.SmackTestCase;
 
 public class JingleSessionTest extends SmackTestCase {
 
@@ -31,9 +29,9 @@ public class JingleSessionTest extends SmackTestCase {
     }
 
     public void testGetInstanceFor() throws XMPPException {
-        String ini1 = "initiator1";
+//        String ini1 = "initiator1";
         String sid1 = "sid1";
-        String ini2 = "initiator2";
+//        String ini2 = "initiator2";
         String sid2 = "sid2";
 
         JingleSession js1 = new OutgoingJingleSession(getConnection(0), sid1, null);  // TODO add content?

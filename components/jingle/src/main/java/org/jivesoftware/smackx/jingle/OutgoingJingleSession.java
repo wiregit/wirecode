@@ -1,7 +1,7 @@
 /**
  * $RCSfile: OutgoingJingleSession.java,v $
- * $Revision: 1.2 $
- * $Date: 2008-07-01 20:44:39 $
+ * $Revision: 1.3 $
+ * $Date: 2008-07-14 19:23:00 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -52,7 +52,6 @@
 
 package org.jivesoftware.smackx.jingle;
 
-import org.apache.log4j.Logger;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.IQ;
@@ -76,7 +75,7 @@ import org.jivesoftware.smackx.packet.JingleError;
  */
 public class OutgoingJingleSession extends JingleSession {
 
-    private static final Logger LOG = Logger.getLogger(OutgoingJingleSession.class);
+//    private static final Logger LOG = Logger.getLogger(OutgoingJingleSession.class);
 
     // states
 

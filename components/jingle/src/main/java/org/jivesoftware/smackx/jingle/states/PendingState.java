@@ -4,19 +4,19 @@ import org.jivesoftware.smackx.packet.Jingle;
 
 public class PendingState implements State{
 
-    private final ActiveState activeState;
-    private final EndedState endedState;
+//    private final ActiveState activeState;
+//    private final EndedState endedState;
 
     public PendingState(ActiveState activeState, EndedState endedState){
-        this.activeState = activeState;
-        this.endedState = endedState;
+//        this.activeState = activeState;
+//        this.endedState = endedState;
     }
 
     public State dispatch(Jingle jin) {
-        Jingle jout;
+//        Jingle jout;
         State nextState = this;
         if(Jingle.Action.CONTENTACCEPT.equals(jin.getAction())) {
-            jout = handleContentAccept(jin);
+            handleContentAccept(jin);
         } /*else if(Jingle.Action.CONTENTMODIFY.equals(jin.getAction())) {
             jout = handleContentModify(jin);
         } else if(Jingle.Action.CONTENTREMOVE.equals(jin.getAction())) {

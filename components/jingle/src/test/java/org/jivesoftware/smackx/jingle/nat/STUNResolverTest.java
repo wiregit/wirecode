@@ -1,19 +1,23 @@
 package org.jivesoftware.smackx.jingle.nat;
 
-import de.javawi.jstun.test.demo.ice.Candidate;
-import de.javawi.jstun.test.demo.ice.ICENegociator;
-import de.javawi.jstun.util.UtilityException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.test.SmackTestCase;
-import org.jivesoftware.smackx.jingle.*;
+import org.jivesoftware.smackx.jingle.IncomingJingleSession;
+import org.jivesoftware.smackx.jingle.JingleManager;
+import org.jivesoftware.smackx.jingle.JingleSession;
+import org.jivesoftware.smackx.jingle.JingleSessionRequest;
+import org.jivesoftware.smackx.jingle.OutgoingJingleSession;
+import org.jivesoftware.smackx.jingle.audiortp.JMFAudioMediaSession;
 import org.jivesoftware.smackx.jingle.audiortp.PayloadType;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionListener;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
-import org.jivesoftware.smackx.jingle.audiortp.JMFAudioMediaSession;
-import org.jivesoftware.smackx.packet.Content;
 
-import java.net.UnknownHostException;
-import java.util.ArrayList;
+import de.javawi.jstun.test.demo.ice.Candidate;
+import de.javawi.jstun.test.demo.ice.ICENegociator;
+import de.javawi.jstun.util.UtilityException;
 
 /**
  * Test the STUN IP resolver.
@@ -234,16 +238,16 @@ public class STUNResolverTest extends SmackTestCase {
         return result;
     }
 
-    private ArrayList<PayloadType.Audio> getTestPayloads2() {
-        ArrayList<PayloadType.Audio> result = new ArrayList<PayloadType.Audio>();
-
-        result.add(new PayloadType.Audio(27, "supercodec-3", 2, 28000));
-        result.add(new PayloadType.Audio(56, "supercodec-2", 1, 44000));
-        result.add(new PayloadType.Audio(32, "supercodec-4", 1, 98000));
-        result.add(new PayloadType.Audio(34, "supercodec-1", 2, 14000));
-
-        return result;
-    }
+//    private ArrayList<PayloadType.Audio> getTestPayloads2() {
+//        ArrayList<PayloadType.Audio> result = new ArrayList<PayloadType.Audio>();
+//
+//        result.add(new PayloadType.Audio(27, "supercodec-3", 2, 28000));
+//        result.add(new PayloadType.Audio(56, "supercodec-2", 1, 44000));
+//        result.add(new PayloadType.Audio(32, "supercodec-4", 1, 98000));
+//        result.add(new PayloadType.Audio(34, "supercodec-1", 2, 14000));
+//
+//        return result;
+//    }
 
     public void testSTUNJingleSession() {
 

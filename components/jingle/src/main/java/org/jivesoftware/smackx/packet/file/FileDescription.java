@@ -1,7 +1,5 @@
 package org.jivesoftware.smackx.packet.file;
 
-import java.io.File;
-
 import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smackx.jingle.JingleContentHandler;
 import org.jivesoftware.smackx.jingle.file.FileLocator;

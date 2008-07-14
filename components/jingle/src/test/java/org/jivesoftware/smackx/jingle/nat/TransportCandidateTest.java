@@ -2,9 +2,6 @@ package org.jivesoftware.smackx.jingle.nat;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.net.InetAddress;
 
 import org.jivesoftware.smack.test.SmackTestCase;
 
@@ -32,6 +29,7 @@ public class TransportCandidateTest extends SmackTestCase {
     /**
      * Test for compareTo()
      */
+    @SuppressWarnings("unchecked")
     public void testCompareTo() {
         int highestPref = 100;
 

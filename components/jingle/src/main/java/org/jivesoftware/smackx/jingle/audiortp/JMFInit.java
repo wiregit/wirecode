@@ -1,9 +1,8 @@
 package org.jivesoftware.smackx.jingle.audiortp;
 
 import java.awt.Frame;
-import java.awt.TextArea;
-import java.awt.Toolkit;
 import java.util.Vector;
+
 import javax.media.Format;
 import javax.media.PlugInManager;
 import javax.media.Renderer;
@@ -21,16 +20,16 @@ public class JMFInit extends Frame implements Runnable {
 
     private String tempDir = "/tmp";
 
-    private boolean done = false;
-
-    private String userHome;
-
-    private boolean visible = false;
+//    private boolean done = false;
+//
+//    private String userHome;
+//
+//    private boolean visible = false;
 
     public JMFInit(String[] args, boolean visible) {
         super("Initializing JMF...");
 
-        this.visible = visible;
+//        this.visible = visible;
 
         Registry.set("secure.allowCaptureFromApplets", true);
         Registry.set("secure.allowSaveFileFromApplets", true);
@@ -65,7 +64,7 @@ public class JMFInit extends Frame implements Runnable {
         detectDirectAudio();
         detectS8DirectAudio();
         detectCaptureDevices();
-        done = true;
+//        done = true;
     }
 
     private void updateTemp(String[] args) {
@@ -73,10 +72,10 @@ public class JMFInit extends Frame implements Runnable {
             tempDir = args[0];
 
             message("Setting cache directory to " + tempDir);
-            Registry r = new Registry();
+//            Registry r = new Registry();
             try {
-                r.set("secure.cacheDir", tempDir);
-                r.commit();
+                Registry.set("secure.cacheDir", tempDir);
+                Registry.commit();
 
                 message("Updated registry");
             }
@@ -165,6 +164,7 @@ public class JMFInit extends Frame implements Runnable {
         */
     }
 
+    @SuppressWarnings("unchecked")
     private void detectDirectAudio() {
         Class cls;
         int plType = PlugInManager.RENDERER;
@@ -211,6 +211,7 @@ public class JMFInit extends Frame implements Runnable {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void detectS8DirectAudio() {
         Class cls;
         int plType = PlugInManager.RENDERER;
@@ -258,23 +259,23 @@ public class JMFInit extends Frame implements Runnable {
         LOG.debug(mesg);
     }
 
-    private void createGUI() {
-        TextArea textBox = new TextArea(5, 50);
-        add("Center", textBox);
-        textBox.setEditable(false);
-        addNotify();
-        pack();
-
-        int scrWidth = (int) Toolkit.getDefaultToolkit().getScreenSize()
-                .getWidth();
-        int scrHeight = (int) Toolkit.getDefaultToolkit().getScreenSize()
-                .getHeight();
-
-        setLocation((scrWidth - getWidth()) / 2, (scrHeight - getHeight()) / 2);
-
-        setVisible(visible);
-
-    }
+//    private void createGUI() {
+//        TextArea textBox = new TextArea(5, 50);
+//        add("Center", textBox);
+//        textBox.setEditable(false);
+//        addNotify();
+//        pack();
+//
+//        int scrWidth = (int) Toolkit.getDefaultToolkit().getScreenSize()
+//                .getWidth();
+//        int scrHeight = (int) Toolkit.getDefaultToolkit().getScreenSize()
+//                .getHeight();
+//
+//        setLocation((scrWidth - getWidth()) / 2, (scrHeight - getHeight()) / 2);
+//
+//        setVisible(visible);
+//
+//    }
 
     public static void start(boolean visible) {
         new JMFInit(null, visible);

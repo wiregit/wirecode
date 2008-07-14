@@ -1,7 +1,7 @@
 /**
  * $RCSfile: IncomingJingleSession.java,v $
- * $Revision: 1.2 $
- * $Date: 2008-07-01 20:44:39 $
+ * $Revision: 1.3 $
+ * $Date: 2008-07-14 19:23:00 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -58,11 +58,10 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smackx.jingle.listeners.JingleMediaListener;
 import org.jivesoftware.smackx.jingle.listeners.JingleTransportListener;
 import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
+import org.jivesoftware.smackx.packet.Content;
 import org.jivesoftware.smackx.packet.Description;
 import org.jivesoftware.smackx.packet.Jingle;
 import org.jivesoftware.smackx.packet.JingleError;
-import org.jivesoftware.smackx.packet.Content;
-import org.apache.log4j.Logger;
 
 /**
  * An incoming Jingle Session implementation.
@@ -76,7 +75,7 @@ import org.apache.log4j.Logger;
  */
 public class IncomingJingleSession extends JingleSession {
 
-    private static final Logger LOG = Logger.getLogger(IncomingJingleSession.class);
+//    private static final Logger LOG = Logger.getLogger(IncomingJingleSession.class);
 
     // states
     private final Accepting accepting;

@@ -20,7 +20,8 @@ public class PayloadTypeTest extends SmackTestCase {
 	/**
 	 * Test for the difference of payloads.
 	 */
-	public void testDifference() {
+	@SuppressWarnings("unchecked")
+    public void testDifference() {
 		ArrayList set1 = new ArrayList();
 		ArrayList set2 = new ArrayList();
 		
@@ -53,7 +54,8 @@ public class PayloadTypeTest extends SmackTestCase {
 	/**
 	 * Test for the difference of payloads when we are handling the same sets.
 	 */
-	public void testDifferenceSameSet() {
+	@SuppressWarnings("unchecked")
+    public void testDifferenceSameSet() {
 		ArrayList set1 = new ArrayList();
 		ArrayList set2 = new ArrayList();
 		

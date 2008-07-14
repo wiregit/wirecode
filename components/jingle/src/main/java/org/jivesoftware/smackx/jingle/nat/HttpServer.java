@@ -1,7 +1,7 @@
 /**
  * $RCSfile: HttpServer.java,v $
- * $Revision: 1.2 $
- * $Date: 2008-07-01 20:44:39 $
+ * $Revision: 1.3 $
+ * $Date: 2008-07-14 19:23:00 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -52,10 +52,14 @@
 
 package org.jivesoftware.smackx.jingle.nat;
 
-import java.net.*;
-import java.io.*;
-import java.util.*;
-import java.lang.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.StringTokenizer;
 
 /**
  * A very Simple HTTP Server
@@ -98,7 +102,7 @@ public class HttpServer {
     }
 
     public static void main(String args[]) {
-        HttpServer httpServer = new HttpServer(Integer.parseInt(args[0]));
+        new HttpServer(Integer.parseInt(args[0]));
     }
 
     class HttpRequestHandler implements Runnable {

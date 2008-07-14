@@ -142,7 +142,8 @@ public class OctTreeQuantizer implements Quantizer {
 		return 0;
 	}
 
-	private void insertColor(int rgb) {
+	@SuppressWarnings("unchecked")
+    private void insertColor(int rgb) {
 		int red = (rgb >> 16) & 0xff;
 		int green = (rgb >> 8) & 0xff;
 		int blue = rgb & 0xff;

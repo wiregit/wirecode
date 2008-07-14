@@ -8,7 +8,7 @@ import org.jivesoftware.smackx.jingle.listeners.CreatedJingleSessionListener;
 
 /**
  * $RCSfile: ICETransportManager.java,v $
- * $Revision: 1.2 $
+ * $Revision: 1.3 $
  * $Date: 02/01/2007
  * <p/>
  * Copyright 2003-2006 Jive Software.
@@ -54,7 +54,7 @@ public class ICETransportManager extends JingleTransportManager implements Jingl
     public void sessionEstablished(TransportCandidate rc, TransportCandidate lc, JingleSession jingleSession) {
         if (lc instanceof ICECandidate) {
             if (((ICECandidate) lc).getType().equals("relay")) {
-                RTPBridge rtpBridge = RTPBridge.relaySession(lc.getConnection(), lc.getSessionId(), lc.getPassword(), rc, lc);
+                RTPBridge.relaySession(lc.getConnection(), lc.getSessionId(), lc.getPassword(), rc, lc);
             }
         }
     }

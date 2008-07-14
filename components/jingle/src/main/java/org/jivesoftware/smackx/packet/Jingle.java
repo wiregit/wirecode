@@ -1,7 +1,7 @@
 /**
  * $RCSfile: Jingle.java,v $
- * $Revision: 1.2 $
- * $Date: 2008-07-01 20:44:40 $
+ * $Revision: 1.3 $
+ * $Date: 2008-07-14 19:23:00 $
  *
  * Copyright 2003-2007 Jive Software.
  *
@@ -21,11 +21,6 @@
 package org.jivesoftware.smackx.packet;
 
 import org.jivesoftware.smack.packet.IQ;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * An Jingle sub-packet, which is used by XMPP clients to exchange info like

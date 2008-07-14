@@ -1,9 +1,13 @@
 package org.jivesoftware.smackx.jingle.nat;
 
-import java.net.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 /**
  * A Simple and Experimental Bridge.
@@ -12,26 +16,26 @@ import java.io.OutputStream;
  */
 public class TcpUdpBridgeServer {
 
-    private String remoteTcpHost = null;
+//    private String remoteTcpHost = null;
     private String remoteUdpHost = null;
-    private int remoteTcpPort = -1;
+//    private int remoteTcpPort = -1;
     private int remoteUdpPort = -1;
-    private int localUdpPort = -1;
+//    private int localUdpPort = -1;
 
     private DatagramSocket localUdpSocket;
     private Socket localTcpSocket;
     private ServerSocket serverTcpSocket;
 
     public TcpUdpBridgeServer(String remoteTcpHost, String remoteUdpHost, int remoteTcpPort, int remoteUdpPort) {
-        this.remoteTcpHost = remoteTcpHost;
+//        this.remoteTcpHost = remoteTcpHost;
         this.remoteUdpHost = remoteUdpHost;
-        this.remoteTcpPort = remoteTcpPort;
+//        this.remoteTcpPort = remoteTcpPort;
         this.remoteUdpPort = remoteUdpPort;
 
         try {
             serverTcpSocket = new ServerSocket(remoteTcpPort);
             localUdpSocket = new DatagramSocket(0);
-            localUdpPort = localUdpSocket.getLocalPort();
+//            localUdpPort = localUdpSocket.getLocalPort();
         }
         catch (IOException e) {
             e.printStackTrace();

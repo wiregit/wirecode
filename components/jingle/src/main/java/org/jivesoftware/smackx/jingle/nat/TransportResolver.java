@@ -1,7 +1,7 @@
 /**
  * $RCSfile: TransportResolver.java,v $
- * $Revision: 1.3 $
- * $Date: 2008-07-01 21:15:17 $
+ * $Revision: 1.4 $
+ * $Date: 2008-07-14 19:23:00 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -327,6 +327,7 @@ public abstract class TransportResolver {
      *
      * @return The best candidate, according to the preference order.
      */
+    @SuppressWarnings("unchecked")
     public TransportCandidate getPreferredCandidate() {
         TransportCandidate result = null;
 
@@ -375,7 +376,7 @@ public abstract class TransportResolver {
         TransportCandidate cand;
 
         synchronized (candidates) {
-            cand = (TransportCandidate) candidates.get(i);
+            cand = candidates.get(i);
         }
         return cand;
     }

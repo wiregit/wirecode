@@ -1,7 +1,7 @@
 /**
  * $RCSfile: JingleManagerTest.java,v $
- * $Revision: 1.3 $
- * $Date: 2008-07-01 21:15:17 $
+ * $Revision: 1.4 $
+ * $Date: 2008-07-14 19:23:00 $
  *
  * Copyright (C) 2002-2006 Jive Software. All rights reserved.
  * ====================================================================
@@ -52,6 +52,11 @@
 
 package org.jivesoftware.smackx.jingle;
 
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.util.ArrayList;
+
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
@@ -60,20 +65,16 @@ import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.test.SmackTestCase;
+import org.jivesoftware.smackx.jingle.audiortp.JMFAudioMediaSession;
+import org.jivesoftware.smackx.jingle.audiortp.PayloadType;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionListener;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
-import org.jivesoftware.smackx.jingle.audiortp.PayloadType;
-import org.jivesoftware.smackx.jingle.audiortp.JMFAudioMediaSession;
-import org.jivesoftware.smackx.jingle.audiortp.AudioRTPContentHandler;
-import org.jivesoftware.smackx.jingle.nat.*;
+import org.jivesoftware.smackx.jingle.nat.FixedTransportManager;
+import org.jivesoftware.smackx.jingle.nat.MockAudioRTPContentHandler;
+import org.jivesoftware.smackx.jingle.nat.RTPBridge;
+import org.jivesoftware.smackx.jingle.nat.TransportCandidate;
 import org.jivesoftware.smackx.packet.Jingle;
-import org.jivesoftware.smackx.packet.Content;
 import org.jivesoftware.smackx.provider.JingleProvider;
-
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.util.ArrayList;
 
 /**
  * Test the Jingle extension using the high level API
@@ -126,6 +127,7 @@ public class JingleManagerTest extends SmackTestCase {
      *
      * @return A testing list
      */
+    @SuppressWarnings("unchecked")
     private ArrayList getTestPayloads1() {
         ArrayList result = new ArrayList();
 
@@ -137,27 +139,29 @@ public class JingleManagerTest extends SmackTestCase {
         return result;
     }
 
-    private ArrayList getTestPayloads2() {
-        ArrayList result = new ArrayList();
+//    @SuppressWarnings("unchecked")
+//    private ArrayList getTestPayloads2() {
+//        ArrayList result = new ArrayList();
+//
+//        result.add(new PayloadType.Audio(27, "supercodec-3", 2, 28000));
+//        result.add(new PayloadType.Audio(56, "supercodec-2", 1, 44000));
+//        result.add(new PayloadType.Audio(32, "supercodec-4", 1, 98000));
+//        result.add(new PayloadType.Audio(34, "supercodec-1", 2, 14000));
+//
+//        return result;
+//    }
 
-        result.add(new PayloadType.Audio(27, "supercodec-3", 2, 28000));
-        result.add(new PayloadType.Audio(56, "supercodec-2", 1, 44000));
-        result.add(new PayloadType.Audio(32, "supercodec-4", 1, 98000));
-        result.add(new PayloadType.Audio(34, "supercodec-1", 2, 14000));
-
-        return result;
-    }
-
-    private ArrayList getTestPayloads3() {
-        ArrayList result = new ArrayList();
-
-        result.add(new PayloadType.Audio(91, "badcodec-1", 2, 28000));
-        result.add(new PayloadType.Audio(92, "badcodec-2", 1, 44000));
-        result.add(new PayloadType.Audio(93, "badcodec-3", 1, 98000));
-        result.add(new PayloadType.Audio(94, "badcodec-4", 2, 14000));
-
-        return result;
-    }
+//    @SuppressWarnings("unchecked")
+//    private ArrayList getTestPayloads3() {
+//        ArrayList result = new ArrayList();
+//
+//        result.add(new PayloadType.Audio(91, "badcodec-1", 2, 28000));
+//        result.add(new PayloadType.Audio(92, "badcodec-2", 1, 44000));
+//        result.add(new PayloadType.Audio(93, "badcodec-3", 1, 98000));
+//        result.add(new PayloadType.Audio(94, "badcodec-4", 2, 14000));
+//
+//        return result;
+//    }
 
     /**
      * Test for the session request detection. Here, we use the same filter we
@@ -230,13 +234,14 @@ public class JingleManagerTest extends SmackTestCase {
      * check if the client receives the message 1. User_1 will send an
      * invitation to user_2.
      */
+    @SuppressWarnings("unchecked")
     public void testSendSimpleMessage() {
 
         resetCounter();
 
         try {
-            TransportResolver tr1 = new FixedResolver("127.0.0.1", 54222);
-            TransportResolver tr2 = new FixedResolver("127.0.0.1", 54567);
+//            TransportResolver tr1 = new FixedResolver("127.0.0.1", 54222);
+//            TransportResolver tr2 = new FixedResolver("127.0.0.1", 54567);
 
             JingleManager man0 = new JingleManager(getConnection(0));
             JingleManager man1 = new JingleManager(getConnection(1));
@@ -275,13 +280,14 @@ public class JingleManagerTest extends SmackTestCase {
      * check if the client receives the message 1. User_1 will send an
      * invitation to user_2.
      */
+    @SuppressWarnings("unchecked")
     public void testAcceptJingleSession() {
 
         resetCounter();
 
         try {
-            TransportResolver tr1 = new FixedResolver("127.0.0.1", 54222);
-            TransportResolver tr2 = new FixedResolver("127.0.0.1", 54567);
+//            TransportResolver tr1 = new FixedResolver("127.0.0.1", 54222);
+//            TransportResolver tr2 = new FixedResolver("127.0.0.1", 54567);
 
             final JingleManager man0 = new JingleManager(getConnection(0));
             final JingleManager man1 = new JingleManager(getConnection(1));
@@ -327,13 +333,14 @@ public class JingleManagerTest extends SmackTestCase {
      * This is a simple test where both endpoints have exactly the same payloads
      * and the session is accepted.
      */
+    @SuppressWarnings("unchecked")
     public void testEqualPayloadsSetSession() {
 
         resetCounter();
 
         try {
-            TransportResolver tr1 = new FixedResolver("127.0.0.1", 54213);
-            TransportResolver tr2 = new FixedResolver("127.0.0.1", 54531);
+//            TransportResolver tr1 = new FixedResolver("127.0.0.1", 54213);
+//            TransportResolver tr2 = new FixedResolver("127.0.0.1", 54531);
 
             final JingleManager man0 = new JingleManager(getConnection(0));
             final JingleManager man1 = new JingleManager(getConnection(1));
@@ -411,13 +418,14 @@ public class JingleManagerTest extends SmackTestCase {
     /**
      * This is a simple test where the user_2 rejects the Jingle session.
      */
+    @SuppressWarnings("unchecked")
     public void testStagesSession() {
 
         resetCounter();
 
         try {
-            TransportResolver tr1 = new FixedResolver("127.0.0.1", 54222);
-            TransportResolver tr2 = new FixedResolver("127.0.0.1", 54567);
+//            TransportResolver tr1 = new FixedResolver("127.0.0.1", 54222);
+//            TransportResolver tr2 = new FixedResolver("127.0.0.1", 54567);
 
             final JingleManager man0 = new JingleManager(getConnection(0));
             final JingleManager man1 = new JingleManager(getConnection(1));
@@ -524,13 +532,14 @@ public class JingleManagerTest extends SmackTestCase {
     /**
      * This is a simple test where the user_2 rejects the Jingle session.
      */
+    @SuppressWarnings("unchecked")
     public void testRejectSession() {
 
         resetCounter();
 
         try {
-            TransportResolver tr1 = new FixedResolver("127.0.0.1", 22222);
-            TransportResolver tr2 = new FixedResolver("127.0.0.1", 22444);
+//            TransportResolver tr1 = new FixedResolver("127.0.0.1", 22222);
+//            TransportResolver tr2 = new FixedResolver("127.0.0.1", 22444);
 
             final JingleManager man0 = new JingleManager(getConnection(0));
             final JingleManager man1 = new JingleManager(getConnection(1));
@@ -609,6 +618,7 @@ public class JingleManagerTest extends SmackTestCase {
     /**
      * RTP Bridge Test
      */
+    @SuppressWarnings("deprecation")
     public void testRTPBridge() {
 
         resetCounter();
@@ -697,6 +707,7 @@ public class JingleManagerTest extends SmackTestCase {
     /**
      * This is a full test in the Jingle API.
      */
+    @SuppressWarnings("unchecked")
     public void testFullTest() {
 
         resetCounter();
@@ -715,7 +726,7 @@ public class JingleManagerTest extends SmackTestCase {
 //            JingleManager jm1 = new JingleSessionManager(
 //                    x1, new ICEResolver());
 
-        AudioRTPContentHandler handler = new AudioRTPContentHandler();
+//        AudioRTPContentHandler handler = new AudioRTPContentHandler();
 
 //        jm0.setMediaManager(mediaSessionFactory);
 //        jm1.setMediaManager(mediaSessionFactory);

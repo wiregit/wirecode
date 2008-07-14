@@ -1,7 +1,7 @@
 /**
  * $RCSfile: AudioRTPDescription.java,v $
- * $Revision: 1.3 $
- * $Date: 2008-07-01 21:15:17 $
+ * $Revision: 1.4 $
+ * $Date: 2008-07-14 19:23:00 $
  *
  * Copyright 2003-2005 Jive Software.
  *
@@ -120,9 +120,7 @@ public class AudioRTPDescription extends Description {
 
         while (jinglePtsIter.hasNext()) {
             JinglePayloadType jpt = (JinglePayloadType) jinglePtsIter.next();
-            if (jpt instanceof JinglePayloadType) {
-                result.add(jpt.getPayloadType());
-            }
+            result.add(jpt.getPayloadType());
         }
 
         return result;
