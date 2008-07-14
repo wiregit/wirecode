@@ -11,6 +11,7 @@ import org.limewire.io.IpPort;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SearchServices;
@@ -51,6 +52,7 @@ class CoreSearch implements Search {
     @Override
     public void stop() {
         listenerList.removeQueryReplyListener(searchGuid, listener);
+        searchServices.stopQuery(new GUID(searchGuid));
     }
 
     private MediaType toMediaType(SearchCategory searchCategory) {
@@ -80,7 +82,7 @@ class CoreSearch implements Search {
         @Override
         public void handleQueryReply(RemoteFileDesc rfd, QueryReply queryReply,
                 Set<? extends IpPort> locs) {
-            searchListener.handleSearchResult(new SearchResultAdapter(rfd,
+            searchListener.handleSearchResult(new RemoteFileDescAdapter(rfd,
                     queryReply, locs));
         }
     }

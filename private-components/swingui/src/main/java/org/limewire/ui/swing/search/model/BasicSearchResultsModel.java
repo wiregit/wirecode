@@ -55,8 +55,7 @@ public class BasicSearchResultsModel {
         @Override
         public VisualSearchResult reevaluate(List<SearchResult> sourceValue,
                 VisualSearchResult transformedValue) {
-            // Do nothing, the adapter will fix it for us.
-            //((SearchResultAdapter) transformedValue).newSources(sourceValue);
+            ((SearchResultAdapter)transformedValue).update();
             return transformedValue;
         }
 

@@ -1,21 +1,29 @@
 package org.limewire.ui.swing.search.resultpanel;
 
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Rectangle;
 
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.Scrollable;
 
 import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.FontUtils;
 
 import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.swing.EventListModel;
+import ca.odell.glazedlists.swing.EventSelectionModel;
 
-public class AudioResultsPanel extends JXPanel {
+public class AudioResultsPanel extends JXPanel implements Scrollable {
+    
+    private final JList resultsList;
+    private final EventSelectionModel<VisualSearchResult> selectionModel;
     
     public AudioResultsPanel(EventList<VisualSearchResult> visualSearchResults) {
         setLayout(new GridBagLayout());
@@ -34,7 +42,11 @@ public class AudioResultsPanel extends JXPanel {
         gbc.weighty = 1;
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.insets = new Insets(0, 5, 5, 0);
-        add(new JList(new EventListModel<VisualSearchResult>(visualSearchResults)), gbc);
+        resultsList = new JList(new EventListModel<VisualSearchResult>(visualSearchResults));
+        selectionModel = new EventSelectionModel<VisualSearchResult>(visualSearchResults);
+        selectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
+        resultsList.setSelectionModel(selectionModel);
+        add(resultsList, gbc);
         
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.weightx = 0;
@@ -42,5 +54,34 @@ public class AudioResultsPanel extends JXPanel {
         gbc.insets = new Insets(0, 5, 0, 5);
         add(new JLabel("sponsored results"), gbc);
     }
+    
+    @Override
+    public Dimension getPreferredScrollableViewportSize() {
+        return resultsList.getPreferredScrollableViewportSize();
+    }
+
+    @Override
+    public int getScrollableBlockIncrement(Rectangle visibleRect,
+            int orientation, int direction) {
+        return resultsList.getScrollableBlockIncrement(visibleRect, orientation, direction);
+    }
+
+    @Override
+    public boolean getScrollableTracksViewportHeight() {
+        return resultsList.getScrollableTracksViewportHeight();
+    }
+
+    @Override
+    public boolean getScrollableTracksViewportWidth() {
+        return true;
+    }
+
+    @Override
+    public int getScrollableUnitIncrement(Rectangle visibleRect,
+            int orientation, int direction) {
+        return resultsList.getScrollableUnitIncrement(visibleRect, orientation, direction);
+    }
+
+
 
 }

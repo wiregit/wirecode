@@ -1,19 +1,38 @@
 package org.limewire.ui.swing.search.model;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
+import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.search.ResultType;
 import org.limewire.core.api.search.SearchResult;
 
 class SearchResultAdapter implements VisualSearchResult {
     
     private final List<SearchResult> coreResults;
+    private final Set<RemoteHost> remoteHosts;
 
     public SearchResultAdapter(List<SearchResult> sourceValue) {
         this.coreResults = sourceValue;
+        this.remoteHosts = new TreeSet<RemoteHost>(new Comparator<RemoteHost>() {
+            @Override
+            public int compare(RemoteHost o1, RemoteHost o2) {
+                return o1.getHostDescription().compareToIgnoreCase(o2.getHostDescription());
+            }
+        });
+        update();
+    }
+
+    void update() {
+        for(SearchResult result : coreResults) {
+            remoteHosts.addAll(result.getSources());
+        }
     }
     
     @Override
@@ -36,13 +55,8 @@ class SearchResultAdapter implements VisualSearchResult {
     }
     
     @Override
-    public List<SearchResultSource> getSources() {
-        return null;
-    }
-    
-    @Override
     public String toString() {
-        return getDescription() + " with " + coreResults.size() + " sources, in category: " + getCategory() + ", with size: " + getSize() + ", and extension: " + getFileExtension();
+        return getDescription() + " with " + getSources().size() + " sources, in category: " + getCategory() + ", with size: " + getSize() + ", and extension: " + getFileExtension();
     }
     
     @Override
@@ -63,6 +77,11 @@ class SearchResultAdapter implements VisualSearchResult {
     @Override
     public long getSize() {
         return coreResults.get(0).getSize();
+    }
+    
+    @Override
+    public Collection<RemoteHost> getSources() {
+        return remoteHosts;
     }
 
 }

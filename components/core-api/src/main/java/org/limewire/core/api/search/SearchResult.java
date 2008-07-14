@@ -1,6 +1,9 @@
 package org.limewire.core.api.search;
 
+import java.util.List;
 import java.util.Map;
+
+import org.limewire.core.api.endpoint.RemoteHost;
 
 public interface SearchResult {
 
@@ -15,5 +18,7 @@ public interface SearchResult {
     long getSize();
     
     String getFileExtension();
+    
+    List<RemoteHost> getSources();
 
 }

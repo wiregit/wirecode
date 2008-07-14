@@ -31,7 +31,7 @@ class SortAndFilterPanel extends JXPanel {
     private final JTextField filterBox;
     
     SortAndFilterPanel() {
-        this.sortBox = new JComboBox(new String[] { "Relevance", "Size", "File Extension" } );
+        this.sortBox = new JComboBox(new String[] { "Sources", "Relevance", "Size", "File Extension" } );
         this.filterBox = new JTextField();
         setBackground(new Color(100, 100, 100));
         
@@ -66,7 +66,7 @@ class SortAndFilterPanel extends JXPanel {
     public EventList<VisualSearchResult> getSortedAndFilteredList(EventList<VisualSearchResult> visualSearchResults) {
         EventList<VisualSearchResult> filteredList = new FilterList<VisualSearchResult>(visualSearchResults, new TextComponentMatcherEditor<VisualSearchResult>(filterBox, new VisualSearchResultTextFilterator(), true));
         final SortedList<VisualSearchResult> sortedList = new SortedList<VisualSearchResult>(filteredList, null);
-        sortBox.addItemListener(new ItemListener() {
+        ItemListener listener = new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
                 if(e.getStateChange() == ItemEvent.SELECTED) {
@@ -75,20 +75,28 @@ class SortAndFilterPanel extends JXPanel {
                     } else if(e.getItem().equals("Size")) {
                         sortedList.setComparator(new Comparator<VisualSearchResult>() {
                             public int compare(VisualSearchResult o1, VisualSearchResult o2) {
-                                return ((Long)o1.getSize()).compareTo(o2.getSize());
+                                return ((Long)o2.getSize()).compareTo(o1.getSize());
                             }
                         });
                     } else if(e.getItem().equals("File Extension")) {
                         sortedList.setComparator(new Comparator<VisualSearchResult>() {
                             public int compare(VisualSearchResult o1, VisualSearchResult o2) {
                                 // TODO: Support locales better.
-                                return o1.getFileExtension().compareToIgnoreCase(o2.getFileExtension());
+                                return o2.getFileExtension().compareToIgnoreCase(o1.getFileExtension());
+                            }
+                        });
+                    } else if(e.getItem().equals("Sources")) {
+                        sortedList.setComparator(new Comparator<VisualSearchResult>() {
+                            public int compare(VisualSearchResult o1, VisualSearchResult o2) {
+                                return ((Integer)o2.getSources().size()).compareTo(o1.getSources().size());
                             }
                         });
                     }
                 }
             }
-        });
+        };
+        listener.itemStateChanged(new ItemEvent(sortBox, ItemEvent.ITEM_STATE_CHANGED, sortBox.getSelectedItem(), ItemEvent.SELECTED));
+        sortBox.addItemListener(listener);
         return sortedList;
     }
     
