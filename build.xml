@@ -7,8 +7,9 @@
     <import file="core/build.xml"/>
     <import file="gui/build.xml" />
     <import file="tests/build.xml" />
+    <import file="components/core-glue/build.xml"/>
     
-    <target name="initialize" depends="lw-core.initialize, lw-gui.initialize, lw-tests.initialize, lw-components.initialize" unless="initialized.limewire">
+    <target name="initialize" depends="lw-core.initialize, lw-gui.initialize, lw-tests.initialize, lw-components.initialize, lw-core-glue.initialize" unless="initialized.limewire">
         <property name="limewire.components.limewire.home"
                   location="${limewire.home}"/>
 		<property name="limewire.components.limewire.tests"
@@ -18,41 +19,42 @@
     
     <target name="compile"
             description="Compiles all code."
-            depends="initialize, lw-components.compile-core-src, lw-components.compile-ui-src, lw-core.compile-core, lw-gui.compile-gui, lw-tests.compile-src, lw-tests.compile-tests"/>
+            depends="initialize, lw-components.compile-core-src, lw-components.compile-ui-src, lw-core.compile-core, lw-gui.compile-gui, lw-tests.compile-src, lw-tests.compile-tests, lw-core-glue.compile-src"/>
     
     <target name="compile-src"
             description="Compiles all source code (not tests)."
-            depends="initialize, lw-components.compile-core-src, lw-components.compile-ui-src, lw-core.compile-core, lw-gui.compile-gui"/>
+            depends="initialize, lw-components.compile-core-src, lw-components.compile-ui-src, lw-core.compile-core, lw-gui.compile-gui, lw-core-glue.compile-src"/>
     
     <target name="compile-tests"
             description="Compiles all code required for tests."
-            depends="initialize, lw-components.compile-tests, lw-tests.compile-src, lw-tests.compile-tests"/>
+            depends="initialize, lw-components.compile-tests, lw-tests.compile-src, lw-tests.compile-tests, lw-core-glue.compile-tests"/>
     
     <target name="clean" 
             description="Cleans everything."
-            depends="initialize, lw-components.clean, clean-core, clean-gui, lw-tests.clean">
+            depends="initialize, lw-components.clean, clean-core, clean-gui, lw-tests.clean, lw-core-glue.clean">
         <do.clean component="limewire"/>
     	<delete dir="${limewire.components.limewire.home}/unused"/>
     </target>
 	
 	<target name="clean-src"
 	        description="Cleans artifacts from compiling src."
-            depends="initialize, lw-components.clean-src, clean-core, clean-gui"/>
+            depends="initialize, lw-components.clean-src, clean-core, clean-gui, lw-core-glue.clean-src"/>
     
 	<target name="clean-tests"
 	        description="Cleans artifacts from compiling tests."
-            depends="initialize, lw-components.clean-tests, lw-tests.clean">
+            depends="initialize, lw-components.clean-tests, lw-tests.clean, lw-core-glue.clean-tests">
 	    <do.clean-testData component="limewire"/>
 	</target>
         
     <target name="test-all"
         	description="Tests all components and LimeWire tests."
-        	depends="compile, lw-tests.test-all, lw-components.test-all">
+        	depends="compile, lw-tests.test-all, lw-components.test-all, lw-core-glue.test-all">
         <mkdir dir="${tests.limewire.components.limewire.xml}"/>
         <do.tests2html component="limewire">
             <more-xml-locations>
                 <fileset dir="${tests.limewire.components.all.xml}" includes="TEST-*.xml"/>
                 <fileset dir="${tests.limewire.components.tests.xml}" includes="TEST-*.xml"/>
+                <fileset dir="${tests.limewire.components.core-glue.xml}" includes="TEST-*.xml"/>
 			</more-xml-locations>
     	</do.tests2html>
     </target>    
@@ -85,7 +87,7 @@
          	description="Tests a single package in limewire/tests.  (Useful for testing outside of the normal directory.)  Requires: -Dpackage="
          	depends="compile, lw-tests.test-package"/>
     
-	<target name="jar" depends="compile-src, lw-components.jar">
+	<target name="jar" depends="compile-src, lw-components.jar, lw-core-glue.jar">
 		<!-- get the list of jars in a space separated list without dirnames -->
 		<fileset dir="${limewire.lib.jars}" includes="**/*.jar" id="alljars"/>
 		<pathconvert property="classpath" refid="alljars" pathsep=" ">
@@ -100,6 +102,7 @@
 	   		<fileset dir="${build.limewire.gui.classes}" includes="com/limegroup/**/*.class"/>
 	   		<fileset dir="${build.limewire.core.classes}" includes="com/limegroup/**/*.class"/>
 	   		<zipfileset src="${dist.limewire.components.all.jar}"/>  
+	   		<zipfileset src="${dist.limewire.components.core-glue.jar}"/>
 	     	<manifest>
 		   		<attribute name="Main-Class" value="com.limegroup.gnutella.gui.Main" />
 		   		<attribute name="Class-Path" value=". ${classpath}"/>
@@ -123,6 +126,7 @@
     			<testsources dir="${limewire.components.tests.home}"/>
     			<testresults dir="${tests.limewire.components.all.xml}" includes="TEST-*.xml"/>
                 <testresults dir="${tests.limewire.components.tests.xml}" includes="TEST-*.xml"/>
+                <testresults dir="${tests.limewire.components.core-glue.xml}" includes="TEST-*.xml"/>
  			</moretestinfo>
         </do.clover2html>
     </target>
@@ -137,6 +141,7 @@
      	        <fileset dir="${limewire.gui.src}"/>
     			<fileset dir="${limewire.components.tests.home}"/>
     			<fileset refid="limewire.components.sources.all"/>
+    			<fileset dir="${limewire.components.core-glue.src}"/>
   			</locations>
   	    </do.clover-setup>
   	</target>
@@ -150,6 +155,7 @@
      		poDirectory="lib/messagebundles" keywords="-kgetStringResource
      		-kgetFormattedStringResource -ktrc -ktr -kmarktr -ktrn:1,2
      		-ktrl -k">
+			<fileset dir="private-components" includes="**/*.java"/>
 			<fileset dir="components" includes="**/*.java"/>
 			<fileset dir="core" includes="**/*.java"/>
 			<fileset dir="gui" includes="**/*.java"/>

@@ -20,6 +20,7 @@
     <module>gui</module>
     <module>tests</module>
     <module>lib</module>
+    <module>components/core-glue</module>
   </modules>
 
   <distributionManagement>

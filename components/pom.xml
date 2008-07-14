@@ -57,6 +57,7 @@
     <!--module>jingle</module>
     <module>xmpp</module-->
     <module>test-util</module>
+    <module>core-api</module>
   </modules>
 
   <repositories>
