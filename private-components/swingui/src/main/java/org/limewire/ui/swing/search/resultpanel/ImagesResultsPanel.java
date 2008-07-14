@@ -15,17 +15,14 @@ import org.jdesktop.swingx.JXPanel;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.util.FontUtils;
 
-import ca.odell.glazedlists.EventList;
-import ca.odell.glazedlists.ListSelection;
 import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
 public class ImagesResultsPanel extends JXPanel implements Scrollable {
     
     private final JList resultsList;
-    private final EventSelectionModel<VisualSearchResult> selectionModel;
     
-    public ImagesResultsPanel(EventList<VisualSearchResult> visualSearchResults) {
+    public ImagesResultsPanel(EventListModel<VisualSearchResult> listModel, EventSelectionModel<VisualSearchResult> selectionModel) {
         setLayout(new GridBagLayout());
         
         GridBagConstraints gbc = new GridBagConstraints();
@@ -42,9 +39,7 @@ public class ImagesResultsPanel extends JXPanel implements Scrollable {
         gbc.weighty = 1;
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.insets = new Insets(0, 5, 5, 0);
-        resultsList = new JList(new EventListModel<VisualSearchResult>(visualSearchResults));
-        selectionModel = new EventSelectionModel<VisualSearchResult>(visualSearchResults);
-        selectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
+        resultsList = new JList(listModel);
         resultsList.setSelectionModel(selectionModel);
         add(resultsList, gbc);
         

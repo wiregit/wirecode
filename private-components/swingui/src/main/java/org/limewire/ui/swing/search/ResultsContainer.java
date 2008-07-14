@@ -15,34 +15,68 @@ import org.limewire.ui.swing.search.resultpanel.VideoResultsPanel;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
+import ca.odell.glazedlists.ListSelection;
+import ca.odell.glazedlists.matchers.AbstractMatcherEditor;
 import ca.odell.glazedlists.matchers.Matcher;
+import ca.odell.glazedlists.swing.EventListModel;
+import ca.odell.glazedlists.swing.EventSelectionModel;
 
 class ResultsContainer extends JXPanel {
-    
+
     private final CardLayout cardLayout;
-    
+    private final FilterMatcherEditor matcherEditor;
+
     ResultsContainer(EventList<VisualSearchResult> visualSearchResults) {
         this.cardLayout = new CardLayout();
         setLayout(cardLayout);
         
-        add(new SearchScrollPane(new AllResultsPanel(visualSearchResults)), SearchCategory.ALL.name());
-        add(new SearchScrollPane(new AudioResultsPanel(filter(visualSearchResults, ResultType.AUDIO))), SearchCategory.AUDIO.name());
-        add(new SearchScrollPane(new VideoResultsPanel(filter(visualSearchResults, ResultType.VIDEO))), SearchCategory.VIDEO.name());
-        add(new SearchScrollPane(new ImagesResultsPanel(filter(visualSearchResults, ResultType.IMAGE))), SearchCategory.IMAGES.name());
-        add(new SearchScrollPane(new DocumentsResultsPanel(filter(visualSearchResults, ResultType.DOCUMENT))), SearchCategory.DOCUMENTS.name());
+        this.matcherEditor = new FilterMatcherEditor();
+        FilterList<VisualSearchResult> filterList = new FilterList<VisualSearchResult>(visualSearchResults, matcherEditor);
+        
+        EventListModel<VisualSearchResult> eventListModel = new EventListModel<VisualSearchResult>(filterList);
+        EventSelectionModel<VisualSearchResult> eventSelectionModel = new EventSelectionModel<VisualSearchResult>(filterList);
+        eventSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
+        add(new SearchScrollPane(new AllResultsPanel(eventListModel, eventSelectionModel)), SearchCategory.ALL.name());
+        add(new SearchScrollPane(new AudioResultsPanel(eventListModel, eventSelectionModel)), SearchCategory.AUDIO.name());
+        add(new SearchScrollPane(new VideoResultsPanel(eventListModel, eventSelectionModel)), SearchCategory.VIDEO.name());
+        add(new SearchScrollPane(new ImagesResultsPanel(eventListModel, eventSelectionModel)), SearchCategory.IMAGES .name());
+        add(new SearchScrollPane(new DocumentsResultsPanel(eventListModel, eventSelectionModel)),SearchCategory.DOCUMENTS.name());
     }
-    
+
     void showCategory(SearchCategory category) {
         cardLayout.show(this, category.name());
+        matcherEditor.categoryChanged(category);
     }
-    
-    private EventList<VisualSearchResult> filter(EventList<VisualSearchResult> eventList, final ResultType resultType) {
-        return new FilterList<VisualSearchResult>(eventList, new Matcher<VisualSearchResult>() {
-            @Override
-            public boolean matches(VisualSearchResult item) {
-                return item.getCategory() == resultType;
+
+    private static class FilterMatcherEditor extends AbstractMatcherEditor<VisualSearchResult> {
+        void categoryChanged(SearchCategory category) {
+            if (category == SearchCategory.ALL) {
+                fireMatchAll();
+            } else {
+                final ResultType type = typeForCategory(category);
+                fireChanged(new Matcher<VisualSearchResult>() {
+                    @Override
+                    public boolean matches(VisualSearchResult item) {
+                        return item.getCategory() == type;
+                    }
+                });
             }
-        });
+        }
+
+        private ResultType typeForCategory(SearchCategory category) {
+            switch (category) {
+            case AUDIO:
+                return ResultType.AUDIO;
+            case DOCUMENTS:
+                return ResultType.DOCUMENT;
+            case IMAGES:
+                return ResultType.IMAGE;
+            case VIDEO:
+                return ResultType.VIDEO;
+            default:
+                throw new IllegalArgumentException(category.name());
+            }
+        }
     }
 
 }
