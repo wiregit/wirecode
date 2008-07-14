@@ -46,6 +46,12 @@
 	<classpathentry kind="src" output="components/xmpp/build/tests" path="components/xmpp/src/test/java"/>
 	<classpathentry excluding="windows/|windows/" kind="src" path="lib/resources"/>
 	<classpathentry kind="src" path="lib/resources/windows"/>
+	<classpathentry kind="src" path="private-components/integrated-ui/src/main/java"/>
+	<classpathentry kind="src" path="private-components/mock-core/src/main/java"/>
+	<classpathentry kind="src" path="private-components/swingui/src/main/java"/>
+	<classpathentry kind="src" path="private-components/swingui/src/main/resources"/>
+	<classpathentry kind="src" path="components/core-api/src/main/java"/>
+	<classpathentry kind="src" path="components/core-glue/src/main/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-net.jar"/>
@@ -77,7 +83,12 @@
 	<classpathentry kind="lib" path="lib/jars/vorbisspi.jar"/>
 	<classpathentry kind="lib" path="lib/jars/windows/iTunes-0.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/jars/windows/jacob-1.14.1.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="lib" path="lib/jars/AppFramework.jar" sourcepath="lib/sources/AppFramework-1.03-src.zip"/>
+	<classpathentry kind="lib" path="lib/jars/glazedlists-1.7.0_java15.jar" sourcepath="lib/sources/glazedlists-1.7.0-source_java15.zip"/>
+	<classpathentry kind="lib" path="lib/jars/guice-assistedinject-snapshot.jar"/>
+	<classpathentry kind="lib" path="lib/jars/swing-worker-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jars/swingx-0.9.3.jar" sourcepath="lib/sources/swingx-0.9.3-src.zip"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="lib/jars/tests/jmock/cglib-nodep.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/jmock/cglib-src.jar"/>
 	<classpathentry kind="lib" path="lib/jars/tests/jmock/hamcrest-core.jar"/>
