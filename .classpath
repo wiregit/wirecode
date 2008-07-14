@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="examples/mojito/|target/" kind="src" output="core" path="core"/>
-	<classpathentry kind="src" path="components/mojito/src/test/resources"/>
+	<classpathentry kind="src" output="components/mojito/build/tests" path="components/mojito/src/test/resources"/>
 	<classpathentry excluding="windows/|macosx/|target/" kind="src" output="gui" path="gui"/>
 	<classpathentry excluding="build/|testData/" kind="src" output="tests/build/tests" path="tests"/>
 	<classpathentry kind="src" output="components/resources/src/main/resources" path="components/resources/src/main/resources"/>
@@ -46,12 +46,12 @@
 	<classpathentry kind="src" output="components/xmpp/build/tests" path="components/xmpp/src/test/java"/>
 	<classpathentry excluding="windows/|windows/" kind="src" path="lib/resources"/>
 	<classpathentry kind="src" path="lib/resources/windows"/>
-	<classpathentry kind="src" path="private-components/integrated-ui/src/main/java"/>
-	<classpathentry kind="src" path="private-components/mock-core/src/main/java"/>
-	<classpathentry kind="src" path="private-components/swingui/src/main/java"/>
-	<classpathentry kind="src" path="private-components/swingui/src/main/resources"/>
-	<classpathentry kind="src" path="components/core-api/src/main/java"/>
-	<classpathentry kind="src" path="components/core-glue/src/main/java"/>
+	<classpathentry kind="src" output="private-components/integrated-ui/build/classes" path="private-components/integrated-ui/src/main/java"/>
+	<classpathentry kind="src" output="private-components/mock-core/build/classes" path="private-components/mock-core/src/main/java"/>
+	<classpathentry kind="src" output="private-components/swingui/build/classes" path="private-components/swingui/src/main/java"/>
+	<classpathentry kind="src" output="private-components/swingui/src/main/resources" path="private-components/swingui/src/main/resources"/>
+	<classpathentry kind="src" output="components/core-api/build/classes" path="components/core-api/src/main/java"/>
+	<classpathentry kind="src" output="components/core-glue/build/classes" path="components/core-glue/src/main/java"/>
 	<classpathentry kind="lib" path="lib/jars/clink.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-logging.jar"/>
 	<classpathentry kind="lib" path="lib/jars/commons-net.jar"/>
