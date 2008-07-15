@@ -37,7 +37,7 @@ public class KeywordUtilImplTest extends BaseTestCase {
         assertSameHash("vacation Hawaii golf", "vacation Hawaii");
         assertSameHash("britney's going crazy", "britney is crazy");
         assertSameHash("britney's going crazy", "britney's crazy mom");
-        assertSameHash("Beyoncé", "beyonce");
+        assertSameHash("Beyonc\u00E9", "beyonce");
 
         assertSameHash(" ", " ");
         assertSameHash("", "");
