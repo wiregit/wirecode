@@ -1,6 +1,6 @@
 package org.limewire.core.api.download;
 
-import java.util.Observable;
+import java.beans.PropertyChangeListener;
 
 
 
@@ -8,16 +8,15 @@ import java.util.Observable;
  * A single download
  *
  */
-//TODO: replace observer with listener and change to interface
-public abstract class DownloadItem extends Observable {
-	
+public interface DownloadItem  {	
 
 	public static enum Category {
 		VIDEO, AUDIO, DOCUMENT, IMAGE
 	};
 
-	public DownloadItem() {
-	}
+	public void addPropertyChangeListener(PropertyChangeListener listener);
+	
+	public void removePropertyChangeListener(PropertyChangeListener listener);
 	
 	public abstract DownloadState getState();
 

@@ -11,6 +11,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.home.HomePanel;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
 
@@ -91,6 +92,11 @@ public class NavTree extends JXPanel implements NavigableTree {
     public void goHome() {
         selectNavigableItemByName(NavCategory.LIMEWIRE, HomePanel.NAME);
     }
+    
+    public void showDownloads(){
+        selectNavigableItemByName(NavCategory.NONE, MainDownloadPanel.NAME);
+    }
+    
     
     private class Listener implements ListSelectionListener {
         

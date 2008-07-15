@@ -1,5 +1,7 @@
 package org.limewire.core.impl.download;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +10,7 @@ import org.limewire.core.api.download.DownloadSource;
 import org.limewire.core.api.download.DownloadState;
 
 
-public class MockDownloadItem extends DownloadItem {
+public class MockDownloadItem implements DownloadItem {
 
 	private String title;
 	private volatile double currentSize = 0;
@@ -18,6 +20,8 @@ public class MockDownloadItem extends DownloadItem {
 	private DownloadState state = DownloadState.DOWNLOADING;
 	private List<DownloadSource> downloadSources;
 	private Category category;
+	
+	private final PropertyChangeSupport support = new PropertyChangeSupport(this);
 
 	//TODO: change constructor
 	public MockDownloadItem(String title, double totalSize, DownloadState state, Category category) {
@@ -29,6 +33,14 @@ public class MockDownloadItem extends DownloadItem {
 		if (this.state == DownloadState.DOWNLOADING) {
 			start();
 		}
+	}
+	
+	public void addPropertyChangeListener(PropertyChangeListener listener){
+		support.addPropertyChangeListener(listener);
+	}
+	
+	public void removePropertyChangeListener(PropertyChangeListener listener){
+		support.removePropertyChangeListener(listener);
 	}
 
 	public String getTitle() {
@@ -45,12 +57,15 @@ public class MockDownloadItem extends DownloadItem {
 	}
 
 	private synchronized void setCurrentSize(double newSize) {
+		double oldSize = this.currentSize;
 		this.currentSize = newSize > getTotalSize() ? getTotalSize() : newSize;
 		if (currentSize == getTotalSize()) {
 			setState(DownloadState.DONE);
+		} else {
+			support.firePropertyChange("currentSize", oldSize, currentSize);
 		}
-		setChanged();
-		notifyObservers();
+//		setChanged();
+//		notifyObservers();
 	}
 
 	public double getTotalSize() {
@@ -107,9 +122,11 @@ public class MockDownloadItem extends DownloadItem {
 
 	//TODO: should be public?  or should state be handled internally?
 	private synchronized void setState(DownloadState state) {
+		DownloadState oldState = this.state;
 		this.state = state;
-		setChanged();
-		notifyObservers();
+		support.firePropertyChange("state", oldState, state);
+		//setChanged();
+		//notifyObservers();
 	}
 	
 	public void addDownloadSource(DownloadSource source){
