@@ -98,7 +98,7 @@ public class HTTPUploaderTest extends LimeTestCase {
 
         fm = (FileManagerStub) injector.getInstance(FileManager.class);
         FileListStub sharedList = (FileListStub)fm.getSharedFileList();
-        sharedList.setUrns(urns);
+//        sharedList.setUrns(urns);
         sharedList.setDescs(descs);
 
         cb = (MyActivityCallback) injector.getInstance(ActivityCallback.class);

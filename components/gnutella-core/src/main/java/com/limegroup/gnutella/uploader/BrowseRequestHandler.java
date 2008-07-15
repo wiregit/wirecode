@@ -142,7 +142,7 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
             sender = new MessageWriter(new ConnectionStats(), new BasicQueue(), sentMessageHandler);
             sender.setWriteChannel(new NoInterestWritableByteChannel(new ContentEncoderChannel(
                     contentEncoder)));
-            iterable = fileManager.getIndexingIterator();
+            iterable = fileManager.getSharedFileList().iterator();
         }
         
         @Override

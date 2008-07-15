@@ -173,7 +173,7 @@ public class HeadTest extends LimeTestCase {
         _rangesOnlyLarge.add(Range.createRange(0xFFFFFF00l, 0xFFFFFFFFFFl));
 		
 		_haveFull =    URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
-		_notHave =      FileListStub.NOT_HAVE;
+		_notHave =      FileManagerStub.NOT_HAVE;
 		_havePartial = URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFD");
         _tlsURN =      URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYTLS");
         _largeURN =     URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYTLG");
@@ -199,13 +199,14 @@ public class HeadTest extends LimeTestCase {
         descs.add(_partialLarge);
         
         FileManagerStub fileManager = (FileManagerStub)injector.getInstance(FileManager.class);
+        fileManager.setUrns(urns);
+        fileManager.setFileDesc(descs);
         FileListStub sharedList = (FileListStub) fileManager.getSharedFileList();
-        sharedList.setUrns(urns);
         sharedList.setDescs(descs);
         
-        assertEquals(_partial,fileManager.getFileDescForUrn(_havePartial));
-        assertEquals(_partialLarge,fileManager.getFileDescForUrn(_largeURN));
-        assertEquals(_complete,fileManager.getFileDescForUrn(_haveFull));
+        assertEquals(_partial,fileManager.getFileDesc(_havePartial));
+        assertEquals(_partialLarge,fileManager.getFileDesc(_largeURN));
+        assertEquals(_complete,fileManager.getFileDesc(_haveFull));
         
         
         blankRFD = remoteFileDescFactory.createRemoteFileDesc("1.1.1.1", 1, 1, "file", 1, new byte[16], 1, false,

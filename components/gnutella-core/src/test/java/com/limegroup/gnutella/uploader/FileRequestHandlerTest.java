@@ -83,7 +83,7 @@ public class FileRequestHandlerTest extends LimeTestCase {
 
         fileManager = (FileManagerStub) injector.getInstance(FileManager.class);
         FileListStub sharedList = (FileListStub)fileManager.getSharedFileList();
-        sharedList.setUrns(urns);
+//        sharedList.setUrns(urns);
         sharedList.setDescs(descs);
         fileRequestHandler = injector.getInstance(FileRequestHandler.class);
     }

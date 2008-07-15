@@ -109,7 +109,7 @@ public final class LicenseSharingTest extends ClientSideTestCase {
     }
     
     public void testQRPExchange() throws Exception {
-        assertEquals(5, fileManager.getSharedFileList().getNumFiles());
+        assertEquals(5, fileManager.getSharedFileList().size());
 
         for (int i = 0; i < testUP.length; i++) {
             assertTrue("should be open", testUP[i].isOpen());

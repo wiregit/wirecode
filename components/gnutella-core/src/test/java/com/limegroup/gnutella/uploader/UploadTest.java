@@ -169,18 +169,18 @@ public class UploadTest extends LimeTestCase {
         startServices();
 
         // get urls from file manager
-        FileDesc fd = fileManager.getFileDescForFile(new File(_sharedDir, fileName));
+        FileDesc fd = fileManager.getFileDesc(new File(_sharedDir, fileName));
         assertNotNull("File not loaded", fd);
         host = protocol + "://localhost:" + PORT;
         fileNameUrl = host + "/get/" + fd.getIndex() + "/" + URLEncoder.encode(fileName, "UTF-8");
         
-        fd = fileManager.getFileDescForFile(new File(_sharedDir, otherFileName));
+        fd = fileManager.getFileDesc(new File(_sharedDir, otherFileName));
         assertNotNull("File not loaded", fd);
         otherFileNameUrl = host + "/get/" + fd.getIndex() + "/" + URLEncoder.encode(otherFileName, "UTF-8");
         
         // add incomplete file to file manager
         File incFile = new File(_incompleteDir, incName);
-        fileManager.removeFileIfSharedOrStore(incFile);
+        fileManager.removeFile(incFile);
         CommonUtils.copyResourceFile(testDirName + "/" + incName, incFile, false);
         URN urn = URN.createSHA1Urn(incompleteHash);
         Set<URN> urns = new HashSet<URN>();
@@ -189,8 +189,8 @@ public class UploadTest extends LimeTestCase {
         fileManager.addIncompleteFile(incFile, urns, incName, 1981, vf);
         incompleteHashUrl = host + incompleteHashUrl;
 
-        assertEquals(1, fileManager.getSharedFileList().getNumIncompleteFiles());
-        assertEquals(2, fileManager.getSharedFileList().getNumFiles());
+        assertEquals(1, fileManager.getIncompleteFileList().size());
+        assertEquals(2, fileManager.getSharedFileList().size());
         assertEquals("Unexpected uploads in progress", 0, uploadManager.uploadsInProgress());
         assertEquals("Unexpected queued uploads", 0, uploadManager.getNumQueuedUploads());
 
@@ -1511,7 +1511,7 @@ public class UploadTest extends LimeTestCase {
         // modify shared file and make sure it gets new timestamp
         Thread.sleep(1000);
         File file = new File(_sharedDir, fileName);
-        FileDesc fd = fileManager.getFileDescForFile(file);        
+        FileDesc fd = fileManager.getFileDesc(file);        
         FileOutputStream out = new FileOutputStream(file);
         try {
             out.write("abc".getBytes());
@@ -1543,7 +1543,7 @@ public class UploadTest extends LimeTestCase {
 
             latch.await(500, TimeUnit.MILLISECONDS);
 
-            fd = fileManager.getFileDescForFile(file);
+            fd = fileManager.getFileDesc(file);
             assertNotNull(fd);
             method = new HttpGet(host + "/get/" + fd.getIndex() + "/" + URLEncoder.encode(fd.getFileName(), "US-ASCII"));
             try {
@@ -1574,7 +1574,7 @@ public class UploadTest extends LimeTestCase {
     }
 
     private HashTree getThexTree(HashTreeCache tigerTreeCache) throws Exception {
-        FileDesc fd = fileManager.getFileDescForFile(new File(_sharedDir, fileName));
+        FileDesc fd = fileManager.getFileDesc(new File(_sharedDir, fileName));
         return ((HashTreeCacheImpl)tigerTreeCache).getHashTreeAndWait(fd, 1000);
     }
 

@@ -39,12 +39,12 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
             {
                 atLeast(1).of(fileManager).getSharedFileList();
                 will(returnValue(sharedFileList));
-                atLeast(1).of(sharedFileList).contains(originalFile.getFile());
+                atLeast(1).of(sharedFileList).contains(fileManager.getFileDesc(originalFile.getFile()));
                 will(returnValue(true));
                 
                 atLeast(1).of(fileManager).getSharedFileList();
                 will(returnValue(sharedFileList));
-                atLeast(1).of(sharedFileList).contains(newFile.getFile());
+                atLeast(1).of(sharedFileList).contains(fileManager.getFileDesc(newFile.getFile()));
                 will(returnValue(true));
             }
         });

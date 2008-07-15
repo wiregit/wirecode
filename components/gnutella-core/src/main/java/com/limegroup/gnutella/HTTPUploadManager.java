@@ -425,7 +425,7 @@ public class HTTPUploadManager implements FileLocker, BandwidthTracker,
     public boolean releaseLock(File file) {
         assert started;
         
-        FileDesc fd = fileManager.get().getFileDescForFile(file);
+        FileDesc fd = fileManager.get().getFileDesc(file);
         if (fd != null)
             return killUploadsForFileDesc(fd);
         else

@@ -5,228 +5,297 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.limewire.collection.IntSet;
 import org.limewire.inspection.Inspectable;
 import org.limewire.util.ByteUtils;
 import org.limewire.util.FileUtils;
 
-public class FileListImpl implements FileList, Inspectable {
+import com.limegroup.gnutella.licenses.LicenseType;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
+/**
+ * A List of FileDescs that are grouped together 
+ */
+public class FileListImpl implements FileList, FileEventListener, Inspectable {
 
     /** 
-     * The list of complete and incomplete files.  An entry is null if it
-     *  is no longer shared.
-     * INVARIANT: for all i, files[i]==null, or files[i].index==i and either
-     *  files[i]._path is in a shared directory with a shareable extension or
-     *  files[i]._path is the incomplete directory if files[i] is an IncompleteFileDesc.
+     * List of all the FileDescs in this FileList.
      */
-    protected List<FileDesc> files;
+    protected final List<FileDesc> fileDescs;
     
     /**
-     * The total size of all complete files, in bytes.
-     * INVARIANT: filesSize=sum of all size of the elements of files,
-     *   except IncompleteFileDescs, whose size may change at any time.
+     * List of files that are in List and are not located in a completed folder.
+     */
+    protected final Set<File> individualFiles;
+    
+    /**
+     * A list of files that have been added to FileManager but have yet to have their 
+     * FileDescs calculated. 
+     */
+    protected final List<File> pendingFiles;
+    
+    /**
+     * Size of all the FileDescs in this list in bytes
      */
     protected long numBytes;
     
-    /**
-     * The number of complete files.
-     * INVARIANT: numFiles==number of elements of files that are not null
-     *  and not IncompleteFileDescs.
-     */
-    protected int numFiles;
+    protected final FileManager fileManager;
     
-    /**
-     * An index that maps a <tt>File</tt> on disk to the 
-     *  <tt>FileDesc</tt> holding it.
-     *
-     * INVARIANT: For all keys k in _fileToFileDescMap, 
-     *  files[_fileToFileDescMap.get(k).getIndex()].getFile().equals(k)
-     *
-     * Keys must be canonical <tt>File</tt> instances.
-     */
-    protected Map<File, FileDesc> fileToFileDescMap;
-    
-    /**
-     * A map of appropriately case-normalized URN strings to the
-     * indices in files.  Used to make query-by-hash faster.
-     * 
-     * INVARIANT: for all keys k in urnMap, for all i in urnMap.get(k),
-     * files[i].containsUrn(k).  Likewise for all i, for all k in
-     *files[i].getUrns(), rnMap.get(k) contains i.
-     */
-    protected Map<URN, IntSet> urnMap;
-    
-    public FileListImpl() {
-        resetVariables();
-    }
-    
-    public void resetVariables() {
-        files = new ArrayList<FileDesc>();
-        numBytes = 0;
-        numFiles = 0;
-        urnMap = new HashMap<URN, IntSet>();
-        fileToFileDescMap = new HashMap<File, FileDesc>();
-    }
-    
-    public void addFile(File file, FileDesc fileDesc) { 
-        files.add(fileDesc);
-        fileToFileDescMap.put(file, fileDesc);
-        numBytes += file.length();
-        numFiles += 1;
+    public FileListImpl(FileManager fileManager, Set<File> individualFiles) {
+        this.fileManager = fileManager;
+        this.individualFiles = individualFiles;
+        this.fileDescs = new ArrayList<FileDesc>();
+        this.pendingFiles = new ArrayList<File>();
+
+        fileManager.addFileEventListener(this);
         
-        updateUrnIndex(fileDesc);
+        clear();
     }
 
-    public FileDesc get(int i) {
-        return files.get(i);
-    }
-
-    public List<FileDesc> getAllFileDescs() { 
-        return new ArrayList<FileDesc>(fileToFileDescMap.values());
-    }
-
-    public FileDesc getFileDesc(File file) {
-        return fileToFileDescMap.get(file);
-    }
-
-    public FileDesc getFileDesc(URN urn) {
-        if (!urn.isSHA1())
-          throw new IllegalArgumentException();
-        return getFileDescForURN(urn);
+    public void addFileAlways(File file) {
+        addFile(file, LimeXMLDocument.EMPTY_LIST);
     }
     
-    private FileDesc getFileDescForURN(URN urn) {
-        IntSet indices = urnMap.get(urn);
-        if(indices == null) return null;
+    public void addFileAlways(File file, List<? extends LimeXMLDocument> list) {
+        addFile(file, list);
+    }
+
+    public void addFileForSession(File file) {
+        addFile(file);
+    }
     
-        IntSet.IntSetIterator iter = indices.iterator();
+    public void addFile(File file) {
+        addFile(file, LimeXMLDocument.EMPTY_LIST);
+    }
+    
+    public void addFile(File file, List<? extends LimeXMLDocument> list) {
+            synchronized(this) {
+//                // if we aren't already waiting for this file, add it to the pending files
+//                // else we already are waiting on FileDesc to just return
+                if(!pendingFiles.contains(file))
+                    pendingFiles.add(file);
+            }
+            fileManager.addFile(file, list);
+    }
+
+    public void addFileDesc(FileDesc fileDesc) {
+        if(fileDesc == null)
+            throw new IllegalArgumentException("FileDesc cannot be null");
         
-        //Pick the first non-null non-Incomplete FileDesc.
-        FileDesc ret = null;
-        while ( iter.hasNext() 
-                   && ( ret == null || ret instanceof IncompleteFileDesc) ) {
-            int index = iter.next();
-            ret = files.get(index);
+        if(!fileDescs.contains(fileDesc) && isFileAddable(fileDesc)) { System.out.println("adding  " + fileDesc.getFileName());
+            fileDescs.add(fileDesc);
+            numBytes += fileDesc.getFileSize();
+            addAsIndividualFile(fileDesc);
         }
-        return ret;
+        
+        // always remove pending file, whether it is allowed to get added or not
+        if(pendingFiles.contains(fileDesc.getFile()))
+            pendingFiles.remove(fileDesc.getFile());
     }
-
+    
+    /**
+     * Only called by events from FileManager. Will only add this
+     * FileDesc if this list was explicitly waiting for this file
+     */
+    protected void addPendingFileDesc(FileDesc fileDesc) {
+        if(pendingFiles.contains(fileDesc.getFile()))
+            addFileDesc(fileDesc);
+    }
+    
+    public boolean remove(FileDesc fileDesc) {
+        if(fileDesc == null)
+            throw new IllegalArgumentException("FileDesc cannot be null");
+        
+        // if we were waiting on this FileDesc but still hadn't recieved it for
+        // some reason, remove it from pending files anyways
+        if(pendingFiles.contains(fileDesc.getFile())) {
+            pendingFiles.remove(fileDesc.getFile());
+        }
+        if(fileDescs.contains(fileDesc)) {
+            fileDescs.remove(fileDesc);
+            numBytes -= fileDesc.getFileSize();
+            
+            removeAsIndividualFile(fileDesc);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    public boolean contains(FileDesc fileDesc) {
+        if(fileDesc == null)
+            return false;
+        
+        return fileDescs.contains(fileDesc) || pendingFiles.contains(fileDesc.getFile());
+    }
+        
+    public Iterator<FileDesc> iterator() {
+        return fileDescs.iterator();
+    }
+    
+    public List<FileDesc> getAllFileDescs() { 
+        return new ArrayList<FileDesc>(fileDescs);
+    }
+    
     public int getNumBytes() {
         return ByteUtils.long2int(numBytes);
     }
     
-    public int getNumFiles() {
-        return numFiles;
+    public int size() {
+        return fileDescs.size();
     }
     
-    public int getListLength() {
-        return files.size();
-    }
-    
-    public void remove(FileDesc fileDesc) {
-        int index = fileDesc.getIndex();
-        assert files.get(index).getFile().equals(fileDesc.getFile()) : "invariant broken!";
-        files.set(index, null);
-        fileToFileDescMap.remove(fileDesc.getFile());
-        numFiles -= 1;
-        numBytes -= fileDesc.getFileSize();
-    }
-    
-    public void remove(URN urn) {
-        urnMap.remove(urn);
+    public void clear() {
+        fileDescs.clear();
+        pendingFiles.clear();
+        numBytes = 0;
     }
 
-    public IntSet getIndicesForUrn(URN urn) {
-        return urnMap.get(urn);
-    }
-
-    public boolean isValidSharedIndex(int i) {
-        return (i >= 0 && i < files.size());
-    }
-
-    public boolean contains(File file) {
-        return fileToFileDescMap.containsKey(file);
-    }
-
-    public boolean contains(FileDesc fileDesc) {
-        return files.contains(fileDesc);
+    public boolean isFileAddable(File file) {
+        return true;
     }
     
-    public boolean contains(URN urn) {
-        return urnMap.containsKey(urn);
-    }
-    
-    /**
-     * Returns a list of all shared file descriptors in the given directory,
-     * in any order.
-     * 
-     * Returns null if directory is not shared, or a zero-length array if it is
-     * shared but contains no files.  This method is not recursive; files in 
-     * any of the directory's children are not returned.
-     * 
-     * This operation is <b>not</b> efficient, and should not be done often.
-     */  
     public List<FileDesc> getFilesInDirectory(File directory) {
         if (directory == null)
             throw new NullPointerException("null directory");
         
-        // a. Remove case, trailing separators, etc.
+        // Remove case, trailing separators, etc.
         try {
             directory = FileUtils.getCanonicalFile(directory);
         } catch (IOException e) { // invalid directory ?
             return Collections.emptyList();
         }
 
-        List<FileDesc> shared = new ArrayList<FileDesc>();
+        List<FileDesc> list = new ArrayList<FileDesc>();
 
-        for(FileDesc fd : files) {//sharedFileList.getAllFileDescs()) {
+        for(FileDesc fd : fileDescs) {
             if( fd == null)
                 continue;
             if(directory.equals(fd.getFile().getParentFile()))
-                shared.add(fd);
+                list.add(fd);
         }
         
-        return shared;
-    }
-    
-    /**
-     * Generic method for adding a fileDesc's URNS to a map
-     */
-    public void updateUrnIndex(FileDesc fileDesc) {
-        for(URN urn : fileDesc.getUrns()) {
-            if (!urn.isSHA1())
-                continue;
-            IntSet indices= urnMap.get(urn);
-            if (indices==null) {
-                indices=new IntSet();
-                urnMap.put(urn, indices);
-            }
-            indices.add(fileDesc.getIndex());
-        }
+        return list;
     }
 
     public Object inspect() {
         Map<String,Object> inspections = new HashMap<String,Object>();
         inspections.put("size of files", Long.valueOf(numBytes));
-        inspections.put("num of files", Integer.valueOf(numFiles));
+        inspections.put("num of files", Integer.valueOf(fileDescs.size()));
         return inspections;
     }
-
-    public void addIncompleteFile(File incompleteFile, IncompleteFileDesc incompleteFileDesc) {
-    }
     
-    public void removeIncomplete(IncompleteFileDesc fileDesc) {
-    }
-
     public int getNumForcedFiles() {
         return 0;
     }
+    
+    /**
+     * Updates the list if a containing file has been renamed
+     */
+    protected void updateFileDescs(FileDesc oldFileDesc, FileDesc newFileDesc) {     
+        if (remove(oldFileDesc)) {
+            addFileDesc(newFileDesc); }
+    }
+    
+    /**
+     * Removes this FileDesc as an individual file
+     */
+    private boolean removeAsIndividualFile(FileDesc fileDesc) {
+        if(individualFiles != null)
+            return individualFiles.remove(fileDesc.getFile());
+        else
+            return false;
+    }
+    
+    /**
+     * Adds this FileDesc as an individual file
+     */
+    protected void addAsIndividualFile(FileDesc fileDesc) {
+    }
+    
+    /**
+     * Returns true if this list is allowed to add this FileDesc
+     * @param fileDesc - FileDesc to be added
+     */
+    protected boolean isFileAddable(FileDesc fileDesc) {
+        return true;
+    }
+    
+    /**
+     * Returns true if the XML doc contains information regarding the LWS
+     */
+    protected boolean isStoreXML(LimeXMLDocument doc) {
+       return doc != null && doc.getLicenseString() != null &&
+               doc.getLicenseString().equals(LicenseType.LIMEWIRE_STORE_PURCHASE.name());
+    }
+    
+    /**
+     * Listens for changes from FileManager and updates this list if 
+     * a containing file is modified
+     */
+    //TODO: synchronization
+    public void handleFileEvent(FileManagerEvent evt) {
+        switch(evt.getType()) {
+            case ADD_FILE:
+                synchronized (this) {
+                    addPendingFileDesc(evt.getNewFileDesc());
+                }
+                break;
+            case FILE_ALREADY_ADDED:
+                synchronized (this) {
+                    addPendingFileDesc(evt.getNewFileDesc());
+                }
+                break;
+            case ADD_FAILED_FILE:
+                synchronized (this) {
+                    if(pendingFiles.contains(evt.getNewFile())){
+                        pendingFiles.remove(evt.getNewFile());
+                    }
+                }
+                break;
+            case REMOVE_FILE:
+                remove(evt.getNewFileDesc());
+                break;
+            case RENAME_FILE:
+                updateFileDescs(evt.getOldFileDesc(), evt.getNewFileDesc());
+                break;
+            case CHANGE_FILE:
+                updateFileDescs(evt.getOldFileDesc(), evt.getNewFileDesc());
+                break;
+        }
+    }
 
-    public int getNumIncompleteFiles() {
-        return 0;
+    
+    ///// BELOW for backwards compatibility with LW 4.x. Notion of an individual file ////
+    /////   does not exist in 5.x  
+    ///// Do Not Add anything below this line
+    
+    public File[] getIndividualFiles() {
+        ArrayList<File> files = new ArrayList<File>(individualFiles.size());
+        for(File f : individualFiles) {
+            if (f.exists())
+                files.add(f);
+        }
+          
+        if (files.isEmpty())
+            return new File[0];
+        else
+            return files.toArray(new File[files.size()]);
+    }
+
+    public int getNumIndividualFiles() {
+        return individualFiles.size();
+    }
+
+    public boolean hasIndividualFiles() {
+        return !individualFiles.isEmpty();
+    }
+
+    public boolean isIndividualFile(File file) {
+        return individualFiles.contains(file);
     }
 }

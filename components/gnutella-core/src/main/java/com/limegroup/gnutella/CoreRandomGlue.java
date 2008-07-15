@@ -176,7 +176,7 @@ class CoreRandomGlue {
         File tFile;
         for(int i = 0; i < file_list.length; i++) {
             tFile = file_list[i];
-            if(!fileManager.getSharedFileList().contains(tFile) &&
+            if(!fileManager.getSharedFileList().contains(fileManager.getFileDesc(tFile)) &&
                     tFile.lastModified() < purgeLimit) {
                 tFile.delete();
             }

@@ -1,12 +1,21 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
-import org.limewire.collection.IntSet;
+import org.limewire.collection.MultiCollection;
+import org.limewire.inspection.InspectableForSize;
 
 import com.limegroup.gnutella.library.SharingUtils;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class SharedFileListImpl extends FileListImpl {
     
@@ -16,45 +25,63 @@ public class SharedFileListImpl extends FileListImpl {
      */
     private int numForcedFiles;
     
-    /**
-     * The total number of incomplete files.
-     * INVARIANT: numFiles + _numIncompleteFiles == the number of
-     *  elements of files that are not null.
-     */
-    private int numIncompleteFiles;
+    private final Set<File> filesNotToShare;
     
     /**
-     * The IntSet for incomplete shared files.
-     * 
-     * INVARIANT: for all i in _incompletesShared,
-     *       files[i]._path == the incomplete directory.
-     *       files[i] instanceof IncompleteFileDesc
-     *  Likewise, for all i s.t.
-     *    files[i] != null and files[i] instanceof IncompleteFileDesc,
-     *       incompletesShared.contains(i)
-     * 
-     * This structure is not strictly needed for correctness, but it allows
-     * others to retrieve all the incomplete shared files, which is
-     * relatively useful.                                                                                                       
+     * Files that are shared only for this LW session.
+     * INVARIANT: no file can be in this and _data.SPECIAL_FILES_TO_SHARE
+     * at the same time
      */
-    private IntSet incompletesShared;
+    @InspectableForSize("number of transiently shared files")
+    private Set<File> transientSharedFiles = new HashSet<File>();
     
-    @Override
-    public void resetVariables() {
-        super.resetVariables();
+    /**
+     * Individual files that are not in a shared folder.
+     */
+    @InspectableForSize("number of individually shared files") 
+    private Collection<File> individualSharedFiles; 
+    
+    public SharedFileListImpl(FileManager fileManager, Set<File> individualFiles, Set<File> filesNotToShare) {
+        super(fileManager, individualFiles);
         
-        incompletesShared = new IntSet();
-        numIncompleteFiles = 0;
-        numForcedFiles = 0;   
+        this.filesNotToShare = filesNotToShare;
+        
+        // the transient files and the special files.
+        individualSharedFiles = Collections.synchronizedCollection(
+                new MultiCollection<File>(transientSharedFiles, individualFiles));
+    }
+    
+    /**
+     * Always adds this file, regardless if it has a failing properties to make
+     * it shareable
+     */
+    @Override
+    public void addFileAlways(File file, List<? extends LimeXMLDocument> list) {
+        filesNotToShare.remove(file);
+        if (!isFileAddable(file))
+            individualFiles.add(file);
+            
+        addFile(file, list);
+    }
+    
+    /**
+     * Adds this file for the session only
+     */
+    @Override
+    public void addFileForSession(File file) {
+        filesNotToShare.remove(file);
+        if (!isFileAddable(file))
+            transientSharedFiles.add(file);
+        addFile(file);
     }
     
     @Override
-    public void addFile(File file, FileDesc fileDesc) {
-        super.addFile(file, fileDesc);
+    public void addFileDesc(FileDesc fileDesc) {
+        super.addFileDesc(fileDesc);
         
         //Register this file with its parent directory.
-        File parent = file.getParentFile();
-        assert parent != null : "Null parent to \""+file+"\"";        
+        File parent = fileDesc.getFile().getParentFile();
+        assert parent != null : "Null parent to \""+fileDesc.getFile()+"\"";        
         // files that are forcibly shared over the network
         // aren't counted or shown.
         if(SharingUtils.isForcedShareDirectory(parent))
@@ -62,73 +89,121 @@ public class SharedFileListImpl extends FileListImpl {
     }
     
     @Override
-    public void addIncompleteFile(File incompleteFile, IncompleteFileDesc incompleteFileDesc) {
-        files.add(incompleteFileDesc);
-        fileToFileDescMap.put(incompleteFile, incompleteFileDesc);
-        numIncompleteFiles += 1;
-        incompletesShared.add(incompleteFileDesc.getIndex());
-    }
-    
-    @Override
-    public void remove(FileDesc fd) {
-        if( fd instanceof IncompleteFileDesc)
-            return;
-       
-        super.remove(fd);
-        
-        File parent = fd.getFile().getParentFile();
-        // files that are forcibly shared over the network aren't counted
-        if(SharingUtils.isForcedShareDirectory(parent)) {
-            numForcedFiles--;
+    public boolean remove(FileDesc fd) {      
+        boolean value = super.remove(fd);
+
+        if(!individualSharedFiles.remove(fd.getFile()))
+            filesNotToShare.add(fd.getFile());
+        if(value) {
+            File parent = fd.getFile().getParentFile();
+            // files that are forcibly shared over the network aren't counted
+            if(SharingUtils.isForcedShareDirectory(parent)) {
+                numForcedFiles--;
+            }
         }
+        return value;
     }
     
     @Override
-    public void removeIncomplete(IncompleteFileDesc fileDesc) {
-        int index = fileDesc.getIndex();
-        assert files.get(index).getFile().equals(fileDesc.getFile()) : "invariant broken!";
-        files.set(index, null);
-        fileToFileDescMap.remove(fileDesc.getFile());
-        numIncompleteFiles--;
-        boolean removed = incompletesShared.remove(fileDesc.getIndex());
-        assert removed : "File "+fileDesc.getIndex()+" not found in " + incompletesShared;
+    protected void updateFileDescs(FileDesc oldFileDesc, FileDesc newFileDesc) {     
+        if (super.remove(oldFileDesc)) { 
+            super.addFileDesc(newFileDesc); }
     }
+
+    //TODO: iterator should ignore specially shared files
     
-    /**
-     * Returns the number of shared files. This number does 
-     * NOT include the number of focibly shared files
-     */
-    @Override 
-    public int getNumFiles() {
-        return numFiles - numForcedFiles;
-    }
-    
-    /**
-     * Returns the number of forcibly shared files. This number
-     * is NOT included in the number of shared files
-     */
     @Override
-    public int getNumForcedFiles() {
-        return numForcedFiles;
+    public int size() {
+        return fileDescs.size() - numForcedFiles;
     }
     
-    /**
-     * Returns the number of shared incomplete files.
-     */
     @Override
-    public int getNumIncompleteFiles() {
-        return numIncompleteFiles;
+    public void clear() {
+        super.clear();
+        
+        numForcedFiles = 0;
+    }
+    
+    @Override
+    public boolean isFileAddable(File file) {
+        if (!SharingUtils.isFilePhysicallyShareable(file))
+            return false;
+        if (individualSharedFiles.contains(file))
+            return true;
+        if (filesNotToShare.contains(file))
+            return false;
+        if (fileManager.isFileInCompletelySharedDirectory(file)) {
+            if (file.getName().toUpperCase(Locale.US).startsWith("LIMEWIRE"))
+                return true;
+            if (!FileManagerImpl.hasShareableExtension(file))
+                return false;
+            return true;
+        }
+        return false;
     }
     
     @Override
     public Object inspect() {
         Map<String,Object> inspections = new HashMap<String,Object>();
         inspections.put("size of files", Long.valueOf(numBytes));
-        inspections.put("num of files", Integer.valueOf(numFiles));
+        inspections.put("num of files", Integer.valueOf(fileDescs.size()));
         inspections.put("num forced shared files", Integer.valueOf(numForcedFiles));
-        inspections.put("num of incomplete files", Integer.valueOf(numIncompleteFiles));
-        inspections.put("num of incomplete files shared", Integer.valueOf(incompletesShared.size()));
         
         return inspections;
+    }
+    
+    @Override
+    protected void addAsIndividualFile(FileDesc fileDesc) {
+        if(!fileManager.isFileInCompletelySharedDirectory(fileDesc.getFile())) {
+            individualFiles.add(fileDesc.getFile());
+        }
+    }
+    
+    /**
+     * Returns true if this list is allowed to add this FileDesc
+     * @param fileDesc - FileDesc to be added
+     */
+    @Override
+    protected boolean isFileAddable(FileDesc fileDesc) {
+        if( fileDesc.getLimeXMLDocuments().size() != 0 && 
+                isStoreXML(fileDesc.getLimeXMLDocuments().get(0))) {
+            return false;
+        } else if( !isFileAddable(fileDesc.getFile())){ System.out.println("cant add");
+            return false;
+        } 
+        return true;
+    }
+    
+    //////////////////////// For Backwards Compatibility /////////////////
+    
+    @Override
+    public File[] getIndividualFiles() {
+        ArrayList<File> files = new ArrayList<File>(individualSharedFiles.size());
+        for(File f : individualSharedFiles) {
+            if (f.exists())
+                files.add(f);
+        }
+          
+        if (files.isEmpty())
+            return new File[0];
+        else
+            return files.toArray(new File[files.size()]);
+    }
+
+    @Override
+    public int getNumIndividualFiles() {
+        return individualSharedFiles.size();
+    }
+
+    @Override
+    public boolean hasIndividualFiles() {
+        return !individualSharedFiles.isEmpty();
+    }
+
+    @Override
+    public boolean isIndividualFile(File file) {
+        return individualFiles.contains(file) && 
+                SharingUtils.isFilePhysicallyShareable(file)&& 
+                !SharingUtils.isApplicationSpecialShare(file);
     }
 }

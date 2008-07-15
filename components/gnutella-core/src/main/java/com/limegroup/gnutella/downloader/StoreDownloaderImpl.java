@@ -346,7 +346,7 @@ class StoreDownloaderImpl extends ManagedDownloaderImpl implements StoreDownload
     @Override
     protected void shareSavedFile(File saveFile) {
         // Always load the resulting file in the FileManager
-        fileManager.addFileIfShared(saveFile);
+        fileManager.getStoreFileList().addFile(saveFile);
     }
 
     @Override

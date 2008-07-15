@@ -630,16 +630,73 @@ public class LimeXMLReplyCollection {
             retVal == MetaDataState.BAD_ID3 ||
             retVal == MetaDataState.INCORRECT_FILETYPE)
             return retVal;
-            
-        // We do not remove the hash from the hashMap because
-        // MetaFileManager needs to look it up to get the doc.
         
-        //Since the hash of the file has changed, the metadata pertaining 
-        //to other schemas will be lost unless we update those tables
-        //with the new hashValue. 
-        //NOTE:This is the only time the hash will change-(mp3 and audio)
-        fileManager.get().fileChanged(new File(fileName));
+        File file = new File(fileName);
+        FileDesc fd = fileManager.get().getFileDesc(file);
+        
+        // if a FileDesc for this file exists, write out the changes to disk
+        // and update the FileDesc in the FileManager
+        if(fd != null) {
+            List<LimeXMLDocument> xmlDocs = fd.getLimeXMLDocuments();
+            if (LimeXMLUtils.isEditableFormat(file)) {
+                try {
+                      //TODO: Disk IO being performed here
+                      LimeXMLDocument diskDoc = metaDataReader.readDocument(file);
+                      xmlDocs = resolveWriteableDocs(xmlDocs, diskDoc);
+                  } catch (IOException e) {
+                      // if we were unable to read this document,
+                      // then simply add the file without metadata.
+                      xmlDocs = Collections.emptyList();
+                  }
+            }
+            //Since the hash of the file has changed, the metadata pertaining 
+            //to other schemas will be lost unless we update those tables
+            //with the new hashValue. 
+            //NOTE:This is the only time the hash will change-(mp3 and audio)
+            fileManager.get().fileChanged(file, xmlDocs);
+        }
         return retVal;
+    }
+    
+    /**
+     * Finds the audio metadata document in allDocs, and makes it's id3 fields
+     * identical with the fields of id3doc (which are only id3).
+     */
+    private List<LimeXMLDocument> resolveWriteableDocs(List<LimeXMLDocument> allDocs,
+            LimeXMLDocument id3Doc) {
+        LimeXMLDocument audioDoc = null;
+        
+        for (LimeXMLDocument doc : allDocs) {
+            if (doc.getSchema().getSchemaURI().equals(LimeXMLNames.AUDIO_SCHEMA)) {
+                audioDoc = doc;
+                break;
+            }
+        }
+
+        if (id3Doc.equals(audioDoc)) // No issue -- both documents are the same
+            return allDocs; // did not modify list, keep using it
+
+        List<LimeXMLDocument> retList = new ArrayList<LimeXMLDocument>();
+        retList.addAll(allDocs);
+
+        if (audioDoc == null) {// nothing to resolve
+            retList.add(id3Doc);
+        } else {
+            // OK. audioDoc exists, remove it
+            retList.remove(audioDoc);
+    
+            // now add the non-id3 tags from audioDoc to id3doc
+            List<NameValue<String>> audioList = audioDoc.getOrderedNameValueList();
+            List<NameValue<String>> id3List = id3Doc.getOrderedNameValueList();
+            for (int i = 0; i < audioList.size(); i++) {
+                NameValue<String> nameVal = audioList.get(i);
+                if (AudioMetaData.isNonLimeAudioField(nameVal.getName()))
+                    id3List.add(nameVal);
+            }
+            audioDoc = limeXMLDocumentFactory.createLimeXMLDocument(id3List, LimeXMLNames.AUDIO_SCHEMA);
+            retList.add(audioDoc);
+        }
+        return retList;
     }
     
     /** Serializes the current map to disk. */

@@ -22,7 +22,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.dht.util.KUIDUtils;
 import com.limegroup.gnutella.settings.DHTSettings;
@@ -73,20 +72,18 @@ public class AltLocModel implements StorableModel {
         
             // Step One: Add every new FileDesc to the Map
             for (FileDesc fd : fds) {
-                if (!(fd instanceof IncompleteFileDesc)) {
-                    URN urn = fd.getSHA1Urn();
-                    KUID primaryKey = KUIDUtils.toKUID(urn);
-                    if (!values.containsKey(primaryKey)) {
-                        long fileSize = fd.getFileSize();
-                        HashTree hashTree = tigerTreeCache.get().getHashTree(urn);
-                        byte[] ttroot = null;
-                        if (hashTree != null) {
-                            ttroot = hashTree.getRootHashBytes();
-                        }
-                        
-                        AltLocValue value = altLocValueFactory.createAltLocValueForSelf(fileSize, ttroot);
-                        values.put(primaryKey, new Storable(primaryKey, value));
+                URN urn = fd.getSHA1Urn();
+                KUID primaryKey = KUIDUtils.toKUID(urn);
+                if (!values.containsKey(primaryKey)) {
+                    long fileSize = fd.getFileSize();
+                    HashTree hashTree = tigerTreeCache.get().getHashTree(urn);
+                    byte[] ttroot = null;
+                    if (hashTree != null) {
+                        ttroot = hashTree.getRootHashBytes();
                     }
+                    
+                    AltLocValue value = altLocValueFactory.createAltLocValueForSelf(fileSize, ttroot);
+                    values.put(primaryKey, new Storable(primaryKey, value));
                 }
             }
             
@@ -100,7 +97,7 @@ public class AltLocModel implements StorableModel {
                 URN urn = KUIDUtils.toURN(primaryKey);
                 
                 // For each URN check if the FileDesc still exists
-                FileDesc fd = fileManager.get().getFileDescForUrn(urn);
+                FileDesc fd = fileManager.get().getFileDesc(urn);
                 
                 // If it doesn't then remove it from the values map and
                 // replace the entity value with the empty value

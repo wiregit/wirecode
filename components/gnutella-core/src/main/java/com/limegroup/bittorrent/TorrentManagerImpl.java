@@ -323,7 +323,7 @@ public class TorrentManagerImpl implements TorrentManager {
         Runnable r = new Runnable() {
             public void run() {
             	if (SharingUtils.isFilePhysicallyShareable(f))
-            		fileManager.addFileForSession(f);
+            		fileManager.getSharedFileList().addFileForSession(f);
             }
         };
         threadPool.execute(r);
@@ -341,7 +341,10 @@ public class TorrentManagerImpl implements TorrentManager {
         final boolean fdelete = delete || t.getState().equals(TorrentState.TRACKER_FAILURE); 
         Runnable r = new Runnable() {
             public void run() {
-                FileDesc fd = fileManager.stopSharingFile(f);          
+                FileDesc fd = fileManager.getFileDesc(f);
+                if(fd != null)
+                    fileManager.getSharedFileList().remove(fd);
+//                FileDesc fd = fileManager.stopSharingFile(f);          
                 if(fd != null && fdelete){
                     FileUtils.delete(fd.getFile(), false);
                 } else

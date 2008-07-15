@@ -26,7 +26,6 @@ import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader.UploadStatus;
@@ -389,7 +388,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         httpHeaderUtils.addRangeHeader(response, uploader, fd);
         httpHeaderUtils.addProxyHeader(response);
 
-        if (fd instanceof IncompleteFileDesc) {
+        if (fileManager.getIncompleteFileList().contains(fd)) {
             if (!downloadManager.get().isActivelyDownloading(fd.getSHA1Urn())) {
                 response.addHeader(HTTPHeaderName.RETRY_AFTER.create(INACTIVE_RETRY_AFTER));
             }
@@ -448,13 +447,8 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         int index = request.index;
 
         // first verify the file index
-        synchronized (fileManager.getSharedFileList()) {
-            if (fileManager.getSharedFileList().isValidSharedIndex(index)) {
-                fd = fileManager.getSharedFileList().get(index);
-            }
-        }
-
-        if (fd == null) {
+        fd = fileManager.get(index);
+        if(!fileManager.getSharedFileList().contains(fd)) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Invalid index in request does not map to file descriptor: " + request);
             }
@@ -494,7 +488,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         }
 
         // special handling for incomplete files
-        if (fd instanceof IncompleteFileDesc) {
+        if(fileManager.getIncompleteFileList().contains(fd)) {
             // Check to see if we're allowing PFSP.
             if (!SharingSettings.ALLOW_PARTIAL_SHARING.getValue()) {
                 if (LOG.isDebugEnabled()) {
@@ -514,8 +508,8 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("File has changed on disk, resharing: " + file);
                 }
-                fileManager.removeFileIfSharedOrStore(file);
-                fileManager.addFileIfShared(file);
+                fileManager.removeFile(file);
+                fileManager.getSharedFileList().addFile(file);
                 return false;
             }
         }
