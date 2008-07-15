@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>  
   <parent>
     <groupId>org.limewire</groupId>
-    <artifactId>lw-components</artifactId>
+    <artifactId>lw-private-components</artifactId>
     <version>1.0</version>
-    <relativePath>../components/pom.xml</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>lw-integrated-ui</artifactId>
