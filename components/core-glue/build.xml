@@ -31,7 +31,7 @@
     	<mkdir dir="${build.limewire.components.core-glue.tests}"/>
     </target>
 	
-	<target name="compile-src" depends="initialize, lw-core.compile-src">
+	<target name="compile-src" depends="initialize, lw-core.compile">
 	    <do.compile-src component="core-glue"/>
 	</target>
     
