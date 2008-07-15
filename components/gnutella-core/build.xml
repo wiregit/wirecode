@@ -23,7 +23,7 @@
 	<!-- builds only the core -->
 	<target name="compile-core" 
 	        description="Compiles just the core."
-	        depends="initialize">
+	        depends="initialize, lw-components.compile-core">
 	    <javac destdir      ="${build.limewire.core.classes}"
 			   debug	    ="${compile.debug}"
 			   deprecation  ="${compile.deprecation}"
