@@ -1202,8 +1202,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         addAlternateLocationsToFiles();
         
         boolean checked = false;
-		for(int i = 0; i < fileManager.getSharedFileList().getNumFiles(); i++) {
-			FileDesc fd = fileManager.getSharedFileList().get(i);
+		for(int i = 0; i < fileManager.getSharedFileList().size(); i++) {
+			FileDesc fd = fileManager.get(i);
 			Response testResponse = responseFactory.createResponse(fd);
 
             String name = fd.getFileName();
@@ -1266,8 +1266,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
         addFilesToLibrary();
         addCreationTimeToFiles();
         boolean checked = false;
-		for(int i = 0; i < fileManager.getSharedFileList().getNumFiles(); i++) {
-			FileDesc fd = fileManager.getSharedFileList().get(i);
+		for(int i = 0; i < fileManager.getSharedFileList().size(); i++) {
+			FileDesc fd = fileManager.get(i);
 			long expectTime = (fd.getIndex() + 1) * 10013;
 			Response testResponse = responseFactory.createResponse(fd);
 			assertEquals(fd.toString(), expectTime, testResponse.getCreateTime());
@@ -1518,7 +1518,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.LimeTestCa
 
         FileManagerTestUtils.waitForLoad(fileManager, 5000);
 
-        assertEquals("unexpected number of shared files", testFiles.length, fileManager.getSharedFileList().getNumFiles());
+        assertEquals("unexpected number of shared files", testFiles.length, fileManager.getSharedFileList().size());
     }
     
     private void addAlternateLocationsToFiles() throws Exception {

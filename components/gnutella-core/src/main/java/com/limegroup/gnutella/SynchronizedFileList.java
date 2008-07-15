@@ -1,9 +1,10 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.util.Iterator;
 import java.util.List;
 
-import org.limewire.collection.IntSet;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class SynchronizedFileList implements FileList {
 
@@ -14,18 +15,18 @@ public class SynchronizedFileList implements FileList {
         if(fileList == null)
             throw new NullPointerException();
         this.fileList = fileList;
-        mutex = this;
-    }
-    
-    public void addFile(File file, FileDesc fileDesc) {
-        synchronized (mutex) {
-            fileList.addFile(file, fileDesc);
-        }
+        mutex = fileList;
     }
 
-    public boolean contains(File file) {
+    public void clear() {
         synchronized (mutex) {
-            return fileList.contains(file);
+            fileList.clear();
+        }
+    }
+    
+    public void addFileDesc(FileDesc fileDesc) {
+        synchronized (mutex) {
+            fileList.addFileDesc(fileDesc);
         }
     }
 
@@ -35,16 +36,8 @@ public class SynchronizedFileList implements FileList {
         }
     }
 
-    public boolean contains(URN urn) {
-        synchronized (mutex) {
-            return fileList.contains(urn);
-        }
-    }
-
-    public FileDesc get(int i) {
-        synchronized (mutex) {
-            return fileList.get(i);
-        }
+    public Iterator<FileDesc> iterator() {
+        return fileList.iterator();
     }
 
     public List<FileDesc> getAllFileDescs() {
@@ -53,93 +46,47 @@ public class SynchronizedFileList implements FileList {
         }
     }
 
-    public FileDesc getFileDesc(URN urn) {
-        synchronized (mutex) {
-            return fileList.getFileDesc(urn);
-        }
-    }
-
-    public FileDesc getFileDesc(File file) {
-        synchronized (mutex) {
-            return fileList.getFileDesc(file);
-        }
-    }
-
-    public IntSet getIndicesForUrn(URN urn) {
-        synchronized (mutex) {
-            return fileList.getIndicesForUrn(urn);
-        }
-    }
-
     public int getNumBytes() {
         synchronized (mutex) {
             return fileList.getNumBytes();
         }
     }
-
-    public int getNumFiles() {
-        synchronized (mutex) {
-            return fileList.getNumFiles();
-        }
+    
+    public void addFileAlways(File file) {
+        fileList.addFileAlways(file);
     }
 
-    public boolean isValidSharedIndex(int i) {
-        synchronized (mutex) {
-            return fileList.isValidSharedIndex(i);
-        }
+    public void addFileAlways(File file, List<? extends LimeXMLDocument> list) {
+        fileList.addFileAlways(file,list);
     }
 
-    public void remove(FileDesc fileDesc) {
-        synchronized (mutex) {
-            fileList.remove(fileDesc);
-        }
+    public void addFileForSession(File file) {
+        fileList.addFileForSession(file);
     }
     
-    public void removeIncomplete(IncompleteFileDesc fileDesc) {
-        synchronized(mutex) {
-            fileList.removeIncomplete(fileDesc);
+    public void addFile(File file) {
+        fileList.addFile(file);
+    }
+
+    public void addFile(File file, List<? extends LimeXMLDocument> list) {
+        fileList.addFile(file, list);
+    }
+
+    public boolean remove(FileDesc fileDesc) {
+        synchronized (mutex) {
+            return fileList.remove(fileDesc);
         }
     }
 
-    public void remove(URN urn) {
+    public int size() {
         synchronized (mutex) {
-            fileList.remove(urn);
+            return fileList.size();
         }
     }
 
-    public void resetVariables() {
+    public boolean isFileAddable(File file) {
         synchronized (mutex) {
-            fileList.resetVariables();
-        }
-    }
-
-    public int getListLength() {
-        synchronized (mutex) {
-            return fileList.getListLength();
-        }
-    }
-
-    public void updateUrnIndex(FileDesc fileDesc) {
-        synchronized (mutex) {
-            fileList.updateUrnIndex(fileDesc);
-        }
-    }
-    
-    public void addIncompleteFile(File incompleteFile, IncompleteFileDesc incompleteFileDesc) {
-        synchronized (mutex) {
-            fileList.addIncompleteFile(incompleteFile, incompleteFileDesc);
-        }
-    }
-
-    public int getNumForcedFiles() {
-        synchronized (mutex) {
-            return fileList.getNumForcedFiles();
-        }
-    }
-
-    public int getNumIncompleteFiles() {
-        synchronized (mutex) {
-            return fileList.getNumIncompleteFiles();
+            return fileList.isFileAddable(file);
         }
     }
 
@@ -148,5 +95,40 @@ public class SynchronizedFileList implements FileList {
             return fileList.getFilesInDirectory(directory);
         }
     }
+    
+    public Object getLock() {
+        return mutex;
+    }
+    
+    /////////// backwards compatibility /////////////////////////
 
+    public File[] getIndividualFiles() {
+        synchronized (mutex) {
+            return fileList.getIndividualFiles();
+        }
+    }
+
+    public int getNumIndividualFiles() {
+        synchronized (mutex) {
+            return fileList.getNumIndividualFiles();
+        }
+    }
+
+    public boolean hasIndividualFiles() {
+        synchronized (mutex) {
+            return fileList.hasIndividualFiles();
+        }
+    }
+
+    public boolean isIndividualFile(File file) {
+        synchronized (mutex) {
+            return fileList.isIndividualFile(file);
+        }
+    }
+
+    public int getNumForcedFiles() {
+        synchronized (mutex) {
+            return fileList.getNumForcedFiles();
+        }
+    }
 }

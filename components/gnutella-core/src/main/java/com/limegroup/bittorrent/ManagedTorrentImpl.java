@@ -865,9 +865,9 @@ public class ManagedTorrentImpl implements ManagedTorrent, DiskManagerListener {
         File _completeFile = context.getFileSystem().getCompleteFile();
         if (_completeFile.isFile()) {
             if (force)
-                fileManager.addFileAlways(_completeFile);
+                fileManager.getSharedFileList().addFileAlways(_completeFile);
             else
-                fileManager.addFileIfShared(_completeFile);
+                fileManager.getSharedFileList().addFile(_completeFile);
         } else if (_completeFile.isDirectory()
                 && (force || fileManager.isFileInCompletelySharedDirectory(_completeFile)))
             fileManager.addSharedFolder(_completeFile);

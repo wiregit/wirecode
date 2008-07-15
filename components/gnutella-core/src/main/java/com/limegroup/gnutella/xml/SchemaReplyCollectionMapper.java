@@ -86,7 +86,7 @@ public class SchemaReplyCollectionMapper implements FileEventListener {
                 load(evt);
                 break;
             case REMOVE_FD:
-                removeFileDesc(evt.getFileDescs()[0]);
+                removeFileDesc(evt.getNewFileDesc());
                 break;
         }
     }
@@ -137,9 +137,9 @@ public class SchemaReplyCollectionMapper implements FileEventListener {
     private synchronized void load(FileManagerEvent evt) {
         Collection<LimeXMLReplyCollection> replies = getCollections();
         for (LimeXMLReplyCollection col : replies)
-            col.initialize(evt.getFileDescs()[0], evt.getMetaData());
+            col.initialize(evt.getNewFileDesc(), evt.getMetaData());
         for (LimeXMLReplyCollection col : replies)
-            col.createIfNecessary(evt.getFileDescs()[0]);
+            col.createIfNecessary(evt.getNewFileDesc());
     }
     
     /**

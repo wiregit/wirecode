@@ -142,18 +142,20 @@ public class QRPUpdater implements FileEventListener, SettingListener, Service, 
         }
         List<FileDesc> fds = fileManager.getSharedFileList().getAllFileDescs();
         for (FileDesc fd : fds) {
-            if (fd instanceof IncompleteFileDesc) {
-                if (!SharingSettings.ALLOW_PARTIAL_SHARING.getValue())
-                    continue;
-                if (!SharingSettings.PUBLISH_PARTIAL_QRP.getValue())
-                    continue;
+            queryRouteTable.add(fd.getPath());
+        }
+        
+        //if partial sharing is allowed, add incomplete file keywords also
+        if(SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
+               SharingSettings.PUBLISH_PARTIAL_QRP.getValue()) {
+            List<FileDesc> incompleteFds = fileManager.getIncompleteFileList().getAllFileDescs();
+            for(FileDesc fd: incompleteFds) {
                 IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
                 if (!ifd.hasUrnsAndPartialData())
                     continue;
 
                 queryRouteTable.add(ifd.getFileName());
-            } else 
-                queryRouteTable.add(fd.getPath());
+            }
         }
 
         for (String string : getXMLKeyWords())
@@ -229,6 +231,7 @@ public class QRPUpdater implements FileEventListener, SettingListener, Service, 
     public void handleFileEvent(FileManagerEvent evt) {
         switch(evt.getType()) {
             case ADD_FILE:
+            case INCOMPLETE_URN_CHANGE:
             case CHANGE_FILE:
             case REMOVE_FILE:
             case RENAME_FILE:

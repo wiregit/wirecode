@@ -135,7 +135,7 @@ public class MulticastTest extends LimeTestCase {
         
         FileManagerTestUtils.waitForLoad(fileManager,3000);
         
-        assertEquals("unexpected number of shared files", 1, fileManager.getSharedFileList().getNumFiles() );
+        assertEquals("unexpected number of shared files", 1, fileManager.getSharedFileList().size() );
     }
     
     @Override
@@ -421,17 +421,17 @@ public class MulticastTest extends LimeTestCase {
             new File(_savedDir, "metadata.mp3").exists());
 
         // Get rid of this file, so the -Dtimes=X option works properly... =)
-        assertEquals("unexpected number of shared files", 2, fileManager.getSharedFileList().getNumFiles());
+        assertEquals("unexpected number of shared files", 2, fileManager.getSharedFileList().size());
 
         File temp = new File(_savedDir, "metadata.mp3");
         if (temp.exists()) {
-            fileManager.removeFileIfSharedOrStore(temp);
+            fileManager.removeFile(temp);
             temp.delete();
         }
         sleep(2 * DELAY);
         assertFalse("file should have been deleted", temp.exists());
 
-        assertEquals("unexpected number of shared files", 1, fileManager.getSharedFileList().getNumFiles());
+        assertEquals("unexpected number of shared files", 1, fileManager.getSharedFileList().size());
 	}
     
     private static void wipeAddress(QueryReply qr) throws Exception {

@@ -183,7 +183,7 @@ public final class CreationTimeCache implements FileEventListener {
                     // check to see if file still exists
                     // NOTE: technically a URN can map to multiple FDs, but I only want
                     // to know about one.  getFileDescForUrn prefers FDs over iFDs.
-                    FileDesc fd = fileManager.getFileDescForUrn(currURN);
+                    FileDesc fd = fileManager.getFileDesc(currURN);
                     if ((fd == null) || (fd.getFile() == null) || !fd.getFile().exists()) {
                         dirty = true;
                         iter.remove();
@@ -301,13 +301,13 @@ public final class CreationTimeCache implements FileEventListener {
                             break;
                         
                         // we only want shared FDs, store files also have cached urns
-                        FileDesc fd = fileManager.getFileDescForUrn(currURN);
+                        FileDesc fd = fileManager.getFileDesc(currURN);
                         
                     	// don't remove store files from the urn cache list
-                    	if( fd != null && fileManager.getStoreFileList().contains(fd.getFile()))
+                    	if( fd != null && fileManager.getStoreFileList().contains(fd))
                     		continue;
                         // unfortunately fds can turn into ifds so ignore
-                        if ((fd == null) || (fd instanceof IncompleteFileDesc)) {
+                        if ((fd == null) || fileManager.getIncompleteFileList().contains(fd)) {
                             if (toRemove == null)
                                 toRemove = new ArrayList<URN>();
                             toRemove.add(currURN);
@@ -479,10 +479,10 @@ public final class CreationTimeCache implements FileEventListener {
         }
     }
     
-    private void fileChanged(long creationTime, URN newUrn ) {
+    private void fileChanged(long creationTime, URN oldUrn, URN newUrn ) {
         // re-populate the ctCache
         synchronized (this) { 
-            removeTime(newUrn);
+            removeTime(oldUrn);
             addTime(newUrn, creationTime);
             commitTime(newUrn);
         }   
@@ -504,14 +504,15 @@ public final class CreationTimeCache implements FileEventListener {
                 // the installer.  We populate free LimeWire's with free installers
                 // so we have to make sure we don't influence the what is new
                 // result set.
-                if (!SharingUtils.isForcedShare(evt.getFiles()[0]) && 
-                        !(evt.getFileDescs()[0] instanceof IncompleteFileDesc)) {     
-                    fileAdded(evt.getFiles()[0], evt.getFileDescs()[0].getSHA1Urn());
+                if (!SharingUtils.isForcedShare(evt.getNewFile()) && 
+                        !(evt.getNewFileDesc() instanceof IncompleteFileDesc)) {     
+                    fileAdded(evt.getNewFile(), evt.getNewFileDesc().getSHA1Urn());
                 }
-                 break;
+                break;
             case CHANGE_FILE: 
-                if(! (evt.getFileDescs()[0] instanceof IncompleteFileDesc))
-                    fileChanged(evt.getFileDescs()[0].getCreationTime(), evt.getFileDescs()[1].getSHA1Urn());
+                if(!evt.getFileManager().getIncompleteFileList().contains(evt.getOldFileDesc()))
+                    fileChanged(evt.getOldFileDesc().getCreationTime(), evt.getOldFileDesc().getSHA1Urn(),
+                            evt.getNewFileDesc().getSHA1Urn());
                 break;
             case REMOVE_URN:
                 removeTime(evt.getURN());

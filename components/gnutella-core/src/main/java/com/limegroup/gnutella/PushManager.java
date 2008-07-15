@@ -97,8 +97,8 @@ public final class PushManager {
         // TODO: why is this check here?  it's a tiny optimization,
         // but could potentially kill any sharing of files that aren't
         // counted in the library.
-        if (fileManager.get().getSharedFileList().getNumFiles() < 1 
-                && fileManager.get().getSharedFileList().getNumIncompleteFiles() < 1)
+        if (fileManager.get().getSharedFileList().size() < 1 
+                && fileManager.get().getIncompleteFileList().size() < 1)
             return;
 
         // We used to have code here that tested if the guy we are pushing to is

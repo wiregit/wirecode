@@ -36,6 +36,7 @@ import com.limegroup.gnutella.settings.NetworkSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.FileManagerTestUtils;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * Tests that What is new support is fully functional.  We use a leaf here - we
@@ -164,16 +165,16 @@ public class ServerSideWhatIsNewTest
     public void testCreationTimeCacheInitialState() throws Exception {
         // wait for fm to finish
         int i = 0;
-        for (; (i < 15) && (fileManager.getSharedFileList().getNumFiles() < 2); i++)
+        for (; (i < 15) && (fileManager.getSharedFileList().size() < 2); i++)
             Thread.sleep(1000);
         if (i == 15) assertTrue(false);
 
         // we should be sharing two files - two text files.
-        assertEquals(2, fileManager.getSharedFileList().getNumFiles());
+        assertEquals(2, fileManager.getSharedFileList().size());
 
         FileManager fm = fileManager;
-        URN berkeleyURN = fm.getFileDescForFile(berkeley).getSHA1Urn();
-        URN susheelURN = fm.getFileDescForFile(susheel).getSHA1Urn();
+        URN berkeleyURN = fm.getFileDesc(berkeley).getSHA1Urn();
+        URN susheelURN = fm.getFileDesc(susheel).getSHA1Urn();
 
         Map urnToLong =  creationTimeCache.getUrnToTime();
         assertEquals(2, urnToLong.size());
@@ -300,8 +301,8 @@ public class ServerSideWhatIsNewTest
     // fine
     public void testAddSharedFiles() throws Exception {
         FileManager fm = fileManager;
-        URN berkeleyURN = fm.getFileDescForFile(berkeley).getSHA1Urn();
-        URN susheelURN = fm.getFileDescForFile(susheel).getSHA1Urn();
+        URN berkeleyURN = fm.getFileDesc(berkeley).getSHA1Urn();
+        URN susheelURN = fm.getFileDesc(susheel).getSHA1Urn();
 
         tempFile1 = new File("tempFile1.txt");
         tempFile2 = new File("tempFile2.txt");
@@ -346,10 +347,10 @@ public class ServerSideWhatIsNewTest
         assertTrue(tempFile2.exists());
 
         FileManagerTestUtils.waitForLoad(fileManager, 1000);
-        assertEquals("Files were not loaded by filemanager", 4, fileManager.getSharedFileList().getNumFiles());
+        assertEquals("Files were not loaded by filemanager", 4, fileManager.getSharedFileList().size());
 
-        URN tempFile1URN = fm.getFileDescForFile(tempFile1).getSHA1Urn();
-        URN tempFile2URN = fm.getFileDescForFile(tempFile2).getSHA1Urn();
+        URN tempFile1URN = fm.getFileDesc(tempFile1).getSHA1Urn();
+        URN tempFile2URN = fm.getFileDesc(tempFile2).getSHA1Urn();
 
         assertEquals(4, urnToLong.size());
         assertNotNull(""+urnToLong, urnToLong.get(berkeleyURN));
@@ -406,7 +407,7 @@ public class ServerSideWhatIsNewTest
         testAddSharedFiles();
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
-        URN tempFile1URN = fm.getFileDescForFile(tempFile1).getSHA1Urn();
+        URN tempFile1URN = fm.getFileDesc(tempFile1).getSHA1Urn();
         Long cTime = ctCache.getCreationTime(tempFile1URN);
 
         FileWriter writer = null;
@@ -424,29 +425,30 @@ public class ServerSideWhatIsNewTest
             }
         }
 
-        final FileDesc beforeChanged = fm.getFileDescForFile(tempFile1);
+        final FileDesc beforeChanged = fm.getFileDesc(tempFile1);
         assertNotNull(beforeChanged);
         
         final CountDownLatch fileChangedLatch = new CountDownLatch(1);
         fm.addFileEventListener(new FileEventListener() {
-            public void handleFileEvent(FileManagerEvent evt) { System.out.println("event " + evt.getType());
+            public void handleFileEvent(FileManagerEvent evt) {
                 if (evt.getType() != FileManagerEvent.Type.CHANGE_FILE)
                     return;
-                if (evt.getFileDescs() == null || evt.getFileDescs().length != 2)
+                //TODO: fix this, result of incomplete file change event in FM
+                if (evt.getOldFileDesc() == null && evt.getNewFileDesc() == null)
                     return;
-                if (evt.getFileDescs()[0] == beforeChanged)
+                if (evt.getOldFileDesc() == beforeChanged)
                     fileChangedLatch.countDown();
             }
         });
-        fm.fileChanged(tempFile1);
+        fm.fileChanged(tempFile1, LimeXMLDocument.EMPTY_LIST);
         assertTrue(fileChangedLatch.await(40, TimeUnit.SECONDS));
-        FileDesc afterChanged = fm.getFileDescForFile(tempFile1);
+        FileDesc afterChanged = fm.getFileDesc(tempFile1);
         assertNotNull(afterChanged);
         assertNotSame(beforeChanged, afterChanged);
         
-        assertNotNull(fm.getFileDescForFile(tempFile1).getSHA1Urn());
-        assertNotEquals(tempFile1URN, fm.getFileDescForFile(tempFile1).getSHA1Urn());
-        assertEquals(ctCache.getCreationTime(fm.getFileDescForFile(tempFile1).getSHA1Urn()),
+        assertNotNull(fm.getFileDesc(tempFile1).getSHA1Urn());
+        assertNotEquals(tempFile1URN, fm.getFileDesc(tempFile1).getSHA1Urn());
+        assertEquals(ctCache.getCreationTime(fm.getFileDesc(tempFile1).getSHA1Urn()),
                      cTime);
 
         // now just send another What Is New query and make sure everything
@@ -490,7 +492,7 @@ public class ServerSideWhatIsNewTest
         testAddSharedFiles();
         FileManager fm = fileManager;
         CreationTimeCache ctCache = creationTimeCache;
-        URN tempFile1URN = fm.getFileDescForFile(tempFile1).getSHA1Urn();
+        URN tempFile1URN = fm.getFileDesc(tempFile1).getSHA1Urn();
 //        URN tempFile2URN = fm.getURNForFile(tempFile2);
         // we are changing tempFile1 to become tempFile2 - but since we
         // call fileChanged(), then the common URN should get tempFile1's
@@ -512,7 +514,7 @@ public class ServerSideWhatIsNewTest
             }
         }
 
-        FileDesc beforeChanged = fm.getFileDescForFile(tempFile1);
+        FileDesc beforeChanged = fm.getFileDesc(tempFile1);
         assertNotNull(beforeChanged);
         
         final CountDownLatch latch = new CountDownLatch(1);
@@ -522,15 +524,15 @@ public class ServerSideWhatIsNewTest
                     latch.countDown();
             }
         });
-        fm.fileChanged(tempFile1);
+        fm.fileChanged(tempFile1, LimeXMLDocument.EMPTY_LIST);
         assertTrue(latch.await(2, TimeUnit.SECONDS));
-        FileDesc afterChanged = fm.getFileDescForFile(tempFile1);
+        FileDesc afterChanged = fm.getFileDesc(tempFile1);
         assertNotNull(afterChanged);
         assertNotSame(beforeChanged, afterChanged);
-        assertNotNull(fm.getFileDescForFile(tempFile1).getSHA1Urn());
-        assertNotEquals(tempFile1URN, fm.getFileDescForFile(tempFile1).getSHA1Urn());
-        assertEquals(fm.getFileDescForFile(tempFile1).getSHA1Urn(), fm.getFileDescForFile(tempFile2).getSHA1Urn());
-        assertEquals(ctCache.getCreationTime(fm.getFileDescForFile(tempFile1).getSHA1Urn()),
+        assertNotNull(fm.getFileDesc(tempFile1).getSHA1Urn());
+        assertNotEquals(tempFile1URN, fm.getFileDesc(tempFile1).getSHA1Urn());
+        assertEquals(fm.getFileDesc(tempFile1).getSHA1Urn(), fm.getFileDesc(tempFile2).getSHA1Urn());
+        assertEquals(ctCache.getCreationTime(fm.getFileDesc(tempFile1).getSHA1Urn()),
                      cTime);
 
         // now just send another What Is New query and make sure everything
@@ -571,11 +573,11 @@ public class ServerSideWhatIsNewTest
     public void testRemoveSharedFile() throws Exception {
         testAddSharedFiles();
         FileManager fm = fileManager;
-        assertEquals(4,fm.getSharedFileList().getNumFiles());
+        assertEquals(4,fm.getSharedFileList().size());
         
         
         // 4 shared files
-        assertEquals(4,fm.getSharedFileList().getNumFiles());
+        assertEquals(4,fm.getSharedFileList().size());
         
         // 4 different urns 
         {
@@ -592,7 +594,7 @@ public class ServerSideWhatIsNewTest
         }
         
         // tempFile1 and 2 have the same URN
-        fm.removeFileIfSharedOrStore(tempFile1);
+        fm.removeFile(tempFile1);
         {
             Map urnToLong = creationTimeCache.getUrnToTime();  
             assertEquals(3, urnToLong.size());
@@ -602,7 +604,7 @@ public class ServerSideWhatIsNewTest
         
         // tempFile2 should result in a removal of an URN
         // as well as a timestamp
-        fm.removeFileIfSharedOrStore(tempFile2);
+        fm.removeFile(tempFile2);
 
         {
             Map urnToLong = creationTimeCache.getUrnToTime();
@@ -623,9 +625,9 @@ public class ServerSideWhatIsNewTest
 
         fm.loadSettings();
         Thread.sleep(2000);
-        assertEquals("num shared files", 1, fileManager.getSharedFileList().getNumFiles());
+        assertEquals("num shared files", 1, fileManager.getSharedFileList().size());
 
-        URN susheelURN = fm.getFileDescForFile(susheel).getSHA1Urn();
+        URN susheelURN = fm.getFileDesc(susheel).getSHA1Urn();
         {
             Map urnToLong = creationTimeCache.getUrnToTime(); 
             assertEquals(""+urnToLong, 1, urnToLong.size());
@@ -644,7 +646,7 @@ public class ServerSideWhatIsNewTest
         CreationTimeCache ctCache = creationTimeCache;
         Map longToUrns = ctCache.getTimeToUrn();
         for (FileDesc fd : fileManager.getSharedFileList().getAllFileDescs()) {
-            fileManager.removeFileIfSharedOrStore(fd.getFile());
+            fileManager.removeFile(fd.getFile());
             fd.getFile().delete();
         }
         longToUrns = ctCache.getTimeToUrn();
@@ -660,7 +662,7 @@ public class ServerSideWhatIsNewTest
                 .createRemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, "whatever.txt", TestFile.length(), guid, 1, false, 3,
                         false, null, urns, false, false, "LIME", new HashSet(), -1, false);
         
-        int sharedBefore = fileManager.getSharedFileList().getNumFiles();
+        int sharedBefore = fileManager.getSharedFileList().size();
         final CountDownLatch downloadedLatch = new CountDownLatch(2); //1 incomplete, 2 complete
         fileManager.addFileEventListener(new FileEventListener() {
             public void handleFileEvent(FileManagerEvent evt) {
@@ -671,11 +673,11 @@ public class ServerSideWhatIsNewTest
         downloadServices.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         assertTrue("download never completed",downloadedLatch.await(320,TimeUnit.SECONDS));
         
-        assertEquals( sharedBefore + 1, fileManager.getSharedFileList().getNumFiles());
+        assertEquals( sharedBefore + 1, fileManager.getSharedFileList().size());
 
         File newFile = new File(_savedDir, "whatever.txt");
         assertTrue(newFile.getAbsolutePath()+" didn't exist", newFile.exists());
-        URN newFileURN = fm.getFileDescForFile(newFile).getSHA1Urn();
+        URN newFileURN = fm.getFileDesc(newFile).getSHA1Urn();
         assertEquals(TestFile.hash(), newFileURN);
         assertEquals(newFileURN.toString(), cTime, ctCache.getCreationTime(newFileURN));
 
@@ -694,7 +696,7 @@ public class ServerSideWhatIsNewTest
         CreationTimeCache ctCache = creationTimeCache;
         
         for (FileDesc fd : fileManager.getSharedFileList().getAllFileDescs()) {
-            fileManager.removeFileIfSharedOrStore(fd.getFile());
+            fileManager.removeFile(fd.getFile());
             fd.getFile().delete();
         }
 
@@ -734,7 +736,7 @@ public class ServerSideWhatIsNewTest
         // second notification is for sharing the entire file
         assertTrue("download never finished",downloadState.tryAcquire(120,TimeUnit.SECONDS));
         
-        assertEquals(1, fileManager.getSharedFileList().getNumFiles());
+        assertEquals(1, fileManager.getSharedFileList().size());
 
         {
             Map urnToLong = ctCache.getUrnToTime(); 
@@ -747,7 +749,7 @@ public class ServerSideWhatIsNewTest
 
         File newFile = new File(_savedDir, "anita.txt");
         assertTrue(newFile.exists());
-        URN newFileURN = fm.getFileDescForFile(newFile).getSHA1Urn();
+        URN newFileURN = fm.getFileDesc(newFile).getSHA1Urn();
         assertEquals(cTime[0], ctCache.getCreationTime(newFileURN));
     }
 
@@ -788,10 +790,10 @@ public class ServerSideWhatIsNewTest
         try {
             fileManager.loadSettings();
             int i = 0;
-            for (; (i < 15) && (fileManager.getSharedFileList().getNumFiles()+ fileManager.getSharedFileList().getNumForcedFiles() < 5); i++)
+            for (; (i < 15) && (fileManager.getSharedFileList().size()+ fileManager.getSharedFileList().getNumForcedFiles() < 5); i++)
                 Thread.sleep(1000);
             if (i == 15)
-                fail("num shared files? " + fileManager.getSharedFileList().getNumFiles());
+                fail("num shared files? " + fileManager.getSharedFileList().size());
     
             // we should be sharing two files - two text files and three installers
             // but the creation time cache should only have the two text files
@@ -799,7 +801,7 @@ public class ServerSideWhatIsNewTest
             //
             //  NOTE: with forced folder sharing, there will be only 2 shared files (forced
             //      files don't count), and 3 forced shared files
-            assertEquals(2, fileManager.getSharedFileList().getNumFiles());
+            assertEquals(2, fileManager.getSharedFileList().size());
             assertEquals(3, fileManager.getSharedFileList().getNumForcedFiles());
     
             {
@@ -814,24 +816,24 @@ public class ServerSideWhatIsNewTest
             // make sure the installer urns are not in the cache
             {
                 assertTrue(winInstaller.exists());
-                assertNull(fm.getFileDescForFile(winInstaller));
+                assertNull(fm.getFileDesc(winInstaller));
             }
             {
                 assertTrue(winInstaller.exists());
-                assertNull(fm.getFileDescForFile(linInstaller));
+                assertNull(fm.getFileDesc(linInstaller));
             }
             {
                 assertTrue(winInstaller.exists());
-                assertNull(fm.getFileDescForFile(osxInstaller));
+                assertNull(fm.getFileDesc(osxInstaller));
             }
             // make sure berkeley and susheel are in the cache.
             {
                 assertTrue(berkeley.exists());
-                assertNotNull(ctCache.getCreationTime(fm.getFileDescForFile(berkeley).getSHA1Urn()));
+                assertNotNull(ctCache.getCreationTime(fm.getFileDesc(berkeley).getSHA1Urn()));
             }
             {
                 assertTrue(susheel.exists());
-                assertNotNull(ctCache.getCreationTime(fm.getFileDescForFile(susheel).getSHA1Urn()));
+                assertNotNull(ctCache.getCreationTime(fm.getFileDesc(susheel).getSHA1Urn()));
             }
         
         } finally {        

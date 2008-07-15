@@ -529,7 +529,8 @@ public class HeadPongTest extends LimeTestCase {
         SSLSettings.TLS_INCOMING.setValue(false);
         networkManager.setAcceptedIncomingConnection(true);
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);        
+//        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1); 
+        ((FileManagerStub)fileManager).s
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -637,7 +638,7 @@ public class HeadPongTest extends LimeTestCase {
         
         MockHeadPongRequestor req = new MockHeadPongRequestor();
         req.setPongGGEPCapable(true);
-        req.setUrn(FileListStub.NOT_HAVE);
+        req.setUrn(FileManagerStub.NOT_HAVE);
         req.setGuid(guid);
                 
         HeadPong pong = headPongFactory.create(req);

@@ -49,9 +49,14 @@ public class LibraryData extends AbstractSettingsGroup {
     
     /**
      * Files in a shared folder that are not the location of the LWS downloads but 
-     * were purchased from the LWS
+     * were purchased from the LWS.
      */
     public final Set<File> SPECIAL_STORE_FILES = DATA.getSet("SPECIAL_STORE_FILES");
+    
+    /**
+     * Files that are shared with buddy's in your IM client.
+     */
+    public final Set<File> BUDDY_LIST_FILES = DATA.getSet("BUDDY_LIST_FILES");
     
     /**
      * Constructs a new LibraryData, adding it to the SettingsHandler for maintanence.
