@@ -1,0 +1,24 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"> 
+  <modelVersion>4.0.0</modelVersion>
+    
+  <groupId>org.limewire</groupId>
+  <artifactId>lw-private-components</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+  <url>http://limewire.org</url>
+  <name>LimeWire Private Components</name>
+
+  <modules>
+    <module>swingui</module>
+    <module>mock-core</module>
+    <module>integrated-ui</module>
+    <!-- This is a hack to let private-components be dependent
+         on code in these places without requiring that they
+         be mvn installed -->
+    <module>../core</module>
+    <module>../components</module>
+    <module>../components/core-glue</module>
+  </modules>
+  
+</project>
