@@ -28,6 +28,17 @@ public class NavTree extends JXPanel implements NavigableTree {
         addNavList(new NavList("Search", Navigator.NavCategory.SEARCH));
         addNavList(new NavList("Library", Navigator.NavCategory.LIBRARY));
         
+        NavList hiddenList = new NavList("None", Navigator.NavCategory.NONE){
+            //force invisibility
+            @Override
+            public boolean isVisible(){
+                return false;
+            }
+            
+        };
+        hiddenList.setVisible(false);
+        addNavList(hiddenList);
+        
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.gridwidth = GridBagConstraints.REMAINDER;

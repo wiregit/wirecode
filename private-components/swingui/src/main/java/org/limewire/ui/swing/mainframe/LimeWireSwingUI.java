@@ -12,6 +12,7 @@ import org.limewire.core.api.search.SearchFactory;
 import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.nav.NavigatorImpl;
+import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.search.SearchHandlerImpl;
 import org.limewire.ui.swing.util.GuiUtils;
@@ -48,7 +49,7 @@ public class LimeWireSwingUI extends JPanel {
         this.searchHandler = new SearchHandlerImpl(navigator, coreInjector.getInstance(SearchFactory.class));
         //TODO:move this and have clicks on DownloadStatusPanel navigate to downloadPanel
         MainDownloadPanel downloadPanel = new MainDownloadPanel(downloadMediator);
-        mainPanel.addNavigablePanel(MainDownloadPanel.NAME, downloadPanel);
+        navigator.addNavigablePanel(NavCategory.NONE, MainDownloadPanel.NAME, downloadPanel, false);
         
         leftPanel.setSearchHandler(searchHandler);
         navigator.addDefaultNavigableItems(searchHandler);

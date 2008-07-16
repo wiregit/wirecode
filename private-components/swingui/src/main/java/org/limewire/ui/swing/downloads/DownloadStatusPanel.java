@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.MouseListener;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -63,6 +64,14 @@ public class DownloadStatusPanel extends JPanel {
 		
 		updateTitle();
 	}
+    
+    //Overridden to add listener to all components in this container so that mouse clicks will work anywhere
+    @Override
+    public void addMouseListener(MouseListener listener){
+        for(Component comp : getComponents()){
+            comp.addMouseListener(listener);
+        }
+    }
 
 	private void updateTitle(){
 		titleLabel.setText(I18n.tr("Downloads ({0})", table.getRowCount()));
