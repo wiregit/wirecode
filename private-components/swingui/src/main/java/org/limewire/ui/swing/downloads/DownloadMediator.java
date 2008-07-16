@@ -20,7 +20,6 @@ import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
-import com.google.inject.Injector;
 
 public class DownloadMediator {
 
