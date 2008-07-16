@@ -1,7 +1,6 @@
 package org.limewire.ui.swing.downloads;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -11,7 +10,6 @@ import java.awt.event.MouseListener;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
-import javax.swing.border.LineBorder;
 import javax.swing.table.TableCellRenderer;
 
 import org.limewire.core.api.download.DownloadItem;
@@ -26,7 +24,7 @@ import com.limegroup.gnutella.gui.I18n;
 
 
 
-public class DownloadStatusPanel extends JPanel {
+public class DownloadSummaryPanel extends JPanel {
 
 	private JTable table;
 
@@ -36,7 +34,7 @@ public class DownloadStatusPanel extends JPanel {
 	/**
 	 * Create the panel
 	 */
-	public DownloadStatusPanel(EventList<DownloadItem> itemList) {
+	public DownloadSummaryPanel(EventList<DownloadItem> itemList) {
 		super();
 		setLayout(new BorderLayout());
 

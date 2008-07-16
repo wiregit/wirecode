@@ -16,7 +16,7 @@ import javax.swing.JScrollPane;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.downloads.DownloadMediator;
-import org.limewire.ui.swing.downloads.DownloadStatusPanel;
+import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.nav.FilesSharingSummaryPanel;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavSelectionListener;
@@ -33,7 +33,7 @@ class LeftPanel extends JPanel implements NavigableTree {
 
     private final SearchBar searchBar;
     private final NavTree navTree;
-    private final DownloadStatusPanel downloadPanel;
+    private final DownloadSummaryPanel downloadPanel;
     private final FilesSharingSummaryPanel filesPanel;
     private SearchHandler searchHandler;
     
@@ -45,7 +45,7 @@ class LeftPanel extends JPanel implements NavigableTree {
     	GuiUtils.injectFields(this);
         this.searchBar = new SearchBar();
         this.navTree = new NavTree();
-        this.downloadPanel =  new DownloadStatusPanel(downloadMediator.getUnfilteredList());
+        this.downloadPanel =  new DownloadSummaryPanel(downloadMediator.getUnfilteredList());
         this.filesPanel = new FilesSharingSummaryPanel();
         setMinimumSize(new Dimension(150, 0));
         setMaximumSize(new Dimension(150, Integer.MAX_VALUE));
