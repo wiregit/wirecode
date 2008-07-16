@@ -4,12 +4,12 @@ import java.util.Locale;
 
 public class I18n {
 
-    private static final String BASENAME = "org.limewire.i18n.Messages";
+ //   private static final String BASENAME = "org.limewire.i18n.Messages";
     //TODO I18nFactory.getI18n(I18n.class, BASENAME);
-    private static org.xnap.commons.i18n.I18n i18n;// = I18nFactory.getI18n(I18n.class, BASENAME);
+   // private static org.xnap.commons.i18n.I18n i18n;// = I18nFactory.getI18n(I18n.class, BASENAME);
     
     public static final void setLocale(Locale locale) {
-        i18n.setResources(BASENAME, locale, ClassLoader.getSystemClassLoader());
+      //  i18n.setResources(BASENAME, locale, ClassLoader.getSystemClassLoader());
     }    
     
     public static final String tr(String text) {
@@ -44,15 +44,21 @@ public class I18n {
     }
 
     public static final String trc(String comment, String text) {
-        return i18n.trc(comment, text);
+        //TODO
+        return text;
+      //  return i18n.trc(comment, text);
     }
     
     public static final String trn(String singularText, String pluralText, long number) {
-        return i18n.trn(singularText, pluralText, number);
+        //TODO
+        return tr(number>1 ? pluralText : singularText, number);
+        //return i18n.trn(singularText, pluralText, number);
     }
 
     public static final String trn(String singularText, String pluralText, long number, Object...args) {
-        return i18n.trn(singularText.replace("'", "''"), pluralText.replace("'", "''"), number, args);
+        //TODO
+        return tr(trn(singularText,pluralText, number), args);
+       // return i18n.trn(singularText.replace("'", "''"), pluralText.replace("'", "''"), number, args);
     }
 
 
