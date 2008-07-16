@@ -3,6 +3,7 @@ package org.limewire.ui.swing.downloads;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseListener;
@@ -15,6 +16,7 @@ import javax.swing.table.TableCellRenderer;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.ui.swing.downloads.table.DownloadTableModel;
+import org.limewire.ui.swing.util.FontUtils;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
@@ -36,15 +38,16 @@ public class DownloadStatusPanel extends JPanel {
 	 */
 	public DownloadStatusPanel(EventList<DownloadItem> itemList) {
 		super();
-		setBorder(new LineBorder(Color.BLACK));
 		setLayout(new BorderLayout());
 
 		titleLabel = new JLabel();
+        FontUtils.changeStyle(titleLabel, Font.BOLD);
 		add(titleLabel, BorderLayout.NORTH);
 		
 	
 
 		table = new JTable(new DownloadTableModel(itemList));
+		table.setShowHorizontalLines(false);
 		//update title when number of downloads changes
 		itemList.addListEventListener(new ListEventListener<DownloadItem>(){
 
@@ -68,6 +71,7 @@ public class DownloadStatusPanel extends JPanel {
     //Overridden to add listener to all components in this container so that mouse clicks will work anywhere
     @Override
     public void addMouseListener(MouseListener listener){
+        super.addMouseListener(listener);
         for(Component comp : getComponents()){
             comp.addMouseListener(listener);
         }
@@ -85,6 +89,9 @@ public class DownloadStatusPanel extends JPanel {
 
 		public DownloadStatusPanelRenderer() {
 			super(new GridBagLayout());
+
+	        FontUtils.changeFontSize(nameLabel, -1);
+	        FontUtils.changeFontSize(percentLabel, -1);
 			setOpaque(false);
 			GridBagConstraints gbc = new GridBagConstraints();
 
