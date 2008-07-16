@@ -30,8 +30,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.ui.swing.downloads.LimeProgressBar;
 import org.limewire.ui.swing.util.GuiUtils;
 
-import com.limegroup.gnutella.gui.I18n;
-
+import org.limewire.ui.swing.util.I18n;
 
 
 public class DownloadRendererEditor extends JPanel implements

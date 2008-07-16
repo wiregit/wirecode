@@ -1,22 +1,16 @@
 package org.limewire.ui.swing.downloads;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JTextField;
 
-import org.limewire.core.api.download.DownloadAddedListener;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadManager;
 import org.limewire.core.api.download.DownloadState;
 
-import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
-import ca.odell.glazedlists.GlazedLists;
-import ca.odell.glazedlists.ObservableElementList;
 import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
@@ -24,8 +18,6 @@ import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 public class DownloadMediator {
 
 	
-	private RemoveCancelledListener cancelledListener = new RemoveCancelledListener();
-
 	private JTextField searchBar;
 	/**
 	 * filtered by textbox
@@ -38,37 +30,12 @@ public class DownloadMediator {
 	private EventList<DownloadItem> commonBaseList;
 	
 	public DownloadMediator(DownloadManager downloadManager) {
-		ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
-		//shared by all models
-		 commonBaseList = new ObservableElementList<DownloadItem>(new BasicEventList<DownloadItem>(), downloadConnector);	
-
-		List<DownloadItem> items = downloadManager.getDownloads();
-		downloadManager.addDownloadAddedListener(new DownloadAddedListener() {
-			@Override
-			public void downloadAdded(DownloadItem downloadItem) {
-				addDownloadItem(downloadItem);
-			}
-		});
-		
-		for (DownloadItem item : items) {
-			addDownloadItem(item);
-		}
-		
+	
+		commonBaseList= downloadManager.getDownloads();	
 		
 		searchBar = new JTextField();
 		filteredList = new FilterList<DownloadItem>(commonBaseList, 
-				new TextComponentMatcherEditor<DownloadItem>(searchBar, new DownloadItemTextFilterator(), true));
-		
-	}
-
-	private void addDownloadItem(DownloadItem downloadItem) {
-		downloadItem.addPropertyChangeListener(cancelledListener);
-		commonBaseList.getReadWriteLock().writeLock().lock();
-		try {
-			commonBaseList.add(downloadItem);
-		} finally {
-			commonBaseList.getReadWriteLock().writeLock().unlock();
-		}
+				new TextComponentMatcherEditor<DownloadItem>(searchBar, new DownloadItemTextFilterator(), true));		
 	}
 
 	
@@ -92,7 +59,7 @@ public class DownloadMediator {
 	
 	public void clearFinished() {
 		List<DownloadItem> finishedItems = new ArrayList<DownloadItem>();
-
+//TODO : should this be here?
 		commonBaseList.getReadWriteLock().writeLock().lock();
 		
 		try {
@@ -124,21 +91,7 @@ public class DownloadMediator {
 		return commonBaseList;
 	}
 	
-	private class RemoveCancelledListener implements PropertyChangeListener {
 
-		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
-			if(evt.getNewValue() == DownloadState.CANCELLED){
-				commonBaseList.getReadWriteLock().writeLock().lock();
-				try {
-					commonBaseList.remove(evt.getSource());
-				} finally {
-					commonBaseList.getReadWriteLock().writeLock().unlock();
-				}
-			}
-		}
-
-	}
 	
     private static class DownloadItemTextFilterator implements TextFilterator<DownloadItem> {
         @Override

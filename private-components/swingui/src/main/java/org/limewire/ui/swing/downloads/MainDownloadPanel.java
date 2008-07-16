@@ -18,7 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
-import com.limegroup.gnutella.gui.I18n;
+import org.limewire.ui.swing.util.I18n;
 
 
 

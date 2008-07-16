@@ -20,7 +20,7 @@ import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.event.ListEvent;
 import ca.odell.glazedlists.event.ListEventListener;
 
-import com.limegroup.gnutella.gui.I18n;
+import org.limewire.ui.swing.util.I18n;
 
 
 
@@ -30,28 +30,29 @@ public class DownloadSummaryPanel extends JPanel {
 
 	
 	private JLabel titleLabel;
+	private EventList<DownloadItem> itemList;
 
 	/**
 	 * Create the panel
 	 */
-	public DownloadSummaryPanel(EventList<DownloadItem> itemList) {
-		super();
+	public DownloadSummaryPanel(final EventList<DownloadItem> itemList) {
+	    this.itemList = itemList;
 		setLayout(new BorderLayout());
-
+		
 		titleLabel = new JLabel();
         FontUtils.changeStyle(titleLabel, Font.BOLD);
 		add(titleLabel, BorderLayout.NORTH);
-		
-	
+			
 
 		table = new JTable(new DownloadTableModel(itemList));
 		table.setShowHorizontalLines(false);
-		//update title when number of downloads changes
+		//update title when number of downloads changes and hide or show panel as necessary
 		itemList.addListEventListener(new ListEventListener<DownloadItem>(){
 
 			@Override
 			public void listChanged(ListEvent<DownloadItem> listChanges) {
 				updateTitle();
+				adjustVisibility();  
 			}
 			
 		});
@@ -64,8 +65,14 @@ public class DownloadSummaryPanel extends JPanel {
 		add(table, BorderLayout.CENTER);
 		
 		updateTitle();
+		adjustVisibility();  
 	}
     
+	//hide panel if there are no downloads.  show it if there are
+    private void adjustVisibility() {
+        setVisible(itemList.size()>0);
+    }
+
     //Overridden to add listener to all components in this container so that mouse clicks will work anywhere
     @Override
     public void addMouseListener(MouseListener listener){
@@ -76,7 +83,7 @@ public class DownloadSummaryPanel extends JPanel {
     }
 
 	private void updateTitle(){
-		titleLabel.setText(I18n.tr("Downloads ({0})", table.getRowCount()));
+		titleLabel.setText(I18n.tr("Downloads ({0})", itemList.size()));
 	}
 	
 	private class DownloadStatusPanelRenderer extends JPanel implements

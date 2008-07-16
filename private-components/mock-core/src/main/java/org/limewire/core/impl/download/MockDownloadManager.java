@@ -1,5 +1,7 @@
 package org.limewire.core.impl.download;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,19 +10,26 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadManager;
 import org.limewire.core.api.download.DownloadState;
 
+import ca.odell.glazedlists.BasicEventList;
+import ca.odell.glazedlists.EventList;
+import ca.odell.glazedlists.GlazedLists;
+import ca.odell.glazedlists.ObservableElementList;
+
 
 public class MockDownloadManager implements DownloadManager {
 	private List<DownloadAddedListener> listeners = new ArrayList<DownloadAddedListener>();
-	private ArrayList<DownloadItem> downloadItems = new ArrayList<DownloadItem>();
+	private RemoveCancelledListener cancelListener = new RemoveCancelledListener();
+	private ObservableElementList<DownloadItem> downloadItems;
 	
 	public MockDownloadManager(){
+	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
+	    downloadItems = new ObservableElementList<DownloadItem>(new BasicEventList<DownloadItem>(), downloadConnector);
 		initializeMockData();
 	}
 
 	@Override
-	public List<DownloadItem> getDownloads() {
-		//defensive copy
-		return new ArrayList<DownloadItem>(downloadItems);
+	public EventList<DownloadItem> getDownloads() {
+		return downloadItems;
 	}
 
 	@Override
@@ -34,6 +43,7 @@ public class MockDownloadManager implements DownloadManager {
 	}
 	
 	public synchronized void addDownload(DownloadItem downloadItem){
+	    downloadItem.addPropertyChangeListener(cancelListener);
 		downloadItems.add(downloadItem);
 		for(DownloadAddedListener listener : listeners){
 			listener.downloadAdded(downloadItem);
@@ -78,5 +88,22 @@ public class MockDownloadManager implements DownloadManager {
 		item.addDownloadSource(new MockDownloadSource("Bob"));
 		addDownload(item);
 	}
+	
+	private class RemoveCancelledListener implements PropertyChangeListener {
+        
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if (evt.getNewValue() == DownloadState.CANCELLED) {
+                // TODO : proper concurrency
+                downloadItems.getReadWriteLock().writeLock().lock();
+                try {
+                    downloadItems.remove(evt.getSource());
+                } finally {
+                    downloadItems.getReadWriteLock().writeLock().unlock();
+                }
+            }
+        }
+
+    }
 
 }

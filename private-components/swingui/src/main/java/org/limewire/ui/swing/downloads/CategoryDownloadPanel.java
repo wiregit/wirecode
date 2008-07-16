@@ -33,7 +33,7 @@ import org.limewire.ui.swing.downloads.table.DownloadStateMatcher;
 import org.limewire.ui.swing.downloads.table.DownloadTable;
 import org.limewire.ui.swing.downloads.table.DownloadTableModel;
 
-import com.limegroup.gnutella.gui.I18n;
+import org.limewire.ui.swing.util.I18n;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -76,7 +76,6 @@ public class CategoryDownloadPanel extends JPanel {
 		list.addListEventListener(new ListEventListener<DownloadItem>() {
 			@Override
 			public void listChanged(ListEvent<DownloadItem> listChanges) {
-				//listChanged occurs on the list thread
 				//TODO:confirm which thread we're on
 				SwingUtilities.invokeLater(new Runnable() {
 					public void run() {
