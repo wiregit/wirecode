@@ -2,40 +2,45 @@ package org.limewire.swarm.file;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.nio.ContentDecoder;
-import org.apache.http.nio.FileContentDecoder;
-import org.apache.http.nio.IOControl;
 import org.limewire.collection.Range;
 import org.limewire.nio.ByteBufferCache;
+import org.limewire.swarm.SwarmContent;
+import org.limewire.swarm.SwarmCoordinator;
+import org.limewire.swarm.SwarmDownload;
+import org.limewire.swarm.SwarmIOControl;
+import org.limewire.swarm.SwarmWriteJob;
 import org.limewire.util.BufferUtils;
 
-class FileCoordinatorWriteJobImpl implements WriteJob {
+class FileCoordinatorWriteJobImpl implements SwarmWriteJob {
     
     private static final Log LOG = LogFactory.getLog(FileCoordinatorWriteJobImpl.class);
     
     private static final int BUFFER_SIZE = 8192;
     
-    private final IOControl ioctrl;
+    private final SwarmIOControl ioctrl;
     private final ExecutorService jobScheduler;
-    private final FileCoordinator fileCoordinator;
+    private final SwarmCoordinator fileCoordinator;
     private final ByteBufferCache byteBufferCache;
-    private final SwarmFile fileWriter;
+    private final SwarmDownload fileWriter;
     private final Object scheduleLock = new Object();
     
     private long startPosition;
     private ByteBuffer buffer;    
     private Future<Void> scheduledJob;
+    private static int ID = 0;
+    private int id = 0;
     
-    public FileCoordinatorWriteJobImpl(long position, IOControl ioctrl,
-            ExecutorService jobScheduler, FileCoordinator fileCoordinator,
-            ByteBufferCache byteBufferCache, SwarmFile fileWriter) {
+    public FileCoordinatorWriteJobImpl(long position, SwarmIOControl ioctrl,
+            ExecutorService jobScheduler, SwarmCoordinator fileCoordinator,
+            ByteBufferCache byteBufferCache, SwarmDownload fileWriter) {
+        id = ID++;
         this.startPosition = position;
         this.ioctrl = ioctrl;
         this.byteBufferCache = byteBufferCache;
@@ -61,18 +66,18 @@ class FileCoordinatorWriteJobImpl implements WriteJob {
         }
     }
     
-    public long consumeContent(ContentDecoder decoder) throws IOException {
+    public long consumeContent(SwarmContent content) throws IOException {
         synchronized(scheduleLock) {
             if(startPosition == -1)
                 throw new IOException("Cancelled");
             
             if(buffer == null) {
-                buffer = byteBufferCache.get(BUFFER_SIZE);
+                buffer = byteBufferCache.getHeap(BUFFER_SIZE);
                 assert buffer.position() == 0;
             }
             
             long priorLength = buffer.position();            
-            long read = decoder.read(buffer);
+            long read = content.read(buffer);
             if(LOG.isTraceEnabled())
                 LOG.trace("Read: " + read + " from decoder");
             
@@ -84,7 +89,8 @@ class FileCoordinatorWriteJobImpl implements WriteJob {
                 long low = startPosition + priorLength;
                 if(LOG.isTraceEnabled())
                     LOG.trace("Marking: [" + low + ", " + (low+read-1) + "] as pending");
-                fileCoordinator.pending(Range.createRange(low, low + read - 1));
+                Range pendingRange = Range.createRange(low, low + read - 1);
+                fileCoordinator.pending(pendingRange);
             }
             
             if(buffer.remaining() == 0) {
@@ -131,7 +137,7 @@ class FileCoordinatorWriteJobImpl implements WriteJob {
                     return;
                 }
 
-                tempBuffer = byteBufferCache.get(BUFFER_SIZE);
+                tempBuffer = byteBufferCache.getHeap(BUFFER_SIZE);
                 assert tempBuffer.position() == 0;
                 
                 buffer.flip();
@@ -164,14 +170,16 @@ class FileCoordinatorWriteJobImpl implements WriteJob {
             try {
                 if(LOG.isTraceEnabled())
                     LOG.trace("Writing from: " + dataBuffer + ", starting at: " + position);
-                long wrote = fileWriter.transferFrom(new BufferDecoder(dataBuffer), position);
+                //long wrote = fileWriter.transferFrom(new BufferDecoder(dataBuffer), position);
+                long wrote = fileWriter.transferFrom(dataBuffer, position);
                 // We assume that the file can always write > 0 bytes.  If it wrote less,
                 // we're completely screwed here.
                 // (This is because there's no feedback from the filesystem on when more could
                 //  be written.)
                 // Fortunately, it's all-but-guaranteed that fileChannel.write will write
                 // all the data we want.
-                fileCoordinator.wrote(Range.createRange(position, position + wrote -1 ));
+                Range range = Range.createRange(position, position + wrote -1 );
+                fileCoordinator.wrote(range);
                 position += wrote;
                 totalWrote += wrote;
             } catch(IOException iox) {
@@ -189,7 +197,7 @@ class FileCoordinatorWriteJobImpl implements WriteJob {
         return totalWrote;
     }
     
-    private static class BufferDecoder implements FileContentDecoder {
+    private static class BufferDecoder implements SwarmContent {
         private final ByteBuffer buffer;
         
         public BufferDecoder(ByteBuffer buffer) {
@@ -197,24 +205,16 @@ class FileCoordinatorWriteJobImpl implements WriteJob {
         }
         
         public boolean isCompleted() {
-            throw new UnsupportedOperationException();
+            throw new UnsupportedOperationException("isCompleted");
         }
         
         public int read(ByteBuffer dst) throws IOException {
             return BufferUtils.transfer(buffer, dst, false);
         }
-        
-        public long transfer(FileChannel dst, long position, long count) throws IOException {
-            int oldLimit = buffer.limit();
-            int newCount = (int)Math.min(Integer.MAX_VALUE, count);
-            if(newCount < buffer.remaining()) {
-                // If we want to transfer less than is available,
-                // change the buffer limit to be only what we want.
-                buffer.limit(buffer.position() + newCount);
-            }
-            long wrote = dst.write(buffer, position);
-            buffer.limit(oldLimit);
-            return wrote;
+
+        public ReadableByteChannel getChannel() throws IOException {
+            throw new UnsupportedOperationException("isCompleted");
         }
+        
     }
 }

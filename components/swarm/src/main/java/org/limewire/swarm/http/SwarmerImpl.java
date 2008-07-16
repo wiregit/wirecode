@@ -68,25 +68,7 @@ public class SwarmerImpl implements Swarmer {
                 new SwarmExecutionHandler(),
                 connectionReuseStrategy,
                 params);
-//        clientHandler.setEventListener(new EventListener() {
-//           public void connectionClosed(NHttpConnection conn) {
-//               Thread.dumpStack();
-//            }
-//           public void connectionOpen(NHttpConnection conn) {
-//               Thread.dumpStack();
-//           }
-//           public void connectionTimeout(NHttpConnection conn) {
-//               Thread.dumpStack();
-//           }
-//           
-//           public void fatalIOException(IOException ex, NHttpConnection conn) {
-//               ex.printStackTrace();
-//           }
-//           
-//           public void fatalProtocolException(HttpException ex, NHttpConnection conn) {
-//               ex.printStackTrace();
-//           }
-//        });
+
         eventDispatch = new DefaultClientIOEventDispatch(clientHandler, params);
     }
     

@@ -1,4 +1,4 @@
-package org.limewire.swarm.file;
+package org.limewire.swarm.file.selection;
 
 
 import java.util.NoSuchElementException;
@@ -8,6 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.swarm.SwarmSelector;
 
 
 /**
@@ -25,7 +26,7 @@ import org.limewire.collection.Range;
  * then the same algorithm is used, except that the location is chosen randomly from
  * an endpoint of one of the existing fragments, in an attempt to coalesce fragments.
  */
-public class RandomDownloadStrategy implements SelectionStrategy {
+public class RandomDownloadStrategy implements SwarmSelector {
     
     private static final Log LOG = LogFactory.getLog(RandomDownloadStrategy.class);
     

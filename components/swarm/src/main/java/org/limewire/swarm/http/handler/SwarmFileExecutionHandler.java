@@ -13,7 +13,7 @@ import org.apache.http.nio.entity.ConsumingNHttpEntityTemplate;
 import org.apache.http.protocol.HttpContext;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.swarm.file.FileCoordinator;
+import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.http.SwarmExecutionContext;
 import org.limewire.swarm.http.SwarmHttpUtils;
 import org.limewire.swarm.http.SwarmSource;
@@ -23,21 +23,21 @@ import org.limewire.swarm.http.listener.ResponseContentListener;
 public class SwarmFileExecutionHandler implements ExecutionHandler {
     private static final Log LOG = LogFactory.getLog(SwarmFileExecutionHandler.class);
     
-    private static final String RESPONSE_LISTENER = "swarm.http.fileswarmer.internal.responseListener";
+    //private static final String RESPONSE_LISTENER = "swarm.http.fileswarmer.internal.responseListener";
     
-    private final FileCoordinator fileCoordinator;
+    private final SwarmCoordinator fileCoordinator;
     
-    public SwarmFileExecutionHandler(FileCoordinator fileCoordinator) {
+    public SwarmFileExecutionHandler(SwarmCoordinator fileCoordinator) {
         this.fileCoordinator = fileCoordinator;
     }
     
     public void finalizeContext(HttpContext context) {
         // Explicitly close content listener, if it was set.
-        ResponseContentListener contentListener = (ResponseContentListener)context.getAttribute(RESPONSE_LISTENER);
-        if(contentListener != null) {
-            contentListener.finished();
-            context.setAttribute(RESPONSE_LISTENER, null);
-        }
+       // ResponseContentListener contentListener = (ResponseContentListener)context.getAttribute(RESPONSE_LISTENER);
+//        if(contentListener != null) {
+//            contentListener.finished();
+//            //context.setAttribute(RESPONSE_LISTENER, null);
+//        }
     }
     
     public void handleResponse(HttpResponse response, HttpContext context) throws IOException {
@@ -47,14 +47,15 @@ public class SwarmFileExecutionHandler implements ExecutionHandler {
             throws IOException {
         int code = response.getStatusLine().getStatusCode();
         if(code >= 200 && code < 300) {
-            ResponseContentListener listener =  (ResponseContentListener)context.getAttribute(RESPONSE_LISTENER);
-            listener.initialize(response);
-            context.setAttribute(RESPONSE_LISTENER, null);
-            return new ConsumingNHttpEntityTemplate(response.getEntity(), listener);
+          //  ResponseContentListener listener =  (ResponseContentListener)context.getAttribute(RESPONSE_LISTENER);
+            //listener.initialize(response);
+          //  context.setAttribute(RESPONSE_LISTENER, null);
+            Range range = (Range) context.getAttribute("range");
+            return new ConsumingNHttpEntityTemplate(response.getEntity(), new FileContentListener(fileCoordinator,range));
         } else {
-            ResponseContentListener listener = (ResponseContentListener)context.getAttribute(RESPONSE_LISTENER);
-            listener.finished();
-            context.setAttribute(RESPONSE_LISTENER, null);
+            //ResponseContentListener listener = (ResponseContentListener)context.getAttribute(RESPONSE_LISTENER);
+            //listener.finished();
+         //   context.setAttribute(RESPONSE_LISTENER, null);
             return null;
         }
     }
@@ -77,7 +78,8 @@ public class SwarmFileExecutionHandler implements ExecutionHandler {
         
         HttpRequest request = new BasicHttpRequest("GET", source.getUri());
         request.addHeader(new BasicHeader("Range", "bytes=" + range.getLow() + "-" + (range.getHigh())));
-        context.setAttribute(RESPONSE_LISTENER, new FileContentListener(fileCoordinator, range));
+        context.setAttribute("range", range);
+       // context.setAttribute(RESPONSE_LISTENER, new FileContentListener(fileCoordinator, range));
         return request;
     }
 

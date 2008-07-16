@@ -10,8 +10,8 @@ import org.apache.http.nio.ContentDecoder;
 import org.apache.http.nio.IOControl;
 import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
-import org.limewire.swarm.file.FileCoordinator;
-import org.limewire.swarm.file.WriteJob;
+import org.limewire.swarm.SwarmCoordinator;
+import org.limewire.swarm.http.SwarmHttpContentDecoderImpl;
 import org.limewire.util.Objects;
 
 
@@ -19,12 +19,11 @@ public class FileContentListener implements ResponseContentListener {
     
     private static final Log LOG = LogFactory.getLog(FileContentListener.class);
     
-    private final FileCoordinator fileCoordinator;
+    private final SwarmCoordinator fileCoordinator;
     private boolean finished;
     private Range expectedRange;
-    private WriteJob writeJob;
 
-    public FileContentListener(FileCoordinator fileCoordinator, Range range) {
+    public FileContentListener(SwarmCoordinator fileCoordinator, Range range) {
         this.fileCoordinator = Objects.nonNull(fileCoordinator, "fileCoordinator");
         this.expectedRange = Objects.nonNull(range, "range");
     }
@@ -32,26 +31,7 @@ public class FileContentListener implements ResponseContentListener {
     public void contentAvailable(ContentDecoder decoder, IOControl ioctrl) throws IOException {
         if(finished)
             throw new IOException("Already finished.");
-        
-        if(writeJob == null) {
-            writeJob = fileCoordinator.newWriteJob(expectedRange.getLow(), ioctrl);
-        }
-        
-        long consumed = writeJob.consumeContent(decoder);
-        
-        // Reposition expectedRange so that we can release ranges
-        // if we get cancelled.
-        if(consumed > 0) {
-            long low = expectedRange.getLow();
-            long high = expectedRange.getHigh();
-            long newLow = low + consumed;
-            if (newLow > high) {
-                expectedRange = null;
-            } else {
-                expectedRange = Range.createRange(newLow, high);
-            }
-        }
-        
+        fileCoordinator.write(expectedRange, new SwarmHttpContentDecoderImpl(decoder));
     }
 
     public void finished() {
@@ -85,8 +65,8 @@ public class FileContentListener implements ResponseContentListener {
                 actualRange = Range.createRange(0, contentLength-1);
             }
         } else if(contentRange == null) {
-            // If no range exists nor content length, assume whole file
-            actualRange = Range.createRange(0, fileCoordinator.getCompleteFileSize()-1);
+         // Fail miserably.
+            throw new IOException("No Content Range Found.");
         } else {
             // Fail miserably.
             throw new IOException("No content length, though content range existed.");

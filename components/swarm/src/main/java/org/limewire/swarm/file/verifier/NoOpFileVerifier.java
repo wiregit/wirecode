@@ -1,12 +1,14 @@
-package org.limewire.swarm.file;
+package org.limewire.swarm.file.verifier;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.swarm.SwarmDownload;
+import org.limewire.swarm.SwarmVerifier;
 
-public class NoOpFileVerifier implements SwarmFileVerifier {
+public class NoOpFileVerifier implements SwarmVerifier {
 
     public long getBlockSize() {
         return 1024;
@@ -16,7 +18,7 @@ public class NoOpFileVerifier implements SwarmFileVerifier {
         return Collections.emptyList();
     }
 
-    public boolean verify(Range range, SwarmFile swarmFile) {
+    public boolean verify(Range range, SwarmDownload swarmFile) {
         throw new UnsupportedOperationException();
     }
 

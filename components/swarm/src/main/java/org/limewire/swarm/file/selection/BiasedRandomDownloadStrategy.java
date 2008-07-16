@@ -1,4 +1,4 @@
-package org.limewire.swarm.file;
+package org.limewire.swarm.file.selection;
 
 
 import java.util.NoSuchElementException;
