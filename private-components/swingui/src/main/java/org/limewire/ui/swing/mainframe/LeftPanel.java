@@ -7,9 +7,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -18,7 +15,6 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.downloads.DownloadStatusPanel;
-import org.limewire.ui.swing.nav.DownloadSummaryPanel;
 import org.limewire.ui.swing.nav.FilesSharingSummaryPanel;
 import org.limewire.ui.swing.nav.NavItem;
 import org.limewire.ui.swing.nav.NavSelectionListener;

@@ -10,7 +10,6 @@ import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadManager;
 import org.limewire.core.api.search.SearchFactory;
 import org.limewire.ui.swing.downloads.DownloadMediator;
-import org.limewire.ui.swing.downloads.DownloadStatusPanel;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.nav.NavigatorImpl;
 import org.limewire.ui.swing.search.SearchHandler;
