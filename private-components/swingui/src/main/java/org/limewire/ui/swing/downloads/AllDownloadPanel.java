@@ -31,6 +31,7 @@ public class AllDownloadPanel extends JPanel {
 
 		this.downloadTableModel = new DownloadTableModel(list);
 		table = new DownloadTable(downloadTableModel);
+		table.getTableHeader().setVisible(false);
 		add(new JScrollPane(table), BorderLayout.CENTER);
 	}
 
