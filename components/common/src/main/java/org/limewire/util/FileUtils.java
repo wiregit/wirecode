@@ -13,7 +13,10 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -892,5 +895,47 @@ public class FileUtils {
                     throw new IOException("unable to copy file");
             }
         }
+    }
+    
+    /**
+     * Utility method to copy an input stream into the target output stream.
+     * @param inputStream
+     * @param outputStream
+     * @throws IOException
+     */
+    public static void write(InputStream inputStream, OutputStream outputStream) throws IOException {
+        int numRead = 0;
+        byte[] buffer = new byte[1024];
+        while ((numRead = inputStream.read(buffer,0,buffer.length)) != -1) {
+            outputStream.write(buffer,0,numRead);
+        }
+    }
+
+    /**
+     * Utility method to generate an MD5 hash from a target file. 
+     * It should be updated to read from a stream if you wish to calculate the md5 for a large file.
+     * The current implementation assumes small file sizes.
+     * 
+     * @param file
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
+    public static String getMD5(File file) throws NoSuchAlgorithmException {
+       byte[] fileBytes = readFileFully(file);
+       String md5 = getMD5(fileBytes);
+       return md5;       
+    }
+
+    /**
+     * Returns the MD5 string for the given byte array.
+     * @param fileBytes
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
+    private static String getMD5(byte[] fileBytes) throws NoSuchAlgorithmException {
+        MessageDigest m= MessageDigest.getInstance("MD5");
+           byte[] digest = m.digest(fileBytes);
+           String md5 =new BigInteger(1,digest).toString(16);
+        return md5;
     }
 }
