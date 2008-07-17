@@ -1,5 +1,6 @@
 package org.limewire.swarm;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.limewire.collection.IntervalSet;
@@ -39,7 +40,7 @@ public interface SwarmCoordinator {
 
     /**
      * Constructs a new WriteJob that will be used to write data.
-     * As data becomes available, {@link SwarmWriteJob#consumeContent(Content)}
+     * As data becomes available, {@link SwarmWriteJob#write(Content)}
      * can be called, informing the job that data is available.
      * If the job cannot consume data, it will suspend I/O.  When the job
      * can begin consuming data again, it will resume I/O.
@@ -48,7 +49,9 @@ public interface SwarmCoordinator {
      * it consumed content, and will eventually call {@link #wrote(Range)}
      * after data has successfully been written to disk.
      */
-    SwarmWriteJob write(Range range, SwarmContent swarmContent);
+    long write(Range range, SwarmContent content);
+    
+    SwarmWriteJob createWriteJob(Range rangem, SwarmWriteJobCallBack callback);
 
     /**
      * Marks a range as pending a write.

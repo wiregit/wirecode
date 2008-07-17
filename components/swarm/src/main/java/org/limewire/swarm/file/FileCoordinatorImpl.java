@@ -16,12 +16,13 @@ import org.limewire.swarm.SwarmContent;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmDownload;
 import org.limewire.swarm.SwarmFileSystem;
-import org.limewire.swarm.SwarmIOControl;
 import org.limewire.swarm.SwarmListener;
 import org.limewire.swarm.SwarmListenerList;
 import org.limewire.swarm.SwarmSelector;
 import org.limewire.swarm.SwarmVerifier;
 import org.limewire.swarm.SwarmWriteJob;
+import org.limewire.swarm.SwarmWriteJobCallBack;
+import org.limewire.swarm.SwarmWriteJobImpl;
 
 /**
  * A {@link FileCoordinator} that verifies files using the given
@@ -368,21 +369,19 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
             neededBytes.delete(pendingBlocks);
             neededBytes.delete(verifiedBlocks);
         }
-
         // Calculate the intersection of neededBytes and availableBytes
         availableRanges.delete(neededBytes.invert(completeSize));
         return availableRanges;
     }
+    
+    public SwarmWriteJob createWriteJob(Range range, SwarmWriteJobCallBack callback) {
+        return new SwarmWriteJobImpl(range, this, writeService, callback);
+    }
 
-    // public SwarmWriteJob newWriteJob(long position, SwarmIOControl ioctrl) {
-    // return new FileCoordinatorWriteJobImpl(position, ioctrl, writeService,
-    // this,
-    // new ByteBufferCache(), swarmFile);
-    // }
-
-    public SwarmWriteJob write(Range range, SwarmContent swarmContent) {
+    public long write(Range range, SwarmContent swarmContent) {
         synchronized (LOCK) {
             long position = range.getLow();
+            long bytesWritten = 0;
 
             ByteBuffer byteBuffer = ByteBuffer.allocate(1024 * 16);
             int numRead = 0;
@@ -394,7 +393,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
 
                     pending(pendingRange);
                     byteBuffer.flip();
-                    swarmFile.transferFrom(byteBuffer, position);
+                    bytesWritten += swarmFile.transferFrom(byteBuffer, position);
                     wrote(pendingRange);
                     byteBuffer.clear();
                     position += bufferPosition;
@@ -403,7 +402,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            return null;
+            return bytesWritten;
         }
     }
 

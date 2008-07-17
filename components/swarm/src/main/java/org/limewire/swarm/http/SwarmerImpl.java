@@ -27,6 +27,7 @@ import org.apache.http.protocol.RequestExpectContinue;
 import org.apache.http.protocol.RequestTargetHost;
 import org.apache.http.protocol.RequestUserAgent;
 import org.limewire.http.protocol.SynchronizedHttpProcessor;
+import org.limewire.swarm.http.gnutella.interceptor.AvailableRangesInterceptor;
 import org.limewire.swarm.http.handler.ExecutionHandler;
 
 public class SwarmerImpl implements Swarmer {
@@ -62,6 +63,7 @@ public class SwarmerImpl implements Swarmer {
         httpProcessor.addInterceptor(new RequestConnControl());
         httpProcessor.addInterceptor(new RequestUserAgent());
         httpProcessor.addInterceptor(new RequestExpectContinue());
+        httpProcessor.addInterceptor(new AvailableRangesInterceptor());
         
         clientHandler = new AsyncNHttpClientHandler(
                 httpProcessor,

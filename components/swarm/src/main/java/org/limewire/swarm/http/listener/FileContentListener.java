@@ -10,18 +10,26 @@ import org.apache.http.nio.ContentDecoder;
 import org.apache.http.nio.IOControl;
 import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
+import org.limewire.swarm.SwarmContent;
 import org.limewire.swarm.SwarmCoordinator;
+import org.limewire.swarm.SwarmWriteJob;
+import org.limewire.swarm.SwarmWriteJobCallBack;
 import org.limewire.swarm.http.SwarmHttpContentDecoderImpl;
 import org.limewire.util.Objects;
 
-
 public class FileContentListener implements ResponseContentListener {
-    
+
     private static final Log LOG = LogFactory.getLog(FileContentListener.class);
-    
+
     private final SwarmCoordinator fileCoordinator;
+
     private boolean finished;
+
     private Range expectedRange;
+
+    private IOControl ioControl = null;
+
+    private SwarmWriteJob writeJob = null;
 
     public FileContentListener(SwarmCoordinator fileCoordinator, Range range) {
         this.fileCoordinator = Objects.nonNull(fileCoordinator, "fileCoordinator");
@@ -29,52 +37,81 @@ public class FileContentListener implements ResponseContentListener {
     }
 
     public void contentAvailable(ContentDecoder decoder, IOControl ioctrl) throws IOException {
-        if(finished)
+        if (finished)
             throw new IOException("Already finished.");
-        fileCoordinator.write(expectedRange, new SwarmHttpContentDecoderImpl(decoder));
+
+        this.ioControl = ioctrl;
+
+        SwarmContent content = new SwarmHttpContentDecoderImpl(decoder);
+
+        final IOControl finalIOControl = ioctrl;
+        finalIOControl.suspendInput();
+        finalIOControl.suspendOutput();
+        if (writeJob == null) {
+            writeJob = fileCoordinator.createWriteJob(expectedRange, new SwarmWriteJobCallBack() {
+                        public void pause() {
+                            finalIOControl.suspendInput();
+                            finalIOControl.suspendOutput();
+                        }
+
+                        public void resume() {
+                            finalIOControl.requestOutput();
+                            finalIOControl.requestInput();
+                        }
+                    });
+        }
+        
+        writeJob.write(content);
     }
 
     public void finished() {
-        if(!finished) {
+        if (!finished) {
             finished = true;
-            if(expectedRange != null) {
+            if (expectedRange != null) {
                 fileCoordinator.unlease(expectedRange);
                 expectedRange = null;
+            }
+            try {
+                if (ioControl != null) {
+                    ioControl.shutdown();
+                }
+            } catch (IOException e) {
+                // TODO handle me!
             }
         }
     }
 
     public void initialize(HttpResponse response) throws IOException {
-        if(finished)
+        if (finished)
             throw new IOException("Already finished");
-        
+
         Header contentRange = response.getFirstHeader("Content-Range");
         Header contentLengthHeader = response.getFirstHeader("Content-Length");
         Range actualRange;
-        
-        if(contentLengthHeader != null) {
+
+        if (contentLengthHeader != null) {
             long contentLength = numberFor(contentLengthHeader.getValue());
-            if(contentLength < 0)
+            if (contentLength < 0)
                 throw new IOException("Invalid content length: " + contentLength);
-            
-            if(contentRange != null) {
+
+            if (contentRange != null) {
                 // If a range exists, that's what we want.
                 actualRange = rangeForContentRange(contentRange.getValue(), contentLength);
             } else {
                 // If no range exists, assume 0 -> contentLength
-                actualRange = Range.createRange(0, contentLength-1);
+                actualRange = Range.createRange(0, contentLength - 1);
             }
-        } else if(contentRange == null) {
-         // Fail miserably.
+        } else if (contentRange == null) {
+            // Fail miserably.
             throw new IOException("No Content Range Found.");
         } else {
             // Fail miserably.
             throw new IOException("No content length, though content range existed.");
         }
-        
+
         validateActualRangeAndShrinkExpectedRange(actualRange);
     }
-    
+
     private void validateActualRangeAndShrinkExpectedRange(Range actualRange) throws IOException {
         if (actualRange == null || expectedRange == null) {
             throw new IOException("No actual or expected range?");
@@ -85,36 +122,37 @@ public class FileContentListener implements ResponseContentListener {
             throw new IOException("Invalid actual range.  Expected: " + expectedRange
                     + ", Actual: " + actualRange);
         }
-        
+
         if (!actualRange.equals(expectedRange)) {
             if (actualRange.getLow() > expectedRange.getLow()) {
-                fileCoordinator.unlease(Range.createRange(expectedRange.getLow(),
-                                                          actualRange.getLow()-1));
+                fileCoordinator.unlease(Range.createRange(expectedRange.getLow(), actualRange
+                        .getLow() - 1));
                 expectedRange = Range.createRange(actualRange.getLow(), expectedRange.getHigh());
             }
 
             if (actualRange.getHigh() < expectedRange.getHigh()) {
-                fileCoordinator.unlease(Range.createRange(actualRange.getHigh()+1,
-                                                          expectedRange.getHigh()));
+                fileCoordinator.unlease(Range.createRange(actualRange.getHigh() + 1, expectedRange
+                        .getHigh()));
                 expectedRange = Range.createRange(expectedRange.getLow(), actualRange.getHigh());
             }
         }
     }
-    
-    
+
     private Range rangeForContentRange(String headerValue, long contentLength) throws IOException {
         if (LOG.isDebugEnabled())
             LOG.debug("reading content range: " + headerValue);
 
         try {
-            int start = headerValue.indexOf("bytes") + 6; //skip "bytes " or "bytes="
+            int start = headerValue.indexOf("bytes") + 6; // skip "bytes " or
+            // "bytes="
             int slash = headerValue.indexOf('/');
 
-            //if looks like: "bytes */*" or "bytes */10" -- NOT part of the spec
+            // if looks like: "bytes */*" or "bytes */10" -- NOT part of the
+            // spec
             if (headerValue.substring(start, slash).equals("*")) {
                 if (LOG.isDebugEnabled())
                     LOG.debug("Content-Range like */?, " + headerValue);
-                return Range.createRange(0, contentLength-1);
+                return Range.createRange(0, contentLength - 1);
             }
 
             int dash = headerValue.lastIndexOf("-");
@@ -126,19 +164,19 @@ public class FileContentListener implements ResponseContentListener {
                         + ") less than low (" + numBeforeDash + ")");
 
             return Range.createRange(numBeforeDash, numBeforeSlash);
-            
+
             // TODO: Is it necessary to validate the number after the slash
-            //       matches the fileCoordinator's size (or is '*')?
+            // matches the fileCoordinator's size (or is '*')?
         } catch (IndexOutOfBoundsException e) {
             throw IOUtils.getIOException("Invalid Header: " + headerValue, e);
         }
 
     }
-    
+
     private static long numberFor(String number) throws IOException {
         try {
             return Long.parseLong(number);
-        } catch(NumberFormatException nfe) {
+        } catch (NumberFormatException nfe) {
             throw IOUtils.getIOException("Invalid number: " + number, nfe);
         }
     }
