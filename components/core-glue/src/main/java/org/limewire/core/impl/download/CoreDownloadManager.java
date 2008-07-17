@@ -1,14 +1,12 @@
 package org.limewire.core.impl.download;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.limewire.core.api.download.DownloadAddedListener;
 import org.limewire.core.api.download.DownloadItem;
+import org.limewire.core.api.download.DownloadListener;
 import org.limewire.core.api.download.DownloadManager;
-import org.limewire.core.api.download.DownloadState;
+
+import com.google.inject.Inject;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -16,15 +14,16 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 
 
-public class CoreDownloadManager implements DownloadManager {
-	private List<DownloadAddedListener> listeners = new ArrayList<DownloadAddedListener>();
-	private RemoveCancelledListener cancelListener = new RemoveCancelledListener();
+public class CoreDownloadManager implements DownloadManager{
+    
 	private EventList<DownloadItem> downloadItems;
 	
-	public CoreDownloadManager(){
+	@Inject
+	public CoreDownloadManager(DownloadListenerList listenerList){
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
 	    downloadItems = GlazedLists.threadSafeList(
 	            new ObservableElementList<DownloadItem>(new BasicEventList<DownloadItem>(), downloadConnector));
+	    listenerList.addDownloadListener(new CoreDownloadListener(downloadItems));
 	}
 
 	@Override
@@ -32,35 +31,25 @@ public class CoreDownloadManager implements DownloadManager {
 		return downloadItems;
 	}
 
-	@Override
-	public synchronized void addDownloadAddedListener(DownloadAddedListener listener) {
-		listeners.add(listener);
-	}
 
-	@Override
-	public synchronized void removeDownloadAddedListener(DownloadAddedListener listener) {
-		listeners.remove(listener);
-	}
 	
-	public synchronized void addDownload(DownloadItem downloadItem){
-	    downloadItem.addPropertyChangeListener(cancelListener);
-		downloadItems.add(downloadItem);
-		for(DownloadAddedListener listener : listeners){
-			listener.downloadAdded(downloadItem);
-		}
-	}
-	
-	
-	
-	private class RemoveCancelledListener implements PropertyChangeListener {
-        
+	private static class CoreDownloadListener implements DownloadListener {
+	    
+	    private List<DownloadItem> list;
+
+        public CoreDownloadListener(List<DownloadItem> list){
+	        this.list = list;
+	    }
+
         @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            if (evt.getNewValue() == DownloadState.CANCELLED) {
-                downloadItems.remove(evt.getSource());
-            }
+        public void downloadAdded(DownloadItem downloadItem) {
+            list.add(downloadItem);
+        }
+
+        @Override
+        public void downloadRemoved(DownloadItem downloadItem) {
+            list.remove(downloadItem);
         }
 
     }
-
 }

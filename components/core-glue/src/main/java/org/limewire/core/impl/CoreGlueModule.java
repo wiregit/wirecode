@@ -1,6 +1,7 @@
 package org.limewire.core.impl;
 
 import org.limewire.core.impl.download.CoreGlueDownloadModule;
+import org.limewire.core.impl.download.DownloadListenerList;
 import org.limewire.core.impl.search.CoreGlueSearchModule;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 
@@ -13,6 +14,7 @@ public class CoreGlueModule extends AbstractModule {
     protected void configure() {
         bind(ActivityCallback.class).to(GlueActivityCallback.class);
         bind(QueryReplyListenerList.class).to(GlueActivityCallback.class);
+        bind(DownloadListenerList.class).to(GlueActivityCallback.class);
         
         install(new CoreGlueSearchModule());
         install(new CoreGlueDownloadModule());

@@ -5,7 +5,7 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.limewire.core.api.download.DownloadAddedListener;
+import org.limewire.core.api.download.DownloadListener;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadManager;
 import org.limewire.core.api.download.DownloadState;
@@ -17,7 +17,6 @@ import ca.odell.glazedlists.ObservableElementList;
 
 
 public class MockDownloadManager implements DownloadManager {
-	private List<DownloadAddedListener> listeners = new ArrayList<DownloadAddedListener>();
 	private RemoveCancelledListener cancelListener = new RemoveCancelledListener();
 	private EventList<DownloadItem> downloadItems;
 	
@@ -33,22 +32,12 @@ public class MockDownloadManager implements DownloadManager {
 		return downloadItems;
 	}
 
-	@Override
-	public synchronized void addDownloadAddedListener(DownloadAddedListener listener) {
-		listeners.add(listener);
-	}
-
-	@Override
-	public synchronized void removeDownloadAddedListener(DownloadAddedListener listener) {
-		listeners.remove(listener);
-	}
+	
 	
 	public synchronized void addDownload(DownloadItem downloadItem){
 	    downloadItem.addPropertyChangeListener(cancelListener);
 		downloadItems.add(downloadItem);
-		for(DownloadAddedListener listener : listeners){
-			listener.downloadAdded(downloadItem);
-		}
+		
 	}
 	
 
