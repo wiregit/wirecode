@@ -96,7 +96,7 @@ export CLASSPATH
 # "\"LimeWire CVS\"", "LimeWire\040CVS", and "'LimeWire CVS'" all fail
 case ${PLATFORM} in
     Darwin)
-	export DYLD_FRAMEWORK_PATH=$DYLD_FRAMEWORK_PATH:../lib/native/osx
+	export DYLD_FRAMEWORK_PATH=$DYLD_FRAMEWORK_PATH:lib/native/osx
 
 	if ! [ -d "lib/native/osx/Growl.framework" ]; then
 		unzip "lib/native/osx/Growl.framework.zip" -d "lib/native/osx/"
