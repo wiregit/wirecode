@@ -19,11 +19,12 @@ import ca.odell.glazedlists.ObservableElementList;
 public class MockDownloadManager implements DownloadManager {
 	private List<DownloadAddedListener> listeners = new ArrayList<DownloadAddedListener>();
 	private RemoveCancelledListener cancelListener = new RemoveCancelledListener();
-	private ObservableElementList<DownloadItem> downloadItems;
+	private EventList<DownloadItem> downloadItems;
 	
 	public MockDownloadManager(){
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
-	    downloadItems = new ObservableElementList<DownloadItem>(new BasicEventList<DownloadItem>(), downloadConnector);
+	    downloadItems = GlazedLists.threadSafeList(
+	            new ObservableElementList<DownloadItem>(new BasicEventList<DownloadItem>(), downloadConnector));
 		initializeMockData();
 	}
 
@@ -94,13 +95,7 @@ public class MockDownloadManager implements DownloadManager {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             if (evt.getNewValue() == DownloadState.CANCELLED) {
-                // TODO : proper concurrency
-                downloadItems.getReadWriteLock().writeLock().lock();
-                try {
-                    downloadItems.remove(evt.getSource());
-                } finally {
-                    downloadItems.getReadWriteLock().writeLock().unlock();
-                }
+                downloadItems.remove(evt.getSource());
             }
         }
 

@@ -59,7 +59,7 @@ public class DownloadMediator {
 	
 	public void clearFinished() {
 		List<DownloadItem> finishedItems = new ArrayList<DownloadItem>();
-//TODO : should this be here?
+		//lock list to ensure it is not modified elsewhere
 		commonBaseList.getReadWriteLock().writeLock().lock();
 		
 		try {
