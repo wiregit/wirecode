@@ -77,8 +77,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
 
     public FileCoordinatorImpl(SwarmFileSystem fileSystem, SwarmVerifier swarmFileVerifier,
             ExecutorService writeService, SwarmBlockSelector selectionStrategy) {
-        this(fileSystem, swarmFileVerifier, writeService, selectionStrategy,
-                DEFAULT_MIN_BLOCK_SIZE);
+        this(fileSystem, swarmFileVerifier, writeService, selectionStrategy, DEFAULT_MIN_BLOCK_SIZE);
     }
 
     public FileCoordinatorImpl(SwarmFileSystem fileSystem, SwarmVerifier swarmFileVerifier,
@@ -102,6 +101,14 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
         return lease(null, fileSystem.getCompleteSize(), blockChooser);
     }
 
+    public Range lease(Range range) {
+        //TODO what if already written etc.?
+        synchronized (LOCK) {
+            addLease(range);
+        }
+        return range;
+    }
+
     public Range leasePortion(IntervalSet availableRanges) {
         // Lease modifies, so clone.
         if (availableRanges != null)
@@ -118,7 +125,8 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
                 blockChooser);
     }
 
-    protected Range lease(IntervalSet availableRanges, long blockSize, SwarmBlockSelector swarmSelector) {
+    protected Range lease(IntervalSet availableRanges, long blockSize,
+            SwarmBlockSelector swarmSelector) {
         IntervalSet neededBytes = new IntervalSet();
         availableRanges = getAvailableRangesForLease(availableRanges, neededBytes);
 
@@ -201,14 +209,15 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
             assert hasPending(writtenRange);
             deletePending(writtenRange);
             addWritten(writtenRange);
-            verifiableRanges = swarmFileVerifier.scanForVerifiableRanges(writtenBlocks,
-                    fileSystem.getCompleteSize());
+            verifiableRanges = swarmFileVerifier.scanForVerifiableRanges(writtenBlocks, fileSystem
+                    .getCompleteSize());
             complete = verifiableRanges.isEmpty() && isComplete();
         }
 
         if (complete) {
             listeners.downloadCompleted(fileSystem);
         }
+        listeners.blockWritten(writtenRange);
 
         verifyRanges(verifiableRanges);
     }
@@ -245,7 +254,9 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
                 if (verified) {
                     verifiedBlocks.add(rangeToVerify);
                     complete = isComplete();
+                    listeners.blockVerified(rangeToVerify);
                 } else {
+                    listeners.blockVerificationFailed(rangeToVerify);
                     // TODO: Add a toggle for keeping lost ranges, and do not
                     // count if doing a 'full scan'.
                     amountLost += rangeToVerify.getHigh() - rangeToVerify.getLow() + 1;
@@ -373,8 +384,9 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
 
             // TODO verify
 
-            while (swarmContent.read(byteBuffer) != -1 && byteBuffer.position() < byteBuffer.limit()) {
-     
+            while (swarmContent.read(byteBuffer) != -1
+                    && byteBuffer.position() < byteBuffer.limit()) {
+
             }
 
             long bytesWritten = 0;

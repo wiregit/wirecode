@@ -1,8 +1,6 @@
 package org.limewire.swarm;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 
@@ -14,6 +12,8 @@ public interface SwarmCoordinator {
      */
     Range lease();
 
+    Range lease(Range range);
+    
     /**
      * Leases just a portion of data, only allowing ranges in availableRanges.
      * If no data is available for leasing, this returns null.
@@ -105,6 +105,8 @@ public interface SwarmCoordinator {
      * once all ranges are verified.
      */
     void addListener(SwarmListener swarmListener);
+
+
 
     //long getCompleteFileSize();
     

@@ -22,11 +22,11 @@ import org.limewire.util.Objects;
  * 
  * 
  */
-public class FileContentListener implements ResponseContentListener {
+public class SwarmContentListener implements ResponseContentListener {
 
-    private static final Log LOG = LogFactory.getLog(FileContentListener.class);
+    private static final Log LOG = LogFactory.getLog(SwarmContentListener.class);
 
-    private final SwarmCoordinator fileCoordinator;
+    private final SwarmCoordinator swarmCoordinator;
 
     private boolean finished;
 
@@ -36,8 +36,8 @@ public class FileContentListener implements ResponseContentListener {
 
     private SwarmWriteJob writeJob = null;
 
-    public FileContentListener(SwarmCoordinator fileCoordinator, Range range) {
-        this.fileCoordinator = Objects.nonNull(fileCoordinator, "fileCoordinator");
+    public SwarmContentListener(SwarmCoordinator swarmCoordinator, Range range) {
+        this.swarmCoordinator = Objects.nonNull(swarmCoordinator, "fileCoordinator");
         this.range = Objects.nonNull(range, "range");
     }
 
@@ -53,7 +53,7 @@ public class FileContentListener implements ResponseContentListener {
         control.pause();
 
         if (writeJob == null) {
-            writeJob = fileCoordinator.createWriteJob(range, control);
+            writeJob = swarmCoordinator.createWriteJob(range, control);
         }
 
         writeJob.write(content);
@@ -78,7 +78,7 @@ public class FileContentListener implements ResponseContentListener {
         if (!finished) {
             finished = true;
             if (range != null) {
-                fileCoordinator.unlease(range);
+                swarmCoordinator.unlease(range);
                 range = null;
             }
             try {
@@ -134,13 +134,13 @@ public class FileContentListener implements ResponseContentListener {
 
         if (!actualRange.equals(range)) {
             if (actualRange.getLow() > range.getLow()) {
-                fileCoordinator
+                swarmCoordinator
                         .unlease(Range.createRange(range.getLow(), actualRange.getLow() - 1));
                 range = Range.createRange(actualRange.getLow(), range.getHigh());
             }
 
             if (actualRange.getHigh() < range.getHigh()) {
-                fileCoordinator.unlease(Range.createRange(actualRange.getHigh() + 1, range
+                swarmCoordinator.unlease(Range.createRange(actualRange.getHigh() + 1, range
                         .getHigh()));
                 range = Range.createRange(range.getLow(), actualRange.getHigh());
             }

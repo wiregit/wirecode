@@ -8,4 +8,6 @@ import org.apache.http.protocol.HttpContext;
 public interface SwarmExecutionContext {
     public static final String HTTP_AVAILABLE_RANGES = "swarm.http.availableRanges";
     public static final String HTTP_SWARM_SOURCE = "swarm.http.source";
+    public static final String SWARM_RESPONSE_LISTENER = "swarm.basic.listener";
+    public static final String SWARM_RANGE = "swarm.basic.range";
 }

@@ -91,7 +91,7 @@ public class SwarmerImplTest extends BaseTestCase {
 
         swarmer.start();
 
-        swarmer.addSource(new SourceImpl(uri, true), null);
+        swarmer.addSource(new SourceImpl(uri, fileSize));
         long sleepTime = (long) ((fileSize * 0.0001) + 5000);
         Thread.sleep(sleepTime);
 

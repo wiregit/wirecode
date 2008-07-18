@@ -21,13 +21,29 @@ public class SwarmListenerList {
         }
     }
     
-    public void verificationFailed(Range failedRange) {
+    public void blockLeased(Range block) {
         for (SwarmListener listener : listeners) {
-            listener.verificationFailed(swarmCoordinator, failedRange);
+            listener.blockLeased(swarmCoordinator, block);
         }
     }
     
+    public void blockWritten(Range block) {
+        for (SwarmListener listener : listeners) {
+            listener.blockWritten(swarmCoordinator, block);
+        }
+    }
     
+    public void blockVerificationFailed(Range failedRange) {
+        for (SwarmListener listener : listeners) {
+            listener.blockVerificationFailed(swarmCoordinator, failedRange);
+        }
+    }
+    
+    public void blockVerified(Range block) {
+        for (SwarmListener listener : listeners) {
+            listener.blockVerified(swarmCoordinator, block);
+        }
+    }
 
     public void add(SwarmListener swarmListener) {
         listeners.add(swarmListener);
