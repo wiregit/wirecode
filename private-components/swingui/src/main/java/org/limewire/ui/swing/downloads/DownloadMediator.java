@@ -6,7 +6,7 @@ import java.util.List;
 import javax.swing.JTextField;
 
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadManager;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 
 import ca.odell.glazedlists.EventList;
@@ -29,7 +29,7 @@ public class DownloadMediator {
 	 */
 	private EventList<DownloadItem> commonBaseList;
 	
-	public DownloadMediator(DownloadManager downloadManager) {
+	public DownloadMediator(DownloadListManager downloadManager) {
 	
 		commonBaseList= downloadManager.getDownloads();	
 		

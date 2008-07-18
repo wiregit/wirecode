@@ -7,7 +7,7 @@ import java.awt.GridBagLayout;
 import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.download.DownloadManager;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.search.SearchFactory;
 import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
@@ -39,7 +39,7 @@ public class LimeWireSwingUI extends JPanel {
     public LimeWireSwingUI(Injector coreInjector) {
     	GuiUtils.injectFields(this);
     	
-        this.downloadMediator = new DownloadMediator(coreInjector.getInstance(DownloadManager.class));        
+        this.downloadMediator = new DownloadMediator(coreInjector.getInstance(DownloadListManager.class));        
         
         this.mainPanel = new MainPanel();
         this.leftPanel = new LeftPanel(downloadMediator);

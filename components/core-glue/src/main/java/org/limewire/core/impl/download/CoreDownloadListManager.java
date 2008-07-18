@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListener;
-import org.limewire.core.api.download.DownloadManager;
+import org.limewire.core.api.download.DownloadListManager;
 
 import com.google.inject.Inject;
 
@@ -14,12 +14,12 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 
 
-public class CoreDownloadManager implements DownloadManager{
+public class CoreDownloadListManager implements DownloadListManager{
     
 	private EventList<DownloadItem> downloadItems;
 	
 	@Inject
-	public CoreDownloadManager(DownloadListenerList listenerList){
+	public CoreDownloadListManager(DownloadListenerList listenerList){
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
 	    downloadItems = GlazedLists.threadSafeList(
 	            new ObservableElementList<DownloadItem>(new BasicEventList<DownloadItem>(), downloadConnector));

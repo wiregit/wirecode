@@ -2,12 +2,9 @@ package org.limewire.core.impl.download;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.limewire.core.api.download.DownloadListener;
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadManager;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -16,11 +13,11 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 
 
-public class MockDownloadManager implements DownloadManager {
+public class MockDownloadListManager implements DownloadListManager {
 	private RemoveCancelledListener cancelListener = new RemoveCancelledListener();
 	private EventList<DownloadItem> downloadItems;
 	
-	public MockDownloadManager(){
+	public MockDownloadListManager(){
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
 	    downloadItems = GlazedLists.threadSafeList(
 	            new ObservableElementList<DownloadItem>(new BasicEventList<DownloadItem>(), downloadConnector));
