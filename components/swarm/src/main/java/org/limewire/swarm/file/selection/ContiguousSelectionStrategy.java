@@ -4,9 +4,9 @@ import java.util.NoSuchElementException;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.swarm.SwarmSelector;
+import org.limewire.swarm.SwarmBlockSelector;
 
-public class ContiguousSelectionStrategy implements SwarmSelector {
+public class ContiguousSelectionStrategy implements SwarmBlockSelector {
 
     public ContiguousSelectionStrategy() {
 

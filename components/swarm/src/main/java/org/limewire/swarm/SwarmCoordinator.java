@@ -24,7 +24,7 @@ public interface SwarmCoordinator {
      * Leases just a portion of data using the given selector, only allowing ranges in availableRanges.
      * If no data is available for leasing, this returns null.
      */
-    Range leasePortion(IntervalSet availableRanges, SwarmSelector selector);
+    Range leasePortion(IntervalSet availableRanges, SwarmBlockSelector selector);
 
     /** 
      * Returns a previously leased range.

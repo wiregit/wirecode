@@ -5,7 +5,7 @@ import java.util.NoSuchElementException;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 
-public interface SwarmSelector {
+public interface SwarmBlockSelector {
 
     /**
      * Encapsulates an algorithm for deciding which block of a file to download next.  

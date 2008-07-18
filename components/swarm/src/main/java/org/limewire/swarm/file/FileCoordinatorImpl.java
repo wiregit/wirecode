@@ -11,14 +11,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.nio.ByteBufferCache;
 import org.limewire.swarm.SwarmContent;
 import org.limewire.swarm.SwarmCoordinator;
-import org.limewire.swarm.SwarmDownload;
 import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmListener;
 import org.limewire.swarm.SwarmListenerList;
-import org.limewire.swarm.SwarmSelector;
+import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmVerifier;
 import org.limewire.swarm.SwarmWriteJob;
 import org.limewire.swarm.SwarmWriteJobControl;
@@ -27,7 +25,7 @@ import org.limewire.swarm.SwarmWriteJobImpl;
 /**
  * A {@link FileCoordinator} that verifies files using the given
  * {@link SwarmFileVerifier} and reads/writes the files using the given
- * {@link SwarmDownload}.
+ * {@link SwarmFileSystem}.
  * 
  * This implementation expects the writeService to use either in-place execution
  * or a single thread. If multiple threads are used, verifying may incorrectly
@@ -43,9 +41,6 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
     /** The minimum block size to use. */
     private final long minBlockSize;
 
-    /** The complete size of the file. */
-    private final long completeSize;
-
     /** All ranges that are out on lease. */
     private final IntervalSet leasedBlocks;
 
@@ -59,10 +54,10 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
     private final IntervalSet pendingBlocks;
 
     /** The strategy for selecting new leased ranges. */
-    private final SwarmSelector blockChooser;
+    private final SwarmBlockSelector blockChooser;
 
     /** The file writer. */
-    private final SwarmDownload swarmFile;
+    private final SwarmFileSystem fileSystem;
 
     /** The ExecutorService to use for writing. */
     private final ExecutorService writeService;
@@ -78,25 +73,22 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
 
     private final SwarmListenerList listeners = new SwarmListenerList(this);
 
-    private SwarmFileSystem fileSystem = null;
-
     /** List of listeners. */
 
-    public FileCoordinatorImpl(long size, SwarmDownload swarmFile, SwarmVerifier swarmFileVerifier,
-            ExecutorService writeService, SwarmSelector selectionStrategy) {
-        this(size, swarmFile, swarmFileVerifier, writeService, selectionStrategy,
+    public FileCoordinatorImpl(SwarmFileSystem fileSystem, SwarmVerifier swarmFileVerifier,
+            ExecutorService writeService, SwarmBlockSelector selectionStrategy) {
+        this(fileSystem, swarmFileVerifier, writeService, selectionStrategy,
                 DEFAULT_MIN_BLOCK_SIZE);
     }
 
-    public FileCoordinatorImpl(long size, SwarmDownload swarmFile, SwarmVerifier swarmFileVerifier,
-            ExecutorService writeService, SwarmSelector selectionStrategy, long minBlockSize) {
-        this.completeSize = size;
+    public FileCoordinatorImpl(SwarmFileSystem fileSystem, SwarmVerifier swarmFileVerifier,
+            ExecutorService writeService, SwarmBlockSelector selectionStrategy, long minBlockSize) {
         this.leasedBlocks = new IntervalSet();
         this.writtenBlocks = new IntervalSet();
         this.pendingBlocks = new IntervalSet();
         this.verifiedBlocks = new IntervalSet();
         this.blockChooser = selectionStrategy;
-        this.swarmFile = swarmFile;
+        this.fileSystem = fileSystem;
         this.writeService = writeService;
         this.swarmFileVerifier = swarmFileVerifier;
         this.minBlockSize = minBlockSize;
@@ -106,12 +98,8 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
         listeners.add(swarmListener);
     }
 
-    public long getCompleteFileSize() {
-        return completeSize;
-    }
-
     public Range lease() {
-        return lease(null, completeSize, blockChooser);
+        return lease(null, fileSystem.getCompleteSize(), blockChooser);
     }
 
     public Range leasePortion(IntervalSet availableRanges) {
@@ -122,7 +110,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
                 blockChooser);
     }
 
-    public Range leasePortion(IntervalSet availableRanges, SwarmSelector swarmSelector) {
+    public Range leasePortion(IntervalSet availableRanges, SwarmBlockSelector swarmSelector) {
         // Lease modifies, so clone.
         if (availableRanges != null)
             availableRanges = availableRanges.clone();
@@ -130,7 +118,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
                 blockChooser);
     }
 
-    protected Range lease(IntervalSet availableRanges, long blockSize, SwarmSelector swarmSelector) {
+    protected Range lease(IntervalSet availableRanges, long blockSize, SwarmBlockSelector swarmSelector) {
         IntervalSet neededBytes = new IntervalSet();
         availableRanges = getAvailableRangesForLease(availableRanges, neededBytes);
 
@@ -214,12 +202,12 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
             deletePending(writtenRange);
             addWritten(writtenRange);
             verifiableRanges = swarmFileVerifier.scanForVerifiableRanges(writtenBlocks,
-                    completeSize);
+                    fileSystem.getCompleteSize());
             complete = verifiableRanges.isEmpty() && isComplete();
         }
 
         if (complete) {
-            listeners.downloadCompleted(swarmFile);
+            listeners.downloadCompleted(fileSystem);
         }
 
         verifyRanges(verifiableRanges);
@@ -240,7 +228,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
         }
 
         return blocksToCheck != null && blocksToCheck.getNumberOfIntervals() == 1
-                && blocksToCheck.getSize() == completeSize;
+                && blocksToCheck.getSize() == fileSystem.getCompleteSize();
     }
 
     private void verifyRanges(List<Range> verifiableRanges) {
@@ -250,7 +238,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
 
         boolean complete = false;
         for (Range rangeToVerify : verifiableRanges) {
-            boolean verified = swarmFileVerifier.verify(rangeToVerify, swarmFile);
+            boolean verified = swarmFileVerifier.verify(rangeToVerify, fileSystem);
             synchronized (LOCK) {
                 assert writtenBlocks.contains(rangeToVerify);
                 writtenBlocks.delete(rangeToVerify);
@@ -269,7 +257,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
         }
 
         if (complete) {
-            listeners.downloadCompleted(swarmFile);
+            listeners.downloadCompleted(fileSystem);
         }
     }
 
@@ -297,7 +285,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
             // and wrote will trigger a verification.)
             if (pendingBlocks.getNumberOfIntervals() == 0 && !writtenBlocks.isEmpty()) {
                 verifiableRanges = swarmFileVerifier.scanForVerifiableRanges(writtenBlocks,
-                        completeSize);
+                        fileSystem.getCompleteSize());
             } else {
                 verifiableRanges = Collections.emptyList();
             }
@@ -322,7 +310,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
             // and wrote will trigger a verification.)
             if (pendingBlocks.getNumberOfIntervals() == 0 && !writtenBlocks.isEmpty()) {
                 verifiableRanges = swarmFileVerifier.scanForVerifiableRanges(writtenBlocks,
-                        completeSize);
+                        fileSystem.getCompleteSize());
             } else {
                 verifiableRanges = Collections.emptyList();
             }
@@ -354,13 +342,13 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
     protected IntervalSet getAvailableRangesForLease(IntervalSet availableRanges,
             IntervalSet neededBytes) {
         if (availableRanges == null)
-            availableRanges = IntervalSet.createSingletonSet(0, completeSize - 1);
+            availableRanges = IntervalSet.createSingletonSet(0, fileSystem.getCompleteSize() - 1);
 
         // Figure out which blocks we still need to assign
         if (neededBytes == null) {
-            neededBytes = IntervalSet.createSingletonSet(0, completeSize - 1);
+            neededBytes = IntervalSet.createSingletonSet(0, fileSystem.getCompleteSize() - 1);
         } else {
-            neededBytes.add(Range.createRange(0, completeSize - 1));
+            neededBytes.add(Range.createRange(0, fileSystem.getCompleteSize() - 1));
         }
 
         synchronized (LOCK) {
@@ -370,7 +358,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
             neededBytes.delete(verifiedBlocks);
         }
         // Calculate the intersection of neededBytes and availableBytes
-        availableRanges.delete(neededBytes.invert(completeSize));
+        availableRanges.delete(neededBytes.invert(fileSystem.getCompleteSize()));
         return availableRanges;
     }
 
@@ -382,12 +370,11 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
         synchronized (LOCK) {
             long position = range.getLow();
             ByteBuffer byteBuffer = ByteBuffer.allocate((int) DEFAULT_MIN_BLOCK_SIZE);
-            int numRead = 0;
 
             // TODO verify
 
-            while ((numRead = swarmContent.read(byteBuffer)) != -1 && byteBuffer.position() < byteBuffer.limit()) {
-                int x = 0;
+            while (swarmContent.read(byteBuffer) != -1 && byteBuffer.position() < byteBuffer.limit()) {
+     
             }
 
             long bytesWritten = 0;
@@ -396,7 +383,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
                 byteBuffer.flip();
                 pending(pendingRange);
 
-                bytesWritten = swarmFile.transferFrom(byteBuffer, position);
+                bytesWritten = fileSystem.write(byteBuffer, position);
                 wrote(pendingRange);
             }
             return bytesWritten;

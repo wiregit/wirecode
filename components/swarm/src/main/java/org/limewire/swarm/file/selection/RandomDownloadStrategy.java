@@ -8,7 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.swarm.SwarmSelector;
+import org.limewire.swarm.SwarmBlockSelector;
 
 
 /**
@@ -26,7 +26,7 @@ import org.limewire.swarm.SwarmSelector;
  * then the same algorithm is used, except that the location is chosen randomly from
  * an endpoint of one of the existing fragments, in an attempt to coalesce fragments.
  */
-public class RandomDownloadStrategy implements SwarmSelector {
+public class RandomDownloadStrategy implements SwarmBlockSelector {
     
     private static final Log LOG = LogFactory.getLog(RandomDownloadStrategy.class);
     

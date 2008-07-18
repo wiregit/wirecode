@@ -3,10 +3,10 @@ package org.limewire.swarm.file;
 import java.util.concurrent.ExecutorService;
 
 import org.limewire.collection.IntervalSet;
-import org.limewire.swarm.SwarmDownload;
+import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmListenerList;
-import org.limewire.swarm.SwarmSelector;
+import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmVerifier;
 
 public class SwarmFileSystemImpl {
@@ -29,10 +29,10 @@ public class SwarmFileSystemImpl {
     private IntervalSet pendingBlocks;
 
     /** The strategy for selecting new leased ranges. */
-    private SwarmSelector blockChooser;
+    private SwarmBlockSelector blockChooser;
 
     /** The file writer. */
-    private SwarmDownload swarmFile;
+    private SwarmFileSystem swarmFile;
 
     /** The ExecutorService to use for writing. */
     private ExecutorService writeService;
@@ -104,19 +104,19 @@ public class SwarmFileSystemImpl {
         this.pendingBlocks = pendingBlocks;
     }
 
-    public SwarmSelector getBlockChooser() {
+    public SwarmBlockSelector getBlockChooser() {
         return blockChooser;
     }
 
-    public void setBlockChooser(SwarmSelector blockChooser) {
+    public void setBlockChooser(SwarmBlockSelector blockChooser) {
         this.blockChooser = blockChooser;
     }
 
-    public SwarmDownload getSwarmFile() {
+    public SwarmFileSystem getSwarmFile() {
         return swarmFile;
     }
 
-    public void setSwarmFile(SwarmDownload swarmFile) {
+    public void setSwarmFile(SwarmFileSystem swarmFile) {
         this.swarmFile = swarmFile;
     }
 

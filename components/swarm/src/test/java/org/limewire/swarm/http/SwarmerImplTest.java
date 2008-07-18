@@ -20,10 +20,10 @@ import org.limewire.http.reactor.LimeConnectingIOReactor;
 import org.limewire.net.SocketsManagerImpl;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.swarm.SwarmCoordinator;
-import org.limewire.swarm.SwarmDownload;
-import org.limewire.swarm.SwarmSelector;
+import org.limewire.swarm.SwarmFileSystem;
+import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmVerifier;
-import org.limewire.swarm.file.FileChannelSwarmFile;
+import org.limewire.swarm.file.FileChannelSwarmFileSystem;
 import org.limewire.swarm.file.FileCoordinatorImpl;
 import org.limewire.swarm.file.selection.ContiguousSelectionStrategy;
 import org.limewire.swarm.file.verifier.NoOpFileVerifier;
@@ -43,23 +43,23 @@ public class SwarmerImplTest extends BaseTestCase {
 
     public void testSimpleSmallFileSwarm() throws Exception {
         String testURI = "http://www.limewire.org/lw-bt-testfiles";
-        
+
         long fileSize = 44425;
         String md5 = "8055d620ba0c507c1af957b43648c99f";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testSimpleSmallFileSwarm.pdf");
         URI uri = new URI("http://localhost/~pvertenten/pub/gnutella_protocol_0.4.pdf");
-        
+
         downloadTest(fileSize, md5, file, uri);
     }
-    
+
     public void testSimpleLargeFileSwarm() throws Exception {
         String testURI = "http://www.limewire.org/lw-bt-testfiles";
-        
+
         long fileSize = 679000064;
         String md5 = "1ba0b5a6e992d6d0461c1e34cb405e34";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testSimpleLargeFileSwarm.iso");
         URI uri = new URI("http://localhost/~pvertenten/pub/debian-40r3-ia64-CD-1.iso");
-        
+
         downloadTest(fileSize, md5, file, uri);
     }
 
@@ -74,16 +74,13 @@ public class SwarmerImplTest extends BaseTestCase {
         ConnectingIOReactor ioReactor = new LimeConnectingIOReactor(params, NIODispatcher
                 .instance().getScheduledExecutorService(), new SocketsManagerImpl());
 
-
-        
         file.delete();
-        
-        SwarmDownload swarmDownload = new FileChannelSwarmFile(file);
+
+        SwarmFileSystem swarmDownload = new FileChannelSwarmFileSystem(fileSize, file);
         SwarmVerifier swarmFileVerifier = new NoOpFileVerifier();
-        SwarmSelector selectionStrategy = new ContiguousSelectionStrategy();
-        
-        
-        SwarmCoordinator swarmCoordinator = new FileCoordinatorImpl(fileSize, swarmDownload,
+        SwarmBlockSelector selectionStrategy = new ContiguousSelectionStrategy();
+
+        SwarmCoordinator swarmCoordinator = new FileCoordinatorImpl(swarmDownload,
                 swarmFileVerifier, ExecutorsHelper.newFixedSizeThreadPool(1, "Writer"),
                 selectionStrategy);
 
@@ -93,19 +90,16 @@ public class SwarmerImplTest extends BaseTestCase {
                 ioReactor, params, null);
 
         swarmer.start();
-        
-        
+
         swarmer.addSource(new SourceImpl(uri, true), null);
         long sleepTime = (long) ((fileSize * 0.0001) + 5000);
         Thread.sleep(sleepTime);
 
         swarmDownload.finish();
-        
-        
+
         Assert.assertTrue(file.exists());
         Assert.assertEquals(fileSize, file.length());
-        
-        
+
         String testmd5 = FileUtils.getMD5(file);
         Assert.assertEquals(md5, testmd5);
     }
