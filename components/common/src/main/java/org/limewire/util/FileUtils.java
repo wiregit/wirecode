@@ -15,6 +15,8 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -912,30 +914,33 @@ public class FileUtils {
     }
 
     /**
-     * Utility method to generate an MD5 hash from a target file. 
-     * It should be updated to read from a stream if you wish to calculate the md5 for a large file.
-     * The current implementation assumes small file sizes.
+     * Utility method to generate an MD5 hash from a target file.
      * 
      * @param file
      * @return
      * @throws NoSuchAlgorithmException
+     * @throws IOException
      */
-    public static String getMD5(File file) throws NoSuchAlgorithmException {
-       byte[] fileBytes = readFileFully(file);
-       String md5 = getMD5(fileBytes);
-       return md5;       
-    }
+    public static String getMD5(File file) throws NoSuchAlgorithmException, IOException {
+        MessageDigest m = MessageDigest.getInstance("MD5");
+        ByteBuffer byteBuffer = ByteBuffer.allocate(16 * 1024);
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(file);
+            FileChannel fileChannel = fileInputStream.getChannel();
+            while (fileChannel.read(byteBuffer) != -1) {
+                byteBuffer.flip();
+                m.update(byteBuffer);
+                byteBuffer.clear();
+            }
 
-    /**
-     * Returns the MD5 string for the given byte array.
-     * @param fileBytes
-     * @return
-     * @throws NoSuchAlgorithmException
-     */
-    private static String getMD5(byte[] fileBytes) throws NoSuchAlgorithmException {
-        MessageDigest m= MessageDigest.getInstance("MD5");
-           byte[] digest = m.digest(fileBytes);
-           String md5 =new BigInteger(1,digest).toString(16);
+        } finally {
+            if (fileInputStream != null) {
+                fileInputStream.close();
+            }
+        }
+        byte[] digest = m.digest();
+        String md5 = new BigInteger(1, digest).toString(16);
         return md5;
     }
 }
