@@ -2,6 +2,10 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 
+import org.limewire.listener.EventListener;
+
+import com.limegroup.gnutella.downloader.DownloadStatusEvent;
+
 /**
  * Defines an interface for downloading a file. The user interface maintains a 
  * list of <code>Downloader</code>'s and uses its methods to stop and 
@@ -321,5 +325,9 @@ public interface Downloader extends BandwidthTracker {
      * used.
      */
     public String getCustomIconDescriptor();
+    
+    public void addListener(EventListener<DownloadStatusEvent> listener);
+
+    public boolean removeListener(EventListener<DownloadStatusEvent> listener); 
 }
 

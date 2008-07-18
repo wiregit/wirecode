@@ -6,9 +6,11 @@ import java.beans.PropertyChangeSupport;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSource;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.listener.EventListener;
 
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
+import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 
 public class CoreDownloadItem implements DownloadItem {
     // TODO: override hash and equals - should be equal if downloader is the same
@@ -16,9 +18,24 @@ public class CoreDownloadItem implements DownloadItem {
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
     private Downloader downloader;
     private volatile int hashCode = 0;
+    private long size = 0;
 
     public CoreDownloadItem(Downloader downloader) {
         this.downloader = downloader;
+        downloader.addListener(new EventListener<DownloadStatusEvent>(){
+
+            @Override
+            public void handleEvent(DownloadStatusEvent event) {
+                //TODO: actually fire correct property
+                long oldSize = size;
+                size = event.getSource().getAmountRead();
+                if(event.getSource().getState() == DownloadStatus.DOWNLOADING){
+                System.out.println("firing "+ event.getSource().getFile().getName() + "  "+size);
+                }
+              support.firePropertyChange("size", oldSize, size);
+            }
+            
+        });
     }
 
     public Downloader getDownloader(){
@@ -83,7 +100,7 @@ public class CoreDownloadItem implements DownloadItem {
 
     @Override
     public String getTitle() {
-        // TODO Auto-generated method stub
+        // TODO return title, not file name
         return downloader.getFile().getName();
     }
 

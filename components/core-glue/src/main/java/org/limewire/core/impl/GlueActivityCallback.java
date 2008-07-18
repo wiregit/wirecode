@@ -218,7 +218,6 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     public void addDownload(Downloader d) {
-        System.out.println("download added : " + d.getFile().getName());
         CoreDownloadItem downloadItem = new CoreDownloadItem(d);
         synchronized (downloadListeners) {
             for (DownloadListener listener : downloadListeners) {
@@ -243,7 +242,6 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     public void removeDownload(Downloader d) {
-        System.out.println("download removed : " + d.getFile().getName());
         CoreDownloadItem downloadItem = new CoreDownloadItem(d);
         synchronized (downloadListeners) {
             for (DownloadListener listener : downloadListeners) {
@@ -254,7 +252,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     public void showDownloads() {
         // TODO Auto-generated method stub
-System.out.println("showdownloads");
+        System.out.println("showdownloads");
     }
 
 }
