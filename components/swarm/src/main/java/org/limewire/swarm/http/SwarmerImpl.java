@@ -76,8 +76,8 @@ public class SwarmerImpl implements Swarmer {
     }
 
     public void addSource(final SwarmSource source, SourceEventListener sourceEventListener) {
-        if (!started.get())
-            throw new IllegalStateException("Cannot add source before starting");
+//        if (!started.get())
+//            throw new IllegalStateException("Cannot add source before starting");
 
         if (LOG.isDebugEnabled())
             LOG.debug("Adding source: " + source);

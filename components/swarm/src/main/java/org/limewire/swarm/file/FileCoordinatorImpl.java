@@ -102,7 +102,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
     }
 
     public Range lease(Range range) {
-        //TODO what if already written etc.?
+        // TODO what if already written etc.?
         synchronized (LOCK) {
             addLease(range);
         }
@@ -382,8 +382,6 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
             long position = range.getLow();
             ByteBuffer byteBuffer = ByteBuffer.allocate((int) DEFAULT_MIN_BLOCK_SIZE);
 
-            // TODO verify
-
             while (swarmContent.read(byteBuffer) != -1
                     && byteBuffer.position() < byteBuffer.limit()) {
 
@@ -399,6 +397,13 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
                 wrote(pendingRange);
             }
             return bytesWritten;
+        }
+    }
+
+    public void finish() throws IOException {
+        synchronized (LOCK) {
+            // TODO handle possible running write jobs.
+            fileSystem.finish();
         }
     }
 

@@ -82,6 +82,7 @@ public class SwarmContentListener implements ResponseContentListener {
                 range = null;
             }
             try {
+                swarmCoordinator.finish();
                 if (ioControl != null) {
                     ioControl.shutdown();
                 }

@@ -106,6 +106,8 @@ public interface SwarmCoordinator {
      */
     void addListener(SwarmListener swarmListener);
 
+    void finish() throws IOException;
+
 
 
     //long getCompleteFileSize();
