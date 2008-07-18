@@ -1,15 +1,14 @@
 package org.limewire.swarm.http;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.security.NoSuchAlgorithmException;
 
 import junit.framework.Assert;
 import junit.framework.Test;
 
 import org.apache.http.ConnectionReuseStrategy;
-import org.apache.http.HttpStatus;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.params.BasicHttpParams;
@@ -42,10 +41,30 @@ public class SwarmerImplTest extends BaseTestCase {
         return buildTestSuite(SwarmerImplTest.class);
     }
 
-    public void testSimpleSwarm() throws Exception {
+    public void testSimpleSmallFileSwarm() throws Exception {
         String testURI = "http://www.limewire.org/lw-bt-testfiles";
         
         long fileSize = 44425;
+        String md5 = "8055d620ba0c507c1af957b43648c99f";
+        File file = new File(System.getProperty("java.io.tmpdir") + "/testSimpleSmallFileSwarm.pdf");
+        URI uri = new URI("http://localhost/~pvertenten/pub/gnutella_protocol_0.4.pdf");
+        
+        downloadTest(fileSize, md5, file, uri);
+    }
+    
+    public void testSimpleLargeFileSwarm() throws Exception {
+        String testURI = "http://www.limewire.org/lw-bt-testfiles";
+        
+        long fileSize = 679000064;
+        String md5 = "1ba0b5a6e992d6d0461c1e34cb405e34";
+        File file = new File(System.getProperty("java.io.tmpdir") + "/testSimpleLargeFileSwarm.iso");
+        URI uri = new URI("http://localhost/~pvertenten/pub/debian-40r3-ia64-CD-1.iso");
+        
+        downloadTest(fileSize, md5, file, uri);
+    }
+
+    private void downloadTest(long fileSize, String md5, File file, URI uri)
+            throws InterruptedException, IOException, NoSuchAlgorithmException {
         HttpParams params = new BasicHttpParams();
         params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000).setIntParameter(
                 CoreConnectionPNames.CONNECTION_TIMEOUT, 2000).setIntParameter(
@@ -54,10 +73,9 @@ public class SwarmerImplTest extends BaseTestCase {
                 CoreProtocolPNames.USER_AGENT, "LimeTest/1.1");
         ConnectingIOReactor ioReactor = new LimeConnectingIOReactor(params, NIODispatcher
                 .instance().getScheduledExecutorService(), new SocketsManagerImpl());
-        // ConnectingIOReactor ioReactor = new DefaultConnectingIOReactor(1,
-        // params);
 
-        File file = new File(System.getProperty("java.io.tmpdir") + "/testSimpleSwarm.pdf");
+
+        
         file.delete();
         
         SwarmDownload swarmDownload = new FileChannelSwarmFile(file);
@@ -76,10 +94,10 @@ public class SwarmerImplTest extends BaseTestCase {
 
         swarmer.start();
         
-        URI uri = new URI("http://localhost/~pvertenten/pub/gnutella_protocol_0.4.pdf");
+        
         swarmer.addSource(new SourceImpl(uri, true), null);
-
-        Thread.sleep(20000);
+        long sleepTime = (long) ((fileSize * 0.0001) + 5000);
+        Thread.sleep(sleepTime);
 
         swarmDownload.finish();
         
@@ -87,11 +105,8 @@ public class SwarmerImplTest extends BaseTestCase {
         Assert.assertTrue(file.exists());
         Assert.assertEquals(fileSize, file.length());
         
-        String md5 = "8055d620ba0c507c1af957b43648c99f";
+        
         String testmd5 = FileUtils.getMD5(file);
         Assert.assertEquals(md5, testmd5);
-        
-        
-   
     }
 }

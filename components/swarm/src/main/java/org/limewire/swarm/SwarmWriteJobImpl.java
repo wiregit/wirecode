@@ -1,7 +1,6 @@
 package org.limewire.swarm;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -23,14 +22,17 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
     private Future<Void> scheduledJob;
 
     private final Range range;
+    
+    private Range writeRange = null;
 
-    private final SwarmWriteJobCallBack callback;
+    private final SwarmWriteJobControl callback;
 
     public SwarmWriteJobImpl(Range range, SwarmCoordinator fileCoordinator,
-            ExecutorService jobScheduler, SwarmWriteJobCallBack callback) {
+            ExecutorService jobScheduler, SwarmWriteJobControl callback) {
         this.jobScheduler = jobScheduler;
         this.fileCoordinator = fileCoordinator;
         this.range = range;
+        this.writeRange = range;
         this.callback = callback;
     }
 
@@ -47,7 +49,7 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
 
     public long write(final SwarmContent content) throws IOException {
         synchronized (scheduleLock) {
-           
+
             scheduledJob = jobScheduler.submit(new Callable<Void>() {
                 public Void call() throws Exception {
                     writeData(range, content);
@@ -55,7 +57,6 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
                 }
             });
 
-            
             return 0;
         }
     }
@@ -65,11 +66,17 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
      * This roundabout way of writing is required to ensure that no shared lock
      * is used both during disk & network I/O. (Disk I/O is inherently blocking,
      * and can stall network I/O otherwise.)
-     * @param range 
+     * 
+     * @param range
      * 
      * @param content
      */
     private void writeData(Range range, SwarmContent content) throws IOException {
-        fileCoordinator.write(range, content);
+        synchronized (scheduleLock) {
+            long bytesWritten = fileCoordinator.write(writeRange, content);
+            Range newRange = Range.createRange(writeRange.getLow() + bytesWritten, writeRange.getHigh());
+            this.writeRange = newRange;
+            callback.resume();
+        }
     }
 }

@@ -6,7 +6,7 @@ package org.limewire.swarm;
  * A job for writing data.  The job is expected to asynchronously write data
  * to disk.
  */
-public interface SwarmWriteJobCallBack {
+public interface SwarmWriteJobControl {
    
    public void pause();
    

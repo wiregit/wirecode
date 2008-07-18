@@ -21,7 +21,7 @@ import org.limewire.swarm.SwarmListenerList;
 import org.limewire.swarm.SwarmSelector;
 import org.limewire.swarm.SwarmVerifier;
 import org.limewire.swarm.SwarmWriteJob;
-import org.limewire.swarm.SwarmWriteJobCallBack;
+import org.limewire.swarm.SwarmWriteJobControl;
 import org.limewire.swarm.SwarmWriteJobImpl;
 
 /**
@@ -373,34 +373,31 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
         availableRanges.delete(neededBytes.invert(completeSize));
         return availableRanges;
     }
-    
-    public SwarmWriteJob createWriteJob(Range range, SwarmWriteJobCallBack callback) {
+
+    public SwarmWriteJob createWriteJob(Range range, SwarmWriteJobControl callback) {
         return new SwarmWriteJobImpl(range, this, writeService, callback);
     }
 
-    public long write(Range range, SwarmContent swarmContent) {
+    public long write(Range range, SwarmContent swarmContent) throws IOException {
         synchronized (LOCK) {
             long position = range.getLow();
-            long bytesWritten = 0;
-
-            ByteBuffer byteBuffer = ByteBuffer.allocate(1024 * 16);
+            ByteBuffer byteBuffer = ByteBuffer.allocate((int) DEFAULT_MIN_BLOCK_SIZE);
             int numRead = 0;
-            // TODO verify
-            try {
-                while ((numRead = swarmContent.read(byteBuffer)) != -1) {
-                    int bufferPosition = byteBuffer.position();
-                    Range pendingRange = Range.createRange(position, position + bufferPosition);
 
-                    pending(pendingRange);
-                    byteBuffer.flip();
-                    bytesWritten += swarmFile.transferFrom(byteBuffer, position);
-                    wrote(pendingRange);
-                    byteBuffer.clear();
-                    position += bufferPosition;
-                }
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            // TODO verify
+
+            while ((numRead = swarmContent.read(byteBuffer)) != -1 && byteBuffer.position() < byteBuffer.limit()) {
+                int x = 0;
+            }
+
+            long bytesWritten = 0;
+            if (byteBuffer.position() > 0) {
+                Range pendingRange = Range.createRange(position, position + byteBuffer.position());
+                byteBuffer.flip();
+                pending(pendingRange);
+
+                bytesWritten = swarmFile.transferFrom(byteBuffer, position);
+                wrote(pendingRange);
             }
             return bytesWritten;
         }

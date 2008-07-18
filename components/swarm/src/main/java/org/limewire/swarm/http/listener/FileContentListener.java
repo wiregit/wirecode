@@ -13,10 +13,15 @@ import org.limewire.io.IOUtils;
 import org.limewire.swarm.SwarmContent;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmWriteJob;
-import org.limewire.swarm.SwarmWriteJobCallBack;
+import org.limewire.swarm.SwarmWriteJobControl;
 import org.limewire.swarm.http.SwarmHttpContentDecoderImpl;
 import org.limewire.util.Objects;
 
+/**
+ * The content listener is registered to receive
+ * 
+ * 
+ */
 public class FileContentListener implements ResponseContentListener {
 
     private static final Log LOG = LogFactory.getLog(FileContentListener.class);
@@ -25,7 +30,7 @@ public class FileContentListener implements ResponseContentListener {
 
     private boolean finished;
 
-    private Range expectedRange;
+    private Range range;
 
     private IOControl ioControl = null;
 
@@ -33,7 +38,7 @@ public class FileContentListener implements ResponseContentListener {
 
     public FileContentListener(SwarmCoordinator fileCoordinator, Range range) {
         this.fileCoordinator = Objects.nonNull(fileCoordinator, "fileCoordinator");
-        this.expectedRange = Objects.nonNull(range, "range");
+        this.range = Objects.nonNull(range, "range");
     }
 
     public void contentAvailable(ContentDecoder decoder, IOControl ioctrl) throws IOException {
@@ -44,32 +49,37 @@ public class FileContentListener implements ResponseContentListener {
 
         SwarmContent content = new SwarmHttpContentDecoderImpl(decoder);
 
-        final IOControl finalIOControl = ioctrl;
-        finalIOControl.suspendInput();
-        finalIOControl.suspendOutput();
-        if (writeJob == null) {
-            writeJob = fileCoordinator.createWriteJob(expectedRange, new SwarmWriteJobCallBack() {
-                        public void pause() {
-                            finalIOControl.suspendInput();
-                            finalIOControl.suspendOutput();
-                        }
+        SwarmWriteJobControl control = createControl(ioctrl);
+        control.pause();
 
-                        public void resume() {
-                            finalIOControl.requestOutput();
-                            finalIOControl.requestInput();
-                        }
-                    });
+        if (writeJob == null) {
+            writeJob = fileCoordinator.createWriteJob(range, control);
         }
-        
+
         writeJob.write(content);
+    }
+
+    private SwarmWriteJobControl createControl(final IOControl finalIOControl) {
+        SwarmWriteJobControl callBack = new SwarmWriteJobControl() {
+            public void pause() {
+                finalIOControl.suspendInput();
+                finalIOControl.suspendOutput();
+            }
+
+            public void resume() {
+                finalIOControl.requestOutput();
+                finalIOControl.requestInput();
+            }
+        };
+        return callBack;
     }
 
     public void finished() {
         if (!finished) {
             finished = true;
-            if (expectedRange != null) {
-                fileCoordinator.unlease(expectedRange);
-                expectedRange = null;
+            if (range != null) {
+                fileCoordinator.unlease(range);
+                range = null;
             }
             try {
                 if (ioControl != null) {
@@ -113,27 +123,26 @@ public class FileContentListener implements ResponseContentListener {
     }
 
     private void validateActualRangeAndShrinkExpectedRange(Range actualRange) throws IOException {
-        if (actualRange == null || expectedRange == null) {
+        if (actualRange == null || range == null) {
             throw new IOException("No actual or expected range?");
         }
 
-        if (actualRange.getLow() < expectedRange.getLow()
-                || actualRange.getHigh() > expectedRange.getHigh()) {
-            throw new IOException("Invalid actual range.  Expected: " + expectedRange
-                    + ", Actual: " + actualRange);
+        if (actualRange.getLow() < range.getLow() || actualRange.getHigh() > range.getHigh()) {
+            throw new IOException("Invalid actual range.  Expected: " + range + ", Actual: "
+                    + actualRange);
         }
 
-        if (!actualRange.equals(expectedRange)) {
-            if (actualRange.getLow() > expectedRange.getLow()) {
-                fileCoordinator.unlease(Range.createRange(expectedRange.getLow(), actualRange
-                        .getLow() - 1));
-                expectedRange = Range.createRange(actualRange.getLow(), expectedRange.getHigh());
+        if (!actualRange.equals(range)) {
+            if (actualRange.getLow() > range.getLow()) {
+                fileCoordinator
+                        .unlease(Range.createRange(range.getLow(), actualRange.getLow() - 1));
+                range = Range.createRange(actualRange.getLow(), range.getHigh());
             }
 
-            if (actualRange.getHigh() < expectedRange.getHigh()) {
-                fileCoordinator.unlease(Range.createRange(actualRange.getHigh() + 1, expectedRange
+            if (actualRange.getHigh() < range.getHigh()) {
+                fileCoordinator.unlease(Range.createRange(actualRange.getHigh() + 1, range
                         .getHigh()));
-                expectedRange = Range.createRange(expectedRange.getLow(), actualRange.getHigh());
+                range = Range.createRange(range.getLow(), actualRange.getHigh());
             }
         }
     }

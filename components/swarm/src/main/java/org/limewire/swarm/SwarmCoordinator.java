@@ -48,10 +48,11 @@ public interface SwarmCoordinator {
      * It is expected that the job will call {@link #pending(Range)} when
      * it consumed content, and will eventually call {@link #wrote(Range)}
      * after data has successfully been written to disk.
+     * @param length 
      */
-    long write(Range range, SwarmContent content);
+    long write(Range range, SwarmContent content) throws IOException;
     
-    SwarmWriteJob createWriteJob(Range rangem, SwarmWriteJobCallBack callback);
+    SwarmWriteJob createWriteJob(Range rangem, SwarmWriteJobControl callback);
 
     /**
      * Marks a range as pending a write.
