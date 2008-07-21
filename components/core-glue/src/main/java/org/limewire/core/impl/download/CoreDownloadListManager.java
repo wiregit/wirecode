@@ -1,12 +1,16 @@
 package org.limewire.core.impl.download;
 
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListener;
-import org.limewire.core.api.download.DownloadManager;
+import org.limewire.core.api.download.DownloadListManager;
 
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -14,18 +18,40 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 
 
-public class CoreDownloadManager implements DownloadManager{
+public class CoreDownloadListManager implements DownloadListManager{
     
 	private EventList<DownloadItem> downloadItems;
+    
+    private static final int PERIOD = 1000;
 	
 	@Inject
-	public CoreDownloadManager(DownloadListenerList listenerList){
+	public CoreDownloadListManager(DownloadListenerList listenerList, @Named("backgroundExecutor") ScheduledExecutorService backgroundExecutor){
 	    ObservableElementList.Connector<DownloadItem> downloadConnector = GlazedLists.beanConnector(DownloadItem.class);
 	    downloadItems = GlazedLists.threadSafeList(
 	            new ObservableElementList<DownloadItem>(new BasicEventList<DownloadItem>(), downloadConnector));
 	    listenerList.addDownloadListener(new CoreDownloadListener(downloadItems));
+	    
+	  //TODO: change backgroundExecutor to listener - currently no listener for download progress
+      //hack to force tables to update
+	    Runnable command = new Runnable() {
+            @Override
+            public void run() {
+                update();
+            }
+        };
+        backgroundExecutor.scheduleAtFixedRate(command, 0, PERIOD, TimeUnit.MILLISECONDS);
+
 	}
 
+    // forces refresh
+    private void update() {
+        synchronized (downloadItems) {
+            if (downloadItems.size() > 0) {
+                downloadItems.set(0, downloadItems.get(0));
+            }
+        }
+    }
+	
 	@Override
 	public EventList<DownloadItem> getDownloads() {
 		return downloadItems;

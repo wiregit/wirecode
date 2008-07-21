@@ -2,13 +2,17 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 
+import org.limewire.listener.ListenerSupport;
+
+import com.limegroup.gnutella.downloader.DownloadStatusEvent;
+
 /**
  * Defines an interface for downloading a file. The user interface maintains a 
  * list of <code>Downloader</code>'s and uses its methods to stop and 
  * resume downloads. Note that there is no start method;
  * it is assumed that the downloader will start as soon as it is instantiated.
  */
-public interface Downloader extends BandwidthTracker {
+public interface Downloader extends BandwidthTracker, ListenerSupport<DownloadStatusEvent> {
     
     /** Enumerates the various states of a download. */
     public static enum DownloadStatus {
