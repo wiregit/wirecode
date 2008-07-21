@@ -45,10 +45,13 @@ public class CoreDownloadListManager implements DownloadListManager{
 
     // forces refresh
     private void update() {
-        synchronized (downloadItems) {
+        downloadItems.getReadWriteLock().writeLock().lock();
+        try {
             if (downloadItems.size() > 0) {
                 downloadItems.set(0, downloadItems.get(0));
             }
+        } finally {
+            downloadItems.getReadWriteLock().writeLock().unlock();
         }
     }
 	
