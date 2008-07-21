@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 
-import org.limewire.listener.EventListener;
+import org.limewire.listener.ListenerSupport;
 
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 
@@ -12,7 +12,7 @@ import com.limegroup.gnutella.downloader.DownloadStatusEvent;
  * resume downloads. Note that there is no start method;
  * it is assumed that the downloader will start as soon as it is instantiated.
  */
-public interface Downloader extends BandwidthTracker {
+public interface Downloader extends BandwidthTracker, ListenerSupport<DownloadStatusEvent> {
     
     /** Enumerates the various states of a download. */
     public static enum DownloadStatus {
@@ -326,8 +326,5 @@ public interface Downloader extends BandwidthTracker {
      */
     public String getCustomIconDescriptor();
     
-    public void addListener(EventListener<DownloadStatusEvent> listener);
-
-    public boolean removeListener(EventListener<DownloadStatusEvent> listener); 
 }
 

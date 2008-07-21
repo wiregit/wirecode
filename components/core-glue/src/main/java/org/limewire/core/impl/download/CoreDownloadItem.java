@@ -13,8 +13,7 @@ import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 
 public class CoreDownloadItem implements DownloadItem {
-    // TODO: override hash and equals - should be equal if downloader is the same
-
+   
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
     private Downloader downloader;
     private volatile int hashCode = 0;
@@ -26,13 +25,10 @@ public class CoreDownloadItem implements DownloadItem {
 
             @Override
             public void handleEvent(DownloadStatusEvent event) {
-                //TODO: actually fire correct property
+                //TODO: fire correct property
                 long oldSize = size;
                 size = event.getSource().getAmountRead();
-                if(event.getSource().getState() == DownloadStatus.DOWNLOADING){
-                System.out.println("firing "+ event.getSource().getFile().getName() + "  "+size);
-                }
-              support.firePropertyChange("size", oldSize, size);
+                support.firePropertyChange("size", oldSize, size);
             }
             
         });
