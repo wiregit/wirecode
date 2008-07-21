@@ -30,5 +30,7 @@ public interface SwarmFileSystem {
     SwarmFile getSwarmFile(long position);
     
     List<SwarmFile> getSwarmFilesInRange(Range range);
+    
+    List<SwarmFile> getSwarmFiles();
 
 }

@@ -9,7 +9,7 @@ import org.limewire.collection.Range;
 import org.limewire.swarm.SwarmFileSystem;
 
 public class SwarmFileSystemImpl implements SwarmFileSystem {
-    private ArrayList<SwarmFileImpl> files = new ArrayList<SwarmFileImpl>();
+    private ArrayList<SwarmFile> files = new ArrayList<SwarmFile>();
 
     private long completeSize = 0;
 
@@ -37,8 +37,12 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
 
     }
 
+    public List<SwarmFile> getSwarmFiles() {
+        return files;
+    }
+    
     public List<SwarmFile> getSwarmFilesInRange(Range range) {
-        ArrayList<SwarmFile> files = new ArrayList<SwarmFile>();
+        ArrayList<SwarmFile> filesRet = new ArrayList<SwarmFile>();
         
         long rangeStart = range.getLow();
         long rangeEnd = range.getHigh();
@@ -47,11 +51,11 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
             long startByte = swarmFile.getStartByte();
             long endByte = swarmFile.getEndByte();
             if (startByte <= rangeEnd && endByte >= rangeStart) {
-                files.add(swarmFile);
+                filesRet.add(swarmFile);
             }
         }
 
-        return files;
+        return filesRet;
     }
 
     public synchronized void add(SwarmFileImpl swarmFile) {
@@ -83,13 +87,15 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
     }
 
     public void close() throws IOException {
-        for (SwarmFileImpl swarmFile : files) {
-            swarmFile.close();
+        for (SwarmFile swarmFile : files) {
+            //TODO close files somehow
         }
     }
 
     public void initialize() throws IOException {
 
     }
+
+
 
 }
