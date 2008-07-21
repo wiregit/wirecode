@@ -362,23 +362,16 @@ public class FileManagerTest extends LimeTestCase {
 
         sharedFiles=fman.getSharedFileList().getFilesInDirectory(_sharedDir);
         assertEquals("unexpected files length", 2, sharedFiles.size());
-        for(FileDesc fd : fman.getSharedFileList().getAllFileDescs()) {
-            System.out.println("sharing " + fd);
-        }
         
-        FileManagerEvent result = renameFile(f2, new File("c:\\asdfoih"));
-        assertTrue(result.toString(), result.getType() == FileManagerEvent.Type.RENAME_FILE_FAILED);
-        assertEquals(f2, result.getOldFile());
-     System.out.println("real rename");   
-        result = renameFile(f1, f2);
+//        FileManagerEvent result = renameFile(f2, new File("c:\\asdfoih"));
+//        assertTrue(result.toString(), result.getType() == FileManagerEvent.Type.RENAME_FILE_FAILED);
+//        assertEquals(f2, result.getOldFile());
+        FileManagerEvent result = renameFile(f1, f2);
         assertTrue(result.toString(), result.isRenameEvent());
         assertEquals(f1, result.getOldFile());
         assertEquals(f2, result.getNewFile());
         sharedFiles=fman.getSharedFileList().getFilesInDirectory(_sharedDir);
         
-        for(FileDesc fd : fman.getSharedFileList().getAllFileDescs()) {
-            System.out.println("sharing " + fd);
-        }
         assertEquals("unexpected files length", 2, fman.getSharedFileList().size());
         assertEquals("unexpected files length", 2, sharedFiles.size());
         assertSharedFiles(sharedFiles, f2, f3);
@@ -593,6 +586,7 @@ public class FileManagerTest extends LimeTestCase {
         f = new File("asdf");
         
         fman.addIncompleteFile(f, urns, "asdf", 1024 * 1024, vf);
+        Thread.sleep(1000);
         ifd = (IncompleteFileDesc) fman.getFileDesc(UrnHelper.URNS[0]);
         assertTrue(ifd.hasUrnsAndPartialData());
         assertGreaterThan(0,keywordIndex.query(qrDesiring).length);
@@ -965,17 +959,19 @@ public class FileManagerTest extends LimeTestCase {
         File shared    = createNewNamedTestFile(10, "shared", _sharedDir.getParentFile());
         File notShared = createNewNamedTestFile(10, "notShared", _sharedDir.getParentFile());
         File sessionShared = createNewNamedTestFile(10, "sessionShared", _sharedDir.getParentFile());
-        getLibraryData().SPECIAL_FILES_TO_SHARE.add(shared);
+//        getLibraryData().SPECIAL_FILES_TO_SHARE.add(shared);
+//        fman.getSharedFileList().addFile(shared);
         waitForLoad();
 
+        addAlways(shared);
         // add the session-shared file
-        fman.getSharedFileList().addFileForSession(sessionShared);
-        Thread.sleep(200);
+        addFileForSession(sessionShared);
         
         //  assert that "shared" and "notShared" are not in a shared directory
         assertFalse(fman.isFileInCompletelySharedDirectory(shared));
         assertFalse(fman.isFileInCompletelySharedDirectory(notShared));
         assertFalse(fman.isFileInCompletelySharedDirectory(sessionShared));
+        assertTrue(fman.getSharedFileList().isIndividualFile(shared));
         
         //  assert that "shared" and "sessionShared" are shared
         assertEquals(2,fman.getSharedFileList().size());
@@ -1019,14 +1015,8 @@ public class FileManagerTest extends LimeTestCase {
         //should not have dipatched an event for the folder
         for(FileManagerEvent fevt: listener.getFileManagerEventList()) {
             if(fevt.isAddFolderEvent()) {
-                File file = fevt.getNewFile();
+                File file = fevt.getOldFile(); 
                 assertFalse(file.getParent().equals(SharingUtils.APPLICATION_SPECIAL_SHARE));
-//                File[] files = fevt.getFiles();
-//                for(int i = 0 ; i < files.length; i++) {
-//                    if(files[i] != null) {
-//                        assertFalse(files[i].getParent().equals(SharingUtils.APPLICATION_SPECIAL_SHARE));
-//                    }
-//                }
             }
         }
         specialShare = createNewNamedTestFile(10, "shared2", SharingUtils.APPLICATION_SPECIAL_SHARE);
@@ -1298,7 +1288,7 @@ public class FileManagerTest extends LimeTestCase {
             createNewNamedTestFile(i + 1, "recshared" + i, dirs[i]);
         }
         
-        fman.removeFolderIfShared(_sharedDir);
+        fman.removeSharedFolder(_sharedDir);
         fman.addSharedFolder(dirs[1]);
         fman.addSharedFolder(dirs[0]);
         
@@ -1308,7 +1298,7 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[1]).size());
         
         // Now unshare sub1
-        fman.removeFolderIfShared(dirs[1]);
+        fman.removeSharedFolder(dirs[1]);
         assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[0]).size());
         assertEquals(0, fman.getSharedFileList().getFilesInDirectory(dirs[1]).size());
         
@@ -1333,7 +1323,7 @@ public class FileManagerTest extends LimeTestCase {
             createNewNamedTestFile(i + 1, "recshared" + i, dirs[i]);
         }
         
-        fman.removeFolderIfShared(_sharedDir);
+        fman.removeSharedFolder(_sharedDir);
         fman.addSharedFolder(dirs[2]);
         fman.addSharedFolder(dirs[0]);
         
@@ -1344,7 +1334,7 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[2]).size());
         
         // Now unshare sub2
-        fman.removeFolderIfShared(dirs[2]);
+        fman.removeSharedFolder(dirs[2]);
         assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[0]).size());
         assertEquals(1, fman.getSharedFileList().getFilesInDirectory(dirs[1]).size());
         assertEquals(0, fman.getSharedFileList().getFilesInDirectory(dirs[2]).size());
@@ -1727,7 +1717,6 @@ public class FileManagerTest extends LimeTestCase {
         // one of the store files is in a shared directory so it is also individual store
         assertEquals("Unexpected number of individual store files", 1, fman.getStoreFileList().getNumIndividualFiles());
         assertEquals("Unexpected number of inidividual share files", 0, fman.getSharedFileList().getNumIndividualFiles());
-        System.out.println("adding store directory to share");
         // start sharing the store directory
         fman.addSharedFolder(_storeDir);
         
@@ -1740,7 +1729,7 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals("Unexpected number of individual store files", 1, fman.getStoreFileList().getNumIndividualFiles());
         assertEquals("Unexpected number of inidividual share files", 0, fman.getSharedFileList().getNumIndividualFiles());
         
-        fman.removeFolderIfShared(_storeDir);
+        fman.removeSharedFolder(_storeDir);
         
     }
     
@@ -1771,7 +1760,7 @@ public class FileManagerTest extends LimeTestCase {
         assertEquals("Unexpeected number of individual store files", 1, fman.getStoreFileList().getNumIndividualFiles());
         
         // unshare the shared directory
-        fman.removeFolderIfShared(_sharedDir);       
+        fman.removeSharedFolder(_sharedDir);       
         
         // should not share any files
         assertEquals("Unexpected number of shared files", 0, fman.getSharedFileList().size());
@@ -1911,7 +1900,7 @@ public class FileManagerTest extends LimeTestCase {
         // try renaming unadded file, should fail
         FileManagerEvent result = renameFile(store3, new File("c:\\asdfoih.mp3"));
         assertTrue(result.toString(), result.getType() == FileManagerEvent.Type.RENAME_FILE_FAILED);
-System.out.println("    real rename" );
+
         // rename a valid store file
         result = renameFile(store1, store3);
         assertTrue(result.toString(), result.isRenameEvent());

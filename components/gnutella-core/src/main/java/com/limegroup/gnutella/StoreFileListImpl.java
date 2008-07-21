@@ -12,8 +12,8 @@ import com.limegroup.gnutella.settings.SharingSettings;
  */
 public class StoreFileListImpl extends FileListImpl {
 
-    public StoreFileListImpl(FileManager fileManager, Set<File> individualFiles) {
-        super(fileManager, individualFiles);
+    public StoreFileListImpl(String name, FileManager fileManager, Set<File> individualFiles) {
+        super(name, fileManager, individualFiles);
     }
     
     /**

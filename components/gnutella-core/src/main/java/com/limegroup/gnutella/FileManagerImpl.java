@@ -87,8 +87,8 @@ public class FileManagerImpl implements FileManager, Service {
     
     private final FileList sharedFileList;
     private final FileList storeFileList; 
-    private final FileList buddyFileList;
     private final FileList incompleteFileList;
+    private final List<FileList> buddyFileLists = new ArrayList<FileList>();
     
     /** 
      * The list of complete and incomplete files.  An entry is null if it
@@ -98,6 +98,8 @@ public class FileManagerImpl implements FileManager, Service {
      *  files[i]._path is the incomplete directory if files[i] is an IncompleteFileDesc.
      */
     protected List<FileDesc> files;
+    
+    private int numFiles;
     
     /**
      * An index that maps a <tt>File</tt> on disk to the 
@@ -153,7 +155,13 @@ public class FileManagerImpl implements FileManager, Service {
      *  that may recursively exist
      */    
     @InspectableForSize("number of directories for the store")
-    private Set<File> _storeDirectories;
+    private Set<File> storeDirectories;
+    
+    /**
+     * Directories that are loaded into LW but aren't necassirly store or
+     * shared folders
+     */
+    private Set<File> displayDirectories;
     
     /**
      * The revision of the library.  Every time 'loadSettings' is called, the revision
@@ -241,10 +249,11 @@ public class FileManagerImpl implements FileManager, Service {
         this.backgroundExecutor = backgroundExecutor;
         this.eventListeners = eventListeners;
         
-        sharedFileList = new SynchronizedFileList(new SharedFileListImpl(this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
-        storeFileList = new SynchronizedFileList(new StoreFileListImpl(this, _data.SPECIAL_STORE_FILES));
-        buddyFileList = new SynchronizedFileList(new BuddyFileListImpl(this, _data.BUDDY_LIST_FILES));
-        incompleteFileList = new SynchronizedFileList(new FileListImpl(this, null));
+        sharedFileList = new SynchronizedFileList(new SharedFileListImpl("Shared", this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
+        storeFileList = new SynchronizedFileList(new StoreFileListImpl("Store", this, _data.SPECIAL_STORE_FILES));
+        incompleteFileList = new SynchronizedFileList(new IncompleteFileListImpl("Incomplete", this, new HashSet<File>()));
+        for(String name : SharingSettings.SHARED_BUDDY_LIST_NAMES.getValue())
+            buddyFileLists.add(new SynchronizedFileList(new BuddyFileListImpl(name, this, _data.getBuddyList(name))));
         
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
@@ -266,14 +275,16 @@ public class FileManagerImpl implements FileManager, Service {
         fileToFileDescMap = new HashMap<File, FileDesc>();
         
         getSharedFileList().clear();
-        getSharedFileList().clear();
+        getStoreFileList().clear();
         getIncompleteFileList().clear();
-        getBuddyFileList().clear();
+        for(FileList fileList : buddyFileLists )
+            fileList.clear();
 
+        numFiles = 0;
         _numPendingFiles = 0;
         _extensions = new HashSet<String>();
         _completelySharedDirectories = new HashSet<File>();
-        _storeDirectories = new HashSet<File>();
+        storeDirectories = new HashSet<File>();
     }
 
     public String getServiceName() {
@@ -318,8 +329,27 @@ public class FileManagerImpl implements FileManager, Service {
         return storeFileList;
     }
     
-    public FileList getBuddyFileList() {
-        return buddyFileList;
+    public FileList getBuddyFileList(String name) {
+        if(containsBuddyFileList(name))
+            return new BuddyFileListImpl(name, this, _data.getBuddyList(name));
+        else
+            return null;
+    }
+    
+    public FileList addBuddyFileList(String name) {
+        if(!containsBuddyFileList(name)) {
+            SharingSettings.addBuddyListName(name);
+        }
+        return new BuddyFileListImpl(name, this, _data.getBuddyList(name));
+    }
+    
+    public boolean containsBuddyFileList(String name) {
+        return _data.containsBuddyList(name);
+    }
+    
+    public void removeBuddyFileList(String name) {
+        _data.removeBuddyList(name);
+        SharingSettings.removeBuddyListName(name);
     }
 
     public FileList getIncompleteFileList() {
@@ -414,9 +444,9 @@ public class FileManagerImpl implements FileManager, Service {
             _data.DIRECTORIES_NOT_TO_SHARE.clear();
             _data.DIRECTORIES_NOT_TO_SHARE.addAll(canonicalize(blackListSet));
         }
-        synchronized(_storeDirectories) {
-            _storeDirectories.clear();
-            _storeDirectories.add(SharingSettings.getSaveLWSDirectory());
+        synchronized(storeDirectories) {
+            storeDirectories.clear();
+            storeDirectories.add(SharingSettings.getSaveLWSDirectory());
         }
         loadSettings();
     }
@@ -483,87 +513,15 @@ public class FileManagerImpl implements FileManager, Service {
         if(LOG.isDebugEnabled())
             LOG.debug("Loading Library Revision: " + revision);
         
-        final File[] directories;
         synchronized (this) {
-            // Reset the file list info
             resetVariables();
 
-            // Load the extensions. 
-            String[] extensions = StringArraySetting.decode(SharingSettings.EXTENSIONS_TO_SHARE.getValue().toLowerCase(Locale.US));
-                        
-            for( String ext : extensions ) {
-                _extensions.add(ext);
-            }
-            
-            // Add any extra extensions per chance           
-            if (SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().length() > 0) {
-                String[] array = StringArraySetting.decode(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue());                
-                for( String ext : array ) {
-                    _extensions.add(ext);
-                }
-            }
-            
-            // Assert no sensitive extensions are shared            
-            if (SharingSettings.DISABLE_SENSITIVE.getValue()) {
-                for( String ext : SharingSettings.getDefaultDisabledExtensions() ) {
-                    _extensions.remove(ext);
-                }
-            }
-            
-            // Assert no disabled extensions are shared            
-            if (SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().length() > 0) {
-                String[] array = StringArraySetting.decode(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue());                
-                for( String ext : array ) {
-                    _extensions.remove(ext);
-                }
-            }
-
-
-            //Ideally we'd like to ensure that "C:\dir\" is loaded BEFORE
-            //C:\dir\subdir.  Although this isn't needed for correctness, it may
-            //help the GUI show "subdir" as a subdirectory of "dir".  One way of
-            //doing this is to do a full topological sort, but that's a lot of 
-            //work. So we just approximate this by sorting by filename length, 
-            //from smallest to largest.  Unless directories are specified as
-            //"C:\dir\..\dir\..\dir", this will do the right thing.
-            
-            directories = SharingSettings.DIRECTORIES_TO_SHARE.getValueAsArray();
-            Arrays.sort(directories, new Comparator<File>() {
-                public int compare(File a, File b) {
-                    return a.toString().length()-b.toString().length();
-                }
-            });
+            loadExtensions();
         }
+        loadDirectories(revision);
 
-        //clear this, list of directories retrieved
-        dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOAD_DIRECTORIES));
-        
-        // Update the FORCED_SHARE directory.
-        updateSharedDirectories(SharingUtils.PROGRAM_SHARE, null, revision);
-        updateSharedDirectories(SharingUtils.PREFERENCE_SHARE, null, revision);
-        
-        //Load the shared directories and add their files.
-        _isUpdating = true;
-        for(int i = 0; i < directories.length && _revision == revision; i++)
-            updateSharedDirectories(directories[i], null, revision);
-            
-        // Update the store directory and add only files from the LWS
-        File storeDir = SharingSettings.getSaveLWSDirectory();
-        updateStoreDirectories(storeDir.getAbsoluteFile(), null, revision);
-
-        // Add specially shared files
-        loadIndividualFiles(getSharedFileList(), revision);
-        
-        // Add individual store files
-        loadIndividualFiles(getSharedFileList(), revision);
-        
-        //Buddy files
-        loadIndividualFiles(getBuddyFileList(), revision);
-        
-        _isUpdating = false;
-        
         if(LOG.isDebugEnabled())
-            LOG.debug("Finished queueing shared files for revision: " + revision);
+            LOG.debug("Finished queueing files for revision: " + revision);
             
         synchronized (this) {
             _updatingFinished = revision;
@@ -574,37 +532,101 @@ public class FileManagerImpl implements FileManager, Service {
     }
     
     /**
+     * Loads the extensions that can be shared and cannot be shared.
+     * NOTE: this does not limit files that can be loaded into the library, just files
+     * that can and cannot be added to the shared list
+     */
+    private void loadExtensions() {
+        // Load the extensions. 
+        String[] extensions = StringArraySetting.decode(SharingSettings.EXTENSIONS_TO_SHARE.getValue().toLowerCase(Locale.US));
+                    
+        for( String ext : extensions ) {
+            _extensions.add(ext);
+        }
+        
+        // Add any extra extensions per chance           
+        if (SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue().length() > 0) {
+            String[] array = StringArraySetting.decode(SharingSettings.EXTENSIONS_LIST_CUSTOM.getValue());                
+            for( String ext : array ) {
+                _extensions.add(ext);
+            }
+        }
+        
+        // Assert no sensitive extensions are shared            
+        if (SharingSettings.DISABLE_SENSITIVE.getValue()) {
+            for( String ext : SharingSettings.getDefaultDisabledExtensions() ) {
+                _extensions.remove(ext);
+            }
+        }
+        
+        // Assert no disabled extensions are shared            
+        if (SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue().length() > 0) {
+            String[] array = StringArraySetting.decode(SharingSettings.EXTENSIONS_LIST_UNSHARED.getValue());                
+            for( String ext : array ) {
+                _extensions.remove(ext);
+            }
+        }
+    }
+    
+    private void loadDirectories(int revision) {
+        //clear this, list of directories retrieved
+        dispatchFileEvent(new FileManagerEvent(this, Type.FILEMANAGER_LOAD_DIRECTORIES));
+
+        _isUpdating = true;
+        // Update the FORCED_SHARE directory.
+        updateSharedDirectories(SharingUtils.PROGRAM_SHARE, null, revision);
+        updateSharedDirectories(SharingUtils.PREFERENCE_SHARE, null, revision);
+        
+        // Shared folders are still treated as they were previously. In clean 5.0 installs
+        // there should be no directories to add here. In upgrades from 4.x installs, 
+        // there should be no noticable difference to files that are shared. 
+        final File[] directories;
+        synchronized (this) {
+            directories = SharingSettings.DIRECTORIES_TO_SHARE.getValueAsArray();
+            Arrays.sort(directories, new Comparator<File>() {
+                public int compare(File a, File b) {
+                    return a.toString().length()-b.toString().length();
+                }
+            });
+        }
+        for(int i = 0; i < directories.length && _revision == revision; i++)
+          updateSharedDirectories(directories[i], null, revision);
+
+            
+        // Update the store directory and add only files from the LWS
+        File storeDir = SharingSettings.getSaveLWSDirectory();
+        updateDirectories(storeDir.getAbsoluteFile(), null, revision, storeDirectories);
+        
+        // Load all other directories that aren't necesarily shared or store folders
+        File[] directory = SharingSettings.DIRECTORIES_TO_DISPLAY.getValueAsArray();
+        for(int i = 0; i < directory.length && _revision == revision; i++)
+            updateDirectories(directory[i], null, revision, displayDirectories);
+
+        // Add specially shared files
+        loadIndividualFiles(getSharedFileList(), revision);
+
+        // Add individual store files
+        loadIndividualFiles(getStoreFileList(), revision);
+        
+        //Buddy files
+        for(FileList fileList: buddyFileLists)
+            loadIndividualFiles(fileList, revision);
+        
+        _isUpdating = false;
+    }
+    
+    /**
      * Takes a collection of files and adds them to the supplied FileList
      */
     private void loadIndividualFiles(FileList list, int revision) {
-        
-        // list lws files found in shared directories in the special
-        //  store files node
         for(File file: list.getIndividualFiles()) {
             if(_revision != revision)
                 break;
             list.addFile(file);
         }
     }   
-    
-    private void updateSharedDirectories(File directory, File parent, int revision) {
-        updateSharedDirectories(directory, directory, parent, revision, 1);
-    }
-    
-    /**
-     * Recursively adds this directory and all subdirectories to the shared
-     * directories as well as queueing their files for sharing.  Does nothing
-     * if <tt>directory</tt> doesn't exist, isn't a directory, or has already
-     * been added.  This method is thread-safe.  It acquires locks on a
-     * per-directory basis.  If the current revision ever changes from the
-     * expected revision, this returns immediately.
-     * 
-     * @requires directory is part of DIRECTORIES_TO_SHARE or one of its
-     *           children, and parent is directory's shared parent or null if
-     *           directory's parent is not shared.
-     * @modifies this
-     */
-    private void updateSharedDirectories(File rootShare, File directory, File parent, int revision, int depth) {     
+
+    private void updateDirectories(File directory, File parent, int revision, Set<File> savedDirectories) {
         //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
         //are the same on Windows but different on Unix.
         try {
@@ -615,127 +637,25 @@ public class FileManagerImpl implements FileManager, Service {
         if(!directory.exists())
             return;
         
-        // STEP 0:
-        // Do not share unsharable directories.
-        if(!isFolderShareable(directory, true))
-            return;
-        
-        // Do not share sensitive directories
-        if (SharingUtils.isSensitiveDirectory(directory)) {
-            //  go through directories that explicitly should not be shared
-            if (_data.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.contains(directory)) {
-                return;
-            }
-            
-            // if we haven't already validated the sensitive directory, ask about it.
-            if (!_data.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
-                //  ask the user whether the sensitive directory should be shared
-                // THIS CALL CAN BLOCK.
-                if (!activityCallback.get().warnAboutSharingSensitiveDirectory(directory))
-                    return;
-            }
-        }
-        
-        // Exit quickly (without doing the dir lookup) if revisions changed.
-        if(_revision != revision)
-            return;
-
-        // STEP 1:
-        // Add directory
-        boolean isForcedShare = SharingUtils.isForcedShareDirectory(directory);
-        
-        boolean isStoreDirectory;
-        synchronized (_storeDirectories) {
-            isStoreDirectory = !_storeDirectories.contains(directory);
-        }
-        
-        synchronized (_completelySharedDirectories) {
+        synchronized (savedDirectories) {
             // if it was already added, ignore.
-            if (_completelySharedDirectories.contains(directory))
-                return;
-
-            if (isStoreDirectory)
-                _completelySharedDirectories.add(directory);
-            if (!isForcedShare) {
-                dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FOLDER, rootShare, depth, directory, parent));
-            }
-        }
-        
-        // STEP 2:
-        // Scan subdirectory for the amount of shared files.
-        File[] file_list = directory.listFiles(SHAREABLE_FILE_FILTER);
-        if (file_list == null)
-            return;
-        for(int i = 0; i < file_list.length && _revision == revision; i++)
-            getSharedFileList().addFile(file_list[i]);
-            
-        // Exit quickly (without doing the dir lookup) if revisions changed.
-        if(_revision != revision)
-            return;
-
-        // STEP 3:
-        // Recursively add subdirectories.
-        // This has the effect of ensuring that the number of pending files
-        // is closer to correct number.
-        // TODO: when we add non-recursive support, add it here.
-        if (isForcedShare) 
-            return;
-        
-        // Do not share subdirectories of the forcibly shared dir.
-        File[] dir_list = directory.listFiles(DIRECTORY_FILTER);
-        if(dir_list != null) {
-            for(int i = 0; i < dir_list.length && _revision == revision; i++)
-                updateSharedDirectories(rootShare, dir_list[i], directory, revision, depth+1);
-        }
-    }
-
-    /**
-     * Recursively add files from the LWS download directory.  Does nothing
-     * if <tt>directory</tt> doesn't exist, isn't a directory, or has already
-     * been added.  This method is thread-safe.  It acquires locks on a
-     * per-directory basis.  If the current revision ever changes from the
-     * expected revision, this returns immediately.
-     * 
-     * @requires directory is part of _storeDirectories or one of its
-     *           children, and parent is directory's store directory parent 
-     * @modifies this
-     */
-    //TODO: move this out of FileManager
-    private void updateStoreDirectories(File directory, File parent, int revision) {
-        //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
-        //are the same on Windows but different on Unix.
-        try {
-            directory = FileUtils.getCanonicalFile(directory);
-        } catch (IOException e) {
-            return;
-        }
-        
-        if(!directory.exists())
-            return;
-        
-        
-        // Exit quickly (without doing the dir lookup) if revisions changed.
-        if(_revision != revision)
-            return;
-
-        
-        synchronized (_storeDirectories) {
-            // if it was already added, ignore.
-            if (_storeDirectories.contains(directory))
+            if (savedDirectories.contains(directory))
                 return;
             
             //otherwise add this directory to list to avoid rescanning it
-            _storeDirectories.add(directory);
-            dispatchFileEvent(new FileManagerEvent(this, Type.ADD_STORE_FOLDER, directory, parent));
+            savedDirectories.add(directory);
+            dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FOLDER, directory, parent));
         }
         
         // STEP 2:
         // Scan subdirectory for the amount of shared files.
-        File[] file_list = directory.listFiles();
-        if (file_list == null)
+        File[] files = directory.listFiles();
+        if (files == null)
             return;
-        for(int i = 0; i < file_list.length && _revision == revision; i++)
-            getStoreFileList().addFile(file_list[i]);
+        
+        for(int i = 0; i < files.length && _revision == revision; i++) {
+            addFile(files[i]);
+        }
             
         // Exit quickly (without doing the dir lookup) if revisions changed.
         if(_revision != revision)
@@ -745,109 +665,16 @@ public class FileManagerImpl implements FileManager, Service {
         // Recursively add subdirectories.
         // This has the effect of ensuring that the number of pending files
         // is closer to correct number.     
-        File[] dir_list = directory.listFiles(DIRECTORY_FILTER);
-        if(dir_list != null) {
-            for(int i = 0; i < dir_list.length && _revision == revision; i++)
-                updateStoreDirectories(dir_list[i], directory, revision);
+        File[] directories = directory.listFiles(DIRECTORY_FILTER);
+        if(directories != null) {
+            for(int i = 0; i < directories.length && _revision == revision; i++)
+                updateDirectories(directories[i], directory, revision, savedDirectories);
         }
-            
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    //  Adding and removing shared files and directories
+    //  Adding and removing directories
     ///////////////////////////////////////////////////////////////////////////
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#removeFolderIfShared(java.io.File)
-     */
-    public void removeFolderIfShared(File folder) {
-        _isUpdating = true;
-        removeFolderIfShared(folder, null);
-        _isUpdating = false;
-
-    }
-    
-    /**
-     * Removes a given directory from being completed shared.
-     * If 'parent' is null, this will remove it from the root-level of
-     * shared folders if it existed there.  (If it is non-null & it was
-     * a root-level shared folder, the folder remains shared.)
-     *
-     * The first time this is called, parent must be non-null in order to ensure
-     * it works correctly.  Otherwise, we'll end up adding tons of stuff
-     * to the DIRECTORIES_NOT_TO_SHARE.
-     */
-    private void removeFolderIfShared(File folder, File parent) {
-        if (!folder.isDirectory() && folder.exists())
-            throw new IllegalArgumentException("Expected a directory, but given: "+folder);
-        
-        try {
-            folder = FileUtils.getCanonicalFile(folder);
-        } catch(IOException ignored) {}
-
-        // grab the value quickly.  release the lock
-        // so that we don't hold it during a long recursive function.
-        // it's no big deal if it changes, we'll just do some extra work for a short
-        // bit of time.
-        boolean contained;
-        synchronized(_completelySharedDirectories) {
-            contained = _completelySharedDirectories.contains(folder);
-        }
-        
-        if(contained) {
-            if(parent != null && SharingSettings.DIRECTORIES_TO_SHARE.contains(folder)) {
-                // we don't wanna remove it, since it's a root-share, nor do we want
-                // to remove any of its children, so we return immediately.
-                return;
-            } else if(parent == null) {
-                // Add the directory in the exclude list if it wasn't in the DIRECTORIES_NOT_TO_SHARE,
-                // or if it was *and* a parent folder of it is fully shared.
-                boolean explicitlyShared = SharingSettings.DIRECTORIES_TO_SHARE.remove(folder);
-                if(!explicitlyShared || isFolderShared(folder.getParentFile()))
-                    _data.DIRECTORIES_NOT_TO_SHARE.add(folder);
-                
-            }
-            
-            // note that if(parent != null && not a root share)
-            // we DO NOT ADD to DIRECTORIES_NOT_TO_SHARE.
-            // this is by design, because the parent has already been removed
-            // from sharing, which inherently will remove the child directories.
-            // there's no need to clutter up DIRECTORIES_NOT_TO_SHARE with useless
-            // entries.
-           
-            synchronized(_completelySharedDirectories) {
-                _completelySharedDirectories.remove(folder);
-            }
-            
-            File[] subs = folder.listFiles();
-            if(subs != null) {
-                for(int i = 0; i < subs.length; i++) {
-                    File f = subs[i];
-                    if(f.isDirectory())
-                        removeFolderIfShared(f, folder);
-                    else if(f.isFile() && !getSharedFileList().isIndividualFile(f)) {
-                        if(removeFile(f) == null)
-                            urnCache.get().clearPendingHashesFor(f, this);
-                    }
-                }
-            }
-            
-            dispatchFileEvent( new FileManagerEvent(this, Type.REMOVE_FOLDER, folder));
-        }
-    }
-    
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#addSharedFolders(java.util.Set, java.util.Set)
-     */
-    public void addSharedFolders(Set<File> folders, Set<File> blackListedSet) {
-        if (folders.isEmpty()) {
-            throw new IllegalArgumentException("Only blacklisting without sharing, not allowed");
-        }
-        _data.DIRECTORIES_NOT_TO_SHARE.addAll(canonicalize(blackListedSet));
-        for (File folder : folders) {
-            addSharedFolder(folder);
-        }
-    }
     
     /**
      * Returns set of canonicalized files or the same set if there
@@ -876,10 +703,13 @@ public class FileManagerImpl implements FileManager, Service {
         }
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.FileManager#addSharedFolder(java.io.File)
-     */
-    public boolean addSharedFolder(File folder) {
+    public void addFolders(Set<File> folders) {
+        for (File folder : folders) {
+            addFolder(folder);
+        }
+    }
+    
+    public boolean addFolder(File folder) {
         if (!folder.isDirectory())
             throw new IllegalArgumentException("Expected a directory, but given: "+folder);
     
@@ -887,17 +717,22 @@ public class FileManagerImpl implements FileManager, Service {
             folder = FileUtils.getCanonicalFile(folder);
         } catch(IOException ignored) {}
         
-        if(!isFolderShareable(folder, false))
-            return false;
-        
-        _data.DIRECTORIES_NOT_TO_SHARE.remove(folder);
-        if (!isFolderShared(folder.getParentFile()))
-            SharingSettings.DIRECTORIES_TO_SHARE.add(folder);
         _isUpdating = true;
-        updateSharedDirectories(folder, null, _revision);
+        updateDirectories(folder, null, _revision, displayDirectories);
         _isUpdating = false;
         
         return true;
+    }
+    
+    public void removeFolder(File folder) {
+        _isUpdating = true;
+        removeFolder(folder, null);
+        _isUpdating = false;
+
+    }
+    
+    private void removeFolder(File folder, File parent) {
+        
     }
     
     /////////////////// Everything below is what FileManager should entail
@@ -999,7 +834,7 @@ public class FileManagerImpl implements FileManager, Service {
                 // try loading the XML for this fileDesc
                 dispatchFileEvent(new FileManagerEvent(FileManagerImpl.this, Type.LOAD_FILE, metadata, fd));
 
-                
+                numFiles += 1;
                 files.add(fd);
                 fileToFileDescMap.put(file, fd);
 
@@ -1023,6 +858,7 @@ public class FileManagerImpl implements FileManager, Service {
                 
                 if (finished) {
                     tryToFinish();
+                    _data.save();
                 }
             }
             
@@ -1078,11 +914,12 @@ public class FileManagerImpl implements FileManager, Service {
      * @param fileDesc
      */
     private void removeFileDesc(FileDesc fileDesc) {
-        if(getIncompleteFileList().contains(fileDesc))
+        if(fileDesc instanceof IncompleteFileDesc)
             removeUrnIndex(fileDesc, false);
         else 
             removeUrnIndex(fileDesc, true);
         
+        numFiles -= 1;
         files.set(fileDesc.getIndex(), null);
         fileToFileDescMap.remove(fileDesc.getFile());
         
@@ -1137,9 +974,10 @@ public class FileManagerImpl implements FileManager, Service {
         // no indices were found for any URN associated with this
         // IncompleteFileDesc... add it.       
         IncompleteFileDesc incompleteFileDesc = new IncompleteFileDesc(incompleteFile, urns, files.size(), name, size, vf);
+        
+        numFiles += 1;
         files.add(incompleteFileDesc);
         fileToFileDescMap.put(incompleteFile, incompleteFileDesc);
-        getIncompleteFileList().addFileDesc(incompleteFileDesc);
         fileURNSUpdated(incompleteFileDesc);
         //TODO: check incomplete file
         dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FILE, incompleteFileDesc));
@@ -1168,7 +1006,7 @@ public class FileManagerImpl implements FileManager, Service {
         FileManagerEvent event = null; 
         synchronized (this) {
             updateUrnIndex(fd);
-            if(getIncompleteFileList().contains(fd)) {
+            if(fd instanceof IncompleteFileDesc) {
                 IncompleteFileDesc ifd = (IncompleteFileDesc) fd;
                 if (SharingSettings.ALLOW_PARTIAL_SHARING.getValue() &&
                         SharingSettings.LOAD_PARTIAL_KEYWORDS.getValue() &&
@@ -1373,8 +1211,8 @@ public class FileManagerImpl implements FileManager, Service {
         if(file == null)
             return false;
         
-        synchronized(_storeDirectories) {
-            return _storeDirectories.contains(file);
+        synchronized(storeDirectories) {
+            return storeDirectories.contains(file);
         }
     }
        
@@ -1417,7 +1255,7 @@ public class FileManagerImpl implements FileManager, Service {
     }
     
     public int size() {
-        return files.size();
+        return numFiles;
     }
   
     /* (non-Javadoc)
@@ -1668,6 +1506,10 @@ public class FileManagerImpl implements FileManager, Service {
                 save();
             }
         }
+        
+        public void setDirty() {
+            isDirty.getAndSet(true);
+        }
 
         /**
          * If a change occurs, write changes to disk
@@ -1676,14 +1518,234 @@ public class FileManagerImpl implements FileManager, Service {
             switch(evt.getType()) {
                 case ADD_FILE:
                 case ADD_FOLDER:
-                case ADD_STORE_FOLDER:
                 case CHANGE_FILE:
                 case REMOVE_FILE:
                 case REMOVE_FOLDER:
-                case REMOVE_STORE_FOLDER:
                 case RENAME_FILE:
-                    isDirty.getAndSet(true);
+                    setDirty();
             }
         }
     }
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    //  DO NOTE ADD ANYTHING BELOW THIS. The following are here for backwards compatibility 
+    //  with pre 5.0 versions. 
+    ////////////////////////////////////////////////////////////////////////////////////////////
+    
+    
+  /* (non-Javadoc)
+   * @see com.limegroup.gnutella.FileManager#removeFolderIfShared(java.io.File)
+   */
+    public void removeSharedFolder(File folder) {
+        _isUpdating = true;
+        removeSharedFolder(folder, null);
+        _isUpdating = false;
+    }
+  
+  /**
+   * REMOVES A GIVEN DIRECTORY FROM BEING COMPLETED SHARED.
+   * IF 'PARENT' IS NULL, THIS WILL REMOVE IT FROM THE ROOT-LEVEL OF
+   * SHARED FOLDERS IF IT EXISTED THERE.  (IF IT IS NON-NULL & IT WAS
+   * A ROOT-LEVEL SHARED FOLDER, THE FOLDER REMAINS SHARED.)
+   *
+   * THE FIRST TIME THIS IS CALLED, PARENT MUST BE NON-NULL IN ORDER TO ENSURE
+   * IT WORKS CORRECTLY.  OTHERWISE, WE'LL END UP ADDING TONS OF STUFF
+   * TO THE DIRECTORIES_NOT_TO_SHARE.
+   */
+    private void removeSharedFolder(File folder, File parent) {
+        if(!folder.isDirectory() && folder.exists()) 
+            throw new IllegalArgumentException("Expected a directory, but given: " + folder);
+          
+        try {
+            folder = FileUtils.getCanonicalFile(folder);
+        } catch (IOException ignored) {}
+
+
+        // GRAB THE VALUE QUICKLY.  RELEASE THE LOCK
+        // SO THAT WE DON'T HOLD IT DURING A LONG RECURSIVE FUNCTION.
+        // IT'S NO BIG DEAL IF IT CHANGES, WE'LL JUST DO SOME EXTRA WORK FOR A SHORT
+        // BIT OF TIME
+        boolean contained;
+        synchronized (_completelySharedDirectories) {
+            contained = _completelySharedDirectories.contains(folder);
+        }
+
+        if(contained) {
+            if(parent != null && SharingSettings.DIRECTORIES_TO_SHARE.contains(folder)) {
+                // we don't want to remove it since its a root share and we do not want
+                // to remove any of its children
+                return;
+            } else if(parent == null) {
+                // add the directory in the excluded list if it wasn't in the directories_not_to_share
+                // or if it was and parent folder of it is fully shared
+                boolean explicityShared = SharingSettings.DIRECTORIES_TO_SHARE.remove(folder);
+                if(!explicityShared || isFolderShared(folder.getParentFile()))
+                    _data.DIRECTORIES_NOT_TO_SHARE.add(folder);
+            }
+          
+            // NOTE: that if parent != null && not a root share)
+            // we do not add to directories not to share.
+            // This is by design, because the parent has already been removed
+            // from sharing, which inherently will remove the child directories.
+            // there's no need to clutter up directories no to share with useless
+            // entries
+            synchronized (_completelySharedDirectories) {
+                _completelySharedDirectories.remove(folder);
+            }
+            
+            File[] subs = folder.listFiles();
+            if(subs != null) {
+                for(File f : subs) {
+                    if(f.isDirectory())
+                        removeSharedFolder(f, folder);
+                    else if(f.isFile() && !getSharedFileList().isIndividualFile(f)){
+                        if(removeFile(f) == null)
+                            urnCache.get().clearPendingHashesFor(f, this);
+                    }
+                }
+            }
+            
+            dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FOLDER, folder));
+        }
+    }
+
+  
+   /* (non-Javadoc)
+    * @see com.limegroup.gnutella.FileManager#addSharedFolders(java.util.Set, java.util.Set)
+    */
+    public void addSharedFolders(Set<File> folders, Set<File> blackListedSet) {
+        if (folders.isEmpty()) {
+            throw new IllegalArgumentException("Only blacklisting without sharing, not allowed");
+        }
+        _data.DIRECTORIES_NOT_TO_SHARE.addAll(canonicalize(blackListedSet));
+        for (File folder : folders) {
+            addSharedFolder(folder);
+        }
+    }
+  
+   /* (non-Javadoc)
+    * @see com.limegroup.gnutella.FileManager#addSharedFolder(java.io.File)
+    */
+    public boolean addSharedFolder(File folder) {
+        if (!folder.isDirectory())
+            throw new IllegalArgumentException("Expected a directory, but given: "+folder);
+    
+        try {
+            folder = FileUtils.getCanonicalFile(folder);
+        } catch(IOException ignored) {}
+       
+        if(!isFolderShareable(folder, false))
+            return false;
+       
+        _data.DIRECTORIES_NOT_TO_SHARE.remove(folder);
+        if (!isFolderShared(folder.getParentFile()))
+            SharingSettings.DIRECTORIES_TO_SHARE.add(folder);
+        _isUpdating = true;
+        updateSharedDirectories(folder, folder, null, _revision, 1);
+        _isUpdating = false;
+       
+        return true;
+    }
+    
+    private void updateSharedDirectories(File directory, File parent, int depth) {
+        updateSharedDirectories(directory, directory, parent, _revision, depth);
+    }
+    
+    /**
+     * Recursively adds this directory and all subdirectories to the shared
+     * directories as well as queueing their files for sharing.  Does nothing
+     * if <tt>directory</tt> doesn't exist, isn't a directory, or has already
+     * been added.  This method is thread-safe.  It acquires locks on a
+     * per-directory basis.  If the current revision ever changes from the
+     * expected revision, this returns immediately.
+     * 
+     * @requires directory is part of DIRECTORIES_TO_SHARE or one of its
+     *           children, and parent is directory's shared parent or null if
+     *           directory's parent is not shared.
+     * @modifies this
+     */
+     private void updateSharedDirectories(File rootShare, File directory, File parent, int revision, int depth) {     
+         //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
+         //are the same on Windows but different on Unix.
+         try {
+             directory = FileUtils.getCanonicalFile(directory);
+         } catch (IOException e) {
+             return;
+         }
+         if(!directory.exists())
+             return;
+         
+         // STEP 0:
+         // Do not share unsharable directories.
+         if(!isFolderShareable(directory, true))
+             return;
+         
+         // Do not share sensitive directories
+         if (SharingUtils.isSensitiveDirectory(directory)) {
+             //  go through directories that explicitly should not be shared
+             if (_data.SENSITIVE_DIRECTORIES_NOT_TO_SHARE.contains(directory)) {
+                 return;
+             }
+             
+             // if we haven't already validated the sensitive directory, ask about it.
+             if (!_data.SENSITIVE_DIRECTORIES_VALIDATED.contains(directory)) {
+                 //  ask the user whether the sensitive directory should be shared
+                 // THIS CALL CAN BLOCK.
+                 if (!activityCallback.get().warnAboutSharingSensitiveDirectory(directory))
+                     return;
+             }
+         }
+     
+         // Exit quickly (without doing the dir lookup) if revisions changed.
+         if(_revision != revision)
+             return;
+    
+         // STEP 1:
+         // Add directory
+         boolean isForcedShare = SharingUtils.isForcedShareDirectory(directory);
+         
+         boolean isStoreDirectory;
+         synchronized (storeDirectories) {
+             isStoreDirectory = !storeDirectories.contains(directory);
+         }
+         
+         synchronized (_completelySharedDirectories) {
+             // if it was already added, ignore.
+             if (_completelySharedDirectories.contains(directory))
+                 return;
+    
+             if (isStoreDirectory)
+                 _completelySharedDirectories.add(directory);
+             if (!isForcedShare) {
+                 dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FOLDER, rootShare, depth, directory, parent));
+             }
+         }
+     
+         // STEP 2:
+         // Scan subdirectory for the amount of shared files.
+         File[] file_list = directory.listFiles(SHAREABLE_FILE_FILTER);
+         if (file_list == null)
+             return;
+         for(int i = 0; i < file_list.length && _revision == revision; i++)
+             getSharedFileList().addFile(file_list[i]);
+             
+         // Exit quickly (without doing the dir lookup) if revisions changed.
+         if(_revision != revision)
+             return;
+    
+         // STEP 3:
+         // Recursively add subdirectories.
+         // This has the effect of ensuring that the number of pending files
+         // is closer to correct number.
+         // TODO: when we add non-recursive support, add it here.
+         if (isForcedShare) 
+             return;
+         
+         // Do not share subdirectories of the forcibly shared dir.
+         File[] dir_list = directory.listFiles(DIRECTORY_FILTER);
+         if(dir_list != null) {
+             for(int i = 0; i < dir_list.length && _revision == revision; i++)
+                 updateSharedDirectories(rootShare, dir_list[i], directory, revision, depth+1);
+         }
+     }
 }

@@ -16,6 +16,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
     private Mockery context;
     private FileManager fileManager;
     private FileList sharedFileList;
+    private FileList incompleteFileList;
 
     public SharedFilesKeywordIndexImplTest(String name) {
         super(name);
@@ -26,6 +27,7 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         context = new Mockery();
         fileManager = context.mock(FileManager.class);
         sharedFileList = context.mock(FileList.class);
+        incompleteFileList = context.mock(FileList.class);
         keywordIndex = new SharedFilesKeywordIndexImpl(fileManager, null, null, null, null);
     }
     
@@ -37,14 +39,26 @@ public class SharedFilesKeywordIndexImplTest extends BaseTestCase {
         
         context.checking(new Expectations() {
             {
+                atLeast(1).of(fileManager).getIncompleteFileList();
+                will(returnValue(incompleteFileList));
+                atLeast(1).of(incompleteFileList).contains(originalFile);
+                will(returnValue(false));
                 atLeast(1).of(fileManager).getSharedFileList();
                 will(returnValue(sharedFileList));
-                atLeast(1).of(sharedFileList).contains(fileManager.getFileDesc(originalFile.getFile()));
+                atLeast(1).of(sharedFileList).contains(originalFile);
                 will(returnValue(true));
                 
+                atLeast(1).of(fileManager).getIncompleteFileList();
+                will(returnValue(incompleteFileList));
+                atLeast(1).of(incompleteFileList).contains(originalFile);
+                will(returnValue(false));
+                atLeast(1).of(fileManager).getIncompleteFileList();
+                will(returnValue(incompleteFileList));
+                atLeast(1).of(incompleteFileList).contains(newFile);
+                will(returnValue(false));
                 atLeast(1).of(fileManager).getSharedFileList();
                 will(returnValue(sharedFileList));
-                atLeast(1).of(sharedFileList).contains(fileManager.getFileDesc(newFile.getFile()));
+                atLeast(1).of(sharedFileList).contains(newFile);
                 will(returnValue(true));
             }
         });

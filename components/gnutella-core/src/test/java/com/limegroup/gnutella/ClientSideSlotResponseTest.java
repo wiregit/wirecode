@@ -77,6 +77,7 @@ public class ClientSideSlotResponseTest extends ClientSideTestCase {
         fileManager.getSharedFileList().addFileAlways(appTorrentFile);
         waiter.waitForLoad();
         fileManager.removeFileEventListener(waiter);
+                
     	assertEquals(5, fileManager.getSharedFileList().size());
     }
     

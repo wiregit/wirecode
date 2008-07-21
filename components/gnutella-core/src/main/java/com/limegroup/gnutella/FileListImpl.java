@@ -23,20 +23,27 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 public class FileListImpl implements FileList, FileEventListener, Inspectable {
 
     /** 
-     * List of all the FileDescs in this FileList.
+     * List of all the FileDescs in this FileList. This is a continous non-null
+     * list.
      */
     protected final List<FileDesc> fileDescs;
     
     /**
-     * List of files that are in List and are not located in a completed folder.
+     * List of files whose FileDescs are in the List and are not located in a 
+     * completed folder.
      */
     protected final Set<File> individualFiles;
     
     /**
-     * A list of files that have been added to FileManager but have yet to have their 
-     * FileDescs calculated. 
+     * A list of files that have been added to FileManager but have yet to have 
+     * their FileDescs calculated. 
      */
     protected final List<File> pendingFiles;
+    
+    /**
+     * Name of this FileList
+     */
+    private final String name;
     
     /**
      * Size of all the FileDescs in this list in bytes
@@ -45,15 +52,20 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
     
     protected final FileManager fileManager;
     
-    public FileListImpl(FileManager fileManager, Set<File> individualFiles) {
+    public FileListImpl(String name, FileManager fileManager, Set<File> individualFiles) {
+        this.name = name;
         this.fileManager = fileManager;
         this.individualFiles = individualFiles;
         this.fileDescs = new ArrayList<FileDesc>();
-        this.pendingFiles = new ArrayList<File>();
+        this.pendingFiles = new ArrayList<File>(); 
 
         fileManager.addFileEventListener(this);
         
         clear();
+    }
+    
+    public String getName() {
+        return name;
     }
 
     public void addFileAlways(File file) {
@@ -73,20 +85,18 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
     }
     
     public void addFile(File file, List<? extends LimeXMLDocument> list) {
-            synchronized(this) {
-//                // if we aren't already waiting for this file, add it to the pending files
-//                // else we already are waiting on FileDesc to just return
-                if(!pendingFiles.contains(file))
-                    pendingFiles.add(file);
-            }
-            fileManager.addFile(file, list);
+        synchronized(this) {
+            if(!pendingFiles.contains(file))
+                pendingFiles.add(file);
+        }
+        fileManager.addFile(file, list);
     }
 
     public void addFileDesc(FileDesc fileDesc) {
         if(fileDesc == null)
             throw new IllegalArgumentException("FileDesc cannot be null");
         
-        if(!fileDescs.contains(fileDesc) && isFileAddable(fileDesc)) { System.out.println("adding  " + fileDesc.getFileName());
+        if(!fileDescs.contains(fileDesc) && isFileAddable(fileDesc)) {
             fileDescs.add(fileDesc);
             numBytes += fileDesc.getFileSize();
             addAsIndividualFile(fileDesc);
@@ -152,6 +162,8 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
     public void clear() {
         fileDescs.clear();
         pendingFiles.clear();
+//        if(individualFiles != null)
+//            individualFiles.clear();
         numBytes = 0;
     }
 
@@ -237,7 +249,6 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
      * Listens for changes from FileManager and updates this list if 
      * a containing file is modified
      */
-    //TODO: synchronization
     public void handleFileEvent(FileManagerEvent evt) {
         switch(evt.getType()) {
             case ADD_FILE:
@@ -258,13 +269,19 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
                 }
                 break;
             case REMOVE_FILE:
-                remove(evt.getNewFileDesc());
+                synchronized (this) {
+                    remove(evt.getNewFileDesc());                    
+                }
                 break;
             case RENAME_FILE:
-                updateFileDescs(evt.getOldFileDesc(), evt.getNewFileDesc());
+                synchronized (this) {
+                    updateFileDescs(evt.getOldFileDesc(), evt.getNewFileDesc());                 
+                }
                 break;
             case CHANGE_FILE:
-                updateFileDescs(evt.getOldFileDesc(), evt.getNewFileDesc());
+                synchronized (this) {
+                    updateFileDescs(evt.getOldFileDesc(), evt.getNewFileDesc());                   
+                }
                 break;
         }
     }

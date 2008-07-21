@@ -11,8 +11,8 @@ import com.limegroup.gnutella.SharedFileListImpl;
 public class FileListStub extends SharedFileListImpl {
 
     
-    public FileListStub(FileManager fileManager, Set<File> individual, Set<File> files) {
-        super(fileManager, individual, files);
+    public FileListStub(String name, FileManager fileManager, Set<File> individual, Set<File> files) {
+        super(name, fileManager, individual, files);
     }
 
     public void setDescs(List<FileDesc> descs) {

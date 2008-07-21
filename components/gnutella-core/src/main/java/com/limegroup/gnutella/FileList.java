@@ -10,7 +10,12 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  * A collection of FileDescs.
  */
 public interface FileList {
-       
+    
+    /**
+     * Returns the name of this fileList
+     */
+    public String getName();
+    
     /**
      * These add a file to this list for special edge cases. These should only be
      * called on SharedFileListImpl
@@ -42,7 +47,9 @@ public interface FileList {
     public void addFileDesc(FileDesc fileDesc);
        
     /**
-     * Removes the FileDesc from the list if it exists.
+     * Removes the FileDesc from the list if it exists. If the value existed 
+     * returns true, false if it did not exist and nothing was removed. This method
+     * simply removes this FileDesc from this list.
      */
     public boolean remove(FileDesc fileDesc);
     
@@ -105,12 +112,14 @@ public interface FileList {
     
     /**
      * Returns a copy of all the files in this list that are not located in 
-     * a complete directory for this FileList type.
+     * a complete directory for this FileList type. This is a subset of files
+     * returned by getAllFileDescs.
      */
     public File[] getIndividualFiles();
     
     /**
-     * Returns true if this list contains individual files, false otherwise.
+     * Returns true if this list contains at least one individual files, 
+     * false otherwise.
      */
     public boolean hasIndividualFiles();
     
@@ -120,8 +129,8 @@ public interface FileList {
     public int getNumIndividualFiles();
     
     /**
-     * Returns true of this file exists in this FileList and is an individual
-     * file in this FileList.
+     * Returns true if this file exists in this FileList and is an individual
+     * file in this FileList, false otherwise.
      */
     public boolean isIndividualFile(File file);
 }

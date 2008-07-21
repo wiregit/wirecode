@@ -8,8 +8,13 @@ import java.util.Set;
  */
 public class BuddyFileListImpl extends FileListImpl {
 
-    public BuddyFileListImpl(FileManager fileManager, Set<File> individualFiles) {
-        super(fileManager, individualFiles);
+    public BuddyFileListImpl(String name, FileManager fileManager, Set<File> individualFiles) {
+        super(name, fileManager, individualFiles);
+    }
+    
+    @Override
+    protected void addPendingFileDesc(FileDesc fileDesc) {
+        addFileDesc(fileDesc);
     }
 
     /**

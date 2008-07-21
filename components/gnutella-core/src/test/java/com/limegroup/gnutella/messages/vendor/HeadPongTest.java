@@ -3,9 +3,13 @@ package com.limegroup.gnutella.messages.vendor;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
@@ -29,12 +33,14 @@ import org.limewire.util.ByteUtils;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.altlocs.AltLocManager;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -529,8 +535,7 @@ public class HeadPongTest extends LimeTestCase {
         SSLSettings.TLS_INCOMING.setValue(false);
         networkManager.setAcceptedIncomingConnection(true);
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
-//        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1); 
-        ((FileManagerStub)fileManager).s
+        setupFileManager(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -568,7 +573,7 @@ public class HeadPongTest extends LimeTestCase {
         SSLSettings.TLS_INCOMING.setValue(true);
         networkManager.setAcceptedIncomingConnection(true);
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);        
+        setupFileManager(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -607,7 +612,7 @@ public class HeadPongTest extends LimeTestCase {
         SSLSettings.TLS_INCOMING.setValue(true);
         networkManager.setAcceptedIncomingConnection(false);
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);        
+        setupFileManager(fd, UrnHelper.SHA1); 
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -671,7 +676,7 @@ public class HeadPongTest extends LimeTestCase {
         req.setGuid(guid);
         
         final IncompleteFileDescStub fd = new IncompleteFileDescStub();
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);        
+        setupFileManager(fd, UrnHelper.SHA1); 
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         mockery.checking(new Expectations() {{
             atLeast(1).of(downloadManager).isActivelyDownloading(with(same(fd.getSHA1Urn())));
@@ -714,7 +719,7 @@ public class HeadPongTest extends LimeTestCase {
             atLeast(1).of(downloadManager).isActivelyDownloading(with(same(fd.getSHA1Urn())));
             will(returnValue(true));
         }});
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);        
+        setupFileManager(fd, UrnHelper.SHA1); 
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         
         HeadPong pong = headPongFactory.create(req);
@@ -750,7 +755,7 @@ public class HeadPongTest extends LimeTestCase {
         req.setGuid(guid);
         
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);
+        setupFileManager(fd, UrnHelper.SHA1);
         uploadManager.setNumQueuedUploads(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
         
         HeadPong pong = headPongFactory.create(req);
@@ -786,7 +791,7 @@ public class HeadPongTest extends LimeTestCase {
         req.setGuid(guid);
         
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);
+        setupFileManager(fd, UrnHelper.SHA1);
         uploadManager.setNumQueuedUploads(3);
         
         HeadPong pong = headPongFactory.create(req);
@@ -822,7 +827,7 @@ public class HeadPongTest extends LimeTestCase {
         req.setGuid(guid);
         
         FileDescStub fd = new FileDescStub("file", UrnHelper.SHA1, 0);
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);
+        setupFileManager(fd, UrnHelper.SHA1);
         uploadManager.setUploadsInProgress(UploadSettings.HARD_MAX_UPLOADS.getValue()-5);
         
         HeadPong pong = headPongFactory.create(req);
@@ -859,7 +864,7 @@ public class HeadPongTest extends LimeTestCase {
         
         final IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals(Range.createRange(0, 500), Range.createRange(705, 1000), Range.createRange(20000, 25000));
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);
+        setupFileManager(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         mockery.checking(new Expectations() {{
             atLeast(1).of(downloadManager).isActivelyDownloading(with(same(fd.getSHA1Urn())));
@@ -908,7 +913,7 @@ public class HeadPongTest extends LimeTestCase {
         
         final IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals(Range.createRange(0, 500), Range.createRange(0xFFFFFFFF00l, 0xFFFFFFFFFFl));
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);
+        setupFileManager(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         mockery.checking(new Expectations() {{
             atLeast(1).of(downloadManager).isActivelyDownloading(with(same(fd.getSHA1Urn())));
@@ -977,7 +982,7 @@ public class HeadPongTest extends LimeTestCase {
         
         final IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals(Range.createRange(0, 500), Range.createRange(705, 1000), Range.createRange(20000, 25000));
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);
+        setupFileManager(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         mockery.checking(new Expectations() {{
             atLeast(1).of(downloadManager).isActivelyDownloading(with(same(fd.getSHA1Urn())));
@@ -1018,7 +1023,7 @@ public class HeadPongTest extends LimeTestCase {
         
         final IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);
+        setupFileManager(fd, UrnHelper.SHA1);
         mockery.checking(new Expectations() {{
             atLeast(1).of(downloadManager).isActivelyDownloading(with(same(fd.getSHA1Urn())));
             will(returnValue(false));
@@ -1058,7 +1063,7 @@ public class HeadPongTest extends LimeTestCase {
         
         final IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);
+        setupFileManager(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         mockery.checking(new Expectations() {{
             atLeast(1).of(downloadManager).isActivelyDownloading(with(same(fd.getSHA1Urn())));
@@ -1103,7 +1108,7 @@ public class HeadPongTest extends LimeTestCase {
         
         final IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);
+        setupFileManager(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         mockery.checking(new Expectations() {{
             atLeast(1).of(downloadManager).isActivelyDownloading(with(same(fd.getSHA1Urn())));
@@ -1247,7 +1252,7 @@ public class HeadPongTest extends LimeTestCase {
         
         final IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);
+        setupFileManager(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         mockery.checking(new Expectations() {{
             atLeast(1).of(downloadManager).isActivelyDownloading(with(same(fd.getSHA1Urn())));
@@ -1340,7 +1345,7 @@ public class HeadPongTest extends LimeTestCase {
         
         final IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);
+        setupFileManager(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         mockery.checking(new Expectations() {{
             atLeast(1).of(downloadManager).isActivelyDownloading(with(same(fd.getSHA1Urn())));
@@ -1392,7 +1397,7 @@ public class HeadPongTest extends LimeTestCase {
         
         final IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);
+        setupFileManager(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         mockery.checking(new Expectations() {{
             atLeast(1).of(downloadManager).isActivelyDownloading(with(same(fd.getSHA1Urn())));
@@ -1443,7 +1448,7 @@ public class HeadPongTest extends LimeTestCase {
         
         final IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);
+        setupFileManager(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         mockery.checking(new Expectations() {{
             atLeast(1).of(downloadManager).isActivelyDownloading(with(same(fd.getSHA1Urn())));
@@ -1516,7 +1521,7 @@ public class HeadPongTest extends LimeTestCase {
         
         final IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);
+        setupFileManager(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         mockery.checking(new Expectations() {{
             atLeast(1).of(downloadManager).isActivelyDownloading(with(same(fd.getSHA1Urn())));
@@ -1567,7 +1572,7 @@ public class HeadPongTest extends LimeTestCase {
         
         final IncompleteFileDescStub fd = new IncompleteFileDescStub();
         fd.setRangesAsIntervals();
-        ((FileListStub)fileManager.getSharedFileList()).addFileDescForUrn(fd, UrnHelper.SHA1);
+        setupFileManager(fd, UrnHelper.SHA1);
         int expectedUploads = -UploadSettings.HARD_MAX_UPLOADS.getValue();
         mockery.checking(new Expectations() {{
             atLeast(1).of(downloadManager).isActivelyDownloading(with(same(fd.getSHA1Urn())));
@@ -1645,4 +1650,12 @@ public class HeadPongTest extends LimeTestCase {
         return out.toByteArray();
     }
 
+    private void setupFileManager(FileDesc fd, URN urn) {
+        Map<URN,FileDesc> map = new HashMap<URN,FileDesc>();
+        map.put(urn, fd);
+        fileManager.setUrns(map);
+        List<FileDesc> list = new ArrayList<FileDesc>();
+        list.add(fd);
+        ((FileListStub)fileManager.getSharedFileList()).setDescs(list);
+    }
 }

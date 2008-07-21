@@ -2,8 +2,11 @@ package com.limegroup.gnutella.settings;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Set;
 
 import org.limewire.setting.BooleanSetting;
@@ -367,12 +370,53 @@ public class SharingSettings extends LimeProps {
         return DEFAULT_EXTENSIONS_TO_DISABLE; 
     }
     
+    /**
+     * A saved list of names of all the buddyLists that have been created.
+     */
+    public static final StringArraySetting SHARED_BUDDY_LIST_NAMES = 
+        FACTORY.createStringArraySetting("SHARED_BUDDY_LIST_NAMES", new String[0]);
+
+    /**
+     * Removes a name of a saved buddylist.
+     */
+    public static final void removeBuddyListName(String removeName) {
+        String[] names = SHARED_BUDDY_LIST_NAMES.getValue();
+        List<String> nameList = new ArrayList<String>(Arrays.asList(names));
+        nameList.remove(removeName);
+        
+        if(nameList.size() != names.length) {
+            SHARED_BUDDY_LIST_NAMES.setValue(nameList.toArray(new String[nameList.size()]));
+        }
+    }
+    
+    /**
+     * Adds a new name to the list of shared buddy list names if one does not 
+     * already exist. Returns true if the name was added or false if it 
+     * already existed
+     */
+    public static final boolean addBuddyListName(String name) {
+        String[] names = SHARED_BUDDY_LIST_NAMES.getValue();
+        List<String> nameList = new ArrayList<String>(Arrays.asList(names));
+        if(nameList.contains(name))
+            return false;
+        else {
+            nameList.add(name);
+            SHARED_BUDDY_LIST_NAMES.setValue(nameList.toArray(new String[nameList.size()]));
+            return true;
+        }
+    }
     
     /**
 	 * The shared directories. 
 	 */
     public static final FileSetSetting DIRECTORIES_TO_SHARE =
         FACTORY.createFileSetSetting("DIRECTORIES_TO_SEARCH_FOR_FILES", new File[0]);
+    
+    /**
+     * Directories to display in LW but not necessarily share
+     */
+    public static final FileSetSetting DIRECTORIES_TO_DISPLAY =
+        FACTORY.createFileSetSetting("DIRECTORIES_TO_DISPLAY", new File[0]);
 
     /**
      * Whether or not to auto-share files when using 'Download As'.

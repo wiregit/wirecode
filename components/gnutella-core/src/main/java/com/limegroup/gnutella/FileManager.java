@@ -24,22 +24,41 @@ public interface FileManager {
     public abstract void stop();
 
     /**
-     * Returns the FileList containing Shared files
+     * Returns the FileList containing Shared files.
      */
     public FileList getSharedFileList();
     
     /**
-     * Returns the FileList containing Store files
+     * Returns the FileList containing Store files.
      */
     public FileList getStoreFileList();
     
     /**
-     * Returns the FileList containing Shared Buddy files
+     * Returns the FileList containing Shared Buddy files of this name. If
+     * this buddy list does not exist, a new Buddylist with this name will 
+     * be created.
      */
-    public FileList getBuddyFileList();
+    public FileList getBuddyFileList(String name);
     
     /**
-     * Returns the FileList containing Incomplete files
+     * Creates a new FileList with the given name and returns it.
+     */
+    public FileList addBuddyFileList(String name);
+    
+    /**
+     * Removes the shared Buddy list containing this name.
+     * @param name
+     */
+    public void removeBuddyFileList(String name);
+    
+    /**
+     * Returns true if a shared buddy list of this name exists, false
+     * otherwise.
+     */
+    public boolean containsBuddyFileList(String name);
+    
+    /**
+     * Returns the FileList containing Incomplete files.
      */
     public FileList getIncompleteFileList();
 
@@ -89,15 +108,26 @@ public interface FileManager {
      * Returns whether or not the updating is finished.
      */
     public abstract boolean isUpdating();
-
+ 
+    /**
+     * Adds a given folder to be shared.
+     * NOTE: this remains for backwards compatibility. This should not be
+     * used as of 5.0. Instead a generic folder should be added using addFolder().
+     */
+    public abstract boolean addSharedFolder(File folder);
+    
     /**
      * Removes a given directory from being completely shared.
+     * NOTE: this remains for backwards compatibility. This should not be
+     * used as of 5.0. Instead a generic folder should be added using removeFolder().
      */
-    public abstract void removeFolderIfShared(File folder);
+    public abstract void removeSharedFolder(File folder);
 
     /**
      * Adds a set of folders to be shared and a black list of subfolders that should
      * not be shared.
+     * NOTE: this remains for backwards compatibility. This should not be
+     * used as of 5.0. Instead a generic folder should be added using addFolders
      * 
      * @param folders set of folders to  be shared
      * @param blackListedSet the subfolders or subsubfolders that are not to be
@@ -106,11 +136,23 @@ public interface FileManager {
     public abstract void addSharedFolders(Set<File> folders, Set<File> blackListedSet);
 
     public abstract Set<File> getFolderNotToShare();
-
+    
     /**
-     * Adds a given folder to be shared.
+     * Adds a folder to be managed. This folder will be checked everytime a refresh occurs
+     * @return true if the folder was added, false otherwise
      */
-    public abstract boolean addSharedFolder(File folder);
+    public boolean addFolder(File folder);
+    
+    /**
+     * Adds a set of folders to be managed.
+     */
+    public void addFolders(Set<File> folders);
+    
+    /**
+     * Removes a managed folder.
+     * @param folder - folder to remove
+     */
+    public void removeFolder(File folder);
 
     /**
      * Adds the file to the master file list. 

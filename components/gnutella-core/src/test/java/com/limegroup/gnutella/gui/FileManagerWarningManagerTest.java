@@ -63,7 +63,7 @@ public class FileManagerWarningManagerTest extends GUIBaseTestCase {
         addEvent = new FileManagerEvent(fileManager, FileManagerEvent.Type.ADD_FILE);
         removeEvent = new FileManagerEvent(fileManager, FileManagerEvent.Type.REMOVE_FILE);
         loadedEvent =  new FileManagerEvent(fileManager, FileManagerEvent.Type.ADD_FILE);
-        randomEvent =  new FileManagerEvent(fileManager, FileManagerEvent.Type.REMOVE_STORE_FOLDER);
+        randomEvent =  new FileManagerEvent(fileManager, FileManagerEvent.Type.REMOVE_FOLDER);
     }
     
     

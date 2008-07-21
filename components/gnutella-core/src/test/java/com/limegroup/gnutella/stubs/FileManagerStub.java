@@ -67,7 +67,7 @@ public class FileManagerStub extends FileManagerImpl {
             CopyOnWriteArrayList<FileEventListener> listeners) {
         super(simppManager, urnCache, creationTimeCache, contentManager, altLocManager, activityCallback, backgroundExecutor, listeners);
     
-        fileListStub = new FileListStub(this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE);
+        fileListStub = new FileListStub("Shared Stub", this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE);
    
         super.resetVariables();
     }

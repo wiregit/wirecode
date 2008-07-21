@@ -54,15 +54,41 @@ public class LibraryData extends AbstractSettingsGroup {
     public final Set<File> SPECIAL_STORE_FILES = DATA.getSet("SPECIAL_STORE_FILES");
     
     /**
-     * Files that are shared with buddy's in your IM client.
-     */
-    public final Set<File> BUDDY_LIST_FILES = DATA.getSet("BUDDY_LIST_FILES");
-    
-    /**
      * Constructs a new LibraryData, adding it to the SettingsHandler for maintanence.
      */
     public LibraryData() {
         SettingsGroupManager.instance().addSettingsGroup(this);
+    }
+    
+    /**
+     * Returns a Set of Files with the key name. If a Set does not
+     * exist with this name it creates one and returns it.
+     */
+    public Set<File> getBuddyList(String name) {
+        return DATA.getSet(name);
+    }
+    
+    /**
+     * Returns true if a BuddyList exists by this name, false
+     * otherwise
+     */
+    public boolean containsBuddyList(String name) {
+        return DATA.contains(name);
+    }
+    
+    /**
+     * Creates a new BuddyList by this name is one does not
+     * exist.
+     */
+    public void addBuddyList(String name) {
+        DATA.getSet(name);
+    }
+    
+    /**
+     * Removes the BuddyList associated with this name
+     */
+    public void removeBuddyList(String name) {
+        DATA.remove(name);
     }
     
     /**

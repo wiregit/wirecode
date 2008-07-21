@@ -15,6 +15,7 @@ import org.limewire.collection.MultiCollection;
 import org.limewire.inspection.InspectableForSize;
 
 import com.limegroup.gnutella.library.SharingUtils;
+import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class SharedFileListImpl extends FileListImpl {
@@ -33,7 +34,7 @@ public class SharedFileListImpl extends FileListImpl {
      * at the same time
      */
     @InspectableForSize("number of transiently shared files")
-    private Set<File> transientSharedFiles = new HashSet<File>();
+    private final Set<File> transientSharedFiles;
     
     /**
      * Individual files that are not in a shared folder.
@@ -41,14 +42,20 @@ public class SharedFileListImpl extends FileListImpl {
     @InspectableForSize("number of individually shared files") 
     private Collection<File> individualSharedFiles; 
     
-    public SharedFileListImpl(FileManager fileManager, Set<File> individualFiles, Set<File> filesNotToShare) {
-        super(fileManager, individualFiles);
+    public SharedFileListImpl(String name, FileManager fileManager, Set<File> individualFiles, Set<File> filesNotToShare) {
+        super(name, fileManager, individualFiles);
         
         this.filesNotToShare = filesNotToShare;
+        transientSharedFiles = new HashSet<File>();
         
         // the transient files and the special files.
         individualSharedFiles = Collections.synchronizedCollection(
                 new MultiCollection<File>(transientSharedFiles, individualFiles));
+    }
+    
+    @Override
+    public void addFileAlways(File file) {
+        addFileAlways(file, LimeXMLDocument.EMPTY_LIST);
     }
     
     /**
@@ -57,7 +64,7 @@ public class SharedFileListImpl extends FileListImpl {
      */
     @Override
     public void addFileAlways(File file, List<? extends LimeXMLDocument> list) {
-        filesNotToShare.remove(file);
+        filesNotToShare.remove(file); 
         if (!isFileAddable(file))
             individualFiles.add(file);
             
@@ -71,7 +78,7 @@ public class SharedFileListImpl extends FileListImpl {
     public void addFileForSession(File file) {
         filesNotToShare.remove(file);
         if (!isFileAddable(file))
-            transientSharedFiles.add(file);
+            transientSharedFiles.add(file); 
         addFile(file);
     }
     
@@ -90,10 +97,11 @@ public class SharedFileListImpl extends FileListImpl {
     
     @Override
     public boolean remove(FileDesc fd) {      
+        if(!individualSharedFiles.contains(fd.getFile()) && fileManager.isFileInCompletelySharedDirectory(fd.getFile()))
+            filesNotToShare.add(fd.getFile());
+        
         boolean value = super.remove(fd);
 
-        if(!individualSharedFiles.remove(fd.getFile()))
-            filesNotToShare.add(fd.getFile());
         if(value) {
             File parent = fd.getFile().getParentFile();
             // files that are forcibly shared over the network aren't counted
@@ -120,7 +128,8 @@ public class SharedFileListImpl extends FileListImpl {
     @Override
     public void clear() {
         super.clear();
-        
+        if(transientSharedFiles != null)
+        transientSharedFiles.clear();
         numForcedFiles = 0;
     }
     
@@ -153,9 +162,13 @@ public class SharedFileListImpl extends FileListImpl {
     }
     
     @Override
-    protected void addAsIndividualFile(FileDesc fileDesc) {
-        if(!fileManager.isFileInCompletelySharedDirectory(fileDesc.getFile())) {
+    protected void addAsIndividualFile(FileDesc fileDesc) { 
+        if(LimeWireUtils.getMajorVersionNumber() >= 5) {
             individualFiles.add(fileDesc.getFile());
+        }else {
+            if(!fileManager.isFileInCompletelySharedDirectory(fileDesc.getFile()) && !transientSharedFiles.contains(fileDesc.getFile())) {
+                individualFiles.add(fileDesc.getFile());
+            }
         }
     }
     
@@ -168,7 +181,7 @@ public class SharedFileListImpl extends FileListImpl {
         if( fileDesc.getLimeXMLDocuments().size() != 0 && 
                 isStoreXML(fileDesc.getLimeXMLDocuments().get(0))) {
             return false;
-        } else if( !isFileAddable(fileDesc.getFile())){ System.out.println("cant add");
+        } else if( !isFileAddable(fileDesc.getFile())){
             return false;
         } 
         return true;
@@ -177,7 +190,7 @@ public class SharedFileListImpl extends FileListImpl {
     //////////////////////// For Backwards Compatibility /////////////////
     
     @Override
-    public File[] getIndividualFiles() {
+    public File[] getIndividualFiles() { 
         ArrayList<File> files = new ArrayList<File>(individualSharedFiles.size());
         for(File f : individualSharedFiles) {
             if (f.exists())

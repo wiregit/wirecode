@@ -17,6 +17,10 @@ public class SynchronizedFileList implements FileList {
         this.fileList = fileList;
         mutex = fileList;
     }
+    
+    public String getName() {
+        return fileList.getName();
+    }
 
     public void clear() {
         synchronized (mutex) {

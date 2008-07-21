@@ -86,24 +86,14 @@ public class FileManagerEvent extends EventObject {
         INCOMPLETE_URN_CHANGE,
         
         /**
-         * Called when a shared folder and all of its contents has been added to FileManager
+         * Called when a folder and all of its contents has been added to FileManager
          */
         ADD_FOLDER,
         
         /**
-         * Called when a store folder and all of its contents has been added to FileManager
-         */
-        ADD_STORE_FOLDER,
-        
-        /**
-         * Called when a shared folder and all of its contents has been removed from FileManager
+         * Called when a folder and all of its contents has been removed from FileManager
          */
         REMOVE_FOLDER,
-        
-        /**
-         * Called when a store folder and all of its contents has been removed from FileManager
-         */
-        REMOVE_STORE_FOLDER,
         
         /**
          * Called once FileManager has begun a new load process of loading all files in all shared
