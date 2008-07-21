@@ -70,6 +70,10 @@ public class SwarmContentListener implements ResponseContentListener {
                 finalIOControl.requestOutput();
                 finalIOControl.requestInput();
             }
+            
+            public void finish() {
+                resume();
+            }
         };
         return callBack;
     }
@@ -82,13 +86,16 @@ public class SwarmContentListener implements ResponseContentListener {
                 range = null;
             }
             try {
-                swarmCoordinator.finish();
+                //swarmCoordinator.finish();//can't close this here if we expect other listeners to finish
                 if (ioControl != null) {
-                    ioControl.shutdown();
+                   ioControl.requestInput();
+                   ioControl.shutdown();//can't close this here if we expect other listeners to finish?
+                   
+                   ioControl.requestOutput();
                 }
             } catch (IOException e) {
                 // TODO handle me!
-            }
+           }
         }
     }
 

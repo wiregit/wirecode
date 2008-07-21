@@ -18,5 +18,7 @@ public interface Swarmer {
     public void addHeaderInterceptor(HttpRequestInterceptor requestInterceptor);
     
     public void addHeaderInterceptor(HttpResponseInterceptor responseInterceptor);
+    
+    public boolean finished();
 
 }

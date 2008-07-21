@@ -85,6 +85,7 @@ public class SwarmerImpl implements Swarmer {
         final SourceEventListener listener = getListener(sourceEventListener);
         SessionRequestCallback sessionRequestCallback = createSessionRequestCallback(source,
                 listener);
+
         ioReactor.connect(source.getAddress(), null, new SourceInfo(source, listener),
                 sessionRequestCallback);
     }
@@ -249,5 +250,10 @@ public class SwarmerImpl implements Swarmer {
         public void responseProcessed(Swarmer swarmer, SwarmSource source, int statusCode) {
         }
     };
+
+    public boolean finished() {
+        // TODO Auto-generated method stub
+        return false;
+    }
 
 }
