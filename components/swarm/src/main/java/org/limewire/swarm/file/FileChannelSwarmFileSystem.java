@@ -5,12 +5,15 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
 import org.limewire.swarm.SwarmFileSystem;
 
 public class FileChannelSwarmFileSystem implements SwarmFileSystem {
-    private final File file;
+    private final SwarmFile swarmFile;
 
     private RandomAccessFile raFile;
 
@@ -18,11 +21,8 @@ public class FileChannelSwarmFileSystem implements SwarmFileSystem {
 
     private final Object LOCK = new Object();
 
-    private final long completeSize;
-
     public FileChannelSwarmFileSystem(long completeSize, File file) {
-        this.file = file;
-        this.completeSize = completeSize;
+        this.swarmFile = new SwarmFileImpl(file, completeSize);
     }
 
     public long write(ByteBuffer byteBuffer, long start) throws IOException {
@@ -42,7 +42,7 @@ public class FileChannelSwarmFileSystem implements SwarmFileSystem {
     }
 
     public long getCompleteSize() {
-        return completeSize;
+        return swarmFile.getFileSize();
     }
 
     public void close() throws IOException {
@@ -57,9 +57,19 @@ public class FileChannelSwarmFileSystem implements SwarmFileSystem {
     public void initialize() throws IOException {
         synchronized (LOCK) {
             if (raFile == null) {
-                raFile = new RandomAccessFile(file, "rw");
+                raFile = new RandomAccessFile(swarmFile.getFile(), "rw");
                 fileChannel = raFile.getChannel();
             }
         }
+    }
+
+    public SwarmFile getSwarmFile(long position) {
+        return swarmFile;
+    }
+
+    public List<SwarmFile> getSwarmFilesInRange(Range range) {
+        ArrayList<SwarmFile> files = new ArrayList<SwarmFile>();
+        files.add(swarmFile);
+        return files;
     }
 }

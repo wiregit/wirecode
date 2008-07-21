@@ -3,6 +3,10 @@ package org.limewire.swarm;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.List;
+
+import org.limewire.collection.Range;
+import org.limewire.swarm.file.SwarmFile;
 
 public interface SwarmFileSystem {
 
@@ -21,6 +25,10 @@ public interface SwarmFileSystem {
     /** Initializes this writer for writing. */
     void initialize() throws IOException;
     
-    public long getCompleteSize();
+    long getCompleteSize();
+    
+    SwarmFile getSwarmFile(long position);
+    
+    List<SwarmFile> getSwarmFilesInRange(Range range);
 
 }

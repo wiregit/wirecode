@@ -8,7 +8,7 @@ public interface SwarmFile {
 
     public abstract File getFile();
 
-    public abstract long getCompleteSize();
+    public abstract long getFileSize();
 
     public abstract void flush() throws IOException;
 

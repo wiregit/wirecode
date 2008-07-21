@@ -36,7 +36,7 @@ public class SwarmFileImpl implements SwarmFile {
     /* (non-Javadoc)
      * @see org.limewire.swarm.file.SwarmFile#getCompleteSize()
      */
-    public long getCompleteSize() {
+    public long getFileSize() {
         return completeSize;
     }
 
@@ -81,7 +81,7 @@ public class SwarmFileImpl implements SwarmFile {
     public long write(ByteBuffer byteBuffer, long start) throws IOException {
         synchronized (LOCK) {
             initialize();
-            long pendingBytes = getCompleteSize() - start;
+            long pendingBytes = getFileSize() - start;
             int oldLimit = byteBuffer.limit();
             int position = byteBuffer.position();
             int capacity = byteBuffer.capacity();
@@ -117,7 +117,7 @@ public class SwarmFileImpl implements SwarmFile {
      * @see org.limewire.swarm.file.SwarmFile#getEndByte()
      */
     public long getEndByte() {
-        long endByte = getCompleteSize() > 0 ? getStartByte() + getCompleteSize() - 1 : 0;
+        long endByte = getFileSize() > 0 ? getStartByte() + getFileSize() - 1 : 0;
         return endByte;
     }
 }

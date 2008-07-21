@@ -3,7 +3,9 @@ package org.limewire.swarm.file;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.List;
 
+import org.limewire.collection.Range;
 import org.limewire.swarm.SwarmFileSystem;
 
 public class SwarmFileSystemImpl implements SwarmFileSystem {
@@ -23,7 +25,7 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
         return completeSize;
     }
 
-    public SwarmFile getFile(long position) {
+    public SwarmFile getSwarmFile(long position) {
         for (SwarmFile swarmFile : files) {
             long startByte = swarmFile.getStartByte();
             long endByte = swarmFile.getEndByte();
@@ -35,10 +37,27 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
 
     }
 
+    public List<SwarmFile> getSwarmFilesInRange(Range range) {
+        ArrayList<SwarmFile> files = new ArrayList<SwarmFile>();
+        
+        long rangeStart = range.getLow();
+        long rangeEnd = range.getHigh();
+        
+        for (SwarmFile swarmFile : files) {
+            long startByte = swarmFile.getStartByte();
+            long endByte = swarmFile.getEndByte();
+            if (startByte <= rangeEnd && endByte >= rangeStart) {
+                files.add(swarmFile);
+            }
+        }
+
+        return files;
+    }
+
     public synchronized void add(SwarmFileImpl swarmFile) {
         files.add(swarmFile);
         swarmFile.setStartByte(completeSize);
-        completeSize += swarmFile.getCompleteSize();
+        completeSize += swarmFile.getFileSize();
     }
 
     public long write(ByteBuffer byteBuffer, long start) throws IOException {
@@ -47,7 +66,7 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
         long wroteTotal = 0;
 
         while (byteBuffer.position() < byteBuffer.limit()) {
-            SwarmFile swarmFile = getFile(currentPosition);
+            SwarmFile swarmFile = getSwarmFile(currentPosition);
             long writeStart = currentPosition - swarmFile.getStartByte();
             long wrote = swarmFile.write(byteBuffer, writeStart);
             currentPosition += wrote;
@@ -58,7 +77,7 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
 
     public long read(ByteBuffer byteBuffer, long position) throws IOException {
         initialize();
-        SwarmFile swarmFile = getFile(position);
+        SwarmFile swarmFile = getSwarmFile(position);
         long read = swarmFile.read(byteBuffer, position);
         return read;
     }
@@ -72,4 +91,5 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
     public void initialize() throws IOException {
 
     }
+
 }
