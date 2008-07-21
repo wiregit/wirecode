@@ -51,7 +51,7 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
             long writeStart = currentPosition - swarmFile.getStartByte();
             long wrote = swarmFile.write(byteBuffer, writeStart);
             currentPosition += wrote;
-            wroteTotal += -wrote;
+            wroteTotal += wrote;
         }
         return wroteTotal;
     }

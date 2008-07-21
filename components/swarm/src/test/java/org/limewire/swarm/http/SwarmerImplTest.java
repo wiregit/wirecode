@@ -26,20 +26,22 @@ import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmVerifier;
 import org.limewire.swarm.file.FileChannelSwarmFileSystem;
 import org.limewire.swarm.file.FileCoordinatorImpl;
+import org.limewire.swarm.file.SwarmFileImpl;
+import org.limewire.swarm.file.SwarmFileSystemImpl;
 import org.limewire.swarm.file.selection.ContiguousSelectionStrategy;
 import org.limewire.swarm.file.verifier.NoOpFileVerifier;
 import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
 
-public class FileChannelSwarmFileSystemSwarmerTest extends BaseTestCase {
+public class SwarmerImplTest extends BaseTestCase {
 
-    public FileChannelSwarmFileSystemSwarmerTest(String name) {
+    public SwarmerImplTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(FileChannelSwarmFileSystemSwarmerTest.class);
+        return buildTestSuite(SwarmerImplTest.class);
     }
 
     public void testRangesStart() throws Exception {
@@ -171,7 +173,8 @@ public class FileChannelSwarmFileSystemSwarmerTest extends BaseTestCase {
                 .instance().getScheduledExecutorService(), new SocketsManagerImpl());
 
         file.delete();
-        SwarmFileSystem swarmDownload = new FileChannelSwarmFileSystem(fileSize, file);
+        //SwarmFileSystem swarmDownload = new FileChannelSwarmFileSystem(fileSize, file);
+        SwarmFileSystem swarmDownload = new SwarmFileSystemImpl(new SwarmFileImpl(file,fileSize));
         SwarmVerifier swarmFileVerifier = new NoOpFileVerifier();
         SwarmBlockSelector selectionStrategy = new ContiguousSelectionStrategy();
 
