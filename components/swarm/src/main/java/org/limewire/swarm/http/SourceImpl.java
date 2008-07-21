@@ -12,31 +12,31 @@ public class SourceImpl implements SwarmSource {
 
     private final SocketAddress socketAddress;
 
-    private final String uri;
+    private final String path;
 
     private final Range range;
 
     public SourceImpl(URI uri, Range range) {
         this.socketAddress = new InetSocketAddress(uri.getHost(), URIUtils.getPort(uri));
-        this.uri = uri.getPath();
+        this.path = uri.getPath();
         this.range = range;
     }
 
     public SourceImpl(URI uri, long fileSize) {
-       this(uri,Range.createRange(0,fileSize-1));
+        this(uri, Range.createRange(0, fileSize - 1));
     }
 
     public SocketAddress getAddress() {
         return socketAddress;
     }
 
-    public String getUri() {
-        return uri;
+    public String getPath() {
+        return path;
     }
 
     @Override
     public String toString() {
-        return "Source for: " + socketAddress + ", uri: " + uri + ", id: "
+        return "Source for: " + socketAddress + ", uri: " + path + ", id: "
                 + System.identityHashCode(this);
     }
 

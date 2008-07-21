@@ -403,7 +403,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
     public void finish() throws IOException {
         synchronized (LOCK) {
             // TODO handle possible running write jobs.
-            fileSystem.finish();
+            fileSystem.close();
         }
     }
 

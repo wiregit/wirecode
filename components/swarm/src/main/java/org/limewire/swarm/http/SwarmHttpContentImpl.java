@@ -6,10 +6,10 @@ import java.nio.ByteBuffer;
 import org.apache.http.nio.ContentDecoder;
 import org.limewire.swarm.SwarmContent;
 
-public class SwarmHttpContentDecoderImpl implements SwarmContent {
+public class SwarmHttpContentImpl implements SwarmContent {
     private final ContentDecoder contentDecoder;
 
-    public SwarmHttpContentDecoderImpl(ContentDecoder contentDecoder) {
+    public SwarmHttpContentImpl(ContentDecoder contentDecoder) {
         assert contentDecoder != null;
         this.contentDecoder = contentDecoder;
     }

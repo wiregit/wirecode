@@ -69,7 +69,7 @@ public class SwarmFileExecutionHandler implements ExecutionHandler {
             return null;
         }
 
-        HttpRequest request = new BasicHttpRequest("GET", source.getUri());
+        HttpRequest request = new BasicHttpRequest("GET", source.getPath());
         request.addHeader(new BasicHeader("Range", "bytes=" + range.getLow() + "-"
                 + (range.getHigh())));
         

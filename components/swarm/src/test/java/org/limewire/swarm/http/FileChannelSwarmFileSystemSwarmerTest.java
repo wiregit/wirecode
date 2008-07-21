@@ -32,14 +32,14 @@ import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
 
-public class SwarmerImplTest extends BaseTestCase {
+public class FileChannelSwarmFileSystemSwarmerTest extends BaseTestCase {
 
-    public SwarmerImplTest(String name) {
+    public FileChannelSwarmFileSystemSwarmerTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return buildTestSuite(SwarmerImplTest.class);
+        return buildTestSuite(FileChannelSwarmFileSystemSwarmerTest.class);
     }
 
     public void testRangesStart() throws Exception {

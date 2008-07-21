@@ -14,7 +14,7 @@ import org.limewire.swarm.SwarmContent;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmWriteJob;
 import org.limewire.swarm.SwarmWriteJobControl;
-import org.limewire.swarm.http.SwarmHttpContentDecoderImpl;
+import org.limewire.swarm.http.SwarmHttpContentImpl;
 import org.limewire.util.Objects;
 
 /**
@@ -47,7 +47,7 @@ public class SwarmContentListener implements ResponseContentListener {
 
         this.ioControl = ioctrl;
 
-        SwarmContent content = new SwarmHttpContentDecoderImpl(decoder);
+        SwarmContent content = new SwarmHttpContentImpl(decoder);
 
         SwarmWriteJobControl control = createControl(ioctrl);
         control.pause();

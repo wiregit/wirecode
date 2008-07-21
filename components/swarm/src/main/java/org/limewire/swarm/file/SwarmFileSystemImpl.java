@@ -1,170 +1,75 @@
 package org.limewire.swarm.file;
 
-import java.util.concurrent.ExecutorService;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
-import org.limewire.collection.IntervalSet;
 import org.limewire.swarm.SwarmFileSystem;
-import org.limewire.swarm.SwarmFileSystem;
-import org.limewire.swarm.SwarmListenerList;
-import org.limewire.swarm.SwarmBlockSelector;
-import org.limewire.swarm.SwarmVerifier;
 
-public class SwarmFileSystemImpl {
-    /** The minimum block size to use. */
-    private long minBlockSize;
+public class SwarmFileSystemImpl implements SwarmFileSystem {
+    private ArrayList<SwarmFileImpl> files = new ArrayList<SwarmFileImpl>();
 
-    /** The complete size of the file. */
-    private long completeSize;
+    private long completeSize = 0;
 
-    /** All ranges that are out on lease. */
-    private IntervalSet leasedBlocks;
+    public SwarmFileSystemImpl() {
 
-    /** The blocks that were written to disk. */
-    private IntervalSet writtenBlocks;
-
-    /** The blocks that were verified after being written to disk. */
-    private IntervalSet verifiedBlocks;
-
-    /** Blocks that are pending to be written to disk. */
-    private IntervalSet pendingBlocks;
-
-    /** The strategy for selecting new leased ranges. */
-    private SwarmBlockSelector blockChooser;
-
-    /** The file writer. */
-    private SwarmFileSystem swarmFile;
-
-    /** The ExecutorService to use for writing. */
-    private ExecutorService writeService;
-
-    /** The file verifier. */
-    private SwarmVerifier swarmFileVerifier;
-
-    /** The amount of data that was lost to corruption. */
-    private long amountLost;
-
-    /** A simple lock. */
-    private Object LOCK;
-
-    private SwarmListenerList listeners;
-
-    private SwarmFileSystem fileSystem;
-
-    public SwarmFileSystemImpl(Object lock, SwarmListenerList listeners, SwarmFileSystem fileSystem) {
-        LOCK = lock;
-        this.listeners = listeners;
-        this.fileSystem = fileSystem;
     }
 
-    public long getMinBlockSize() {
-        return minBlockSize;
-    }
-
-    public void setMinBlockSize(long minBlockSize) {
-        this.minBlockSize = minBlockSize;
+    public SwarmFileSystemImpl(SwarmFileImpl swarmFile) {
+        add(swarmFile);
     }
 
     public long getCompleteSize() {
         return completeSize;
     }
 
-    public void setCompleteSize(long completeSize) {
-        this.completeSize = completeSize;
+    public SwarmFile getFile(long position) {
+        for (SwarmFile swarmFile : files) {
+            long startByte = swarmFile.getStartByte();
+            long endByte = swarmFile.getEndByte();
+            if (startByte <= position && endByte >= position) {
+                return swarmFile;
+            }
+        }
+        return null;
+
     }
 
-    public IntervalSet getLeasedBlocks() {
-        return leasedBlocks;
+    public synchronized void add(SwarmFileImpl swarmFile) {
+        files.add(swarmFile);
+        swarmFile.setStartByte(completeSize);
+        completeSize += swarmFile.getCompleteSize();
     }
 
-    public void setLeasedBlocks(IntervalSet leasedBlocks) {
-        this.leasedBlocks = leasedBlocks;
+    public long write(ByteBuffer byteBuffer, long start) throws IOException {
+        initialize();
+        long currentPosition = start;
+        long wroteTotal = 0;
+
+        while (byteBuffer.position() < byteBuffer.limit()) {
+            SwarmFile swarmFile = getFile(currentPosition);
+            long writeStart = currentPosition - swarmFile.getStartByte();
+            long wrote = swarmFile.write(byteBuffer, writeStart);
+            currentPosition += wrote;
+            wroteTotal += -wrote;
+        }
+        return wroteTotal;
     }
 
-    public IntervalSet getWrittenBlocks() {
-        return writtenBlocks;
+    public long read(ByteBuffer byteBuffer, long position) throws IOException {
+        initialize();
+        SwarmFile swarmFile = getFile(position);
+        long read = swarmFile.read(byteBuffer, position);
+        return read;
     }
 
-    public void setWrittenBlocks(IntervalSet writtenBlocks) {
-        this.writtenBlocks = writtenBlocks;
+    public void close() throws IOException {
+        for (SwarmFileImpl swarmFile : files) {
+            swarmFile.close();
+        }
     }
 
-    public IntervalSet getVerifiedBlocks() {
-        return verifiedBlocks;
-    }
+    public void initialize() throws IOException {
 
-    public void setVerifiedBlocks(IntervalSet verifiedBlocks) {
-        this.verifiedBlocks = verifiedBlocks;
-    }
-
-    public IntervalSet getPendingBlocks() {
-        return pendingBlocks;
-    }
-
-    public void setPendingBlocks(IntervalSet pendingBlocks) {
-        this.pendingBlocks = pendingBlocks;
-    }
-
-    public SwarmBlockSelector getBlockChooser() {
-        return blockChooser;
-    }
-
-    public void setBlockChooser(SwarmBlockSelector blockChooser) {
-        this.blockChooser = blockChooser;
-    }
-
-    public SwarmFileSystem getSwarmFile() {
-        return swarmFile;
-    }
-
-    public void setSwarmFile(SwarmFileSystem swarmFile) {
-        this.swarmFile = swarmFile;
-    }
-
-    public ExecutorService getWriteService() {
-        return writeService;
-    }
-
-    public void setWriteService(ExecutorService writeService) {
-        this.writeService = writeService;
-    }
-
-    public SwarmVerifier getSwarmFileVerifier() {
-        return swarmFileVerifier;
-    }
-
-    public void setSwarmFileVerifier(SwarmVerifier swarmFileVerifier) {
-        this.swarmFileVerifier = swarmFileVerifier;
-    }
-
-    public long getAmountLost() {
-        return amountLost;
-    }
-
-    public void setAmountLost(long amountLost) {
-        this.amountLost = amountLost;
-    }
-
-    public Object getLOCK() {
-        return LOCK;
-    }
-
-    public void setLOCK(Object lock) {
-        LOCK = lock;
-    }
-
-    public SwarmListenerList getListeners() {
-        return listeners;
-    }
-
-    public void setListeners(SwarmListenerList listeners) {
-        this.listeners = listeners;
-    }
-
-    public SwarmFileSystem getFileSystem() {
-        return fileSystem;
-    }
-
-    public void setFileSystem(SwarmFileSystem fileSystem) {
-        this.fileSystem = fileSystem;
     }
 }

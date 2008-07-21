@@ -16,7 +16,7 @@ public interface SwarmFileSystem {
     long read(ByteBuffer byteBuffer, long start) throws IOException;
 
     /** Closes this writer. */
-    void finish() throws IOException;
+    void close() throws IOException;
 
     /** Initializes this writer for writing. */
     void initialize() throws IOException;

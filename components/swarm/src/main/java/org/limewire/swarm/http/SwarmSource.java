@@ -8,7 +8,7 @@ public interface SwarmSource {
 
     SocketAddress getAddress();
 
-    String getUri();
+    String getPath();
     
     Range getRange();
 

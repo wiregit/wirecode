@@ -45,7 +45,7 @@ public class FileChannelSwarmFileSystem implements SwarmFileSystem {
         return completeSize;
     }
 
-    public void finish() throws IOException {
+    public void close() throws IOException {
         synchronized (LOCK) {
             if (raFile != null) {
                 IOUtils.close(fileChannel);
