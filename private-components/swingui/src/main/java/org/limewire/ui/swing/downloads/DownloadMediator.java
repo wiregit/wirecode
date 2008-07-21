@@ -23,7 +23,7 @@ public class DownloadMediator {
 	 * filtered by textbox
 	 */
 	private EventList<DownloadItem> filteredList;
-	//TODO:synchronization for list
+	
 	/**
 	 * unfiltered - common to all tables
 	 */
