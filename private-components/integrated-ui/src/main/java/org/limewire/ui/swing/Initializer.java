@@ -115,7 +115,7 @@ public final class Initializer {
         
         // Load the UI, system tray & notification handlers,
         // and hide the splash screen & display the UI.
-        loadUI();
+        loadUI(awtSplash);
         loadTrayAndNotifications();
         hideSplashAndShowUI();
         
@@ -410,8 +410,9 @@ public final class Initializer {
     }
     
     /** Loads the UI. */
-    private void loadUI() {
+    private void loadUI(Frame awtSplash) {
         Application.launch(AppFrame.class, new String[0]);
+        awtSplash.dispose();
 //        GUIMediator.setSplashScreenString(I18n.tr("Loading User Interface..."));
 //        stopwatch.resetAndLog("update splash for UI");
 //
