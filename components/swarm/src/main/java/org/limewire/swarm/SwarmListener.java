@@ -16,6 +16,10 @@ public interface SwarmListener {
     void blockLeased(SwarmCoordinator swarmCoordinator, Range block);
     
     void blockUnleased(SwarmCoordinator swarmCoordinator, Range block);
+
+    void blockUnpending(SwarmCoordinator swarmCoordinator, Range block);
+
+    void blockPending(SwarmCoordinator swarmCoordinator, Range block);
     
     
 

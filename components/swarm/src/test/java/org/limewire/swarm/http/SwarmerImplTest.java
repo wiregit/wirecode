@@ -44,10 +44,9 @@ public class SwarmerImplTest extends BaseTestCase {
         return buildTestSuite(SwarmerImplTest.class);
     }
 
-    
     @Override
     protected void tearDown() throws Exception {
-       System.out.println("===================================");
+        System.out.println("===================================");
     }
 
     public void testRangesStart() throws Exception {
@@ -213,6 +212,16 @@ public class SwarmerImplTest extends BaseTestCase {
             public void downloadCompleted(SwarmCoordinator fileCoordinator,
                     SwarmFileSystem swarmDownload) {
                 System.out.println("download complete");
+            }
+
+            public void blockPending(SwarmCoordinator swarmCoordinator, Range block) {
+                System.out.println("block pending: " + block.toString());
+
+            }
+
+            public void blockUnpending(SwarmCoordinator swarmCoordinator, Range block) {
+                System.out.println("block unpending: " + block.toString());
+
             }
 
         });

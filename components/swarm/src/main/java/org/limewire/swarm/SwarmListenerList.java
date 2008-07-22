@@ -27,6 +27,24 @@ public class SwarmListenerList {
         }
     }
     
+    public void blockUnleased(Range block) {
+        for (SwarmListener listener : listeners) {
+            listener.blockUnleased(swarmCoordinator, block);
+        }
+    }
+    
+    public void blockPending(Range block) {
+        for (SwarmListener listener : listeners) {
+            listener.blockPending(swarmCoordinator, block);
+        }
+    }
+    
+    public void blockUnpending(Range block) {
+        for (SwarmListener listener : listeners) {
+            listener.blockUnpending(swarmCoordinator, block);
+        }
+    }
+    
     public void blockWritten(Range block) {
         for (SwarmListener listener : listeners) {
             listener.blockWritten(swarmCoordinator, block);

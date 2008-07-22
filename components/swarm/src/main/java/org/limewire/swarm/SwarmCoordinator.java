@@ -115,6 +115,8 @@ public interface SwarmCoordinator {
 
     boolean isComplete();
 
+    Range release(Range oldLease, Range newLease);
+
     // long getCompleteFileSize();
 
 }

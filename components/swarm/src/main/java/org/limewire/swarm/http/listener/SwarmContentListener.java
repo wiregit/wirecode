@@ -119,17 +119,7 @@ public class SwarmContentListener implements ResponseContentListener {
         }
 
         if (!actualRange.equals(expectedRange)) {
-            if (actualRange.getLow() > expectedRange.getLow()) {
-                fileCoordinator.unlease(Range.createRange(expectedRange.getLow(), actualRange
-                        .getLow() - 1));
-                expectedRange = Range.createRange(actualRange.getLow(), expectedRange.getHigh());
-            }
-
-            if (actualRange.getHigh() < expectedRange.getHigh()) {
-                fileCoordinator.unlease(Range.createRange(actualRange.getHigh() + 1, expectedRange
-                        .getHigh()));
-                expectedRange = Range.createRange(expectedRange.getLow(), actualRange.getHigh());
-            }
+            expectedRange = fileCoordinator.release(expectedRange, actualRange);
         }
     }
 
@@ -139,7 +129,7 @@ public class SwarmContentListener implements ResponseContentListener {
 
         try {
             int start = headerValue.indexOf("bytes") + 6; // skip "bytes " or
-                                                          // "bytes="
+            // "bytes="
             int slash = headerValue.indexOf('/');
 
             // if looks like: "bytes */*" or "bytes */10" -- NOT part of the

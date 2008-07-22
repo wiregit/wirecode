@@ -160,6 +160,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
 
     private void addLease(Range chosen) {
         leasedBlocks.add(chosen);
+        listeners.blockLeased(chosen);
     }
 
     private boolean hasLease(Range range) {
@@ -168,14 +169,17 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
 
     private void addPending(Range range) {
         pendingBlocks.add(range);
+        listeners.blockPending(range);
     }
 
     private void deleteLease(Range range) {
         leasedBlocks.delete(range);
+        listeners.blockUnleased(range);
     }
 
     private void deletePending(Range range) {
         pendingBlocks.delete(range);
+        listeners.blockUnpending(range);
     }
 
     private boolean hasPending(Range range) {
@@ -388,6 +392,18 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
             // TODO handle possible running write jobs.
             fileSystem.close();
         }
+    }
+
+    public Range release(Range oldLease, Range newLease) {
+        synchronized (LOCK) {
+            assert hasLease(oldLease);
+            assert newLease.isSubrange(oldLease);
+            
+            deleteLease(oldLease);
+            addLease(newLease);
+            return newLease;
+        }
+        
     }
 
 }
