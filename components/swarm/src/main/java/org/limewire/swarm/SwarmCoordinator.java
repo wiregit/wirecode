@@ -1,6 +1,8 @@
 package org.limewire.swarm;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 
@@ -50,7 +52,7 @@ public interface SwarmCoordinator {
      * after data has successfully been written to disk.
      * @param length 
      */
-    long write(Range range, SwarmContent content) throws IOException;
+    long write(Range range, ByteBuffer content) throws IOException;
     
     SwarmWriteJob createWriteJob(Range rangem, SwarmWriteJobControl callback);
 

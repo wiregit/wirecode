@@ -377,25 +377,15 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
         return new SwarmWriteJobImpl(range, this, writeService, callback);
     }
 
-    public long write(Range range, SwarmContent swarmContent) throws IOException {
+    public long write(Range range, ByteBuffer swarmContent) throws IOException {
         synchronized (LOCK) {
             long position = range.getLow();
-            ByteBuffer byteBuffer = ByteBuffer.allocate((int) DEFAULT_MIN_BLOCK_SIZE);
-
-            while (swarmContent.read(byteBuffer) != -1
-                    && byteBuffer.position() < byteBuffer.limit()) {
-
-            }
-
-            long bytesWritten = 0;
-            if (byteBuffer.position() > 0) {
-                Range pendingRange = Range.createRange(position, position + byteBuffer.position());
-                byteBuffer.flip();
-                pending(pendingRange);
-
-                bytesWritten = fileSystem.write(byteBuffer, position);
-                wrote(pendingRange);
-            }
+            long startRange = range.getLow();
+            long endRange = startRange - swarmContent.position() + swarmContent.limit() - 1;
+            Range pendingRange = Range.createRange(startRange, endRange);            
+            pending(pendingRange);
+            long bytesWritten = fileSystem.write(swarmContent, position);
+            wrote(pendingRange);
             return bytesWritten;
         }
     }

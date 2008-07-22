@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.URI;
 
+import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 
 import com.limegroup.gnutella.http.URIUtils;
@@ -14,12 +15,14 @@ public class SourceImpl implements SwarmSource {
 
     private final String path;
 
-    private final Range range;
+    private IntervalSet availableRanges = new IntervalSet();
+
+    // private final Range range;
 
     public SourceImpl(URI uri, Range range) {
         this.socketAddress = new InetSocketAddress(uri.getHost(), URIUtils.getPort(uri));
         this.path = uri.getPath();
-        this.range = range;
+        this.availableRanges.add(range);
     }
 
     public SourceImpl(URI uri, long fileSize) {
@@ -40,7 +43,10 @@ public class SourceImpl implements SwarmSource {
                 + System.identityHashCode(this);
     }
 
-    public Range getRange() {
-        return range;
+    public IntervalSet getAvailableRanges() {
+        return availableRanges;
     }
+    // public Range getRange() {
+    // return range;
+    // }
 }

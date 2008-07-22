@@ -84,13 +84,12 @@ public class SwarmFileImpl implements SwarmFile {
             long pendingBytes = getFileSize() - start;
             int oldLimit = byteBuffer.limit();
             int position = byteBuffer.position();
-            int capacity = byteBuffer.capacity();
             long wrote = 0;
             try {
                 if (pendingBytes < Integer.MAX_VALUE) {
                     int pending = (int) pendingBytes;
                     int limit = position + pending;
-                    if (limit < capacity) {
+                    if (limit < oldLimit) {
                         byteBuffer.limit(limit);
                     }
                 }

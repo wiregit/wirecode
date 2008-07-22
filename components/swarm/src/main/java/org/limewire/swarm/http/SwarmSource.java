@@ -2,7 +2,7 @@ package org.limewire.swarm.http;
 
 import java.net.SocketAddress;
 
-import org.limewire.collection.Range;
+import org.limewire.collection.IntervalSet;
 
 public interface SwarmSource {
 
@@ -10,6 +10,6 @@ public interface SwarmSource {
 
     String getPath();
     
-    Range getRange();
+    IntervalSet getAvailableRanges();
 
 }

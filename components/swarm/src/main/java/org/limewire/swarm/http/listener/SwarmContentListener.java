@@ -10,53 +10,41 @@ import org.apache.http.nio.ContentDecoder;
 import org.apache.http.nio.IOControl;
 import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
-import org.limewire.swarm.SwarmContent;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmWriteJob;
 import org.limewire.swarm.SwarmWriteJobControl;
 import org.limewire.swarm.http.SwarmHttpContentImpl;
 import org.limewire.util.Objects;
 
-/**
- * The content listener is registered to receive
- * 
- * 
- */
 public class SwarmContentListener implements ResponseContentListener {
 
     private static final Log LOG = LogFactory.getLog(SwarmContentListener.class);
 
-    private final SwarmCoordinator swarmCoordinator;
+    private final SwarmCoordinator fileCoordinator;
 
     private boolean finished;
 
-    private Range range;
+    private Range expectedRange;
 
-    private IOControl ioControl = null;
+    private SwarmWriteJob writeJob;
 
-    private SwarmWriteJob writeJob = null;
-
-    public SwarmContentListener(SwarmCoordinator swarmCoordinator, Range range) {
-        this.swarmCoordinator = Objects.nonNull(swarmCoordinator, "fileCoordinator");
-        this.range = Objects.nonNull(range, "range");
+    public SwarmContentListener(SwarmCoordinator fileCoordinator, Range range) {
+        this.fileCoordinator = Objects.nonNull(fileCoordinator, "fileCoordinator");
+        this.expectedRange = Objects.nonNull(range, "range");
     }
 
     public void contentAvailable(ContentDecoder decoder, IOControl ioctrl) throws IOException {
         if (finished)
             throw new IOException("Already finished.");
 
-        this.ioControl = ioctrl;
+        if (!decoder.isCompleted()) {
 
-        SwarmContent content = new SwarmHttpContentImpl(decoder);
+            if (writeJob == null) {
+                writeJob = fileCoordinator.createWriteJob(expectedRange, createControl(ioctrl));
+            }
 
-        SwarmWriteJobControl control = createControl(ioctrl);
-        control.pause();
-
-        if (writeJob == null) {
-            writeJob = swarmCoordinator.createWriteJob(range, control);
+            long consumed = writeJob.write(new SwarmHttpContentImpl(decoder));
         }
-
-        writeJob.write(content);
     }
 
     private SwarmWriteJobControl createControl(final IOControl finalIOControl) {
@@ -70,7 +58,7 @@ public class SwarmContentListener implements ResponseContentListener {
                 finalIOControl.requestOutput();
                 finalIOControl.requestInput();
             }
-            
+
             public void finish() {
                 resume();
             }
@@ -81,21 +69,10 @@ public class SwarmContentListener implements ResponseContentListener {
     public void finished() {
         if (!finished) {
             finished = true;
-            if (range != null) {
-                swarmCoordinator.unlease(range);
-                range = null;
+            if (expectedRange != null) {
+                fileCoordinator.unlease(expectedRange);
+                expectedRange = null;
             }
-            try {
-                //swarmCoordinator.finish();//can't close this here if we expect other listeners to finish
-                if (ioControl != null) {
-                   ioControl.requestInput();
-                   ioControl.shutdown();//can't close this here if we expect other listeners to finish?
-                   
-                   ioControl.requestOutput();
-                }
-            } catch (IOException e) {
-                // TODO handle me!
-           }
         }
     }
 
@@ -131,26 +108,27 @@ public class SwarmContentListener implements ResponseContentListener {
     }
 
     private void validateActualRangeAndShrinkExpectedRange(Range actualRange) throws IOException {
-        if (actualRange == null || range == null) {
+        if (actualRange == null || expectedRange == null) {
             throw new IOException("No actual or expected range?");
         }
 
-        if (actualRange.getLow() < range.getLow() || actualRange.getHigh() > range.getHigh()) {
-            throw new IOException("Invalid actual range.  Expected: " + range + ", Actual: "
-                    + actualRange);
+        if (actualRange.getLow() < expectedRange.getLow()
+                || actualRange.getHigh() > expectedRange.getHigh()) {
+            throw new IOException("Invalid actual range.  Expected: " + expectedRange
+                    + ", Actual: " + actualRange);
         }
 
-        if (!actualRange.equals(range)) {
-            if (actualRange.getLow() > range.getLow()) {
-                swarmCoordinator
-                        .unlease(Range.createRange(range.getLow(), actualRange.getLow() - 1));
-                range = Range.createRange(actualRange.getLow(), range.getHigh());
+        if (!actualRange.equals(expectedRange)) {
+            if (actualRange.getLow() > expectedRange.getLow()) {
+                fileCoordinator.unlease(Range.createRange(expectedRange.getLow(), actualRange
+                        .getLow() - 1));
+                expectedRange = Range.createRange(actualRange.getLow(), expectedRange.getHigh());
             }
 
-            if (actualRange.getHigh() < range.getHigh()) {
-                swarmCoordinator.unlease(Range.createRange(actualRange.getHigh() + 1, range
+            if (actualRange.getHigh() < expectedRange.getHigh()) {
+                fileCoordinator.unlease(Range.createRange(actualRange.getHigh() + 1, expectedRange
                         .getHigh()));
-                range = Range.createRange(range.getLow(), actualRange.getHigh());
+                expectedRange = Range.createRange(expectedRange.getLow(), actualRange.getHigh());
             }
         }
     }
@@ -161,7 +139,7 @@ public class SwarmContentListener implements ResponseContentListener {
 
         try {
             int start = headerValue.indexOf("bytes") + 6; // skip "bytes " or
-            // "bytes="
+                                                          // "bytes="
             int slash = headerValue.indexOf('/');
 
             // if looks like: "bytes */*" or "bytes */10" -- NOT part of the

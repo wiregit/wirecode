@@ -10,6 +10,7 @@ import junit.framework.Test;
 
 import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
+import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.nio.reactor.ConnectingIOReactor;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
@@ -84,6 +85,7 @@ public class SwarmerImplTest extends BaseTestCase {
         String md5 = "8055d620ba0c507c1af957b43648c99f";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testMultipleRanges.pdf");
         URI uri = new URI("http://localhost/~pvertenten/pub/gnutella_protocol_0.4.pdf");
+        URI uri2 = new URI("http://www9.limewire.com/developer/gnutella_protocol_0.4.pdf");
         int lowByte1 = 0;
         int highByte1 = (2 * 16 * 1024) - 1;
         int lowByte2 = highByte1+1;
@@ -96,7 +98,11 @@ public class SwarmerImplTest extends BaseTestCase {
 
         
         swarmer.addSource(new SourceImpl(uri, range2));
-        swarmer.addSource(new SourceImpl(uri, range1));
+        swarmer.addSource(new SourceImpl(uri2, range1));
+        
+        
+        
+        
         assertSwarmer(md5, file, fileSize);
     }
     
@@ -139,21 +145,21 @@ public class SwarmerImplTest extends BaseTestCase {
         assertSwarmer(md5, file, fileSize);
     }
 
-    public void testSimpleLargeFileSwarm() throws Exception {
-        String md5 = "1ba0b5a6e992d6d0461c1e34cb405e34";
-        File file = new File(System.getProperty("java.io.tmpdir") + "/testSimpleLargeFileSwarm.iso");
-        URI uri = new URI("http://localhost/~pvertenten/pub/debian-40r3-ia64-CD-1.iso");
-        int lowByte = 0;
-        int highByte = 679000064 - 1;
-        long fileSize = highByte + 1;
-        Swarmer swarmer = createSwarmer(file, fileSize);
-        swarmer.addSource(new SourceImpl(uri, Range.createRange(lowByte, highByte)));
-        assertSwarmer(md5, file, fileSize);
-    }
+//    public void testSimpleLargeFileSwarm() throws Exception {
+//        String md5 = "1ba0b5a6e992d6d0461c1e34cb405e34";
+//        File file = new File(System.getProperty("java.io.tmpdir") + "/testSimpleLargeFileSwarm.iso");
+//        URI uri = new URI("http://localhost/~pvertenten/pub/debian-40r3-ia64-CD-1.iso");
+//        int lowByte = 0;
+//        int highByte = 679000064 - 1;
+//        long fileSize = highByte + 1;
+//        Swarmer swarmer = createSwarmer(file, fileSize);
+//        swarmer.addSource(new SourceImpl(uri, Range.createRange(lowByte, highByte)));
+//        assertSwarmer(md5, file, fileSize);
+//    }
 
     private void assertSwarmer(String md5, File file, long fileSize) throws InterruptedException,
             NoSuchAlgorithmException, IOException {
-        long sleepTime = (long) ((fileSize * 0.0001) + 5000);
+        long sleepTime = (long) ((fileSize * 0.0001) + 3000);
         Thread.sleep(sleepTime);
         Assert.assertTrue(file.exists());
         Assert.assertEquals(fileSize, file.length());

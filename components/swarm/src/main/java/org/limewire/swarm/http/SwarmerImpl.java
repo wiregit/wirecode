@@ -64,9 +64,17 @@ public class SwarmerImpl implements Swarmer {
         httpProcessor.addInterceptor(new RequestConnControl());
         httpProcessor.addInterceptor(new RequestUserAgent());
         httpProcessor.addInterceptor(new RequestExpectContinue());
-
+ 
+        final ConnectionReuseStrategy finalConnectionReuseStrategy = connectionReuseStrategy;
         clientHandler = new AsyncNHttpClientHandler(httpProcessor, new SwarmExecutionHandler(),
-                connectionReuseStrategy, params);
+                new ConnectionReuseStrategy() {
+
+                    public boolean keepAlive(HttpResponse arg0, HttpContext arg1) {
+                        
+                        return finalConnectionReuseStrategy.keepAlive(arg0, arg1);
+                    }
+            
+        }, params);
 
         eventDispatch = new DefaultClientIOEventDispatch(clientHandler, params);
     }
