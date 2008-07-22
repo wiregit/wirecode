@@ -3,6 +3,7 @@ package org.limewire.ui.swing.search.resultpanel;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -35,6 +36,8 @@ class BaseResultPanel extends JXPanel implements Scrollable {
             SearchResultDownloader searchResultDownloader, Search search) {
         this.searchResultDownloader = searchResultDownloader;
         this.search = search;
+        
+        setLayout(new GridBagLayout());
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridwidth = GridBagConstraints.REMAINDER;
