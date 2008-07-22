@@ -14,8 +14,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.search.SearchCategory;
-import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.downloads.DownloadSummaryPanel;
 import org.limewire.ui.swing.nav.FilesSharingSummaryPanel;
 import org.limewire.ui.swing.nav.NavItem;
@@ -41,11 +41,11 @@ class LeftPanel extends JPanel implements NavigableTree {
     @Resource
     private Color lineColor;
 
-    public LeftPanel(DownloadMediator downloadMediator) {
+    public LeftPanel(DownloadListManager downloadListManager) {
     	GuiUtils.injectFields(this);
         this.searchBar = new SearchBar();
         this.navTree = new NavTree();
-        this.downloadPanel =  new DownloadSummaryPanel(downloadMediator.getUnfilteredList());
+        this.downloadPanel =  new DownloadSummaryPanel(downloadListManager.getDownloads());
         this.filesPanel = new FilesSharingSummaryPanel();
         setMinimumSize(new Dimension(150, 0));
         setMaximumSize(new Dimension(150, Integer.MAX_VALUE));

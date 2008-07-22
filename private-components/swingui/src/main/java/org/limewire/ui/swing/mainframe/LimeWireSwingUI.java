@@ -9,7 +9,6 @@ import javax.swing.JPanel;
 import org.jdesktop.application.Resource;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.search.SearchFactory;
-import org.limewire.ui.swing.downloads.DownloadMediator;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.nav.NavigatorImpl;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
@@ -28,7 +27,6 @@ public class LimeWireSwingUI extends JPanel {
     private final StatusPanel statusPanel;
     private final NavigatorImpl navigator;
     private final SearchHandler searchHandler;
-    private DownloadMediator downloadMediator;
     
     /**
 	 * The color of the lines separating the GUI panels
@@ -39,16 +37,17 @@ public class LimeWireSwingUI extends JPanel {
     public LimeWireSwingUI(Injector coreInjector) {
     	GuiUtils.injectFields(this);
     	
-        this.downloadMediator = new DownloadMediator(coreInjector.getInstance(DownloadListManager.class));        
+        DownloadListManager downloadListManager = coreInjector.getInstance(DownloadListManager.class);        
         
         this.mainPanel = new MainPanel();
-        this.leftPanel = new LeftPanel(downloadMediator);
+        this.leftPanel = new LeftPanel(downloadListManager);
         this.navigator = new NavigatorImpl(mainPanel, leftPanel);
         this.topPanel = new TopPanel();
         this.statusPanel = new StatusPanel();
         this.searchHandler = new SearchHandlerImpl(navigator, coreInjector.getInstance(SearchFactory.class));
+        
         //TODO:move this and have clicks on DownloadSummaryPanel navigate to downloadPanel
-        MainDownloadPanel downloadPanel = new MainDownloadPanel(downloadMediator);
+        MainDownloadPanel downloadPanel = new MainDownloadPanel(downloadListManager);
         navigator.addNavigablePanel(NavCategory.NONE, MainDownloadPanel.NAME, downloadPanel, false);
         
         leftPanel.setSearchHandler(searchHandler);

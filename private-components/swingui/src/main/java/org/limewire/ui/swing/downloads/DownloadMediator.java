@@ -15,7 +15,7 @@ import ca.odell.glazedlists.TextFilterator;
 import ca.odell.glazedlists.swing.TextComponentMatcherEditor;
 
 
-public class DownloadMediator {
+class DownloadMediator {
 
 	
 	private JTextField searchBar;

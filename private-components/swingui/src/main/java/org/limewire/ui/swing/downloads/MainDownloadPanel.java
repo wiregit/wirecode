@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
+import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
@@ -33,13 +34,14 @@ public class MainDownloadPanel extends JPanel {
 	private final JPanel cardPanel;
 	private static final String NO_CATEGORY = "noCategory";
 	private static final String CATEGORY = "category";
-	private DownloadMediator downloadMediator;
+	
+	private final DownloadMediator downloadMediator;
 
 	/**
 	 * Create the panel
 	 */
-	public MainDownloadPanel(DownloadMediator downloadMediator) {
-		this.downloadMediator = downloadMediator;
+	public MainDownloadPanel(DownloadListManager downloadListManager) {
+		this.downloadMediator = new DownloadMediator(downloadListManager);
 		setLayout(new BorderLayout());
 
 		cardPanel = new JPanel();

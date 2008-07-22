@@ -8,19 +8,17 @@ import java.util.List;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSource;
 import org.limewire.core.api.download.DownloadState;
-import org.limewire.listener.EventListener;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
-import com.limegroup.gnutella.downloader.DownloadStatusEvent;
 
 public class CoreDownloadItem implements DownloadItem {
    
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
     private Downloader downloader;
     private volatile int hashCode = 0;
-    private long size = 0;
+//    private long size = 0;
 
     public CoreDownloadItem(Downloader downloader) {
         this.downloader = downloader;
