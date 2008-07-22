@@ -11,12 +11,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.swarm.SwarmContent;
+import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmListener;
 import org.limewire.swarm.SwarmListenerList;
-import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmVerifier;
 import org.limewire.swarm.SwarmWriteJob;
 import org.limewire.swarm.SwarmWriteJobControl;
@@ -220,16 +219,18 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
      * 
      * LOCK must be held while calling this.
      */
-    private boolean isComplete() {
-        IntervalSet blocksToCheck = null;
-        if (verifiedBlocks.isEmpty()) {
-            blocksToCheck = writtenBlocks;
-        } else if (writtenBlocks.isEmpty()) {
-            blocksToCheck = verifiedBlocks;
-        }
+    public boolean isComplete() {
+        synchronized (LOCK) {
+            IntervalSet blocksToCheck = null;
+            if (verifiedBlocks.isEmpty()) {
+                blocksToCheck = writtenBlocks;
+            } else if (writtenBlocks.isEmpty()) {
+                blocksToCheck = verifiedBlocks;
+            }
 
-        return blocksToCheck != null && blocksToCheck.getNumberOfIntervals() == 1
-                && blocksToCheck.getSize() == fileSystem.getCompleteSize();
+            return blocksToCheck != null && blocksToCheck.getNumberOfIntervals() == 1
+                    && blocksToCheck.getSize() == fileSystem.getCompleteSize();
+        }
     }
 
     private void verifyRanges(List<Range> verifiableRanges) {
@@ -374,7 +375,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
             long position = range.getLow();
             long startRange = range.getLow();
             long endRange = startRange - swarmContent.position() + swarmContent.limit() - 1;
-            Range pendingRange = Range.createRange(startRange, endRange);            
+            Range pendingRange = Range.createRange(startRange, endRange);
             pending(pendingRange);
             long bytesWritten = fileSystem.write(swarmContent, position);
             wrote(pendingRange);

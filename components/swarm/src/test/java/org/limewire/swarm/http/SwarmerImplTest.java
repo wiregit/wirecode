@@ -44,6 +44,12 @@ public class SwarmerImplTest extends BaseTestCase {
         return buildTestSuite(SwarmerImplTest.class);
     }
 
+    
+    @Override
+    protected void tearDown() throws Exception {
+       System.out.println("===================================");
+    }
+
     public void testRangesStart() throws Exception {
         String md5 = "cea47a73ebb7b0da41feef1d030a4c7a";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testRangesStart.pdf");
@@ -151,6 +157,7 @@ public class SwarmerImplTest extends BaseTestCase {
 
     private Swarmer createSwarmer(File file, long fileSize) throws InterruptedException,
             IOException {
+        System.out.println("-----------------------------------");
         HttpParams params = new BasicHttpParams();
         params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000).setIntParameter(
                 CoreConnectionPNames.CONNECTION_TIMEOUT, 2000).setIntParameter(
@@ -164,7 +171,7 @@ public class SwarmerImplTest extends BaseTestCase {
         // SwarmFileSystem swarmDownload = new
         // FileChannelSwarmFileSystem(fileSize, file);
         SwarmFileSystem swarmfilesystem = new SwarmFileSystemImpl(new SwarmFileImpl(file, fileSize));
-       
+
         SwarmVerifier swarmFileVerifier = new NoOpFileVerifier();
         SwarmBlockSelector selectionStrategy = new ContiguousSelectionStrategy();
 
@@ -172,39 +179,44 @@ public class SwarmerImplTest extends BaseTestCase {
                 swarmFileVerifier, ExecutorsHelper.newFixedSizeThreadPool(1, "Writer"),
                 selectionStrategy);
 
-        swarmCoordinator.addListener(new SwarmListener(){
+        SwarmFileExecutionHandler executionHandler = new SwarmFileExecutionHandler(swarmCoordinator);
+        ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
+        final Swarmer swarmer = new SwarmerImpl(executionHandler, connectionReuseStrategy,
+                ioReactor, params, null);
+
+        swarmCoordinator.addListener(new SwarmListener() {
 
             public void blockLeased(SwarmCoordinator swarmCoordinator, Range block) {
                 System.out.println("block leased: " + block.toString());
-                
+
             }
 
             public void blockVerificationFailed(SwarmCoordinator swarmCoordinator, Range block) {
                 System.out.println("block verification failed: " + block.toString());
-                
+
             }
 
             public void blockVerified(SwarmCoordinator swarmCoordinator, Range block) {
                 System.out.println("block verified: " + block.toString());
-                
+
             }
 
             public void blockWritten(SwarmCoordinator swarmCoordinator, Range block) {
                 System.out.println("block written: " + block.toString());
-                
+            }
+
+            public void blockUnleased(SwarmCoordinator swarmCoordinator, Range block) {
+                System.out.println("block unleased: " + block.toString());
+
             }
 
             public void downloadCompleted(SwarmCoordinator fileCoordinator,
                     SwarmFileSystem swarmDownload) {
                 System.out.println("download complete");
-                
             }
-            
+
         });
-        SwarmFileExecutionHandler executionHandler = new SwarmFileExecutionHandler(swarmCoordinator);
-        ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
-        final Swarmer swarmer = new SwarmerImpl(executionHandler, connectionReuseStrategy,
-                ioReactor, params, null);
+
         swarmer.start();
         return swarmer;
     }
