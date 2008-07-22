@@ -120,11 +120,11 @@ public class DownloadSummaryPanel extends JPanel {
 				Object value, boolean isSelected, boolean hasFocus, int row,
 				int column) {
 			DownloadItem item = (DownloadItem) value;
-			if (item.getPercent() >= 100) {
+			if (item.getPercentComplete() >= 100) {
 				return null;
 			} else {
 				nameLabel.setText(item.getTitle());
-				percentLabel.setText(item.getPercent() + "%");
+				percentLabel.setText(item.getPercentComplete() + "%");
 				return this;
 			}
 		}

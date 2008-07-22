@@ -5,6 +5,7 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -14,10 +15,12 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
+import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
 
@@ -54,7 +57,7 @@ public class MainDownloadPanel extends JPanel {
 
 		final DownloadSettingsPanel settingsPanel = new DownloadSettingsPanel();
 		settingsPanel.setBorder(new LineBorder(Color.black, 1, false));
-		add(settingsPanel, BorderLayout.SOUTH);
+		add(settingsPanel, BorderLayout.NORTH);
 	}
 	
 	public void setCategorized(boolean categorized){
@@ -69,6 +72,7 @@ public class MainDownloadPanel extends JPanel {
 		private final JButton clearFinishedButton;
 		private final JCheckBox categorizeCheckBox;
 		private final JTextField searchBar;
+		private final JLabel titleLabel;
 		
 		private final Action pauseAction = new AbstractAction(I18n.tr("Pause All")) {
 
@@ -115,7 +119,9 @@ public class MainDownloadPanel extends JPanel {
 			resumeAllButton = new JButton(resumeAction);
 			clearFinishedButton = new JButton(clearAction);
 			categorizeCheckBox = new JCheckBox(categorizeAction);
-			
+			titleLabel = new JLabel(I18n.tr("Downloads"));
+			FontUtils.changeStyle(titleLabel, Font.BOLD);
+			FontUtils.changeFontSize(titleLabel, 5);
 			searchBar = downloadMediator.getFilterBar();
 			//TODO: make SearchBar work with filtering
 			//searchBar.setDefaultText(I18n.tr("Filter downloads..."));
@@ -136,13 +142,18 @@ public class MainDownloadPanel extends JPanel {
 			gbc.insets = insets;
 			gbc.fill = GridBagConstraints.NONE;
 			gbc.anchor = GridBagConstraints.LINE_START;
-			add(buttonPanel, gbc);
+			add(titleLabel, gbc);
 			
-			
-			gbc.gridx++;
-			gbc.gridy = 0;
-			gbc.insets = insets;
-			add(categorizeCheckBox, gbc);
+            
+            gbc.gridx++;
+            gbc.gridy = 0;
+            gbc.insets = insets;
+            add(buttonPanel, gbc);          
+            
+            gbc.gridx++;
+            gbc.gridy = 0;
+            gbc.insets = insets;
+            add(categorizeCheckBox, gbc);
 
 			gbc.gridx++;
 			gbc.gridy = 0;

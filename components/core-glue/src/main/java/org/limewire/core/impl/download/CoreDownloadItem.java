@@ -7,6 +7,7 @@ import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSource;
 import org.limewire.core.api.download.DownloadState;
 import org.limewire.listener.EventListener;
+import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
@@ -21,17 +22,18 @@ public class CoreDownloadItem implements DownloadItem {
 
     public CoreDownloadItem(Downloader downloader) {
         this.downloader = downloader;
-        downloader.addListener(new EventListener<DownloadStatusEvent>(){
-
-            @Override
-            public void handleEvent(DownloadStatusEvent event) {
-                //TODO: fire correct property
-                long oldSize = size;
-                size = event.getSource().getAmountRead();
-                support.firePropertyChange("size", oldSize, size);
-            }
-            
-        });
+        //TODO: put this back in - using timer for now
+//        downloader.addListener(new EventListener<DownloadStatusEvent>(){
+//
+//            @Override
+//            public void handleEvent(DownloadStatusEvent event) {
+//                //TODO: fire correct property
+//                long oldSize = size;
+//                size = event.getSource().getAmountRead();
+//                support.firePropertyChange("size", oldSize, size);
+//            }
+//            
+//        });
     }
 
     public Downloader getDownloader(){
@@ -77,7 +79,7 @@ public class CoreDownloadItem implements DownloadItem {
     }
 
     @Override
-    public int getPercent() {
+    public int getPercentComplete() {
         // TODO - check for div by zero?
         return (int) (100 * getCurrentSize() / getTotalSize());
     }
@@ -85,7 +87,11 @@ public class CoreDownloadItem implements DownloadItem {
     @Override
     public String getRemainingTime() {
         // TODO Auto-generated method stub
-        return "remaining time todo";
+        double remaining = getTotalSize() - getCurrentSize();
+        double speedInBytes = downloader.getAverageBandwidth() * 1000;
+        System.out.println(remaining + "/" + speedInBytes);
+        return CommonUtils.seconds2time((long) (remaining / speedInBytes));
+        // return "remaining time todo";
     }
 
     @Override
@@ -172,11 +178,11 @@ public class CoreDownloadItem implements DownloadItem {
         }
     }
 
-    public boolean equals(Object o){
-        if(o ==null || !(o instanceof CoreDownloadItem)){
+    public boolean equals(Object o) {
+        if (o == null || !(o instanceof CoreDownloadItem)) {
             return false;
         }
-        return getDownloader().equals(((CoreDownloadItem)o).getDownloader());
+        return getDownloader().equals(((CoreDownloadItem) o).getDownloader());
     }
     
     //TODO: better hashCode

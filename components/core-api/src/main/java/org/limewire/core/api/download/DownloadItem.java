@@ -22,10 +22,16 @@ public interface DownloadItem  {
 
 	public abstract String getTitle();
 
-	public abstract int getPercent();
+	public abstract int getPercentComplete();
 
+	/**
+	 * @return size in bytes
+	 */
 	public abstract double getCurrentSize();
-
+	
+	/**
+     * @return size in bytes
+     */
 	public abstract double getTotalSize();
 
 	public abstract String getRemainingTime();

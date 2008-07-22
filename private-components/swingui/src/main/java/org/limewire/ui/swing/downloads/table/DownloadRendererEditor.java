@@ -227,15 +227,19 @@ public class DownloadRendererEditor extends JPanel implements
 		double totalSize = item.getTotalSize();
 		double curSize = item.getCurrentSize();
 		if (curSize < totalSize) {
-			timeLabel.setVisible(true);
 			progressBar.setHidden(false);
 			progressBar.setMaximum((int) item.getTotalSize());
 			progressBar.setValue((int) item.getCurrentSize());
 		} else {
 			progressBar.setHidden(true);
-			timeLabel.setVisible(false);
 		}
 		statusLabel.setText(getMessage(item));
+		if(item.getState() == DownloadState.DOWNLOADING){
+		    timeLabel.setText(item.getRemainingTime());
+		    timeLabel.setVisible(true);
+		} else {
+		    timeLabel.setVisible(false);
+		}
 		setButtonVisibility(item.getState());
 
 		return this;
