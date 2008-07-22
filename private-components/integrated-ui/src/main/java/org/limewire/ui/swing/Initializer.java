@@ -1,23 +1,37 @@
 package org.limewire.ui.swing;
 
 import java.awt.Frame;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.plaf.basic.BasicHTML;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.application.Application;
 import org.jdesktop.swingx.JXLabel;
 import org.limewire.i18n.I18nMarker;
+import org.limewire.io.IOUtils;
 import org.limewire.lifecycle.Service;
 import org.limewire.lifecycle.ServiceRegistry;
 import org.limewire.lifecycle.ServiceRegistryListener;
+import org.limewire.service.ErrorService;
+import org.limewire.ui.swing.browser.WinCreatorHook;
 import org.limewire.ui.swing.mainframe.AppFrame;
+import org.limewire.ui.swing.util.SwingUtils;
+import org.limewire.util.CommonUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.Stopwatch;
 import org.limewire.util.SystemUtils;
+import org.mozilla.browser.MozillaConfig;
+import org.mozilla.browser.MozillaInitialization;
+import org.mozilla.browser.MozillaPanel;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -28,6 +42,7 @@ import com.limegroup.gnutella.LimeWireCore;
 import com.limegroup.gnutella.LimeCoreGlue.InstallFailedException;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.StartupSettings;
+import com.limegroup.gnutella.util.Expand;
 import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.util.LogUtils;
 
@@ -105,7 +120,7 @@ public final class Initializer {
 
         // Move from the AWT splash to the Swing splash & start early core.
         switchSplashes(awtSplash);
-//        startEarlyCore(setupManager, limeWireCore);
+        startEarlyCore(/*setupManager,*/ limeWireCore);
         
         // Initialize early UI components, display the setup manager (if necessary),
         // and ensure the save directory is valid.
@@ -312,16 +327,16 @@ public final class Initializer {
     }
     
     /** Starts any early core-related functionality. */
-//    private void startEarlyCore(SetupManager setupManager, LimeWireCore limeWireCore) {        
-//        // Add this running program to the Windows Firewall Exceptions list
-//        boolean inFirewallException = limeWireCore.getFirewallService().addToFirewall();
-//        stopwatch.resetAndLog("add firewall exception");
-//        
+    private void startEarlyCore(/*SetupManager setupManager, */LimeWireCore limeWireCore) {        
+        // Add this running program to the Windows Firewall Exceptions list
+        /*boolean inFirewallException = */limeWireCore.getFirewallService().addToFirewall();
+        stopwatch.resetAndLog("add firewall exception");
+        
 //        if(!inFirewallException && !setupManager.shouldShowFirewallWindow()) {
 //            limeWireCore.getLifecycleManager().loadBackgroundTasks();
 //            stopwatch.resetAndLog("load background tasks");
 //        }
-//    }
+    }
     
     /** Switches from the AWT splash to the Swing splash. */
     private void switchSplashes(Frame awtSplash) {
@@ -348,43 +363,43 @@ public final class Initializer {
 //        GUIMediator.setSplashScreenString(I18n.tr("Loading HTML Engine..."));
 //        stopwatch.resetAndLog("update splash for HTML engine");
 
-//        GUIMediator.safeInvokeAndWait(new Runnable() {
-//            public void run() {
-//                stopwatch.resetAndLog("enter evt queue");
-//
-//                JLabel label = new JLabel();
-//                // setting font and color to null to minimize generated css
-//                // script
-//                // which causes a parser exception under circumstances
-//                label.setFont(null);
-//                label.setForeground(null);
-//                BasicHTML.createHTMLView(label, "<html>.</html>");
-//                stopwatch.resetAndLog("create HTML view");
-//            }
-//        });
-//        stopwatch.resetAndLog("return from evt queue");
+        SwingUtils.invokeAndWait(new Runnable() {
+            public void run() {
+                stopwatch.resetAndLog("enter evt queue");
+
+                JLabel label = new JLabel();
+                // setting font and color to null to minimize generated css
+                // script
+                // which causes a parser exception under circumstances
+                label.setFont(null);
+                label.setForeground(null);
+                BasicHTML.createHTMLView(label, "<html>.</html>");
+                stopwatch.resetAndLog("create HTML view");
+            }
+        });
+        stopwatch.resetAndLog("return from evt queue");
 //
 //        // Initialize the bug manager
 //        BugManager.instance();
 //        stopwatch.resetAndLog("BugManager instance");
 //        
 //        GUIMediator.setSplashScreenString(I18n.tr("Loading Browser..."));
-//        // Not pretty but Mozilla initialization errors should not crash the
-//        // program
-//        try {
-//            setupXulLibraryPath();
-//        } catch (Exception e) {
-//            LOG.error("Mozilla initialization failed");
-//        }
-//        stopwatch.resetAndLog("Load XUL Library Path");
-//        GUIMediator.safeInvokeAndWait(new Runnable() {
-//            public void run() {
-//                stopwatch.resetAndLog("enter evt queue");
-//                new MozillaPanel();
-//                stopwatch.resetAndLog("Load MozillaPanel");
-//            }
-//        });
-//        stopwatch.resetAndLog("return from evt queue");
+        // Not pretty but Mozilla initialization errors should not crash the
+        // program
+        try {
+            setupXulLibraryPath();
+        } catch (Exception e) {
+            LOG.error("Mozilla initialization failed");
+        }
+        stopwatch.resetAndLog("Load XUL Library Path");
+        SwingUtils.invokeAndWait(new Runnable() {
+            public void run() {
+                stopwatch.resetAndLog("enter evt queue");
+                new MozillaPanel();
+                stopwatch.resetAndLog("Load MozillaPanel");
+            }
+        });
+        stopwatch.resetAndLog("return from evt queue");
     }
     
     /** Starts the SetupManager, if necessary. */
@@ -603,40 +618,40 @@ public final class Initializer {
     /**
      * Adds absolute xulrunner path to java.library.path. This is necessary for MozSwing.
      */
-//    private void setupXulLibraryPath() {
-//        if (OSUtils.isWindows()) {
-//            File xulInstallPath = new File(CommonUtils.getUserSettingsDir(), "/browser");
-//            File xulFile = new File(xulInstallPath + "/xulrunner/xulrunner.exe");
-//            // xulrunner.zip needs to be uncompressed if xulFile doesn't exist
-//            if (!xulFile.exists()) {
-//                if (LOG.isDebugEnabled())
-//                    LOG.debug("unzip xulrunner to " + xulInstallPath);
-//                InputStream in = null;
-//                try {
-//                    in = new BufferedInputStream(CommonUtils.getResourceStream("xulrunner.zip"));
-//                    Expand.expandFile(in, xulInstallPath, true, null);
-//                } catch (IOException e) {
-//                    ErrorService.error(e);
-//                } finally {
-//                    IOUtils.close(in);
-//                }
-//            }
-//
-//            String newLibraryPath = System.getProperty("java.library.path") + File.pathSeparator
-//                    + xulInstallPath.getAbsolutePath();
-//            System.setProperty("java.library.path", newLibraryPath);
-//            
-//            MozillaConfig.setXULRunnerHome(xulInstallPath);
-//            File profileDir = new File(CommonUtils.getUserSettingsDir(), "/mozilla-profile");
-//            profileDir.mkdirs();
-//            MozillaConfig.setProfileDir(profileDir);            
-//            MozillaInitialization.initialize();
-//            WinCreatorHook.addHook();
-//            
-//            if(LOG.isDebugEnabled())
-//                LOG.debug("Moz Summary: " + MozillaConfig.getConfigSummary());
-//        }
-//    }
+    private void setupXulLibraryPath() {
+        if (OSUtils.isWindows()) {
+            File xulInstallPath = new File(CommonUtils.getUserSettingsDir(), "/browser");
+            File xulFile = new File(xulInstallPath + "/xulrunner/xulrunner.exe");
+            // xulrunner.zip needs to be uncompressed if xulFile doesn't exist
+            if (!xulFile.exists()) {
+                if (LOG.isDebugEnabled())
+                    LOG.debug("unzip xulrunner to " + xulInstallPath);
+                InputStream in = null;
+                try {
+                    in = new BufferedInputStream(CommonUtils.getResourceStream("xulrunner.zip"));
+                    Expand.expandFile(in, xulInstallPath, true, null);
+                } catch (IOException e) {
+                    ErrorService.error(e);
+                } finally {
+                    IOUtils.close(in);
+                }
+            }
+
+            String newLibraryPath = System.getProperty("java.library.path") + File.pathSeparator
+                    + xulInstallPath.getAbsolutePath();
+            System.setProperty("java.library.path", newLibraryPath);
+            
+            MozillaConfig.setXULRunnerHome(xulInstallPath);
+            File profileDir = new File(CommonUtils.getUserSettingsDir(), "/mozilla-profile");
+            profileDir.mkdirs();
+            MozillaConfig.setProfileDir(profileDir);            
+            MozillaInitialization.initialize();
+            WinCreatorHook.addHook();
+            
+            if(LOG.isDebugEnabled())
+                LOG.debug("Moz Summary: " + MozillaConfig.getConfigSummary());
+        }
+    }
     
 }
 

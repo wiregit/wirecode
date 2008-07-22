@@ -9,6 +9,9 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.limewire.ui.swing.browser.Browser;
+import org.mozilla.browser.IMozillaWindow.VisibilityMode;
+
 public class NewAtLimePanel extends JPanel {
     
     public NewAtLimePanel() {
@@ -26,9 +29,10 @@ public class NewAtLimePanel extends JPanel {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1;
         gbc.weighty = 1;
-        NewAtLimeBox naBox = new NewAtLimeBox();
-        naBox.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        add(naBox, gbc);
+        Browser browser = new Browser(VisibilityMode.FORCED_HIDDEN, VisibilityMode.FORCED_HIDDEN);
+        browser.load("http://www.limewire.com");
+        browser.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        add(browser, gbc);
     }
 
 }
