@@ -14,8 +14,6 @@ public interface SwarmCoordinator {
      */
     Range lease();
 
-    Range lease(Range range);
-    
     /**
      * Leases just a portion of data, only allowing ranges in availableRanges.
      * If no data is available for leasing, this returns null.

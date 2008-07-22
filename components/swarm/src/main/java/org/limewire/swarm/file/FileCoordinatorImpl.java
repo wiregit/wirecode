@@ -101,14 +101,6 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
         return lease(null, fileSystem.getCompleteSize(), blockChooser);
     }
 
-    public Range lease(Range range) {
-        // TODO what if already written etc.?
-        synchronized (LOCK) {
-            addLease(range);
-        }
-        return range;
-    }
-
     public Range leasePortion(IntervalSet availableRanges) {
         // Lease modifies, so clone.
         if (availableRanges != null)
@@ -214,11 +206,11 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
             complete = verifiableRanges.isEmpty() && isComplete();
         }
 
+        listeners.blockWritten(writtenRange);
+
         if (complete) {
             listeners.downloadCompleted(fileSystem);
         }
-        listeners.blockWritten(writtenRange);
-
         verifyRanges(verifiableRanges);
     }
 
