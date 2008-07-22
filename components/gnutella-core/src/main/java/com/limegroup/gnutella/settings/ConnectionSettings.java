@@ -35,12 +35,11 @@ public final class ConnectionSettings extends LimeProps {
 		FACTORY.createBooleanSetting("EVER_ACCEPTED_INCOMING", false);
 	
 	/**
-	 * Setting for whether we have ever determined that we are not able to
-	 * do Firewall-to-firewall transfers in the past based on information
-	 * received in pongs.
+	 * Setting for whether we are able to do Firewall-to-firewall transfers,
+     * as determined from previously received pongs.
 	 */
-	public static final BooleanSetting LAST_FWT_STATE =
-		FACTORY.createExpirableBooleanSetting("LAST_FWT_STATE", false);
+	public static final BooleanSetting CAN_DO_FWT =
+		FACTORY.createExpirableBooleanSetting("LAST_FWT_STATE", true);
 
 	/**
 	 * Settings for whether or not to automatically connect to the network

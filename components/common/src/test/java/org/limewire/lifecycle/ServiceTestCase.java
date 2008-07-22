@@ -21,12 +21,16 @@ public abstract class ServiceTestCase extends BaseTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        injector = Guice.createInjector(Stage.PRODUCTION, getModules());
+        injector = createInjector(getModules());
         registry = injector.getInstance(ServiceRegistry.class);
         registry.initialize();
         registry.start();
     }
-    
+
+    protected Injector createInjector(Module [] modules) {
+        return Guice.createInjector(Stage.PRODUCTION, modules);
+    }
+
     private Module [] getModules() {
         List<Module> modules = new ArrayList<Module>();
         modules.add(new LimeWireCommonModule());

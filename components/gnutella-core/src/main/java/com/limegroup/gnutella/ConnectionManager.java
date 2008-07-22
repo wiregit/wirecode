@@ -7,11 +7,13 @@ import java.util.Set;
 
 import org.limewire.io.Connectable;
 import org.limewire.io.IpPort;
+import org.limewire.listener.EventListener;
 import org.limewire.net.ConnectionAcceptor;
 import org.limewire.net.SocketsManager.ConnectType;
 
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
+import com.limegroup.gnutella.connection.GnutellaConnectionEvent;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HandshakeStatus;
@@ -54,7 +56,7 @@ import com.limegroup.gnutella.util.EventDispatcher;
  * doesn't quite fit the BandwidthTracker interface.
  */
 public interface ConnectionManager extends ConnectionAcceptor, 
-        EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener> {
+        EventDispatcher<ConnectionLifecycleEvent, ConnectionLifecycleListener>, EventListener<GnutellaConnectionEvent> {
     
 
     /** The number of connections leaves should maintain to Ultrapeers. */

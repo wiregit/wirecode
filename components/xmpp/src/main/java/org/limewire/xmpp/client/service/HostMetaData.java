@@ -3,6 +3,7 @@ package org.limewire.xmpp.client.service;
 import org.limewire.io.IpPort;
 
 import java.util.Set;
+import java.net.UnknownHostException;
 
 public interface HostMetaData {
     public String getIP();
@@ -15,7 +16,8 @@ public interface HostMetaData {
     public boolean isMultiCastReply();
     public boolean isFirewalled();
     public String getVendor();
-    public Set<? extends IpPort> getPushProxies();
-    public int getFirewallTransferVrsion();
+    public Set<? extends IpPort> getPushProxies() throws UnknownHostException;
+    public int getFirewallTransferVersion();
     public boolean isTLSCapable();
+    public String toXML();
 }

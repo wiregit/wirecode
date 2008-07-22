@@ -22,16 +22,12 @@ public class LibraryIQListener implements PacketListener {
 
     private static final Log LOG = LogFactory.getLog(LibraryIQListener.class);
 
-    private XMPPConnection connection;
+    private final XMPPConnection connection;
     private final LibraryProvider libraryProvider;
     private final ConcurrentHashMap <String, LibraryListener> libraryHandlers = new ConcurrentHashMap<String, LibraryListener>();
 
     public LibraryIQListener(XMPPConnection connection, LibraryProvider libraryProvider) {
         this.libraryProvider = libraryProvider;
-        this.connection = connection;
-    }
-
-    public void setConnection(XMPPConnection connection) {
         this.connection = connection;
     }
 

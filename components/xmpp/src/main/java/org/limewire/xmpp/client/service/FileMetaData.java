@@ -1,6 +1,7 @@
 package org.limewire.xmpp.client.service;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +39,7 @@ public interface FileMetaData {
 
     public int getIndex();
     public Map<String, String> getMetaData();
-    public Set<URI> getURIs();
+    public Set<URI> getURIs() throws URISyntaxException;
     public Date getCreateTime();
-    public HostMetaData getHostMetaData();
+    public String toXML();
 }

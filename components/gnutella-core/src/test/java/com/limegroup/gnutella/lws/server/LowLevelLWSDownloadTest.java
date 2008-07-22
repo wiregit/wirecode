@@ -79,7 +79,7 @@ public class LowLevelLWSDownloadTest extends DownloadTestCase {
         boolean isComplete = true;
         for (RemoteFileDesc rfd : rfds) {
             File f = new File(_storeDir, rfd.getFileName());
-            isComplete &= isComplete(f, rfd.getFileSize());
+            isComplete &= isComplete(f, rfd.getSize());
         }
         if (isComplete)
             LOG.debug("pass" + "\n");

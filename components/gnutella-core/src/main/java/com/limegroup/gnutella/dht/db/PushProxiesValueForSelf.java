@@ -16,7 +16,6 @@ import com.limegroup.gnutella.ApplicationServices;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointFactory;
-import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.util.StrictIpPortSet;
 
 /**
@@ -81,7 +80,7 @@ class PushProxiesValueForSelf extends AbstractPushProxiesValue {
     public Set<? extends IpPort> getPushProxies() {
         if (networkManager.acceptedIncomingConnection() && networkManager.isIpPortValid()) {
             // port should be the same as returned in #get
-            return new StrictIpPortSet<Connectable>(new ConnectableImpl(new IpPortImpl(networkManager.getAddress(), networkManager.getPort()), SSLSettings.isIncomingTLSEnabled()));
+            return new StrictIpPortSet<Connectable>(new ConnectableImpl(new IpPortImpl(networkManager.getAddress(), networkManager.getPort()), networkManager.isIncomingTLSEnabled()));
         } else {
             return self.getProxies();
         }

@@ -1,37 +1,54 @@
 package org.limewire.xmpp.client.impl;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.io.InputStream;
-import java.io.FileNotFoundException;
-import java.io.OutputStream;
-import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jivesoftware.smack.*;
+import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.ConnectionCreationListener;
+import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
-import org.jivesoftware.smackx.packet.StreamInitiation;
-import org.jivesoftware.smackx.packet.Jingle;
-import org.jivesoftware.smackx.packet.Content;
-import org.jivesoftware.smackx.packet.Description;
-import org.jivesoftware.smackx.packet.file.FileDescription;
-import org.jivesoftware.smackx.jingle.file.FileLocator;
-import org.jivesoftware.smackx.jingle.file.UserAcceptor;
-import org.jivesoftware.smackx.jingle.file.FileContentHandler;
+import org.jivesoftware.smackx.jingle.IncomingJingleSession;
 import org.jivesoftware.smackx.jingle.JingleManager;
 import org.jivesoftware.smackx.jingle.JingleSessionRequest;
-import org.jivesoftware.smackx.jingle.IncomingJingleSession;
+import org.jivesoftware.smackx.jingle.file.FileContentHandler;
+import org.jivesoftware.smackx.jingle.file.FileLocator;
+import org.jivesoftware.smackx.jingle.file.UserAcceptor;
 import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
+import org.jivesoftware.smackx.packet.Content;
+import org.jivesoftware.smackx.packet.Description;
+import org.jivesoftware.smackx.packet.Jingle;
+import org.jivesoftware.smackx.packet.StreamInitiation;
+import org.jivesoftware.smackx.packet.file.FileDescription;
 import org.limewire.concurrent.ThreadExecutor;
-import org.limewire.xmpp.client.service.*;
+import org.limewire.listener.EventListener;
+import com.limegroup.gnutella.NetworkManager;
+import com.limegroup.gnutella.NetworkManagerEvent;
+
+import org.limewire.net.address.AddressFactory;
+import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
 import org.limewire.xmpp.client.impl.messages.library.LibraryIQ;
 import org.limewire.xmpp.client.impl.messages.library.LibraryIQListener;
+import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
+import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider;
+import org.limewire.xmpp.client.service.FileTransferProgressListener;
+import org.limewire.xmpp.client.service.IncomingFileAcceptor;
+import org.limewire.xmpp.client.service.LibraryProvider;
+import org.limewire.xmpp.client.service.User;
+import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
 
-class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnection {
+//import com.limegroup.gnutella.BrowseHostReplyHandler;
+
+class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnection, EventListener<NetworkManagerEvent> {
     
     private static final Log LOG = LogFactory.getLog(XMPPConnectionImpl.class);
     
@@ -39,23 +56,29 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
     private final LibraryProvider libraryProvider;
     private final IncomingFileAcceptor incomingFileAcceptor;
     private final FileTransferProgressListener progressListener;
+    //private final NetworkManager networkManager;
+    private final AddressFactory addressFactory;
     private org.jivesoftware.smack.XMPPConnection connection;
     
     private final CopyOnWriteArrayList<org.limewire.xmpp.client.service.RosterListener> rosterListeners;
     private final HashMap<String, UserImpl> users;
     protected LibraryIQListener libraryIQListener;
+    protected AddressIQListener addressIQListener;
     
-    XMPPConnectionImpl(XMPPConnectionConfiguration configuration, 
+    XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
                        LibraryProvider libraryProvider,
                        IncomingFileAcceptor incomingFileAcceptor,
-                       FileTransferProgressListener progressListener) {
+                       FileTransferProgressListener progressListener,
+                       NetworkManager networkManager, AddressFactory addressFactory) {
         this.configuration = configuration;
         this.libraryProvider = libraryProvider;
         this.incomingFileAcceptor = incomingFileAcceptor;
         this.progressListener = progressListener;
+        //this.networkManager = networkManager;
+        this.addressFactory = addressFactory;
         this.rosterListeners = new CopyOnWriteArrayList<org.limewire.xmpp.client.service.RosterListener>();
         this.rosterListeners.add(configuration.getRosterListener());
-        this.users = new HashMap<String, UserImpl>();        
+        this.users = new HashMap<String, UserImpl>();
     }
 
     public XMPPConnectionConfiguration getConfiguration() {
@@ -97,7 +120,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
     public void initialize() {
         this.rosterListeners.add(new org.limewire.xmpp.client.service.RosterListener() {
             public void userAdded(User user) {
-                user.addPresenceListener(new LibraryGetter());
+                //user.addPresenceListener(new LibraryGetter());
             }
             public void userUpdated(User user) {}
             public void userDeleted(String id) {}
@@ -118,9 +141,14 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
                         ServiceDiscoveryManager.getInstanceFor(connection).addFeature(XMPPServiceImpl.LW_SERVICE_NS);
                     }
                     libraryIQListener = new LibraryIQListener(connection, libraryProvider);
-                    libraryIQListener.setConnection(connection);
+                    addressIQListener = new AddressIQListener(connection, addressFactory);
                     connection.addPacketListener(libraryIQListener, libraryIQListener.getPacketFilter());
                     ProviderManager.getInstance().addIQProvider("library", "jabber:iq:lw-library", LibraryIQ.getIQProvider());
+                    ProviderManager.getInstance().addIQProvider("file-transfer", "jabber:iq:lw-file-transfer", FileTransferIQ.getIQProvider());
+                    //connection.addPacketListener(browseHostIQListener, browseHostIQListener.getPacketFilter());
+                    //ProviderManager.getInstance().addIQProvider("browse-host", "jabber:iq:lw-browse-host", BrowseHostIQ.getIQProvider());
+                    connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());
+                    ProviderManager.getInstance().addIQProvider("address", "jabber:iq:lw-address", new AddressIQProvider(addressFactory));
                     FileDescription.setUserAccptor(new UserAcceptor() {
                         public boolean userAccepts(FileDescription.FileContainer file) {
                             return incomingFileAcceptor.accept(new FileMetaDataAdapter(file.getFile()));
@@ -230,51 +258,60 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
         }
 
         public void presenceChanged(final org.jivesoftware.smack.packet.Presence presence) {
-            Thread t = ThreadExecutor.newManagedThread(new Runnable() {
-                public void run() {
-                    UserImpl user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("user " + user + " presence changed to " + presence.getType());
-                    }
-                    if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.available)) {
-                        try {
-                            if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature(XMPPServiceImpl.LW_SERVICE_NS)) {
-                                if(LOG.isDebugEnabled()) {
-                                    LOG.debug("limwire user " + user + ", presence " + presence.getFrom() + " detected");
-                                }
-                                user.addPresense(new LimePresenceImpl(presence, connection, libraryIQListener, new FileLocatorAdapter()));
-                            } else {
-                                user.addPresense(new PresenceImpl(presence, connection));
-                            }
-                        } catch (org.jivesoftware.smack.XMPPException exception) {
-                            LOG.error(exception.getMessage(), exception);
+            if(!presence.getFrom().equals(connection.getUser())) {
+                Thread t = ThreadExecutor.newManagedThread(new Runnable() {
+                    public void run() {
+                        UserImpl user = users.get(StringUtils.parseBareAddress(presence.getFrom()));
+                        if(LOG.isDebugEnabled()) {
+                            LOG.debug("user " + user + " presence changed to " + presence.getType());
                         }
-                    } else if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.unavailable)) {
-                        user.removePresense(new PresenceImpl(presence, connection));
+                        if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.available)) {
+                            try {
+                                if (ServiceDiscoveryManager.getInstanceFor(connection).discoverInfo(presence.getFrom()).containsFeature(XMPPServiceImpl.LW_SERVICE_NS)) {
+                                    if(LOG.isDebugEnabled()) {
+                                        LOG.debug("limwire user " + user + ", presence " + presence.getFrom() + " detected");
+                                    }
+                                    LimePresenceImpl limePresense = new LimePresenceImpl(presence, connection, libraryIQListener, new FileLocatorAdapter());
+                                    limePresense.sendGetAddress();
+                                    user.addPresense(limePresense);
+                                } else {
+                                    user.addPresense(new PresenceImpl(presence, connection));
+                                }
+                            } catch (org.jivesoftware.smack.XMPPException exception) {
+                                LOG.error(exception.getMessage(), exception);
+                            }
+                        } else if (presence.getType().equals(org.jivesoftware.smack.packet.Presence.Type.unavailable)) {
+                            user.removePresense(new PresenceImpl(presence, connection));
+                        }
                     }
-                }
-            }, "presence-handler-" + presence.getFrom());
-            t.start();
-        }
-    }
-    
-    private class LibraryGetter implements PresenceListener {
-        public void presenceChanged(Presence presence) {
-            if(presence.getType().equals(Presence.Type.available)) {
-                if(presence instanceof LimePresence) {
-                    ((LimePresenceImpl) presence).sendGetLibrary();
-                }
+                }, "presence-handler-" + presence.getFrom());
+                t.start();
             }
         }
     }
     
+//    private class LibraryGetter implements PresenceListener {
+//        public void presenceChanged(Presence presence) {
+//            if(presence.getType().equals(Presence.Type.available)) {
+//                if(presence instanceof LimePresence) {
+//                    ((LimePresenceImpl) presence).sendGetLibrary();
+//                }
+//            }
+//        }
+//    }
+    
+    
     private class FileLocatorAdapter implements FileLocator {
         public InputStream readFile(StreamInitiation.File file) throws FileNotFoundException {
-            return libraryProvider.readFile(new FileMetaDataAdapter(file));
+            return null;//libraryProvider.readFile(new FileMetaDataAdapter(file));
         }
 
         public OutputStream writeFile(StreamInitiation.File file) throws IOException {
             return libraryProvider.writeFile(new FileMetaDataAdapter(file));
         }    
+    }
+
+    public void handleEvent(NetworkManagerEvent event) {
+        addressIQListener.handleEvent(event);
     }
 }

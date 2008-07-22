@@ -28,6 +28,7 @@ import org.limewire.security.SecurityToken;
 import org.limewire.security.SettingsProvider;
 import org.limewire.security.certificate.LimeWireSecurityCertificateModule;
 import org.limewire.statistic.LimeWireStatisticsModule;
+import org.limewire.listener.ListenerSupport;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -226,6 +227,7 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireGeocodeGlueModule());        
         binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
         binder().install(new LimeWireSimppModule());
+        //binder().install(new LimeWireXMPPModule());
         
         bind(LimeWireCore.class);
         
@@ -235,6 +237,7 @@ public class LimeWireCoreModule extends AbstractModule {
 
         bind(DownloadCallback.class).to(ActivityCallback.class);
         bind(NetworkManager.class).to(NetworkManagerImpl.class);
+        bind(new TypeLiteral<ListenerSupport<NetworkManagerEvent>>(){}).to(NetworkManagerImpl.class);
         bind(DHTManager.class).to(DHTManagerImpl.class);
         bind(DHTControllerFactory.class).to(DHTControllerFactoryImpl.class);
         bind(PingReplyFactory.class).to(PingReplyFactoryImpl.class);
@@ -359,7 +362,6 @@ public class LimeWireCoreModule extends AbstractModule {
         // These are bound because they are Singletons & Services, and must be started.
         bind(Statistics.class);
         bind(CoreRandomGlue.class);
-        bind(TlsTester.class);
         bind(ConnectionAcceptorGlue.class);
         bind(DownloadUpgradeTaskService.class);
         bind(LocalAcceptor.class);

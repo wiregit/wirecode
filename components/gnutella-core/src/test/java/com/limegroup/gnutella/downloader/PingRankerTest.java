@@ -321,13 +321,13 @@ public class PingRankerTest extends LimeTestCase {
         
         // now this host should be prefered over other hosts.
         RemoteFileDesc rfd = ranker.getBest();
-        assertEquals("1.2.3.5",rfd.getHost());
+        assertEquals("1.2.3.5",rfd.getAddress());
      
         // but if we ask for more hosts we'll get some of the unverified ones
         assertTrue(ranker.hasMore());
         rfd = ranker.getBest();
-        assertNotEquals("1.2.3.5",rfd.getHost());
-        assertTrue(rfd.getHost().startsWith("1.2.3."));
+        assertNotEquals("1.2.3.5",rfd.getAddress());
+        assertTrue(rfd.getAddress().startsWith("1.2.3."));
     }
     
     /**
@@ -366,9 +366,9 @@ public class PingRankerTest extends LimeTestCase {
         ranker.processMessage(notBusy, udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.5"),1, spamFilterFactory.createPersonalFilter()));
         
         RemoteFileDesc best = ranker.getBest();
-        assertEquals("1.2.3.5",best.getHost()); // not busy
+        assertEquals("1.2.3.5",best.getAddress()); // not busy
         best = ranker.getBest();
-        assertEquals("1.2.3.4",best.getHost()); // busy
+        assertEquals("1.2.3.4",best.getAddress()); // busy
     }
     
     /**
@@ -391,11 +391,11 @@ public class PingRankerTest extends LimeTestCase {
         ranker.processMessage(noFree,udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.6"),1, spamFilterFactory.createPersonalFilter()));
         
         RemoteFileDesc best = ranker.getBest();
-        assertEquals("1.2.3.5",best.getHost()); // one free slot
+        assertEquals("1.2.3.5",best.getAddress()); // one free slot
         best = ranker.getBest();
-        assertEquals("1.2.3.6",best.getHost()); // no free slots
+        assertEquals("1.2.3.6",best.getAddress()); // no free slots
         best = ranker.getBest();
-        assertEquals("1.2.3.4",best.getHost()); // one queued
+        assertEquals("1.2.3.4",best.getAddress()); // one queued
     }
     
     /**
@@ -420,11 +420,11 @@ public class PingRankerTest extends LimeTestCase {
         ranker.processMessage(pushPong,udpReplyHandlerFactory.createUDPReplyHandler(InetAddress.getByName("1.2.3.6"),6, spamFilterFactory.createPersonalFilter()));
         
         RemoteFileDesc best = ranker.getBest();
-        assertEquals("1.2.3.5",best.getHost()); // open with more slots
+        assertEquals("1.2.3.5",best.getAddress()); // open with more slots
         best = ranker.getBest();
         assertTrue(best.getPushProxies().contains(new IpPortImpl("1.2.3.6",6))); // firewalled
         best = ranker.getBest();
-        assertEquals("1.2.3.4",best.getHost()); // open
+        assertEquals("1.2.3.4",best.getAddress()); // open
         
     }
     
@@ -453,11 +453,11 @@ public class PingRankerTest extends LimeTestCase {
         RemoteFileDesc best = ranker.getBest();
         assertTrue(best.getPushProxies().contains(new IpPortImpl("1.2.3.7",7))); // full, firewalled , one slot
         best = ranker.getBest();
-        assertEquals("1.2.3.6",best.getHost()); // partial, open, one slot
+        assertEquals("1.2.3.6",best.getAddress()); // partial, open, one slot
         best = ranker.getBest();
-        assertEquals("1.2.3.5",best.getHost()); // full, open, one slot 
+        assertEquals("1.2.3.5",best.getAddress()); // full, open, one slot 
         best = ranker.getBest();
-        assertEquals("1.2.3.4",best.getHost()); // full, no slots, firewalled
+        assertEquals("1.2.3.4",best.getAddress()); // full, no slots, firewalled
     }
     
     /**

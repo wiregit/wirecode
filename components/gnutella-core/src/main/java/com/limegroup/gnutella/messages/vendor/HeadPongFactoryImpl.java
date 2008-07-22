@@ -38,7 +38,6 @@ import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message.Network;
-import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 
 @Singleton
@@ -210,8 +209,8 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
         
         // If we're not firewalled and support TLS,
         // spread word about our TLS status.
-        if(networkManager.acceptedIncomingConnection() && 
-                SSLSettings.isIncomingTLSEnabled() ) {
+        if(networkManager.acceptedIncomingConnection() &&
+                networkManager.isIncomingTLSEnabled()) {
             ggep.put(HeadPong.FEATURES, HeadPong.TLS_CAPABLE);
             size += 4;
         }

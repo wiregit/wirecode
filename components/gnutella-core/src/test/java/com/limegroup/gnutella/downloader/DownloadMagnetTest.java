@@ -158,7 +158,7 @@ public class DownloadMagnetTest extends DownloadTestCase {
                 return "filename";
             }
 
-            public long getFileSize() {
+            public long getSize() {
                 return TestFile.length();
             }
 
@@ -181,7 +181,14 @@ public class DownloadMagnetTest extends DownloadTestCase {
             public boolean isFirewalled() {
                 return true;
             }
-            
+
+            public long getIndex() {
+                return 0;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            public long getCreationTime() {
+                return 0;  //To change body of implemented methods use File | Settings | File Templates.
+            }
         };
         
        return fileDetails;

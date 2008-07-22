@@ -21,7 +21,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.http.HTTPConnectionData;
-import com.limegroup.gnutella.settings.SSLSettings;
 
 /**
  * Manages state for push upload requests.
@@ -41,6 +40,7 @@ public final class PushManager {
     private final Provider<SocketsManager> socketsManager;
     private final Provider<HTTPAcceptor> httpAcceptor;
     private final Provider<UDPSelectorProvider> udpSelectorProvider;
+    private final Provider<NetworkManager> networkManager;
 
     /**
      * @param fileManager
@@ -51,11 +51,13 @@ public final class PushManager {
     public PushManager(Provider<FileManager> fileManager,
             Provider<SocketsManager> socketsManager,
             Provider<HTTPAcceptor> httpAcceptor,
-            Provider<UDPSelectorProvider> udpSelectorProvider) {
+            Provider<UDPSelectorProvider> udpSelectorProvider,
+            Provider<NetworkManager> networkManager) {
         this.fileManager = fileManager;
         this.socketsManager = socketsManager;
         this.httpAcceptor = httpAcceptor;
         this.udpSelectorProvider = udpSelectorProvider;
+        this.networkManager = networkManager;
     }    
 
 	/**
@@ -120,7 +122,7 @@ public final class PushManager {
             if (LOG.isDebugEnabled())
                 LOG.debug("Adding push observer to host: " + host + ":" + port);
             try {
-                ConnectType type = tlsCapable && SSLSettings.isOutgoingTLSEnabled() ? ConnectType.TLS : ConnectType.PLAIN;
+                ConnectType type = tlsCapable && networkManager.get().isOutgoingTLSEnabled() ? ConnectType.TLS : ConnectType.PLAIN;
                 socketsManager.get().connect(new InetSocketAddress(host, port), CONNECT_TIMEOUT, new PushObserver(data, false, httpAcceptor.get()), type);
             } catch(IOException iox) {
             }

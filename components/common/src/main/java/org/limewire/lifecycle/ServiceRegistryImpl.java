@@ -85,7 +85,7 @@ class ServiceRegistryImpl implements ServiceRegistry {
             for(Iterator<ServiceHolder> iter = servicedStages.iterator(); iter.hasNext(); ) {
                 ServiceHolder service = iter.next();
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("starting service: " + service.service.getClass().getSimpleName());
+                    LOG.debug("starting service: " + service.service.service.getClass().getSimpleName());
                 }
                 service.start();
                 startedServices.add(service);
@@ -104,7 +104,7 @@ class ServiceRegistryImpl implements ServiceRegistry {
     public void stop() {
         for(int i = startedServices.size()-1; i >= 0; i--) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("stopping service: " + startedServices.get(i).service.getClass().getSimpleName());
+                LOG.debug("stopping service: " + startedServices.get(i).service.service.getClass().getSimpleName());
             }
             startedServices.get(i).stop();
         }

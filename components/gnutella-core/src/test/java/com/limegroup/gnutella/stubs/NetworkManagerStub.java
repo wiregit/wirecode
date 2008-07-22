@@ -12,6 +12,9 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NetworkManagerEvent;
 
+import org.limewire.net.address.MediatedConnectionAddress;
+import org.limewire.net.address.HolePunchConnectionAddress;
+
 @Singleton
 public class NetworkManagerStub implements NetworkManager {
     private boolean acceptedIncomingConnection;
@@ -41,6 +44,10 @@ public class NetworkManagerStub implements NetworkManager {
     public boolean addressChanged() {
         // TODO Auto-generated method stub
         return false;
+    }
+
+    public void externalAddressChanged() {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 
     public boolean canDoFWT() {
@@ -202,5 +209,37 @@ public class NetworkManagerStub implements NetworkManager {
     public String getServiceName() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    public void disableTLS(Throwable reason) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public boolean isTLSDisabled() {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public boolean isIncomingTLSEnabled() {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public boolean isOutgoingTLSEnabled() {
+        return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void portChanged() {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void acceptedIncomingConnectionChanged() {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void newMediatedConnectionAddress(MediatedConnectionAddress address) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void newHolePunchConnectionAddress(HolePunchConnectionAddress address) {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
 }

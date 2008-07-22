@@ -213,9 +213,15 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             return;
         }
 
-		synchronized(ADDRESS_LOCK) {
-		    _externalAddress = byteAddr;
+        boolean addrChanged = false;
+        synchronized(ADDRESS_LOCK) {
+            if( !Arrays.equals(_externalAddress, byteAddr) ) {
+			    _externalAddress = byteAddr;
+			    addrChanged = true;
+			}
 		}
+        if(addrChanged) 
+            networkManager.externalAddressChanged();
     }
 
 	/* (non-Javadoc)
@@ -292,7 +298,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         if (_port != oldPort || tryingRandom) {
             NetworkSettings.PORT.setValue(_port);
             SettingsGroupManager.instance().save();
-            networkManager.addressChanged();
+            networkManager.portChanged();
         }
        
         // Make sure UPnP gets setup.
@@ -333,7 +339,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
         	        ConnectionSettings.FORCED_PORT.setValue(mappedPort);
         	        ConnectionSettings.UPNP_IN_USE.setValue(true);
         	        if (mappedPort != _port)
-        	            networkManager.addressChanged();
+        	            networkManager.portChanged();
         		
         		    // we could get our external address from the NAT but its too slow
         		    // so we clear the last connect back times and re-validate cause our
@@ -586,8 +592,9 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
             return false;
         
 	    _acceptedIncoming = canReceiveIncoming;
-		activityCallback.get().acceptedIncomingChanged(canReceiveIncoming);
-	    return true;
+        networkManager.acceptedIncomingConnectionChanged();
+        activityCallback.get().acceptedIncomingChanged(canReceiveIncoming);        
+        return true;
 	}
 	
 	/* (non-Javadoc)

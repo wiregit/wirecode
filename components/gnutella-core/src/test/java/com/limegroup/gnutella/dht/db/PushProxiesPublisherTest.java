@@ -34,7 +34,6 @@ import com.limegroup.gnutella.dht.NullDHTController;
 import com.limegroup.gnutella.dht.DHTEvent.Type;
 import com.limegroup.gnutella.dht.DHTManager.DHTMode;
 import com.limegroup.gnutella.settings.DHTSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.stubs.NetworkManagerStub;
 import com.limegroup.gnutella.util.LimeTestCase;
 
@@ -82,7 +81,7 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         assertNull("First value should be null since not stable", value);
         
         value = pushProxiesPublisher.getValueToPublish();
-        Connectable expected = new ConnectableImpl(new IpPortImpl(networkManagerStub.getAddress(), networkManagerStub.getPort()), SSLSettings.isOutgoingTLSEnabled());
+        Connectable expected = new ConnectableImpl(new IpPortImpl(networkManagerStub.getAddress(), networkManagerStub.getPort()), networkManagerStub.isOutgoingTLSEnabled());
         assertEquals(0, IpPort.IP_COMPARATOR.compare(expected, value.getPushProxies().iterator().next()));
     }
     
@@ -100,8 +99,8 @@ public class PushProxiesPublisherTest extends LimeTestCase {
         assertNull("First value should be null, since not considered stable", value);
         
         value = pushProxiesPublisher.getValueToPublish();
-        
-        Connectable expected = new ConnectableImpl(new IpPortImpl(networkManagerStub.getAddress(), networkManagerStub.getPort()), SSLSettings.isOutgoingTLSEnabled());
+
+        Connectable expected = new ConnectableImpl(new IpPortImpl(networkManagerStub.getAddress(), networkManagerStub.getPort()), networkManagerStub.isOutgoingTLSEnabled());
         assertEquals(0, IpPort.IP_COMPARATOR.compare(expected, value.getPushProxies().iterator().next()));
         assertEquals(1, value.getFwtVersion());
         

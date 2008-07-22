@@ -4,8 +4,17 @@ import java.io.IOException;
 
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.net.address.HolePunchConnectionAddress;
+import org.limewire.net.address.MediatedConnectionAddress;
 
 public interface NetworkManager extends Service, ListenerSupport<NetworkManagerEvent> {
+    void disableTLS(Throwable reason);
+
+    boolean isTLSDisabled();
+
+    boolean isIncomingTLSEnabled();
+
+    boolean isOutgoingTLSEnabled();
 
     public static enum EventType {
         ADDRESS_CHANGE
@@ -42,7 +51,7 @@ public interface NetworkManager extends Service, ListenerSupport<NetworkManagerE
     /**
      * Returns the port used for downloads and messaging connections.
      * Used to fill out the My-Address header in ManagedConnection.
-     * @see Acceptor#getPort
+     * @see com.limegroup.gnutella.Acceptor#getPort
      */
     public int getPort();
 
@@ -75,6 +84,16 @@ public interface NetworkManager extends Service, ListenerSupport<NetworkManagerE
      */
     // TODO: Convert to listener pattern
     public boolean addressChanged();
+    
+    public void externalAddressChanged();
+    
+    public void portChanged();
+    
+    public void acceptedIncomingConnectionChanged();
+    
+    public void newMediatedConnectionAddress(MediatedConnectionAddress address);
+    
+    public void newHolePunchConnectionAddress(HolePunchConnectionAddress address);
 
     /** 
      * Returns true if this has accepted an incoming connection, and hence

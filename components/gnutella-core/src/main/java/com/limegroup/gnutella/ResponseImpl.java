@@ -235,7 +235,7 @@ class ResponseImpl implements Response {
     public RemoteFileDesc toRemoteFileDesc(QueryReply queryReply, RemoteFileDescFactory remoteFileDescFactory){
         if(cachedRFD != null &&
            cachedRFD.getPort() == queryReply.getPort() &&
-           cachedRFD.getHost().equals(queryReply.getIP()))
+           cachedRFD.getAddress().equals(queryReply.getIP()))
             return cachedRFD;
         else {
             RemoteFileDesc rfd = remoteFileDescFactory.createRemoteFileDesc(queryReply.getIP(), queryReply.getPort(), getIndex(),

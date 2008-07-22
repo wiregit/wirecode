@@ -23,7 +23,7 @@ public interface LibraryProvider {
      * @return an <code>InputStream</code> to the file
      * @throws FileNotFoundException
      */
-    public InputStream readFile(FileMetaData file) throws FileNotFoundException;
+    public FileTransferMetaData readFile(FileMetaData file);
 
     /**
      * Used by the jingle engine to write an received remote file to the

@@ -1,50 +1,65 @@
 package org.limewire.xmpp.client.impl.messages.filetransfer;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
+import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
+import org.limewire.xmpp.client.impl.messages.HostMetaDataImpl;
+import org.limewire.xmpp.client.service.FileMetaData;
+import org.limewire.xmpp.client.service.FileTransferMetaData;
+import org.limewire.xmpp.client.service.HostMetaData;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.limewire.xmpp.client.service.FileMetaData;
-
-import java.io.IOException;
 
 public class FileTransferIQ extends IQ {
 
-    enum TransferType {OFFER, REQUEST}
-    
-    private static final Log LOG = LogFactory.getLog(FileTransferIQ.class);
+    public enum TransferType {OFFER, REQUEST}
 
     private FileMetaData fileMetaData;
+    private HostMetaData hostMetaData;
     private TransferType transferType;
     
-    public FileTransferIQ(XmlPullParser parser) {
-        try {
-            do {
-                int eventType = parser.getEventType();
-                if(eventType == XmlPullParser.START_TAG) {
-                    if(parser.getName().equals("file-transfer")) {
-                        transferType = TransferType.valueOf(parser.getAttributeValue(null, "type"));
-                    }
-                    else if(parser.getName().equals("file")) {
-                        fileMetaData = new FileMetaDataImpl(parser);
-                    }
-                } else if(eventType == XmlPullParser.END_TAG) {
-                    if(parser.getName().equals("file-transfer")) {
-                        return;
-                    }
+    public FileTransferIQ(XmlPullParser parser) throws IOException, XmlPullParserException {
+        do {
+            int eventType = parser.getEventType();
+            if(eventType == XmlPullParser.START_TAG) {
+                if(parser.getName().equals("file-transfer")) {
+                    transferType = TransferType.valueOf(parser.getAttributeValue(null, "type"));
+                } else if(parser.getName().equals("file")) {
+                    fileMetaData = new FileMetaDataImpl(parser);
+                } else if(parser.getName().equals("host")) {
+                    hostMetaData = new HostMetaDataImpl(parser);
                 }
-            } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);   // TODO throw?
-        } catch (XmlPullParserException e) {
-            LOG.error(e.getMessage(), e);   // TODO throw?
-        }
+            } else if(eventType == XmlPullParser.END_TAG) {
+                if(parser.getName().equals("file-transfer")) {
+                    return;
+                }
+            }
+        } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
+    }
+    
+    public FileTransferIQ(FileTransferMetaData fileTransferMetaData, TransferType transferType) {
+        this(fileTransferMetaData.getFileMetaData(), fileTransferMetaData.getHostMetaData(), transferType);
+    }
+    
+    public FileTransferIQ(FileMetaData fileMetaData, HostMetaData hostMetaData, TransferType transferType) {
+        this.fileMetaData = fileMetaData;
+        this.hostMetaData = hostMetaData;
+        this.transferType = transferType;
+    }
+    
+    public FileTransferIQ(FileMetaData fileMetaData, TransferType transferType) {
+        this(fileMetaData, null, transferType);
     }
 
     public FileMetaData getFileMetaData() {
         return fileMetaData;
+    }
+    
+    public HostMetaData getHostMetaData() {
+        return hostMetaData;
     }
 
     public TransferType getTransferType() {
@@ -52,7 +67,15 @@ public class FileTransferIQ extends IQ {
     }
 
     public String getChildElementXML() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        String fileTransfer = "<file-transfer xmlns='jabber:iq:lw-file-transfer' type='" + transferType.toString() + "'>";
+        if(fileMetaData != null) {
+            fileTransfer += fileMetaData.toXML();
+        }
+        if(hostMetaData != null) {
+            fileTransfer += hostMetaData.toXML();
+        }
+        fileTransfer += "</file-transfer>";
+        return fileTransfer;
     }
     
     public static IQProvider getIQProvider() {

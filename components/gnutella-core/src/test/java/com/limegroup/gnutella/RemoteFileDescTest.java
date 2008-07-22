@@ -98,7 +98,7 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.LimeTe
                 true, null, urns, false, false, "", null, -1, false);
 		URL rfdUrl = rfd.getUrl();
 		String urlString = rfdUrl.toString();
-		String host = rfd.getHost();
+		String host = rfd.getAddress();
 		String colonPort = ":"+rfd.getPort();
 		assertTrue("unexpected beginning of url", 
 				   urlString.startsWith("http://"+host+colonPort));

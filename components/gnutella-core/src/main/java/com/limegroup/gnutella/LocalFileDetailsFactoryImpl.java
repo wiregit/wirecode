@@ -1,8 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.Set;
 
 import com.google.inject.Inject;
@@ -12,13 +9,11 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 @Singleton
 public class LocalFileDetailsFactoryImpl implements LocalFileDetailsFactory {
     
-    private final NetworkManager networkManager;
-    private final ApplicationServices applicationServices;
+    private final CreationTimeCache creationTimeCache;
     
     @Inject
-    public LocalFileDetailsFactoryImpl(NetworkManager networkManager, ApplicationServices applicationServices) {
-        this.networkManager = networkManager;
-        this.applicationServices = applicationServices;
+    public LocalFileDetailsFactoryImpl(CreationTimeCache creationTimeCache) {
+        this.creationTimeCache = creationTimeCache;
     }
     
     /* (non-Javadoc)
@@ -30,21 +25,8 @@ public class LocalFileDetailsFactoryImpl implements LocalFileDetailsFactory {
                 return fd.getFileName();
             }
 
-            public long getFileSize() {
+            public long getSize() {
                 return fd.getFileSize();
-            }
-            
-            public InetSocketAddress getInetSocketAddress() {
-                // TODO maybe cache this, even statically
-                try {
-                    return new InetSocketAddress(InetAddress.getByAddress(networkManager.getAddress()), networkManager.getPort());
-                } catch (UnknownHostException e) {
-                }
-                return null;
-            }
-            
-            public boolean isFirewalled() {
-                return !networkManager.acceptedIncomingConnection();
             }
 
             public URN getSHA1Urn() {
@@ -58,9 +40,13 @@ public class LocalFileDetailsFactoryImpl implements LocalFileDetailsFactory {
             public LimeXMLDocument getXMLDocument() {
                 return fd.getXMLDocument();
             }
-            
-            public byte[] getClientGUID() {
-                return applicationServices.getMyGUID();
+
+            public long getIndex() {
+                return fd.getIndex();
+            }
+
+            public long getCreationTime() {
+                return creationTimeCache.getCreationTimeAsLong(fd.getSHA1Urn());
             }
         };
     }

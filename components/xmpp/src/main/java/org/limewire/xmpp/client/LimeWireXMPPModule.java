@@ -18,7 +18,7 @@ public class LimeWireXMPPModule extends AbstractModule {
     private final Provider<FileTransferProgressListener> progressListener;
     private final Provider<IncomingFileAcceptor> fileAcceptor;
     private final Provider<List<XMPPConnectionConfiguration>> configurations;
-    
+
     public LimeWireXMPPModule(Provider<List<XMPPConnectionConfiguration>> configurations,
                               Provider<LibraryProvider> libraryProvider,
                               Provider<FileTransferProgressListener> progressListener,

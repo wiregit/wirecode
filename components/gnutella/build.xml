@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="lw-gnutella" basedir="." default="compile-src">
+
+	<description>
+		LimeWire component 'gnutella'.
+	    This component contains gnutella support.
+	</description>
+	
+    <import file="../common/build-macros.xml" />
+    <import file="../common/build.xml"/>
+    
+    <target name="initialize" depends="lw-common.initialize" unless="initialized.gnutella">
+        <do.setup-properties component="xmpp">
+			<src-classpath>
+                <pathelement location="${limewire.lib.jars}/forms_rt.jar"/>
+                <path refid="build.limewire.components.common.buildpath"/>
+            </src-classpath>
+            <build-tests-classpath>
+                <path refid="tests.limewire.components.common.classpath"/>
+                <path refid="tests.limewire.components.io.classpath"/>
+            </build-tests-classpath>
+        </do.setup-properties>
+    </target>
+	
+	<target name="clean" depends="lw-common.clean">
+	    <do.clean component="gnutella"/>
+	</target>
+    
+    <target name="compile" depends="lw-common.compile">
+    	<do.compile component="gnutella"/>
+    </target>
+	
+	<target name="compile-src" depends="lw-common.compile-src">
+	    <do.compile-src component="gnutella" excludes="**/server/**"/>
+	</target>
+    
+	<target name="clean-src" depends="lw-common.clean-src">
+	    <do.clean-src component="gnutella"/>
+	</target>
+	
+	<target name="compile-tests">
+	    <do.compile-tests component="gnutella"/>
+	</target>
+	
+	<target name="clean-tests">
+	    <do.clean-tests component="gnutella"/>
+	</target>
+	
+	<target name="test" if="class" depends="compile">
+	    <do.test component="gnutella" class="${class}"/>
+	</target>
+	
+	<target name="test-package" if="package" depends="compile">
+	    <do.test-package component="gnutella" package="${package}"/>
+	</target>
+	
+	<target name="test-all" depends="compile">
+	    <do.test-all component="xmpp"/>
+	</target>
+    
+    <target name="jar" depends="initialize, compile-src">
+        <do.jar component="gnutella"/>
+    </target>
+    
+	<target name="javadoc" depends="initialize, compile-src">
+    	<do.javadoc component="gnutella"/>
+	</target>
+    
+    <target name="clean-dist" depends="initialize">
+        <do.clean-dist component="gnutella"/>
+    </target>
+	
+    <target name="with.clover" depends="initialize">
+        <do.clover-setup component="gnutella"/>
+	</target>
+    
+    <target name="clover2html" depends="initialize">
+        <do.clover2html component="gnutella"/>
+    </target>
+    
+</project>

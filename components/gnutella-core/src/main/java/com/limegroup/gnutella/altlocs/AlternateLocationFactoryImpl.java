@@ -20,7 +20,6 @@ import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
 
 @Singleton
 public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
@@ -72,10 +71,10 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     	    
     	    
     		if (open && networkInstanceUtils.isValidExternalIpPort(ipPortForSelf)) {
-    		    return new DirectAltLoc(new ConnectableImpl(
+                return new DirectAltLoc(new ConnectableImpl(
     		                NetworkUtils.ip2string(networkManager.getAddress()),
     		                networkManager.getPort(),
-    		                SSLSettings.isIncomingTLSEnabled())
+                        networkManager.isIncomingTLSEnabled())
     		            , urn, networkInstanceUtils, ipPortForSelf);
     		} else { 
     			return new PushAltLoc(pushEndpointFactory.createForSelf(), urn, applicationServices);
@@ -100,7 +99,7 @@ public class AlternateLocationFactoryImpl implements AlternateLocationFactory {
     	    throw new NullPointerException("cannot accept null URN");
     
     	if (!rfd.needsPush()) {
-            return new DirectAltLoc(new ConnectableImpl(rfd.getHost(), rfd.getPort(), rfd
+            return new DirectAltLoc(new ConnectableImpl(rfd.getAddress(), rfd.getPort(), rfd
                     .isTLSCapable()), urn, networkInstanceUtils, ipPortForSelf);
         } else {
             PushEndpoint copy;

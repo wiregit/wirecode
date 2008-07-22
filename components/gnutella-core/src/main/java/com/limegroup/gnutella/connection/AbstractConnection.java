@@ -559,6 +559,7 @@ public abstract class AbstractConnection implements Connection {
 
         // Notify the acceptor of our address.
         // TODO: move out of here!
+        // TODO store address in one place       
         acceptor.setAddress(localAddress);
     }
 
@@ -591,39 +592,43 @@ public abstract class AbstractConnection implements Connection {
      */
     // TODO: this really shouldn't be here -- use a listener pattern instead
     private void updateAddress(HandshakeResponse readHeaders) {
-        String ip = readHeaders.getProperty(HeaderNames.REMOTE_IP);
-        if (ip == null) {
+        String ipStringFromHeader = readHeaders.getProperty(HeaderNames.REMOTE_IP);
+        if (ipStringFromHeader == null) {
             return;
         }
 
-        InetAddress ia = null;
+        InetAddress ipAddressFromHeader = null;
         try {
-            ia = InetAddress.getByName(ip);
+            ipAddressFromHeader = InetAddress.getByName(ipStringFromHeader);
         } catch (UnknownHostException uhe) {
             return; // invalid.
         }
 
         // invalid or private, exit
-        if (!NetworkUtils.isValidAddress(ia) || networkInstanceUtils.isPrivateAddress(ia))
+        if (!NetworkUtils.isValidAddress(ipAddressFromHeader) || networkInstanceUtils.isPrivateAddress(ipAddressFromHeader))
             return;
 
-        myIp = ia.getAddress();
+        // TODO store address in one place
+        myIp = ipAddressFromHeader.getAddress();
         
         // If we're forcing, change that if necessary.
         if (ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
             StringSetting addr = ConnectionSettings.FORCED_IP_ADDRESS_STRING;
-            if (!ip.equals(addr.getValue())) {
-                addr.setValue(ip);
+            if (!ipStringFromHeader.equals(addr.getValue())) {
+                // TODO store address in one place
+                addr.setValue(ipStringFromHeader);
                 networkManager.addressChanged();
             }
         }
         // Otherwise, if our current address is invalid, change.
         else if (!NetworkUtils.isValidAddress(networkManager.getAddress())) {
             // will auto-call addressChanged.
-            acceptor.setAddress(ia);
+            // TODO store address in one place     
+            acceptor.setAddress(ipAddressFromHeader);
         }
 
-        acceptor.setExternalAddress(ia);
+        // TODO store address in one place      
+        acceptor.setExternalAddress(ipAddressFromHeader);
     }
 
     /*

@@ -6,12 +6,11 @@ import java.util.Iterator;
 
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.limewire.xmpp.client.impl.messages.FileMetaDataImpl;
 import org.limewire.xmpp.client.service.FileMetaData;
 import org.limewire.xmpp.client.service.LibraryProvider;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Used to (de)serialize <code>library</code> IQ messages.  These messages look like this on the wire:<BR>
@@ -28,39 +27,28 @@ import org.limewire.xmpp.client.service.LibraryProvider;
  * </iq></pre>
  */
 public class LibraryIQ extends IQ {
-
-    private static final Log LOG = LogFactory.getLog(LibraryIQ.class);
     
     private LibraryProvider libraryProvider;
     private FileMetaData[] files;
 
-    public LibraryIQ(XmlPullParser parser) {
+    public LibraryIQ(XmlPullParser parser) throws IOException, XmlPullParserException {
         files = parseFiles(parser);
     }
 
-    private FileMetaData[] parseFiles(XmlPullParser parser) {
+    private FileMetaData[] parseFiles(XmlPullParser parser) throws XmlPullParserException, IOException {
         ArrayList<FileMetaData> files = new ArrayList<FileMetaData>();
-        try {
-            do {
-                int eventType = parser.getEventType();
-                if(eventType == XmlPullParser.START_TAG) {
-                    if(parser.getName().equals("file")) {
-                        String urn = parser.getAttributeValue(null, "id");
-                        String name = parser.getAttributeValue(null, "name");
-                        // TODO size, date, description
-                        files.add(new FileMetaDataImpl(urn, name));
-                    }
-                } else if(eventType == XmlPullParser.END_TAG) {
-                    if(parser.getName().equals("library")) {
-                        return files.toArray(new FileMetaData[]{});
-                    }
+        do {
+            int eventType = parser.getEventType();
+            if(eventType == XmlPullParser.START_TAG) {
+                if(parser.getName().equals("file")) {
+                    files.add(new FileMetaDataImpl(parser));
                 }
-            } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);   // TODO throw?
-        } catch (XmlPullParserException e) {
-            LOG.error(e.getMessage(), e);   // TODO throw?
-        }
+            } else if(eventType == XmlPullParser.END_TAG) {
+                if(parser.getName().equals("library")) {
+                    return files.toArray(new FileMetaData[]{});
+                }
+            }
+        } while (parser.nextTag() != XmlPullParser.END_DOCUMENT);
         return files.toArray(new FileMetaData[]{});
     }
 

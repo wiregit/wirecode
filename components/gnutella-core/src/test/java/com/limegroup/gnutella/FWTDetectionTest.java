@@ -134,9 +134,9 @@ public class FWTDetectionTest extends LimeTestCase {
      */
     public void testDisconnected() throws Exception {
         connectionManager.setConnected(false);
-        ConnectionSettings.LAST_FWT_STATE.setValue(false);
+        ConnectionSettings.CAN_DO_FWT.setValue(true);
         assertTrue(udpService.canDoFWT());
-        ConnectionSettings.LAST_FWT_STATE.setValue(true);
+        ConnectionSettings.CAN_DO_FWT.setValue(false);
         assertFalse(udpService.canDoFWT());
         
     }
@@ -146,9 +146,9 @@ public class FWTDetectionTest extends LimeTestCase {
      */
     public void testNotReceivedPong() throws Exception {
         connectionManager.setConnected(true);
-        ConnectionSettings.LAST_FWT_STATE.setValue(false);
+        ConnectionSettings.CAN_DO_FWT.setValue(true);
         assertTrue(udpService.canDoFWT());
-        ConnectionSettings.LAST_FWT_STATE.setValue(true);
+        ConnectionSettings.CAN_DO_FWT.setValue(false);
         assertFalse(udpService.canDoFWT());
         
         connectionManager.setConnected(false);
@@ -166,9 +166,9 @@ public class FWTDetectionTest extends LimeTestCase {
         //reply with a pong that does not carry info
         ponger1.reply(null);
         connectionManager.setConnected(true);
-        ConnectionSettings.LAST_FWT_STATE.setValue(false);
+        ConnectionSettings.CAN_DO_FWT.setValue(true);
         assertTrue(udpService.canDoFWT());
-        ConnectionSettings.LAST_FWT_STATE.setValue(true);
+        ConnectionSettings.CAN_DO_FWT.setValue(false);
         assertFalse(udpService.canDoFWT());
         
         //reply with a pong that does carry info
@@ -177,9 +177,9 @@ public class FWTDetectionTest extends LimeTestCase {
         Thread.sleep(1000);
         
         connectionManager.setConnected(true);
-        ConnectionSettings.LAST_FWT_STATE.setValue(false);
+        ConnectionSettings.CAN_DO_FWT.setValue(true);
         assertTrue(udpService.canDoFWT());
-        ConnectionSettings.LAST_FWT_STATE.setValue(true);
+        ConnectionSettings.CAN_DO_FWT.setValue(false);
         assertTrue(udpService.canDoFWT());
     }
     
@@ -360,7 +360,7 @@ public class FWTDetectionTest extends LimeTestCase {
         Thread.sleep(500);
         connectionManager.setConnected(true);
         assertTrue(udpService.canDoFWT());
-        assertFalse(ConnectionSettings.LAST_FWT_STATE.getValue());
+        assertTrue(ConnectionSettings.CAN_DO_FWT.getValue());
         connectionManager.setConnected(false);
     }
     
@@ -385,7 +385,7 @@ public class FWTDetectionTest extends LimeTestCase {
         Thread.sleep(500);
         connectionManager.setConnected(true);
         assertFalse(udpService.canDoFWT());
-        assertTrue(ConnectionSettings.LAST_FWT_STATE.getValue());
+        assertFalse(ConnectionSettings.CAN_DO_FWT.getValue());
         connectionManager.setConnected(false);
     }
     

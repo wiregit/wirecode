@@ -27,6 +27,7 @@ import org.limewire.inspection.InspectableForSize;
 import org.limewire.inspection.InspectablePrimitive;
 import org.limewire.inspection.InspectionPoint;
 import org.limewire.io.Connectable;
+import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.io.NetworkUtils;
@@ -34,6 +35,8 @@ import org.limewire.lifecycle.Service;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
+import org.limewire.net.address.gnutella.PushProxyAddress;
+import org.limewire.net.address.gnutella.PushProxyMediatedAddress;
 import org.limewire.util.SystemUtils;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
@@ -45,26 +48,26 @@ import com.google.inject.name.Named;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
+import com.limegroup.gnutella.connection.ConnectionLifecycleEvent.EventType;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.GnetConnectObserver;
+import com.limegroup.gnutella.connection.GnutellaConnectionEvent;
 import com.limegroup.gnutella.connection.RoutedConnection;
 import com.limegroup.gnutella.connection.RoutedConnectionFactory;
-import com.limegroup.gnutella.connection.ConnectionLifecycleEvent.EventType;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HandshakeStatus;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.PingRequestFactory;
-import com.limegroup.gnutella.messages.Message.Network;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.SSLSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.simpp.SimppListener;
 import com.limegroup.gnutella.simpp.SimppManager;
@@ -2354,7 +2357,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
                 LOG.debug("Starting fetch for connectable host: " + incoming);
 
             this.endpoint = incoming;
-            ConnectType type = endpoint.isTLSCapable() && SSLSettings.isOutgoingTLSEnabled() ? 
+            ConnectType type = endpoint.isTLSCapable() && networkManager.isOutgoingTLSEnabled() ? 
                                         ConnectType.TLS : ConnectType.PLAIN;
             connection = managedConnectionFactory.createRoutedConnection(endpoint.getAddress(),
                     endpoint.getPort(), type);
@@ -2602,6 +2605,29 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
                 ret.put(mc.getAddress()+":"+mc.getPort(), ((Inspectable)mc).inspect());
             }
             return ret;
+        }
+    }
+
+    public void handleEvent(final GnutellaConnectionEvent event) {
+        Set<Connectable> pushProxies = getPushProxies();
+        final List<PushProxyAddress> pushProxyAddresses = new ArrayList<PushProxyAddress>();
+        for(Connectable proxy : pushProxies) {
+            pushProxyAddresses.add(new PushProxyAddressImpl(proxy));
+        }
+        networkManager.newMediatedConnectionAddress(new PushProxyMediatedAddress() {
+            public GUID getClientID() {
+                return event.getGuid();
+            }
+
+            public List<PushProxyAddress> getPushProxies() {
+                return pushProxyAddresses;
+            }
+        });
+    }
+    
+    private class PushProxyAddressImpl extends ConnectableImpl implements PushProxyAddress {
+        public PushProxyAddressImpl(Connectable connectable) {
+            super(connectable);
         }
     }
 }

@@ -1,4 +1,4 @@
-package org.limewire.xmpp.client.impl.messages.library;
+package org.limewire.xmpp.client;
 
 import java.util.Date;
 import java.util.Map;
@@ -6,7 +6,6 @@ import java.util.Set;
 import java.net.URI;
 
 import org.limewire.xmpp.client.service.FileMetaData;
-import org.limewire.xmpp.client.service.HostMetaData;
 
 class FileMetaDataImpl implements FileMetaData {
     private String id;
@@ -14,7 +13,7 @@ class FileMetaDataImpl implements FileMetaData {
     private long size;
     private Date date;
     private String description;
-    
+
     FileMetaDataImpl(String id, String name) {
         this.id = id;
         this.name = name;
@@ -76,7 +75,7 @@ class FileMetaDataImpl implements FileMetaData {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public HostMetaData getHostMetaData() {
+    public String toXML() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }
