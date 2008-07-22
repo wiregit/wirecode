@@ -35,14 +35,14 @@
 	    <do.clean component="swingui"/>
 	</target>
     
-    <target name="compile" depends="initialize, lw-core-api.compile, lw-mock-core.compile">
+    <target name="compile" depends="initialize, lw-core-api.compile, lw-mock-core.compile, lw-common.compile">
         <!-- Currently no tests - using compile-src in the meantime -->
     	<!--<do.compile component="core-api"/>-->
     	<do.compile-src component="swingui"/>
         <mkdir dir="${build.limewire.components.swingui.tests}"/>
     </target>
 	
-	<target name="compile-src" depends="initialize, lw-core-api.compile-src, lw-mock-core.compile-src">
+	<target name="compile-src" depends="initialize, lw-core-api.compile-src, lw-mock-core.compile-src, lw-common.compile-src">
 	    <do.compile-src component="swingui"/>
 	</target>
     
