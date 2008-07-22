@@ -13,6 +13,6 @@ public class DocumentsResultsPanel extends BaseResultPanel {
             EventSelectionModel<VisualSearchResult> selectionModel,
             SearchResultDownloader searchResultDownloader,
             Search search) {
-        super("Documents from Everyone", listModel, selectionModel, searchResultDownloader, null);
+        super("Documents from Everyone", listModel, selectionModel, searchResultDownloader, search);
     }
 }

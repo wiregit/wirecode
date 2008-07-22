@@ -14,6 +14,6 @@ public class ImagesResultsPanel extends BaseResultPanel {
             EventSelectionModel<VisualSearchResult> selectionModel,
             SearchResultDownloader searchResultDownloader,
             Search search) {
-        super("Images from Everyone", listModel, selectionModel, searchResultDownloader, null);
+        super("Images from Everyone", listModel, selectionModel, searchResultDownloader, search);
     }
 }

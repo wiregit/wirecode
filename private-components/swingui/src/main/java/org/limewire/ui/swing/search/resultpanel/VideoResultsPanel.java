@@ -14,6 +14,6 @@ public class VideoResultsPanel extends BaseResultPanel {
             EventSelectionModel<VisualSearchResult> selectionModel,
             SearchResultDownloader searchResultDownloader,
             Search search) {
-        super("Video from Everyone", listModel, selectionModel, searchResultDownloader, null);
+        super("Video from Everyone", listModel, selectionModel, searchResultDownloader, search);
     }
 }

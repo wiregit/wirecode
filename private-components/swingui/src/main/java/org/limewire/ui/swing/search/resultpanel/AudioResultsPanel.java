@@ -14,6 +14,6 @@ public class AudioResultsPanel extends BaseResultPanel {
             EventSelectionModel<VisualSearchResult> selectionModel,
             SearchResultDownloader searchResultDownloader,
             Search search) {
-        super("Audio from Everyone", listModel, selectionModel, searchResultDownloader, null);
+        super("Audio from Everyone", listModel, selectionModel, searchResultDownloader, search);
     }
 }
