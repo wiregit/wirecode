@@ -7,32 +7,48 @@ public class SwarmFileImpl implements SwarmFile {
 
     private final long completeSize;
 
-
-
     private long startByte = 0;
 
+    private String path;
 
-
-    public SwarmFileImpl(File file, long completeSize) {
+    public SwarmFileImpl(File file, String path, long completeSize) {
         this.file = file;
         this.completeSize = completeSize;
+        this.path = path;
+        if (this.path == null) {
+            this.path = file.getName();
+        }
     }
 
-    /* (non-Javadoc)
+    public SwarmFileImpl(File file, long completeSize) {
+        this(file, file.getName(), completeSize);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.limewire.swarm.file.SwarmFile#getFile()
      */
     public File getFile() {
         return file;
     }
 
-    /* (non-Javadoc)
+    public String getPath() {
+        return path;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.limewire.swarm.file.SwarmFile#getCompleteSize()
      */
     public long getFileSize() {
         return completeSize;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.limewire.swarm.file.SwarmFile#getStartByte()
      */
     public long getStartByte() {
@@ -43,7 +59,9 @@ public class SwarmFileImpl implements SwarmFile {
         this.startByte = startByte;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.limewire.swarm.file.SwarmFile#getEndByte()
      */
     public long getEndByte() {

@@ -406,4 +406,8 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
         
     }
 
+    public SwarmFile getFirstSwarmFile(Range range) {
+       return  fileSystem.getSwarmFile(range.getLow());
+    }
+
 }

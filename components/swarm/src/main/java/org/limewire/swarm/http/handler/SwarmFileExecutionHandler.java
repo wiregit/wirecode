@@ -14,6 +14,7 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.swarm.SwarmCoordinator;
+import org.limewire.swarm.file.SwarmFile;
 import org.limewire.swarm.http.SwarmExecutionContext;
 import org.limewire.swarm.http.SwarmHttpUtils;
 import org.limewire.swarm.http.SwarmSource;
@@ -77,10 +78,27 @@ public class SwarmFileExecutionHandler implements ExecutionHandler {
             return null;
         }
 
-        HttpRequest request = new BasicHttpRequest("GET", source.getPath());
-        request.addHeader(new BasicHeader("Range", "bytes=" + range.getLow() + "-"
-                + (range.getHigh())));
-        context.setAttribute(RESPONSE_LISTENER, new SwarmContentListener(fileCoordinator, range));
+        SwarmFile swarmFile = fileCoordinator.getFirstSwarmFile(range);
+        long fileEndByte = swarmFile.getEndByte();
+
+        if (range.getHigh() > fileEndByte) {
+            Range oldRange = range;
+            range = Range.createRange(range.getLow(), fileEndByte);
+            range = fileCoordinator.release(oldRange, range);
+        }
+
+        long startRange = range.getLow();
+        long endRange = range.getHigh();
+
+        String path = source.getPath().trim();
+        if (path.charAt(path.length() - 1) == '/') {
+            path += swarmFile.getPath();
+        }
+
+        HttpRequest request = new BasicHttpRequest("GET", path);
+        request.addHeader(new BasicHeader("Range", "bytes=" + startRange + "-" + (endRange)));
+        context.setAttribute(RESPONSE_LISTENER, new SwarmContentListener(fileCoordinator,
+                swarmFile, range));
         return request;
     }
 }

@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
+import org.limewire.swarm.file.SwarmFile;
 
 public interface SwarmCoordinator {
 
@@ -116,6 +117,8 @@ public interface SwarmCoordinator {
     boolean isComplete();
 
     Range release(Range oldLease, Range newLease);
+
+    SwarmFile getFirstSwarmFile(Range range);
 
     // long getCompleteFileSize();
 

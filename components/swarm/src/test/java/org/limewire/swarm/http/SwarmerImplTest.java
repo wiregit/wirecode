@@ -49,14 +49,26 @@ public class SwarmerImplTest extends BaseTestCase {
         System.out.println("===================================");
     }
 
+    public void testBasic() throws Exception {
+        String md5 = "8055d620ba0c507c1af957b43648c99f";
+        File file = new File(System.getProperty("java.io.tmpdir") + "/gnutella_protocol_0.4.pdf");
+        URI uri = new URI("http://localhost/~pvertenten/pub/gnutella_protocol_0.4.pdf");
+        int lowByte = 0;
+        int highByte = 44425 - 1;
+        long fileSize = 44425;
+        Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
+        swarmer.addSource(new SourceImpl(uri, Range.createRange(lowByte, highByte)));
+        assertSwarmer(md5, file, fileSize);
+    }
+
     public void testRangesStart() throws Exception {
         String md5 = "cea47a73ebb7b0da41feef1d030a4c7a";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testRangesStart.pdf");
-        URI uri = new URI("http://localhost/~pvertenten/pub/gnutella_protocol_0.4.pdf");
+        URI uri = new URI("http://localhost/~pvertenten/pub/");
         int lowByte = 0;
         int highByte = (16 * 1024) - 1;
         long fileSize = highByte + 1;
-        Swarmer swarmer = createSwarmer(file, fileSize);
+        Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
         swarmer.addSource(new SourceImpl(uri, Range.createRange(lowByte, highByte)));
         assertSwarmer(md5, file, fileSize);
     }
@@ -64,11 +76,11 @@ public class SwarmerImplTest extends BaseTestCase {
     public void testRangesMiddle() throws Exception {
         String md5 = "bff2db0947dabf7978f55eebd7e3b2b4";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testRangesMiddle.pdf");
-        URI uri = new URI("http://localhost/~pvertenten/pub/gnutella_protocol_0.4.pdf");
+        URI uri = new URI("http://localhost/~pvertenten/pub/");
         int lowByte = (16 * 1024);
         int highByte = (2 * 16 * 1024) - 1;
         long fileSize = highByte + 1;
-        Swarmer swarmer = createSwarmer(file, fileSize);
+        Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
         swarmer.addSource(new SourceImpl(uri, Range.createRange(lowByte, highByte)));
         assertSwarmer(md5, file, fileSize);
     }
@@ -76,11 +88,11 @@ public class SwarmerImplTest extends BaseTestCase {
     public void testRangesEnd() throws Exception {
         String md5 = "c68ab8fbc3f712207774b33367d10f03";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testRangesEnd.pdf");
-        URI uri = new URI("http://localhost/~pvertenten/pub/gnutella_protocol_0.4.pdf");
+        URI uri = new URI("http://localhost/~pvertenten/pub/");
         int lowByte = (2 * 16 * 1024);
         int highByte = 44425 - 1;
         long fileSize = highByte + 1;
-        Swarmer swarmer = createSwarmer(file, fileSize);
+        Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
         swarmer.addSource(new SourceImpl(uri, Range.createRange(lowByte, highByte)));
         assertSwarmer(md5, file, fileSize);
     }
@@ -88,8 +100,8 @@ public class SwarmerImplTest extends BaseTestCase {
     public void testMultipleRanges() throws Exception {
         String md5 = "8055d620ba0c507c1af957b43648c99f";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testMultipleRanges.pdf");
-        URI uri = new URI("http://localhost/~pvertenten/pub/gnutella_protocol_0.4.pdf");
-        URI uri2 = new URI("http://www9.limewire.com/developer/gnutella_protocol_0.4.pdf");
+        URI uri = new URI("http://localhost/~pvertenten/pub/");
+        URI uri2 = new URI("http://www9.limewire.com/developer/");
         int lowByte1 = 0;
         int highByte1 = (2 * 16 * 1024) - 1;
         int lowByte2 = highByte1 + 1;
@@ -98,7 +110,7 @@ public class SwarmerImplTest extends BaseTestCase {
         Range range1 = Range.createRange(lowByte1, highByte1);
         Range range2 = Range.createRange(lowByte2, highByte2);
 
-        Swarmer swarmer = createSwarmer(file, fileSize);
+        Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
 
         swarmer.addSource(new SourceImpl(uri, range2));
         swarmer.addSource(new SourceImpl(uri2, range1));
@@ -109,9 +121,9 @@ public class SwarmerImplTest extends BaseTestCase {
     public void testMultipleRanges2() throws Exception {
         String md5 = "8055d620ba0c507c1af957b43648c99f";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testMultipleRanges2.pdf");
-        URI uri = new URI("http://localhost/~pvertenten/pub/gnutella_protocol_0.4.pdf");
-        URI uri2 = new URI("http://localhost/~pvertenten/pub2/gnutella_protocol_0.4.pdf");
-        URI uri3 = new URI("http://www9.limewire.com/developer/gnutella_protocol_0.4.pdf");
+        URI uri = new URI("http://localhost/~pvertenten/pub/");
+        URI uri2 = new URI("http://localhost/~pvertenten/pub2/");
+        URI uri3 = new URI("http://www9.limewire.com/developer/");
 
         int lowByte1 = 0;
         int highByte1 = (1 * 16 * 1024) - 1;
@@ -124,7 +136,7 @@ public class SwarmerImplTest extends BaseTestCase {
         Range range1 = Range.createRange(lowByte1, highByte1);
         Range range2 = Range.createRange(lowByte2, highByte2);
         Range range3 = Range.createRange(lowByte3, highByte3);
-        Swarmer swarmer = createSwarmer(file, fileSize);
+        Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
 
         swarmer.addSource(new SourceImpl(uri2, range2));
         swarmer.addSource(new SourceImpl(uri, range1));
@@ -135,11 +147,11 @@ public class SwarmerImplTest extends BaseTestCase {
     public void testSimpleSmallFileSwarm() throws Exception {
         String md5 = "8055d620ba0c507c1af957b43648c99f";
         File file = new File(System.getProperty("java.io.tmpdir") + "/testSimpleSmallFileSwarm.pdf");
-        URI uri = new URI("http://localhost/~pvertenten/pub/gnutella_protocol_0.4.pdf");
+        URI uri = new URI("http://localhost/~pvertenten/pub/");
         int lowByte = 0;
         int highByte = 44425 - 1;
         long fileSize = highByte + 1;
-        Swarmer swarmer = createSwarmer(file, fileSize);
+        Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
         swarmer.addSource(new SourceImpl(uri, Range.createRange(lowByte, highByte)));
         assertSwarmer(md5, file, fileSize);
     }
@@ -154,8 +166,8 @@ public class SwarmerImplTest extends BaseTestCase {
         Assert.assertEquals(md5, testmd5);
     }
 
-    private Swarmer createSwarmer(File file, long fileSize) throws InterruptedException,
-            IOException {
+    private Swarmer createSwarmer(File file, String path, long fileSize)
+            throws InterruptedException, IOException {
         System.out.println("-----------------------------------");
         HttpParams params = new BasicHttpParams();
         params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000).setIntParameter(
@@ -167,9 +179,10 @@ public class SwarmerImplTest extends BaseTestCase {
                 .instance().getScheduledExecutorService(), new SocketsManagerImpl());
 
         file.delete();
-        // SwarmFileSystem swarmDownload = new
-        // FileChannelSwarmFileSystem(fileSize, file);
-        SwarmFileSystem swarmfilesystem = new SwarmFileSystemImpl(new SwarmFileImpl(file, fileSize));
+
+        
+        SwarmFileSystem swarmfilesystem = new SwarmFileSystemImpl(new SwarmFileImpl(file, path,
+                fileSize));
 
         SwarmVerifier swarmFileVerifier = new NoOpFileVerifier();
         SwarmBlockSelector selectionStrategy = new ContiguousSelectionStrategy();

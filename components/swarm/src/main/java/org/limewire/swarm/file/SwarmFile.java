@@ -11,5 +11,7 @@ public interface SwarmFile {
     public abstract long getStartByte();
 
     public abstract long getEndByte();
+    
+    public abstract String getPath();
 
 }

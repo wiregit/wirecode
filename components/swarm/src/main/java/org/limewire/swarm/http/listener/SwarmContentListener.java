@@ -13,6 +13,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmWriteJob;
 import org.limewire.swarm.SwarmWriteJobControl;
+import org.limewire.swarm.file.SwarmFile;
 import org.limewire.swarm.http.SwarmHttpContentImpl;
 import org.limewire.util.Objects;
 
@@ -27,10 +28,13 @@ public class SwarmContentListener implements ResponseContentListener {
     private Range expectedRange;
 
     private SwarmWriteJob writeJob;
+    
+    private final SwarmFile swarmFile;
 
-    public SwarmContentListener(SwarmCoordinator fileCoordinator, Range range) {
+    public SwarmContentListener(SwarmCoordinator fileCoordinator, SwarmFile swarmFile, Range range) {
         this.fileCoordinator = Objects.nonNull(fileCoordinator, "fileCoordinator");
         this.expectedRange = Objects.nonNull(range, "range");
+        this.swarmFile = swarmFile;
     }
 
     public void contentAvailable(ContentDecoder decoder, IOControl ioctrl) throws IOException {
