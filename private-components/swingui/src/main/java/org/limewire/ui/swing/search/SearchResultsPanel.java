@@ -5,6 +5,8 @@ import java.awt.GridBagLayout;
 
 import javax.swing.JPanel;
 
+import org.limewire.core.api.download.SearchResultDownloader;
+import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
@@ -16,9 +18,12 @@ public class SearchResultsPanel extends JPanel {
     private final ResultsContainer resultsContainer;
     private final SortAndFilterPanel sortAndFilterPanel;
 
-    public SearchResultsPanel(SearchInfo searchInfo, EventList<VisualSearchResult> visualSearchResults) {
+    public SearchResultsPanel(SearchInfo searchInfo,
+            EventList<VisualSearchResult> visualSearchResults,
+            SearchResultDownloader searchResultDownloader,
+            Search search) {
         this.sortAndFilterPanel = new SortAndFilterPanel();
-        this.resultsContainer = new ResultsContainer(sortAndFilterPanel.getSortedAndFilteredList(visualSearchResults));
+        this.resultsContainer = new ResultsContainer(sortAndFilterPanel.getSortedAndFilteredList(visualSearchResults), searchResultDownloader, search);
         this.searchTab = new SearchTabItems(searchInfo.getSearchCategory(), new SearchTabItems.SearchTabListener() {
             @Override
             public void categorySelected(SearchCategory searchCategory) {

@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpException;
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.lifecycle.Service;
 
 import com.google.inject.Inject;
@@ -26,7 +27,6 @@ import com.limegroup.gnutella.DownloadServices;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.Mutable;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 import com.limegroup.gnutella.lws.server.LWSManager;
 import com.limegroup.gnutella.lws.server.LWSManagerCommandResponseHandlerWithCallback;

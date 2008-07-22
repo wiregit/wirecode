@@ -18,6 +18,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.DualIterator;
 import org.limewire.collection.MultiIterable;
+import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.SaveLocationException.LocationCode;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.InvalidDataException;
 import org.limewire.io.IpPort;
@@ -566,7 +568,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
         String fName = getFileName(files, fileName);
         if (conflicts(files, new File(saveDir,fName))) {
             throw new SaveLocationException
-            (SaveLocationException.FILE_ALREADY_DOWNLOADING,
+            (LocationCode.FILE_ALREADY_DOWNLOADING,
                     new File(fName != null ? fName : ""));
         }
 
@@ -612,7 +614,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
         }
         if (conflicts(magnet.getSHA1Urn(), 0, new File(saveDir,fileName))) {
             throw new SaveLocationException
-            (SaveLocationException.FILE_ALREADY_DOWNLOADING, new File(fileName));
+            (LocationCode.FILE_ALREADY_DOWNLOADING, new File(fileName));
         }
 
         //Note: If the filename exists, it would be nice to check that we are
@@ -649,7 +651,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
         
         if (conflicts(rfd.getSHA1Urn(), 0, new File(saveDir,fileName))) {
             throw new SaveLocationException
-            (SaveLocationException.FILE_ALREADY_DOWNLOADING, new File(fileName));
+            (LocationCode.FILE_ALREADY_DOWNLOADING, new File(fileName));
         }
       
         //Start download asynchronously.  This automatically moves downloader to
@@ -671,7 +673,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
      
         if (conflictsWithIncompleteFile(incompleteFile)) {
             throw new SaveLocationException
-            (SaveLocationException.FILE_ALREADY_DOWNLOADING, incompleteFile);
+            (LocationCode.FILE_ALREADY_DOWNLOADING, incompleteFile);
         }
         
         if (IncompleteFileManager.isTorrentFolder(incompleteFile)) 
@@ -764,7 +766,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
         dir.mkdirs();
         File f = new File(dir, info.getUpdateFileName());
         if(conflicts(info.getUpdateURN(), (int)info.getSize(), f))
-            throw new SaveLocationException(SaveLocationException.FILE_ALREADY_DOWNLOADING, f);
+            throw new SaveLocationException(LocationCode.FILE_ALREADY_DOWNLOADING, f);
         
         incompleteFileManager.purge();
         ManagedDownloader d = coreDownloaderFactory.createInNetworkDownloader(
@@ -794,7 +796,7 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
         for (File f : info.getFilesAndFolders()) {
             if (f.exists())
                 throw new SaveLocationException
-                (SaveLocationException.FILE_ALREADY_EXISTS, f);
+                (LocationCode.FILE_ALREADY_EXISTS, f);
         }
     }
     
@@ -804,12 +806,12 @@ public class DownloadManagerImpl implements DownloadManager, Service, FileEventL
             if (urn.equals(current.getSha1Urn())) {
                 // this is the place to add new trackers eventually.
                 throw new SaveLocationException
-                (SaveLocationException.FILE_ALREADY_DOWNLOADING, system.getCompleteFile());
+                (LocationCode.FILE_ALREADY_DOWNLOADING, system.getCompleteFile());
             }
             for (File f : system.getFilesAndFolders()) {
                 if (current.conflictsSaveFile(f)) {
                     throw new SaveLocationException
-                    (SaveLocationException.FILE_IS_ALREADY_DOWNLOADED_TO, f);
+                    (LocationCode.FILE_IS_ALREADY_DOWNLOADED_TO, f);
                 }
             }
         }

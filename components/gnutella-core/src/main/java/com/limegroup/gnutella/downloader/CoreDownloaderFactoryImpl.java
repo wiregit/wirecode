@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.io.InvalidDataException;
 
 import com.google.inject.Inject;
@@ -13,7 +14,6 @@ import com.limegroup.bittorrent.BTDownloader;
 import com.limegroup.bittorrent.BTMetaInfo;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.browser.MagnetOptions;
 import com.limegroup.gnutella.downloader.serial.DownloadMemento;
 import com.limegroup.gnutella.version.DownloadInformation;

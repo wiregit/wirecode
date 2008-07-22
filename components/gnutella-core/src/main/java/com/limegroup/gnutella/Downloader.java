@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.listener.ListenerSupport;
 
 import com.limegroup.gnutella.downloader.DownloadStatusEvent;

@@ -8,6 +8,8 @@ import java.util.Locale;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.SaveLocationException.LocationCode;
 import org.limewire.i18n.I18nMarker;
 import org.limewire.io.ByteReader;
 import org.limewire.io.IOUtils;
@@ -22,7 +24,6 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.DownloadServices;
-import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 
 @Singleton
@@ -162,11 +163,11 @@ public class ExternalControl {
 			    ErrorService.error(il);
 			}
 			catch (SaveLocationException sle) {
-				if (sle.getErrorCode() == SaveLocationException.FILE_ALREADY_EXISTS) {
+				if (sle.getErrorCode() == LocationCode.FILE_ALREADY_EXISTS) {
                 MessageService.showFormattedError(
                     I18nMarker.marktr("You have already downloaded {0}"), sle.getFile().getName());
 				}
-				else if (sle.getErrorCode() == SaveLocationException.FILE_ALREADY_DOWNLOADING) {
+				else if (sle.getErrorCode() == LocationCode.FILE_ALREADY_DOWNLOADING) {
 					MessageService.showFormattedError(
 		                    I18nMarker
                                     .marktr("You are already downloading this file to {0}"), sle.getFile().getName());	

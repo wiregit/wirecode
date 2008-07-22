@@ -10,6 +10,7 @@ import org.limewire.core.api.endpoint.RemoteHost;
 import org.limewire.core.api.endpoint.RemoteHostAction;
 import org.limewire.core.api.search.ResultType;
 import org.limewire.core.api.search.Search;
+import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
 import org.limewire.core.api.search.SearchListener;
 import org.limewire.core.api.search.SearchResult;
@@ -23,7 +24,12 @@ public class MockSearch implements Search {
     @Override
     public void stop() {
         // TODO Auto-generated method stub
-
+    }
+    
+    @Override
+    public SearchCategory getCategory() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override

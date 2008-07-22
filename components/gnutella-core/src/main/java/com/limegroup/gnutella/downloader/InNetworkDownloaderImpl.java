@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.io.InvalidDataException;
 
 import com.google.inject.Inject;
@@ -15,7 +16,6 @@ import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.SaveLocationManager;
 import com.limegroup.gnutella.SavedFileManager;
 import com.limegroup.gnutella.URN;

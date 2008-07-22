@@ -28,6 +28,14 @@ public class RemoteFileDescAdapter implements SearchResult {
         this.rfd = rfd;
         this.locs = new ArrayList<IpPort>(locs);
     }
+    
+    public RemoteFileDesc getRfd() {
+        return rfd;
+    }
+    
+    public List<IpPort> getAlts() {
+        return locs;
+    }
 
     @Override
     public String getDescription() {

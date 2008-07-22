@@ -7,6 +7,7 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.io.LocalSocketAddressProvider;
 
 import com.google.inject.AbstractModule;
@@ -20,7 +21,6 @@ import com.limegroup.gnutella.LimeTestUtils;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.helpers.UrnHelper;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;

@@ -9,11 +9,12 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.limewire.collection.MultiCollection;
+import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.SaveLocationException.LocationCode;
 import org.limewire.util.Base32;
 import org.limewire.util.CommonUtils;
 import org.limewire.util.FileUtils;
 
-import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.downloader.serial.TorrentFileSystemMemento;
 import com.limegroup.gnutella.downloader.serial.TorrentFileSystemMementoImpl;
 import com.limegroup.gnutella.settings.SharingSettings;
@@ -101,7 +102,7 @@ public class TorrentFileSystem {
 		_completeFile = new File(SharingSettings.getSaveDirectory(_name), _name);
 		
 		if (!FileUtils.isReallyParent(SharingSettings.getSaveDirectory(_name), _completeFile))
-		 throw new SaveLocationException(SaveLocationException.SECURITY_VIOLATION, _completeFile);
+		 throw new SaveLocationException(LocationCode.SECURITY_VIOLATION, _completeFile);
 		
         if(data.getFiles() != null) {
             List<BTData.BTFileData> files = data.getFiles();
@@ -109,7 +110,7 @@ public class TorrentFileSystem {
             for(BTData.BTFileData file : files) {
             	TorrentFile f = new TorrentFile(file.getLength(), new File(_completeFile, file.getPath()).getAbsolutePath());
             	if (!FileUtils.isReallyInParentPath(_completeFile, f))
-            		throw new SaveLocationException(SaveLocationException.SECURITY_VIOLATION, f);
+            		throw new SaveLocationException(LocationCode.SECURITY_VIOLATION, f);
                 torrents.add(f);
             }
             

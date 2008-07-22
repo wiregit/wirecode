@@ -219,7 +219,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     public void addDownload(Downloader d) {
         CoreDownloadItem downloadItem = new CoreDownloadItem(d);
         for (DownloadListener listener : downloadListeners) {
-                listener.downloadAdded(downloadItem);
+            listener.downloadAdded(downloadItem);
         }
     }
 

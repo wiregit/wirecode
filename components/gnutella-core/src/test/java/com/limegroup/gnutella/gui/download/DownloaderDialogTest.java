@@ -2,10 +2,12 @@ package com.limegroup.gnutella.gui.download;
 
 import java.io.File;
 
+import org.limewire.core.api.download.SaveLocationException;
+import org.limewire.core.api.download.SaveLocationException.LocationCode;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.SaveLocationException;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.gui.GUIBaseTestCase;
 
@@ -81,7 +83,7 @@ public class DownloaderDialogTest extends GUIBaseTestCase {
 
 	private void createUniqueFilenameDownloader(File file) {
 		factory.setSaveFile(file);
-		SaveLocationException e = new SaveLocationException(SaveLocationException.FILE_ALREADY_EXISTS, file);
+		SaveLocationException e = new SaveLocationException(LocationCode.FILE_ALREADY_EXISTS, file);
 		DownloaderDialog d = new DownloaderDialog(factory, e);
 		d.createUniqueFilenameDownloader();
 	}

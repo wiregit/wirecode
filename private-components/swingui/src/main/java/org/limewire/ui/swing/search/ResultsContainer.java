@@ -3,7 +3,9 @@ package org.limewire.ui.swing.search;
 import java.awt.CardLayout;
 
 import org.jdesktop.swingx.JXPanel;
+import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.ResultType;
+import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 import org.limewire.ui.swing.search.resultpanel.AllResultsPanel;
@@ -26,7 +28,7 @@ class ResultsContainer extends JXPanel {
     private final CardLayout cardLayout;
     private final FilterMatcherEditor matcherEditor;
 
-    ResultsContainer(EventList<VisualSearchResult> visualSearchResults) {
+    ResultsContainer(EventList<VisualSearchResult> visualSearchResults, SearchResultDownloader searchResultDownloader, Search search) {
         this.cardLayout = new CardLayout();
         setLayout(cardLayout);
         
@@ -36,11 +38,11 @@ class ResultsContainer extends JXPanel {
         EventListModel<VisualSearchResult> eventListModel = new EventListModel<VisualSearchResult>(filterList);
         EventSelectionModel<VisualSearchResult> eventSelectionModel = new EventSelectionModel<VisualSearchResult>(filterList);
         eventSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
-        add(new SearchScrollPane(new AllResultsPanel(eventListModel, eventSelectionModel)), SearchCategory.ALL.name());
-        add(new SearchScrollPane(new AudioResultsPanel(eventListModel, eventSelectionModel)), SearchCategory.AUDIO.name());
-        add(new SearchScrollPane(new VideoResultsPanel(eventListModel, eventSelectionModel)), SearchCategory.VIDEO.name());
-        add(new SearchScrollPane(new ImagesResultsPanel(eventListModel, eventSelectionModel)), SearchCategory.IMAGES .name());
-        add(new SearchScrollPane(new DocumentsResultsPanel(eventListModel, eventSelectionModel)),SearchCategory.DOCUMENTS.name());
+        add(new SearchScrollPane(new AllResultsPanel(eventListModel, eventSelectionModel, searchResultDownloader, search)), SearchCategory.ALL.name());
+        add(new SearchScrollPane(new AudioResultsPanel(eventListModel, eventSelectionModel, searchResultDownloader, search)), SearchCategory.AUDIO.name());
+        add(new SearchScrollPane(new VideoResultsPanel(eventListModel, eventSelectionModel, searchResultDownloader, search)), SearchCategory.VIDEO.name());
+        add(new SearchScrollPane(new ImagesResultsPanel(eventListModel, eventSelectionModel, searchResultDownloader, search)), SearchCategory.IMAGES .name());
+        add(new SearchScrollPane(new DocumentsResultsPanel(eventListModel, eventSelectionModel, searchResultDownloader, search)),SearchCategory.DOCUMENTS.name());
     }
 
     void showCategory(SearchCategory category) {

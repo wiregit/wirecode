@@ -44,7 +44,7 @@ public class LimeWireSwingUI extends JPanel {
         this.navigator = new NavigatorImpl(mainPanel, leftPanel);
         this.topPanel = new TopPanel();
         this.statusPanel = new StatusPanel();
-        this.searchHandler = new SearchHandlerImpl(navigator, coreInjector.getInstance(SearchFactory.class));
+        this.searchHandler = new SearchHandlerImpl(navigator, coreInjector.getInstance(SearchFactory.class), downloadListManager);
         
         //TODO:move this and have clicks on DownloadSummaryPanel navigate to downloadPanel
         MainDownloadPanel downloadPanel = new MainDownloadPanel(downloadListManager);

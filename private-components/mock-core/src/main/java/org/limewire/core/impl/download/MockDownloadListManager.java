@@ -2,10 +2,12 @@ package org.limewire.core.impl.download;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.List;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
 
 import ca.odell.glazedlists.BasicEventList;
@@ -31,7 +33,7 @@ public class MockDownloadListManager implements DownloadListManager {
 	}
 
 	@Override
-	public DownloadItem addDownload(SearchResult... searchResults) {
+	public DownloadItem addDownload(Search search, List<? extends SearchResult> coreSearchResults) {
 	    // TODO Auto-generated method stub
 	    return null;
 	}

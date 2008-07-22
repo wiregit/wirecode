@@ -12,17 +12,16 @@ import org.limewire.io.IpPort;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.SearchServices;
 import com.limegroup.gnutella.messages.QueryReply;
 
-class CoreSearch implements Search {
+public class CoreSearch implements Search {
 
     private final SearchDetails searchDetails;
     private final SearchServices searchServices;
     private final QueryReplyListenerList listenerList;
-    private AtomicBoolean started = new AtomicBoolean(false);
+    private final AtomicBoolean started = new AtomicBoolean(false);
     private volatile byte[] searchGuid;
     private volatile QueryReplyListener listener;
 
@@ -33,6 +32,11 @@ class CoreSearch implements Search {
         this.searchDetails = searchDetails;
         this.searchServices = searchServices;
         this.listenerList = listenerList;
+    }
+    
+    @Override
+    public SearchCategory getCategory() {
+        return searchDetails.getSearchCategory();
     }
 
     @Override
@@ -46,30 +50,13 @@ class CoreSearch implements Search {
         listenerList.addQueryReplyListener(searchGuid, listener);
 
         searchServices.query(searchGuid, searchDetails.getSearchQuery(), "",
-                toMediaType(searchDetails.getSearchCategory()));
+                MediaTypeConverter.toMediaType(searchDetails.getSearchCategory()));
     }
 
     @Override
     public void stop() {
         listenerList.removeQueryReplyListener(searchGuid, listener);
         searchServices.stopQuery(new GUID(searchGuid));
-    }
-
-    private MediaType toMediaType(SearchCategory searchCategory) {
-        switch (searchCategory) {
-        case ALL:
-            return MediaType.getAnyTypeMediaType();
-        case AUDIO:
-            return MediaType.getAudioMediaType();
-        case DOCUMENTS:
-            return MediaType.getDocumentMediaType();
-        case IMAGES:
-            return MediaType.getImageMediaType();
-        case VIDEO:
-            return MediaType.getVideoMediaType();
-        default:
-            throw new IllegalArgumentException(searchCategory.name());
-        }
     }
 
     private static class QrListener implements QueryReplyListener {
@@ -85,6 +72,10 @@ class CoreSearch implements Search {
             searchListener.handleSearchResult(new RemoteFileDescAdapter(rfd,
                     queryReply, locs));
         }
+    }
+
+    public GUID getQueryGuid() {
+        return new GUID(searchGuid);
     }
 
 }

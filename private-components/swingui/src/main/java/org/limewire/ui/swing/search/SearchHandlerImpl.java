@@ -2,6 +2,7 @@ package org.limewire.ui.swing.search;
 
 import javax.swing.SwingUtilities;
 
+import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
@@ -17,20 +18,17 @@ public class SearchHandlerImpl implements SearchHandler {
     
     private final Navigator navigator;
     private final SearchFactory searchFactory;
+    private final SearchResultDownloader searchResultDownloader;
     
-    public SearchHandlerImpl(Navigator navigator, SearchFactory searchFactory) {
+    public SearchHandlerImpl(Navigator navigator, SearchFactory searchFactory,
+            SearchResultDownloader searchResultDownloader) {
         this.navigator = navigator;
         this.searchFactory = searchFactory;
+        this.searchResultDownloader = searchResultDownloader;
     }
 
     @Override
-    public void doSearch(final SearchInfo info) {
-        String panelTitle = info.getTitle();
-        final BasicSearchResultsModel model = new BasicSearchResultsModel();
-        SearchResultsPanel searchPanel = new SearchResultsPanel(info, model.getVisualSearchResults());
-        NavItem item = navigator.addNavigablePanel(NavCategory.SEARCH, panelTitle, searchPanel, true);
-        item.select();
-     
+    public void doSearch(final SearchInfo info) {        
         Search search = searchFactory.createSearch(new SearchDetails() {
             @Override
             public SearchCategory getSearchCategory() {
@@ -42,6 +40,12 @@ public class SearchHandlerImpl implements SearchHandler {
                 return info.getQuery();
             }
         });
+        
+        String panelTitle = info.getTitle();
+        final BasicSearchResultsModel model = new BasicSearchResultsModel();
+        SearchResultsPanel searchPanel = new SearchResultsPanel(info, model.getVisualSearchResults(), searchResultDownloader, search);
+        NavItem item = navigator.addNavigablePanel(NavCategory.SEARCH, panelTitle, searchPanel, true);
+        item.select();
         
         search.start(new SearchListener() {
             @Override
