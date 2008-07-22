@@ -6,6 +6,7 @@ import java.beans.PropertyChangeListener;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadState;
+import org.limewire.core.api.search.SearchResult;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
@@ -29,6 +30,11 @@ public class MockDownloadListManager implements DownloadListManager {
 		return downloadItems;
 	}
 
+	@Override
+	public DownloadItem addDownload(SearchResult... searchResults) {
+	    // TODO Auto-generated method stub
+	    return null;
+	}
 	
 	
 	public synchronized void addDownload(DownloadItem downloadItem){
@@ -39,7 +45,7 @@ public class MockDownloadListManager implements DownloadListManager {
 	
 
 	private void initializeMockData(){
-		DownloadItem item = new MockDownloadItem("Monkey on Skateboard", 44.6,
+	    MockDownloadItem item = new MockDownloadItem("Monkey on Skateboard", 44.6,
 				DownloadState.DOWNLOADING, DownloadItem.Category.VIDEO);
 		item.addDownloadSource(new MockDownloadSource("Frank"));
 		item.addDownloadSource(new MockDownloadSource("Bob"));

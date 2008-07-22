@@ -4,18 +4,18 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-
 import org.limewire.core.api.download.DownloadItem;
-import org.limewire.core.api.download.DownloadListener;
 import org.limewire.core.api.download.DownloadListManager;
-
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import org.limewire.core.api.download.DownloadListener;
+import org.limewire.core.api.search.SearchResult;
 
 import ca.odell.glazedlists.BasicEventList;
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 
 public class CoreDownloadListManager implements DownloadListManager{
@@ -60,6 +60,11 @@ public class CoreDownloadListManager implements DownloadListManager{
 		return downloadItems;
 	}
 
+	@Override
+	public DownloadItem addDownload(SearchResult... searchResults) {
+	    // TODO Auto-generated method stub
+	    return null;
+	}
 
 	
 	private static class CoreDownloadListener implements DownloadListener {

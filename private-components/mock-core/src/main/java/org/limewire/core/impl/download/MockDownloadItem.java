@@ -138,12 +138,13 @@ public class MockDownloadItem implements DownloadItem {
 		return downloadSources.size();
 	}
 	
+	
 	/**
 	 * @throws ArrayIndexOutOfBoundsException
 	 */
 	@Override
-	public DownloadSource getDownloadSource(int index){
-		return downloadSources.get(index);
+	public List<DownloadSource> getSources() {
+		return downloadSources;
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package org.limewire.core.api.download;
 
 import java.beans.PropertyChangeListener;
+import java.util.List;
 
 
 
@@ -41,12 +42,10 @@ public interface DownloadItem  {
 	public abstract void pause();
 
 	public abstract void resume();
-		
-	public abstract void addDownloadSource(DownloadSource source);
 
 	public abstract int getDownloadSourceCount();
 
-	public abstract DownloadSource getDownloadSource(int index);
+	public abstract List<DownloadSource> getSources();
 	
 	public abstract Category getCategory();
 

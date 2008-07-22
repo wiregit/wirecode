@@ -1,8 +1,6 @@
 package org.limewire.core.impl;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
@@ -35,7 +33,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     private final SortedMap<byte[], List<QueryReplyListener>> queryReplyListeners;
 
-    private List<DownloadListener> downloadListeners = Collections.synchronizedList(new ArrayList<DownloadListener>());
+    private final List<DownloadListener> downloadListeners = new CopyOnWriteArrayList<DownloadListener>();
 
     public GlueActivityCallback() {
         queryReplyListeners = new ConcurrentSkipListMap<byte[], List<QueryReplyListener>>(
@@ -68,12 +66,12 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     @Override
-    public synchronized void addDownloadListener(DownloadListener listener) {
-            downloadListeners.add(listener);
+    public void addDownloadListener(DownloadListener listener) {
+        downloadListeners.add(listener);
     }
 
     @Override
-    public synchronized void removeDownloadListener(DownloadListener listener) {
+    public void removeDownloadListener(DownloadListener listener) {
         downloadListeners.remove(listener);
     }
 
@@ -123,6 +121,7 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
     }
 
     public void handleConnectionLifecycleEvent(ConnectionLifecycleEvent evt) {
+        System.out.println("Lifecycle event: " + evt);
         // TODO Auto-generated method stub
 
     }
@@ -219,10 +218,8 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     public void addDownload(Downloader d) {
         CoreDownloadItem downloadItem = new CoreDownloadItem(d);
-        synchronized (downloadListeners) {
-            for (DownloadListener listener : downloadListeners) {
+        for (DownloadListener listener : downloadListeners) {
                 listener.downloadAdded(downloadItem);
-            }
         }
     }
 
@@ -243,10 +240,8 @@ class GlueActivityCallback implements ActivityCallback, QueryReplyListenerList,
 
     public void removeDownload(Downloader d) {
         CoreDownloadItem downloadItem = new CoreDownloadItem(d);
-        synchronized (downloadListeners) {
-            for (DownloadListener listener : downloadListeners) {
-                listener.downloadRemoved(downloadItem);
-            }
+        for (DownloadListener listener : downloadListeners) {
+            listener.downloadRemoved(downloadItem);
         }
     }
 

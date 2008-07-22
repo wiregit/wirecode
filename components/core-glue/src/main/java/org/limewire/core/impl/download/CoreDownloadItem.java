@@ -2,6 +2,8 @@ package org.limewire.core.impl.download;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Collections;
+import java.util.List;
 
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadSource;
@@ -68,9 +70,8 @@ public class CoreDownloadItem implements DownloadItem {
     }
 
     @Override
-    public DownloadSource getDownloadSource(int index) {
-        //TODO: getDownload source
-        return new CoreDownloadSource("name");
+    public List<DownloadSource> getSources() {
+        return Collections.singletonList((DownloadSource)new CoreDownloadSource("name"));
     }
 
     @Override
@@ -121,12 +122,6 @@ public class CoreDownloadItem implements DownloadItem {
     public void resume() {
         downloader.resume();
 
-    }
-
-    @Override
-    public void addDownloadSource(DownloadSource source) {
-        // TODO Auto-generated method stub
-        
     }
     
     private static DownloadState convertState(DownloadStatus status) {
