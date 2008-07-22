@@ -269,7 +269,6 @@ public class FileManagerTest extends LimeTestCase {
         f3 = createNewTestFile(11);
 
         FileManagerEvent result = addIfShared(new File("C:\\bad.ABCDEF"));
-//        assertTrue(result.toString(), result.isFailedAddEvent());
         assertFalse(fman.getSharedFileList().contains(result.getNewFileDesc()));
         
         result = addIfShared(f2);
@@ -354,19 +353,22 @@ public class FileManagerTest extends LimeTestCase {
     
     public void testRenameSharedFiles() throws Exception {
         f1 = createNewTestFile(1);
-        f2 = createNewTestFile(3);
+
         waitForLoad();
         f3 = createNewTestFile(11);
-        fman.removeFile(f2);
         addIfShared(f3);
+        
+        f2 = createNewTestFile(3);
+
+
 
         sharedFiles=fman.getSharedFileList().getFilesInDirectory(_sharedDir);
         assertEquals("unexpected files length", 2, sharedFiles.size());
         
-//        FileManagerEvent result = renameFile(f2, new File("c:\\asdfoih"));
-//        assertTrue(result.toString(), result.getType() == FileManagerEvent.Type.RENAME_FILE_FAILED);
-//        assertEquals(f2, result.getOldFile());
-        FileManagerEvent result = renameFile(f1, f2);
+        FileManagerEvent result = renameFile(f2, new File("c:\\asdfoih"));
+        assertTrue(result.toString(), result.getType() == FileManagerEvent.Type.RENAME_FILE_FAILED);
+        assertEquals(f2, result.getOldFile());
+        result = renameFile(f1, f2);
         assertTrue(result.toString(), result.isRenameEvent());
         assertEquals(f1, result.getOldFile());
         assertEquals(f2, result.getNewFile());

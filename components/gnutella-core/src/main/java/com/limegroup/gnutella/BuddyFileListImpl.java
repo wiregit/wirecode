@@ -4,17 +4,12 @@ import java.io.File;
 import java.util.Set;
 
 /**
- * Lists of files shared with buddys
+ * A collection of FileDescs containing files shared with an individual buddy.
  */
 public class BuddyFileListImpl extends FileListImpl {
 
     public BuddyFileListImpl(String name, FileManager fileManager, Set<File> individualFiles) {
         super(name, fileManager, individualFiles);
-    }
-    
-    @Override
-    protected void addPendingFileDesc(FileDesc fileDesc) {
-        addFileDesc(fileDesc);
     }
 
     /**

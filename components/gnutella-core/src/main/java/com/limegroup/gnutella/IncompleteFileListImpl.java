@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.Set;
 
 /**
- * FileList that contains only IncompleteFileDescs
+ * A collection of IncompleteFileDescs.
  */
 public class IncompleteFileListImpl extends FileListImpl {
 

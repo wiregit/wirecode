@@ -791,6 +791,8 @@ public class ServerSideWhatIsNewTest
             int i = 0;
             for (; (i < 15) && (fileManager.getSharedFileList().size()+ fileManager.getSharedFileList().getNumForcedFiles() < 5); i++)
                 Thread.sleep(1000);
+            
+            System.out.println(fileManager.getSharedFileList().size() + " " + fileManager.getSharedFileList().getNumForcedFiles());
             if (i == 15)
                 fail("num shared files? " + fileManager.getSharedFileList().size());
     

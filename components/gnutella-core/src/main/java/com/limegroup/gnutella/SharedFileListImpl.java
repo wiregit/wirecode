@@ -15,7 +15,6 @@ import org.limewire.collection.MultiCollection;
 import org.limewire.inspection.InspectableForSize;
 
 import com.limegroup.gnutella.library.SharingUtils;
-import com.limegroup.gnutella.util.LimeWireUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 public class SharedFileListImpl extends FileListImpl {
@@ -126,6 +125,11 @@ public class SharedFileListImpl extends FileListImpl {
     }
     
     @Override
+    public int getNumForcedFiles() {
+        return numForcedFiles;
+    }
+    
+    @Override
     public void clear() {
         super.clear();
         if(transientSharedFiles != null)
@@ -163,13 +167,13 @@ public class SharedFileListImpl extends FileListImpl {
     
     @Override
     protected void addAsIndividualFile(FileDesc fileDesc) { 
-        if(LimeWireUtils.getMajorVersionNumber() >= 5) {
-            individualFiles.add(fileDesc.getFile());
-        }else {
+//        if(LimeWireUtils.getMajorVersionNumber() >= 5) {
+//            individualFiles.add(fileDesc.getFile());
+//        }else {
             if(!fileManager.isFileInCompletelySharedDirectory(fileDesc.getFile()) && !transientSharedFiles.contains(fileDesc.getFile())) {
                 individualFiles.add(fileDesc.getFile());
             }
-        }
+//        }
     }
     
     /**

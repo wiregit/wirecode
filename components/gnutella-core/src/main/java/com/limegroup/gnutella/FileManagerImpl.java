@@ -1647,8 +1647,8 @@ public class FileManagerImpl implements FileManager, Service {
         return true;
     }
     
-    private void updateSharedDirectories(File directory, File parent, int depth) {
-        updateSharedDirectories(directory, directory, parent, _revision, depth);
+    private void updateSharedDirectories(File directory, File parent, int revision) {
+        updateSharedDirectories(directory, directory, parent, revision, 1);
     }
     
     /**

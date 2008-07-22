@@ -162,8 +162,6 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
     public void clear() {
         fileDescs.clear();
         pendingFiles.clear();
-//        if(individualFiles != null)
-//            individualFiles.clear();
         numBytes = 0;
     }
 
