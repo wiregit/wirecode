@@ -80,6 +80,11 @@
       <artifactId>lw-geocode</artifactId>
       <version>${limewire.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.limewire</groupId>
+      <artifactId>lw-core-api</artifactId>
+      <version>${limewire.version}</version>
+    </dependency>
 	<!-- Customized LimeWire Jars --> 
 	<dependency>
       <groupId>org.limewire</groupId>
