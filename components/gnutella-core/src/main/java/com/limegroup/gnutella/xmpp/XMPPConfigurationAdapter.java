@@ -10,7 +10,9 @@ public class XMPPConfigurationAdapter implements XMPPConnectionConfiguration {
     private final RosterListener rosterListener;
     private final XMPPErrorListener errorListener;
 
-    public XMPPConfigurationAdapter(XMPPServerConfiguration serverConfiguration, RosterListener rosterListener, XMPPErrorListener errorListener) {
+    public XMPPConfigurationAdapter(XMPPServerConfiguration serverConfiguration,
+                                    RosterListener rosterListener,
+                                    XMPPErrorListener errorListener) {
         this.serverConfiguration = serverConfiguration;
         this.rosterListener = rosterListener;
         this.errorListener = errorListener;

@@ -4,7 +4,7 @@ import org.limewire.xmpp.client.service.IncomingChatListener;
 import org.limewire.xmpp.client.service.MessageWriter;
 import org.limewire.xmpp.client.service.MessageReader;
 
-class IncomingChatListenerImpl implements IncomingChatListener {
+public class IncomingChatListenerImpl implements IncomingChatListener {
     MessageWriter writer;
     MessageReaderImpl reader;
     

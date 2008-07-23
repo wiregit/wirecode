@@ -9,7 +9,6 @@ import org.limewire.xmpp.client.service.FileMetaData;
 import org.limewire.xmpp.client.service.User;
 import org.limewire.xmpp.client.service.PresenceListener;
 import org.limewire.xmpp.client.service.LimePresence;
-import org.limewire.xmpp.client.service.LibraryListener;
 import org.jivesoftware.smack.util.StringUtils;
 
 public class RosterListenerImpl implements RosterListener {
@@ -34,12 +33,7 @@ public class RosterListenerImpl implements RosterListener {
                     presence.setIncomingChatListener(listener);
                     if(presence instanceof LimePresence) {
                         System.out.println("lime user " + presence.getJID() + " (" + name + ") available");
-                        ((LimePresence)presence).setLibraryListener(new LibraryListener() {
-                             public void fileAdded(FileMetaData f){
-                                System.out.println(f.getName() + ": " + f.getId());
-                                files.add(f);
-                            }
-                        });
+                        // TODO browse host
                     } else {                            
                         System.out.println("user " + presence.getJID() + " (" + name + ") available");
                     }
