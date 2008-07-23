@@ -3,13 +3,13 @@ package org.limewire.swarm;
 public abstract class AbstractSwarmCoordinator implements SwarmCoordinator {
     
     /** List of listeners. */
-    private final SwarmListenerList listeners = new SwarmListenerList(this);
+    private final SwarmCoordinatorListenerList listeners = new SwarmCoordinatorListenerList(this);
 
-    public void addListener(SwarmListener swarmListener) {
+    public void addListener(SwarmCoordinatorListener swarmListener) {
         listeners.add(swarmListener);
     }
 
-    protected SwarmListenerList listeners() {
+    protected SwarmCoordinatorListenerList listeners() {
         return listeners;
     }
 }

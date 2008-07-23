@@ -121,7 +121,7 @@ public interface SwarmCoordinator {
      * once all ranges are written. If verification is active, the listener will
      * be notified once all ranges are verified.
      */
-    void addListener(SwarmListener swarmListener);
+    void addListener(SwarmCoordinatorListener swarmListener);
 
     /**
      * Shuts down any resources opened by this coordinator.

@@ -21,7 +21,7 @@ import org.limewire.nio.NIODispatcher;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmFileSystem;
-import org.limewire.swarm.SwarmListener;
+import org.limewire.swarm.SwarmCoordinatorListener;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.file.FileCoordinatorImpl;
 import org.limewire.swarm.file.SwarmFile;
@@ -138,7 +138,7 @@ public class SwarmerImplMultipleFilesTest extends BaseTestCase {
         
         });
 
-        swarmCoordinator.addListener(new SwarmListener() {
+        swarmCoordinator.addListener(new SwarmCoordinatorListener() {
 
             public void blockLeased(SwarmCoordinator swarmCoordinator, Range block) {
                 System.out.println("block leased: " + block.toString());
