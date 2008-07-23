@@ -86,109 +86,109 @@ public class LogImpl implements Log {
         delegate.warn(arg0);
     }
 
-    public void debug(String message, Object... args) {
+    public void debugf(String message, Object... args) {
         if (delegate.isDebugEnabled()) {
             delegate.debug(MessageFormat.format(message, args));
         }
     }
     
     @Override
-    public void debug(String message, Object arg) {
+    public void debugf(String message, Object arg) {
         if (delegate.isDebugEnabled()) {
             delegate.debug(MessageFormat.format(message, arg));
         }
     }
 
     @Override
-    public void debug(String message, Object arg1, Object arg2) {
+    public void debugf(String message, Object arg1, Object arg2) {
         if (delegate.isDebugEnabled()) {
             delegate.debug(MessageFormat.format(message, arg1, arg2));
         }
     }
 
     @Override
-    public void debug(String message, Object arg1, Object arg2, Object arg3) {
+    public void debugf(String message, Object arg1, Object arg2, Object arg3) {
         if (delegate.isDebugEnabled()) {
             delegate.debug(MessageFormat.format(message, arg1, arg2, arg3));
         }
     }
 
-    public void info(String message, Object... args) {
+    public void infof(String message, Object... args) {
         if (delegate.isInfoEnabled()) {
             delegate.info(MessageFormat.format(message, args));
         }
     }
     
     @Override
-    public void info(String message, Object arg) {
+    public void infof(String message, Object arg) {
         if (delegate.isInfoEnabled()) {
             delegate.info(MessageFormat.format(message, arg));
         }
     }
 
     @Override
-    public void info(String message, Object arg1, Object arg2) {
+    public void infof(String message, Object arg1, Object arg2) {
         if (delegate.isInfoEnabled()) {
             delegate.info(MessageFormat.format(message, arg1, arg2));
         }
     }
 
     @Override
-    public void info(String message, Object arg1, Object arg2, Object arg3) {
+    public void infof(String message, Object arg1, Object arg2, Object arg3) {
         if (delegate.isInfoEnabled()) {
             delegate.info(MessageFormat.format(message, arg1, arg2, arg3));
         }
     }
 
-    public void trace(String message, Object... args) {
+    public void tracef(String message, Object... args) {
         if (delegate.isTraceEnabled()) {
             delegate.trace(MessageFormat.format(message, args));
         }
     }
     
     @Override
-    public void trace(String message, Object arg) {
+    public void tracef(String message, Object arg) {
         if (delegate.isTraceEnabled()) {
             delegate.trace(MessageFormat.format(message, arg));
         }
     }
 
     @Override
-    public void trace(String message, Object arg1, Object arg2) {
+    public void tracef(String message, Object arg1, Object arg2) {
         if (delegate.isTraceEnabled()) {
             delegate.trace(MessageFormat.format(message, arg1, arg2));
         }
     }
 
     @Override
-    public void trace(String message, Object arg1, Object arg2, Object arg3) {
+    public void tracef(String message, Object arg1, Object arg2, Object arg3) {
         if (delegate.isTraceEnabled()) {
             delegate.trace(MessageFormat.format(message, arg1, arg2, arg3));
         }
     }
 
-    public void warn(String message, Object... args) {
+    public void warnf(String message, Object... args) {
         if (delegate.isWarnEnabled()) {
             delegate.warn(MessageFormat.format(message, args));
         }
     }
 
     @Override
-    public void warn(String message, Object arg) {
+    public void warnf(String message, Object arg) {
         if (delegate.isWarnEnabled()) {
             delegate.warn(MessageFormat.format(message, arg));
         }
     }
 
     @Override
-    public void warn(String message, Object arg1, Object arg2) {
+    public void warnf(String message, Object arg1, Object arg2) {
         if (delegate.isWarnEnabled()) {
             delegate.warn(MessageFormat.format(message, arg1, arg2));
         }
     }
 
     @Override
-    public void warn(String message, Object arg1, Object arg2, Object arg3) {
+    public void warnf(String message, Object arg1, Object arg2, Object arg3) {
         if (delegate.isWarnEnabled()) {
             delegate.warn(MessageFormat.format(message, arg1, arg2, arg3));
         }

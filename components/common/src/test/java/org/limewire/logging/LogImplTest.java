@@ -1,6 +1,5 @@
 package org.limewire.logging;
 
-import org.apache.commons.logging.Log;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.limewire.logging.LogImpl;
@@ -27,23 +26,26 @@ public class LogImplTest extends BaseTestCase {
     }
 
     public void testDebugWithArgs() {
-        final Log delegate = context.mock(Log.class);
+        final org.apache.commons.logging.Log delegate = context.mock(Log.class);
         context.checking(new Expectations() {{
             allowing(delegate).isDebugEnabled();
             will(returnValue(true));
         }});
-        LogImpl log = new LogImpl(delegate);
+        Log log = new LogImpl(delegate);
+        
+        final Exception exception = new Exception();
         
         context.checking(new Expectations() {{
             one(delegate).debug("hello, world");
             one(delegate).debug("hello");
             one(delegate).debug("hello");
+            one(delegate).debug("hello", exception);
         }});
         
-        log.debug("hello, {0}", "world");
+        log.debugf("hello, {0}", "world");
         log.debug("hello");
-        log.debug("hello", "ignored");
-        
+        log.debugf("hello", "ignored");
+        log.debug("hello", exception);
         
         context.assertIsSatisfied();
     }
