@@ -372,9 +372,10 @@ public class DownloadRendererEditor extends JPanel implements
 			        GuiUtils.toUnitbytes((long)item.getCurrentSize()), GuiUtils.toUnitbytes((long)item.getTotalSize()),
 			        item.getPercentComplete()});
         case LOCAL_QUEUED:
-            return I18n.tr("Queued – About x seconds before download can begin");
+            //TODO: queue time
+            return I18n.tr("Queued - About x seconds before download can begin");
         case REMOTE_QUEUED:
-            return I18n.tr("Queued – {0} people ahead of you for this file", item.getQueuePosition());
+            return I18n.tr("Queued - {0} people ahead of you for this file", item.getQueuePosition());
 		default:
             return item.getState().toString();
 		}
