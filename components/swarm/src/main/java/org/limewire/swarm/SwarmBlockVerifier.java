@@ -5,7 +5,7 @@ import java.util.List;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 
-public interface SwarmVerifier {
+public interface SwarmBlockVerifier {
     /**
      * Returns a list of ranges that can be verified using
      * {@link #verify(Range, SwarmFileSystem)}.

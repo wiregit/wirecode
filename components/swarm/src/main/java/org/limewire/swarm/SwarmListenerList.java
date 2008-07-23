@@ -8,6 +8,7 @@ public class SwarmListenerList {
 
     private final SwarmCoordinator swarmCoordinator;
 
+    /** List of listeners. */
     private final CopyOnWriteArrayList<SwarmListener> listeners = new CopyOnWriteArrayList<SwarmListener>();
 
     public SwarmListenerList(SwarmCoordinator swarmCoordinator) {
@@ -15,9 +16,9 @@ public class SwarmListenerList {
         this.swarmCoordinator = swarmCoordinator;
     }
 
-    public void downloadCompleted(SwarmFileSystem swarmDownload) {
+    public void downloadCompleted(SwarmFileSystem swarmFilesystem) {
         for (SwarmListener listener : listeners) {
-            listener.downloadCompleted(swarmCoordinator, swarmDownload);
+            listener.downloadCompleted(swarmCoordinator, swarmFilesystem);
         }
     }
     

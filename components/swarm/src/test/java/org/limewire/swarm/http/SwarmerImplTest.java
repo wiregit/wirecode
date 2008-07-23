@@ -24,7 +24,7 @@ import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmListener;
-import org.limewire.swarm.SwarmVerifier;
+import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.file.FileCoordinatorImpl;
 import org.limewire.swarm.file.SwarmFileImpl;
 import org.limewire.swarm.file.SwarmFileSystemImpl;
@@ -184,7 +184,7 @@ public class SwarmerImplTest extends BaseTestCase {
         SwarmFileSystem swarmfilesystem = new SwarmFileSystemImpl(new SwarmFileImpl(file, path,
                 fileSize));
 
-        SwarmVerifier swarmFileVerifier = new NoOpFileVerifier();
+        SwarmBlockVerifier swarmFileVerifier = new NoOpFileVerifier();
         SwarmBlockSelector selectionStrategy = new ContiguousSelectionStrategy();
 
         SwarmCoordinator swarmCoordinator = new FileCoordinatorImpl(swarmfilesystem,

@@ -43,6 +43,10 @@ public interface SwarmCoordinator {
      */
     boolean isRangeAvailableForLease(IntervalSet availableRanges);
 
+    
+    long write(Range range, ByteBuffer content) throws IOException;
+
+    
     /**
      * Constructs a new WriteJob that will be used to write data. As data
      * becomes available, {@link SwarmWriteJob#write(Content)} can be called,
@@ -56,8 +60,6 @@ public interface SwarmCoordinator {
      * 
      * @param length
      */
-    long write(Range range, ByteBuffer content) throws IOException;
-
     SwarmWriteJob createWriteJob(Range rangem, SwarmWriteJobControl callback);
 
     /**
@@ -118,7 +120,7 @@ public interface SwarmCoordinator {
 
     Range renewLease(Range oldLease, Range newLease);
 
-    SwarmFile getFirstSwarmFile(Range range);
+    SwarmFile getSwarmFile(Range range);
 
     // long getCompleteFileSize();
 

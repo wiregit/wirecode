@@ -78,7 +78,7 @@ public class SwarmFileExecutionHandler implements ExecutionHandler {
             return null;
         }
 
-        SwarmFile swarmFile = fileCoordinator.getFirstSwarmFile(range);
+        SwarmFile swarmFile = fileCoordinator.getSwarmFile(range);
         long fileEndByte = swarmFile.getEndByte();
 
         if (range.getHigh() > fileEndByte) {

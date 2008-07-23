@@ -22,7 +22,7 @@ import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmCoordinator;
 import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmListener;
-import org.limewire.swarm.SwarmVerifier;
+import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.file.FileCoordinatorImpl;
 import org.limewire.swarm.file.SwarmFile;
 import org.limewire.swarm.file.SwarmFileImpl;
@@ -99,7 +99,7 @@ public class SwarmerImplMultipleFilesTest extends BaseTestCase {
         SwarmFileImpl swarmFile2 = new SwarmFileImpl(file2, "hi.txt", fileSize2);
         swarmfilesystem.add(swarmFile2);
 
-        SwarmVerifier swarmFileVerifier = new NoOpFileVerifier();
+        SwarmBlockVerifier swarmFileVerifier = new NoOpFileVerifier();
         SwarmBlockSelector selectionStrategy = new ContiguousSelectionStrategy();
 
         SwarmCoordinator swarmCoordinator = new FileCoordinatorImpl(swarmfilesystem,

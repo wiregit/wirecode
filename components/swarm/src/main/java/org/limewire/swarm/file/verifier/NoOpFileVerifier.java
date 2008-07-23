@@ -6,9 +6,9 @@ import java.util.List;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.swarm.SwarmFileSystem;
-import org.limewire.swarm.SwarmVerifier;
+import org.limewire.swarm.SwarmBlockVerifier;
 
-public class NoOpFileVerifier implements SwarmVerifier {
+public class NoOpFileVerifier implements SwarmBlockVerifier {
 
     public long getBlockSize() {
         return 1024;
