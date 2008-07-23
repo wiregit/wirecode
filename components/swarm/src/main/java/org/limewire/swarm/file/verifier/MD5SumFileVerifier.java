@@ -1,10 +1,9 @@
 package org.limewire.swarm.file.verifier;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
@@ -15,13 +14,18 @@ import org.limewire.util.FileUtils;
 
 public class MD5SumFileVerifier implements SwarmBlockVerifier {
 
-    private final Range range;
+    private Map<Range, String> rangeMD5s = new HashMap<Range, String>();
 
-    private final String md5String;
-
+    public MD5SumFileVerifier()
+    {
+        
+    }
     public MD5SumFileVerifier(Range range, String md5String) {
-        this.range = range;
-        this.md5String = md5String;
+        addMD5(range, md5String);
+    }
+
+    public void addMD5(Range range, String md5String) {
+        rangeMD5s.put(range, md5String);
     }
 
     public long getBlockSize() {
@@ -29,16 +33,22 @@ public class MD5SumFileVerifier implements SwarmBlockVerifier {
     }
 
     public List<Range> scanForVerifiableRanges(IntervalSet writtenBlocks, long completeSize) {
-        if (writtenBlocks.contains(range)) {
-            List<Range> ret = new ArrayList<Range>();
-            ret.add(range);
-            return ret;
+        List<Range> ret = new ArrayList<Range>();
+        for (Map.Entry<Range, String> entry : rangeMD5s.entrySet()) {
+            Range range = entry.getKey();
+
+            if (writtenBlocks.contains(range)) {
+                ret.add(range);
+            }
         }
-        return Collections.emptyList();
+
+        return ret;
     }
 
     public boolean verify(Range range, SwarmFileSystem swarmFileSystem) {
         SwarmFile swarmFile = swarmFileSystem.getSwarmFile(range.getLow());
+        String md5String = rangeMD5s.get(range);
+
         String testMd5;
         try {
             testMd5 = FileUtils.getMD5(swarmFile.getFile());

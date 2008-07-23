@@ -28,6 +28,7 @@ import org.limewire.swarm.file.FileCoordinatorImpl;
 import org.limewire.swarm.file.SwarmFileImpl;
 import org.limewire.swarm.file.SwarmFileSystemImpl;
 import org.limewire.swarm.file.selection.ContiguousSelectionStrategy;
+import org.limewire.swarm.file.verifier.MD5SumFileVerifier;
 import org.limewire.swarm.file.verifier.NoOpFileVerifier;
 import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
 import org.limewire.util.BaseTestCase;
@@ -48,10 +49,17 @@ public class SwarmerImplMultipleFilesTest extends BaseTestCase {
         long fileSize2 = 18;
         File file1 = new File(System.getProperty("java.io.tmpdir") + "/test2.pdf");
         File file2 = new File(System.getProperty("java.io.tmpdir") + "/test2.txt");
-        
+        String md51 = "8055d620ba0c507c1af957b43648c99f";
+        String md52 = "b534f966248fde84b5a7bbb399db1c3d";
         URI uri = new URI("http://localhost/~pvertenten/pub/");
-        final  SwarmSource swarmSource = new SourceImpl(uri, (fileSize1 + fileSize2));
-        final Swarmer swarmer = createSwarmer(fileSize1, fileSize2, file1, file2, swarmSource);
+        Range range1 = Range.createRange(0, fileSize1 - 1);
+        Range range2 = Range.createRange(fileSize1, fileSize1 + fileSize2 - 1);
+        final SwarmSource swarmSource = new SourceImpl(uri, (fileSize1 + fileSize2));
+        MD5SumFileVerifier swarmBlockVerifier = new MD5SumFileVerifier();
+        swarmBlockVerifier.addMD5(range1, md51);
+        swarmBlockVerifier.addMD5(range2, md52);
+        final Swarmer swarmer = createSwarmer(fileSize1, fileSize2, file1, file2, swarmSource,
+                swarmBlockVerifier);
 
         swarmer.start();
 
@@ -62,25 +70,20 @@ public class SwarmerImplMultipleFilesTest extends BaseTestCase {
         Assert.assertTrue(file1.exists());
         Assert.assertEquals(fileSize1, file1.length());
         String testmd5 = FileUtils.getMD5(file1);
-        String md5 = "8055d620ba0c507c1af957b43648c99f";
-        Assert.assertEquals(md5, testmd5);
+
+        Assert.assertEquals(md51, testmd5);
 
         Assert.assertTrue(file2.exists());
         Assert.assertEquals(fileSize2, file2.length());
         testmd5 = FileUtils.getMD5(file2);
-        Assert.assertEquals("b534f966248fde84b5a7bbb399db1c3d", testmd5);
+        Assert.assertEquals(md52, testmd5);
     }
 
     private Swarmer createSwarmer(long fileSize1, long fileSize2, File file1, File file2,
-            final SwarmSource swarmSource) {
+            final SwarmSource swarmSource, SwarmBlockVerifier swarmBlockVerifier) {
         file1.delete();
 
-        
-
-        
         file2.delete();
-
-        
 
         HttpParams params = new BasicHttpParams();
         params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000).setIntParameter(
@@ -99,17 +102,15 @@ public class SwarmerImplMultipleFilesTest extends BaseTestCase {
         SwarmFileImpl swarmFile2 = new SwarmFileImpl(file2, "hi.txt", fileSize2);
         swarmfilesystem.addSwarmFile(swarmFile2);
 
-        SwarmBlockVerifier swarmFileVerifier = new NoOpFileVerifier();
         SwarmBlockSelector selectionStrategy = new ContiguousSelectionStrategy();
 
         SwarmCoordinator swarmCoordinator = new FileCoordinatorImpl(swarmfilesystem,
-                swarmFileVerifier, ExecutorsHelper.newFixedSizeThreadPool(1, "Writer"),
+                swarmBlockVerifier, ExecutorsHelper.newFixedSizeThreadPool(1, "Writer"),
                 selectionStrategy, 32 * 1024);
 
         SwarmFileExecutionHandler executionHandler = new SwarmFileExecutionHandler(swarmCoordinator);
         ConnectionReuseStrategy connectionReuseStrategy = new DefaultConnectionReuseStrategy();
-        
-       
+
         final Swarmer swarmer = new SwarmerImpl(executionHandler, connectionReuseStrategy,
                 ioReactor, params, null);
 
