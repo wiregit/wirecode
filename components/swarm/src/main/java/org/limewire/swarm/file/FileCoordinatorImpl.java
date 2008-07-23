@@ -90,7 +90,6 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
         this.minBlockSize = minBlockSize;
     }
 
-  
     public Range lease() {
         return lease(null, fileSystem.getCompleteSize(), blockSelector);
     }
@@ -140,7 +139,8 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
 
     public void unlease(Range range) {
         synchronized (LOCK) {
-            assert hasLease(range);
+            // assert hasLease(range); there are valid times where unless will
+            // be called and we don't have the lease
             deleteLease(range);
         }
     }
@@ -370,7 +370,7 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
     }
 
     public long write(Range range, ByteBuffer swarmContent) throws IOException {
-        //TODO unlock certain portions allow multiple writes at teh same time
+        // TODO unlock certain portions allow multiple writes at teh same time
         synchronized (LOCK) {
             long position = range.getLow();
             long startRange = range.getLow();
@@ -386,7 +386,7 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
     public void finish() throws IOException {
         synchronized (LOCK) {
             // TODO handle possible running write jobs.
-            // TODO we can cancel the running write jobs through the scheduler 
+            // TODO we can cancel the running write jobs through the scheduler
             fileSystem.close();
         }
     }
@@ -399,11 +399,11 @@ public class FileCoordinatorImpl extends AbstractSwarmCoordinator {
             addLease(newLease);
             return newLease;
         }
-        
+
     }
 
     public SwarmFile getSwarmFile(Range range) {
-       return  fileSystem.getSwarmFile(range.getLow());
+        return fileSystem.getSwarmFile(range.getLow());
     }
 
 }
