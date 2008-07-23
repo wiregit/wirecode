@@ -12,25 +12,10 @@ import org.xmlpull.v1.XmlPullParserException;
 public interface LimePresence extends Presence {
 
     /**
-     * Request a file from this user
-     * @param file
-     * @param progressListener
-     */
-    public FileTransferMetaData requestFile(FileMetaData file, FileTransferProgressListener progressListener) throws IOException, XmlPullParserException;
-
-    /**
      * send a file to this user
      * @param file
-     * @param progressListener
      */
-    public void sendFile(FileTransferMetaData file, FileTransferProgressListener progressListener);
-
-    /**
-     * Register a <code>LibraryListener</code> on this user, so as to be
-     * notified about the files that user is sharing
-     * @param libraryListener
-     */
-    public void setLibraryListener(LibraryListener libraryListener);
+    public void sendFile(FileMetaData file);
     
     public Address getAddress();
 }

@@ -24,6 +24,7 @@ public class AddressFactoryImpl implements AddressFactory {
             for(Class interfase : interfaces) {
                 serializer = serializerClassMap.get(interfase);
                 if(serializer != null) {
+                    // TODO subclasses
                     return serializer;
                 }
             }

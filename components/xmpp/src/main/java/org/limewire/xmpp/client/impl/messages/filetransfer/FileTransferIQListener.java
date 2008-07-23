@@ -1,28 +1,23 @@
 package org.limewire.xmpp.client.impl.messages.filetransfer;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.io.IOException;
-
-import org.jivesoftware.smack.PacketListener;
-import org.jivesoftware.smack.XMPPConnection;
-import org.jivesoftware.smack.filter.PacketFilter;
-import org.jivesoftware.smack.packet.Packet;
-import org.jivesoftware.smack.packet.IQ;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.limewire.xmpp.client.service.LibraryProvider;
-import org.limewire.xmpp.client.service.LibraryListener;
+import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.filter.PacketFilter;
+import org.jivesoftware.smack.packet.IQ;
+import org.jivesoftware.smack.packet.Packet;
+import org.limewire.xmpp.client.service.FileOfferHandler;
 import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 
 public class FileTransferIQListener implements PacketListener {
     private static final Log LOG = LogFactory.getLog(FileTransferIQListener.class);
 
-    private XMPPConnection connection;
-    private final LibraryProvider libraryProvider;
+    private final FileOfferHandler fileOfferHandler;
 
-    public FileTransferIQListener(XMPPConnection connection, LibraryProvider libraryProvider) {
-        this.libraryProvider = libraryProvider;
-        this.connection = connection;
+    public FileTransferIQListener(FileOfferHandler fileOfferHandler) {
+        this.fileOfferHandler = fileOfferHandler;
     }
 
     public void processPacket(Packet packet) {
@@ -56,12 +51,10 @@ public class FileTransferIQListener implements PacketListener {
         if(LOG.isDebugEnabled()) {
             LOG.debug("handling file transfer get " + packet.getPacketID());
         }
-        FileTransferIQ queryResult = new FileTransferIQ(libraryProvider.readFile(packet.getFileMetaData()), packet.getTransferType());
-        queryResult.setTo(packet.getFrom());
-        queryResult.setFrom(packet.getTo());
-        queryResult.setPacketID(packet.getPacketID());
-        queryResult.setType(IQ.Type.RESULT);
-        connection.sendPacket(queryResult);
+        // TODO async?
+        fileOfferHandler.fileOfferred(packet.getFileMetaData());
+        // TODO send acceptance or rejection;
+        // TODO only needed for user feedback
     }
 
     public PacketFilter getPacketFilter() {

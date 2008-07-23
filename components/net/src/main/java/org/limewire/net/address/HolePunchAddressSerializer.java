@@ -7,7 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class HolePunchConnectionAddressSerializer implements AddressSerializer {
+public class HolePunchAddressSerializer implements AddressSerializer {
     @Inject
     public void register(AddressFactory factory) {
         factory.addSerializer(this);
@@ -18,12 +18,12 @@ public class HolePunchConnectionAddressSerializer implements AddressSerializer {
     }
 
     public Class<? extends Address> getAddressClass() {
-        return HolePunchConnectionAddress.class;
+        return HolePunchAddress.class;
     }
 
     public Address deserialize(byte[] serializedAddress) throws IOException {
         final int version = serializedAddress[0];
-        return new HolePunchConnectionAddress() {
+        return new HolePunchAddress() {
             public int getVersion() {
                 return version;
             }
@@ -32,16 +32,16 @@ public class HolePunchConnectionAddressSerializer implements AddressSerializer {
                 return null;
             }
 
-            public MediatedConnectionAddress getMediatedConnectionAddress() {
+            public MediatorAddress getMediatorAddress() {
                 return null; 
             }
         };
     }
 
     public byte[] serialize(Address address) throws IOException {
-        HolePunchConnectionAddress holePunchConnectionAddress = (HolePunchConnectionAddress)address;
+        HolePunchAddress holePunchAddress = (HolePunchAddress)address;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bos.write(holePunchConnectionAddress.getVersion());
+        bos.write(holePunchAddress.getVersion());
         return bos.toByteArray();
     }
 }

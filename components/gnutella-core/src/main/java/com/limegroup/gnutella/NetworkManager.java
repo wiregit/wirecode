@@ -1,13 +1,14 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
-
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.ListenerSupport;
-import org.limewire.net.address.HolePunchConnectionAddress;
-import org.limewire.net.address.MediatedConnectionAddress;
+import org.limewire.net.address.AddressEvent;
+import org.limewire.net.address.HolePunchAddress;
+import org.limewire.net.address.MediatorAddress;
 
-public interface NetworkManager extends Service, ListenerSupport<NetworkManagerEvent> {
+import java.io.IOException;
+
+public interface NetworkManager extends Service, ListenerSupport<AddressEvent> {
     void disableTLS(Throwable reason);
 
     boolean isTLSDisabled();
@@ -15,10 +16,6 @@ public interface NetworkManager extends Service, ListenerSupport<NetworkManagerE
     boolean isIncomingTLSEnabled();
 
     boolean isOutgoingTLSEnabled();
-
-    public static enum EventType {
-        ADDRESS_CHANGE
-    }
 
     /** @return true if your IP and port information is valid.
      */
@@ -91,9 +88,9 @@ public interface NetworkManager extends Service, ListenerSupport<NetworkManagerE
     
     public void acceptedIncomingConnectionChanged();
     
-    public void newMediatedConnectionAddress(MediatedConnectionAddress address);
+    public void newMediatedConnectionAddress(MediatorAddress address);
     
-    public void newHolePunchConnectionAddress(HolePunchConnectionAddress address);
+    public void newHolePunchConnectionAddress(HolePunchAddress address);
 
     /** 
      * Returns true if this has accepted an incoming connection, and hence

@@ -1,31 +1,28 @@
 package org.limewire.xmpp.client.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.limewire.lifecycle.Asynchronous;
 import org.limewire.lifecycle.Service;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.ListenerSupport;
-import com.limegroup.gnutella.NetworkManagerEvent;
+import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
-import org.limewire.xmpp.client.service.FileTransferProgressListener;
-import org.limewire.xmpp.client.service.IncomingFileAcceptor;
-import org.limewire.xmpp.client.service.LibraryProvider;
+import org.limewire.xmpp.client.service.FileOfferHandler;
 import org.limewire.xmpp.client.service.XMPPConnection;
 import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
 import org.limewire.xmpp.client.service.XMPPService;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import com.google.inject.Singleton;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Singleton
-public class XMPPServiceImpl implements Service, XMPPService, EventListener<NetworkManagerEvent> {
+public class XMPPServiceImpl implements Service, XMPPService, EventListener<AddressEvent> {
 
     private static final Log LOG = LogFactory.getLog(XMPPServiceImpl.class);
     
@@ -33,23 +30,15 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Netw
     
     private CopyOnWriteArrayList<XMPPConnectionImpl> connections;
     private final Provider<List<XMPPConnectionConfiguration>> configurations;
-    private final LibraryProvider libraryProvider;
-    private final IncomingFileAcceptor incomingFileAcceptor;
-    private final FileTransferProgressListener progressListener;
-    //private final NetworkManager networkManager;
+    private final FileOfferHandler fileOfferHandler;
     private final AddressFactory addressFactory;
 
     @Inject
     XMPPServiceImpl(Provider<List<XMPPConnectionConfiguration>> configurations,
-                    LibraryProvider libraryProvider,
-                    IncomingFileAcceptor incomingFileAcceptor,
-                    FileTransferProgressListener progressListener,
-                    /*NetworkManager networkManager,*/ AddressFactory addressFactory) {
+                    FileOfferHandler fileOfferHandler,
+                    AddressFactory addressFactory) {
         this.configurations = configurations;
-        this.libraryProvider = libraryProvider;
-        this.incomingFileAcceptor = incomingFileAcceptor;
-        this.progressListener = progressListener;
-        //this.networkManager = networkManager;
+        this.fileOfferHandler = fileOfferHandler;
         this.addressFactory = addressFactory;
         this.connections = new CopyOnWriteArrayList<XMPPConnectionImpl>();
     }
@@ -60,7 +49,7 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Netw
     }
     
     @Inject
-    void register(ListenerSupport<NetworkManagerEvent> registry) {
+    void register(ListenerSupport<AddressEvent> registry) {
         registry.addListener(this);
     }
 
@@ -114,12 +103,12 @@ public class XMPPServiceImpl implements Service, XMPPService, EventListener<Netw
     }
 
     public void addConnectionConfiguration(XMPPConnectionConfiguration configuration) {
-        XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, libraryProvider, incomingFileAcceptor, progressListener,  null/*networkManager*/, addressFactory);
+        XMPPConnectionImpl connection = new XMPPConnectionImpl(configuration, fileOfferHandler, addressFactory);
         connection.initialize();
         connections.add(connection);
     }
 
-    public void handleEvent(NetworkManagerEvent event) {
+    public void handleEvent(AddressEvent event) {
         for(XMPPConnectionImpl connection : connections) {
             connection.handleEvent(event);
         }

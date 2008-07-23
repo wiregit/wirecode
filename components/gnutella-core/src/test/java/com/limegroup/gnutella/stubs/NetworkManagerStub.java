@@ -12,8 +12,8 @@ import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
 import com.limegroup.gnutella.NetworkManagerEvent;
 
-import org.limewire.net.address.MediatedConnectionAddress;
-import org.limewire.net.address.HolePunchConnectionAddress;
+import org.limewire.net.address.MediatorAddress;
+import org.limewire.net.address.HolePunchAddress;
 
 @Singleton
 public class NetworkManagerStub implements NetworkManager {
@@ -235,11 +235,11 @@ public class NetworkManagerStub implements NetworkManager {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public void newMediatedConnectionAddress(MediatedConnectionAddress address) {
+    public void newMediatedConnectionAddress(MediatorAddress address) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public void newHolePunchConnectionAddress(HolePunchConnectionAddress address) {
+    public void newHolePunchConnectionAddress(HolePunchAddress address) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 }

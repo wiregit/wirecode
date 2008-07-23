@@ -1,9 +1,5 @@
 package org.limewire.xmpp.client.impl.messages.address;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.PacketListener;
@@ -12,14 +8,16 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
 import org.limewire.listener.EventListener;
-import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.NetworkManagerEvent;
 import org.limewire.net.address.Address;
 import org.limewire.net.address.AddressEvent;
 import org.limewire.net.address.AddressFactory;
 import org.xmlpull.v1.XmlPullParserException;
 
-public class AddressIQListener implements PacketListener, EventListener<NetworkManagerEvent> {
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class AddressIQListener implements PacketListener, EventListener<AddressEvent> {
     private static final Log LOG = LogFactory.getLog(AddressIQListener.class);
 
     private XMPPConnection connection;
@@ -28,10 +26,9 @@ public class AddressIQListener implements PacketListener, EventListener<NetworkM
     private final AddressFactory factory;
 
     public AddressIQListener(XMPPConnection connection,
-                             /*NetworkManager networkManager,*/ AddressFactory factory) {
+                             AddressFactory factory) {
         this.connection = connection;
         this.factory = factory;
-        //networkManager.addListener(this);
     }
 
     public void processPacket(Packet packet) {
@@ -97,19 +94,17 @@ public class AddressIQListener implements PacketListener, EventListener<NetworkM
         };
     }
 
-    public void handleEvent(NetworkManagerEvent event) {
-        if(event instanceof AddressEvent) {
-            if(event.getType().equals(NetworkManager.EventType.ADDRESS_CHANGE)) {
-                // TODO async?
-                synchronized (this) {
-                    address = ((AddressEvent)event).getAddress();
-                    for(AddressIQ getRequest : getRequests) {
-                        sendResult(getRequest);        
-                    }
-                    getRequests.clear();
+    public void handleEvent(AddressEvent event) {
+        if(event.getType().equals(Address.EventType.ADDRESS_CHANGED)) {
+            // TODO async?
+            synchronized (this) {
+                address = event.getSource();
+                for(AddressIQ getRequest : getRequests) {
+                    sendResult(getRequest);
                 }
-                // TODO notify all buddies?                
+                getRequests.clear();
             }
+            // TODO notify all buddies?
         }
     }
 }

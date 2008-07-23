@@ -11,7 +11,6 @@ class FileMetaDataImpl implements FileMetaData {
     private String id;
     private String name;
     private long size;
-    private Date date;
     private String description;
 
     FileMetaDataImpl(String id, String name) {
@@ -43,14 +42,6 @@ class FileMetaDataImpl implements FileMetaData {
         this.size = size;
     }
 
-    public Date getDate() {
-        return date;
-    }
-
-    void setDate(Date date) {
-        this.date = date;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -59,7 +50,7 @@ class FileMetaDataImpl implements FileMetaData {
         this.description = description;
     }
 
-    public int getIndex() {
+    public long getIndex() {
         return 0;  //To change body of implemented methods use File | Settings | File Templates.
     }
 

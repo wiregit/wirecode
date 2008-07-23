@@ -1,13 +1,5 @@
 package org.limewire.xmpp.client.impl;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -17,64 +9,44 @@ import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
-import org.jivesoftware.smackx.jingle.IncomingJingleSession;
-import org.jivesoftware.smackx.jingle.JingleManager;
-import org.jivesoftware.smackx.jingle.JingleSessionRequest;
-import org.jivesoftware.smackx.jingle.file.FileContentHandler;
-import org.jivesoftware.smackx.jingle.file.FileLocator;
-import org.jivesoftware.smackx.jingle.file.UserAcceptor;
-import org.jivesoftware.smackx.jingle.listeners.JingleSessionRequestListener;
-import org.jivesoftware.smackx.packet.Content;
-import org.jivesoftware.smackx.packet.Description;
-import org.jivesoftware.smackx.packet.Jingle;
-import org.jivesoftware.smackx.packet.StreamInitiation;
-import org.jivesoftware.smackx.packet.file.FileDescription;
 import org.limewire.concurrent.ThreadExecutor;
 import org.limewire.listener.EventListener;
-import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.NetworkManagerEvent;
-
 import org.limewire.net.address.AddressFactory;
-import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
-import org.limewire.xmpp.client.impl.messages.library.LibraryIQ;
-import org.limewire.xmpp.client.impl.messages.library.LibraryIQListener;
+import org.limewire.net.address.AddressEvent;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQListener;
 import org.limewire.xmpp.client.impl.messages.address.AddressIQProvider;
-import org.limewire.xmpp.client.service.FileTransferProgressListener;
-import org.limewire.xmpp.client.service.IncomingFileAcceptor;
-import org.limewire.xmpp.client.service.LibraryProvider;
+import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQ;
+import org.limewire.xmpp.client.impl.messages.filetransfer.FileTransferIQListener;
+import org.limewire.xmpp.client.service.FileOfferHandler;
 import org.limewire.xmpp.client.service.User;
 import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 //import com.limegroup.gnutella.BrowseHostReplyHandler;
 
-class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnection, EventListener<NetworkManagerEvent> {
+class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnection, EventListener<AddressEvent> {
     
     private static final Log LOG = LogFactory.getLog(XMPPConnectionImpl.class);
     
     private final XMPPConnectionConfiguration configuration;
-    private final LibraryProvider libraryProvider;
-    private final IncomingFileAcceptor incomingFileAcceptor;
-    private final FileTransferProgressListener progressListener;
+    private final FileOfferHandler fileOfferHandler;
     //private final NetworkManager networkManager;
     private final AddressFactory addressFactory;
     private org.jivesoftware.smack.XMPPConnection connection;
     
     private final CopyOnWriteArrayList<org.limewire.xmpp.client.service.RosterListener> rosterListeners;
     private final HashMap<String, UserImpl> users;
-    protected LibraryIQListener libraryIQListener;
     protected AddressIQListener addressIQListener;
-    
+    protected FileTransferIQListener fileTransferIQListener;
+
     XMPPConnectionImpl(XMPPConnectionConfiguration configuration,
-                       LibraryProvider libraryProvider,
-                       IncomingFileAcceptor incomingFileAcceptor,
-                       FileTransferProgressListener progressListener,
-                       NetworkManager networkManager, AddressFactory addressFactory) {
+                       FileOfferHandler fileOfferHandler,
+                       AddressFactory addressFactory) {
         this.configuration = configuration;
-        this.libraryProvider = libraryProvider;
-        this.incomingFileAcceptor = incomingFileAcceptor;
-        this.progressListener = progressListener;
-        //this.networkManager = networkManager;
+        this.fileOfferHandler = fileOfferHandler;
         this.addressFactory = addressFactory;
         this.rosterListeners = new CopyOnWriteArrayList<org.limewire.xmpp.client.service.RosterListener>();
         this.rosterListeners.add(configuration.getRosterListener());
@@ -125,11 +97,6 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
             public void userUpdated(User user) {}
             public void userDeleted(String id) {}
         });
-        try {
-            Class.forName("org.jivesoftware.smackx.jingle.JingleManager");
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException(e);
-        }
         org.jivesoftware.smack.XMPPConnection.addConnectionCreationListener(new ConnectionCreationListener() {
             public void connectionCreated(final org.jivesoftware.smack.XMPPConnection connection) {
                 if(XMPPConnectionImpl.this.connection == connection) {
@@ -140,57 +107,13 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
                         // TODO conncurrency control
                         ServiceDiscoveryManager.getInstanceFor(connection).addFeature(XMPPServiceImpl.LW_SERVICE_NS);
                     }
-                    libraryIQListener = new LibraryIQListener(connection, libraryProvider);
                     addressIQListener = new AddressIQListener(connection, addressFactory);
-                    connection.addPacketListener(libraryIQListener, libraryIQListener.getPacketFilter());
-                    ProviderManager.getInstance().addIQProvider("library", "jabber:iq:lw-library", LibraryIQ.getIQProvider());
-                    ProviderManager.getInstance().addIQProvider("file-transfer", "jabber:iq:lw-file-transfer", FileTransferIQ.getIQProvider());
-                    //connection.addPacketListener(browseHostIQListener, browseHostIQListener.getPacketFilter());
-                    //ProviderManager.getInstance().addIQProvider("browse-host", "jabber:iq:lw-browse-host", BrowseHostIQ.getIQProvider());
                     connection.addPacketListener(addressIQListener, addressIQListener.getPacketFilter());
                     ProviderManager.getInstance().addIQProvider("address", "jabber:iq:lw-address", new AddressIQProvider(addressFactory));
-                    FileDescription.setUserAccptor(new UserAcceptor() {
-                        public boolean userAccepts(FileDescription.FileContainer file) {
-                            return incomingFileAcceptor.accept(new FileMetaDataAdapter(file.getFile()));
-                        }
-                    });
-                    
-                    JingleManager manager = new JingleManager(connection);
-                    manager.addJingleSessionRequestListener(new JingleSessionRequestListener() {
-                        public void sessionRequested(JingleSessionRequest request) {
-                            try {
-                                if(LOG.isInfoEnabled()) {
-                                    LOG.info("incoming jingle request from " + request.getFrom());
-                                }
-                                IncomingJingleSession session = request.accept();
-                                Jingle jingle = session.getInitialSessionRequest().getJingle();
-                                if(jingle != null) {
-                                    Content content = jingle.getContent();
-                                    if(content != null) {
-                                        Description description = content.getDescriptions().get(0);
-                                        if(description != null) {
-                                            if(description instanceof FileDescription) {
-                                                ((FileContentHandler)session.getContentHandler()).setFileLocator(new FileLocatorAdapter());
-                                                ((FileContentHandler)session.getContentHandler()).setProgressListener(new ProgressListenerAdapter(progressListener, session));
-                                                // TODO set UserAcceptor
-                                                if(LOG.isInfoEnabled()) {
-                                                    LOG.info("starting jingle session");
-                                                }
-                                                session.start();
-                                                return;
-                                            }
-                                        }
-                                    }
-                                }
-                                if(LOG.isInfoEnabled()) {
-                                    LOG.info("rejecting jingle session");
-                                }
-                                session.terminate();
-                            } catch (org.jivesoftware.smack.XMPPException e) {
-                                LOG.error(e.getMessage(), e);
-                            }
-                        }
-                    });
+
+                    fileTransferIQListener = new FileTransferIQListener(fileOfferHandler);
+                    connection.addPacketListener(fileTransferIQListener, fileTransferIQListener.getPacketFilter());
+                    ProviderManager.getInstance().addIQProvider("file-transfer", "jabber:iq:lw-file-transfer", FileTransferIQ.getIQProvider());
                 }
             }
         });
@@ -271,7 +194,7 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
                                     if(LOG.isDebugEnabled()) {
                                         LOG.debug("limwire user " + user + ", presence " + presence.getFrom() + " detected");
                                     }
-                                    LimePresenceImpl limePresense = new LimePresenceImpl(presence, connection, libraryIQListener, new FileLocatorAdapter());
+                                    LimePresenceImpl limePresense = new LimePresenceImpl(presence, connection);
                                     limePresense.sendGetAddress();
                                     user.addPresense(limePresense);
                                 } else {
@@ -299,19 +222,8 @@ class XMPPConnectionImpl implements org.limewire.xmpp.client.service.XMPPConnect
 //            }
 //        }
 //    }
-    
-    
-    private class FileLocatorAdapter implements FileLocator {
-        public InputStream readFile(StreamInitiation.File file) throws FileNotFoundException {
-            return null;//libraryProvider.readFile(new FileMetaDataAdapter(file));
-        }
 
-        public OutputStream writeFile(StreamInitiation.File file) throws IOException {
-            return libraryProvider.writeFile(new FileMetaDataAdapter(file));
-        }    
-    }
-
-    public void handleEvent(NetworkManagerEvent event) {
+    public void handleEvent(AddressEvent event) {
         addressIQListener.handleEvent(event);
     }
 }

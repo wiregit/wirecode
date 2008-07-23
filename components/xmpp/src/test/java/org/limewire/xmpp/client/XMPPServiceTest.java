@@ -1,5 +1,25 @@
 package org.limewire.xmpp.client;
 
+import com.google.inject.Module;
+import com.google.inject.TypeLiteral;
+import org.apache.log4j.BasicConfigurator;
+import org.limewire.inject.AbstractModule;
+import org.limewire.lifecycle.ServiceTestCase;
+import org.limewire.listener.ListenerSupport;
+import org.limewire.net.LimeWireNetTestModule;
+import org.limewire.net.address.Address;
+import org.limewire.net.address.AddressEvent;
+import org.limewire.net.address.DirectConnectionAddress;
+import org.limewire.net.address.DirectConnectionAddressImpl;
+import org.limewire.xmpp.client.impl.XMPPException;
+import org.limewire.xmpp.client.impl.XMPPConnectionConfigurationImpl;
+import org.limewire.xmpp.client.service.LimePresence;
+import org.limewire.xmpp.client.service.MessageWriter;
+import org.limewire.xmpp.client.service.Presence;
+import org.limewire.xmpp.client.service.XMPPConnection;
+import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
+import org.limewire.xmpp.client.service.XMPPService;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -10,35 +30,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.log4j.BasicConfigurator;
-import org.limewire.inject.AbstractModule;
-import org.limewire.lifecycle.ServiceTestCase;
-import org.limewire.listener.ListenerSupport;
-import org.limewire.net.LimeWireNetTestModule;
-import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.NetworkManagerEvent;
-
-import org.limewire.net.address.AddressEvent;
-import org.limewire.net.address.DirectConnectionAddress;
-import org.limewire.net.address.DirectConnectionAddressImpl;
-import org.limewire.xmpp.client.impl.XMPPException;
-import org.limewire.xmpp.client.service.FileMetaData;
-import org.limewire.xmpp.client.service.LimePresence;
-import org.limewire.xmpp.client.service.MessageWriter;
-import org.limewire.xmpp.client.service.Presence;
-import org.limewire.xmpp.client.service.XMPPConnection;
-import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
-import org.limewire.xmpp.client.service.XMPPService;
-
-import com.google.inject.Module;
-import com.google.inject.TypeLiteral;
-import com.limegroup.gnutella.stubs.NetworkManagerStub;
-
 public class XMPPServiceTest extends ServiceTestCase {
     protected RosterListenerImpl rosterListener;
-    protected LibraryProviderImpl libraryProvider;
     protected RosterListenerImpl rosterListener2;
-    protected NetworkEventTestBroadcaster networkEventBroadcaster;
+    protected AddressEventTestBroadcaster addressEventBroadcaster;
 
     public XMPPServiceTest(String name) {
         super(name);
@@ -60,21 +55,16 @@ public class XMPPServiceTest extends ServiceTestCase {
     protected List<Module> getServiceModules() {
         rosterListener = new RosterListenerImpl();
         rosterListener2 = new RosterListenerImpl();
-        XMPPConnectionConfiguration configuration = new XMPPConnectionConfigurationImpl("limebuddy1@gmail.com", 
+        XMPPConnectionConfiguration configuration = new XMPPConnectionConfigurationImpl("limebuddy1@gmail.com",
                 "limebuddy123", "talk.google.com", 5222, "gmail.com", rosterListener);
-        XMPPConnectionConfiguration configuration2 = new XMPPConnectionConfigurationImpl("limebuddy2@gmail.com", 
+        XMPPConnectionConfiguration configuration2 = new XMPPConnectionConfigurationImpl("limebuddy2@gmail.com",
                 "limebuddy234", "talk.google.com", 5222, "gmail.com", rosterListener2);
-        try {
-            libraryProvider = new LibraryProviderImpl();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        Module xmppModule = new LimeWireXMPPModule(new XMPPConnectionConfigurationListProvider(configuration, configuration2), libraryProvider,
-                new ProgressListener(), new IncomingFileAcceptorImpl());
-        networkEventBroadcaster = new NetworkEventTestBroadcaster();
+        Module xmppModule = new LimeWireXMPPModule(new XMPPConnectionConfigurationListProvider(configuration, configuration2),
+                new FileOfferHandlerImpl());
+        addressEventBroadcaster = new AddressEventTestBroadcaster();
         Module m = new AbstractModule() {
             protected void configure() {
-                bind(new TypeLiteral<ListenerSupport<NetworkManagerEvent>>(){}).toInstance(networkEventBroadcaster);
+                bind(new TypeLiteral<ListenerSupport<AddressEvent>>(){}).toInstance(addressEventBroadcaster);
             }
         };
         return Arrays.asList(xmppModule, m, new LimeWireNetTestModule());
@@ -100,8 +90,8 @@ public class XMPPServiceTest extends ServiceTestCase {
         assertEquals("limebuddy1@gmail.com", rosterListener2.roster.keySet().iterator().next());
         assertEquals(0, rosterListener2.roster.get("limebuddy1@gmail.com").size());
         
-        networkEventBroadcaster.listeners.broadcast(new AddressEvent(new NetworkManagerStub(),
-                NetworkManager.EventType.ADDRESS_CHANGE, new DirectConnectionAddressImpl("199.199.199.199", 2048, true)));
+        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new DirectConnectionAddressImpl("199.199.199.199", 2048, true),
+                Address.EventType.ADDRESS_CHANGED));
         
         Thread.sleep(1000);
         
@@ -133,8 +123,8 @@ public class XMPPServiceTest extends ServiceTestCase {
     }
     
     public void testChat() throws InterruptedException, XMPPException, IOException {
-        networkEventBroadcaster.listeners.broadcast(new AddressEvent(new NetworkManagerStub(),
-                NetworkManager.EventType.ADDRESS_CHANGE, new DirectConnectionAddressImpl("199.199.199.199", 2048, true)));
+        addressEventBroadcaster.listeners.broadcast(new AddressEvent(new DirectConnectionAddressImpl("199.199.199.199", 2048, true),
+                Address.EventType.ADDRESS_CHANGED));
         
         Thread.sleep(1000);
         
@@ -160,23 +150,17 @@ public class XMPPServiceTest extends ServiceTestCase {
     }
     
     public void testSendFile() throws InterruptedException, IOException {
-        ProgressListener progressListener = new ProgressListener();
-        assertFalse(progressListener.started);
         
         HashMap<String, ArrayList<Presence>> roster1 = rosterListener.roster;
         
         LimePresence limebuddy2 = ((LimePresence)roster1.get("limebuddy2@gmail.com").get(0));
-        File toSend = libraryProvider.lib.listFiles()[0];
-        FileMetaDataImpl metaData = new FileMetaDataImpl(new Random().nextInt() + "", toSend.getName());
-        metaData.setSize(toSend.length());
-        metaData.setDate(new Date(toSend.lastModified()));
+        FileMetaDataImpl metaData = new FileMetaDataImpl(new Random().nextInt() + "", "a_cool_file.txt");
+        metaData.setSize(1000);
+        metaData.setDate(new Date());
         metaData.setDescription("cool file");
-        //limebuddy2.sendFile(metaData, progressListener);        
+        limebuddy2.sendFile(metaData);        
         
         Thread.sleep(6 * 1000);
-
-        assertTrue(progressListener.started);
-        assertTrue(progressListener.completed);
         
         File receivedFile = null;
         File [] savedFiles2 = libraryProvider.saveDir.listFiles();
@@ -189,36 +173,6 @@ public class XMPPServiceTest extends ServiceTestCase {
         
         assertNotNull(receivedFile);
         // TODO compare contents
-
-    }
-    
-    public void testRequestFile() throws InterruptedException, IOException {
-        ProgressListener progressListener = new ProgressListener();
-        assertFalse(progressListener.started);
-        
-        HashMap<String, ArrayList<Presence>> roster1 = rosterListener.roster;
-        
-        LimePresence limebuddy2 = ((LimePresence)roster1.get("limebuddy2@gmail.com").get(0));
-        FileMetaData toRequest = rosterListener.files.get(0);
-        //limebuddy2.requestFile(toRequest, progressListener);        
-        
-        Thread.sleep(6 * 1000);
-        
-        assertTrue(progressListener.started);
-        assertTrue(progressListener.completed);
-        
-        File receivedFile = null;
-        File [] savedFiles = libraryProvider.saveDir.listFiles();
-        for(File saved : savedFiles) {
-            if(saved.getName().equals(toRequest.getName())) {
-                receivedFile = saved;
-                break;
-            }
-        }
-        
-        assertNotNull(receivedFile);
-        // TODO compare contents              
-
     }
 
 }

@@ -1,17 +1,10 @@
 package org.limewire.net.address;
 
-import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.NetworkManagerEvent;
+import org.limewire.listener.DefaultEvent;
 
-public class AddressEvent extends NetworkManagerEvent {
-    private final Address address;
+public class AddressEvent extends DefaultEvent<Address, Address.EventType> {
 
-    public AddressEvent(NetworkManager source, NetworkManager.EventType event, Address address) {
+    public AddressEvent(Address source, Address.EventType event) {
         super(source, event);
-        this.address = address;
-    }
-    
-    public Address getAddress() {
-        return address;
     }
 }

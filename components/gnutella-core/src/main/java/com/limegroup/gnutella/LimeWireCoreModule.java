@@ -29,6 +29,7 @@ import org.limewire.security.SettingsProvider;
 import org.limewire.security.certificate.LimeWireSecurityCertificateModule;
 import org.limewire.statistic.LimeWireStatisticsModule;
 import org.limewire.listener.ListenerSupport;
+import org.limewire.xmpp.client.LimeWireXMPPModule;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -164,6 +165,7 @@ import com.limegroup.gnutella.search.QueryHandlerFactory;
 import com.limegroup.gnutella.search.QueryHandlerFactoryImpl;
 import com.limegroup.gnutella.settings.SettingsBackedProxySettings;
 import com.limegroup.gnutella.settings.SettingsBackedSocketBindingSettings;
+import com.limegroup.gnutella.settings.LimeWireSettingsModule;
 import com.limegroup.gnutella.simpp.LimeWireSimppModule;
 import com.limegroup.gnutella.spam.RatingTable;
 import com.limegroup.gnutella.statistics.LimeWireGnutellaStatisticsModule;
@@ -227,7 +229,8 @@ public class LimeWireCoreModule extends AbstractModule {
         binder().install(new LimeWireGeocodeGlueModule());        
         binder().install(new LimeWirePromotionModule(PromotionBinderRequestorImpl.class, PromotionServicesImpl.class));
         binder().install(new LimeWireSimppModule());
-        //binder().install(new LimeWireXMPPModule());
+        binder().install(new LimeWireXMPPModule());
+        binder().install(new LimeWireSettingsModule());
         
         bind(LimeWireCore.class);
         
@@ -237,7 +240,7 @@ public class LimeWireCoreModule extends AbstractModule {
 
         bind(DownloadCallback.class).to(ActivityCallback.class);
         bind(NetworkManager.class).to(NetworkManagerImpl.class);
-        bind(new TypeLiteral<ListenerSupport<NetworkManagerEvent>>(){}).to(NetworkManagerImpl.class);
+        bind(new TypeLiteral<ListenerSupport<org.limewire.net.address.AddressEvent>>(){}).to(NetworkManagerImpl.class);
         bind(DHTManager.class).to(DHTManagerImpl.class);
         bind(DHTControllerFactory.class).to(DHTControllerFactoryImpl.class);
         bind(PingReplyFactory.class).to(PingReplyFactoryImpl.class);

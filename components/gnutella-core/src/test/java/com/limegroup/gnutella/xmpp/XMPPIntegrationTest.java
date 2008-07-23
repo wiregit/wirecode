@@ -19,16 +19,14 @@ import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
 import org.limewire.net.address.gnutella.PushProxyAddress;
-import org.limewire.net.address.gnutella.PushProxyHolePunchConnectionAddress;
-import org.limewire.net.address.gnutella.PushProxyMediatedAddress;
+import org.limewire.net.address.gnutella.PushProxyHolePunchAddress;
+import org.limewire.net.address.gnutella.PushProxyMediatorAddress;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.util.TestUtils;
-import org.limewire.xmpp.client.IncomingFileAcceptorImpl;
-import org.limewire.xmpp.client.LibraryProviderImpl;
+import org.limewire.xmpp.client.FileOfferHandlerImpl;
 import org.limewire.xmpp.client.LimeWireXMPPModule;
-import org.limewire.xmpp.client.ProgressListener;
 import org.limewire.xmpp.client.RosterListenerImpl;
-import org.limewire.xmpp.client.XMPPConnectionConfigurationImpl;
+import org.limewire.xmpp.client.impl.XMPPConnectionConfigurationImpl;
 import org.limewire.xmpp.client.XMPPConnectionConfigurationListProvider;
 import org.limewire.xmpp.client.service.LimePresence;
 import org.limewire.xmpp.client.service.Presence;
@@ -37,11 +35,8 @@ import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.Module;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.google.inject.name.Names;
 import com.limegroup.gnutella.BrowseHostHandler;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
@@ -61,7 +56,6 @@ import com.limegroup.gnutella.util.LimeTestCase;
 
 public class XMPPIntegrationTest extends LimeTestCase {
     protected RosterListenerImpl rosterListener;
-    protected LibraryProviderImpl libraryProvider;
     protected RosterListenerImpl rosterListener2;
     protected PushEndpointFactory pushEndpointFactory;
     
@@ -81,17 +75,12 @@ public class XMPPIntegrationTest extends LimeTestCase {
         started = new CountDownLatch(1);
         rosterListener = new RosterListenerImpl();
         rosterListener2 = new RosterListenerImpl();
-        XMPPConnectionConfiguration configuration = new XMPPConnectionConfigurationImpl("limebuddy1@gmail.com", 
+        XMPPConnectionConfiguration configuration = new XMPPConnectionConfigurationImpl("limebuddy1@gmail.com",
                 "limebuddy123", "talk.google.com", 5222, "gmail.com", rosterListener);
         XMPPConnectionConfiguration configuration2 = new XMPPConnectionConfigurationImpl("limebuddy2@gmail.com", 
                 "limebuddy234", "talk.google.com", 5222, "gmail.com", rosterListener2);
-        try {
-            libraryProvider = new LibraryProviderImpl();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        Module xmppModule = new LimeWireXMPPModule(new XMPPConnectionConfigurationListProvider(configuration, configuration2), libraryProvider,
-                new ProgressListener(), new IncomingFileAcceptorImpl());
+        Module xmppModule = new LimeWireXMPPModule(new XMPPConnectionConfigurationListProvider(configuration, configuration2),
+                new FileOfferHandlerImpl());
         
         String directoryName = "com/limegroup/gnutella";
         File sharedDirectory = TestUtils.getResourceFile(directoryName);
@@ -161,14 +150,14 @@ public class XMPPIntegrationTest extends LimeTestCase {
         int version = 0;
         IpPort directAddrss = null;
         
-        if(presence.getAddress() instanceof PushProxyMediatedAddress) {
-            PushProxyMediatedAddress address = (PushProxyMediatedAddress) presence.getAddress();
+        if(presence.getAddress() instanceof PushProxyMediatorAddress) {
+            PushProxyMediatorAddress address = (PushProxyMediatorAddress) presence.getAddress();
             guidBytes = address.getClientID().bytes();
             proxies = getIPPortSet(address.getPushProxies());
-        } else if(presence.getAddress() instanceof PushProxyHolePunchConnectionAddress) {
-            PushProxyHolePunchConnectionAddress address = (PushProxyHolePunchConnectionAddress) presence.getAddress();
-            guidBytes = ((PushProxyMediatedAddress)address.getMediatedConnectionAddress()).getClientID().bytes();
-            proxies = getIPPortSet(((PushProxyMediatedAddress)address.getMediatedConnectionAddress()).getPushProxies());
+        } else if(presence.getAddress() instanceof PushProxyHolePunchAddress) {
+            PushProxyHolePunchAddress address = (PushProxyHolePunchAddress) presence.getAddress();
+            guidBytes = ((PushProxyMediatorAddress)address.getMediatorAddress()).getClientID().bytes();
+            proxies = getIPPortSet(((PushProxyMediatorAddress)address.getMediatorAddress()).getPushProxies());
             version = address.getVersion();
             BitNumbers bn = HTTPHeaderUtils.getTLSIndices(proxies, (Math.min(proxies.size(), PushEndpoint.MAX_PROXIES)));
             features = bn.toByteArray()[0] |= PushEndpoint.PPTLS_BINARY;

@@ -17,7 +17,7 @@ import org.xmlpull.v1.XmlPullParserException;
 public class FileMetaDataImpl implements FileMetaData {
 
     private enum Element {
-        id, name, size, date, description, index, metadata, uris, createTime
+        id, name, size, description, index, metadata, uris, createTime
     }
 
     private Map<Element, String> data = new HashMap<Element, String>();
@@ -59,14 +59,6 @@ public class FileMetaDataImpl implements FileMetaData {
         data.put(Element.size, Long.toString(size));
     }
 
-    public Date getDate() {
-        return new Date(Long.valueOf(data.get(Element.date)));
-    }
-    
-    public void setDate(Date date) {
-        data.put(Element.date, Long.toString(date.getTime()));
-    }
-
     public String getDescription() {
         return data.get(Element.description);
     }
@@ -75,8 +67,8 @@ public class FileMetaDataImpl implements FileMetaData {
         data.put(Element.description, description);
     }
 
-    public int getIndex() {
-        return Integer.valueOf(data.get(Element.index));
+    public long getIndex() {
+        return Long.valueOf(data.get(Element.index));
     }
     
     public void setIndex(int index) {

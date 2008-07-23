@@ -14,12 +14,12 @@ import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 
 @Singleton
-public class PushProxyMediatedAddressSerializer implements AddressSerializer {
+public class PushProxyMediatorAddressSerializer implements AddressSerializer {
     
     private final AddressFactory factory;
     
     @Inject
-    PushProxyMediatedAddressSerializer(AddressFactory factory) {
+    PushProxyMediatorAddressSerializer(AddressFactory factory) {
         this.factory = factory;
     }   
 
@@ -33,7 +33,7 @@ public class PushProxyMediatedAddressSerializer implements AddressSerializer {
     }
 
     public Class<? extends Address> getAddressClass() {
-        return PushProxyMediatedAddress.class;
+        return PushProxyMediatorAddress.class;
     }
 
     public Address deserialize(byte[] serializedAddress) throws IOException {
@@ -46,7 +46,7 @@ public class PushProxyMediatedAddressSerializer implements AddressSerializer {
             System.arraycopy(serializedAddress, (i * 7) + 16, pushProxy, 0, 7);
             pushProxyAddresses.add((PushProxyAddress)factory.deserialize("push-proxy-info", pushProxy));    
         }
-        return new PushProxyMediatedAddress() {
+        return new PushProxyMediatorAddress() {
             public GUID getClientID() {
                 return guid;
             }
@@ -58,10 +58,10 @@ public class PushProxyMediatedAddressSerializer implements AddressSerializer {
     }
 
     public byte[] serialize(Address address) throws IOException {
-        PushProxyMediatedAddress mediatedAddress = (PushProxyMediatedAddress)address;
+        PushProxyMediatorAddress mediatorAddress = (PushProxyMediatorAddress)address;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bos.write(mediatedAddress.getClientID().bytes());
-        List<PushProxyAddress> pushProxyAddresses = mediatedAddress.getPushProxies();
+        bos.write(mediatorAddress.getClientID().bytes());
+        List<PushProxyAddress> pushProxyAddresses = mediatorAddress.getPushProxies();
         for(PushProxyAddress pushProxyAddress : pushProxyAddresses) {
             bos.write(factory.serialize(pushProxyAddress));
         }

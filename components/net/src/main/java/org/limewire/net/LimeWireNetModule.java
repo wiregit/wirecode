@@ -3,10 +3,10 @@ package org.limewire.net;
 import org.limewire.net.address.AddressFactory;
 import org.limewire.net.address.AddressFactoryImpl;
 import org.limewire.net.address.DirectConnectionAddressSerializer;
-import org.limewire.net.address.HolePunchConnectionAddressSerializer;
+import org.limewire.net.address.HolePunchAddressSerializer;
 import org.limewire.net.address.gnutella.PushProxyAddressSerializer;
-import org.limewire.net.address.gnutella.PushProxyHolePunchConnectionAddressSerializer;
-import org.limewire.net.address.gnutella.PushProxyMediatedAddressSerializer;
+import org.limewire.net.address.gnutella.PushProxyHolePunchAddressSerializer;
+import org.limewire.net.address.gnutella.PushProxyMediatorAddressSerializer;
 import org.limewire.util.OSUtils;
 
 import com.google.inject.AbstractModule;
@@ -46,9 +46,9 @@ public class LimeWireNetModule extends AbstractModule {
         bind(FirewallService.class).to(FirewallServiceImpl.class);
         bind(AddressFactory.class).to(AddressFactoryImpl.class);
         bind(DirectConnectionAddressSerializer.class);
-        bind(HolePunchConnectionAddressSerializer.class);
-        bind(PushProxyMediatedAddressSerializer.class);
-        bind(PushProxyHolePunchConnectionAddressSerializer.class);
+        bind(HolePunchAddressSerializer.class);
+        bind(PushProxyMediatorAddressSerializer.class);
+        bind(PushProxyHolePunchAddressSerializer.class);
         bind(PushProxyAddressSerializer.class);
         
         if(OSUtils.isSocketChallengedWindows())

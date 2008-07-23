@@ -36,7 +36,7 @@ import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
 import org.limewire.net.address.gnutella.PushProxyAddress;
-import org.limewire.net.address.gnutella.PushProxyMediatedAddress;
+import org.limewire.net.address.gnutella.PushProxyMediatorAddress;
 import org.limewire.util.SystemUtils;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
@@ -2614,7 +2614,7 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
         for(Connectable proxy : pushProxies) {
             pushProxyAddresses.add(new PushProxyAddressImpl(proxy));
         }
-        networkManager.newMediatedConnectionAddress(new PushProxyMediatedAddress() {
+        networkManager.newMediatedConnectionAddress(new PushProxyMediatorAddress() {
             public GUID getClientID() {
                 return event.getGuid();
             }

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The file meta-data necessary to do a jingle file exchange
+ * The file meta-data necessary to do a file exchange
  */
 public interface FileMetaData {
 
@@ -28,16 +28,11 @@ public interface FileMetaData {
     public long getSize();
 
     /**
-     * @return the last modified time of the file
-     */
-    public Date getDate();
-
-    /**
      * @return the description of the file, as input by the user
      */
     public String getDescription();
 
-    public int getIndex();
+    public long getIndex();
     public Map<String, String> getMetaData();
     public Set<URI> getURIs() throws URISyntaxException;
     public Date getCreateTime();
