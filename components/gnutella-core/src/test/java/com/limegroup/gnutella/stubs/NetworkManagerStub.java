@@ -6,14 +6,13 @@ import org.limewire.io.NetworkUtils;
 import org.limewire.io.SimpleNetworkInstanceUtils;
 import org.limewire.listener.EventListener;
 import org.limewire.listener.EventListenerList;
+import org.limewire.net.address.AddressEvent;
+import org.limewire.net.address.HolePunchAddress;
+import org.limewire.net.address.MediatorAddress;
 
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.NetworkManager;
-import com.limegroup.gnutella.NetworkManagerEvent;
-
-import org.limewire.net.address.MediatorAddress;
-import org.limewire.net.address.HolePunchAddress;
 
 @Singleton
 public class NetworkManagerStub implements NetworkManager {
@@ -31,7 +30,7 @@ public class NetworkManagerStub implements NetworkManager {
     private int stableUDPPort = 7777;
     private int fwtVersion;
 
-    private EventListenerList<NetworkManagerEvent> listeners = new EventListenerList<NetworkManagerEvent>();
+    private EventListenerList<AddressEvent> listeners = new EventListenerList<AddressEvent>();
 
     public boolean acceptedIncomingConnection() {
         return acceptedIncomingConnection;
@@ -194,15 +193,15 @@ public class NetworkManagerStub implements NetworkManager {
     public void initialize() {}
     
     
-    public void addListener(EventListener<NetworkManagerEvent> listener) {
+    public void addListener(EventListener<AddressEvent> listener) {
         listeners.addListener(listener);
     }
 
-    public boolean removeListener(EventListener<NetworkManagerEvent> listener) {
+    public boolean removeListener(EventListener<AddressEvent> listener) {
         return listeners.removeListener(listener);
     }
     
-    public void fireEvent(NetworkManagerEvent event) {
+    public void fireEvent(AddressEvent event) {
         listeners.broadcast(event);
     }
     

@@ -14,7 +14,7 @@ import java.util.StringTokenizer;
 @Singleton
 public class XMPPSettings extends LimeProps implements Provider<List<XMPPServerConfiguration>> {
     private static final StringSetSetting XMPP_CONNECTIONS =
-		FACTORY.createStringSetSetting("XMPP_CONNECTIONS", null);
+		FACTORY.createStringSetSetting("XMPP_CONNECTIONS", "");
 
     public List<XMPPServerConfiguration> get() {
         List<XMPPServerConfiguration> configurations = new ArrayList<XMPPServerConfiguration>();

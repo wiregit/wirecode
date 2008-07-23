@@ -32,6 +32,7 @@ import org.limewire.io.ConnectableImpl;
 import org.limewire.io.NetworkInstanceUtils;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
+import org.limewire.nio.ByteBufferCache;
 import org.limewire.util.TestUtils;
 
 import com.google.inject.AbstractModule;
@@ -49,6 +50,7 @@ import com.limegroup.gnutella.ConnectionServices;
 import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.FileManagerEvent.Type;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.LifecycleManager;
@@ -58,7 +60,6 @@ import com.limegroup.gnutella.NetworkManagerImpl;
 import com.limegroup.gnutella.NodeAssigner;
 import com.limegroup.gnutella.QueryUnicaster;
 import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.FileManagerEvent.Type;
 import com.limegroup.gnutella.connection.BlockingConnection;
 import com.limegroup.gnutella.connection.BlockingConnectionFactory;
 import com.limegroup.gnutella.connection.ConnectionCheckerManager;
@@ -582,9 +583,10 @@ public class PushUploadTest extends LimeTestCase {
         public MyNetworkManager(Provider<UDPService> udpService, Provider<Acceptor> acceptor,
                 Provider<DHTManager> dhtManager, Provider<ConnectionManager> connectionManager,
                 Provider<ActivityCallback> activityCallback, OutOfBandStatistics outOfBandStatistics, 
-                NetworkInstanceUtils networkInstanceUtils, Provider<CapabilitiesVMFactory> capabilitiesVMFactory) {
+                NetworkInstanceUtils networkInstanceUtils, Provider<CapabilitiesVMFactory> capabilitiesVMFactory,
+                Provider<ByteBufferCache> bbCache) {
             super(udpService, acceptor, dhtManager, connectionManager, activityCallback,
-                    outOfBandStatistics, networkInstanceUtils, capabilitiesVMFactory);
+                    outOfBandStatistics, networkInstanceUtils, capabilitiesVMFactory, bbCache);
         }
 
         @Override

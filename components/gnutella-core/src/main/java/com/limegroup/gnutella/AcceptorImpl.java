@@ -562,6 +562,7 @@ public class AcceptorImpl implements ConnectionAcceptor, SocketProcessor, Accept
 
             if(LOG.isDebugEnabled())
                 LOG.debug("listening UDP/TCP on " + _port);
+            networkManager.portChanged();
         }
     }
 

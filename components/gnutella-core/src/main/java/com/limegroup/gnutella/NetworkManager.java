@@ -89,8 +89,6 @@ public interface NetworkManager extends Service, ListenerSupport<AddressEvent> {
     public void acceptedIncomingConnectionChanged();
     
     public void newMediatedConnectionAddress(MediatorAddress address);
-    
-    public void newHolePunchConnectionAddress(HolePunchAddress address);
 
     /** 
      * Returns true if this has accepted an incoming connection, and hence

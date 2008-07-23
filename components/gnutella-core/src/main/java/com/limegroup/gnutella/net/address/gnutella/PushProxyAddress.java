@@ -1,4 +1,4 @@
-package org.limewire.net.address.gnutella;
+package com.limegroup.gnutella.net.address.gnutella;
 
 import org.limewire.net.address.DirectConnectionAddress;
 

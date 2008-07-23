@@ -1,9 +1,10 @@
-package org.limewire.net.address.gnutella;
+package com.limegroup.gnutella.net.address.gnutella;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.limewire.net.address.Address;
 import org.limewire.net.address.AddressFactory;
@@ -40,28 +41,20 @@ public class PushProxyMediatorAddressSerializer implements AddressSerializer {
         byte [] guidBytes = new byte[16];
         System.arraycopy(serializedAddress, 0, guidBytes, 0, 16);
         final GUID guid = new GUID(guidBytes);
-        final List<PushProxyAddress> pushProxyAddresses = new ArrayList<PushProxyAddress>();
+        final Set<PushProxyAddress> pushProxyAddresses = new HashSet<PushProxyAddress>();
         for(int i = 0; i < (serializedAddress.length - 16) / 7; i++) {
             byte [] pushProxy = new byte[7];
             System.arraycopy(serializedAddress, (i * 7) + 16, pushProxy, 0, 7);
             pushProxyAddresses.add((PushProxyAddress)factory.deserialize("push-proxy-info", pushProxy));    
         }
-        return new PushProxyMediatorAddress() {
-            public GUID getClientID() {
-                return guid;
-            }
-
-            public List<PushProxyAddress> getPushProxies() {
-                return pushProxyAddresses;
-            }
-        };
+        return new PushProxyMediatorAddressImpl(guid, pushProxyAddresses);
     }
 
     public byte[] serialize(Address address) throws IOException {
         PushProxyMediatorAddress mediatorAddress = (PushProxyMediatorAddress)address;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         bos.write(mediatorAddress.getClientID().bytes());
-        List<PushProxyAddress> pushProxyAddresses = mediatorAddress.getPushProxies();
+        Set<PushProxyAddress> pushProxyAddresses = mediatorAddress.getPushProxies();
         for(PushProxyAddress pushProxyAddress : pushProxyAddresses) {
             bos.write(factory.serialize(pushProxyAddress));
         }

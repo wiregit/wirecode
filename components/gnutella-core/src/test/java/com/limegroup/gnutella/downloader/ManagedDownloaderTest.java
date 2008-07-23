@@ -82,7 +82,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
     private DownloadManagerImpl downloadManager;
     private FileManagerStub fileManager;
     private CoreDownloaderFactory gnutellaDownloaderFactory;
-    private NetworkManagerStub networkManager;
+    private static NetworkManagerStub networkManager;
     private Injector injector;
     private ScheduledExecutorService background;
 
@@ -755,7 +755,7 @@ public class ManagedDownloaderTest extends LimeTestCase {
                 RemoteFileDesc rfd, VerifyingFile vf) {
             return new AltLocWorkerStub(manager, rfd, vf, httpDownloaderFactory,
                     backgroundExecutor, nioExecutor, pushDownloadManager,
-                    socketsManager);
+                    socketsManager, networkManager);
         }
     }
     
@@ -765,9 +765,10 @@ public class ManagedDownloaderTest extends LimeTestCase {
         public AltLocWorkerStub(DownloadWorkerSupport manager, RemoteFileDesc rfd, VerifyingFile vf,
                 HTTPDownloaderFactory httpDownloaderFactory,
                 ScheduledExecutorService backgroundExecutor, ScheduledExecutorService nioExecutor,
-                Provider<PushDownloadManager> pushDownloadManager, SocketsManager socketsManager) {
+                Provider<PushDownloadManager> pushDownloadManager, SocketsManager socketsManager,
+                NetworkManager networkManager) {
             super(manager, rfd, vf, httpDownloaderFactory, backgroundExecutor, nioExecutor,
-                    pushDownloadManager, socketsManager);
+                    pushDownloadManager, socketsManager, networkManager);
         }
 
         public void setHTTPDownloader(HTTPDownloader httpDownloader) {

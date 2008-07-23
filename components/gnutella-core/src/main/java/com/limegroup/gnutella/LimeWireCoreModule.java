@@ -191,6 +191,9 @@ import com.limegroup.gnutella.xml.LimeXMLDocumentFactoryImpl;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactory;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollectionFactoryImpl;
 import com.limegroup.gnutella.xml.MetaFileManager;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddressSerializer;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddressSerializer;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyAddressSerializer;
 
 /**
  * The module that defines what implementations are used within
@@ -355,6 +358,9 @@ public class LimeWireCoreModule extends AbstractModule {
         bind(SharedFilesKeywordIndex.class).to(SharedFilesKeywordIndexImpl.class);
         bind(OutgoingQueryReplyFactory.class).to(OutgoingQueryReplyFactoryImpl.class);
         bind(UPnPManagerConfiguration.class).to(UPnPManagerConfigurationImpl.class);
+        bind(PushProxyMediatorAddressSerializer.class);
+        bind(PushProxyHolePunchAddressSerializer.class);
+        bind(PushProxyAddressSerializer.class);
         
         bindAll(Names.named("unlimitedExecutor"), ExecutorService.class, UnlimitedExecutorProvider.class, Executor.class);
         bindAll(Names.named("backgroundExecutor"), ScheduledExecutorService.class, BackgroundTimerProvider.class, ExecutorService.class, Executor.class);

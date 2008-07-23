@@ -7,7 +7,6 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -18,16 +17,14 @@ import org.limewire.collection.BitNumbers;
 import org.limewire.io.Connectable;
 import org.limewire.io.ConnectableImpl;
 import org.limewire.io.IpPort;
-import org.limewire.net.address.gnutella.PushProxyAddress;
-import org.limewire.net.address.gnutella.PushProxyHolePunchAddress;
-import org.limewire.net.address.gnutella.PushProxyMediatorAddress;
 import org.limewire.rudp.RUDPUtils;
 import org.limewire.util.TestUtils;
-import org.limewire.xmpp.client.FileOfferHandlerImpl;
 import org.limewire.xmpp.client.LimeWireXMPPModule;
 import org.limewire.xmpp.client.RosterListenerImpl;
-import org.limewire.xmpp.client.impl.XMPPConnectionConfigurationImpl;
 import org.limewire.xmpp.client.XMPPConnectionConfigurationListProvider;
+import org.limewire.xmpp.client.impl.XMPPConnectionConfigurationImpl;
+import org.limewire.xmpp.client.service.FileMetaData;
+import org.limewire.xmpp.client.service.FileOfferHandler;
 import org.limewire.xmpp.client.service.LimePresence;
 import org.limewire.xmpp.client.service.Presence;
 import org.limewire.xmpp.client.service.XMPPConnectionConfiguration;
@@ -36,6 +33,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Module;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.limegroup.gnutella.BrowseHostHandler;
 import com.limegroup.gnutella.FileDesc;
@@ -49,6 +47,8 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.SearchServices;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyHolePunchAddress;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddress;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.uploader.HTTPHeaderUtils;
@@ -153,11 +153,11 @@ public class XMPPIntegrationTest extends LimeTestCase {
         if(presence.getAddress() instanceof PushProxyMediatorAddress) {
             PushProxyMediatorAddress address = (PushProxyMediatorAddress) presence.getAddress();
             guidBytes = address.getClientID().bytes();
-            proxies = getIPPortSet(address.getPushProxies());
+            proxies = address.getPushProxies();
         } else if(presence.getAddress() instanceof PushProxyHolePunchAddress) {
             PushProxyHolePunchAddress address = (PushProxyHolePunchAddress) presence.getAddress();
             guidBytes = ((PushProxyMediatorAddress)address.getMediatorAddress()).getClientID().bytes();
-            proxies = getIPPortSet(((PushProxyMediatorAddress)address.getMediatorAddress()).getPushProxies());
+            proxies = ((PushProxyMediatorAddress)address.getMediatorAddress()).getPushProxies();
             version = address.getVersion();
             BitNumbers bn = HTTPHeaderUtils.getTLSIndices(proxies, (Math.min(proxies.size(), PushEndpoint.MAX_PROXIES)));
             features = bn.toByteArray()[0] |= PushEndpoint.PPTLS_BINARY;
@@ -204,14 +204,6 @@ public class XMPPIntegrationTest extends LimeTestCase {
         assertTrue("Browse returned more results than shared: " + files,
                 files.isEmpty());
     }
-
-    private Set<? extends IpPort> getIPPortSet(List<PushProxyAddress> pushProxies) {
-        Set<IpPort> ipPorts = new HashSet<IpPort>();
-        for(PushProxyAddress proxy : pushProxies) {
-            ipPorts.add(proxy);
-        }
-        return ipPorts;
-    }
     
     @Singleton
     public static class QueryReplyHandler extends ReplyHandlerStub {
@@ -226,5 +218,15 @@ public class XMPPIntegrationTest extends LimeTestCase {
             replies.add(queryReply);
         }
 
+    }
+    
+    class FileOfferHandlerImpl implements FileOfferHandler, Provider<FileOfferHandler> {
+        public boolean fileOfferred(FileMetaData f) {
+            return false;  //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public FileOfferHandler get() {
+            return this;
+        }
     }
 }

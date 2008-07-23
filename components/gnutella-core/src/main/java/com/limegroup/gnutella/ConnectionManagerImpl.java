@@ -8,6 +8,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,8 +36,6 @@ import org.limewire.lifecycle.Service;
 import org.limewire.net.ConnectionDispatcher;
 import org.limewire.net.SocketsManager;
 import org.limewire.net.SocketsManager.ConnectType;
-import org.limewire.net.address.gnutella.PushProxyAddress;
-import org.limewire.net.address.gnutella.PushProxyMediatorAddress;
 import org.limewire.util.SystemUtils;
 import org.limewire.util.Version;
 import org.limewire.util.VersionFormatException;
@@ -66,6 +65,8 @@ import com.limegroup.gnutella.messages.vendor.CapabilitiesVMFactory;
 import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyAddress;
+import com.limegroup.gnutella.net.address.gnutella.PushProxyMediatorAddressImpl;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
@@ -2610,19 +2611,11 @@ public class ConnectionManagerImpl implements ConnectionManager, Service {
 
     public void handleEvent(final GnutellaConnectionEvent event) {
         Set<Connectable> pushProxies = getPushProxies();
-        final List<PushProxyAddress> pushProxyAddresses = new ArrayList<PushProxyAddress>();
+        final Set<PushProxyAddress> pushProxyAddresses = new HashSet<PushProxyAddress>();
         for(Connectable proxy : pushProxies) {
             pushProxyAddresses.add(new PushProxyAddressImpl(proxy));
         }
-        networkManager.newMediatedConnectionAddress(new PushProxyMediatorAddress() {
-            public GUID getClientID() {
-                return event.getGuid();
-            }
-
-            public List<PushProxyAddress> getPushProxies() {
-                return pushProxyAddresses;
-            }
-        });
+        networkManager.newMediatedConnectionAddress(new PushProxyMediatorAddressImpl(event.getGuid(), pushProxyAddresses));
     }
     
     private class PushProxyAddressImpl extends ConnectableImpl implements PushProxyAddress {

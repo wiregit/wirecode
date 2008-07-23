@@ -12,6 +12,7 @@ import org.limewire.net.SocketsManager.ConnectType;
 import com.limegroup.gnutella.connection.ConnectionLifecycleEvent;
 import com.limegroup.gnutella.connection.ConnectionLifecycleListener;
 import com.limegroup.gnutella.connection.RoutedConnection;
+import com.limegroup.gnutella.connection.GnutellaConnectionEvent;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HandshakeStatus;
 import com.limegroup.gnutella.messages.Message.Network;
@@ -330,4 +331,7 @@ public class ConnectionManagerAdapter implements ConnectionManager {
 
     }
 
+    public void handleEvent(GnutellaConnectionEvent event) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
 }

@@ -1,4 +1,4 @@
-package org.limewire.net.address.gnutella;
+package com.limegroup.gnutella.net.address.gnutella;
 
 import java.io.IOException;
 import java.net.UnknownHostException;

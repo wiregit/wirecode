@@ -1,4 +1,4 @@
-package org.limewire.net.address.gnutella;
+package com.limegroup.gnutella.net.address.gnutella;
 
 import java.io.IOException;
 
@@ -38,19 +38,7 @@ public class PushProxyHolePunchAddressSerializer extends HolePunchAddressSeriali
         byte [] pushProxyBytes = new byte[serializedAddress.length - 8];
         System.arraycopy(serializedAddress, 8, pushProxyBytes, 0, pushProxyBytes.length);
         final PushProxyMediatorAddress pushProxy = (PushProxyMediatorAddress)factory.deserialize("push-proxy", pushProxyBytes);
-        return new PushProxyHolePunchAddress() {
-            public int getVersion() {
-                return address.getVersion();
-            }
-
-            public DirectConnectionAddress getDirectConnectionAddress() {
-                return directConnect;
-            }
-
-            public MediatorAddress getMediatorAddress() {
-                return pushProxy;
-            }
-        };
+        return new PushProxyHolePunchAddressImpl(address.getVersion(), directConnect, pushProxy);
     }
 
     public byte[] serialize(Address address) throws IOException {
