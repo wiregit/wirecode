@@ -1,6 +1,7 @@
 package org.limewire.core.impl.download;
 
 import org.limewire.core.api.download.DownloadListManager;
+import org.limewire.core.api.download.SearchResultDownloader;
 
 import com.google.inject.AbstractModule;
 
@@ -10,6 +11,7 @@ public class MockDownloadModule extends AbstractModule {
     protected void configure() {
        
     	bind(DownloadListManager.class).to(MockDownloadListManager.class);
+    	bind(SearchResultDownloader.class).to(MockDownloadListManager.class);
         
     }
 

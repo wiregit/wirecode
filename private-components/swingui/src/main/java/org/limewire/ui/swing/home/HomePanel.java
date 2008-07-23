@@ -13,6 +13,8 @@ import javax.swing.JPanel;
 
 import org.limewire.ui.swing.search.SearchHandler;
 
+import com.google.inject.Inject;
+
 /**
  * The main home page.
  */
@@ -21,6 +23,7 @@ public class HomePanel extends JPanel {
     public static final String NAME = "Home";
     private final HomeSearchPanel hsPanel;
 
+    @Inject
     public HomePanel(SearchHandler searchHandler) {
         this.hsPanel = new HomeSearchPanel(searchHandler);
 

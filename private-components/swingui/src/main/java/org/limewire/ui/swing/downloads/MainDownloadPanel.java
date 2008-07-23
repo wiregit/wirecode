@@ -24,9 +24,13 @@ import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.ui.swing.util.FontUtils;
 import org.limewire.ui.swing.util.I18n;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 
 
+
+@Singleton
 public class MainDownloadPanel extends JPanel {
 	
     public static final String NAME = "MainDownloadPanel";
@@ -40,6 +44,7 @@ public class MainDownloadPanel extends JPanel {
 	/**
 	 * Create the panel
 	 */
+	@Inject
 	public MainDownloadPanel(DownloadListManager downloadListManager) {
 		this.downloadMediator = new DownloadMediator(downloadListManager);
 		setLayout(new BorderLayout());

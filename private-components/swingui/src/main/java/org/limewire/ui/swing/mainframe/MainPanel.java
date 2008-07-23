@@ -9,6 +9,9 @@ import javax.swing.JPanel;
 
 import org.limewire.ui.swing.nav.NavigableTarget;
 
+import com.google.inject.Singleton;
+
+@Singleton
 class MainPanel extends JPanel implements NavigableTarget {
 
     private final Map<String, JComponent> keyToComponents = new HashMap<String, JComponent>();

@@ -2,7 +2,6 @@ package org.limewire.ui.swing.search;
 
 import javax.swing.SwingUtilities;
 
-import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.core.api.search.SearchDetails;
@@ -14,17 +13,20 @@ import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.search.model.BasicSearchResultsModel;
 
-public class SearchHandlerImpl implements SearchHandler {
+import com.google.inject.Inject;
+
+class SearchHandlerImpl implements SearchHandler {
     
     private final Navigator navigator;
     private final SearchFactory searchFactory;
-    private final SearchResultDownloader searchResultDownloader;
+    private final SearchResultsPanelFactory panelFactory;
     
-    public SearchHandlerImpl(Navigator navigator, SearchFactory searchFactory,
-            SearchResultDownloader searchResultDownloader) {
+    @Inject
+    SearchHandlerImpl(Navigator navigator, SearchFactory searchFactory,
+            SearchResultsPanelFactory panelFactory) {
         this.navigator = navigator;
         this.searchFactory = searchFactory;
-        this.searchResultDownloader = searchResultDownloader;
+        this.panelFactory = panelFactory;
     }
 
     @Override
@@ -43,7 +45,7 @@ public class SearchHandlerImpl implements SearchHandler {
         
         String panelTitle = info.getTitle();
         final BasicSearchResultsModel model = new BasicSearchResultsModel();
-        SearchResultsPanel searchPanel = new SearchResultsPanel(info, model.getVisualSearchResults(), searchResultDownloader, search);
+        SearchResultsPanel searchPanel = panelFactory.createSearchResultsPanel(info, model.getVisualSearchResults(), search);
         NavItem item = navigator.addNavigablePanel(NavCategory.SEARCH, panelTitle, searchPanel, true);
         item.select();
         

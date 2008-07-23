@@ -10,6 +10,9 @@ import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
 
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
+
 import ca.odell.glazedlists.EventList;
 
 public class SearchResultsPanel extends JPanel {
@@ -18,10 +21,10 @@ public class SearchResultsPanel extends JPanel {
     private final ResultsContainer resultsContainer;
     private final SortAndFilterPanel sortAndFilterPanel;
 
-    public SearchResultsPanel(SearchInfo searchInfo,
-            EventList<VisualSearchResult> visualSearchResults,
+    @AssistedInject public SearchResultsPanel(@Assisted SearchInfo searchInfo,
+            @Assisted EventList<VisualSearchResult> visualSearchResults,
             SearchResultDownloader searchResultDownloader,
-            Search search) {
+            @Assisted Search search) {
         this.sortAndFilterPanel = new SortAndFilterPanel();
         this.resultsContainer = new ResultsContainer(sortAndFilterPanel.getSortedAndFilteredList(visualSearchResults), searchResultDownloader, search);
         this.searchTab = new SearchTabItems(searchInfo.getSearchCategory(), new SearchTabItems.SearchTabListener() {

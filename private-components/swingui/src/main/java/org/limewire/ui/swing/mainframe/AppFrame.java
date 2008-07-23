@@ -13,6 +13,7 @@ import org.jdesktop.application.Resource;
 import org.jdesktop.application.SingleFrameApplication;
 import org.limewire.core.impl.download.MockDownloadModule;
 import org.limewire.core.impl.search.MockSearchModule;
+import org.limewire.ui.swing.LimeWireSwingUiModule;
 import org.limewire.ui.swing.util.GuiUtils;
 
 import com.google.inject.Guice;
@@ -22,7 +23,9 @@ import com.google.inject.Injector;
 public class AppFrame extends SingleFrameApplication {
     
     @Inject
-    private static volatile Injector injector;    
+    private static volatile Injector injector;
+    
+    private static volatile boolean started;
 	  
 	/** Default background color for panels */
 	@Resource
@@ -32,29 +35,38 @@ public class AppFrame extends SingleFrameApplication {
 	@Resource
 	private Image frameIcon;
 	
+	public static boolean isStarted() {
+	    return started;
+	}
+	
     @Override
     protected void startup() {
-    	GuiUtils.injectFields(this);
+    	GuiUtils.assignResources(this);
     	initColors();
     	
     	Injector injector = createInjector();
         
     	getMainFrame().setIconImage(frameIcon);
-        getMainFrame().setJMenuBar(new LimeMenuBar());        
-        LimeWireSwingUI ui = new LimeWireSwingUI(injector);
+        getMainFrame().setJMenuBar(new LimeMenuBar());    
+        
+        LimeWireSwingUI ui = injector.getInstance(LimeWireSwingUI.class);
         show(ui);
         ui.goHome();
         
         // Keep this here while building UI - ensures we test 
         // with proper sizes.
         getMainFrame().setSize(new Dimension(1024, 768));
+        
+        started = true;
     }
     
     public Injector createInjector() {
         if(injector == null) {
-            injector = Guice.createInjector(new MockSearchModule(), new MockDownloadModule());
+            injector = Guice.createInjector(new MockSearchModule(), new MockDownloadModule(), new LimeWireSwingUiModule());
+            return injector;
+        } else {
+            return Guice.createInjector(injector, new LimeWireSwingUiModule());
         }
-        return injector;
     }
     
 

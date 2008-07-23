@@ -23,7 +23,7 @@ public class SearchBar extends JTextField {
 	
 	public SearchBar() {
 	    super();
-	    GuiUtils.injectFields(this);
+	    GuiUtils.assignResources(this);
 	    setText(defaultText);
 		setForeground(defaultTextColor);
 		addFocusListener(new SearchFocusListener());

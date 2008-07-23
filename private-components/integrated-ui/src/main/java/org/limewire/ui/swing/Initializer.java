@@ -428,6 +428,14 @@ public final class Initializer {
     private void loadUI(Frame awtSplash) {
         Application.launch(AppFrame.class, new String[0]);
         awtSplash.dispose();
+        
+        SwingUtils.invokeAndWait(new Runnable() {
+            public void run() {
+                if(!AppFrame.isStarted()) {
+                    System.exit(1);
+                }
+            }
+        });
 //        GUIMediator.setSplashScreenString(I18n.tr("Loading User Interface..."));
 //        stopwatch.resetAndLog("update splash for UI");
 //

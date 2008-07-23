@@ -6,6 +6,9 @@ import java.awt.Dimension;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import com.google.inject.Singleton;
+
+@Singleton
 class StatusPanel extends JPanel {
     
     public StatusPanel() {

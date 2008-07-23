@@ -13,7 +13,7 @@ public class GuiUtils {
 	 * 
 	 * @param object the object whose fields will be injected
 	 */
-	public static void injectFields(Object object) {
+	public static void assignResources(Object object) {
 		Application.getInstance().getContext().getResourceMap(AppFrame.class)
 				.injectFields(object);
 	}

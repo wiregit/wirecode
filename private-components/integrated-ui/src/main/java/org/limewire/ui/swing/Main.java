@@ -14,7 +14,18 @@ public class Main {
         if (args == null || args.length == 0)
             splash = showInitialSplash();
         
-        new Initializer().initialize(args, splash);
+        try {
+            new Initializer().initialize(args, splash);
+        } catch(Throwable t) {
+            if(splash != null) {
+                try {
+                    splash.dispose();
+                } catch(Throwable ignored) {}
+            }
+            
+            t.printStackTrace();
+            System.exit(1);
+        }
     }
     
     /**

@@ -6,7 +6,10 @@ import java.awt.Dimension;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import com.google.inject.Singleton;
 
+
+@Singleton
 class TopPanel extends JPanel {
     
     public TopPanel() {

@@ -26,6 +26,7 @@ import ca.odell.glazedlists.GlazedLists;
 import ca.odell.glazedlists.ObservableElementList;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
@@ -35,7 +36,8 @@ import com.limegroup.gnutella.downloader.RemoteFileDescFactory;
 import com.limegroup.gnutella.settings.SharingSettings;
 
 
-public class CoreDownloadListManager implements DownloadListManager{
+@Singleton
+public class CoreDownloadListManager implements DownloadListManager {
     
 	private final EventList<DownloadItem> downloadItems;
 	private final DownloadManager downloadManager;

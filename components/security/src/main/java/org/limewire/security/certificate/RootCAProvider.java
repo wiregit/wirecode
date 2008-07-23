@@ -3,9 +3,6 @@ package org.limewire.security.certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import com.google.inject.Singleton;
-
-@Singleton
 public interface RootCAProvider {
     /**
      * This method should do a lookup of the root certificate, validate that it

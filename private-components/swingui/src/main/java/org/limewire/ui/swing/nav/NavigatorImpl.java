@@ -13,12 +13,18 @@ import org.limewire.ui.swing.library.VideoPanel;
 import org.limewire.ui.swing.mainframe.StorePanel;
 import org.limewire.ui.swing.search.SearchHandler;
 
-public class NavigatorImpl implements Navigator {
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+
+@Singleton
+class NavigatorImpl implements Navigator {
 
     private final NavigableTarget navTarget;
     private final NavigableTree navTree;
 
-    public NavigatorImpl(NavigableTarget navTarget, NavigableTree navTree) {
+    @Inject
+    public NavigatorImpl(@Named("MainTarget") NavigableTarget navTarget, @Named("MainTree") NavigableTree navTree) {
         this.navTarget = navTarget;
         this.navTree = navTree;
         
@@ -75,13 +81,16 @@ public class NavigatorImpl implements Navigator {
         navTarget.showNavigablePanel(navItem);
     }
 
-    public void addDefaultNavigableItems(SearchHandler searchHandler) {
-        addNavigablePanel(NavCategory.LIMEWIRE, HomePanel.NAME, new HomePanel(searchHandler), false);
-        addNavigablePanel(NavCategory.LIMEWIRE, StorePanel.NAME, new StorePanel(), false);
+    @Inject
+    public void addDefaultNavigableItems(SearchHandler searchHandler, HomePanel homePanel,
+            StorePanel storePanel, MusicPanel musicPanel, VideoPanel videoPanel,
+            ImagePanel imagePanel, DocumentPanel documentPanel) {
+        addNavigablePanel(NavCategory.LIMEWIRE, HomePanel.NAME, homePanel, false);
+        addNavigablePanel(NavCategory.LIMEWIRE, StorePanel.NAME, storePanel, false);
 
-        addNavigablePanel(NavCategory.LIBRARY, MusicPanel.NAME, new MusicPanel(), false);
-        addNavigablePanel(NavCategory.LIBRARY, VideoPanel.NAME, new VideoPanel(), false);
-        addNavigablePanel(NavCategory.LIBRARY, ImagePanel.NAME, new ImagePanel(), false);
-        addNavigablePanel(NavCategory.LIBRARY, DocumentPanel.NAME, new DocumentPanel(), false);
+        addNavigablePanel(NavCategory.LIBRARY, MusicPanel.NAME, musicPanel, false);
+        addNavigablePanel(NavCategory.LIBRARY, VideoPanel.NAME, videoPanel, false);
+        addNavigablePanel(NavCategory.LIBRARY, ImagePanel.NAME, imagePanel, false);
+        addNavigablePanel(NavCategory.LIBRARY, DocumentPanel.NAME, documentPanel, false);
     }
 }

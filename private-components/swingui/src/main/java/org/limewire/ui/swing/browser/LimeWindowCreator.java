@@ -35,7 +35,7 @@ class LimeWindowCreator extends WindowCreator {
     private File icoFile;
     
     LimeWindowCreator(WindowCreator delegateCreator) {
-        GuiUtils.injectFields(this);
+        GuiUtils.assignResources(this);
         icoFile = new File(URI.create(ClassLoader.getSystemResource(limeFrameIconLocation).getFile()).getPath()).getAbsoluteFile();
         this.delegateCreator = delegateCreator;
     }

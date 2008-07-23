@@ -29,6 +29,10 @@ import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.Line;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+@Singleton
 class LeftPanel extends JPanel implements NavigableTree {
 
     private final SearchBar searchBar;
@@ -41,8 +45,9 @@ class LeftPanel extends JPanel implements NavigableTree {
     @Resource
     private Color lineColor;
 
+    @Inject
     public LeftPanel(DownloadListManager downloadListManager) {
-    	GuiUtils.injectFields(this);
+    	GuiUtils.assignResources(this);
         this.searchBar = new SearchBar();
         this.navTree = new NavTree();
         this.downloadPanel =  new DownloadSummaryPanel(downloadListManager.getDownloads());
@@ -113,6 +118,7 @@ class LeftPanel extends JPanel implements NavigableTree {
         add(filesPanel, gbc);
     }
 
+    @Inject
     public void setSearchHandler(SearchHandler searchHandler) {
         this.searchHandler = searchHandler;
     }

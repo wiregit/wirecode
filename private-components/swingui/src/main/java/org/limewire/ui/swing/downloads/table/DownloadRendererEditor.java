@@ -71,7 +71,7 @@ public class DownloadRendererEditor extends JPanel implements
 	 * Create the panel
 	 */
 	public DownloadRendererEditor() {
-		GuiUtils.injectFields(this);
+		GuiUtils.assignResources(this);
 
 		iconLabel = new JLabel();
 

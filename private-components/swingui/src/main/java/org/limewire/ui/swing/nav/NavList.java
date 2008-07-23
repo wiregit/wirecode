@@ -45,7 +45,7 @@ class NavList extends JXPanel {
     private Icon rolloverKillIcon;
     
     NavList(String title, Navigator.NavCategory target) {
-        GuiUtils.injectFields(this);
+        GuiUtils.assignResources(this);
         
         this.navCategory = target;
         this.titleLabel = new JLabel(title);

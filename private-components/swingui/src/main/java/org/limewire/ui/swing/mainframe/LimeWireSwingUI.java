@@ -7,26 +7,18 @@ import java.awt.GridBagLayout;
 import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
-import org.limewire.core.api.download.DownloadListManager;
-import org.limewire.core.api.search.SearchFactory;
 import org.limewire.ui.swing.downloads.MainDownloadPanel;
-import org.limewire.ui.swing.nav.NavigatorImpl;
+import org.limewire.ui.swing.nav.Navigator;
 import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.search.SearchHandler;
-import org.limewire.ui.swing.search.SearchHandlerImpl;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.Line;
 
-import com.google.inject.Injector;
+import com.google.inject.Inject;
 
 public class LimeWireSwingUI extends JPanel {
     
-    private final TopPanel topPanel;
     private final LeftPanel leftPanel;
-    private final MainPanel mainPanel;
-    private final StatusPanel statusPanel;
-    private final NavigatorImpl navigator;
-    private final SearchHandler searchHandler;
     
     /**
 	 * The color of the lines separating the GUI panels
@@ -34,24 +26,16 @@ public class LimeWireSwingUI extends JPanel {
 	@Resource
     private Color lineColor;
     
-    public LimeWireSwingUI(Injector coreInjector) {
-    	GuiUtils.injectFields(this);
-    	
-        DownloadListManager downloadListManager = coreInjector.getInstance(DownloadListManager.class);        
-        
-        this.mainPanel = new MainPanel();
-        this.leftPanel = new LeftPanel(downloadListManager);
-        this.navigator = new NavigatorImpl(mainPanel, leftPanel);
-        this.topPanel = new TopPanel();
-        this.statusPanel = new StatusPanel();
-        this.searchHandler = new SearchHandlerImpl(navigator, coreInjector.getInstance(SearchFactory.class), downloadListManager);
+	@Inject
+    public LimeWireSwingUI(TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
+            StatusPanel statusPanel, Navigator navigator, SearchHandler searchHandler,
+            MainDownloadPanel mainDownloadPanel) {
+    	GuiUtils.assignResources(this);
+    	        
+    	this.leftPanel = leftPanel;
         
         //TODO:move this and have clicks on DownloadSummaryPanel navigate to downloadPanel
-        MainDownloadPanel downloadPanel = new MainDownloadPanel(downloadListManager);
-        navigator.addNavigablePanel(NavCategory.NONE, MainDownloadPanel.NAME, downloadPanel, false);
-        
-        leftPanel.setSearchHandler(searchHandler);
-        navigator.addDefaultNavigableItems(searchHandler);
+        navigator.addNavigablePanel(NavCategory.NONE, MainDownloadPanel.NAME, mainDownloadPanel, false);
         
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
