@@ -29,6 +29,7 @@ import org.limewire.swarm.file.FileCoordinatorImpl;
 import org.limewire.swarm.file.SwarmFileImpl;
 import org.limewire.swarm.file.SwarmFileSystemImpl;
 import org.limewire.swarm.file.selection.ContiguousSelectionStrategy;
+import org.limewire.swarm.file.verifier.MD5SumFileVerifier;
 import org.limewire.swarm.file.verifier.NoOpFileVerifier;
 import org.limewire.swarm.file.verifier.RandomFailFileVerifier;
 import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
@@ -152,8 +153,9 @@ public class SwarmerImplTest extends BaseTestCase {
         int lowByte = 0;
         int highByte = 44425 - 1;
         long fileSize = highByte + 1;
-        Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize);
-        swarmer.addSource(new SourceImpl(uri, Range.createRange(lowByte, highByte)));
+        Range range = Range.createRange(lowByte, highByte);
+        Swarmer swarmer = createSwarmer(file, "gnutella_protocol_0.4.pdf", fileSize, new MD5SumFileVerifier(range,md5));
+        swarmer.addSource(new SourceImpl(uri, range));
         assertSwarmer(md5, file, fileSize);
     }
 
@@ -168,6 +170,10 @@ public class SwarmerImplTest extends BaseTestCase {
     }
 
     private Swarmer createSwarmer(File file, String path, long fileSize)
+    throws InterruptedException, IOException {
+       return  createSwarmer(file,path,fileSize,new RandomFailFileVerifier());
+    }
+    private Swarmer createSwarmer(File file, String path, long fileSize, SwarmBlockVerifier swarmFileVerifier)
             throws InterruptedException, IOException {
         System.out.println("-----------------------------------");
         HttpParams params = new BasicHttpParams();
@@ -185,7 +191,6 @@ public class SwarmerImplTest extends BaseTestCase {
         SwarmFileSystem swarmfilesystem = new SwarmFileSystemImpl(new SwarmFileImpl(file, path,
                 fileSize));
 
-        SwarmBlockVerifier swarmFileVerifier = new RandomFailFileVerifier();
         SwarmBlockSelector selectionStrategy = new ContiguousSelectionStrategy();
 
         SwarmCoordinator swarmCoordinator = new FileCoordinatorImpl(swarmfilesystem,
