@@ -33,16 +33,6 @@ public interface SwarmCoordinator {
      */
     void unlease(Range range);
 
-    /** Returns true if any range is available for leasing. */
-    boolean isRangeAvailableForLease();
-
-    /**
-     * Returns true if any ranges within available ranges are available for
-     * leasing.
-     */
-    boolean isRangeAvailableForLease(IntervalSet availableRanges);
-
-    
     /**
      * Writes the given range to disk using the supplied buffer. The buffer might not contain
      * The full range to be written, the number of bytes written will be returned and a modified
