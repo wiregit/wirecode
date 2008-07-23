@@ -94,10 +94,10 @@ public class SwarmerImplMultipleFilesTest extends BaseTestCase {
         SwarmFileSystemImpl swarmfilesystem = new SwarmFileSystemImpl();
 
         SwarmFileImpl swarmFile1 = new SwarmFileImpl(file1, "gnutella_protocol_0.4.pdf", fileSize1);
-        swarmfilesystem.add(swarmFile1);
+        swarmfilesystem.addSwarmFile(swarmFile1);
 
         SwarmFileImpl swarmFile2 = new SwarmFileImpl(file2, "hi.txt", fileSize2);
-        swarmfilesystem.add(swarmFile2);
+        swarmfilesystem.addSwarmFile(swarmFile2);
 
         SwarmBlockVerifier swarmFileVerifier = new NoOpFileVerifier();
         SwarmBlockSelector selectionStrategy = new ContiguousSelectionStrategy();

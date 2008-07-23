@@ -15,11 +15,11 @@ public class SwarmFileSystemImplTest extends TestCase {
         SwarmFileSystemImpl swarmFileSystem = new SwarmFileSystemImpl();
         File file1 = createFile("testGetCompleteSize.1.txt");
         file1.delete();
-        swarmFileSystem.add(new SwarmFileImpl(file1, 1024));
+        swarmFileSystem.addSwarmFile(new SwarmFileImpl(file1, 1024));
         Assert.assertEquals(1024, swarmFileSystem.getCompleteSize());
         File file2 = createFile("testGetCompleteSize.2.txt");
         file2.delete();
-        swarmFileSystem.add(new SwarmFileImpl(file2, 1023));
+        swarmFileSystem.addSwarmFile(new SwarmFileImpl(file2, 1023));
         Assert.assertEquals(2047, swarmFileSystem.getCompleteSize());
     }
 
@@ -31,7 +31,7 @@ public class SwarmFileSystemImplTest extends TestCase {
         SwarmFileSystemImpl swarmFileSystem = new SwarmFileSystemImpl();
         File file1 = createFile("testWrite.1.txt");
         file1.delete();
-        swarmFileSystem.add(new SwarmFileImpl(file1, 1024));
+        swarmFileSystem.addSwarmFile(new SwarmFileImpl(file1, 1024));
 
         String testWrite1 = "testWrite File 1";
         ByteBuffer byteBuffer = ByteBuffer.allocate(testWrite1.length());
@@ -47,7 +47,7 @@ public class SwarmFileSystemImplTest extends TestCase {
     public void testRead1() throws IOException {
         SwarmFileSystemImpl swarmFileSystem = new SwarmFileSystemImpl();
         File file1 = createFile("testWrite.1.txt");
-        swarmFileSystem.add(new SwarmFileImpl(file1, 1024));
+        swarmFileSystem.addSwarmFile(new SwarmFileImpl(file1, 1024));
         
         String testWrite1 = "testWrite File 1";
         ByteBuffer byteBuffer = ByteBuffer.allocate(testWrite1.length());
@@ -61,11 +61,11 @@ public class SwarmFileSystemImplTest extends TestCase {
         SwarmFileSystemImpl swarmFileSystem = new SwarmFileSystemImpl();
         File file1 = createFile("testWriteMulti.1.txt");
         file1.delete();
-        swarmFileSystem.add(new SwarmFileImpl(file1, 10));
+        swarmFileSystem.addSwarmFile(new SwarmFileImpl(file1, 10));
         
         File file2 = createFile("testWriteMulti.2.txt");
         file2.delete();
-        swarmFileSystem.add(new SwarmFileImpl(file2, 6));
+        swarmFileSystem.addSwarmFile(new SwarmFileImpl(file2, 6));
         
         
 
@@ -87,11 +87,11 @@ public class SwarmFileSystemImplTest extends TestCase {
         SwarmFileSystemImpl swarmFileSystem = new SwarmFileSystemImpl();
         File file1 = createFile("testWriteMultiPartial.1.txt");
         file1.delete();
-        swarmFileSystem.add(new SwarmFileImpl(file1, 10));
+        swarmFileSystem.addSwarmFile(new SwarmFileImpl(file1, 10));
         
         File file2 = createFile("testWriteMultiPartial.2.txt");
         file2.delete();
-        swarmFileSystem.add(new SwarmFileImpl(file2, 6));
+        swarmFileSystem.addSwarmFile(new SwarmFileImpl(file2, 6));
         
         
 

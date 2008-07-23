@@ -15,7 +15,7 @@ import org.limewire.io.IOUtils;
 import org.limewire.swarm.SwarmFileSystem;
 
 public class SwarmFileSystemImpl implements SwarmFileSystem {
-    private ArrayList<SwarmFile> files = new ArrayList<SwarmFile>();
+    private ArrayList<SwarmFile> swarmFiles = new ArrayList<SwarmFile>();
 
     private Map<SwarmFile, FileHandle> fileHandles = new HashMap<SwarmFile, FileHandle>();
 
@@ -26,7 +26,7 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
     }
 
     public SwarmFileSystemImpl(SwarmFileImpl swarmFile) {
-        add(swarmFile);
+        addSwarmFile(swarmFile);
     }
 
     public long getCompleteSize() {
@@ -34,7 +34,7 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
     }
 
     public SwarmFile getSwarmFile(long position) {
-        for (SwarmFile swarmFile : files) {
+        for (SwarmFile swarmFile : swarmFiles) {
             long startByte = swarmFile.getStartByte();
             long endByte = swarmFile.getEndByte();
             if (startByte <= position && endByte >= position) {
@@ -46,7 +46,7 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
     }
 
     public List<SwarmFile> getSwarmFiles() {
-        return files;
+        return swarmFiles;
     }
 
     public List<SwarmFile> getSwarmFilesInRange(Range range) {
@@ -55,7 +55,7 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
         long rangeStart = range.getLow();
         long rangeEnd = range.getHigh();
 
-        for (SwarmFile swarmFile : files) {
+        for (SwarmFile swarmFile : swarmFiles) {
             long startByte = swarmFile.getStartByte();
             long endByte = swarmFile.getEndByte();
             if (startByte <= rangeEnd && endByte >= rangeStart) {
@@ -66,8 +66,8 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
         return filesRet;
     }
 
-    public synchronized void add(SwarmFileImpl swarmFile) {
-        files.add(swarmFile);
+    public synchronized void addSwarmFile(SwarmFileImpl swarmFile) {
+        swarmFiles.add(swarmFile);
         swarmFile.setStartByte(completeSize);
         completeSize += swarmFile.getFileSize();
     }
@@ -95,7 +95,7 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
     }
 
     public void close() throws IOException {
-        for (SwarmFile swarmFile : files) {
+        for (SwarmFile swarmFile : swarmFiles) {
             FileHandle fileHandle = getFileHandle(swarmFile);
             fileHandle.close();
         }
