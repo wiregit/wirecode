@@ -14,7 +14,7 @@ import org.apache.http.protocol.HttpContext;
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
 import org.limewire.swarm.SwarmCoordinator;
-import org.limewire.swarm.file.SwarmFile;
+import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.http.SwarmExecutionContext;
 import org.limewire.swarm.http.SwarmHttpUtils;
 import org.limewire.swarm.http.SwarmSource;

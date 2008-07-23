@@ -14,6 +14,7 @@ import org.limewire.collection.Range;
 import org.limewire.swarm.AbstractSwarmCoordinator;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmCoordinator;
+import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmCoordinatorListener;
 import org.limewire.swarm.SwarmCoordinatorListenerList;

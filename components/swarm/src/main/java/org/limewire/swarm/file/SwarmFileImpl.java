@@ -2,6 +2,8 @@ package org.limewire.swarm.file;
 
 import java.io.File;
 
+import org.limewire.swarm.SwarmFile;
+
 public class SwarmFileImpl implements SwarmFile {
     private final File file;
 
@@ -11,6 +13,14 @@ public class SwarmFileImpl implements SwarmFile {
 
     private String path;
 
+    /**
+     * Contructor for the SwarmFileImpl. If the given path is null, the given
+     * file's name is uses as the path instead.
+     * 
+     * @param file
+     * @param path
+     * @param completeSize
+     */
     public SwarmFileImpl(File file, String path, long completeSize) {
         this.file = file;
         this.completeSize = completeSize;
@@ -20,6 +30,13 @@ public class SwarmFileImpl implements SwarmFile {
         }
     }
 
+    /**
+     * Contructor for the SwarmFileImpl. The given file's name is uses as the
+     * path.
+     * 
+     * @param file
+     * @param completeSize
+     */
     public SwarmFileImpl(File file, long completeSize) {
         this(file, file.getName(), completeSize);
     }
@@ -33,6 +50,11 @@ public class SwarmFileImpl implements SwarmFile {
         return file;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.limewire.swarm.file.SwarmFile#getPath()
+     */
     public String getPath() {
         return path;
     }
@@ -55,6 +77,12 @@ public class SwarmFileImpl implements SwarmFile {
         return startByte;
     }
 
+    /**
+     * Method to allow the SwarmFileSystemImpl to set the startByte of its
+     * files.
+     * 
+     * @param startByte
+     */
     public void setStartByte(long startByte) {
         this.startByte = startByte;
     }

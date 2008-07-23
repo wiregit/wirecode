@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 
 import org.limewire.collection.IntervalSet;
 import org.limewire.collection.Range;
-import org.limewire.swarm.file.SwarmFile;
 
 public interface SwarmCoordinator {
 

@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
+import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.SwarmFileSystem;
 
 public class SwarmFileSystemImpl implements SwarmFileSystem {

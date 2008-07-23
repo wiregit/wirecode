@@ -3,7 +3,6 @@ package org.limewire.swarm;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import org.limewire.swarm.file.SwarmFile;
 
 public interface SwarmFileSystem {
 

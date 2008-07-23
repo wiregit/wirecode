@@ -20,11 +20,11 @@ import org.limewire.net.SocketsManagerImpl;
 import org.limewire.nio.NIODispatcher;
 import org.limewire.swarm.SwarmBlockSelector;
 import org.limewire.swarm.SwarmCoordinator;
+import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.SwarmCoordinatorListener;
 import org.limewire.swarm.SwarmBlockVerifier;
 import org.limewire.swarm.file.FileCoordinatorImpl;
-import org.limewire.swarm.file.SwarmFile;
 import org.limewire.swarm.file.SwarmFileImpl;
 import org.limewire.swarm.file.SwarmFileSystemImpl;
 import org.limewire.swarm.file.selection.ContiguousSelectionStrategy;
@@ -111,32 +111,7 @@ public class SwarmerImplMultipleFilesTest extends BaseTestCase {
         
        
         final Swarmer swarmer = new SwarmerImpl(executionHandler, connectionReuseStrategy,
-                ioReactor, params, new SourceEventListener()
-        {
-
-            public void connectFailed(Swarmer swarmer, SwarmSource source) {
-                System.out.println("connect failed");
-                
-                
-            }
-
-            public void connected(Swarmer swarmer, SwarmSource source) {
-                System.out.println("connectted");
-                
-            }
-
-            public void connectionClosed(Swarmer swarmer, SwarmSource source) {
-                System.out.println("connectionClosed");
-              //  swarmer.addSource(swarmSource);
-            }
-
-            public void responseProcessed(Swarmer swarmer, SwarmSource source, int statusCode) {
-                System.out.println("responseProcessed");
-                
-            }
-            
-        
-        });
+                ioReactor, params, null);
 
         swarmCoordinator.addListener(new SwarmCoordinatorListener() {
 

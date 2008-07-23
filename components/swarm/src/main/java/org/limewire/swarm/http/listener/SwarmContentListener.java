@@ -11,9 +11,9 @@ import org.apache.http.nio.IOControl;
 import org.limewire.collection.Range;
 import org.limewire.io.IOUtils;
 import org.limewire.swarm.SwarmCoordinator;
+import org.limewire.swarm.SwarmFile;
 import org.limewire.swarm.SwarmWriteJob;
 import org.limewire.swarm.SwarmWriteJobControl;
-import org.limewire.swarm.file.SwarmFile;
 import org.limewire.swarm.http.SwarmHttpContentImpl;
 import org.limewire.util.Objects;
 
