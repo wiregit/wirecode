@@ -19,6 +19,7 @@
 				<pathelement location="${limewire.lib.jars}/AppFramework.jar"/>
 				<pathelement location="${limewire.lib.jars}/glazedlists-1.7.0_java15.jar"/>
 				<pathelement location="${limewire.lib.jars}/guice-snapshot.jar"/>
+				<pathelement location="${limewire.lib.jars}/guice-assistedinject-snapshot.jar"/>
 				<pathelement location="${limewire.lib.jars}/mozdom4java.jar"/>
 				<pathelement location="${limewire.lib.jars}/MozillaInterfaces-1.9.jar"/>
 				<pathelement location="${limewire.lib.jars}/MozillaGlue-1.9.jar"/>

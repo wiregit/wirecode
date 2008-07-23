@@ -3,17 +3,19 @@ package org.limewire.ui.swing.search;
 import java.awt.CardLayout;
 
 import org.jdesktop.swingx.JXPanel;
-import org.limewire.core.api.download.SearchResultDownloader;
 import org.limewire.core.api.search.ResultType;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchCategory;
 import org.limewire.ui.swing.search.model.VisualSearchResult;
-import org.limewire.ui.swing.search.resultpanel.AllResultsPanel;
-import org.limewire.ui.swing.search.resultpanel.AudioResultsPanel;
-import org.limewire.ui.swing.search.resultpanel.DocumentsResultsPanel;
-import org.limewire.ui.swing.search.resultpanel.ImagesResultsPanel;
+import org.limewire.ui.swing.search.resultpanel.AllResultsPanelFactory;
+import org.limewire.ui.swing.search.resultpanel.AudioResultsPanelFactory;
+import org.limewire.ui.swing.search.resultpanel.DocumentsResultsPanelFactory;
+import org.limewire.ui.swing.search.resultpanel.ImagesResultsPanelFactory;
 import org.limewire.ui.swing.search.resultpanel.SearchScrollPane;
-import org.limewire.ui.swing.search.resultpanel.VideoResultsPanel;
+import org.limewire.ui.swing.search.resultpanel.VideoResultsPanelFactory;
+
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.AssistedInject;
 
 import ca.odell.glazedlists.EventList;
 import ca.odell.glazedlists.FilterList;
@@ -23,12 +25,18 @@ import ca.odell.glazedlists.matchers.Matcher;
 import ca.odell.glazedlists.swing.EventListModel;
 import ca.odell.glazedlists.swing.EventSelectionModel;
 
-class ResultsContainer extends JXPanel {
+public class ResultsContainer extends JXPanel {
 
     private final CardLayout cardLayout;
     private final FilterMatcherEditor matcherEditor;
 
-    ResultsContainer(EventList<VisualSearchResult> visualSearchResults, SearchResultDownloader searchResultDownloader, Search search) {
+    @AssistedInject ResultsContainer(@Assisted EventList<VisualSearchResult> visualSearchResults, 
+                     @Assisted Search search,
+                     AllResultsPanelFactory allFactory,
+                     AudioResultsPanelFactory audioFactory,
+                     VideoResultsPanelFactory videoFactory,
+                     ImagesResultsPanelFactory imagesFactory,
+                     DocumentsResultsPanelFactory documentsFactory) {
         this.cardLayout = new CardLayout();
         setLayout(cardLayout);
         
@@ -38,11 +46,11 @@ class ResultsContainer extends JXPanel {
         EventListModel<VisualSearchResult> eventListModel = new EventListModel<VisualSearchResult>(filterList);
         EventSelectionModel<VisualSearchResult> eventSelectionModel = new EventSelectionModel<VisualSearchResult>(filterList);
         eventSelectionModel.setSelectionMode(ListSelection.MULTIPLE_INTERVAL_SELECTION_DEFENSIVE);
-        add(new SearchScrollPane(new AllResultsPanel(eventListModel, eventSelectionModel, searchResultDownloader, search)), SearchCategory.ALL.name());
-        add(new SearchScrollPane(new AudioResultsPanel(eventListModel, eventSelectionModel, searchResultDownloader, search)), SearchCategory.AUDIO.name());
-        add(new SearchScrollPane(new VideoResultsPanel(eventListModel, eventSelectionModel, searchResultDownloader, search)), SearchCategory.VIDEO.name());
-        add(new SearchScrollPane(new ImagesResultsPanel(eventListModel, eventSelectionModel, searchResultDownloader, search)), SearchCategory.IMAGES .name());
-        add(new SearchScrollPane(new DocumentsResultsPanel(eventListModel, eventSelectionModel, searchResultDownloader, search)),SearchCategory.DOCUMENTS.name());
+        add(new SearchScrollPane(allFactory.create(eventListModel, eventSelectionModel, search)), SearchCategory.ALL.name());
+        add(new SearchScrollPane(audioFactory.create(eventListModel, eventSelectionModel, search)), SearchCategory.AUDIO.name());
+        add(new SearchScrollPane(videoFactory.create(eventListModel, eventSelectionModel, search)), SearchCategory.VIDEO.name());
+        add(new SearchScrollPane(imagesFactory.create(eventListModel, eventSelectionModel, search)), SearchCategory.IMAGES .name());
+        add(new SearchScrollPane(documentsFactory.create(eventListModel, eventSelectionModel, search)),SearchCategory.DOCUMENTS.name());
     }
 
     void showCategory(SearchCategory category) {
