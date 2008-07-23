@@ -7,6 +7,7 @@ import org.limewire.setting.FileSetting;
 import org.limewire.setting.FloatSetting;
 import org.limewire.setting.IntSetting;
 import org.limewire.setting.LongSetting;
+import org.limewire.setting.StringArraySetting;
 import org.limewire.setting.StringSetting;
 import org.limewire.util.OSUtils;
 
@@ -30,6 +31,10 @@ public class ApplicationSettings extends LimeProps {
     @InspectablePrimitive("average application uptime")
     public static final IntSetting AVERAGE_UPTIME =
         FACTORY.createExpirableIntSetting("AVERAGE_UPTIME", 0);
+    
+    @InspectablePrimitive("last n application uptimes")
+    public static final StringArraySetting LAST_N_UPTIMES =
+        FACTORY.createStringArraySetting("LAST_N_UPTIMES", new String[0]);
    
     /**
 	 * The total time this user has used the application.
