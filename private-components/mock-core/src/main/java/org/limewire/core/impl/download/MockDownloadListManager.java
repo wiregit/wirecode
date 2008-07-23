@@ -66,10 +66,16 @@ public class MockDownloadListManager implements DownloadListManager {
 		addDownload(item);
 		
 		item = new MockDownloadItem("queued file", 5.5,
-				DownloadState.QUEUED, DownloadItem.Category.DOCUMENT);
+				DownloadState.LOCAL_QUEUED, DownloadItem.Category.DOCUMENT);
 		item.addDownloadSource(new MockDownloadSource("Barack"));
 		item.addDownloadSource(new MockDownloadSource("Bob"));
 		addDownload(item);
+		
+		item = new MockDownloadItem("other queued file", 5.5,
+                DownloadState.REMOTE_QUEUED, DownloadItem.Category.DOCUMENT);
+        item.addDownloadSource(new MockDownloadSource("Barack"));
+        item.addDownloadSource(new MockDownloadSource("Bob"));
+        addDownload(item);
 		
 		item = new MockDownloadItem("Paused file", 5.5,
 				DownloadState.PAUSED, DownloadItem.Category.AUDIO);

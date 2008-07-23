@@ -11,6 +11,7 @@ import org.limewire.core.api.download.DownloadState;
 import org.limewire.util.CommonUtils;
 
 import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.Downloader.DownloadStatus;
 
 public class CoreDownloadItem implements DownloadItem {
@@ -69,6 +70,7 @@ public class CoreDownloadItem implements DownloadItem {
 
     @Override
     public List<DownloadSource> getSources() {
+        //TODO: getSources
         return Collections.singletonList((DownloadSource)new CoreDownloadSource("name"));
     }
 
@@ -84,18 +86,29 @@ public class CoreDownloadItem implements DownloadItem {
     }
 
     @Override
-    public String getRemainingTime() {
-        // TODO Auto-generated method stub
-        double remaining = getTotalSize() - getCurrentSize();
-        double speedInBytes = downloader.getAverageBandwidth() * 1000;
-        System.out.println(remaining + "/" + speedInBytes);
-        return CommonUtils.seconds2time((long) (remaining / speedInBytes));
-        // return "remaining time todo";
+    public String getRemainingDownloadTime() {
+        double remaining = (getTotalSize() - getCurrentSize()) / 1024.0;
+        float speed = getDownloadSpeed();
+        if (speed > 0) {
+            return CommonUtils.seconds2time((long) (remaining / speed));
+        } else {
+            // TODO: remaining time when speed is unknown
+            return "unknown";
+        }
+
+    }
+    
+    @Override
+    public float getDownloadSpeed(){
+        try {
+            return downloader.getMeasuredBandwidth();
+        } catch (InsufficientDataException e) {
+            return 0;
+        }  
     }
 
     @Override
     public DownloadState getState() {
-        // TODO Auto-generated method stub
         return convertState(downloader.getState());
     }
 
@@ -122,50 +135,64 @@ public class CoreDownloadItem implements DownloadItem {
 
     }
     
+    @Override
+    public int getQueuePosition(){
+        return downloader.getQueuePosition();
+    }
+    
     private static DownloadState convertState(DownloadStatus status) {
-        // TODO: actually return proper state
+        // TODO: double check states
         switch (status) {
 
         case SAVING:
+        case HASHING:
             return DownloadState.FINISHING;
 
         case DOWNLOADING:
+        case FETCHING://"FETCHING" is downloading .torrent file
+        case IDENTIFY_CORRUPTION: // or should this be FINISHING?  doesn't seem to be used
             return DownloadState.DOWNLOADING;
 
-        case FETCHING:
+        
         case CONNECTING:
         case RESUMING:
         case INITIALIZING:
+        case WAITING_FOR_GNET_RESULTS:
+        case QUERYING_DHT:
+        case BUSY:
         case WAITING_FOR_CONNECTIONS:
+        case ITERATIVE_GUESSING:
             return DownloadState.CONNECTING;
 
         case COMPLETE:
             return DownloadState.DONE;
 
         case REMOTE_QUEUED:
-        case HASHING:
-        case ITERATIVE_GUESSING:
-        case QUERYING_DHT:
+            return DownloadState.REMOTE_QUEUED;
+            
+
         case QUEUED:
-            return DownloadState.QUEUED;
+            return DownloadState.LOCAL_QUEUED;
 
         case PAUSED:
             return DownloadState.PAUSED;
 
-        case WAITING_FOR_GNET_RESULTS:
+        
         case WAITING_FOR_USER:
-        case BUSY:
+        case GAVE_UP://"GAVE_UP" means no sources
             return DownloadState.STALLED;
 
-        case GAVE_UP:
         case ABORTED:
+            return DownloadState.CANCELLED;
+
         case DISK_PROBLEM:
         case CORRUPT_FILE:
-        case INVALID:
         case RECOVERY_FAILED:
-        case IDENTIFY_CORRUPTION:
+        case INVALID:
             return DownloadState.ERROR;
+            
 
+       
         default:
             return DownloadState.DOWNLOADING;
         }
@@ -185,4 +212,28 @@ public class CoreDownloadItem implements DownloadItem {
         }
         return hashCode;
     }
+
+    @Override
+    public String getRemainingStateTime() {
+        return CommonUtils.seconds2time(downloader.getRemainingStateTime());
+    }
+
+    @Override
+    public ErrorState getErrorState() {
+        switch (downloader.getState()) {
+        case CORRUPT_FILE:
+        case RECOVERY_FAILED:
+            return ErrorState.CORRUPT_FILE;
+        case DISK_PROBLEM:
+            return ErrorState.DISK_PROBLEM;
+        case INVALID:
+            return ErrorState.FILE_NOT_SHARABLE;
+       // TODO: what state is this?
+          //  return ErrorState.UNABLE_TO_CONNECT;
+        default:
+            return ErrorState.NONE;
+        }
+    }
+    
+   
 }

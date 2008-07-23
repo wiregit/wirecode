@@ -7,7 +7,8 @@ public enum DownloadState {
 	DOWNLOADING(true, true, false, false), 
 	PAUSED(true, false, true, false), 
 	FINISHING(true, false, false, false), 
-	QUEUED(true, false, false, false), 
+    LOCAL_QUEUED(true, false, false, false), 
+    REMOTE_QUEUED(true, false, false, false), 
 	CANCELLED(false, false, false, false), 
 	STALLED(true, false, false, true), 
 	ERROR(false, false, false, false);

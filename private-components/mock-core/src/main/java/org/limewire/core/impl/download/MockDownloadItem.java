@@ -72,7 +72,7 @@ public class MockDownloadItem implements DownloadItem {
 		return totalSize;
 	}
 
-	public String getRemainingTime() {
+	public String getRemainingDownloadTime() {
 		return "1:42 minutes";
 	}
 
@@ -151,6 +151,28 @@ public class MockDownloadItem implements DownloadItem {
 	public Category getCategory() {
 		return category;
 	}
+
+    @Override
+    public float getDownloadSpeed() {
+        return 56;
+    }
+
+    @Override
+    public int getQueuePosition() {
+        return 2;
+    }
+
+    @Override
+    public String getRemainingStateTime() {
+        // TODO Auto-generated method stub
+        return "1:20";
+    }
+
+    @Override
+    public ErrorState getErrorState() {
+        // TODO Auto-generated method stub
+        return ErrorState.NONE;
+    }
 
 
 

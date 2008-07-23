@@ -112,7 +112,7 @@ public class DownloadRendererEditor extends JPanel implements
 
 		searchAgainButton = new JButton();
 		searchAgainButton.addActionListener(EDITOR_LISTENER);
-		searchAgainButton.setToolTipText(I18n.tr("Search Again"));
+		searchAgainButton.setToolTipText(I18n.tr("Try Again"));
 		searchAgainButton.setText("S");
 		
 		buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -235,7 +235,7 @@ public class DownloadRendererEditor extends JPanel implements
 		}
 		statusLabel.setText(getMessage(item));
 		if(item.getState() == DownloadState.DOWNLOADING){
-		    timeLabel.setText(item.getRemainingTime());
+		    timeLabel.setText(item.getRemainingDownloadTime());
 		    timeLabel.setVisible(true);
 		} else {
 		    timeLabel.setVisible(false);
@@ -326,7 +326,7 @@ public class DownloadRendererEditor extends JPanel implements
 			} else if (e.getSource() == resumeButton) {
 				downloadItem.resume();
 			} else if (e.getSource() == searchAgainButton) {
-				//TODO: search again
+				downloadItem.resume();
 			}
 			cancelCellEditing();
 		}
@@ -337,27 +337,48 @@ public class DownloadRendererEditor extends JPanel implements
 		switch (item.getState()) {
 		case CANCELLED:
 			return I18n.tr("Cancelled");
+        case FINISHING:
+            return I18n.tr("Finishing download...");
+            //TODO: correct time for finishing
+            //return I18n.tr("Finishing download, {0} remaining", item.getRemainingStateTime());
 		case DONE:
 			return I18n.tr("Done");
 		case CONNECTING:
 			return I18n.tr("Connecting...");
 		case DOWNLOADING:
 			//TODO : uploaders in DownloadItem & plural
-			return I18n.tr("Downloading {0}MB of {1}MB from {2} people", 
-							item.getCurrentSize(), item.getTotalSize(), item.getDownloadSourceCount() );
+			return I18n.tr("Downloading {0} of {1} ({2}) from {3} people", 
+							GuiUtils.toUnitbytes((long)item.getCurrentSize()), GuiUtils.toUnitbytes((long)item.getTotalSize()),
+							GuiUtils.rate2speed(item.getDownloadSpeed()), item.getDownloadSourceCount() );
 		case STALLED:
 			return I18n
-					.tr("Downloading {0}MB of {1}MB from 0 people",
-							new Object[] { item.getCurrentSize(),
-									item.getTotalSize() });
+					.tr("Stalled - {0} of {1} ({2}%) from 0 people",
+							new Object[] { GuiUtils.toUnitbytes((long)item.getCurrentSize()),
+					        GuiUtils.toUnitbytes((long)item.getTotalSize() ), item.getPercentComplete()});
 		case ERROR:
-			return I18n.tr("Cancelled");
+			switch (item.getErrorState()) {
+			//TODO: all error messages should link to: http://wiki.limewire.org/index.php?title=User_Guide_Download
+            case CORRUPT_FILE:
+                return I18n.tr("Unable to download: the file is corrupted");
+            case DISK_PROBLEM:
+                return I18n.tr("Unable to download: there is a disk problem");
+            case FILE_NOT_SHARABLE:
+                return I18n.tr("Unable to download: the file is not sharable ");
+            case UNABLE_TO_CONNECT:
+                return I18n.tr("Unable to download: trouble connecting to people");
+            }
 		case PAUSED:
-			return I18n.tr("Paused -- {0}MB of {1}MB", new Object[] {
-					item.getCurrentSize(), item.getTotalSize() });
+			return I18n.tr("Paused - {0} of {1} ({2}%)", new Object[] {
+			        GuiUtils.toUnitbytes((long)item.getCurrentSize()), GuiUtils.toUnitbytes((long)item.getTotalSize()),
+			        item.getPercentComplete()});
+        case LOCAL_QUEUED:
+            return I18n.tr("Queued – About x seconds before download can begin");
+        case REMOTE_QUEUED:
+            return I18n.tr("Queued – {0} people ahead of you for this file", item.getQueuePosition());
+		default:
+            return item.getState().toString();
 		}
 		
-		return I18n.tr("other message");
 	}
 
 }

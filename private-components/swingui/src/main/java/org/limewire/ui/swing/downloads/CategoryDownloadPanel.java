@@ -69,7 +69,7 @@ public class CategoryDownloadPanel extends JPanel {
 		addTable(list, I18n.tr("Active"),
 				DownloadState.DOWNLOADING, DownloadState.CONNECTING);
 		addTable(list, I18n.tr("Inactive"), DownloadState.PAUSED,
-				DownloadState.QUEUED);
+				DownloadState.REMOTE_QUEUED, DownloadState.LOCAL_QUEUED);
 		addTable(list, I18n.tr("Unsuccessful"),
 				DownloadState.ERROR, DownloadState.STALLED);
 		

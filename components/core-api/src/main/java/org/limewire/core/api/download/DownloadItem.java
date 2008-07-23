@@ -14,39 +14,62 @@ public interface DownloadItem  {
 	public static enum Category {
 		VIDEO, AUDIO, DOCUMENT, IMAGE
 	};
+	
+	public static enum ErrorState {
+        NONE, DISK_PROBLEM, CORRUPT_FILE, FILE_NOT_SHARABLE, UNABLE_TO_CONNECT
+    };
 
 	public void addPropertyChangeListener(PropertyChangeListener listener);
 	
 	public void removePropertyChangeListener(PropertyChangeListener listener);
 	
-	public abstract DownloadState getState();
+	public DownloadState getState();
 
-	public abstract String getTitle();
+	public String getTitle();
 
-	public abstract int getPercentComplete();
+	public int getPercentComplete();
 
 	/**
 	 * @return size in bytes
 	 */
-	public abstract double getCurrentSize();
+	public double getCurrentSize();
 	
 	/**
      * @return size in bytes
      */
-	public abstract double getTotalSize();
+	public double getTotalSize();
 
-	public abstract String getRemainingTime();
+	public String getRemainingDownloadTime();
 
-	public abstract void cancel();
+	public void cancel();
 
-	public abstract void pause();
+	public void pause();
 
-	public abstract void resume();
+	public void resume();
 
-	public abstract int getDownloadSourceCount();
+	public int getDownloadSourceCount();
 
-	public abstract List<DownloadSource> getSources();
+	public List<DownloadSource> getSources();
 	
-	public abstract Category getCategory();
+	public Category getCategory();
+
+    /**
+     * @return speed in kb/s or 0 if speed could not be measured
+     */
+	public float getDownloadSpeed();
+
+	/**
+     * Returns the position of the download on the uploader, relevant only if
+     * the downloader is remote queued.
+     */
+    int getQueuePosition();
+    
+    /**
+     * Returns an upper bound on the amount of time (in seconds) this will stay 
+     * in the current state.  Returns <code>Integer.MAX_VALUE</code> if unknown.
+     */
+    public String getRemainingStateTime();
+    
+    public ErrorState getErrorState();
 
 }

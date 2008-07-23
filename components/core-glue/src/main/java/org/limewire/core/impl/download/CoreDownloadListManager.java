@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.limewire.core.api.download.DownloadItem;
 import org.limewire.core.api.download.DownloadListManager;
 import org.limewire.core.api.download.DownloadListener;
+import org.limewire.core.api.download.DownloadState;
 import org.limewire.core.api.download.SaveLocationException;
 import org.limewire.core.api.search.Search;
 import org.limewire.core.api.search.SearchResult;
@@ -170,7 +171,10 @@ public class CoreDownloadListManager implements DownloadListManager {
 
         @Override
         public void downloadRemoved(DownloadItem downloadItem) {
-            list.remove(downloadItem);
+            //don't automatically remove finished downloads
+            if (downloadItem.getState() != DownloadState.DONE) {
+                list.remove(downloadItem);
+            }
         }
 
     }
