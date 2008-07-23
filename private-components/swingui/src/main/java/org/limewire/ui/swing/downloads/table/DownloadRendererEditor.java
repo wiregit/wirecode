@@ -64,8 +64,10 @@ public class DownloadRendererEditor extends JPanel implements
 	private Icon videoIcon;
 	@Resource
 	private Icon documentIcon;
-	@Resource
-	private Icon otherIcon;
+    @Resource
+    private Icon otherIcon;
+    @Resource
+    private Icon warningIcon;
 
 	/**
 	 * Create the panel
@@ -206,22 +208,26 @@ public class DownloadRendererEditor extends JPanel implements
 			boolean isSelected, boolean hasFocus, int row, int column) {
 		DownloadItem item = (DownloadItem) value;
 		titleLabel.setText(item.getTitle());
-		switch (item.getCategory()) {
-		case AUDIO:
-			iconLabel.setIcon(audioIcon);
-			break;
-		case DOCUMENT:
-			iconLabel.setIcon(documentIcon);
-			break;
-		case IMAGE:
-			iconLabel.setIcon(imageIcon);
-			break;
-		case VIDEO:
-			iconLabel.setIcon(videoIcon);
-			break;
-		default:
-			iconLabel.setIcon(otherIcon);
-		}
+		if(item.getState() == DownloadState.ERROR || item.getState() == DownloadState.STALLED ){
+		    iconLabel.setIcon(warningIcon);
+		} else {
+            switch (item.getCategory()) {
+            case AUDIO:
+                iconLabel.setIcon(audioIcon);
+                break;
+            case DOCUMENT:
+                iconLabel.setIcon(documentIcon);
+                break;
+            case IMAGE:
+                iconLabel.setIcon(imageIcon);
+                break;
+            case VIDEO:
+                iconLabel.setIcon(videoIcon);
+                break;
+            default:
+                iconLabel.setIcon(otherIcon);
+            }
+        }
 		//TODO time remaining
 		//TODO : doubles in progress bar
 		double totalSize = item.getTotalSize();
