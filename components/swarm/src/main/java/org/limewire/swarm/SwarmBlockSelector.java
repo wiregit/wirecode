@@ -20,7 +20,7 @@ public interface SwarmBlockSelector {
      * @param neededBytes a representation of the set of bytes
      *      of the file that have not yet been leased, verified, etc.
      * @param blockSize the maximum size of the returned Interval. Any values less than 1 will
-     *      be ignared.  The returned Interval will in no case span a blockSize boundary.
+     *      be ignored.  The returned Interval will in no case span a blockSize boundary.
      *      Any values less than 1 will generate IllegalArgumentExceptions.
      * @return the Interval that should be assigned next, which does not span a blockSize boundary
      * @throws NoSuchElementException if passed an empty IntervalSet

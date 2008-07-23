@@ -102,11 +102,11 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
         }
     }
 
-    public void initialize() throws IOException {
+    public synchronized void initialize() throws IOException {
 
     }
 
-    private FileHandle getFileHandle(SwarmFile swarmFile) {
+    private synchronized FileHandle getFileHandle(SwarmFile swarmFile) {
         FileHandle fileHandle = fileHandles.get(swarmFile);
         if (fileHandle == null) {
             fileHandle = new FileHandle(swarmFile);
@@ -145,11 +145,7 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
             raFile = null;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.limewire.swarm.file.SwarmFile#flush()
-         */
+
         public void flush() throws IOException {
             synchronized (LOCK) {
                 initialize();
@@ -157,12 +153,6 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
             }
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.limewire.swarm.file.SwarmFile#read(java.nio.ByteBuffer,
-         * long)
-         */
         public long read(ByteBuffer byteBuffer, long position) throws IOException {
             synchronized (LOCK) {
                 initialize();
@@ -171,12 +161,6 @@ public class SwarmFileSystemImpl implements SwarmFileSystem {
             }
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.limewire.swarm.file.SwarmFile#write(java.nio.ByteBuffer,
-         * long)
-         */
         public long write(ByteBuffer byteBuffer, long start) throws IOException {
             synchronized (LOCK) {
                 initialize();

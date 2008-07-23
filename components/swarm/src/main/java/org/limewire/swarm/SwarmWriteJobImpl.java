@@ -11,6 +11,11 @@ import org.apache.commons.logging.LogFactory;
 import org.limewire.collection.Range;
 import org.limewire.nio.ByteBufferCache;
 
+/**
+ * 
+ * @author pvertenten
+ *
+ */
 public class SwarmWriteJobImpl implements SwarmWriteJob {
 
     private static final Log LOG = LogFactory.getLog(SwarmWriteJobImpl.class);
@@ -28,11 +33,20 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
     private Range writeRange = null;
 
     private final SwarmWriteJobControl callback;
-    
+
     private final ByteBufferCache byteBufferCache;
-    
+
     private static final int BUFFER_SIZE = 8192;
 
+    /**
+     * Constructor for a SwarmWriteJobImpl, it will write the data for a given
+     * range of bytes, by making subsequent calls to this jobs write method.
+     * 
+     * @param range
+     * @param fileCoordinator
+     * @param jobScheduler
+     * @param callback
+     */
     public SwarmWriteJobImpl(Range range, SwarmCoordinator fileCoordinator,
             ExecutorService jobScheduler, SwarmWriteJobControl callback) {
         this.jobScheduler = jobScheduler;
@@ -40,9 +54,12 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
         this.range = range;
         this.writeRange = range;
         this.callback = callback;
-        this.byteBufferCache= new ByteBufferCache();
+        this.byteBufferCache = new ByteBufferCache();
     }
 
+    /**
+     * Cancels this write job and any pending scheduled tasks.
+     */
     public void cancel() {
         synchronized (scheduleLock) {
             LOG.debug("Cancelling Write Job");
@@ -54,14 +71,23 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
         }
     }
 
+    /**
+     * Schedules a write job to write the data to disk.
+     * 
+     * @param content
+     * @return the number of bytes to be written
+     * 
+     */
     public long write(final SwarmContent content) throws IOException {
         long written = 0;
+        // TODO do something with the written variable.
+
         synchronized (scheduleLock) {
 
             final ByteBuffer networkUnblockingBuffer = byteBufferCache.getHeap(BUFFER_SIZE);
             content.read(networkUnblockingBuffer);
             networkUnblockingBuffer.flip();
-            
+
             scheduledJob = jobScheduler.submit(new Callable<Void>() {
                 public Void call() throws Exception {
                     writeData(range, networkUnblockingBuffer);
@@ -86,21 +112,20 @@ public class SwarmWriteJobImpl implements SwarmWriteJob {
         synchronized (scheduleLock) {
             ByteBuffer networkUnblockingBuffer = byteBufferCache.getHeap(BUFFER_SIZE);
             try {
-                
+
                 networkUnblockingBuffer.put(buffer);
                 byteBufferCache.release(buffer);
                 networkUnblockingBuffer.flip();
-                
+
                 long bytesWritten = fileCoordinator.write(writeRange, networkUnblockingBuffer);
                 long newLow = writeRange.getLow() + bytesWritten;
                 long newHigh = writeRange.getHigh();
-                
+
                 LOG.trace("Re-requesting I/O");
                 callback.resume();
 
                 if (newLow <= newHigh) {
-                    Range newRange = Range.createRange(newLow,
-                            newHigh);
+                    Range newRange = Range.createRange(newLow, newHigh);
                     this.writeRange = newRange;
                 }
             } finally {
