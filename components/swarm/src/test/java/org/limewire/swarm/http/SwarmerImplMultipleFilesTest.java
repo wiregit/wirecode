@@ -18,18 +18,17 @@ import org.limewire.concurrent.ExecutorsHelper;
 import org.limewire.http.reactor.LimeConnectingIOReactor;
 import org.limewire.net.SocketsManagerImpl;
 import org.limewire.nio.NIODispatcher;
+import org.limewire.swarm.EchoSwarmCoordinatorListener;
 import org.limewire.swarm.SwarmBlockSelector;
-import org.limewire.swarm.SwarmCoordinator;
-import org.limewire.swarm.SwarmFile;
-import org.limewire.swarm.SwarmFileSystem;
-import org.limewire.swarm.SwarmCoordinatorListener;
 import org.limewire.swarm.SwarmBlockVerifier;
+import org.limewire.swarm.SwarmCoordinator;
+import org.limewire.swarm.SwarmCoordinatorListener;
+import org.limewire.swarm.SwarmFileSystem;
 import org.limewire.swarm.file.FileCoordinatorImpl;
 import org.limewire.swarm.file.SwarmFileImpl;
 import org.limewire.swarm.file.SwarmFileSystemImpl;
 import org.limewire.swarm.file.selection.ContiguousSelectionStrategy;
 import org.limewire.swarm.file.verifier.MD5SumFileVerifier;
-import org.limewire.swarm.file.verifier.NoOpFileVerifier;
 import org.limewire.swarm.http.handler.SwarmFileExecutionHandler;
 import org.limewire.util.BaseTestCase;
 import org.limewire.util.FileUtils;
@@ -114,48 +113,7 @@ public class SwarmerImplMultipleFilesTest extends BaseTestCase {
         final Swarmer swarmer = new SwarmerImpl(executionHandler, connectionReuseStrategy,
                 ioReactor, params, null);
 
-        swarmCoordinator.addListener(new SwarmCoordinatorListener() {
-
-            public void blockLeased(SwarmCoordinator swarmCoordinator, Range block) {
-                System.out.println("block leased: " + block.toString());
-
-            }
-
-            public void blockVerificationFailed(SwarmCoordinator swarmCoordinator, Range block) {
-                System.out.println("block verification failed: " + block.toString());
-
-            }
-
-            public void blockVerified(SwarmCoordinator swarmCoordinator, Range block) {
-                System.out.println("block verified: " + block.toString());
-
-            }
-
-            public void blockWritten(SwarmCoordinator swarmCoordinator, Range block) {
-                System.out.println("block written: " + block.toString());
-            }
-
-            public void blockUnleased(SwarmCoordinator swarmCoordinator, Range block) {
-                System.out.println("block unleased: " + block.toString());
-
-            }
-
-            public void downloadCompleted(SwarmCoordinator fileCoordinator,
-                    SwarmFileSystem swarmDownload) {
-                System.out.println("download complete");
-            }
-
-            public void blockPending(SwarmCoordinator swarmCoordinator, Range block) {
-                System.out.println("block pending: " + block.toString());
-
-            }
-
-            public void blockUnpending(SwarmCoordinator swarmCoordinator, Range block) {
-                System.out.println("block unpending: " + block.toString());
-
-            }
-
-        });
+        swarmCoordinator.addListener(new EchoSwarmCoordinatorListener());
         return swarmer;
     }
 }
