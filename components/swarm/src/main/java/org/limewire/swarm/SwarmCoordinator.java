@@ -44,6 +44,15 @@ public interface SwarmCoordinator {
     boolean isRangeAvailableForLease(IntervalSet availableRanges);
 
     
+    /**
+     * Writes the given range to disk using the supplied buffer. The buffer might not contain
+     * The full range to be written, the number of bytes written will be returned and a modified
+     * range can be passed in to write additional bytes.
+     * @param range
+     * @param content
+     * @return the number of bytes writen.
+     * @throws IOException
+     */
     long write(Range range, ByteBuffer content) throws IOException;
 
     
@@ -114,14 +123,33 @@ public interface SwarmCoordinator {
      */
     void addListener(SwarmListener swarmListener);
 
+    /**
+     * Shuts down any resources opened by this coordinator.
+     * @throws IOException
+     */
     void finish() throws IOException;
 
+    /**
+     * Returns true if all the pieces have been written to disk.
+     * @return
+     */
     boolean isComplete();
 
+    /**
+     * Renews the oldLease with the newLease. New lease must be a subset of oldLease.
+     * {@link #unlease(Range)} is called with the oldLease, then {@link #lease(Range)} 
+     * is called with the newLease.
+     * @param oldLease
+     * @param newLease
+     * @return the newly leased Range.
+     */
     Range renewLease(Range oldLease, Range newLease);
 
+    /**
+     * Returns the swarmFile to be written at the start of the given Range.
+     * @param range
+     * @return
+     */
     SwarmFile getSwarmFile(Range range);
-
-    // long getCompleteFileSize();
 
 }
