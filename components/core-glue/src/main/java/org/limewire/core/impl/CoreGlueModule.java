@@ -2,6 +2,7 @@ package org.limewire.core.impl;
 
 import org.limewire.core.impl.download.CoreGlueDownloadModule;
 import org.limewire.core.impl.download.DownloadListenerList;
+import org.limewire.core.impl.library.CoreGlueLibraryModule;
 import org.limewire.core.impl.search.CoreGlueSearchModule;
 import org.limewire.core.impl.search.QueryReplyListenerList;
 
@@ -18,6 +19,7 @@ public class CoreGlueModule extends AbstractModule {
         
         install(new CoreGlueSearchModule());
         install(new CoreGlueDownloadModule());
+        install(new CoreGlueLibraryModule());
     }
 
 }

@@ -10,13 +10,21 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.font.TextLayout;
+import java.util.Map;
 
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
+import org.limewire.core.api.library.FileList;
+import org.limewire.core.api.library.LibraryListEventType;
+import org.limewire.core.api.library.LibraryListListener;
+import org.limewire.core.api.library.LibraryManager;
 import org.limewire.ui.swing.util.GuiUtils;
+import org.limewire.ui.swing.util.SwingUtils;
+
+import com.google.inject.Inject;
 
 public class FilesSharingSummaryPanel extends JPanel {
     
@@ -30,9 +38,28 @@ public class FilesSharingSummaryPanel extends JPanel {
     @Resource private Icon someBuddiesIcon;    
     @Resource private Font iconOverlayFont;
     @Resource private Color iconOverlayColor;
-    
-    public FilesSharingSummaryPanel() {
+        
+    @Inject
+    FilesSharingSummaryPanel(LibraryManager libraryManager) {
         GuiUtils.assignResources(this);
+        
+        libraryManager.addLibraryLisListener(new LibraryListListener() {
+            @Override
+            public void handleLibraryListEvent(LibraryListEventType type) {
+                switch(type) {
+                case FILE_ADDED:
+                case FILE_REMOVED:
+                    SwingUtils.invokeLater(new Runnable() {
+                        public void run() {
+                            all.repaint();
+                            some.repaint();
+                            buddies.repaint();
+                        }
+                    });
+                    break;
+                }
+            }
+        });
         
         setOpaque(false);
         title.setName("FilesSharingSummaryPanel.title");
@@ -40,11 +67,11 @@ public class FilesSharingSummaryPanel extends JPanel {
         
         //TODO: NumberIcons
         all.setName("FilesSharingSummaryPanel.all");
-        all.setIcon(new NumberIcon(1, allIcon));
+        all.setIcon(new NumberIcon(libraryManager.getGnutellaFileList(), allIcon));
 		buddies.setName("FilesSharingSummaryPanel.buddies");
-		buddies.setIcon(new NumberIcon(22, buddiesIcon));
+		buddies.setIcon(new NumberIcon(libraryManager.getBuddiesFileList(), buddiesIcon));
 		some.setName("FilesSharingSummaryPanel.some");
-		some.setIcon(new NumberIcon(333, someBuddiesIcon));
+		some.setIcon(new NumberIcon(libraryManager.getUniqueLists(), someBuddiesIcon));
                 
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -70,12 +97,20 @@ public class FilesSharingSummaryPanel extends JPanel {
     }
     
     private class NumberIcon implements Icon {
-        private final int number;
+        private final FileList fileList;
+        private final Map<String, FileList> fileLists;
         private final Icon delegateIcon;
         
-        public NumberIcon(int number, Icon icon) {
-            this.number = number;
+        public NumberIcon(FileList fileList, Icon icon) {
+            this.fileList = fileList;
             this.delegateIcon = icon;
+            this.fileLists = null;
+        }
+        
+        public NumberIcon(Map<String, FileList> fileLists, Icon icon) {
+            this.fileList = null;
+            this.delegateIcon = icon;
+            this.fileLists = fileLists;
         }
         
         @Override
@@ -91,11 +126,24 @@ public class FilesSharingSummaryPanel extends JPanel {
         public void paintIcon(Component c, Graphics g, int x, int y) {
             Graphics2D g2 = (Graphics2D)g;
             g2.setFont(iconOverlayFont);
-            TextLayout layout = new TextLayout(String.valueOf(number), g2.getFont(), g2.getFontRenderContext());
+            TextLayout layout = new TextLayout(String.valueOf(getNumber()), g2.getFont(), g2.getFontRenderContext());
             delegateIcon.paintIcon(c, g, x, y);
             Rectangle bounds = layout.getPixelBounds(null, 0, 0);
             g2.setPaint(iconOverlayColor);
             layout.draw(g2, x + getIconWidth() - bounds.width, y + bounds.height);
+        }
+        
+        private long getNumber() {
+            if(fileList != null) {
+                return fileList.size();
+            } else {
+                long x = 0;
+                for(FileList list : fileLists.values()) {
+                    x += list.size();
+                }
+                return x;
+            }
+            
         }
     }
 

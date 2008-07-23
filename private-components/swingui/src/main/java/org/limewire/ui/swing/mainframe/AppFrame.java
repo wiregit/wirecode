@@ -11,8 +11,7 @@ import javax.swing.plaf.ColorUIResource;
 
 import org.jdesktop.application.Resource;
 import org.jdesktop.application.SingleFrameApplication;
-import org.limewire.core.impl.download.MockDownloadModule;
-import org.limewire.core.impl.search.MockSearchModule;
+import org.limewire.core.impl.MockModule;
 import org.limewire.ui.swing.LimeWireSwingUiModule;
 import org.limewire.ui.swing.util.GuiUtils;
 
@@ -62,7 +61,7 @@ public class AppFrame extends SingleFrameApplication {
     
     public Injector createInjector() {
         if(injector == null) {
-            injector = Guice.createInjector(new MockSearchModule(), new MockDownloadModule(), new LimeWireSwingUiModule());
+            injector = Guice.createInjector(new MockModule(), new LimeWireSwingUiModule());
             return injector;
         } else {
             return Guice.createInjector(injector, new LimeWireSwingUiModule());

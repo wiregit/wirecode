@@ -35,10 +35,8 @@ import com.google.inject.Singleton;
 @Singleton
 class LeftPanel extends JPanel implements NavigableTree {
 
-    private final SearchBar searchBar;
     private final NavTree navTree;
-    private final DownloadSummaryPanel downloadPanel;
-    private final FilesSharingSummaryPanel filesPanel;
+
     private SearchHandler searchHandler;
     
     /** The color of the lines separating the GUI panels */
@@ -46,12 +44,11 @@ class LeftPanel extends JPanel implements NavigableTree {
     private Color lineColor;
 
     @Inject
-    public LeftPanel(DownloadListManager downloadListManager) {
+    public LeftPanel(DownloadListManager downloadListManager, FilesSharingSummaryPanel filesSharingPanel) {
     	GuiUtils.assignResources(this);
-        this.searchBar = new SearchBar();
+        final SearchBar searchBar = new SearchBar();
         this.navTree = new NavTree();
-        this.downloadPanel =  new DownloadSummaryPanel(downloadListManager.getDownloads());
-        this.filesPanel = new FilesSharingSummaryPanel();
+        DownloadSummaryPanel downloadPanel =  new DownloadSummaryPanel(downloadListManager.getDownloads());
         setMinimumSize(new Dimension(150, 0));
         setMaximumSize(new Dimension(150, Integer.MAX_VALUE));
         setPreferredSize(new Dimension(150, 700));
@@ -115,7 +112,7 @@ class LeftPanel extends JPanel implements NavigableTree {
         gbc.insets = new Insets(2, 5, 2, 0);
         gbc.weighty = 0;
         gbc.gridx = GridBagConstraints.REMAINDER;
-        add(filesPanel, gbc);
+        add(filesSharingPanel, gbc);
     }
 
     @Inject
