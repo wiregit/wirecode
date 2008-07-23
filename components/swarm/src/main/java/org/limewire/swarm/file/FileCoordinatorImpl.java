@@ -394,7 +394,7 @@ public class FileCoordinatorImpl implements SwarmCoordinator {
         }
     }
 
-    public Range release(Range oldLease, Range newLease) {
+    public Range renewLease(Range oldLease, Range newLease) {
         synchronized (LOCK) {
             assert hasLease(oldLease);
             assert newLease.isSubrange(oldLease);

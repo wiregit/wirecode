@@ -116,7 +116,7 @@ public interface SwarmCoordinator {
 
     boolean isComplete();
 
-    Range release(Range oldLease, Range newLease);
+    Range renewLease(Range oldLease, Range newLease);
 
     SwarmFile getFirstSwarmFile(Range range);
 

@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.ConnectionReuseStrategy;
+import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponse;
@@ -27,6 +28,8 @@ import org.apache.http.protocol.RequestExpectContinue;
 import org.apache.http.protocol.RequestTargetHost;
 import org.apache.http.protocol.RequestUserAgent;
 import org.limewire.http.protocol.SynchronizedHttpProcessor;
+import org.limewire.http.reactor.HttpIOSession;
+import org.limewire.http.reactor.LimeConnectingIOReactor;
 import org.limewire.swarm.http.handler.ExecutionHandler;
 
 public class SwarmerImpl implements Swarmer {
@@ -64,6 +67,15 @@ public class SwarmerImpl implements Swarmer {
         httpProcessor.addInterceptor(new RequestConnControl());
         httpProcessor.addInterceptor(new RequestUserAgent());
         httpProcessor.addInterceptor(new RequestExpectContinue());
+//        httpProcessor.addInterceptor(new HttpRequestInterceptor(){
+//
+//            public void process(HttpRequest arg0, HttpContext arg1) throws HttpException,
+//                    IOException {
+//               arg0.
+//                
+//            }
+//            
+//        });
  
         final ConnectionReuseStrategy finalConnectionReuseStrategy = connectionReuseStrategy;
         clientHandler = new AsyncNHttpClientHandler(httpProcessor, new SwarmExecutionHandler(),
@@ -234,7 +246,9 @@ public class SwarmerImpl implements Swarmer {
 
         public HttpRequest submitRequest(HttpContext context) {
             if (isActive()) {
+                HttpIOSession ioSession = (HttpIOSession) context.getAttribute(LimeConnectingIOReactor.IO_SESSION_KEY);
                 HttpRequest request = executionHandler.submitRequest(context);
+
                 if (LOG.isTraceEnabled() && request != null)
                     LOG.trace("Submitting request: " + request.getRequestLine());
                 return request;

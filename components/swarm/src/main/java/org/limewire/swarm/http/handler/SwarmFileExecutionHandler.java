@@ -84,11 +84,11 @@ public class SwarmFileExecutionHandler implements ExecutionHandler {
         if (range.getHigh() > fileEndByte) {
             Range oldRange = range;
             range = Range.createRange(range.getLow(), fileEndByte);
-            range = fileCoordinator.release(oldRange, range);
+            range = fileCoordinator.renewLease(oldRange, range);
         }
 
-        long startRange = range.getLow();
-        long endRange = range.getHigh();
+        long downloadStartRange = range.getLow() - swarmFile.getStartByte();
+        long downloadEndRange = range.getHigh() - swarmFile.getStartByte();
 
         String path = source.getPath().trim();
         if (path.charAt(path.length() - 1) == '/') {
@@ -96,7 +96,7 @@ public class SwarmFileExecutionHandler implements ExecutionHandler {
         }
 
         HttpRequest request = new BasicHttpRequest("GET", path);
-        request.addHeader(new BasicHeader("Range", "bytes=" + startRange + "-" + (endRange)));
+        request.addHeader(new BasicHeader("Range", "bytes=" + downloadStartRange + "-" + (downloadEndRange)));
         context.setAttribute(RESPONSE_LISTENER, new SwarmContentListener(fileCoordinator,
                 swarmFile, range));
         return request;

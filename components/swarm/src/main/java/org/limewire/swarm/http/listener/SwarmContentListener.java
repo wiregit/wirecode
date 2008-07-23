@@ -107,7 +107,9 @@ public class SwarmContentListener implements ResponseContentListener {
             // Fail miserably.
             throw new IOException("No content length, though content range existed.");
         }
-
+        long startByte = swarmFile.getStartByte();
+        
+        actualRange = Range.createRange(startByte+actualRange.getLow(), startByte+actualRange.getHigh());
         validateActualRangeAndShrinkExpectedRange(actualRange);
     }
 
@@ -123,7 +125,7 @@ public class SwarmContentListener implements ResponseContentListener {
         }
 
         if (!actualRange.equals(expectedRange)) {
-            expectedRange = fileCoordinator.release(expectedRange, actualRange);
+            expectedRange = fileCoordinator.renewLease(expectedRange, actualRange);
         }
     }
 
