@@ -61,7 +61,7 @@ public class BTMetaInfoImpl implements BTMetaInfo {
     /**
      * An array for URL[] containing all webseeds of this torrent.
      */
-    private final URI[] _webSeeds;
+    private URI[] _webSeeds;
     
 	/**
 	 * FileDesc for the GUI
@@ -373,5 +373,13 @@ public class BTMetaInfoImpl implements BTMetaInfo {
 		public FakeFileDesc(File file, Set<? extends URN> s) {
 			super(file, s, Integer.MAX_VALUE);
 		}
-	}	
+	}
+
+    public boolean isMultiFileTorrent() {
+        return getFileSystem().getFiles().size() > 1;
+    }
+
+    public void setWebSeeds(URI[] uris) {
+       this._webSeeds = uris;
+    }	
 }

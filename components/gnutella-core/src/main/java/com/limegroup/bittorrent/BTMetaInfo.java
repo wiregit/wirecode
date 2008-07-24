@@ -89,4 +89,8 @@ public interface BTMetaInfo {
      */
     public abstract BTMetaInfoMemento toMemento();
 
+    public abstract boolean isMultiFileTorrent();
+
+    abstract void setWebSeeds(URI[] uris);
+
 }
