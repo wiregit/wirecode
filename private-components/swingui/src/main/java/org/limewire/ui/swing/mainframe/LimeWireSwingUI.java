@@ -7,9 +7,7 @@ import java.awt.GridBagLayout;
 import javax.swing.JPanel;
 
 import org.jdesktop.application.Resource;
-import org.limewire.ui.swing.downloads.MainDownloadPanel;
 import org.limewire.ui.swing.nav.Navigator;
-import org.limewire.ui.swing.nav.Navigator.NavCategory;
 import org.limewire.ui.swing.search.SearchHandler;
 import org.limewire.ui.swing.util.GuiUtils;
 import org.limewire.ui.swing.util.Line;
@@ -29,15 +27,11 @@ public class LimeWireSwingUI extends JPanel {
     
 	@Inject
     public LimeWireSwingUI(TopPanel topPanel, LeftPanel leftPanel, MainPanel mainPanel,
-            StatusPanel statusPanel, Navigator navigator, SearchHandler searchHandler,
-            MainDownloadPanel mainDownloadPanel) {
+            StatusPanel statusPanel, Navigator navigator, SearchHandler searchHandler) {
     	GuiUtils.assignResources(this);
     	        
     	this.topPanel = topPanel;
     	this.leftPanel = leftPanel;
-        
-        //TODO:move this and have clicks on DownloadSummaryPanel navigate to downloadPanel
-        navigator.addNavigablePanel(NavCategory.NONE, MainDownloadPanel.NAME, mainDownloadPanel, false);
         
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);

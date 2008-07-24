@@ -26,6 +26,7 @@ import org.limewire.ui.swing.browser.WinCreatorHook;
 import org.limewire.ui.swing.mainframe.AppFrame;
 import org.limewire.ui.swing.util.SwingUtils;
 import org.limewire.util.CommonUtils;
+import org.limewire.util.FileUtils;
 import org.limewire.util.OSUtils;
 import org.limewire.util.Stopwatch;
 import org.limewire.util.SystemUtils;
@@ -629,15 +630,17 @@ public final class Initializer {
     private void setupXulLibraryPath() {
         if (OSUtils.isWindows()) {
             File xulInstallPath = new File(CommonUtils.getUserSettingsDir(), "/browser");
-            File xulFile = new File(xulInstallPath + "/xulrunner/xulrunner.exe");
-            // xulrunner.zip needs to be uncompressed if xulFile doesn't exist
+            // Check to see if the correct version of XUL exists.
+            File xulFile = new File(xulInstallPath, "xul-v0.1-do-not-remove");
             if (!xulFile.exists()) {
                 if (LOG.isDebugEnabled())
                     LOG.debug("unzip xulrunner to " + xulInstallPath);
+                FileUtils.deleteRecursive(xulInstallPath);
                 InputStream in = null;
                 try {
                     in = new BufferedInputStream(CommonUtils.getResourceStream("xulrunner.zip"));
                     Expand.expandFile(in, xulInstallPath, true, null);
+                    xulFile.createNewFile();
                 } catch (IOException e) {
                     ErrorService.error(e);
                 } finally {
