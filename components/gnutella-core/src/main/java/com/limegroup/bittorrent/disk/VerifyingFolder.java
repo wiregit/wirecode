@@ -959,8 +959,10 @@ class VerifyingFolder implements TorrentDiskManager {
 		}
 	}
     public BTInterval renewLease(BTInterval oldInterval, BTInterval newInterval) {
-       requestedRanges.removeInterval(oldInterval);
-       requestedRanges.addInterval(newInterval);
+        synchronized(VerifyingFolder.this) {
+           requestedRanges.removeInterval(oldInterval);
+           requestedRanges.addInterval(newInterval);
+        }
         return newInterval;
     }
 }
