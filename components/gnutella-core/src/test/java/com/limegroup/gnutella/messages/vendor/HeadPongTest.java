@@ -1656,6 +1656,7 @@ public class HeadPongTest extends LimeTestCase {
         fileManager.setUrns(map);
         List<FileDesc> list = new ArrayList<FileDesc>();
         list.add(fd);
+        fileManager.setFileDesc(list);
         ((FileListStub)fileManager.getSharedFileList()).setDescs(list);
     }
 }

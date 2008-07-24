@@ -114,7 +114,7 @@ class Container {
     
     /**
      * Removes the set from the container.
-     * @param name
+     * @param name - name of Set to remove
      */
     synchronized void remove(String name) {
         STORED.remove(name);

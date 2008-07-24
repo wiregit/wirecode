@@ -15,7 +15,7 @@ public class IncompleteFileListImpl extends FileListImpl {
     @Override
     protected void addPendingFileDesc(FileDesc fileDesc) { 
         if(fileDesc instanceof IncompleteFileDesc) {
-            addFileDesc(fileDesc);
+            add(fileDesc);
         }
     }
     

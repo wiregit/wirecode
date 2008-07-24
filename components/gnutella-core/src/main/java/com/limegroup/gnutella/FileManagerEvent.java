@@ -81,7 +81,7 @@ public class FileManagerEvent extends EventObject {
         REMOVE_FD,
         
         /**
-         * 
+         * Called when an IncompleteFileDesc has had its URNs modified.
          */
         INCOMPLETE_URN_CHANGE,
         
@@ -296,8 +296,9 @@ public class FileManagerEvent extends EventObject {
     }
     
     /**
-     * Returns the old File that has been replaced with a new File. If
-     * no old File was being modified this method returns null;
+     * Returns the previous instance of this File that has been replaced with 
+     * an instance of a new File. If no old File was being modified this 
+     * method returns null.
      */
     public File getOldFile() {
         return oldFile;
@@ -312,8 +313,8 @@ public class FileManagerEvent extends EventObject {
     }
     
     /**
-     * Returns the oldFileDesc if the FileManager has modified an existing
-     * FileDesc such as a CHANGE_EVENT or RENAME_EVENT
+     * Returns the previous instance of the FileDesc if the FileManager has 
+     * modified an existing FileDesc such as a in CHANGE_EVENT or RENAME_EVENT
      * @return
      */
     public FileDesc getOldFileDesc() {

@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.limewire.inspection.Inspectable;
 import org.limewire.util.ByteUtils;
@@ -22,6 +23,11 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
  */
 public class FileListImpl implements FileList, FileEventListener, Inspectable {
 
+    /**
+     * A list of listeners for this list
+     */
+    private final CopyOnWriteArrayList<FileListListener> listeners;
+    
     /** 
      * List of all the FileDescs in this FileList. This is a continous non-null
      * list.
@@ -61,6 +67,8 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
 
         fileManager.addFileEventListener(this);
         
+        listeners = new CopyOnWriteArrayList<FileListListener>();
+        
         clear();
     }
     
@@ -92,31 +100,55 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
         fileManager.addFile(file, list);
     }
 
-    public void addFileDesc(FileDesc fileDesc) {
-        if(fileDesc == null)
-            throw new IllegalArgumentException("FileDesc cannot be null");
-        
-        if(!fileDescs.contains(fileDesc) && isFileAddable(fileDesc)) {
-            fileDescs.add(fileDesc);
-            numBytes += fileDesc.getFileSize();
-            addAsIndividualFile(fileDesc);
-        }
-        
-        // always remove pending file, whether it is allowed to get added or not
-        if(pendingFiles.contains(fileDesc.getFile()))
-            pendingFiles.remove(fileDesc.getFile());
+    public void add(FileDesc fileDesc) {
+        if(addFileDesc(fileDesc))
+            fireAddEvent(fileDesc);
     }
-    
+   
     /**
      * Only called by events from FileManager. Will only add this
      * FileDesc if this list was explicitly waiting for this file
      */
     protected void addPendingFileDesc(FileDesc fileDesc) {
         if(pendingFiles.contains(fileDesc.getFile()))
-            addFileDesc(fileDesc);
+            add(fileDesc);
+    }
+
+    /**
+     * Performs the actual add. No notication is sent when this returns.
+     * @return true if the fileDesc was added, false otherwise
+     */
+    protected boolean addFileDesc(FileDesc fileDesc) {
+        if(fileDesc == null)
+            throw new IllegalArgumentException("FileDesc cannot be null");
+        
+        // always remove pending file, whether it is allowed to get added or not
+        if(pendingFiles.contains(fileDesc.getFile()))
+            pendingFiles.remove(fileDesc.getFile());
+        
+        if(!fileDescs.contains(fileDesc) && isFileAddable(fileDesc)) {
+            fileDescs.add(fileDesc);
+            numBytes += fileDesc.getFileSize();
+            addAsIndividualFile(fileDesc);
+            return true;
+        } else
+            return false;
     }
     
     public boolean remove(FileDesc fileDesc) {
+        if(removeFileDesc(fileDesc)) {
+            fireRemoveEvent(fileDesc);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Performs the actual remove. No notification is sent when this returns. 
+     * @return true if the fileDesc was removed, false otherwise
+     */
+    protected boolean removeFileDesc(FileDesc fileDesc) {
         if(fileDesc == null)
             throw new IllegalArgumentException("FileDesc cannot be null");
         
@@ -203,12 +235,51 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
         return 0;
     }
     
+    public Object getLock() {
+        return this;
+    }
+
+    public void addFileListListener(FileListListener listener) {
+        if(listener == null)
+            throw new IllegalArgumentException("FileListListener cannot be null");
+        listeners.addIfAbsent(listener);
+    }
+
+    public void removeFileListListener(FileListListener listener) {
+        if(listener == null)
+            throw new IllegalArgumentException("FileListListener cannot be null");
+        listeners.remove(listener);
+    }
+    
+    protected void fireAddEvent(FileDesc fileDesc) {
+        for(FileListListener listener : listeners) {
+            listener.addEvent(fileDesc);
+        }
+    }
+    
+    protected void fireRemoveEvent(FileDesc fileDesc) {
+        for(FileListListener listener : listeners) {
+            listener.removeEvent(fileDesc);
+        }
+    }
+    
+    protected void fireChangeEvent(FileDesc oldFileDesc, FileDesc newFileDesc) {
+        for(FileListListener listener : listeners) {
+            listener.changeEvent(oldFileDesc, newFileDesc);
+        }
+    }
+    
     /**
      * Updates the list if a containing file has been renamed
      */
     protected void updateFileDescs(FileDesc oldFileDesc, FileDesc newFileDesc) {     
-        if (remove(oldFileDesc)) {
-            addFileDesc(newFileDesc); }
+        if (removeFileDesc(oldFileDesc)) {
+            if(addFileDesc(newFileDesc)) {
+                fireChangeEvent(oldFileDesc, newFileDesc);
+            } else {
+                fireRemoveEvent(oldFileDesc);
+            }
+        }
     }
     
     /**
@@ -284,6 +355,9 @@ public class FileListImpl implements FileList, FileEventListener, Inspectable {
         }
     }
 
+    public void cleanupListeners() {
+        fileManager.removeFileEventListener(this);
+    }
     
     ///// BELOW for backwards compatibility with LW 4.x. Notion of an individual file ////
     /////   does not exist in 5.x  

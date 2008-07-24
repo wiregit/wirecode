@@ -307,7 +307,7 @@ public final class CreationTimeCache implements FileEventListener {
                     	if( fd != null && fileManager.getStoreFileList().contains(fd))
                     		continue;
                         // unfortunately fds can turn into ifds so ignore
-                        if ((fd == null) || fileManager.getIncompleteFileList().contains(fd)) {
+                        if ((fd == null) || fd instanceof IncompleteFileDesc) {
                             if (toRemove == null)
                                 toRemove = new ArrayList<URN>();
                             toRemove.add(currURN);
@@ -512,7 +512,7 @@ public final class CreationTimeCache implements FileEventListener {
                 }
                 break;
             case CHANGE_FILE: 
-                if(!evt.getFileManager().getIncompleteFileList().contains(evt.getOldFileDesc()))
+                if(!(evt.getOldFileDesc() instanceof IncompleteFileDesc))
                     fileChanged(evt.getOldFileDesc().getCreationTime(), evt.getOldFileDesc().getSHA1Urn(),
                             evt.getNewFileDesc().getSHA1Urn());
                 break;

@@ -166,8 +166,10 @@ public class BrowseRequestHandler extends SimpleNHttpRequestHandler {
             }
             
             List<Response> responses = new ArrayList<Response>(RESPONSES_PER_REPLY); 
-            for (int i = 0; iterable.hasNext() && i < RESPONSES_PER_REPLY; i++) {
-                responses.add(responseFactory.get().createResponse(iterable.next()));
+            synchronized(fileManager.getSharedFileList().getLock()) {
+                for (int i = 0; iterable.hasNext() && i < RESPONSES_PER_REPLY; i++) {
+                    responses.add(responseFactory.get().createResponse(iterable.next()));
+                }
             }
             
             Iterable<QueryReply> it = outgoingQueryReplyFactory.createReplies(responses.toArray(new Response[0]),

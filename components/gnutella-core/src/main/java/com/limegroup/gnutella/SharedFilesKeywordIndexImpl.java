@@ -187,7 +187,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     
                         // If the file is unshared or an incomplete file
                         // DO NOT SEND IT.
-                        if(fd == null || fileManager.getIncompleteFileList().contains(fd))
+                        if(fd == null || (fd instanceof IncompleteFileDesc))
                             continue;
                         if(fd.containsUrn(urn)) {
                             // still valid
@@ -223,7 +223,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
             
             // should never happen since we don't add times for IFDs and
             // we clear removed files...
-            if ((desc==null) || fileManager.getIncompleteFileList().contains(desc))
+            if ((desc==null) || (desc instanceof IncompleteFileDesc))
                 throw new RuntimeException("Bad Rep - No IFDs allowed!");
             
             // Formulate the response
@@ -274,7 +274,7 @@ public class SharedFilesKeywordIndexImpl implements SharedFilesKeywordIndex {
     
     private void removeFileDescs(FileDesc...fileDescs) {
         for (FileDesc fileDesc : fileDescs) {
-            if(fileManager.getIncompleteFileList().contains(fileDesc)) {
+            if(fileDesc instanceof IncompleteFileDesc) {
                 removeKeywords(incompleteKeywordTrie, fileDesc);
             } else {
                 removeKeywords(keywordTrie, fileDesc);

@@ -26,6 +26,7 @@ import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.PushEndpointFactory;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.Uploader.UploadStatus;
@@ -388,7 +389,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         httpHeaderUtils.addRangeHeader(response, uploader, fd);
         httpHeaderUtils.addProxyHeader(response);
 
-        if (fileManager.getIncompleteFileList().contains(fd)) {
+        if (fd instanceof IncompleteFileDesc) {
             if (!downloadManager.get().isActivelyDownloading(fd.getSHA1Urn())) {
                 response.addHeader(HTTPHeaderName.RETRY_AFTER.create(INACTIVE_RETRY_AFTER));
             }
@@ -448,7 +449,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
 
         // first verify the file index
         fd = fileManager.get(index);
-        if(!fileManager.getSharedFileList().contains(fd)) {
+        if(fd == null || !fileManager.getSharedFileList().contains(fd)) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Invalid index in request does not map to file descriptor: " + request);
             }
@@ -488,7 +489,7 @@ public class FileRequestHandler extends SimpleNHttpRequestHandler {
         }
 
         // special handling for incomplete files
-        if(fileManager.getIncompleteFileList().contains(fd)) {
+        if(fd instanceof IncompleteFileDesc) {
             // Check to see if we're allowing PFSP.
             if (!SharingSettings.ALLOW_PARTIAL_SHARING.getValue()) {
                 if (LOG.isDebugEnabled()) {

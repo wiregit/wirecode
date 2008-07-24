@@ -63,10 +63,12 @@ public class SharedFileListImpl extends FileListImpl {
      */
     @Override
     public void addFileAlways(File file, List<? extends LimeXMLDocument> list) {
-        filesNotToShare.remove(file); 
-        if (!isFileAddable(file))
-            individualFiles.add(file);
-            
+        synchronized (this) {
+            filesNotToShare.remove(file); 
+            if (!isFileAddable(file))
+                individualFiles.add(file);
+                   
+        }
         addFile(file, list);
     }
     
@@ -75,15 +77,17 @@ public class SharedFileListImpl extends FileListImpl {
      */
     @Override
     public void addFileForSession(File file) {
-        filesNotToShare.remove(file);
-        if (!isFileAddable(file))
-            transientSharedFiles.add(file); 
+        synchronized (this) {
+            filesNotToShare.remove(file);
+            if (!isFileAddable(file))
+                transientSharedFiles.add(file);    
+        }
         addFile(file);
     }
     
     @Override
-    public void addFileDesc(FileDesc fileDesc) {
-        super.addFileDesc(fileDesc);
+    public boolean addFileDesc(FileDesc fileDesc) {
+        boolean value = super.addFileDesc(fileDesc);
         
         //Register this file with its parent directory.
         File parent = fileDesc.getFile().getParentFile();
@@ -92,10 +96,12 @@ public class SharedFileListImpl extends FileListImpl {
         // aren't counted or shown.
         if(SharingUtils.isForcedShareDirectory(parent))
             numForcedFiles++;
+        
+        return value;
     }
     
     @Override
-    public boolean remove(FileDesc fd) {      
+    public boolean removeFileDesc(FileDesc fd) {      
         if(!individualSharedFiles.contains(fd.getFile()) && fileManager.isFileInCompletelySharedDirectory(fd.getFile()))
             filesNotToShare.add(fd.getFile());
         
@@ -113,8 +119,13 @@ public class SharedFileListImpl extends FileListImpl {
     
     @Override
     protected void updateFileDescs(FileDesc oldFileDesc, FileDesc newFileDesc) {     
-        if (super.remove(oldFileDesc)) { 
-            super.addFileDesc(newFileDesc); }
+        if (super.removeFileDesc(oldFileDesc)) {
+            if(super.addFileDesc(newFileDesc)) {
+                fireChangeEvent(oldFileDesc, newFileDesc);
+            } else {
+                fireRemoveEvent(oldFileDesc);
+            }
+        }
     }
 
     //TODO: iterator should ignore specially shared files
@@ -167,13 +178,9 @@ public class SharedFileListImpl extends FileListImpl {
     
     @Override
     protected void addAsIndividualFile(FileDesc fileDesc) { 
-//        if(LimeWireUtils.getMajorVersionNumber() >= 5) {
-//            individualFiles.add(fileDesc.getFile());
-//        }else {
-            if(!fileManager.isFileInCompletelySharedDirectory(fileDesc.getFile()) && !transientSharedFiles.contains(fileDesc.getFile())) {
-                individualFiles.add(fileDesc.getFile());
-            }
-//        }
+        if(!fileManager.isFileInCompletelySharedDirectory(fileDesc.getFile()) && !transientSharedFiles.contains(fileDesc.getFile())) {
+            individualFiles.add(fileDesc.getFile());
+        }
     }
     
     /**

@@ -44,7 +44,7 @@ public interface FileList {
      * is null, throws an IllegalArguementException. 
      * @param fileDesc - FileDesc to be added to this list
      */
-    public void addFileDesc(FileDesc fileDesc);
+    public void add(FileDesc fileDesc);
        
     /**
      * Removes the FileDesc from the list if it exists. If the value existed 
@@ -106,6 +106,27 @@ public interface FileList {
     
     int getNumForcedFiles();
     
+    /**
+     * Adds a listener to this list
+     */
+    public void addFileListListener(FileListListener listener);
+
+    /**
+     * Removes a listener from this list
+     */
+    public void removeFileListListener(FileListListener listener);
+    
+    /**
+     * Returns an object which to lock on when iterating over this FileList. The
+     * Lock should be used only during iteration, all other calls are thread safe
+     * when used with SynchronizedFileList.
+     */
+    public Object getLock();
+    
+    /**
+     * Removes any listeners this list might be holding prior to its destruction.
+     */
+    public void cleanupListeners();
         
     ///// BELOW for backwards compatibility with LW 4.x. Notion of an individual file ////
     /////   does not exist in 5.x  ////

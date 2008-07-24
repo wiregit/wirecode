@@ -34,6 +34,12 @@ public interface FileManager {
     public FileList getStoreFileList();
     
     /**
+     * Returns the FileList containing files shared with
+     * all buddys.
+     */
+    public FileList getBuddyFileList();
+    
+    /**
      * Returns the FileList containing Shared Buddy files of this name. If
      * this buddy list does not exist, a new Buddylist with this name will 
      * be created.
@@ -41,9 +47,9 @@ public interface FileManager {
     public FileList getBuddyFileList(String name);
     
     /**
-     * Creates a new FileList with the given name and returns it.
+     * Creates a new FileList with the given name.
      */
-    public FileList addBuddyFileList(String name);
+    public void addBuddyFileList(String name);
     
     /**
      * Removes the shared Buddy list containing this name.
@@ -139,9 +145,8 @@ public interface FileManager {
     
     /**
      * Adds a folder to be managed. This folder will be checked everytime a refresh occurs
-     * @return true if the folder was added, false otherwise
      */
-    public boolean addFolder(File folder);
+    public void addFolder(File folder);
     
     /**
      * Adds a set of folders to be managed.
@@ -283,8 +288,6 @@ public interface FileManager {
      */
     public void fileURNSUpdated(FileDesc ifd);
 
-    /**
-     */
     public IntSet getIndices(URN urn);
     
     /**

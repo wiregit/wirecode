@@ -179,7 +179,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
             code = HeadPong.FIREWALLED;
         }
         
-        if(fileManager.get().getIncompleteFileList().contains(fd)){
+        if(fd instanceof IncompleteFileDesc) {
             code |= HeadPong.PARTIAL_FILE;
             
             if (downloadManager.get().isActivelyDownloading(fd.getSHA1Urn())) {
@@ -200,7 +200,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
         URN urn = ping.getUrn();
         FileDesc desc = fileManager.get().getFileDesc(urn);
         // Easy case: no file, add code & exit
-        if(!fileManager.get().getSharedFileList().contains(desc)) {
+        if(desc == null || !fileManager.get().getSharedFileList().contains(desc)) {
             ggep.put(HeadPong.CODE, HeadPong.FILE_NOT_FOUND);
             return writeGGEP(ggep);
         }
@@ -299,7 +299,7 @@ public class HeadPongFactoryImpl implements HeadPongFactory {
     			LOG.debug("writing features "+features);
     		
     		//if we don't have the file or its too large...
-    		if (!fileManager.get().getSharedFileList().contains(desc) || desc.getFileSize() > Integer.MAX_VALUE) {
+    		if (desc == null || !fileManager.get().getSharedFileList().contains(desc) || desc.getFileSize() > Integer.MAX_VALUE) {
     			LOG.debug("we do not have the file");
     			daos.write(HeadPong.FILE_NOT_FOUND);
     			return baos.toByteArray();

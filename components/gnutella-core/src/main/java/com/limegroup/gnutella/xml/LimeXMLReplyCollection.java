@@ -659,8 +659,8 @@ public class LimeXMLReplyCollection {
     }
     
     /**
-     * Finds the audio metadata document in allDocs, and makes it's id3 fields
-     * identical with the fields of id3doc (which are only id3).
+     * Finds the audio metadata document in allDocs, and makes its id3 fields
+     * identical with the fields of id3doc (which are only audio files).
      */
     private List<LimeXMLDocument> resolveWriteableDocs(List<LimeXMLDocument> allDocs,
             LimeXMLDocument id3Doc) {

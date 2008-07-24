@@ -28,9 +28,9 @@ public class SynchronizedFileList implements FileList {
         }
     }
     
-    public void addFileDesc(FileDesc fileDesc) {
+    public void add(FileDesc fileDesc) {
         synchronized (mutex) {
-            fileList.addFileDesc(fileDesc);
+            fileList.add(fileDesc);
         }
     }
 
@@ -100,8 +100,28 @@ public class SynchronizedFileList implements FileList {
         }
     }
     
+    public int getNumForcedFiles() {
+        synchronized (mutex) {
+            return fileList.getNumForcedFiles();
+        }
+    }
+    
     public Object getLock() {
         return mutex;
+    }
+    
+    public void cleanupListeners() {
+        synchronized (mutex) {
+            fileList.cleanupListeners();
+        }
+    }
+    
+    public void addFileListListener(FileListListener listener) {
+        fileList.addFileListListener(listener);
+    }
+
+    public void removeFileListListener(FileListListener listener) {
+        fileList.removeFileListListener(listener);
     }
     
     /////////// backwards compatibility /////////////////////////
@@ -127,12 +147,6 @@ public class SynchronizedFileList implements FileList {
     public boolean isIndividualFile(File file) {
         synchronized (mutex) {
             return fileList.isIndividualFile(file);
-        }
-    }
-
-    public int getNumForcedFiles() {
-        synchronized (mutex) {
-            return fileList.getNumForcedFiles();
         }
     }
 }

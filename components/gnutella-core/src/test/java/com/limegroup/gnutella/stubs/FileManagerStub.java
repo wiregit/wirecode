@@ -132,7 +132,7 @@ public class FileManagerStub extends FileManagerImpl {
         
         IncompleteFileDesc ifd = new IncompleteFileDesc(
         incompleteFile, urns, fileIndex, name, size, vf);
-        getIncompleteFileList().addFileDesc(ifd);
+        getIncompleteFileList().add(ifd);
         fileURNSUpdated(ifd);
         
         dispatchFileEvent(new FileManagerEvent(this, Type.ADD_FILE, ifd));

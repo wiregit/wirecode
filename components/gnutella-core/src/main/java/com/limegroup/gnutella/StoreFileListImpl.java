@@ -23,7 +23,7 @@ public class StoreFileListImpl extends FileListImpl {
      */
     @Override
     protected void addPendingFileDesc(FileDesc fileDesc) {
-        addFileDesc(fileDesc);
+        add(fileDesc);
     }
     
     /**

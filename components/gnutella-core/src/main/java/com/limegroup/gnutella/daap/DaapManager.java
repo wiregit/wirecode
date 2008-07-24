@@ -39,6 +39,7 @@ import com.limegroup.gnutella.FileEventListener;
 import com.limegroup.gnutella.FileList;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.settings.DaapSettings;
@@ -421,7 +422,7 @@ public final class DaapManager implements FileEventListener {
         }
         
         FileDesc fileDesc = evt.getNewFileDesc();
-        if (!evt.getFileManager().getIncompleteFileList().contains(fileDesc)) {
+        if (!(fileDesc instanceof IncompleteFileDesc)) {
 
             String name = fileDesc.getFileName().toLowerCase(Locale.US);
 

@@ -60,9 +60,9 @@ import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
- * The list of all shared files.  Provides operations to add and remove
- * individual files, directory, or sets of directories.  Provides a method to
- * efficiently query for files whose names contain certain keywords.<p>
+ * The list of all known files. This creates and maintains a list of 
+ * directories and FileDescs. It also creates a set of FileLists which 
+ * may contain subsets of all FileDescs.  <p>
  *
  * This class is thread-safe.
  */
@@ -87,8 +87,9 @@ public class FileManagerImpl implements FileManager, Service {
     
     private final FileList sharedFileList;
     private final FileList storeFileList; 
+    private final FileList buddyFileList;
     private final FileList incompleteFileList;
-    private final List<FileList> buddyFileLists = new ArrayList<FileList>();
+    private final Map<String, FileList> buddyFileLists = new HashMap<String,FileList>();
     
     /** 
      * The list of complete and incomplete files.  An entry is null if it
@@ -158,8 +159,8 @@ public class FileManagerImpl implements FileManager, Service {
     private Set<File> storeDirectories;
     
     /**
-     * Directories that are loaded into LW but aren't necassirly store or
-     * shared folders
+     * Generic directories that are loaded. Subsets of these folders can be
+     * shared files/ store files/ shared with buddys or none of the above. 
      */
     private Set<File> displayDirectories;
     
@@ -251,9 +252,10 @@ public class FileManagerImpl implements FileManager, Service {
         
         sharedFileList = new SynchronizedFileList(new SharedFileListImpl("Shared", this, _data.SPECIAL_FILES_TO_SHARE, _data.FILES_NOT_TO_SHARE));
         storeFileList = new SynchronizedFileList(new StoreFileListImpl("Store", this, _data.SPECIAL_STORE_FILES));
+        buddyFileList = new SynchronizedFileList(new BuddyFileListImpl("All Buddys", this, _data.getBuddyList("All")));
         incompleteFileList = new SynchronizedFileList(new IncompleteFileListImpl("Incomplete", this, new HashSet<File>()));
         for(String name : SharingSettings.SHARED_BUDDY_LIST_NAMES.getValue())
-            buddyFileLists.add(new SynchronizedFileList(new BuddyFileListImpl(name, this, _data.getBuddyList(name))));
+            buddyFileLists.put(name, new SynchronizedFileList(new BuddyFileListImpl(name, this, _data.getBuddyList(name))));
         
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
@@ -277,8 +279,8 @@ public class FileManagerImpl implements FileManager, Service {
         getSharedFileList().clear();
         getStoreFileList().clear();
         getIncompleteFileList().clear();
-        for(FileList fileList : buddyFileLists )
-            fileList.clear();
+        for(String key : buddyFileLists.keySet() )
+            buddyFileLists.get(key).clear();
 
         numFiles = 0;
         _numPendingFiles = 0;
@@ -321,6 +323,10 @@ public class FileManagerImpl implements FileManager, Service {
         _data.save();
     }
     
+    /////////////////////////////////////////////////////////////////////////
+    //  FileList Accessors
+    ////////////////////////////////////////////////////////////////////////
+    
     public FileList getSharedFileList() {
         return sharedFileList;
     }
@@ -329,41 +335,53 @@ public class FileManagerImpl implements FileManager, Service {
         return storeFileList;
     }
     
-    public FileList getBuddyFileList(String name) {
-        if(containsBuddyFileList(name))
-            return new BuddyFileListImpl(name, this, _data.getBuddyList(name));
-        else
-            return null;
+    public FileList getBuddyFileList() {
+        return buddyFileList;
     }
     
-    public FileList addBuddyFileList(String name) {
+    public FileList getBuddyFileList(String name) {
+        return buddyFileLists.get(name);
+    }
+    
+    public void addBuddyFileList(String name) {
         if(!containsBuddyFileList(name)) {
             SharingSettings.addBuddyListName(name);
+            _data.addBuddyList(name);
+            buddyFileLists.put(name, new SynchronizedFileList(new BuddyFileListImpl(name, this, _data.getBuddyList(name))));
         }
-        return new BuddyFileListImpl(name, this, _data.getBuddyList(name));
     }
     
     public boolean containsBuddyFileList(String name) {
-        return _data.containsBuddyList(name);
+        return buddyFileLists.containsKey(name);
     }
     
     public void removeBuddyFileList(String name) {
-        _data.removeBuddyList(name);
-        SharingSettings.removeBuddyListName(name);
+        // if it was a valid key, remove saved references to it
+        FileList removeFileList = buddyFileLists.get(name);
+        if(removeFileList != null) {
+            removeFileList.cleanupListeners();
+            buddyFileLists.remove(name);
+            _data.removeBuddyList(name);
+            SharingSettings.removeBuddyListName(name);
+        }
     }
 
     public FileList getIncompleteFileList() {
         return incompleteFileList;
     }
     
+    public Map<String, FileList> getAllBuddyLists(){
+        return buddyFileLists;
+    }
+    
     ///////////////////////////////////////////////////////////////////////////
-    //  Accessors
+    //  FileDesc Accessors
     ///////////////////////////////////////////////////////////////////////////
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#getNumPendingFiles()
      */
-    public int getNumPendingFiles() {
+    public synchronized int getNumPendingFiles() {
         return _numPendingFiles;
     }
 
@@ -508,7 +526,6 @@ public class FileManagerImpl implements FileManager, Service {
      * If the current revision ever changed from the expected revision, this returns
      * immediately.
      */
-    //TODO: move this out of FileManager
     private void loadSettingsInternal(int revision) {
         if(LOG.isDebugEnabled())
             LOG.debug("Loading Library Revision: " + revision);
@@ -601,7 +618,7 @@ public class FileManagerImpl implements FileManager, Service {
         File[] directory = SharingSettings.DIRECTORIES_TO_DISPLAY.getValueAsArray();
         for(int i = 0; i < directory.length && _revision == revision; i++)
             updateDirectories(directory[i], null, revision, displayDirectories);
-
+        
         // Add specially shared files
         loadIndividualFiles(getSharedFileList(), revision);
 
@@ -609,8 +626,8 @@ public class FileManagerImpl implements FileManager, Service {
         loadIndividualFiles(getStoreFileList(), revision);
         
         //Buddy files
-        for(FileList fileList: buddyFileLists)
-            loadIndividualFiles(fileList, revision);
+        for(String key : buddyFileLists.keySet())
+            loadIndividualFiles(buddyFileLists.get(key), revision);
         
         _isUpdating = false;
     }
@@ -709,7 +726,7 @@ public class FileManagerImpl implements FileManager, Service {
         }
     }
     
-    public boolean addFolder(File folder) {
+    public void addFolder(File folder) {
         if (!folder.isDirectory())
             throw new IllegalArgumentException("Expected a directory, but given: "+folder);
     
@@ -717,26 +734,80 @@ public class FileManagerImpl implements FileManager, Service {
             folder = FileUtils.getCanonicalFile(folder);
         } catch(IOException ignored) {}
         
+        synchronized (displayDirectories) {
+            // if folder already exists, just return
+            if(displayDirectories.contains(folder))
+                return;
+        }
+        
         _isUpdating = true;
+        // add folder, then load files from within the folder
+        synchronized (SharingSettings.DIRECTORIES_TO_DISPLAY) {
+            SharingSettings.DIRECTORIES_TO_DISPLAY.add(folder);
+        }
         updateDirectories(folder, null, _revision, displayDirectories);
         _isUpdating = false;
-        
-        return true;
     }
     
     public void removeFolder(File folder) {
         _isUpdating = true;
-        removeFolder(folder, null);
+        boolean contained;
+
+        // if this was in an old shared folder, remove it the old way
+        synchronized (_completelySharedDirectories) {
+            contained = _completelySharedDirectories.contains(folder);
+        }
+        if(contained) {
+            removeSharedFolder(folder);
+        }
+
+        // if this was in a new folder, remove it the proper way
+        synchronized (displayDirectories) {
+           contained = displayDirectories.contains(folder);
+        }
+        if( contained )
+            removeFolder(folder, null);
+        
         _isUpdating = false;
 
     }
     
     private void removeFolder(File folder, File parent) {
+        if(!folder.isDirectory() && folder.exists()) 
+            throw new IllegalArgumentException("Expected a directory, but given: " + folder);
+          
+        try {
+            folder = FileUtils.getCanonicalFile(folder);
+        } catch (IOException ignored) {}
+
+        synchronized (displayDirectories) {
+            // if the folder isn't loaded already, just return
+            if(!displayDirectories.remove(folder))
+                return;
+        }
+
+        // remove folder from disk
+        synchronized (SharingSettings.DIRECTORIES_TO_DISPLAY) {
+            SharingSettings.DIRECTORIES_TO_DISPLAY.remove(folder);
+        }
         
+        File[] subs = folder.listFiles();
+        if(subs != null) {
+            for(File f : subs) {
+                if(f.isDirectory())
+                    removeFolder(f, folder);
+                else if(f.isFile()){
+                    if(removeFile(f) == null)
+                        urnCache.get().clearPendingHashesFor(f, this);
+                }
+            }
+        }
+        dispatchFileEvent(new FileManagerEvent(this, Type.REMOVE_FOLDER, folder));
     }
     
-    /////////////////// Everything below is what FileManager should entail
-    /////////////////// Everything above should really be moved out of here
+    //////////////////////////////////////////////////////////////////////////////
+    //  File Accessors
+    //////////////////////////////////////////////////////////////////////////////
     
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.FileManager#addFileIfShared(java.io.File)
@@ -777,9 +848,11 @@ public class FileManagerImpl implements FileManager, Service {
         }
 
         // if the file is already added
-        if(fileToFileDescMap.containsKey(file)) {
-            dispatchFileEvent( new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, getFileDesc(file)));
-            return;
+        synchronized (this) {
+            if(fileToFileDescMap.containsKey(file)) {
+                dispatchFileEvent( new FileManagerEvent(this, Type.FILE_ALREADY_ADDED, getFileDesc(file)));
+                return;
+            }
         }
         
         //make sure a FileDesc can be created from this file
